@@ -51,6 +51,39 @@ The best known CUDA FHT baseline is `Dao-AILab/fast-hadamard-transform`:
 
 The large-block backend here is a scalable correctness/performance baseline. It is not expected to beat a Dao-style register/shared-memory implementation for dimensions like `32768`, but it keeps the algorithm tractable up to `2^23` while we port the optimized kernels.
 
+## Fused Linear Direction
+
+The near-term inference kernel should start with the trivial on-the-fly version:
+
+```text
+for each generated BlockFHT weight block:
+  load latent / signs
+  apply BlockFHT transform
+  multiply the generated weights by the matching input slice
+  accumulate into output
+```
+
+This version is intentionally simple. It may regenerate or reload the same generated block across CTAs, but it gives a correctness baseline and exposes where time is spent before adding scheduling complexity.
+
+The more ambitious shared-memory design is to split each latent-generated MLP/linear weight block into small sub-blocks that fit in SMEM and align with the hidden dimension. For an MLP written as:
+
+```text
+y[j] = sum_i x[i] * A[i, j]
+```
+
+the kernel can launch interleaved CTAs over sub-blocks of `A`:
+
+```text
+for each hidden-dim-aligned generated sub-block:
+  generate the sub-block from its latent slice in shared memory
+  run sign/FHT/sign locally in shared memory
+  multiply x[i] values by the generated rows/columns
+  accumulate partial y[j]
+collect/reduce partial outputs across CTAs
+```
+
+The goal is to avoid full generated-weight HBM residency while getting useful reuse from shared memory. The constraint is that a Hadamard output normally depends on the full latent block, so the sub-block partition must be chosen carefully: either the latent generator itself is block-partitioned, or each sub-block corresponds to a complete smaller FHT domain. For now, prefer the trivial on-the-fly implementation first, then introduce this interleaved shared-memory scheme once the baseline fused path is measured.
+
 ## TileLang Direction
 
 TileLang is worth evaluating for a portable implementation, especially for Metal/MPS later. It is not the first path for peak CUDA FHT performance because the hand-written CUDA FHT kernels are already close to memory bandwidth limits.

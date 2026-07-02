@@ -59,8 +59,9 @@ CUDA/kernel optimization path:
 2. Make `block_size=32768` fit in the per-SM working set. On RTX 4080-class Ada, opt-in shared memory is roughly 100 KiB per block and L1/shared capacity is finite; `32768` values are `128 KiB` in fp32 but `64 KiB` in fp16/bf16.
 3. Port/adapt Dao-AILab style register/shared-memory FHT for `32768`, instead of relying on the global-memory fallback for GPT-sized per-matrix latents.
 4. Benchmark sign generation variants inside the full transform. Current sign generation uses one 32-bit hash word for 32 contiguous signs.
-5. Add a fused `BlockFHTLinear` path that generates and consumes weight tiles inside the matmul/linear kernel, without writing full generated weights to HBM.
-6. Extend fusion to attention/MLP blocks so inference and training can operate block by block.
+5. Add the trivial fused `BlockFHTLinear` inference path first: generate/apply the BlockFHT transform on the fly, immediately multiply by the corresponding input slice, and accumulate output. This may still reload/regenerate work, but it establishes correctness and profiling baselines.
+6. Add the shared-memory interleaved sub-block path for large MLP/linear layers. Split the latent/weight block into hidden-dimension-aligned sub-blocks that fit in shared memory, launch interleaved CTAs to generate each sub-block with FHT in shared memory, compute `x[i] * generated_rows_or_columns`, accumulate partial outputs, then reduce/collect across CTAs. This is the intended path to avoid full generated-weight HBM residency while increasing reuse inside each CTA.
+7. Extend fusion to attention/MLP blocks so inference and training can operate block by block.
 
 Memory target:
 
