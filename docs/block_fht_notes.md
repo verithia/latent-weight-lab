@@ -65,6 +65,24 @@ for each generated BlockFHT weight block:
 
 This version is intentionally simple. It may regenerate or reload the same generated block across CTAs, but it gives a correctness baseline and exposes where time is spent before adding scheduling complexity.
 
+The current fused forward prototype has already moved past output atomics to a row-block kernel, but it is still not a fully optimized CUDA GEMM replacement:
+
+- It is not tensor-core/MMA based.
+- It is not vectorized with `float4`, `half2`, or `bfloat162` loads.
+- It performs scalar reductions inside a CTA.
+- It requires `block_size % in_features == 0` to let one generated block cover whole output rows.
+- It is useful as a non-materialized correctness/memory baseline, not as a speed target.
+
+The benchmark should compare stacks of matrices, not a single tiny linear, because the system goal is reducing generated-weight residency across many MLP/attention matrices. A representative row-aligned stacked benchmark on RTX 4080 showed:
+
+```text
+tokens=1024, in=1024, out=4096, matrices=4, latent_dim=16384, FHT layers=2
+fused row-block: 491.4 ms, peak 76.4 MiB
+materialized:       6.2 ms, peak 92.4 MiB
+```
+
+This confirms the expected state: lower memory footprint, but unacceptable speed until the fused path uses vectorized loads and tensor-core style tiling/reuse.
+
 The more ambitious shared-memory design is to split each latent-generated MLP/linear weight block into small sub-blocks that fit in SMEM and align with the hidden dimension. For an MLP written as:
 
 ```text
