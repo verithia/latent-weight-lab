@@ -37,6 +37,8 @@ This avoids storing sign matrices and avoids one hash per output coordinate.
 ## Status
 
 - CPU/PyTorch fallback supports autograd.
-- CUDA extension prototype supports float32 and `block_size <= 16384`.
-- CUDA kernel is correctness-first, not the final optimized path.
+- CUDA extension prototype supports float32 and padded `block_size` from `2^5` through `2^23`.
+- Small blocks use a shared-memory CTA kernel; large blocks use global-memory butterfly passes.
+- The large-block backend is `O(n log n)` with each CUDA butterfly stage implemented as a linear pass.
+- CUDA kernels are correctness/scalability-first, not the final optimized path.
 - Next performance target is adapting Dao-AILab `fast-hadamard-transform` style kernels for fp16/bf16 and `block_size=32768`.

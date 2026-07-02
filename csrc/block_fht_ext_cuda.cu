@@ -3,9 +3,13 @@
 #include <c10/cuda/CUDAException.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cmath>
 #include <vector>
 
 namespace {
+
+constexpr int64_t kSharedMaxBlockSize = 16384;
+constexpr int64_t kGlobalMaxBlockSize = 1LL << 23;
 
 static inline int64_t next_power_of_two(int64_t value) {
   int64_t out = 1;
@@ -139,6 +143,156 @@ __global__ void block_fht_backward_kernel(
   }
 }
 
+__global__ void init_forward_blocks_kernel(
+    const float* __restrict__ latent,
+    float* __restrict__ work,
+    int64_t latent_size,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t block_count,
+    uint64_t seed) {
+  int64_t total = block_count * block_size;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_block = index / block_size;
+    int64_t pos = index - local_block * block_size;
+    int64_t block = first_block + local_block;
+    float value = pos < latent_size ? latent[pos] : 0.0f;
+    work[index] = value * sign_for(seed, block, 0, (int)pos);
+  }
+}
+
+__global__ void init_backward_blocks_kernel(
+    const float* __restrict__ grad_out,
+    float* __restrict__ work,
+    int64_t output_size,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t block_count,
+    int64_t start,
+    int64_t stop) {
+  int64_t total = block_count * block_size;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_block = index / block_size;
+    int64_t pos = index - local_block * block_size;
+    int64_t global_index = (first_block + local_block) * block_size + pos;
+    float value = 0.0f;
+    if (global_index >= start && global_index < stop && global_index < output_size) {
+      value = grad_out[global_index - start];
+    }
+    work[index] = value;
+  }
+}
+
+__global__ void fht_step_blocks_kernel(
+    float* __restrict__ work,
+    int64_t block_size,
+    int64_t pair_count,
+    int64_t step) {
+  for (int64_t pair = blockIdx.x * blockDim.x + threadIdx.x; pair < pair_count;
+       pair += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_pair = pair % (block_size / 2);
+    int64_t block = pair / (block_size / 2);
+    int64_t group = local_pair / step;
+    int64_t lane = local_pair - group * step;
+    int64_t a = block * block_size + group * (step << 1) + lane;
+    int64_t b = a + step;
+    float x = work[a];
+    float y = work[b];
+    work[a] = x + y;
+    work[b] = x - y;
+  }
+}
+
+__global__ void scale_blocks_kernel(
+    float* __restrict__ work,
+    int64_t total,
+    float scale) {
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    work[index] *= scale;
+  }
+}
+
+__global__ void apply_sign_blocks_kernel(
+    float* __restrict__ work,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t block_count,
+    int layer,
+    uint64_t seed) {
+  int64_t total = block_count * block_size;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_block = index / block_size;
+    int64_t pos = index - local_block * block_size;
+    int64_t block = first_block + local_block;
+    work[index] *= sign_for(seed, block, layer, (int)pos);
+  }
+}
+
+__global__ void gather_slice_kernel(
+    const float* __restrict__ work,
+    float* __restrict__ out,
+    int64_t output_size,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t start,
+    int64_t stop) {
+  int64_t length = stop - start;
+  for (int64_t offset = blockIdx.x * blockDim.x + threadIdx.x; offset < length;
+       offset += (int64_t)blockDim.x * gridDim.x) {
+    int64_t global_index = start + offset;
+    if (global_index < output_size) {
+      int64_t block = global_index / block_size;
+      int64_t pos = global_index - block * block_size;
+      out[offset] = work[(block - first_block) * block_size + pos];
+    }
+  }
+}
+
+__global__ void accumulate_latent_grad_kernel(
+    const float* __restrict__ work,
+    float* __restrict__ grad_latent,
+    int64_t latent_size,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t block_count,
+    uint64_t seed) {
+  int64_t total = block_count * latent_size;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_block = index / latent_size;
+    int64_t pos = index - local_block * latent_size;
+    int64_t block = first_block + local_block;
+    float value = work[local_block * block_size + pos] * sign_for(seed, block, 0, (int)pos);
+    atomicAdd(grad_latent + pos, value);
+  }
+}
+
+int launch_blocks_for(int64_t work_items) {
+  int64_t blocks = (work_items + 255) / 256;
+  if (blocks < 1) return 1;
+  if (blocks > 65535) return 65535;
+  return (int)blocks;
+}
+
+void run_global_fht(torch::Tensor work, int64_t block_size, int64_t block_count, cudaStream_t stream) {
+  int threads = 256;
+  int64_t pair_count = block_count * (block_size / 2);
+  for (int64_t step = 1; step < block_size; step <<= 1) {
+    fht_step_blocks_kernel<<<launch_blocks_for(pair_count), threads, 0, stream>>>(
+        work.data_ptr<float>(), block_size, pair_count, step);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+  }
+  int64_t total = block_count * block_size;
+  float scale = 1.0f / std::sqrt((float)block_size);
+  scale_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+      work.data_ptr<float>(), total, scale);
+  C10_CUDA_KERNEL_LAUNCH_CHECK();
+}
+
 }  // namespace
 
 std::vector<torch::Tensor> block_fht_forward_cuda(
@@ -153,18 +307,42 @@ std::vector<torch::Tensor> block_fht_forward_cuda(
   TORCH_CHECK(layers >= 1 && layers <= 3, "layers must be 1, 2, or 3");
   int64_t latent_size = latent.numel();
   int64_t block_size = next_power_of_two(latent_size);
-  TORCH_CHECK(block_size <= 16384, "prototype CUDA kernel supports block_size <= 16384");
+  TORCH_CHECK(block_size >= 32 && block_size <= kGlobalMaxBlockSize,
+              "Block-FHT CUDA supports power-of-two block sizes from 2^5 to 2^23 after padding");
   auto out = torch::empty({stop - start}, latent.options());
   int64_t first_block = start / block_size;
   int64_t last_block = (stop + block_size - 1) / block_size;
   int64_t blocks = last_block - first_block;
   int threads = 256;
-  size_t smem = block_size * sizeof(float);
   auto stream = at::cuda::getCurrentCUDAStream();
-  block_fht_forward_kernel<<<blocks, threads, smem, stream>>>(
-      latent.data_ptr<float>(), out.data_ptr<float>(), (int)latent_size, (int)output_size,
-      (int)block_size, (int)layers, (uint64_t)seed, (int)start, (int)stop);
-  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  if (block_size <= kSharedMaxBlockSize) {
+    size_t smem = block_size * sizeof(float);
+    if (smem >= 48 * 1024) {
+      C10_CUDA_CHECK(cudaFuncSetAttribute(
+          block_fht_forward_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
+    }
+    block_fht_forward_kernel<<<blocks, threads, smem, stream>>>(
+        latent.data_ptr<float>(), out.data_ptr<float>(), (int)latent_size, (int)output_size,
+        (int)block_size, (int)layers, (uint64_t)seed, (int)start, (int)stop);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+  } else {
+    int64_t total = blocks * block_size;
+    auto work = torch::empty({total}, latent.options());
+    init_forward_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+        latent.data_ptr<float>(), work.data_ptr<float>(), latent_size, block_size,
+        first_block, blocks, (uint64_t)seed);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+    for (int layer = 0; layer < layers; ++layer) {
+      run_global_fht(work, block_size, blocks, stream);
+      apply_sign_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+          work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed);
+      C10_CUDA_KERNEL_LAUNCH_CHECK();
+    }
+    gather_slice_kernel<<<launch_blocks_for(stop - start), threads, 0, stream>>>(
+        work.data_ptr<float>(), out.data_ptr<float>(), output_size, block_size,
+        first_block, start, stop);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+  }
   return {out};
 }
 
@@ -178,17 +356,41 @@ torch::Tensor block_fht_backward_cuda(
     int64_t stop) {
   TORCH_CHECK(grad_out.is_contiguous(), "grad_out must be contiguous");
   int64_t block_size = next_power_of_two(latent_size);
-  TORCH_CHECK(block_size <= 16384, "prototype CUDA kernel supports block_size <= 16384");
+  TORCH_CHECK(block_size >= 32 && block_size <= kGlobalMaxBlockSize,
+              "Block-FHT CUDA supports power-of-two block sizes from 2^5 to 2^23 after padding");
   auto grad_latent = torch::zeros({latent_size}, grad_out.options());
   int64_t first_block = start / block_size;
   int64_t last_block = (stop + block_size - 1) / block_size;
   int64_t blocks = last_block - first_block;
   int threads = 256;
-  size_t smem = block_size * sizeof(float);
   auto stream = at::cuda::getCurrentCUDAStream();
-  block_fht_backward_kernel<<<blocks, threads, smem, stream>>>(
-      grad_out.data_ptr<float>(), grad_latent.data_ptr<float>(), (int)latent_size, (int)output_size,
-      (int)block_size, (int)layers, (uint64_t)seed, (int)start, (int)stop);
-  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  if (block_size <= kSharedMaxBlockSize) {
+    size_t smem = block_size * sizeof(float);
+    if (smem >= 48 * 1024) {
+      C10_CUDA_CHECK(cudaFuncSetAttribute(
+          block_fht_backward_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
+    }
+    block_fht_backward_kernel<<<blocks, threads, smem, stream>>>(
+        grad_out.data_ptr<float>(), grad_latent.data_ptr<float>(), (int)latent_size, (int)output_size,
+        (int)block_size, (int)layers, (uint64_t)seed, (int)start, (int)stop);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+  } else {
+    int64_t total = blocks * block_size;
+    auto work = torch::empty({total}, grad_out.options());
+    init_backward_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+        grad_out.data_ptr<float>(), work.data_ptr<float>(), output_size, block_size,
+        first_block, blocks, start, stop);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+    for (int layer = (int)layers - 1; layer >= 0; --layer) {
+      apply_sign_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+          work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed);
+      C10_CUDA_KERNEL_LAUNCH_CHECK();
+      run_global_fht(work, block_size, blocks, stream);
+    }
+    accumulate_latent_grad_kernel<<<launch_blocks_for(blocks * latent_size), threads, 0, stream>>>(
+        work.data_ptr<float>(), grad_latent.data_ptr<float>(), latent_size, block_size,
+        first_block, blocks, (uint64_t)seed);
+    C10_CUDA_KERNEL_LAUNCH_CHECK();
+  }
   return grad_latent;
 }

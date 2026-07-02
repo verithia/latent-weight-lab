@@ -31,6 +31,13 @@ def test_external_latent_parameter():
     assert bfht.latent is latent
 
 
+def test_supported_cuda_block_range_metadata():
+    small = BlockFHT(32, size=64, layers=1, seed=1)
+    large = BlockFHT((1 << 23) - 17, size=1 << 23, layers=1, seed=1)
+    assert small.block_size == 32
+    assert large.block_size == 1 << 23
+
+
 def test_reference_function():
     latent = torch.randn(8, requires_grad=True)
     out = block_fht_slice_torch(latent, size=40, layers=2, seed=7, start=5, stop=23)
