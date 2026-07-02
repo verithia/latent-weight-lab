@@ -42,3 +42,34 @@ This avoids storing sign matrices and avoids one hash per output coordinate.
 - The large-block backend is `O(n log n)` with each CUDA butterfly stage implemented as a linear pass.
 - CUDA kernels are correctness/scalability-first, not the final optimized path.
 - Next performance target is adapting Dao-AILab `fast-hadamard-transform` style kernels for fp16/bf16 and `block_size=32768`.
+
+## Roadmap
+
+The final systems goal is not just fewer trainable parameters. The goal is blockwise execution where a forward pass keeps HBM footprint close to latent size plus activations, instead of materializing full generated weight tensors in HBM.
+
+Near-term verification path:
+
+1. Run a short GPT-2 BlockFHT attempt with the same 2000-step FineWeb-Edu setup as the vanilla baseline.
+2. Compare loss curve, wall time, peak VRAM, and stability against the vanilla `262M` token baseline.
+3. Keep this as a functional check only; it is not a final scaling-law baseline.
+
+CUDA/kernel optimization path:
+
+1. Add fp16/bf16 native kernels. Current extension is float32-only.
+2. Make `block_size=32768` fit in the per-SM working set. On RTX 4080-class Ada, opt-in shared memory is roughly 100 KiB per block and L1/shared capacity is finite; `32768` values are `128 KiB` in fp32 but `64 KiB` in fp16/bf16.
+3. Port/adapt Dao-AILab style register/shared-memory FHT for `32768`, instead of relying on the global-memory fallback for GPT-sized per-matrix latents.
+4. Benchmark sign generation variants inside the full transform. Current sign generation uses one 32-bit hash word for 32 contiguous signs.
+5. Add a fused `BlockFHTLinear` path that generates and consumes weight tiles inside the matmul/linear kernel, without writing full generated weights to HBM.
+6. Extend fusion to attention/MLP blocks so inference and training can operate block by block.
+
+Memory target:
+
+- Current verification path may still materialize generated weights in PyTorch modules.
+- Intermediate CUDA path should hold one generated tile/block at a time.
+- Final path should avoid full generated-weight HBM residency; persistent weight state should be latent vectors plus deterministic seeds.
+
+Portability path:
+
+- CUDA first, because FHT performance depends heavily on warp/register/shared-memory details.
+- Evaluate TileLang after CUDA semantics are stable, especially for future Metal/MPS support.
+- Expect a dedicated Metal or TileLang backend; CUDA kernels will not port directly to MPS.
