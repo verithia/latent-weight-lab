@@ -1,7 +1,7 @@
 import pytest
 import torch
 
-from latent_weight_lab.block_fht import BlockFHT, block_fht_slice_torch
+from latent_weight_lab.block_fht import BlockFHT, BlockFHTLinear, block_fht_slice_torch
 
 
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")
@@ -38,3 +38,24 @@ def test_cuda_scales_to_2_23_block_size():
     torch.cuda.synchronize()
     assert out.shape == (1024,)
     assert bfht.latent.grad is not None
+
+
+def test_cuda_fused_linear_forward_matches_materialized_weight():
+    torch.manual_seed(123)
+    layer = BlockFHTLinear(7, 5, bias=True, latent_dim=32, layers=2, seed=99).cuda()
+    x = torch.randn(11, 7, device="cuda")
+    fused = layer.forward_fused(x)
+    materialized = layer(x)
+    torch.cuda.synchronize()
+    assert torch.allclose(fused, materialized, atol=2e-5, rtol=2e-5)
+
+
+def test_cuda_fused_linear_forward_supports_batched_input():
+    torch.manual_seed(321)
+    layer = BlockFHTLinear(8, 6, bias=False, latent_dim=32, layers=1, seed=7).cuda()
+    x = torch.randn(3, 4, 8, device="cuda")
+    fused = layer.forward_fused(x)
+    materialized = layer(x)
+    torch.cuda.synchronize()
+    assert fused.shape == (3, 4, 6)
+    assert torch.allclose(fused, materialized, atol=2e-5, rtol=2e-5)

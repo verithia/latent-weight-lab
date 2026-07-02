@@ -143,6 +143,53 @@ __global__ void block_fht_backward_kernel(
   }
 }
 
+__global__ void block_fht_linear_forward_kernel(
+    const float* __restrict__ input,
+    const float* __restrict__ latent,
+    float* __restrict__ out,
+    int tokens,
+    int in_features,
+    int out_features,
+    int latent_size,
+    int block_size,
+    int layers,
+    uint64_t seed) {
+  extern __shared__ float values[];
+  constexpr int kTokenTile = 16;
+  int block = blockIdx.x;
+  int token_start = blockIdx.y * kTokenTile;
+  int output_size = in_features * out_features;
+  int block_start = block * block_size;
+  int local_stop = min(block_size, output_size - block_start);
+
+  for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
+    float v = i < latent_size ? latent[i] : 0.0f;
+    values[i] = v * sign_for(seed, block, 0, i);
+  }
+  __syncthreads();
+
+  for (int layer = 0; layer < layers; ++layer) {
+    fht_inplace(values, block_size);
+    for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
+      values[i] *= sign_for(seed, block, layer + 1, i);
+    }
+    __syncthreads();
+  }
+
+  for (int i = threadIdx.x; i < local_stop; i += blockDim.x) {
+    int weight_index = block_start + i;
+    int out_index = weight_index / in_features;
+    int in_index = weight_index - out_index * in_features;
+    float w = values[i];
+    for (int t = 0; t < kTokenTile; ++t) {
+      int token = token_start + t;
+      if (token < tokens) {
+        atomicAdd(out + token * out_features + out_index, input[token * in_features + in_index] * w);
+      }
+    }
+  }
+}
+
 __global__ void init_forward_blocks_kernel(
     const float* __restrict__ latent,
     float* __restrict__ work,
@@ -434,4 +481,42 @@ torch::Tensor block_fht_backward_cuda(
     C10_CUDA_KERNEL_LAUNCH_CHECK();
   }
   return grad_latent;
+}
+
+torch::Tensor block_fht_linear_forward_cuda(
+    torch::Tensor input,
+    torch::Tensor latent,
+    int64_t out_features,
+    int64_t layers,
+    int64_t seed) {
+  TORCH_CHECK(input.is_contiguous(), "input must be contiguous");
+  TORCH_CHECK(latent.is_contiguous(), "latent must be contiguous");
+  TORCH_CHECK(input.dim() == 2, "input must be 2D [tokens, in_features]");
+  TORCH_CHECK(layers >= 1 && layers <= 3, "layers must be 1, 2, or 3");
+  int64_t tokens = input.size(0);
+  int64_t in_features = input.size(1);
+  int64_t latent_size = latent.numel();
+  int64_t block_size = next_power_of_two(latent_size);
+  TORCH_CHECK(block_size <= kSharedMaxBlockSize,
+              "fused linear forward currently supports shared-memory block sizes <= 16384");
+  TORCH_CHECK(out_features > 0, "out_features must be positive");
+  TORCH_CHECK(in_features * out_features > 0, "linear weight must be non-empty");
+  auto out = torch::zeros({tokens, out_features}, input.options());
+  int64_t output_size = in_features * out_features;
+  int64_t blocks = (output_size + block_size - 1) / block_size;
+  constexpr int kTokenTile = 16;
+  dim3 grid((unsigned int)blocks, (unsigned int)((tokens + kTokenTile - 1) / kTokenTile));
+  int threads = 256;
+  size_t smem = block_size * sizeof(float);
+  auto stream = at::cuda::getCurrentCUDAStream();
+  if (smem >= 48 * 1024) {
+    C10_CUDA_CHECK(cudaFuncSetAttribute(
+        block_fht_linear_forward_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
+  }
+  block_fht_linear_forward_kernel<<<grid, threads, smem, stream>>>(
+      input.data_ptr<float>(), latent.data_ptr<float>(), out.data_ptr<float>(),
+      (int)tokens, (int)in_features, (int)out_features, (int)latent_size,
+      (int)block_size, (int)layers, (uint64_t)seed);
+  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  return out;
 }

@@ -229,6 +229,33 @@ def block_fht_grad_latent(
         )[0]
 
 
+def block_fht_linear_forward(
+    input: torch.Tensor,
+    latent: torch.Tensor,
+    out_features: int,
+    layers: int,
+    seed: int,
+) -> torch.Tensor:
+    if input.dim() < 2:
+        raise ValueError("input must have at least 2 dimensions")
+    in_features = input.shape[-1]
+    flat_input = input.reshape(-1, in_features).contiguous()
+    ext = (
+        _load_block_fht_ext()
+        if flat_input.is_cuda and latent.is_cuda and flat_input.dtype == torch.float32 and latent.dtype == torch.float32
+        else None
+    )
+    size = int(in_features) * int(out_features)
+    if ext is not None and next_power_of_two(latent.numel()) <= 16384:
+        out = ext.linear_forward(flat_input, latent.contiguous(), int(out_features), int(layers), int(seed))
+    else:
+        weight = block_fht_slice(latent, size, int(layers), int(seed), 0, size).view(
+            int(out_features), int(in_features)
+        )
+        out = F.linear(flat_input, weight)
+    return out.reshape(*input.shape[:-1], int(out_features))
+
+
 class _BlockFHTLinearFn(torch.autograd.Function):
     @staticmethod
     def forward(
@@ -330,6 +357,18 @@ class BlockFHTLinear(nn.Module):
             self.generator.layers,
             self.generator.seed,
         )
+
+    def forward_fused(self, input: torch.Tensor) -> torch.Tensor:
+        out = block_fht_linear_forward(
+            input,
+            self.generator.latent,
+            self.out_features,
+            self.generator.layers,
+            self.generator.seed,
+        )
+        if self.bias is not None:
+            out = out + self.bias
+        return out
 
     def materialize_weight_cache(self, dtype: torch.dtype | None = None) -> None:
         if self._cached_weight is not None:

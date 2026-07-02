@@ -17,6 +17,13 @@ torch::Tensor block_fht_backward_cuda(
     int64_t start,
     int64_t stop);
 
+torch::Tensor block_fht_linear_forward_cuda(
+    torch::Tensor input,
+    torch::Tensor latent,
+    int64_t out_features,
+    int64_t layers,
+    int64_t seed);
+
 std::vector<torch::Tensor> block_fht_forward(
     torch::Tensor latent,
     int64_t output_size,
@@ -42,7 +49,21 @@ torch::Tensor block_fht_backward(
   return block_fht_backward_cuda(grad_out, latent_size, output_size, layers, seed, start, stop);
 }
 
+torch::Tensor block_fht_linear_forward(
+    torch::Tensor input,
+    torch::Tensor latent,
+    int64_t out_features,
+    int64_t layers,
+    int64_t seed) {
+  TORCH_CHECK(input.is_cuda(), "block_fht_linear_forward: input must be CUDA");
+  TORCH_CHECK(latent.is_cuda(), "block_fht_linear_forward: latent must be CUDA");
+  TORCH_CHECK(input.scalar_type() == torch::kFloat32, "block_fht_linear_forward: only float32 currently supported");
+  TORCH_CHECK(latent.scalar_type() == torch::kFloat32, "block_fht_linear_forward: only float32 currently supported");
+  return block_fht_linear_forward_cuda(input, latent, out_features, layers, seed);
+}
+
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("forward", &block_fht_forward, "Block-FHT slice forward (CUDA)");
   m.def("backward", &block_fht_backward, "Block-FHT slice backward (CUDA)");
+  m.def("linear_forward", &block_fht_linear_forward, "Block-FHT fused linear forward (CUDA)");
 }
