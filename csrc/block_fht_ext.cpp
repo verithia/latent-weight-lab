@@ -22,7 +22,8 @@ torch::Tensor block_fht_linear_forward_cuda(
     torch::Tensor latent,
     int64_t out_features,
     int64_t layers,
-    int64_t seed);
+    int64_t seed,
+    double weight_scale);
 
 std::vector<torch::Tensor> block_fht_forward(
     torch::Tensor latent,
@@ -54,12 +55,15 @@ torch::Tensor block_fht_linear_forward(
     torch::Tensor latent,
     int64_t out_features,
     int64_t layers,
-    int64_t seed) {
+    int64_t seed,
+    double weight_scale) {
   TORCH_CHECK(input.is_cuda(), "block_fht_linear_forward: input must be CUDA");
   TORCH_CHECK(latent.is_cuda(), "block_fht_linear_forward: latent must be CUDA");
-  TORCH_CHECK(input.scalar_type() == torch::kFloat32, "block_fht_linear_forward: only float32 currently supported");
-  TORCH_CHECK(latent.scalar_type() == torch::kFloat32, "block_fht_linear_forward: only float32 currently supported");
-  return block_fht_linear_forward_cuda(input, latent, out_features, layers, seed);
+  TORCH_CHECK(input.scalar_type() == latent.scalar_type(), "block_fht_linear_forward: input and latent dtype must match");
+  TORCH_CHECK(input.scalar_type() == torch::kFloat32 || input.scalar_type() == torch::kFloat16 ||
+                  input.scalar_type() == torch::kBFloat16,
+              "block_fht_linear_forward: only float32, float16, and bfloat16 currently supported");
+  return block_fht_linear_forward_cuda(input, latent, out_features, layers, seed, weight_scale);
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {

@@ -59,3 +59,40 @@ def test_cuda_fused_linear_forward_supports_batched_input():
     torch.cuda.synchronize()
     assert fused.shape == (3, 4, 6)
     assert torch.allclose(fused, materialized, atol=2e-5, rtol=2e-5)
+
+
+def test_cuda_fused_linear_forward_supports_weight_scale():
+    torch.manual_seed(456)
+    layer = BlockFHTLinear(8, 6, bias=False, latent_dim=32, layers=2, seed=8).cuda()
+    x = torch.randn(5, 8, device="cuda")
+    scale = 0.125
+    fused = layer.forward_fused(x, weight_scale=scale)
+    materialized = torch.nn.functional.linear(x, layer.weight * scale)
+    torch.cuda.synchronize()
+    assert torch.allclose(fused, materialized, atol=2e-5, rtol=2e-5)
+
+
+def test_cuda_fused_linear_forward_supports_float16():
+    torch.manual_seed(789)
+    layer = BlockFHTLinear(8, 6, bias=False, latent_dim=32, layers=2, seed=9).cuda().half()
+    x = torch.randn(5, 8, device="cuda", dtype=torch.float16)
+    scale = 0.5
+    fused = layer.forward_fused(x, weight_scale=scale)
+    materialized = torch.nn.functional.linear(x.float(), layer.weight.float() * scale).half()
+    torch.cuda.synchronize()
+    assert fused.dtype == torch.float16
+    assert torch.allclose(fused, materialized, atol=2e-3, rtol=2e-3)
+
+
+def test_cuda_fused_linear_forward_supports_bfloat16():
+    if not torch.cuda.is_bf16_supported():
+        pytest.skip("bf16 unsupported on this CUDA device")
+    torch.manual_seed(987)
+    layer = BlockFHTLinear(8, 6, bias=False, latent_dim=32, layers=2, seed=10).cuda().bfloat16()
+    x = torch.randn(5, 8, device="cuda", dtype=torch.bfloat16)
+    scale = 0.5
+    fused = layer.forward_fused(x, weight_scale=scale)
+    materialized = torch.nn.functional.linear(x.float(), layer.weight.float() * scale).bfloat16()
+    torch.cuda.synchronize()
+    assert fused.dtype == torch.bfloat16
+    assert torch.allclose(fused, materialized, atol=2e-2, rtol=2e-2)

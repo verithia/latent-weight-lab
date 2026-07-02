@@ -235,6 +235,7 @@ def block_fht_linear_forward(
     out_features: int,
     layers: int,
     seed: int,
+    weight_scale: float = 1.0,
 ) -> torch.Tensor:
     if input.dim() < 2:
         raise ValueError("input must have at least 2 dimensions")
@@ -242,17 +243,28 @@ def block_fht_linear_forward(
     flat_input = input.reshape(-1, in_features).contiguous()
     ext = (
         _load_block_fht_ext()
-        if flat_input.is_cuda and latent.is_cuda and flat_input.dtype == torch.float32 and latent.dtype == torch.float32
+        if flat_input.is_cuda
+        and latent.is_cuda
+        and flat_input.dtype == latent.dtype
+        and flat_input.dtype in {torch.bfloat16, torch.float16, torch.float32}
         else None
     )
     size = int(in_features) * int(out_features)
     block_size = next_power_of_two(latent.numel())
     if ext is not None and block_size <= 16384 and block_size % int(in_features) == 0:
-        out = ext.linear_forward(flat_input, latent.contiguous(), int(out_features), int(layers), int(seed))
+        out = ext.linear_forward(
+            flat_input,
+            latent.contiguous(),
+            int(out_features),
+            int(layers),
+            int(seed),
+            float(weight_scale),
+        )
     else:
         weight = block_fht_slice(latent, size, int(layers), int(seed), 0, size).view(
             int(out_features), int(in_features)
         )
+        weight = weight * float(weight_scale)
         out = F.linear(flat_input, weight)
     return out.reshape(*input.shape[:-1], int(out_features))
 
@@ -359,13 +371,14 @@ class BlockFHTLinear(nn.Module):
             self.generator.seed,
         )
 
-    def forward_fused(self, input: torch.Tensor) -> torch.Tensor:
+    def forward_fused(self, input: torch.Tensor, weight_scale: float = 1.0) -> torch.Tensor:
         out = block_fht_linear_forward(
             input,
             self.generator.latent,
             self.out_features,
             self.generator.layers,
             self.generator.seed,
+            weight_scale=weight_scale,
         )
         if self.bias is not None:
             out = out + self.bias

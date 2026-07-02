@@ -2,9 +2,11 @@
 #include <ATen/cuda/CUDAContext.h>
 #include <c10/cuda/CUDAException.h>
 #include <cuda.h>
+#include <cuda_bf16.h>
+#include <cuda_fp16.h>
 #include <cuda_runtime.h>
-#include <cub/cub.cuh>
 #include <cmath>
+#include <type_traits>
 #include <vector>
 
 namespace {
@@ -39,6 +41,79 @@ __device__ __forceinline__ uint32_t sign_word_for(uint64_t seed, int64_t block, 
 __device__ __forceinline__ float sign_for(uint64_t seed, int64_t block, int layer, int pos) {
   uint32_t bits = sign_word_for(seed, block, layer, pos >> 5);
   return ((bits >> (pos & 31)) & 1U) ? 1.0f : -1.0f;
+}
+
+template <typename scalar_t>
+__device__ __forceinline__ float scalar_to_float(scalar_t value) {
+  return static_cast<float>(value);
+}
+
+template <>
+__device__ __forceinline__ float scalar_to_float<at::Half>(at::Half value) {
+  return __half2float(*reinterpret_cast<const __half*>(&value));
+}
+
+template <>
+__device__ __forceinline__ float scalar_to_float<at::BFloat16>(at::BFloat16 value) {
+  return __bfloat162float(*reinterpret_cast<const __nv_bfloat16*>(&value));
+}
+
+template <typename scalar_t>
+__device__ __forceinline__ scalar_t float_to_scalar(float value) {
+  return static_cast<scalar_t>(value);
+}
+
+template <>
+__device__ __forceinline__ at::Half float_to_scalar<at::Half>(float value) {
+  __half out = __float2half(value);
+  return *reinterpret_cast<at::Half*>(&out);
+}
+
+template <>
+__device__ __forceinline__ at::BFloat16 float_to_scalar<at::BFloat16>(float value) {
+  __nv_bfloat16 out = __float2bfloat16(value);
+  return *reinterpret_cast<at::BFloat16*>(&out);
+}
+
+template <typename scalar_t>
+__device__ void init_signed_latent(float* values, const scalar_t* latent, int latent_size, int block_size, uint64_t seed, int64_t block) {
+  int words = (block_size + 31) >> 5;
+  for (int word = threadIdx.x; word < words; word += blockDim.x) {
+    uint32_t bits = sign_word_for(seed, block, 0, word);
+    #pragma unroll
+    for (int bit = 0; bit < 32; ++bit) {
+      int pos = (word << 5) + bit;
+      if (pos < block_size) {
+        float v = pos < latent_size ? scalar_to_float(latent[pos]) : 0.0f;
+        values[pos] = v * (((bits >> bit) & 1U) ? 1.0f : -1.0f);
+      }
+    }
+  }
+}
+
+__device__ void apply_sign_wordwise(float* values, int block_size, uint64_t seed, int64_t block, int layer) {
+  int words = (block_size + 31) >> 5;
+  for (int word = threadIdx.x; word < words; word += blockDim.x) {
+    uint32_t bits = sign_word_for(seed, block, layer, word);
+    #pragma unroll
+    for (int bit = 0; bit < 32; ++bit) {
+      int pos = (word << 5) + bit;
+      if (pos < block_size) {
+        values[pos] *= ((bits >> bit) & 1U) ? 1.0f : -1.0f;
+      }
+    }
+  }
+}
+
+__device__ __forceinline__ float dot4(float4 a, float4 b) {
+  return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
+
+__device__ __forceinline__ float warp_sum(float value) {
+  for (int offset = 16; offset > 0; offset >>= 1) {
+    value += __shfl_down_sync(0xffffffff, value, offset);
+  }
+  return value;
 }
 
 __device__ void fht_inplace(float* values, int n) {
@@ -80,17 +155,12 @@ __global__ void block_fht_forward_kernel(
   int local_start = max(start - block_start, 0);
   int local_stop = min(stop - block_start, block_size);
 
-  for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-    float v = i < latent_size ? latent[i] : 0.0f;
-    values[i] = v * sign_for(seed, block, 0, i);
-  }
+  init_signed_latent(values, latent, latent_size, block_size, seed, block);
   __syncthreads();
 
   for (int layer = 0; layer < layers; ++layer) {
     fht_inplace(values, block_size);
-    for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-      values[i] *= sign_for(seed, block, layer + 1, i);
-    }
+    apply_sign_wordwise(values, block_size, seed, block, layer + 1);
     __syncthreads();
   }
 
@@ -132,9 +202,7 @@ __global__ void block_fht_backward_kernel(
   __syncthreads();
 
   for (int layer = layers - 1; layer >= 0; --layer) {
-    for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-      values[i] *= sign_for(seed, block, layer + 1, i);
-    }
+    apply_sign_wordwise(values, block_size, seed, block, layer + 1);
     __syncthreads();
     fht_inplace(values, block_size);
   }
@@ -144,17 +212,19 @@ __global__ void block_fht_backward_kernel(
   }
 }
 
-__global__ void block_fht_linear_forward_kernel(
-    const float* __restrict__ input,
-    const float* __restrict__ latent,
-    float* __restrict__ out,
+template <typename scalar_t>
+__global__ __launch_bounds__(256) void block_fht_linear_forward_kernel(
+    const scalar_t* __restrict__ input,
+    const scalar_t* __restrict__ latent,
+    scalar_t* __restrict__ out,
     int tokens,
     int in_features,
     int out_features,
     int latent_size,
     int block_size,
     int layers,
-    uint64_t seed) {
+    uint64_t seed,
+    float weight_scale) {
   extern __shared__ float values[];
   constexpr int kTokenTile = 8;
   int block = blockIdx.x;
@@ -166,16 +236,18 @@ __global__ void block_fht_linear_forward_kernel(
   int out_row_start = block * rows_per_block;
   int active_rows = min(rows_per_block, out_features - out_row_start);
 
-  for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-    float v = i < latent_size ? latent[i] : 0.0f;
-    values[i] = v * sign_for(seed, block, 0, i);
-  }
+  init_signed_latent(values, latent, latent_size, block_size, seed, block);
   __syncthreads();
 
   for (int layer = 0; layer < layers; ++layer) {
     fht_inplace(values, block_size);
+    apply_sign_wordwise(values, block_size, seed, block, layer + 1);
+    __syncthreads();
+  }
+
+  if (weight_scale != 1.0f) {
     for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-      values[i] *= sign_for(seed, block, layer + 1, i);
+      values[i] *= weight_scale;
     }
     __syncthreads();
   }
@@ -185,8 +257,11 @@ __global__ void block_fht_linear_forward_kernel(
   }
 
   // One CTA owns a complete row-block for a small token tile. No atomics:
-  // each output element is reduced inside the CTA and written exactly once.
-  for (int pair = 0; pair < kTokenTile * active_rows; ++pair) {
+  // each warp reduces one output element, so rows/token pairs run concurrently.
+  int lane = threadIdx.x & 31;
+  int warp = threadIdx.x >> 5;
+  constexpr int kWarpsPerCTA = 256 / 32;
+  for (int pair = warp; pair < kTokenTile * active_rows; pair += kWarpsPerCTA) {
     int token_offset = pair / active_rows;
     int local_row = pair - token_offset * active_rows;
     int token = token_start + token_offset;
@@ -195,18 +270,46 @@ __global__ void block_fht_linear_forward_kernel(
     }
     float partial = 0.0f;
     int row_base = local_row * in_features;
-    for (int i = threadIdx.x; i < in_features; i += blockDim.x) {
-      partial += input[token * in_features + i] * values[row_base + i];
+    if constexpr (std::is_same<scalar_t, float>::value) {
+      if ((in_features & 3) == 0) {
+      const float4* input4 = reinterpret_cast<const float4*>(input + token * in_features);
+      const float4* values4 = reinterpret_cast<const float4*>(values + row_base);
+      int in_features4 = in_features >> 2;
+      for (int i = lane; i < in_features4; i += 32) {
+        partial += dot4(input4[i], values4[i]);
+      }
+      } else {
+        for (int i = lane; i < in_features; i += 32) {
+          partial += input[token * in_features + i] * values[row_base + i];
+        }
+      }
+    } else if constexpr (std::is_same<scalar_t, at::Half>::value) {
+      if ((in_features & 1) == 0) {
+        const __half2* input2 = reinterpret_cast<const __half2*>(input + token * in_features);
+        int in_features2 = in_features >> 1;
+        for (int i = lane; i < in_features2; i += 32) {
+          float2 x = __half22float2(input2[i]);
+          int base = row_base + (i << 1);
+          partial += x.x * values[base] + x.y * values[base + 1];
+        }
+      } else {
+        for (int i = lane; i < in_features; i += 32) {
+          partial += static_cast<float>(input[token * in_features + i]) * values[row_base + i];
+        }
+      }
+    } else if constexpr (std::is_same<scalar_t, at::BFloat16>::value) {
+      for (int i = lane; i < in_features; i += 32) {
+        partial += scalar_to_float(input[token * in_features + i]) * values[row_base + i];
+      }
+    } else {
+      for (int i = lane; i < in_features; i += 32) {
+        partial += scalar_to_float(input[token * in_features + i]) * values[row_base + i];
+      }
     }
-
-    typedef cub::BlockReduce<float, 256> BlockReduce;
-    __shared__ typename BlockReduce::TempStorage temp_storage;
-    float sum = BlockReduce(temp_storage).Sum(partial);
-    __syncthreads();
-    if (threadIdx.x == 0) {
-      out[token * out_features + out_row_start + local_row] = sum;
+    float sum = warp_sum(partial);
+    if (lane == 0) {
+      out[token * out_features + out_row_start + local_row] = float_to_scalar<scalar_t>(sum);
     }
-    __syncthreads();
   }
 }
 
@@ -508,7 +611,8 @@ torch::Tensor block_fht_linear_forward_cuda(
     torch::Tensor latent,
     int64_t out_features,
     int64_t layers,
-    int64_t seed) {
+    int64_t seed,
+    double weight_scale) {
   TORCH_CHECK(input.is_contiguous(), "input must be contiguous");
   TORCH_CHECK(latent.is_contiguous(), "latent must be contiguous");
   TORCH_CHECK(input.dim() == 2, "input must be 2D [tokens, in_features]");
@@ -533,12 +637,30 @@ torch::Tensor block_fht_linear_forward_cuda(
   auto stream = at::cuda::getCurrentCUDAStream();
   if (smem >= 48 * 1024) {
     C10_CUDA_CHECK(cudaFuncSetAttribute(
-        block_fht_linear_forward_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
+        block_fht_linear_forward_kernel<float>, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
+    C10_CUDA_CHECK(cudaFuncSetAttribute(
+        block_fht_linear_forward_kernel<at::Half>, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
+    C10_CUDA_CHECK(cudaFuncSetAttribute(
+        block_fht_linear_forward_kernel<at::BFloat16>, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
   }
-  block_fht_linear_forward_kernel<<<grid, threads, smem, stream>>>(
-      input.data_ptr<float>(), latent.data_ptr<float>(), out.data_ptr<float>(),
-      (int)tokens, (int)in_features, (int)out_features, (int)latent_size,
-      (int)block_size, (int)layers, (uint64_t)seed);
+  if (input.scalar_type() == torch::kFloat32) {
+    block_fht_linear_forward_kernel<float><<<grid, threads, smem, stream>>>(
+        input.data_ptr<float>(), latent.data_ptr<float>(), out.data_ptr<float>(),
+        (int)tokens, (int)in_features, (int)out_features, (int)latent_size,
+        (int)block_size, (int)layers, (uint64_t)seed, (float)weight_scale);
+  } else if (input.scalar_type() == torch::kFloat16) {
+    block_fht_linear_forward_kernel<at::Half><<<grid, threads, smem, stream>>>(
+        input.data_ptr<at::Half>(), latent.data_ptr<at::Half>(), out.data_ptr<at::Half>(),
+        (int)tokens, (int)in_features, (int)out_features, (int)latent_size,
+        (int)block_size, (int)layers, (uint64_t)seed, (float)weight_scale);
+  } else if (input.scalar_type() == torch::kBFloat16) {
+    block_fht_linear_forward_kernel<at::BFloat16><<<grid, threads, smem, stream>>>(
+        input.data_ptr<at::BFloat16>(), latent.data_ptr<at::BFloat16>(), out.data_ptr<at::BFloat16>(),
+        (int)tokens, (int)in_features, (int)out_features, (int)latent_size,
+        (int)block_size, (int)layers, (uint64_t)seed, (float)weight_scale);
+  } else {
+    TORCH_CHECK(false, "fused linear forward CUDA supports float32, float16, and bfloat16");
+  }
   C10_CUDA_KERNEL_LAUNCH_CHECK();
   return out;
 }

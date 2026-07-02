@@ -75,13 +75,17 @@ The current fused forward prototype has already moved past output atomics to a r
 
 The benchmark should compare stacks of matrices, not a single tiny linear, because the system goal is reducing generated-weight residency across many MLP/attention matrices. A representative row-aligned stacked benchmark on RTX 4080 showed:
 
+For true autoregressive decoding, the benchmark should keep `tokens` small and scale the number of matrices/layers. A row-aligned matrix-scaling benchmark on RTX 4080 showed:
+
 ```text
-tokens=1024, in=1024, out=4096, matrices=4, latent_dim=16384, FHT layers=2
-fused row-block: 491.4 ms, peak 76.4 MiB
-materialized:       6.2 ms, peak 92.4 MiB
+tokens=1, in=1024, out=4096, latent_dim=16384, FHT layers=2
+matrices=1:  fused 0.850 ms, materialized 0.753 ms, peak  8.2 vs 24.2 MiB
+matrices=4:  fused 3.405 ms, materialized 3.048 ms, peak  8.4 vs 24.4 MiB
+matrices=16: fused 13.765 ms, materialized 12.026 ms, peak 9.4 vs 25.4 MiB
+matrices=64: fused 55.721 ms, materialized 49.819 ms, peak 13.2 vs 29.1 MiB
 ```
 
-This confirms the expected state: lower memory footprint, but unacceptable speed until the fused path uses vectorized loads and tensor-core style tiling/reuse.
+For small-token decoding, the current row-block fused path is close enough to be a useful memory/systems baseline, while still lacking vectorized/tensor-core tiling. For large-token prefill/training-style workloads it remains much slower than materialized GEMM.
 
 The more ambitious shared-memory design is to split each latent-generated MLP/linear weight block into small sub-blocks that fit in SMEM and align with the hidden dimension. For an MLP written as:
 
