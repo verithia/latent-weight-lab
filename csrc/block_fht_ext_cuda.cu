@@ -3,6 +3,7 @@
 #include <c10/cuda/CUDAException.h>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cub/cub.cuh>
 #include <cmath>
 #include <vector>
 
@@ -155,12 +156,15 @@ __global__ void block_fht_linear_forward_kernel(
     int layers,
     uint64_t seed) {
   extern __shared__ float values[];
-  constexpr int kTokenTile = 16;
+  constexpr int kTokenTile = 8;
   int block = blockIdx.x;
   int token_start = blockIdx.y * kTokenTile;
   int output_size = in_features * out_features;
   int block_start = block * block_size;
   int local_stop = min(block_size, output_size - block_start);
+  int rows_per_block = block_size / in_features;
+  int out_row_start = block * rows_per_block;
+  int active_rows = min(rows_per_block, out_features - out_row_start);
 
   for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
     float v = i < latent_size ? latent[i] : 0.0f;
@@ -176,17 +180,33 @@ __global__ void block_fht_linear_forward_kernel(
     __syncthreads();
   }
 
-  for (int i = threadIdx.x; i < local_stop; i += blockDim.x) {
-    int weight_index = block_start + i;
-    int out_index = weight_index / in_features;
-    int in_index = weight_index - out_index * in_features;
-    float w = values[i];
-    for (int t = 0; t < kTokenTile; ++t) {
-      int token = token_start + t;
-      if (token < tokens) {
-        atomicAdd(out + token * out_features + out_index, input[token * in_features + in_index] * w);
-      }
+  if (local_stop <= 0 || active_rows <= 0) {
+    return;
+  }
+
+  // One CTA owns a complete row-block for a small token tile. No atomics:
+  // each output element is reduced inside the CTA and written exactly once.
+  for (int pair = 0; pair < kTokenTile * active_rows; ++pair) {
+    int token_offset = pair / active_rows;
+    int local_row = pair - token_offset * active_rows;
+    int token = token_start + token_offset;
+    if (token >= tokens) {
+      continue;
     }
+    float partial = 0.0f;
+    int row_base = local_row * in_features;
+    for (int i = threadIdx.x; i < in_features; i += blockDim.x) {
+      partial += input[token * in_features + i] * values[row_base + i];
+    }
+
+    typedef cub::BlockReduce<float, 256> BlockReduce;
+    __shared__ typename BlockReduce::TempStorage temp_storage;
+    float sum = BlockReduce(temp_storage).Sum(partial);
+    __syncthreads();
+    if (threadIdx.x == 0) {
+      out[token * out_features + out_row_start + local_row] = sum;
+    }
+    __syncthreads();
   }
 }
 
@@ -499,12 +519,14 @@ torch::Tensor block_fht_linear_forward_cuda(
   int64_t block_size = next_power_of_two(latent_size);
   TORCH_CHECK(block_size <= kSharedMaxBlockSize,
               "fused linear forward currently supports shared-memory block sizes <= 16384");
+  TORCH_CHECK(block_size % in_features == 0,
+              "fused linear forward requires block_size to be a multiple of in_features");
   TORCH_CHECK(out_features > 0, "out_features must be positive");
   TORCH_CHECK(in_features * out_features > 0, "linear weight must be non-empty");
   auto out = torch::zeros({tokens, out_features}, input.options());
-  int64_t output_size = in_features * out_features;
-  int64_t blocks = (output_size + block_size - 1) / block_size;
-  constexpr int kTokenTile = 16;
+  int64_t rows_per_block = block_size / in_features;
+  int64_t blocks = (out_features + rows_per_block - 1) / rows_per_block;
+  constexpr int kTokenTile = 8;
   dim3 grid((unsigned int)blocks, (unsigned int)((tokens + kTokenTile - 1) / kTokenTile));
   int threads = 256;
   size_t smem = block_size * sizeof(float);

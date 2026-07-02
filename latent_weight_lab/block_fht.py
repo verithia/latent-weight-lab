@@ -246,7 +246,8 @@ def block_fht_linear_forward(
         else None
     )
     size = int(in_features) * int(out_features)
-    if ext is not None and next_power_of_two(latent.numel()) <= 16384:
+    block_size = next_power_of_two(latent.numel())
+    if ext is not None and block_size <= 16384 and block_size % int(in_features) == 0:
         out = ext.linear_forward(flat_input, latent.contiguous(), int(out_features), int(layers), int(seed))
     else:
         weight = block_fht_slice(latent, size, int(layers), int(seed), 0, size).view(
