@@ -1,6 +1,14 @@
 import torch
+import torch.nn.functional as F
 
-from latent_weight_lab.block_fht import BlockFHT, block_fht_slice_torch, sign_word_for
+from latent_weight_lab.block_fht import (
+    BlockFHT,
+    BlockFHTLinear,
+    block_fht_slice_torch,
+    flush_block_fht_weight_cache,
+    prepare_block_fht_weight_cache,
+    sign_word_for,
+)
 
 
 def test_sign_word_uses_32_positions():
@@ -44,3 +52,31 @@ def test_reference_function():
     assert out.shape == (18,)
     out.square().sum().backward()
     assert latent.grad is not None
+
+
+def test_block_fht_linear_matches_materialized_weight():
+    layer = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=11)
+    x = torch.randn(4, 5)
+    out = layer(x)
+    expected = F.linear(x, layer.weight, layer.bias)
+    assert torch.allclose(out, expected)
+
+
+def test_block_fht_linear_cached_grad_matches_dynamic():
+    torch.manual_seed(123)
+    dynamic = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=11)
+    cached = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=11)
+    cached.load_state_dict(dynamic.state_dict())
+    x = torch.randn(4, 5)
+
+    dynamic_loss = dynamic(x).square().mean()
+    dynamic_loss.backward()
+
+    prepare_block_fht_weight_cache(cached)
+    cached_loss = cached(x).square().mean()
+    cached_loss.backward()
+    flush_block_fht_weight_cache(cached)
+
+    assert torch.allclose(cached_loss, dynamic_loss)
+    assert torch.allclose(cached.generator.latent.grad, dynamic.generator.latent.grad, atol=1e-6)
+    assert torch.allclose(cached.bias.grad, dynamic.bias.grad, atol=1e-6)

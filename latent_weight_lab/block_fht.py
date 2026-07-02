@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 
 import torch
+import torch.nn.functional as F
 from torch import nn
 
 
@@ -185,6 +186,189 @@ def block_fht_slice(
     stop: int,
 ) -> torch.Tensor:
     return _BlockFHTSliceFn.apply(latent, int(size), int(layers), int(seed), int(start), int(stop))
+
+
+def block_fht_grad_latent(
+    latent: torch.Tensor,
+    grad_out: torch.Tensor,
+    size: int,
+    layers: int,
+    seed: int,
+    start: int = 0,
+    stop: int | None = None,
+) -> torch.Tensor:
+    stop = int(size) if stop is None else int(stop)
+    grad_out = grad_out.contiguous().to(dtype=latent.dtype)
+    ext = _load_block_fht_ext() if latent.is_cuda and latent.dtype == torch.float32 else None
+    if ext is not None:
+        return ext.backward(
+            grad_out,
+            latent.numel(),
+            int(size),
+            int(layers),
+            int(seed),
+            int(start),
+            int(stop),
+        )
+    with torch.enable_grad():
+        latent_for_grad = latent.detach().requires_grad_(True)
+        weight_flat = block_fht_slice(
+            latent_for_grad,
+            int(size),
+            int(layers),
+            int(seed),
+            int(start),
+            int(stop),
+        )
+        return torch.autograd.grad(
+            weight_flat,
+            latent_for_grad,
+            grad_out,
+            retain_graph=False,
+            allow_unused=False,
+        )[0]
+
+
+class _BlockFHTLinearFn(torch.autograd.Function):
+    @staticmethod
+    def forward(
+        ctx,
+        input: torch.Tensor,
+        latent: torch.Tensor,
+        bias: torch.Tensor | None,
+        in_features: int,
+        out_features: int,
+        size: int,
+        layers: int,
+        seed: int,
+    ) -> torch.Tensor:
+        weight_flat = block_fht_slice(latent, int(size), int(layers), int(seed), 0, int(size))
+        weight = weight_flat.view(int(out_features), int(in_features)).to(dtype=input.dtype)
+        output = F.linear(input, weight, bias)
+        ctx.save_for_backward(input, latent)
+        ctx.has_bias = bias is not None
+        ctx.in_features = int(in_features)
+        ctx.out_features = int(out_features)
+        ctx.size = int(size)
+        ctx.layers = int(layers)
+        ctx.seed = int(seed)
+        return output
+
+    @staticmethod
+    def backward(ctx, grad_output: torch.Tensor):
+        input, latent = ctx.saved_tensors
+        grad_input = grad_latent = grad_bias = None
+        grad_2d = grad_output.reshape(-1, ctx.out_features)
+        input_2d = input.reshape(-1, ctx.in_features)
+
+        if ctx.needs_input_grad[0]:
+            with torch.no_grad():
+                weight_flat = block_fht_slice(latent, ctx.size, ctx.layers, ctx.seed, 0, ctx.size)
+                weight = weight_flat.view(ctx.out_features, ctx.in_features).to(dtype=grad_output.dtype)
+            grad_input = grad_2d.matmul(weight).reshape_as(input)
+
+        if ctx.needs_input_grad[1]:
+            grad_weight = grad_2d.transpose(0, 1).to(dtype=latent.dtype).matmul(
+                input_2d.to(dtype=latent.dtype)
+            )
+            grad_latent = block_fht_grad_latent(
+                latent,
+                grad_weight.reshape(-1),
+                ctx.size,
+                ctx.layers,
+                ctx.seed,
+            )
+
+        if ctx.has_bias and ctx.needs_input_grad[2]:
+            grad_bias = grad_2d.sum(dim=0).to(dtype=grad_output.dtype)
+
+        return grad_input, grad_latent, grad_bias, None, None, None, None, None
+
+
+class BlockFHTLinear(nn.Module):
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        bias: bool = False,
+        latent_dim: int | None = None,
+        latent_ratio: float = 0.01,
+        layers: int = 3,
+        seed: int = 0,
+        latent_init_std: float = 0.02,
+    ) -> None:
+        super().__init__()
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        size = self.in_features * self.out_features
+        if latent_dim is None:
+            latent_dim = max(1, round(size * float(latent_ratio)))
+        self.generator = BlockFHT(
+            int(latent_dim),
+            size=size,
+            layers=layers,
+            seed=seed,
+            latent_init_std=latent_init_std,
+        )
+        self.bias = nn.Parameter(torch.zeros(self.out_features)) if bias else None
+        self._cached_weight: torch.Tensor | None = None
+
+    @property
+    def weight(self) -> torch.Tensor:
+        return self.generator().view(self.out_features, self.in_features)
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        if self._cached_weight is not None:
+            return F.linear(input, self._cached_weight, self.bias)
+        return _BlockFHTLinearFn.apply(
+            input,
+            self.generator.latent,
+            self.bias,
+            self.in_features,
+            self.out_features,
+            self.generator.size,
+            self.generator.layers,
+            self.generator.seed,
+        )
+
+    def materialize_weight_cache(self, dtype: torch.dtype | None = None) -> None:
+        if self._cached_weight is not None:
+            return
+        with torch.no_grad():
+            weight = self.weight
+            if dtype is not None:
+                weight = weight.to(dtype=dtype)
+        self._cached_weight = weight.detach().requires_grad_(True)
+
+    def flush_weight_cache_to_latent_grad(self) -> None:
+        if self._cached_weight is None:
+            return
+        if self._cached_weight.grad is not None:
+            grad_weight = self._cached_weight.grad.reshape(-1).to(dtype=self.generator.latent.dtype)
+            grad_latent = block_fht_grad_latent(
+                self.generator.latent,
+                grad_weight,
+                self.generator.size,
+                self.generator.layers,
+                self.generator.seed,
+            )
+            if self.generator.latent.grad is None:
+                self.generator.latent.grad = grad_latent
+            else:
+                self.generator.latent.grad.add_(grad_latent)
+        self._cached_weight = None
+
+
+def prepare_block_fht_weight_cache(model: nn.Module, dtype: torch.dtype | None = None) -> None:
+    for module in model.modules():
+        if isinstance(module, BlockFHTLinear):
+            module.materialize_weight_cache(dtype=dtype)
+
+
+def flush_block_fht_weight_cache(model: nn.Module) -> None:
+    for module in model.modules():
+        if isinstance(module, BlockFHTLinear):
+            module.flush_weight_cache_to_latent_grad()
 
 
 class BlockFHT(nn.Module):
