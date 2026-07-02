@@ -232,6 +232,24 @@ __global__ void apply_sign_blocks_kernel(
   }
 }
 
+__global__ void apply_sign_scale_blocks_kernel(
+    float* __restrict__ work,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t block_count,
+    int layer,
+    uint64_t seed,
+    float scale) {
+  int64_t total = block_count * block_size;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_block = index / block_size;
+    int64_t pos = index - local_block * block_size;
+    int64_t block = first_block + local_block;
+    work[index] *= scale * sign_for(seed, block, layer, (int)pos);
+  }
+}
+
 __global__ void gather_slice_kernel(
     const float* __restrict__ work,
     float* __restrict__ out,
@@ -271,6 +289,26 @@ __global__ void accumulate_latent_grad_kernel(
   }
 }
 
+__global__ void accumulate_latent_grad_scaled_kernel(
+    const float* __restrict__ work,
+    float* __restrict__ grad_latent,
+    int64_t latent_size,
+    int64_t block_size,
+    int64_t first_block,
+    int64_t block_count,
+    uint64_t seed,
+    float scale) {
+  int64_t total = block_count * latent_size;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x; index < total;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t local_block = index / latent_size;
+    int64_t pos = index - local_block * latent_size;
+    int64_t block = first_block + local_block;
+    float value = scale * work[local_block * block_size + pos] * sign_for(seed, block, 0, (int)pos);
+    atomicAdd(grad_latent + pos, value);
+  }
+}
+
 int launch_blocks_for(int64_t work_items) {
   int64_t blocks = (work_items + 255) / 256;
   if (blocks < 1) return 1;
@@ -278,7 +316,7 @@ int launch_blocks_for(int64_t work_items) {
   return (int)blocks;
 }
 
-void run_global_fht(torch::Tensor work, int64_t block_size, int64_t block_count, cudaStream_t stream) {
+void run_global_fht_unscaled(torch::Tensor work, int64_t block_size, int64_t block_count, cudaStream_t stream) {
   int threads = 256;
   int64_t pair_count = block_count * (block_size / 2);
   for (int64_t step = 1; step < block_size; step <<= 1) {
@@ -286,11 +324,6 @@ void run_global_fht(torch::Tensor work, int64_t block_size, int64_t block_count,
         work.data_ptr<float>(), block_size, pair_count, step);
     C10_CUDA_KERNEL_LAUNCH_CHECK();
   }
-  int64_t total = block_count * block_size;
-  float scale = 1.0f / std::sqrt((float)block_size);
-  scale_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
-      work.data_ptr<float>(), total, scale);
-  C10_CUDA_KERNEL_LAUNCH_CHECK();
 }
 
 }  // namespace
@@ -333,9 +366,10 @@ std::vector<torch::Tensor> block_fht_forward_cuda(
         first_block, blocks, (uint64_t)seed);
     C10_CUDA_KERNEL_LAUNCH_CHECK();
     for (int layer = 0; layer < layers; ++layer) {
-      run_global_fht(work, block_size, blocks, stream);
-      apply_sign_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
-          work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed);
+      run_global_fht_unscaled(work, block_size, blocks, stream);
+      float scale = 1.0f / std::sqrt((float)block_size);
+      apply_sign_scale_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+          work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed, scale);
       C10_CUDA_KERNEL_LAUNCH_CHECK();
     }
     gather_slice_kernel<<<launch_blocks_for(stop - start), threads, 0, stream>>>(
@@ -382,14 +416,21 @@ torch::Tensor block_fht_backward_cuda(
         first_block, blocks, start, stop);
     C10_CUDA_KERNEL_LAUNCH_CHECK();
     for (int layer = (int)layers - 1; layer >= 0; --layer) {
-      apply_sign_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
-          work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed);
+      if (layer == (int)layers - 1) {
+        apply_sign_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+            work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed);
+      } else {
+        float scale = 1.0f / std::sqrt((float)block_size);
+        apply_sign_scale_blocks_kernel<<<launch_blocks_for(total), threads, 0, stream>>>(
+            work.data_ptr<float>(), block_size, first_block, blocks, layer + 1, (uint64_t)seed, scale);
+      }
       C10_CUDA_KERNEL_LAUNCH_CHECK();
-      run_global_fht(work, block_size, blocks, stream);
+      run_global_fht_unscaled(work, block_size, blocks, stream);
     }
-    accumulate_latent_grad_kernel<<<launch_blocks_for(blocks * latent_size), threads, 0, stream>>>(
+    float scale = 1.0f / std::sqrt((float)block_size);
+    accumulate_latent_grad_scaled_kernel<<<launch_blocks_for(blocks * latent_size), threads, 0, stream>>>(
         work.data_ptr<float>(), grad_latent.data_ptr<float>(), latent_size, block_size,
-        first_block, blocks, (uint64_t)seed);
+        first_block, blocks, (uint64_t)seed, scale);
     C10_CUDA_KERNEL_LAUNCH_CHECK();
   }
   return grad_latent;

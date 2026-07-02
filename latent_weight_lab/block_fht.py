@@ -104,6 +104,12 @@ def _load_block_fht_ext():
         cuda_home = os.environ.get("CUDA_HOME")
         if cuda_home:
             os.environ["PATH"] = f"{cuda_home}/bin:" + os.environ.get("PATH", "")
+        try:
+            import ninja
+
+            os.environ["PATH"] = f"{ninja.BIN_DIR}:" + os.environ.get("PATH", "")
+        except Exception:
+            pass
         _BLOCK_FHT_EXT = load(
             name="latent_weight_lab_block_fht_ext_scaled_v2",
             sources=[
