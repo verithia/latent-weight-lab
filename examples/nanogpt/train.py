@@ -186,12 +186,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mapping-stability-temperature", type=float, default=1.0)
     parser.add_argument("--mapping-norm-lambda", type=float, default=0.0)
     parser.add_argument("--mapping-norm-target-rms", type=float, default=0.03)
+    parser.add_argument("--perf-profile", action=argparse.BooleanOptionalAction, default=False)
+    parser.add_argument("--perf-warmup-iters", type=int, default=5)
+    parser.add_argument("--perf-log-interval", type=int, default=10)
     namespace = parser.parse_args()
     config = load_config(namespace.config)
     for key, value in config.items():
         setattr(namespace, key.replace("-", "_"), value)
     if namespace.data_dir is None or namespace.out_dir is None:
         raise ValueError("--data-dir and --out-dir are required, either as args or config keys")
+    if namespace.perf_log_interval <= 0:
+        raise ValueError("--perf-log-interval must be > 0")
+    if namespace.perf_warmup_iters < 0:
+        raise ValueError("--perf-warmup-iters must be >= 0")
     return namespace
 
 
@@ -304,14 +311,28 @@ def main() -> None:
         )
 
     x, y = get_batch(data_dir, "train", args.batch_size, args.block_size, args.device)
-    t0 = time.time()
+    t0 = time.perf_counter()
+    perf_peak_reset = False
+
+    def perf_sync() -> None:
+        if args.perf_profile and device_type == "cuda":
+            torch.cuda.synchronize()
+
+    def perf_now() -> float:
+        perf_sync()
+        return time.perf_counter()
+
     while True:
+        eval_ms = 0.0
         lr = cosine_lr(iter_num, args)
         for group in optimizer.param_groups:
             group["lr"] = lr
         if iter_num % args.eval_interval == 0:
             cache_model = raw_model if use_weight_cache else None
+            eval_start = perf_now() if args.perf_profile else 0.0
             losses = estimate_loss(model, data_dir, args, ctx, cache_model=cache_model, cache_dtype=ptdtype)
+            if args.perf_profile:
+                eval_ms = (perf_now() - eval_start) * 1000.0
             print(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
             if losses["val"] < best_val_loss:
                 best_val_loss = losses["val"]
@@ -329,13 +350,29 @@ def main() -> None:
         if iter_num >= args.max_iters:
             break
 
+        perf_active = bool(args.perf_profile and iter_num >= args.perf_warmup_iters)
+        if perf_active and device_type == "cuda" and not perf_peak_reset:
+            torch.cuda.reset_peak_memory_stats()
+            perf_peak_reset = True
+        iter_start = perf_now() if args.perf_profile else 0.0
+        prepare_cache_ms = 0.0
+        forward_backward_ms = 0.0
+        flush_cache_ms = 0.0
+        grad_postprocess_ms = 0.0
+        optimizer_ms = 0.0
+        data_ms = 0.0
+
         ce_accum = 0.0
         stability_accum = 0.0
         norm_accum = 0.0
         postgelu_accum = 0.0
         if use_weight_cache:
+            section_start = perf_now() if args.perf_profile else 0.0
             raw_model.prepare_block_fht_cache(dtype=ptdtype)
+            if args.perf_profile:
+                prepare_cache_ms += (perf_now() - section_start) * 1000.0
         for _ in range(args.gradient_accumulation_steps):
+            section_start = perf_now() if args.perf_profile else 0.0
             with ctx:
                 logits, loss = model(x, y)
                 if float(args.mapping_norm_lambda) != 0.0:
@@ -369,9 +406,18 @@ def main() -> None:
                 finally:
                     restore_block_fht_latents(raw_model, noises)
             ce_accum += float(loss.detach().item()) * args.gradient_accumulation_steps
+            if args.perf_profile:
+                forward_backward_ms += (perf_now() - section_start) * 1000.0
+                section_start = perf_now()
             x, y = get_batch(data_dir, "train", args.batch_size, args.block_size, args.device)
+            if args.perf_profile:
+                data_ms += (perf_now() - section_start) * 1000.0
         if use_weight_cache:
+            section_start = perf_now() if args.perf_profile else 0.0
             raw_model.flush_block_fht_cache()
+            if args.perf_profile:
+                flush_cache_ms += (perf_now() - section_start) * 1000.0
+        section_start = perf_now() if args.perf_profile else 0.0
         if args.grad_clip != 0:
             scaler.unscale_(optimizer)
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
@@ -381,10 +427,38 @@ def main() -> None:
                     continue
                 grad_rms = latent.grad.float().square().mean().sqrt().clamp_min(1e-12)
                 latent.grad.mul_(float(args.block_fht_latent_grad_target_rms) / grad_rms)
+        if args.perf_profile:
+            grad_postprocess_ms += (perf_now() - section_start) * 1000.0
+            section_start = perf_now()
         scaler.step(optimizer)
         scaler.update()
         optimizer.zero_grad(set_to_none=True)
-        t1 = time.time()
+        if args.perf_profile:
+            optimizer_ms += (perf_now() - section_start) * 1000.0
+        if perf_active and (iter_num % args.perf_log_interval == 0 or eval_ms > 0.0):
+            iter_ms = (perf_now() - iter_start) * 1000.0
+            tokens_per_second = tokens_per_iter / max(iter_ms / 1000.0, 1e-12)
+            other_ms = iter_ms - prepare_cache_ms - forward_backward_ms - flush_cache_ms - grad_postprocess_ms - optimizer_ms - data_ms
+            peak_mib = 0.0
+            if device_type == "cuda":
+                peak_mib = torch.cuda.max_memory_allocated() / (1024.0 * 1024.0)
+            print(
+                "perf "
+                f"iter={iter_num} "
+                f"tokens_per_s={tokens_per_second:.2f} "
+                f"iter_ms={iter_ms:.2f} "
+                f"prepare_ms={prepare_cache_ms:.2f} "
+                f"fwbw_ms={forward_backward_ms:.2f} "
+                f"train_compute_ms={forward_backward_ms:.2f} "
+                f"flush_ms={flush_cache_ms:.2f} "
+                f"grad_ms={grad_postprocess_ms:.2f} "
+                f"opt_ms={optimizer_ms:.2f} "
+                f"data_ms={data_ms:.2f} "
+                f"other_ms={other_ms:.2f} "
+                f"eval_ms={eval_ms:.2f} "
+                f"peak_mib={peak_mib:.2f}"
+            )
+        t1 = time.perf_counter()
         if iter_num % args.log_interval == 0:
             msg = f"iter {iter_num}: loss {ce_accum / args.gradient_accumulation_steps:.4f}, time {(t1 - t0) * 1000:.2f}ms"
             if float(args.mapping_stability_lambda) != 0.0:

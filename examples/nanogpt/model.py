@@ -151,6 +151,18 @@ class HeadwiseLinear(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        cached_weights = [getattr(head, "_cached_weight", None) for head in self.heads]
+        if cached_weights and all(weight is not None for weight in cached_weights):
+            biases = [getattr(head, "bias", None) for head in self.heads]
+            if all(bias is None for bias in biases):
+                combined_bias = None
+            elif all(bias is not None for bias in biases):
+                combined_bias = torch.cat(biases, dim=0)
+            else:
+                combined_bias = None
+                return torch.cat([head(x) for head in self.heads], dim=-1)
+            combined_weight = torch.cat(cached_weights, dim=0)
+            return F.linear(x, combined_weight, combined_bias)
         return torch.cat([head(x) for head in self.heads], dim=-1)
 
 
@@ -844,6 +856,22 @@ class MLP(nn.Module):
         self.postgelu_std_target = float(config.block_fht_ffn_postgelu_std_target)
         self.last_postgelu: torch.Tensor | None = None
 
+    def _fused_cached_cproj_lowrank(self, activated: torch.Tensor) -> torch.Tensor | None:
+        if self.cproj_lowrank_left is None or self.cproj_lowrank_right is None:
+            return None
+        if not isinstance(self.cproj_lowrank_left, nn.Module) or not isinstance(self.cproj_lowrank_right, nn.Module):
+            return None
+        c_proj_weight = getattr(self.c_proj, "_cached_weight", None)
+        left_weight = getattr(self.cproj_lowrank_left, "_cached_weight", None)
+        right_weight = getattr(self.cproj_lowrank_right, "_cached_weight", None)
+        if c_proj_weight is None or left_weight is None or right_weight is None:
+            return None
+        if getattr(self.cproj_lowrank_left, "bias", None) is not None or getattr(self.cproj_lowrank_right, "bias", None) is not None:
+            return None
+        c_proj_bias = getattr(self.c_proj, "bias", None)
+        combined_weight = c_proj_weight + self.cproj_lowrank_scale * (right_weight @ left_weight)
+        return F.linear(activated, combined_weight, c_proj_bias)
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         hidden = self.c_fc(x)
         if self.lowrank_left is not None and self.lowrank_right is not None:
@@ -858,8 +886,11 @@ class MLP(nn.Module):
             self.last_postgelu = activated
         else:
             self.last_postgelu = None
-        out = self.c_proj(activated)
-        if self.cproj_lowrank_left is not None and self.cproj_lowrank_right is not None:
+        out = self._fused_cached_cproj_lowrank(activated)
+        fused_cproj_lowrank = out is not None
+        if not fused_cproj_lowrank:
+            out = self.c_proj(activated)
+        if not fused_cproj_lowrank and self.cproj_lowrank_left is not None and self.cproj_lowrank_right is not None:
             if isinstance(self.cproj_lowrank_left, nn.Parameter) and isinstance(self.cproj_lowrank_right, nn.Parameter):
                 delta = activated.matmul(self.cproj_lowrank_left.to(dtype=activated.dtype)).matmul(self.cproj_lowrank_right.to(dtype=activated.dtype))
             else:
