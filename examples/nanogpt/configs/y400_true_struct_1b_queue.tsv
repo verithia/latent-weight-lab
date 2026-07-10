@@ -1,0 +1,6 @@
+y400_true_struct_1b_01_tied_cfc_skip_vec	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_true_struct_1b_01_tied_cfc_skip_vec.json	7630	131072
+y400_true_struct_1b_02_quarter_diag	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_true_struct_1b_02_quarter_diag.json	7630	131072
+y400_true_struct_1b_03_spectral64_diag	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_true_struct_1b_03_spectral64_diag.json	7630	131072
+y400_true_struct_1b_04_tied_quarter	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_true_struct_1b_04_tied_quarter.json	7630	131072
+y400_true_struct_1b_05_spectral128_diag	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_true_struct_1b_05_spectral128_diag.json	7630	131072
+y400_true_struct_1b_06_tied_spectral64	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_true_struct_1b_06_tied_spectral64.json	7630	131072
