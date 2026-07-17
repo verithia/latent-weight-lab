@@ -78,6 +78,9 @@ class GPTConfig:
     block_fht_ffn_lowrank_rank: int = 0
     block_fht_ffn_lowrank_scale: float = 1.0
     block_fht_ffn_lowrank_init_std: float = 0.02
+    block_fht_ffn_spectral_rank: int = 0
+    block_fht_ffn_spectral_out_groups: int = 1
+    block_fht_ffn_spectral_in_groups: int = 1
     block_fht_cproj_lowrank_rank: int = 0
     block_fht_cproj_lowrank_scale: float = 1.0
     block_fht_cproj_lowrank_init_std: float = 0.02
@@ -304,6 +307,9 @@ def make_linear(
             residual_base_std=target_std,
             output_gain=target_name in config.block_fht_output_gain_targets,
             input_gain=target_name in config.block_fht_input_gain_targets,
+            spectral_rank=config.block_fht_ffn_spectral_rank if target_name == "mlp.c_fc" else 0,
+            spectral_out_groups=config.block_fht_ffn_spectral_out_groups if target_name == "mlp.c_fc" else 1,
+            spectral_in_groups=config.block_fht_ffn_spectral_in_groups if target_name == "mlp.c_fc" else 1,
         )
     return nn.Linear(in_features, out_features, bias=bias)
 
@@ -1005,6 +1011,7 @@ class GPT(nn.Module):
         optimizer: str = "adamw",
         muon_momentum: float = 0.95,
         muon_ns_steps: int = 5,
+        muon_adamw_lr_scale: float = 1.0,
     ):
         params = {name: param for name, param in self.named_parameters() if param.requires_grad}
         decay = [param for _, param in params.items() if param.dim() >= 2]
@@ -1031,14 +1038,20 @@ class GPT(nn.Module):
                         ns_steps=muon_ns_steps,
                     )
                 )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
             if other:
                 fused_available = "fused" in inspect.signature(torch.optim.AdamW).parameters
                 use_fused = fused_available and device_type == "cuda"
                 extra_args = {"fused": True} if use_fused else {}
-                optimizers.append(torch.optim.AdamW([{"params": other, "weight_decay": 0.0}], lr=learning_rate, betas=betas, **extra_args))
+                adamw_lr = learning_rate * float(muon_adamw_lr_scale)
+                optimizers.append(torch.optim.AdamW([{"params": other, "weight_decay": 0.0, "lr_scale": float(muon_adamw_lr_scale)}], lr=adamw_lr, betas=betas, **extra_args))
+            else:
+                adamw_lr = learning_rate * float(muon_adamw_lr_scale)
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
-                f"momentum={muon_momentum} ns_steps={muon_ns_steps}"
+                f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
+                f"adamw_lr_scale={float(muon_adamw_lr_scale)} adamw_lr={adamw_lr}"
             )
             return MultiOptimizer(optimizers)
         groups = [{"params": decay, "weight_decay": weight_decay}, {"params": nodecay, "weight_decay": 0.0}]
@@ -1077,6 +1090,12 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 module.bias.requires_grad_(True)
             if module.output_gain is not None:
                 module.output_gain.requires_grad_(True)
+            if module.input_gain is not None:
+                module.input_gain.requires_grad_(True)
+            if module.spectral_core is not None:
+                module.spectral_core.requires_grad_(True)
+                module.spectral_log_out_gain.requires_grad_(True)
+                module.spectral_log_in_gain.requires_grad_(True)
     if train_embeddings and isinstance(model, GPT):
         model.transformer.wte.weight.requires_grad_(True)
         model.transformer.wpe.weight.requires_grad_(True)

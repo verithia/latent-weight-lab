@@ -1,0 +1,7 @@
+ladder_id	phase	status	prior_status	terminal_val	baseline_config	dependency
+pro6_5tpp	corrected_baseline	PARKED_SUPERSEDED_BY_Y400_MAI_SCALING_LADDER	COMPLETED	3.0100	examples/nanogpt/configs/pro6_350m_muon_5tpp_20b.json	historical machine-comparison endpoint; do not relaunch
+pro6_10tpp	corrected_baseline	PARKED_SUPERSEDED_BY_Y400_MAI_SCALING_LADDER	COMPLETED	2.8637	examples/nanogpt/configs/pro6_350m_muon_10tpp_20b.json	historical machine-comparison endpoint; do not relaunch
+pro6_20tpp	corrected_baseline	PARKED_SUPERSEDED_BY_Y400_MAI_SCALING_LADDER	INTERRUPTED_AT_ITER_1680	3.5692	examples/nanogpt/configs/pro6_350m_muon_20tpp_20b.json	incomplete non-registered duplicate endpoint; do not restart
+pro6_40tpp	corrected_baseline	PARKED_SUPERSEDED_BY_Y400_MAI_SCALING_LADDER	BLOCKED_ON_20TPP_COMPLETION		examples/nanogpt/configs/pro6_350m_muon_40tpp_20b.json	parked; invalid one-size horizon for the MAI scaling ladder
+pro6_structured_20tpp	structural_candidate	PARKED_SUPERSEDED_BY_Y400_MAI_SCALING_LADDER	BLOCKED_ON_IMPLEMENTATION_DIAGNOSTICS			parked; full-attention candidates remain blocked on every dense MAI 20TPP rung
+pro6_structured_40tpp	structural_candidate	PARKED_SUPERSEDED_BY_Y400_MAI_SCALING_LADDER	BLOCKED_ON_IMPLEMENTATION_DIAGNOSTICS			parked; no structural candidate is registered from this obsolete queue

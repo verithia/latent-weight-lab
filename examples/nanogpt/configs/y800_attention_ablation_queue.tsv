@@ -1,0 +1,6 @@
+y800_attn_ablate_100m_01_cattn_only_lat8	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_ablate_100m_01_cattn_only_lat8.json	763	131072
+y800_attn_ablate_100m_02_cproj_only_lat8	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_ablate_100m_02_cproj_only_lat8.json	763	131072
+y800_attn_ablate_100m_03_attn_only_lat5	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_ablate_100m_03_attn_only_lat5.json	763	131072
+y800_attn_ablate_100m_04_attn_only_lat8	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_ablate_100m_04_attn_only_lat8.json	763	131072
+y800_attn_ablate_100m_05_attn_only_lat12	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_ablate_100m_05_attn_only_lat12.json	763	131072
+y800_attn_ablate_100m_06_attn_only_gain_lat8	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_ablate_100m_06_attn_only_gain_lat8.json	763	131072

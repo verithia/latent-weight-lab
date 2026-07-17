@@ -106,6 +106,8 @@ collect/reduce partial outputs across CTAs
 
 The goal is to avoid full generated-weight HBM residency while getting useful reuse from shared memory. The constraint is that a Hadamard output normally depends on the full latent block, so the sub-block partition must be chosen carefully: either the latent generator itself is block-partitioned, or each sub-block corresponds to a complete smaller FHT domain. For now, prefer the trivial on-the-fly implementation first, then introduce this interleaved shared-memory scheme once the baseline fused path is measured.
 
+Nsight Compute bank-conflict measurement is currently blocked on the WSL2 remote host because NVIDIA performance counters are controlled by the Windows host driver. Enabling them requires Windows-side NVIDIA Control Panel / developer settings and a WSL restart. Skip bank-conflict measurement for now; rely on ptxas reports and correctness tests until counter access is available.
+
 ## TileLang Direction
 
 TileLang is worth evaluating for a portable implementation, especially for Metal/MPS later. It is not the first path for peak CUDA FHT performance because the hand-written CUDA FHT kernels are already close to memory bandwidth limits.

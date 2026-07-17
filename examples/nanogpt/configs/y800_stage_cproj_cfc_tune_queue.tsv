@@ -1,0 +1,6 @@
+y800_stage2c_100m_01_rank32_cfc_l8	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_stage2c_100m_01_rank32_cfc_l8.json	763	131072
+y800_stage2c_100m_02_rank32_cfc_l12	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_stage2c_100m_02_rank32_cfc_l12.json	763	131072
+y800_stage2c_100m_03_rank48_repeat	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_stage2c_100m_03_rank48_repeat.json	763	131072
+y800_stage2c_100m_04_rank32_lr12e4	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_stage2c_100m_04_rank32_lr12e4.json	763	131072
+y800_stage2c_100m_05_rank32_lr18e4	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_stage2c_100m_05_rank32_lr18e4.json	763	131072
+y800_stage2c_100m_06_rank48_lr18e4	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_stage2c_100m_06_rank48_lr18e4.json	763	131072

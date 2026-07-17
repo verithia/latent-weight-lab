@@ -1,0 +1,6 @@
+y800_attn_qkmix_100m_01_mix25_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qkmix_100m_01_mix25_l1.json	763	131072
+y800_attn_qkmix_100m_02_mix50_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qkmix_100m_02_mix50_l1.json	763	131072
+y800_attn_qkmix_100m_03_mix75_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qkmix_100m_03_mix75_l1.json	763	131072
+y800_attn_qkmix_100m_04_mix25_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qkmix_100m_04_mix25_cproj_l1.json	763	131072
+y800_attn_qkmix_100m_05_mix50_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qkmix_100m_05_mix50_cproj_l1.json	763	131072
+y800_attn_qkmix_100m_06_mix75_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qkmix_100m_06_mix75_cproj_l1.json	763	131072

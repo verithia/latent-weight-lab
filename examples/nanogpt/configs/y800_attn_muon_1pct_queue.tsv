@@ -1,0 +1,5 @@
+y800_muon_100m_01_vanilla	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_muon_100m_01_vanilla.json	763	131072
+y800_muon_100m_02_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_muon_100m_02_cproj_l1.json	763	131072
+y800_muon_100m_03_v_only_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_muon_100m_03_v_only_l1.json	763	131072
+y800_muon_100m_04_qk_headwise_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_muon_100m_04_qk_headwise_cproj_l1.json	763	131072
+y800_muon_100m_05_mix25_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_muon_100m_05_mix25_cproj_l1.json	763	131072

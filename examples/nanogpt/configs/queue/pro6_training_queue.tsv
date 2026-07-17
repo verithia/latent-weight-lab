@@ -1,0 +1,2 @@
+job_id	status	config	benchmark_min_tok_s	data_manifest_sha256	train_bytes	blocker
+pro6_350m_muon_5tpp_20b	running	examples/nanogpt/configs/pro6_350m_muon_5tpp_20b.json	88494.6	1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b	40000000000	launched

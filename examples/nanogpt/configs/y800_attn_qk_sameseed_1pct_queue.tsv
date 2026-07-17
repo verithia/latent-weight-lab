@@ -1,0 +1,4 @@
+y800_attn_qksameseed_100m_01_global_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qksameseed_100m_01_global_l1.json	763	131072
+y800_attn_qksameseed_100m_02_headwise_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qksameseed_100m_02_headwise_l1.json	763	131072
+y800_attn_qksameseed_100m_03_global_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qksameseed_100m_03_global_cproj_l1.json	763	131072
+y800_attn_qksameseed_100m_04_headwise_cproj_l1	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_attn_qksameseed_100m_04_headwise_cproj_l1.json	763	131072

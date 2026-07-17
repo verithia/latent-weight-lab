@@ -1,0 +1,6 @@
+y800_cproj_lowrank_100m_01_attn_only	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_lowrank_100m_01_attn_only.json	763	131072
+y800_cproj_lowrank_100m_02_plain_r8	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_lowrank_100m_02_plain_r8.json	763	131072
+y800_cproj_lowrank_100m_03_plain_r16	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_lowrank_100m_03_plain_r16.json	763	131072
+y800_cproj_lowrank_100m_04_plain_r32	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_lowrank_100m_04_plain_r32.json	763	131072
+y800_cproj_lowrank_100m_05_group12_r16	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_lowrank_100m_05_group12_r16.json	763	131072
+y800_cproj_lowrank_100m_06_outg12_r16	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_lowrank_100m_06_outg12_r16.json	763	131072

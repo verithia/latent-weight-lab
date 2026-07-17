@@ -14,6 +14,10 @@ namespace {
 constexpr int64_t kSharedMaxBlockSize = 16384;
 constexpr int64_t kGlobalMaxBlockSize = 1LL << 23;
 
+static inline int64_t padded_shared_size(int64_t logical_size) {
+  return logical_size + ((logical_size + 31) / 32);
+}
+
 static inline int64_t next_power_of_two(int64_t value) {
   int64_t out = 1;
   while (out < value) out <<= 1;
@@ -41,6 +45,10 @@ __device__ __forceinline__ uint32_t sign_word_for(uint64_t seed, int64_t block, 
 __device__ __forceinline__ float sign_for(uint64_t seed, int64_t block, int layer, int pos) {
   uint32_t bits = sign_word_for(seed, block, layer, pos >> 5);
   return ((bits >> (pos & 31)) & 1U) ? 1.0f : -1.0f;
+}
+
+__device__ __forceinline__ int smem_index(int pos) {
+  return pos + (pos >> 5);
 }
 
 template <typename scalar_t>
@@ -85,7 +93,7 @@ __device__ void init_signed_latent(float* values, const scalar_t* latent, int la
       int pos = (word << 5) + bit;
       if (pos < block_size) {
         float v = pos < latent_size ? scalar_to_float(latent[pos]) : 0.0f;
-        values[pos] = v * (((bits >> bit) & 1U) ? 1.0f : -1.0f);
+        values[smem_index(pos)] = v * (((bits >> bit) & 1U) ? 1.0f : -1.0f);
       }
     }
   }
@@ -99,7 +107,7 @@ __device__ void apply_sign_wordwise(float* values, int block_size, uint64_t seed
     for (int bit = 0; bit < 32; ++bit) {
       int pos = (word << 5) + bit;
       if (pos < block_size) {
-        values[pos] *= ((bits >> bit) & 1U) ? 1.0f : -1.0f;
+        values[smem_index(pos)] *= ((bits >> bit) & 1U) ? 1.0f : -1.0f;
       }
     }
   }
@@ -124,16 +132,18 @@ __device__ void fht_inplace(float* values, int n) {
       int lane = i - group * step;
       int a = group * (step << 1) + lane;
       int b = a + step;
-      float x = values[a];
-      float y = values[b];
-      values[a] = x + y;
-      values[b] = x - y;
+      int pa = smem_index(a);
+      int pb = smem_index(b);
+      float x = values[pa];
+      float y = values[pb];
+      values[pa] = x + y;
+      values[pb] = x - y;
     }
   }
   __syncthreads();
   float scale = rsqrtf((float)n);
   for (int i = threadIdx.x; i < n; i += blockDim.x) {
-    values[i] *= scale;
+    values[smem_index(i)] *= scale;
   }
   __syncthreads();
 }
@@ -167,7 +177,7 @@ __global__ void block_fht_forward_kernel(
   for (int i = local_start + threadIdx.x; i < local_stop; i += blockDim.x) {
     int global_index = block_start + i;
     if (global_index < output_size) {
-      out[global_index - start] = values[i];
+      out[global_index - start] = values[smem_index(i)];
     }
   }
 }
@@ -190,13 +200,13 @@ __global__ void block_fht_backward_kernel(
   int local_stop = min(stop - block_start, block_size);
 
   for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-    values[i] = 0.0f;
+    values[smem_index(i)] = 0.0f;
   }
   __syncthreads();
   for (int i = local_start + threadIdx.x; i < local_stop; i += blockDim.x) {
     int global_index = block_start + i;
     if (global_index < output_size) {
-      values[i] = grad_out[global_index - start];
+      values[smem_index(i)] = grad_out[global_index - start];
     }
   }
   __syncthreads();
@@ -207,7 +217,7 @@ __global__ void block_fht_backward_kernel(
     fht_inplace(values, block_size);
   }
   for (int i = threadIdx.x; i < latent_size; i += blockDim.x) {
-    float g = values[i] * sign_for(seed, block, 0, i);
+    float g = values[smem_index(i)] * sign_for(seed, block, 0, i);
     atomicAdd(grad_latent + i, g);
   }
 }
@@ -247,7 +257,7 @@ __global__ __launch_bounds__(256) void block_fht_linear_forward_kernel(
 
   if (weight_scale != 1.0f) {
     for (int i = threadIdx.x; i < block_size; i += blockDim.x) {
-      values[i] *= weight_scale;
+      values[smem_index(i)] *= weight_scale;
     }
     __syncthreads();
   }
@@ -273,14 +283,19 @@ __global__ __launch_bounds__(256) void block_fht_linear_forward_kernel(
     if constexpr (std::is_same<scalar_t, float>::value) {
       if ((in_features & 3) == 0) {
       const float4* input4 = reinterpret_cast<const float4*>(input + token * in_features);
-      const float4* values4 = reinterpret_cast<const float4*>(values + row_base);
       int in_features4 = in_features >> 2;
       for (int i = lane; i < in_features4; i += 32) {
-        partial += dot4(input4[i], values4[i]);
+        int base = row_base + (i << 2);
+        float4 w = make_float4(
+            values[smem_index(base)],
+            values[smem_index(base + 1)],
+            values[smem_index(base + 2)],
+            values[smem_index(base + 3)]);
+        partial += dot4(input4[i], w);
       }
       } else {
         for (int i = lane; i < in_features; i += 32) {
-          partial += input[token * in_features + i] * values[row_base + i];
+          partial += input[token * in_features + i] * values[smem_index(row_base + i)];
         }
       }
     } else if constexpr (std::is_same<scalar_t, at::Half>::value) {
@@ -290,20 +305,20 @@ __global__ __launch_bounds__(256) void block_fht_linear_forward_kernel(
         for (int i = lane; i < in_features2; i += 32) {
           float2 x = __half22float2(input2[i]);
           int base = row_base + (i << 1);
-          partial += x.x * values[base] + x.y * values[base + 1];
+          partial += x.x * values[smem_index(base)] + x.y * values[smem_index(base + 1)];
         }
       } else {
         for (int i = lane; i < in_features; i += 32) {
-          partial += static_cast<float>(input[token * in_features + i]) * values[row_base + i];
+          partial += static_cast<float>(input[token * in_features + i]) * values[smem_index(row_base + i)];
         }
       }
     } else if constexpr (std::is_same<scalar_t, at::BFloat16>::value) {
       for (int i = lane; i < in_features; i += 32) {
-        partial += scalar_to_float(input[token * in_features + i]) * values[row_base + i];
+        partial += scalar_to_float(input[token * in_features + i]) * values[smem_index(row_base + i)];
       }
     } else {
       for (int i = lane; i < in_features; i += 32) {
-        partial += scalar_to_float(input[token * in_features + i]) * values[row_base + i];
+        partial += scalar_to_float(input[token * in_features + i]) * values[smem_index(row_base + i)];
       }
     }
     float sum = warp_sum(partial);
@@ -519,7 +534,7 @@ std::vector<torch::Tensor> block_fht_forward_cuda(
   int threads = 256;
   auto stream = at::cuda::getCurrentCUDAStream();
   if (block_size <= kSharedMaxBlockSize) {
-    size_t smem = block_size * sizeof(float);
+    size_t smem = padded_shared_size(block_size) * sizeof(float);
     if (smem >= 48 * 1024) {
       C10_CUDA_CHECK(cudaFuncSetAttribute(
           block_fht_forward_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
@@ -569,7 +584,7 @@ torch::Tensor block_fht_backward_cuda(
   int threads = 256;
   auto stream = at::cuda::getCurrentCUDAStream();
   if (block_size <= kSharedMaxBlockSize) {
-    size_t smem = block_size * sizeof(float);
+    size_t smem = padded_shared_size(block_size) * sizeof(float);
     if (smem >= 48 * 1024) {
       C10_CUDA_CHECK(cudaFuncSetAttribute(
           block_fht_backward_kernel, cudaFuncAttributeMaxDynamicSharedMemorySize, smem));
@@ -633,7 +648,7 @@ torch::Tensor block_fht_linear_forward_cuda(
   constexpr int kTokenTile = 8;
   dim3 grid((unsigned int)blocks, (unsigned int)((tokens + kTokenTile - 1) / kTokenTile));
   int threads = 256;
-  size_t smem = block_size * sizeof(float);
+  size_t smem = padded_shared_size(block_size) * sizeof(float);
   auto stream = at::cuda::getCurrentCUDAStream();
   if (smem >= 48 * 1024) {
     C10_CUDA_CHECK(cudaFuncSetAttribute(

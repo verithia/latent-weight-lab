@@ -7,8 +7,10 @@ from latent_weight_lab.block_fht import (
     block_fht_slice_torch,
     flush_block_fht_weight_cache,
     prepare_block_fht_weight_cache,
+    signs_for,
     sign_word_for,
 )
+from examples.nanogpt.model import freeze_non_block_fht
 
 
 def test_sign_word_uses_32_positions():
@@ -16,6 +18,15 @@ def test_sign_word_uses_32_positions():
     signs = [1 if ((bits >> bit) & 1) else -1 for bit in range(32)]
     assert len(signs) == 32
     assert set(signs) <= {-1, 1}
+
+
+def test_vectorized_signs_match_scalar_hash_bits():
+    size = 65
+    got = signs_for(torch.empty(1), block=3, layer=2, seed=999, block_size=size)
+    expected = torch.tensor(
+        [1.0 if ((sign_word_for(999, 3, 2, pos >> 5) >> (pos & 31)) & 1) else -1.0 for pos in range(size)]
+    )
+    assert torch.equal(got, expected)
 
 
 def test_slice_matches_full_forward_cpu():
@@ -80,3 +91,39 @@ def test_block_fht_linear_cached_grad_matches_dynamic():
     assert torch.allclose(cached_loss, dynamic_loss)
     assert torch.allclose(cached.generator.latent.grad, dynamic.generator.latent.grad, atol=1e-6)
     assert torch.allclose(cached.bias.grad, dynamic.bias.grad, atol=1e-6)
+
+
+def test_forward_fused_matches_materialized_with_both_gains():
+    layer = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=11, output_gain=True, input_gain=True)
+    x = torch.randn(4, 5)
+    assert torch.allclose(layer.forward_fused(x), F.linear(x, layer.weight, layer.bias))
+
+
+def test_freeze_restores_input_gain_trainability():
+    layer = BlockFHTLinear(5, 3, latent_dim=8, layers=2, output_gain=True, input_gain=True)
+    freeze_non_block_fht(torch.nn.Sequential(layer), train_embeddings=False)
+    assert layer.input_gain.requires_grad and layer.output_gain.requires_grad
+
+
+def test_spectral_zero_correction_matches_same_seed_block_fht():
+    base = BlockFHTLinear(8, 12, bias=True, latent_dim=8, layers=2, seed=9)
+    structured = BlockFHTLinear(8, 12, bias=True, latent_dim=8, layers=2, seed=9, spectral_rank=2, spectral_out_groups=3, spectral_in_groups=2)
+    structured.load_state_dict(base.state_dict(), strict=False)
+    x = torch.randn(3, 8)
+    assert torch.allclose(structured.weight, base.weight)
+    assert torch.allclose(structured(x), base(x))
+
+
+def test_spectral_core_and_group_gains_receive_gradients_and_disable_cache():
+    layer = BlockFHTLinear(8, 12, latent_dim=8, layers=2, seed=9, spectral_rank=2, spectral_out_groups=3, spectral_in_groups=2)
+    with torch.no_grad():
+        layer.spectral_core[0, 0] = 0.1
+    layer.materialize_weight_cache()
+    assert layer._cached_weight is None
+    loss = layer(torch.randn(4, 8)).square().mean()
+    loss.backward()
+    assert torch.isfinite(layer.spectral_core.grad).all()
+    assert torch.isfinite(layer.spectral_log_out_gain.grad).all()
+    assert torch.isfinite(layer.spectral_log_in_gain.grad).all()
+    freeze_non_block_fht(torch.nn.Sequential(layer), train_embeddings=False)
+    assert layer.spectral_core.requires_grad and layer.spectral_log_out_gain.requires_grad and layer.spectral_log_in_gain.requires_grad

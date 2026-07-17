@@ -55,11 +55,30 @@ def sign_word_for(seed: int, block: int, layer: int, word: int) -> int:
 def signs_for(
     reference: torch.Tensor, block: int, layer: int, seed: int, block_size: int
 ) -> torch.Tensor:
-    values = []
-    for pos in range(block_size):
-        bits = sign_word_for(seed, block, layer, pos >> 5)
-        values.append(1.0 if ((bits >> (pos & 31)) & 1) else -1.0)
-    return torch.tensor(values, device=reference.device, dtype=reference.dtype)
+    """Generate the exact ``sign_word_for`` bit pattern without a Python loop.
+
+    The fallback FHT can request tens of thousands of signs per block.  Building
+    them one Python scalar at a time dominated CUDA inference on hosts without
+    the optional extension, even though the signs are already destined for the
+    accelerator.  The uint32 hash is evaluated in vectorized int64 arithmetic
+    with an explicit low-32-bit mask after every mixing operation, preserving
+    ``sign_word_for`` bit-for-bit.
+    """
+    mask = (1 << 32) - 1
+    words = torch.arange((int(block_size) + 31) // 32, device=reference.device, dtype=torch.int64)
+    seed32 = (int(seed) ^ (int(seed) >> 32)) & mask
+    mixed = torch.full_like(words, seed32)
+    mixed = (mixed ^ ((0x9E3779B9 * (int(block) + 1)) & mask)) & mask
+    mixed = (mixed ^ ((0x85EBCA6B * (int(layer) + 1)) & mask)) & mask
+    mixed = (mixed ^ ((0xC2B2AE35 * (words + 1)) & mask)) & mask
+    mixed = (mixed ^ (mixed >> 16)) & mask
+    mixed = (mixed * 0x7FEB352D) & mask
+    mixed = (mixed ^ (mixed >> 15)) & mask
+    mixed = (mixed * 0x846CA68B) & mask
+    mixed = (mixed ^ (mixed >> 16)) & mask
+    positions = torch.arange(32, device=reference.device, dtype=torch.int64)
+    bits = (mixed.unsqueeze(1) >> positions) & 1
+    return (2.0 * bits.reshape(-1)[:block_size] - 1.0).to(dtype=reference.dtype)
 
 
 def block_fht_slice_torch(
@@ -281,8 +300,13 @@ class _BlockFHTLinearFn(torch.autograd.Function):
         size: int,
         layers: int,
         seed: int,
+        weight_scale: float,
+        modulation_alpha: float,
     ) -> torch.Tensor:
         weight_flat = block_fht_slice(latent, int(size), int(layers), int(seed), 0, int(size))
+        weight_flat = weight_flat * float(weight_scale)
+        if float(modulation_alpha) != 0.0:
+            weight_flat = weight_flat + float(modulation_alpha) * latent.square().sum()
         weight = weight_flat.view(int(out_features), int(in_features)).to(dtype=input.dtype)
         output = F.linear(input, weight, bias)
         ctx.save_for_backward(input, latent)
@@ -292,6 +316,8 @@ class _BlockFHTLinearFn(torch.autograd.Function):
         ctx.size = int(size)
         ctx.layers = int(layers)
         ctx.seed = int(seed)
+        ctx.weight_scale = float(weight_scale)
+        ctx.modulation_alpha = float(modulation_alpha)
         return output
 
     @staticmethod
@@ -304,6 +330,9 @@ class _BlockFHTLinearFn(torch.autograd.Function):
         if ctx.needs_input_grad[0]:
             with torch.no_grad():
                 weight_flat = block_fht_slice(latent, ctx.size, ctx.layers, ctx.seed, 0, ctx.size)
+                weight_flat = weight_flat * ctx.weight_scale
+                if ctx.modulation_alpha != 0.0:
+                    weight_flat = weight_flat + ctx.modulation_alpha * latent.square().sum()
                 weight = weight_flat.view(ctx.out_features, ctx.in_features).to(dtype=grad_output.dtype)
             grad_input = grad_2d.matmul(weight).reshape_as(input)
 
@@ -311,18 +340,20 @@ class _BlockFHTLinearFn(torch.autograd.Function):
             grad_weight = grad_2d.transpose(0, 1).to(dtype=latent.dtype).matmul(
                 input_2d.to(dtype=latent.dtype)
             )
-            grad_latent = block_fht_grad_latent(
+            grad_latent = ctx.weight_scale * block_fht_grad_latent(
                 latent,
                 grad_weight.reshape(-1),
                 ctx.size,
                 ctx.layers,
                 ctx.seed,
             )
+            if ctx.modulation_alpha != 0.0:
+                grad_latent = grad_latent + 2.0 * ctx.modulation_alpha * latent * grad_weight.sum()
 
         if ctx.has_bias and ctx.needs_input_grad[2]:
             grad_bias = grad_2d.sum(dim=0).to(dtype=grad_output.dtype)
 
-        return grad_input, grad_latent, grad_bias, None, None, None, None, None
+        return grad_input, grad_latent, grad_bias, None, None, None, None, None, None, None
 
 
 class BlockFHTLinear(nn.Module):
@@ -336,6 +367,16 @@ class BlockFHTLinear(nn.Module):
         layers: int = 3,
         seed: int = 0,
         latent_init_std: float = 0.02,
+        weight_scale: float = 1.0,
+        modulation_alpha: float = 0.0,
+        modulation_centered: bool = False,
+        residual_base_scale: float = 0.0,
+        residual_base_std: float = 0.02,
+        output_gain: bool = False,
+        input_gain: bool = False,
+        spectral_rank: int = 0,
+        spectral_out_groups: int = 1,
+        spectral_in_groups: int = 1,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -352,14 +393,79 @@ class BlockFHTLinear(nn.Module):
         )
         self.bias = nn.Parameter(torch.zeros(self.out_features)) if bias else None
         self._cached_weight: torch.Tensor | None = None
+        self.weight_scale = float(weight_scale)
+        self.modulation_alpha = float(modulation_alpha)
+        self.modulation_centered = bool(modulation_centered)
+        self.latent_init_std = float(latent_init_std)
+        self.residual_base_scale = float(residual_base_scale)
+        self.output_gain = nn.Parameter(torch.ones(self.out_features)) if output_gain else None
+        self.input_gain = nn.Parameter(torch.ones(self.in_features)) if input_gain else None
+        self.spectral_rank = int(spectral_rank)
+        self.spectral_out_groups = int(spectral_out_groups)
+        self.spectral_in_groups = int(spectral_in_groups)
+        if self.spectral_rank:
+            if self.spectral_rank > min(self.in_features, self.out_features):
+                raise ValueError("spectral_rank exceeds matrix dimensions")
+            if self.out_features % self.spectral_out_groups or self.in_features % self.spectral_in_groups:
+                raise ValueError("spectral gain groups must divide feature dimensions")
+            self.register_buffer("spectral_u", self._hadamard_columns(self.out_features, self.spectral_rank, seed + 17), persistent=True)
+            self.register_buffer("spectral_v", self._hadamard_columns(self.in_features, self.spectral_rank, seed + 31), persistent=True)
+            self.spectral_core = nn.Parameter(torch.zeros(self.spectral_rank, self.spectral_rank))
+            self.spectral_log_out_gain = nn.Parameter(torch.zeros(self.spectral_out_groups))
+            self.spectral_log_in_gain = nn.Parameter(torch.zeros(self.spectral_in_groups))
+        else:
+            self.spectral_u = self.spectral_v = None
+            self.spectral_core = self.spectral_log_out_gain = self.spectral_log_in_gain = None
+        if self.residual_base_scale != 0.0:
+            base_weight = torch.empty(self.out_features, self.in_features)
+            nn.init.normal_(base_weight, mean=0.0, std=float(residual_base_std))
+            self.register_buffer("residual_base_weight", base_weight, persistent=True)
+        else:
+            self.residual_base_weight = None
+
+    @staticmethod
+    def _hadamard_columns(length: int, rank: int, seed: int) -> torch.Tensor:
+        rows = torch.arange(length, dtype=torch.int64).view(-1, 1)
+        cols = (torch.arange(rank, dtype=torch.int64) + int(seed)).view(1, -1)
+        bits = rows.bitwise_and(cols)
+        parity = torch.zeros_like(bits)
+        while bits.any():
+            parity = parity.bitwise_xor(bits.bitwise_and(1))
+            bits = bits.bitwise_right_shift(1)
+        return (1.0 - 2.0 * parity.float()) / math.sqrt(length)
+
+    def _modulation_offset(self) -> torch.Tensor:
+        offset = self.generator.latent.square().sum()
+        if self.modulation_centered:
+            expected = self.generator.latent.numel() * self.latent_init_std * self.latent_init_std
+            offset = offset - offset.new_tensor(expected)
+        return offset
 
     @property
     def weight(self) -> torch.Tensor:
-        return self.generator().view(self.out_features, self.in_features)
+        weight = self.generator() * self.weight_scale
+        if self.modulation_alpha != 0.0:
+            weight = weight + self.modulation_alpha * self._modulation_offset()
+        weight = weight.view(self.out_features, self.in_features)
+        if self.residual_base_weight is not None:
+            weight = self.residual_base_weight.to(device=weight.device, dtype=weight.dtype) + self.residual_base_scale * weight
+        if self.spectral_core is not None:
+            correction = self.spectral_u.to(dtype=weight.dtype).matmul(self.spectral_core.to(dtype=weight.dtype)).matmul(self.spectral_v.to(dtype=weight.dtype).transpose(0, 1))
+            weight = weight + correction
+            out_gain = self.spectral_log_out_gain.exp().repeat_interleave(self.out_features // self.spectral_out_groups).to(dtype=weight.dtype)
+            in_gain = self.spectral_log_in_gain.exp().repeat_interleave(self.in_features // self.spectral_in_groups).to(dtype=weight.dtype)
+            weight = weight * out_gain.view(-1, 1) * in_gain.view(1, -1)
+        if self.output_gain is not None:
+            weight = weight * self.output_gain.to(device=weight.device, dtype=weight.dtype).view(-1, 1)
+        if self.input_gain is not None:
+            weight = weight * self.input_gain.to(device=weight.device, dtype=weight.dtype).view(1, -1)
+        return weight
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         if self._cached_weight is not None:
             return F.linear(input, self._cached_weight, self.bias)
+        if self.residual_base_weight is not None or self.modulation_centered or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+            return F.linear(input, self.weight.to(dtype=input.dtype), self.bias)
         return _BlockFHTLinearFn.apply(
             input,
             self.generator.latent,
@@ -369,22 +475,34 @@ class BlockFHTLinear(nn.Module):
             self.generator.size,
             self.generator.layers,
             self.generator.seed,
+            self.weight_scale,
+            self.modulation_alpha,
         )
 
     def forward_fused(self, input: torch.Tensor, weight_scale: float = 1.0) -> torch.Tensor:
+        if self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+            return F.linear(input, self.weight.to(dtype=input.dtype), self.bias)
         out = block_fht_linear_forward(
             input,
             self.generator.latent,
             self.out_features,
             self.generator.layers,
             self.generator.seed,
-            weight_scale=weight_scale,
+            weight_scale=weight_scale * self.weight_scale,
         )
+        if self.modulation_alpha != 0.0:
+            modulation = self.modulation_alpha * self._modulation_offset()
+            out = out + modulation.to(dtype=out.dtype) * input.sum(dim=-1, keepdim=True)
+        if self.residual_base_weight is not None:
+            base_out = F.linear(input, self.residual_base_weight.to(device=input.device, dtype=input.dtype))
+            out = base_out + self.residual_base_scale * out
         if self.bias is not None:
             out = out + self.bias
         return out
 
     def materialize_weight_cache(self, dtype: torch.dtype | None = None) -> None:
+        if self.residual_base_weight is not None or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+            return
         if self._cached_weight is not None:
             return
         with torch.no_grad():
@@ -398,13 +516,18 @@ class BlockFHTLinear(nn.Module):
             return
         if self._cached_weight.grad is not None:
             grad_weight = self._cached_weight.grad.reshape(-1).to(dtype=self.generator.latent.dtype)
-            grad_latent = block_fht_grad_latent(
+            generated_grad_weight = grad_weight
+            if self.residual_base_weight is not None:
+                generated_grad_weight = generated_grad_weight * self.residual_base_scale
+            grad_latent = self.weight_scale * block_fht_grad_latent(
                 self.generator.latent,
-                grad_weight,
+                generated_grad_weight,
                 self.generator.size,
                 self.generator.layers,
                 self.generator.seed,
             )
+            if self.modulation_alpha != 0.0:
+                grad_latent = grad_latent + 2.0 * self.modulation_alpha * self.generator.latent * generated_grad_weight.sum()
             if self.generator.latent.grad is None:
                 self.generator.latent.grad = grad_latent
             else:

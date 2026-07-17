@@ -10,4 +10,8 @@ dist/
 *.so
 *.dylib
 *.dll
+.slim/
 .slim/deepwork/
+# BEGIN oh-my-opencode-slim clonedeps
+.slim/clonedeps/repos/
+# END oh-my-opencode-slim clonedeps
