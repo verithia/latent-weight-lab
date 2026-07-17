@@ -121,7 +121,11 @@ def heartbeat_text(samples: list[dict]) -> str:
         current = sample.get("last_iter")
         total = sample.get("max_iters")
         progress = f"{current}/{total}" if current is not None and total is not None else "unavailable"
-        parts.append(f"{sample['name']}: iter={progress} gpu={sample['gpu'] or 'unavailable'}")
+        terminal = str(sample.get("status", {}).get("state", "")).lower() in {"finished", "failed"}
+        process_state = "process=missing" if not sample.get("alive") and not terminal else ""
+        parts.append(
+            f"{sample['name']}: iter={progress} {process_state} gpu={sample['gpu'] or 'unavailable'}".rstrip()
+        )
     return "Y400 dense ladder HEARTBEAT: " + " | ".join(parts)
 
 
@@ -218,6 +222,14 @@ def main() -> None:
                 )
                 if run_state.get("terminal_signature") != terminal_signature:
                     terminal_events.append((sample["name"], terminal_signature[0], terminal_signature[1]))
+            elif not sample.get("alive"):
+                key = event_key(sample["name"], "process_missing", sample.get("pgid", sample["name"]))
+                if key not in state.setdefault("sent", {}) and send(
+                    args.chat_id,
+                    f"Y400 {sample['name']} ERROR: process group missing while status=running; "
+                    f"last_iter={current_iter}",
+                ):
+                    state["sent"][key] = now
             for error in sample.get("errors", []):
                 key = event_key(sample["name"], "error", error)
                 if key not in state.setdefault("sent", {}) and send(args.chat_id, f"Y400 {sample['name']} ERROR: {error}"):
