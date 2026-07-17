@@ -1,0 +1,5 @@
+y400_next_idle_01_fhtlora_r16_lr26_decay6500	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_next_idle_01_fhtlora_r16_lr26_decay6500.json	7630	131072
+y400_next_idle_02_fhtlora_r16_lr24_decay6500	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_next_idle_02_fhtlora_r16_lr24_decay6500.json	7630	131072
+y400_next_idle_03_fhtlora_liveB_lr24_decay6500	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_next_idle_03_fhtlora_liveB_lr24_decay6500.json	7630	131072
+y400_next_idle_04_fullattn_qk_lr21_4b	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_next_idle_04_fullattn_qk_lr21_4b.json	30520	131072
+y400_next_idle_05_fullattn_mix25_lr19_4b	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_next_idle_05_fullattn_mix25_lr19_4b.json	30520	131072

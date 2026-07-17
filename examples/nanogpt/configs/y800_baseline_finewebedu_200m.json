@@ -1,0 +1,22 @@
+{
+  "method": "baseline",
+  "data_dir": "/root/userdata/MappingNetworks/data/finewebedu_2b",
+  "out_dir": "/root/userdata/MappingNetworks/runs/y800_baseline_finewebedu_200m",
+  "init_from": "scratch",
+  "max_iters": 1526,
+  "lr_decay_iters": 1526,
+  "eval_interval": 250,
+  "eval_iters": 5,
+  "batch_size": 4,
+  "gradient_accumulation_steps": 32,
+  "block_size": 1024,
+  "n_layer": 12,
+  "n_head": 12,
+  "n_embd": 768,
+  "vocab_size": 50304,
+  "learning_rate": 0.0006,
+  "min_lr": 0.00006,
+  "warmup_iters": 100,
+  "dtype": "bfloat16",
+  "compile": false
+}

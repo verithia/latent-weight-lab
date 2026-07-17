@@ -1,0 +1,6 @@
+y800_cproj_mix_100m_01_attn_only	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_mix_100m_01_attn_only.json	763	131072
+y800_cproj_mix_100m_02_plain_outmix	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_mix_100m_02_plain_outmix.json	763	131072
+y800_cproj_mix_100m_03_plain_outmix_colgain	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_mix_100m_03_plain_outmix_colgain.json	763	131072
+y800_cproj_mix_100m_04_outg12_mix	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_mix_100m_04_outg12_mix.json	763	131072
+y800_cproj_mix_100m_05_outg12_mix_colgain	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_mix_100m_05_outg12_mix_colgain.json	763	131072
+y800_cproj_mix_100m_06_group12_inmix	/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y800_cproj_mix_100m_06_group12_inmix.json	763	131072

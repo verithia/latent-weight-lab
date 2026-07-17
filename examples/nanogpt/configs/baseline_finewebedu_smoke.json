@@ -1,0 +1,22 @@
+{
+  "method": "baseline",
+  "data_dir": "/home/jerson/mapping_networks/nanoGPT/data/finewebedu_2b",
+  "out_dir": "/home/jerson/mapping_networks/runs/latent_weight_lab_nanogpt_baseline_smoke",
+  "init_from": "scratch",
+  "max_iters": 20,
+  "lr_decay_iters": 20,
+  "eval_interval": 10,
+  "eval_iters": 2,
+  "batch_size": 1,
+  "gradient_accumulation_steps": 1,
+  "block_size": 1024,
+  "n_layer": 12,
+  "n_head": 12,
+  "n_embd": 768,
+  "vocab_size": 50304,
+  "learning_rate": 0.0006,
+  "min_lr": 0.00006,
+  "warmup_iters": 1,
+  "dtype": "bfloat16",
+  "compile": false
+}
