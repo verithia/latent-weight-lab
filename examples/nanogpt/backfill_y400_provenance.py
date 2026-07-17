@@ -105,9 +105,17 @@ def backfill_one(
     if not isinstance(data_dir, str) or not data_dir:
         raise ValueError("config has no data_dir")
     manifest = (Path(data_dir) / "manifest.json").resolve()
+    expected_manifest_sha256 = config.get("data_manifest_sha256")
+    if not isinstance(expected_manifest_sha256, str) or not expected_manifest_sha256:
+        raise ValueError("config has no dataset manifest hash")
     manifest_sha256 = sha256_file(manifest)
-    if config.get("data_manifest_sha256") != manifest_sha256:
-        raise ValueError("config data manifest hash differs from current manifest")
+    manifest_verified = expected_manifest_sha256 == manifest_sha256
+    if not manifest_verified:
+        if not allow_unverified:
+            raise ValueError("config data manifest hash differs from current manifest")
+        if verification["status"] == "post_launch_reconstructed":
+            verification["status"] = "post_launch_partially_verified"
+        verification["dataset_capture"] = "current manifest differs from the hash recorded in the resolved config"
 
     stem = status_path.stem
     config_archive = output_dir / f"{stem}.config.json"
@@ -139,7 +147,12 @@ def backfill_one(
             "sha256": sha256_file(config_archive),
             "resolved_config_sha256": identity.get("config_sha256"),
         },
-        "dataset_manifest": {"path": str(manifest), "sha256": manifest_sha256},
+        "dataset_manifest": {
+            "path": str(manifest),
+            "expected_sha256": expected_manifest_sha256,
+            "observed_sha256": manifest_sha256,
+            "verified": manifest_verified,
+        },
         "source_hashes": source_hashes,
     }
     atomic_write(
