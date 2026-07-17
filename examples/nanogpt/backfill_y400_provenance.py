@@ -73,16 +73,34 @@ def source_hashes_match(source_root: Path, expected: dict[str, Any]) -> None:
             raise ValueError(f"recovered source does not match checkpoint hash: {relative_path}")
 
 
-def backfill_one(status_path: Path, source_root: Path, output_dir: Path) -> Path:
+def backfill_one(
+    status_path: Path, source_root: Path, output_dir: Path, *, allow_unverified: bool
+) -> Path:
     status = json.loads(status_path.read_text())
     config_path = Path(status["config"])
     raw_config = config_path.read_bytes()
     config = json.loads(raw_config)
     if not isinstance(config, dict):
         raise ValueError(f"config is not an object: {config_path}")
-    identity = checkpoint_identity(config)
-    source_hashes = identity["source_hashes"]
-    source_hashes_match(source_root, source_hashes)
+    verification: dict[str, Any]
+    try:
+        identity = checkpoint_identity(config)
+        source_hashes = identity["source_hashes"]
+        source_hashes_match(source_root, source_hashes)
+        verification = {
+            "status": "post_launch_reconstructed",
+            "source_capture": "recovery checkout matches checkpoint source hashes",
+        }
+    except ValueError as error:
+        if not allow_unverified:
+            raise
+        identity = {}
+        source_hashes = {}
+        verification = {
+            "status": "post_launch_unverified",
+            "source_capture": "checkpoint hashes are unavailable or do not match the recovery checkout",
+            "verification_error": str(error),
+        }
     data_dir = config.get("data_dir")
     if not isinstance(data_dir, str) or not data_dir:
         raise ValueError("config has no data_dir")
@@ -103,8 +121,7 @@ def backfill_one(status_path: Path, source_root: Path, output_dir: Path) -> Path
         "run_id": stem,
         "run_name": status["run_name"],
         "historical_recovery": {
-            "status": "post_launch_reconstructed",
-            "source_capture": "recovery checkout matches checkpoint source hashes",
+            **verification,
             "command_capture": "reconstructed from the archived detached-launcher contract; not captured argv",
             "status_sidecar": str(status_path.resolve()),
         },
@@ -137,13 +154,20 @@ def main() -> None:
     parser.add_argument("--status", action="append", required=True, help="legacy status JSON; repeat")
     parser.add_argument("--source-root", required=True, help="Git recovery checkout matching checkpoint hashes")
     parser.add_argument("--output-dir", required=True)
+    parser.add_argument(
+        "--allow-unverified",
+        action="store_true",
+        help="emit explicitly unverified records when checkpoint-hash validation is unavailable",
+    )
     args = parser.parse_args()
     source_root = Path(args.source_root).resolve()
     if git_value(source_root, "status", "--porcelain"):
         raise ValueError("recovery source checkout must be clean")
     output_dir = Path(args.output_dir).resolve()
     for raw_status in args.status:
-        output = backfill_one(Path(raw_status).resolve(), source_root, output_dir)
+        output = backfill_one(
+            Path(raw_status).resolve(), source_root, output_dir, allow_unverified=args.allow_unverified
+        )
         print(output)
 
 
