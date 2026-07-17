@@ -43,7 +43,7 @@
       "planned_tokens": 13898572800,
       "config": {
         "repo_path": "examples/nanogpt/configs/y400_mai_v2_690m_muon_20tpp_selected_lr24e4_resolved.json",
-        "sha256": "b0ae3377307f556f4ca0fc280184ec667e7fc728cd3719ec4ab60910f09f1985"
+        "sha256": "69c433315783b897af6f6bab91eb376b72faf3f7c5971a92ec51ebb4a697ea65"
       },
       "selection": {
         "artifact_path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v2/selection_artifacts/690m/5tpp-comparison.json",
