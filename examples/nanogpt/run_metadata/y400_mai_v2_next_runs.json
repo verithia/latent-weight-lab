@@ -1,0 +1,76 @@
+{
+  "schema_version": "y400_prelaunch_run_metadata_v1",
+  "policy_version": "mai_ladder_selection_v2",
+  "repository": {
+    "canonical_origin": "git@github.com:verithia/latent-weight-lab.git",
+    "continuation_ref": "y400-v2-continuation-provenance",
+    "selection_critical_source_hashes": {
+      "examples/nanogpt/model.py": "0b020e2d8fa6e756eb399643ca218e6e2005a4479b6df28455fb59779c729834",
+      "examples/nanogpt/train.py": "91bb68dd6de89cba13ca1351a139f6e93532580e099161ed31af799d46c2e3e5",
+      "latent_weight_lab/block_fht.py": "24ced32e5f0a973af0fe90a57c656acd6e492eee9853304243186bb6cf9c26d4"
+    },
+    "launch_requirement": "clean Git worktree at an immutable commit on this continuation ref; the launcher captures the exact commit at launch"
+  },
+  "launch_contract": {
+    "launcher": "examples/nanogpt/launch_y400_ladder_detached.sh",
+    "entrypoint": [
+      "python3",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "runtime_command": "written atomically by the launcher after it archives the resolved config",
+    "required_capture": [
+      "git commit and origin",
+      "entrypoint and literal argv",
+      "resolved config copy and SHA-256",
+      "dataset manifest path and SHA-256",
+      "status/checkpoint provenance binding"
+    ]
+  },
+  "dataset": {
+    "manifest_path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "runs": [
+    {
+      "name": "y400_mai_v2_690m_muon_20tpp_selected_lr24e4_resolved",
+      "state": "PENDING_SCHEDULING",
+      "authorization": "metadata prepared only; do not launch until the active 985M 5TPP comparison is resolved and scheduling is explicitly selected",
+      "tier": "690m",
+      "method": "baseline",
+      "planned_tpp": 20.0,
+      "planned_tokens": 13898572800,
+      "config": {
+        "repo_path": "examples/nanogpt/configs/y400_mai_v2_690m_muon_20tpp_selected_lr24e4_resolved.json",
+        "sha256": "b0ae3377307f556f4ca0fc280184ec667e7fc728cd3719ec4ab60910f09f1985"
+      },
+      "selection": {
+        "artifact_path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v2/selection_artifacts/690m/5tpp-comparison.json",
+        "artifact_sha256": "bd7c14f69426c228e937bd8b4a996c8bdec36fccb99d0ed27857aefe50a83890",
+        "outcome": "PRACTICAL_TIE",
+        "selected_slot": "top1",
+        "learning_rate": 0.0024
+      }
+    },
+    {
+      "name": "y400_mai_v2_985m_muon_20tpp_selected",
+      "state": "BLOCKED_ON_ACTIVE_5TPP_COMPARISON",
+      "authorization": "not launchable: live top1/top2 must complete, produce accepted terminal records, and form a hash-pinned comparison artifact",
+      "tier": "985m",
+      "method": "baseline",
+      "planned_tpp": 20.0,
+      "planned_tokens": 19698186240,
+      "config_template": {
+        "repo_path": "examples/nanogpt/configs/y400_mai_v2_985m_muon_20tpp_selected.json",
+        "sha256": "7cabfa72f7cbd2d18e2ea2503ad258f572f93211d52bad1f7d1db5326873f514"
+      }
+    },
+    {
+      "name": "full_attention_blockfht_ladder",
+      "state": "BLOCKED_ON_ACCEPTED_FOUR_RUNG_DENSE_FIT",
+      "authorization": "not launchable: requires accepted 124M/350M/690M/985M dense 20TPP terminal records and a SHA-pinned dense scaling-fit artifact",
+      "scope": "24 generated BlockFHT screen/confirmation/selected-recipe templates across 124M, 350M, 690M, and 985M"
+    }
+  ]
+}
