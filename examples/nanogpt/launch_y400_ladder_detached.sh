@@ -145,6 +145,34 @@ if [[ "${1:-}" == "--status-self-test" ]]; then
   exit 0
 fi
 
+if [[ "${1:-}" == "--provenance-self-test" ]]; then
+  [[ "$#" -eq 2 ]] || { echo "usage: $0 --provenance-self-test CONFIG_PATH" >&2; exit 2; }
+  CONFIG_INPUT="$2"
+  if [[ "$CONFIG_INPUT" = /* ]]; then CONFIG="$CONFIG_INPUT"; else CONFIG="$REPO_DIR/$CONFIG_INPUT"; fi
+  [[ -f "$CONFIG" ]] || { echo "config not found: $CONFIG" >&2; exit 2; }
+  require_clean_git_checkout
+  SELFTEST_DIR="${TMPDIR:-/tmp}/y400-provenance-selftest-$$"
+  CONFIG_ARCHIVE="$SELFTEST_DIR/config.json"
+  PROVENANCE="$SELFTEST_DIR/provenance.json"
+  LAUNCHED_AT="$(date -Is)"
+  PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN")"
+  "${PYTHON_BIN}" - "$PROVENANCE" "$PROVENANCE_SHA256" "$GIT_COMMIT" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+path, expected_sha, expected_commit = sys.argv[1:]
+raw = Path(path).read_bytes()
+payload = json.loads(raw)
+assert hashlib.sha256(raw).hexdigest() == expected_sha
+assert payload["repository"]["git_commit"] == expected_commit
+assert payload["entrypoint"][-1] == "examples.nanogpt.train"
+assert payload["command"][-2] == "--config"
+assert Path(payload["config"]["archive_path"]).is_file()
+assert len(payload["dataset_manifest"]["sha256"]) == 64
+print("provenance-self-test-ok")
+PY
+  exit 0
+fi
+
 worker() {
   local config="$1" gpu="$2" run_name="$3" workspace="$4" log="$5" status="$6" provenance="$7" provenance_sha256="$8" pgid
   pgid="$(ps -o pgid= -p "$$" | tr -d ' ')"
