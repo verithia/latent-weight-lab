@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Y400-only detached launcher for one ladder config. It does not poll or notify.
 # Usage (on Y400):
-#   examples/nanogpt/launch_y400_ladder_detached.sh [--resume] examples/nanogpt/configs/NAME.json 0 NAME [WORKSPACE_ROOT]
+#   examples/nanogpt/launch_y400_ladder_detached.sh [--resume] [--foreground] examples/nanogpt/configs/NAME.json 0 NAME [WORKSPACE_ROOT]
 # The printed PID is also the setsid process-group leader; use it with the local
 # watcher. The worker records its own terminal JSON status and exits with the
 # exact training exit code.
@@ -50,8 +50,8 @@ PY
 }
 
 write_provenance() {
-  local config="$1" config_archive="$2" provenance="$3" run_id="$4" run_name="$5" gpu="$6" workspace="$7" launched_at="$8" git_commit="$9" git_origin="${10}" resume_mode="${11}"
-  "${PYTHON_BIN}" - "$config" "$config_archive" "$provenance" "$run_id" "$run_name" "$gpu" "$workspace" "$launched_at" "$git_commit" "$git_origin" "$REPO_DIR" "$SCRIPT_DIR" "$PYTHON_BIN" "$PROVENANCE_SCHEMA_VERSION" "$resume_mode" <<'PY'
+  local config="$1" config_archive="$2" provenance="$3" run_id="$4" run_name="$5" gpu="$6" workspace="$7" launched_at="$8" git_commit="$9" git_origin="${10}" resume_mode="${11}" foreground_mode="${12}"
+  "${PYTHON_BIN}" - "$config" "$config_archive" "$provenance" "$run_id" "$run_name" "$gpu" "$workspace" "$launched_at" "$git_commit" "$git_origin" "$REPO_DIR" "$SCRIPT_DIR" "$PYTHON_BIN" "$PROVENANCE_SCHEMA_VERSION" "$resume_mode" "$foreground_mode" <<'PY'
 import hashlib
 import json
 import os
@@ -61,7 +61,7 @@ from pathlib import Path
 
 (
     config_path, config_archive, provenance_path, run_id, run_name, gpu, workspace,
-    launched_at, git_commit, git_origin, repo_dir, launcher_dir, python_bin, schema_version, resume_mode,
+    launched_at, git_commit, git_origin, repo_dir, launcher_dir, python_bin, schema_version, resume_mode, foreground_mode,
 ) = sys.argv[1:]
 
 source = Path(config_path).resolve()
@@ -132,6 +132,7 @@ payload = {
         "workspace": str(Path(workspace).resolve()),
         "cuda_visible_devices": str(gpu),
         "python": str(Path(python_bin).resolve()) if Path(python_bin).exists() else python_bin,
+        "launch_mode": "foreground" if foreground_mode == "1" else "setsid_detached",
     },
 }
 encoded = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode() + b"\n"
@@ -157,7 +158,7 @@ if [[ "${1:-}" == "--provenance-self-test" ]]; then
   CONFIG_ARCHIVE="$SELFTEST_DIR/config.json"
   PROVENANCE="$SELFTEST_DIR/provenance.json"
   LAUNCHED_AT="$(date -Is)"
-  PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" 0)"
+  PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" 0 0)"
   "${PYTHON_BIN}" - "$PROVENANCE" "$PROVENANCE_SHA256" "$GIT_COMMIT" <<'PY'
 import hashlib, json, sys
 from pathlib import Path
@@ -213,12 +214,14 @@ if [[ "${1:-}" == "--worker" ]]; then
 fi
 
 RESUME_MODE=0
-if [[ "${1:-}" == "--resume" ]]; then
-  RESUME_MODE=1
+FOREGROUND_MODE=0
+while [[ "${1:-}" == "--resume" || "${1:-}" == "--foreground" ]]; do
+  if [[ "$1" == "--resume" ]]; then RESUME_MODE=1; fi
+  if [[ "$1" == "--foreground" ]]; then FOREGROUND_MODE=1; fi
   shift
-fi
+done
 
-[[ "$#" -ge 3 && "$#" -le 4 ]] || { echo "usage: $0 [--resume] CONFIG_PATH GPU_INDEX RUN_NAME [WORKSPACE_ROOT]" >&2; exit 2; }
+[[ "$#" -ge 3 && "$#" -le 4 ]] || { echo "usage: $0 [--resume] [--foreground] CONFIG_PATH GPU_INDEX RUN_NAME [WORKSPACE_ROOT]" >&2; exit 2; }
 CONFIG_INPUT="$1"; GPU="$2"; RUN_NAME="$3"; WORKSPACE="${4:-/root/userdata/MappingNetworks}"
 [[ "$GPU" =~ ^[0-9]+$ ]] || { echo "GPU_INDEX must be a non-negative integer" >&2; exit 2; }
 [[ "$RUN_NAME" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "RUN_NAME may contain only letters, digits, dot, underscore, and dash" >&2; exit 2; }
@@ -234,8 +237,12 @@ STATUS="$RUN_DIR/status/${RUN_ID}.json"
 CONFIG_ARCHIVE="$RUN_DIR/provenance/${RUN_ID}.config.json"
 PROVENANCE="$RUN_DIR/provenance/${RUN_ID}.json"
 LAUNCHED_AT="$(date -Is)"
-PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$RESUME_MODE")"
+PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$RESUME_MODE" "$FOREGROUND_MODE")"
 # Pass every value as a distinct argv element: no generated remote shell string.
+if [[ "$FOREGROUND_MODE" == "1" ]]; then
+  printf 'launched foreground run=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$LOG" "$STATUS" "$PROVENANCE"
+  worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" "$RESUME_MODE" >"$LOG" 2>&1
+fi
 setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" "$RESUME_MODE" </dev/null >"$LOG" 2>&1 &
 PID=$!
 printf 'launched run=%s pid=%s pgid=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$PID" "$PID" "$LOG" "$STATUS" "$PROVENANCE"
