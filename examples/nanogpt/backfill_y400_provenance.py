@@ -102,20 +102,17 @@ def backfill_one(
             "verification_error": str(error),
         }
     data_dir = config.get("data_dir")
-    if not isinstance(data_dir, str) or not data_dir:
-        raise ValueError("config has no data_dir")
-    manifest = (Path(data_dir) / "manifest.json").resolve()
+    manifest = (Path(data_dir) / "manifest.json").resolve() if isinstance(data_dir, str) and data_dir else None
     expected_manifest_sha256 = config.get("data_manifest_sha256")
-    if not isinstance(expected_manifest_sha256, str) or not expected_manifest_sha256:
-        raise ValueError("config has no dataset manifest hash")
-    manifest_sha256 = sha256_file(manifest)
-    manifest_verified = expected_manifest_sha256 == manifest_sha256
+    expected_manifest_sha256 = expected_manifest_sha256 if isinstance(expected_manifest_sha256, str) else None
+    observed_manifest_sha256 = sha256_file(manifest) if manifest and manifest.is_file() else None
+    manifest_verified = bool(expected_manifest_sha256 and expected_manifest_sha256 == observed_manifest_sha256)
     if not manifest_verified:
         if not allow_unverified:
-            raise ValueError("config data manifest hash differs from current manifest")
+            raise ValueError("dataset manifest is absent or differs from the resolved-config hash")
         if verification["status"] == "post_launch_reconstructed":
             verification["status"] = "post_launch_partially_verified"
-        verification["dataset_capture"] = "current manifest differs from the hash recorded in the resolved config"
+        verification["dataset_capture"] = "manifest hash is absent, unavailable, or differs from the resolved config"
 
     stem = status_path.stem
     config_archive = output_dir / f"{stem}.config.json"
@@ -148,9 +145,9 @@ def backfill_one(
             "resolved_config_sha256": identity.get("config_sha256"),
         },
         "dataset_manifest": {
-            "path": str(manifest),
+            "path": str(manifest) if manifest else None,
             "expected_sha256": expected_manifest_sha256,
-            "observed_sha256": manifest_sha256,
+            "observed_sha256": observed_manifest_sha256,
             "verified": manifest_verified,
         },
         "source_hashes": source_hashes,
