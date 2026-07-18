@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One aggregate Y400 ladder heartbeat with progress-aware clock resets.
+"""One aggregate GPU-ladder heartbeat with progress-aware clock resets.
 
 Milestone watchers own 20/50/80/terminal callbacks.  This supervisor sends a
 single combined health update only when no successfully delivered milestone has
@@ -115,7 +115,7 @@ def heartbeat_due(now: float, last_callback_at: float, progress_at: float, perio
     return now - max(last_callback_at, progress_at) >= period_seconds
 
 
-def heartbeat_text(samples: list[dict]) -> str:
+def heartbeat_text(label: str, samples: list[dict]) -> str:
     parts = []
     for sample in samples:
         current = sample.get("last_iter")
@@ -126,7 +126,7 @@ def heartbeat_text(samples: list[dict]) -> str:
         parts.append(
             f"{sample['name']}: iter={progress} {process_state} gpu={sample['gpu'] or 'unavailable'}".rstrip()
         )
-    return "Y400 dense ladder HEARTBEAT: " + " | ".join(parts)
+    return f"{label} HEARTBEAT: " + " | ".join(parts)
 
 
 def milestone_crossings(previous: int | None, current: int | None, maximum: int | None, sent: set[int]) -> list[int]:
@@ -136,10 +136,14 @@ def milestone_crossings(previous: int | None, current: int | None, maximum: int 
     return [percent for percent in (20, 50, 80) if percent not in sent and previous * 100 < percent * maximum <= current * 100]
 
 
-def event_text(progress_events: list[tuple[str, int, int, int]], terminal_events: list[tuple[str, str, int | None]]) -> str:
+def event_text(
+    label: str,
+    progress_events: list[tuple[str, int, int, int]],
+    terminal_events: list[tuple[str, str, int | None]],
+) -> str:
     parts = [f"{name} {percent}% ({iteration}/{maximum})" for name, percent, iteration, maximum in progress_events]
     parts.extend(f"{name} {state}{'' if exit_code is None else f' exit={exit_code}'}" for name, state, exit_code in terminal_events)
-    return "Y400 dense ladder PROGRESS: " + " | ".join(parts)
+    return f"{label} PROGRESS: " + " | ".join(parts)
 
 
 def probe(host: str, runs: list[dict]) -> list[dict]:
@@ -172,6 +176,8 @@ def monitor_error_text(exc: Exception) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="Y400")
+    parser.add_argument("--label", default="Y400 dense ladder")
+    parser.add_argument("--state-key", default="y400_dense_aggregate")
     parser.add_argument("--chat-id", required=True)
     parser.add_argument("--state-dir", type=Path, required=True)
     parser.add_argument("--run", action="append", required=True, type=parse_run)
@@ -182,8 +188,10 @@ def main() -> None:
     if args.heartbeat_minutes < 1 or args.stall_minutes < 1 or args.interval < 15:
         parser.error("heartbeat/stall minutes must be >=1 and interval >=15 seconds")
 
-    state_path = args.state_dir / "y400_dense_aggregate.json"
-    progress_path = args.state_dir / "y400_dense_aggregate_progress.json"
+    if not args.state_key or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for char in args.state_key):
+        parser.error("--state-key may contain only letters, digits, dot, underscore, and dash")
+    state_path = args.state_dir / f"{args.state_key}.json"
+    progress_path = args.state_dir / f"{args.state_key}_progress.json"
     state = load(state_path)
     initialized = bool(state.get("initialized"))
     while True:
@@ -194,7 +202,7 @@ def main() -> None:
             key = event_key("aggregate", "monitor_degraded", type(exc).__name__)
             if key not in state.setdefault("sent", {}) and send(
                 args.chat_id,
-                f"Y400 dense ladder MONITOR_DEGRADED: {monitor_error_text(exc)}",
+                f"{args.label} MONITOR_DEGRADED: {monitor_error_text(exc)}",
             ):
                 state["sent"][key] = now
             atomic(state_path, state)
@@ -238,24 +246,24 @@ def main() -> None:
                 key = event_key(sample["name"], "process_missing", sample.get("pgid", sample["name"]))
                 if key not in state.setdefault("sent", {}) and send(
                     args.chat_id,
-                    f"Y400 {sample['name']} ERROR: process group missing while status=running; "
+                    f"{args.label} {sample['name']} ERROR: process group missing while status=running; "
                     f"last_iter={current_iter}",
                 ):
                     state["sent"][key] = now
             for error in sample.get("errors", []):
                 key = event_key(sample["name"], "error", error)
-                if key not in state.setdefault("sent", {}) and send(args.chat_id, f"Y400 {sample['name']} ERROR: {error}"):
+                if key not in state.setdefault("sent", {}) and send(args.chat_id, f"{args.label} {sample['name']} ERROR: {error}"):
                     state["sent"][key] = now
             progress_at = float(run_state.get("last_progress_at", now))
             if sample.get("alive") and not terminal and now - progress_at >= args.stall_minutes * 60:
                 key = event_key(sample["name"], "stall", int((now - progress_at) // (args.stall_minutes * 60)))
-                if key not in state.setdefault("sent", {}) and send(args.chat_id, f"Y400 {sample['name']} STALL: no progress for {int(now - progress_at)}s"):
+                if key not in state.setdefault("sent", {}) and send(args.chat_id, f"{args.label} {sample['name']} STALL: no progress for {int(now - progress_at)}s"):
                     state["sent"][key] = now
 
         # One message can describe every milestone/terminal transition found in
         # this probe.  Only a successful delivery advances the heartbeat clock.
         if progress_events or terminal_events:
-            if send(args.chat_id, event_text(progress_events, terminal_events)):
+            if send(args.chat_id, event_text(args.label, progress_events, terminal_events)):
                 for name, percent, _iteration, _maximum in progress_events:
                     run_state = state["runs"][name]
                     run_state["sent_milestones"] = sorted(set(run_state.get("sent_milestones", [])) | {percent})
@@ -276,7 +284,7 @@ def main() -> None:
             initialized = True
             state["initialized"] = True
         if heartbeat_due(now, float(state.get("last_callback_at", now)), progress_at, args.heartbeat_minutes * 60):
-            if send(args.chat_id, heartbeat_text(samples)):
+            if send(args.chat_id, heartbeat_text(args.label, samples)):
                 state["last_callback_at"] = now
         state["updated_at"] = now
         atomic(state_path, state)
