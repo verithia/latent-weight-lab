@@ -160,6 +160,15 @@ def event_key(name: str, kind: str, detail: object) -> str:
     return f"{name}:{kind}:{digest}"
 
 
+def monitor_error_text(exc: Exception) -> str:
+    """Return a short actionable probe failure without leaking command details."""
+    if isinstance(exc, subprocess.CalledProcessError):
+        return f"remote probe failed (ssh exit {exc.returncode}); retrying"
+    if isinstance(exc, subprocess.TimeoutExpired):
+        return "remote probe timed out; retrying"
+    return f"remote probe failed ({type(exc).__name__}); retrying"
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="Y400")
@@ -183,7 +192,10 @@ def main() -> None:
             samples = probe(args.host, args.run)
         except Exception as exc:  # Monitoring must keep trying after a transport fault.
             key = event_key("aggregate", "monitor_degraded", type(exc).__name__)
-            if key not in state.setdefault("sent", {}) and send(args.chat_id, f"Y400 dense ladder MONITOR_DEGRADED: {exc}"):
+            if key not in state.setdefault("sent", {}) and send(
+                args.chat_id,
+                f"Y400 dense ladder MONITOR_DEGRADED: {monitor_error_text(exc)}",
+            ):
                 state["sent"][key] = now
             atomic(state_path, state)
             time.sleep(min(args.interval * 2, 600))
