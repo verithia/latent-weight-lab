@@ -276,6 +276,11 @@ def main() -> None:
                         str(status.get("finished_at", "")),
                     )
                 state["last_callback_at"] = now
+                # Persist canonical event ownership immediately after a
+                # successful delivery. A service reload between the bridge
+                # call and the end-of-probe state write must not replay a
+                # terminal or milestone callback.
+                atomic(state_path, state)
                 atomic(progress_path, {"last_progress_callback_at": now, "event": "aggregate_progress"})
 
         progress_at = progress_reset_at(progress_path)
