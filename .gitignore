@@ -10,6 +10,7 @@ dist/
 *.so
 *.dylib
 *.dll
+outputs/
 .slim/
 .slim/deepwork/
 # BEGIN oh-my-opencode-slim clonedeps
