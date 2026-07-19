@@ -933,8 +933,12 @@ class MLP(nn.Module):
     def postgelu_spread_loss(self) -> torch.Tensor | None:
         if self.last_postgelu is None or self.postgelu_std_target <= 0.0:
             return None
-        values = self.last_postgelu.float().reshape(-1, self.last_postgelu.shape[-1])
-        std = values.std(dim=0, unbiased=False)
+        # Do not materialize a full FP32 [batch*sequence, 4*width] copy here:
+        # at b64/1024 that is 1GiB *per layer* and can dominate the model
+        # activation budget. CUDA's reduction accumulates the BF16 input
+        # without that copy; only the per-channel result is promoted to FP32
+        # for the small penalty calculation.
+        std = self.last_postgelu.std(dim=(0, 1), unbiased=False).float()
         target = std.new_tensor(self.postgelu_std_target)
         return torch.relu(target - std).square().mean()
 

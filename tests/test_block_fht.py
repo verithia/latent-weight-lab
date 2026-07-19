@@ -12,7 +12,7 @@ from latent_weight_lab.block_fht import (
     sign_word_for,
     suspend_block_fht_weight_cache,
 )
-from examples.nanogpt.model import freeze_non_block_fht
+from examples.nanogpt.model import GPTConfig, MLP, freeze_non_block_fht
 
 
 def test_sign_word_uses_32_positions():
@@ -130,6 +130,19 @@ def test_suspended_cache_keeps_ce_grad_and_live_perturbation_grad():
     assert torch.allclose(hybrid_perturbed, dynamic_perturbed)
     assert torch.allclose(hybrid.generator.latent.grad, dynamic.generator.latent.grad, atol=1e-6)
     assert torch.allclose(hybrid.bias.grad, dynamic.bias.grad, atol=1e-6)
+
+
+def test_postgelu_spread_reduces_without_full_activation_cast():
+    mlp = MLP(GPTConfig(n_embd=4, n_head=1, block_fht_ffn_postgelu_std_target=0.15), layer_id=0)
+    values = torch.randn(3, 5, 16, requires_grad=True)
+    mlp.last_postgelu = values
+    actual = mlp.postgelu_spread_loss()
+    assert actual is not None
+    expected_std = values.float().reshape(-1, values.shape[-1]).std(dim=0, unbiased=False)
+    expected = torch.relu(expected_std.new_tensor(0.15) - expected_std).square().mean()
+    assert torch.allclose(actual, expected)
+    actual.backward()
+    assert values.grad is not None and torch.isfinite(values.grad).all()
 
 
 def test_forward_fused_matches_materialized_with_both_gains():
