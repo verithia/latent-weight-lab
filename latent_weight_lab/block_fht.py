@@ -547,6 +547,31 @@ def flush_block_fht_weight_cache(model: nn.Module) -> None:
             module.flush_weight_cache_to_latent_grad()
 
 
+def suspend_block_fht_weight_cache(model: nn.Module) -> list[tuple[BlockFHTLinear, torch.Tensor]]:
+    """Temporarily bypass materialized weights for a live-latent forward.
+
+    Mapping-stability uses a perturbed latent point.  Its forward must not see
+    the unperturbed cached weights, but CE microbatches in the same optimizer
+    step still benefit from that cache.  The returned handles retain the exact
+    leaf tensors (and their accumulated CE gradients) for later restoration
+    and normal cache-to-latent gradient projection.
+    """
+    suspended: list[tuple[BlockFHTLinear, torch.Tensor]] = []
+    for module in model.modules():
+        if isinstance(module, BlockFHTLinear) and module._cached_weight is not None:
+            suspended.append((module, module._cached_weight))
+            module._cached_weight = None
+    return suspended
+
+
+def restore_block_fht_weight_cache(suspended: list[tuple[BlockFHTLinear, torch.Tensor]]) -> None:
+    """Restore a cache suspended by :func:`suspend_block_fht_weight_cache`."""
+    for module, weight in suspended:
+        if module._cached_weight is not None:
+            raise RuntimeError("cannot restore BlockFHT cache over a live cached weight")
+        module._cached_weight = weight
+
+
 class BlockFHT(nn.Module):
     def __init__(
         self,

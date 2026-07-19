@@ -20,6 +20,7 @@ from pathlib import Path
 
 
 CALLBACK_URL = "http://127.0.0.1:8766/send-opencode-test"
+AGENT_MENTION = "@Codex"
 
 REMOTE_PROBE = r'''python3 - "$1" <<'PY'
 import json, pathlib, re, subprocess, sys
@@ -93,7 +94,9 @@ def parse_run(value: str) -> dict[str, object]:
 def send(chat_id: str, text: str) -> bool:
     request = urllib.request.Request(
         CALLBACK_URL,
-        data=json.dumps({"chat_id": chat_id, "text": text}).encode(),
+        # The bridge invocation endpoint wakes the active coding agent.  The
+        # explicit visible mention makes ownership unambiguous in the group.
+        data=json.dumps({"chat_id": chat_id, "text": f"{AGENT_MENTION} {text}"}).encode(),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
@@ -133,16 +136,19 @@ def milestone_crossings(previous: int | None, current: int | None, maximum: int 
     """Return only milestones newly crossed since the previous aggregate probe."""
     if previous is None or current is None or maximum is None or current <= previous:
         return []
-    return [percent for percent in (20, 50, 80) if percent not in sent and previous * 100 < percent * maximum <= current * 100]
+    return [percent for percent in (20, 50) if percent not in sent and previous * 100 < percent * maximum <= current * 100]
 
 
 def event_text(
     label: str,
     progress_events: list[tuple[str, int, int, int]],
-    terminal_events: list[tuple[str, str, int | None]],
+    terminal_events: list[tuple[str, str, int | None, int | None, int | None]],
 ) -> str:
     parts = [f"{name} {percent}% ({iteration}/{maximum})" for name, percent, iteration, maximum in progress_events]
-    parts.extend(f"{name} {state}{'' if exit_code is None else f' exit={exit_code}'}" for name, state, exit_code in terminal_events)
+    parts.extend(
+        f"{name} 100% ({current}/{maximum}) {state}{'' if exit_code is None else f' exit={exit_code}'}"
+        for name, state, exit_code, current, maximum in terminal_events
+    )
     return f"{label} PROGRESS: " + " | ".join(parts)
 
 
@@ -215,7 +221,7 @@ def main() -> None:
         for sample, run in zip(samples, args.run):
             sample["max_iters"] = run["max_iters"]
         progress_events: list[tuple[str, int, int, int]] = []
-        terminal_events: list[tuple[str, str, int | None]] = []
+        terminal_events: list[tuple[str, str, int | None, int | None, int | None]] = []
         for sample in samples:
             run_state = state.setdefault("runs", {}).setdefault(sample["name"], {})
             previous_iter = run_state.get("last_iter")
@@ -224,7 +230,7 @@ def main() -> None:
             sent_milestones = set(run_state.get("sent_milestones", []))
             if previous_iter is None and current_iter is not None and maximum is not None:
                 # The first sample is a baseline, never a catch-up notification.
-                sent_milestones.update(percent for percent in (20, 50, 80) if current_iter * 100 >= percent * maximum)
+                sent_milestones.update(percent for percent in (20, 50) if current_iter * 100 >= percent * maximum)
             else:
                 for percent in milestone_crossings(previous_iter, current_iter, maximum, sent_milestones):
                     progress_events.append((sample["name"], percent, current_iter, maximum))
@@ -241,7 +247,7 @@ def main() -> None:
                     str(sample.get("status", {}).get("finished_at", "")),
                 )
                 if run_state.get("terminal_signature") != terminal_signature:
-                    terminal_events.append((sample["name"], terminal_signature[0], terminal_signature[1]))
+                    terminal_events.append((sample["name"], terminal_signature[0], terminal_signature[1], current_iter, maximum))
             elif not sample.get("alive"):
                 key = event_key(sample["name"], "process_missing", sample.get("pgid", sample["name"]))
                 if key not in state.setdefault("sent", {}) and send(
@@ -267,7 +273,7 @@ def main() -> None:
                 for name, percent, _iteration, _maximum in progress_events:
                     run_state = state["runs"][name]
                     run_state["sent_milestones"] = sorted(set(run_state.get("sent_milestones", [])) | {percent})
-                for name, _terminal_state, _exit_code in terminal_events:
+                for name, _terminal_state, _exit_code, _current, _maximum in terminal_events:
                     sample = state["runs"][name]["sample"]
                     status = sample.get("status", {})
                     state["runs"][name]["terminal_signature"] = (

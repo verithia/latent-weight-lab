@@ -7,8 +7,10 @@ from latent_weight_lab.block_fht import (
     block_fht_slice_torch,
     flush_block_fht_weight_cache,
     prepare_block_fht_weight_cache,
+    restore_block_fht_weight_cache,
     signs_for,
     sign_word_for,
+    suspend_block_fht_weight_cache,
 )
 from examples.nanogpt.model import freeze_non_block_fht
 
@@ -91,6 +93,43 @@ def test_block_fht_linear_cached_grad_matches_dynamic():
     assert torch.allclose(cached_loss, dynamic_loss)
     assert torch.allclose(cached.generator.latent.grad, dynamic.generator.latent.grad, atol=1e-6)
     assert torch.allclose(cached.bias.grad, dynamic.bias.grad, atol=1e-6)
+
+
+def test_suspended_cache_keeps_ce_grad_and_live_perturbation_grad():
+    """A stability forward must bypass only the unperturbed CE cache."""
+    torch.manual_seed(456)
+    dynamic = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=17)
+    hybrid = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=17)
+    hybrid.load_state_dict(dynamic.state_dict())
+    x = torch.randn(4, 5)
+    perturbation = torch.randn_like(dynamic.generator.latent) * 1e-3
+
+    dynamic_base = dynamic(x).square().mean()
+    dynamic_base.backward()
+    with torch.no_grad():
+        dynamic.generator.latent.add_(perturbation)
+    dynamic_perturbed = dynamic(x).square().mean()
+    dynamic_perturbed.backward()
+    with torch.no_grad():
+        dynamic.generator.latent.sub_(perturbation)
+
+    prepare_block_fht_weight_cache(hybrid)
+    hybrid_base = hybrid(x).square().mean()
+    hybrid_base.backward()
+    suspended = suspend_block_fht_weight_cache(hybrid)
+    with torch.no_grad():
+        hybrid.generator.latent.add_(perturbation)
+    hybrid_perturbed = hybrid(x).square().mean()
+    hybrid_perturbed.backward()
+    with torch.no_grad():
+        hybrid.generator.latent.sub_(perturbation)
+    restore_block_fht_weight_cache(suspended)
+    flush_block_fht_weight_cache(hybrid)
+
+    assert torch.allclose(hybrid_base, dynamic_base)
+    assert torch.allclose(hybrid_perturbed, dynamic_perturbed)
+    assert torch.allclose(hybrid.generator.latent.grad, dynamic.generator.latent.grad, atol=1e-6)
+    assert torch.allclose(hybrid.bias.grad, dynamic.bias.grad, atol=1e-6)
 
 
 def test_forward_fused_matches_materialized_with_both_gains():

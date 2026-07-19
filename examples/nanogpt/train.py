@@ -942,10 +942,9 @@ def main() -> None:
     use_weight_cache = (
         args.method == "block_fht"
         and args.block_fht_cache_weights
-        and float(args.mapping_stability_lambda) == 0.0
     )
-    if args.method == "block_fht" and args.block_fht_cache_weights and not use_weight_cache:
-        print("block_fht: disabled weight cache because latent stability perturbations require live weights")
+    if use_weight_cache and float(args.mapping_stability_lambda) != 0.0:
+        print("block_fht: cached CE weights with live-latent stability perturbation forwards")
     tokens_per_iter = args.batch_size * args.block_size * args.gradient_accumulation_steps
     print(f"tokens per iteration: {tokens_per_iter:,}")
     print(f"model_config: {asdict(gpt_config)}")
@@ -1090,6 +1089,11 @@ def main() -> None:
                 float(args.mapping_stability_lambda) != 0.0
                 and microbatch_index < stability_microbatches
             ):
+                # CE used the unperturbed cache above. Suspend it only around
+                # this second forward so the KL term differentiates through
+                # the actual perturbed latent weights; restore it before the
+                # end-of-step cache flush projects CE gradients to latents.
+                suspended_cache = raw_model.suspend_block_fht_cache() if use_weight_cache else []
                 noises = perturb_block_fht_latents(raw_model, args.mapping_stability_sigma)
                 try:
                     with ctx:
@@ -1108,6 +1112,8 @@ def main() -> None:
                     stability_accum += float(stability_loss.detach().item())
                 finally:
                     restore_block_fht_latents(raw_model, noises)
+                    if suspended_cache:
+                        raw_model.restore_block_fht_cache(suspended_cache)
             ce_loss = loss.detach() * args.gradient_accumulation_steps
             ce_accum = ce_loss if ce_accum is None else ce_accum + ce_loss
             if args.perf_profile:

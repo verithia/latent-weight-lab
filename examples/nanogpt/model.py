@@ -9,7 +9,13 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from examples.nanogpt.muon import Muon
-from latent_weight_lab import BlockFHTLinear, flush_block_fht_weight_cache, prepare_block_fht_weight_cache
+from latent_weight_lab import (
+    BlockFHTLinear,
+    flush_block_fht_weight_cache,
+    prepare_block_fht_weight_cache,
+    restore_block_fht_weight_cache,
+    suspend_block_fht_weight_cache,
+)
 
 
 class MultiOptimizer:
@@ -1078,6 +1084,12 @@ class GPT(nn.Module):
 
     def flush_block_fht_cache(self) -> None:
         flush_block_fht_weight_cache(self)
+
+    def suspend_block_fht_cache(self):
+        return suspend_block_fht_weight_cache(self)
+
+    def restore_block_fht_cache(self, suspended) -> None:
+        restore_block_fht_weight_cache(suspended)
 
 
 def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> None:
