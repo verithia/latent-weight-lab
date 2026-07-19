@@ -648,6 +648,42 @@ def logits_kl_stability_loss(logits: torch.Tensor, perturbed_logits: torch.Tenso
     return F.kl_div(perturbed_log_probs, reference, reduction="batchmean") * (temp * temp)
 
 
+def iter_logits_kl_stability_backward_chunks(
+    logits: torch.Tensor,
+    perturbed_logits: torch.Tensor,
+    temperature: float,
+    chunk_rows: int,
+):
+    """Yield exact KL values/output gradients without a full FP32 logits copy.
+
+    ``F.kl_div(..., reduction='batchmean') * T^2`` has derivative
+    ``T * (softmax(perturbed/T) - softmax(reference/T)) / batch`` with respect
+    to perturbed logits. Computing it in bounded rows retains the complete
+    token objective while avoiding simultaneous full FP32 logits tensors.
+    """
+    if logits.shape != perturbed_logits.shape or logits.ndim != 3:
+        raise ValueError("stability logits must be matching [batch, sequence, vocab] tensors")
+    if chunk_rows <= 0:
+        raise ValueError("stability chunk_rows must be positive")
+    temp = float(temperature)
+    if temp <= 0.0 or not math.isfinite(temp):
+        raise ValueError("stability temperature must be finite and positive")
+    batch_size, _, vocab_size = perturbed_logits.shape
+    flat_reference = logits.detach().reshape(-1, vocab_size)
+    flat_perturbed = perturbed_logits.reshape(-1, vocab_size)
+    for start in range(0, flat_perturbed.shape[0], int(chunk_rows)):
+        stop = min(flat_perturbed.shape[0], start + int(chunk_rows))
+        # No autograd graph is needed for the analytic output gradient. The
+        # caller immediately backpropagates it through the original output
+        # slice, freeing each FP32 chunk before the next one.
+        with torch.no_grad():
+            reference = F.softmax(flat_reference[start:stop].float() / temp, dim=-1)
+            perturbed_log_probs = F.log_softmax(flat_perturbed[start:stop].float() / temp, dim=-1)
+            value = F.kl_div(perturbed_log_probs, reference, reduction="sum") * (temp * temp / batch_size)
+            output_gradient = (perturbed_log_probs.exp() - reference) * (temp / batch_size)
+        yield flat_perturbed[start:stop], value, output_gradient.to(dtype=perturbed_logits.dtype)
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=None)
@@ -742,6 +778,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mapping-stability-sigma", type=float, default=1e-3)
     parser.add_argument("--mapping-stability-temperature", type=float, default=1.0)
     parser.add_argument("--mapping-stability-microbatches", type=int, default=0)
+    parser.add_argument("--mapping-stability-chunk-rows", type=int, default=2048)
     parser.add_argument("--mapping-norm-lambda", type=float, default=0.0)
     parser.add_argument("--mapping-norm-target-rms", type=float, default=0.03)
     parser.add_argument("--perf-profile", action=argparse.BooleanOptionalAction, default=False)
@@ -769,6 +806,8 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--mapping-stability-microbatches must be >= 0")
     if namespace.mapping_stability_microbatches > namespace.gradient_accumulation_steps:
         raise ValueError("--mapping-stability-microbatches cannot exceed gradient accumulation steps")
+    if namespace.mapping_stability_chunk_rows <= 0:
+        raise ValueError("--mapping-stability-chunk-rows must be positive")
     return namespace
 
 
@@ -1098,18 +1137,25 @@ def main() -> None:
                 try:
                     with ctx:
                         perturbed_logits, _ = model(x, None)
-                        stability_loss = logits_kl_stability_loss(
-                            logits,
-                            perturbed_logits,
-                            args.mapping_stability_temperature,
+                    chunks_remaining = math.ceil(
+                        perturbed_logits.shape[0] * perturbed_logits.shape[1]
+                        / args.mapping_stability_chunk_rows
+                    )
+                    stability_value = 0.0
+                    for output_slice, chunk_value, output_gradient in iter_logits_kl_stability_backward_chunks(
+                        logits,
+                        perturbed_logits,
+                        args.mapping_stability_temperature,
+                        args.mapping_stability_chunk_rows,
+                    ):
+                        chunks_remaining -= 1
+                        output_gradient.mul_(float(args.mapping_stability_lambda) / stability_microbatches)
+                        scaler.scale(output_slice).backward(
+                            gradient=output_gradient,
+                            retain_graph=chunks_remaining > 0,
                         )
-                        scaled_stability = (
-                            float(args.mapping_stability_lambda)
-                            * stability_loss
-                            / stability_microbatches
-                        )
-                    scaler.scale(scaled_stability).backward()
-                    stability_accum += float(stability_loss.detach().item())
+                        stability_value += float(chunk_value.item())
+                    stability_accum += stability_value
                 finally:
                     restore_block_fht_latents(raw_model, noises)
                     if suspended_cache:

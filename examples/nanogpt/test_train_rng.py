@@ -19,6 +19,28 @@ from examples.nanogpt import mai_selection_artifacts as mai_artifacts
 
 
 class FixedEvaluationRngTests(unittest.TestCase):
+    def test_chunked_stability_gradient_matches_full_kl(self):
+        torch.manual_seed(20260720)
+        reference = torch.randn(2, 5, 7)
+        perturbed_full = torch.randn(2, 5, 7, requires_grad=True)
+        perturbed_chunked = perturbed_full.detach().clone().requires_grad_(True)
+        temperature = 1.7
+
+        full = train.logits_kl_stability_loss(reference, perturbed_full, temperature)
+        full.backward()
+
+        chunk_value = 0.0
+        chunks_remaining = math.ceil((perturbed_chunked.shape[0] * perturbed_chunked.shape[1]) / 3)
+        for output_slice, value, gradient in train.iter_logits_kl_stability_backward_chunks(
+            reference, perturbed_chunked, temperature, 3
+        ):
+            chunks_remaining -= 1
+            output_slice.backward(gradient=gradient, retain_graph=chunks_remaining > 0)
+            chunk_value += float(value.item())
+
+        self.assertAlmostEqual(chunk_value, float(full.item()), places=5)
+        self.assertTrue(torch.allclose(perturbed_chunked.grad, perturbed_full.grad, atol=1e-6, rtol=1e-6))
+
     def test_omitted_seed_keeps_global_generator_behavior(self):
         self.assertIsNone(train.make_cpu_generator(None))
 
