@@ -97,11 +97,33 @@ def test_block_fht_linear_cached_grad_matches_dynamic():
 
 def test_block_fht_linear_cached_grad_matches_dynamic_with_channel_gains():
     torch.manual_seed(321)
-    dynamic = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=13, output_gain=True, input_gain=True)
+    dynamic = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        layers=2,
+        seed=13,
+        output_gain=True,
+        input_gain=True,
+        modulation_alpha=1e-3,
+        modulation_centered=True,
+    )
     with torch.no_grad():
         dynamic.output_gain.copy_(torch.tensor([0.7, 1.1, 1.3]))
         dynamic.input_gain.copy_(torch.tensor([0.8, 1.2, 0.9, 1.4, 0.6]))
-    cached = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=13, output_gain=True, input_gain=True)
+    cached = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        layers=2,
+        seed=13,
+        output_gain=True,
+        input_gain=True,
+        modulation_alpha=1e-3,
+        modulation_centered=True,
+    )
     cached.load_state_dict(dynamic.state_dict())
     x = torch.randn(4, 5)
 
