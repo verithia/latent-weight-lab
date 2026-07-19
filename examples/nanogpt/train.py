@@ -653,24 +653,40 @@ def iter_logits_kl_stability_backward_chunks(
     perturbed_logits: torch.Tensor,
     temperature: float,
     chunk_rows: int,
+    token_rows: int = 0,
 ):
     """Yield exact KL values/output gradients without a full FP32 logits copy.
 
     ``F.kl_div(..., reduction='batchmean') * T^2`` has derivative
     ``T * (softmax(perturbed/T) - softmax(reference/T)) / batch`` with respect
     to perturbed logits. Computing it in bounded rows retains the complete
-    token objective while avoiding simultaneous full FP32 logits tensors.
+    token objective while avoiding simultaneous full FP32 logits tensors. A
+    positive ``token_rows`` uses evenly distributed token rows and rescales the
+    result to a fixed-position estimator of the full-token objective.
     """
     if logits.shape != perturbed_logits.shape or logits.ndim != 3:
         raise ValueError("stability logits must be matching [batch, sequence, vocab] tensors")
     if chunk_rows <= 0:
         raise ValueError("stability chunk_rows must be positive")
+    if token_rows < 0:
+        raise ValueError("stability token_rows must be non-negative")
     temp = float(temperature)
     if temp <= 0.0 or not math.isfinite(temp):
         raise ValueError("stability temperature must be finite and positive")
-    batch_size, _, vocab_size = perturbed_logits.shape
+    batch_size, sequence_length, vocab_size = perturbed_logits.shape
     flat_reference = logits.detach().reshape(-1, vocab_size)
     flat_perturbed = perturbed_logits.reshape(-1, vocab_size)
+    total_rows = flat_perturbed.shape[0]
+    if 0 < token_rows < total_rows:
+        # Each row is a token position. Data batches remain independently
+        # sampled, while this evenly distributed fixed selection avoids an
+        # additional RNG stream/checkpoint obligation for the estimator.
+        positions = ((torch.arange(token_rows, device=flat_perturbed.device) + 0.5) * total_rows / token_rows).to(torch.long)
+        flat_reference = flat_reference.index_select(0, positions)
+        flat_perturbed = flat_perturbed.index_select(0, positions)
+        normalization = float(sequence_length) / token_rows
+    else:
+        normalization = 1.0 / batch_size
     for start in range(0, flat_perturbed.shape[0], int(chunk_rows)):
         stop = min(flat_perturbed.shape[0], start + int(chunk_rows))
         # No autograd graph is needed for the analytic output gradient. The
@@ -679,8 +695,8 @@ def iter_logits_kl_stability_backward_chunks(
         with torch.no_grad():
             reference = F.softmax(flat_reference[start:stop].float() / temp, dim=-1)
             perturbed_log_probs = F.log_softmax(flat_perturbed[start:stop].float() / temp, dim=-1)
-            value = F.kl_div(perturbed_log_probs, reference, reduction="sum") * (temp * temp / batch_size)
-            output_gradient = (perturbed_log_probs.exp() - reference) * (temp / batch_size)
+            value = F.kl_div(perturbed_log_probs, reference, reduction="sum") * (temp * temp * normalization)
+            output_gradient = (perturbed_log_probs.exp() - reference) * (temp * normalization)
         yield flat_perturbed[start:stop], value, output_gradient.to(dtype=perturbed_logits.dtype)
 
 
@@ -779,6 +795,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mapping-stability-temperature", type=float, default=1.0)
     parser.add_argument("--mapping-stability-microbatches", type=int, default=0)
     parser.add_argument("--mapping-stability-chunk-rows", type=int, default=2048)
+    parser.add_argument("--mapping-stability-token-rows", type=int, default=0)
     parser.add_argument("--mapping-norm-lambda", type=float, default=0.0)
     parser.add_argument("--mapping-norm-target-rms", type=float, default=0.03)
     parser.add_argument("--perf-profile", action=argparse.BooleanOptionalAction, default=False)
@@ -808,6 +825,8 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--mapping-stability-microbatches cannot exceed gradient accumulation steps")
     if namespace.mapping_stability_chunk_rows <= 0:
         raise ValueError("--mapping-stability-chunk-rows must be positive")
+    if namespace.mapping_stability_token_rows < 0:
+        raise ValueError("--mapping-stability-token-rows must be non-negative")
     return namespace
 
 
@@ -1137,16 +1156,20 @@ def main() -> None:
                 try:
                     with ctx:
                         perturbed_logits, _ = model(x, None)
-                    chunks_remaining = math.ceil(
-                        perturbed_logits.shape[0] * perturbed_logits.shape[1]
-                        / args.mapping_stability_chunk_rows
+                    available_rows = perturbed_logits.shape[0] * perturbed_logits.shape[1]
+                    selected_rows = (
+                        args.mapping_stability_token_rows
+                        if 0 < args.mapping_stability_token_rows < available_rows
+                        else available_rows
                     )
+                    chunks_remaining = math.ceil(selected_rows / args.mapping_stability_chunk_rows)
                     stability_value = 0.0
                     for output_slice, chunk_value, output_gradient in iter_logits_kl_stability_backward_chunks(
                         logits,
                         perturbed_logits,
                         args.mapping_stability_temperature,
                         args.mapping_stability_chunk_rows,
+                        args.mapping_stability_token_rows,
                     ):
                         chunks_remaining -= 1
                         output_gradient.mul_(float(args.mapping_stability_lambda) / stability_microbatches)

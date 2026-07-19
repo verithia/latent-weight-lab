@@ -39,6 +39,7 @@
   "mapping_stability_sigma": 0.001,
   "mapping_stability_microbatches": 1,
   "mapping_stability_chunk_rows": 2048,
+  "mapping_stability_token_rows": 512,
   "mapping_norm_lambda": 1.0,
   "mapping_norm_target_rms": 0.04,
   "freeze_non_block_fht": false,
@@ -47,6 +48,6 @@
   "mfu_preflight_required": true,
   "mfu_min_fraction": 0.2,
   "prelaunch_provenance_requirements": "record Git commit, entrypoint, literal command, archived config SHA-256, data manifest SHA-256, runtime fixed-evaluation index digest, and a passing measured MFU certificate",
-  "experiment_role": "performance-gated 350M Mapping-Loss screen; feasible 48x16 plan caches CE weights and evaluates the normalized full-token stability estimator through one live perturbed-latent forward with memory-bounded exact KL chunks",
+  "experiment_role": "performance-gated 350M Mapping-Loss screen; feasible 48x16 plan caches CE weights and evaluates a one-microbatch, 512 evenly distributed token-row stability estimator through one live perturbed-latent forward",
   "selection_endpoint": "terminal held-out NLL on registered fixed evaluation windows"
 }

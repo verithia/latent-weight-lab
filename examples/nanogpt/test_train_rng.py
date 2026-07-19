@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 import numpy as np
 import torch
+from torch.nn import functional as F
 
 from examples.nanogpt import train
 from examples.nanogpt import dense_scaling_fit as dense_fit
@@ -40,6 +41,36 @@ class FixedEvaluationRngTests(unittest.TestCase):
 
         self.assertAlmostEqual(chunk_value, float(full.item()), places=5)
         self.assertTrue(torch.allclose(perturbed_chunked.grad, perturbed_full.grad, atol=1e-6, rtol=1e-6))
+
+    def test_token_row_stability_estimator_matches_its_scaled_objective(self):
+        torch.manual_seed(20260721)
+        reference = torch.randn(2, 5, 7)
+        perturbed_manual = torch.randn(2, 5, 7, requires_grad=True)
+        perturbed_chunked = perturbed_manual.detach().clone().requires_grad_(True)
+        temperature = 1.3
+        token_rows = 4
+        total_rows = reference.shape[0] * reference.shape[1]
+        positions = ((torch.arange(token_rows) + 0.5) * total_rows / token_rows).to(torch.long)
+        flat_reference = reference.reshape(-1, reference.shape[-1]).index_select(0, positions)
+        flat_perturbed = perturbed_manual.reshape(-1, perturbed_manual.shape[-1]).index_select(0, positions)
+        manual = F.kl_div(
+            F.log_softmax(flat_perturbed / temperature, dim=-1),
+            F.softmax(flat_reference / temperature, dim=-1),
+            reduction="sum",
+        ) * (temperature * temperature * reference.shape[1] / token_rows)
+        manual.backward()
+
+        chunk_value = 0.0
+        chunks_remaining = math.ceil(token_rows / 3)
+        for output_slice, value, gradient in train.iter_logits_kl_stability_backward_chunks(
+            reference, perturbed_chunked, temperature, 3, token_rows
+        ):
+            chunks_remaining -= 1
+            output_slice.backward(gradient=gradient, retain_graph=chunks_remaining > 0)
+            chunk_value += float(value.item())
+
+        self.assertAlmostEqual(chunk_value, float(manual.item()), places=5)
+        self.assertTrue(torch.allclose(perturbed_chunked.grad, perturbed_manual.grad, atol=1e-6, rtol=1e-6))
 
     def test_omitted_seed_keeps_global_generator_behavior(self):
         self.assertIsNone(train.make_cpu_generator(None))
