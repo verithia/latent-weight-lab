@@ -95,6 +95,32 @@ def test_block_fht_linear_cached_grad_matches_dynamic():
     assert torch.allclose(cached.bias.grad, dynamic.bias.grad, atol=1e-6)
 
 
+def test_block_fht_linear_cached_grad_matches_dynamic_with_channel_gains():
+    torch.manual_seed(321)
+    dynamic = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=13, output_gain=True, input_gain=True)
+    with torch.no_grad():
+        dynamic.output_gain.copy_(torch.tensor([0.7, 1.1, 1.3]))
+        dynamic.input_gain.copy_(torch.tensor([0.8, 1.2, 0.9, 1.4, 0.6]))
+    cached = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=13, output_gain=True, input_gain=True)
+    cached.load_state_dict(dynamic.state_dict())
+    x = torch.randn(4, 5)
+
+    dynamic_loss = dynamic(x).square().mean()
+    dynamic_loss.backward()
+
+    prepare_block_fht_weight_cache(cached)
+    assert cached._cached_weight is not None
+    cached_loss = cached(x).square().mean()
+    cached_loss.backward()
+    flush_block_fht_weight_cache(cached)
+
+    assert torch.allclose(cached_loss, dynamic_loss)
+    assert torch.allclose(cached.generator.latent.grad, dynamic.generator.latent.grad, atol=1e-6)
+    assert torch.allclose(cached.bias.grad, dynamic.bias.grad, atol=1e-6)
+    assert torch.allclose(cached.output_gain.grad, dynamic.output_gain.grad, atol=1e-6)
+    assert torch.allclose(cached.input_gain.grad, dynamic.input_gain.grad, atol=1e-6)
+
+
 def test_suspended_cache_keeps_ce_grad_and_live_perturbation_grad():
     """A stability forward must bypass only the unperturbed CE cache."""
     torch.manual_seed(456)

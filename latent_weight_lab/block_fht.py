@@ -501,7 +501,7 @@ class BlockFHTLinear(nn.Module):
         return out
 
     def materialize_weight_cache(self, dtype: torch.dtype | None = None) -> None:
-        if self.residual_base_weight is not None or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+        if self.residual_base_weight is not None or self.spectral_core is not None:
             return
         if self._cached_weight is not None:
             return
@@ -515,8 +515,30 @@ class BlockFHTLinear(nn.Module):
         if self._cached_weight is None:
             return
         if self._cached_weight.grad is not None:
-            grad_weight = self._cached_weight.grad.reshape(-1).to(dtype=self.generator.latent.dtype)
+            grad_weight = self._cached_weight.grad.to(dtype=self.generator.latent.dtype)
+            cached_weight = self._cached_weight.detach().to(dtype=self.generator.latent.dtype)
             generated_grad_weight = grad_weight
+            if self.output_gain is not None:
+                output_gain = self.output_gain.detach().to(dtype=self.generator.latent.dtype)
+                if torch.any(output_gain == 0):
+                    raise RuntimeError("cannot flush a cached BlockFHT weight with a zero output gain")
+                output_gain_grad = (grad_weight * (cached_weight / output_gain.view(-1, 1))).sum(dim=1)
+                if self.output_gain.grad is None:
+                    self.output_gain.grad = output_gain_grad.to(dtype=self.output_gain.dtype)
+                else:
+                    self.output_gain.grad.add_(output_gain_grad.to(dtype=self.output_gain.dtype))
+                generated_grad_weight = generated_grad_weight * output_gain.view(-1, 1)
+            if self.input_gain is not None:
+                input_gain = self.input_gain.detach().to(dtype=self.generator.latent.dtype)
+                if torch.any(input_gain == 0):
+                    raise RuntimeError("cannot flush a cached BlockFHT weight with a zero input gain")
+                input_gain_grad = (grad_weight * (cached_weight / input_gain.view(1, -1))).sum(dim=0)
+                if self.input_gain.grad is None:
+                    self.input_gain.grad = input_gain_grad.to(dtype=self.input_gain.dtype)
+                else:
+                    self.input_gain.grad.add_(input_gain_grad.to(dtype=self.input_gain.dtype))
+                generated_grad_weight = generated_grad_weight * input_gain.view(1, -1)
+            generated_grad_weight = generated_grad_weight.reshape(-1)
             if self.residual_base_weight is not None:
                 generated_grad_weight = generated_grad_weight * self.residual_base_scale
             grad_latent = self.weight_scale * block_fht_grad_latent(
