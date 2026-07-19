@@ -157,6 +157,12 @@ def main() -> None:
     }
     try:
         gemm_peak = empirical_bf16_gemm_peak_tflops(args.gemm_size, args.gemm_warmups, args.gemm_trials)
+        certificate["calibration"] = {
+            "bf16_gemm_size": args.gemm_size,
+            "bf16_gemm_warmups": args.gemm_warmups,
+            "bf16_gemm_trials": args.gemm_trials,
+            "empirical_bf16_gemm_peak_tflops": gemm_peak,
+        }
         preflight_config = make_preflight_config(
             source, temporary_root / "run", args.warmup_updates, args.timed_updates
         )
@@ -191,12 +197,6 @@ def main() -> None:
         )
         certificate.update(
             {
-                "calibration": {
-                    "bf16_gemm_size": args.gemm_size,
-                    "bf16_gemm_warmups": args.gemm_warmups,
-                    "bf16_gemm_trials": args.gemm_trials,
-                    "empirical_bf16_gemm_peak_tflops": gemm_peak,
-                },
                 "measurement": {
                     "active_params_6n_estimate": active_params,
                     "tokens_per_second": tokens_per_second,
@@ -224,6 +224,9 @@ def main() -> None:
         certificate["elapsed_seconds"] = certificate["finished_at_unix"] - start
         temporary_log = log_path.read_text(errors="replace") if log_path.exists() else ""
         certificate["preflight_log_sha256"] = hashlib.sha256(temporary_log.encode()).hexdigest()
+        # Failed qualification must be diagnosable after its temporary working
+        # tree is removed. Keep only a bounded tail in the durable certificate.
+        certificate["preflight_log_tail"] = temporary_log[-12000:]
         temporary_certificate = output.with_suffix(output.suffix + ".part")
         temporary_certificate.write_text(json.dumps(certificate, indent=2, sort_keys=True) + "\n")
         os.replace(temporary_certificate, output)
