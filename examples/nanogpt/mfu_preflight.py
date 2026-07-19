@@ -185,6 +185,10 @@ def main() -> None:
         active_params = estimate_active_params(source)
         model_tflops = 6.0 * active_params * tokens_per_second / 1e12
         mfu_fraction = model_tflops / gemm_peak
+        timing_keys = (
+            "prepare_ms", "fwbw_ms", "flush_ms", "grad_ms", "opt_ms",
+            "data_ms", "other_ms", "eval_ms",
+        )
         certificate.update(
             {
                 "calibration": {
@@ -200,6 +204,10 @@ def main() -> None:
                     "model_tflops": model_tflops,
                     "mfu_fraction": mfu_fraction,
                     "peak_mib": max(row.get("peak_mib", 0.0) for row in steady),
+                    "timing_breakdown_ms": {
+                        key: sum(row.get(key, 0.0) for row in steady) / len(steady)
+                        for key in timing_keys
+                    },
                 },
                 "passed": mfu_fraction >= args.min_fraction,
             }
