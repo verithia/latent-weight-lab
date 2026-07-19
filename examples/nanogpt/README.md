@@ -131,3 +131,17 @@ The training path supports materialized per-optimizer-step BlockFHT weight cachi
 ```
 
 This is the intended training path. The fused non-materialized path is currently inference-focused and exposed through `BlockFHTLinear.forward_fused()`.
+## Mandatory MFU launch gate
+
+`launch_y400_ladder_detached.sh` refuses every training launch unless the exact
+config sets `mfu_preflight_required: true` and `mfu_min_fraction: 0.20` (or
+higher). Before it writes run provenance or starts a detached worker, it
+requires the selected GPU to be exclusive, measures a real short training run
+with the exact model/generator/regularizers, calibrates the same GPU with BF16
+tensor-core GEMM, and writes a passing MFU certificate. The certificate SHA,
+measured MFU, and denominator are recorded in the run provenance.
+
+This is a hard rejection criterion. A synthetic benchmark, `nvidia-smi`
+utilization, power draw, or a value copied from another accelerator cannot
+substitute for a passing certificate. For a changed model, microbatch shape,
+regularizer, compiler setting, or GPU, run the gate again before launch.

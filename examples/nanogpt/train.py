@@ -741,6 +741,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--mapping-stability-lambda", type=float, default=0.0)
     parser.add_argument("--mapping-stability-sigma", type=float, default=1e-3)
     parser.add_argument("--mapping-stability-temperature", type=float, default=1.0)
+    parser.add_argument("--mapping-stability-microbatches", type=int, default=0)
     parser.add_argument("--mapping-norm-lambda", type=float, default=0.0)
     parser.add_argument("--mapping-norm-target-rms", type=float, default=0.03)
     parser.add_argument("--perf-profile", action=argparse.BooleanOptionalAction, default=False)
@@ -764,6 +765,10 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--perf-warmup-iters must be >= 0")
     if namespace.checkpoint_wall_clock_seconds <= 0:
         raise ValueError("--checkpoint-wall-clock-seconds must be > 0")
+    if namespace.mapping_stability_microbatches < 0:
+        raise ValueError("--mapping-stability-microbatches must be >= 0")
+    if namespace.mapping_stability_microbatches > namespace.gradient_accumulation_steps:
+        raise ValueError("--mapping-stability-microbatches cannot exceed gradient accumulation steps")
     return namespace
 
 
@@ -1057,7 +1062,16 @@ def main() -> None:
             raw_model.prepare_block_fht_cache(dtype=ptdtype)
             if args.perf_profile:
                 prepare_cache_ms += (perf_now() - section_start) * 1000.0
-        for _ in range(args.gradient_accumulation_steps):
+        # A zero value preserves the legacy objective: evaluate stability on
+        # every accumulated microbatch.  A positive value is an explicitly
+        # labelled stochastic estimator of that mean regularizer, evaluated on
+        # the first N independently sampled microbatches and normalized by N.
+        stability_microbatches = (
+            args.gradient_accumulation_steps
+            if args.mapping_stability_microbatches == 0
+            else args.mapping_stability_microbatches
+        )
+        for microbatch_index in range(args.gradient_accumulation_steps):
             section_start = perf_now() if args.perf_profile else 0.0
             with ctx:
                 logits, loss = model(x, y)
@@ -1072,7 +1086,10 @@ def main() -> None:
                 loss = loss / args.gradient_accumulation_steps
             scaler.scale(loss).backward()
 
-            if float(args.mapping_stability_lambda) != 0.0:
+            if (
+                float(args.mapping_stability_lambda) != 0.0
+                and microbatch_index < stability_microbatches
+            ):
                 noises = perturb_block_fht_latents(raw_model, args.mapping_stability_sigma)
                 try:
                     with ctx:
@@ -1085,7 +1102,7 @@ def main() -> None:
                         scaled_stability = (
                             float(args.mapping_stability_lambda)
                             * stability_loss
-                            / args.gradient_accumulation_steps
+                            / stability_microbatches
                         )
                     scaler.scale(scaled_stability).backward()
                     stability_accum += float(stability_loss.detach().item())
@@ -1158,7 +1175,7 @@ def main() -> None:
             ce_value = float((ce_accum / args.gradient_accumulation_steps).item()) if ce_accum is not None else 0.0
             msg = f"iter {iter_num}: loss {ce_value:.4f}, time {(t1 - t0) * 1000:.2f}ms"
             if float(args.mapping_stability_lambda) != 0.0:
-                msg += f", stability {stability_accum / args.gradient_accumulation_steps:.6f}"
+                msg += f", stability {stability_accum / stability_microbatches:.6f}"
             if float(args.mapping_norm_lambda) != 0.0:
                 msg += f", norm {norm_accum / args.gradient_accumulation_steps:.6f}"
             if float(args.block_fht_ffn_postgelu_std_lambda) != 0.0:

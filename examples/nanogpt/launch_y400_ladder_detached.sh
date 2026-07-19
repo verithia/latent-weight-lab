@@ -50,8 +50,8 @@ PY
 }
 
 write_provenance() {
-  local config="$1" config_archive="$2" provenance="$3" run_id="$4" run_name="$5" gpu="$6" workspace="$7" launched_at="$8" git_commit="$9" git_origin="${10}"
-  "${PYTHON_BIN}" - "$config" "$config_archive" "$provenance" "$run_id" "$run_name" "$gpu" "$workspace" "$launched_at" "$git_commit" "$git_origin" "$REPO_DIR" "$SCRIPT_DIR" "$PYTHON_BIN" "$PROVENANCE_SCHEMA_VERSION" <<'PY'
+  local config="$1" config_archive="$2" provenance="$3" run_id="$4" run_name="$5" gpu="$6" workspace="$7" launched_at="$8" git_commit="$9" git_origin="${10}" mfu_certificate="${11}"
+  "${PYTHON_BIN}" - "$config" "$config_archive" "$provenance" "$run_id" "$run_name" "$gpu" "$workspace" "$launched_at" "$git_commit" "$git_origin" "$mfu_certificate" "$REPO_DIR" "$SCRIPT_DIR" "$PYTHON_BIN" "$PROVENANCE_SCHEMA_VERSION" <<'PY'
 import hashlib
 import json
 import os
@@ -61,7 +61,7 @@ from pathlib import Path
 
 (
     config_path, config_archive, provenance_path, run_id, run_name, gpu, workspace,
-    launched_at, git_commit, git_origin, repo_dir, launcher_dir, python_bin, schema_version,
+    launched_at, git_commit, git_origin, mfu_certificate, repo_dir, launcher_dir, python_bin, schema_version,
 ) = sys.argv[1:]
 
 source = Path(config_path).resolve()
@@ -81,6 +81,19 @@ manifest_sha256 = hashlib.sha256(manifest.read_bytes()).hexdigest()
 expected_manifest_sha256 = config.get("data_manifest_sha256")
 if not isinstance(expected_manifest_sha256, str) or expected_manifest_sha256 != manifest_sha256:
     raise SystemExit("refusing launch: config data_manifest_sha256 does not match dataset manifest")
+if config.get("mfu_preflight_required") is not True:
+    raise SystemExit("refusing launch: config must set mfu_preflight_required=true")
+if float(config.get("mfu_min_fraction", 0.0)) < 0.20:
+    raise SystemExit("refusing launch: config mfu_min_fraction must be >= 0.20")
+certificate = Path(mfu_certificate)
+if not certificate.is_file():
+    raise SystemExit("refusing launch: measured MFU certificate is absent")
+certificate_raw = certificate.read_bytes()
+certificate_payload = json.loads(certificate_raw)
+if certificate_payload.get("passed") is not True:
+    raise SystemExit("refusing launch: measured MFU certificate did not pass")
+if certificate_payload.get("config", {}).get("sha256") != hashlib.sha256(raw_config).hexdigest():
+    raise SystemExit("refusing launch: MFU certificate does not match config")
 
 def atomic_write(path: Path, payload: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -126,6 +139,13 @@ payload = {
         "sha256": config_sha256,
     },
     "dataset_manifest": {"path": str(manifest), "sha256": manifest_sha256},
+    "performance_preflight": {
+        "path": str(certificate.resolve()),
+        "sha256": hashlib.sha256(certificate_raw).hexdigest(),
+        "mfu_fraction": certificate_payload["measurement"]["mfu_fraction"],
+        "minimum_fraction": certificate_payload["policy"]["minimum_fraction"],
+        "denominator": certificate_payload["policy"]["denominator"],
+    },
     "runtime": {
         "workspace": str(Path(workspace).resolve()),
         "cuda_visible_devices": str(gpu),
@@ -152,10 +172,30 @@ if [[ "${1:-}" == "--provenance-self-test" ]]; then
   [[ -f "$CONFIG" ]] || { echo "config not found: $CONFIG" >&2; exit 2; }
   require_clean_git_checkout
   SELFTEST_DIR="${TMPDIR:-/tmp}/y400-provenance-selftest-$$"
+  SELFTEST_CONFIG="$SELFTEST_DIR/input.json"
   CONFIG_ARCHIVE="$SELFTEST_DIR/config.json"
   PROVENANCE="$SELFTEST_DIR/provenance.json"
+  MFU_CERTIFICATE="$SELFTEST_DIR/mfu.json"
+  mkdir -p "$SELFTEST_DIR"
+  "${PYTHON_BIN}" - "$CONFIG" "$SELFTEST_CONFIG" "$MFU_CERTIFICATE" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+source, config_path, certificate_path = map(Path, sys.argv[1:])
+config = json.loads(source.read_text())
+config["mfu_preflight_required"] = True
+config["mfu_min_fraction"] = 0.20
+raw = json.dumps(config, sort_keys=True).encode() + b"\n"
+config_path.write_bytes(raw)
+certificate = {
+    "passed": True,
+    "config": {"sha256": hashlib.sha256(raw).hexdigest()},
+    "policy": {"minimum_fraction": 0.20, "denominator": "self_test"},
+    "measurement": {"mfu_fraction": 0.20},
+}
+certificate_path.write_text(json.dumps(certificate, sort_keys=True) + "\n")
+PY
   LAUNCHED_AT="$(date -Is)"
-  PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN")"
+  PROVENANCE_SHA256="$(write_provenance "$SELFTEST_CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE")"
   "${PYTHON_BIN}" - "$PROVENANCE" "$PROVENANCE_SHA256" "$GIT_COMMIT" <<'PY'
 import hashlib, json, sys
 from pathlib import Path
@@ -168,6 +208,7 @@ assert payload["entrypoint"][-1] == "examples.nanogpt.train"
 assert payload["command"][-2] == "--config"
 assert Path(payload["config"]["archive_path"]).is_file()
 assert len(payload["dataset_manifest"]["sha256"]) == 64
+assert payload["performance_preflight"]["mfu_fraction"] == 0.20
 print("provenance-self-test-ok")
 PY
   exit 0
@@ -221,8 +262,28 @@ LOG="$RUN_DIR/logs/${RUN_ID}.log"
 STATUS="$RUN_DIR/status/${RUN_ID}.json"
 CONFIG_ARCHIVE="$RUN_DIR/provenance/${RUN_ID}.config.json"
 PROVENANCE="$RUN_DIR/provenance/${RUN_ID}.json"
+MFU_CERTIFICATE="$RUN_DIR/provenance/${RUN_ID}.mfu.json"
 LAUNCHED_AT="$(date -Is)"
-PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN")"
+
+# A launch is forbidden unless the selected card is idle and the exact config
+# clears a real-training MFU measurement.  This is intentionally before both
+# provenance publication and detached worker creation.
+GPU_PIDS="$(nvidia-smi -i "$GPU" --query-compute-apps=pid --format=csv,noheader 2>/dev/null | sed '/^No running processes found$/d;/^$/d' || true)"
+[[ -z "$GPU_PIDS" ]] || { echo "refusing launch: GPU $GPU is not exclusive for MFU preflight (PIDs: $GPU_PIDS)" >&2; exit 2; }
+MFU_MIN_FRACTION="$("$PYTHON_BIN" - "$CONFIG" <<'PY'
+import json, sys
+config = json.load(open(sys.argv[1]))
+if config.get("mfu_preflight_required") is not True:
+    raise SystemExit("refusing launch: config must set mfu_preflight_required=true")
+minimum = float(config.get("mfu_min_fraction", 0.0))
+if minimum < 0.20:
+    raise SystemExit("refusing launch: config mfu_min_fraction must be >= 0.20")
+print(minimum)
+PY
+)"
+CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON_BIN" -u -m examples.nanogpt.mfu_preflight \
+  --config "$CONFIG" --output "$MFU_CERTIFICATE" --min-fraction "$MFU_MIN_FRACTION"
+PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE")"
 # Pass every value as a distinct argv element: no generated remote shell string.
 setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" </dev/null >"$LOG" 2>&1 &
 PID=$!
