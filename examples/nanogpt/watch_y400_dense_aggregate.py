@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One aggregate GPU-ladder heartbeat with progress-aware clock resets.
 
-Milestone watchers own 20/50/80/terminal callbacks.  This supervisor sends a
+Milestone watchers own 20/50/terminal callbacks.  This supervisor sends a
 single combined health update only when no successfully delivered milestone has
 reset the shared clock during the preceding heartbeat period.  It also reports
 per-run stalls or log errors immediately.
@@ -132,6 +132,29 @@ def heartbeat_text(label: str, samples: list[dict]) -> str:
     return f"{label} HEARTBEAT: " + " | ".join(parts)
 
 
+def is_terminal(sample: dict) -> bool:
+    return str(sample.get("status", {}).get("state", "")).lower() in {"finished", "failed"}
+
+
+def terminal_signature(sample: dict) -> tuple[str, int | None, str]:
+    status = sample.get("status", {})
+    return (
+        str(status.get("state", "")),
+        status.get("exit_code"),
+        str(status.get("finished_at", "")),
+    )
+
+
+def all_terminal_delivered(samples: list[dict], state: dict) -> bool:
+    """Return true only after every terminal callback has durable ownership."""
+    if not samples or not all(is_terminal(sample) for sample in samples):
+        return False
+    return all(
+        state.get("runs", {}).get(sample["name"], {}).get("terminal_signature") == terminal_signature(sample)
+        for sample in samples
+    )
+
+
 def milestone_crossings(previous: int | None, current: int | None, maximum: int | None, sent: set[int]) -> list[int]:
     """Return only milestones newly crossed since the previous aggregate probe."""
     if previous is None or current is None or maximum is None or current <= previous:
@@ -239,15 +262,11 @@ def main() -> None:
             run_state["last_iter"] = current_iter
             run_state["sent_milestones"] = sorted(sent_milestones)
             run_state["sample"] = sample
-            terminal = str(sample.get("status", {}).get("state", "")).lower() in {"finished", "failed"}
+            terminal = is_terminal(sample)
             if terminal:
-                terminal_signature = (
-                    str(sample.get("status", {}).get("state", "")),
-                    sample.get("status", {}).get("exit_code"),
-                    str(sample.get("status", {}).get("finished_at", "")),
-                )
-                if run_state.get("terminal_signature") != terminal_signature:
-                    terminal_events.append((sample["name"], terminal_signature[0], terminal_signature[1], current_iter, maximum))
+                signature = terminal_signature(sample)
+                if run_state.get("terminal_signature") != signature:
+                    terminal_events.append((sample["name"], signature[0], signature[1], current_iter, maximum))
             elif not sample.get("alive"):
                 key = event_key(sample["name"], "process_missing", sample.get("pgid", sample["name"]))
                 if key not in state.setdefault("sent", {}) and send(
@@ -276,11 +295,7 @@ def main() -> None:
                 for name, _terminal_state, _exit_code, _current, _maximum in terminal_events:
                     sample = state["runs"][name]["sample"]
                     status = sample.get("status", {})
-                    state["runs"][name]["terminal_signature"] = (
-                        str(status.get("state", "")),
-                        status.get("exit_code"),
-                        str(status.get("finished_at", "")),
-                    )
+                    state["runs"][name]["terminal_signature"] = terminal_signature(sample)
                 state["last_callback_at"] = now
                 # Persist canonical event ownership immediately after a
                 # successful delivery. A service reload between the bridge
@@ -288,6 +303,18 @@ def main() -> None:
                 # terminal or milestone callback.
                 atomic(state_path, state)
                 atomic(progress_path, {"last_progress_callback_at": now, "event": "aggregate_progress"})
+
+        # A completed aggregate has no reason to remain resident.  In
+        # particular, never emit a later idle heartbeat for terminal work.
+        # If delivery of a terminal callback failed, keep retrying only that
+        # callback; once delivery is durable, exit cleanly.
+        if samples and all(is_terminal(sample) for sample in samples):
+            state["updated_at"] = now
+            atomic(state_path, state)
+            if all_terminal_delivered(samples, state):
+                return
+            time.sleep(args.interval)
+            continue
 
         progress_at = progress_reset_at(progress_path)
         if not initialized:
