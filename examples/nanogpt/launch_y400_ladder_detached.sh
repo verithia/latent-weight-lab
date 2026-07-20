@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Y400-only detached launcher for one ladder config. It does not poll or notify.
+# Y400-only ladder launcher for one config. It does not poll or notify.
 # Usage (on Y400):
 #   examples/nanogpt/launch_y400_ladder_detached.sh examples/nanogpt/configs/NAME.json 0 NAME [WORKSPACE_ROOT]
-# The printed PID is also the setsid process-group leader; use it with the local
-# watcher. The worker records its own terminal JSON status and exits with the
-# exact training exit code.
+# Detached mode prints a setsid process-group leader.  Foreground mode is for a
+# caller-owned persistent supervisor (normally a named tmux session); the
+# worker records terminal JSON status and exits with the exact training code.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -247,6 +247,12 @@ if [[ "${1:-}" == "--worker" ]]; then
   worker "$@"
 fi
 
+FOREGROUND_MODE=0
+if [[ "${1:-}" == "--foreground" ]]; then
+  FOREGROUND_MODE=1
+  shift
+fi
+
 [[ "$#" -ge 3 && "$#" -le 4 ]] || { echo "usage: $0 CONFIG_PATH GPU_INDEX RUN_NAME [WORKSPACE_ROOT]" >&2; exit 2; }
 CONFIG_INPUT="$1"; GPU="$2"; RUN_NAME="$3"; WORKSPACE="${4:-/root/userdata/MappingNetworks}"
 [[ "$GPU" =~ ^[0-9]+$ ]] || { echo "GPU_INDEX must be a non-negative integer" >&2; exit 2; }
@@ -284,7 +290,15 @@ PY
 CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON_BIN" -u -m examples.nanogpt.mfu_preflight \
   --config "$CONFIG" --output "$MFU_CERTIFICATE" --min-fraction "$MFU_MIN_FRACTION"
 PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE")"
+if [[ "$FOREGROUND_MODE" -eq 1 ]]; then
+  # The caller must keep this process alive (for example with `tmux new-session
+  # -d`).  Do not use a second detached process group: otherwise tmux cannot
+  # reliably report or terminate the actual training process.
+  printf 'launching foreground run=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$LOG" "$STATUS" "$PROVENANCE"
+  exec "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" >"$LOG" 2>&1
+fi
+
 # Pass every value as a distinct argv element: no generated remote shell string.
 setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" </dev/null >"$LOG" 2>&1 &
 PID=$!
-printf 'launched run=%s pid=%s pgid=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$PID" "$PID" "$LOG" "$STATUS" "$PROVENANCE"
+printf 'launched detached run=%s pid=%s pgid=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$PID" "$PID" "$LOG" "$STATUS" "$PROVENANCE"
