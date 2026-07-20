@@ -169,10 +169,16 @@ def event_text(
     terminal_events: list[tuple[str, str, int | None, int | None, int | None]],
 ) -> str:
     parts = [f"{name} {percent}% ({iteration}/{maximum})" for name, percent, iteration, maximum in progress_events]
-    parts.extend(
-        f"{name} 100% ({current}/{maximum}) {state}{'' if exit_code is None else f' exit={exit_code}'}"
-        for name, state, exit_code, current, maximum in terminal_events
-    )
+    for name, state, exit_code, current, maximum in terminal_events:
+        suffix = "" if exit_code is None else f" exit={exit_code}"
+        if state.lower() in {"finished", "completed", "clean"}:
+            parts.append(f"{name} 100% ({current}/{maximum}) {state}{suffix}")
+        else:
+            # A terminal sidecar can represent an interrupted process before
+            # its terminal training evaluation. Never imply successful 100%
+            # completion merely because the monitor has reached a terminal
+            # state.
+            parts.append(f"{name} FAILED ({current}/{maximum}){suffix}")
     return f"{label} PROGRESS: " + " | ".join(parts)
 
 
