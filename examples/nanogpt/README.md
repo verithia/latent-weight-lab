@@ -145,3 +145,21 @@ This is a hard rejection criterion. A synthetic benchmark, `nvidia-smi`
 utilization, power draw, or a value copied from another accelerator cannot
 substitute for a passing certificate. For a changed model, microbatch shape,
 regularizer, compiler setting, or GPU, run the gate again before launch.
+
+## Y400 dense queue worker
+
+`y400_dense_queue_worker.py` is the single admission and callback owner for the
+registered MAI-v3 dense queue. It launches only on an exclusive GPU, requires
+enough workspace headroom for every active atomic checkpoint temporary plus an
+8 GiB reserve, validates the exact resume checkpoint iteration, synchronizes a
+clean `origin/main` checkout, and verifies the registered config and training
+source hashes before submission. Each exact config still passes the launcher's
+real >=20% MFU gate. The worker sends aggregate `@Codex` callbacks at 20%, 50%,
+and terminal 100%; one 90-minute heartbeat is reset by any delivered progress
+or submission callback.
+
+The active queue contract is
+`configs/y400_mai_v3_dense_queue.json`. Its deferred stages deliberately encode
+the required order: finish/rank dense baselines, then materialize the 985M 5TPP
+and 20TPP selections, then run attention-only full replacements. MLP work is
+not submitted by this queue.

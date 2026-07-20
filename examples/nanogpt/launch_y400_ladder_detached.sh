@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Y400-only ladder launcher for one config. It does not poll or notify.
 # Usage (on Y400):
-#   examples/nanogpt/launch_y400_ladder_detached.sh examples/nanogpt/configs/NAME.json 0 NAME [WORKSPACE_ROOT]
+#   examples/nanogpt/launch_y400_ladder_detached.sh [--foreground] [--resume] examples/nanogpt/configs/NAME.json 0 NAME [WORKSPACE_ROOT]
 # Detached mode prints a setsid process-group leader.  Foreground mode is for a
 # caller-owned persistent supervisor (normally a named tmux session); the
 # worker records terminal JSON status and exits with the exact training code.
@@ -50,8 +50,8 @@ PY
 }
 
 write_provenance() {
-  local config="$1" config_archive="$2" provenance="$3" run_id="$4" run_name="$5" gpu="$6" workspace="$7" launched_at="$8" git_commit="$9" git_origin="${10}" mfu_certificate="${11}"
-  "${PYTHON_BIN}" - "$config" "$config_archive" "$provenance" "$run_id" "$run_name" "$gpu" "$workspace" "$launched_at" "$git_commit" "$git_origin" "$mfu_certificate" "$REPO_DIR" "$SCRIPT_DIR" "$PYTHON_BIN" "$PROVENANCE_SCHEMA_VERSION" <<'PY'
+  local config="$1" config_archive="$2" provenance="$3" run_id="$4" run_name="$5" gpu="$6" workspace="$7" launched_at="$8" git_commit="$9" git_origin="${10}" mfu_certificate="${11}" init_from="${12}"
+  "${PYTHON_BIN}" - "$config" "$config_archive" "$provenance" "$run_id" "$run_name" "$gpu" "$workspace" "$launched_at" "$git_commit" "$git_origin" "$mfu_certificate" "$REPO_DIR" "$SCRIPT_DIR" "$PYTHON_BIN" "$PROVENANCE_SCHEMA_VERSION" "$init_from" <<'PY'
 import hashlib
 import json
 import os
@@ -62,6 +62,7 @@ from pathlib import Path
 (
     config_path, config_archive, provenance_path, run_id, run_name, gpu, workspace,
     launched_at, git_commit, git_origin, mfu_certificate, repo_dir, launcher_dir, python_bin, schema_version,
+    init_from,
 ) = sys.argv[1:]
 
 source = Path(config_path).resolve()
@@ -118,6 +119,8 @@ atomic_write(archive, raw_config)
 config_sha256 = hashlib.sha256(raw_config).hexdigest()
 entrypoint = [python_bin, "-u", "-m", "examples.nanogpt.train"]
 command = [*entrypoint, "--config", str(archive.resolve())]
+if init_from == "resume":
+    command.extend(["--init-from", "resume"])
 payload = {
     "schema_version": schema_version,
     "run_id": run_id,
@@ -195,7 +198,7 @@ certificate = {
 certificate_path.write_text(json.dumps(certificate, sort_keys=True) + "\n")
 PY
   LAUNCHED_AT="$(date -Is)"
-  PROVENANCE_SHA256="$(write_provenance "$SELFTEST_CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE")"
+  PROVENANCE_SHA256="$(write_provenance "$SELFTEST_CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" provenance-self-test provenance-self-test 0 /tmp "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE" scratch)"
   "${PYTHON_BIN}" - "$PROVENANCE" "$PROVENANCE_SHA256" "$GIT_COMMIT" <<'PY'
 import hashlib, json, sys
 from pathlib import Path
@@ -215,7 +218,7 @@ PY
 fi
 
 worker() {
-  local config="$1" gpu="$2" run_name="$3" workspace="$4" log="$5" status="$6" provenance="$7" provenance_sha256="$8" pgid
+  local config="$1" gpu="$2" run_name="$3" workspace="$4" log="$5" status="$6" provenance="$7" provenance_sha256="$8" init_from="$9" pgid
   pgid="$(ps -o pgid= -p "$$" | tr -d ' ')"
   local started finished rc
   started="$(date -Is)"
@@ -235,7 +238,11 @@ worker() {
   export EXPERIMENT_PROVENANCE_SHA256="$provenance_sha256"
   cd "$REPO_DIR"
   set +e
-  "$PYTHON_BIN" -u -m examples.nanogpt.train --config "$config"
+  if [[ "$init_from" == "resume" ]]; then
+    "$PYTHON_BIN" -u -m examples.nanogpt.train --config "$config" --init-from resume
+  else
+    "$PYTHON_BIN" -u -m examples.nanogpt.train --config "$config"
+  fi
   rc=$?
   set -e
   finish "$rc"
@@ -243,17 +250,22 @@ worker() {
 
 if [[ "${1:-}" == "--worker" ]]; then
   shift
-  [[ "$#" -eq 8 ]] || { echo "internal worker argument error" >&2; exit 2; }
+  [[ "$#" -eq 9 ]] || { echo "internal worker argument error" >&2; exit 2; }
   worker "$@"
 fi
 
 FOREGROUND_MODE=0
-if [[ "${1:-}" == "--foreground" ]]; then
-  FOREGROUND_MODE=1
+INIT_FROM=scratch
+while [[ "${1:-}" == --* ]]; do
+  case "$1" in
+    --foreground) FOREGROUND_MODE=1 ;;
+    --resume) INIT_FROM=resume ;;
+    *) echo "unknown option: $1" >&2; exit 2 ;;
+  esac
   shift
-fi
+done
 
-[[ "$#" -ge 3 && "$#" -le 4 ]] || { echo "usage: $0 CONFIG_PATH GPU_INDEX RUN_NAME [WORKSPACE_ROOT]" >&2; exit 2; }
+[[ "$#" -ge 3 && "$#" -le 4 ]] || { echo "usage: $0 [--foreground] [--resume] CONFIG_PATH GPU_INDEX RUN_NAME [WORKSPACE_ROOT]" >&2; exit 2; }
 CONFIG_INPUT="$1"; GPU="$2"; RUN_NAME="$3"; WORKSPACE="${4:-/root/userdata/MappingNetworks}"
 [[ "$GPU" =~ ^[0-9]+$ ]] || { echo "GPU_INDEX must be a non-negative integer" >&2; exit 2; }
 [[ "$RUN_NAME" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "RUN_NAME may contain only letters, digits, dot, underscore, and dash" >&2; exit 2; }
@@ -289,16 +301,16 @@ PY
 )"
 CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON_BIN" -u -m examples.nanogpt.mfu_preflight \
   --config "$CONFIG" --output "$MFU_CERTIFICATE" --min-fraction "$MFU_MIN_FRACTION"
-PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE")"
+PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE" "$INIT_FROM")"
 if [[ "$FOREGROUND_MODE" -eq 1 ]]; then
   # The caller must keep this process alive (for example with `tmux new-session
   # -d`).  Do not use a second detached process group: otherwise tmux cannot
   # reliably report or terminate the actual training process.
   printf 'launching foreground run=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$LOG" "$STATUS" "$PROVENANCE"
-  exec "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" >"$LOG" 2>&1
+  exec "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" "$INIT_FROM" >"$LOG" 2>&1
 fi
 
 # Pass every value as a distinct argv element: no generated remote shell string.
-setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" </dev/null >"$LOG" 2>&1 &
+setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" "$INIT_FROM" </dev/null >"$LOG" 2>&1 &
 PID=$!
 printf 'launched detached run=%s pid=%s pgid=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$PID" "$PID" "$LOG" "$STATUS" "$PROVENANCE"
