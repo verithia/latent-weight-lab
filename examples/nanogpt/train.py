@@ -8,6 +8,7 @@ import os
 import random
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import nullcontext
 from dataclasses import asdict
 from pathlib import Path
@@ -387,6 +388,69 @@ def load_config(path: str | None) -> dict:
     return json.loads(Path(path).read_text())
 
 
+class TokenBatchSource:
+    """Persistent, vectorized token reader for the training/evaluation bins.
+
+    Opening a new memmap and constructing a Python list of one row at a time
+    for every microbatch can dominate small-microbatch GPU training.  Keep the
+    mappings open and gather the complete ``x/y`` window in one NumPy indexed
+    operation instead.  Sampling still consumes exactly one ``torch.randint``
+    call with the caller's supplied generator, so the checkpointed sequence is
+    unchanged.
+    """
+
+    def __init__(self, data_dir: Path) -> None:
+        self.data_dir = data_dir
+        self._splits: dict[str, np.memmap] = {}
+        self._offsets: dict[int, np.ndarray] = {}
+
+    def _data(self, split: str) -> np.memmap:
+        data = self._splits.get(split)
+        if data is None:
+            data = np.memmap(self.data_dir / f"{split}.bin", dtype=np.uint16, mode="r")
+            self._splits[split] = data
+        return data
+
+    def _window_offsets(self, block_size: int) -> np.ndarray:
+        offsets = self._offsets.get(block_size)
+        if offsets is None:
+            offsets = np.arange(block_size + 1, dtype=np.int64)
+            self._offsets[block_size] = offsets
+        return offsets
+
+    def get_batch_cpu(
+        self,
+        split: str,
+        batch_size: int,
+        block_size: int,
+        *,
+        generator: torch.Generator | None = None,
+        indices: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        data = self._data(split)
+        if indices is None:
+            starts = torch.randint(len(data) - block_size, (batch_size,), generator=generator)
+        else:
+            starts = indices.detach().to(device="cpu", dtype=torch.long).reshape(-1)
+            if starts.numel() != batch_size:
+                raise ValueError(f"expected {batch_size} {split} batch indices, got {starts.numel()}")
+        start_array = starts.numpy().astype(np.int64, copy=False)
+        windows = np.asarray(
+            data[start_array[:, None] + self._window_offsets(block_size)[None, :]],
+            dtype=np.int64,
+        )
+        tokens = torch.from_numpy(np.ascontiguousarray(windows))
+        return tokens[:, :-1].contiguous(), tokens[:, 1:].contiguous()
+
+
+def move_batch_to_device(
+    x: torch.Tensor, y: torch.Tensor, device: str
+) -> tuple[torch.Tensor, torch.Tensor]:
+    if "cuda" in device:
+        return x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
+    return x.to(device), y.to(device)
+
+
 def get_batch(
     data_dir: Path,
     split: str,
@@ -396,19 +460,13 @@ def get_batch(
     *,
     generator: torch.Generator | None = None,
     indices: torch.Tensor | None = None,
+    source: TokenBatchSource | None = None,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    data = np.memmap(data_dir / f"{split}.bin", dtype=np.uint16, mode="r")
-    if indices is None:
-        ix = torch.randint(len(data) - block_size, (batch_size,), generator=generator)
-    else:
-        ix = indices.detach().to(device="cpu", dtype=torch.long).reshape(-1)
-        if ix.numel() != batch_size:
-            raise ValueError(f"expected {batch_size} {split} batch indices, got {ix.numel()}")
-    x = torch.stack([torch.from_numpy((data[i : i + block_size]).astype(np.int64)) for i in ix])
-    y = torch.stack([torch.from_numpy((data[i + 1 : i + 1 + block_size]).astype(np.int64)) for i in ix])
-    if "cuda" in device:
-        return x.pin_memory().to(device, non_blocking=True), y.pin_memory().to(device, non_blocking=True)
-    return x.to(device), y.to(device)
+    batch_source = TokenBatchSource(data_dir) if source is None else source
+    x, y = batch_source.get_batch_cpu(
+        split, batch_size, block_size, generator=generator, indices=indices
+    )
+    return move_batch_to_device(x, y, device)
 
 
 def make_fixed_eval_indices(
@@ -1018,6 +1076,7 @@ def main() -> None:
 
     # This is the state immediately before ``x, y``.  Evaluation checkpoints
     # persist it so a continuation replays the pending current batch exactly.
+    train_batch_source = TokenBatchSource(data_dir)
     pending_train_data_generator_state = generator_state(train_data_generator)
     x, y = get_batch(
         data_dir,
@@ -1026,7 +1085,11 @@ def main() -> None:
         args.block_size,
         args.device,
         generator=train_data_generator,
+        source=train_batch_source,
     )
+    # Exactly one producer preserves the ordered CPU RNG stream while allowing
+    # token gather/page faults to overlap the current GPU microbatch.
+    train_prefetch = ThreadPoolExecutor(max_workers=1, thread_name_prefix="token-prefetch")
     t0 = time.perf_counter()
     perf_peak_reset = False
     if checkpoint is not None:
@@ -1129,6 +1192,17 @@ def main() -> None:
             else args.mapping_stability_microbatches
         )
         for microbatch_index in range(args.gradient_accumulation_steps):
+            # Record the state immediately before the pending batch, exactly
+            # as the old synchronous path did. The worker consumes the next
+            # batch from that single generator while this one is on the GPU.
+            next_pending_train_data_generator_state = generator_state(train_data_generator)
+            next_batch_future = train_prefetch.submit(
+                train_batch_source.get_batch_cpu,
+                "train",
+                args.batch_size,
+                args.block_size,
+                generator=train_data_generator,
+            )
             section_start = perf_now() if args.perf_profile else 0.0
             with ctx:
                 logits, loss = model(x, y)
@@ -1188,15 +1262,9 @@ def main() -> None:
             if args.perf_profile:
                 forward_backward_ms += (perf_now() - section_start) * 1000.0
                 section_start = perf_now()
-            pending_train_data_generator_state = generator_state(train_data_generator)
-            x, y = get_batch(
-                data_dir,
-                "train",
-                args.batch_size,
-                args.block_size,
-                args.device,
-                generator=train_data_generator,
-            )
+            next_x_cpu, next_y_cpu = next_batch_future.result()
+            pending_train_data_generator_state = next_pending_train_data_generator_state
+            x, y = move_batch_to_device(next_x_cpu, next_y_cpu, args.device)
             if args.perf_profile:
                 data_ms += (perf_now() - section_start) * 1000.0
         if use_weight_cache:
@@ -1266,6 +1334,7 @@ def main() -> None:
         ):
             save_exact_resume_checkpoint("wall_clock_safety", next_iter_value=iter_num + 1)
         iter_num += 1
+    train_prefetch.shutdown(wait=True)
 
 
 if __name__ == "__main__":
