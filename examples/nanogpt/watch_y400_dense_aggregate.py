@@ -219,10 +219,16 @@ def main() -> None:
     parser.add_argument("--run", action="append", required=True, type=parse_run)
     parser.add_argument("--heartbeat-minutes", type=int, default=90)
     parser.add_argument("--stall-minutes", type=int, default=15)
+    parser.add_argument("--missing-grace-minutes", type=int, default=2)
     parser.add_argument("--interval", type=int, default=60)
     args = parser.parse_args()
-    if args.heartbeat_minutes < 1 or args.stall_minutes < 1 or args.interval < 15:
-        parser.error("heartbeat/stall minutes must be >=1 and interval >=15 seconds")
+    if (
+        args.heartbeat_minutes < 1
+        or args.stall_minutes < 1
+        or args.missing_grace_minutes < 0
+        or args.interval < 15
+    ):
+        parser.error("heartbeat/stall minutes must be >=1, missing grace >=0, and interval >=15 seconds")
 
     if not args.state_key or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for char in args.state_key):
         parser.error("--state-key may contain only letters, digits, dot, underscore, and dash")
@@ -252,6 +258,7 @@ def main() -> None:
             sample["max_iters"] = run["max_iters"]
         progress_events: list[tuple[str, int, int, int]] = []
         terminal_events: list[tuple[str, str, int | None, int | None, int | None]] = []
+        missing_events: list[tuple[str, int | None, str]] = []
         for sample in samples:
             run_state = state.setdefault("runs", {}).setdefault(sample["name"], {})
             previous_iter = run_state.get("last_iter")
@@ -271,17 +278,20 @@ def main() -> None:
             run_state["sample"] = sample
             terminal = is_terminal(sample)
             if terminal:
+                run_state.pop("missing_since", None)
                 signature = terminal_signature(sample)
                 if run_state.get("terminal_signature") != signature:
                     terminal_events.append((sample["name"], signature[0], signature[1], current_iter, maximum))
             elif not sample.get("alive"):
+                missing_since = float(run_state.setdefault("missing_since", now))
                 key = event_key(sample["name"], "process_missing", sample.get("pgid", sample["name"]))
-                if key not in state.setdefault("sent", {}) and send(
-                    args.chat_id,
-                    f"{args.label} {sample['name']} ERROR: process group missing while status=running; "
-                    f"last_iter={current_iter}",
+                if (
+                    now - missing_since >= args.missing_grace_minutes * 60
+                    and key not in state.setdefault("sent", {})
                 ):
-                    state["sent"][key] = now
+                    missing_events.append((sample["name"], current_iter, key))
+            else:
+                run_state.pop("missing_since", None)
             for error in sample.get("errors", []):
                 key = event_key(sample["name"], "error", error)
                 if key not in state.setdefault("sent", {}) and send(args.chat_id, f"{args.label} {sample['name']} ERROR: {error}"):
@@ -290,6 +300,18 @@ def main() -> None:
             if sample.get("alive") and not terminal and now - progress_at >= args.stall_minutes * 60:
                 key = event_key(sample["name"], "stall", int((now - progress_at) // (args.stall_minutes * 60)))
                 if key not in state.setdefault("sent", {}) and send(args.chat_id, f"{args.label} {sample['name']} STALL: no progress for {int(now - progress_at)}s"):
+                    state["sent"][key] = now
+
+        # A missing group can race with a worker's small terminal-status
+        # write. Defer it briefly, and if it remains unresolved report every
+        # affected task in one aggregate callback rather than a message burst.
+        if missing_events:
+            detail = " | ".join(
+                f"{name}: process missing while status=running; last_iter={iteration}"
+                for name, iteration, _key in missing_events
+            )
+            if send(args.chat_id, f"{args.label} ERROR: {detail}"):
+                for _name, _iteration, key in missing_events:
                     state["sent"][key] = now
 
         # One message can describe every milestone/terminal transition found in
