@@ -136,13 +136,14 @@ def is_terminal(sample: dict) -> bool:
     return str(sample.get("status", {}).get("state", "")).lower() in {"finished", "failed"}
 
 
-def terminal_signature(sample: dict) -> tuple[str, int | None, str]:
+def terminal_signature(sample: dict) -> list[str | int | None]:
+    """Return a JSON-stable identity for one terminal status sidecar."""
     status = sample.get("status", {})
-    return (
+    return [
         str(status.get("state", "")),
         status.get("exit_code"),
         str(status.get("finished_at", "")),
-    )
+    ]
 
 
 def all_terminal_delivered(samples: list[dict], state: dict) -> bool:
