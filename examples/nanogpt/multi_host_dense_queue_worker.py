@@ -415,6 +415,9 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                     "state": "submitting",
                     "assigned_host": host,
                     "run_name": variant["run_name"],
+                    "last_iter": int(variant.get("expected_checkpoint_next_iter") or 0)
+                    if variant.get("resume") is True
+                    else 0,
                     "gpu": idle_by_host[host].pop(0),
                     "session": session,
                     "submit_log": submit_log,
