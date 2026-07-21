@@ -101,6 +101,7 @@ def load_state(path: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
             },
         )
     state.setdefault("last_callback_at", time.time())
+    state.setdefault("paused_hosts", [])
     return state
 
 
@@ -382,9 +383,12 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
     idle_by_host: Dict[str, List[int]] = {}
     identity_by_host: Dict[str, Tuple[bool, str]] = {}
     blockers: Dict[str, str] = {}
+    paused_hosts = set(state.get("paused_hosts", []))
     for host, definition in manifest["hosts"].items():
         idle_by_host[host] = base.idle_gpu_indices(snapshots[host], int(definition["gpu_idle_memory_mib"]))
         identity_by_host[host] = host_identity_valid(manifest, host, snapshots[host])
+        if host in paused_hosts:
+            blockers[host] = "operator paused"
 
     launched: List[Tuple[str, str, int]] = []
     for task in sorted(manifest["entries"], key=lambda item: item["priority"]):
@@ -393,7 +397,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
             continue
         rejected = set(runtime.get("rejected_hosts", []))
         for host in task["host_preference"]:
-            if host in rejected or host not in task["variants"] or not idle_by_host.get(host):
+            if host in paused_hosts or host in rejected or host not in task["variants"] or not idle_by_host.get(host):
                 continue
             definition = manifest["hosts"][host]
             variant = task["variants"][host]
@@ -455,12 +459,17 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
 
     for host, definition in manifest["hosts"].items():
         parts = []
+        if host in paused_hosts:
+            parts.append("operator paused")
         if not idle_by_host.get(host):
             parts.append("no exclusive GPU is free")
         identity_ok, reason = identity_by_host[host]
         if not identity_ok:
             parts.append(reason)
-        blockers.setdefault(host, "; ".join(parts))
+        if parts:
+            blockers[host] = "; ".join(dict.fromkeys(parts))
+        else:
+            blockers.setdefault(host, "")
 
     if launched and base.send(
         args.chat_id,

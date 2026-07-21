@@ -1,11 +1,14 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from examples.nanogpt.multi_host_dense_queue_worker import (
     active_budget,
     host_admission_status,
     launch,
+    load_state,
     validate_pending_variant,
 )
 from unittest import mock
@@ -13,6 +16,15 @@ from unittest import mock
 
 class MultiHostDenseQueueWorkerTest(unittest.TestCase):
     GIB = 1024**3
+
+    def test_load_state_preserves_operator_host_pause(self) -> None:
+        manifest = {"entries": [{"name": "task", "variants": {"Y400": {}}}]}
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            path.write_text('{"paused_hosts": ["Y400"]}')
+            state = load_state(path, manifest)
+        self.assertEqual(state["paused_hosts"], ["Y400"])
+        self.assertEqual(state["entries"]["task"]["state"], "pending")
 
     def test_one_global_assignment_counts_budget_only_on_assigned_host(self) -> None:
         manifest = {
