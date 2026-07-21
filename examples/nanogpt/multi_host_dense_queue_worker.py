@@ -19,18 +19,33 @@ except ImportError:  # Direct script execution places this directory on sys.path
 
 
 REMOTE_LAUNCH = r'''set -euo pipefail
-root="$1"; python_bin="$2"; config="$3"; gpu="$4"; run_name="$5"; session="$6"; submit_log="$7"; resume="$8"
+root="$1"; python_bin="$2"; config="$3"; gpu="$4"; run_name="$5"; session="$6"; submit_log="$7"; resume="$8"; launch_mode="$9"
 repo="$root/latent-weight-lab"
 launcher="$repo/examples/nanogpt/launch_y400_ladder_detached.sh"
 mkdir -p "$(dirname "$submit_log")"
-if tmux has-session -t "$session" 2>/dev/null; then
-  echo "refusing duplicate queue session: $session" >&2
-  exit 2
-fi
-printf -v command 'cd %q && export PYTHON_BIN=%q && exec bash %q --foreground' "$repo" "$python_bin" "$launcher"
-if [[ "$resume" == "true" ]]; then command+=' --resume'; fi
-printf -v command '%s %q %q %q %q >%q 2>&1' "$command" "$config" "$gpu" "$run_name" "$root" "$submit_log"
-tmux new-session -d -s "$session" "$command"
+case "$launch_mode" in
+  tmux)
+    command -v tmux >/dev/null 2>&1 || { echo "tmux launch mode requested but tmux is unavailable" >&2; exit 2; }
+    if tmux has-session -t "$session" 2>/dev/null; then
+      echo "refusing duplicate queue session: $session" >&2
+      exit 2
+    fi
+    printf -v command_line 'cd %q && export PYTHON_BIN=%q && exec bash %q --foreground' "$repo" "$python_bin" "$launcher"
+    if [[ "$resume" == "true" ]]; then command_line+=' --resume'; fi
+    printf -v command_line '%s %q %q %q %q >%q 2>&1' "$command_line" "$config" "$gpu" "$run_name" "$root" "$submit_log"
+    tmux new-session -d -s "$session" "$command_line"
+    ;;
+  detached)
+    args=()
+    if [[ "$resume" == "true" ]]; then args+=(--resume); fi
+    cd "$repo"
+    PYTHON_BIN="$python_bin" bash "$launcher" "${args[@]}" "$config" "$gpu" "$run_name" "$root" >"$submit_log" 2>&1
+    ;;
+  *)
+    echo "unsupported launch mode: $launch_mode" >&2
+    exit 2
+    ;;
+esac
 '''
 
 
@@ -172,7 +187,8 @@ def launch(
     attempt: int,
 ) -> Tuple[str, str]:
     safe = re.sub(r"[^A-Za-z0-9_-]", "_", variant["run_name"])
-    session = ("denseq_" + safe + f"_a{attempt}")[:120]
+    launch_mode = host_definition.get("launch_mode", "tmux")
+    session = ("denseq_" + safe + f"_a{attempt}")[:120] if launch_mode == "tmux" else ""
     root = host_definition["root"]
     submit_log = f"{root}/outputs/y400_ladder_runs/queue/{safe}_a{attempt}.submit.log"
     config = f"{root}/latent-weight-lab/{variant['config']}"
@@ -180,7 +196,17 @@ def launch(
     base.ssh_script(
         host,
         REMOTE_LAUNCH,
-        [root, python_bin, config, str(gpu), variant["run_name"], session, submit_log, str(bool(variant.get("resume"))).lower()],
+        [
+            root,
+            python_bin,
+            config,
+            str(gpu),
+            variant["run_name"],
+            session,
+            submit_log,
+            str(bool(variant.get("resume"))).lower(),
+            launch_mode,
+        ],
     )
     return session, submit_log
 

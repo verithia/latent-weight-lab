@@ -4,8 +4,10 @@ import unittest
 
 from examples.nanogpt.multi_host_dense_queue_worker import (
     active_budget,
+    launch,
     validate_pending_variant,
 )
+from unittest import mock
 
 
 class MultiHostDenseQueueWorkerTest(unittest.TestCase):
@@ -36,6 +38,19 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         fresh = {"resume": False, "expected_checkpoint_next_iter": None}
         self.assertEqual(validate_pending_variant(fresh, {"checkpoint_next_iter": None}), (True, ""))
         self.assertFalse(validate_pending_variant(fresh, {"checkpoint_next_iter": 0})[0])
+
+    @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
+    def test_detached_host_does_not_publish_a_tmux_session(self, ssh_script: mock.Mock) -> None:
+        session, _ = launch(
+            "PRO6",
+            {"root": "/remote", "python_relative": ".venv/bin/python", "launch_mode": "detached"},
+            "task",
+            {"run_name": "run", "config": "config.json", "resume": False},
+            0,
+            1,
+        )
+        self.assertEqual(session, "")
+        self.assertEqual(ssh_script.call_args.args[2][-1], "detached")
 
 
 if __name__ == "__main__":
