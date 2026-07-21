@@ -4,6 +4,7 @@ import unittest
 
 from examples.nanogpt.multi_host_dense_queue_worker import (
     active_budget,
+    host_admission_status,
     launch,
     validate_pending_variant,
 )
@@ -11,6 +12,8 @@ from unittest import mock
 
 
 class MultiHostDenseQueueWorkerTest(unittest.TestCase):
+    GIB = 1024**3
+
     def test_one_global_assignment_counts_budget_only_on_assigned_host(self) -> None:
         manifest = {
             "entries": [
@@ -38,6 +41,35 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         fresh = {"resume": False, "expected_checkpoint_next_iter": None}
         self.assertEqual(validate_pending_variant(fresh, {"checkpoint_next_iter": None}), (True, ""))
         self.assertFalse(validate_pending_variant(fresh, {"checkpoint_next_iter": 0})[0])
+
+    def test_admission_honors_policy_cap_and_physical_free_space(self) -> None:
+        definition = {
+            "workspace_cap_bytes": 256 * self.GIB,
+            "workspace_reserve_bytes": 8 * self.GIB,
+        }
+        admitted = host_admission_status(
+            {"workspace_used_bytes": 100 * self.GIB, "filesystem_available_bytes": 20 * self.GIB},
+            definition,
+            0,
+            6 * self.GIB,
+        )
+        self.assertEqual(admitted, (True, ""))
+        physical = host_admission_status(
+            {"workspace_used_bytes": 100 * self.GIB, "filesystem_available_bytes": 10 * self.GIB},
+            definition,
+            0,
+            6 * self.GIB,
+        )
+        self.assertFalse(physical[0])
+        self.assertIn("physical free", physical[1])
+        policy = host_admission_status(
+            {"workspace_used_bytes": 250 * self.GIB, "filesystem_available_bytes": 100 * self.GIB},
+            definition,
+            0,
+            1 * self.GIB,
+        )
+        self.assertFalse(policy[0])
+        self.assertIn("workspace headroom", policy[1])
 
     @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
     def test_detached_host_does_not_publish_a_tmux_session(self, ssh_script: mock.Mock) -> None:

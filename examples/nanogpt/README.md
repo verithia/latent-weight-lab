@@ -173,4 +173,7 @@ host lineages with matching seeds, data manifest, recipe, token budget, and
 fixed evaluation. The scheduler never labels a PRO6 fresh start as a Y400
 resume, and never launches the same task on both hosts. One aggregate callback
 stream covers submissions, 20%, 50%, terminal states, and the resettable
-90-minute heartbeat across both machines.
+90-minute heartbeat across both machines. Admission enforces both the configured
+workspace cap and live physical-filesystem free space, including active atomic
+checkpoint budgets and the reserve, so a larger policy cap cannot mask a nearly
+full host volume.

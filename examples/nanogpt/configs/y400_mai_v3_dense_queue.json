@@ -1,7 +1,7 @@
 {
   "schema_version": "y400_dense_queue_v1",
   "label": "Y400 dense baseline queue",
-  "workspace_cap_bytes": 274877906944,
+  "workspace_cap_bytes": 322122547200,
   "workspace_reserve_bytes": 8589934592,
   "gpu_idle_memory_mib": 1024,
   "required_source_hashes": {

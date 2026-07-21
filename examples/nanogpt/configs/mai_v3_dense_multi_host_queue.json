@@ -10,7 +10,7 @@
     "Y400": {
       "root": "/root/userdata/MappingNetworks",
       "python_relative": ".venv-gpt2/bin/python",
-      "workspace_cap_bytes": 274877906944,
+      "workspace_cap_bytes": 322122547200,
       "workspace_reserve_bytes": 8589934592,
       "gpu_idle_memory_mib": 1024,
       "launch_mode": "tmux"
@@ -18,7 +18,7 @@
     "PRO6": {
       "root": "/home/pro6000-9980x/MappingNetworks",
       "python_relative": ".venv/bin/python",
-      "workspace_cap_bytes": 137438953472,
+      "workspace_cap_bytes": 274877906944,
       "workspace_reserve_bytes": 8589934592,
       "gpu_idle_memory_mib": 1024,
       "launch_mode": "detached"

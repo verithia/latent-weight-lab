@@ -49,6 +49,11 @@ def file_sha(path):
         return None
 
 used = int(command(["du", "-sb", str(root)], "0").split()[0])
+try:
+    filesystem = os.statvfs(root)
+    filesystem_available_bytes = int(filesystem.f_bavail * filesystem.f_frsize)
+except OSError:
+    filesystem_available_bytes = None
 git_commit = command(["git", "-C", str(repo), "rev-parse", "HEAD"])
 git_dirty = bool(command(["git", "-C", str(repo), "status", "--porcelain"]))
 source_hashes = {path: file_sha(repo / path) for path in payload.get("source_paths", [])}
@@ -148,6 +153,7 @@ for entry in payload.get("entries", []):
 
 print(json.dumps({
     "workspace_used_bytes": used,
+    "filesystem_available_bytes": filesystem_available_bytes,
     "git_commit": git_commit,
     "git_dirty": git_dirty,
     "source_hashes": source_hashes,

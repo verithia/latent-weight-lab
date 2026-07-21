@@ -178,6 +178,26 @@ def validate_pending_variant(variant: Dict[str, Any], observed: Dict[str, Any]) 
     return True, ""
 
 
+def host_admission_status(
+    snapshot: Dict[str, Any],
+    definition: Dict[str, Any],
+    active_checkpoint_budget: int,
+    candidate_checkpoint_budget: int,
+) -> Tuple[bool, str]:
+    used = int(snapshot["workspace_used_bytes"])
+    cap = int(definition["workspace_cap_bytes"])
+    reserve = int(definition["workspace_reserve_bytes"])
+    required = reserve + active_checkpoint_budget + candidate_checkpoint_budget
+    if not base.can_admit(used, cap, reserve, active_checkpoint_budget, candidate_checkpoint_budget):
+        return False, f"workspace headroom {(cap - used) / (1024**3):.1f}GiB < required {required / (1024**3):.1f}GiB"
+    filesystem_available = snapshot.get("filesystem_available_bytes")
+    if not isinstance(filesystem_available, int):
+        return False, "physical filesystem free-space probe unavailable"
+    if filesystem_available < required:
+        return False, f"physical free {filesystem_available / (1024**3):.1f}GiB < required {required / (1024**3):.1f}GiB"
+    return True, ""
+
+
 def launch(
     host: str,
     host_definition: Dict[str, Any],
@@ -239,7 +259,11 @@ def heartbeat_text(
     for host, definition in manifest["hosts"].items():
         used = int(snapshots[host].get("workspace_used_bytes", 0)) / (1024**3)
         cap = int(definition["workspace_cap_bytes"]) / (1024**3)
-        hosts.append(f"{host}={used:.1f}/{cap:.0f}GiB blocked={blockers.get(host) or 'none'}")
+        filesystem_available = snapshots[host].get("filesystem_available_bytes")
+        physical = ""
+        if isinstance(filesystem_available, int) and filesystem_available / (1024**3) < cap:
+            physical = f" fsfree={filesystem_available / (1024**3):.1f}GiB"
+        hosts.append(f"{host}={used:.1f}/{cap:.0f}GiB{physical} blocked={blockers.get(host) or 'none'}")
     return manifest["label"] + " HEARTBEAT: " + " | ".join(tasks + hosts)
 
 
@@ -253,6 +277,7 @@ def status_summary(
             host: {
                 "workspace_used_bytes": snapshots[host].get("workspace_used_bytes"),
                 "workspace_cap_bytes": definition["workspace_cap_bytes"],
+                "filesystem_available_bytes": snapshots[host].get("filesystem_available_bytes"),
                 "gpus": snapshots[host].get("gpus", []),
                 "git_commit": snapshots[host].get("git_commit"),
                 "blocker": blockers.get(host, ""),
@@ -372,14 +397,14 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                 continue
             definition = manifest["hosts"][host]
             variant = task["variants"][host]
-            used = int(snapshots[host]["workspace_used_bytes"])
-            if not base.can_admit(
-                used,
-                int(definition["workspace_cap_bytes"]),
-                int(definition["workspace_reserve_bytes"]),
+            admissible, capacity_reason = host_admission_status(
+                snapshots[host],
+                definition,
                 active_budget(manifest, state, host),
                 int(variant["checkpoint_budget_bytes"]),
-            ):
+            )
+            if not admissible:
+                blockers[host] = capacity_reason
                 continue
             identity_ok, _reason = identity_by_host[host]
             if not identity_ok:
