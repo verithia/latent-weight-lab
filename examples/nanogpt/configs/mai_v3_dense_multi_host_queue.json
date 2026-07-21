@@ -1,0 +1,145 @@
+{
+  "schema_version": "multi_host_dense_queue_v1",
+  "label": "MAI-v3 dense multi-host queue",
+  "required_source_hashes": {
+    "examples/nanogpt/train.py": "ab4dad2f1ef0543505f1da3384e7b00aa3359e76c6a3b697a328a0573fbe0af1",
+    "examples/nanogpt/model.py": "2609e37784f3622c5924dfbfd17bb1eeed705ff692f19465945973b2fb6c7536",
+    "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+  },
+  "hosts": {
+    "Y400": {
+      "root": "/root/userdata/MappingNetworks",
+      "python_relative": ".venv-gpt2/bin/python",
+      "workspace_cap_bytes": 274877906944,
+      "workspace_reserve_bytes": 8589934592,
+      "gpu_idle_memory_mib": 1024
+    },
+    "PRO6": {
+      "root": "/home/pro6000-9980x/MappingNetworks",
+      "python_relative": ".venv/bin/python",
+      "workspace_cap_bytes": 137438953472,
+      "workspace_reserve_bytes": 8589934592,
+      "gpu_idle_memory_mib": 1024
+    }
+  },
+  "entries": [
+    {
+      "priority": 10,
+      "name": "mai_v3_690m_20tpp_baseline",
+      "stage": "dense_selected_20tpp",
+      "max_iters": 53019,
+      "host_preference": ["PRO6", "Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_690m_20tpp_baseline_resume1",
+          "config": "examples/nanogpt/configs/y400_mai_v3_690m_muon_20tpp_selected_b16ga16_prefetch_restart.json",
+          "config_sha256": "f71d9309ca20e601bf9432abfdaffc9486780f8319a1225b9b95284769756612",
+          "resume": true,
+          "expected_checkpoint_next_iter": 2196,
+          "checkpoint_budget_bytes": 5822773609
+        },
+        "PRO6": {
+          "run_name": "pro6_mai_v3_690m_20tpp_baseline_fresh1",
+          "config": "examples/nanogpt/configs/pro6_mai_v3_690m_muon_20tpp_selected_b16ga16_prefetch_restart_fresh1.json",
+          "config_sha256": "af99d4a2ed7c2ff45ce295200124dac6bab0c97cd7b373dbf05778e4bd51ef42",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 11645547218
+        }
+      }
+    },
+    {
+      "priority": 20,
+      "name": "mai_v3_985m_0p5tpp_lr16e4",
+      "stage": "dense_recipe_screen_0p5tpp",
+      "max_iters": 1879,
+      "host_preference": ["Y400", "PRO6"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_0p5tpp_lr16e4_resume1",
+          "config": "examples/nanogpt/configs/y400_mai_v3_985m_muon_0p5tpp_lr16e4_prefetch.json",
+          "config_sha256": "0ae8811faabe50f94319e1d4f2bd0a6f519c71c382dacc83d6eff8445eada07e",
+          "resume": true,
+          "expected_checkpoint_next_iter": 0,
+          "checkpoint_budget_bytes": 3939749171
+        },
+        "PRO6": {
+          "run_name": "pro6_mai_v3_985m_0p5tpp_lr16e4_fresh1",
+          "config": "examples/nanogpt/configs/pro6_mai_v3_985m_muon_0p5tpp_lr16e4_prefetch_fresh1.json",
+          "config_sha256": "acb52171d8adb6dd40babc50f5a69c3620d049a1e6c609ae67560ab5c4ea413c",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 7879498342
+        }
+      }
+    },
+    {
+      "priority": 21,
+      "name": "mai_v3_985m_0p5tpp_lr20e4",
+      "stage": "dense_recipe_screen_0p5tpp",
+      "max_iters": 1879,
+      "host_preference": ["Y400", "PRO6"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_0p5tpp_lr20e4_resume1",
+          "config": "examples/nanogpt/configs/y400_mai_v3_985m_muon_0p5tpp_lr20e4_prefetch.json",
+          "config_sha256": "1e6b61fe5950c2f63de39914a5d521424db32aae4ffeba666f2861e204b34220",
+          "resume": true,
+          "expected_checkpoint_next_iter": 0,
+          "checkpoint_budget_bytes": 3939749299
+        },
+        "PRO6": {
+          "run_name": "pro6_mai_v3_985m_0p5tpp_lr20e4_fresh1",
+          "config": "examples/nanogpt/configs/pro6_mai_v3_985m_muon_0p5tpp_lr20e4_prefetch_fresh1.json",
+          "config_sha256": "59f35b98341f20fe41a81c188e72736c8594f90e2718521ad4304724a497e8a5",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 7879498598
+        }
+      }
+    },
+    {
+      "priority": 22,
+      "name": "mai_v3_985m_0p5tpp_lr24e4",
+      "stage": "dense_recipe_screen_0p5tpp",
+      "max_iters": 1879,
+      "host_preference": ["Y400", "PRO6"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_0p5tpp_lr24e4_resume1",
+          "config": "examples/nanogpt/configs/y400_mai_v3_985m_muon_0p5tpp_lr24e4_prefetch.json",
+          "config_sha256": "04e0f5cdb556a2744599e7b80a8325551f407da3fb431e6e9543689f3ee8a1ad",
+          "resume": true,
+          "expected_checkpoint_next_iter": 0,
+          "checkpoint_budget_bytes": 3939749171
+        },
+        "PRO6": {
+          "run_name": "pro6_mai_v3_985m_0p5tpp_lr24e4_fresh1",
+          "config": "examples/nanogpt/configs/pro6_mai_v3_985m_muon_0p5tpp_lr24e4_prefetch_fresh1.json",
+          "config_sha256": "a8fd9810f9fab07b884ce829ba60e66a7ea9dfe1e5970c638e0eb3b812ff96a5",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 7879498342
+        }
+      }
+    }
+  ],
+  "deferred_stages": [
+    {
+      "name": "985m_top2_5tpp_confirmations",
+      "state": "blocked_on_terminal_0p5tpp_ranking"
+    },
+    {
+      "name": "985m_selected_20tpp",
+      "state": "blocked_on_accepted_5tpp_comparison"
+    },
+    {
+      "name": "full_attention_replacement_ladder",
+      "state": "blocked_on_accepted_four_rung_dense_fit"
+    },
+    {
+      "name": "mlp_replacement_work",
+      "state": "parked_after_attention"
+    }
+  ]
+}

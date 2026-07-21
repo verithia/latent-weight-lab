@@ -163,3 +163,14 @@ The active queue contract is
 the required order: finish/rank dense baselines, then materialize the 985M 5TPP
 and 20TPP selections, then run attention-only full replacements. MLP work is
 not submitted by this queue.
+
+`multi_host_dense_queue_worker.py` supersedes the single-host service when both
+Y400 and PRO6 are available. Its contract
+`configs/mai_v3_dense_multi_host_queue.json` gives each scientific task one
+global claim while describing host-specific variants. Y400 variants preserve
+their exact path-bound resume checkpoints; PRO6 variants are explicitly fresh
+host lineages with matching seeds, data manifest, recipe, token budget, and
+fixed evaluation. The scheduler never labels a PRO6 fresh start as a Y400
+resume, and never launches the same task on both hosts. One aggregate callback
+stream covers submissions, 20%, 50%, terminal states, and the resettable
+90-minute heartbeat across both machines.
