@@ -246,6 +246,12 @@ def progress_text(
     return label + " PROGRESS: " + " | ".join(parts)
 
 
+def submitted_text(label: str, launched: List[Tuple[str, str, int, int]]) -> str:
+    return label + " SUBMITTED: " + " | ".join(
+        f"{name}@{host} GPU{gpu} attempt={attempt}" for name, host, gpu, attempt in launched
+    )
+
+
 def heartbeat_text(
     manifest: Dict[str, Any], state: Dict[str, Any], snapshots: Dict[str, Dict[str, Any]], blockers: Dict[str, str]
 ) -> str:
@@ -390,7 +396,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
         if host in paused_hosts:
             blockers[host] = "operator paused"
 
-    launched: List[Tuple[str, str, int]] = []
+    launched: List[Tuple[str, str, int, int]] = []
     for task in sorted(manifest["entries"], key=lambda item: item["priority"]):
         runtime = state["entries"][task["name"]]
         if runtime.get("state") != "pending":
@@ -454,7 +460,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                     "last_progress_at": now,
                 }
             )
-            launched.append((task["name"], host, runtime["gpu"]))
+            launched.append((task["name"], host, runtime["gpu"], attempt))
             break
 
     for host, definition in manifest["hosts"].items():
@@ -473,7 +479,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
 
     if launched and base.send(
         args.chat_id,
-        manifest["label"] + " SUBMITTED: " + " | ".join(f"{name}@{host} GPU{gpu}" for name, host, gpu in launched),
+        submitted_text(manifest["label"], launched),
     ):
         state["last_callback_at"] = now
 

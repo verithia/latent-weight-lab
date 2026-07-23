@@ -9,6 +9,7 @@ from examples.nanogpt.multi_host_dense_queue_worker import (
     host_admission_status,
     launch,
     load_state,
+    submitted_text,
     validate_pending_variant,
 )
 from unittest import mock
@@ -82,6 +83,12 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         )
         self.assertFalse(policy[0])
         self.assertIn("workspace headroom", policy[1])
+
+    def test_submission_callback_names_attempt_identity(self) -> None:
+        self.assertEqual(
+            submitted_text("dense queue", [("top1", "Y400", 0, 2), ("top2", "Y400", 1, 3)]),
+            "dense queue SUBMITTED: top1@Y400 GPU0 attempt=2 | top2@Y400 GPU1 attempt=3",
+        )
 
     @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
     def test_detached_host_does_not_publish_a_tmux_session(self, ssh_script: mock.Mock) -> None:
