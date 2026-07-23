@@ -966,6 +966,8 @@ class FixedEvaluationRngTests(unittest.TestCase):
             f"step {config['max_iters']}: train loss 2.1250, val loss 2.2500\n"
         )
         resolved = json.loads(json.dumps(config))
+        resolved.setdefault("fixed_eval_index_spec_sha256", config.get("fixed_eval_index_spec_sha256"))
+        resolved.setdefault("fixed_eval_indices_protocol", config.get("fixed_eval_indices_protocol"))
         resolved["fixed_eval_indices_sha256"] = "c" * 64
         identity = {
             "resolved_config": resolved,
@@ -978,8 +980,8 @@ class FixedEvaluationRngTests(unittest.TestCase):
                 "protocol": config["eval_protocol_id"],
                 "fixed_eval_indices": True,
                 "fixed_eval_indices_sha256": "c" * 64,
-                "fixed_eval_index_spec_sha256": config["fixed_eval_index_spec_sha256"],
-                "fixed_eval_indices_protocol": config["fixed_eval_indices_protocol"],
+                "fixed_eval_index_spec_sha256": config.get("fixed_eval_index_spec_sha256"),
+                "fixed_eval_indices_protocol": config.get("fixed_eval_indices_protocol"),
                 "eval_seed": config["eval_seed"],
                 "eval_batch_size": config["eval_batch_size"],
                 "eval_iters": config["eval_iters"],
@@ -1036,6 +1038,17 @@ class FixedEvaluationRngTests(unittest.TestCase):
             self.assertEqual(screen["completion"]["terminal_train_loss"], 2.125)
             self.assertEqual(screen["completion"]["terminal_val_loss"], 2.25)
             self.assertEqual(mai_artifacts.validate_terminal_result(screen), screen)
+
+        with tempfile.TemporaryDirectory() as raw:
+            root = Path(raw)
+            config = json.loads(Path(
+                "examples/nanogpt/configs/y400_mai_v3_985m_muon_0p5tpp_lr16e4_prefetch.json"
+            ).read_text())
+            screen = self._build_terminal_bridge_result(
+                self._write_terminal_bridge_inputs(root, config)
+            )
+            self.assertEqual(screen["hpo_stage"], "dense_recipe_screen_0p5tpp")
+            self.assertEqual(screen["candidate"], {"field": "learning_rate", "value": 0.0016})
 
         with tempfile.TemporaryDirectory() as raw:
             root = Path(raw)

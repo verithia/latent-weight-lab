@@ -216,6 +216,10 @@ REGISTERED_SCREEN_CANDIDATES = {
         "field": "learning_rate",
         "values": (0.0016, 0.0020, 0.0024),
     },
+    ("baseline", "dense_recipe_screen_0p5tpp"): {
+        "field": "learning_rate",
+        "values": (0.0016, 0.0020, 0.0024),
+    },
     ("block_fht", "full_attention_blockfht_screen_0p5tpp"): {
         "field": "candidate_main_lr_multiplier",
         "values": (0.5, 0.75, 1.0),
@@ -1756,19 +1760,63 @@ def _identity_from_checkpoint_metadata(
         "eval_protocol_id": evaluation.get("protocol"),
         "run_contract": contract,
     }, method=method)
-    _require_config_matches_resolved(config, resolved, method=method)
-    if config.get("mai_ladder_policy_version") != POLICY_VERSION:
-        raise ValueError("launch config is not a registered MAI v2 config")
+    high_throughput_screen = (
+        "mai_ladder_policy_version" not in config
+        and config.get("method") == "baseline"
+        and config.get("hpo_stage") == "dense_recipe_screen_0p5tpp"
+        and config.get("ladder_role") == "screen_only"
+    )
+    if high_throughput_screen:
+        _validate_high_throughput_screen_config(config, resolved_config=resolved)
+    else:
+        _require_config_matches_resolved(config, resolved, method=method)
+        if config.get("mai_ladder_policy_version") != POLICY_VERSION:
+            raise ValueError("launch config is not a registered MAI v2 config")
     if config.get("data_manifest_sha256") != identity["data_manifest_sha256"]:
         raise ValueError("launch config data manifest disagrees with checkpoint metadata")
     if config.get("eval_protocol_id") != identity["eval_protocol_id"]:
         raise ValueError("launch config evaluation protocol disagrees with checkpoint metadata")
-    validate_v2_launch_config(
-        config,
-        resolved_config=resolved,
-        runtime_source_hashes=run_identity.get("source_hashes"),
-    )
+    if not high_throughput_screen:
+        validate_v2_launch_config(
+            config,
+            resolved_config=resolved,
+            runtime_source_hashes=run_identity.get("source_hashes"),
+        )
     return identity, resolved
+
+
+def _validate_high_throughput_screen_config(
+    config: dict[str, Any], *, resolved_config: dict[str, Any] | None = None
+) -> None:
+    """Accept the hash-pinned MAI-v3 prefetch screens as ranking evidence.
+
+    These screens predate the selection-policy metadata overlay, but their
+    checkpoint sidecars bind the complete resolved runtime, source hashes,
+    data manifest, and fixed-evaluation digest.  Only this exact registered
+    stage is bridged; later rungs still require normal immutable artifacts.
+    """
+    if config.get("launch_ready") is not True or config.get("recipe_resolution_required") is not False:
+        raise ValueError("MAI-v3 high-throughput screen is not launch-ready")
+    if (
+        config.get("method") != "baseline"
+        or config.get("hpo_stage") != "dense_recipe_screen_0p5tpp"
+        or config.get("ladder_role") != "screen_only"
+        or config.get("model_tier") != "985m"
+    ):
+        raise ValueError("launch config is not the registered MAI-v3 high-throughput screen")
+    _exact_tpp(config.get("planned_tpp"), 0.5, "MAI-v3 high-throughput screen")
+    _validate_v2_determinism_config(config)
+    _validate_v2_optimizer_config(config)
+    candidate = {"field": "learning_rate", "value": config.get("learning_rate")}
+    _validate_registered_screen_candidate(config.get("method"), config.get("hpo_stage"), candidate)
+    if config.get("mfu_preflight_required") is not True or float(config.get("mfu_min_fraction", 0.0)) < 0.20:
+        raise ValueError("MAI-v3 high-throughput screen lacks the mandatory 20% MFU gate")
+    if resolved_config is not None:
+        for field, value in config.items():
+            if field not in resolved_config or not _same_typed_value(resolved_config[field], value):
+                raise ValueError(
+                    f"MAI-v3 high-throughput launch config field {field} disagrees with checkpoint metadata"
+                )
 
 
 def _confirmation_provenance_from_config(
@@ -1865,9 +1913,10 @@ def build_terminal_result(
     if not accept:
         raise ValueError("terminal result requires explicit acceptance")
     config = _load_json_object(config_path, "config")
-    if config.get("mai_ladder_policy_version") != POLICY_VERSION:
-        raise ValueError("config is not a registered MAI v2 config")
-    validate_v2_launch_config(config)
+    if config.get("mai_ladder_policy_version") == POLICY_VERSION:
+        validate_v2_launch_config(config)
+    else:
+        _validate_high_throughput_screen_config(config)
     max_iters = _integer(config.get("max_iters"), "config.max_iters", positive=True)
     status = _load_json_object(status_path, "status")
     _validate_clean_status(
