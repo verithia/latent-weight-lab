@@ -1691,7 +1691,10 @@ def _require_config_matches_resolved(
 
 
 def _validate_fixed_evaluation_identity_binding(
-    evaluation: dict[str, Any], resolved: dict[str, Any]
+    evaluation: dict[str, Any],
+    resolved: dict[str, Any],
+    *,
+    allow_missing_legacy_labels: bool = False,
 ) -> None:
     """Reject a checkpoint sidecar whose evaluation identity is self-contradictory."""
     bindings = (
@@ -1709,6 +1712,13 @@ def _validate_fixed_evaluation_identity_binding(
     )
     for evaluation_field, resolved_field in bindings:
         if evaluation_field not in evaluation or resolved_field not in resolved:
+            if (
+                allow_missing_legacy_labels
+                and evaluation_field in {"fixed_eval_index_spec_sha256", "fixed_eval_indices_protocol"}
+                and evaluation_field not in evaluation
+                and resolved_field not in resolved
+            ):
+                continue
             raise ValueError(
                 "checkpoint metadata run_identity evaluation/resolved config is missing "
                 f"fixed-eval field {evaluation_field}"
@@ -1751,7 +1761,17 @@ def _identity_from_checkpoint_metadata(
         raise ValueError("checkpoint metadata run_identity data/evaluation identity is invalid")
     if evaluation.get("fixed_eval_indices") is not True:
         raise ValueError("checkpoint metadata run_identity lacks fixed evaluation indices")
-    _validate_fixed_evaluation_identity_binding(evaluation, resolved)
+    high_throughput_screen = (
+        "mai_ladder_policy_version" not in config
+        and config.get("method") == "baseline"
+        and config.get("hpo_stage") == "dense_recipe_screen_0p5tpp"
+        and config.get("ladder_role") == "screen_only"
+    )
+    _validate_fixed_evaluation_identity_binding(
+        evaluation,
+        resolved,
+        allow_missing_legacy_labels=high_throughput_screen,
+    )
     identity = _validate_identity({
         "config_sha256": run_identity.get("config_sha256"),
         "source_hashes": run_identity.get("source_hashes"),
@@ -1760,12 +1780,6 @@ def _identity_from_checkpoint_metadata(
         "eval_protocol_id": evaluation.get("protocol"),
         "run_contract": contract,
     }, method=method)
-    high_throughput_screen = (
-        "mai_ladder_policy_version" not in config
-        and config.get("method") == "baseline"
-        and config.get("hpo_stage") == "dense_recipe_screen_0p5tpp"
-        and config.get("ladder_role") == "screen_only"
-    )
     if high_throughput_screen:
         _validate_high_throughput_screen_config(config, resolved_config=resolved)
     else:

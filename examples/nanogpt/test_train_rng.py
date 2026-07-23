@@ -966,9 +966,25 @@ class FixedEvaluationRngTests(unittest.TestCase):
             f"step {config['max_iters']}: train loss 2.1250, val loss 2.2500\n"
         )
         resolved = json.loads(json.dumps(config))
-        resolved.setdefault("fixed_eval_index_spec_sha256", config.get("fixed_eval_index_spec_sha256"))
-        resolved.setdefault("fixed_eval_indices_protocol", config.get("fixed_eval_indices_protocol"))
+        high_throughput_screen = config.get("hpo_stage") == "dense_recipe_screen_0p5tpp"
+        if not high_throughput_screen:
+            resolved.setdefault("fixed_eval_index_spec_sha256", config.get("fixed_eval_index_spec_sha256"))
+            resolved.setdefault("fixed_eval_indices_protocol", config.get("fixed_eval_indices_protocol"))
         resolved["fixed_eval_indices_sha256"] = "c" * 64
+        evaluation = {
+            "protocol": config["eval_protocol_id"],
+            "fixed_eval_indices": True,
+            "fixed_eval_indices_sha256": "c" * 64,
+            "eval_seed": config["eval_seed"],
+            "eval_batch_size": config["eval_batch_size"],
+            "eval_iters": config["eval_iters"],
+            "block_size": config["block_size"],
+        }
+        if not high_throughput_screen:
+            evaluation.update({
+                "fixed_eval_index_spec_sha256": config.get("fixed_eval_index_spec_sha256"),
+                "fixed_eval_indices_protocol": config.get("fixed_eval_indices_protocol"),
+            })
         identity = {
             "resolved_config": resolved,
             "config_sha256": hashlib.sha256(
@@ -976,17 +992,7 @@ class FixedEvaluationRngTests(unittest.TestCase):
             ).hexdigest(),
             "source_hashes": train.source_hashes(),
             "data_manifest": {"path": "/registered/data/manifest.json", "sha256": "b" * 64},
-            "evaluation": {
-                "protocol": config["eval_protocol_id"],
-                "fixed_eval_indices": True,
-                "fixed_eval_indices_sha256": "c" * 64,
-                "fixed_eval_index_spec_sha256": config.get("fixed_eval_index_spec_sha256"),
-                "fixed_eval_indices_protocol": config.get("fixed_eval_indices_protocol"),
-                "eval_seed": config["eval_seed"],
-                "eval_batch_size": config["eval_batch_size"],
-                "eval_iters": config["eval_iters"],
-                "block_size": config["block_size"],
-            },
+            "evaluation": evaluation,
         }
         metadata_path = root / "ckpt.meta.json"
         metadata_path.write_text(json.dumps({
