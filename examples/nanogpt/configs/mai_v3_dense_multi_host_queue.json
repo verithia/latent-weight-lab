@@ -30,22 +30,14 @@
       "name": "mai_v3_690m_20tpp_baseline",
       "stage": "dense_selected_20tpp",
       "max_iters": 53019,
-      "host_preference": ["PRO6", "Y400"],
+      "host_preference": ["Y400"],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_690m_20tpp_baseline_resume1",
-          "config": "examples/nanogpt/configs/y400_mai_v3_690m_muon_20tpp_selected_b16ga16_prefetch_restart.json",
-          "config_sha256": "f71d9309ca20e601bf9432abfdaffc9486780f8319a1225b9b95284769756612",
-          "resume": true,
-          "expected_checkpoint_next_iter": 2196,
-          "checkpoint_budget_bytes": 5822773609
-        },
-        "PRO6": {
-          "run_name": "pro6_mai_v3_690m_20tpp_baseline_fresh1",
+          "run_name": "y400_resume_pro6_mai_v3_690m_20tpp_baseline",
           "config": "examples/nanogpt/configs/pro6_mai_v3_690m_muon_20tpp_selected_b16ga16_prefetch_restart_fresh1.json",
           "config_sha256": "af99d4a2ed7c2ff45ce295200124dac6bab0c97cd7b373dbf05778e4bd51ef42",
-          "resume": false,
-          "expected_checkpoint_next_iter": null,
+          "resume": true,
+          "expected_checkpoint_next_iter": 37891,
           "checkpoint_budget_bytes": 11645547218
         }
       }
