@@ -1,6 +1,6 @@
 {
   "schema_version": "multi_host_dense_queue_v1",
-  "label": "MAI-v3 dense multi-host queue",
+  "label": "MAI-v3 dense + early-attention multi-host queue",
   "required_source_hashes": {
     "examples/nanogpt/train.py": "ab4dad2f1ef0543505f1da3384e7b00aa3359e76c6a3b697a328a0573fbe0af1",
     "examples/nanogpt/model.py": "2609e37784f3622c5924dfbfd17bb1eeed705ff692f19465945973b2fb6c7536",
@@ -158,6 +158,57 @@
           "checkpoint_budget_bytes": 7879498342
         }
       }
+    },
+    {
+      "priority": 40,
+      "name": "mai_v3_124m_fullattn_prefit_mult0p50",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_prefit_mult0p50",
+          "config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult0p50.json",
+          "config_sha256": "ffcc4e40478a55e661d3a8d6cd7b057dff157cf3e5a6290632d74a61e8dcf869",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 41,
+      "name": "mai_v3_124m_fullattn_prefit_mult0p75",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_prefit_mult0p75",
+          "config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult0p75.json",
+          "config_sha256": "92982834464ee51ed36a7905edfa73234ccf6e33520799a7eb11afc235899871",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 42,
+      "name": "mai_v3_124m_fullattn_prefit_mult1p00",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_prefit_mult1p00",
+          "config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult1p00.json",
+          "config_sha256": "a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -167,7 +218,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
     },
     {
       "name": "mlp_replacement_work",
