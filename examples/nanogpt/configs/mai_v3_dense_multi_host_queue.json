@@ -124,13 +124,43 @@
           "checkpoint_budget_bytes": 7879498342
         }
       }
+    },
+    {
+      "priority": 30,
+      "name": "mai_v3_985m_5tpp_top1_lr24e4",
+      "stage": "dense_recipe_confirmation_5tpp",
+      "max_iters": 18786,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_5tpp_top1_lr24e4",
+          "config": "examples/nanogpt/configs/y400_mai_v3_985m_muon_5tpp_top1_lr24e4_prefetch.json",
+          "config_sha256": "e3273e53454d1ac3aabcb533d4673c4ba5463ff6eb6b0383a2552284abed8745",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 7879498342
+        }
+      }
+    },
+    {
+      "priority": 31,
+      "name": "mai_v3_985m_5tpp_top2_lr20e4",
+      "stage": "dense_recipe_confirmation_5tpp",
+      "max_iters": 18786,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_5tpp_top2_lr20e4",
+          "config": "examples/nanogpt/configs/y400_mai_v3_985m_muon_5tpp_top2_lr20e4_prefetch.json",
+          "config_sha256": "1cd8ddd0ed15f9c3ad74f6de98d3c212939b58d8759273ffe296e560d2ffdbc4",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 7879498342
+        }
+      }
     }
   ],
   "deferred_stages": [
-    {
-      "name": "985m_top2_5tpp_confirmations",
-      "state": "blocked_on_terminal_0p5tpp_ranking"
-    },
     {
       "name": "985m_selected_20tpp",
       "state": "blocked_on_accepted_5tpp_comparison"
