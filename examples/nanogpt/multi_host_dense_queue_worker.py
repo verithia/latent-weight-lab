@@ -234,15 +234,18 @@ def launch(
 
 def progress_text(
     label: str,
-    progress: List[Tuple[str, str, int, int, int]],
-    terminals: List[Tuple[str, str, str, int, int, Any]],
+    progress: List[Tuple[str, str, int, int, int, int]],
+    terminals: List[Tuple[str, str, int, str, int, int, Any]],
 ) -> str:
-    parts = [f"{name}@{host} {percent}% ({current}/{maximum})" for name, host, percent, current, maximum in progress]
-    for name, host, terminal_state, current, maximum, exit_code in terminals:
+    parts = [
+        f"{name}@{host} attempt={attempt} {percent}% ({current}/{maximum})"
+        for name, host, attempt, percent, current, maximum in progress
+    ]
+    for name, host, attempt, terminal_state, current, maximum, exit_code in terminals:
         if terminal_state == "finished" and exit_code == 0:
-            parts.append(f"{name}@{host} 100% ({current}/{maximum}) finished exit=0")
+            parts.append(f"{name}@{host} attempt={attempt} 100% ({current}/{maximum}) finished exit=0")
         else:
-            parts.append(f"{name}@{host} FAILED ({current}/{maximum}) exit={exit_code}")
+            parts.append(f"{name}@{host} attempt={attempt} FAILED ({current}/{maximum}) exit={exit_code}")
     return label + " PROGRESS: " + " | ".join(parts)
 
 
@@ -259,8 +262,11 @@ def heartbeat_text(
     for task in sorted(manifest["entries"], key=lambda item: item["priority"]):
         runtime = state["entries"][task["name"]]
         host = runtime.get("assigned_host") or "unassigned"
+        attempt = runtime.get("attempts_by_host", {}).get(host) if host != "unassigned" else None
+        attempt_text = f" attempt={attempt}" if attempt else ""
         tasks.append(
-            f"{task['name']}@{host}: {runtime.get('state')} iter={runtime.get('last_iter')}/{task['max_iters']}"
+            f"{task['name']}@{host}{attempt_text}: "
+            f"{runtime.get('state')} iter={runtime.get('last_iter')}/{task['max_iters']}"
         )
     hosts = []
     for host, definition in manifest["hosts"].items():
@@ -303,17 +309,30 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
     now = time.time()
     snapshots = probe_all(manifest, state)
     tasks = task_by_name(manifest)
-    progress_events: List[Tuple[str, str, int, int, int]] = []
-    terminal_events: List[Tuple[str, str, str, int, int, Any]] = []
+    progress_events: List[Tuple[str, str, int, int, int, int]] = []
+    terminal_events: List[Tuple[str, str, int, str, int, int, Any]] = []
 
     for name, runtime in state["entries"].items():
         if runtime.get("state") not in {"submitting", "running"}:
             if runtime.get("terminal_pending") and not runtime.get("terminal_notified"):
                 pending = runtime["terminal_pending"]
-                terminal_events.append((name, runtime.get("assigned_host") or "unknown", pending[0], int(runtime.get("last_iter", 0)), int(tasks[name]["max_iters"]), pending[1]))
+                terminal_host = runtime.get("assigned_host") or "unknown"
+                attempt = int(runtime.get("attempts_by_host", {}).get(terminal_host, 0))
+                terminal_events.append(
+                    (
+                        name,
+                        terminal_host,
+                        attempt,
+                        pending[0],
+                        int(runtime.get("last_iter", 0)),
+                        int(tasks[name]["max_iters"]),
+                        pending[1],
+                    )
+                )
             continue
         task = tasks[name]
         host = runtime["assigned_host"]
+        attempt = int(runtime.get("attempts_by_host", {}).get(host, 0))
         observed = observed_for(task, runtime, snapshots)
         if observed.get("status_path"):
             runtime["status_path"] = observed["status_path"]
@@ -324,7 +343,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
             sent = set(runtime.get("sent_milestones", []))
             for percent in (20, 50):
                 if percent not in sent and previous * 100 < percent * task["max_iters"] <= current * 100:
-                    progress_events.append((name, host, percent, current, task["max_iters"]))
+                    progress_events.append((name, host, attempt, percent, current, task["max_iters"]))
             if current > previous:
                 runtime["last_progress_at"] = now
             runtime["last_iter"] = current
@@ -361,26 +380,47 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                 )
         if runtime.get("terminal_pending") and not runtime.get("terminal_notified"):
             pending = runtime["terminal_pending"]
-            terminal_events.append((name, host, pending[0], int(runtime.get("last_iter", 0)), int(task["max_iters"]), pending[1]))
+            terminal_events.append(
+                (
+                    name,
+                    host,
+                    attempt,
+                    pending[0],
+                    int(runtime.get("last_iter", 0)),
+                    int(task["max_iters"]),
+                    pending[1],
+                )
+            )
 
     submission_errors = [
-        (name, runtime.pop("submission_error_pending"))
+        (
+            name,
+            runtime["submission_error_pending"],
+            int(runtime.get("attempts_by_host", {}).get(runtime["submission_error_pending"], 0)),
+        )
         for name, runtime in state["entries"].items()
         if runtime.get("submission_error_pending")
     ]
+    for runtime in state["entries"].values():
+        runtime.pop("submission_error_pending", None)
     if submission_errors:
         base.send(
             args.chat_id,
-            manifest["label"] + " ERROR: " + " | ".join(f"{name}@{host} preflight/launcher failed; host variant rejected" for name, host in submission_errors),
+            manifest["label"]
+            + " ERROR: "
+            + " | ".join(
+                f"{name}@{host} attempt={attempt} preflight/launcher failed; host variant rejected"
+                for name, host, attempt in submission_errors
+            ),
         )
         state["last_callback_at"] = now
 
     if progress_events or terminal_events:
         if base.send(args.chat_id, progress_text(manifest["label"], progress_events, terminal_events)):
-            for name, _host, percent, _current, _maximum in progress_events:
+            for name, _host, _attempt, percent, _current, _maximum in progress_events:
                 runtime = state["entries"][name]
                 runtime["sent_milestones"] = sorted(set(runtime.get("sent_milestones", [])) | {percent})
-            for name, _host, _terminal_state, _current, _maximum, _exit_code in terminal_events:
+            for name, _host, _attempt, _terminal_state, _current, _maximum, _exit_code in terminal_events:
                 runtime = state["entries"][name]
                 runtime["terminal_notified"] = True
                 runtime["terminal_signature"] = runtime.get("terminal_pending")
