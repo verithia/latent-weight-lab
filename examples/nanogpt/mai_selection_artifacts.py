@@ -1715,8 +1715,8 @@ def _validate_fixed_evaluation_identity_binding(
             if (
                 allow_missing_legacy_labels
                 and evaluation_field in {"fixed_eval_index_spec_sha256", "fixed_eval_indices_protocol"}
-                and evaluation_field not in evaluation
-                and resolved_field not in resolved
+                and evaluation.get(evaluation_field) is None
+                and resolved.get(resolved_field) is None
             ):
                 continue
             raise ValueError(
