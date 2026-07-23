@@ -135,7 +135,7 @@
         "Y400": {
           "run_name": "y400_mai_v3_985m_5tpp_top1_lr24e4",
           "config": "examples/nanogpt/configs/y400_mai_v3_985m_muon_5tpp_top1_lr24e4_prefetch.json",
-          "config_sha256": "e3273e53454d1ac3aabcb533d4673c4ba5463ff6eb6b0383a2552284abed8745",
+          "config_sha256": "06f9004c3f5d3008a22f1c285ccd6b6bbb3d27bcc084a07ac64593e983caccb2",
           "resume": false,
           "expected_checkpoint_next_iter": null,
           "checkpoint_budget_bytes": 7879498342

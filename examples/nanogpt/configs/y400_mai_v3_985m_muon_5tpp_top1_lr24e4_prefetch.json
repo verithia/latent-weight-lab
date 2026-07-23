@@ -42,14 +42,14 @@
   },
   "mai_selection_recipe": {
     "learning_rate": 0.0024,
-    "min_lr": 0.00023999999999999998,
+    "min_lr": 0.00024,
     "muon_adamw_lr_scale": 0.3
   },
   "max_iters": 18786,
   "method": "baseline",
   "mfu_min_fraction": 0.2,
   "mfu_preflight_required": true,
-  "min_lr": 0.00023999999999999998,
+  "min_lr": 0.00024,
   "model_seed": 1337,
   "model_tier": "985m",
   "muon_adamw_lr_scale": 0.3,
