@@ -25,6 +25,11 @@ from typing import Any
 
 import torch
 
+from examples.nanogpt.mai_selection_artifacts import (
+    POLICY_VERSION as MAI_SELECTION_POLICY_VERSION,
+    validate_v2_launch_config,
+)
+
 
 def load_json_object(path: Path) -> dict[str, Any]:
     value = json.loads(path.read_text())
@@ -85,6 +90,10 @@ def make_preflight_config(source: dict[str, Any], temporary_out: Path, warmups: 
     # avoid checkpoint/evaluation overhead and any deterministic-run policy
     # intended for registered results.
     config.pop("prelaunch_provenance_requirements", None)
+    # The immutable source config is validated before this transformation.
+    # The short scratch run deliberately changes checkpoint/evaluation policy,
+    # so it must not masquerade as a registered scientific rung.
+    config.pop("mai_ladder_policy_version", None)
     config["registered_resume_determinism_required"] = False
     config["out_dir"] = str(temporary_out)
     config["init_from"] = "scratch"
@@ -125,6 +134,8 @@ def main() -> None:
 
     config_path = args.config.resolve()
     source = load_json_object(config_path)
+    if source.get("mai_ladder_policy_version") == MAI_SELECTION_POLICY_VERSION:
+        validate_v2_launch_config(source)
     required = source.get("mfu_preflight_required")
     if required is not True:
         raise ValueError("config must set mfu_preflight_required=true")
