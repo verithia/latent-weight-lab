@@ -152,6 +152,23 @@
       }
     },
     {
+      "priority": 32,
+      "name": "mai_v3_985m_20tpp_selected_lr24e4",
+      "stage": "dense_selected_recipe_20tpp",
+      "max_iters": 75143,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_20tpp_selected_lr24e4",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_muon_20tpp_selected.json",
+          "config_sha256": "c3955f639734cfec27693a93fb10a66577bddc1b00297c4801fc7a3b354a899a",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 7879498342
+        }
+      }
+    },
+    {
       "priority": 40,
       "name": "mai_v3_124m_fullattn_prefit_mult0p50",
       "stage": "operator_override_early_full_attention_screen_0p5tpp",
@@ -410,7 +427,7 @@
   "deferred_stages": [
     {
       "name": "985m_selected_20tpp",
-      "state": "blocked_on_accepted_5tpp_comparison"
+      "state": "accepted_practical_tie_lr24e4_queued_priority_32"
     },
     {
       "name": "full_attention_replacement_ladder",
