@@ -460,6 +460,60 @@
           "active_checkpoint_budget_bytes": 4300000000
         }
       }
+    },
+    {
+      "priority": 57,
+      "name": "mai_v3_985m_fullattn_0p5tpp_mult0p50_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 1879,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_fullattn_0p5tpp_mult0p50_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_0p5tpp_mult0p50.json",
+          "config_sha256": "b8655b6466288acdb68c570c09bb4dcd0636c7aec1f369617a924b13faf59611",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 13000000000,
+          "active_checkpoint_budget_bytes": 6500000000
+        }
+      }
+    },
+    {
+      "priority": 58,
+      "name": "mai_v3_985m_fullattn_0p5tpp_mult0p75_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 1879,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_fullattn_0p5tpp_mult0p75_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_0p5tpp_mult0p75.json",
+          "config_sha256": "de7f40c34ecc4fb37aa758191768229823a9e471ec80a42cda4953e8d74de9fe",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 13000000000,
+          "active_checkpoint_budget_bytes": 6500000000
+        }
+      }
+    },
+    {
+      "priority": 59,
+      "name": "mai_v3_985m_fullattn_0p5tpp_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 1879,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_fullattn_0p5tpp_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_0p5tpp_mult1p00.json",
+          "config_sha256": "a18575933fbcee32f190f4c1014e19ceb7beefa0f34dec27eac342d274209f33",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 13000000000,
+          "active_checkpoint_budget_bytes": 6500000000
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -469,7 +523,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional_124m_and_350m_selected_20tpp_plus_690m_top_two_5tpp_confirmations_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_and_350m_selected_20tpp_plus_690m_top_two_5tpp confirmations and 985m 0p5tpp screens operator-unblocked; formal acceptance still blocked on accepted four-rung dense fit"
     },
     {
       "name": "mlp_replacement_work",
