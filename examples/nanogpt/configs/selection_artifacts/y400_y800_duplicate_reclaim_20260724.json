@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "operation": "verified_duplicate_reclaim",
+  "primary": {
+    "host": "Y400",
+    "root": "/root/userdata/MappingNetworks/runs"
+  },
+  "authority": {
+    "host": "Y800",
+    "root": "/root/userdata/MappingNetworks/runs"
+  },
+  "entries": [
+    {
+      "path": "y800_baseline_finewebedu_1b/ckpt.pt",
+      "bytes": 1492567825,
+      "sha256": "e333c1ef73008c80e8e02550aed2424be134a0d579a6e5a4968f2eac58226b60"
+    },
+    {
+      "path": "y800_baseline_finewebedu_200m/ckpt.pt",
+      "bytes": 1492567697,
+      "sha256": "f5a0b0024522478e30909e66282678798648831b1bb50e7ac3e1bd90fdac1ef3"
+    },
+    {
+      "path": "y800_exp_100m_27_cfc_only_lat10/ckpt.pt",
+      "bytes": 1186805073,
+      "sha256": "2e9edff6837e516657faf710b2fe818f23a07c999a872b4b79b44b6e32d9c47d"
+    },
+    {
+      "path": "y800_exp_100m_29_attn_only_lat8/ckpt.pt",
+      "bytes": 1180013521,
+      "sha256": "2d9240721c317758352c11316996f0df8dffaba54739f6cc35d812e9c3cef2de"
+    },
+    {
+      "path": "y800_block_fht_r2_attn_only_finewebedu_200m/ckpt.pt",
+      "bytes": 1156228561,
+      "sha256": "d71a3b0c239afd1706a07e6cd18fa37c3aeb5dc4ddd64ec0bc2b9029719abba8"
+    },
+    {
+      "path": "y800_probe_muon_vanilla_1b_lr18e4_ckpt/ckpt.pt",
+      "bytes": 1152806321,
+      "sha256": "c848484923caf92b042fe91f6ec7b17e235c11f38faeb48e72b8a33394cc3ac1"
+    },
+    {
+      "path": "y800_cproj_scalefix_100m_01_attn_only_ckpt/ckpt_iter000250.pt",
+      "bytes": 929925399,
+      "sha256": "1abff37e15c6f9a119d5e521bae5d262dacdde70c987dc4ef78965b6b6dbb58c"
+    },
+    {
+      "path": "y800_cproj_scalefix_100m_01_attn_only_ckpt/ckpt_iter000500.pt",
+      "bytes": 929925399,
+      "sha256": "02dff10dda320097f72bf500ac309d31305c4205e7bce537339b344c2b131b8f"
+    },
+    {
+      "path": "y800_cproj_scalefix_100m_01_attn_only_ckpt/ckpt_iter000750.pt",
+      "bytes": 929925399,
+      "sha256": "db836ac859525df3fc1efdc63f17ee7ad1cd891f5085996c7cd6e53f9a7332fb"
+    },
+    {
+      "path": "y800_exp_100m_28_ffn_only_lat8/ckpt.pt",
+      "bytes": 867452945,
+      "sha256": "da69b641de781e663084d620390634cc6d4227aa9b54796006235226c663a204"
+    },
+    {
+      "path": "y800_cproj_scalefix_100m_04_cproj_outg16_only_ckpt/ckpt_iter000250.pt",
+      "bytes": 707076803,
+      "sha256": "037bde8f44235e44996b894ad0bf76d5c4360a966b19e3fb2f16878593a331f0"
+    },
+    {
+      "path": "y800_cproj_scalefix_100m_04_cproj_outg16_only_ckpt/ckpt_iter000500.pt",
+      "bytes": 707076803,
+      "sha256": "03243a3d67055a9338a6f51913f63951015ed4e5cc772e12cd96e6e2463d8766"
+    },
+    {
+      "path": "y800_cproj_scalefix_100m_04_cproj_outg16_only_ckpt/ckpt_iter000750.pt",
+      "bytes": 707076803,
+      "sha256": "955a702781217a754a3e22e18693b9638eefaf53422b74e6cf0864e624a3ff73"
+    }
+  ],
+  "expected_total_bytes": 13439448549,
+  "policy": {
+    "delete_only_primary_files_after_both_hosts_match_manifest": true,
+    "preserve_authority_files": true,
+    "preserve_parent_metadata_and_logs_on_primary": true,
+    "exclude_current_mai_ladder_outputs": true
+  }
+}
