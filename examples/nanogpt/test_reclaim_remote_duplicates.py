@@ -5,6 +5,7 @@ import pytest
 from examples.nanogpt.reclaim_remote_duplicates import (
     expected_observation,
     manifest_sha256,
+    same_storage_namespace,
     validate_manifest,
 )
 
@@ -28,6 +29,19 @@ def test_validate_manifest_and_expected_observation() -> None:
     assert len(manifest_sha256(payload)) == 64
 
 
+def test_same_storage_namespace_requires_matching_mount_and_inode() -> None:
+    identity = {
+        "filesystem_type": "ceph",
+        "mount_source": "monitors:/volume/share",
+        "mount_root": "/volume/share",
+        "inode": 123,
+    }
+    assert same_storage_namespace(identity, copy.deepcopy(identity))
+    distinct = copy.deepcopy(identity)
+    distinct["inode"] = 124
+    assert not same_storage_namespace(identity, distinct)
+
+
 @pytest.mark.parametrize(
     "mutation",
     [
@@ -35,6 +49,7 @@ def test_validate_manifest_and_expected_observation() -> None:
         lambda payload: payload.update(expected_total_bytes=9),
         lambda payload: payload["entries"][0].update(sha256="invalid"),
         lambda payload: payload["entries"].append(copy.deepcopy(payload["entries"][0])),
+        lambda payload: payload.update(policy={"do_not_execute": True}),
     ],
 )
 def test_validate_manifest_rejects_unsafe_or_inconsistent_entries(mutation) -> None:

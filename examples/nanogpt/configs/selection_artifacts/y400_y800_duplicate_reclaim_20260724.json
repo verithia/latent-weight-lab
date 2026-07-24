@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "operation": "verified_duplicate_reclaim",
+  "status": "invalidated_shared_ceph_namespace_incident",
   "primary": {
     "host": "Y400",
     "root": "/root/userdata/MappingNetworks/runs"
@@ -78,6 +79,8 @@
   ],
   "expected_total_bytes": 13439448549,
   "policy": {
+    "do_not_execute": true,
+    "invalidated_reason": "Y400 and Y800 expose the same CephFS namespace for /root/userdata; host labels are not independent storage authorities",
     "delete_only_primary_files_after_both_hosts_match_manifest": true,
     "preserve_authority_files": true,
     "preserve_parent_metadata_and_logs_on_primary": true,

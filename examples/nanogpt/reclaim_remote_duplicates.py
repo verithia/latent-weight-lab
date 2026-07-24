@@ -55,6 +55,34 @@ for entry in entries:
     deleted[rel] = actual
 print(json.dumps(deleted, sort_keys=True))'''
 
+REMOTE_STORAGE_IDENTITY = r'''import json, os, pathlib, sys
+path = pathlib.Path(sys.argv[1]).resolve()
+best = None
+with open("/proc/self/mountinfo") as handle:
+    for line in handle:
+        before, after = line.rstrip().split(" - ", 1)
+        fields = before.split()
+        mount_root = fields[3].replace("\\040", " ")
+        mount_point = fields[4].replace("\\040", " ")
+        suffix = after.split()
+        candidate = {
+            "mount_root": mount_root,
+            "mount_point": mount_point,
+            "filesystem_type": suffix[0],
+            "mount_source": suffix[1],
+        }
+        try:
+            path.relative_to(mount_point)
+        except ValueError:
+            continue
+        if best is None or len(mount_point) > len(best["mount_point"]):
+            best = candidate
+if best is None:
+    raise SystemExit(f"no mount identity for {path}")
+stat = path.stat()
+best.update({"path": str(path), "inode": stat.st_ino})
+print(json.dumps(best, sort_keys=True))'''
+
 
 def atomic_json(path: Path, payload: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -66,6 +94,8 @@ def atomic_json(path: Path, payload: Dict[str, Any]) -> None:
 def validate_manifest(payload: Dict[str, Any]) -> None:
     if payload.get("schema_version") != 1:
         raise ValueError("unsupported manifest schema")
+    if payload.get("policy", {}).get("do_not_execute"):
+        raise ValueError("manifest is explicitly invalidated and must not execute")
     entries = payload.get("entries")
     if not isinstance(entries, list) or not entries:
         raise ValueError("manifest entries must be a non-empty list")
@@ -139,6 +169,39 @@ def remote_python(host: str, script: str, root: str, entries: list[dict]) -> dic
     return json.loads(completed.stdout)
 
 
+def remote_storage_identity(host: str, root: str) -> dict:
+    completed = subprocess.run(
+        [
+            "ssh",
+            "-o",
+            "BatchMode=yes",
+            "-o",
+            "Compression=no",
+            "-o",
+            "ConnectTimeout=20",
+            host,
+            "python3",
+            "-",
+            root,
+        ],
+        input=REMOTE_STORAGE_IDENTITY,
+        text=True,
+        capture_output=True,
+        timeout=120,
+        check=True,
+    )
+    return json.loads(completed.stdout)
+
+
+def same_storage_namespace(primary: dict, authority: dict) -> bool:
+    return (
+        primary["filesystem_type"] == authority["filesystem_type"]
+        and primary["mount_source"] == authority["mount_source"]
+        and primary["mount_root"] == authority["mount_root"]
+        and primary["inode"] == authority["inode"]
+    )
+
+
 def expected_observation(entries: list[dict]) -> dict:
     return {
         entry["path"]: {
@@ -164,6 +227,21 @@ def main() -> None:
     authority = payload["authority"]
     expected = expected_observation(entries)
     started = time.time()
+    primary_storage = remote_storage_identity(primary["host"], primary["root"])
+    authority_storage = remote_storage_identity(authority["host"], authority["root"])
+    if same_storage_namespace(primary_storage, authority_storage):
+        state = {
+            "state": "shared_storage_namespace_refused",
+            "manifest_path": str(args.manifest.resolve()),
+            "manifest_sha256": manifest_sha256(payload),
+            "started_at": started,
+            "finished_at": time.time(),
+            "primary_storage": primary_storage,
+            "authority_storage": authority_storage,
+            "executed": False,
+        }
+        atomic_json(args.state, state)
+        raise SystemExit("primary and authority resolve to one storage namespace")
 
     primary_before = remote_python(
         primary["host"], REMOTE_INSPECT, primary["root"], entries
