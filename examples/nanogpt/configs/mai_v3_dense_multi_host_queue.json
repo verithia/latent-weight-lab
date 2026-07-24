@@ -337,6 +337,57 @@
           "checkpoint_budget_bytes": 6442450944
         }
       }
+    },
+    {
+      "priority": 51,
+      "name": "mai_v3_690m_fullattn_0p5tpp_mult0p50_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 1326,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_690m_fullattn_0p5tpp_mult0p50_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_0p5tpp_mult0p50.json",
+          "config_sha256": "f75134a27a7d4ea0c7e945d31adae18218586cb96a35af67e19ec918a8e2ffb1",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 9663676416
+        }
+      }
+    },
+    {
+      "priority": 52,
+      "name": "mai_v3_690m_fullattn_0p5tpp_mult0p75_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 1326,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_690m_fullattn_0p5tpp_mult0p75_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_0p5tpp_mult0p75.json",
+          "config_sha256": "7e885f06cb6daf9c478b2e3b60506a8729d1dceb647f08060421968c22690f5d",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 9663676416
+        }
+      }
+    },
+    {
+      "priority": 53,
+      "name": "mai_v3_690m_fullattn_0p5tpp_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 1326,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_690m_fullattn_0p5tpp_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_0p5tpp_mult1p00.json",
+          "config_sha256": "55ffa3633068998ad9d82b79dcd05d55c676d3992e5ba243e9ffc6e89b34f483",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 9663676416
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -346,7 +397,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional_124m_selected_20tpp_and_350m_top_two_5tpp_confirmations_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_selected_20tpp_350m_top_two_5tpp_confirmations_and_690m_0p5tpp_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
     },
     {
       "name": "mlp_replacement_work",
