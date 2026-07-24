@@ -11,6 +11,8 @@ from examples.nanogpt.multi_host_dense_queue_worker import (
     launch,
     load_state,
     progress_text,
+    stalled_run_event,
+    stall_text,
     submitted_text,
     validate_pending_variant,
 )
@@ -124,6 +126,40 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
             ),
             "dense queue PROGRESS: top1@Y400 attempt=3 20% (400/2000) | "
             "top2@Y400 attempt=2 FAILED (0/2000) exit=None",
+        )
+
+    def test_stall_callback_is_alive_only_deduplicated_and_attempt_scoped(self) -> None:
+        runtime = {
+            "state": "running",
+            "last_iter": 400,
+            "last_progress_at": 100.0,
+        }
+        event = stalled_run_event(
+            "top1",
+            "Y400",
+            3,
+            runtime,
+            {"alive": True},
+            2000,
+            1000.0,
+            15 * 60,
+        )
+        self.assertIsNotNone(event)
+        assert event is not None
+        self.assertEqual(
+            stall_text("dense queue", [event]),
+            "dense queue STALL: top1@Y400 attempt=3 no iteration progress for 900s "
+            "(400/2000); process remains alive",
+        )
+        runtime["stall_notified_marker"] = event[-1]
+        self.assertIsNone(
+            stalled_run_event("top1", "Y400", 3, runtime, {"alive": True}, 2000, 1100.0, 15 * 60)
+        )
+        self.assertIsNone(
+            stalled_run_event("top1", "Y400", 3, runtime, {"alive": False}, 2000, 1200.0, 15 * 60)
+        )
+        self.assertIsNotNone(
+            stalled_run_event("top1", "Y400", 4, runtime, {"alive": True}, 2000, 1200.0, 15 * 60)
         )
 
     def test_heartbeat_names_active_attempt_identity(self) -> None:

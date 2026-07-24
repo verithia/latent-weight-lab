@@ -278,6 +278,37 @@ def submitted_text(label: str, launched: List[Tuple[str, str, int, int]]) -> str
     )
 
 
+def stalled_run_event(
+    name: str,
+    host: str,
+    attempt: int,
+    runtime: Dict[str, Any],
+    observed: Dict[str, Any],
+    maximum: int,
+    now: float,
+    stall_seconds: float,
+) -> Tuple[str, str, int, int, int, int, str] | None:
+    if runtime.get("state") != "running" or not observed.get("alive"):
+        return None
+    progress_at = float(runtime.get("last_progress_at", now))
+    stalled_seconds = max(0, int(now - progress_at))
+    if stalled_seconds < stall_seconds:
+        return None
+    current = int(runtime.get("last_iter", 0))
+    marker = f"{host}:{attempt}:{current}:{progress_at:.6f}"
+    if runtime.get("stall_notified_marker") == marker:
+        return None
+    return name, host, attempt, current, maximum, stalled_seconds, marker
+
+
+def stall_text(label: str, stalls: List[Tuple[str, str, int, int, int, int, str]]) -> str:
+    return label + " STALL: " + " | ".join(
+        f"{name}@{host} attempt={attempt} no iteration progress for {seconds}s "
+        f"({current}/{maximum}); process remains alive"
+        for name, host, attempt, current, maximum, seconds, _marker in stalls
+    )
+
+
 def heartbeat_text(
     manifest: Dict[str, Any], state: Dict[str, Any], snapshots: Dict[str, Dict[str, Any]], blockers: Dict[str, str]
 ) -> str:
@@ -334,6 +365,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
     tasks = task_by_name(manifest)
     progress_events: List[Tuple[str, str, int, int, int, int]] = []
     terminal_events: List[Tuple[str, str, int, str, int, int, Any]] = []
+    stall_events: List[Tuple[str, str, int, int, int, int, str]] = []
 
     for name, runtime in state["entries"].items():
         if runtime.get("state") not in {"submitting", "running"}:
@@ -369,6 +401,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                     progress_events.append((name, host, attempt, percent, current, task["max_iters"]))
             if current > previous:
                 runtime["last_progress_at"] = now
+                runtime.pop("stall_notified_marker", None)
             runtime["last_iter"] = current
         status = observed.get("status", {})
         status_state = str(status.get("state", "")).lower()
@@ -401,6 +434,18 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                         "submission_error_pending": host,
                     }
                 )
+        stall = stalled_run_event(
+            name,
+            host,
+            attempt,
+            runtime,
+            observed,
+            int(task["max_iters"]),
+            now,
+            args.stall_minutes * 60,
+        )
+        if stall is not None:
+            stall_events.append(stall)
         if runtime.get("terminal_pending") and not runtime.get("terminal_notified"):
             pending = runtime["terminal_pending"]
             terminal_events.append(
@@ -448,6 +493,11 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                 runtime["terminal_notified"] = True
                 runtime["terminal_signature"] = runtime.get("terminal_pending")
             state["last_callback_at"] = now
+
+    if stall_events and base.send(args.chat_id, stall_text(manifest["label"], stall_events)):
+        for name, _host, _attempt, _current, _maximum, _seconds, marker in stall_events:
+            state["entries"][name]["stall_notified_marker"] = marker
+        state["last_callback_at"] = now
 
     idle_by_host: Dict[str, List[int]] = {}
     identity_by_host: Dict[str, Tuple[bool, str]] = {}
@@ -508,6 +558,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                 runtime["rejected_hosts"] = sorted(rejected)
                 continue
             runtime.setdefault("attempts_by_host", {})[host] = attempt
+            runtime.pop("stall_notified_marker", None)
             runtime.update(
                 {
                     "state": "submitting",
@@ -564,13 +615,14 @@ def main() -> None:
     parser.add_argument("--chat-id", required=True)
     parser.add_argument("--interval", type=int, default=60)
     parser.add_argument("--heartbeat-minutes", type=int, default=90)
+    parser.add_argument("--stall-minutes", type=int, default=15)
     parser.add_argument("--missing-grace-minutes", type=int, default=2)
     parser.add_argument("--submission-grace-minutes", type=int, default=15)
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
-    if args.interval < 15:
-        parser.error("interval must be >=15")
+    if args.interval < 15 or args.stall_minutes < 1:
+        parser.error("interval must be >=15 seconds and stall minutes must be >=1")
     manifest = load_manifest(args.queue.resolve(), args.repo.resolve())
     state = load_state(args.state_path, manifest)
     while True:
