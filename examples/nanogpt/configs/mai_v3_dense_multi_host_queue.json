@@ -235,6 +235,74 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 45,
+      "name": "mai_v3_124m_fullattn_20tpp_selected_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_selected_20tpp",
+      "max_iters": 9489,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_20tpp_selected_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_20tpp_selected.json",
+          "config_sha256": "66dce94e3721cd286a105880f1084bf0fa7449c7b544af10a213b67b8e32f5c6",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 46,
+      "name": "mai_v3_350m_fullattn_0p5tpp_mult0p50_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 677,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_350m_fullattn_0p5tpp_mult0p50_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult0p50.json",
+          "config_sha256": "ab49ddd6247c2ee28381a1ef40c4381c71569d7acf0463d443b85f7db3b2f89f",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 6442450944
+        }
+      }
+    },
+    {
+      "priority": 47,
+      "name": "mai_v3_350m_fullattn_0p5tpp_mult0p75_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 677,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_350m_fullattn_0p5tpp_mult0p75_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult0p75.json",
+          "config_sha256": "cb7fcae21411cf977daaf705a00a561481ceb07b3792b438ca04f0edc9b12733",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 6442450944
+        }
+      }
+    },
+    {
+      "priority": 48,
+      "name": "mai_v3_350m_fullattn_0p5tpp_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_screen_0p5tpp",
+      "max_iters": 677,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_350m_fullattn_0p5tpp_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult1p00.json",
+          "config_sha256": "dcefa50f197cf7b2516ca4357900b5cf9e5d67284cbb99a560226bba706535a3",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 6442450944
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -244,7 +312,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional_124m_5tpp_confirmations_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_selected_20tpp_and_350m_0p5tpp_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
     },
     {
       "name": "mlp_replacement_work",
