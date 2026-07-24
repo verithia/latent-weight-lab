@@ -438,7 +438,7 @@
           "config_sha256": "4f82a7c1a8ade8d42cca64240d1225330ca776eeb1758e1acdb0b11c678d0ee1",
           "resume": false,
           "expected_checkpoint_next_iter": null,
-          "checkpoint_budget_bytes": 9000000000,
+          "checkpoint_budget_bytes": 8800000000,
           "active_checkpoint_budget_bytes": 4300000000
         }
       }
@@ -456,7 +456,7 @@
           "config_sha256": "cd327a5cd29601bd844bdd538461ed8f53ec255faf0901059099ca26d76049ae",
           "resume": false,
           "expected_checkpoint_next_iter": null,
-          "checkpoint_budget_bytes": 9000000000,
+          "checkpoint_budget_bytes": 8800000000,
           "active_checkpoint_budget_bytes": 4300000000
         }
       }
