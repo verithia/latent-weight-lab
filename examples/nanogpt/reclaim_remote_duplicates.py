@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -12,9 +13,9 @@ from pathlib import Path, PurePosixPath
 from typing import Any, Dict
 
 
-REMOTE_INSPECT = r'''import hashlib, json, pathlib, sys
+REMOTE_INSPECT = r'''import base64, hashlib, json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
-entries = json.loads(sys.argv[2])
+entries = json.loads(base64.urlsafe_b64decode(sys.argv[2]))
 result = {}
 for entry in entries:
     rel = entry["path"]
@@ -33,9 +34,9 @@ for entry in entries:
     }
 print(json.dumps(result, sort_keys=True))'''
 
-REMOTE_DELETE = r'''import hashlib, json, pathlib, sys
+REMOTE_DELETE = r'''import base64, hashlib, json, pathlib, sys
 root = pathlib.Path(sys.argv[1])
-entries = json.loads(sys.argv[2])
+entries = json.loads(base64.urlsafe_b64decode(sys.argv[2]))
 deleted = {}
 for entry in entries:
     rel = entry["path"]
@@ -111,6 +112,9 @@ def manifest_sha256(payload: Dict[str, Any]) -> str:
 
 
 def remote_python(host: str, script: str, root: str, entries: list[dict]) -> dict:
+    encoded_entries = base64.urlsafe_b64encode(
+        json.dumps(entries, separators=(",", ":")).encode()
+    ).decode()
     completed = subprocess.run(
         [
             "ssh",
@@ -124,7 +128,7 @@ def remote_python(host: str, script: str, root: str, entries: list[dict]) -> dic
             "python3",
             "-",
             root,
-            json.dumps(entries, separators=(",", ":")),
+            encoded_entries,
         ],
         input=script,
         text=True,
