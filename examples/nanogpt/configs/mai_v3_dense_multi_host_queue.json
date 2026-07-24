@@ -424,6 +424,42 @@
           "checkpoint_budget_bytes": 9000000000
         }
       }
+    },
+    {
+      "priority": 55,
+      "name": "mai_v3_690m_fullattn_5tpp_top1_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_confirmation_5tpp",
+      "max_iters": 13255,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_690m_fullattn_5tpp_top1_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_5tpp_top1.json",
+          "config_sha256": "4f82a7c1a8ade8d42cca64240d1225330ca776eeb1758e1acdb0b11c678d0ee1",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 9000000000,
+          "active_checkpoint_budget_bytes": 4300000000
+        }
+      }
+    },
+    {
+      "priority": 56,
+      "name": "mai_v3_690m_fullattn_5tpp_top2_mult0p75_provisional",
+      "stage": "operator_override_early_full_attention_confirmation_5tpp",
+      "max_iters": 13255,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_690m_fullattn_5tpp_top2_mult0p75_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_5tpp_top2.json",
+          "config_sha256": "cd327a5cd29601bd844bdd538461ed8f53ec255faf0901059099ca26d76049ae",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 9000000000,
+          "active_checkpoint_budget_bytes": 4300000000
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -433,7 +469,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional_124m_and_350m_selected_20tpp_plus_690m_0p5tpp_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_and_350m_selected_20tpp_plus_690m_top_two_5tpp_confirmations_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
     },
     {
       "name": "mlp_replacement_work",
