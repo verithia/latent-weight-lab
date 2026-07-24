@@ -74,6 +74,12 @@ def load_manifest(path: Path, repo: Path) -> Dict[str, Any]:
                 raise ValueError("variant MFU floor is below 20%: " + name + "/" + host)
             if int(variant.get("checkpoint_budget_bytes", 0)) <= 0:
                 raise ValueError("variant lacks checkpoint budget: " + name + "/" + host)
+            active_budget_bytes = variant.get("active_checkpoint_budget_bytes")
+            if active_budget_bytes is not None and (
+                int(active_budget_bytes) <= 0
+                or int(active_budget_bytes) > int(variant["checkpoint_budget_bytes"])
+            ):
+                raise ValueError("variant has invalid active checkpoint budget: " + name + "/" + host)
     for relative, expected in payload["required_source_hashes"].items():
         if base.file_sha256(repo / relative) != expected:
             raise ValueError("local registered source hash mismatch: " + relative)
@@ -160,13 +166,30 @@ def host_identity_valid(manifest: Dict[str, Any], host: str, remote: Dict[str, A
     return base.remote_identity_valid(remote, host_probe_manifest(manifest, host))
 
 
-def active_budget(manifest: Dict[str, Any], state: Dict[str, Any], host: str) -> int:
+def active_budget(
+    manifest: Dict[str, Any],
+    state: Dict[str, Any],
+    host: str,
+    snapshot: Dict[str, Any] | None = None,
+) -> int:
     tasks = task_by_name(manifest)
-    return sum(
-        int(tasks[name]["variants"][host]["checkpoint_budget_bytes"])
-        for name, runtime in state["entries"].items()
-        if runtime.get("assigned_host") == host and runtime.get("state") in {"submitting", "running"}
-    )
+    total = 0
+    for name, runtime in state["entries"].items():
+        if runtime.get("assigned_host") != host or runtime.get("state") not in {"submitting", "running"}:
+            continue
+        variant = tasks[name]["variants"][host]
+        budget = int(variant["checkpoint_budget_bytes"])
+        active_increment = variant.get("active_checkpoint_budget_bytes")
+        if runtime.get("state") == "running" and active_increment is not None and snapshot is not None:
+            observed = snapshot.get("entries", {}).get(variant["run_name"], {})
+            if observed.get("checkpoint_next_iter") is not None:
+                # The persistent checkpoint is already included in live workspace
+                # usage. Reserve only one additional complete copy for the next
+                # atomic replacement; fresh/submitting runs retain the full
+                # two-copy admission budget.
+                budget = int(active_increment)
+        total += budget
+    return total
 
 
 def validate_pending_variant(variant: Dict[str, Any], observed: Dict[str, Any]) -> Tuple[bool, str]:
@@ -450,7 +473,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
             admissible, capacity_reason = host_admission_status(
                 snapshots[host],
                 definition,
-                active_budget(manifest, state, host),
+                active_budget(manifest, state, host, snapshots[host]),
                 int(variant["checkpoint_budget_bytes"]),
             )
             if not admissible:

@@ -49,6 +49,29 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         self.assertEqual(active_budget(manifest, state, "Y400"), 0)
         self.assertEqual(active_budget(manifest, state, "PRO6"), 20)
 
+    def test_active_budget_uses_one_copy_only_after_checkpoint_is_observed(self) -> None:
+        manifest = {
+            "entries": [
+                {
+                    "name": "task",
+                    "variants": {
+                        "Y400": {
+                            "run_name": "run",
+                            "checkpoint_budget_bytes": 20,
+                            "active_checkpoint_budget_bytes": 11,
+                        }
+                    },
+                }
+            ]
+        }
+        running = {"entries": {"task": {"state": "running", "assigned_host": "Y400"}}}
+        no_checkpoint = {"entries": {"run": {"checkpoint_next_iter": None}}}
+        checkpoint = {"entries": {"run": {"checkpoint_next_iter": 0}}}
+        self.assertEqual(active_budget(manifest, running, "Y400", no_checkpoint), 20)
+        self.assertEqual(active_budget(manifest, running, "Y400", checkpoint), 11)
+        submitting = {"entries": {"task": {"state": "submitting", "assigned_host": "Y400"}}}
+        self.assertEqual(active_budget(manifest, submitting, "Y400", checkpoint), 20)
+
     def test_resume_requires_exact_checkpoint_but_fresh_requires_empty_output(self) -> None:
         resume = {"resume": True, "expected_checkpoint_next_iter": 2196}
         self.assertEqual(validate_pending_variant(resume, {"checkpoint_next_iter": 2196}), (True, ""))
