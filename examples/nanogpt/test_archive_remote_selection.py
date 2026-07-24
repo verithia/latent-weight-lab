@@ -4,6 +4,7 @@ import pytest
 
 from examples.nanogpt.archive_remote_selection import (
     local_manifest,
+    partition_names,
     rsync_command,
     validate_names,
 )
@@ -44,3 +45,9 @@ def test_rsync_command_selects_only_requested_directories(tmp_path: Path) -> Non
     assert "--include=/second/***" in command
     assert "--exclude=*" in command
     assert "Y400:/remote/root/" in command
+
+
+def test_partition_names_limits_and_balances_parallel_transfers() -> None:
+    assert partition_names(["a", "b", "c"], 1) == [["a", "b", "c"]]
+    assert partition_names(["a", "b", "c"], 2) == [["a", "c"], ["b"]]
+    assert partition_names(["a", "b", "c"], 8) == [["a"], ["b"], ["c"]]

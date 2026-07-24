@@ -165,6 +165,14 @@ def rsync_command(
     ]
 
 
+def partition_names(names: Sequence[str], parallel_transfers: int) -> list[list[str]]:
+    transfer_count = min(len(names), parallel_transfers)
+    groups: list[list[str]] = [[] for _ in range(transfer_count)]
+    for index, name in enumerate(names):
+        groups[index % transfer_count].append(name)
+    return groups
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", required=True)
@@ -177,9 +185,17 @@ def main() -> None:
     parser.add_argument("--label", default="remote selection archive")
     parser.add_argument("--poll-seconds", type=int, default=60)
     parser.add_argument("--heartbeat-minutes", type=int, default=90)
+    parser.add_argument("--parallel-transfers", type=int, default=1)
     args = parser.parse_args()
-    if args.poll_seconds < 15 or args.heartbeat_minutes < 1:
-        parser.error("poll-seconds must be >=15 and heartbeat-minutes >=1")
+    if (
+        args.poll_seconds < 15
+        or args.heartbeat_minutes < 1
+        or args.parallel_transfers < 1
+    ):
+        parser.error(
+            "poll-seconds must be >=15, heartbeat-minutes >=1, and "
+            "parallel-transfers >=1"
+        )
     try:
         names = validate_names(args.include_name)
     except ValueError as error:
@@ -202,13 +218,22 @@ def main() -> None:
     }
     atomic_json(args.state, state)
     with args.log.open("ab") as log:
-        process = subprocess.Popen(
-            rsync_command(args.host, args.source_root, args.destination, names),
-            stdout=log,
-            stderr=subprocess.STDOUT,
-        )
+        processes = [
+            subprocess.Popen(
+                rsync_command(
+                    args.host,
+                    args.source_root,
+                    args.destination,
+                    group,
+                ),
+                stdout=log,
+                stderr=subprocess.STDOUT,
+            )
+            for group in partition_names(names, args.parallel_transfers)
+        ]
+        state["parallel_transfers"] = len(processes)
         last_callback = started
-        while process.poll() is None:
+        while any(process.poll() is None for process in processes):
             copied = local_bytes(args.destination)
             now = time.time()
             state.update({"copied_bytes": copied, "updated_at": now})
@@ -229,19 +254,23 @@ def main() -> None:
                     last_callback = now
             atomic_json(args.state, state)
             time.sleep(args.poll_seconds)
-        return_code = process.wait()
+        return_codes = [process.wait() for process in processes]
 
-    if return_code != 0:
+    if any(return_code != 0 for return_code in return_codes):
         state.update(
-            {"state": "failed", "exit_code": return_code, "finished_at": time.time()}
+            {
+                "state": "failed",
+                "exit_codes": return_codes,
+                "finished_at": time.time(),
+            }
         )
         atomic_json(args.state, state)
         send(
             args.chat_id,
-            f"{args.label} ERROR: rsync failed exit={return_code}; "
+            f"{args.label} ERROR: rsync failed exits={return_codes}; "
             "partial archive retained",
         )
-        raise SystemExit(return_code)
+        raise SystemExit(next(code for code in return_codes if code != 0))
 
     state.update(
         {
