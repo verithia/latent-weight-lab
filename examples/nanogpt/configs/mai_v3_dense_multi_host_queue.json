@@ -303,6 +303,40 @@
           "checkpoint_budget_bytes": 6442450944
         }
       }
+    },
+    {
+      "priority": 49,
+      "name": "mai_v3_350m_fullattn_5tpp_top1_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_confirmation_5tpp",
+      "max_iters": 6764,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_350m_fullattn_5tpp_top1_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_5tpp_top1.json",
+          "config_sha256": "57e22b763f0a254b7067d2b47f589607d30dd8cbd59e52a31fe14907239424ca",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 6442450944
+        }
+      }
+    },
+    {
+      "priority": 50,
+      "name": "mai_v3_350m_fullattn_5tpp_top2_mult0p75_provisional",
+      "stage": "operator_override_early_full_attention_confirmation_5tpp",
+      "max_iters": 6764,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_350m_fullattn_5tpp_top2_mult0p75_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_5tpp_top2.json",
+          "config_sha256": "32b65339ee5f685b8270bd07938c15863af212f2bcf2aaf5f8c815f70cc0b078",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 6442450944
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -312,7 +346,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional_124m_selected_20tpp_and_350m_0p5tpp_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_selected_20tpp_and_350m_top_two_5tpp_confirmations_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
     },
     {
       "name": "mlp_replacement_work",
