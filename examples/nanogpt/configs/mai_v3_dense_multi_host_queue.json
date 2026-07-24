@@ -340,6 +340,23 @@
     },
     {
       "priority": 51,
+      "name": "mai_v3_350m_fullattn_20tpp_selected_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_selected_20tpp",
+      "max_iters": 27054,
+      "host_preference": ["Y400"],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_350m_fullattn_20tpp_selected_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_20tpp_selected.json",
+          "config_sha256": "a091e13e964425e0b492b327e2cde27ae67d303fdad11754ab079a69b05177bb",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 6442450944
+        }
+      }
+    },
+    {
+      "priority": 52,
       "name": "mai_v3_690m_fullattn_0p5tpp_mult0p50_provisional",
       "stage": "operator_override_early_full_attention_screen_0p5tpp",
       "max_iters": 1326,
@@ -356,7 +373,7 @@
       }
     },
     {
-      "priority": 52,
+      "priority": 53,
       "name": "mai_v3_690m_fullattn_0p5tpp_mult0p75_provisional",
       "stage": "operator_override_early_full_attention_screen_0p5tpp",
       "max_iters": 1326,
@@ -373,7 +390,7 @@
       }
     },
     {
-      "priority": 53,
+      "priority": 54,
       "name": "mai_v3_690m_fullattn_0p5tpp_mult1p00_provisional",
       "stage": "operator_override_early_full_attention_screen_0p5tpp",
       "max_iters": 1326,
@@ -397,7 +414,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional_124m_selected_20tpp_350m_top_two_5tpp_confirmations_and_690m_0p5tpp_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
+      "state": "provisional_124m_and_350m_selected_20tpp_plus_690m_0p5tpp_screens_operator_unblocked; formal_acceptance_still_blocked_on_accepted_four_rung_dense_fit"
     },
     {
       "name": "mlp_replacement_work",
