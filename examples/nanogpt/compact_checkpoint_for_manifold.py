@@ -44,7 +44,11 @@ def tensor_inventory(model: dict[str, Any]) -> dict[str, Any]:
     return records
 
 
-def build_snapshot(checkpoint: dict[str, Any], source: Path) -> dict[str, Any]:
+def build_snapshot(
+    checkpoint: dict[str, Any],
+    source: Path,
+    allow_legacy_missing_provenance: bool = False,
+) -> dict[str, Any]:
     required = {
         "schema_version",
         "model",
@@ -52,12 +56,16 @@ def build_snapshot(checkpoint: dict[str, Any], source: Path) -> dict[str, Any]:
         "next_iter",
         "best_val_loss",
         "run_identity",
-        "execution_provenance",
         "saved_at_unix",
     }
     missing = sorted(required - checkpoint.keys())
     if missing:
         raise ValueError("checkpoint is missing snapshot fields: " + ", ".join(missing))
+    legacy_missing_fields: list[str] = []
+    if "execution_provenance" not in checkpoint:
+        if not allow_legacy_missing_provenance:
+            raise ValueError("checkpoint is missing snapshot fields: execution_provenance")
+        legacy_missing_fields.append("execution_provenance")
     if not isinstance(checkpoint["model"], dict) or not checkpoint["model"]:
         raise ValueError("checkpoint model state is invalid")
     inventory = tensor_inventory(checkpoint["model"])
@@ -68,7 +76,8 @@ def build_snapshot(checkpoint: dict[str, Any], source: Path) -> dict[str, Any]:
         "next_iter": checkpoint["next_iter"],
         "best_val_loss": checkpoint["best_val_loss"],
         "run_identity": checkpoint["run_identity"],
-        "execution_provenance": checkpoint["execution_provenance"],
+        "execution_provenance": checkpoint.get("execution_provenance"),
+        "legacy_missing_fields": legacy_missing_fields,
         "source_checkpoint": {
             "path": str(source),
             "bytes": source.stat().st_size,
@@ -91,6 +100,7 @@ def verify_snapshot(snapshot_path: Path, expected: dict[str, Any]) -> dict[str, 
         "best_val_loss",
         "run_identity",
         "execution_provenance",
+        "legacy_missing_fields",
         "source_checkpoint",
         "tensor_inventory",
     ):
@@ -106,13 +116,18 @@ def verify_snapshot(snapshot_path: Path, expected: dict[str, Any]) -> dict[str, 
     return observed
 
 
-def create_snapshot(source: Path, destination: Path, receipt: Path) -> dict[str, Any]:
+def create_snapshot(
+    source: Path,
+    destination: Path,
+    receipt: Path,
+    allow_legacy_missing_provenance: bool = False,
+) -> dict[str, Any]:
     if destination.exists() or receipt.exists():
         raise ValueError("destination or receipt already exists")
     checkpoint = torch.load(source, map_location="cpu", weights_only=False)
     if not isinstance(checkpoint, dict):
         raise ValueError("checkpoint is invalid")
-    snapshot = build_snapshot(checkpoint, source)
+    snapshot = build_snapshot(checkpoint, source, allow_legacy_missing_provenance)
     temporary = destination.with_suffix(destination.suffix + ".part")
     torch.save(snapshot, temporary)
     os.replace(temporary, destination)
@@ -129,6 +144,7 @@ def create_snapshot(source: Path, destination: Path, receipt: Path) -> dict[str,
             "next_iter": snapshot["next_iter"],
             "tensor_count": len(inventory),
             "tensor_bytes": sum(item["bytes"] for item in inventory.values()),
+            "legacy_missing_fields": snapshot["legacy_missing_fields"],
         },
         "source_deleted": False,
         "verified_at_unix": time.time(),
@@ -174,11 +190,21 @@ def main() -> None:
     parser.add_argument("--destination", required=True, type=Path)
     parser.add_argument("--receipt", required=True, type=Path)
     parser.add_argument("--reclaim-source", action="store_true")
+    parser.add_argument(
+        "--allow-legacy-missing-provenance",
+        action="store_true",
+        help="Permit only a legacy missing execution_provenance field and record that absence explicitly.",
+    )
     args = parser.parse_args()
     if args.reclaim_source:
         result = reclaim_source(args.source, args.destination, args.receipt)
     else:
-        result = create_snapshot(args.source, args.destination, args.receipt)
+        result = create_snapshot(
+            args.source,
+            args.destination,
+            args.receipt,
+            allow_legacy_missing_provenance=args.allow_legacy_missing_provenance,
+        )
     print(json.dumps(result, sort_keys=True))
 
 

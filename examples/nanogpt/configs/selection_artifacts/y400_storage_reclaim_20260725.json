@@ -76,7 +76,8 @@
   "policy": {
     "preserve_active_resume_checkpoints": true,
     "preserve_logs_metadata_and_provenance": true,
-    "compact_completed_dense_checkpoints_only_after_exact_tensor_reload_verification": true,
+    "compact_completed_or_superseded_inactive_dense_checkpoints_only_after_exact_tensor_reload_verification": true,
+    "legacy_checkpoints_missing_embedded_execution_provenance_require_explicit_opt_in_and_record_the_absence": true,
     "reclaim_full_resume_payload_only_after_guarded_second_pass": true,
     "pro6_training_remains_operator_paused": true
   }

@@ -3,6 +3,7 @@ import json
 import torch
 
 from examples.nanogpt.compact_checkpoint_for_manifold import (
+    build_snapshot,
     create_snapshot,
     reclaim_source,
 )
@@ -41,3 +42,22 @@ def test_snapshot_preserves_tensors_before_guarded_reclaim(tmp_path) -> None:
     assert not source.exists()
     assert destination.exists()
     assert json.loads(receipt.read_text())["source_deleted"] is True
+
+
+def test_legacy_missing_provenance_requires_explicit_opt_in(tmp_path) -> None:
+    source = tmp_path / "ckpt.pt"
+    write_checkpoint(source)
+    checkpoint = torch.load(source, map_location="cpu", weights_only=False)
+    checkpoint.pop("execution_provenance")
+    torch.save(checkpoint, source)
+
+    try:
+        build_snapshot(checkpoint, source)
+    except ValueError as error:
+        assert "execution_provenance" in str(error)
+    else:
+        raise AssertionError("legacy checkpoint unexpectedly passed strict provenance validation")
+
+    snapshot = build_snapshot(checkpoint, source, allow_legacy_missing_provenance=True)
+    assert snapshot["execution_provenance"] is None
+    assert snapshot["legacy_missing_fields"] == ["execution_provenance"]
