@@ -1,0 +1,56 @@
+{
+  "accepted_as_formal_dense_fit_conditioned_result": false,
+  "comparison": {
+    "absolute_terminal_validation_gap": 0.0292,
+    "outcome": "DISTINCT_WINNER",
+    "practical_equivalence_nll": 0.02,
+    "selection_rule": "select the lower stable terminal validation NLL when the absolute gap exceeds 0.02; otherwise retain the 0.5TPP leader",
+    "selected_candidate": {
+      "candidate_main_lr_multiplier": 1.0,
+      "learning_rate": 0.0024,
+      "terminal_train_loss": 2.9717,
+      "terminal_validation_loss": 2.9488
+    }
+  },
+  "dataset": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "method": "block_fht",
+  "recorded_at": "2026-07-25",
+  "schema_version": "provisional_full_attention_five_tpp_comparison_v1",
+  "sources": [
+    {
+      "candidate_main_lr_multiplier": 1.0,
+      "config_sha256": "4f82a7c1a8ade8d42cca64240d1225330ca776eeb1758e1acdb0b11c678d0ee1",
+      "git_commit": "4631704544fae668af5753192377c94a4e8652ff",
+      "learning_rate": 0.0024,
+      "log_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_690m_fullattn_5tpp_top1_mult1p00_provisional_20260724T084724Z_3700850.log",
+      "log_sha256": "5ac6d857c1aa699028d88472b3b2447390920820f7a1e18fdd0d5a456128feed",
+      "provenance_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_690m_fullattn_5tpp_top1_mult1p00_provisional_20260724T084724Z_3700850.json",
+      "provenance_sha256": "fadfa601056e6e683d52c367cdddf8b42c5de0ae242a0dc9fdff3aac7fa44961",
+      "status_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/status/y400_mai_v3_690m_fullattn_5tpp_top1_mult1p00_provisional_20260724T084724Z_3700850.json",
+      "status_sha256": "fe08981d9abfef1e451887dfde92795cb9eea9715f2501bb68437777d4915216",
+      "terminal_iteration": 13255,
+      "terminal_train_loss": 2.9717,
+      "terminal_validation_loss": 2.9488
+    },
+    {
+      "candidate_main_lr_multiplier": 0.75,
+      "config_sha256": "cd327a5cd29601bd844bdd538461ed8f53ec255faf0901059099ca26d76049ae",
+      "git_commit": "4631704544fae668af5753192377c94a4e8652ff",
+      "learning_rate": 0.0018,
+      "log_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_690m_fullattn_5tpp_top2_mult0p75_provisional_20260724T113345Z_3710879.log",
+      "log_sha256": "6f7383c41b713b644b11afb7aca9ba32ca0a7447cfb31ce95892c377ec69cfdc",
+      "provenance_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_690m_fullattn_5tpp_top2_mult0p75_provisional_20260724T113345Z_3710879.json",
+      "provenance_sha256": "e6a088213ef7a8af1bc4325bb5bfa9c97b7500aa29a07a2d6b96875cbb2ff754",
+      "status_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/status/y400_mai_v3_690m_fullattn_5tpp_top2_mult0p75_provisional_20260724T113345Z_3710879.json",
+      "status_sha256": "f6d5dfd608b31c2397836b38d5dfe294e433166f6b087e7521145e5849789b0f",
+      "terminal_iteration": 13255,
+      "terminal_train_loss": 3.0003,
+      "terminal_validation_loss": 2.978
+    }
+  ],
+  "state": "PROVISIONAL_OPERATOR_OVERRIDE",
+  "tier": "690m"
+}
