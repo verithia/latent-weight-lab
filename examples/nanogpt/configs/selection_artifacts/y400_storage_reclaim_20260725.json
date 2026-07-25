@@ -53,7 +53,7 @@
       "reason": "superseded corrected-ladder checkpoint; current MAI-v3 checkpoint and manifold snapshots retained"
     }
   ],
-  "pending_sha_pinned_deletions": [
+  "sha_pinned_deletions": [
     {
       "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_690m_muon_20tpp_selected_b16ga16_prefetch_restart/ckpt.pt",
       "bytes": 5822773609,
@@ -122,6 +122,11 @@
     "root_glob": "/root/userdata/MappingNetworks/outputs/**/manifold_snapshot_iter*.receipt.json",
     "verification": "Each receipt records source SHA-256, snapshot SHA-256, tensor inventory, torch.equal reload verification, and guarded source reclaim.",
     "legacy_missing_provenance_is_explicit": true
+  },
+  "prelaunch_workspace": {
+    "du_bytes": 160837891407,
+    "ceph_quota_accounted_bytes": 160837882737,
+    "all_four_resume_envelopes_reverified": true
   },
   "policy": {
     "preserve_active_resume_checkpoints": true,
