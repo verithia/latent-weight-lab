@@ -48,7 +48,15 @@ def file_sha(path):
     except OSError:
         return None
 
-used = int(command(["du", "-sb", str(root)], "0").split()[0])
+du_used = int(command(["du", "-sb", str(root)], "0").split()[0])
+try:
+    quota_accounted_used = int(os.getxattr(root, b"ceph.dir.rbytes").decode())
+except (OSError, ValueError):
+    quota_accounted_used = None
+# Ceph deletion accounting can lag behind directory traversal. Admission must
+# honor whichever view is larger or a just-deleted checkpoint/probe can be
+# incorrectly treated as immediately reusable quota headroom.
+used = max(du_used, quota_accounted_used or 0)
 try:
     filesystem = os.statvfs(root)
     filesystem_available_bytes = int(filesystem.f_bavail * filesystem.f_frsize)
@@ -153,6 +161,8 @@ for entry in payload.get("entries", []):
 
 print(json.dumps({
     "workspace_used_bytes": used,
+    "workspace_du_bytes": du_used,
+    "workspace_quota_accounted_bytes": quota_accounted_used,
     "filesystem_available_bytes": filesystem_available_bytes,
     "git_commit": git_commit,
     "git_dirty": git_dirty,
@@ -160,6 +170,11 @@ print(json.dumps({
     "gpus": gpus,
     "entries": entries,
 }))'''
+
+
+def effective_workspace_used(du_used: int, quota_accounted_used: int | None) -> int:
+    """Return the conservative workspace usage used for admission."""
+    return max(du_used, quota_accounted_used or 0)
 
 
 REMOTE_LAUNCH = r'''set -euo pipefail

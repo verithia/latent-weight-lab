@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
   "operation": "sha_pinned_superseded_payload_reclaim_and_lossless_manifold_compaction",
-  "status": "in_progress",
+  "status": "verified_reclaim_complete",
   "host": "Y400",
   "workspace": "/root/userdata/MappingNetworks",
   "quota_observation": {
     "declared_ceph_quota_bytes": 322122547200,
-    "effective_admission_cap_bytes": 274877906944,
-    "evidence": "CephFS returned EDQUOT for new writes above the effective 256 GiB ceiling even though the directory quota xattr reported 300 GiB."
+    "declared_and_admission_cap_bytes": 322122547200,
+    "evidence": "The 300 GiB directory quota is valid. CephFS deletion accounting lags du: an 8 GiB write/delete probe remained present in ceph.dir.rbytes after du dropped it. Admission therefore uses max(du, ceph.dir.rbytes)."
   },
   "deleted_payloads": [
     {
@@ -73,6 +73,56 @@
       "reason": "superseded MAI-v2 rung; completed MAI-v3 equivalent retained"
     }
   ],
+  "dataset_reclaim": {
+    "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/shards",
+    "deleted_bytes": 40040000000,
+    "train_shards": 400,
+    "val_shards": 1,
+    "active_train": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/train.bin",
+      "bytes": 40000000000,
+      "sha256": "2800028a0b8d9c323953cc3e5eea7a8d5f1f550387f280af4c62228ca799b448"
+    },
+    "active_val": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/val.bin",
+      "bytes": 40000000,
+      "sha256": "190d62ac03041135e2dd1055c8b644ec830e7693b0575a0855a35ea9a973d388"
+    },
+    "ordered_train_shards_sha256": "2800028a0b8d9c323953cc3e5eea7a8d5f1f550387f280af4c62228ca799b448",
+    "ordered_val_shards_sha256": "190d62ac03041135e2dd1055c8b644ec830e7693b0575a0855a35ea9a973d388",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "preparation_state_sha256": "bca4160c1f952706b7a33972256e56d7a57cba98470ba6a2ee2383b151ebf3cb",
+    "active_files_preserved": true
+  },
+  "additional_superseded_deletions": [
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v2/y400_mai_v2_985m_muon_5tpp_top2_lr20e4_resolved/ckpt.pt",
+      "bytes": 8195246453,
+      "sha256": "82cb1ebcc77e59c05854fbb3a960817489b5592186bcd6e109c90dab77242fbb",
+      "metadata_sha256": "152cb12ffd0a0e8bb2a94f06b5591aeaf12c21e0f3f2338f12ba13f70e42ebd1",
+      "next_iter": 14091,
+      "reason": "superseded mid-run v2 point; completed v3 top-2 model snapshot retained"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v2/y400_mai_v2_985m_muon_5tpp_top1_lr24e4_resolved/ckpt.pt",
+      "bytes": 8195246453,
+      "sha256": "8205a0c45088acdf81a214a66dee646f1b0fdd41db443b9140067bb183380655",
+      "metadata_sha256": "0be30d2c2f760598ac507f66bed7fd064e22a4dc4590732a9410fc4bfc5549a3",
+      "next_iter": 18786,
+      "reason": "superseded v2 terminal; completed v3 top-1 model snapshot retained"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v2/y400_mai_v2_350m_muon_20tpp_selected_lr24e4_resolved/analysis_snapshots/ckpt_iter027054.pt",
+      "bytes": 3047405217,
+      "sha256": "bbdd17a120b7106c5cf6f2d5a52bc64773f396549827a388424a7c02e3ead71c",
+      "reason": "hash-identical duplicate of the terminal ckpt.pt before lossless manifold compaction"
+    }
+  ],
+  "manifold_receipts": {
+    "root_glob": "/root/userdata/MappingNetworks/outputs/**/manifold_snapshot_iter*.receipt.json",
+    "verification": "Each receipt records source SHA-256, snapshot SHA-256, tensor inventory, torch.equal reload verification, and guarded source reclaim.",
+    "legacy_missing_provenance_is_explicit": true
+  },
   "policy": {
     "preserve_active_resume_checkpoints": true,
     "preserve_logs_metadata_and_provenance": true,

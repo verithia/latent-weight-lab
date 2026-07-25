@@ -3,10 +3,17 @@ from __future__ import annotations
 import unittest
 
 from examples.nanogpt.y400_dense_queue_worker import (
+    effective_workspace_used,
     can_admit,
     idle_gpu_indices,
     remote_identity_valid,
 )
+
+
+def test_effective_workspace_used_honors_delayed_ceph_accounting() -> None:
+    assert effective_workspace_used(100, 140) == 140
+    assert effective_workspace_used(140, 100) == 140
+    assert effective_workspace_used(140, None) == 140
 
 
 class Y400DenseQueueWorkerTest(unittest.TestCase):
