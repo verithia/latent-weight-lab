@@ -13,7 +13,7 @@
       "workspace_cap_bytes": 322122547200,
       "workspace_reserve_bytes": 8589934592,
       "gpu_idle_memory_mib": 1024,
-      "launch_mode": "detached"
+      "launch_mode": "tmux-isolated"
     },
     "PRO6": {
       "root": "/home/pro6000-9980x/MappingNetworks",
@@ -163,7 +163,7 @@
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_muon_20tpp_selected.json",
           "config_sha256": "c3955f639734cfec27693a93fb10a66577bddc1b00297c4801fc7a3b354a899a",
           "resume": true,
-          "expected_checkpoint_next_iter": 17135,
+          "expected_checkpoint_next_iter": 17136,
           "checkpoint_budget_bytes": 8400000000,
           "active_checkpoint_budget_bytes": 8400000000
         }
@@ -549,7 +549,7 @@
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_5tpp_top1.json",
           "config_sha256": "8c811a4b6baff77db6e84e688489ffe291e4a87934e86f76b7cc6d715e55127a",
           "resume": true,
-          "expected_checkpoint_next_iter": 1662,
+          "expected_checkpoint_next_iter": 1663,
           "checkpoint_budget_bytes": 6000000000,
           "active_checkpoint_budget_bytes": 6000000000
         }
@@ -569,7 +569,7 @@
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_5tpp_top2.json",
           "config_sha256": "d90a4b5624e7e4deda07aefda8a3abf5c739b070a76d0d9af2cfe99ab2aad915",
           "resume": true,
-          "expected_checkpoint_next_iter": 1666,
+          "expected_checkpoint_next_iter": 1667,
           "checkpoint_budget_bytes": 6000000000,
           "active_checkpoint_budget_bytes": 6000000000
         }

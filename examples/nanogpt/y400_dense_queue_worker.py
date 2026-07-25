@@ -138,9 +138,19 @@ for entry in payload.get("entries", []):
             pass
     session = entry.get("session")
     if session:
-        result["tmux_alive"] = subprocess.run(
-            ["tmux", "has-session", "-t", session], stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+        tmux_command = ["tmux", "has-session", "-t", session]
+        if session.startswith("tmuxl:"):
+            parts = session.split(":")
+            if (
+                len(parts) == 3
+                and re.fullmatch(r"[A-Za-z0-9_-]+", parts[1])
+                and re.fullmatch(r"[A-Za-z0-9_-]+", parts[2])
+            ):
+                tmux_command = ["tmux", "-L", parts[1], "has-session", "-t", parts[2]]
+            else:
+                tmux_command = []
+        result["tmux_alive"] = bool(tmux_command) and subprocess.run(
+            tmux_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         ).returncode == 0
     log_path_value = status.get("log") or entry.get("submit_log")
     if log_path_value:

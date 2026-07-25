@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -35,6 +36,20 @@ case "$launch_mode" in
     printf -v command_line '%s %q %q %q %q >%q 2>&1' "$command_line" "$config" "$gpu" "$run_name" "$root" "$submit_log"
     tmux new-session -d -s "$session" "$command_line"
     ;;
+  tmux-isolated)
+    command -v tmux >/dev/null 2>&1 || { echo "isolated tmux launch mode requested but tmux is unavailable" >&2; exit 2; }
+    IFS=: read -r session_kind socket_name tmux_session <<<"$session"
+    [[ "$session_kind" == "tmuxl" && "$socket_name" =~ ^[A-Za-z0-9_-]+$ && "$tmux_session" =~ ^[A-Za-z0-9_-]+$ ]] \
+      || { echo "invalid isolated tmux session identity: $session" >&2; exit 2; }
+    if tmux -L "$socket_name" has-session -t "$tmux_session" 2>/dev/null; then
+      echo "refusing duplicate isolated queue session: $session" >&2
+      exit 2
+    fi
+    printf -v command_line 'cd %q && export PYTHON_BIN=%q && exec bash %q --foreground' "$repo" "$python_bin" "$launcher"
+    if [[ "$resume" == "true" ]]; then command_line+=' --resume'; fi
+    printf -v command_line '%s %q %q %q %q >%q 2>&1' "$command_line" "$config" "$gpu" "$run_name" "$root" "$submit_log"
+    tmux -L "$socket_name" new-session -d -s "$tmux_session" "$command_line"
+    ;;
   detached)
     args=()
     if [[ "$resume" == "true" ]]; then args+=(--resume); fi
@@ -54,6 +69,9 @@ def load_manifest(path: Path, repo: Path) -> Dict[str, Any]:
     if payload.get("schema_version") != "multi_host_dense_queue_v1":
         raise ValueError("unsupported multi-host queue schema")
     names = set()
+    for host, definition in payload.get("hosts", {}).items():
+        if definition.get("launch_mode", "tmux") not in {"tmux", "tmux-isolated", "detached"}:
+            raise ValueError(f"unsupported launch mode for {host}")
     for task in payload.get("entries", []):
         name = task.get("name")
         if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9._-]+", name) or name in names:
@@ -232,7 +250,13 @@ def launch(
 ) -> Tuple[str, str]:
     safe = re.sub(r"[^A-Za-z0-9_-]", "_", variant["run_name"])
     launch_mode = host_definition.get("launch_mode", "tmux")
-    session = ("denseq_" + safe + f"_a{attempt}")[:120] if launch_mode == "tmux" else ""
+    if launch_mode == "tmux":
+        session = ("denseq_" + safe + f"_a{attempt}")[:120]
+    elif launch_mode == "tmux-isolated":
+        socket_name = "denseq_" + hashlib.sha256(f"{safe}:a{attempt}".encode()).hexdigest()[:16]
+        session = f"tmuxl:{socket_name}:run"
+    else:
+        session = ""
     root = host_definition["root"]
     submit_log = f"{root}/outputs/y400_ladder_runs/queue/{safe}_a{attempt}.submit.log"
     config = f"{root}/latent-weight-lab/{variant['config']}"

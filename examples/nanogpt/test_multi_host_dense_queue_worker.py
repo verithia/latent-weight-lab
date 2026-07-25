@@ -197,6 +197,20 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         self.assertEqual(session, "")
         self.assertEqual(ssh_script.call_args.args[2][-1], "detached")
 
+    @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
+    def test_isolated_tmux_host_publishes_per_attempt_socket(self, ssh_script: mock.Mock) -> None:
+        session, _ = launch(
+            "Y400",
+            {"root": "/remote", "python_relative": ".venv/bin/python", "launch_mode": "tmux-isolated"},
+            "task",
+            {"run_name": "run", "config": "config.json", "resume": True},
+            2,
+            4,
+        )
+        self.assertRegex(session, r"^tmuxl:denseq_[0-9a-f]{16}:run$")
+        self.assertEqual(ssh_script.call_args.args[2][5], session)
+        self.assertEqual(ssh_script.call_args.args[2][-1], "tmux-isolated")
+
 
 if __name__ == "__main__":
     unittest.main()

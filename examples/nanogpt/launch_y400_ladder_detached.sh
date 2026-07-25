@@ -311,6 +311,7 @@ if [[ "$FOREGROUND_MODE" -eq 1 ]]; then
 fi
 
 # Pass every value as a distinct argv element: no generated remote shell string.
-setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" "$INIT_FROM" </dev/null >"$LOG" 2>&1 &
+nohup setsid "$0" --worker "$CONFIG_ARCHIVE" "$GPU" "$RUN_NAME" "$WORKSPACE" "$LOG" "$STATUS" "$PROVENANCE" "$PROVENANCE_SHA256" "$INIT_FROM" </dev/null >"$LOG" 2>&1 &
 PID=$!
+disown "$PID" 2>/dev/null || true
 printf 'launched detached run=%s pid=%s pgid=%s\nlog=%s\nstatus=%s\nprovenance=%s\n' "$RUN_NAME" "$PID" "$PID" "$LOG" "$STATUS" "$PROVENANCE"
