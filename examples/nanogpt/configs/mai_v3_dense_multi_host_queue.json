@@ -534,6 +534,46 @@
           "active_checkpoint_budget_bytes": 4300000000
         }
       }
+    },
+    {
+      "priority": 61,
+      "name": "mai_v3_985m_fullattn_5tpp_top1_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_confirmation_5tpp",
+      "max_iters": 18786,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_fullattn_5tpp_top1_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_5tpp_top1.json",
+          "config_sha256": "8c811a4b6baff77db6e84e688489ffe291e4a87934e86f76b7cc6d715e55127a",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 13000000000,
+          "active_checkpoint_budget_bytes": 6500000000
+        }
+      }
+    },
+    {
+      "priority": 62,
+      "name": "mai_v3_985m_fullattn_5tpp_top2_mult0p75_provisional",
+      "stage": "operator_override_early_full_attention_confirmation_5tpp",
+      "max_iters": 18786,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_fullattn_5tpp_top2_mult0p75_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_5tpp_top2.json",
+          "config_sha256": "d90a4b5624e7e4deda07aefda8a3abf5c739b070a76d0d9af2cfe99ab2aad915",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 13000000000,
+          "active_checkpoint_budget_bytes": 6500000000
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -543,7 +583,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional 124m/350m/690m selected 20tpp plus 985m 0p5tpp screens operator-unblocked; formal acceptance still blocked on accepted four-rung dense fit"
+      "state": "provisional 124m/350m/690m selected 20tpp plus ranking-selected 985m top-two 5tpp confirmations operator-unblocked; formal acceptance still blocked on accepted four-rung dense fit"
     },
     {
       "name": "mlp_replacement_work",

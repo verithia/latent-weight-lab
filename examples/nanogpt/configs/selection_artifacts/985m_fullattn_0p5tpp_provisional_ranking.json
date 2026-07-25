@@ -1,0 +1,59 @@
+{
+  "accepted_as_formal_dense_fit_conditioned_result": false,
+  "dataset": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "method": "block_fht",
+  "ranked_candidates": [
+    {
+      "candidate_main_lr_multiplier": 1.0,
+      "config_sha256": "a18575933fbcee32f190f4c1014e19ceb7beefa0f34dec27eac342d274209f33",
+      "learning_rate": 0.0024,
+      "log_sha256": "b04a20841f474c5ffa2d48ac5786e7afe3f9c6e4caa60a5fe2f699003b9b0ad0",
+      "provenance_sha256": "22236f5c0125f9a3ce18f6b7686dcf8fc1a0f72b05b2fb18c291df48c1d6184b",
+      "rank": 1,
+      "status_sha256": "f474d13bd13f4aa9fd06f78c7ccfcecd8e32f96d657800fa2a1ee3345b8b1da9",
+      "terminal_iteration": 1879,
+      "terminal_train_loss": 3.5126,
+      "terminal_validation_loss": 3.4947
+    },
+    {
+      "candidate_main_lr_multiplier": 0.75,
+      "config_sha256": "de7f40c34ecc4fb37aa758191768229823a9e471ec80a42cda4953e8d74de9fe",
+      "learning_rate": 0.0018,
+      "log_sha256": "5590938bbd4312d3b7b9698e736a1171c9cc45d1ff885ebf0a608c929be6a6ad",
+      "provenance_sha256": "8a293931a7dbcbe0a4908b243404ea7664839bbed175c1a057965dd47ad55cbd",
+      "rank": 2,
+      "status_sha256": "ee10748026356d5e3b43369ae8f2ef4b3451d2ffc2795a93845142efc13b015c",
+      "terminal_iteration": 1879,
+      "terminal_train_loss": 3.57,
+      "terminal_validation_loss": 3.5528
+    },
+    {
+      "candidate_main_lr_multiplier": 0.5,
+      "config_sha256": "b8655b6466288acdb68c570c09bb4dcd0636c7aec1f369617a924b13faf59611",
+      "learning_rate": 0.0012,
+      "log_sha256": "fbbecea50ced660d65ef96547a4e85082ff58d9656c9678d4322d1da003375a9",
+      "provenance_sha256": "edb85d5728ff4bf9f8a307977edf7b3dd0f592be0dc1076ec6ed9008126f8b21",
+      "rank": 3,
+      "status_sha256": "988ce5cd90b06305cc6de377e2701ab35b67eb51bc0ac741411f9efdadd70b42",
+      "terminal_iteration": 1879,
+      "terminal_train_loss": 3.6746,
+      "terminal_validation_loss": 3.6595
+    }
+  ],
+  "ranking_rule": "stable terminal held-out validation NLL ascending",
+  "recorded_at": "2026-07-25",
+  "schema_version": "provisional_full_attention_zero_point_five_tpp_ranking_v1",
+  "state": "PROVISIONAL_OPERATOR_OVERRIDE",
+  "tier": "985m",
+  "top1": {
+    "candidate_main_lr_multiplier": 1.0,
+    "learning_rate": 0.0024
+  },
+  "top2": {
+    "candidate_main_lr_multiplier": 0.75,
+    "learning_rate": 0.0018
+  }
+}
