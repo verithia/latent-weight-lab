@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "operation": "sha_pinned_superseded_payload_reclaim_and_lossless_manifold_compaction",
+  "status": "in_progress",
+  "host": "Y400",
+  "workspace": "/root/userdata/MappingNetworks",
+  "quota_observation": {
+    "declared_ceph_quota_bytes": 322122547200,
+    "effective_admission_cap_bytes": 274877906944,
+    "evidence": "CephFS returned EDQUOT for new writes above the effective 256 GiB ceiling even though the directory quota xattr reported 300 GiB."
+  },
+  "deleted_payloads": [
+    {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_2b/finewebedu_2b.meta.json",
+      "sha256": "3cc09349d82742e8a6a4defb675a677671aff239d3e45c9071f29c0f0d727f1",
+      "reason": "unused reproducible dataset payload"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_2b/prepare_finewebedu_2b.py",
+      "sha256": "17f068a8adf68834b718fa70ce2fd739a5c9555c59d230e4ebbe54173e5c93",
+      "reason": "unused reproducible dataset payload"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_2b/train.bin",
+      "sha256": "cb10c1615732bb0ca6ab4ae40a538bc29503185150200736242637271480dd5",
+      "reason": "unused reproducible dataset payload"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_2b/train.done",
+      "sha256": "6f226425d15df18ebaa3f72b34dcab8fc18a884733630b72092d967480cb2c09",
+      "reason": "unused reproducible dataset payload"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_2b/val.bin",
+      "sha256": "853b192cbd30db1fd153577f7206fd9cc0f3c4e4231a03e6b560dc1b2146550",
+      "reason": "unused reproducible dataset payload"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_2b/val.done",
+      "sha256": "de6aeb89f1ab8cff978d3add8f4c288825ff582224bdb6edabf8b4d6919bbf0",
+      "reason": "unused reproducible dataset payload"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_corrected_long_ladder/y400_mai_350m_muon_20tpp_baseline_lr24e4_scale03_resolved/ckpt.pt",
+      "bytes": 3047354865,
+      "sha256": "d183a158795c9771020542d22a42a5cb2db2ff2f602609eb6962f2b24fe5ac1",
+      "reason": "superseded corrected-ladder checkpoint; current MAI-v3 checkpoint and manifold snapshots retained"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_corrected_long_ladder/y400_mai_350m_muon_40tpp_baseline_lr24e4_scale03_resolved/ckpt.pt",
+      "bytes": 3047354865,
+      "sha256": "1b5e323b0cf6f93a2ca9ea805a37dac56bad7d6c872445648d912df353f2519",
+      "reason": "superseded corrected-ladder checkpoint; current MAI-v3 checkpoint and manifold snapshots retained"
+    }
+  ],
+  "pending_sha_pinned_deletions": [
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_690m_muon_20tpp_selected_b16ga16_prefetch_restart/ckpt.pt",
+      "bytes": 5822773609,
+      "sha256": "9549f7d75b260193a918157d2b3445f530bfe9ceae4c597ee0ff7b33ead18b76",
+      "reason": "superseded interrupted 690M resume; terminal MAI-v3 690M baseline retained"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_985m_fullattn_blockfht_0p5tpp_mult0p50_provisional/ckpt.pt",
+      "bytes": 5816647680,
+      "sha256": "ed47f887acce4c79f8da09ba58b9f1d0d0a7bee061edcb41d63991ba7aa5401f",
+      "reason": "third-ranked unselected attention screen; result metadata and selected top-1/top-2 archives retained"
+    },
+    {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v2/y400_mai_v2_985m_muon_0p5tpp_lr24e4/ckpt.pt",
+      "bytes": 8195244981,
+      "sha256": "d216be56ac4b957c132af3864f283155e5bb4672fcaf6d42ac9ffc0d1d806d58",
+      "reason": "superseded MAI-v2 rung; completed MAI-v3 equivalent retained"
+    }
+  ],
+  "policy": {
+    "preserve_active_resume_checkpoints": true,
+    "preserve_logs_metadata_and_provenance": true,
+    "compact_completed_dense_checkpoints_only_after_exact_tensor_reload_verification": true,
+    "reclaim_full_resume_payload_only_after_guarded_second_pass": true,
+    "pro6_training_remains_operator_paused": true
+  }
+}

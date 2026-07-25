@@ -10,7 +10,7 @@
     "Y400": {
       "root": "/root/userdata/MappingNetworks",
       "python_relative": ".venv-gpt2/bin/python",
-      "workspace_cap_bytes": 322122547200,
+      "workspace_cap_bytes": 274877906944,
       "workspace_reserve_bytes": 8589934592,
       "gpu_idle_memory_mib": 1024,
       "launch_mode": "detached"
@@ -159,13 +159,13 @@
       "host_preference": ["Y400"],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_985m_20tpp_selected_lr24e4",
+          "run_name": "y400_mai_v3_985m_20tpp_selected_lr24e4_resume1",
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_muon_20tpp_selected.json",
           "config_sha256": "c3955f639734cfec27693a93fb10a66577bddc1b00297c4801fc7a3b354a899a",
-          "resume": false,
-          "expected_checkpoint_next_iter": null,
-          "checkpoint_budget_bytes": 7879498342,
-          "active_checkpoint_budget_bytes": 4100000000
+          "resume": true,
+          "expected_checkpoint_next_iter": 17135,
+          "checkpoint_budget_bytes": 8400000000,
+          "active_checkpoint_budget_bytes": 8400000000
         }
       }
     },
@@ -525,12 +525,12 @@
       ],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_690m_fullattn_20tpp_selected_mult1p00_provisional",
+          "run_name": "y400_mai_v3_690m_fullattn_20tpp_selected_mult1p00_provisional_resume1",
           "config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_20tpp_selected.json",
           "config_sha256": "2a9d42637f75a185ec7d94b8dc27682961e9c80aaae44d5ba04027c27a9ef765",
-          "resume": false,
-          "expected_checkpoint_next_iter": null,
-          "checkpoint_budget_bytes": 8800000000,
+          "resume": true,
+          "expected_checkpoint_next_iter": 4284,
+          "checkpoint_budget_bytes": 4300000000,
           "active_checkpoint_budget_bytes": 4300000000
         }
       }
@@ -545,12 +545,12 @@
       ],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_985m_fullattn_5tpp_top1_mult1p00_provisional",
+          "run_name": "y400_mai_v3_985m_fullattn_5tpp_top1_mult1p00_provisional_resume1",
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_5tpp_top1.json",
           "config_sha256": "8c811a4b6baff77db6e84e688489ffe291e4a87934e86f76b7cc6d715e55127a",
-          "resume": false,
-          "expected_checkpoint_next_iter": null,
-          "checkpoint_budget_bytes": 11900000000,
+          "resume": true,
+          "expected_checkpoint_next_iter": 1662,
+          "checkpoint_budget_bytes": 6000000000,
           "active_checkpoint_budget_bytes": 6000000000
         }
       }
@@ -565,12 +565,12 @@
       ],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_985m_fullattn_5tpp_top2_mult0p75_provisional",
+          "run_name": "y400_mai_v3_985m_fullattn_5tpp_top2_mult0p75_provisional_resume1",
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_5tpp_top2.json",
           "config_sha256": "d90a4b5624e7e4deda07aefda8a3abf5c739b070a76d0d9af2cfe99ab2aad915",
-          "resume": false,
-          "expected_checkpoint_next_iter": null,
-          "checkpoint_budget_bytes": 11900000000,
+          "resume": true,
+          "expected_checkpoint_next_iter": 1666,
+          "checkpoint_budget_bytes": 6000000000,
           "active_checkpoint_budget_bytes": 6000000000
         }
       }
