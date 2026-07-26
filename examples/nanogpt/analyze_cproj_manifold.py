@@ -78,7 +78,8 @@ def spectral_residual_metrics(model: GPT, layer: int) -> dict[str, float] | None
     if diag is None or scale is None or in_basis is None or out_basis is None or residual is None:
         return None
 
-    diagonal = diag.detach().float().reshape(-1)
+    raw_parameter = diag.detach().float()
+    diagonal = raw_parameter.reshape(-1)
     energy = diagonal.square()
     total = energy.sum()
     if total > 0:
@@ -92,6 +93,13 @@ def spectral_residual_metrics(model: GPT, layer: int) -> dict[str, float] | None
         hard_rank = 0.0
         top1_energy = 0.0
         top10_energy = 0.0
+    coefficient_matrix = (
+        raw_parameter
+        if raw_parameter.ndim == 2
+        and raw_parameter.shape[0] == raw_parameter.shape[1]
+        else torch.diag(diagonal)
+    )
+    coefficient_spectrum = spectrum_metrics(coefficient_matrix)
 
     base = base_c_proj_weight(model, layer)
     basis_rank = int(in_basis.shape[1])
@@ -113,6 +121,13 @@ def spectral_residual_metrics(model: GPT, layer: int) -> dict[str, float] | None
         "diag_hard_rank": hard_rank,
         "diag_top1_energy": top1_energy,
         "diag_top10_energy": top10_energy,
+        "coefficient_matrix_soft_rank": coefficient_spectrum["soft_rank"],
+        "coefficient_matrix_hard_rank": coefficient_spectrum["hard_rank"],
+        "coefficient_matrix_stable_rank": coefficient_spectrum["stable_rank"],
+        "coefficient_matrix_top1_energy": coefficient_spectrum["top1_energy"],
+        "coefficient_matrix_top10_energy": coefficient_spectrum["top10_energy"],
+        "coefficient_matrix_fro_norm": coefficient_spectrum["fro_norm"],
+        "coefficient_matrix_spectral_norm": coefficient_spectrum["spectral_norm"],
         "residual_fro_norm": float(torch.linalg.matrix_norm(residual)),
         "residual_to_base_fro": float(
             torch.linalg.matrix_norm(residual) / torch.linalg.matrix_norm(base).clamp_min(1e-30)
