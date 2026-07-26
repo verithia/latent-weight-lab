@@ -797,7 +797,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "scale/group/quarter corrections and both paired-diagonal priorities 71/72 are rejected; Muon raised correction norm by 42 percent without changing effective spectrum, activation geometry, or CE. Matched functional least squares found a fixed 64x64 cross-basis core explains 4.324 percent of endpoint-output correction versus 0.326 percent for paired coefficients (13.27x), so priority 73 is the isolated evidence-backed 0.5TPP full-core screen under a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
+      "state": "scale/group/quarter, both paired diagonals, and priority-73 fixed-basis full-core c_proj are rejected. Priority 73 passed at 29.887 percent MFU and finished val 5.7334: only 0.0002 ahead of group12 and 0.2416 behind attention-only. Its active rank-37 core produced a 12.14-percent-of-base correction but left activation/residual geometry unchanged and was Frobenius-orthogonal to the generated base. Fixed-random c_proj is closed; c_fc and joint MLP remain parked pending a task-conditioned fixed/non-LoRA subspace with materially better offline functional span"
     }
   ]
 }
