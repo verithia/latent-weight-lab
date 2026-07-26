@@ -574,6 +574,26 @@
           "active_checkpoint_budget_bytes": 6000000000
         }
       }
+    },
+    {
+      "priority": 63,
+      "name": "mai_v3_985m_fullattn_20tpp_selected_mult1p00_provisional",
+      "stage": "operator_override_early_full_attention_selected_20tpp",
+      "max_iters": 75143,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_985m_fullattn_20tpp_selected_mult1p00_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_20tpp_selected.json",
+          "config_sha256": "d2176cf21e31b30da9d2ec2c1a1b3e57b5c1a8564dbbd8de25ee606fed07ca3f",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 13000000000,
+          "active_checkpoint_budget_bytes": 6500000000
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -583,7 +603,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional 124m/350m/690m selected 20tpp plus ranking-selected 985m top-two 5tpp confirmations operator-unblocked; formal acceptance still blocked on accepted four-rung dense fit"
+      "state": "provisional 124m/350m/690m selected 20tpp plus distinct-winner 985m selected 20tpp operator-unblocked; formal acceptance still blocked on accepted four-rung dense fit"
     },
     {
       "name": "mlp_replacement_work",
