@@ -1,11 +1,11 @@
 {
   "schema_version": "nanogpt_matched_checkpoint_diagnostic_plan_v1",
   "recorded_at": "2026-07-26",
-  "analysis_code_commit": "1d377bc3e8bbaadbaaccad4960ecda3ccda6282c",
+  "analysis_code_commit": "59dbf02f81e73a34c29e8596db76cd4c3ff9832b",
   "entrypoints": {
     "examples/nanogpt/analyze_residual_compatibility.py": "1b86bdca1cf7bfda3e37e24c790853799b256a6fb2071ca1fb8adf65bdfcd311",
     "examples/nanogpt/analyze_cproj_manifold.py": "427d3fe9bb181f09cbaa310fed7174964169653d8743631bdb340a46cffbf3a9",
-    "examples/nanogpt/model.py": "0ee13ef7d0d686dece5cb1d9f87fcc10ecd85d478725d5f952229be37ed81f05",
+    "examples/nanogpt/model.py": "168473366b3f2bf91a642f255d00ee426c7162066553dd3569e1d4f9838582e1",
     "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
   },
   "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_terminal_diagnostic_manifest.csv",
