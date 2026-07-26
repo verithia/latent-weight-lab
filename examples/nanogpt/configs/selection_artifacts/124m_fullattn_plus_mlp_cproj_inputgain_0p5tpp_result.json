@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_progressive_mlp_input_gain_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_inputgain_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "0e0081358d2451003ffabe904a008efd5395603f",
+    "config_sha256": "0813acdc28e2f66bc76fa23169a32cad63ddc4c8309b5329c86f73790b461c56",
+    "provenance_sha256": "0347f8f7f9505d4812cdc107b69676f64f632c135ae32d420472d1772bd0d19f",
+    "status_sha256": "507ca930f61053241351257388c94acfcb47bb6efaea7cdee7fd4500a88a41aa",
+    "log_sha256": "e64ce85959b40568831ba7dee543d04a76a02d6188f77006c6ddb71ffd10a715",
+    "finished_at": "2026-07-26T18:55:12+08:00",
+    "exit_code": 0,
+    "optimizer": "muon",
+    "max_iters": 238,
+    "terminal_train_loss": 5.7387,
+    "terminal_validation_loss": 5.7430
+  },
+  "controls": {
+    "attention_only_terminal_validation_loss": 5.4918,
+    "plain_cproj_terminal_validation_loss": 5.7394
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4936,
+      "candidate_minus_plain_cproj": 0.0133,
+      "candidate_minus_attention_only": 0.2752
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9889,
+      "candidate_minus_plain_cproj": 0.0056,
+      "candidate_minus_attention_only": 0.1931
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.8056,
+      "candidate_minus_plain_cproj": 0.0037,
+      "candidate_minus_attention_only": 0.2201
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7430,
+      "candidate_minus_plain_cproj": 0.0036,
+      "candidate_minus_attention_only": 0.2512
+    }
+  ],
+  "decision": {
+    "classification": "PRACTICAL_TIE_WORSE_THAN_REJECTED_PLAIN_CPROJ",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "reason": "Learnable input-channel scaling is slightly worse than plain c_proj at every matched window and remains 0.2512 validation NLL behind attention-only. Equal column norm is not the primary bottleneck by itself."
+  },
+  "next_screen": {
+    "candidate": "12-way grouped-input mlp.c_proj generation with per-input-channel gain",
+    "why": "The grouping changes the generator subspace and unties input-channel blocks while preserving the same total target matrix shape and avoiding a learned dense basis.",
+    "admission": "must pass a synchronously polled 20% MFU gate because twelve smaller generated projections may be kernel-inefficient",
+    "formal_status": "provisional structural diagnosis only"
+  }
+}
