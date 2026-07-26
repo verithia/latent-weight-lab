@@ -1,0 +1,64 @@
+{
+  "schema_version": "nanogpt_cproj_correction_alignment_result_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "b836224e6e6d181cc155c398d336265dbbc999b3",
+  "execution_commit": "5d3adc02b0ed05ebc4c047668fbb2845a7e7a0df",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_correction_alignment_plan.json",
+  "plan_sha256": "0287d3779a7a6931337746509f663aae9085d9411d1366aba08f1f0fd31d0511",
+  "remote_artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_muondiag_terminal_matched/alignment",
+    "log_sha256": "f1ac65b4332a96692618b172beddeaf21b4e4a69b9954acb6dfa903488e4d5d9",
+    "rows_sha256": "944ad6753501b9822ba672827da360fbd373fcd3a29bb8ad968a8959d16032e3",
+    "summary_sha256": "bddfd078efc3f97bf9d08e5251381d70fea8e1901c0dd821c6e9bf58b97bf80a"
+  },
+  "target_definition": "Matched terminal attention-only effective c_proj minus matched terminal plain generated-c_proj effective c_proj at layers 3, 6, and 9.",
+  "target_caveat": "This separately trained endpoint displacement is a co-adapted raw-weight proxy. It is not invariant to hidden-unit gauge symmetries and is not a causal oracle for the isolated functional optimum.",
+  "projection_definition": "Exact least-squares projection onto the 64 paired fixed FHT-derived atoms u_k v_k^T, accounting for cropped-basis Gram geometry.",
+  "span_capacity": {
+    "ambient_matrix_dimension": 2359296,
+    "paired_atom_count": 64,
+    "isotropic_random_span_energy_fraction": 0.00002712673611111111,
+    "observed_explainable_energy_fraction_mean": 0.00002970298131306966,
+    "observed_to_isotropic_ratio": 1.094970703125,
+    "observed_explainable_percent": 0.002970298131306966,
+    "unexplained_energy_fraction_mean": 0.9999702970186869,
+    "atom_gram_rank_mean": 64,
+    "atom_gram_condition_mean": 1
+  },
+  "adamw_vector_alignment": {
+    "target_frobenius_norm_mean": 8.8262675603,
+    "least_squares_projection_frobenius_norm_mean": 0.0480400560,
+    "learned_correction_frobenius_norm_mean": 0.0469945831,
+    "learned_to_projection_norm_mean": 0.9819216728,
+    "learned_target_cosine_mean": -0.0007762845,
+    "learned_projection_cosine_mean": -0.1508618581,
+    "learned_endpoint_error_reduction_fraction_mean": -0.0000365973
+  },
+  "muon_matrix_alignment": {
+    "target_frobenius_norm_mean": 8.8262675603,
+    "least_squares_projection_frobenius_norm_mean": 0.0480400560,
+    "learned_correction_frobenius_norm_mean": 0.0668503915,
+    "learned_to_projection_norm_mean": 1.3947680791,
+    "learned_target_cosine_mean": -0.0005452063,
+    "learned_projection_cosine_mean": -0.1046794072,
+    "learned_endpoint_error_reduction_fraction_mean": -0.0000655254
+  },
+  "layerwise_explainable_energy_fraction": {
+    "3": 0.000028371810913085938,
+    "6": 0.000026524066925048828,
+    "9": 0.00003421306610107422
+  },
+  "conclusions": [
+    "The 64 paired fixed-basis atoms explain only 0.00297 percent of the matched raw endpoint displacement energy, just 1.095 times the isotropic random-span expectation.",
+    "Both learned corrections are essentially orthogonal to the endpoint displacement; neither approaches the least-squares coefficient direction, and both slightly increase raw endpoint error.",
+    "Together with the terminal CE and Muon-amplitude diagnostic, this closes the fixed random paired-basis diagonal family: the dominant limitation is directional span alignment/capacity, not merely AdamW fallback or residual-branch scale.",
+    "A learned dense basis would change this into a LoRA-like adapter, as the operator noted. The next Mapping-Network-native direction should instead derive structured directions from activation/channel geometry or the generator Jacobian, and must be justified by a pre-training representability diagnostic."
+  ],
+  "decision": {
+    "classification": "REJECT_FIXED_PAIRED_BASIS_AS_CHANCE_ALIGNED",
+    "promote_to_5tpp": false,
+    "repeat_with_higher_random_rank": false,
+    "queue_learned_dense_basis": false,
+    "queue_plain_cfc_or_joint_mlp": false
+  }
+}
