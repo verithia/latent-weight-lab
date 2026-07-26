@@ -1,0 +1,88 @@
+{
+  "schema_version": "nanogpt_matched_cproj_spectral64_terminal_diagnostic_result_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "59dbf02f81e73a34c29e8596db76cd4c3ff9832b",
+  "execution_commit": "0a2b1eb0efd33d1ea6f167e315cffcdd79a736bb",
+  "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_terminal_diagnostic_manifest.csv",
+  "checkpoint_manifest_sha256": "94a3638bf9b743aea4e41faca766a8593fd42240162aeb9c4c36ca35b777aca7",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "matched_step": 238,
+  "remote_artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_terminal_matched",
+    "attempt1_device_init_failure_log_sha256": "aa645c8dcf13d09ef775e8d1ad72f498b6e3f053171b4f467a1ae8fd605be364",
+    "attempt2_basis_device_failure_log_sha256": "eca716005e86fa5eb470059ffb83439cbc37cfd5e0ce0a480af6bf9cd4c2052f",
+    "residual_log_sha256": "223f07d1800d95c13413fb29e04207a62ce76f1e024c741a02632ad3773b861b",
+    "residual_csv_sha256": "7c26d20f58ff19a14ad83f3632ec885f0b5c56d4387324a5cf8c1ca4cb214794",
+    "residual_json_sha256": "9b000f61fc0391b662cadd9727b0d0673553702c0704db76b703ae774565539b",
+    "manifold_log_sha256": "85a5ce2ae019e9e36db7046aef3725c8912a2f9589bd5657bf4c7614c44b8685",
+    "activation_summary_sha256": "3bf03711cbed98d6477d2beb773c59fe562cedf6a8bdd91393d33ece11f55636",
+    "activation_rows_sha256": "c8fa760641939ff0b89a185be4f9d82c076332c15f35ebd3b272ba858b649123",
+    "parameter_metrics_sha256": "e51e77c5dade53bbb464b4660165bb263d955c6e1dc40604154cdb3793024c56",
+    "parameter_summary_sha256": "d91c64b083ef0be940f7c92843f6e1b08c679882eb164cdc68bd689f3e6a11d2",
+    "spectral_residual_metrics_sha256": "32875057db7ca9ef3f3eaaf08e2b383dd415c05ffea1b92c08f6e90a42d4c1cc",
+    "spectral_residual_summary_sha256": "d36384be476497ef2faf5159fe89bca3583ade66eacc1293760edc3d00571e0b"
+  },
+  "learned_diagonal_means": {
+    "outer_scale": 0.9992380341,
+    "absolute_mean": 0.0063102289,
+    "absolute_max": 0.0244172153,
+    "l2_norm": 0.0626974764,
+    "nonzero_fraction": 1.0,
+    "soft_rank": 30.0862312,
+    "hard_rank": 19.1088428,
+    "top1_energy": 0.1577184424,
+    "top10_energy": 0.5836249987,
+    "residual_frobenius_norm": 0.0469945831,
+    "residual_to_base_frobenius": 0.0082281443,
+    "residual_spectral_norm": 0.0182877310
+  },
+  "effective_cproj_spectrum_means": {
+    "plain_cproj": {
+      "soft_rank": 677.5827230,
+      "hard_rank": 614.1314697,
+      "stable_rank": 342.6638387,
+      "top1_energy": 0.0029184494,
+      "frobenius_norm": 5.7039393,
+      "spectral_norm": 0.3081758
+    },
+    "spectral64_fixedbasis": {
+      "soft_rank": 677.5768840,
+      "hard_rank": 614.1238810,
+      "stable_rank": 342.7354329,
+      "top1_energy": 0.0029178304,
+      "frobenius_norm": 5.7124844,
+      "spectral_norm": 0.3086036
+    }
+  },
+  "residual_activation_means": {
+    "update_to_residual_rms": 0.3618847032,
+    "residual_update_cosine": 0.1266527490,
+    "residual_update_cka": 0.9629753761,
+    "update_hard_rank": 31.2732993,
+    "output_hard_rank": 26.4487381,
+    "postgelu_hard_rank": 35.8202309
+  },
+  "basis_geometry": {
+    "input_gram_identity_max_abs": 0.25,
+    "output_gram_identity_max_abs": 0.25,
+    "interpretation": "The columns exactly reproduce the implemented zero-padded-and-cropped FHT path, but truncating power-of-two transforms to 3072 and 768 physical dimensions means they are not an exactly orthonormal basis in those physical spaces."
+  },
+  "conclusions": [
+    "The learned diagonal is nonzero and moderately concentrated, but its effective residual remains only 0.82 percent of the generated base c_proj Frobenius norm.",
+    "Adding that residual leaves the effective c_proj singular spectrum, MLP update rank, residual-output rank, and held-out NLL practically indistinguishable from the rejected plain c_proj screen.",
+    "The rank-64 diagonal was a vector and therefore used the AdamW fallback at 0.3 times the main learning rate rather than Muon. The terminal evidence diagnoses unused correction amplitude before it diagnoses fixed-basis alignment.",
+    "The exact implemented FHT-derived columns are not exactly orthonormal after non-power-of-two truncation, so future reports must call them fixed FHT-derived bases rather than an exact orthogonal basis."
+  ],
+  "next_screen": {
+    "mechanism": "store the same rank-64 diagonal as a 1x64 matrix so Muon optimizes it at the main learning rate",
+    "expressivity_change": "none; reshape to a flat diagonal in the forward path",
+    "initialization": "identical zero function with outer scale one",
+    "fixed_bases": "unchanged",
+    "acceptance": "must pass the synchronous 20 percent MFU gate and materially change correction amplitude/effective spectrum before any 5TPP promotion",
+    "forbidden_followups": [
+      "plain c_fc replacement",
+      "joint c_fc plus c_proj replacement",
+      "another scale/group/hyperconnection-only variant"
+    ]
+  }
+}

@@ -13,7 +13,7 @@ from latent_weight_lab.block_fht import (
     sign_word_for,
     suspend_block_fht_weight_cache,
 )
-from examples.nanogpt.model import FixedFHTMix, GPTConfig, MLP, freeze_non_block_fht
+from examples.nanogpt.model import FixedFHTMix, GPT, GPTConfig, MLP, freeze_non_block_fht
 
 
 def test_sign_word_uses_32_positions():
@@ -259,6 +259,75 @@ def test_cproj_fixed_basis_spectrum_is_zero_function_but_trainable_at_scale_one(
         structured.cproj_spectral_resid_scale.grad,
         torch.zeros_like(structured.cproj_spectral_resid_scale.grad),
     )
+
+
+def test_cproj_fixed_basis_muon_matrix_preserves_diagonal_forward_and_uses_matrix_parameter():
+    torch.manual_seed(789)
+    vector = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_cproj_spectral_resid_rank=2,
+            block_fht_cproj_spectral_resid_scale_init=1.0,
+            block_fht_cproj_spectral_resid_seed=17001,
+        ),
+        layer_id=0,
+    )
+    matrix = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_cproj_spectral_resid_rank=2,
+            block_fht_cproj_spectral_resid_scale_init=1.0,
+            block_fht_cproj_spectral_resid_seed=17001,
+            block_fht_cproj_spectral_resid_muon_matrix=True,
+        ),
+        layer_id=0,
+    )
+    shared_state = vector.state_dict()
+    shared_state.pop("cproj_spectral_resid_diag")
+    matrix.load_state_dict(shared_state, strict=False)
+    with torch.no_grad():
+        values = torch.tensor([0.25, -0.125])
+        vector.cproj_spectral_resid_diag.copy_(values)
+        matrix.cproj_spectral_resid_diag.copy_(values.view(1, -1))
+    assert vector.cproj_spectral_resid_diag.ndim == 1
+    assert matrix.cproj_spectral_resid_diag.ndim == 2
+    x = torch.randn(3, 5, 4)
+    torch.testing.assert_close(matrix(x), vector(x))
+
+
+def test_cproj_fixed_basis_muon_matrix_is_assigned_to_muon_optimizer():
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht_cproj_spectral_resid_rank=4,
+            block_fht_cproj_spectral_resid_scale_init=1.0,
+            block_fht_cproj_spectral_resid_seed=17001,
+            block_fht_cproj_spectral_resid_muon_matrix=True,
+        )
+    )
+    diagonal = model.transformer.h[0].mlp.cproj_spectral_resid_diag
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_adamw_lr_scale=0.3,
+    )
+    muon_parameters = [
+        parameter
+        for child in optimizer.optimizers
+        if child.__class__.__name__ == "Muon"
+        for group in child.param_groups
+        for parameter in group["params"]
+    ]
+    assert any(parameter is diagonal for parameter in muon_parameters)
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")

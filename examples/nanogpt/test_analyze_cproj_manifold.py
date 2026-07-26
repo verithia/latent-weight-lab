@@ -25,11 +25,12 @@ def _tiny_spectral_model() -> GPT:
         block_fht_cproj_spectral_resid_rank=4,
         block_fht_cproj_spectral_resid_scale_init=1.0,
         block_fht_cproj_spectral_resid_seed=17001,
+        block_fht_cproj_spectral_resid_muon_matrix=True,
     )
     model = GPT(config)
     with torch.no_grad():
         model.transformer.h[0].mlp.cproj_spectral_resid_diag.copy_(
-            torch.tensor([0.5, -0.25, 0.125, -0.0625])
+            torch.tensor([[0.5, -0.25, 0.125, -0.0625]])
         )
     return model
 
@@ -42,7 +43,7 @@ def test_effective_cproj_weight_includes_fixed_basis_spectral_residual() -> None
 
     expected = (
         mlp.cproj_spectral_resid_out_basis
-        * mlp.cproj_spectral_resid_diag.unsqueeze(0)
+        * mlp.cproj_spectral_resid_diag.reshape(-1).unsqueeze(0)
     ) @ mlp.cproj_spectral_resid_in_basis.transpose(0, 1)
     torch.testing.assert_close(residual, expected)
     torch.testing.assert_close(effective_c_proj_weight(model, 0), base_c_proj_weight(model, 0) + expected)

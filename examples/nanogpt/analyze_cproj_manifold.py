@@ -48,7 +48,7 @@ def spectral_residual_weight(model: GPT, layer: int) -> torch.Tensor | None:
     # weights use [out, in], so the equivalent matrix is U diag V.T.
     return (
         scale.detach().float()
-        * (out_basis.detach().float() * diag.detach().float().unsqueeze(0))
+        * (out_basis.detach().float() * diag.detach().float().reshape(-1).unsqueeze(0))
         @ in_basis.detach().float().transpose(0, 1)
     )
 
@@ -71,7 +71,7 @@ def spectral_residual_metrics(model: GPT, layer: int) -> dict[str, float] | None
     if diag is None or scale is None or in_basis is None or out_basis is None or residual is None:
         return None
 
-    diagonal = diag.detach().float()
+    diagonal = diag.detach().float().reshape(-1)
     energy = diagonal.square()
     total = energy.sum()
     if total > 0:

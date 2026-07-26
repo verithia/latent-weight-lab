@@ -103,6 +103,7 @@ class GPTConfig:
     block_fht_cproj_spectral_resid_rank: int = 0
     block_fht_cproj_spectral_resid_scale_init: float = 0.0
     block_fht_cproj_spectral_resid_seed: int = 0
+    block_fht_cproj_spectral_resid_muon_matrix: bool = False
     block_fht_ffn_postgelu_std_target: float = 0.0
     tie_word_embeddings: bool = True
 
@@ -902,7 +903,12 @@ class MLP(nn.Module):
         if spectral_rank > 0:
             if spectral_rank > config.n_embd or spectral_rank > 4 * config.n_embd:
                 raise ValueError("block_fht_cproj_spectral_resid_rank must be <= n_embd and <= 4*n_embd")
-            self.cproj_spectral_resid_diag = nn.Parameter(torch.zeros(spectral_rank))
+            spectral_shape = (
+                (1, spectral_rank)
+                if config.block_fht_cproj_spectral_resid_muon_matrix
+                else (spectral_rank,)
+            )
+            self.cproj_spectral_resid_diag = nn.Parameter(torch.zeros(spectral_shape))
             self.cproj_spectral_resid_scale = nn.Parameter(torch.tensor(float(config.block_fht_cproj_spectral_resid_scale_init)))
             spectral_seed = int(config.block_fht_cproj_spectral_resid_seed)
             self.cproj_spectral_resid_in_mix = FixedFHTMix(4 * config.n_embd, spectral_seed + layer_id * 64 + 129)
@@ -983,7 +989,7 @@ class MLP(nn.Module):
             and self.cproj_spectral_resid_out_basis is not None
         ):
             mixed_in = F.linear(activated, self.cproj_spectral_resid_in_basis.transpose(0, 1))
-            spectral = mixed_in * self.cproj_spectral_resid_diag.to(dtype=activated.dtype)
+            spectral = mixed_in * self.cproj_spectral_resid_diag.reshape(-1).to(dtype=activated.dtype)
             spectral = F.linear(spectral, self.cproj_spectral_resid_out_basis)
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
         return self.dropout(out)
