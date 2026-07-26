@@ -632,6 +632,25 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 67,
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_inputgain_0p5tpp_lr24e4_provisional_muon",
+      "stage": "operator_override_progressive_mlp_input_gain_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_inputgain_0p5tpp_lr24e4_provisional_muon",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_inputgain_0p5tpp_lr24e4_provisional_muon.json",
+          "config_sha256": "0813acdc28e2f66bc76fa23169a32cad63ddc4c8309b5329c86f73790b461c56",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -645,7 +664,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "plain progressive 124m attention-plus-mlp.c_proj 0.5TPP screen finished 0.2476 validation NLL behind attention-only and is rejected; the first sparse residual attempt is excluded because an omitted optimizer field selected AdamW; an explicit-Muon corrected lineage is queued at priority 66; c_fc and joint MLP replacement remain parked"
+      "state": "plain c_proj finished 0.2476 validation NLL behind attention-only; valid Muon zero-weight quarter residual is a practical tie with plain c_proj and is rejected; per-input-channel c_proj gain is queued at priority 67; c_fc and joint MLP replacement remain parked"
     }
   ]
 }

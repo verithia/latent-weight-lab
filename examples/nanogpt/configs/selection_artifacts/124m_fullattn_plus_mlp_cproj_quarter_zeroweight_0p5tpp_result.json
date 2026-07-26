@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_progressive_mlp_structural_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "valid_muon_screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_quarter_zeroweight_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "34ecbb31c3e5ad110bd6da035efcecd93e39332f",
+    "config_sha256": "1bc991a2b4b070bef54c7fc99555db68bdf684a7b2375db3480552516828efc5",
+    "provenance_sha256": "c5fa4dc115ebb6755882944091b054c97cb9a0a9caf349cb9dd4d3880e3b1cd7",
+    "status_sha256": "ad9abd7b3957c8057b5a945ebb829f31e175f4198bc1ea69a1229a15d6df81c2",
+    "log_sha256": "555313940c1d79cadf677d26e26b26eb01d74b555e5d076a2c897d2bb2a1c115",
+    "finished_at": "2026-07-26T18:46:04+08:00",
+    "exit_code": 0,
+    "optimizer_log_line": "optimizer=muon matrix_tensors=24 adamw_other_tensors=219 momentum=0.95 ns_steps=5 adamw_lr_scale=0.3 adamw_lr=0.0007199999999999999",
+    "max_iters": 238,
+    "terminal_train_loss": 5.7333,
+    "terminal_validation_loss": 5.7379
+  },
+  "excluded_predecessor": {
+    "name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_quarter_zeroweight_0p5tpp_lr24e4_provisional",
+    "classification": "INVALID_OPTIMIZER_FALLBACK_ADAMW",
+    "source_commit": "c9acebd6612a31f329f8ae98d49ba36c4d5a67b3",
+    "config_sha256": "af1e2f3071054d238286bab6d4103c34069f18d0fe95e1699bb19b5749feb1c7",
+    "provenance_sha256": "6bd03004b64e0f5135f78a8494cb0abd54e8dc0b7ce1ef3e9b4d398060b142aa",
+    "terminal_validation_loss": 5.5865,
+    "scientific_evidence": false,
+    "reason": "The derived config omitted the explicit optimizer field and used the parser's AdamW default."
+  },
+  "controls": {
+    "attention_only": {
+      "name": "mai_v3_124m_fullattn_prefit_mult1p00",
+      "terminal_validation_loss": 5.4918
+    },
+    "plain_cproj": {
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional",
+      "terminal_validation_loss": 5.7394,
+      "result_artifact_sha256": "39c10dec4410bcf9ff5c6ebb2d797e2deb3d57dccbcaf455a0572be3772b2c87"
+    }
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4837,
+      "candidate_minus_plain_cproj": 0.0034,
+      "candidate_minus_attention_only": 0.2653
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9803,
+      "candidate_minus_plain_cproj": -0.0030,
+      "candidate_minus_attention_only": 0.1845
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.7996,
+      "candidate_minus_plain_cproj": -0.0023,
+      "candidate_minus_attention_only": 0.2141
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7379,
+      "candidate_minus_plain_cproj": -0.0015,
+      "candidate_minus_attention_only": 0.2461
+    }
+  ],
+  "decision": {
+    "classification": "PRACTICAL_TIE_WITH_REJECTED_PLAIN_CPROJ",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "reason": "The valid Muon correction differs from plain c_proj by at most 0.0034 at every matched window and remains 0.2461 validation NLL behind attention-only at terminal. The replicated short PRO6 benefit does not transfer to this selected-attention setting."
+  },
+  "next_screen": {
+    "candidate": "learnable input-channel gain on mlp.c_proj",
+    "why": "It directly relaxes tied generated-weight column energy while retaining the same generated c_proj subspace, adds only a diagonal channel scale, and is not a learned basis or LoRA adapter.",
+    "formal_status": "provisional structural diagnosis only"
+  }
+}
