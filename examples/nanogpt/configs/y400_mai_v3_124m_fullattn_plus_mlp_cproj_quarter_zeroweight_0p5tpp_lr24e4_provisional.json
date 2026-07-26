@@ -146,15 +146,22 @@
   "n_embd": 768,
   "n_head": 12,
   "n_layer": 12,
+  "optimizer": "muon",
   "operator_override": {
     "accepted_as_formal_dense_fit_conditioned_result": false,
     "reason": "all selected attention-only 20TPP runs are launched, the plain c_proj screen failed, and the user required idle Y400 capacity to advance through evidence-based MLP work",
     "recorded_at": "2026-07-26",
     "scope": "provisional 124m 0.5TPP sparse c_proj residual-compatibility screen only"
   },
-  "out_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_quarter_zeroweight_0p5tpp_lr24e4_provisional",
+  "out_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_quarter_zeroweight_0p5tpp_lr24e4_provisional_muon",
   "parent_plain_cproj_result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_fullattn_plus_mlp_cproj_0p5tpp_result.json",
   "parent_plain_cproj_result_artifact_sha256": "39c10dec4410bcf9ff5c6ebb2d797e2deb3d57dccbcaf455a0572be3772b2c87",
+  "predecessor_invalid_attempt": {
+    "classification": "INVALID_OPTIMIZER_FALLBACK_ADAMW",
+    "config_commit": "c9acebd6612a31f329f8ae98d49ba36c4d5a67b3",
+    "config_sha256": "af1e2f3071054d238286bab6d4103c34069f18d0fe95e1699bb19b5749feb1c7",
+    "reason": "derived config omitted the explicit optimizer field and therefore took the parser's AdamW default; its losses are excluded from Muon ladder evidence"
+  },
   "planned_tokens": 62186880,
   "planned_tpp": 0.5,
   "practical_equivalence_nll": 0.02,
