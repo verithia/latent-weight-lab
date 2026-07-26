@@ -1,0 +1,88 @@
+{
+  "schema_version": "mai_progressive_mlp_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "6e8c754c4d93ab06b57242b06d06f6e27a02a831",
+    "config_sha256": "0c026f73b9d1f1b4be4e41aa0df89a644a8f1bd9b7c74a7093ca0869bf141076",
+    "provenance_sha256": "cd27acb53715eaebd20b72da102eed8c71aca92991e95469f0d5f41d9956405e",
+    "status_sha256": "8914ddc42ec42897994e805bde6ecbe9ca5b6458149eb723df1af10612aa9bf3",
+    "log_sha256": "1069438f7decc696593452247095b88c75b3226c40104132eb89b557db88a162",
+    "checkpoint_sha256": "07f6f201dfcb56301ef874833384be819b0fcc083dbae1b75a8b9d95483f6528",
+    "checkpoint_meta_sha256": "a37ea3ec8265d2eaa3ac4cf4ffc1a50d176197875909dec862d43909d9e8d9c2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "finished_at": "2026-07-26T20:30:07+08:00",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.7370,
+    "terminal_validation_loss": 5.7412
+  },
+  "performance_gate": {
+    "classification": "passed",
+    "mfu": 0.2993014071,
+    "tokens_per_second": 315431.86,
+    "milliseconds_per_update": 831.0667,
+    "peak_memory_mib": 32006.86,
+    "certificate_sha256": "4221b32cdf1eab59b9c435b45c8814e3fb1b52984e1375e5e3ba46863a80fb2f"
+  },
+  "mechanism": {
+    "target": "mlp.c_proj",
+    "fixed_basis": "seeded signed normalized FHT-derived input and output basis columns",
+    "rank": 64,
+    "trainable_scalars_per_layer": 65,
+    "learned_basis": false,
+    "initialization": "diagonal coefficients zero and outer scale one",
+    "implementation": "same forward function as the vector spectral residual; diagonal stored as a 1x64 matrix",
+    "optimizer_assignment": "Muon; matrix_tensors increased from 12 to 24"
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4898,
+      "vector_spectral_validation_loss": 6.4891,
+      "attention_only_validation_loss": 6.2184,
+      "plain_cproj_validation_loss": 6.4803,
+      "group12_inputgain_validation_loss": 6.4415
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9863,
+      "vector_spectral_validation_loss": 5.9869,
+      "attention_only_validation_loss": 5.7958,
+      "plain_cproj_validation_loss": 5.9833,
+      "group12_inputgain_validation_loss": 5.9698
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.8038,
+      "vector_spectral_validation_loss": 5.8041,
+      "attention_only_validation_loss": 5.5855,
+      "plain_cproj_validation_loss": 5.8019,
+      "group12_inputgain_validation_loss": 5.7944
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7412,
+      "vector_spectral_validation_loss": 5.7416,
+      "attention_only_validation_loss": 5.4918,
+      "plain_cproj_validation_loss": 5.7394,
+      "group12_inputgain_validation_loss": 5.7336,
+      "candidate_minus_vector_spectral": -0.0004,
+      "candidate_minus_attention_only": 0.2494,
+      "candidate_minus_plain_cproj": 0.0018,
+      "candidate_minus_group12_inputgain": 0.0076
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_MUON_DIAGONAL_NO_GAIN",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "reason": "Changing only the optimizer ownership of the rank-64 diagonal changes terminal validation NLL by just -0.0004 versus the AdamW-vector form, remains worse than plain and grouped c_proj, and leaves a +0.2494 penalty versus attention-only."
+  },
+  "next_action": {
+    "diagnostic": "measure learned diagonal energy/rank, correction amplitude, effective c_proj spectrum, MLP activation ranks, and residual-link compatibility on the terminal checkpoint",
+    "constraint": "do not choose another MLP generator until the diagnostic establishes whether Muon materially activated the correction"
+  }
+}
