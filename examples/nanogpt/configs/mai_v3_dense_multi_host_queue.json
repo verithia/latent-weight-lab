@@ -797,7 +797,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "scale/group/quarter, both paired diagonals, and priority-73 fixed-basis full-core c_proj are rejected. Priority 73 passed at 29.887 percent MFU and finished val 5.7334: only 0.0002 ahead of group12 and 0.2416 behind attention-only. Its active rank-37 core produced a 12.14-percent-of-base correction but left activation/residual geometry unchanged and was Frobenius-orthogonal to the generated base. Fixed-random c_proj is closed; c_fc and joint MLP remain parked pending a task-conditioned fixed/non-LoRA subspace with materially better offline functional span"
+      "state": "scale/group/quarter, both paired diagonals, and priority-73 fixed-basis full-core c_proj are rejected. The native one-percent BlockFHT c_proj tangent nevertheless explains 60.28 percent of held-out matched endpoint correction energy, 13.94x the fixed rank-64 full-core span, but requires a fitted displacement 1.21x the trained latent norm. Native BlockFHT latents are rank-one tensors owned by the AdamW fallback at 0.3x main LR, not Muon. Classify this as substantial manifold capacity with an optimization/locality limitation. Fixed-random c_proj remains closed; c_fc and joint MLP remain parked pending an offline-gated generator-metric or task-conditioned latent preconditioner with improved local-radius coverage"
     }
   ]
 }

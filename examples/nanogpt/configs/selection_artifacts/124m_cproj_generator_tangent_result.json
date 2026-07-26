@@ -1,0 +1,176 @@
+{
+  "schema_version": "nanogpt_cproj_generator_tangent_result_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "4b05f99b6d04c7ef5520242be1bb27c228a93597",
+  "execution_commit": "21c20a33fcdcb386e95568b6de33e30dbbefc1a5",
+  "diagnostic_plan": "examples/nanogpt/configs/selection_artifacts/124m_cproj_generator_tangent_plan.json",
+  "diagnostic_plan_sha256": "eb1f5466e4ca622ccfc1bab982ef9b7392034dce383044ffd2c5a8d5a2d3549d",
+  "entrypoints": {
+    "examples/nanogpt/analyze_cproj_generator_tangent.py": "fee50e20a578b1d2a2ba4a638d5d66a95a2043d5b0bd3e7b1f3e281c57720d67",
+    "tests/test_cproj_generator_tangent.py": "20a734182d8f09a085bdec080a445793221d5077089301d37fcaad1c1860ff83",
+    "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+  },
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "protocol": {
+    "layers": [
+      3,
+      6,
+      9
+    ],
+    "fit_samples_per_layer": 4096,
+    "fit_sample_seed": 20260716,
+    "holdout_samples_per_layer": 4096,
+    "holdout_sample_seed": 20260717,
+    "solver": "matrix-free conjugate-gradient least squares",
+    "iterations": 64,
+    "recorded_iterations": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "operator": "delta_z -> H_plain * reshape(J_BlockFHT * delta_z)^T",
+    "adjoint": "exact block_fht_grad_latent",
+    "linearity_condition": "block_fht_modulation_alpha=0, so the generator Jacobian is constant and this operator spans the complete native BlockFHT c_proj generator subspace"
+  },
+  "remote_artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_generator_tangent",
+    "summary_sha256": "dc118dc5911391a3106ba662677a5f1b696e85f5a591dadfd91f757eea0806b3",
+    "cgls_csv_sha256": "526d6ab422af79da088ca62800eaafa84fd12b623928811f5e4b532b63106d27",
+    "run_log_sha256": "fea07e1102635eb2eddf5ed9e2f16857b5f8efb77d6f67766eb3aab9c0bb448f",
+    "superseded_fit_only_root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_generator_tangent.fit_only_preholdout"
+  },
+  "per_layer": {
+    "3": {
+      "latent_dim": 23593,
+      "weight_size": 2359296,
+      "latent_ratio": 0.010000016954210069,
+      "fit_explained_energy": 0.6677933931350708,
+      "holdout_explained_energy": 0.651672899723053,
+      "fit_target_cosine": 0.8171862363815308,
+      "holdout_target_cosine": 0.8072950839996338,
+      "delta_latent_l2": 3.8465993404388428,
+      "trained_latent_l2": 3.276550531387329,
+      "delta_to_trained_latent_l2": 1.173978328704834
+    },
+    "6": {
+      "latent_dim": 23593,
+      "weight_size": 2359296,
+      "latent_ratio": 0.010000016954210069,
+      "fit_explained_energy": 0.5961304903030396,
+      "holdout_explained_energy": 0.5702372789382935,
+      "fit_target_cosine": 0.7720949053764343,
+      "holdout_target_cosine": 0.7553000450134277,
+      "delta_latent_l2": 4.025207042694092,
+      "trained_latent_l2": 3.2967445850372314,
+      "delta_to_trained_latent_l2": 1.2209641933441162
+    },
+    "9": {
+      "latent_dim": 23593,
+      "weight_size": 2359296,
+      "latent_ratio": 0.010000016954210069,
+      "fit_explained_energy": 0.6194198131561279,
+      "holdout_explained_energy": 0.5864537954330444,
+      "fit_target_cosine": 0.7870322465896606,
+      "holdout_target_cosine": 0.7659991383552551,
+      "delta_latent_l2": 4.104739665985107,
+      "trained_latent_l2": 3.3062174320220947,
+      "delta_to_trained_latent_l2": 1.2415213584899902
+    }
+  },
+  "means": {
+    "fit_explained_energy": 0.6277812321980795,
+    "holdout_explained_energy": 0.602787991364797,
+    "fit_target_cosine": 0.7921044627825419,
+    "holdout_target_cosine": 0.7761980891227722,
+    "delta_latent_l2": 3.9921820163726807,
+    "trained_latent_l2": 3.2931708494822183,
+    "mean_layerwise_delta_to_trained_latent_l2": 1.2121546268463135,
+    "ratio_of_mean_delta_to_mean_trained_latent_l2": 1.2122608266741968,
+    "relative_normal_residual": 0.0000030708442864124663
+  },
+  "radius_curve_means": [
+    {
+      "iteration": 1,
+      "holdout_explained_energy": 0.35601667563120526,
+      "holdout_target_cosine": 0.5963444312413534,
+      "delta_latent_l2": 1.5263055562973022,
+      "delta_to_mean_trained_latent_l2": 0.4634759707463345
+    },
+    {
+      "iteration": 2,
+      "holdout_explained_energy": 0.5020164450009664,
+      "holdout_target_cosine": 0.7082955241203308,
+      "delta_latent_l2": 2.528118292490641,
+      "delta_to_mean_trained_latent_l2": 0.767685130241006
+    },
+    {
+      "iteration": 4,
+      "holdout_explained_energy": 0.5809659163157145,
+      "holdout_target_cosine": 0.7619615197181702,
+      "delta_latent_l2": 3.449177344640096,
+      "delta_to_mean_trained_latent_l2": 1.0473727305045248
+    },
+    {
+      "iteration": 8,
+      "holdout_explained_energy": 0.6017106572786967,
+      "holdout_target_cosine": 0.7754921118418375,
+      "delta_latent_l2": 3.929267724355062,
+      "delta_to_mean_trained_latent_l2": 1.1931563541481174
+    },
+    {
+      "iteration": 16,
+      "holdout_explained_energy": 0.6027905941009521,
+      "holdout_target_cosine": 0.7761998375256857,
+      "delta_latent_l2": 3.9916892051696777,
+      "delta_to_mean_trained_latent_l2": 1.2121111802618096
+    },
+    {
+      "iteration": 32,
+      "holdout_explained_energy": 0.602787991364797,
+      "holdout_target_cosine": 0.776198128859202,
+      "delta_latent_l2": 3.992181936899821,
+      "delta_to_mean_trained_latent_l2": 1.2122608025415709
+    },
+    {
+      "iteration": 64,
+      "holdout_explained_energy": 0.602787991364797,
+      "holdout_target_cosine": 0.7761980891227722,
+      "delta_latent_l2": 3.9921820163726807,
+      "delta_to_mean_trained_latent_l2": 1.2122608266741968
+    }
+  ],
+  "comparison": {
+    "fixed_rank64_fullcore_holdout_functional_span": 0.04324,
+    "native_blockfht_tangent_holdout_functional_span": 0.602787991364797,
+    "coverage_multiple": 13.940518764218246
+  },
+  "optimizer_audit": {
+    "configured_optimizer": "muon",
+    "block_fht_latent_tensor_rank": 1,
+    "actual_owner": "AdamW fallback for all one-dimensional BlockFHT latents",
+    "base_learning_rate": 0.0024,
+    "muon_adamw_lr_scale": 0.3,
+    "latent_learning_rate": 0.00072,
+    "weight_decay": 0.0,
+    "evidence": "GPT.configure_optimizers assigns only rank>=2 non-embedding tensors to Muon; rank<2 tensors enter the AdamW other group"
+  },
+  "conclusions": [
+    "The native one-percent BlockFHT c_proj generator tangent has substantial task-conditioned functional capacity: it explains 60.28 percent of held-out matched endpoint correction energy, about 13.94 times the fixed random rank-64 full-core span.",
+    "The capacity is not local in the trained coordinates. Full coverage requires a mean fitted displacement 1.21 times the entire trained latent norm; even the four-iteration solution already crosses 1.05 times that norm.",
+    "At a more local 0.46-times-trained-latent displacement, held-out explained energy is only 35.60 percent. The fit/holdout gap at convergence is modest, so the result is not primarily sample-window overfitting.",
+    "The plain c_proj run was configured as Muon, but its one-dimensional BlockFHT latents were actually optimized by the AdamW fallback at 0.3 times the main learning rate, or 7.2e-4. The earlier Muon conclusions apply to matrix add-ons, not to the native generator latents.",
+    "This rejects the simple claim that c_proj fails because its native generator manifold lacks useful directions. The stronger diagnosis is a nonlocal, poorly conditioned exploration problem in generator coordinates.",
+    "The endpoint target compares separately co-adapted models and the per-layer fits are independent. It does not prove that one simultaneous latent update recovers network validation loss."
+  ],
+  "decision": {
+    "classification": "MANIFOLD_CAPACITY_PRESENT_OPTIMIZATION_LOCALITY_LIMIT",
+    "queue_training_now": false,
+    "promote_fixed_random_basis": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "next_action": "derive and offline-gate a generator-metric or task-conditioned latent preconditioner/trust-region update; require improved local-radius held-out coverage before another MLP training launch"
+  }
+}
