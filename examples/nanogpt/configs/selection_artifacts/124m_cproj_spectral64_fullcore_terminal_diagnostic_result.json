@@ -1,0 +1,153 @@
+{
+  "schema_version": "nanogpt_matched_cproj_spectral64_fullcore_terminal_diagnostic_result_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "d00b01fac2002a2e5645e9d21b0e7c5b718e70f7",
+  "execution_commit": "b52bfb30f66fefa94cb99acc09c22a64546fddc4",
+  "screen_result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_result.json",
+  "screen_result_artifact_sha256": "6286b089e65e787b32c968abd2a6c166c28d76d16d363b34a0e41e8930a01776",
+  "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_fullcore_terminal_diagnostic_manifest.csv",
+  "checkpoint_manifest_sha256": "9b30362f31de1291b7d2fcf263711d04f23a8f33c69dbe52427a789ed60f7067",
+  "diagnostic_plan": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_fullcore_terminal_diagnostic_plan.json",
+  "diagnostic_plan_sha256": "2522781af6c94bd6d53c32ab6b65d3bca04ba1c042b3b8164701a7a691ac74e8",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "matched_step": 238,
+  "remote_artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_fullcore_terminal_matched",
+    "residual_log_sha256": "2bcd383a031d8565eb5f8f0d568f0a75fdd13aa8532549d483cb122299779d22",
+    "residual_csv_sha256": "908fb538e984e850dd8c1a9a859df05aa911199994d5412907d1b4ffb6533972",
+    "residual_json_sha256": "2b8df30a196c8c8e5b0c58e9a5be1d858b659d03bad9888028e371da821d959a",
+    "manifold_log_sha256": "baf03461e3f2ae058804bcf82d895cf3f629cd829d47b1eb85eec5dd6ae1c197",
+    "activation_summary_sha256": "e2202ff24d3b54616433d54c4590df6bf65b3727c16e68e1fa7721a3185f2216",
+    "activation_rows_sha256": "8ea221557e597755a8f6e24ce48a701d52b1729a8ac1ed458821d81f08b5aa08",
+    "parameter_metrics_sha256": "0e9032c33e04fedd4cd36bbc6945fc3829d6510304899077a515a3f6ff328c13",
+    "parameter_summary_sha256": "60c344927b740171446ba16dd050ea514e3833d770f3c51f972e28caba33cf17",
+    "spectral_residual_metrics_sha256": "2afc0c2518118a4b249ca2ef0f99f8637e7086af21a56ae104fb00aa7bb869e7",
+    "spectral_residual_summary_sha256": "d086f29cabeb394fee9e5e1dd93370b1d2d61690c90683ceaf1fd0bdef5a4b5f"
+  },
+  "learned_core_geometry_means": {
+    "outer_scale": 1.0160293182,
+    "coefficient_matrix_soft_rank": 43.1050542196,
+    "coefficient_matrix_hard_rank": 37.1600354513,
+    "coefficient_matrix_stable_rank": 21.5126476288,
+    "coefficient_matrix_frobenius_norm": 0.9060238401,
+    "coefficient_matrix_spectral_norm": 0.1953410357,
+    "residual_frobenius_norm": 0.6905581355,
+    "residual_to_base_frobenius": 0.1213603665,
+    "residual_spectral_norm": 0.1488559246
+  },
+  "muon_diagonal_geometry_means": {
+    "outer_scale": 0.9945090413,
+    "coefficient_matrix_soft_rank": 29.5803635915,
+    "coefficient_matrix_hard_rank": 22.0620358785,
+    "coefficient_matrix_stable_rank": 10.3734912872,
+    "coefficient_matrix_frobenius_norm": 0.0896200389,
+    "coefficient_matrix_spectral_norm": 0.0278885271,
+    "residual_frobenius_norm": 0.0668503915,
+    "residual_to_base_frobenius": 0.0117056674,
+    "residual_spectral_norm": 0.0207983032
+  },
+  "full_core_to_muon_diagonal_ratios": {
+    "coefficient_matrix_frobenius_norm": 10.109598,
+    "coefficient_matrix_spectral_norm": 7.004351,
+    "residual_frobenius_norm": 10.329907,
+    "residual_to_base_frobenius": 10.367660,
+    "residual_spectral_norm": 7.157118
+  },
+  "base_residual_relation": {
+    "derivation": "For each matched layer, cosine(base,residual) = (||base+residual||_F^2 - ||base||_F^2 - ||residual||_F^2) / (2 ||base||_F ||residual||_F); base norm is recovered from residual_frobenius_norm / residual_to_base_frobenius.",
+    "layer_3_residual_base_cosine": -0.001431985,
+    "layer_6_residual_base_cosine": 0.001679890,
+    "layer_9_residual_base_cosine": -0.000125111,
+    "mean_residual_base_cosine": 0.000040931,
+    "mean_effective_norm_gain": 0.007351055,
+    "interpretation": "The large learned correction is almost exactly Frobenius-orthogonal to the generated base c_proj. Its 12.14 percent relative norm therefore increases effective c_proj norm by only 0.74 percent."
+  },
+  "effective_cproj_spectrum_means": {
+    "attention_only": {
+      "hard_rank": 611.4185791,
+      "stable_rank": 336.3918457,
+      "top1_energy": 0.0029731175,
+      "frobenius_norm": 6.7365958,
+      "spectral_norm": 0.3673537
+    },
+    "plain_cproj": {
+      "hard_rank": 614.1314697,
+      "stable_rank": 342.6638387,
+      "top1_energy": 0.0029184494,
+      "frobenius_norm": 5.7039393,
+      "spectral_norm": 0.3081758
+    },
+    "group12_inputgain": {
+      "hard_rank": 614.3883260,
+      "stable_rank": 342.7823385,
+      "top1_energy": 0.0029174077,
+      "frobenius_norm": 6.5770106,
+      "spectral_norm": 0.3552829
+    },
+    "muon_diagonal": {
+      "hard_rank": 614.1276042,
+      "stable_rank": 342.6630758,
+      "top1_energy": 0.0029184502,
+      "frobenius_norm": 5.7114932,
+      "spectral_norm": 0.3085830
+    },
+    "full_core": {
+      "hard_rank": 612.1735229,
+      "stable_rank": 334.3295390,
+      "top1_energy": 0.0029918971,
+      "frobenius_norm": 5.7312004,
+      "spectral_norm": 0.3135209
+    }
+  },
+  "activation_geometry_means": {
+    "muon_diagonal": {
+      "pre_gelu_hard_rank": 27.6568101,
+      "post_gelu_hard_rank": 35.9276547,
+      "mlp_output_hard_rank": 31.1545400
+    },
+    "full_core": {
+      "pre_gelu_hard_rank": 27.6937261,
+      "post_gelu_hard_rank": 35.9747488,
+      "mlp_output_hard_rank": 31.2862604
+    }
+  },
+  "residual_link_geometry_means": {
+    "muon_diagonal": {
+      "update_to_residual_rms": 0.3621994423,
+      "residual_update_cosine": 0.1260339899,
+      "residual_update_cka": 0.9629605280,
+      "update_hard_rank": 31.2775739,
+      "output_hard_rank": 26.4458497,
+      "post_gelu_hard_rank": 35.8134978
+    },
+    "full_core": {
+      "update_to_residual_rms": 0.3615118828,
+      "residual_update_cosine": 0.1200645707,
+      "residual_update_cka": 0.9629144801,
+      "update_hard_rank": 31.3930920,
+      "output_hard_rank": 26.5422290,
+      "post_gelu_hard_rank": 35.8635245
+    }
+  },
+  "matched_terminal_validation": {
+    "attention_only": 5.4918,
+    "plain_cproj": 5.7394,
+    "group12_inputgain": 5.7336,
+    "muon_diagonal": 5.7412,
+    "full_core": 5.7334
+  },
+  "conclusions": [
+    "The full core is neither optimizer-starved nor rank-collapsed: its mean 64x64 coefficient-matrix hard rank is 37.16 and its effective correction is 12.14 percent of base c_proj Frobenius norm.",
+    "Cross-basis mixing moves effective c_proj hard/stable rank and top singular energy toward attention-only, but terminal validation improves by only 0.0078 versus the Muon diagonal and remains 0.2416 behind attention-only. Matching these low-order weight-spectrum statistics is not sufficient.",
+    "Despite a 10.33-fold larger correction than the Muon diagonal, pre/post-GELU rank, MLP-output rank, update/residual ratio, cosine, and CKA are effectively unchanged.",
+    "The correction is almost exactly Frobenius-orthogonal to the generated base c_proj. This agrees with the earlier 4.324 percent functional-span ceiling: a fixed random input/output subspace can carry a substantial high-rank update, but it is poorly aligned with the task-relevant displacement.",
+    "The c_proj deficit is therefore not just a scalar-amplitude, optimizer, rank-capacity, or identity-residual problem. The current fixed random subspace is the primary limitation; increasing rank or adding another gain would spend parameters without evidence of task alignment."
+  ],
+  "decision": {
+    "classification": "CLOSE_FIXED_RANDOM_BASIS_CPROJ_LINE",
+    "promote_to_5tpp": false,
+    "queue_higher_rank_or_learned_basis": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "next_action": "derive any future MLP mechanism from task-conditioned activation or generator-Jacobian geometry while preserving a fixed/non-LoRA basis, and require an offline functional-span gain before another training launch"
+  }
+}
