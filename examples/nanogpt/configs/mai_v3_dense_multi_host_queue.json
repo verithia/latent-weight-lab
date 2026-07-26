@@ -734,6 +734,31 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 72,
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_lr24e4_provisional_muon",
+      "stage": "operator_override_progressive_mlp_cproj_fixedbasis_spectral64_muondiag_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_lr24e4_provisional_muon",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_lr24e4_provisional_muon.json",
+          "config_sha256": "0c026f73b9d1f1b4be4e41aa0df89a644a8f1bd9b7c74a7093ca0869bf141076",
+          "repo_relative": "latent-weight-lab-spectral64",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "01b2a3ac5caad983dab452a73a1e043807cf25534e6e922f046a14895f6ff88b",
+            "examples/nanogpt/model.py": "7c2df528f3d40e9b29bc75abb6de9ec3c03e3ba2794bb0680e0a3a7ee39bd41d",
+            "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -747,7 +772,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "all scale/group/quarter corrections through priority 70 are rejected; matched terminal diagnostics identify excessive c_proj spectral isotropy and lost update/output hard rank; corrected priority 71 learns only a rank-64 diagonal spectrum in fixed seeded FHT bases with zero function at initialization, a live first-step gradient, and a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
+      "state": "scale/group/quarter corrections and vector-diagonal priority 71 are rejected; terminal diagnosis found priority 71 changed effective c_proj by only 0.82 percent Frobenius because its vector used fallback AdamW; priority 72 preserves the exact forward function but reshapes that diagonal for Muon ownership under a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
     }
   ]
 }
