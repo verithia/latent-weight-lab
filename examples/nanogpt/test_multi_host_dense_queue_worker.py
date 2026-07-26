@@ -262,6 +262,46 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
             },
         )
 
+    def test_host_probe_manifest_ignores_terminal_variant_worktree_identity(self) -> None:
+        manifest = {
+            "required_source_hashes": {"model.py": "default"},
+            "entries": [
+                {
+                    "name": "finished",
+                    "variants": {
+                        "Y400": {
+                            "run_name": "old-run",
+                            "config": "old.json",
+                            "config_sha256": "old-config",
+                            "repo_relative": "latent-weight-lab-spectral64",
+                            "required_source_hashes": {"model.py": "old"},
+                        }
+                    },
+                },
+                {
+                    "name": "pending",
+                    "variants": {
+                        "Y400": {
+                            "run_name": "new-run",
+                            "config": "new.json",
+                            "config_sha256": "new-config",
+                            "repo_relative": "latent-weight-lab-spectral64",
+                            "required_source_hashes": {"model.py": "new"},
+                        }
+                    },
+                },
+            ],
+        }
+        state = {
+            "entries": {
+                "finished": {"state": "finished"},
+                "pending": {"state": "pending"},
+            }
+        }
+        probe = host_probe_manifest(manifest, "Y400", state)
+        self.assertEqual([entry["name"] for entry in probe["entries"]], ["new-run"])
+        self.assertEqual(probe["entries"][0]["required_source_hashes"], {"model.py": "new"})
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -155,9 +155,17 @@ def task_by_name(manifest: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
     return {task["name"]: task for task in manifest["entries"]}
 
 
-def host_probe_manifest(manifest: Dict[str, Any], host: str) -> Dict[str, Any]:
+def host_probe_manifest(
+    manifest: Dict[str, Any],
+    host: str,
+    state: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     entries = []
     for task in manifest["entries"]:
+        if state is not None:
+            runtime_state = state["entries"][task["name"]].get("state")
+            if runtime_state not in {"pending", "submitting", "running"}:
+                continue
         variant = task.get("variants", {}).get(host)
         if variant:
             entries.append(
@@ -194,7 +202,7 @@ def probe_all(manifest: Dict[str, Any], state: Dict[str, Any]) -> Dict[str, Dict
         snapshots[host] = base.snapshot(
             host,
             definition["root"],
-            host_probe_manifest(manifest, host),
+            host_probe_manifest(manifest, host, state),
             host_probe_state(manifest, state, host),
         )
     return snapshots
@@ -210,11 +218,18 @@ def observed_for(
     return snapshots[host].get("entries", {}).get(run_name, {})
 
 
-def host_identity_valid(manifest: Dict[str, Any], host: str, remote: Dict[str, Any]) -> Tuple[bool, str]:
-    valid, reason = base.remote_identity_valid(remote, host_probe_manifest(manifest, host))
+def host_identity_valid(
+    manifest: Dict[str, Any],
+    state: Dict[str, Any],
+    host: str,
+    remote: Dict[str, Any],
+) -> Tuple[bool, str]:
+    valid, reason = base.remote_identity_valid(remote, host_probe_manifest(manifest, host, state))
     if not valid:
         return valid, reason
     for task in manifest["entries"]:
+        if state["entries"][task["name"]].get("state") not in {"pending", "submitting", "running"}:
+            continue
         variant = task.get("variants", {}).get(host)
         if not variant:
             continue
@@ -574,7 +589,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
     paused_hosts = set(state.get("paused_hosts", []))
     for host, definition in manifest["hosts"].items():
         idle_by_host[host] = base.idle_gpu_indices(snapshots[host], int(definition["gpu_idle_memory_mib"]))
-        identity_by_host[host] = host_identity_valid(manifest, host, snapshots[host])
+        identity_by_host[host] = host_identity_valid(manifest, state, host, snapshots[host])
         if host in paused_hosts:
             blockers[host] = "operator paused"
 
@@ -605,10 +620,10 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                     snapshots[host] = base.snapshot(
                         host,
                         definition["root"],
-                        host_probe_manifest(manifest, host),
+                        host_probe_manifest(manifest, host, state),
                         host_probe_state(manifest, state, host),
                     )
-                    identity_by_host[host] = host_identity_valid(manifest, host, snapshots[host])
+                    identity_by_host[host] = host_identity_valid(manifest, state, host, snapshots[host])
                     identity_ok = identity_by_host[host][0]
                 except (OSError, subprocess.SubprocessError):
                     identity_ok = False
