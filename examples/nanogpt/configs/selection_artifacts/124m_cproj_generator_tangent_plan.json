@@ -1,9 +1,10 @@
 {
   "schema_version": "nanogpt_generator_tangent_diagnostic_plan_v1",
   "recorded_at": "2026-07-26",
-  "analysis_code_commit": "851d98f5029925e0ceca3b628076b0e4a4b0eb50",
+  "analysis_code_commit": "4b05f99b6d04c7ef5520242be1bb27c228a93597",
+  "plan_revision": "The first matrix-free pass used the fit window for evaluation. Commit 4b05f99 adds a disjoint 20260717 token window and records fit and holdout coverage at every CGLS milestone; only the rerun is decision-grade.",
   "entrypoints": {
-    "examples/nanogpt/analyze_cproj_generator_tangent.py": "e8c3f5fc9551a2c2d47d3a63fa5a077a299896002cc63ce946c28b55b84733ad",
+    "examples/nanogpt/analyze_cproj_generator_tangent.py": "fee50e20a578b1d2a2ba4a638d5d66a95a2043d5b0bd3e7b1f3e281c57720d67",
     "examples/nanogpt/analyze_cproj_functional_span.py": "b6f470430d25cfb60546aa475e91e098f3e8a4eee884f03b90ddbb9b00b4011d",
     "examples/nanogpt/analyze_residual_compatibility.py": "1b86bdca1cf7bfda3e37e24c790853799b256a6fb2071ca1fb8adf65bdfcd311",
     "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
@@ -24,7 +25,8 @@
   "dataset": {
     "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
     "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
-    "fixed_sample_seed": 20260716
+    "fixed_sample_seed": 20260716,
+    "holdout_sample_seed": 20260717
   },
   "host": "Y400",
   "gpu": 3,
@@ -40,7 +42,7 @@
     "solver": "64 iterations of matrix-free conjugate-gradient least squares, recording iterations 1,2,4,8,16,32,64",
     "scope": "The current modulation alpha is zero, so BlockFHT weight generation is exactly linear in z and its Jacobian is constant. This measures the complete generator subspace on the matched endpoint proxy, not a random low-rank add-on."
   },
-  "command": "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_generator_tangent --attention-only /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt --plain-cproj /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --layers 3,6,9 --batch-size 8 --block-size 256 --batches 8 --sample-cap 4096 --sample-seed 20260716 --iterations 64 --record-iterations 1,2,4,8,16,32,64 --device cuda --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_generator_tangent",
+  "command": "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_generator_tangent --attention-only /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt --plain-cproj /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --layers 3,6,9 --batch-size 8 --block-size 256 --batches 8 --sample-cap 4096 --sample-seed 20260716 --holdout-sample-seed 20260717 --iterations 64 --record-iterations 1,2,4,8,16,32,64 --device cuda --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_generator_tangent",
   "monitoring": {
     "mode": "foreground synchronous polling",
     "watchdog": false,
