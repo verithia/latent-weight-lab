@@ -265,7 +265,9 @@ def test_cproj_fixed_basis_spectrum_is_zero_function_but_trainable_at_scale_one(
 def test_fixed_fht_mix_constructs_under_ambient_cuda_device():
     with torch.device("cuda:0"):
         mix = FixedFHTMix(8, 17001)
+        basis = mix.basis_columns(4)
     assert mix.signs.device.type == "cpu"
+    assert basis.device.type == "cpu"
     mix.to("cuda:0")
     output = mix(torch.randn(2, 8, device="cuda:0"))
     assert output.device.type == "cuda"

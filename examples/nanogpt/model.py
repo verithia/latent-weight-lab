@@ -232,8 +232,16 @@ class FixedFHTMix(nn.Module):
         rank = int(rank)
         if rank <= 0 or rank > self.features:
             raise ValueError(f"rank must be in [1, {self.features}]")
-        rows = torch.arange(self.features, dtype=torch.int64).view(-1, 1)
-        cols = torch.arange(rank, dtype=torch.int64).view(1, -1)
+        rows = torch.arange(
+            self.features,
+            dtype=torch.int64,
+            device=self.signs.device,
+        ).view(-1, 1)
+        cols = torch.arange(
+            rank,
+            dtype=torch.int64,
+            device=self.signs.device,
+        ).view(1, -1)
         bits = rows.bitwise_and(cols)
         parity = torch.zeros_like(bits)
         while bits.any():
