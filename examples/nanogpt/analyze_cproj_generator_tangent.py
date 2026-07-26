@@ -98,11 +98,20 @@ def cgls_generator_tangent(
     iterations: int,
     record_iterations: set[int],
     relative_tolerance: float = 1e-8,
+    holdout_hidden: torch.Tensor | None = None,
+    holdout_target: torch.Tensor | None = None,
 ) -> tuple[torch.Tensor, list[dict[str, float]]]:
     if iterations <= 0:
         raise ValueError("iterations must be positive")
     hidden = hidden.float()
     target = target.float()
+    if (holdout_hidden is None) != (holdout_target is None):
+        raise ValueError(
+            "holdout_hidden and holdout_target must be provided together"
+        )
+    if holdout_hidden is not None:
+        holdout_hidden = holdout_hidden.float()
+        holdout_target = holdout_target.float()
     delta = torch.zeros_like(module.generator.latent.detach()).float()
     residual = target.clone()
     gradient = tangent_adjoint(module, hidden, residual)
@@ -124,22 +133,47 @@ def cgls_generator_tangent(
         new_gamma = torch.dot(new_gradient, new_gradient)
         if iteration in record_iterations or iteration == iterations:
             prediction = target - residual
-            rows.append(
-                {
-                    "iteration": float(iteration),
-                    "explained_energy": float(
-                        1.0 - residual.square().sum() / target_energy
-                    ),
-                    "target_cosine": cosine(prediction, target),
-                    "target_rms": float(target.square().mean().sqrt()),
-                    "prediction_rms": float(prediction.square().mean().sqrt()),
-                    "residual_rms": float(residual.square().mean().sqrt()),
-                    "delta_latent_l2": float(delta.norm()),
-                    "relative_normal_residual": float(
-                        (new_gamma / initial_gamma.clamp_min(1e-30)).sqrt()
-                    ),
-                }
-            )
+            row = {
+                "iteration": float(iteration),
+                "explained_energy": float(
+                    1.0 - residual.square().sum() / target_energy
+                ),
+                "target_cosine": cosine(prediction, target),
+                "target_rms": float(target.square().mean().sqrt()),
+                "prediction_rms": float(prediction.square().mean().sqrt()),
+                "residual_rms": float(residual.square().mean().sqrt()),
+                "delta_latent_l2": float(delta.norm()),
+                "relative_normal_residual": float(
+                    (new_gamma / initial_gamma.clamp_min(1e-30)).sqrt()
+                ),
+            }
+            if holdout_hidden is not None and holdout_target is not None:
+                holdout_prediction = tangent_apply(
+                    module, holdout_hidden, delta
+                )
+                holdout_residual = holdout_target - holdout_prediction
+                row.update(
+                    {
+                        "holdout_explained_energy": float(
+                            1.0
+                            - holdout_residual.square().sum()
+                            / holdout_target.square().sum().clamp_min(1e-30)
+                        ),
+                        "holdout_target_cosine": cosine(
+                            holdout_prediction, holdout_target
+                        ),
+                        "holdout_target_rms": float(
+                            holdout_target.square().mean().sqrt()
+                        ),
+                        "holdout_prediction_rms": float(
+                            holdout_prediction.square().mean().sqrt()
+                        ),
+                        "holdout_residual_rms": float(
+                            holdout_residual.square().mean().sqrt()
+                        ),
+                    }
+                )
+            rows.append(row)
         if new_gamma <= initial_gamma * float(relative_tolerance) ** 2:
             gamma = new_gamma
             break
@@ -169,6 +203,7 @@ def main() -> None:
     parser.add_argument("--batches", type=int, default=8)
     parser.add_argument("--sample-cap", type=int, default=4096)
     parser.add_argument("--sample-seed", type=int, default=20260716)
+    parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
     parser.add_argument("--iterations", type=int, default=64)
     parser.add_argument("--record-iterations", default="1,2,4,8,16,32,64")
     parser.add_argument("--device", default="cuda")
@@ -195,6 +230,29 @@ def main() -> None:
     plain = collect_layer_io(
         args.plain_cproj, batches, layers, args.sample_cap, args.device
     )
+    holdout_batches = fixed_validation_batches(
+        args.data_dir,
+        args.batch_size,
+        args.block_size,
+        args.batches,
+        args.holdout_sample_seed,
+    )
+    print("collecting held-out attention-only activations", flush=True)
+    attention_holdout = collect_layer_io(
+        args.attention_only,
+        holdout_batches,
+        layers,
+        args.sample_cap,
+        args.device,
+    )
+    print("collecting held-out plain-cproj activations", flush=True)
+    plain_holdout = collect_layer_io(
+        args.plain_cproj,
+        holdout_batches,
+        layers,
+        args.sample_cap,
+        args.device,
+    )
     model = load_model(args.plain_cproj, args.device)
 
     rows: list[dict[str, object]] = []
@@ -210,6 +268,11 @@ def main() -> None:
             target = (
                 attention[(layer, "mlp_out")] - plain[(layer, "mlp_out")]
             ).to(args.device)
+            holdout_hidden = plain_holdout[(layer, "post_gelu")].to(args.device)
+            holdout_target = (
+                attention_holdout[(layer, "mlp_out")]
+                - plain_holdout[(layer, "mlp_out")]
+            ).to(args.device)
             print(
                 f"solving layer {layer}: samples={hidden.shape[0]} "
                 f"latent={module.generator.latent.numel()} iterations={args.iterations}",
@@ -221,6 +284,8 @@ def main() -> None:
                 target,
                 args.iterations,
                 record_iterations,
+                holdout_hidden=holdout_hidden,
+                holdout_target=holdout_target,
             )
             latent = module.generator.latent.detach().float()
             for row in layer_rows:

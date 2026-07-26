@@ -38,6 +38,8 @@ def test_cgls_recovers_an_exact_generator_tangent_target() -> None:
     hidden = torch.randn(16, 4)
     true_delta = torch.randn(4)
     target = tangent_apply(module, hidden, true_delta)
+    holdout_hidden = torch.randn(9, 4)
+    holdout_target = tangent_apply(module, holdout_hidden, true_delta)
     fitted, rows = cgls_generator_tangent(
         module,
         hidden,
@@ -45,10 +47,13 @@ def test_cgls_recovers_an_exact_generator_tangent_target() -> None:
         iterations=12,
         record_iterations={1, 2, 4, 8, 12},
         relative_tolerance=1e-10,
+        holdout_hidden=holdout_hidden,
+        holdout_target=holdout_target,
     )
     prediction = tangent_apply(module, hidden, fitted)
     torch.testing.assert_close(prediction, target, rtol=2e-4, atol=2e-5)
     assert rows[-1]["explained_energy"] > 0.999999
+    assert rows[-1]["holdout_explained_energy"] > 0.999999
     assert all(
         later["explained_energy"] >= earlier["explained_energy"] - 1e-7
         for earlier, later in zip(rows, rows[1:])
