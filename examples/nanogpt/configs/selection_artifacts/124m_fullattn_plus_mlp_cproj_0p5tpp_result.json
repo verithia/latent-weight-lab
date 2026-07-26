@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_progressive_mlp_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional",
+    "host": "Y400",
+    "source_commit": "92997463f661cbfd1f75e946ce8823834d9bc60b",
+    "config_sha256": "ddfd7b30af639f2cfd8de7e3293d4ff0db5663113507cbee99f2b3290df24ab1",
+    "provenance_sha256": "20169ccf6b8667b42818a5e95521faff075f03f733ea7eaef3ea493cd7a5539f",
+    "status_sha256": "55df2171efd7dc0963971ae1c7de4a020f728fbc68a042f241e146e47675df1b",
+    "log_sha256": "01f71020fe181c7bdcf0611adec4af74574ce31fabc9de52230c6bb8063b10eb",
+    "finished_at": "2026-07-26T18:28:14+08:00",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.7351,
+    "terminal_validation_loss": 5.7394
+  },
+  "matched_attention_only_control": {
+    "name": "mai_v3_124m_fullattn_prefit_mult1p00",
+    "config_sha256": "a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7",
+    "terminal_validation_loss": 5.4918
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4803,
+      "control_validation_loss": 6.2184,
+      "candidate_minus_control": 0.2619
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9833,
+      "control_validation_loss": 5.7958,
+      "candidate_minus_control": 0.1875
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.8019,
+      "control_validation_loss": 5.5855,
+      "candidate_minus_control": 0.2164
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7394,
+      "control_validation_loss": 5.4918,
+      "candidate_minus_control": 0.2476
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_PLAIN_CPROJ_REPLACEMENT",
+    "practical_equivalence_nll": 0.02,
+    "promote_plain_cproj_to_5tpp": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "reason": "The c_proj-only replacement is outside the equivalence band at every matched evaluation and ends 0.2476 validation NLL behind attention-only. Historical matched evidence makes c_fc and joint replacement still less suitable as the next plain target."
+  },
+  "next_screen": {
+    "candidate": "zero-initialized quarter-diagonal residual correction on the same full-attention-plus-mlp.c_proj target",
+    "why": "This adds an exactly zero initial, sparse four-way aligned residual path rather than a learned dense basis. The same correction previously improved matched 350M controls across two seeds, whereas direct gain and random-direction residual variants did not replicate.",
+    "formal_status": "provisional structural diagnosis only"
+  }
+}
