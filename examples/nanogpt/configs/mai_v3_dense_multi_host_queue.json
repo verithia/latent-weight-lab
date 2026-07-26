@@ -594,6 +594,25 @@
           "active_checkpoint_budget_bytes": 6500000000
         }
       }
+    },
+    {
+      "priority": 64,
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional",
+      "stage": "operator_override_progressive_mlp_target_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional.json",
+          "config_sha256": "ddfd7b30af639f2cfd8de7e3293d4ff0db5663113507cbee99f2b3290df24ab1",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -607,7 +626,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "parked_after_attention"
+      "state": "progressive 124m attention-plus-mlp.c_proj 0.5TPP screen queued at priority 64; joint MLP replacement remains parked"
     }
   ]
 }

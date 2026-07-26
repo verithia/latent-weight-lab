@@ -1,0 +1,77 @@
+{
+  "accepted_as_mai_scaling_ladder_result": false,
+  "comparison": {
+    "attention_only_validation_loss": 3.3978,
+    "joint_c_fc_c_proj_delta": 0.8482,
+    "mlp_c_fc_delta": 0.3163,
+    "mlp_c_proj_delta": 0.1989,
+    "selected_first_progressive_target": "mlp.c_proj",
+    "selection_rule": "start with the single MLP target having the smallest matched validation-loss degradation; do not start with joint MLP replacement"
+  },
+  "limitations": [
+    "historical Y800 12-layer 768-width 1B-token evidence, not a formal MAI rung",
+    "evaluation used five batches rather than the current fixed 400-batch MAI protocol",
+    "used FineWeb-Edu 2B data rather than the current FineWeb-Edu 20B manifest"
+  ],
+  "recorded_at": "2026-07-26",
+  "schema_version": "provisional_mlp_target_ordering_evidence_v1",
+  "sources": [
+    {
+      "block_fht_targets": [
+        "attn.c_attn.qk_headwise",
+        "attn.c_attn.v",
+        "attn.c_proj"
+      ],
+      "learning_rate": 0.0022,
+      "log_path": "/root/userdata/MappingNetworks/logs/y800_fullattn_mlp_muon_1b_v3_01_attn_only_repeat_lr22e4_20260707T141037Z.log",
+      "log_sha256": "db0bc39bb14e0328943e6a7bf26122c4042d6a517bb2a5d353b32b0a1757075e",
+      "terminal_evaluation_step": 7500,
+      "terminal_train_loss": 3.4856,
+      "terminal_validation_loss": 3.3978
+    },
+    {
+      "block_fht_targets": [
+        "attn.c_attn.qk_headwise",
+        "attn.c_attn.v",
+        "attn.c_proj",
+        "mlp.c_fc"
+      ],
+      "learning_rate": 0.0022,
+      "log_path": "/root/userdata/MappingNetworks/logs/y800_fullattn_mlp_muon_1b_v3_02_attn_cfc_lr22e4_20260707T141109Z.log",
+      "log_sha256": "da8d4fec47c2c9d34d0fc2b621b147735d6c3d489cb8e3161464c50a973b8c79",
+      "terminal_evaluation_step": 7500,
+      "terminal_train_loss": 3.8989,
+      "terminal_validation_loss": 3.7141
+    },
+    {
+      "block_fht_targets": [
+        "attn.c_attn.qk_headwise",
+        "attn.c_attn.v",
+        "attn.c_proj",
+        "mlp.c_proj"
+      ],
+      "learning_rate": 0.0022,
+      "log_path": "/root/userdata/MappingNetworks/logs/y800_fullattn_mlp_muon_1b_v3_03_attn_cproj_lr22e4_20260707T154618Z.log",
+      "log_sha256": "fe8d63ebf89c06321abd5f4da3c2bcade14a23bf2032f3775203e527e71a02d0",
+      "terminal_evaluation_step": 7500,
+      "terminal_train_loss": 3.5936,
+      "terminal_validation_loss": 3.5967
+    },
+    {
+      "block_fht_targets": [
+        "attn.c_attn.qk_headwise",
+        "attn.c_attn.v",
+        "attn.c_proj",
+        "mlp.c_fc",
+        "mlp.c_proj"
+      ],
+      "learning_rate": 0.0022,
+      "log_path": "/root/userdata/MappingNetworks/logs/y800_fullattn_mlp_muon_1b_v3_04_attn_cfc_cproj_lr22e4_20260707T154824Z.log",
+      "log_sha256": "35fa4c888fdf1f0390c57acfa1c9f1e53556197d896d2246908098ceede7e8a8",
+      "terminal_evaluation_step": 7500,
+      "terminal_train_loss": 4.2202,
+      "terminal_validation_loss": 4.246
+    }
+  ],
+  "state": "HISTORICAL_TARGET_ORDERING_PRIOR"
+}
