@@ -689,6 +689,25 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 70,
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_dualgain_0p5tpp_lr24e4_provisional_muon",
+      "stage": "operator_override_progressive_mlp_cproj_dualgain_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_dualgain_0p5tpp_lr24e4_provisional_muon",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_dualgain_0p5tpp_lr24e4_provisional_muon.json",
+          "config_sha256": "0a02c3948b58cbab5d82947400dd4d2cfe0935a6626eab6e5870c6b6281cbf1b",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -702,7 +721,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "plain c_proj, zero-weight quarter residual, and plain input-channel gain are rejected; grouped-input c_proj consistently improved plain replacement but only by 0.0058 terminal NLL and remains rejected; complementary output-grouped c_proj plus per-group input gain is queued at priority 69 subject to a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
+      "state": "plain c_proj, zero-weight quarter residual, input-only gain, and both input/output grouping are rejected; input grouping improved plain replacement by only 0.0058 terminal NLL, while output grouping was worse; the final non-basis scale-only screen, plain c_proj with simultaneous input/output gains, is queued at priority 70 subject to a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
     }
   ]
 }

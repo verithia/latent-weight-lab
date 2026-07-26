@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_progressive_mlp_outgroup12_input_gain_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_outgroup12_inputgain_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "85b2085783867c3b2bd8a66013e46ba5b08e40c4",
+    "config_sha256": "4f294b81eb0c7aa2de68e30e292989cdd7e06f67ca8fef43b94a745d9c6be0aa",
+    "provenance_sha256": "fe8c4f72b17d9943bb43a46821cc86172a2d7a9acc766268e675627765116ba8",
+    "status_sha256": "54ea32761ca4f5d7c4d4cead46f85ee5da736cadd789ac2f817004e5f8219728",
+    "log_sha256": "4ef384b1fd159cf112031ddbc89e3169038d2adfb56cd20db74f944f258b3280",
+    "finished_at": "2026-07-26T19:14:11+08:00",
+    "exit_code": 0,
+    "optimizer": "muon",
+    "max_iters": 238,
+    "terminal_train_loss": 5.7431,
+    "terminal_validation_loss": 5.7475
+  },
+  "controls": {
+    "attention_only_terminal_validation_loss": 5.4918,
+    "plain_cproj_terminal_validation_loss": 5.7394,
+    "group12_inputgain_terminal_validation_loss": 5.7336
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.5026,
+      "candidate_minus_plain_cproj": 0.0223,
+      "candidate_minus_group12_inputgain": 0.0611,
+      "candidate_minus_attention_only": 0.2842
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9929,
+      "candidate_minus_plain_cproj": 0.0096,
+      "candidate_minus_group12_inputgain": 0.0231,
+      "candidate_minus_attention_only": 0.1971
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.8101,
+      "candidate_minus_plain_cproj": 0.0082,
+      "candidate_minus_group12_inputgain": 0.0157,
+      "candidate_minus_attention_only": 0.2246
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7475,
+      "candidate_minus_plain_cproj": 0.0081,
+      "candidate_minus_group12_inputgain": 0.0139,
+      "candidate_minus_attention_only": 0.2557
+    }
+  ],
+  "decision": {
+    "classification": "REJECTED_OUTPUT_ROW_PARTITION",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "reason": "Twelve independent residual-output groups are worse than plain c_proj and input-grouped c_proj at every matched window, and finish 0.2557 NLL behind attention-only."
+  },
+  "next_screen": {
+    "candidate": "plain mlp.c_proj with simultaneous learnable input-channel and output-channel gains",
+    "why": "Input-only gain and output-only historical controls are negative, but their two-sided diagonal composition is the remaining non-basis scale-only test of row and column manifold degrees of freedom.",
+    "admission": "must pass the same synchronously polled 20% MFU gate",
+    "formal_status": "provisional structural diagnosis only"
+  }
+}
