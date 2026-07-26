@@ -1,0 +1,102 @@
+{
+  "schema_version": "nanogpt_matched_cproj_spectral64_muondiag_terminal_diagnostic_result_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "6e8c754c4d93ab06b57242b06d06f6e27a02a831",
+  "execution_commit": "9318a16737383b16d607425ce1a1f7f9e5c9fa9d",
+  "screen_result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_result.json",
+  "screen_result_artifact_sha256": "bd6c7839298514badbbe79aea58b604b2db94fcb16c55d04bcd7cf2696196a63",
+  "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_muondiag_terminal_diagnostic_manifest.csv",
+  "checkpoint_manifest_sha256": "18185c7a4881197fce1dcfb34c4f065c9a9ac3e085df9dc29cff736d2a6b8d9b",
+  "diagnostic_plan_sha256": "b00eab4dff30c71c76910032d38e8405621cfe00c638d67f728dfc7287785d94",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "matched_step": 238,
+  "remote_artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_muondiag_terminal_matched",
+    "residual_log_sha256": "fecf0ea7826010fec6a1866aa729e145babbe318ce4eb0e4af8b3d995714a5c3",
+    "residual_csv_sha256": "7a21cfe56558dd9fa5b3a86511518af8491a13d14fa5aec50aff0e31fe1e0dc7",
+    "residual_json_sha256": "ddb972fa888a62049e44311a47c4679696219b3ae1b8221b40a51bc0c2b998d3",
+    "manifold_log_sha256": "deb236069b01e8792e2a360129c16793bfce97c8e45a58ba53b562f1ba3dcfcc",
+    "activation_summary_sha256": "c1b722f42e1967fbad832d936b43a58c8d0b0b964ab601923f40c4b142aee56a",
+    "activation_rows_sha256": "43db436c8165ea9f60e38a08f31f4b3302a3cbb0f49740988653c008cc37df90",
+    "parameter_metrics_sha256": "aa5cde5c09746aae598728d1ee3453408f1c2a16c69e72536e3625b12429f34c",
+    "parameter_summary_sha256": "57ba11d5fc78899086dae252f9b7c50f99398028279c497d195ce1b9e97ec20c",
+    "spectral_residual_metrics_sha256": "b2d430082c7739dc3c9706ff457c197bdee26f813a5a4e2b9a4391a256a07762",
+    "spectral_residual_summary_sha256": "1afe920b0208a71f314ef8b686d7cead2bfb125f508215b871b8429cd9965281"
+  },
+  "optimizer_assignment_effect": {
+    "adamw_vector": {
+      "outer_scale": 0.9992380341,
+      "diagonal_absolute_mean": 0.0063102289,
+      "diagonal_l2_norm": 0.0626974764,
+      "diagonal_hard_rank": 19.1088428,
+      "residual_frobenius_norm": 0.0469945831,
+      "residual_to_base_frobenius": 0.0082281443,
+      "residual_spectral_norm": 0.0182877310
+    },
+    "muon_matrix": {
+      "outer_scale": 0.9945090413,
+      "diagonal_absolute_mean": 0.0087076190,
+      "diagonal_l2_norm": 0.0896200364,
+      "diagonal_hard_rank": 22.0620340,
+      "residual_frobenius_norm": 0.0668503915,
+      "residual_to_base_frobenius": 0.0117056677,
+      "residual_spectral_norm": 0.0207983597
+    },
+    "relative_changes": {
+      "diagonal_absolute_mean": 0.3799228375,
+      "diagonal_l2_norm": 0.4294106078,
+      "residual_frobenius_norm": 0.4225169699,
+      "residual_to_base_frobenius": 0.4225842745
+    }
+  },
+  "effective_cproj_spectrum_means": {
+    "plain_cproj": {
+      "hard_rank": 614.1314697,
+      "stable_rank": 342.6638387,
+      "top1_energy": 0.0029184494,
+      "frobenius_norm": 5.7039393,
+      "spectral_norm": 0.3081758
+    },
+    "adamw_vector": {
+      "hard_rank": 614.1238810,
+      "stable_rank": 342.7354329,
+      "top1_energy": 0.0029178304,
+      "frobenius_norm": 5.7124844,
+      "spectral_norm": 0.3086036
+    },
+    "muon_matrix": {
+      "hard_rank": 614.1276042,
+      "stable_rank": 342.6565348,
+      "top1_energy": 0.0029185031,
+      "frobenius_norm": 5.7114932,
+      "spectral_norm": 0.3085860
+    }
+  },
+  "residual_activation_means": {
+    "update_to_residual_rms": 0.3621994423,
+    "residual_update_cosine": 0.1260339899,
+    "residual_update_cka": 0.9629605280,
+    "update_hard_rank": 31.2775739,
+    "output_hard_rank": 26.4458497,
+    "postgelu_hard_rank": 35.8134978
+  },
+  "matched_terminal_validation": {
+    "attention_only": 5.4918,
+    "plain_cproj": 5.7394,
+    "group12_inputgain": 5.7336,
+    "adamw_vector": 5.7416,
+    "muon_matrix": 5.7412
+  },
+  "conclusions": [
+    "Muon ownership did activate the learned diagonal more strongly: its L2 norm and effective correction Frobenius norm increased by about 43 percent.",
+    "The correction nevertheless remains only 1.17 percent of the generated base c_proj Frobenius norm, and the effective c_proj singular spectrum is practically unchanged.",
+    "Residual-link compatibility and pre/post-activation rank are indistinguishable from the rejected AdamW-vector form, while terminal validation improves by only 0.0004 and remains worse than plain and grouped c_proj.",
+    "Optimizer starvation was a secondary limitation, not the primary cause of the c_proj replacement deficit. The next diagnostic must directly measure how much of the matched dense-c_proj target displacement lies in the fixed paired-basis diagonal span."
+  ],
+  "decision": {
+    "classification": "CLOSE_FIXEDBASIS_DIAGONAL_OPTIMIZER_LINE",
+    "promote_to_5tpp": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "next_action": "project the matched attention-only versus generated-c_proj terminal weight displacement onto the 64 fixed paired-basis atoms and compare the learned correction with the least-squares optimum"
+  }
+}
