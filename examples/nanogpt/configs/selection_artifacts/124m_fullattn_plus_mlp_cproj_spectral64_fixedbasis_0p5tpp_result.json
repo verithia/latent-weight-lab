@@ -1,0 +1,101 @@
+{
+  "schema_version": "mai_progressive_mlp_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "88b85b9eac5d6a8a8fda70b68087715599ce82ae",
+    "config_sha256": "fd6ee727bd9f81b20196b1737813d48fbf8fdde1b1e1cb700fb153d42d8324cf",
+    "provenance_sha256": "97d7b0484d6c4fd0fd8a0070c8702798b087b848dc90e262122e7a3041921c12",
+    "status_sha256": "8659360b2d9ce2c2e53796a775e055790f23c46edc43cc8cb97d22a5094f857f",
+    "log_sha256": "76e03da6ee601696c92089e30815fff80533f1e5ddd058a688a33e5bb89a7b28",
+    "submit_log_sha256": "97f21e2c77ad710de7f5e6a12fc3601e9d2d1572801bad0b2d8d43da4fbd36a1",
+    "checkpoint_sha256": "4993f0210a507be6b335d08720775bebb0a5e926d84489d978e3c54eabe0a5b3",
+    "checkpoint_meta_sha256": "eef087c04eb4369bacaac3d5483c8c9e283f81b7a2497f74b320469b5b0d31b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "finished_at": "2026-07-26T20:00:48+08:00",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.7373,
+    "terminal_validation_loss": 5.7416
+  },
+  "performance_gate": {
+    "attempt_1": {
+      "classification": "rejected_before_training",
+      "mfu": 0.0379165386,
+      "tokens_per_second": 39987.76,
+      "milliseconds_per_update": 6555.61,
+      "reason": "token-wise Python-stage FHT execution was below the fixed 20 percent MFU floor"
+    },
+    "attempt_2": {
+      "classification": "passed",
+      "mfu": 0.2998990663,
+      "tokens_per_second": 316276.49,
+      "milliseconds_per_update": 828.843,
+      "peak_memory_mib": 32006.88,
+      "certificate_sha256": "82fabd5823c1a4247e674613b9645357acc6b4449f0c55acd0e46fd2d4c42efa"
+    }
+  },
+  "mechanism": {
+    "target": "mlp.c_proj",
+    "fixed_basis": "seeded signed normalized FHT input and output basis columns",
+    "rank": 64,
+    "trainable_scalars_per_layer": 65,
+    "learned_basis": false,
+    "initialization": "diagonal coefficients zero and outer scale one",
+    "implementation": "two exact low-rank accelerator GEMMs around the learned diagonal"
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4891,
+      "attention_only_validation_loss": 6.2184,
+      "plain_cproj_validation_loss": 6.4803,
+      "group12_inputgain_validation_loss": 6.4415,
+      "candidate_minus_attention_only": 0.2707,
+      "candidate_minus_plain_cproj": 0.0088,
+      "candidate_minus_group12_inputgain": 0.0476
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9869,
+      "attention_only_validation_loss": 5.7958,
+      "plain_cproj_validation_loss": 5.9833,
+      "group12_inputgain_validation_loss": 5.9698,
+      "candidate_minus_attention_only": 0.1911,
+      "candidate_minus_plain_cproj": 0.0036,
+      "candidate_minus_group12_inputgain": 0.0171
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.8041,
+      "attention_only_validation_loss": 5.5855,
+      "plain_cproj_validation_loss": 5.8019,
+      "group12_inputgain_validation_loss": 5.7944,
+      "candidate_minus_attention_only": 0.2186,
+      "candidate_minus_plain_cproj": 0.0022,
+      "candidate_minus_group12_inputgain": 0.0097
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7416,
+      "attention_only_validation_loss": 5.4918,
+      "plain_cproj_validation_loss": 5.7394,
+      "group12_inputgain_validation_loss": 5.7336,
+      "candidate_minus_attention_only": 0.2498,
+      "candidate_minus_plain_cproj": 0.0022,
+      "candidate_minus_group12_inputgain": 0.0080
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_FIXEDBASIS_SPECTRAL64_NO_GAIN",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "reason": "The corrected directional residual is slightly worse than plain c_proj at every matched window, finishes 0.2498 validation NLL behind attention-only, and therefore does not repair the generated c_proj deficit."
+  },
+  "next_action": {
+    "diagnostic": "measure the learned diagonal energy/rank, effective c_proj spectrum, MLP activation ranks, and residual-link compatibility on the terminal checkpoint",
+    "constraint": "do not choose another directional generator until the terminal diagnostic distinguishes unused capacity from a fixed-basis alignment failure"
+  }
+}

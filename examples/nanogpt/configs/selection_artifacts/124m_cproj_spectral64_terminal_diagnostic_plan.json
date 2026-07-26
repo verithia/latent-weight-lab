@@ -1,0 +1,31 @@
+{
+  "schema_version": "nanogpt_matched_checkpoint_diagnostic_plan_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "18b28065c3d37489bd65beb4d06cebac39696774",
+  "entrypoints": {
+    "examples/nanogpt/analyze_residual_compatibility.py": "f5c86492556c3bddcb487b939362cf968c9b0f4041459ed79b05bc87c29063a0",
+    "examples/nanogpt/analyze_cproj_manifold.py": "427d3fe9bb181f09cbaa310fed7174964169653d8743631bdb340a46cffbf3a9",
+    "examples/nanogpt/model.py": "d2c525c9448d44ae8da40b4ee4e44343ae6fb20e13a0fc80b85ba0a534fe7e7c",
+    "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+  },
+  "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_terminal_diagnostic_manifest.csv",
+  "dataset": {
+    "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_sample_seed": 20260716
+  },
+  "host": "Y400",
+  "gpu": 3,
+  "output": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_terminal_matched",
+  "commands": [
+    "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_residual_compatibility --checkpoint spectral64_fixedbasis=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_terminal_matched/residual --device cuda --layers 3,6,9 --batch-size 8 --block-size 256 --batches 8 --sample-cap 512 --sample-seed 20260716",
+    "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_manifold --manifest /root/userdata/MappingNetworks/latent-weight-lab-spectral64/examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_terminal_diagnostic_manifest.csv --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_terminal_matched/manifold --control-run attention_only --layers 3,6,9 --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --device cuda --param-device cuda --split val --batch-size 8 --block-size 256 --max-batches 8 --sample-cap 512 --sample-seed 20260716 --regime-split val --activation-runs spectral64_fixedbasis --activation-steps 238"
+  ],
+  "monitoring": {
+    "mode": "foreground synchronous polling",
+    "watchdog": false,
+    "reason": "short inference-time terminal diagnostic; long-run callbacks are not appropriate",
+    "training_mfu_gate_applicable": false,
+    "performance_policy": "use batched validation and accelerator-side SVD; poll process, GPU memory/utilization, and phase output directly"
+  }
+}
