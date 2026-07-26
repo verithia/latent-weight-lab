@@ -167,7 +167,10 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         manifest = {
             "label": "dense queue",
             "hosts": {"Y400": {"workspace_cap_bytes": self.GIB}},
-            "entries": [{"priority": 1, "name": "top1", "max_iters": 2000}],
+            "entries": [
+                {"priority": 1, "name": "top1", "max_iters": 2000},
+                {"priority": 2, "name": "old", "max_iters": 1000},
+            ],
         }
         state = {
             "entries": {
@@ -176,14 +179,23 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
                     "attempts_by_host": {"Y400": 3},
                     "state": "running",
                     "last_iter": 400,
-                }
+                },
+                "old": {
+                    "assigned_host": "Y400",
+                    "attempts_by_host": {"Y400": 1},
+                    "state": "finished",
+                    "last_iter": 1000,
+                },
             }
         }
         snapshots = {"Y400": {"workspace_used_bytes": 0, "filesystem_available_bytes": 2 * self.GIB}}
+        heartbeat = heartbeat_text(manifest, state, snapshots, {"Y400": ""})
         self.assertIn(
             "top1@Y400 attempt=3: running iter=400/2000",
-            heartbeat_text(manifest, state, snapshots, {"Y400": ""}),
+            heartbeat,
         )
+        self.assertNotIn("old@Y400", heartbeat)
+        self.assertIn("totals=running:1,submitting:0,pending:0,finished:1,failed:0", heartbeat)
 
     @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
     def test_detached_host_does_not_publish_a_tmux_session(self, ssh_script: mock.Mock) -> None:

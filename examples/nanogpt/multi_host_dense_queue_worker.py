@@ -397,15 +397,25 @@ def heartbeat_text(
     manifest: Dict[str, Any], state: Dict[str, Any], snapshots: Dict[str, Dict[str, Any]], blockers: Dict[str, str]
 ) -> str:
     tasks = []
+    state_counts: Dict[str, int] = {}
     for task in sorted(manifest["entries"], key=lambda item: item["priority"]):
         runtime = state["entries"][task["name"]]
+        runtime_state = str(runtime.get("state") or "unknown")
+        state_counts[runtime_state] = state_counts.get(runtime_state, 0) + 1
+        if runtime_state not in {"running", "submitting", "pending"}:
+            continue
         host = runtime.get("assigned_host") or "unassigned"
         attempt = runtime.get("attempts_by_host", {}).get(host) if host != "unassigned" else None
         attempt_text = f" attempt={attempt}" if attempt else ""
         tasks.append(
             f"{task['name']}@{host}{attempt_text}: "
-            f"{runtime.get('state')} iter={runtime.get('last_iter')}/{task['max_iters']}"
+            f"{runtime_state} iter={runtime.get('last_iter')}/{task['max_iters']}"
         )
+    known_states = ("running", "submitting", "pending", "finished", "failed")
+    totals = "totals=" + ",".join(f"{name}:{state_counts.get(name, 0)}" for name in known_states)
+    unexpected_states = sorted(set(state_counts) - set(known_states))
+    if unexpected_states:
+        totals += "," + ",".join(f"{name}:{state_counts[name]}" for name in unexpected_states)
     hosts = []
     for host, definition in manifest["hosts"].items():
         used = int(snapshots[host].get("workspace_used_bytes", 0)) / (1024**3)
@@ -415,7 +425,7 @@ def heartbeat_text(
         if isinstance(filesystem_available, int) and filesystem_available / (1024**3) < cap:
             physical = f" fsfree={filesystem_available / (1024**3):.1f}GiB"
         hosts.append(f"{host}={used:.1f}/{cap:.0f}GiB{physical} blocked={blockers.get(host) or 'none'}")
-    return manifest["label"] + " HEARTBEAT: " + " | ".join(tasks + hosts)
+    return manifest["label"] + " HEARTBEAT: " + " | ".join(tasks + [totals] + hosts)
 
 
 def status_summary(
