@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_progressive_mlp_group12_input_gain_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_group12_inputgain_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "75a0074386b75e8d43036a20edaa282e109c1827",
+    "config_sha256": "29942ee6522d909c1f7bb9521255fb93640cf392088f01f6e1f96cc41435ecec",
+    "provenance_sha256": "4fbc603141eb60771780f13c011b2eb7542785e64c31983cc79f510cb1f4abd4",
+    "status_sha256": "1934636f416a9b92330f517e14b936ba59ea6e4412dff529de63e3af1c4f6c5a",
+    "log_sha256": "19d53087d520928019f8a27cfa7a86136238e93970ed57397cd3b338035d67c3",
+    "finished_at": "2026-07-26T19:04:35+08:00",
+    "exit_code": 0,
+    "optimizer": "muon",
+    "max_iters": 238,
+    "terminal_train_loss": 5.7295,
+    "terminal_validation_loss": 5.7336
+  },
+  "controls": {
+    "attention_only_terminal_validation_loss": 5.4918,
+    "plain_cproj_terminal_validation_loss": 5.7394
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4415,
+      "candidate_minus_plain_cproj": -0.0388,
+      "candidate_minus_attention_only": 0.2231
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9698,
+      "candidate_minus_plain_cproj": -0.0135,
+      "candidate_minus_attention_only": 0.1740
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.7944,
+      "candidate_minus_plain_cproj": -0.0075,
+      "candidate_minus_attention_only": 0.2089
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7336,
+      "candidate_minus_plain_cproj": -0.0058,
+      "candidate_minus_attention_only": 0.2418
+    }
+  ],
+  "decision": {
+    "classification": "CONSISTENT_SMALL_GAIN_STILL_REJECTED",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "reason": "Twelve independently seeded input-group generators improve on plain c_proj at all four matched windows, but the terminal gain is only 0.0058 NLL and the candidate remains 0.2418 NLL behind attention-only."
+  },
+  "next_screen": {
+    "candidate": "12-way output-grouped mlp.c_proj generation with per-input-channel gain inside each output group",
+    "why": "Input-side grouping produced only a small gain, so the complementary test directly unties residual-output row subspaces without adding a learned dense basis.",
+    "admission": "must pass a synchronously polled 20% MFU gate because twelve smaller generated projections may be kernel-inefficient",
+    "formal_status": "provisional structural diagnosis only"
+  }
+}
