@@ -81,6 +81,7 @@
   "eval_tokens_per_split": 6553600,
   "eval_total_tokens": 13107200,
   "experiment_role": "provisional directional-subspace screen selected by matched terminal c_proj parameter/residual/activation diagnostics; fixed seeded FHT bases with only a rank-64 diagonal spectrum and one outer scalar learned per layer",
+  "implementation": "exact signed-FHT leading basis columns are deterministically materialized once, then each residual uses two accelerator low-rank GEMMs around the learned diagonal; no token-wise Python FHT stages",
   "fixed_eval_index_runtime_digest": "record train.py rng_eval_metadata.fixed_eval_indices_sha256 before launch; candidate and controls must match",
   "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
   "fixed_eval_indices": true,
@@ -170,6 +171,14 @@
   "recipe_resolution_required": false,
   "recipe_resolution_stage": "progressive_mlp_cproj_fixedbasis_spectral64_screen_0p5tpp",
   "registered_execution_stack": "eager PyTorch/CUDA BF16; torch.compile=false",
+  "rejected_preflight_attempt": {
+    "attempt": 1,
+    "certificate_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon_20260726T114205Z_3873077.mfu.json",
+    "certificate_sha256": "739b3d19c890c069e74d192de446748af088d016c48a6848e7f6d7949da2a4fe",
+    "measured_mfu_fraction": 0.03791653860876384,
+    "reason": "token-wise Python FHT stages consumed 6523ms of the 6556ms update; no real training was launched",
+    "source_commit": "f07e5dbbbdaace6f41c92b0ee5aca612ab4b3eab"
+  },
   "registered_resume_determinism_required": true,
   "registered_resume_protocol": "atomic_latest_checkpoint_v2_with_pre_current_batch_and_full_rng_state",
   "save_checkpoint": true,

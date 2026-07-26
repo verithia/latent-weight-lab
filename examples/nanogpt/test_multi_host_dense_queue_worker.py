@@ -8,6 +8,7 @@ from examples.nanogpt.multi_host_dense_queue_worker import (
     active_budget,
     heartbeat_text,
     host_admission_status,
+    host_probe_manifest,
     launch,
     load_state,
     progress_text,
@@ -195,7 +196,8 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
             1,
         )
         self.assertEqual(session, "")
-        self.assertEqual(ssh_script.call_args.args[2][-1], "detached")
+        self.assertEqual(ssh_script.call_args.args[2][-2], "detached")
+        self.assertEqual(ssh_script.call_args.args[2][-1], "latent-weight-lab")
 
     @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
     def test_isolated_tmux_host_publishes_per_attempt_socket(self, ssh_script: mock.Mock) -> None:
@@ -209,7 +211,56 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
         )
         self.assertRegex(session, r"^tmuxl:denseq_[0-9a-f]{16}:run$")
         self.assertEqual(ssh_script.call_args.args[2][5], session)
-        self.assertEqual(ssh_script.call_args.args[2][-1], "tmux-isolated")
+        self.assertEqual(ssh_script.call_args.args[2][-2], "tmux-isolated")
+        self.assertEqual(ssh_script.call_args.args[2][-1], "latent-weight-lab")
+
+    @mock.patch("examples.nanogpt.multi_host_dense_queue_worker.base.ssh_script")
+    def test_launch_can_use_an_isolated_registered_worktree(self, ssh_script: mock.Mock) -> None:
+        launch(
+            "Y400",
+            {"root": "/remote", "python_relative": ".venv/bin/python", "launch_mode": "tmux-isolated"},
+            "task",
+            {
+                "run_name": "run",
+                "config": "config.json",
+                "resume": False,
+                "repo_relative": "latent-weight-lab-spectral64",
+            },
+            3,
+            2,
+        )
+        arguments = ssh_script.call_args.args[2]
+        self.assertEqual(arguments[2], "/remote/latent-weight-lab-spectral64/config.json")
+        self.assertEqual(arguments[-1], "latent-weight-lab-spectral64")
+
+    def test_host_probe_manifest_preserves_variant_worktree_identity(self) -> None:
+        manifest = {
+            "required_source_hashes": {"model.py": "old"},
+            "entries": [
+                {
+                    "name": "task",
+                    "variants": {
+                        "Y400": {
+                            "run_name": "run",
+                            "config": "config.json",
+                            "config_sha256": "abc",
+                            "repo_relative": "latent-weight-lab-spectral64",
+                            "required_source_hashes": {"model.py": "new"},
+                        }
+                    },
+                }
+            ],
+        }
+        self.assertEqual(
+            host_probe_manifest(manifest, "Y400")["entries"][0],
+            {
+                "name": "run",
+                "config": "config.json",
+                "config_sha256": "abc",
+                "repo_relative": "latent-weight-lab-spectral64",
+                "required_source_hashes": {"model.py": "new"},
+            },
+        )
 
 
 if __name__ == "__main__":

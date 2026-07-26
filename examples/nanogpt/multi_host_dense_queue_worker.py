@@ -20,8 +20,8 @@ except ImportError:  # Direct script execution places this directory on sys.path
 
 
 REMOTE_LAUNCH = r'''set -euo pipefail
-root="$1"; python_bin="$2"; config="$3"; gpu="$4"; run_name="$5"; session="$6"; submit_log="$7"; resume="$8"; launch_mode="$9"
-repo="$root/latent-weight-lab"
+root="$1"; python_bin="$2"; config="$3"; gpu="$4"; run_name="$5"; session="$6"; submit_log="$7"; resume="$8"; launch_mode="$9"; repo_relative="${10}"
+repo="$root/$repo_relative"
 launcher="$repo/examples/nanogpt/launch_y400_ladder_detached.sh"
 mkdir -p "$(dirname "$submit_log")"
 case "$launch_mode" in
@@ -92,15 +92,37 @@ def load_manifest(path: Path, repo: Path) -> Dict[str, Any]:
                 raise ValueError("variant MFU floor is below 20%: " + name + "/" + host)
             if int(variant.get("checkpoint_budget_bytes", 0)) <= 0:
                 raise ValueError("variant lacks checkpoint budget: " + name + "/" + host)
+            repo_relative = variant.get("repo_relative", "latent-weight-lab")
+            if not isinstance(repo_relative, str) or not re.fullmatch(r"[A-Za-z0-9._-]+", repo_relative):
+                raise ValueError("variant has invalid repo_relative: " + name + "/" + host)
+            variant_hashes = variant.get("required_source_hashes")
+            if variant_hashes is not None and (
+                not isinstance(variant_hashes, dict)
+                or not variant_hashes
+                or any(
+                    not isinstance(relative, str) or not isinstance(digest, str)
+                    for relative, digest in variant_hashes.items()
+                )
+            ):
+                raise ValueError("variant has invalid required_source_hashes: " + name + "/" + host)
             active_budget_bytes = variant.get("active_checkpoint_budget_bytes")
             if active_budget_bytes is not None and (
                 int(active_budget_bytes) <= 0
                 or int(active_budget_bytes) > int(variant["checkpoint_budget_bytes"])
             ):
                 raise ValueError("variant has invalid active checkpoint budget: " + name + "/" + host)
-    for relative, expected in payload["required_source_hashes"].items():
-        if base.file_sha256(repo / relative) != expected:
-            raise ValueError("local registered source hash mismatch: " + relative)
+    registered_source_sets = [payload["required_source_hashes"]]
+    registered_source_sets.extend(
+        variant["required_source_hashes"]
+        for task in payload["entries"]
+        for variant in task.get("variants", {}).values()
+        if variant.get("required_source_hashes")
+    )
+    if not any(
+        all(base.file_sha256(repo / relative) == expected for relative, expected in source_set.items())
+        for source_set in registered_source_sets
+    ):
+        raise ValueError("local source tree does not match any registered worktree identity")
     return payload
 
 
@@ -139,7 +161,15 @@ def host_probe_manifest(manifest: Dict[str, Any], host: str) -> Dict[str, Any]:
         variant = task.get("variants", {}).get(host)
         if variant:
             entries.append(
-                {"name": variant["run_name"], "config": variant["config"], "config_sha256": variant["config_sha256"]}
+                {
+                    "name": variant["run_name"],
+                    "config": variant["config"],
+                    "config_sha256": variant["config_sha256"],
+                    "repo_relative": variant.get("repo_relative", "latent-weight-lab"),
+                    "required_source_hashes": variant.get(
+                        "required_source_hashes", manifest["required_source_hashes"]
+                    ),
+                }
             )
     return {"required_source_hashes": manifest["required_source_hashes"], "entries": entries}
 
@@ -181,7 +211,20 @@ def observed_for(
 
 
 def host_identity_valid(manifest: Dict[str, Any], host: str, remote: Dict[str, Any]) -> Tuple[bool, str]:
-    return base.remote_identity_valid(remote, host_probe_manifest(manifest, host))
+    valid, reason = base.remote_identity_valid(remote, host_probe_manifest(manifest, host))
+    if not valid:
+        return valid, reason
+    for task in manifest["entries"]:
+        variant = task.get("variants", {}).get(host)
+        if not variant:
+            continue
+        observed = remote.get("entries", {}).get(variant["run_name"], {})
+        if observed.get("repo_git_dirty"):
+            return False, f"remote variant Git worktree is dirty: {variant['run_name']}"
+        expected = variant.get("required_source_hashes", manifest["required_source_hashes"])
+        if observed.get("repo_source_hashes") != expected:
+            return False, f"remote variant source hashes do not match: {variant['run_name']}"
+    return True, ""
 
 
 def active_budget(
@@ -258,8 +301,9 @@ def launch(
     else:
         session = ""
     root = host_definition["root"]
+    repo_relative = variant.get("repo_relative", "latent-weight-lab")
     submit_log = f"{root}/outputs/y400_ladder_runs/queue/{safe}_a{attempt}.submit.log"
-    config = f"{root}/latent-weight-lab/{variant['config']}"
+    config = f"{root}/{repo_relative}/{variant['config']}"
     python_bin = f"{root}/{host_definition['python_relative']}"
     base.ssh_script(
         host,
@@ -274,6 +318,7 @@ def launch(
             submit_log,
             str(bool(variant.get("resume"))).lower(),
             launch_mode,
+            repo_relative,
         ],
     )
     return session, submit_log
@@ -554,7 +599,7 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
                 blockers[host] = capacity_reason
                 continue
             identity_ok, _reason = identity_by_host[host]
-            if not identity_ok:
+            if not identity_ok and definition.get("auto_deploy", True):
                 try:
                     base.deploy_main(host, definition["root"])
                     snapshots[host] = base.snapshot(

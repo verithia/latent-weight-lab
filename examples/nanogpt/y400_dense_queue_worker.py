@@ -93,9 +93,24 @@ entries = {}
 status_root = root / "outputs/y400_ladder_runs/status"
 for entry in payload.get("entries", []):
     name = entry["name"]
-    config = repo / entry["config"]
+    entry_repo = root / entry.get("repo_relative", "latent-weight-lab")
+    config = entry_repo / entry["config"]
+    if entry_repo == repo:
+        entry_git_commit = git_commit
+        entry_git_dirty = git_dirty
+        entry_source_hashes = source_hashes
+    else:
+        entry_git_commit = command(["git", "-C", str(entry_repo), "rev-parse", "HEAD"])
+        entry_git_dirty = bool(command(["git", "-C", str(entry_repo), "status", "--porcelain"]))
+        entry_source_hashes = {
+            path: file_sha(entry_repo / path)
+            for path in entry.get("required_source_hashes", payload.get("required_source_hashes", {}))
+        }
     result = {
         "config_sha256": file_sha(config),
+        "repo_git_commit": entry_git_commit,
+        "repo_git_dirty": entry_git_dirty,
+        "repo_source_hashes": entry_source_hashes,
         "checkpoint_next_iter": None,
         "checkpoint_metadata_path": None,
         "status_path": entry.get("status_path"),
@@ -315,6 +330,10 @@ def snapshot(host: str, root: str, manifest: Dict[str, Any], state: Dict[str, An
                 "submit_log": runtime.get("submit_log"),
                 "submitted_at": runtime.get("submitted_at", 0.0),
                 "status_path": runtime.get("status_path"),
+                "repo_relative": entry.get("repo_relative", "latent-weight-lab"),
+                "required_source_hashes": entry.get(
+                    "required_source_hashes", manifest["required_source_hashes"]
+                ),
             }
         )
     payload = {

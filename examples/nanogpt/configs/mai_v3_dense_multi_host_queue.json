@@ -13,7 +13,8 @@
       "workspace_cap_bytes": 322122547200,
       "workspace_reserve_bytes": 8589934592,
       "gpu_idle_memory_mib": 1024,
-      "launch_mode": "tmux-isolated"
+      "launch_mode": "tmux-isolated",
+      "auto_deploy": false
     },
     "PRO6": {
       "root": "/home/pro6000-9980x/MappingNetworks",
@@ -721,7 +722,13 @@
         "Y400": {
           "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon",
           "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon.json",
-          "config_sha256": "abacf4f53b347da7712b39d3e9228279f8584c15e73085c231e8d1c115e16d70",
+          "config_sha256": "fd6ee727bd9f81b20196b1737813d48fbf8fdde1b1e1cb700fb153d42d8324cf",
+          "repo_relative": "latent-weight-lab-spectral64",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "ab4dad2f1ef0543505f1da3384e7b00aa3359e76c6a3b697a328a0573fbe0af1",
+            "examples/nanogpt/model.py": "d2c525c9448d44ae8da40b4ee4e44343ae6fb20e13a0fc80b85ba0a534fe7e7c",
+            "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+          },
           "resume": false,
           "expected_checkpoint_next_iter": null,
           "checkpoint_budget_bytes": 2147483648

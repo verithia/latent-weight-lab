@@ -207,6 +207,30 @@ class FixedFHTMix(nn.Module):
         signs = torch.randint(0, 2, (self.padded,), generator=generator, dtype=torch.float32) * 2.0 - 1.0
         self.register_buffer("signs", signs, persistent=True)
 
+    def basis_columns(self, rank: int) -> torch.Tensor:
+        """Materialize exact leading columns of the signed normalized FHT.
+
+        A low-rank linear correction should not execute the Python-stage FHT
+        over every token.  These deterministic columns let the same transform
+        run as two accelerator GEMMs around a learned diagonal spectrum.
+        """
+        rank = int(rank)
+        if rank <= 0 or rank > self.features:
+            raise ValueError(f"rank must be in [1, {self.features}]")
+        rows = torch.arange(self.features, dtype=torch.int64).view(-1, 1)
+        cols = torch.arange(rank, dtype=torch.int64).view(1, -1)
+        bits = rows.bitwise_and(cols)
+        parity = torch.zeros_like(bits)
+        while bits.any():
+            parity = parity.bitwise_xor(bits.bitwise_and(1))
+            bits = bits.bitwise_right_shift(1)
+        hadamard = (1.0 - 2.0 * parity.float()) / math.sqrt(self.padded)
+        return (
+            self.signs[: self.features].view(-1, 1)
+            * hadamard
+            * self.signs[:rank].view(1, -1)
+        )
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         if x.shape[-1] != self.features:
             raise ValueError(f"expected last dim {self.features}, got {x.shape[-1]}")
@@ -860,11 +884,23 @@ class MLP(nn.Module):
             spectral_seed = int(config.block_fht_cproj_spectral_resid_seed)
             self.cproj_spectral_resid_in_mix = FixedFHTMix(4 * config.n_embd, spectral_seed + layer_id * 64 + 129)
             self.cproj_spectral_resid_out_mix = FixedFHTMix(config.n_embd, spectral_seed + layer_id * 64 + 130)
+            self.register_buffer(
+                "cproj_spectral_resid_in_basis",
+                self.cproj_spectral_resid_in_mix.basis_columns(spectral_rank),
+                persistent=False,
+            )
+            self.register_buffer(
+                "cproj_spectral_resid_out_basis",
+                self.cproj_spectral_resid_out_mix.basis_columns(spectral_rank),
+                persistent=False,
+            )
         else:
             self.cproj_spectral_resid_diag = None
             self.cproj_spectral_resid_scale = None
             self.cproj_spectral_resid_in_mix = None
             self.cproj_spectral_resid_out_mix = None
+            self.cproj_spectral_resid_in_basis = None
+            self.cproj_spectral_resid_out_basis = None
         self.postgelu_std_target = float(config.block_fht_ffn_postgelu_std_target)
         self.last_postgelu: torch.Tensor | None = None
 
@@ -920,13 +956,12 @@ class MLP(nn.Module):
             and self.cproj_spectral_resid_scale is not None
             and self.cproj_spectral_resid_in_mix is not None
             and self.cproj_spectral_resid_out_mix is not None
+            and self.cproj_spectral_resid_in_basis is not None
+            and self.cproj_spectral_resid_out_basis is not None
         ):
-            rank = self.cproj_spectral_resid_diag.shape[0]
-            mixed_in = self.cproj_spectral_resid_in_mix(activated)[..., :rank]
+            mixed_in = F.linear(activated, self.cproj_spectral_resid_in_basis.transpose(0, 1))
             spectral = mixed_in * self.cproj_spectral_resid_diag.to(dtype=activated.dtype)
-            if rank < out.shape[-1]:
-                spectral = F.pad(spectral, (0, out.shape[-1] - rank))
-            spectral = self.cproj_spectral_resid_out_mix(spectral)
+            spectral = F.linear(spectral, self.cproj_spectral_resid_out_basis)
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
         return self.dropout(out)
 

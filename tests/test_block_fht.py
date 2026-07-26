@@ -12,7 +12,7 @@ from latent_weight_lab.block_fht import (
     sign_word_for,
     suspend_block_fht_weight_cache,
 )
-from examples.nanogpt.model import GPTConfig, MLP, freeze_non_block_fht
+from examples.nanogpt.model import FixedFHTMix, GPTConfig, MLP, freeze_non_block_fht
 
 
 def test_sign_word_uses_32_positions():
@@ -258,3 +258,17 @@ def test_cproj_fixed_basis_spectrum_is_zero_function_but_trainable_at_scale_one(
         structured.cproj_spectral_resid_scale.grad,
         torch.zeros_like(structured.cproj_spectral_resid_scale.grad),
     )
+
+
+def test_fixed_fht_basis_columns_match_both_lowrank_projection_sides():
+    torch.manual_seed(2468)
+    mix = FixedFHTMix(5, seed=23)
+    rank = 3
+    basis = mix.basis_columns(rank)
+
+    inputs = torch.randn(7, 5)
+    assert torch.allclose(inputs.matmul(basis), mix(inputs)[..., :rank], atol=1e-6)
+
+    coefficients = torch.randn(7, rank)
+    padded = F.pad(coefficients, (0, 5 - rank))
+    assert torch.allclose(coefficients.matmul(basis.transpose(0, 1)), mix(padded), atol=1e-6)
