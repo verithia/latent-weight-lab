@@ -1,0 +1,124 @@
+{
+  "schema_version": "mai_progressive_mlp_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "gpu": 3,
+    "source_commit": "b740a6c894004989ebbe9cf79b9c586ab743a72a",
+    "source_hashes": {
+      "examples/nanogpt/train.py": "f45cf79e48df3e7cc6c74a4ec1782ad51677622c9dc9cf5fa6326551a00e9552",
+      "examples/nanogpt/model.py": "f35198cf31dbe1b8a4887d7a0bb11bd879060d7db5e6b6b5307dd673ca3db017",
+      "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+    },
+    "entrypoint": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_lr24e4_provisional_muon_20260726T125911Z_3883909.config.json"
+    ],
+    "config_sha256": "8f9886756cefe8fa76af5040c67ced627b7e4b4580aab33c22baa1f78688398b",
+    "provenance_sha256": "0a6ee7cd35688773a686d9e77db4b89729d940c0f555018b1edf673203deb227",
+    "status_sha256": "a66288248d9cd900f854e529c9ac6a9e4f2d9258cb77f5997b6ca6da0a118b14",
+    "log_sha256": "4ce63798d7ac32e9006037f4680e1dc837563e0b4158b39c39393f198f47d7c3",
+    "checkpoint_sha256": "5e24d01f1ee61cf4bd76eb67aeab79f1d5bbcc55acecc2676339d45fabb3b6dc",
+    "checkpoint_meta_sha256": "1e1d431e47f19aee9797ff00419264b6c6fb8696947e97109f7b403fd58cfd92",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "finished_at": "2026-07-26T21:04:01+08:00",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.7292,
+    "terminal_validation_loss": 5.7334
+  },
+  "performance_gate": {
+    "classification": "passed",
+    "mfu": 0.2988667380,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "tokens_per_second": 315379.08,
+    "milliseconds_per_update": 831.2033,
+    "peak_memory_mib": 32006.93,
+    "certificate_sha256": "d90ae5414f015f34a4213ca85b27bb939d60e5cecca20c857624519b54c7fe98"
+  },
+  "mechanism": {
+    "target": "mlp.c_proj",
+    "fixed_basis": "unchanged seeded signed normalized FHT-derived input and output basis columns",
+    "rank": 64,
+    "trainable_core_parameters_per_layer": 4096,
+    "trainable_scalars_per_layer_including_outer_scale": 4097,
+    "learned_basis": false,
+    "initialization": "64x64 core zero and outer scale one",
+    "implementation": "post-GELU activations are projected into the fixed input basis, mixed by a learned full core, projected through the fixed output basis, and added to generated c_proj",
+    "optimizer_assignment": "Muon; matrix_tensors=24"
+  },
+  "functional_span_premise": {
+    "paired_diagonal_optimal_explained_energy": 0.0032591025,
+    "full_64x64_core_optimal_explained_energy": 0.0432362556,
+    "full_core_to_diagonal_explainability_ratio": 13.2663098543,
+    "result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_functional_span_result.json",
+    "result_artifact_sha256": "f500d52887542f88fa47baf6e7053bd9713ccfe62a072d9537c965ec3e638533"
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4660,
+      "attention_only_validation_loss": 6.2184,
+      "plain_cproj_validation_loss": 6.4803,
+      "group12_inputgain_validation_loss": 6.4415,
+      "vector_spectral_validation_loss": 6.4891,
+      "muon_diagonal_validation_loss": 6.4898
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9761,
+      "attention_only_validation_loss": 5.7958,
+      "plain_cproj_validation_loss": 5.9833,
+      "group12_inputgain_validation_loss": 5.9698,
+      "vector_spectral_validation_loss": 5.9869,
+      "muon_diagonal_validation_loss": 5.9863
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.7961,
+      "attention_only_validation_loss": 5.5855,
+      "plain_cproj_validation_loss": 5.8019,
+      "group12_inputgain_validation_loss": 5.7944,
+      "vector_spectral_validation_loss": 5.8041,
+      "muon_diagonal_validation_loss": 5.8038
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7334,
+      "attention_only_validation_loss": 5.4918,
+      "plain_cproj_validation_loss": 5.7394,
+      "group12_inputgain_validation_loss": 5.7336,
+      "vector_spectral_validation_loss": 5.7416,
+      "muon_diagonal_validation_loss": 5.7412,
+      "candidate_minus_attention_only": 0.2416,
+      "candidate_minus_plain_cproj": -0.0060,
+      "candidate_minus_group12_inputgain": -0.0002,
+      "candidate_minus_vector_spectral": -0.0082,
+      "candidate_minus_muon_diagonal": -0.0078
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_FULL_CORE_PRACTICAL_TIE_WITH_GROUP12",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "queue_plain_cfc_or_joint_mlp_next": false,
+    "close_fixed_random_basis_cproj_line": true,
+    "reason": "Cross-basis mixing consistently improves both paired-diagonal variants and terminal plain c_proj, but its 0.0002 terminal advantage over group-12 is not material and it retains a 0.2416 validation-NLL penalty versus attention-only."
+  },
+  "next_action": {
+    "diagnostic": "measure full-core correction amplitude and spectrum plus post-GELU and residual-link geometry on the terminal checkpoint",
+    "constraint": "do not promote this fixed random basis, do not raise its rank, and do not move to plain c_fc or joint MLP replacement without a new activation- or generator-geometry-derived mechanism"
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "schema_version": "nanogpt_matched_checkpoint_diagnostic_plan_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "b740a6c894004989ebbe9cf79b9c586ab743a72a",
+  "entrypoints": {
+    "examples/nanogpt/analyze_residual_compatibility.py": "1b86bdca1cf7bfda3e37e24c790853799b256a6fb2071ca1fb8adf65bdfcd311",
+    "examples/nanogpt/analyze_cproj_manifold.py": "cea03deb0f61132f6891a5c7951a9b49231ba188d862959fa128c3bf2d965fde",
+    "examples/nanogpt/model.py": "f35198cf31dbe1b8a4887d7a0bb11bd879060d7db5e6b6b5307dd673ca3db017",
+    "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+  },
+  "screen_result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_result.json",
+  "screen_result_artifact_sha256": "6286b089e65e787b32c968abd2a6c166c28d76d16d363b34a0e41e8930a01776",
+  "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_fullcore_terminal_diagnostic_manifest.csv",
+  "checkpoint_manifest_sha256": "9b30362f31de1291b7d2fcf263711d04f23a8f33c69dbe52427a789ed60f7067",
+  "dataset": {
+    "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_sample_seed": 20260716
+  },
+  "host": "Y400",
+  "gpu": 3,
+  "output": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_fullcore_terminal_matched",
+  "questions": [
+    "How large is the learned full-core correction relative to the generated base c_proj and the rejected Muon diagonal?",
+    "Does cross-basis mixing measurably change effective c_proj spectrum, post-GELU rank, or MLP output rank?",
+    "Does its small CE gain correspond to improved residual-link update geometry, or is the fixed random subspace still functionally misaligned?"
+  ],
+  "commands": [
+    "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_residual_compatibility --checkpoint spectral64_fullcore=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_lr24e4_provisional_muon/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_fullcore_terminal_matched/residual --device cuda --layers 3,6,9 --batch-size 8 --block-size 256 --batches 8 --sample-cap 512 --sample-seed 20260716",
+    "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_manifold --manifest /root/userdata/MappingNetworks/latent-weight-lab-spectral64/examples/nanogpt/configs/selection_artifacts/124m_cproj_spectral64_fullcore_terminal_diagnostic_manifest.csv --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_fullcore_terminal_matched/manifold --control-run attention_only --layers 3,6,9 --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --device cuda --param-device cuda --split val --batch-size 8 --block-size 256 --max-batches 8 --sample-cap 512 --sample-seed 20260716 --regime-split val --activation-runs spectral64_muondiag,spectral64_fullcore --activation-steps 238"
+  ],
+  "monitoring": {
+    "mode": "foreground synchronous polling",
+    "watchdog": false,
+    "reason": "short inference-time terminal diagnostic; long-run callbacks are not appropriate",
+    "training_mfu_gate_applicable": false,
+    "performance_policy": "use batched validation and accelerator-side SVD; poll process, GPU memory/utilization, and phase output directly"
+  }
+}
