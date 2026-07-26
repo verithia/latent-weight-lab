@@ -24,7 +24,7 @@ def load_model(checkpoint_path: Path, device: str) -> GPT:
     return model
 
 
-def effective_c_proj_weight(model: GPT, layer: int) -> torch.Tensor:
+def base_c_proj_weight(model: GPT, layer: int) -> torch.Tensor:
     module = model.transformer.h[layer].mlp.c_proj
     if hasattr(module, "heads"):
         parts = [head.weight.detach().float() for head in module.heads]
@@ -32,6 +32,86 @@ def effective_c_proj_weight(model: GPT, layer: int) -> torch.Tensor:
             return torch.cat(parts, dim=1)
         return torch.cat(parts, dim=0)
     return module.weight.detach().float()
+
+
+def spectral_residual_weight(model: GPT, layer: int) -> torch.Tensor | None:
+    mlp = model.transformer.h[layer].mlp
+    diag = mlp.cproj_spectral_resid_diag
+    scale = mlp.cproj_spectral_resid_scale
+    in_basis = mlp.cproj_spectral_resid_in_basis
+    out_basis = mlp.cproj_spectral_resid_out_basis
+    if diag is None or scale is None or in_basis is None or out_basis is None:
+        return None
+    # The forward path is
+    #   (x @ V) * diag @ U.T
+    # where V/U are fixed signed-Hadamard basis columns.  PyTorch linear
+    # weights use [out, in], so the equivalent matrix is U diag V.T.
+    return (
+        scale.detach().float()
+        * (out_basis.detach().float() * diag.detach().float().unsqueeze(0))
+        @ in_basis.detach().float().transpose(0, 1)
+    )
+
+
+def effective_c_proj_weight(model: GPT, layer: int) -> torch.Tensor:
+    weight = base_c_proj_weight(model, layer)
+    spectral = spectral_residual_weight(model, layer)
+    if spectral is not None:
+        weight = weight + spectral
+    return weight
+
+
+def spectral_residual_metrics(model: GPT, layer: int) -> dict[str, float] | None:
+    mlp = model.transformer.h[layer].mlp
+    diag = mlp.cproj_spectral_resid_diag
+    scale = mlp.cproj_spectral_resid_scale
+    in_basis = mlp.cproj_spectral_resid_in_basis
+    out_basis = mlp.cproj_spectral_resid_out_basis
+    residual = spectral_residual_weight(model, layer)
+    if diag is None or scale is None or in_basis is None or out_basis is None or residual is None:
+        return None
+
+    diagonal = diag.detach().float()
+    energy = diagonal.square()
+    total = energy.sum()
+    if total > 0:
+        probability = energy / total
+        soft_rank = float(torch.exp(-(probability * torch.log(probability.clamp_min(1e-30))).sum()))
+        hard_rank = float(1.0 / probability.square().sum())
+        top1_energy = float(probability.max())
+        top10_energy = float(torch.topk(probability, min(10, probability.numel())).values.sum())
+    else:
+        soft_rank = 0.0
+        hard_rank = 0.0
+        top1_energy = 0.0
+        top10_energy = 0.0
+
+    base = base_c_proj_weight(model, layer)
+    identity = torch.eye(diagonal.numel(), device=in_basis.device, dtype=torch.float32)
+    in_gram = in_basis.detach().float().transpose(0, 1) @ in_basis.detach().float()
+    out_gram = out_basis.detach().float().transpose(0, 1) @ out_basis.detach().float()
+    return {
+        "rank": float(diagonal.numel()),
+        "scale": float(scale.detach()),
+        "diag_mean": float(diagonal.mean()),
+        "diag_std": float(diagonal.std()),
+        "diag_abs_mean": float(diagonal.abs().mean()),
+        "diag_abs_max": float(diagonal.abs().max()),
+        "diag_l1": float(diagonal.abs().sum()),
+        "diag_l2": float(diagonal.norm()),
+        "diag_nonzero_fraction": float((diagonal != 0).float().mean()),
+        "diag_soft_rank": soft_rank,
+        "diag_hard_rank": hard_rank,
+        "diag_top1_energy": top1_energy,
+        "diag_top10_energy": top10_energy,
+        "residual_fro_norm": float(torch.linalg.matrix_norm(residual)),
+        "residual_to_base_fro": float(
+            torch.linalg.matrix_norm(residual) / torch.linalg.matrix_norm(base).clamp_min(1e-30)
+        ),
+        "residual_spectral_norm": float(torch.linalg.svdvals(residual).max()),
+        "in_basis_orthogonality_max_abs": float((in_gram - identity).abs().max()),
+        "out_basis_orthogonality_max_abs": float((out_gram - identity).abs().max()),
+    }
 
 
 def spectrum_metrics(weight: torch.Tensor) -> dict[str, float]:
@@ -98,6 +178,7 @@ def parameter_flow(args: argparse.Namespace) -> None:
     runs: dict[str, dict[int, dict[int, torch.Tensor]]] = defaultdict(lambda: defaultdict(dict))
     meta: dict[tuple[str, int], str] = {}
     rows = []
+    spectral_rows = []
     for item in manifest:
         run = item["run"]
         step = int(item["step"])
@@ -115,6 +196,17 @@ def parameter_flow(args: argparse.Namespace) -> None:
                 **metrics,
             }
             rows.append(row)
+            spectral = spectral_residual_metrics(model, layer)
+            if spectral is not None:
+                spectral_rows.append(
+                    {
+                        "run": run,
+                        "kind": item.get("kind", ""),
+                        "step": step,
+                        "layer": layer,
+                        **spectral,
+                    }
+                )
         meta[(run, step)] = item.get("kind", "")
         del model
         if "cuda" in args.param_device:
@@ -151,8 +243,14 @@ def parameter_flow(args: argparse.Namespace) -> None:
 
     write_csv(Path(args.output) / "cproj_param_metrics.csv", rows)
     write_csv(Path(args.output) / "cproj_flow_metrics.csv", flow_rows)
+    write_csv(Path(args.output) / "cproj_spectral_residual_metrics.csv", spectral_rows)
     summarize(Path(args.output) / "cproj_param_summary.csv", rows, ["run", "kind", "step"])
     summarize(Path(args.output) / "cproj_flow_summary.csv", flow_rows, ["run", "kind", "step"])
+    summarize(
+        Path(args.output) / "cproj_spectral_residual_summary.csv",
+        spectral_rows,
+        ["run", "kind", "step"],
+    )
 
 
 def summarize(path: Path, rows: list[dict[str, object]], keys: list[str]) -> None:
