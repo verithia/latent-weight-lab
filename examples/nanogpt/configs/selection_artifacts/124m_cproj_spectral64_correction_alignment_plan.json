@@ -1,0 +1,37 @@
+{
+  "schema_version": "nanogpt_cproj_correction_alignment_plan_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "b836224e6e6d181cc155c398d336265dbbc999b3",
+  "entrypoint": {
+    "path": "examples/nanogpt/analyze_cproj_correction_alignment.py",
+    "sha256": "5cdca0f60454dec1329279be3dda0d463d064cd2a84962923f81d17a5ad4ed6b"
+  },
+  "inputs": {
+    "attention_only": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "spectral64_fixedbasis": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon/ckpt.pt",
+      "sha256": "4993f0210a507be6b335d08720775bebb0a5e926d84489d978e3c54eabe0a5b3"
+    },
+    "spectral64_muondiag": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_lr24e4_provisional_muon/ckpt.pt",
+      "sha256": "07f6f201dfcb56301ef874833384be819b0fcc083dbae1b75a8b9d95483f6528"
+    }
+  },
+  "target_definition": "For each matched layer, attention-only terminal effective c_proj minus the plain generated-c_proj terminal effective c_proj. This is an endpoint displacement proxy under co-adaptation, not a causal oracle for the isolated optimum.",
+  "projection_definition": "Exact least-squares projection onto span{u_k v_k^T}_{k=1..64}, using the Hadamard product of the cropped input/output FHT-derived basis Gram matrices.",
+  "command": "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_correction_alignment --attention-only /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt --plain-cproj /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --candidate spectral64_fixedbasis=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon/ckpt.pt --candidate spectral64_muondiag=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_muondiag_0p5tpp_lr24e4_provisional_muon/ckpt.pt --layers 3,6,9 --device cuda --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_spectral64_muondiag_terminal_matched/alignment",
+  "monitoring": {
+    "mode": "foreground synchronous polling",
+    "watchdog": false,
+    "reason": "short data-free checkpoint diagnostic",
+    "training_mfu_gate_applicable": false
+  },
+  "decision_use": "If the span explains little endpoint-displacement energy, close this paired fixed-basis family as misaligned. If it explains substantial energy but the learned correction is far from the least-squares projection, investigate optimization/conditioning before changing generator structure."
+}
