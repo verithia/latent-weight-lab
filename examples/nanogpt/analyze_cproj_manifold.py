@@ -171,9 +171,9 @@ def summarize(path: Path, rows: list[dict[str, object]], keys: list[str]) -> Non
     write_csv(path, out)
 
 
-def token_regimes(data_dir: Path, vocab_size: int) -> np.ndarray:
-    train = np.memmap(data_dir / "train.bin", dtype=np.uint16, mode="r")
-    counts = np.bincount(np.asarray(train), minlength=vocab_size).astype(np.int64)
+def token_regimes(data_dir: Path, vocab_size: int, split: str = "val") -> np.ndarray:
+    values = np.memmap(data_dir / f"{split}.bin", dtype=np.uint16, mode="r")
+    counts = np.bincount(np.asarray(values), minlength=vocab_size).astype(np.int64)
     order = np.argsort(-counts)
     total = int(counts.sum())
     cumsum = np.cumsum(counts[order])
@@ -190,11 +190,12 @@ def get_batch(data_dir: Path, split: str, batch_size: int, block_size: int, devi
     return x.to(device)
 
 
-def effective_ranks(values: torch.Tensor) -> dict[str, float]:
+def effective_ranks(values: torch.Tensor, device: str) -> dict[str, float]:
     if values.shape[0] < 2:
         return {"soft_rank": float("nan"), "hard_rank": float("nan"), "samples": int(values.shape[0])}
-    x = values.float() - values.float().mean(dim=0, keepdim=True)
-    singular = torch.linalg.svdvals(x.cpu())
+    x = values.to(device=device, dtype=torch.float32)
+    x = x - x.mean(dim=0, keepdim=True)
+    singular = torch.linalg.svdvals(x)
     eig = singular.square()
     total = eig.sum().clamp_min(1e-30)
     p = eig / total
@@ -206,11 +207,19 @@ def effective_ranks(values: torch.Tensor) -> dict[str, float]:
 
 
 class ActivationCollector:
-    def __init__(self, model: GPT, regimes: np.ndarray, layers: list[int], sample_cap: int) -> None:
+    def __init__(
+        self,
+        model: GPT,
+        regimes: np.ndarray,
+        layers: list[int],
+        sample_cap: int,
+        rank_device: str,
+    ) -> None:
         self.model = model
         self.regimes = regimes
         self.layers = set(layers)
         self.sample_cap = int(sample_cap)
+        self.rank_device = rank_device
         self.current_tokens: torch.Tensor | None = None
         self.samples: dict[tuple[int, str, str], list[torch.Tensor]] = defaultdict(list)
         self.counts: dict[tuple[int, str, str], int] = defaultdict(int)
@@ -260,7 +269,7 @@ class ActivationCollector:
         rows = []
         for (layer, point, regime), pieces in sorted(self.samples.items()):
             values = torch.cat(pieces, dim=0)[: self.sample_cap]
-            ranks = effective_ranks(values)
+            ranks = effective_ranks(values, self.rank_device)
             rows.append({"layer": layer, "point": point, "regime": regime, **ranks})
         return rows
 
@@ -271,6 +280,7 @@ def activation_ranks(args: argparse.Namespace) -> None:
     selected_runs = set(args.activation_runs.split(","))
     layers = [int(part) for part in args.layers.split(",")]
     data_dir = Path(args.data_dir)
+    regimes = token_regimes(data_dir, 50304, args.regime_split)
     rows = []
     for item in manifest:
         run = item["run"]
@@ -278,9 +288,15 @@ def activation_ranks(args: argparse.Namespace) -> None:
         if run not in selected_runs or step not in selected_steps:
             continue
         model = load_model(Path(item["checkpoint"]), args.device)
-        regimes = token_regimes(data_dir, model.config.vocab_size)
-        collector = ActivationCollector(model, regimes, layers, args.sample_cap)
+        if model.config.vocab_size != len(regimes):
+            raise ValueError(
+                f"cached token-regime vocabulary has {len(regimes)} entries, "
+                f"but {run} expects {model.config.vocab_size}"
+            )
+        collector = ActivationCollector(model, regimes, layers, args.sample_cap, args.device)
         try:
+            torch.manual_seed(args.sample_seed)
+            np.random.seed(args.sample_seed)
             with torch.no_grad():
                 for _ in range(args.max_batches):
                     x = get_batch(data_dir, args.split, args.batch_size, args.block_size, args.device)
@@ -310,6 +326,8 @@ def main() -> None:
     parser.add_argument("--block-size", type=int, default=256)
     parser.add_argument("--max-batches", type=int, default=16)
     parser.add_argument("--sample-cap", type=int, default=512)
+    parser.add_argument("--sample-seed", type=int, default=20260716)
+    parser.add_argument("--regime-split", default="val")
     parser.add_argument("--activation-runs", default="attn_only,cproj_group12,cproj_outg12,g12_pregain_cproj_group12,g12_pregain_cproj_outg12")
     parser.add_argument("--activation-steps", default="0,250,750")
     parser.add_argument("--skip-activations", action="store_true")

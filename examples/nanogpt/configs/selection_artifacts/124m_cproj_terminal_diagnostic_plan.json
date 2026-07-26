@@ -4,7 +4,7 @@
   "analysis_code_commit": "97708679d04f0962d24ae6dac6e79841d692de0a",
   "entrypoints": {
     "examples/nanogpt/analyze_residual_compatibility.py": "f5c86492556c3bddcb487b939362cf968c9b0f4041459ed79b05bc87c29063a0",
-    "examples/nanogpt/analyze_cproj_manifold.py": "aeff4ca881bb2ac75eb1c510545c594b3bb7abc8408db0cfa661391cff875c58",
+    "examples/nanogpt/analyze_cproj_manifold.py": "e64b4671e25c48a59bcd63c94288aa237c0733caef244e28fd1f8ee8ed7e81c9",
     "examples/nanogpt/model.py": "2609e37784f3622c5924dfbfd17bb1eeed705ff692f19465945973b2fb6c7536",
     "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
   },
@@ -19,7 +19,7 @@
   "output": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched",
   "commands": [
     "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_residual_compatibility --checkpoint attention_only=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt --checkpoint plain_cproj=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --checkpoint group12_inputgain=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_group12_inputgain_0p5tpp_lr24e4_provisional_muon/ckpt.pt --checkpoint dualgain=/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_dualgain_0p5tpp_lr24e4_provisional_muon/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/residual --device cuda --layers 3,6,9 --batch-size 8 --block-size 256 --batches 8 --sample-cap 512 --sample-seed 20260716",
-    "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_manifold --manifest /root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_cproj_terminal_diagnostic_manifest.csv --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/manifold --control-run attention_only --layers 3,6,9 --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --device cuda --param-device cuda --split val --batch-size 8 --block-size 256 --max-batches 8 --sample-cap 512 --activation-runs attention_only,plain_cproj,group12_inputgain,dualgain --activation-steps 238"
+    "CUDA_VISIBLE_DEVICES=3 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_cproj_manifold --manifest /root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_cproj_terminal_diagnostic_manifest.csv --output /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/manifold --control-run attention_only --layers 3,6,9 --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --device cuda --param-device cuda --split val --batch-size 8 --block-size 256 --max-batches 8 --sample-cap 512 --sample-seed 20260716 --regime-split val --activation-runs attention_only,plain_cproj,group12_inputgain,dualgain --activation-steps 238"
   ],
   "monitoring": {
     "mode": "foreground synchronous polling",
