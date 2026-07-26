@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_progressive_mlp_cproj_dualgain_screen_result_v1",
+  "recorded_at": "2026-07-26",
+  "screen": {
+    "name": "mai_v3_124m_fullattn_plus_mlp_cproj_dualgain_0p5tpp_lr24e4_provisional_muon",
+    "host": "Y400",
+    "source_commit": "97708679d04f0962d24ae6dac6e79841d692de0a",
+    "config_sha256": "0a02c3948b58cbab5d82947400dd4d2cfe0935a6626eab6e5870c6b6281cbf1b",
+    "provenance_sha256": "67025030eedb74ae5358102e5831bce27a7831220350dd033a57b476fa4f08d0",
+    "status_sha256": "a2bcbb3da56ea71f19a3a7839c882222adc90179261239aaf2f78dd1458ecdc7",
+    "log_sha256": "6068e5af7320c6be52557c6ddabb95bae282b970f2f379049ce734fad5bcfaf0",
+    "checkpoint_sha256": "97d1ea2f2ece6d3c51016fc87e717429246d9149e51cfc31d70b00f3e513e94b",
+    "checkpoint_meta_sha256": "6028e73022f13becf7a0266f95a19c3f23fb39c41ab4bb82770074fd584b31de",
+    "finished_at": "2026-07-26T19:22:08+08:00",
+    "exit_code": 0,
+    "optimizer": "muon",
+    "max_iters": 238,
+    "terminal_train_loss": 5.7397,
+    "terminal_validation_loss": 5.7440
+  },
+  "controls": {
+    "attention_only_terminal_validation_loss": 5.4918,
+    "plain_cproj_terminal_validation_loss": 5.7394,
+    "inputgain_terminal_validation_loss": 5.7430,
+    "group12_inputgain_terminal_validation_loss": 5.7336
+  },
+  "matched_fixed_evaluations": [
+    {
+      "step": 60,
+      "candidate_validation_loss": 6.4958,
+      "candidate_minus_plain_cproj": 0.0155,
+      "candidate_minus_inputgain": 0.0022,
+      "candidate_minus_group12_inputgain": 0.0543,
+      "candidate_minus_attention_only": 0.2774
+    },
+    {
+      "step": 120,
+      "candidate_validation_loss": 5.9903,
+      "candidate_minus_plain_cproj": 0.0070,
+      "candidate_minus_inputgain": 0.0014,
+      "candidate_minus_group12_inputgain": 0.0205,
+      "candidate_minus_attention_only": 0.1945
+    },
+    {
+      "step": 180,
+      "candidate_validation_loss": 5.8066,
+      "candidate_minus_plain_cproj": 0.0047,
+      "candidate_minus_inputgain": 0.0010,
+      "candidate_minus_group12_inputgain": 0.0122,
+      "candidate_minus_attention_only": 0.2211
+    },
+    {
+      "step": 238,
+      "candidate_validation_loss": 5.7440,
+      "candidate_minus_plain_cproj": 0.0046,
+      "candidate_minus_inputgain": 0.0010,
+      "candidate_minus_group12_inputgain": 0.0104,
+      "candidate_minus_attention_only": 0.2522
+    }
+  ],
+  "decision": {
+    "classification": "REJECTED_TWO_SIDED_DIAGONAL_SCALE",
+    "practical_equivalence_nll": 0.02,
+    "promote_to_5tpp": false,
+    "close_scale_only_branch": true,
+    "reason": "Simultaneous learned row and column gains are worse than plain c_proj, input-only gain, and input-grouped c_proj at every matched window, and finish 0.2522 NLL behind attention-only."
+  },
+  "next_action": {
+    "action": "matched checkpoint diagnostics before any different generator",
+    "measurements": [
+      "effective c_proj singular spectrum and row/column norm distribution",
+      "FFN pre/post-GELU effective rank by HEAD/MID/TAIL token regime",
+      "MLP update-to-residual RMS, residual-update cosine, and CKA"
+    ],
+    "formal_status": "diagnosis only; no c_fc or joint MLP promotion"
+  }
+}
