@@ -759,6 +759,31 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 73,
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_lr24e4_provisional_muon",
+      "stage": "operator_override_progressive_mlp_cproj_fixedbasis_spectral64_fullcore_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_lr24e4_provisional_muon",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fullcore_0p5tpp_lr24e4_provisional_muon.json",
+          "config_sha256": "8f9886756cefe8fa76af5040c67ced627b7e4b4580aab33c22baa1f78688398b",
+          "repo_relative": "latent-weight-lab-spectral64",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "f45cf79e48df3e7cc6c74a4ec1782ad51677622c9dc9cf5fa6326551a00e9552",
+            "examples/nanogpt/model.py": "f35198cf31dbe1b8a4887d7a0bb11bd879060d7db5e6b6b5307dd673ca3db017",
+            "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -772,7 +797,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "scale/group/quarter corrections and vector-diagonal priority 71 are rejected; terminal diagnosis found priority 71 changed effective c_proj by only 0.82 percent Frobenius because its vector used fallback AdamW; priority 72 preserves the exact forward function but reshapes that diagonal for Muon ownership under a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
+      "state": "scale/group/quarter corrections and both paired-diagonal priorities 71/72 are rejected; Muon raised correction norm by 42 percent without changing effective spectrum, activation geometry, or CE. Matched functional least squares found a fixed 64x64 cross-basis core explains 4.324 percent of endpoint-output correction versus 0.326 percent for paired coefficients (13.27x), so priority 73 is the isolated evidence-backed 0.5TPP full-core screen under a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
     }
   ]
 }
