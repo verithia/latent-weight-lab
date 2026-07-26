@@ -189,6 +189,10 @@ def load_model(checkpoint_path: Path, device: str) -> GPT:
     with torch.device(device):
         model = GPT(GPTConfig(**checkpoint["model_config"]))
     model.load_state_dict(checkpoint["model"])
+    # Fixed deterministic mapping buffers are deliberately initialized on CPU
+    # so their CPU generators remain valid under an ambient CUDA device.
+    # Move the complete mixed-device module after loading the checkpoint.
+    model.to(device)
     model.eval()
     return model
 

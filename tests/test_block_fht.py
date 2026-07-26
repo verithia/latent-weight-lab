@@ -1,3 +1,4 @@
+import pytest
 import torch
 import torch.nn.functional as F
 
@@ -258,6 +259,16 @@ def test_cproj_fixed_basis_spectrum_is_zero_function_but_trainable_at_scale_one(
         structured.cproj_spectral_resid_scale.grad,
         torch.zeros_like(structured.cproj_spectral_resid_scale.grad),
     )
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
+def test_fixed_fht_mix_constructs_under_ambient_cuda_device():
+    with torch.device("cuda:0"):
+        mix = FixedFHTMix(8, 17001)
+    assert mix.signs.device.type == "cpu"
+    mix.to("cuda:0")
+    output = mix(torch.randn(2, 8, device="cuda:0"))
+    assert output.device.type == "cuda"
 
 
 def test_fixed_fht_basis_columns_match_both_lowrank_projection_sides():

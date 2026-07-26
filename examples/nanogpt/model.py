@@ -204,7 +204,22 @@ class FixedFHTMix(nn.Module):
         self.padded = next_power_of_two(self.features)
         generator = torch.Generator(device="cpu")
         generator.manual_seed(int(seed))
-        signs = torch.randint(0, 2, (self.padded,), generator=generator, dtype=torch.float32) * 2.0 - 1.0
+        # Pin generator-driven initialization to CPU even when a caller uses
+        # ``with torch.device("cuda")`` for fast checkpoint construction.
+        # PyTorch otherwise inherits the ambient CUDA device for randint and
+        # rejects the explicitly CPU generator.
+        signs = (
+            torch.randint(
+                0,
+                2,
+                (self.padded,),
+                generator=generator,
+                dtype=torch.float32,
+                device="cpu",
+            )
+            * 2.0
+            - 1.0
+        )
         self.register_buffer("signs", signs, persistent=True)
 
     def basis_columns(self, rank: int) -> torch.Tensor:
