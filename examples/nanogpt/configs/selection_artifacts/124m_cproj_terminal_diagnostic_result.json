@@ -1,0 +1,112 @@
+{
+  "schema_version": "nanogpt_matched_cproj_terminal_diagnostic_result_v1",
+  "recorded_at": "2026-07-26",
+  "analysis_code_commit": "e2159806ce7ec01c4196bd485ebefbb2621d23a1",
+  "checkpoint_manifest": "examples/nanogpt/configs/selection_artifacts/124m_cproj_terminal_diagnostic_manifest.csv",
+  "checkpoint_manifest_sha256": "be54b0a6fd4638109238481d5331651249c31103ea3db72a7b1ec913710cc1ae",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "matched_step": 238,
+  "runs": [
+    "attention_only",
+    "plain_cproj",
+    "group12_inputgain",
+    "dualgain"
+  ],
+  "remote_artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched",
+    "residual_csv_sha256": "7cb4fc0ce22019b42166ebf1ed56f95cf3dae26287bbccb57e85a5637ac72120",
+    "residual_json_sha256": "0f47a0af3b2d8d6fec6f04a43b129d8631e649144af590ecd32e1aac82e39dfb",
+    "residual_log_sha256": "1e62cf73e4fa737ae453ad02257cb54f25e89859dcfad70b58490885944acd83",
+    "activation_summary_sha256": "a9bbf8f6102c319798b95c71bb5de8c15d69d32f96afd866500678bbff1fd38d",
+    "activation_rows_sha256": "5ccbf88afcf7ce9cac4519a22a3dede1340818d48c4e8f0f1594e970d7c9e535",
+    "parameter_metrics_sha256": "baa09f62664e3b114e1f6fe09223348f43c22c5fefc3f8541d9defe8319b6482",
+    "parameter_summary_sha256": "ac67889e3025ddbbfda980795bded83514bfa673c02a25057fee0db3679c5ba4",
+    "manifold_log_sha256": "45533cad439d7aaa8ce4f57737570cb3ffb4a10891499758c5835acd8285470b"
+  },
+  "parameter_spectrum_means": {
+    "attention_only": {
+      "soft_rank": 675.839,
+      "hard_rank": 611.419,
+      "stable_rank": 336.392,
+      "top1_energy": 0.0029731,
+      "top10_energy": 0.0286296,
+      "frobenius_norm": 6.73660,
+      "spectral_norm": 0.367354
+    },
+    "plain_cproj": {
+      "soft_rank": 677.583,
+      "hard_rank": 614.131,
+      "stable_rank": 342.664,
+      "top1_energy": 0.00291845,
+      "top10_energy": 0.0283050,
+      "frobenius_norm": 5.70394,
+      "spectral_norm": 0.308176
+    },
+    "group12_inputgain": {
+      "soft_rank": 677.761,
+      "hard_rank": 614.388,
+      "stable_rank": 342.782,
+      "top1_energy": 0.00291741,
+      "top10_energy": 0.0282450,
+      "frobenius_norm": 6.57701,
+      "spectral_norm": 0.355283
+    },
+    "dualgain": {
+      "soft_rank": 677.474,
+      "hard_rank": 613.959,
+      "stable_rank": 342.593,
+      "top1_energy": 0.00291907,
+      "top10_energy": 0.0283176,
+      "frobenius_norm": 5.72522,
+      "spectral_norm": 0.309356
+    }
+  },
+  "residual_activation_means": {
+    "attention_only": {
+      "update_to_residual_rms": 0.372304,
+      "residual_update_cosine": 0.129543,
+      "residual_output_cka": 0.954465,
+      "update_hard_rank": 34.871,
+      "output_hard_rank": 29.401,
+      "mlp_output_hard_rank": 35.5604
+    },
+    "plain_cproj": {
+      "update_to_residual_rms": 0.363504,
+      "residual_update_cosine": 0.122781,
+      "residual_output_cka": 0.962812,
+      "update_hard_rank": 31.470,
+      "output_hard_rank": 26.611,
+      "mlp_output_hard_rank": 31.3442
+    },
+    "group12_inputgain": {
+      "update_to_residual_rms": 0.371423,
+      "residual_update_cosine": 0.115091,
+      "residual_output_cka": 0.962932,
+      "update_hard_rank": 31.336,
+      "output_hard_rank": 26.994,
+      "mlp_output_hard_rank": 31.1669
+    },
+    "dualgain": {
+      "update_to_residual_rms": 0.360191,
+      "residual_update_cosine": 0.130297,
+      "residual_output_cka": 0.963182,
+      "update_hard_rank": 31.082,
+      "output_hard_rank": 26.304,
+      "mlp_output_hard_rank": 30.9509
+    }
+  },
+  "conclusions": [
+    "Generated c_proj matrices are consistently more isotropic than the matched dense c_proj: higher hard/stable rank and lower top singular energy.",
+    "Input grouping repairs global Frobenius and spectral norm almost completely but does not repair spectral concentration, update rank, or terminal validation loss.",
+    "Two-sided diagonal gain restores residual-update cosine but shrinks update RMS and further reduces update/output hard rank, so identity-residual incompatibility is not the sole cause.",
+    "The next screen must add directional subspace structure rather than another channel scale, grouping, or hyperconnection-only variant."
+  ],
+  "next_screen": {
+    "mechanism": "fixed FHT input/output bases with a learned rank-64 diagonal spectrum added to generated mlp.c_proj",
+    "learned_basis": false,
+    "lora_equivalent": false,
+    "trainable_scalars_per_layer": 65,
+    "initialization": "diagonal coefficients zero and outer scale one: exactly zero residual function at initialization with nonzero first-step diagonal gradients",
+    "historical_defect": "prior spectral configs set both diagonal coefficients and outer scale to zero, making both gradients identically zero"
+  }
+}

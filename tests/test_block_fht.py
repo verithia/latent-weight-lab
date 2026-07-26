@@ -227,3 +227,34 @@ def test_spectral_core_and_group_gains_receive_gradients_and_disable_cache():
     assert torch.isfinite(layer.spectral_log_in_gain.grad).all()
     freeze_non_block_fht(torch.nn.Sequential(layer), train_embeddings=False)
     assert layer.spectral_core.requires_grad and layer.spectral_log_out_gain.requires_grad and layer.spectral_log_in_gain.requires_grad
+
+
+def test_cproj_fixed_basis_spectrum_is_zero_function_but_trainable_at_scale_one():
+    torch.manual_seed(789)
+    base = MLP(GPTConfig(n_embd=4, n_head=1), layer_id=0)
+    structured = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_cproj_spectral_resid_rank=2,
+            block_fht_cproj_spectral_resid_scale_init=1.0,
+            block_fht_cproj_spectral_resid_seed=17001,
+        ),
+        layer_id=0,
+    )
+    structured.load_state_dict(base.state_dict(), strict=False)
+    x = torch.randn(3, 5, 4)
+
+    expected = base(x)
+    actual = structured(x)
+    assert torch.allclose(actual, expected)
+
+    actual.square().mean().backward()
+    assert structured.cproj_spectral_resid_diag.grad is not None
+    assert torch.isfinite(structured.cproj_spectral_resid_diag.grad).all()
+    assert structured.cproj_spectral_resid_diag.grad.abs().sum() > 0
+    assert structured.cproj_spectral_resid_scale.grad is not None
+    assert torch.equal(
+        structured.cproj_spectral_resid_scale.grad,
+        torch.zeros_like(structured.cproj_spectral_resid_scale.grad),
+    )

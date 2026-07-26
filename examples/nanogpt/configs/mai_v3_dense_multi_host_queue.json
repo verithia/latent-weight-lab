@@ -708,6 +708,25 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 71,
+      "name": "mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon",
+      "stage": "operator_override_progressive_mlp_cproj_fixedbasis_spectral64_screen_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_spectral64_fixedbasis_0p5tpp_lr24e4_provisional_muon.json",
+          "config_sha256": "abacf4f53b347da7712b39d3e9228279f8584c15e73085c231e8d1c115e16d70",
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -721,7 +740,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "plain c_proj, zero-weight quarter residual, input-only gain, and both input/output grouping are rejected; input grouping improved plain replacement by only 0.0058 terminal NLL, while output grouping was worse; the final non-basis scale-only screen, plain c_proj with simultaneous input/output gains, is queued at priority 70 subject to a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
+      "state": "all scale/group/quarter corrections through priority 70 are rejected; matched terminal diagnostics identify excessive c_proj spectral isotropy and lost update/output hard rank; corrected priority 71 learns only a rank-64 diagonal spectrum in fixed seeded FHT bases with zero function at initialization, a live first-step gradient, and a strict 20% MFU gate; c_fc and joint MLP replacement remain parked"
     }
   ]
 }
