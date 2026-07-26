@@ -1,10 +1,11 @@
 {
   "schema_version": "nanogpt_matched_checkpoint_diagnostic_plan_v1",
   "recorded_at": "2026-07-26",
-  "analysis_code_commit": "b740a6c894004989ebbe9cf79b9c586ab743a72a",
+  "analysis_code_commit": "d00b01fac2002a2e5645e9d21b0e7c5b718e70f7",
+  "plan_revision": "The first foreground pass exposed that flat coefficient participation rank is not the singular rank of a 64x64 core. Commit d00b01f adds explicit coefficient-matrix spectrum fields; the final manifold command must be rerun from this revision.",
   "entrypoints": {
     "examples/nanogpt/analyze_residual_compatibility.py": "1b86bdca1cf7bfda3e37e24c790853799b256a6fb2071ca1fb8adf65bdfcd311",
-    "examples/nanogpt/analyze_cproj_manifold.py": "cea03deb0f61132f6891a5c7951a9b49231ba188d862959fa128c3bf2d965fde",
+    "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
     "examples/nanogpt/model.py": "f35198cf31dbe1b8a4887d7a0bb11bd879060d7db5e6b6b5307dd673ca3db017",
     "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
   },
