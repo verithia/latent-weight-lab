@@ -42,15 +42,22 @@ def spectral_residual_weight(model: GPT, layer: int) -> torch.Tensor | None:
     out_basis = mlp.cproj_spectral_resid_out_basis
     if diag is None or scale is None or in_basis is None or out_basis is None:
         return None
-    # The forward path is
-    #   (x @ V) * diag @ U.T
-    # where V/U are fixed signed-Hadamard basis columns.  PyTorch linear
-    # weights use [out, in], so the equivalent matrix is U diag V.T.
-    return (
-        scale.detach().float()
-        * (out_basis.detach().float() * diag.detach().float().reshape(-1).unsqueeze(0))
-        @ in_basis.detach().float().transpose(0, 1)
-    )
+    # The diagonal forward is (x @ V) * diag @ U.T and the full-core
+    # forward is (x @ V) @ core.T @ U.T. PyTorch linear weights use
+    # [out, in], so the equivalent matrices are U diag V.T and U core V.T.
+    parameter = diag.detach().float()
+    if parameter.ndim == 2 and parameter.shape[0] == parameter.shape[1]:
+        residual = (
+            out_basis.detach().float()
+            @ parameter
+            @ in_basis.detach().float().transpose(0, 1)
+        )
+    else:
+        residual = (
+            out_basis.detach().float()
+            * parameter.reshape(-1).unsqueeze(0)
+        ) @ in_basis.detach().float().transpose(0, 1)
+    return scale.detach().float() * residual
 
 
 def effective_c_proj_weight(model: GPT, layer: int) -> torch.Tensor:
@@ -87,11 +94,13 @@ def spectral_residual_metrics(model: GPT, layer: int) -> dict[str, float] | None
         top10_energy = 0.0
 
     base = base_c_proj_weight(model, layer)
-    identity = torch.eye(diagonal.numel(), device=in_basis.device, dtype=torch.float32)
+    basis_rank = int(in_basis.shape[1])
+    identity = torch.eye(basis_rank, device=in_basis.device, dtype=torch.float32)
     in_gram = in_basis.detach().float().transpose(0, 1) @ in_basis.detach().float()
     out_gram = out_basis.detach().float().transpose(0, 1) @ out_basis.detach().float()
     return {
-        "rank": float(diagonal.numel()),
+        "rank": float(basis_rank),
+        "parameter_count": float(diagonal.numel()),
         "scale": float(scale.detach()),
         "diag_mean": float(diagonal.mean()),
         "diag_std": float(diagonal.std()),

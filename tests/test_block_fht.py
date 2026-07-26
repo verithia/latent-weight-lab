@@ -330,6 +330,91 @@ def test_cproj_fixed_basis_muon_matrix_is_assigned_to_muon_optimizer():
     assert any(parameter is diagonal for parameter in muon_parameters)
 
 
+def test_cproj_fixed_basis_full_core_is_zero_function_trainable_and_muon_owned():
+    torch.manual_seed(790)
+    base = MLP(GPTConfig(n_embd=4, n_head=1), layer_id=0)
+    structured = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_cproj_spectral_resid_rank=2,
+            block_fht_cproj_spectral_resid_scale_init=1.0,
+            block_fht_cproj_spectral_resid_seed=17001,
+            block_fht_cproj_spectral_resid_full_core=True,
+        ),
+        layer_id=0,
+    )
+    structured.load_state_dict(base.state_dict(), strict=False)
+    core = structured.cproj_spectral_resid_diag
+    assert core.shape == (2, 2)
+    x = torch.randn(3, 5, 4)
+    torch.testing.assert_close(structured(x), base(x))
+    structured(x).square().mean().backward()
+    assert core.grad is not None
+    assert torch.isfinite(core.grad).all()
+    assert core.grad.abs().sum() > 0
+
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht_cproj_spectral_resid_rank=4,
+            block_fht_cproj_spectral_resid_scale_init=1.0,
+            block_fht_cproj_spectral_resid_seed=17001,
+            block_fht_cproj_spectral_resid_full_core=True,
+        )
+    )
+    model_core = model.transformer.h[0].mlp.cproj_spectral_resid_diag
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_adamw_lr_scale=0.3,
+    )
+    muon_parameters = [
+        parameter
+        for child in optimizer.optimizers
+        if child.__class__.__name__ == "Muon"
+        for group in child.param_groups
+        for parameter in group["params"]
+    ]
+    assert any(parameter is model_core for parameter in muon_parameters)
+
+
+def test_cproj_fixed_basis_full_core_matches_explicit_basis_weight():
+    layer = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_cproj_spectral_resid_rank=2,
+            block_fht_cproj_spectral_resid_scale_init=0.75,
+            block_fht_cproj_spectral_resid_seed=17001,
+            block_fht_cproj_spectral_resid_full_core=True,
+        ),
+        layer_id=0,
+    )
+    with torch.no_grad():
+        layer.cproj_spectral_resid_diag.copy_(
+            torch.tensor([[0.25, -0.125], [0.5, 0.375]])
+        )
+    x = torch.randn(2, 3, 4)
+    hidden = layer.c_fc(x)
+    activated = layer.gelu(hidden)
+    base = layer.c_proj(activated)
+    effective = (
+        layer.cproj_spectral_resid_out_basis
+        @ layer.cproj_spectral_resid_diag
+        @ layer.cproj_spectral_resid_in_basis.T
+    )
+    expected = base + 0.75 * torch.nn.functional.linear(activated, effective)
+    torch.testing.assert_close(layer(x), expected)
+
+
 @pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
 def test_fixed_fht_mix_constructs_under_ambient_cuda_device():
     with torch.device("cuda:0"):

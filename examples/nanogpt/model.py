@@ -104,6 +104,7 @@ class GPTConfig:
     block_fht_cproj_spectral_resid_scale_init: float = 0.0
     block_fht_cproj_spectral_resid_seed: int = 0
     block_fht_cproj_spectral_resid_muon_matrix: bool = False
+    block_fht_cproj_spectral_resid_full_core: bool = False
     block_fht_ffn_postgelu_std_target: float = 0.0
     tie_word_embeddings: bool = True
 
@@ -903,11 +904,20 @@ class MLP(nn.Module):
         if spectral_rank > 0:
             if spectral_rank > config.n_embd or spectral_rank > 4 * config.n_embd:
                 raise ValueError("block_fht_cproj_spectral_resid_rank must be <= n_embd and <= 4*n_embd")
-            spectral_shape = (
-                (1, spectral_rank)
-                if config.block_fht_cproj_spectral_resid_muon_matrix
-                else (spectral_rank,)
-            )
+            if (
+                config.block_fht_cproj_spectral_resid_full_core
+                and config.block_fht_cproj_spectral_resid_muon_matrix
+            ):
+                raise ValueError(
+                    "block_fht_cproj_spectral_resid_full_core and "
+                    "block_fht_cproj_spectral_resid_muon_matrix are mutually exclusive"
+                )
+            if config.block_fht_cproj_spectral_resid_full_core:
+                spectral_shape = (spectral_rank, spectral_rank)
+            elif config.block_fht_cproj_spectral_resid_muon_matrix:
+                spectral_shape = (1, spectral_rank)
+            else:
+                spectral_shape = (spectral_rank,)
             self.cproj_spectral_resid_diag = nn.Parameter(torch.zeros(spectral_shape))
             self.cproj_spectral_resid_scale = nn.Parameter(torch.tensor(float(config.block_fht_cproj_spectral_resid_scale_init)))
             spectral_seed = int(config.block_fht_cproj_spectral_resid_seed)
@@ -989,7 +999,22 @@ class MLP(nn.Module):
             and self.cproj_spectral_resid_out_basis is not None
         ):
             mixed_in = F.linear(activated, self.cproj_spectral_resid_in_basis.transpose(0, 1))
-            spectral = mixed_in * self.cproj_spectral_resid_diag.reshape(-1).to(dtype=activated.dtype)
+            if (
+                self.cproj_spectral_resid_diag.ndim == 2
+                and self.cproj_spectral_resid_diag.shape[0]
+                == self.cproj_spectral_resid_diag.shape[1]
+            ):
+                spectral = F.linear(
+                    mixed_in,
+                    self.cproj_spectral_resid_diag.to(dtype=activated.dtype),
+                )
+            else:
+                spectral = (
+                    mixed_in
+                    * self.cproj_spectral_resid_diag.reshape(-1).to(
+                        dtype=activated.dtype
+                    )
+                )
             spectral = F.linear(spectral, self.cproj_spectral_resid_out_basis)
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
         return self.dropout(out)

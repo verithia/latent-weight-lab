@@ -840,6 +840,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-cproj-spectral-resid-scale-init", type=float, default=0.0)
     parser.add_argument("--block-fht-cproj-spectral-resid-seed", type=int, default=0)
     parser.add_argument("--block-fht-cproj-spectral-resid-muon-matrix", action="store_true")
+    parser.add_argument("--block-fht-cproj-spectral-resid-full-core", action="store_true")
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--block-fht-seed", type=int, default=1000)
@@ -997,6 +998,7 @@ def main() -> None:
         block_fht_cproj_spectral_resid_scale_init=args.block_fht_cproj_spectral_resid_scale_init,
         block_fht_cproj_spectral_resid_seed=args.block_fht_cproj_spectral_resid_seed,
         block_fht_cproj_spectral_resid_muon_matrix=args.block_fht_cproj_spectral_resid_muon_matrix,
+        block_fht_cproj_spectral_resid_full_core=args.block_fht_cproj_spectral_resid_full_core,
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         tie_word_embeddings=args.tie_word_embeddings,
     )
