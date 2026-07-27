@@ -793,7 +793,7 @@
     },
     {
       "name": "full_attention_replacement_ladder",
-      "state": "provisional 124m/350m/690m selected 20tpp plus distinct-winner 985m selected 20tpp operator-unblocked; formal acceptance still blocked on accepted four-rung dense fit"
+      "state": "provisional 124m/350m selected 20tpp are terminal; 690m selected 20tpp is terminal at val 2.7443 versus matched dense 2.6303, a persistent +0.1140 negative result outside the 0.02 equivalence band; distinct-winner 985m selected 20tpp remains running. Formal acceptance remains blocked on the accepted four-rung dense fit"
     },
     {
       "name": "mlp_replacement_work",

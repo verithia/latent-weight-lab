@@ -1,0 +1,97 @@
+{
+  "schema_version": "provisional_full_attention_twenty_tpp_terminal_v1",
+  "recorded_at": "2026-07-27",
+  "state": "PROVISIONAL_OPERATOR_OVERRIDE",
+  "accepted_as_formal_dense_fit_conditioned_result": false,
+  "tier": "690m",
+  "method": "block_fht",
+  "candidate": {
+    "scope": "full_attention_only_qk_headwise_v_cproj_no_mlp_targets",
+    "candidate_main_lr_multiplier": 1.0,
+    "learning_rate": 0.0024,
+    "terminal_iteration": 53019,
+    "terminal_train_loss": 2.7646,
+    "terminal_validation_loss": 2.7443,
+    "finished_at": "2026-07-27T12:37:21+08:00",
+    "exit_code": 0,
+    "git_commit": "828820582cae6ae54e4c1039479c19ff9bd37f1a",
+    "config_sha256": "2a9d42637f75a185ec7d94b8dc27682961e9c80aaae44d5ba04027c27a9ef765",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "status_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/status/y400_mai_v3_690m_fullattn_20tpp_selected_mult1p00_provisional_resume1_20260725T065259Z_3787215.json",
+    "status_sha256": "0569088228ff874c580c2f7bb78e01a48084b99c117e972da4ca45b0f2ee457d",
+    "log_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_690m_fullattn_20tpp_selected_mult1p00_provisional_resume1_20260725T065259Z_3787215.log",
+    "log_sha256": "bc2f76bf5435116a91a66da7722ba86a4a86898efa41eb9f1fd1358fbd82062b",
+    "provenance_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_690m_fullattn_20tpp_selected_mult1p00_provisional_resume1_20260725T065259Z_3787215.json",
+    "provenance_sha256": "fe5cbcd731a3e2b7fa08dd65950b19eb278fd33db4b2dfc3c302aa13347ebb6d",
+    "mfu_certificate_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_690m_fullattn_20tpp_selected_mult1p00_provisional_resume1_20260725T065259Z_3787215.mfu.json",
+    "mfu_certificate_sha256": "b15ebfaf908fb79854c1ebab187f49c123cafff0f8de8c5e279d2634e659dfe8",
+    "mfu_fraction": 0.4145262597070129,
+    "checkpoint_path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_690m_fullattn_blockfht_20tpp_selected_provisional/ckpt.pt",
+    "checkpoint_sha256": "592caefd2050132bca4fed6851b5a5ef8cd2d4e65297d5a73962f00989f323e0",
+    "checkpoint_meta_sha256": "96ea0b2a90cde33aee9ed8c6511d13a224b30ca8b4b100c574287ee2eed48f1d"
+  },
+  "candidate_fixed_evaluations": [
+    {
+      "step": 13255,
+      "train_loss": 3.1247,
+      "validation_loss": 3.1014
+    },
+    {
+      "step": 26510,
+      "train_loss": 2.9858,
+      "validation_loss": 2.962
+    },
+    {
+      "step": 39765,
+      "train_loss": 2.8543,
+      "validation_loss": 2.8319
+    },
+    {
+      "step": 53019,
+      "train_loss": 2.7646,
+      "validation_loss": 2.7443
+    }
+  ],
+  "matched_dense_baseline": {
+    "run_name": "y400_resume_pro6_mai_v3_690m_20tpp_baseline",
+    "terminal_iteration": 53019,
+    "terminal_train_loss": 2.6492,
+    "terminal_validation_loss": 2.6303,
+    "status_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/status/y400_resume_pro6_mai_v3_690m_20tpp_baseline_20260723T094726Z_2663331.json",
+    "status_sha256": "e93a00d7d7e3af63e091a22ebf2b8f5e5f3eab4f2e6dac7ff101164ecef7981a",
+    "log_path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_resume_pro6_mai_v3_690m_20tpp_baseline_20260723T094726Z_2663331.log",
+    "log_sha256": "6ae7e9d8c02f426a6e55fe4d89f10fc24666d740ce0d3d090a66c2059348cc25",
+    "provenance_sha256": "a8ce6e63be3d5e0558cd8fb42389b59f6ac06e544625bcd75aa48a9365951839",
+    "fixed_evaluations_used_for_comparison": [
+      {
+        "step": 39765,
+        "train_loss": 2.736,
+        "validation_loss": 2.7146
+      },
+      {
+        "step": 53019,
+        "train_loss": 2.6492,
+        "validation_loss": 2.6303
+      }
+    ]
+  },
+  "comparison": {
+    "practical_equivalence_nll": 0.02,
+    "step_39765_validation_gap_candidate_minus_dense": 0.1173,
+    "terminal_train_gap_candidate_minus_dense": 0.1154,
+    "terminal_validation_gap_candidate_minus_dense": 0.114,
+    "outcome": "NOT_EQUIVALENT_TO_DENSE",
+    "interpretation": "The candidate penalty is stable from 15TPP to 20TPP and remains 5.7 times the registered practical-equivalence width."
+  },
+  "dependencies": {
+    "zero_point_five_tpp_ranking": "examples/nanogpt/configs/selection_artifacts/690m_fullattn_0p5tpp_provisional_ranking.json",
+    "five_tpp_comparison": "examples/nanogpt/configs/selection_artifacts/690m_fullattn_5tpp_provisional_comparison.json"
+  },
+  "decision": {
+    "classification": "PROVISIONAL_FULL_ATTENTION_REPLACEMENT_NEGATIVE_AT_20TPP",
+    "promote_as_dense_equivalent": false,
+    "launch_additional_690m_full_attention_recipe": false,
+    "next_action": "retain the endpoint for cross-rung scaling analysis; do not spend another 690m attention-only training run without a mechanism-level change"
+  }
+}
