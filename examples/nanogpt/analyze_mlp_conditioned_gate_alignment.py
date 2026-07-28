@@ -37,6 +37,7 @@ from examples.nanogpt.analyze_mlp_chart_gradient_alignment import (
 from examples.nanogpt.analyze_residual_compatibility import (
     fixed_validation_batches,
 )
+from examples.nanogpt.model import normalized_fht_last_dim
 
 
 GATE_GROUPS = ("slope", "bias")
@@ -83,6 +84,107 @@ class ResidualConditionedOutputGate(torch.nn.Module):
             update,
             self.modulation(condition),
         )
+
+
+class FixedBasisBilinearOutputGate(torch.nn.Module):
+    """Identity-initialized fixed-basis token-conditioned channel mixer.
+
+    With a fixed orthogonal signed/permuted block-Hadamard basis ``Q``, this
+    applies
+
+        update + Q^-1[(Q update) * (slope * Q condition + bias)].
+
+    Unlike the raw diagonal gate, each spectral coordinate can rotate the
+    update across residual channels.  The basis is fixed and only the two
+    residual-width coordinate vectors are trainable.
+    """
+
+    def __init__(
+        self,
+        width: int,
+        scale: float = 1.0,
+        *,
+        basis_block_size: int = 256,
+        seed: int = 271828,
+    ) -> None:
+        super().__init__()
+        self.width = int(width)
+        self.scale = float(scale)
+        self.basis_block_size = int(basis_block_size)
+        if (
+            self.basis_block_size <= 0
+            or self.basis_block_size & (self.basis_block_size - 1)
+            or self.width % self.basis_block_size
+        ):
+            raise ValueError(
+                "basis_block_size must be a power of two dividing width"
+            )
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        permutation = torch.randperm(
+            self.width, generator=generator, device="cpu"
+        )
+        signs = (
+            torch.randint(
+                0,
+                2,
+                (self.width,),
+                generator=generator,
+                dtype=torch.float32,
+                device="cpu",
+            )
+            * 2.0
+            - 1.0
+        )
+        self.register_buffer("permutation", permutation, persistent=True)
+        self.register_buffer(
+            "inverse_permutation",
+            torch.argsort(permutation),
+            persistent=True,
+        )
+        self.register_buffer("signs", signs, persistent=True)
+        self.slope = torch.nn.Parameter(torch.zeros(self.width))
+        self.bias = torch.nn.Parameter(torch.zeros(self.width))
+
+    def _basis(self, values: torch.Tensor, *, inverse: bool) -> torch.Tensor:
+        signs = self.signs.to(device=values.device, dtype=values.dtype)
+        if inverse:
+            values = values * signs
+            grouped = values.reshape(
+                *values.shape[:-1],
+                self.width // self.basis_block_size,
+                self.basis_block_size,
+            )
+            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            return values.index_select(-1, self.inverse_permutation)
+        values = values.index_select(-1, self.permutation)
+        grouped = values.reshape(
+            *values.shape[:-1],
+            self.width // self.basis_block_size,
+            self.basis_block_size,
+        )
+        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        return values * signs
+
+    def modulation(self, condition: torch.Tensor) -> torch.Tensor:
+        spectral_condition = self._basis(condition, inverse=False)
+        return self.scale * torch.addcmul(
+            self.bias.to(dtype=condition.dtype),
+            spectral_condition,
+            self.slope.to(dtype=condition.dtype),
+        )
+
+    def forward(
+        self, condition: torch.Tensor, update: torch.Tensor
+    ) -> torch.Tensor:
+        if condition.shape != update.shape:
+            raise ValueError(
+                "gate condition and update must be aligned, got "
+                f"{tuple(condition.shape)} and {tuple(update.shape)}"
+            )
+        spectral_update = self._basis(update, inverse=False)
+        correction = spectral_update * self.modulation(condition)
+        return update + self._basis(correction, inverse=True)
 
 
 def sha256(path: Path) -> str:
@@ -168,9 +270,13 @@ def load_gate_model(
     device: str,
     layers: list[int],
     initial_output_log_gain: float,
+    *,
+    gate_kind: str = "diagonal",
+    basis_block_size: int = 256,
+    basis_seed: int = 271828,
 ) -> tuple[
     torch.nn.Module,
-    dict[int, ResidualConditionedOutputGate],
+    dict[int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate],
     list[torch.utils.hooks.RemovableHandle],
 ]:
     model = load_chart_model(
@@ -178,11 +284,23 @@ def load_gate_model(
     )
     for parameter in model.parameters():
         parameter.requires_grad_(False)
-    gates: dict[int, ResidualConditionedOutputGate] = {}
+    gates: dict[
+        int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
+    ] = {}
     handles: list[torch.utils.hooks.RemovableHandle] = []
     for layer in layers:
         mlp = model.transformer.h[layer].mlp
-        gate = ResidualConditionedOutputGate(model.config.n_embd).to(device)
+        if gate_kind == "diagonal":
+            gate = ResidualConditionedOutputGate(model.config.n_embd)
+        elif gate_kind == "fixed_bilinear":
+            gate = FixedBasisBilinearOutputGate(
+                model.config.n_embd,
+                basis_block_size=basis_block_size,
+                seed=basis_seed + layer * 64,
+            )
+        else:
+            raise ValueError(f"unsupported gate kind: {gate_kind}")
+        gate = gate.to(device)
         mlp.add_module("residual_conditioned_output_gate_probe", gate)
 
         def hook(
@@ -202,7 +320,9 @@ def load_gate_model(
 
 
 def gate_parameters(
-    gates: dict[int, ResidualConditionedOutputGate],
+    gates: dict[
+        int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
+    ],
 ) -> dict[str, torch.nn.Parameter]:
     output: dict[str, torch.nn.Parameter] = {}
     for layer, gate in gates.items():
@@ -254,7 +374,9 @@ def task_ce_gradients(
 
 def teacher_mse_gradients(
     model: torch.nn.Module,
-    gates: dict[int, ResidualConditionedOutputGate],
+    gates: dict[
+        int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
+    ],
     split: GateSplitData,
     layers: list[int],
     device: str,
@@ -363,6 +485,13 @@ def main() -> None:
     parser.add_argument(
         "--initial-output-log-gain", type=float, default=0.125
     )
+    parser.add_argument(
+        "--gate-kind",
+        choices=("diagonal", "fixed_bilinear"),
+        default="diagonal",
+    )
+    parser.add_argument("--basis-block-size", type=int, default=256)
+    parser.add_argument("--basis-seed", type=int, default=271828)
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
@@ -406,6 +535,9 @@ def main() -> None:
         args.device,
         layers,
         args.initial_output_log_gain,
+        gate_kind=args.gate_kind,
+        basis_block_size=args.basis_block_size,
+        basis_seed=args.basis_seed,
     )
     parameters = gate_parameters(gates)
     rows: list[dict[str, object]] = []
@@ -494,13 +626,29 @@ def main() -> None:
         "holdout_token_sha256": holdout.token_sha256,
         "initial_output_log_gain": args.initial_output_log_gain,
         "gate": {
+            "kind": args.gate_kind,
             "formula": (
                 "update + update * (slope * mlp_input + bias)"
+                if args.gate_kind == "diagonal"
+                else (
+                    "update + Q^-1[(Q update) * "
+                    "(slope * Q mlp_input + bias)]"
+                )
             ),
             "parameters_per_selected_layer": 2 * model.config.n_embd,
             "identity_initialized": True,
             "learned_basis": False,
             "lora_adapter": False,
+            "basis_block_size": (
+                args.basis_block_size
+                if args.gate_kind == "fixed_bilinear"
+                else None
+            ),
+            "basis_seed": (
+                args.basis_seed
+                if args.gate_kind == "fixed_bilinear"
+                else None
+            ),
         },
         "diagnostics": diagnostics,
         "global_alignment": [
