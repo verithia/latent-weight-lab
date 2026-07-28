@@ -21,7 +21,6 @@ from examples.nanogpt.model import (
     LearnedFHTBlockOrthogonalOutputMix,
     LearnedGivensOutputMix,
     MLP,
-    _residual_conditioned_slope_add,
     freeze_non_block_fht,
 )
 
@@ -1113,30 +1112,6 @@ def test_mlp_residual_conditioned_output_gate_can_reuse_static_gain() -> None:
     modulation.sum().backward()
     assert mlp.residual_conditioned_output_slope.grad is not None
     assert mlp.residual_conditioned_output_slope.grad.abs().sum() > 0
-
-
-def test_residual_conditioned_slope_add_matches_explicit_formula() -> None:
-    residual = torch.randn(2, 3, 8, requires_grad=True)
-    update = torch.randn(2, 3, 8, requires_grad=True)
-    condition = torch.randn(2, 3, 8, requires_grad=True)
-    slope = torch.randn(8, requires_grad=True)
-    inputs = (residual, update, condition, slope)
-    actual = _residual_conditioned_slope_add(*inputs)
-    expected = residual + update * (1.0 + condition * slope)
-    torch.testing.assert_close(actual, expected)
-    actual.sum().backward(retain_graph=True)
-    actual_gradients = tuple(
-        value.grad.detach().clone() for value in inputs
-    )
-    for value in inputs:
-        value.grad = None
-    expected.sum().backward()
-    for actual_gradient, value in zip(
-        actual_gradients,
-        inputs,
-        strict=True,
-    ):
-        torch.testing.assert_close(actual_gradient, value.grad)
 
 
 def test_freeze_keeps_block_output_chart_trainable() -> None:

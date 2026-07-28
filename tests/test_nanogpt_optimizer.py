@@ -1,8 +1,11 @@
+from argparse import Namespace
+
 import pytest
 import torch
 
 from examples.nanogpt.train import (
     apply_scheduled_lr,
+    conditioned_output_gate_config_kwargs,
     freeze_mlp_hidden_chart_gradients,
     schedule_mlp_cproj_chart_gradients,
 )
@@ -16,6 +19,23 @@ def test_scheduled_lr_respects_adamw_group_scale_and_default_scale_one():
     apply_scheduled_lr(optimizer, 0.0024)
     assert optimizer.param_groups[0]["lr"] == pytest.approx(0.00048)
     assert optimizer.param_groups[1]["lr"] == pytest.approx(0.0024)
+
+
+def test_conditioned_output_gate_training_config_is_not_dropped() -> None:
+    kwargs = conditioned_output_gate_config_kwargs(
+        Namespace(
+            block_fht_mlp_residual_conditioned_output_gate=True,
+            block_fht_mlp_residual_conditioned_output_gate_scale=0.5,
+            block_fht_mlp_residual_conditioned_output_gate_layers=[0, 11],
+            block_fht_mlp_residual_conditioned_output_gate_bias=False,
+        )
+    )
+    assert kwargs == {
+        "block_fht_mlp_residual_conditioned_output_gate": True,
+        "block_fht_mlp_residual_conditioned_output_gate_scale": 0.5,
+        "block_fht_mlp_residual_conditioned_output_gate_layers": (0, 11),
+        "block_fht_mlp_residual_conditioned_output_gate_bias": False,
+    }
 
 
 class _ChartedMLP(torch.nn.Module):
