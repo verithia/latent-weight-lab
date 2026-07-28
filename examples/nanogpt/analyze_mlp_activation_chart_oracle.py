@@ -71,7 +71,7 @@ def parse_source(value: str) -> tuple[str, Path]:
 
 
 class ActivationCollector:
-    """Collect aligned pre-GELU and complete MLP output rows."""
+    """Collect aligned residual, pre-GELU, and complete MLP output rows."""
 
     def __init__(
         self,
@@ -79,10 +79,12 @@ class ActivationCollector:
         layers: list[int],
         sample_cap: int,
         collect_pre_gelu: bool,
+        collect_residual_in: bool = False,
     ) -> None:
         self.layers = set(layers)
         self.sample_cap = int(sample_cap)
         self.collect_pre_gelu = bool(collect_pre_gelu)
+        self.collect_residual_in = bool(collect_residual_in)
         self.values: dict[tuple[int, str], list[torch.Tensor]] = defaultdict(
             list
         )
@@ -91,6 +93,12 @@ class ActivationCollector:
         for index, block in enumerate(model.transformer.h):
             if index not in self.layers:
                 continue
+            if self.collect_residual_in:
+                self.handles.append(
+                    block.ln_2.register_forward_pre_hook(
+                        self._pre_hook(index, "residual_in")
+                    )
+                )
             if self.collect_pre_gelu:
                 self.handles.append(
                     block.mlp.c_fc.register_forward_hook(
@@ -105,20 +113,37 @@ class ActivationCollector:
 
     @property
     def points(self) -> tuple[str, ...]:
+        points: list[str] = []
+        if self.collect_residual_in:
+            points.append("residual_in")
         if self.collect_pre_gelu:
-            return ("pre_gelu", "mlp_out")
-        return ("mlp_out",)
+            points.append("pre_gelu")
+        points.append("mlp_out")
+        return tuple(points)
+
+    def _append(self, layer: int, point: str, output: torch.Tensor) -> None:
+        key = (layer, point)
+        remaining = self.sample_cap - self.counts[key]
+        if remaining <= 0:
+            return
+        rows = output.detach().float().reshape(-1, output.shape[-1])
+        rows = rows[:remaining].cpu()
+        self.values[key].append(rows)
+        self.counts[key] += int(rows.shape[0])
+
+    def _pre_hook(self, layer: int, point: str):
+        def hook(_module, inputs):
+            if not inputs:
+                raise RuntimeError(
+                    f"layer {layer} {point} pre-hook received no input"
+                )
+            self._append(layer, point, inputs[0])
+
+        return hook
 
     def _hook(self, layer: int, point: str):
         def hook(_module, _inputs, output):
-            key = (layer, point)
-            remaining = self.sample_cap - self.counts[key]
-            if remaining <= 0:
-                return
-            rows = output.detach().float().reshape(-1, output.shape[-1])
-            rows = rows[:remaining].cpu()
-            self.values[key].append(rows)
-            self.counts[key] += int(rows.shape[0])
+            self._append(layer, point, output)
 
         return hook
 
@@ -154,6 +179,7 @@ def collect_model(
     sample_cap: int,
     device: str,
     collect_pre_gelu: bool,
+    collect_residual_in: bool = False,
 ) -> tuple[
     dict[tuple[int, str], torch.Tensor],
     dict[int, torch.Tensor],
@@ -162,7 +188,11 @@ def collect_model(
     model = load_model(checkpoint, device)
     prepare_inference_cache(model)
     collector = ActivationCollector(
-        model, layers, sample_cap, collect_pre_gelu
+        model,
+        layers,
+        sample_cap,
+        collect_pre_gelu,
+        collect_residual_in,
     )
     try:
         with torch.no_grad():
