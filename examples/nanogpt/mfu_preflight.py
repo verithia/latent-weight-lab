@@ -105,6 +105,10 @@ def make_preflight_config(source: dict[str, Any], temporary_out: Path, warmups: 
     config["eval_seed"] = None
     config["save_checkpoint"] = False
     config["checkpoint_history"] = False
+    # Parameter-trajectory I/O is a scientific sampling side effect, not part
+    # of the steady-state compute gate.  The long run records its cost in wall
+    # time, while the foreground preflight measures the uninstrumented update.
+    config["trajectory_snapshot_interval"] = 0
     config["perf_profile"] = True
     config["perf_warmup_iters"] = warmups
     config["perf_log_interval"] = 1

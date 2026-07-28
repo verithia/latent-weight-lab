@@ -784,6 +784,32 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 74,
+      "name": "mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+      "stage": "operator_requested_mlp_parameter_trajectory_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_mlp_trajectory_lr24e4.json",
+          "config_sha256": "8b26dbdff4d4ceb1e0961447e87e7eecef8cdd24e4fd7ea71978227e70a00c63",
+          "repo_relative": "latent-weight-lab-trajectory",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "ae6e0ecb6763ee09d7a09acb28accc15f7fc06930528a44d957f6239eaf3eea1",
+            "examples/nanogpt/model.py": "f35198cf31dbe1b8a4887d7a0bb11bd879060d7db5e6b6b5307dd673ca3db017",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "483f20a2ea322fb664aef8494c52d7eea3403e73412cb5ff836f9537574fda92"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 17179869184
+        }
+      }
     }
   ],
   "deferred_stages": [

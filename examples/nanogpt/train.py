@@ -25,6 +25,11 @@ from examples.nanogpt.dense_scaling_fit import (
     validate_dense_fit_artifact,
 )
 from examples.nanogpt.mai_selection_artifacts import validate_v2_launch_config
+from examples.nanogpt.parameter_trajectory import (
+    add_arguments as add_parameter_trajectory_arguments,
+    validate_arguments as validate_parameter_trajectory_arguments,
+    write_parameter_snapshot,
+)
 from latent_weight_lab import BlockFHTLinear
 
 
@@ -60,6 +65,7 @@ def source_hashes() -> dict[str, str]:
     paths = (
         root / "examples/nanogpt/train.py",
         root / "examples/nanogpt/model.py",
+        root / "examples/nanogpt/parameter_trajectory.py",
         root / "latent_weight_lab/block_fht.py",
     )
     return {
@@ -861,6 +867,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--perf-profile", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--perf-warmup-iters", type=int, default=5)
     parser.add_argument("--perf-log-interval", type=int, default=10)
+    add_parameter_trajectory_arguments(parser)
     namespace = parser.parse_args()
     config = load_config(namespace.config)
     for key, value in config.items():
@@ -887,6 +894,7 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--mapping-stability-chunk-rows must be positive")
     if namespace.mapping_stability_token_rows < 0:
         raise ValueError("--mapping-stability-token-rows must be non-negative")
+    validate_parameter_trajectory_arguments(namespace)
     return namespace
 
 
@@ -1057,6 +1065,7 @@ def main() -> None:
         scaler.load_state_dict(checkpoint["grad_scaler"])
         restore_rng_state(checkpoint, device_type=device_type)
     raw_model = model
+    trajectory_execution_provenance = execution_provenance_from_environment(required=False)
     if args.compile:
         model = torch.compile(model)
     use_weight_cache = (
@@ -1133,6 +1142,31 @@ def main() -> None:
     def perf_now() -> float:
         perf_sync()
         return time.perf_counter()
+
+    def save_parameter_trajectory_if_due(step: int) -> None:
+        interval = int(args.trajectory_snapshot_interval)
+        if interval <= 0 or (step != 0 and step != args.max_iters and step % interval != 0):
+            return
+        started = time.perf_counter()
+        raw_model.flush_block_fht_cache()
+        path = write_parameter_snapshot(
+            model=raw_model,
+            out_dir=out_dir,
+            step=step,
+            targets=list(args.trajectory_snapshot_targets),
+            dtype=args.trajectory_snapshot_dtype,
+            model_config=gpt_config,
+            run_identity=run_identity,
+            execution_provenance=trajectory_execution_provenance,
+        )
+        print(
+            f"parameter trajectory snapshot step={step} path={path} "
+            f"elapsed_s={time.perf_counter() - started:.3f}",
+            flush=True,
+        )
+
+    save_parameter_trajectory_if_due(iter_num)
+    t0 = time.perf_counter()
 
     while True:
         eval_ms = 0.0
@@ -1329,6 +1363,8 @@ def main() -> None:
                 msg += f", postgelu {postgelu_accum / args.gradient_accumulation_steps:.6f}"
             print(msg)
         t0 = t1
+        save_parameter_trajectory_if_due(iter_num + 1)
+        t0 = time.perf_counter()
         # This check runs once per outer optimizer step, never per microbatch.
         # Evaluation saves have already reset the coalesced wall-clock deadline.
         if (

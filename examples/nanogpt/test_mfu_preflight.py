@@ -19,6 +19,7 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertNotIn("mai_ladder_policy_version", probe)
         self.assertFalse(probe["registered_resume_determinism_required"])
         self.assertFalse(probe["save_checkpoint"])
+        self.assertEqual(probe["trajectory_snapshot_interval"], 0)
         self.assertEqual(source["mai_ladder_policy_version"], "mai_ladder_selection_v2")
 
 
