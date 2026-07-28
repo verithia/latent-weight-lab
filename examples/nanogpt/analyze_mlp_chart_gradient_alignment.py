@@ -345,8 +345,8 @@ def task_ce_gradients(
     losses: list[float] = []
     for tokens in batches:
         tokens = tokens.to(device)
-        inputs = tokens[:, :-1]
-        targets = tokens[:, 1:]
+        inputs = tokens[:, :-1].contiguous()
+        targets = tokens[:, 1:].contiguous()
         context = (
             torch.autocast(device_type="cuda", dtype=torch.bfloat16)
             if device.startswith("cuda")
