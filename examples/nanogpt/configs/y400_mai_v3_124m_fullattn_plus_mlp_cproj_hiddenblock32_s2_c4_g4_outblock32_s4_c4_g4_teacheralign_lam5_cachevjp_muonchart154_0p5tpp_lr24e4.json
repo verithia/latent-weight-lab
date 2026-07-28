@@ -180,9 +180,9 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "post_gradient_alignment_bilateral_teacheralign_lam5_0p5tpp",
-  "implementation_commit": "8c69628c5f029719476fbdb967db6c0da72e4329",
+  "implementation_commit": "42407b64d6a725eb8d463c24b0137458b1adf841",
   "implementation_source_hashes": {
-    "examples/nanogpt/model.py": "130c600c37e246a88a7e8a7015c11bb98c6e4684e4a0ee5fd9f720365f823d97",
+    "examples/nanogpt/model.py": "c364ae8e2a213166eb4e64fa377e832c8f93f71d297f0b49bd1bba1edcc8044e",
     "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
     "examples/nanogpt/train.py": "b866b3a6119654e0bf0bdaf409069b0c1317774b5da5beed9595b70d929ef8b4",
     "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"

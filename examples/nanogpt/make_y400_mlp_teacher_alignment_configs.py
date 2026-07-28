@@ -15,7 +15,7 @@ PARENT = (
     "hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_"
     "cachevjp_muonchart154_0p5tpp_lr24e4.json"
 )
-IMPLEMENTATION_COMMIT = "8c69628c5f029719476fbdb967db6c0da72e4329"
+IMPLEMENTATION_COMMIT = "42407b64d6a725eb8d463c24b0137458b1adf841"
 TEACHER_CHECKPOINT = (
     "/root/userdata/MappingNetworks/outputs/"
     "y400_mai_scaling_ladder_v3/diagnostics/"
