@@ -102,6 +102,7 @@
   "block_fht_mlp_output_rotation_seed": 271828,
   "block_fht_mlp_output_rotation_stages": 0,
   "block_fht_mlp_residual_conditioned_output_gate": true,
+  "block_fht_mlp_residual_conditioned_output_gate_bias": false,
   "block_fht_mlp_residual_conditioned_output_gate_layers": [
     0
   ],
@@ -151,15 +152,17 @@
     "alignment_diagnostic_commit": "1754a2135d257a9cf01bd4e05575ee02754897b9",
     "all_diagnosed_layers_fit_teacher_direction_cosine": 0.04250643029808998,
     "all_diagnosed_layers_holdout_teacher_direction_cosine": 0.037691108882427216,
-    "coordinates_per_layer": 1536,
-    "coordinates_total": 1536,
-    "fit_teacher_direction_cosine": 0.09833482652902603,
-    "formula": "update + update * (slope * layernorm_residual + bias)",
-    "holdout_teacher_direction_cosine": 0.10798729956150055,
+    "bias_coordinate_reused_from_parent": "the bilateral parent already has a learned per-output residual gain, so a second static bias coordinate is redundant",
+    "coordinates_per_layer": 768,
+    "coordinates_total": 768,
+    "fit_teacher_direction_cosine": 0.04898739978671074,
+    "formula": "update + update * (slope * layernorm_residual)",
+    "holdout_teacher_direction_cosine": 0.05935664474964142,
     "identity_initialization": true,
     "inference_input_dependent": true,
     "learned_dense_basis": false,
     "lora_adapter": false,
+    "selected_coordinate_group": "slope",
     "selected_layers": [
       0
     ],
@@ -205,9 +208,9 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "post_direction_rescondgate_0p5tpp",
-  "implementation_commit": "62ac3f44c356c6474f929e51e00774e847d4945b",
+  "implementation_commit": "4e87771d6874b911954484bec1383c2af939a2dd",
   "implementation_source_hashes": {
-    "examples/nanogpt/model.py": "1bbaa390ff367c20840830ff8e37f510695c6d0b43386346252ed698e3502921",
+    "examples/nanogpt/model.py": "234a01b7c50c1266291df0f491dfd1b64cdb46ff2446699d6d2bd855dd446cf9",
     "examples/nanogpt/train.py": "017d52317e91af7672002eb40142d5573e4805ba38083a5d2ce68f6af3dbc799",
     "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
   },
