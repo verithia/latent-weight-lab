@@ -733,6 +733,23 @@ def test_fht_block_orthogonal_mix_is_identity_and_norm_preserving() -> None:
     assert float(mix.coordinates.grad.abs().sum()) > 0.0
 
 
+def test_fht_block_orthogonal_inverse_recovers_inputs_and_gradients() -> None:
+    mix = LearnedFHTBlockOrthogonalOutputMix(16, 3, 4, 8, 29)
+    values = torch.randn(3, 5, 16, requires_grad=True)
+    with torch.no_grad():
+        mix.coordinates.normal_(std=0.1)
+    reconstructed = mix.inverse(mix(values))
+    torch.testing.assert_close(
+        reconstructed,
+        values,
+        atol=3e-5,
+        rtol=3e-5,
+    )
+    reconstructed.square().mean().backward()
+    assert values.grad is not None
+    assert mix.coordinates.grad is not None
+
+
 def test_fht_block_orthogonal_coordinate_scale_scales_identity_tangent() -> None:
     base = LearnedFHTBlockOrthogonalOutputMix(
         16, 2, 4, 8, 31, coordinate_scale=1.0

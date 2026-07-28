@@ -542,6 +542,34 @@ class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
             )
         return result
 
+    def inverse(self, values: torch.Tensor) -> torch.Tensor:
+        """Apply the exact inverse row-vector operator without materializing it."""
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, "
+                f"got {values.shape[-1]}"
+            )
+        result = values
+        for stage in reversed(range(self.stages)):
+            result = self._basis(result, stage, inverse=False)
+            blocks = result.reshape(
+                *result.shape[:-1],
+                self.rotation_blocks,
+                self.rotation_block_size,
+            )
+            rotations = self._rotations(
+                stage, device=result.device, dtype=result.dtype
+            )
+            blocks = torch.einsum(
+                "...gi,gij->...gj",
+                blocks,
+                rotations.transpose(-1, -2),
+            )
+            result = self._basis(
+                blocks.reshape_as(result), stage, inverse=True
+            )
+        return result
+
     def matrix(self, reference: torch.Tensor) -> torch.Tensor:
         """Materialize the row-vector operator for efficient weight folding."""
         identity = torch.eye(
