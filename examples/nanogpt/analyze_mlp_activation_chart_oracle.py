@@ -142,8 +142,9 @@ class ActivationCollector:
 
 def prepare_inference_cache(model: torch.nn.Module) -> None:
     if model.config.block_fht:
+        # GPT.prepare_block_fht_cache also asks each MLP to materialize its
+        # complete charted c_proj cache after the generated base weights.
         model.prepare_block_fht_cache(dtype=next(model.parameters()).dtype)
-        model.prepare_charted_cproj_cache()
 
 
 def collect_model(
