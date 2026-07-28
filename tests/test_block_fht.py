@@ -393,7 +393,8 @@ def test_mlp_cproj_teacher_alignment_is_zero_at_identity_and_differentiable():
         block_fht_mlp_residual_output_gain=True,
     )
     mlp = MLP(config, layer_id=0)
-    mlp.set_cproj_teacher_weight(mlp.c_proj.weight.detach().clone())
+    teacher_weight = mlp.c_proj.weight.detach().clone()
+    mlp.set_cproj_teacher_weight(teacher_weight)
     values = torch.randn(2, 3, 8)
 
     mlp(values)
@@ -408,6 +409,16 @@ def test_mlp_cproj_teacher_alignment_is_zero_at_identity_and_differentiable():
     mlp(values)
     shifted_loss = mlp.cproj_teacher_alignment_loss()
     assert shifted_loss is not None and shifted_loss > 0
+    with torch.no_grad():
+        activated = mlp.gelu(mlp.c_fc(values))
+        student_weight = mlp._materialize_charted_cproj_weight(
+            mlp.c_proj.weight
+        )
+        expected = F.mse_loss(
+            F.linear(activated, student_weight),
+            F.linear(activated, teacher_weight),
+        )
+    assert torch.allclose(shifted_loss, expected)
     shifted_loss.backward()
     assert mlp.residual_output_log_gain.grad is not None
     assert torch.isfinite(mlp.residual_output_log_gain.grad).all()

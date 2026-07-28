@@ -1519,6 +1519,15 @@ class MLP(nn.Module):
             raise ValueError(
                 "c_proj teacher alignment requires a charted c_proj"
             )
+        if getattr(self.c_proj, "bias", None) is not None:
+            raise ValueError(
+                "c_proj teacher alignment currently requires bias-free c_proj"
+            )
+        if self.output_rotation is not None:
+            raise ValueError(
+                "c_proj teacher alignment requires output rotation folded "
+                "into the c_proj weight"
+            )
         reference = next(self.parameters())
         self.cproj_teacher_weight = weight.detach().to(
             device=reference.device,
@@ -1814,21 +1823,29 @@ class MLP(nn.Module):
             out = self.output_rotation(out)
         if self.training and self.cproj_teacher_weight is not None:
             detached_activated = activated.detach()
-            aligned_student = self._charted_cproj(detached_activated)
-            if aligned_student is None:
-                raise RuntimeError(
-                    "c_proj teacher alignment requires a charted c_proj"
+            aligned_student_weight = self._cached_charted_cproj_weight
+            if aligned_student_weight is None:
+                base_weight = getattr(self.c_proj, "_cached_weight", None)
+                if base_weight is None:
+                    base_weight = self.c_proj.weight
+                aligned_student_weight = (
+                    self._materialize_charted_cproj_weight(base_weight)
                 )
-            aligned_teacher = F.linear(
+            teacher_weight = self.cproj_teacher_weight.to(
+                device=aligned_student_weight.device,
+                dtype=aligned_student_weight.dtype,
+            )
+            # F.linear(x, Ws) - F.linear(x, Wt) is exactly
+            # F.linear(x, Ws-Wt), but costs one projection GEMM rather than
+            # two. The detached activation keeps this diagnostic signal on
+            # the generated c_proj base and chart only.
+            alignment_residual = F.linear(
                 detached_activated,
-                self.cproj_teacher_weight.to(
-                    device=detached_activated.device,
-                    dtype=detached_activated.dtype,
-                ),
+                aligned_student_weight - teacher_weight,
                 None,
             )
-            self.last_cproj_teacher_alignment_loss = F.mse_loss(
-                aligned_student.float(), aligned_teacher.float()
+            self.last_cproj_teacher_alignment_loss = (
+                alignment_residual.float().square().mean()
             )
         return self.dropout(out)
 
