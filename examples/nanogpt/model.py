@@ -1844,18 +1844,6 @@ class MLP(nn.Module):
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
         if self.output_rotation is not None:
             out = self.output_rotation(out)
-        if self.residual_conditioned_output_slope is not None:
-            assert self.residual_conditioned_output_bias is not None
-            modulation = self.residual_conditioned_output_gate_scale * torch.addcmul(
-                self.residual_conditioned_output_bias.to(dtype=x.dtype),
-                x,
-                self.residual_conditioned_output_slope.to(dtype=x.dtype),
-            )
-            out = torch.addcmul(
-                out,
-                out,
-                modulation.to(dtype=out.dtype),
-            )
         if self.training and self.cproj_teacher_weight is not None:
             detached_activated = activated.detach()
             aligned_student_weight = self._cached_charted_cproj_weight
@@ -1884,6 +1872,24 @@ class MLP(nn.Module):
             )
         return self.dropout(out)
 
+    def residual_conditioned_output_modulation(
+        self,
+        condition: torch.Tensor,
+    ) -> torch.Tensor | None:
+        if self.residual_conditioned_output_slope is None:
+            return None
+        assert self.residual_conditioned_output_bias is not None
+        modulation = torch.addcmul(
+            self.residual_conditioned_output_bias.to(dtype=condition.dtype),
+            condition,
+            self.residual_conditioned_output_slope.to(dtype=condition.dtype),
+        )
+        if self.residual_conditioned_output_gate_scale != 1.0:
+            modulation = (
+                self.residual_conditioned_output_gate_scale * modulation
+            )
+        return modulation
+
     def postgelu_spread_loss(self) -> torch.Tensor | None:
         if self.last_postgelu is None or self.postgelu_std_target <= 0.0:
             return None
@@ -1907,8 +1913,16 @@ class Block(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.attn(self.ln_1(x))
-        x = x + self.mlp(self.ln_2(x))
-        return x
+        mlp_input = self.ln_2(x)
+        mlp_output = self.mlp(mlp_input)
+        modulation = self.mlp.residual_conditioned_output_modulation(mlp_input)
+        if modulation is None:
+            return x + mlp_output
+        return torch.addcmul(
+            x + mlp_output,
+            mlp_output,
+            modulation.to(dtype=mlp_output.dtype),
+        )
 
 
 class GPT(nn.Module):

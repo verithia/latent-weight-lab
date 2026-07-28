@@ -14,6 +14,7 @@ from latent_weight_lab.block_fht import (
     suspend_block_fht_weight_cache,
 )
 from examples.nanogpt.model import (
+    Block,
     FixedFHTMix,
     GPT,
     GPTConfig,
@@ -1036,7 +1037,15 @@ def test_mlp_residual_output_gain_init_is_in_effective_log_coordinates() -> None
 
 
 def test_mlp_residual_conditioned_output_gate_is_identity_and_dynamic() -> None:
-    mlp = MLP(
+    torch.manual_seed(490)
+    base = Block(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+        ),
+        layer_id=0,
+    )
+    paired = Block(
         GPTConfig(
             n_embd=8,
             n_head=1,
@@ -1044,13 +1053,12 @@ def test_mlp_residual_conditioned_output_gate_is_identity_and_dynamic() -> None:
         ),
         layer_id=0,
     )
+    paired.load_state_dict(base.state_dict(), strict=False)
     values = torch.randn(2, 3, 8)
-    with torch.no_grad():
-        expected = mlp.dropout(mlp.c_proj(mlp.gelu(mlp.c_fc(values))))
-    actual = mlp(values)
-    torch.testing.assert_close(actual, expected)
+    torch.testing.assert_close(paired(values), base(values))
 
-    actual.sum().backward()
+    paired(values).sum().backward()
+    mlp = paired.mlp
     assert mlp.residual_conditioned_output_slope is not None
     assert mlp.residual_conditioned_output_bias is not None
     assert mlp.residual_conditioned_output_slope.grad is not None
