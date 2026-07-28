@@ -381,6 +381,8 @@ class BlockFHTLinear(nn.Module):
         weight_scale: float = 1.0,
         modulation_alpha: float = 0.0,
         modulation_centered: bool = False,
+        quadratic_scale: float = 0.0,
+        quadratic_seed_offset: int = 104729,
         residual_base_scale: float = 0.0,
         residual_base_std: float = 0.02,
         output_gain: bool = False,
@@ -417,6 +419,14 @@ class BlockFHTLinear(nn.Module):
         self.modulation_alpha = float(modulation_alpha)
         self.modulation_centered = bool(modulation_centered)
         self.latent_init_std = float(latent_init_std)
+        self.quadratic_scale = float(quadratic_scale)
+        self.quadratic_seed_offset = int(quadratic_seed_offset)
+        if not math.isfinite(self.quadratic_scale):
+            raise ValueError("quadratic_scale must be finite")
+        if self.quadratic_scale != 0.0 and self.latent_init_std <= 0.0:
+            raise ValueError("latent_init_std must be positive for a quadratic FHT chart")
+        if self.quadratic_seed_offset <= 0:
+            raise ValueError("quadratic_seed_offset must be positive")
         self.residual_base_scale = float(residual_base_scale)
         self.output_gain = nn.Parameter(torch.ones(self.out_features)) if output_gain else None
         self.input_gain = nn.Parameter(torch.ones(self.in_features)) if input_gain else None
@@ -461,9 +471,48 @@ class BlockFHTLinear(nn.Module):
             offset = offset - offset.new_tensor(expected)
         return offset
 
+    def _quadratic_chart(self) -> torch.Tensor:
+        """Generate a centered, variance-normalized nonlinear FHT chart.
+
+        The ordinary BlockFHT generator is a single fixed affine subspace
+        ``A z``.  This chart adds a fixed quadratic feature map
+        ``B z * C z`` using independent seeded FHT maps.  It therefore changes
+        the tangent with ``z`` without introducing a learned basis or any
+        additional trainable parameter.
+        """
+        linear = self.generator()
+        if self.quadratic_scale == 0.0:
+            return linear
+        first = block_fht_slice(
+            self.generator.latent,
+            self.generator.size,
+            self.generator.layers,
+            self.generator.seed + self.quadratic_seed_offset,
+            0,
+            self.generator.size,
+        )
+        second = block_fht_slice(
+            self.generator.latent,
+            self.generator.size,
+            self.generator.layers,
+            self.generator.seed + 2 * self.quadratic_seed_offset,
+            0,
+            self.generator.size,
+        )
+        product = first * second
+        product = product - product.mean()
+        scale = self.quadratic_scale
+        variance_ratio = self.generator.latent_size / self.generator.block_size
+        normalization = 1.0 / math.sqrt(
+            1.0 + scale * scale * variance_ratio
+        )
+        return normalization * (
+            linear + scale * product / self.latent_init_std
+        )
+
     @property
     def weight(self) -> torch.Tensor:
-        weight = self.generator() * self.weight_scale
+        weight = self._quadratic_chart() * self.weight_scale
         if self.modulation_alpha != 0.0:
             weight = weight + self.modulation_alpha * self._modulation_offset()
         weight = weight.view(self.out_features, self.in_features)
@@ -484,7 +533,7 @@ class BlockFHTLinear(nn.Module):
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         if self._cached_weight is not None:
             return F.linear(input, self._cached_weight, self.bias)
-        if self.residual_base_weight is not None or self.modulation_centered or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+        if self.residual_base_weight is not None or self.modulation_centered or self.quadratic_scale != 0.0 or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
             return F.linear(input, self.weight.to(dtype=input.dtype), self.bias)
         return _BlockFHTLinearFn.apply(
             input,
@@ -500,7 +549,7 @@ class BlockFHTLinear(nn.Module):
         )
 
     def forward_fused(self, input: torch.Tensor, weight_scale: float = 1.0) -> torch.Tensor:
-        if self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+        if self.quadratic_scale != 0.0 or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
             return F.linear(input, self.weight.to(dtype=input.dtype), self.bias)
         out = block_fht_linear_forward(
             input,
@@ -561,13 +610,64 @@ class BlockFHTLinear(nn.Module):
             generated_grad_weight = generated_grad_weight.reshape(-1)
             if self.residual_base_weight is not None:
                 generated_grad_weight = generated_grad_weight * self.residual_base_scale
-            grad_latent = self.weight_scale * block_fht_grad_latent(
-                self.generator.latent,
-                generated_grad_weight,
-                self.generator.size,
-                self.generator.layers,
-                self.generator.seed,
-            )
+            if self.quadratic_scale == 0.0:
+                grad_latent = self.weight_scale * block_fht_grad_latent(
+                    self.generator.latent,
+                    generated_grad_weight,
+                    self.generator.size,
+                    self.generator.layers,
+                    self.generator.seed,
+                )
+            else:
+                with torch.no_grad():
+                    first = block_fht_slice(
+                        self.generator.latent,
+                        self.generator.size,
+                        self.generator.layers,
+                        self.generator.seed + self.quadratic_seed_offset,
+                        0,
+                        self.generator.size,
+                    )
+                    second = block_fht_slice(
+                        self.generator.latent,
+                        self.generator.size,
+                        self.generator.layers,
+                        self.generator.seed + 2 * self.quadratic_seed_offset,
+                        0,
+                        self.generator.size,
+                    )
+                product_grad = generated_grad_weight - generated_grad_weight.mean()
+                scale = self.quadratic_scale
+                variance_ratio = (
+                    self.generator.latent_size / self.generator.block_size
+                )
+                normalization = 1.0 / math.sqrt(
+                    1.0 + scale * scale * variance_ratio
+                )
+                grad_latent = block_fht_grad_latent(
+                    self.generator.latent,
+                    generated_grad_weight,
+                    self.generator.size,
+                    self.generator.layers,
+                    self.generator.seed,
+                )
+                grad_latent = grad_latent + scale / self.latent_init_std * (
+                    block_fht_grad_latent(
+                        self.generator.latent,
+                        product_grad * second,
+                        self.generator.size,
+                        self.generator.layers,
+                        self.generator.seed + self.quadratic_seed_offset,
+                    )
+                    + block_fht_grad_latent(
+                        self.generator.latent,
+                        product_grad * first,
+                        self.generator.size,
+                        self.generator.layers,
+                        self.generator.seed + 2 * self.quadratic_seed_offset,
+                    )
+                )
+                grad_latent = self.weight_scale * normalization * grad_latent
             if self.modulation_alpha != 0.0:
                 grad_latent = grad_latent + 2.0 * self.modulation_alpha * self.generator.latent * generated_grad_weight.sum()
             if self.generator.latent.grad is None:

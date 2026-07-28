@@ -144,6 +144,121 @@ def test_block_fht_linear_cached_grad_matches_dynamic_with_channel_gains():
     assert torch.allclose(cached.input_gain.grad, dynamic.input_gain.grad, atol=1e-6)
 
 
+def test_quadratic_chart_cached_gradient_matches_dynamic_gradient():
+    torch.manual_seed(327)
+    dynamic = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        layers=2,
+        seed=17,
+        quadratic_scale=0.5,
+    )
+    cached = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        layers=2,
+        seed=17,
+        quadratic_scale=0.5,
+    )
+    cached.load_state_dict(dynamic.state_dict())
+    x = torch.randn(4, 5)
+
+    dynamic_loss = dynamic(x).square().mean()
+    dynamic_loss.backward()
+
+    prepare_block_fht_weight_cache(cached)
+    cached_loss = cached(x).square().mean()
+    cached_loss.backward()
+    flush_block_fht_weight_cache(cached)
+
+    torch.testing.assert_close(cached_loss, dynamic_loss)
+    torch.testing.assert_close(
+        cached.generator.latent.grad,
+        dynamic.generator.latent.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+    torch.testing.assert_close(
+        cached.bias.grad,
+        dynamic.bias.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+
+
+def test_quadratic_chart_is_nonlinear_without_extra_parameters():
+    torch.manual_seed(329)
+    linear = BlockFHTLinear(5, 3, latent_dim=8, layers=2, seed=19)
+    curved = BlockFHTLinear(
+        5,
+        3,
+        latent_dim=8,
+        layers=2,
+        seed=19,
+        quadratic_scale=0.5,
+    )
+    curved.load_state_dict(linear.state_dict())
+    assert sum(parameter.numel() for parameter in curved.parameters()) == sum(
+        parameter.numel() for parameter in linear.parameters()
+    )
+
+    with torch.no_grad():
+        z = curved.generator.latent.detach().clone()
+        curved.generator.latent.copy_(z)
+        positive = curved.weight.clone()
+        curved.generator.latent.copy_(-z)
+        negative = curved.weight.clone()
+        curved.generator.latent.zero_()
+        origin = curved.weight.clone()
+    second_difference = positive + negative - 2.0 * origin
+    assert second_difference.norm() > 0
+
+
+def test_quadratic_chart_preserves_initial_weight_scale():
+    torch.manual_seed(331)
+    linear = BlockFHTLinear(
+        64,
+        128,
+        latent_ratio=0.1,
+        layers=2,
+        seed=23,
+    )
+    curved = BlockFHTLinear(
+        64,
+        128,
+        latent_ratio=0.1,
+        layers=2,
+        seed=23,
+        quadratic_scale=0.5,
+    )
+    curved.load_state_dict(linear.state_dict())
+    relative_std = curved.weight.std() / linear.weight.std()
+    assert 0.95 < relative_std < 1.05
+
+
+def test_quadratic_chart_is_target_selective_in_gpt():
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht=True,
+            block_fht_targets=("attn.c_proj", "mlp.c_proj"),
+            block_fht_latent_ratio=1.0,
+            block_fht_quadratic_targets=("mlp.c_proj",),
+            block_fht_quadratic_scale=0.5,
+        )
+    )
+    assert model.transformer.h[0].attn.c_proj.quadratic_scale == 0.0
+    assert model.transformer.h[0].mlp.c_proj.quadratic_scale == 0.5
+
+
 def test_matrix_latent_matches_flat_latent_forward_and_gradient():
     torch.manual_seed(333)
     flat = BlockFHTLinear(5, 3, latent_dim=8, layers=2, seed=19)

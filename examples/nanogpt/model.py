@@ -75,6 +75,9 @@ class GPTConfig:
     block_fht_latent_init_std: float = 0.02
     block_fht_modulation_alpha: float = 0.0
     block_fht_modulation_centered: bool = False
+    block_fht_quadratic_targets: tuple[str, ...] = ()
+    block_fht_quadratic_scale: float = 0.0
+    block_fht_quadratic_seed_offset: int = 104729
     block_fht_match_gpt_init: bool = False
     block_fht_weight_scale: float | None = None
     block_fht_residual_base_scale: float = 0.0
@@ -373,6 +376,12 @@ def make_linear(
             weight_scale=weight_scale,
             modulation_alpha=config.block_fht_modulation_alpha,
             modulation_centered=config.block_fht_modulation_centered,
+            quadratic_scale=(
+                config.block_fht_quadratic_scale
+                if target_name in config.block_fht_quadratic_targets
+                else 0.0
+            ),
+            quadratic_seed_offset=config.block_fht_quadratic_seed_offset,
             residual_base_scale=config.block_fht_residual_base_scale,
             residual_base_std=target_std,
             output_gain=target_name in config.block_fht_output_gain_targets,

@@ -817,6 +817,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-latent-init-std", type=float, default=0.02)
     parser.add_argument("--block-fht-modulation-alpha", type=float, default=0.0)
     parser.add_argument("--block-fht-modulation-centered", action="store_true")
+    parser.add_argument("--block-fht-quadratic-targets", nargs="+", default=[])
+    parser.add_argument("--block-fht-quadratic-scale", type=float, default=0.0)
+    parser.add_argument("--block-fht-quadratic-seed-offset", type=int, default=104729)
     parser.add_argument("--block-fht-match-gpt-init", action="store_true")
     parser.add_argument("--block-fht-weight-scale", type=float, default=None)
     parser.add_argument("--block-fht-residual-base-scale", type=float, default=0.0)
@@ -980,6 +983,9 @@ def main() -> None:
         block_fht_latent_init_std=args.block_fht_latent_init_std,
         block_fht_modulation_alpha=args.block_fht_modulation_alpha,
         block_fht_modulation_centered=args.block_fht_modulation_centered,
+        block_fht_quadratic_targets=tuple(args.block_fht_quadratic_targets),
+        block_fht_quadratic_scale=args.block_fht_quadratic_scale,
+        block_fht_quadratic_seed_offset=args.block_fht_quadratic_seed_offset,
         block_fht_match_gpt_init=args.block_fht_match_gpt_init,
         block_fht_weight_scale=args.block_fht_weight_scale,
         block_fht_residual_base_scale=args.block_fht_residual_base_scale,
