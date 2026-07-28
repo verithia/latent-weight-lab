@@ -1304,6 +1304,84 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 94,
+      "name": "mai_v3_124m_cproj_bilateral_s1_c8_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_s1_c8_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s1_c8_g4_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s1_c8_g4_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "8b155ab6926e2914de9b20dbb6bbdbde90434206ea0815f07202bd06b6a6d76f",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "1aec1d64f42b5cffc884230b539748b1e37b7618a10286a58f98799e6306567a",
+            "examples/nanogpt/model.py": "cd492ede7348b9a1e49a8ce5cb1879713a8df3b29644873ed921688d74f1bb29",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 95,
+      "name": "mai_v3_124m_cproj_bilateral_s2_c4_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_s2_c4_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "47f1e3e37a8aaf5cddcdb50a6d18b2da4d4140a8bcda162286fdb1381ed3db9e",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "1aec1d64f42b5cffc884230b539748b1e37b7618a10286a58f98799e6306567a",
+            "examples/nanogpt/model.py": "cd492ede7348b9a1e49a8ce5cb1879713a8df3b29644873ed921688d74f1bb29",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 96,
+      "name": "mai_v3_124m_cproj_bilateral_s2_c8_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_s2_c8_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c8_g4_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c8_g4_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "eda1d107b28dbe59f551bb03696a810ae408881bb3c873e4e10cab080daffc78",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "1aec1d64f42b5cffc884230b539748b1e37b7618a10286a58f98799e6306567a",
+            "examples/nanogpt/model.py": "cd492ede7348b9a1e49a8ce5cb1879713a8df3b29644873ed921688d74f1bb29",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -1317,7 +1395,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its matrix displacement directions are high-rank and layer-specific. Priority 89's four-stage output chart is the current structural winner at val 5.6906, improving plain generated c_proj by 0.0488 CE but remaining 0.1988 behind attention-only; priority 90 finished at 5.6944. Paired c_fc-row/c_proj-column log-norm motion has 92.27% PC1 and 98.88% PC1+2 temporal energy. After removing layer means, 66.89% of terminal paired-channel energy is same-sign/common-mode, while the layer means are gauge-like (c_fc -0.0221, c_proj +0.0568). A distinct fit/holdout activation oracle shows common+gauge+centered coordinates recover 43.69-44.30% source error versus only 44.53-45.57% for fully independent pre/post channel scales. Commit 8753495 implements the identity-initialized 3,074-coordinate activation chart with no learned basis or LoRA adapter. Priorities 91-92 compose it with the selected fixed-basis output chart at metrics 4/8; exact foreground MFU gates pass at 21.61%/21.57%."
+      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its displacement directions are high-rank and layer-specific. Output-only priority 89 reached val 5.6906; the trajectory-derived activation chart improves the composition only to 5.6832 and activation alone reaches 5.7364. A distinct five-layer fit/heldout oracle finds that output-only orientation recovers 65.36% of source error, two-stage hidden orientation alone 70.69%, and bilateral hidden-two/output-four 72.70%; the bilateral gain is positive at every probed layer, while adding activation coordinates changes recovery only to 72.81%. Commit 170a5b7 implements the identity-initialized bilateral chart by once-per-step cached weight folding with exact VJPs and no learned basis or LoRA. Priorities 94-96 bracket hidden depth/metric; exact Y400 MFU gates pass at 23.76%, 22.07%, and 22.07%."
     }
   ]
 }
