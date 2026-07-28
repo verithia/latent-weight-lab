@@ -422,8 +422,16 @@ def summarize(rows: list[dict[str, object]]) -> dict[str, dict[str, float]]:
             if not selected:
                 continue
             summary[f"{source}/{family}"] = {
-                key: float(
-                    np.nanmean([float(row[key]) for row in selected])
+                key: (
+                    float(np.mean(finite))
+                    if (
+                        finite := [
+                            float(row[key])
+                            for row in selected
+                            if np.isfinite(float(row[key]))
+                        ]
+                    )
+                    else float("nan")
                 )
                 for key, value in selected[0].items()
                 if key not in {"source", "family", "layer"}
