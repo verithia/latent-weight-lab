@@ -1,0 +1,71 @@
+{
+  "artifact_schema": "deterministic_diagnostic_result_v1",
+  "decision": {
+    "action": "reject_without_training",
+    "reason": "The activation-weighted output-space inverse pullback is almost orthogonal to the dense-teacher repair direction and makes the task direction unstable across fit and held-out tokens at every tested damping.",
+    "short_training_run_launched": false,
+    "watchdog_attached": false
+  },
+  "diagnostic": {
+    "command_template": "CUDA_VISIBLE_DEVICES=<GPU> /root/userdata/MappingNetworks/.venv-gpt2/bin/python -m examples.nanogpt.analyze_mlp_chart_gradient_alignment --attention-only /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt --plain-cproj /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --output <OUTPUT> --layers 0,3,6,9,11 --batch-size 8 --block-size 256 --batches 8 --ce-batches 8 --muon-ns-steps 5 --natural-damping-ratio <DAMPING> --natural-cg-steps 8 --natural-trace-samples 1 --natural-trace-seed 260219134 --sample-cap 2048 --sample-seed 20260716 --holdout-sample-seed 20260717 --initializations 0.125 --device cuda",
+    "entrypoint": "examples.nanogpt.analyze_mlp_chart_gradient_alignment",
+    "git_commit": "edd12569a703d2405660ed3a5c165b7c4e7ef074",
+    "host": "Y400",
+    "metric": "mean_post_gelu_output_mse_JtJ",
+    "source_path": "examples/nanogpt/analyze_mlp_chart_gradient_alignment.py",
+    "worktree": "/root/userdata/MappingNetworks/latent-weight-lab-mlp-geometry"
+  },
+  "inputs": {
+    "attention_only_checkpoint_sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_token_sha256": "5ffbcbcb14dd284cded97fef7b9e80fbe4656b8c8de7cdf1beff1bcc6669350b",
+    "holdout_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e",
+    "plain_cproj_checkpoint_sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+  },
+  "protocol": {
+    "cg_steps": 8,
+    "initial_output_log_gain": 0.125,
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "parameter_updates": 0,
+    "post_gelu_samples_per_layer": 2048,
+    "trace_samples": 1
+  },
+  "results": [
+    {
+      "csv_sha256": "7ff3428b1298bbe54b32b7ae31fac8bb2e8cd04f4a2ba9055fd6e8311d98c8a4",
+      "damping_ratio": 0.01,
+      "fit_holdout_task_cosine": 0.008117152377963066,
+      "fit_holdout_teacher_cosine": 0.8808530569076538,
+      "fit_vs_teacher_cosine": 0.0012193748261779547,
+      "holdout_vs_teacher_cosine": 0.0009186714887619019,
+      "output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_chart_gradient_alignment_functional_natural_damp0p01_v1",
+      "summary_sha256": "953a569277b028dbe2825da620847a05affcd8d2ae585d69ff52edff57546c2c"
+    },
+    {
+      "csv_sha256": "ac767b3fcd9183bc30a67a13e1fbdbcd0646572847a85315d6d2ade87c800ee6",
+      "damping_ratio": 0.1,
+      "fit_holdout_task_cosine": 0.008405434899032116,
+      "fit_holdout_teacher_cosine": 0.8816670179367065,
+      "fit_vs_teacher_cosine": 0.001246017636731267,
+      "holdout_vs_teacher_cosine": 0.000867138325702399,
+      "output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_chart_gradient_alignment_functional_natural_damp0p1_v1",
+      "summary_sha256": "182834cb88ef51b6a3d34acd14be53a7a10fc294c037e6aebbf29b0707215638"
+    },
+    {
+      "csv_sha256": "f1018079e5ed6207d64c7af89fbd1dae641f84af4eecbdcb0dc58f366cc54839",
+      "damping_ratio": 1.0,
+      "fit_holdout_task_cosine": 0.011944650672376156,
+      "fit_holdout_teacher_cosine": 0.8889659643173218,
+      "fit_vs_teacher_cosine": 0.0016572632594034076,
+      "holdout_vs_teacher_cosine": 0.0008401640807278454,
+      "output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_chart_gradient_alignment_functional_natural_damp1p0_v1",
+      "summary_sha256": "e0c65dbdd21d71ccceddc037eb6fa93129f832044bc5717bee60ba82c1a3dd62"
+    }
+  ]
+}
