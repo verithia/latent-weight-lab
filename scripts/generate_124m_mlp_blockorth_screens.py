@@ -15,11 +15,11 @@ BASE = (
     CONFIG_DIR
     / "y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonchart154_0p5tpp_lr24e4.json"
 )
-IMPLEMENTATION_COMMIT = "0d022e289ff1321abafee661a68fc0f86ea0aed7"
+IMPLEMENTATION_COMMIT = "e316c509144be877c4351ab50e46aa4bd8cc269c"
 ANALYSIS_COMMIT = "2a2816df99d46909c9cac8a8d127175ce2402af5"
 SOURCE_HASHES = {
     "examples/nanogpt/model.py": (
-        "d269593aae95d1e6b9cee6254071618dfe5918da3a0b7f8413543c0fec04a0ea"
+        "93bdbdfa8470f92d43b572c5968ca30bfcbb1aefc8587bb5d321846bbda58eb8"
     ),
     "examples/nanogpt/train.py": (
         "7cb2708956869def4afeada74b415c91bf4e4085898a063c5389de4b92a6d69e"
