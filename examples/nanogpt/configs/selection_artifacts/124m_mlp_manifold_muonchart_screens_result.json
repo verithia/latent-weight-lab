@@ -1,0 +1,175 @@
+{
+  "schema_version": "mai_124m_mlp_manifold_muonchart_screens_result_v1",
+  "recorded_at": "2026-07-28",
+  "manifold_evidence": {
+    "dense_run": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "structure_analysis_metadata_sha256": "335e380ef96f1c59e15d21d33057f64c46161415d500671b182e6638b228237a",
+    "interpretation": "The optimizer trajectory is locally two-PC and smoothly curved, but its temporal directions and terminal displacements are high-rank matrices; layers have distinct raw-coordinate tangents and c_fc-output/c_proj-input channel salience is coupled.",
+    "scope_limit": "One optimizer trajectory does not establish the intrinsic dimension of the global solution manifold."
+  },
+  "shared_execution_identity": {
+    "host": "Y400",
+    "source_commit": "1e87a28053e085a54aa869db324137769c119984",
+    "source_hashes": {
+      "examples/nanogpt/model.py": "eac7935e495015a0652762c96bd3a97ad60dea6203efd37aa508688bdc14da2c",
+      "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+      "examples/nanogpt/train.py": "b813d931444f3de8be5164f955e2d4f84b4c144a59c3e0c9f896188ca70e0336",
+      "latent_weight_lab/block_fht.py": "aa89aa33adc47441f6e5e68a70607bed29d660111b57ac91647ca43388b1d568"
+    },
+    "entrypoint": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "optimizer": "muon",
+    "main_learning_rate": 0.0024,
+    "muon_adamw_lr_scale": 0.3,
+    "max_iters": 238,
+    "tokens_per_iter": 262144
+  },
+  "controls": {
+    "attention_only": {
+      "name": "y400_mai_v3_124m_fullattn_prefit_mult1p00",
+      "validation_loss": {
+        "60": 6.2184,
+        "120": 5.7958,
+        "180": 5.5855,
+        "238": 5.4918
+      }
+    },
+    "plain_generated_cproj": {
+      "name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional",
+      "validation_loss": {
+        "60": 6.4803,
+        "120": 5.9833,
+        "180": 5.8019,
+        "238": 5.7394
+      }
+    }
+  },
+  "screens": [
+    {
+      "name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonchart154_0p5tpp",
+      "mechanism": "The native BlockFHT c_proj latent is stored as a near-square 154x154 matrix and owned by Muon; the flattened generator map is unchanged and no learned basis is added.",
+      "config_sha256": "0bbb821712896ea49bd5989b75efc9b0cac5caa7dd018be608bc3807195b80df",
+      "command": [
+        "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonchart154_0p5tpp_20260728T031413Z_4066589.config.json"
+      ],
+      "provenance_sha256": "ae71ee39ffdc540554bcd337d88bfd59b49253d9b94baa56c0a38ac33cc63e4c",
+      "status_sha256": "e0e7f8732bd47d274098b7a74c405f0e44615e79f0c8fd0d330a9d5fe7783072",
+      "log_sha256": "0f1a0e0aca14cde9ccee0333ddb666c38f7ef1994746bfc50a52f9a6f66e1ec1",
+      "checkpoint_sha256": "7dece4534fa3c915260dd6a59077862d028ac13b384d7b9313dc35ad7e057fc4",
+      "checkpoint_metadata_sha256": "8e5bf034b3d65fd9843d664910b1b42f9c31c0aede441caa53c43845ec5247b2",
+      "performance_gate": {
+        "mfu_fraction": 0.322907689145416,
+        "minimum_fraction": 0.2,
+        "certificate_sha256": "4b0e974f75ecb92d69fe1edee39dd3ee372f90b4fc1fa7f1a1254c87cc7576cc"
+      },
+      "finished_at": "2026-07-28T11:18:45+08:00",
+      "exit_code": 0,
+      "validation_loss": {
+        "60": 6.5143,
+        "120": 5.9871,
+        "180": 5.8037,
+        "238": 5.7395
+      },
+      "terminal_train_loss": 5.7351,
+      "terminal_validation_loss": 5.7395,
+      "terminal_delta_vs_plain_cproj": 0.0001,
+      "terminal_delta_vs_attention_only": 0.2477,
+      "decision": "REJECT_OPTIMIZER_ONLY_PRACTICAL_TIE_WITH_PLAIN_CPROJ"
+    },
+    {
+      "name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonchart154_sharedhidden_0p5tpp",
+      "mechanism": "The Muon-chart c_proj control plus one zero-log-initialized hidden-channel gain shared before GELU and before c_proj; no learned basis.",
+      "config_sha256": "be009f8dbabdc71405e6177e305c8162fb9848a5a657fd0595bf251edba2cad0",
+      "command": [
+        "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonchart154_sharedhidden_0p5tpp_20260728T031418Z_4066759.config.json"
+      ],
+      "provenance_sha256": "21a6abced998b153b61d2eaeabac62e32f2b78e992b6d39530b1a1d26f53aa60",
+      "status_sha256": "aec14660ed81701bc0e0f74d780ac7bddc1f88743cc5c3fa93ea67810b98bc97",
+      "log_sha256": "82740a50819c4f50096ddaf1eac6f4ca8d277b7d89dc98f29c9de4067ba9f599",
+      "checkpoint_sha256": "7fc0ca6f554c00b2e5e38b7153dcf05e9af927e79b982ddfef41c710b6c655d4",
+      "checkpoint_metadata_sha256": "666c0e69db03e6be0b2a5332f1c9a3b241ff5efd28b80dfa56a2e9f93b79347c",
+      "performance_gate": {
+        "mfu_fraction": 0.27101751949659425,
+        "minimum_fraction": 0.2,
+        "certificate_sha256": "d2b1c990d7c0959e880abbf062f64d41a609f4ad7873c228d7aaffb4b90f4a02"
+      },
+      "finished_at": "2026-07-28T11:19:37+08:00",
+      "exit_code": 0,
+      "validation_loss": {
+        "60": 6.5258,
+        "120": 5.9907,
+        "180": 5.8064,
+        "238": 5.7419
+      },
+      "terminal_train_loss": 5.7375,
+      "terminal_validation_loss": 5.7419,
+      "terminal_delta_vs_muonchart_control": 0.0024,
+      "terminal_delta_vs_plain_cproj": 0.0025,
+      "terminal_delta_vs_attention_only": 0.2501,
+      "decision": "REJECT_PAIRED_DIAGONAL_CHANNEL_CHART_NO_GAIN"
+    },
+    {
+      "name": "y400_mai_v3_124m_fullattn_plus_jointmlp_muonchart154_sharedhidden_0p5tpp",
+      "mechanism": "Separate near-square Muon-owned native BlockFHT latents for c_fc and c_proj plus the shared hidden-channel gain; no learned basis.",
+      "config_sha256": "0d25c3720d8d0292979b590a828d257b55a4ecda142f47543767927e75502dbe",
+      "command": [
+        "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_jointmlp_muonchart154_sharedhidden_0p5tpp_20260728T031424Z_4066941.config.json"
+      ],
+      "provenance_sha256": "4278e2eb5ae2693ca4fff668fd98e05f4d7ccdcae0f3baaafafcaa8660af15d4",
+      "status_sha256": "230898da020b9f1e43064779f3bef6cc839dbfb28b851a276f20c796fff0707b",
+      "log_sha256": "e503a4c31c4266cfc7e625422e2c438c58a996505d3fb7e51d054082d72efe91",
+      "checkpoint_sha256": "249d2a8fb1d691f0453e88ee066b8f7620589cebaa25c9eb50b0a768678a12b4",
+      "checkpoint_metadata_sha256": "bd87b6745f449015a0f9350a853a9b70ccc4c51cf06bc4ee7728ad9eae802f2e",
+      "performance_gate": {
+        "mfu_fraction": 0.2694416741679197,
+        "minimum_fraction": 0.2,
+        "certificate_sha256": "f9b2ec5c81b67829ef07d1e6c407db62c8b284aa9a9b113e2963ba7911b029a6"
+      },
+      "finished_at": "2026-07-28T11:19:42+08:00",
+      "exit_code": 0,
+      "validation_loss": {
+        "60": 6.8573,
+        "120": 6.1915,
+        "180": 5.9890,
+        "238": 5.9230
+      },
+      "terminal_train_loss": 5.9178,
+      "terminal_validation_loss": 5.9230,
+      "terminal_delta_vs_plain_cproj": 0.1836,
+      "terminal_delta_vs_attention_only": 0.4312,
+      "decision": "REJECT_JOINT_MLP_SUBSTANTIAL_REGRESSION"
+    }
+  ],
+  "overall_decision": {
+    "classification": "NATIVE_OPTIMIZER_AND_DIAGONAL_CHANNEL_CHART_INSUFFICIENT",
+    "promote_any_to_5tpp": false,
+    "conclusions": [
+      "Changing native c_proj latent ownership from AdamW to Muon does not change terminal NLL.",
+      "The directly learned shared expansion-channel diagonal does not exploit the observed c_fc/c_proj channel-salience correlation.",
+      "Joint MLP replacement remains much harder than c_proj-only replacement.",
+      "The missing chart must be task-conditioned and non-diagonal/high-rank; another fixed low-rank basis, scalar modulation, or residual HyperConnection is not supported."
+    ],
+    "next_required_diagnostic": "Measure whether the shared gains moved materially and whether the native latent update reached useful local radius; then test a nonlinear latent-conditioned rotation of the fixed FHT chart or a generated-weight-space task-gradient projection, not another LoRA-like learned basis."
+  }
+}
