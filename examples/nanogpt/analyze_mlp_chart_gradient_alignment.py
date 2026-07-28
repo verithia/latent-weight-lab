@@ -37,6 +37,7 @@ from examples.nanogpt.analyze_residual_compatibility import (
     fixed_validation_batches,
 )
 from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.muon import zeropower_via_newtonschulz5
 
 
 CHART_GROUPS = (
@@ -331,12 +332,77 @@ def clone_parameter_gradients(
     return output
 
 
+def effective_polar_chart_gradients(
+    model: GPT,
+    parameters: dict[str, torch.nn.Parameter],
+    layers: list[int],
+    ns_steps: int,
+) -> dict[str, torch.Tensor]:
+    """Pull a dense effective-weight polar direction into chart coordinates.
+
+    CE first produces a dense gradient on the cached effective ``c_proj``
+    weight.  Dense Muon acts in that matrix space, whereas the current chart
+    sends the raw VJP to AdamW-owned coordinates.  This no-update diagnostic
+    applies Muon's Newton-Schulz polar transform to the effective gradient,
+    then computes the exact VJP through the fixed bilateral chart.  It does
+    not change the generated base, create a learned basis, or retain dense
+    optimizer state.
+    """
+
+    if ns_steps <= 0:
+        raise ValueError("ns_steps must be positive")
+    output: dict[str, torch.Tensor] = {}
+    for layer in layers:
+        mlp = model.transformer.h[layer].mlp
+        cached = mlp._cached_charted_cproj_weight
+        if cached is None or cached.grad is None:
+            raise RuntimeError(
+                f"layer {layer} has no cached effective c_proj gradient"
+            )
+        base_weight = getattr(mlp.c_proj, "_cached_weight", None)
+        if base_weight is None:
+            raise RuntimeError(
+                f"layer {layer} has no cached generated c_proj base"
+            )
+        selected = {
+            key: parameter
+            for key, parameter in parameters.items()
+            if split_chart_key(key)[0] == layer
+        }
+        keys = sorted(selected)
+        values = [selected[key] for key in keys]
+        dense_polar = zeropower_via_newtonschulz5(
+            cached.grad.detach().float(),
+            steps=ns_steps,
+        )
+        with torch.enable_grad():
+            # The base is fixed for this chart-only direction diagnostic.
+            # FP32 avoids conflating the metric test with BF16 VJP rounding.
+            charted = mlp._materialize_charted_cproj_weight(
+                base_weight.detach().float()
+            )
+            gradients = torch.autograd.grad(
+                charted,
+                values,
+                grad_outputs=dense_polar.to(dtype=charted.dtype),
+            )
+        for key, gradient in zip(keys, gradients):
+            output[key] = gradient.detach().float().cpu()
+    return output
+
+
 def task_ce_gradients(
     model: GPT,
     parameters: dict[str, torch.nn.Parameter],
     batches: list[torch.Tensor],
     device: str,
-) -> tuple[dict[str, torch.Tensor], float]:
+    layers: list[int],
+    ns_steps: int,
+) -> tuple[
+    dict[str, torch.Tensor],
+    dict[str, torch.Tensor],
+    float,
+]:
     model.zero_grad(set_to_none=True)
     cache_dtype = (
         torch.bfloat16 if device.startswith("cuda") else torch.float32
@@ -357,8 +423,18 @@ def task_ce_gradients(
         assert loss is not None
         losses.append(float(loss.detach()))
         (loss / len(batches)).backward()
+    polar_gradients = effective_polar_chart_gradients(
+        model,
+        parameters,
+        layers,
+        ns_steps,
+    )
     model.flush_block_fht_cache()
-    return clone_parameter_gradients(parameters), float(np.mean(losses))
+    return (
+        clone_parameter_gradients(parameters),
+        polar_gradients,
+        float(np.mean(losses)),
+    )
 
 
 def teacher_mse_gradients(
@@ -472,6 +548,7 @@ def main() -> None:
     parser.add_argument("--block-size", type=int, default=256)
     parser.add_argument("--batches", type=int, default=8)
     parser.add_argument("--ce-batches", type=int, default=1)
+    parser.add_argument("--muon-ns-steps", type=int, default=5)
     parser.add_argument("--sample-cap", type=int, default=2048)
     parser.add_argument("--sample-seed", type=int, default=20260716)
     parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
@@ -488,6 +565,8 @@ def main() -> None:
         raise ValueError("sample cap exceeds the available activation rows")
     if args.ce_batches <= 0 or args.ce_batches > args.batches:
         raise ValueError("ce-batches must be in [1, batches]")
+    if args.muon_ns_steps <= 0:
+        raise ValueError("muon-ns-steps must be positive")
 
     fit = collect_split(
         name="fit",
@@ -532,18 +611,25 @@ def main() -> None:
         )
         parameters = chart_parameters(model, layers)
         ce_by_split: dict[str, dict[str, torch.Tensor]] = {}
+        polar_by_split: dict[str, dict[str, torch.Tensor]] = {}
         teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
         init_key = f"{initialization:.8g}"
         objective[init_key] = {}
         for split in (fit, holdout):
             ce_batches = split.batches[: args.ce_batches]
-            ce_gradient, ce_loss = task_ce_gradients(
-                model, parameters, ce_batches, args.device
+            ce_gradient, polar_gradient, ce_loss = task_ce_gradients(
+                model,
+                parameters,
+                ce_batches,
+                args.device,
+                layers,
+                args.muon_ns_steps,
             )
             teacher_gradient, teacher_losses = teacher_mse_gradients(
                 model, parameters, split, layers, args.device
             )
             ce_by_split[split.name] = ce_gradient
+            polar_by_split[split.name] = polar_gradient
             teacher_by_split[split.name] = teacher_gradient
             objective[init_key][split.name] = {
                 "task_ce": ce_loss,
@@ -559,10 +645,19 @@ def main() -> None:
                 initialization=initialization,
             )
             rows.extend(split_rows)
+            polar_rows = alignment_rows(
+                polar_gradient,
+                teacher_gradient,
+                comparison="task_ce_effective_polar_vjp_vs_teacher_mse",
+                split=split.name,
+                initialization=initialization,
+            )
+            rows.extend(polar_rows)
             print(
                 f"initialization={initialization} split={split.name} "
                 f"task_ce={ce_loss:.6f} global_cosine="
-                f"{split_rows[0]['cosine']:.6f}",
+                f"{split_rows[0]['cosine']:.6f} polar_vjp_cosine="
+                f"{polar_rows[0]['cosine']:.6f}",
                 flush=True,
             )
         rows.extend(
@@ -570,6 +665,15 @@ def main() -> None:
                 ce_by_split["fit"],
                 ce_by_split["holdout"],
                 comparison="task_ce_fit_vs_holdout",
+                split="cross_split",
+                initialization=initialization,
+            )
+        )
+        rows.extend(
+            alignment_rows(
+                polar_by_split["fit"],
+                polar_by_split["holdout"],
+                comparison="task_ce_effective_polar_vjp_fit_vs_holdout",
                 split="cross_split",
                 initialization=initialization,
             )
@@ -597,7 +701,7 @@ def main() -> None:
         if row["scope"] == "global"
     ]
     metadata = {
-        "schema_version": "mlp_chart_gradient_alignment_v1",
+        "schema_version": "mlp_chart_gradient_alignment_v2",
         "scientific_scope": (
             "deterministic no-update gradient diagnostic; not a training result"
         ),
@@ -627,6 +731,12 @@ def main() -> None:
             torch.cat(holdout.batches[: args.ce_batches])
         ),
         "initial_effective_output_log_gains": args.initializations,
+        "effective_polar_vjp": {
+            "muon_ns_steps": args.muon_ns_steps,
+            "base_gradient_unchanged": True,
+            "chart_only": True,
+            "dense_optimizer_state_retained": False,
+        },
         "chart": {
             "hidden_rotation_stages": 2,
             "hidden_rotation_coordinate_scale": 4.0,
