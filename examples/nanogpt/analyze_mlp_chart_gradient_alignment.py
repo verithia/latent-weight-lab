@@ -398,7 +398,14 @@ class ChartedCProjWeightView(torch.nn.Module):
     def __init__(self, mlp: torch.nn.Module, base_weight: torch.Tensor) -> None:
         super().__init__()
         self.mlp = mlp
-        self.register_buffer("base_weight", base_weight.detach().float())
+        reference = next(mlp.parameters())
+        self.register_buffer(
+            "base_weight",
+            base_weight.detach().to(
+                device=reference.device,
+                dtype=torch.float32,
+            ),
+        )
 
     def forward(self) -> torch.Tensor:
         return self.mlp._materialize_charted_cproj_weight(self.base_weight)
