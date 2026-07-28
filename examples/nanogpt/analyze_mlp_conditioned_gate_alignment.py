@@ -5,7 +5,7 @@ metrics, and residual summary objectives do not identify the useful chart
 direction.  This probe adds the smallest coordinate family that exposes
 token-conditioned output orientation without a learned basis:
 
-    update' = update * exp(tanh(slope * LN(residual) + bias))
+    update' = update + update * (slope * LN(residual) + bias)
 
 ``slope`` and ``bias`` are residual-width vectors per layer and initialize to
 zero, so the gate is exactly identity.  The diagnostic compares causal CE and
@@ -63,9 +63,11 @@ class ResidualConditionedOutputGate(torch.nn.Module):
         self.bias = torch.nn.Parameter(torch.zeros(int(width)))
         self.scale = float(scale)
 
-    def log_gain(self, condition: torch.Tensor) -> torch.Tensor:
-        return self.scale * torch.tanh(
-            condition * self.slope + self.bias
+    def modulation(self, condition: torch.Tensor) -> torch.Tensor:
+        return self.scale * torch.addcmul(
+            self.bias,
+            condition,
+            self.slope,
         )
 
     def forward(
@@ -76,7 +78,11 @@ class ResidualConditionedOutputGate(torch.nn.Module):
                 "gate condition and update must be aligned, got "
                 f"{tuple(condition.shape)} and {tuple(update.shape)}"
             )
-        return update * self.log_gain(condition).exp()
+        return torch.addcmul(
+            update,
+            update,
+            self.modulation(condition),
+        )
 
 
 def sha256(path: Path) -> str:
@@ -488,7 +494,9 @@ def main() -> None:
         "holdout_token_sha256": holdout.token_sha256,
         "initial_output_log_gain": args.initial_output_log_gain,
         "gate": {
-            "formula": "update * exp(tanh(slope * mlp_input + bias))",
+            "formula": (
+                "update + update * (slope * mlp_input + bias)"
+            ),
             "parameters_per_selected_layer": 2 * model.config.n_embd,
             "identity_initialized": True,
             "learned_basis": False,

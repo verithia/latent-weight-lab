@@ -89,7 +89,8 @@ def main() -> None:
             "parent_bilateral_config_sha256": sha256(PARENT),
             "conditioned_output_gate": {
                 "formula": (
-                    "update * exp(tanh(slope * layernorm_residual + bias))"
+                    "update + update * "
+                    "(slope * layernorm_residual + bias)"
                 ),
                 "coordinates_per_layer": 1536,
                 "coordinates_total": 18432,

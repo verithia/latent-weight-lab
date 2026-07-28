@@ -1846,12 +1846,16 @@ class MLP(nn.Module):
             out = self.output_rotation(out)
         if self.residual_conditioned_output_slope is not None:
             assert self.residual_conditioned_output_bias is not None
-            log_gain = self.residual_conditioned_output_gate_scale * (
-                x
-                * self.residual_conditioned_output_slope.to(dtype=x.dtype)
-                + self.residual_conditioned_output_bias.to(dtype=x.dtype)
-            ).tanh()
-            out = out * log_gain.exp().to(dtype=out.dtype)
+            modulation = self.residual_conditioned_output_gate_scale * torch.addcmul(
+                self.residual_conditioned_output_bias.to(dtype=x.dtype),
+                x,
+                self.residual_conditioned_output_slope.to(dtype=x.dtype),
+            )
+            out = torch.addcmul(
+                out,
+                out,
+                modulation.to(dtype=out.dtype),
+            )
         if self.training and self.cproj_teacher_weight is not None:
             detached_activated = activated.detach()
             aligned_student_weight = self._cached_charted_cproj_weight
