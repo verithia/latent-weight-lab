@@ -113,6 +113,10 @@ class GPTConfig:
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
+    block_fht_mlp_activation_chart: bool = False
+    block_fht_mlp_activation_chart_channel_scale: float = 1.0
+    block_fht_mlp_activation_chart_common_scale: float = 1.0
+    block_fht_mlp_activation_chart_gauge_scale: float = 1.0
     block_fht_mlp_output_rotation_stages: int = 0
     block_fht_mlp_output_rotation_seed: int = 271828
     block_fht_mlp_output_block_rotation_stages: int = 0
@@ -1220,6 +1224,48 @@ class MLP(nn.Module):
         self.shared_hidden_gain_scale = float(config.block_fht_mlp_shared_hidden_gain_scale)
         if not math.isfinite(self.shared_hidden_gain_scale) or self.shared_hidden_gain_scale <= 0.0:
             raise ValueError("block_fht_mlp_shared_hidden_gain_scale must be positive and finite")
+        if (
+            config.block_fht_mlp_activation_chart
+            and self.shared_hidden_log_gain is not None
+        ):
+            raise ValueError(
+                "activation chart and legacy shared hidden gain are "
+                "mutually exclusive"
+            )
+        self.activation_chart_channel_log_gain = (
+            nn.Parameter(torch.zeros(4 * config.n_embd))
+            if config.block_fht_mlp_activation_chart
+            else None
+        )
+        self.activation_chart_common_log_gain = (
+            nn.Parameter(torch.zeros(()))
+            if config.block_fht_mlp_activation_chart
+            else None
+        )
+        self.activation_chart_gauge_log_gain = (
+            nn.Parameter(torch.zeros(()))
+            if config.block_fht_mlp_activation_chart
+            else None
+        )
+        self.activation_chart_channel_scale = float(
+            config.block_fht_mlp_activation_chart_channel_scale
+        )
+        self.activation_chart_common_scale = float(
+            config.block_fht_mlp_activation_chart_common_scale
+        )
+        self.activation_chart_gauge_scale = float(
+            config.block_fht_mlp_activation_chart_gauge_scale
+        )
+        for name, scale in (
+            ("channel", self.activation_chart_channel_scale),
+            ("common", self.activation_chart_common_scale),
+            ("gauge", self.activation_chart_gauge_scale),
+        ):
+            if not math.isfinite(scale) or scale <= 0.0:
+                raise ValueError(
+                    "block_fht_mlp_activation_chart_"
+                    f"{name}_scale must be positive and finite"
+                )
         rotation_stages = int(config.block_fht_mlp_output_rotation_stages)
         if rotation_stages < 0:
             raise ValueError("block_fht_mlp_output_rotation_stages must be non-negative")
@@ -1487,6 +1533,32 @@ class MLP(nn.Module):
         combined_weight = c_proj_weight + self.cproj_lowrank_scale * (right_weight @ left_weight)
         return F.linear(activated, combined_weight, c_proj_bias)
 
+    def activation_chart_log_scales(
+        self,
+    ) -> tuple[torch.Tensor, torch.Tensor] | None:
+        """Return paired pre/post-GELU log scales from manifold coordinates.
+
+        ``common`` moves both paired matrix norms in the same direction,
+        ``gauge`` moves ``c_fc`` and ``c_proj`` oppositely, and the centered
+        channel vector supplies the layer-specific hidden-channel path without
+        duplicating the layerwise mean coordinate.
+        """
+
+        channel = self.activation_chart_channel_log_gain
+        common = self.activation_chart_common_log_gain
+        gauge = self.activation_chart_gauge_log_gain
+        if channel is None or common is None or gauge is None:
+            return None
+        centered = self.activation_chart_channel_scale * (
+            channel - channel.mean()
+        )
+        common_value = self.activation_chart_common_scale * common
+        gauge_value = self.activation_chart_gauge_scale * gauge
+        return (
+            common_value - gauge_value + centered,
+            common_value + gauge_value + centered,
+        )
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         hidden = self.c_fc(x)
         if self.lowrank_left is not None and self.lowrank_right is not None:
@@ -1496,6 +1568,10 @@ class MLP(nn.Module):
             hidden = hidden * self.pregelu_gain.to(dtype=hidden.dtype)
         if self.pregelu_bias is not None:
             hidden = hidden + self.pregelu_bias.to(dtype=hidden.dtype)
+        activation_chart = self.activation_chart_log_scales()
+        if activation_chart is not None:
+            pre_log_gain, post_log_gain = activation_chart
+            hidden = hidden * pre_log_gain.exp().to(dtype=hidden.dtype)
         shared_hidden_gain = None
         if self.shared_hidden_log_gain is not None:
             shared_hidden_gain = (
@@ -1503,6 +1579,10 @@ class MLP(nn.Module):
             ).exp().to(dtype=hidden.dtype)
             hidden = hidden * shared_hidden_gain
         activated = self.gelu(hidden)
+        if activation_chart is not None:
+            activated = activated * post_log_gain.exp().to(
+                dtype=activated.dtype
+            )
         if shared_hidden_gain is not None:
             activated = activated * shared_hidden_gain
         if self.training and self.postgelu_std_target > 0.0:
@@ -1754,6 +1834,14 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 module.spectral_log_in_gain.requires_grad_(True)
         if isinstance(module, MLP) and module.shared_hidden_log_gain is not None:
             module.shared_hidden_log_gain.requires_grad_(True)
+        if isinstance(module, MLP):
+            for parameter in (
+                module.activation_chart_channel_log_gain,
+                module.activation_chart_common_log_gain,
+                module.activation_chart_gauge_log_gain,
+            ):
+                if parameter is not None:
+                    parameter.requires_grad_(True)
         if (
             isinstance(module, MLP)
             and module.output_block_rotation is not None
