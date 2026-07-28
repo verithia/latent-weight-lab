@@ -901,7 +901,7 @@
         "Y400": {
           "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_quadraticfht_q0p25_muonchart154_0p5tpp",
           "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_quadraticfht_q0p25_muonchart154_0p5tpp_lr24e4.json",
-          "config_sha256": "7730ab42643984e6da42623183a9c782084061fb207e947c6306459336510bcb",
+          "config_sha256": "043d19e7eadebe257926ea0337827773a8be71bdf7853fbad5b14b31c37b9f1a",
           "repo_relative": "latent-weight-lab-mlp-quadratic",
           "required_source_hashes": {
             "examples/nanogpt/train.py": "e20108cdeb86f9c5a91ba5f69c150acc8f70db52a03f0d6e0938058830e7549c",
@@ -927,7 +927,7 @@
         "Y400": {
           "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_quadraticfht_q0p50_muonchart154_0p5tpp",
           "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_quadraticfht_q0p50_muonchart154_0p5tpp_lr24e4.json",
-          "config_sha256": "d379eacc3dc2eff5ac128964d9e1e6d09af9bc7aec23c601da57bad4785bd34a",
+          "config_sha256": "061edd3ea8b6b72b4d30dfe4949ec818d9d5b507ccd66175dceb4c9232abbcc8",
           "repo_relative": "latent-weight-lab-mlp-quadratic",
           "required_source_hashes": {
             "examples/nanogpt/train.py": "e20108cdeb86f9c5a91ba5f69c150acc8f70db52a03f0d6e0938058830e7549c",
@@ -953,7 +953,7 @@
         "Y400": {
           "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_quadraticfht_q1p00_muonchart154_0p5tpp",
           "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_quadraticfht_q1p00_muonchart154_0p5tpp_lr24e4.json",
-          "config_sha256": "df0d188dc35cf9e07032f0cf75cdb838fe2640a55fb79e68148b68841fb4798b",
+          "config_sha256": "2af7f15147875b3bd4745e7214e4fa839f0363363fc6f833891daac6e7ffa30c",
           "repo_relative": "latent-weight-lab-mlp-quadratic",
           "required_source_hashes": {
             "examples/nanogpt/train.py": "e20108cdeb86f9c5a91ba5f69c150acc8f70db52a03f0d6e0938058830e7549c",

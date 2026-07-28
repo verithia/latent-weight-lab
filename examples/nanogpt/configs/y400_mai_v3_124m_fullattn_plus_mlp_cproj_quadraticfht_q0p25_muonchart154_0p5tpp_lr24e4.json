@@ -140,6 +140,7 @@
   "max_iters": 238,
   "method": "block_fht",
   "mfu_min_fraction": 0.2,
+  "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_quadratic_screens/performance_preflight_0p25.json",
   "mfu_preflight_required": true,
   "min_lr": 0.00024,
   "mixed_continuation_provenance": {

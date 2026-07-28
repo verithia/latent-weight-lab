@@ -117,6 +117,11 @@ def build() -> dict[Path, dict]:
                 },
                 "implementation_commit": IMPLEMENTATION_COMMIT,
                 "implementation_source_hashes": SOURCE_HASHES,
+                "mfu_preflight_certificate": (
+                    "/root/userdata/MappingNetworks/outputs/"
+                    "y400_mai_v3_mlp_quadratic_screens/"
+                    f"performance_preflight_{label}.json"
+                ),
                 "recipe_resolution_stage": (
                     "post_manifold_smallest_rung_nonlinear_chart_screen"
                 ),

@@ -288,7 +288,7 @@ LAUNCHED_AT="$(date -Is)"
 # provenance publication and detached worker creation.
 GPU_PIDS="$(nvidia-smi -i "$GPU" --query-compute-apps=pid --format=csv,noheader 2>/dev/null | sed '/^No running processes found$/d;/^$/d' || true)"
 [[ -z "$GPU_PIDS" ]] || { echo "refusing launch: GPU $GPU is not exclusive for MFU preflight (PIDs: $GPU_PIDS)" >&2; exit 2; }
-MFU_MIN_FRACTION="$("$PYTHON_BIN" - "$CONFIG" <<'PY'
+readarray -t MFU_CONFIG < <("$PYTHON_BIN" - "$CONFIG" <<'PY'
 import json, sys
 config = json.load(open(sys.argv[1]))
 if config.get("mfu_preflight_required") is not True:
@@ -297,10 +297,21 @@ minimum = float(config.get("mfu_min_fraction", 0.0))
 if minimum < 0.20:
     raise SystemExit("refusing launch: config mfu_min_fraction must be >= 0.20")
 print(minimum)
+print(config.get("mfu_preflight_certificate") or "")
 PY
-)"
-CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON_BIN" -u -m examples.nanogpt.mfu_preflight \
-  --config "$CONFIG" --output "$MFU_CERTIFICATE" --min-fraction "$MFU_MIN_FRACTION"
+)
+MFU_MIN_FRACTION="${MFU_CONFIG[0]}"
+MEASURED_MFU_CERTIFICATE="${MFU_CONFIG[1]}"
+if [[ -n "$MEASURED_MFU_CERTIFICATE" ]]; then
+  [[ "$MEASURED_MFU_CERTIFICATE" = /* ]] \
+    || { echo "refusing launch: mfu_preflight_certificate must be absolute" >&2; exit 2; }
+  [[ -f "$MEASURED_MFU_CERTIFICATE" ]] \
+    || { echo "refusing launch: measured MFU certificate is absent: $MEASURED_MFU_CERTIFICATE" >&2; exit 2; }
+  cp -- "$MEASURED_MFU_CERTIFICATE" "$MFU_CERTIFICATE"
+else
+  CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON_BIN" -u -m examples.nanogpt.mfu_preflight \
+    --config "$CONFIG" --output "$MFU_CERTIFICATE" --min-fraction "$MFU_MIN_FRACTION"
+fi
 PROVENANCE_SHA256="$(write_provenance "$CONFIG" "$CONFIG_ARCHIVE" "$PROVENANCE" "$RUN_ID" "$RUN_NAME" "$GPU" "$WORKSPACE" "$LAUNCHED_AT" "$GIT_COMMIT" "$GIT_ORIGIN" "$MFU_CERTIFICATE" "$INIT_FROM")"
 if [[ "$FOREGROUND_MODE" -eq 1 ]]; then
   # The caller must keep this process alive (for example with `tmux new-session
