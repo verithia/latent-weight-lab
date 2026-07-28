@@ -1,0 +1,113 @@
+{
+  "schema_version": "mai_mlp_residual_conditioned_gate_result_v1",
+  "recorded_at": "2026-07-28",
+  "screen": {
+    "name": "y400_mai_v3_124m_cproj_rescond_slope_l0_0p5tpp",
+    "host": "Y400",
+    "gpu": 0,
+    "repository_commit": "9848c5aba89249345c8c9acbf8dbf0975fc06eaa",
+    "implementation_commit": "333e0f1f9f05c3c097f0c645bac4b271256e453b",
+    "source_hashes": {
+      "examples/nanogpt/model.py": "dd18fe4a2cc99878a6e31c9cfcc87497a98dac2ae3088a73b3a16aa5df6c1fe8",
+      "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+      "examples/nanogpt/train.py": "71b5d8452cd0c8d343752681676e31acc28607c335d387bdd6474607e6729c35",
+      "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+    },
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_cproj_rescond_slope_l0_0p5tpp_20260728T103506Z_218980.config.json"
+    ],
+    "config_sha256": "1b870f5a7ffa8dc2292dc61af274c6e3eb598819bffb618c3ea7fe2a415974a7",
+    "resolved_config_sha256": "b46eca63ca4d79ff50d0270478ba9c11ac81d4305788aab4522798bbec088331",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "ebe1ef3923414e9e0c96fd9f527fcf0437fef191bc328aa250d7ef77abf76f56",
+    "status_sha256": "dffdece46d59bdd9aa585b3b6ce6e99fb7b65ba054aa01337bd3c97279754954",
+    "log_sha256": "731041e9a23520901e93d4704b05d35d474051df214cfe57d3974765b70a9f68",
+    "checkpoint_sha256": "12f23391988906319ba312082437a69a3e9e84e16fc7996af9a676243a5d6bda",
+    "checkpoint_meta_sha256": "817ce51cfb2b73d3041ad2a777dc3612b144de8696dfad298660a396e4899a6d",
+    "mfu_certificate_sha256": "f08c2868cec4028631d3b0c0c45aa2a66cc34e7e5ca07c6a7583371a2f8d11c5",
+    "finished_at": "2026-07-28T18:40:57+08:00",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.6939,
+    "terminal_validation_loss": 5.6983
+  },
+  "performance_gate": {
+    "classification": "passed",
+    "minimum_mfu": 0.2,
+    "mfu": 0.21688470331998796,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "empirical_bf16_gemm_peak_tflops": 791.2883406159297,
+    "model_tflops": 171.6183369950515,
+    "tokens_per_second": 229787.89666666664,
+    "milliseconds_per_update": 1140.8100000000002,
+    "peak_memory_mib": 31727.84
+  },
+  "mechanism": {
+    "parent": "unrestricted bilateral generated-c_proj chart",
+    "selected_layers": [
+      0
+    ],
+    "formula": "update + update * (slope * layernorm_residual)",
+    "trainable_coordinates": 768,
+    "identity_initialized": true,
+    "input_dependent": true,
+    "learned_basis": false,
+    "lora_adapter": false,
+    "static_bias_coordinate": "omitted because the parent already supplies a learned per-output residual gain",
+    "optimizer_assignment": "one slope vector in the MLP chart AdamW fallback"
+  },
+  "direction_screen": {
+    "diagnostic_commit": "1754a2135d257a9cf01bd4e05575ee02754897b9",
+    "alignment_csv_sha256": "e5035d857b7adae7448f82cefe7916ceaf338dc59d25680fd4905916250480ee",
+    "selected_layer": 0,
+    "selected_coordinate_group": "slope",
+    "task_ce_vs_dense_teacher_cosine_fit": 0.04898739978671074,
+    "task_ce_vs_dense_teacher_cosine_holdout": 0.05935664474964142,
+    "selection_reason": "strongest diagnosed dynamic slope direction that is positive on both deterministic token splits"
+  },
+  "matched_terminal_comparison": {
+    "attention_only_validation_loss": 5.4918,
+    "plain_generated_cproj_validation_loss": 5.7394,
+    "unrestricted_bilateral_validation_loss": 5.7001,
+    "best_output_plus_activation_validation_loss": 5.6832,
+    "functional_teacher_alignment_lambda20_validation_loss": 5.6844,
+    "candidate_minus_attention_only": 0.2065,
+    "candidate_minus_plain_generated_cproj": -0.0411,
+    "candidate_minus_unrestricted_bilateral": -0.0018,
+    "candidate_minus_best_output_plus_activation": 0.0151,
+    "candidate_minus_functional_teacher_alignment_lambda20": 0.0139
+  },
+  "learned_coordinate": {
+    "key": "transformer.h.0.mlp.residual_conditioned_output_slope",
+    "numel": 768,
+    "l2_norm": 0.2805810272693634,
+    "rms": 0.01012459583580494,
+    "mean": -0.00036619589081965387,
+    "minimum": -0.02852790430188179,
+    "maximum": 0.033904172480106354,
+    "nonzero": 768
+  },
+  "decision": {
+    "classification": "REJECT_DYNAMIC_DIAGONAL_PRACTICAL_TIE_WITH_BILATERAL_PARENT",
+    "practical_equivalence_nll": 0.02,
+    "accepted_attention_gap": 0.1,
+    "promote_to_5tpp": false,
+    "reason": "The evidence-selected token-conditioned slope learns nonzero values and slightly improves its parent, but the 0.0018 gain is a practical tie and leaves a 0.2065 validation-NLL gap to attention-only."
+  },
+  "next_action": {
+    "diagnostic": "screen a fixed-basis bilinear channel-mixing correction whose tangent can rotate the MLP update rather than only rescale it",
+    "constraints": [
+      "use the smallest 124M ladder",
+      "require positive fit and holdout direction alignment before training",
+      "add no learned dense basis or LoRA adapter",
+      "foreground-poll the MFU gate and any 238-step run",
+      "do not launch below 20 percent MFU"
+    ]
+  }
+}
