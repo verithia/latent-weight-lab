@@ -28,6 +28,7 @@ from pathlib import Path
 import numpy as np
 import torch
 import torch.nn.functional as F
+from torch.func import functional_call, jvp, vjp
 
 from examples.nanogpt.analyze_mlp_activation_chart_oracle import (
     collect_model,
@@ -391,6 +392,192 @@ def effective_polar_chart_gradients(
     return output
 
 
+class ChartedCProjWeightView(torch.nn.Module):
+    """Expose only the materialized effective c_proj weight as a function."""
+
+    def __init__(self, mlp: torch.nn.Module, base_weight: torch.Tensor) -> None:
+        super().__init__()
+        self.mlp = mlp
+        self.register_buffer("base_weight", base_weight.detach().float())
+
+    def forward(self) -> torch.Tensor:
+        return self.mlp._materialize_charted_cproj_weight(self.base_weight)
+
+
+def _tuple_dot(
+    left: tuple[torch.Tensor, ...],
+    right: tuple[torch.Tensor, ...],
+) -> torch.Tensor:
+    return sum(
+        (left_value * right_value).sum()
+        for left_value, right_value in zip(left, right, strict=True)
+    )
+
+
+def natural_chart_directions(
+    model: GPT,
+    parameters: dict[str, torch.nn.Parameter],
+    layers: list[int],
+    dense_gradients: dict[int, torch.Tensor],
+    base_weights: dict[int, torch.Tensor],
+    *,
+    damping_ratio: float,
+    cg_steps: int,
+    trace_samples: int,
+    trace_seed: int,
+) -> tuple[dict[str, torch.Tensor], dict[int, dict[str, float]]]:
+    """Solve a matrix-free damped inverse-pullback system per layer.
+
+    For effective weight Jacobian ``J`` and dense objective covector ``u``,
+    this returns ``delta = (J^T J + damping I)^-1 J^T u``.  Damping is a
+    dimensionless fraction of a deterministic Hutchinson estimate of the
+    mean eigenvalue of ``J^T J``.  No update is applied.
+    """
+
+    if not math.isfinite(damping_ratio) or damping_ratio <= 0.0:
+        raise ValueError("damping_ratio must be positive and finite")
+    if cg_steps <= 0:
+        raise ValueError("cg_steps must be positive")
+    if trace_samples <= 0:
+        raise ValueError("trace_samples must be positive")
+    output: dict[str, torch.Tensor] = {}
+    diagnostics: dict[int, dict[str, float]] = {}
+    group_to_name = {
+        "hidden_rotation": "mlp.hidden_block_rotation.coordinates",
+        "hidden_gain": "mlp.hidden_log_gain",
+        "output_rotation": "mlp.output_block_rotation.coordinates",
+        "output_gain": "mlp.residual_output_log_gain",
+    }
+    for layer in layers:
+        if layer not in dense_gradients or layer not in base_weights:
+            raise ValueError(f"missing dense gradient/base for layer {layer}")
+        mlp = model.transformer.h[layer].mlp
+        view = ChartedCProjWeightView(mlp, base_weights[layer])
+        keys = [chart_key(layer, group) for group in CHART_GROUPS]
+        values = [parameters[key] for key in keys]
+        names = [group_to_name[group] for group in CHART_GROUPS]
+        primals = tuple(value.detach() for value in values)
+
+        def materialize(*coordinates: torch.Tensor) -> torch.Tensor:
+            replacements = {
+                name: coordinate
+                for name, coordinate in zip(
+                    names, coordinates, strict=True
+                )
+            }
+            return functional_call(
+                view,
+                replacements,
+                (),
+                strict=False,
+            )
+
+        _, pullback = vjp(materialize, *primals)
+        dense_gradient = dense_gradients[layer].to(
+            device=primals[0].device,
+            dtype=torch.float32,
+        )
+        rhs = tuple(value.detach() for value in pullback(dense_gradient))
+
+        generator = torch.Generator(device=primals[0].device)
+        generator.manual_seed(int(trace_seed) + int(layer) * 1009)
+        trace_estimates: list[torch.Tensor] = []
+        coordinate_count = sum(value.numel() for value in primals)
+        for _ in range(trace_samples):
+            probe = tuple(
+                (
+                    torch.randint(
+                        0,
+                        2,
+                        value.shape,
+                        device=value.device,
+                        generator=generator,
+                    ).to(dtype=value.dtype)
+                    * 2.0
+                    - 1.0
+                )
+                for value in primals
+            )
+            _, image = jvp(materialize, primals, probe)
+            trace_estimates.append(image.float().square().sum())
+        mean_eigenvalue = torch.stack(trace_estimates).mean() / float(
+            coordinate_count
+        )
+        damping = (
+            float(damping_ratio)
+            * mean_eigenvalue.clamp_min(1e-12)
+        )
+
+        def system(
+            direction: tuple[torch.Tensor, ...],
+        ) -> tuple[torch.Tensor, ...]:
+            _, image = jvp(materialize, primals, direction)
+            pulled = pullback(image)
+            return tuple(
+                value.detach() + damping * direction_value
+                for value, direction_value in zip(
+                    pulled, direction, strict=True
+                )
+            )
+
+        solution = tuple(torch.zeros_like(value) for value in rhs)
+        residual = tuple(value.clone() for value in rhs)
+        conjugate = tuple(value.clone() for value in residual)
+        initial_norm_squared = _tuple_dot(residual, residual).clamp_min(
+            1e-30
+        )
+        norm_squared = initial_norm_squared
+        completed_steps = 0
+        for step in range(cg_steps):
+            image = system(conjugate)
+            denominator = _tuple_dot(conjugate, image)
+            if not torch.isfinite(denominator) or denominator <= 0:
+                break
+            alpha = norm_squared / denominator
+            solution = tuple(
+                value + alpha * direction
+                for value, direction in zip(
+                    solution, conjugate, strict=True
+                )
+            )
+            residual = tuple(
+                value - alpha * image_value
+                for value, image_value in zip(
+                    residual, image, strict=True
+                )
+            )
+            next_norm_squared = _tuple_dot(residual, residual)
+            completed_steps = step + 1
+            if next_norm_squared <= initial_norm_squared * 1e-12:
+                norm_squared = next_norm_squared
+                break
+            beta = next_norm_squared / norm_squared.clamp_min(1e-30)
+            conjugate = tuple(
+                residual_value + beta * direction
+                for residual_value, direction in zip(
+                    residual, conjugate, strict=True
+                )
+            )
+            norm_squared = next_norm_squared
+
+        for key, value in zip(keys, solution, strict=True):
+            output[key] = value.detach().float().cpu()
+        diagnostics[layer] = {
+            "coordinate_count": float(coordinate_count),
+            "mean_eigenvalue": float(mean_eigenvalue),
+            "damping": float(damping),
+            "rhs_norm": float(initial_norm_squared.sqrt()),
+            "relative_residual": float(
+                (
+                    norm_squared.clamp_min(0).sqrt()
+                    / initial_norm_squared.sqrt()
+                )
+            ),
+            "cg_steps": float(completed_steps),
+        }
+    return output, diagnostics
+
+
 def task_ce_gradients(
     model: GPT,
     parameters: dict[str, torch.nn.Parameter],
@@ -401,6 +588,8 @@ def task_ce_gradients(
 ) -> tuple[
     dict[str, torch.Tensor],
     dict[str, torch.Tensor],
+    dict[int, torch.Tensor],
+    dict[int, torch.Tensor],
     float,
 ]:
     model.zero_grad(set_to_none=True)
@@ -423,6 +612,18 @@ def task_ce_gradients(
         assert loss is not None
         losses.append(float(loss.detach()))
         (loss / len(batches)).backward()
+    dense_gradients: dict[int, torch.Tensor] = {}
+    base_weights: dict[int, torch.Tensor] = {}
+    for layer in layers:
+        mlp = model.transformer.h[layer].mlp
+        cached = mlp._cached_charted_cproj_weight
+        base = getattr(mlp.c_proj, "_cached_weight", None)
+        if cached is None or cached.grad is None or base is None:
+            raise RuntimeError(
+                f"layer {layer} is missing cached CE weight state"
+            )
+        dense_gradients[layer] = cached.grad.detach().float().clone()
+        base_weights[layer] = base.detach().float().clone()
     polar_gradients = effective_polar_chart_gradients(
         model,
         parameters,
@@ -433,6 +634,8 @@ def task_ce_gradients(
     return (
         clone_parameter_gradients(parameters),
         polar_gradients,
+        dense_gradients,
+        base_weights,
         float(np.mean(losses)),
     )
 
@@ -443,9 +646,14 @@ def teacher_mse_gradients(
     split: SplitData,
     layers: list[int],
     device: str,
-) -> tuple[dict[str, torch.Tensor], dict[int, float]]:
+) -> tuple[
+    dict[str, torch.Tensor],
+    dict[int, float],
+    dict[int, torch.Tensor],
+]:
     output: dict[str, torch.Tensor] = {}
     losses: dict[int, float] = {}
+    dense_gradients: dict[int, torch.Tensor] = {}
     for layer in layers:
         mlp = model.transformer.h[layer].mlp
         selected = {
@@ -464,11 +672,12 @@ def teacher_mse_gradients(
         charted_weight = mlp._materialize_charted_cproj_weight(weight)
         prediction = F.linear(activated, charted_weight, bias)
         loss = F.mse_loss(prediction, target)
-        gradients = torch.autograd.grad(loss, values)
+        gradients = torch.autograd.grad(loss, [charted_weight, *values])
+        dense_gradients[layer] = gradients[0].detach().float()
         losses[layer] = float(loss.detach())
-        for key, gradient in zip(keys, gradients):
+        for key, gradient in zip(keys, gradients[1:]):
             output[key] = gradient.detach().float().cpu()
-    return output, losses
+    return output, losses, dense_gradients
 
 
 def collect_split(
@@ -549,6 +758,10 @@ def main() -> None:
     parser.add_argument("--batches", type=int, default=8)
     parser.add_argument("--ce-batches", type=int, default=1)
     parser.add_argument("--muon-ns-steps", type=int, default=5)
+    parser.add_argument("--natural-damping-ratio", type=float, default=0.1)
+    parser.add_argument("--natural-cg-steps", type=int, default=8)
+    parser.add_argument("--natural-trace-samples", type=int, default=1)
+    parser.add_argument("--natural-trace-seed", type=int, default=260219134)
     parser.add_argument("--sample-cap", type=int, default=2048)
     parser.add_argument("--sample-seed", type=int, default=20260716)
     parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
@@ -567,6 +780,15 @@ def main() -> None:
         raise ValueError("ce-batches must be in [1, batches]")
     if args.muon_ns_steps <= 0:
         raise ValueError("muon-ns-steps must be positive")
+    if (
+        not math.isfinite(args.natural_damping_ratio)
+        or args.natural_damping_ratio <= 0.0
+    ):
+        raise ValueError("natural-damping-ratio must be positive and finite")
+    if args.natural_cg_steps <= 0:
+        raise ValueError("natural-cg-steps must be positive")
+    if args.natural_trace_samples <= 0:
+        raise ValueError("natural-trace-samples must be positive")
 
     fit = collect_split(
         name="fit",
@@ -613,11 +835,19 @@ def main() -> None:
         ce_by_split: dict[str, dict[str, torch.Tensor]] = {}
         polar_by_split: dict[str, dict[str, torch.Tensor]] = {}
         teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
+        natural_ce_by_split: dict[str, dict[str, torch.Tensor]] = {}
+        natural_teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
         init_key = f"{initialization:.8g}"
         objective[init_key] = {}
         for split in (fit, holdout):
             ce_batches = split.batches[: args.ce_batches]
-            ce_gradient, polar_gradient, ce_loss = task_ce_gradients(
+            (
+                ce_gradient,
+                polar_gradient,
+                ce_dense_gradient,
+                ce_base_weights,
+                ce_loss,
+            ) = task_ce_gradients(
                 model,
                 parameters,
                 ce_batches,
@@ -625,16 +855,54 @@ def main() -> None:
                 layers,
                 args.muon_ns_steps,
             )
-            teacher_gradient, teacher_losses = teacher_mse_gradients(
+            (
+                teacher_gradient,
+                teacher_losses,
+                teacher_dense_gradient,
+            ) = teacher_mse_gradients(
                 model, parameters, split, layers, args.device
+            )
+            natural_ce, natural_ce_diagnostics = natural_chart_directions(
+                model,
+                parameters,
+                layers,
+                ce_dense_gradient,
+                ce_base_weights,
+                damping_ratio=args.natural_damping_ratio,
+                cg_steps=args.natural_cg_steps,
+                trace_samples=args.natural_trace_samples,
+                trace_seed=args.natural_trace_seed,
+            )
+            natural_teacher, natural_teacher_diagnostics = (
+                natural_chart_directions(
+                    model,
+                    parameters,
+                    layers,
+                    teacher_dense_gradient,
+                    split.cproj_weight,
+                    damping_ratio=args.natural_damping_ratio,
+                    cg_steps=args.natural_cg_steps,
+                    trace_samples=args.natural_trace_samples,
+                    trace_seed=args.natural_trace_seed,
+                )
             )
             ce_by_split[split.name] = ce_gradient
             polar_by_split[split.name] = polar_gradient
             teacher_by_split[split.name] = teacher_gradient
+            natural_ce_by_split[split.name] = natural_ce
+            natural_teacher_by_split[split.name] = natural_teacher
             objective[init_key][split.name] = {
                 "task_ce": ce_loss,
                 "teacher_mse_by_layer": {
                     str(layer): teacher_losses[layer] for layer in layers
+                },
+                "natural_ce_diagnostics": {
+                    str(layer): natural_ce_diagnostics[layer]
+                    for layer in layers
+                },
+                "natural_teacher_diagnostics": {
+                    str(layer): natural_teacher_diagnostics[layer]
+                    for layer in layers
                 },
             }
             split_rows = alignment_rows(
@@ -653,11 +921,22 @@ def main() -> None:
                 initialization=initialization,
             )
             rows.extend(polar_rows)
+            natural_rows = alignment_rows(
+                natural_ce,
+                natural_teacher,
+                comparison=(
+                    "task_ce_natural_vs_teacher_mse_natural"
+                ),
+                split=split.name,
+                initialization=initialization,
+            )
+            rows.extend(natural_rows)
             print(
                 f"initialization={initialization} split={split.name} "
                 f"task_ce={ce_loss:.6f} global_cosine="
                 f"{split_rows[0]['cosine']:.6f} polar_vjp_cosine="
-                f"{polar_rows[0]['cosine']:.6f}",
+                f"{polar_rows[0]['cosine']:.6f} natural_cosine="
+                f"{natural_rows[0]['cosine']:.6f}",
                 flush=True,
             )
         rows.extend(
@@ -674,6 +953,24 @@ def main() -> None:
                 polar_by_split["fit"],
                 polar_by_split["holdout"],
                 comparison="task_ce_effective_polar_vjp_fit_vs_holdout",
+                split="cross_split",
+                initialization=initialization,
+            )
+        )
+        rows.extend(
+            alignment_rows(
+                natural_ce_by_split["fit"],
+                natural_ce_by_split["holdout"],
+                comparison="task_ce_natural_fit_vs_holdout",
+                split="cross_split",
+                initialization=initialization,
+            )
+        )
+        rows.extend(
+            alignment_rows(
+                natural_teacher_by_split["fit"],
+                natural_teacher_by_split["holdout"],
+                comparison="teacher_mse_natural_fit_vs_holdout",
                 split="cross_split",
                 initialization=initialization,
             )
@@ -736,6 +1033,16 @@ def main() -> None:
             "base_gradient_unchanged": True,
             "chart_only": True,
             "dense_optimizer_state_retained": False,
+        },
+        "natural_inverse_pullback": {
+            "metric": "effective_weight_frobenius_JtJ",
+            "damping_ratio_to_estimated_mean_eigenvalue": (
+                args.natural_damping_ratio
+            ),
+            "cg_steps": args.natural_cg_steps,
+            "trace_samples": args.natural_trace_samples,
+            "trace_seed": args.natural_trace_seed,
+            "no_parameter_update": True,
         },
         "chart": {
             "hidden_rotation_stages": 2,

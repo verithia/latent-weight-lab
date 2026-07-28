@@ -10,6 +10,7 @@ from examples.nanogpt.analyze_mlp_chart_gradient_alignment import (
     chart_parameters,
     effective_polar_chart_gradients,
     flatten_gradients,
+    natural_chart_directions,
     parse_float_list,
     vector_alignment,
 )
@@ -104,11 +105,27 @@ def test_effective_polar_chart_gradients_are_finite_and_chart_only() -> None:
     loss = model(inputs, targets)[1]
     assert loss is not None
     loss.backward()
+    mlp = model.transformer.h[0].mlp
+    cached_weight = mlp._cached_charted_cproj_weight
+    base_weight = getattr(mlp.c_proj, "_cached_weight", None)
+    assert cached_weight is not None and cached_weight.grad is not None
+    assert base_weight is not None
     polar = effective_polar_chart_gradients(
         model,
         parameters,
         [0],
         ns_steps=5,
+    )
+    natural, diagnostics = natural_chart_directions(
+        model,
+        parameters,
+        [0],
+        {0: cached_weight.grad.detach().float()},
+        {0: base_weight.detach().float()},
+        damping_ratio=0.1,
+        cg_steps=12,
+        trace_samples=2,
+        trace_seed=73,
     )
     model.flush_block_fht_cache()
     raw = {
@@ -119,6 +136,11 @@ def test_effective_polar_chart_gradients_are_finite_and_chart_only() -> None:
     assert set(polar) == set(parameters)
     assert all(polar[key].shape == parameters[key].shape for key in polar)
     assert all(torch.isfinite(value).all() for value in polar.values())
+    assert set(natural) == set(parameters)
+    assert all(torch.isfinite(value).all() for value in natural.values())
+    assert diagnostics[0]["cg_steps"] > 0
+    assert diagnostics[0]["relative_residual"] < 1.0
+    assert diagnostics[0]["damping"] > 0.0
     keys = sorted(parameters)
     cosine = vector_alignment(
         flatten_gradients(polar, keys),
