@@ -144,6 +144,72 @@ def test_block_fht_linear_cached_grad_matches_dynamic_with_channel_gains():
     assert torch.allclose(cached.input_gain.grad, dynamic.input_gain.grad, atol=1e-6)
 
 
+def test_matrix_latent_matches_flat_latent_forward_and_gradient():
+    torch.manual_seed(333)
+    flat = BlockFHTLinear(5, 3, latent_dim=8, layers=2, seed=19)
+    matrix = BlockFHTLinear(
+        5,
+        3,
+        latent_dim=8,
+        latent_shape=(2, 4),
+        layers=2,
+        seed=19,
+    )
+    with torch.no_grad():
+        matrix.generator.latent.copy_(flat.generator.latent.reshape(2, 4))
+    x_flat = torch.randn(4, 5, requires_grad=True)
+    x_matrix = x_flat.detach().clone().requires_grad_(True)
+
+    flat_loss = flat(x_flat).square().mean()
+    matrix_loss = matrix(x_matrix).square().mean()
+    flat_loss.backward()
+    matrix_loss.backward()
+
+    torch.testing.assert_close(matrix_loss, flat_loss)
+    torch.testing.assert_close(x_matrix.grad, x_flat.grad)
+    torch.testing.assert_close(
+        matrix.generator.latent.grad.reshape(-1),
+        flat.generator.latent.grad,
+    )
+
+
+def test_matrix_latent_cached_gradient_matches_dynamic_gradient():
+    torch.manual_seed(335)
+    dynamic = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        latent_shape=(2, 4),
+        layers=2,
+        seed=23,
+    )
+    cached = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        latent_shape=(2, 4),
+        layers=2,
+        seed=23,
+    )
+    cached.load_state_dict(dynamic.state_dict())
+    x = torch.randn(4, 5)
+
+    dynamic_loss = dynamic(x).square().mean()
+    dynamic_loss.backward()
+    prepare_block_fht_weight_cache(cached)
+    cached_loss = cached(x).square().mean()
+    cached_loss.backward()
+    flush_block_fht_weight_cache(cached)
+
+    torch.testing.assert_close(cached_loss, dynamic_loss)
+    torch.testing.assert_close(
+        cached.generator.latent.grad,
+        dynamic.generator.latent.grad,
+    )
+
+
 def test_suspended_cache_keeps_ce_grad_and_live_perturbation_grad():
     """A stability forward must bypass only the unperturbed CE cache."""
     torch.manual_seed(456)
@@ -204,6 +270,64 @@ def test_freeze_restores_input_gain_trainability():
     layer = BlockFHTLinear(5, 3, latent_dim=8, layers=2, output_gain=True, input_gain=True)
     freeze_non_block_fht(torch.nn.Sequential(layer), train_embeddings=False)
     assert layer.input_gain.requires_grad and layer.output_gain.requires_grad
+
+
+def test_mlp_shared_hidden_gain_is_identity_initialized_and_trainable():
+    torch.manual_seed(334)
+    base = MLP(GPTConfig(n_embd=4, n_head=1), layer_id=0)
+    paired = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_mlp_shared_hidden_gain=True,
+        ),
+        layer_id=0,
+    )
+    paired.load_state_dict(base.state_dict(), strict=False)
+    x = torch.randn(3, 5, 4)
+    torch.testing.assert_close(paired(x), base(x))
+    paired(x).square().mean().backward()
+    assert paired.shared_hidden_log_gain.grad is not None
+    assert paired.shared_hidden_log_gain.grad.abs().sum() > 0
+
+
+def test_selected_block_fht_latent_is_matrix_and_muon_owned():
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht=True,
+            block_fht_targets=("attn.c_proj", "mlp.c_proj"),
+            block_fht_latent_ratio=1.0,
+            block_fht_muon_latent_targets=("mlp.c_proj",),
+            block_fht_muon_latent_rows=4,
+        )
+    )
+    attn_latent = model.transformer.h[0].attn.c_proj.generator.latent
+    mlp_latent = model.transformer.h[0].mlp.c_proj.generator.latent
+    assert attn_latent.ndim == 1
+    assert mlp_latent.ndim == 2
+    assert mlp_latent.shape[0] == 4
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_adamw_lr_scale=0.3,
+    )
+    muon_parameters = [
+        parameter
+        for child in optimizer.optimizers
+        if child.__class__.__name__ == "Muon"
+        for group in child.param_groups
+        for parameter in group["params"]
+    ]
+    assert any(parameter is mlp_latent for parameter in muon_parameters)
+    assert not any(parameter is attn_latent for parameter in muon_parameters)
 
 
 def test_spectral_zero_correction_matches_same_seed_block_fht():

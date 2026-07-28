@@ -68,6 +68,8 @@ class GPTConfig:
     block_fht_targets: tuple[str, ...] = ("attn.c_attn", "attn.c_proj", "mlp.c_fc", "mlp.c_proj")
     block_fht_latent_ratio: float = 0.01
     block_fht_latent_ratios: dict[str, float] | None = None
+    block_fht_muon_latent_targets: tuple[str, ...] = ()
+    block_fht_muon_latent_rows: int = 32
     block_fht_layers: int = 2
     block_fht_seed: int = 1000
     block_fht_latent_init_std: float = 0.02
@@ -106,6 +108,7 @@ class GPTConfig:
     block_fht_cproj_spectral_resid_muon_matrix: bool = False
     block_fht_cproj_spectral_resid_full_core: bool = False
     block_fht_ffn_postgelu_std_target: float = 0.0
+    block_fht_mlp_shared_hidden_gain: bool = False
     tie_word_embeddings: bool = True
 
 
@@ -338,6 +341,16 @@ def make_linear(
         latent_ratio = float(config.block_fht_latent_ratio)
         if config.block_fht_latent_ratios is not None and target_name in config.block_fht_latent_ratios:
             latent_ratio = float(config.block_fht_latent_ratios[target_name])
+        latent_dim = max(1, round(in_features * out_features * latent_ratio))
+        latent_shape = None
+        if target_name in config.block_fht_muon_latent_targets:
+            requested_rows = int(config.block_fht_muon_latent_rows)
+            if requested_rows <= 0:
+                raise ValueError("block_fht_muon_latent_rows must be positive")
+            rows = min(requested_rows, latent_dim)
+            columns = math.ceil(latent_dim / rows)
+            latent_dim = rows * columns
+            latent_shape = (rows, columns)
         target_std = 0.02
         if is_residual_projection_target(target_name):
             target_std = 0.02 / math.sqrt(2 * config.n_layer)
@@ -351,6 +364,8 @@ def make_linear(
             in_features,
             out_features,
             bias=bias,
+            latent_dim=latent_dim,
+            latent_shape=latent_shape,
             latent_ratio=latent_ratio,
             layers=config.block_fht_layers,
             seed=config.block_fht_seed + seed_offset,
@@ -941,6 +956,11 @@ class MLP(nn.Module):
             self.cproj_spectral_resid_in_basis = None
             self.cproj_spectral_resid_out_basis = None
         self.postgelu_std_target = float(config.block_fht_ffn_postgelu_std_target)
+        self.shared_hidden_log_gain = (
+            nn.Parameter(torch.zeros(4 * config.n_embd))
+            if config.block_fht_mlp_shared_hidden_gain
+            else None
+        )
         self.last_postgelu: torch.Tensor | None = None
 
     def _fused_cached_cproj_lowrank(self, activated: torch.Tensor) -> torch.Tensor | None:
@@ -968,7 +988,13 @@ class MLP(nn.Module):
             hidden = hidden * self.pregelu_gain.to(dtype=hidden.dtype)
         if self.pregelu_bias is not None:
             hidden = hidden + self.pregelu_bias.to(dtype=hidden.dtype)
+        shared_hidden_gain = None
+        if self.shared_hidden_log_gain is not None:
+            shared_hidden_gain = self.shared_hidden_log_gain.exp().to(dtype=hidden.dtype)
+            hidden = hidden * shared_hidden_gain
         activated = self.gelu(hidden)
+        if shared_hidden_gain is not None:
+            activated = activated * shared_hidden_gain
         if self.training and self.postgelu_std_target > 0.0:
             self.last_postgelu = activated
         else:
@@ -1201,6 +1227,8 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 module.spectral_core.requires_grad_(True)
                 module.spectral_log_out_gain.requires_grad_(True)
                 module.spectral_log_in_gain.requires_grad_(True)
+        if isinstance(module, MLP) and module.shared_hidden_log_gain is not None:
+            module.shared_hidden_log_gain.requires_grad_(True)
     if train_embeddings and isinstance(model, GPT):
         model.transformer.wte.weight.requires_grad_(True)
         model.transformer.wpe.weight.requires_grad_(True)

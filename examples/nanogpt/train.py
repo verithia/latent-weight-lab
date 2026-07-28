@@ -810,6 +810,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compile", action="store_true")
     parser.add_argument("--block-fht-latent-ratio", type=float, default=0.01)
     parser.add_argument("--block-fht-latent-ratios", type=json.loads, default=None)
+    parser.add_argument("--block-fht-muon-latent-targets", nargs="+", default=[])
+    parser.add_argument("--block-fht-muon-latent-rows", type=int, default=32)
     parser.add_argument("--block-fht-layers", type=int, default=2)
     parser.add_argument("--block-fht-targets", nargs="+", default=["attn.c_attn", "attn.c_proj", "mlp.c_fc", "mlp.c_proj"])
     parser.add_argument("--block-fht-latent-init-std", type=float, default=0.02)
@@ -849,6 +851,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-cproj-spectral-resid-full-core", action="store_true")
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
+    parser.add_argument("--block-fht-mlp-shared-hidden-gain", action="store_true")
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -970,6 +973,8 @@ def main() -> None:
         block_fht_targets=tuple(args.block_fht_targets),
         block_fht_latent_ratio=args.block_fht_latent_ratio,
         block_fht_latent_ratios=args.block_fht_latent_ratios,
+        block_fht_muon_latent_targets=tuple(args.block_fht_muon_latent_targets),
+        block_fht_muon_latent_rows=args.block_fht_muon_latent_rows,
         block_fht_layers=args.block_fht_layers,
         block_fht_seed=args.block_fht_seed,
         block_fht_latent_init_std=args.block_fht_latent_init_std,
@@ -1008,6 +1013,7 @@ def main() -> None:
         block_fht_cproj_spectral_resid_muon_matrix=args.block_fht_cproj_spectral_resid_muon_matrix,
         block_fht_cproj_spectral_resid_full_core=args.block_fht_cproj_spectral_resid_full_core,
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
+        block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,
         tie_word_embeddings=args.tie_word_embeddings,
     )
 

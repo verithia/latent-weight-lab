@@ -91,7 +91,8 @@ def block_fht_slice_torch(
 ) -> torch.Tensor:
     if not 0 <= start <= stop <= size:
         raise ValueError(f"invalid slice [{start}, {stop}) for size {size}")
-    block_size = next_power_of_two(latent.numel())
+    latent_flat = latent.reshape(-1)
+    block_size = next_power_of_two(latent_flat.numel())
     pieces = []
     first_block = start // block_size
     last_block = (stop + block_size - 1) // block_size
@@ -99,14 +100,14 @@ def block_fht_slice_torch(
         block_start = block * block_size
         local_start = max(start - block_start, 0)
         local_stop = min(stop - block_start, block_size)
-        values = latent.new_zeros(block_size)
-        values[: latent.numel()] = latent
-        values = values * signs_for(latent, block, 0, seed, block_size)
+        values = latent_flat.new_zeros(block_size)
+        values[: latent_flat.numel()] = latent_flat
+        values = values * signs_for(latent_flat, block, 0, seed, block_size)
         for layer in range(layers):
             values = normalized_fht_last_dim(values)
-            values = values * signs_for(latent, block, layer + 1, seed, block_size)
+            values = values * signs_for(latent_flat, block, layer + 1, seed, block_size)
         pieces.append(values[local_start:local_stop])
-    return torch.cat(pieces) if pieces else latent.new_empty(0)
+    return torch.cat(pieces) if pieces else latent_flat.new_empty(0)
 
 
 _BLOCK_FHT_EXT = None
@@ -204,7 +205,14 @@ def block_fht_slice(
     start: int,
     stop: int,
 ) -> torch.Tensor:
-    return _BlockFHTSliceFn.apply(latent, int(size), int(layers), int(seed), int(start), int(stop))
+    return _BlockFHTSliceFn.apply(
+        latent.reshape(-1),
+        int(size),
+        int(layers),
+        int(seed),
+        int(start),
+        int(stop),
+    )
 
 
 def block_fht_grad_latent(
@@ -218,17 +226,18 @@ def block_fht_grad_latent(
 ) -> torch.Tensor:
     stop = int(size) if stop is None else int(stop)
     grad_out = grad_out.contiguous().to(dtype=latent.dtype)
-    ext = _load_block_fht_ext() if latent.is_cuda and latent.dtype == torch.float32 else None
+    latent_flat = latent.reshape(-1).contiguous()
+    ext = _load_block_fht_ext() if latent_flat.is_cuda and latent_flat.dtype == torch.float32 else None
     if ext is not None:
         return ext.backward(
             grad_out,
-            latent.numel(),
+            latent_flat.numel(),
             int(size),
             int(layers),
             int(seed),
             int(start),
             int(stop),
-        )
+        ).reshape_as(latent)
     with torch.enable_grad():
         latent_for_grad = latent.detach().requires_grad_(True)
         weight_flat = block_fht_slice(
@@ -260,20 +269,21 @@ def block_fht_linear_forward(
         raise ValueError("input must have at least 2 dimensions")
     in_features = input.shape[-1]
     flat_input = input.reshape(-1, in_features).contiguous()
+    latent_flat = latent.reshape(-1).contiguous()
     ext = (
         _load_block_fht_ext()
         if flat_input.is_cuda
-        and latent.is_cuda
-        and flat_input.dtype == latent.dtype
+        and latent_flat.is_cuda
+        and flat_input.dtype == latent_flat.dtype
         and flat_input.dtype in {torch.bfloat16, torch.float16, torch.float32}
         else None
     )
     size = int(in_features) * int(out_features)
-    block_size = next_power_of_two(latent.numel())
+    block_size = next_power_of_two(latent_flat.numel())
     if ext is not None and block_size <= 16384 and block_size % int(in_features) == 0:
         out = ext.linear_forward(
             flat_input,
-            latent.contiguous(),
+            latent_flat,
             int(out_features),
             int(layers),
             int(seed),
@@ -363,6 +373,7 @@ class BlockFHTLinear(nn.Module):
         out_features: int,
         bias: bool = False,
         latent_dim: int | None = None,
+        latent_shape: tuple[int, int] | None = None,
         latent_ratio: float = 0.01,
         layers: int = 3,
         seed: int = 0,
@@ -384,8 +395,17 @@ class BlockFHTLinear(nn.Module):
         size = self.in_features * self.out_features
         if latent_dim is None:
             latent_dim = max(1, round(size * float(latent_ratio)))
+        if latent_shape is not None:
+            latent_shape = (int(latent_shape[0]), int(latent_shape[1]))
+            if min(latent_shape) <= 0:
+                raise ValueError("latent_shape dimensions must be positive")
+            if math.prod(latent_shape) != int(latent_dim):
+                raise ValueError("latent_shape product must equal latent_dim")
+            latent: int | tuple[int, int] = latent_shape
+        else:
+            latent = int(latent_dim)
         self.generator = BlockFHT(
-            int(latent_dim),
+            latent,
             size=size,
             layers=layers,
             seed=seed,
@@ -597,7 +617,7 @@ def restore_block_fht_weight_cache(suspended: list[tuple[BlockFHTLinear, torch.T
 class BlockFHT(nn.Module):
     def __init__(
         self,
-        latent: int | torch.Tensor | nn.Parameter,
+        latent: int | tuple[int, int] | torch.Tensor | nn.Parameter,
         size: int,
         layers: int = 3,
         seed: int = 0,
@@ -614,9 +634,16 @@ class BlockFHT(nn.Module):
             self.latent_size = int(latent)
             self.latent = nn.Parameter(torch.empty(self.latent_size))
             nn.init.normal_(self.latent, std=float(latent_init_std))
+        elif isinstance(latent, tuple):
+            if len(latent) != 2 or min(int(dim) for dim in latent) <= 0:
+                raise ValueError("latent shape must contain two positive dimensions")
+            latent_shape = (int(latent[0]), int(latent[1]))
+            self.latent_size = math.prod(latent_shape)
+            self.latent = nn.Parameter(torch.empty(latent_shape))
+            nn.init.normal_(self.latent, std=float(latent_init_std))
         else:
-            if latent.dim() != 1:
-                raise ValueError("latent tensor must be 1D")
+            if latent.dim() not in {1, 2}:
+                raise ValueError("latent tensor must be 1D or 2D")
             self.latent_size = int(latent.numel())
             self.latent = latent if isinstance(latent, nn.Parameter) else nn.Parameter(latent)
         self.size = int(size)
@@ -626,7 +653,8 @@ class BlockFHT(nn.Module):
 
     def extra_repr(self) -> str:
         return (
-            f"latent_size={self.latent_size}, size={self.size}, layers={self.layers}, "
+            f"latent_size={self.latent_size}, latent_shape={tuple(self.latent.shape)}, "
+            f"size={self.size}, layers={self.layers}, "
             f"seed={self.seed}, block_size={self.block_size}"
         )
 
