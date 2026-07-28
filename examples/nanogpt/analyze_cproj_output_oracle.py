@@ -29,7 +29,118 @@ from examples.nanogpt.analyze_cproj_manifold import (
     load_model,
 )
 from examples.nanogpt.analyze_residual_compatibility import fixed_validation_batches
-from examples.nanogpt.model import LearnedGivensOutputMix
+from examples.nanogpt.model import (
+    LearnedGivensOutputMix,
+    normalized_fht_last_dim,
+)
+
+
+class LearnedConjugatedGivensOutputMix(torch.nn.Module):
+    """Identity-initialized dense-tangent rotations in fixed FHT bases."""
+
+    def __init__(
+        self,
+        features: int,
+        stages: int,
+        seed: int,
+        block_size: int = 256,
+    ) -> None:
+        super().__init__()
+        self.features = int(features)
+        self.stages = int(stages)
+        self.block_size = int(block_size)
+        if self.features <= 0 or self.features % 2:
+            raise ValueError("features must be positive and even")
+        if self.stages <= 0:
+            raise ValueError("stages must be positive")
+        if (
+            self.block_size <= 0
+            or self.block_size & (self.block_size - 1)
+            or self.features % self.block_size
+        ):
+            raise ValueError(
+                "block_size must be a power of two dividing features"
+            )
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        permutations = torch.stack(
+            [
+                torch.randperm(self.features, generator=generator)
+                for _ in range(self.stages)
+            ]
+        )
+        signs = torch.randint(
+            0,
+            2,
+            (self.stages, self.features),
+            generator=generator,
+            dtype=torch.int64,
+        ).float()
+        signs = signs.mul_(2.0).sub_(1.0)
+        self.register_buffer("permutations", permutations, persistent=True)
+        self.register_buffer(
+            "inverse_permutations",
+            torch.argsort(permutations, dim=1),
+            persistent=True,
+        )
+        self.register_buffer("signs", signs, persistent=True)
+        self.angles = torch.nn.Parameter(
+            torch.zeros(self.stages * (self.features // 2))
+        )
+
+    def _basis(
+        self, values: torch.Tensor, stage: int, inverse: bool
+    ) -> torch.Tensor:
+        signs = self.signs[stage].to(
+            device=values.device, dtype=values.dtype
+        )
+        if inverse:
+            values = values * signs
+            grouped = values.reshape(
+                *values.shape[:-1],
+                self.features // self.block_size,
+                self.block_size,
+            )
+            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            return values.index_select(
+                -1, self.inverse_permutations[stage]
+            )
+        values = values.index_select(-1, self.permutations[stage])
+        grouped = values.reshape(
+            *values.shape[:-1],
+            self.features // self.block_size,
+            self.block_size,
+        )
+        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        return values * signs
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, "
+                f"got {values.shape[-1]}"
+            )
+        result = values
+        angles = self.angles.view(self.stages, self.features // 2)
+        for stage in range(self.stages):
+            basis = self._basis(result, stage, inverse=False)
+            pairs = basis.reshape(
+                *basis.shape[:-1], self.features // 2, 2
+            )
+            angle = angles[stage].to(
+                device=values.device, dtype=values.dtype
+            )
+            cosine = angle.cos()
+            sine = angle.sin()
+            rotated = torch.stack(
+                (
+                    cosine * pairs[..., 0] - sine * pairs[..., 1],
+                    sine * pairs[..., 0] + cosine * pairs[..., 1],
+                ),
+                dim=-1,
+            ).reshape_as(basis)
+            result = self._basis(rotated, stage, inverse=True)
+        return result
 
 
 def sha256(path: Path) -> str:
@@ -206,6 +317,7 @@ def fit_sparse_givens_operator(
     seed: int,
     steps: int,
     learning_rate: float,
+    conjugated: bool = False,
 ) -> dict[str, float | str]:
     """Fit a fixed-pair Givens chain to the full diagonal+orthogonal oracle."""
 
@@ -219,7 +331,12 @@ def fit_sparse_givens_operator(
     target_operator = (
         torch.diag(diagonal) @ rotation.transpose(0, 1)
     ).detach()
-    mixer = LearnedGivensOutputMix(
+    mixer_type = (
+        LearnedConjugatedGivensOutputMix
+        if conjugated
+        else LearnedGivensOutputMix
+    )
+    mixer = mixer_type(
         source_train.shape[-1], int(stages), int(seed)
     ).to(device=source_train.device, dtype=torch.float32)
     log_gain = torch.nn.Parameter(
@@ -252,7 +369,10 @@ def fit_sparse_givens_operator(
             target_operator - operator
         ).square().sum() / operator_energy
     return {
-        "family": f"givens{int(stages)}_output_diagonal",
+        "family": (
+            f"{'fht_conjugated_' if conjugated else ''}"
+            f"givens{int(stages)}_output_diagonal"
+        ),
         "operator_explained_energy": float(operator_explained),
         "parameter_count": float(
             mixer.angles.numel() + log_gain.numel()
@@ -314,6 +434,7 @@ def main() -> None:
     parser.add_argument("--sample-seed", type=int, default=20260716)
     parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
     parser.add_argument("--givens-stages", default="1,2,4,8,16")
+    parser.add_argument("--conjugated-givens-stages", default="")
     parser.add_argument("--givens-fit-steps", type=int, default=400)
     parser.add_argument("--givens-learning-rate", type=float, default=0.05)
     parser.add_argument("--givens-seed", type=int, default=271828)
@@ -362,6 +483,11 @@ def main() -> None:
     givens_stages = [
         int(part) for part in args.givens_stages.split(",") if part
     ]
+    conjugated_givens_stages = [
+        int(part)
+        for part in args.conjugated_givens_stages.split(",")
+        if part
+    ]
     for layer in layers:
         source_train = plain_train[(layer, "mlp_out")].to(args.device)
         target_train = attention_train[(layer, "mlp_out")].to(args.device)
@@ -388,6 +514,24 @@ def main() -> None:
                 args.givens_seed + layer * 64,
                 args.givens_fit_steps,
                 args.givens_learning_rate,
+            )
+            rows.append({"layer": layer, **row})
+        for stages in conjugated_givens_stages:
+            print(
+                f"fitting layer={layer} "
+                f"fht_conjugated_givens_stages={stages}",
+                flush=True,
+            )
+            row = fit_sparse_givens_operator(
+                source_train,
+                target_train,
+                source_holdout,
+                target_holdout,
+                stages,
+                args.givens_seed + layer * 64,
+                args.givens_fit_steps,
+                args.givens_learning_rate,
+                conjugated=True,
             )
             rows.append({"layer": layer, **row})
 
@@ -432,6 +576,7 @@ def main() -> None:
         "sample_seed": args.sample_seed,
         "holdout_sample_seed": args.holdout_sample_seed,
         "givens_stages": givens_stages,
+        "conjugated_givens_stages": conjugated_givens_stages,
         "givens_fit_steps": args.givens_fit_steps,
         "givens_learning_rate": args.givens_learning_rate,
         "givens_seed": args.givens_seed,

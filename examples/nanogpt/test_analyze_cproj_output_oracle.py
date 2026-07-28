@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 
 from examples.nanogpt.analyze_cproj_output_oracle import (
+    LearnedConjugatedGivensOutputMix,
     fit_oracles,
     functional_orthogonal_procrustes,
     write_csv,
@@ -58,3 +59,18 @@ def test_write_csv_accepts_family_specific_metrics(tmp_path) -> None:
     text = output.read_text()
     assert "operator_explained_energy" in text
     assert "givens4" in text
+
+
+def test_conjugated_givens_is_identity_initialized_and_norm_preserving() -> None:
+    torch.manual_seed(19)
+    module = LearnedConjugatedGivensOutputMix(
+        features=16, stages=3, seed=23, block_size=8
+    )
+    values = torch.randn(7, 16)
+    assert torch.allclose(module(values), values, atol=2e-6, rtol=2e-6)
+    with torch.no_grad():
+        module.angles.normal_(std=0.3)
+    output = module(values)
+    assert torch.allclose(
+        output.norm(dim=-1), values.norm(dim=-1), atol=2e-5, rtol=2e-5
+    )
