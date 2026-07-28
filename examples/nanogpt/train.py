@@ -82,6 +82,51 @@ def data_manifest_identity(data_dir: Path) -> dict[str, str | None]:
     }
 
 
+def load_mlp_cproj_teacher_weights(
+    model: GPT,
+    checkpoint_path: Path,
+    expected_sha256: str,
+) -> dict[str, Any]:
+    actual_sha256 = sha256_file(checkpoint_path)
+    if actual_sha256 != expected_sha256:
+        raise ValueError(
+            "MLP c_proj teacher checkpoint SHA-256 does not match"
+        )
+    checkpoint = torch.load(
+        checkpoint_path, map_location="cpu", weights_only=False
+    )
+    state = checkpoint.get("model")
+    model_config = checkpoint.get("model_config")
+    if not isinstance(state, dict) or not isinstance(model_config, dict):
+        raise ValueError("MLP c_proj teacher checkpoint is malformed")
+    for key in ("n_layer", "n_embd"):
+        if int(model_config.get(key, -1)) != int(getattr(model.config, key)):
+            raise ValueError(
+                f"MLP c_proj teacher {key} does not match the student"
+            )
+    installed: list[dict[str, object]] = []
+    for layer, block in enumerate(model.transformer.h):
+        key = f"transformer.h.{layer}.mlp.c_proj.weight"
+        weight = state.get(key)
+        if not isinstance(weight, torch.Tensor):
+            raise ValueError(
+                f"MLP c_proj teacher checkpoint is missing {key}"
+            )
+        block.mlp.set_cproj_teacher_weight(weight)
+        installed.append(
+            {
+                "layer": layer,
+                "key": key,
+                "shape": list(weight.shape),
+            }
+        )
+    return {
+        "path": str(checkpoint_path.resolve()),
+        "sha256": actual_sha256,
+        "layers": installed,
+    }
+
+
 def execution_provenance_from_environment(*, required: bool) -> dict[str, Any] | None:
     """Load the immutable launcher envelope without making it resume identity.
 
@@ -922,6 +967,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-cproj-spectral-resid-full-core", action="store_true")
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
+    parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
+    parser.add_argument("--mlp-cproj-teacher-sha256", default=None)
+    parser.add_argument("--mlp-cproj-teacher-lambda", type=float, default=0.0)
     parser.add_argument("--block-fht-mlp-shared-hidden-gain", action="store_true")
     parser.add_argument("--block-fht-mlp-shared-hidden-gain-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-activation-chart", action="store_true")
@@ -1014,6 +1062,15 @@ def parse_args() -> argparse.Namespace:
     if namespace.block_fht_mlp_cproj_chart_start_iter < 0:
         raise ValueError(
             "--block-fht-mlp-cproj-chart-start-iter must be >= 0"
+        )
+    if namespace.mlp_cproj_teacher_lambda < 0.0:
+        raise ValueError("--mlp-cproj-teacher-lambda must be >= 0")
+    if namespace.mlp_cproj_teacher_lambda != 0.0 and (
+        not namespace.mlp_cproj_teacher_checkpoint
+        or not namespace.mlp_cproj_teacher_sha256
+    ):
+        raise ValueError(
+            "nonzero MLP c_proj teacher lambda requires checkpoint and SHA-256"
         )
     if (
         namespace.block_fht_mlp_cproj_chart_freeze_base_at_start
@@ -1211,6 +1268,17 @@ def main() -> None:
     else:
         model = GPT(gpt_config)
     model.to(args.device)
+    if float(args.mlp_cproj_teacher_lambda) != 0.0:
+        teacher_identity = load_mlp_cproj_teacher_weights(
+            model,
+            Path(args.mlp_cproj_teacher_checkpoint),
+            args.mlp_cproj_teacher_sha256,
+        )
+        print(
+            "mlp_cproj_teacher "
+            + json.dumps(teacher_identity, sort_keys=True),
+            flush=True,
+        )
     if args.method == "block_fht" and args.freeze_non_block_fht:
         freeze_non_block_fht(model, train_embeddings=args.train_embeddings_when_frozen)
     optimizer = model.configure_optimizers(
@@ -1381,6 +1449,7 @@ def main() -> None:
         stability_accum = 0.0
         norm_accum = 0.0
         postgelu_accum = 0.0
+        cproj_teacher_accum = 0.0
         if use_weight_cache:
             section_start = perf_now() if args.perf_profile else 0.0
             raw_model.prepare_block_fht_cache(dtype=ptdtype)
@@ -1418,6 +1487,18 @@ def main() -> None:
                     postgelu_loss = raw_model.postgelu_spread_loss()
                     loss = loss + float(args.block_fht_ffn_postgelu_std_lambda) * postgelu_loss
                     postgelu_accum += float(postgelu_loss.detach().item())
+                if float(args.mlp_cproj_teacher_lambda) != 0.0:
+                    cproj_teacher_loss = (
+                        raw_model.mlp_cproj_teacher_alignment_loss()
+                    )
+                    loss = (
+                        loss
+                        + float(args.mlp_cproj_teacher_lambda)
+                        * cproj_teacher_loss
+                    )
+                    cproj_teacher_accum += float(
+                        cproj_teacher_loss.detach().item()
+                    )
                 loss = loss / args.gradient_accumulation_steps
             scaler.scale(loss).backward()
 
@@ -1562,6 +1643,11 @@ def main() -> None:
                 msg += f", norm {norm_accum / args.gradient_accumulation_steps:.6f}"
             if float(args.block_fht_ffn_postgelu_std_lambda) != 0.0:
                 msg += f", postgelu {postgelu_accum / args.gradient_accumulation_steps:.6f}"
+            if float(args.mlp_cproj_teacher_lambda) != 0.0:
+                msg += (
+                    ", cproj_teacher "
+                    f"{cproj_teacher_accum / args.gradient_accumulation_steps:.6f}"
+                )
             print(msg)
         t0 = t1
         save_parameter_trajectory_if_due(iter_num + 1)

@@ -383,6 +383,36 @@ def test_postgelu_spread_reduces_without_full_activation_cast():
     assert values.grad is not None and torch.isfinite(values.grad).all()
 
 
+def test_mlp_cproj_teacher_alignment_is_zero_at_identity_and_differentiable():
+    config = GPTConfig(
+        n_embd=8,
+        n_head=1,
+        block_fht_mlp_output_block_rotation_stages=1,
+        block_fht_mlp_output_block_rotation_size=4,
+        block_fht_mlp_output_block_rotation_basis_size=8,
+        block_fht_mlp_residual_output_gain=True,
+    )
+    mlp = MLP(config, layer_id=0)
+    mlp.set_cproj_teacher_weight(mlp.c_proj.weight.detach().clone())
+    values = torch.randn(2, 3, 8)
+
+    mlp(values)
+    identity_loss = mlp.cproj_teacher_alignment_loss()
+    assert identity_loss is not None
+    assert torch.allclose(identity_loss, torch.zeros_like(identity_loss))
+
+    assert mlp.residual_output_log_gain is not None
+    with torch.no_grad():
+        mlp.residual_output_log_gain.add_(0.1)
+    mlp.zero_grad(set_to_none=True)
+    mlp(values)
+    shifted_loss = mlp.cproj_teacher_alignment_loss()
+    assert shifted_loss is not None and shifted_loss > 0
+    shifted_loss.backward()
+    assert mlp.residual_output_log_gain.grad is not None
+    assert torch.isfinite(mlp.residual_output_log_gain.grad).all()
+
+
 def test_forward_fused_matches_materialized_with_both_gains():
     layer = BlockFHTLinear(5, 3, bias=True, latent_dim=8, layers=2, seed=11, output_gain=True, input_gain=True)
     x = torch.randn(4, 5)

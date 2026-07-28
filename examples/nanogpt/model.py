@@ -1499,8 +1499,34 @@ class MLP(nn.Module):
                 "residual output gain cannot be combined with a separate "
                 "c_proj residual add-on"
             )
+        # Optional non-persistent teacher state is installed by the training
+        # entry point. It is neither trainable nor part of a checkpoint.
+        self.register_buffer(
+            "cproj_teacher_weight", None, persistent=False
+        )
+        self.last_cproj_teacher_alignment_loss: torch.Tensor | None = None
         self.last_postgelu: torch.Tensor | None = None
         self._cached_charted_cproj_weight: torch.Tensor | None = None
+
+    def set_cproj_teacher_weight(self, weight: torch.Tensor) -> None:
+        expected = (self.c_proj.out_features, self.c_proj.in_features)
+        if tuple(weight.shape) != expected:
+            raise ValueError(
+                "c_proj teacher weight shape mismatch: expected "
+                f"{expected}, got {tuple(weight.shape)}"
+            )
+        if not self.has_charted_cproj():
+            raise ValueError(
+                "c_proj teacher alignment requires a charted c_proj"
+            )
+        reference = next(self.parameters())
+        self.cproj_teacher_weight = weight.detach().to(
+            device=reference.device,
+            dtype=reference.dtype,
+        )
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return self.last_cproj_teacher_alignment_loss
 
     def has_charted_cproj(self) -> bool:
         return any(
@@ -1708,6 +1734,7 @@ class MLP(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        self.last_cproj_teacher_alignment_loss = None
         hidden = self.c_fc(x)
         if self.lowrank_left is not None and self.lowrank_right is not None:
             residual = x.matmul(self.lowrank_left.to(dtype=x.dtype)).matmul(self.lowrank_right.to(dtype=x.dtype))
@@ -1785,6 +1812,24 @@ class MLP(nn.Module):
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
         if self.output_rotation is not None:
             out = self.output_rotation(out)
+        if self.training and self.cproj_teacher_weight is not None:
+            detached_activated = activated.detach()
+            aligned_student = self._charted_cproj(detached_activated)
+            if aligned_student is None:
+                raise RuntimeError(
+                    "c_proj teacher alignment requires a charted c_proj"
+                )
+            aligned_teacher = F.linear(
+                detached_activated,
+                self.cproj_teacher_weight.to(
+                    device=detached_activated.device,
+                    dtype=detached_activated.dtype,
+                ),
+                None,
+            )
+            self.last_cproj_teacher_alignment_loss = F.mse_loss(
+                aligned_student.float(), aligned_teacher.float()
+            )
         return self.dropout(out)
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:
@@ -1863,6 +1908,16 @@ class GPT(nn.Module):
         losses = []
         for block in self.transformer.h:
             loss = block.mlp.postgelu_spread_loss()
+            if loss is not None:
+                losses.append(loss)
+        if not losses:
+            return next(self.parameters()).new_zeros(())
+        return torch.stack(losses).mean()
+
+    def mlp_cproj_teacher_alignment_loss(self) -> torch.Tensor:
+        losses = []
+        for block in self.transformer.h:
+            loss = block.mlp.cproj_teacher_alignment_loss()
             if loss is not None:
                 losses.append(loss)
         if not losses:
