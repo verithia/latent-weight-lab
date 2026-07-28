@@ -1,0 +1,79 @@
+{
+  "artifact_schema": "deterministic_diagnostic_result_v1",
+  "decision": {
+    "action": "reject_without_training",
+    "reason": "No residual-moment objective has a stable, useful cosine with the dense-teacher MLP-output repair gradient. The best positive fit/holdout cosine is only 0.012264/0.014109, while log RMS-ratio matching is opposed at -0.079427/-0.063983.",
+    "short_training_run_launched": false,
+    "watchdog_attached": false
+  },
+  "diagnostic": {
+    "command": "CUDA_VISIBLE_DEVICES=0 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -m examples.nanogpt.analyze_mlp_residual_objective_alignment --attention-only /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt --plain-cproj /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_residual_objective_alignment/commit_9b7fb8c_init0 --layers 0,3,6,9,11 --batch-size 8 --block-size 256 --batches 8 --sample-cap 2048 --sample-seed 20260716 --holdout-sample-seed 20260717 --initial-output-log-gain 0.0 --device cuda",
+    "entrypoint": "examples.nanogpt.analyze_mlp_residual_objective_alignment",
+    "git_commit": "9b7fb8c5f7c24dcdded483cb92b3b3504789c9c8",
+    "host": "Y400",
+    "source_path": "examples/nanogpt/analyze_mlp_residual_objective_alignment.py",
+    "source_sha256": "f31f2bed35f7bd429a7df66ea1d35159ae4ca82634c7b459e9f7e65acba29036",
+    "worktree": "/root/userdata/MappingNetworks/latent-weight-lab-mlp-geometry"
+  },
+  "inputs": {
+    "attention_only_checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "dataset": {
+      "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b"
+    },
+    "fit_token_sha256": "5ffbcbcb14dd284cded97fef7b9e80fbe4656b8c8de7cdf1beff1bcc6669350b",
+    "holdout_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e",
+    "plain_cproj_checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    }
+  },
+  "outputs": {
+    "csv": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_residual_objective_alignment/commit_9b7fb8c_init0/mlp_residual_objective_alignment.csv",
+      "sha256": "2b1713704a5227f8c61fc32ecc4f4a049010798caa341dbb9ca11ead0688ea06"
+    },
+    "summary": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_residual_objective_alignment/commit_9b7fb8c_init0/mlp_residual_objective_alignment_summary.json",
+      "sha256": "ac35c59c2f0465b8ecad87e23e1418796ca18c2a0a8357cb25de5ad52c709043"
+    }
+  },
+  "protocol": {
+    "batch_size": 8,
+    "batches": 8,
+    "block_size": 256,
+    "initial_output_log_gain": 0.0,
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "parameter_updates": 0,
+    "sample_cap": 2048
+  },
+  "results": {
+    "fit_holdout_cross_split_cosine": {
+      "cosine": 0.925330400466919,
+      "joint": 0.9266236424446106,
+      "log_rms_ratio": 0.9523770213127136,
+      "parallel_energy": 0.9103304743766785
+    },
+    "fit_vs_teacher_mse_cosine": {
+      "cosine": 0.012264332734048367,
+      "joint": -0.021672355011105537,
+      "log_rms_ratio": -0.07942698895931244,
+      "parallel_energy": 0.010021739639341831
+    },
+    "holdout_vs_teacher_mse_cosine": {
+      "cosine": 0.014109347946941853,
+      "joint": -0.014060578308999538,
+      "log_rms_ratio": -0.06398336589336395,
+      "parallel_energy": 0.008886906318366528
+    }
+  }
+}
