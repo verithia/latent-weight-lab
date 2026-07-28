@@ -1226,6 +1226,58 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 91,
+      "name": "mai_v3_124m_cproj_blockorth32_s4_c4_g4_actchart4_cachevjp_0p5tpp",
+      "stage": "post_manifold_cproj_blockorth32_s4_c4_g4_actchart4_cachevjp_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s4_c4_g4_actchart4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s4_c4_g4_actchart4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "41d4a64ead7b5090bd46fd053099bcd54695130d01eb08f532ae9322b5c8caf0",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "add572130609e1e1a7397286e3d959a092b5f8ac9ce596efc0a3ab8cc8f779b2",
+            "examples/nanogpt/model.py": "a94d24c8385302698f8b644214478c46d208ddf9608213eba9c4da3ad6554160",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 92,
+      "name": "mai_v3_124m_cproj_blockorth32_s4_c4_g4_actchart8_cachevjp_0p5tpp",
+      "stage": "post_manifold_cproj_blockorth32_s4_c4_g4_actchart8_cachevjp_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s4_c4_g4_actchart8_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s4_c4_g4_actchart8_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "6bb11803dac5812a068fe800c15d83a4f509a7f45d13d31f3289088e87373227",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "add572130609e1e1a7397286e3d959a092b5f8ac9ce596efc0a3ab8cc8f779b2",
+            "examples/nanogpt/model.py": "a94d24c8385302698f8b644214478c46d208ddf9608213eba9c4da3ad6554160",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -1239,7 +1291,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 124M dense Muon trajectory is locally two-PC and globally smooth, but the registered 1% BlockFHT tangent captures only 1.005% of dense displacement energy. Priorities 75-83 are terminal practical ties or negative controls. A held-out fixed-token oracle shows full output orthogonal-plus-diagonal alignment recovers 52.85% target energy. Priority 84's fixed-basis two-stage 32x32 chart finished at val 5.7030, improving plain generated c_proj by about 0.0365 CE but retaining a 0.2112 gap to attention-only. Priorities 85-87 terminally bracketed the rotation metric at 4/16/32 with measured +0.125 residual log-gain initialization; metric 16 won at val 5.6957, only 0.0073 better than priority 84, so the residual gap is structural. One-stage wider 64x64 and 128x128 oracles explain only 7.22% and 10.61% held-out output energy versus 15.84% for two-stage 32x32, showing composition through distinct fixed bases is essential. Commit 2357c77 caches the complete charted c_proj once per optimizer step and exactly VJPs its gradient to base latent/chart coordinates/gain, lifting two-stage MFU to 28.24% and four-stage MFU from a rejected 14.20% to 24.75-25.28%. Priority 88 tests the four-stage metric-16 chart; its step-60/120 validation is 6.4090/5.9534, worse than two-stage metric 16, indicating overrotation. Priorities 89-90 are the qualified four-stage metric-4/8 follow-ups. The four-stage oracle explains 25.31% held-out output energy with no learned dense basis or LoRA adapter."
+      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its matrix displacement directions are high-rank and layer-specific. Priority 89's four-stage output chart is the current structural winner at val 5.6906, improving plain generated c_proj by 0.0488 CE but remaining 0.1988 behind attention-only; priority 90 finished at 5.6944. Paired c_fc-row/c_proj-column log-norm motion has 92.27% PC1 and 98.88% PC1+2 temporal energy. After removing layer means, 66.89% of terminal paired-channel energy is same-sign/common-mode, while the layer means are gauge-like (c_fc -0.0221, c_proj +0.0568). A distinct fit/holdout activation oracle shows common+gauge+centered coordinates recover 43.69-44.30% source error versus only 44.53-45.57% for fully independent pre/post channel scales. Commit 8753495 implements the identity-initialized 3,074-coordinate activation chart with no learned basis or LoRA adapter. Priorities 91-92 compose it with the selected fixed-basis output chart at metrics 4/8; exact foreground MFU gates pass at 21.61%/21.57%."
     }
   ]
 }
