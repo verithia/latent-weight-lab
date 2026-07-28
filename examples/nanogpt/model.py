@@ -118,6 +118,7 @@ class GPTConfig:
     block_fht_mlp_output_block_rotation_stages: int = 0
     block_fht_mlp_output_block_rotation_size: int = 32
     block_fht_mlp_output_block_rotation_basis_size: int = 256
+    block_fht_mlp_output_block_rotation_coordinate_scale: float = 1.0
     block_fht_mlp_residual_output_gain: bool = False
     block_fht_mlp_residual_output_gain_scale: float = 1.0
     tie_word_embeddings: bool = True
@@ -363,16 +364,23 @@ class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
         rotation_block_size: int,
         basis_block_size: int,
         seed: int,
+        coordinate_scale: float = 1.0,
     ) -> None:
         super().__init__()
         self.features = int(features)
         self.stages = int(stages)
         self.rotation_block_size = int(rotation_block_size)
         self.basis_block_size = int(basis_block_size)
+        self.coordinate_scale = float(coordinate_scale)
         if self.features <= 0:
             raise ValueError("features must be positive")
         if self.stages <= 0:
             raise ValueError("stages must be positive")
+        if (
+            not math.isfinite(self.coordinate_scale)
+            or self.coordinate_scale <= 0.0
+        ):
+            raise ValueError("coordinate_scale must be positive and finite")
         if (
             self.rotation_block_size <= 1
             or self.features % self.rotation_block_size
@@ -479,6 +487,7 @@ class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
             self.rotation_blocks,
             self.coordinates_per_block,
         )[stage].to(device=device, dtype=solve_dtype)
+        coordinates = self.coordinate_scale * coordinates
         skew = coordinates.new_zeros(
             self.rotation_blocks,
             self.rotation_block_size,
@@ -1261,6 +1270,9 @@ class MLP(nn.Module):
                 seed=(
                     int(config.block_fht_mlp_output_rotation_seed)
                     + layer_id * 64
+                ),
+                coordinate_scale=float(
+                    config.block_fht_mlp_output_block_rotation_coordinate_scale
                 ),
             )
             if block_rotation_stages

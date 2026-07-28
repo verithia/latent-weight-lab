@@ -732,6 +732,25 @@ def test_fht_block_orthogonal_mix_is_identity_and_norm_preserving() -> None:
     assert float(mix.coordinates.grad.abs().sum()) > 0.0
 
 
+def test_fht_block_orthogonal_coordinate_scale_scales_identity_tangent() -> None:
+    base = LearnedFHTBlockOrthogonalOutputMix(
+        16, 2, 4, 8, 31, coordinate_scale=1.0
+    )
+    scaled = LearnedFHTBlockOrthogonalOutputMix(
+        16, 2, 4, 8, 31, coordinate_scale=4.0
+    )
+    values = torch.randn(3, 16)
+    torch.testing.assert_close(base(values), scaled(values))
+    base(values)[:, 0].sum().backward()
+    scaled(values)[:, 0].sum().backward()
+    torch.testing.assert_close(
+        scaled.coordinates.grad,
+        4.0 * base.coordinates.grad,
+        atol=1e-6,
+        rtol=1e-6,
+    )
+
+
 def test_mlp_folds_block_rotation_and_output_gain_into_cproj_weight() -> None:
     torch.manual_seed(303)
     config = GPTConfig(
