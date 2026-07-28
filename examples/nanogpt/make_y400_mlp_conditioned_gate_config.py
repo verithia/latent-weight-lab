@@ -62,6 +62,7 @@ def main() -> None:
             "block_fht_mlp_residual_conditioned_output_gate": True,
             "block_fht_mlp_residual_conditioned_output_gate_scale": 1.0,
             "block_fht_mlp_residual_conditioned_output_gate_layers": [0],
+            "block_fht_mlp_residual_conditioned_output_gate_bias": False,
             "implementation_commit": git_head(),
             "implementation_source_hashes": {
                 path: sha256(ROOT / path) for path in SOURCE_PATHS
@@ -91,18 +92,24 @@ def main() -> None:
             "conditioned_output_gate": {
                 "formula": (
                     "update + update * "
-                    "(slope * layernorm_residual + bias)"
+                    "(slope * layernorm_residual)"
                 ),
-                "coordinates_per_layer": 1536,
-                "coordinates_total": 1536,
+                "coordinates_per_layer": 768,
+                "coordinates_total": 768,
                 "selected_layers": [0],
+                "selected_coordinate_group": "slope",
+                "bias_coordinate_reused_from_parent": (
+                    "the bilateral parent already has a learned per-output "
+                    "residual gain, so a second static bias coordinate is "
+                    "redundant"
+                ),
                 "selection_rule": (
                     "strongest task-CE versus dense-teacher direction "
                     "cosine among diagnosed layers, positive on fit and "
                     "holdout"
                 ),
-                "fit_teacher_direction_cosine": 0.09833482652902603,
-                "holdout_teacher_direction_cosine": 0.10798729956150055,
+                "fit_teacher_direction_cosine": 0.04898739978671074,
+                "holdout_teacher_direction_cosine": 0.05935664474964142,
                 "all_diagnosed_layers_fit_teacher_direction_cosine": (
                     0.04250643029808998
                 ),

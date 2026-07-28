@@ -1093,6 +1093,27 @@ def test_mlp_residual_conditioned_output_gate_selects_layers() -> None:
     )
 
 
+def test_mlp_residual_conditioned_output_gate_can_reuse_static_gain() -> None:
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_residual_conditioned_output_gate=True,
+            block_fht_mlp_residual_conditioned_output_gate_bias=False,
+        ),
+        layer_id=0,
+    )
+    assert mlp.residual_conditioned_output_slope is not None
+    assert mlp.residual_conditioned_output_bias is None
+    condition = torch.randn(2, 3, 8)
+    modulation = mlp.residual_conditioned_output_modulation(condition)
+    assert modulation is not None
+    torch.testing.assert_close(modulation, torch.zeros_like(modulation))
+    modulation.sum().backward()
+    assert mlp.residual_conditioned_output_slope.grad is not None
+    assert mlp.residual_conditioned_output_slope.grad.abs().sum() > 0
+
+
 def test_freeze_keeps_block_output_chart_trainable() -> None:
     mlp = MLP(
         GPTConfig(

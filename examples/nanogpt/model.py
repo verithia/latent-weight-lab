@@ -137,6 +137,7 @@ class GPTConfig:
     block_fht_mlp_residual_conditioned_output_gate: bool = False
     block_fht_mlp_residual_conditioned_output_gate_scale: float = 1.0
     block_fht_mlp_residual_conditioned_output_gate_layers: tuple[int, ...] = ()
+    block_fht_mlp_residual_conditioned_output_gate_bias: bool = True
     tie_word_embeddings: bool = True
 
 
@@ -1539,7 +1540,10 @@ class MLP(nn.Module):
         )
         self.residual_conditioned_output_bias = (
             nn.Parameter(torch.zeros(config.n_embd))
-            if conditioned_gate_enabled
+            if (
+                conditioned_gate_enabled
+                and config.block_fht_mlp_residual_conditioned_output_gate_bias
+            )
             else None
         )
         # Optional non-persistent teacher state is installed by the training
@@ -1898,12 +1902,19 @@ class MLP(nn.Module):
     ) -> torch.Tensor | None:
         if self.residual_conditioned_output_slope is None:
             return None
-        assert self.residual_conditioned_output_bias is not None
-        modulation = torch.addcmul(
-            self.residual_conditioned_output_bias.to(dtype=condition.dtype),
-            condition,
-            self.residual_conditioned_output_slope.to(dtype=condition.dtype),
+        slope = self.residual_conditioned_output_slope.to(
+            dtype=condition.dtype
         )
+        if self.residual_conditioned_output_bias is None:
+            modulation = condition * slope
+        else:
+            modulation = torch.addcmul(
+                self.residual_conditioned_output_bias.to(
+                    dtype=condition.dtype
+                ),
+                condition,
+                slope,
+            )
         if self.residual_conditioned_output_gate_scale != 1.0:
             modulation = (
                 self.residual_conditioned_output_gate_scale * modulation
