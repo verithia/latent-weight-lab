@@ -157,9 +157,23 @@ def main() -> None:
             gauge_log = (log_fc.double() - log_proj.double()) / math.sqrt(
                 2.0
             )
+            centered_log_fc = log_fc.double() - log_fc.double().mean()
+            centered_log_proj = (
+                log_proj.double() - log_proj.double().mean()
+            )
+            centered_common_log = (
+                centered_log_fc + centered_log_proj
+            ) / math.sqrt(2.0)
+            centered_gauge_log = (
+                centered_log_fc - centered_log_proj
+            ) / math.sqrt(2.0)
             total_log_energy = (
                 log_fc.double().square().sum()
                 + log_proj.double().square().sum()
+            ).clamp_min(1e-30)
+            centered_total_log_energy = (
+                centered_log_fc.square().sum()
+                + centered_log_proj.square().sum()
             ).clamp_min(1e-30)
             previous = previous_log_changes.get(layer)
             increment_correlation = float("nan")
@@ -187,6 +201,22 @@ def main() -> None:
                     "gauge_log_energy_fraction": float(
                         gauge_log.square().sum() / total_log_energy
                     ),
+                    "centered_common_log_energy_fraction": float(
+                        centered_common_log.square().sum()
+                        / centered_total_log_energy
+                    ),
+                    "centered_gauge_log_energy_fraction": float(
+                        centered_gauge_log.square().sum()
+                        / centered_total_log_energy
+                    ),
+                    "mean_log_norm_change_fc": float(log_fc.mean()),
+                    "mean_log_norm_change_proj": float(log_proj.mean()),
+                    "rms_log_norm_change_fc": float(
+                        log_fc.double().square().mean().sqrt()
+                    ),
+                    "rms_log_norm_change_proj": float(
+                        log_proj.double().square().mean().sqrt()
+                    ),
                     **radial,
                 }
             )
@@ -206,6 +236,12 @@ def main() -> None:
         "signed_log_norm_increment_correlation",
         "common_log_energy_fraction",
         "gauge_log_energy_fraction",
+        "centered_common_log_energy_fraction",
+        "centered_gauge_log_energy_fraction",
+        "mean_log_norm_change_fc",
+        "mean_log_norm_change_proj",
+        "rms_log_norm_change_fc",
+        "rms_log_norm_change_proj",
         "signed_radial_correlation",
         "independent_radial_capture",
         "common_radial_capture",
