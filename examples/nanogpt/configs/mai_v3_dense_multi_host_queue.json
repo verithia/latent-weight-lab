@@ -1382,6 +1382,84 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 97,
+      "name": "mai_v3_124m_cproj_bilateral_stop30_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_stop30_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_stop30_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_stop30_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "74533ba7c28892efb16775f1f6aa8682d249614beba2edb33ddeb1c6744fadf3",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "afe89135638470774f9b489ae954a66fee341da99f4e557b83088b08865d7531",
+            "examples/nanogpt/model.py": "cd492ede7348b9a1e49a8ce5cb1879713a8df3b29644873ed921688d74f1bb29",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 98,
+      "name": "mai_v3_124m_cproj_bilateral_stop60_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_stop60_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_stop60_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_stop60_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "fc96833f8d4e685996d1b525afffc7a3b2f9f9155c249f8a1fa6407dee7b4435",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "afe89135638470774f9b489ae954a66fee341da99f4e557b83088b08865d7531",
+            "examples/nanogpt/model.py": "cd492ede7348b9a1e49a8ce5cb1879713a8df3b29644873ed921688d74f1bb29",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 99,
+      "name": "mai_v3_124m_cproj_bilateral_stop120_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_stop120_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_stop120_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_stop120_outblock32_s4_c4_g4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "1cc2b8c785af43d241e145225522747b24ba218ddcc84f41b5a3213c4c3d8885",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "afe89135638470774f9b489ae954a66fee341da99f4e557b83088b08865d7531",
+            "examples/nanogpt/model.py": "cd492ede7348b9a1e49a8ce5cb1879713a8df3b29644873ed921688d74f1bb29",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -1395,7 +1473,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its displacement directions are high-rank and layer-specific. Output-only priority 89 reached val 5.6906; the trajectory-derived activation chart improves the composition only to 5.6832 and activation alone reaches 5.7364. A distinct five-layer fit/heldout oracle finds that output-only orientation recovers 65.36% of source error, two-stage hidden orientation alone 70.69%, and bilateral hidden-two/output-four 72.70%; the bilateral gain is positive at every probed layer, while adding activation coordinates changes recovery only to 72.81%. Commit 170a5b7 implements the identity-initialized bilateral chart by once-per-step cached weight folding with exact VJPs and no learned basis or LoRA. Priorities 94-96 bracket hidden depth/metric; exact Y400 MFU gates pass at 23.76%, 22.07%, and 22.07%."
+      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its displacement directions are high-rank, layer-specific, and globally curved. Output-only reached val 5.6906; output+activation reached 5.6832. The unrestricted fixed-basis bilateral chart has held-out endpoint capacity (72.70% source-error recovery versus 65.36% output-only) but trained to only val 5.7001: it was slightly better than output-only at step 60, then worse by step 120, and its added hidden chart reduced output-coordinate RMS by 15.5%. Commit eed3799 adds an exact-resume-safe local trust-region stop; priorities 97-99 freeze hidden-side updates at steps 30/60/120 while base/output coordinates continue. Exact Y400 MFU gates pass at 21.92%, 22.09%, and 22.18%."
     }
   ]
 }
