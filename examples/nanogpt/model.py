@@ -115,6 +115,11 @@ class GPTConfig:
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
     block_fht_mlp_output_rotation_stages: int = 0
     block_fht_mlp_output_rotation_seed: int = 271828
+    block_fht_mlp_output_block_rotation_stages: int = 0
+    block_fht_mlp_output_block_rotation_size: int = 32
+    block_fht_mlp_output_block_rotation_basis_size: int = 256
+    block_fht_mlp_residual_output_gain: bool = False
+    block_fht_mlp_residual_output_gain_scale: float = 1.0
     tie_word_embeddings: bool = True
 
 
@@ -339,6 +344,180 @@ class LearnedGivensOutputMix(nn.Module):
             second = sine * pairs[..., 0] + cosine * pairs[..., 1]
             rotated = torch.stack((first, second), dim=-1).reshape_as(permuted)
             result = rotated.index_select(-1, self.inverse_permutations[stage])
+        return result
+
+
+class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
+    """Compact global output chart with fixed FHT bases and learned rotations.
+
+    Each identity-initialized stage conjugates independent small Cayley
+    rotations by a fixed signed, permuted block-FHT basis.  The basis has no
+    learned parameters; only the upper-triangular coordinates of the
+    block-skew generators are optimized.
+    """
+
+    def __init__(
+        self,
+        features: int,
+        stages: int,
+        rotation_block_size: int,
+        basis_block_size: int,
+        seed: int,
+    ) -> None:
+        super().__init__()
+        self.features = int(features)
+        self.stages = int(stages)
+        self.rotation_block_size = int(rotation_block_size)
+        self.basis_block_size = int(basis_block_size)
+        if self.features <= 0:
+            raise ValueError("features must be positive")
+        if self.stages <= 0:
+            raise ValueError("stages must be positive")
+        if (
+            self.rotation_block_size <= 1
+            or self.features % self.rotation_block_size
+        ):
+            raise ValueError(
+                "rotation_block_size must be > 1 and divide features"
+            )
+        if (
+            self.basis_block_size <= 0
+            or self.basis_block_size & (self.basis_block_size - 1)
+            or self.features % self.basis_block_size
+        ):
+            raise ValueError(
+                "basis_block_size must be a power of two dividing features"
+            )
+
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        permutations = torch.stack(
+            [
+                torch.randperm(
+                    self.features, generator=generator, device="cpu"
+                )
+                for _ in range(self.stages)
+            ]
+        )
+        signs = (
+            torch.randint(
+                0,
+                2,
+                (self.stages, self.features),
+                generator=generator,
+                dtype=torch.float32,
+                device="cpu",
+            )
+            * 2.0
+            - 1.0
+        )
+        upper_rows, upper_columns = torch.triu_indices(
+            self.rotation_block_size,
+            self.rotation_block_size,
+            offset=1,
+            device="cpu",
+        )
+        self.register_buffer("permutations", permutations, persistent=True)
+        self.register_buffer(
+            "inverse_permutations",
+            torch.argsort(permutations, dim=1),
+            persistent=True,
+        )
+        self.register_buffer("signs", signs, persistent=True)
+        self.register_buffer("upper_rows", upper_rows, persistent=False)
+        self.register_buffer("upper_columns", upper_columns, persistent=False)
+        self.rotation_blocks = self.features // self.rotation_block_size
+        self.coordinates_per_block = (
+            self.rotation_block_size * (self.rotation_block_size - 1) // 2
+        )
+        # Keep the parameter one-dimensional: these are chart coordinates,
+        # not dense matrices for Muon's matrix update.
+        self.coordinates = nn.Parameter(
+            torch.zeros(
+                self.stages
+                * self.rotation_blocks
+                * self.coordinates_per_block
+            )
+        )
+
+    def _basis(
+        self, values: torch.Tensor, stage: int, inverse: bool
+    ) -> torch.Tensor:
+        signs = self.signs[stage].to(
+            device=values.device, dtype=values.dtype
+        )
+        if inverse:
+            values = values * signs
+            grouped = values.reshape(
+                *values.shape[:-1],
+                self.features // self.basis_block_size,
+                self.basis_block_size,
+            )
+            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            return values.index_select(
+                -1, self.inverse_permutations[stage]
+            )
+        values = values.index_select(-1, self.permutations[stage])
+        grouped = values.reshape(
+            *values.shape[:-1],
+            self.features // self.basis_block_size,
+            self.basis_block_size,
+        )
+        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        return values * signs
+
+    def _rotations(
+        self, stage: int, *, device: torch.device, dtype: torch.dtype
+    ) -> torch.Tensor:
+        solve_dtype = (
+            torch.float32
+            if dtype in (torch.float16, torch.bfloat16)
+            else dtype
+        )
+        coordinates = self.coordinates.view(
+            self.stages,
+            self.rotation_blocks,
+            self.coordinates_per_block,
+        )[stage].to(device=device, dtype=solve_dtype)
+        skew = coordinates.new_zeros(
+            self.rotation_blocks,
+            self.rotation_block_size,
+            self.rotation_block_size,
+        )
+        rows = self.upper_rows.to(device=device)
+        columns = self.upper_columns.to(device=device)
+        skew[:, rows, columns] = coordinates
+        skew[:, columns, rows] = -coordinates
+        identity = torch.eye(
+            self.rotation_block_size, device=device, dtype=solve_dtype
+        ).expand(self.rotation_blocks, -1, -1)
+        # Cayley(A) = (I-A)^-1(I+A) is exactly orthogonal for skew A and
+        # equals identity at the zero-coordinate initialization.
+        return torch.linalg.solve(
+            identity - skew, identity + skew
+        ).to(dtype=dtype)
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, "
+                f"got {values.shape[-1]}"
+            )
+        result = values
+        for stage in range(self.stages):
+            result = self._basis(result, stage, inverse=False)
+            blocks = result.reshape(
+                *result.shape[:-1],
+                self.rotation_blocks,
+                self.rotation_block_size,
+            )
+            rotations = self._rotations(
+                stage, device=result.device, dtype=result.dtype
+            )
+            blocks = torch.einsum("...gi,gij->...gj", blocks, rotations)
+            result = self._basis(
+                blocks.reshape_as(result), stage, inverse=True
+            )
         return result
 
 
@@ -1034,7 +1213,113 @@ class MLP(nn.Module):
             if rotation_stages
             else None
         )
+        block_rotation_stages = int(
+            config.block_fht_mlp_output_block_rotation_stages
+        )
+        if block_rotation_stages < 0:
+            raise ValueError(
+                "block_fht_mlp_output_block_rotation_stages "
+                "must be non-negative"
+            )
+        if rotation_stages and block_rotation_stages:
+            raise ValueError(
+                "pairwise and block-orthogonal output rotations are "
+                "mutually exclusive"
+            )
+        if block_rotation_stages and not isinstance(
+            self.c_proj, (nn.Linear, BlockFHTLinear)
+        ):
+            raise ValueError(
+                "block-orthogonal output rotation requires a plain "
+                "mlp.c_proj linear"
+            )
+        incompatible_cproj_addon = any(
+            value is not None
+            for value in (
+                self.cproj_lowrank_left,
+                self.cproj_lowrank_right,
+                self.cproj_tied_cfc_scale,
+                self.cproj_quarter_diag_weight,
+                self.cproj_spectral_resid_diag,
+            )
+        )
+        if block_rotation_stages and incompatible_cproj_addon:
+            raise ValueError(
+                "block-orthogonal output rotation cannot be combined with "
+                "a separate c_proj residual add-on"
+            )
+        self.output_block_rotation = (
+            LearnedFHTBlockOrthogonalOutputMix(
+                features=config.n_embd,
+                stages=block_rotation_stages,
+                rotation_block_size=int(
+                    config.block_fht_mlp_output_block_rotation_size
+                ),
+                basis_block_size=int(
+                    config.block_fht_mlp_output_block_rotation_basis_size
+                ),
+                seed=(
+                    int(config.block_fht_mlp_output_rotation_seed)
+                    + layer_id * 64
+                ),
+            )
+            if block_rotation_stages
+            else None
+        )
+        self.residual_output_log_gain = (
+            nn.Parameter(torch.zeros(config.n_embd))
+            if config.block_fht_mlp_residual_output_gain
+            else None
+        )
+        self.residual_output_gain_scale = float(
+            config.block_fht_mlp_residual_output_gain_scale
+        )
+        if (
+            not math.isfinite(self.residual_output_gain_scale)
+            or self.residual_output_gain_scale <= 0.0
+        ):
+            raise ValueError(
+                "block_fht_mlp_residual_output_gain_scale must be "
+                "positive and finite"
+            )
+        if self.residual_output_log_gain is not None and not isinstance(
+            self.c_proj, (nn.Linear, BlockFHTLinear)
+        ):
+            raise ValueError(
+                "residual output gain requires a plain mlp.c_proj linear"
+            )
+        if self.residual_output_log_gain is not None and incompatible_cproj_addon:
+            raise ValueError(
+                "residual output gain cannot be combined with a separate "
+                "c_proj residual add-on"
+            )
         self.last_postgelu: torch.Tensor | None = None
+
+    def _charted_cproj(self, activated: torch.Tensor) -> torch.Tensor | None:
+        if (
+            self.output_block_rotation is None
+            and self.residual_output_log_gain is None
+        ):
+            return None
+        weight = getattr(self.c_proj, "_cached_weight", None)
+        if weight is None:
+            weight = self.c_proj.weight
+        bias = getattr(self.c_proj, "bias", None)
+        transposed = weight.transpose(0, 1)
+        gain = None
+        if self.residual_output_log_gain is not None:
+            gain = (
+                self.residual_output_gain_scale
+                * self.residual_output_log_gain
+            ).exp().to(device=weight.device, dtype=weight.dtype)
+            transposed = transposed * gain
+            if bias is not None:
+                bias = bias * gain
+        if self.output_block_rotation is not None:
+            transposed = self.output_block_rotation(transposed)
+            if bias is not None:
+                bias = self.output_block_rotation(bias)
+        return F.linear(activated, transposed.transpose(0, 1), bias)
 
     def _fused_cached_cproj_lowrank(self, activated: torch.Tensor) -> torch.Tensor | None:
         if self.cproj_lowrank_left is None or self.cproj_lowrank_right is None:
@@ -1074,7 +1359,9 @@ class MLP(nn.Module):
             self.last_postgelu = activated
         else:
             self.last_postgelu = None
-        out = self._fused_cached_cproj_lowrank(activated)
+        out = self._charted_cproj(activated)
+        if out is None:
+            out = self._fused_cached_cproj_lowrank(activated)
         fused_cproj_lowrank = out is not None
         if not fused_cproj_lowrank:
             out = self.c_proj(activated)
@@ -1306,6 +1593,16 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 module.spectral_log_in_gain.requires_grad_(True)
         if isinstance(module, MLP) and module.shared_hidden_log_gain is not None:
             module.shared_hidden_log_gain.requires_grad_(True)
+        if (
+            isinstance(module, MLP)
+            and module.output_block_rotation is not None
+        ):
+            module.output_block_rotation.coordinates.requires_grad_(True)
+        if (
+            isinstance(module, MLP)
+            and module.residual_output_log_gain is not None
+        ):
+            module.residual_output_log_gain.requires_grad_(True)
     if train_embeddings and isinstance(model, GPT):
         model.transformer.wte.weight.requires_grad_(True)
         model.transformer.wpe.weight.requires_grad_(True)

@@ -17,6 +17,7 @@ from examples.nanogpt.model import (
     FixedFHTMix,
     GPT,
     GPTConfig,
+    LearnedFHTBlockOrthogonalOutputMix,
     LearnedGivensOutputMix,
     MLP,
     freeze_non_block_fht,
@@ -704,6 +705,77 @@ def test_learned_givens_output_mix_preserves_norm_and_has_angle_gradient() -> No
     output[..., 0].sum().backward()
     assert mix.angles.grad is not None
     assert float(mix.angles.grad.abs().sum()) > 0.0
+
+
+def test_fht_block_orthogonal_mix_is_identity_and_norm_preserving() -> None:
+    mix = LearnedFHTBlockOrthogonalOutputMix(
+        features=16,
+        stages=2,
+        rotation_block_size=4,
+        basis_block_size=8,
+        seed=29,
+    )
+    values = torch.randn(5, 7, 16)
+    torch.testing.assert_close(mix(values), values, atol=2e-6, rtol=2e-6)
+    assert mix.coordinates.ndim == 1
+    with torch.no_grad():
+        mix.coordinates.normal_(std=0.1)
+    output = mix(values)
+    torch.testing.assert_close(
+        output.norm(dim=-1),
+        values.norm(dim=-1),
+        atol=2e-5,
+        rtol=2e-5,
+    )
+    output[..., 0].sum().backward()
+    assert mix.coordinates.grad is not None
+    assert float(mix.coordinates.grad.abs().sum()) > 0.0
+
+
+def test_mlp_folds_block_rotation_and_output_gain_into_cproj_weight() -> None:
+    torch.manual_seed(303)
+    config = GPTConfig(
+        n_embd=8,
+        n_head=1,
+        block_fht_mlp_output_block_rotation_stages=2,
+        block_fht_mlp_output_block_rotation_size=4,
+        block_fht_mlp_output_block_rotation_basis_size=8,
+        block_fht_mlp_residual_output_gain=True,
+        block_fht_mlp_residual_output_gain_scale=3.0,
+    )
+    mlp = MLP(config, layer_id=0)
+    values = torch.randn(2, 3, 8)
+    with torch.no_grad():
+        mlp.output_block_rotation.coordinates.normal_(std=0.05)
+        mlp.residual_output_log_gain.normal_(std=0.03)
+    activated = mlp.gelu(mlp.c_fc(values))
+    gain = (3.0 * mlp.residual_output_log_gain).exp()
+    expected_weight = mlp.output_block_rotation(
+        mlp.c_proj.weight.transpose(0, 1) * gain
+    ).transpose(0, 1)
+    expected = F.linear(activated, expected_weight, mlp.c_proj.bias)
+    torch.testing.assert_close(mlp(values), expected)
+    mlp(values).square().mean().backward()
+    assert mlp.output_block_rotation.coordinates.grad is not None
+    assert mlp.residual_output_log_gain.grad is not None
+
+
+def test_freeze_keeps_block_output_chart_trainable() -> None:
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_output_block_rotation_stages=1,
+            block_fht_mlp_output_block_rotation_size=4,
+            block_fht_mlp_output_block_rotation_basis_size=8,
+            block_fht_mlp_residual_output_gain=True,
+        ),
+        layer_id=0,
+    )
+    freeze_non_block_fht(mlp, train_embeddings=False)
+    assert mlp.output_block_rotation.coordinates.requires_grad
+    assert mlp.residual_output_log_gain.requires_grad
+    assert not mlp.c_proj.weight.requires_grad
 
 
 def test_shared_hidden_gain_coordinate_scale_preserves_identity_and_scales_tangent() -> None:

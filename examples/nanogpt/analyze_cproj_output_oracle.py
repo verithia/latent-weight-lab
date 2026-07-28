@@ -30,6 +30,7 @@ from examples.nanogpt.analyze_cproj_manifold import (
 )
 from examples.nanogpt.analyze_residual_compatibility import fixed_validation_batches
 from examples.nanogpt.model import (
+    LearnedFHTBlockOrthogonalOutputMix,
     LearnedGivensOutputMix,
     normalized_fht_last_dim,
 )
@@ -394,6 +395,92 @@ def fit_sparse_givens_operator(
     }
 
 
+def fit_block_orthogonal_operator(
+    source_train: torch.Tensor,
+    target_train: torch.Tensor,
+    source_holdout: torch.Tensor,
+    target_holdout: torch.Tensor,
+    stages: int,
+    rotation_block_size: int,
+    basis_block_size: int,
+    seed: int,
+    steps: int,
+    learning_rate: float,
+) -> dict[str, float | str]:
+    """Fit the exact production fixed-basis block-orthogonal output chart."""
+
+    source_train = source_train.float()
+    target_train = target_train.float()
+    source_holdout = source_holdout.float()
+    target_holdout = target_holdout.float()
+    diagonal, rotation = fit_diagonal_then_orthogonal(
+        source_train, target_train
+    )
+    target_operator = (
+        torch.diag(diagonal) @ rotation.transpose(0, 1)
+    ).detach()
+    mixer = LearnedFHTBlockOrthogonalOutputMix(
+        features=source_train.shape[-1],
+        stages=int(stages),
+        rotation_block_size=int(rotation_block_size),
+        basis_block_size=int(basis_block_size),
+        seed=int(seed),
+    ).to(device=source_train.device, dtype=torch.float32)
+    log_gain = torch.nn.Parameter(
+        torch.zeros(
+            source_train.shape[-1],
+            device=source_train.device,
+            dtype=torch.float32,
+        )
+    )
+    optimizer = torch.optim.Adam(
+        [mixer.coordinates, log_gain], lr=float(learning_rate)
+    )
+    identity = torch.eye(
+        source_train.shape[-1],
+        device=source_train.device,
+        dtype=torch.float32,
+    )
+    for _ in range(int(steps)):
+        optimizer.zero_grad(set_to_none=True)
+        operator = mixer(identity * log_gain.exp())
+        loss = (operator - target_operator).square().mean()
+        loss.backward()
+        optimizer.step()
+    with torch.no_grad():
+        operator = mixer(identity * log_gain.exp())
+        train_prediction = mixer(source_train * log_gain.exp())
+        holdout_prediction = mixer(source_holdout * log_gain.exp())
+        operator_energy = target_operator.square().sum().clamp_min(1e-30)
+        operator_explained = 1.0 - (
+            target_operator - operator
+        ).square().sum() / operator_energy
+    return {
+        "family": (
+            f"fht_blockorth{int(rotation_block_size)}x"
+            f"{int(stages)}_output_diagonal"
+        ),
+        "operator_explained_energy": float(operator_explained),
+        "parameter_count": float(
+            mixer.coordinates.numel() + log_gain.numel()
+        ),
+        "coordinate_rms": float(
+            mixer.coordinates.detach().square().mean().sqrt()
+        ),
+        "log_gain_rms": float(log_gain.detach().square().mean().sqrt()),
+        **{
+            f"train_{key}": value
+            for key, value in metrics(target_train, train_prediction).items()
+        },
+        **{
+            f"holdout_{key}": value
+            for key, value in metrics(
+                target_holdout, holdout_prediction
+            ).items()
+        },
+    }
+
+
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     fieldnames = list(rows[0])
     for row in rows[1:]:
@@ -435,6 +522,9 @@ def main() -> None:
     parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
     parser.add_argument("--givens-stages", default="1,2,4,8,16")
     parser.add_argument("--conjugated-givens-stages", default="")
+    parser.add_argument("--block-orthogonal-stages", default="")
+    parser.add_argument("--block-rotation-size", type=int, default=32)
+    parser.add_argument("--block-basis-size", type=int, default=256)
     parser.add_argument("--givens-fit-steps", type=int, default=400)
     parser.add_argument("--givens-learning-rate", type=float, default=0.05)
     parser.add_argument("--givens-seed", type=int, default=271828)
@@ -488,6 +578,11 @@ def main() -> None:
         for part in args.conjugated_givens_stages.split(",")
         if part
     ]
+    block_orthogonal_stages = [
+        int(part)
+        for part in args.block_orthogonal_stages.split(",")
+        if part
+    ]
     for layer in layers:
         source_train = plain_train[(layer, "mlp_out")].to(args.device)
         target_train = attention_train[(layer, "mlp_out")].to(args.device)
@@ -534,6 +629,25 @@ def main() -> None:
                 conjugated=True,
             )
             rows.append({"layer": layer, **row})
+        for stages in block_orthogonal_stages:
+            print(
+                f"fitting layer={layer} "
+                f"fht_blockorth={args.block_rotation_size}x{stages}",
+                flush=True,
+            )
+            row = fit_block_orthogonal_operator(
+                source_train,
+                target_train,
+                source_holdout,
+                target_holdout,
+                stages,
+                args.block_rotation_size,
+                args.block_basis_size,
+                args.givens_seed + layer * 64,
+                args.givens_fit_steps,
+                args.givens_learning_rate,
+            )
+            rows.append({"layer": layer, **row})
 
     print("fitting endpoint weight oracles", flush=True)
     attention_model = load_model(args.attention_only, args.device)
@@ -577,6 +691,9 @@ def main() -> None:
         "holdout_sample_seed": args.holdout_sample_seed,
         "givens_stages": givens_stages,
         "conjugated_givens_stages": conjugated_givens_stages,
+        "block_orthogonal_stages": block_orthogonal_stages,
+        "block_rotation_size": args.block_rotation_size,
+        "block_basis_size": args.block_basis_size,
         "givens_fit_steps": args.givens_fit_steps,
         "givens_learning_rate": args.givens_learning_rate,
         "givens_seed": args.givens_seed,
