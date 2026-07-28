@@ -148,7 +148,32 @@ def load_state(path: Path, manifest: Dict[str, Any]) -> Dict[str, Any]:
         )
     state.setdefault("last_callback_at", time.time())
     state.setdefault("paused_hosts", [])
+    if "probe_outage_active" not in state and state.get("last_probe_error"):
+        state["probe_outage_active"] = True
+        state["probe_outage_notified"] = bool(state.get("last_error_callback_at"))
     return state
+
+
+def record_probe_failure(state: Dict[str, Any], exc: Exception, now: float) -> bool:
+    state["last_probe_error"] = {"type": type(exc).__name__, "at": now}
+    state["probe_outage_active"] = True
+    return not bool(state.get("probe_outage_notified", False))
+
+
+def mark_probe_failure_notified(state: Dict[str, Any], now: float) -> None:
+    state["probe_outage_notified"] = True
+    state["last_error_callback_at"] = now
+    state["last_callback_at"] = now
+
+
+def record_probe_recovery(state: Dict[str, Any]) -> bool:
+    should_notify = bool(
+        state.get("probe_outage_active", False) and state.get("probe_outage_notified", False)
+    )
+    state.pop("probe_outage_active", None)
+    state.pop("probe_outage_notified", None)
+    state.pop("last_probe_error", None)
+    return should_notify
 
 
 def task_by_name(manifest: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
@@ -453,7 +478,13 @@ def status_summary(
     }
 
 
-def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str, Any]) -> None:
+def run_once(
+    args: argparse.Namespace,
+    manifest: Dict[str, Any],
+    state: Dict[str, Any],
+    *,
+    suppress_heartbeat: bool = False,
+) -> None:
     now = time.time()
     snapshots = probe_all(manifest, state)
     tasks = task_by_name(manifest)
@@ -691,7 +722,10 @@ def run_once(args: argparse.Namespace, manifest: Dict[str, Any], state: Dict[str
     ):
         state["last_callback_at"] = now
 
-    if now - float(state.get("last_callback_at", now)) >= args.heartbeat_minutes * 60:
+    if (
+        not suppress_heartbeat
+        and now - float(state.get("last_callback_at", now)) >= args.heartbeat_minutes * 60
+    ):
         if base.send(args.chat_id, heartbeat_text(manifest, state, snapshots, blockers)):
             state["last_callback_at"] = now
     state["updated_at"] = now
@@ -726,15 +760,26 @@ def main() -> None:
                 blockers = {host: "dry-run" for host in manifest["hosts"]}
                 base.atomic_json(args.status_path, status_summary(manifest, state, snapshots, blockers))
             else:
-                run_once(args, manifest, state)
+                run_once(
+                    args,
+                    manifest,
+                    state,
+                    suppress_heartbeat=bool(state.get("probe_outage_active", False)),
+                )
+            if record_probe_recovery(state):
+                now = time.time()
+                if base.send(
+                    args.chat_id,
+                    manifest["label"] + " MONITOR_RECOVERED: multi-host probe succeeded",
+                ):
+                    state["last_callback_at"] = now
+                base.atomic_json(args.state_path, state)
         except Exception as exc:
             now = time.time()
-            state["last_probe_error"] = {"type": type(exc).__name__, "at": now}
-            base.atomic_json(args.state_path, state)
-            if now - float(state.get("last_error_callback_at", 0.0)) >= args.heartbeat_minutes * 60:
+            if record_probe_failure(state, exc, now):
                 if base.send(args.chat_id, manifest["label"] + " MONITOR_DEGRADED: multi-host probe failed; retrying"):
-                    state["last_error_callback_at"] = now
-                    state["last_callback_at"] = now
+                    mark_probe_failure_notified(state, now)
+            base.atomic_json(args.state_path, state)
         if args.once:
             return
         time.sleep(args.interval)

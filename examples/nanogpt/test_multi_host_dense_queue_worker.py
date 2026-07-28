@@ -11,7 +11,10 @@ from examples.nanogpt.multi_host_dense_queue_worker import (
     host_probe_manifest,
     launch,
     load_state,
+    mark_probe_failure_notified,
     progress_text,
+    record_probe_failure,
+    record_probe_recovery,
     stalled_run_event,
     stall_text,
     submitted_text,
@@ -31,6 +34,34 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
             state = load_state(path, manifest)
         self.assertEqual(state["paused_hosts"], ["Y400"])
         self.assertEqual(state["entries"]["task"]["state"], "pending")
+
+    def test_load_state_migrates_existing_probe_outage_without_realerting(self) -> None:
+        manifest = {"entries": [{"name": "task", "variants": {"Y400": {}}}]}
+        with TemporaryDirectory() as directory:
+            path = Path(directory) / "state.json"
+            path.write_text(
+                '{"last_probe_error":{"type":"RuntimeError","at":100},'
+                '"last_error_callback_at":100}'
+            )
+            state = load_state(path, manifest)
+        self.assertTrue(state["probe_outage_active"])
+        self.assertTrue(state["probe_outage_notified"])
+
+    def test_probe_outage_is_edge_triggered_and_recovery_is_one_shot(self) -> None:
+        state = {}
+        self.assertTrue(record_probe_failure(state, RuntimeError("down"), 100.0))
+        mark_probe_failure_notified(state, 100.0)
+        self.assertFalse(record_probe_failure(state, RuntimeError("still down"), 200.0))
+        self.assertEqual(state["last_probe_error"]["at"], 200.0)
+        self.assertTrue(record_probe_recovery(state))
+        self.assertNotIn("probe_outage_active", state)
+        self.assertNotIn("last_probe_error", state)
+        self.assertFalse(record_probe_recovery(state))
+
+    def test_failed_degraded_callback_is_retried(self) -> None:
+        state = {}
+        self.assertTrue(record_probe_failure(state, RuntimeError("down"), 100.0))
+        self.assertTrue(record_probe_failure(state, RuntimeError("still down"), 200.0))
 
     def test_one_global_assignment_counts_budget_only_on_assigned_host(self) -> None:
         manifest = {
