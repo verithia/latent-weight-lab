@@ -1070,6 +1070,84 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 85,
+      "name": "mai_v3_124m_cproj_blockorth32_s2_c4_g4_init0p125_0p5tpp",
+      "stage": "post_manifold_cproj_blockorth32_s2_c4_g4_init0p125_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_c4_g4_init0p125_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_c4_g4_init0p125_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "18993ab7bd763653906b78d0877ab04d1b0ca16636b796dd56990f85e9bac151",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "3a28ed4975b01cc2ae7677f424b1cbcae7a2df71ea33ab40abd54e49af19ca5a",
+            "examples/nanogpt/model.py": "5026e92c8dd82d9a668de39e6179ba6459274e15e577009caad23feb9fa0b832",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 86,
+      "name": "mai_v3_124m_cproj_blockorth32_s2_c16_g4_init0p125_0p5tpp",
+      "stage": "post_manifold_cproj_blockorth32_s2_c16_g4_init0p125_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_c16_g4_init0p125_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_c16_g4_init0p125_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "8111ad8bfe6c5e2a15c6d061cb00c64472d11de9406147214c189e9a66f35b33",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "3a28ed4975b01cc2ae7677f424b1cbcae7a2df71ea33ab40abd54e49af19ca5a",
+            "examples/nanogpt/model.py": "5026e92c8dd82d9a668de39e6179ba6459274e15e577009caad23feb9fa0b832",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 87,
+      "name": "mai_v3_124m_cproj_blockorth32_s2_c32_g4_init0p125_0p5tpp",
+      "stage": "post_manifold_cproj_blockorth32_s2_c32_g4_init0p125_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_c32_g4_init0p125_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_c32_g4_init0p125_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "90a5f0aab02fd6158a9a7ae6e6cb26ddbe8d2017ec6201dad90702320b55475d",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "3a28ed4975b01cc2ae7677f424b1cbcae7a2df71ea33ab40abd54e49af19ca5a",
+            "examples/nanogpt/model.py": "5026e92c8dd82d9a668de39e6179ba6459274e15e577009caad23feb9fa0b832",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -1083,7 +1161,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 124M dense Muon trajectory is locally two-PC and globally smooth, but the registered 1% BlockFHT tangent captures only 1.005% of dense displacement energy. Priorities 75-83 are terminal practical ties or negative controls. A held-out fixed-token oracle shows full output orthogonal-plus-diagonal alignment recovers 52.85% target energy; the fixed-basis 2-stage 32x32 Cayley chart recovers 15.84% with 1.04% c_proj coordinates. Priority 84 is the >=20% MFU-qualified smallest-rung test; the 4-stage form was rejected prelaunch at 14.20% MFU."
+      "state": "The 124M dense Muon trajectory is locally two-PC and globally smooth, but the registered 1% BlockFHT tangent captures only 1.005% of dense displacement energy. Priorities 75-83 are terminal practical ties or negative controls. A held-out fixed-token oracle shows full output orthogonal-plus-diagonal alignment recovers 52.85% target energy; the fixed-basis 2-stage 32x32 Cayley chart recovers 15.84% with 1.04% c_proj coordinates. Priority 84 finished at val 5.7030, improving the plain generated c_proj by about 0.0365 CE but retaining a 0.2112 gap to attention-only. Its learned residual branch was under-scaled and used only about 5.4% of the oracle rotation coordinate magnitude. Priorities 85-87 are >=20% MFU-qualified 124M follow-ups that initialize a measured +0.125 residual log-gain and bracket the rotation-coordinate metric at 4, 16, and 32; the 4-stage form remains rejected prelaunch at 14.20% MFU."
     }
   ]
 }
