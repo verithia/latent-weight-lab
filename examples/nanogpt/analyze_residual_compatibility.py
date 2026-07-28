@@ -134,7 +134,14 @@ class ResidualCollector:
             self.handles.append(block.ln_2.register_forward_hook(self._hook(layer_index, "ln2")))
             self.handles.append(block.mlp.c_fc.register_forward_hook(self._hook(layer_index, "pre_gelu")))
             self.handles.append(block.mlp.gelu.register_forward_hook(self._hook(layer_index, "post_gelu")))
-            self.handles.append(block.mlp.c_proj.register_forward_hook(self._hook(layer_index, "mlp_out")))
+            # Observe the actual residual branch output.  Some optimized MLP
+            # charts fold a generated c_proj weight into F.linear directly,
+            # so a hook on the c_proj submodule would silently miss them.
+            self.handles.append(
+                block.mlp.register_forward_hook(
+                    self._hook(layer_index, "mlp_out")
+                )
+            )
             self.handles.append(block.register_forward_hook(self._hook(layer_index, "residual_out")))
 
     def close(self) -> None:
