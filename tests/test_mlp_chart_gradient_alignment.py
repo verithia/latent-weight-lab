@@ -127,6 +127,20 @@ def test_effective_polar_chart_gradients_are_finite_and_chart_only() -> None:
         trace_samples=2,
         trace_seed=73,
     )
+    functional_natural, functional_diagnostics = natural_chart_directions(
+        model,
+        parameters,
+        [0],
+        {0: cached_weight.grad.detach().float()},
+        {0: base_weight.detach().float()},
+        damping_ratio=0.1,
+        cg_steps=12,
+        trace_samples=2,
+        trace_seed=73,
+        metric_activations={
+            0: torch.randn(11, config.n_embd * 4)
+        },
+    )
     model.flush_block_fht_cache()
     raw = {
         key: parameter.grad.detach().clone()
@@ -141,6 +155,14 @@ def test_effective_polar_chart_gradients_are_finite_and_chart_only() -> None:
     assert diagnostics[0]["cg_steps"] > 0
     assert diagnostics[0]["relative_residual"] < 1.0
     assert diagnostics[0]["damping"] > 0.0
+    assert set(functional_natural) == set(parameters)
+    assert all(
+        torch.isfinite(value).all()
+        for value in functional_natural.values()
+    )
+    assert functional_diagnostics[0]["metric"] == "activation_output_mse"
+    assert functional_diagnostics[0]["activation_samples"] == 11.0
+    assert functional_diagnostics[0]["relative_residual"] < 1.0
     keys = sorted(parameters)
     cosine = vector_alignment(
         flatten_gradients(polar, keys),

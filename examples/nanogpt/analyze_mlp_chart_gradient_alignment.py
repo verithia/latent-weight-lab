@@ -432,13 +432,16 @@ def natural_chart_directions(
     cg_steps: int,
     trace_samples: int,
     trace_seed: int,
+    metric_activations: dict[int, torch.Tensor] | None = None,
 ) -> tuple[dict[str, torch.Tensor], dict[int, dict[str, float]]]:
     """Solve a matrix-free damped inverse-pullback system per layer.
 
     For effective weight Jacobian ``J`` and dense objective covector ``u``,
     this returns ``delta = (J^T J + damping I)^-1 J^T u``.  Damping is a
     dimensionless fraction of a deterministic Hutchinson estimate of the
-    mean eigenvalue of ``J^T J``.  No update is applied.
+    mean eigenvalue of ``J^T J``.  When ``metric_activations`` is supplied,
+    the system instead uses the functional metric induced by the actual MLP
+    outputs ``A @ delta_W^T``.  No update is applied.
     """
 
     if not math.isfinite(damping_ratio) or damping_ratio <= 0.0:
@@ -485,6 +488,27 @@ def natural_chart_directions(
             dtype=torch.float32,
         )
         rhs = tuple(value.detach() for value in pullback(dense_gradient))
+        activations = None
+        if metric_activations is not None:
+            if layer not in metric_activations:
+                raise ValueError(
+                    f"missing metric activations for layer {layer}"
+                )
+            activations = metric_activations[layer].detach().to(
+                device=primals[0].device,
+                dtype=torch.float32,
+            )
+            if activations.ndim != 2:
+                raise ValueError(
+                    "metric activations must be rank two, got "
+                    f"{tuple(activations.shape)} for layer {layer}"
+                )
+            if activations.shape[1] != base_weights[layer].shape[1]:
+                raise ValueError(
+                    "metric activation width does not match c_proj input "
+                    f"for layer {layer}: {activations.shape[1]} vs "
+                    f"{base_weights[layer].shape[1]}"
+                )
 
         generator = torch.Generator(device=primals[0].device)
         generator.manual_seed(int(trace_seed) + int(layer) * 1009)
@@ -505,8 +529,14 @@ def natural_chart_directions(
                 )
                 for value in primals
             )
-            _, image = jvp(materialize, primals, probe)
-            trace_estimates.append(image.float().square().sum())
+            _, weight_image = jvp(materialize, primals, probe)
+            if activations is None:
+                trace_image = weight_image
+            else:
+                trace_image = F.linear(
+                    activations, weight_image
+                ) / math.sqrt(float(activations.shape[0]))
+            trace_estimates.append(trace_image.float().square().sum())
         mean_eigenvalue = torch.stack(trace_estimates).mean() / float(
             coordinate_count
         )
@@ -518,8 +548,15 @@ def natural_chart_directions(
         def system(
             direction: tuple[torch.Tensor, ...],
         ) -> tuple[torch.Tensor, ...]:
-            _, image = jvp(materialize, primals, direction)
-            pulled = pullback(image)
+            _, weight_image = jvp(materialize, primals, direction)
+            if activations is None:
+                metric_image = weight_image
+            else:
+                output_image = F.linear(activations, weight_image)
+                metric_image = (
+                    output_image.transpose(0, 1) @ activations
+                ) / float(activations.shape[0])
+            pulled = pullback(metric_image)
             return tuple(
                 value.detach() + damping * direction_value
                 for value, direction_value in zip(
@@ -581,6 +618,16 @@ def natural_chart_directions(
                 )
             ),
             "cg_steps": float(completed_steps),
+            "metric": (
+                "activation_output_mse"
+                if activations is not None
+                else "effective_weight_frobenius"
+            ),
+            "activation_samples": (
+                float(activations.shape[0])
+                if activations is not None
+                else 0.0
+            ),
         }
     return output, diagnostics
 
@@ -844,6 +891,12 @@ def main() -> None:
         teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
         natural_ce_by_split: dict[str, dict[str, torch.Tensor]] = {}
         natural_teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
+        functional_natural_ce_by_split: dict[
+            str, dict[str, torch.Tensor]
+        ] = {}
+        functional_natural_teacher_by_split: dict[
+            str, dict[str, torch.Tensor]
+        ] = {}
         init_key = f"{initialization:.8g}"
         objective[init_key] = {}
         for split in (fit, holdout):
@@ -893,11 +946,51 @@ def main() -> None:
                     trace_seed=args.natural_trace_seed,
                 )
             )
+            metric_activations = {
+                layer: F.gelu(split.pre_gelu[layer])
+                for layer in layers
+            }
+            (
+                functional_natural_ce,
+                functional_natural_ce_diagnostics,
+            ) = natural_chart_directions(
+                model,
+                parameters,
+                layers,
+                ce_dense_gradient,
+                ce_base_weights,
+                damping_ratio=args.natural_damping_ratio,
+                cg_steps=args.natural_cg_steps,
+                trace_samples=args.natural_trace_samples,
+                trace_seed=args.natural_trace_seed,
+                metric_activations=metric_activations,
+            )
+            (
+                functional_natural_teacher,
+                functional_natural_teacher_diagnostics,
+            ) = natural_chart_directions(
+                model,
+                parameters,
+                layers,
+                teacher_dense_gradient,
+                split.cproj_weight,
+                damping_ratio=args.natural_damping_ratio,
+                cg_steps=args.natural_cg_steps,
+                trace_samples=args.natural_trace_samples,
+                trace_seed=args.natural_trace_seed,
+                metric_activations=metric_activations,
+            )
             ce_by_split[split.name] = ce_gradient
             polar_by_split[split.name] = polar_gradient
             teacher_by_split[split.name] = teacher_gradient
             natural_ce_by_split[split.name] = natural_ce
             natural_teacher_by_split[split.name] = natural_teacher
+            functional_natural_ce_by_split[split.name] = (
+                functional_natural_ce
+            )
+            functional_natural_teacher_by_split[split.name] = (
+                functional_natural_teacher
+            )
             objective[init_key][split.name] = {
                 "task_ce": ce_loss,
                 "teacher_mse_by_layer": {
@@ -909,6 +1002,16 @@ def main() -> None:
                 },
                 "natural_teacher_diagnostics": {
                     str(layer): natural_teacher_diagnostics[layer]
+                    for layer in layers
+                },
+                "functional_natural_ce_diagnostics": {
+                    str(layer): functional_natural_ce_diagnostics[layer]
+                    for layer in layers
+                },
+                "functional_natural_teacher_diagnostics": {
+                    str(layer): (
+                        functional_natural_teacher_diagnostics[layer]
+                    )
                     for layer in layers
                 },
             }
@@ -938,12 +1041,25 @@ def main() -> None:
                 initialization=initialization,
             )
             rows.extend(natural_rows)
+            functional_natural_rows = alignment_rows(
+                functional_natural_ce,
+                functional_natural_teacher,
+                comparison=(
+                    "task_ce_functional_natural_vs_"
+                    "teacher_mse_functional_natural"
+                ),
+                split=split.name,
+                initialization=initialization,
+            )
+            rows.extend(functional_natural_rows)
             print(
                 f"initialization={initialization} split={split.name} "
                 f"task_ce={ce_loss:.6f} global_cosine="
                 f"{split_rows[0]['cosine']:.6f} polar_vjp_cosine="
                 f"{polar_rows[0]['cosine']:.6f} natural_cosine="
-                f"{natural_rows[0]['cosine']:.6f}",
+                f"{natural_rows[0]['cosine']:.6f} "
+                "functional_natural_cosine="
+                f"{functional_natural_rows[0]['cosine']:.6f}",
                 flush=True,
             )
         rows.extend(
@@ -984,6 +1100,26 @@ def main() -> None:
         )
         rows.extend(
             alignment_rows(
+                functional_natural_ce_by_split["fit"],
+                functional_natural_ce_by_split["holdout"],
+                comparison="task_ce_functional_natural_fit_vs_holdout",
+                split="cross_split",
+                initialization=initialization,
+            )
+        )
+        rows.extend(
+            alignment_rows(
+                functional_natural_teacher_by_split["fit"],
+                functional_natural_teacher_by_split["holdout"],
+                comparison=(
+                    "teacher_mse_functional_natural_fit_vs_holdout"
+                ),
+                split="cross_split",
+                initialization=initialization,
+            )
+        )
+        rows.extend(
+            alignment_rows(
                 teacher_by_split["fit"],
                 teacher_by_split["holdout"],
                 comparison="teacher_mse_fit_vs_holdout",
@@ -1005,7 +1141,7 @@ def main() -> None:
         if row["scope"] == "global"
     ]
     metadata = {
-        "schema_version": "mlp_chart_gradient_alignment_v2",
+        "schema_version": "mlp_chart_gradient_alignment_v3",
         "scientific_scope": (
             "deterministic no-update gradient diagnostic; not a training result"
         ),
@@ -1043,6 +1179,17 @@ def main() -> None:
         },
         "natural_inverse_pullback": {
             "metric": "effective_weight_frobenius_JtJ",
+            "damping_ratio_to_estimated_mean_eigenvalue": (
+                args.natural_damping_ratio
+            ),
+            "cg_steps": args.natural_cg_steps,
+            "trace_samples": args.natural_trace_samples,
+            "trace_seed": args.natural_trace_seed,
+            "no_parameter_update": True,
+        },
+        "functional_natural_inverse_pullback": {
+            "metric": "mean_post_gelu_output_mse_JtJ",
+            "activations": "source_model_fixed_validation_post_gelu",
             "damping_ratio_to_estimated_mean_eigenvalue": (
                 args.natural_damping_ratio
             ),
