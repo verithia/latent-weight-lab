@@ -1331,6 +1331,117 @@ class MLP(nn.Module):
                 "c_proj residual add-on"
             )
         self.last_postgelu: torch.Tensor | None = None
+        self._cached_charted_cproj_weight: torch.Tensor | None = None
+
+    def _materialize_charted_cproj_weight(
+        self, weight: torch.Tensor
+    ) -> torch.Tensor:
+        transposed = weight.transpose(0, 1)
+        if self.residual_output_log_gain is not None:
+            gain = (
+                self.residual_output_gain_scale
+                * self.residual_output_log_gain
+            ).exp().to(device=weight.device, dtype=weight.dtype)
+            transposed = transposed * gain
+        if self.output_block_rotation is not None:
+            rotation = self.output_block_rotation.matrix(transposed)
+            transposed = transposed @ rotation
+        return transposed.transpose(0, 1).contiguous()
+
+    def prepare_charted_cproj_cache(self) -> None:
+        """Materialize the complete generated c_proj chart once per step.
+
+        BlockFHT's normal cache makes the generated base weight a leaf and
+        projects its accumulated gradient back to the latent after all
+        microbatches.  The output chart needs the same treatment; otherwise
+        its rotation and weight-folding GEMM are repeated for every
+        accumulation microbatch.
+        """
+        if (
+            self.output_block_rotation is None
+            and self.residual_output_log_gain is None
+        ):
+            return
+        if self._cached_charted_cproj_weight is not None:
+            return
+        base_weight = getattr(self.c_proj, "_cached_weight", None)
+        # Biases also need output-chart VJPs.  Current scientific GPT configs
+        # are bias-free; retain the live path for a biased c_proj.
+        if base_weight is None or getattr(self.c_proj, "bias", None) is not None:
+            return
+        with torch.no_grad():
+            charted_weight = self._materialize_charted_cproj_weight(
+                base_weight
+            )
+        self._cached_charted_cproj_weight = (
+            charted_weight.detach().requires_grad_(True)
+        )
+
+    def flush_charted_cproj_cache(self) -> None:
+        """Project a cached charted-weight gradient to base and chart params."""
+        cached = self._cached_charted_cproj_weight
+        if cached is None:
+            return
+        self._cached_charted_cproj_weight = None
+        if cached.grad is None:
+            return
+        base_weight = getattr(self.c_proj, "_cached_weight", None)
+        if base_weight is None:
+            raise RuntimeError(
+                "charted c_proj cache cannot flush without its base cache"
+            )
+        chart_parameters: list[torch.Tensor] = []
+        if self.output_block_rotation is not None:
+            chart_parameters.extend(
+                parameter
+                for parameter in self.output_block_rotation.parameters()
+                if parameter.requires_grad
+            )
+        if (
+            self.residual_output_log_gain is not None
+            and self.residual_output_log_gain.requires_grad
+        ):
+            chart_parameters.append(self.residual_output_log_gain)
+        with torch.enable_grad():
+            base_proxy = base_weight.detach().requires_grad_(True)
+            charted_proxy = self._materialize_charted_cproj_weight(base_proxy)
+            gradients = torch.autograd.grad(
+                charted_proxy,
+                [base_proxy, *chart_parameters],
+                grad_outputs=cached.grad.to(dtype=charted_proxy.dtype),
+                allow_unused=True,
+            )
+        base_gradient = gradients[0]
+        if base_weight.grad is None:
+            base_weight.grad = base_gradient.to(dtype=base_weight.dtype)
+        else:
+            base_weight.grad.add_(
+                base_gradient.to(dtype=base_weight.dtype)
+            )
+        for parameter, gradient in zip(chart_parameters, gradients[1:]):
+            if gradient is None:
+                continue
+            gradient = gradient.to(dtype=parameter.dtype)
+            if parameter.grad is None:
+                parameter.grad = gradient
+            else:
+                parameter.grad.add_(gradient)
+
+    def suspend_charted_cproj_cache(self) -> torch.Tensor | None:
+        cached = self._cached_charted_cproj_weight
+        self._cached_charted_cproj_weight = None
+        return cached
+
+    def restore_charted_cproj_cache(
+        self, cached: torch.Tensor | None
+    ) -> None:
+        if cached is None:
+            return
+        if self._cached_charted_cproj_weight is not None:
+            raise RuntimeError(
+                "cannot restore a charted c_proj cache over a live cache"
+            )
+        self._cached_charted_cproj_weight = cached
 
     def _charted_cproj(self, activated: torch.Tensor) -> torch.Tensor | None:
         if (
@@ -1338,26 +1449,27 @@ class MLP(nn.Module):
             and self.residual_output_log_gain is None
         ):
             return None
+        if self._cached_charted_cproj_weight is not None:
+            return F.linear(
+                activated,
+                self._cached_charted_cproj_weight,
+                None,
+            )
         weight = getattr(self.c_proj, "_cached_weight", None)
         if weight is None:
             weight = self.c_proj.weight
         bias = getattr(self.c_proj, "bias", None)
-        transposed = weight.transpose(0, 1)
-        gain = None
-        if self.residual_output_log_gain is not None:
-            gain = (
-                self.residual_output_gain_scale
-                * self.residual_output_log_gain
-            ).exp().to(device=weight.device, dtype=weight.dtype)
-            transposed = transposed * gain
-            if bias is not None:
+        charted_weight = self._materialize_charted_cproj_weight(weight)
+        if bias is not None:
+            if self.residual_output_log_gain is not None:
+                gain = (
+                    self.residual_output_gain_scale
+                    * self.residual_output_log_gain
+                ).exp().to(device=bias.device, dtype=bias.dtype)
                 bias = bias * gain
-        if self.output_block_rotation is not None:
-            rotation = self.output_block_rotation.matrix(transposed)
-            transposed = transposed @ rotation
-            if bias is not None:
-                bias = bias @ rotation
-        return F.linear(activated, transposed.transpose(0, 1), bias)
+            if self.output_block_rotation is not None:
+                bias = bias @ self.output_block_rotation.matrix(bias)
+        return F.linear(activated, charted_weight, bias)
 
     def _fused_cached_cproj_lowrank(self, activated: torch.Tensor) -> torch.Tensor | None:
         if self.cproj_lowrank_left is None or self.cproj_lowrank_right is None:
@@ -1602,15 +1714,26 @@ class GPT(nn.Module):
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
         prepare_block_fht_weight_cache(self, dtype=dtype)
+        for block in self.transformer.h:
+            block.mlp.prepare_charted_cproj_cache()
 
     def flush_block_fht_cache(self) -> None:
+        for block in self.transformer.h:
+            block.mlp.flush_charted_cproj_cache()
         flush_block_fht_weight_cache(self)
 
     def suspend_block_fht_cache(self):
-        return suspend_block_fht_weight_cache(self)
+        charted = [
+            (block.mlp, block.mlp.suspend_charted_cproj_cache())
+            for block in self.transformer.h
+        ]
+        return suspend_block_fht_weight_cache(self), charted
 
     def restore_block_fht_cache(self, suspended) -> None:
-        restore_block_fht_weight_cache(suspended)
+        block_fht, charted = suspended
+        restore_block_fht_weight_cache(block_fht)
+        for mlp, cached in charted:
+            mlp.restore_charted_cproj_cache(cached)
 
 
 def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> None:

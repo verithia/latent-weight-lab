@@ -780,6 +780,74 @@ def test_mlp_folds_block_rotation_and_output_gain_into_cproj_weight() -> None:
     assert mlp.residual_output_log_gain.grad is not None
 
 
+def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
+    torch.manual_seed(307)
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=1,
+        n_embd=8,
+        bias=False,
+        block_fht=True,
+        block_fht_targets=("mlp.c_proj",),
+        block_fht_latent_ratio=0.25,
+        block_fht_mlp_output_block_rotation_stages=2,
+        block_fht_mlp_output_block_rotation_size=4,
+        block_fht_mlp_output_block_rotation_basis_size=8,
+        block_fht_mlp_output_block_rotation_coordinate_scale=3.0,
+        block_fht_mlp_residual_output_gain=True,
+        block_fht_mlp_residual_output_gain_scale=2.0,
+        block_fht_mlp_residual_output_log_gain_init=0.1,
+    )
+    live = GPT(config)
+    cached = GPT(config)
+    cached.load_state_dict(live.state_dict())
+    with torch.no_grad():
+        for model in (live, cached):
+            mlp = model.transformer.h[0].mlp
+            mlp.output_block_rotation.coordinates.normal_(std=0.03)
+            mlp.residual_output_log_gain.add_(
+                torch.linspace(-0.02, 0.02, config.n_embd)
+            )
+    cached.load_state_dict(live.state_dict())
+    inputs = torch.randint(0, config.vocab_size, (2, config.block_size))
+    targets = torch.randint(0, config.vocab_size, inputs.shape)
+
+    live_loss = live(inputs, targets)[1]
+    assert live_loss is not None
+    live_loss.backward()
+
+    cached.prepare_block_fht_cache()
+    cached_mlp = cached.transformer.h[0].mlp
+    assert cached_mlp._cached_charted_cproj_weight is not None
+    cached_loss = cached(inputs, targets)[1]
+    assert cached_loss is not None
+    cached_loss.backward()
+    cached.flush_block_fht_cache()
+    assert cached_mlp._cached_charted_cproj_weight is None
+
+    torch.testing.assert_close(cached_loss, live_loss)
+    torch.testing.assert_close(
+        cached_mlp.c_proj.generator.latent.grad,
+        live.transformer.h[0].mlp.c_proj.generator.latent.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+    torch.testing.assert_close(
+        cached_mlp.output_block_rotation.coordinates.grad,
+        live.transformer.h[0].mlp.output_block_rotation.coordinates.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+    torch.testing.assert_close(
+        cached_mlp.residual_output_log_gain.grad,
+        live.transformer.h[0].mlp.residual_output_log_gain.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+
+
 def test_mlp_residual_output_gain_init_is_in_effective_log_coordinates() -> None:
     mlp = MLP(
         GPTConfig(
