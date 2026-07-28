@@ -208,10 +208,10 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "post_direction_rescondgate_0p5tpp",
-  "implementation_commit": "aa3c17a874853956e8fe4328937fff5158851f85",
+  "implementation_commit": "333e0f1f9f05c3c097f0c645bac4b271256e453b",
   "implementation_source_hashes": {
-    "examples/nanogpt/model.py": "9c3a74e54bd15d6f33e633728c9277d17ea45d8eab848b4865b16ceffac44ef9",
-    "examples/nanogpt/train.py": "017d52317e91af7672002eb40142d5573e4805ba38083a5d2ce68f6af3dbc799",
+    "examples/nanogpt/model.py": "dd18fe4a2cc99878a6e31c9cfcc87497a98dac2ae3088a73b3a16aa5df6c1fe8",
+    "examples/nanogpt/train.py": "71b5d8452cd0c8d343752681676e31acc28607c335d387bdd6474607e6729c35",
     "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
   },
   "inherit_dense_fallback_scale_from": "y400_mai_v2_124m_muon_20tpp_selected",
