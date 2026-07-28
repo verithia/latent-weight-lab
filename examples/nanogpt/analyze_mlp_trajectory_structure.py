@@ -27,6 +27,7 @@ from examples.nanogpt.analyze_parameter_trajectory import (
     load_snapshots,
     parse_int_list,
     spectral_metrics,
+    summarize_parameter,
     write_csv,
 )
 
@@ -65,6 +66,77 @@ def subspace_overlap(left: torch.Tensor, right: torch.Tensor) -> float:
     if rank == 0:
         return 0.0
     return float((left.T @ right).square().sum() / rank)
+
+
+def polynomial_fit_r2(x: torch.Tensor, y: torch.Tensor, degree: int) -> float:
+    design = torch.stack([x.double().pow(power) for power in range(degree + 1)], dim=1)
+    target = y.double()
+    coefficients = torch.linalg.lstsq(design, target.unsqueeze(1)).solution
+    prediction = (design @ coefficients).squeeze(1)
+    centered = target - target.mean()
+    denominator = centered.square().sum()
+    if float(denominator) <= 0.0:
+        return 1.0
+    return float(1.0 - (target - prediction).square().sum() / denominator)
+
+
+def local_window_rows(
+    *,
+    steps: list[int],
+    values: dict[str, list[torch.Tensor]],
+    boundaries: list[int],
+    device: str,
+) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    for start, end in zip(boundaries[:-1], boundaries[1:], strict=True):
+        indices = [index for index, step in enumerate(steps) if start <= step <= end]
+        if len(indices) < 3:
+            raise ValueError(f"local trajectory window {start}:{end} has fewer than three snapshots")
+        window_steps = [steps[index] for index in indices]
+        for name, tensors in sorted(values.items()):
+            summary, _, _ = summarize_parameter(
+                name=name,
+                steps=window_steps,
+                tensors=[tensors[index] for index in indices],
+                device=device,
+            )
+            result.append(
+                {
+                    "window_start": start,
+                    "window_end": end,
+                    **summary,
+                }
+            )
+    return result
+
+
+def geometric_curve_rows(trajectory_analysis: Path) -> list[dict[str, Any]]:
+    rows = list(csv.DictReader((trajectory_analysis / "layerwise_pca_coordinates.csv").open()))
+    grouped: dict[tuple[str, int], list[dict[str, str]]] = {}
+    for row in rows:
+        grouped.setdefault((row["target"], int(row["layer"])), []).append(row)
+    result: list[dict[str, Any]] = []
+    for (target, layer), selected in sorted(grouped.items()):
+        selected.sort(key=lambda row: int(row["step"]))
+        pc1 = torch.tensor([float(row["pc1"]) for row in selected], dtype=torch.float64)
+        for component in (2, 3):
+            values = torch.tensor(
+                [float(row[f"pc{component}"]) for row in selected],
+                dtype=torch.float64,
+            )
+            for degree in (1, 2, 3):
+                result.append(
+                    {
+                        "target": target,
+                        "layer": layer,
+                        "dependent_component": component,
+                        "independent_component": 1,
+                        "polynomial_degree": degree,
+                        "r2": polynomial_fit_r2(pc1, values, degree),
+                        "interpretation": "geometric curve fit in temporal-PCA coordinates",
+                    }
+                )
+    return result
 
 
 def paired_metrics(
@@ -317,6 +389,7 @@ def main() -> None:
     parser.add_argument("--spectral-steps", default="60,120,180,238")
     parser.add_argument("--components", type=int, default=5)
     parser.add_argument("--subspace-ranks", default="16,64")
+    parser.add_argument("--window-boundaries", default="0,60,120,180,238")
     parser.add_argument("--device", default="cuda")
     parser.add_argument("--plots", action="store_true")
     args = parser.parse_args()
@@ -333,6 +406,14 @@ def main() -> None:
     ranks = parse_int_list(args.subspace_ranks)
     if not ranks or any(rank <= 0 for rank in ranks):
         raise ValueError("--subspace-ranks must be positive")
+    window_boundaries = parse_int_list(args.window_boundaries)
+    if (
+        len(window_boundaries) < 2
+        or window_boundaries != sorted(set(window_boundaries))
+        or window_boundaries[0] < steps[0]
+        or window_boundaries[-1] > steps[-1]
+    ):
+        raise ValueError("--window-boundaries must be ordered unique steps within the trajectory")
     args.output.mkdir(parents=True, exist_ok=True)
 
     displacement_rows: list[dict[str, Any]] = []
@@ -368,10 +449,19 @@ def main() -> None:
 
     cross_rows = cross_layer_alignment_rows(values=values, device=args.device)
     pair_rows = paired_layer_rows(values=values, device=args.device, ranks=ranks)
+    window_rows = local_window_rows(
+        steps=steps,
+        values=values,
+        boundaries=window_boundaries,
+        device=args.device,
+    )
+    curve_rows = geometric_curve_rows(args.trajectory_analysis)
     write_csv(args.output / "selected_step_displacement_spectra.csv", displacement_rows)
     write_csv(args.output / "temporal_pc_spatial_spectra.csv", pc_direction_rows)
     write_csv(args.output / "cross_layer_terminal_delta_alignment.csv", cross_rows)
     write_csv(args.output / "paired_cfc_cproj_terminal_delta_geometry.csv", pair_rows)
+    write_csv(args.output / "local_window_trajectory_summary.csv", window_rows)
+    write_csv(args.output / "geometric_pc_curve_fits.csv", curve_rows)
     plot_files = write_plots(args.trajectory_analysis, args.output) if args.plots else []
 
     script = Path(__file__).resolve()
@@ -383,6 +473,7 @@ def main() -> None:
         "steps": steps,
         "spectral_steps": spectral_steps,
         "subspace_ranks": ranks,
+        "window_boundaries": window_boundaries,
         "analysis_execution": {
             "git_commit": git_commit(repo),
             "entrypoint": str(script),
@@ -421,6 +512,8 @@ def main() -> None:
                 "pc_direction_rows": len(pc_direction_rows),
                 "cross_layer_rows": len(cross_rows),
                 "paired_layer_rows": len(pair_rows),
+                "local_window_rows": len(window_rows),
+                "geometric_curve_rows": len(curve_rows),
                 "plots": plot_files,
                 "output": str(args.output),
             },

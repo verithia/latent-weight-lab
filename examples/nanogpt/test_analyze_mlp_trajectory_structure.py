@@ -7,6 +7,7 @@ import torch
 from examples.nanogpt.analyze_mlp_trajectory_structure import (
     paired_metrics,
     pearson,
+    polynomial_fit_r2,
     subspace_overlap,
 )
 
@@ -29,6 +30,12 @@ class AnalyzeMLPTrajectoryStructureTest(unittest.TestCase):
         self.assertAlmostEqual(metrics["residual_channel_delta_norm_pearson"], 1.0, places=6)
         self.assertAlmostEqual(metrics["residual_subspace_overlap_rank4"], 1.0, places=5)
         self.assertAlmostEqual(metrics["expansion_subspace_overlap_rank4"], 1.0, places=5)
+
+    def test_polynomial_fit_distinguishes_line_and_quadratic(self) -> None:
+        x = torch.linspace(-2, 2, 21)
+        quadratic = 0.5 + 2 * x - 3 * x.square()
+        self.assertLess(polynomial_fit_r2(x, quadratic, 1), 0.9)
+        self.assertAlmostEqual(polynomial_fit_r2(x, quadratic, 2), 1.0, places=6)
 
 
 if __name__ == "__main__":
