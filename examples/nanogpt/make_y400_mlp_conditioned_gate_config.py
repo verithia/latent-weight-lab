@@ -61,6 +61,7 @@ def main() -> None:
             ),
             "block_fht_mlp_residual_conditioned_output_gate": True,
             "block_fht_mlp_residual_conditioned_output_gate_scale": 1.0,
+            "block_fht_mlp_residual_conditioned_output_gate_layers": [0],
             "implementation_commit": git_head(),
             "implementation_source_hashes": {
                 path: sha256(ROOT / path) for path in SOURCE_PATHS
@@ -93,7 +94,21 @@ def main() -> None:
                     "(slope * layernorm_residual + bias)"
                 ),
                 "coordinates_per_layer": 1536,
-                "coordinates_total": 18432,
+                "coordinates_total": 1536,
+                "selected_layers": [0],
+                "selection_rule": (
+                    "strongest task-CE versus dense-teacher direction "
+                    "cosine among diagnosed layers, positive on fit and "
+                    "holdout"
+                ),
+                "fit_teacher_direction_cosine": 0.09833482652902603,
+                "holdout_teacher_direction_cosine": 0.10798729956150055,
+                "all_diagnosed_layers_fit_teacher_direction_cosine": (
+                    0.04250643029808998
+                ),
+                "all_diagnosed_layers_holdout_teacher_direction_cosine": (
+                    0.037691108882427216
+                ),
                 "identity_initialization": True,
                 "learned_dense_basis": False,
                 "lora_adapter": False,
@@ -104,8 +119,6 @@ def main() -> None:
                 "alignment_csv_sha256": (
                     "e5035d857b7adae7448f82cefe7916ceaf338dc59d25680fd4905916250480ee"
                 ),
-                "fit_teacher_direction_cosine": 0.04250643029808998,
-                "holdout_teacher_direction_cosine": 0.037691108882427216,
                 "teacher_fit_holdout_cosine": 0.9799924492835999,
             },
             "screen_only_resolution": (

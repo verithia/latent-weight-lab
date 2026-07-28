@@ -1067,6 +1067,32 @@ def test_mlp_residual_conditioned_output_gate_is_identity_and_dynamic() -> None:
     assert mlp.residual_conditioned_output_bias.grad.abs().sum() > 0
 
 
+def test_mlp_residual_conditioned_output_gate_selects_layers() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=3,
+            n_head=1,
+            n_embd=8,
+            block_fht_mlp_residual_conditioned_output_gate=True,
+            block_fht_mlp_residual_conditioned_output_gate_layers=(0, 2),
+        )
+    )
+    assert (
+        model.transformer.h[0].mlp.residual_conditioned_output_slope
+        is not None
+    )
+    assert (
+        model.transformer.h[1].mlp.residual_conditioned_output_slope
+        is None
+    )
+    assert (
+        model.transformer.h[2].mlp.residual_conditioned_output_slope
+        is not None
+    )
+
+
 def test_freeze_keeps_block_output_chart_trainable() -> None:
     mlp = MLP(
         GPTConfig(

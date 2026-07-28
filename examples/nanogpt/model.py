@@ -136,6 +136,7 @@ class GPTConfig:
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
     block_fht_mlp_residual_conditioned_output_gate: bool = False
     block_fht_mlp_residual_conditioned_output_gate_scale: float = 1.0
+    block_fht_mlp_residual_conditioned_output_gate_layers: tuple[int, ...] = ()
     tie_word_embeddings: bool = True
 
 
@@ -1512,14 +1513,33 @@ class MLP(nn.Module):
                 "block_fht_mlp_residual_conditioned_output_gate_scale "
                 "must be positive and finite"
             )
+        conditioned_gate_layers = tuple(
+            int(layer)
+            for layer in config.block_fht_mlp_residual_conditioned_output_gate_layers
+        )
+        if any(
+            layer < 0 or layer >= config.n_layer
+            for layer in conditioned_gate_layers
+        ):
+            raise ValueError(
+                "block_fht_mlp_residual_conditioned_output_gate_layers "
+                "contains an invalid layer"
+            )
+        conditioned_gate_enabled = (
+            config.block_fht_mlp_residual_conditioned_output_gate
+            and (
+                not conditioned_gate_layers
+                or layer_id in conditioned_gate_layers
+            )
+        )
         self.residual_conditioned_output_slope = (
             nn.Parameter(torch.zeros(config.n_embd))
-            if config.block_fht_mlp_residual_conditioned_output_gate
+            if conditioned_gate_enabled
             else None
         )
         self.residual_conditioned_output_bias = (
             nn.Parameter(torch.zeros(config.n_embd))
-            if config.block_fht_mlp_residual_conditioned_output_gate
+            if conditioned_gate_enabled
             else None
         )
         # Optional non-persistent teacher state is installed by the training
