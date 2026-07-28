@@ -679,6 +679,33 @@ def block_fht_latents(model: GPT) -> list[torch.Tensor]:
     return [module.generator.latent for module in model.modules() if isinstance(module, BlockFHTLinear)]
 
 
+def freeze_mlp_hidden_chart_gradients(
+    model: GPT,
+    *,
+    iter_num: int,
+    stop_iter: int,
+) -> int:
+    """Hold the learned local hidden-side chart fixed after ``stop_iter``.
+
+    The parameters remain in the optimizer so exact-resume optimizer identity
+    is unchanged. A ``None`` gradient makes AdamW skip both the parameter
+    update and decoupled weight decay, preserving the chart reached
+    immediately before the stop iteration.
+    """
+    if stop_iter < 0 or iter_num < stop_iter:
+        return 0
+    frozen = 0
+    for name, parameter in model.named_parameters():
+        if (
+            "hidden_block_rotation." in name
+            or name == "hidden_log_gain"
+            or name.endswith(".hidden_log_gain")
+        ):
+            parameter.grad = None
+            frozen += 1
+    return frozen
+
+
 def latent_rms_hinge_loss(model: GPT, target: float) -> torch.Tensor:
     losses = []
     for latent in block_fht_latents(model):
@@ -868,6 +895,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-mlp-hidden-gain", action="store_true")
     parser.add_argument("--block-fht-mlp-hidden-gain-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-hidden-log-gain-init", type=float, default=0.0)
+    parser.add_argument(
+        "--block-fht-mlp-hidden-chart-stop-iter",
+        type=int,
+        default=-1,
+        help=(
+            "freeze hidden-side c_proj rotation/gain coordinates before the "
+            "optimizer update at this iteration; -1 leaves them active"
+        ),
+    )
     parser.add_argument("--block-fht-mlp-output-rotation-stages", type=int, default=0)
     parser.add_argument("--block-fht-mlp-output-rotation-seed", type=int, default=271828)
     parser.add_argument("--block-fht-mlp-output-block-rotation-stages", type=int, default=0)
@@ -914,6 +950,10 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--perf-warmup-iters must be >= 0")
     if namespace.checkpoint_wall_clock_seconds <= 0:
         raise ValueError("--checkpoint-wall-clock-seconds must be > 0")
+    if namespace.block_fht_mlp_hidden_chart_stop_iter < -1:
+        raise ValueError(
+            "--block-fht-mlp-hidden-chart-stop-iter must be >= -1"
+        )
     if namespace.mapping_stability_microbatches < 0:
         raise ValueError("--mapping-stability-microbatches must be >= 0")
     if namespace.mapping_stability_microbatches > namespace.gradient_accumulation_steps:
@@ -1366,6 +1406,20 @@ def main() -> None:
             raw_model.flush_block_fht_cache()
             if args.perf_profile:
                 flush_cache_ms += (perf_now() - section_start) * 1000.0
+        frozen_hidden_chart_parameters = freeze_mlp_hidden_chart_gradients(
+            raw_model,
+            iter_num=iter_num,
+            stop_iter=args.block_fht_mlp_hidden_chart_stop_iter,
+        )
+        if (
+            frozen_hidden_chart_parameters
+            and iter_num == args.block_fht_mlp_hidden_chart_stop_iter
+        ):
+            print(
+                "froze MLP hidden chart at "
+                f"iter={iter_num} parameters={frozen_hidden_chart_parameters}",
+                flush=True,
+            )
         section_start = perf_now() if args.perf_profile else 0.0
         if args.grad_clip != 0:
             scaler.unscale_(optimizer)
