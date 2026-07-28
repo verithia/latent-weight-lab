@@ -134,6 +134,8 @@ class GPTConfig:
     block_fht_mlp_residual_output_gain: bool = False
     block_fht_mlp_residual_output_gain_scale: float = 1.0
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
+    block_fht_mlp_residual_conditioned_output_gate: bool = False
+    block_fht_mlp_residual_conditioned_output_gate_scale: float = 1.0
     tie_word_embeddings: bool = True
 
 
@@ -1499,6 +1501,27 @@ class MLP(nn.Module):
                 "residual output gain cannot be combined with a separate "
                 "c_proj residual add-on"
             )
+        self.residual_conditioned_output_gate_scale = float(
+            config.block_fht_mlp_residual_conditioned_output_gate_scale
+        )
+        if (
+            not math.isfinite(self.residual_conditioned_output_gate_scale)
+            or self.residual_conditioned_output_gate_scale <= 0.0
+        ):
+            raise ValueError(
+                "block_fht_mlp_residual_conditioned_output_gate_scale "
+                "must be positive and finite"
+            )
+        self.residual_conditioned_output_slope = (
+            nn.Parameter(torch.zeros(config.n_embd))
+            if config.block_fht_mlp_residual_conditioned_output_gate
+            else None
+        )
+        self.residual_conditioned_output_bias = (
+            nn.Parameter(torch.zeros(config.n_embd))
+            if config.block_fht_mlp_residual_conditioned_output_gate
+            else None
+        )
         # Optional non-persistent teacher state is installed by the training
         # entry point. It is neither trainable nor part of a checkpoint.
         self.register_buffer(
@@ -1821,6 +1844,14 @@ class MLP(nn.Module):
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
         if self.output_rotation is not None:
             out = self.output_rotation(out)
+        if self.residual_conditioned_output_slope is not None:
+            assert self.residual_conditioned_output_bias is not None
+            log_gain = self.residual_conditioned_output_gate_scale * (
+                x
+                * self.residual_conditioned_output_slope.to(dtype=x.dtype)
+                + self.residual_conditioned_output_bias.to(dtype=x.dtype)
+            ).tanh()
+            out = out * log_gain.exp().to(dtype=out.dtype)
         if self.training and self.cproj_teacher_weight is not None:
             detached_activated = activated.detach()
             aligned_student_weight = self._cached_charted_cproj_weight
@@ -1972,6 +2003,8 @@ class GPT(nn.Module):
                 ".hidden_log_gain",
                 "output_block_rotation.coordinates",
                 ".residual_output_log_gain",
+                ".residual_conditioned_output_slope",
+                ".residual_conditioned_output_bias",
                 ".activation_chart_channel_log_gain",
                 ".activation_chart_common_log_gain",
                 ".activation_chart_gauge_log_gain",
@@ -2133,6 +2166,13 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
             and module.residual_output_log_gain is not None
         ):
             module.residual_output_log_gain.requires_grad_(True)
+        if isinstance(module, MLP):
+            for parameter in (
+                module.residual_conditioned_output_slope,
+                module.residual_conditioned_output_bias,
+            ):
+                if parameter is not None:
+                    parameter.requires_grad_(True)
     if train_embeddings and isinstance(model, GPT):
         model.transformer.wte.weight.requires_grad_(True)
         model.transformer.wpe.weight.requires_grad_(True)

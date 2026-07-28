@@ -1035,6 +1035,30 @@ def test_mlp_residual_output_gain_init_is_in_effective_log_coordinates() -> None
     )
 
 
+def test_mlp_residual_conditioned_output_gate_is_identity_and_dynamic() -> None:
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_residual_conditioned_output_gate=True,
+        ),
+        layer_id=0,
+    )
+    values = torch.randn(2, 3, 8)
+    with torch.no_grad():
+        expected = mlp.dropout(mlp.c_proj(mlp.gelu(mlp.c_fc(values))))
+    actual = mlp(values)
+    torch.testing.assert_close(actual, expected)
+
+    actual.sum().backward()
+    assert mlp.residual_conditioned_output_slope is not None
+    assert mlp.residual_conditioned_output_bias is not None
+    assert mlp.residual_conditioned_output_slope.grad is not None
+    assert mlp.residual_conditioned_output_bias.grad is not None
+    assert mlp.residual_conditioned_output_slope.grad.abs().sum() > 0
+    assert mlp.residual_conditioned_output_bias.grad.abs().sum() > 0
+
+
 def test_freeze_keeps_block_output_chart_trainable() -> None:
     mlp = MLP(
         GPTConfig(
@@ -1048,6 +1072,7 @@ def test_freeze_keeps_block_output_chart_trainable() -> None:
             block_fht_mlp_output_block_rotation_size=4,
             block_fht_mlp_output_block_rotation_basis_size=8,
             block_fht_mlp_residual_output_gain=True,
+            block_fht_mlp_residual_conditioned_output_gate=True,
         ),
         layer_id=0,
     )
@@ -1056,6 +1081,8 @@ def test_freeze_keeps_block_output_chart_trainable() -> None:
     assert mlp.hidden_log_gain.requires_grad
     assert mlp.output_block_rotation.coordinates.requires_grad
     assert mlp.residual_output_log_gain.requires_grad
+    assert mlp.residual_conditioned_output_slope.requires_grad
+    assert mlp.residual_conditioned_output_bias.requires_grad
     assert not mlp.c_proj.weight.requires_grad
 
 
