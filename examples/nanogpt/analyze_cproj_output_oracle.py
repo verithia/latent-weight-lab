@@ -275,8 +275,13 @@ def fit_sparse_givens_operator(
 
 
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    fieldnames = list(rows[0])
+    for row in rows[1:]:
+        for key in row:
+            if key not in fieldnames:
+                fieldnames.append(key)
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 

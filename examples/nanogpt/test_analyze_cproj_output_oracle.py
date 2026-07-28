@@ -5,6 +5,7 @@ import torch
 from examples.nanogpt.analyze_cproj_output_oracle import (
     fit_oracles,
     functional_orthogonal_procrustes,
+    write_csv,
 )
 
 
@@ -39,3 +40,21 @@ def test_oracles_generalize_exact_diagonal_rotation() -> None:
         "holdout_explained_target_energy"
     ] > 0.99999
     assert rows["full_linear"]["holdout_explained_target_energy"] > 0.99999
+
+
+def test_write_csv_accepts_family_specific_metrics(tmp_path) -> None:
+    output = tmp_path / "oracles.csv"
+    write_csv(
+        output,
+        [
+            {"family": "identity", "energy": 0.0},
+            {
+                "family": "givens4",
+                "energy": 0.2,
+                "operator_explained_energy": 0.1,
+            },
+        ],
+    )
+    text = output.read_text()
+    assert "operator_explained_energy" in text
+    assert "givens4" in text
