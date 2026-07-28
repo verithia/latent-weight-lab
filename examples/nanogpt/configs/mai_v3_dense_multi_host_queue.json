@@ -995,17 +995,17 @@
     },
     {
       "priority": 82,
-      "name": "mai_v3_124m_cproj_givens4_0p5tpp",
-      "stage": "post_manifold_cproj_givens4_0p5tpp",
+      "name": "mai_v3_124m_cproj_givens1_0p5tpp",
+      "stage": "post_manifold_cproj_givens1_0p5tpp",
       "max_iters": 238,
       "host_preference": [
         "Y400"
       ],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_givens4_muonchart154_0p5tpp",
-          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_givens4_muonchart154_0p5tpp_lr24e4.json",
-          "config_sha256": "5e7a8b8b92ba14ac49cf0e70f8b27c41c1315c808cbeebafd952ae10e7c929ea",
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_givens1_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_givens1_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "e0e645ce95e6ee41b12c9d4a1aa7f1301953f160ecdbeebc32b22973ea0c85f3",
           "repo_relative": "latent-weight-lab-mlp-geometry",
           "required_source_hashes": {
             "examples/nanogpt/train.py": "daebbbb7ed1080a172b4dae37169a9fa7458dfb8d1ae891cd9c6d1746f5ad63c",
@@ -1021,17 +1021,17 @@
     },
     {
       "priority": 83,
-      "name": "mai_v3_124m_cproj_radial4_givens4_0p5tpp",
-      "stage": "post_manifold_cproj_radial4_givens4_0p5tpp",
+      "name": "mai_v3_124m_cproj_radial4_givens1_0p5tpp",
+      "stage": "post_manifold_cproj_radial4_givens1_0p5tpp",
       "max_iters": 238,
       "host_preference": [
         "Y400"
       ],
       "variants": {
         "Y400": {
-          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_givens4_muonchart154_0p5tpp",
-          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_givens4_muonchart154_0p5tpp_lr24e4.json",
-          "config_sha256": "016c6d7a51c0c5a16ccd07b7d4e5452d3a0a8d7218c04ee70577f94d105299a7",
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_givens1_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_givens1_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "31b583c3b2373f0c08797b69593af91553b83379a1b0eef3b54465079fb424fd",
           "repo_relative": "latent-weight-lab-mlp-geometry",
           "required_source_hashes": {
             "examples/nanogpt/train.py": "daebbbb7ed1080a172b4dae37169a9fa7458dfb8d1ae891cd9c6d1746f5ad63c",

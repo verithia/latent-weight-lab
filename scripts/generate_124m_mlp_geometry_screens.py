@@ -68,23 +68,23 @@ def build() -> dict[Path, dict]:
             ),
         },
         {
-            "label": "givens4",
+            "label": "givens1",
             "shared_gain": False,
             "gain_scale": 1.0,
-            "rotation_stages": 4,
+            "rotation_stages": 1,
             "hypothesis": (
                 "repair c_proj-to-residual directional alignment with an exactly "
-                "norm-preserving identity-initialized compact output rotation"
+                "norm-preserving identity-initialized minimal output rotation"
             ),
         },
         {
-            "label": "radial4_givens4",
+            "label": "radial4_givens1",
             "shared_gain": True,
             "gain_scale": 4.0,
-            "rotation_stages": 4,
+            "rotation_stages": 1,
             "hypothesis": (
                 "combine the measured paired hidden radial tangent with the "
-                "residual-alignment output rotation"
+                "minimal residual-alignment output rotation"
             ),
         },
     )
