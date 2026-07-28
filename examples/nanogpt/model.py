@@ -163,6 +163,27 @@ MLP_C_PROJ_IN_GROUP_MIX_TARGETS = {
 }
 
 
+def _residual_conditioned_slope_add(
+    residual: torch.Tensor,
+    update: torch.Tensor,
+    condition: torch.Tensor,
+    slope: torch.Tensor,
+) -> torch.Tensor:
+    modulation = condition * slope.to(dtype=condition.dtype)
+    return torch.addcmul(
+        residual + update,
+        update,
+        modulation.to(dtype=update.dtype),
+    )
+
+
+_compiled_residual_conditioned_slope_add = (
+    torch.compile(_residual_conditioned_slope_add, fullgraph=True)
+    if hasattr(torch, "compile")
+    else _residual_conditioned_slope_add
+)
+
+
 def is_residual_projection_target(target_name: str) -> bool:
     return target_name.endswith("c_proj") or target_name.startswith("mlp.c_proj_")
 
@@ -1946,9 +1967,22 @@ class Block(nn.Module):
         x = x + self.attn(self.ln_1(x))
         mlp_input = self.ln_2(x)
         mlp_output = self.mlp(mlp_input)
-        modulation = self.mlp.residual_conditioned_output_modulation(mlp_input)
-        if modulation is None:
+        if self.mlp.residual_conditioned_output_slope is None:
             return x + mlp_output
+        if (
+            x.is_cuda
+            and self.mlp.residual_conditioned_output_bias is None
+            and self.mlp.residual_conditioned_output_gate_scale == 1.0
+        ):
+            assert self.mlp.residual_conditioned_output_slope is not None
+            return _compiled_residual_conditioned_slope_add(
+                x,
+                mlp_output,
+                mlp_input,
+                self.mlp.residual_conditioned_output_slope,
+            )
+        modulation = self.mlp.residual_conditioned_output_modulation(mlp_input)
+        assert modulation is not None
         return torch.addcmul(
             x + mlp_output,
             mlp_output,
