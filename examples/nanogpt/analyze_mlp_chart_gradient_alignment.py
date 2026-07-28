@@ -209,7 +209,6 @@ def chart_config(
     values = dict(source)
     values.update(
         {
-            "block_fht_cache_weights": True,
             "block_fht_mlp_activation_chart": False,
             "block_fht_mlp_hidden_block_rotation_stages": 2,
             "block_fht_mlp_hidden_block_rotation_size": 32,
@@ -471,7 +470,8 @@ def main() -> None:
     parser.add_argument("--layers", default="0,3,6,9,11")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--block-size", type=int, default=256)
-    parser.add_argument("--batches", type=int, default=1)
+    parser.add_argument("--batches", type=int, default=8)
+    parser.add_argument("--ce-batches", type=int, default=1)
     parser.add_argument("--sample-cap", type=int, default=2048)
     parser.add_argument("--sample-seed", type=int, default=20260716)
     parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
@@ -486,6 +486,8 @@ def main() -> None:
         raise ValueError("at least one layer is required")
     if args.sample_cap > args.batch_size * args.block_size * args.batches:
         raise ValueError("sample cap exceeds the available activation rows")
+    if args.ce_batches <= 0 or args.ce_batches > args.batches:
+        raise ValueError("ce-batches must be in [1, batches]")
 
     fit = collect_split(
         name="fit",
@@ -534,8 +536,9 @@ def main() -> None:
         init_key = f"{initialization:.8g}"
         objective[init_key] = {}
         for split in (fit, holdout):
+            ce_batches = split.batches[: args.ce_batches]
             ce_gradient, ce_loss = task_ce_gradients(
-                model, parameters, split.batches, args.device
+                model, parameters, ce_batches, args.device
             )
             teacher_gradient, teacher_losses = teacher_mse_gradients(
                 model, parameters, split, layers, args.device
@@ -548,19 +551,18 @@ def main() -> None:
                     str(layer): teacher_losses[layer] for layer in layers
                 },
             }
-            rows.extend(
-                alignment_rows(
-                    ce_gradient,
-                    teacher_gradient,
-                    comparison="task_ce_vs_teacher_mse",
-                    split=split.name,
-                    initialization=initialization,
-                )
+            split_rows = alignment_rows(
+                ce_gradient,
+                teacher_gradient,
+                comparison="task_ce_vs_teacher_mse",
+                split=split.name,
+                initialization=initialization,
             )
+            rows.extend(split_rows)
             print(
                 f"initialization={initialization} split={split.name} "
                 f"task_ce={ce_loss:.6f} global_cosine="
-                f"{rows[-(1 + len(CHART_GROUPS) + len(layers) * (1 + len(CHART_GROUPS)))]['cosine']:.6f}",
+                f"{split_rows[0]['cosine']:.6f}",
                 flush=True,
             )
         rows.extend(
@@ -612,11 +614,18 @@ def main() -> None:
         "batch_size": args.batch_size,
         "block_size": args.block_size,
         "batches": args.batches,
+        "ce_batches": args.ce_batches,
         "sample_cap": args.sample_cap,
         "sample_seed": args.sample_seed,
         "holdout_sample_seed": args.holdout_sample_seed,
         "fit_token_sha256": fit.token_sha256,
         "holdout_token_sha256": holdout.token_sha256,
+        "fit_ce_token_sha256": tensor_sha256(
+            torch.cat(fit.batches[: args.ce_batches])
+        ),
+        "holdout_ce_token_sha256": tensor_sha256(
+            torch.cat(holdout.batches[: args.ce_batches])
+        ),
         "initial_effective_output_log_gains": args.initializations,
         "chart": {
             "hidden_rotation_stages": 2,

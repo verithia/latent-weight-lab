@@ -6,9 +6,11 @@ import torch
 
 from examples.nanogpt.analyze_mlp_chart_gradient_alignment import (
     alignment_rows,
+    chart_config,
     parse_float_list,
     vector_alignment,
 )
+from examples.nanogpt.model import GPTConfig
 
 
 def test_vector_alignment_distinguishes_aligned_orthogonal_and_opposed() -> None:
@@ -59,3 +61,11 @@ def test_alignment_rows_preserve_global_group_and_layer_scopes() -> None:
 
 def test_parse_float_list() -> None:
     assert parse_float_list("0,0.125") == [0.0, 0.125]
+
+
+def test_chart_config_uses_only_model_configuration_fields() -> None:
+    configured = chart_config(vars(GPTConfig()), 0.125)
+
+    assert configured.block_fht_mlp_hidden_block_rotation_stages == 2
+    assert configured.block_fht_mlp_output_block_rotation_stages == 4
+    assert configured.block_fht_mlp_residual_output_log_gain_init == 0.125
