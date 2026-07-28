@@ -453,6 +453,65 @@ def test_selected_block_fht_latent_is_matrix_and_muon_owned():
     assert not any(parameter is attn_latent for parameter in muon_parameters)
 
 
+def test_mlp_chart_lr_scale_only_scales_chart_adamw_group():
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht=True,
+            block_fht_targets=("mlp.c_proj",),
+            block_fht_latent_ratio=1.0,
+            block_fht_muon_latent_targets=("mlp.c_proj",),
+            block_fht_muon_latent_rows=4,
+            block_fht_mlp_hidden_block_rotation_stages=1,
+            block_fht_mlp_hidden_block_rotation_size=4,
+            block_fht_mlp_hidden_block_rotation_basis_size=8,
+            block_fht_mlp_output_block_rotation_stages=1,
+            block_fht_mlp_output_block_rotation_size=4,
+            block_fht_mlp_output_block_rotation_basis_size=8,
+            block_fht_mlp_residual_output_gain=True,
+        )
+    )
+    mlp = model.transformer.h[0].mlp
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_adamw_lr_scale=0.3,
+        block_fht_mlp_chart_lr_scale=5.0,
+    )
+    adamw = next(
+        child
+        for child in optimizer.optimizers
+        if child.__class__.__name__ == "AdamW"
+    )
+    chart_parameters = {
+        id(mlp.hidden_block_rotation.coordinates),
+        id(mlp.output_block_rotation.coordinates),
+        id(mlp.residual_output_log_gain),
+    }
+    chart_group = next(
+        group
+        for group in adamw.param_groups
+        if any(id(parameter) in chart_parameters for parameter in group["params"])
+    )
+    regular_group = next(
+        group
+        for group in adamw.param_groups
+        if not any(id(parameter) in chart_parameters for parameter in group["params"])
+    )
+    assert chart_group["lr_scale"] == pytest.approx(1.5)
+    assert regular_group["lr_scale"] == pytest.approx(0.3)
+    assert {
+        id(parameter) for parameter in chart_group["params"]
+    }.issuperset(chart_parameters)
+
+
 def test_spectral_zero_correction_matches_same_seed_block_fht():
     base = BlockFHTLinear(8, 12, bias=True, latent_dim=8, layers=2, seed=9)
     structured = BlockFHTLinear(8, 12, bias=True, latent_dim=8, layers=2, seed=9, spectral_rank=2, spectral_out_groups=3, spectral_in_groups=2)

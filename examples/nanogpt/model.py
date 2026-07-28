@@ -1879,6 +1879,7 @@ class GPT(nn.Module):
         muon_momentum: float = 0.95,
         muon_ns_steps: int = 5,
         muon_adamw_lr_scale: float = 1.0,
+        block_fht_mlp_chart_lr_scale: float = 1.0,
     ):
         params = {name: param for name, param in self.named_parameters() if param.requires_grad}
         decay = [param for _, param in params.items() if param.dim() >= 2]
@@ -1893,6 +1894,26 @@ class GPT(nn.Module):
                 param
                 for name, param in params.items()
                 if param.dim() < 2 or "wte" in name or "wpe" in name or "lm_head" in name
+            ]
+            chart_names = (
+                "hidden_block_rotation.coordinates",
+                ".hidden_log_gain",
+                "output_block_rotation.coordinates",
+                ".residual_output_log_gain",
+                ".activation_chart_channel_log_gain",
+                ".activation_chart_common_log_gain",
+                ".activation_chart_gauge_log_gain",
+            )
+            other_parameter_ids = {id(param) for param in other}
+            chart_other = [
+                param
+                for name, param in params.items()
+                if id(param) in other_parameter_ids
+                and any(token in name for token in chart_names)
+            ]
+            chart_parameter_ids = {id(param) for param in chart_other}
+            regular_other = [
+                param for param in other if id(param) not in chart_parameter_ids
             ]
             optimizers = []
             if matrix:
@@ -1912,13 +1933,43 @@ class GPT(nn.Module):
                 use_fused = fused_available and device_type == "cuda"
                 extra_args = {"fused": True} if use_fused else {}
                 adamw_lr = learning_rate * float(muon_adamw_lr_scale)
-                optimizers.append(torch.optim.AdamW([{"params": other, "weight_decay": 0.0, "lr_scale": float(muon_adamw_lr_scale)}], lr=adamw_lr, betas=betas, **extra_args))
+                fallback_groups = []
+                if regular_other:
+                    fallback_groups.append(
+                        {
+                            "params": regular_other,
+                            "weight_decay": 0.0,
+                            "lr_scale": float(muon_adamw_lr_scale),
+                        }
+                    )
+                if chart_other:
+                    fallback_groups.append(
+                        {
+                            "params": chart_other,
+                            "weight_decay": 0.0,
+                            "lr_scale": (
+                                float(muon_adamw_lr_scale)
+                                * float(block_fht_mlp_chart_lr_scale)
+                            ),
+                        }
+                    )
+                optimizers.append(
+                    torch.optim.AdamW(
+                        fallback_groups,
+                        lr=adamw_lr,
+                        betas=betas,
+                        **extra_args,
+                    )
+                )
             else:
                 adamw_lr = learning_rate * float(muon_adamw_lr_scale)
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
+                f"mlp_chart_tensors={len(chart_other)} "
                 f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
-                f"adamw_lr_scale={float(muon_adamw_lr_scale)} adamw_lr={adamw_lr}"
+                f"adamw_lr_scale={float(muon_adamw_lr_scale)} "
+                f"mlp_chart_lr_scale={float(block_fht_mlp_chart_lr_scale)} "
+                f"adamw_lr={adamw_lr}"
             )
             return MultiOptimizer(optimizers)
         groups = [{"params": decay, "weight_decay": weight_decay}, {"params": nodecay, "weight_decay": 0.0}]

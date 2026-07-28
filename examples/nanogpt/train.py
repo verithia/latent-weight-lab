@@ -615,6 +615,14 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
         raise ValueError(
             "config has unresolved required optimizer fields: " + ", ".join(unresolved)
         )
+    mlp_chart_lr_scale = float(
+        getattr(args, "block_fht_mlp_chart_lr_scale", 1.0)
+    )
+    if (
+        not math.isfinite(mlp_chart_lr_scale)
+        or mlp_chart_lr_scale <= 0.0
+    ):
+        raise ValueError("block_fht_mlp_chart_lr_scale must be positive and finite")
     validate_dense_fit_gate(config, args)
     return None
 
@@ -861,6 +869,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--muon-momentum", type=float, default=0.95)
     parser.add_argument("--muon-ns-steps", type=int, default=5)
     parser.add_argument("--muon-adamw-lr-scale", type=float, default=1.0)
+    parser.add_argument("--block-fht-mlp-chart-lr-scale", type=float, default=1.0)
     parser.add_argument("--beta1", type=float, default=0.9)
     parser.add_argument("--beta2", type=float, default=0.95)
     parser.add_argument("--grad-clip", type=float, default=1.0)
@@ -1213,6 +1222,7 @@ def main() -> None:
         muon_momentum=args.muon_momentum,
         muon_ns_steps=args.muon_ns_steps,
         muon_adamw_lr_scale=args.muon_adamw_lr_scale,
+        block_fht_mlp_chart_lr_scale=args.block_fht_mlp_chart_lr_scale,
     )
     if args.init_from == "resume":
         optimizer.load_state_dict(checkpoint["optimizer"])
