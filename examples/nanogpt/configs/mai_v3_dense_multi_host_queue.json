@@ -1541,6 +1541,87 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 103,
+      "name": "mai_v3_124m_cproj_bilateral_chartlr4_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_chartlr4_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_chartlr4_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_chartlr4_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "8572d06c3fb2c95050e852f97086d64c0bfaaf1932d1aefd32697a137ce31fb6",
+          "mfu_preflight_certificate_sha256": "c608b5ef0879486460f2a07263810b840f5d661163a273939f04fbca726b4e77",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "1bb74dd686dcaab838db456782e1637cb67a6e91f8c59dce7396219c4630eac8",
+            "examples/nanogpt/model.py": "9b624cf9504c9a484c6d8339c51ae63478e0eabc3f59a6c1e5cc89f7adedc7ea",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 104,
+      "name": "mai_v3_124m_cproj_bilateral_chartlr8_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_chartlr8_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_chartlr8_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_chartlr8_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "681469523a65ec58505f83ce11cb00ebd7e10651ffb919804331c17ea588bfd8",
+          "mfu_preflight_certificate_sha256": "6154a1e093635dbc16c3312330a570a0c5c9553d4ee034d596ff2ded68658290",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "1bb74dd686dcaab838db456782e1637cb67a6e91f8c59dce7396219c4630eac8",
+            "examples/nanogpt/model.py": "9b624cf9504c9a484c6d8339c51ae63478e0eabc3f59a6c1e5cc89f7adedc7ea",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 105,
+      "name": "mai_v3_124m_cproj_bilateral_chartlr16_0p5tpp",
+      "stage": "post_manifold_cproj_bilateral_chartlr16_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_chartlr16_cachevjp_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_hiddenblock32_s2_c4_g4_outblock32_s4_c4_g4_chartlr16_cachevjp_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "bc5d651c822f1727bb1e422f98fbdbe8dc921068caabd024e55a9c9e8887d3c7",
+          "mfu_preflight_certificate_sha256": "88ca67c36c6020c79f3f6c2e62b1d4379a17fed73865877c1d5484e737f2111c",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "1bb74dd686dcaab838db456782e1637cb67a6e91f8c59dce7396219c4630eac8",
+            "examples/nanogpt/model.py": "9b624cf9504c9a484c6d8339c51ae63478e0eabc3f59a6c1e5cc89f7adedc7ea",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -1554,7 +1635,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its displacement directions are high-rank, layer-specific, and globally curved. Output-only reached val 5.6906; output+activation reached 5.6832. The unrestricted bilateral chart has held-out endpoint capacity (72.70% source-error recovery versus 65.36% output-only) but trained to val 5.7001. Trust-region stops at steps 30/60/120 were all negative (5.7110/5.7155/5.7095). A paired inverse-gauge chart and an independent pre-GELU chart added no useful held-out capacity, localizing the useful function class to post-GELU/output charts. Priorities 100-102 now test delayed chart activation at steps 60/120 with moving or frozen generated c_proj bases; exact Y400 MFU gates pass at 21.95%, 22.17%, and 21.98%."
+      "state": "The 41-snapshot 124M dense Muon trajectory is globally smooth and locally two-PC, while its displacement directions are high-rank, layer-specific, and globally curved. Output-only reached val 5.6906; output+activation reached 5.6832. The unrestricted bilateral chart has held-out endpoint capacity (72.70% source-error recovery versus 65.36% output-only) but trained to val 5.7001. Trust-region stops and delayed activation/source-freeze screens were negative; start60 moving, start120 moving, and start120 fixed finished at 5.7586/5.7484/5.7520. Paired inverse-gauge and independent pre-GELU charts add no useful held-out capacity. Oracle coordinates are roughly 20-50x larger than CE-trained coordinates, so priorities 103-105 test 4x/8x/16x chart-only AdamW rates while leaving Muon and non-chart AdamW unchanged; exact Y400 MFU gates pass at 21.89%, 22.27%, and 22.00%."
     }
   ]
 }
