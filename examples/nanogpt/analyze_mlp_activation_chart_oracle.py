@@ -184,10 +184,7 @@ def collect_model(
                 spectral = spectral_residual_weight(model, layer)
                 if spectral is not None:
                     weight = weight + spectral
-                if (
-                    mlp.output_block_rotation is not None
-                    or mlp.residual_output_log_gain is not None
-                ):
+                if mlp.has_charted_cproj():
                     weight = mlp._materialize_charted_cproj_weight(weight)
                 if mlp.output_rotation is not None:
                     raise ValueError(

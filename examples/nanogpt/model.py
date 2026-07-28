@@ -117,6 +117,14 @@ class GPTConfig:
     block_fht_mlp_activation_chart_channel_scale: float = 1.0
     block_fht_mlp_activation_chart_common_scale: float = 1.0
     block_fht_mlp_activation_chart_gauge_scale: float = 1.0
+    block_fht_mlp_hidden_block_rotation_stages: int = 0
+    block_fht_mlp_hidden_block_rotation_size: int = 32
+    block_fht_mlp_hidden_block_rotation_basis_size: int = 256
+    block_fht_mlp_hidden_block_rotation_coordinate_scale: float = 1.0
+    block_fht_mlp_hidden_block_rotation_seed: int = 314159
+    block_fht_mlp_hidden_gain: bool = False
+    block_fht_mlp_hidden_gain_scale: float = 1.0
+    block_fht_mlp_hidden_log_gain_init: float = 0.0
     block_fht_mlp_output_rotation_stages: int = 0
     block_fht_mlp_output_rotation_seed: int = 271828
     block_fht_mlp_output_block_rotation_stages: int = 0
@@ -1308,6 +1316,93 @@ class MLP(nn.Module):
                 self.cproj_spectral_resid_diag,
             )
         )
+        hidden_block_rotation_stages = int(
+            config.block_fht_mlp_hidden_block_rotation_stages
+        )
+        if hidden_block_rotation_stages < 0:
+            raise ValueError(
+                "block_fht_mlp_hidden_block_rotation_stages must be "
+                "non-negative"
+            )
+        if hidden_block_rotation_stages and not isinstance(
+            self.c_proj, (nn.Linear, BlockFHTLinear)
+        ):
+            raise ValueError(
+                "block-orthogonal hidden rotation requires a plain "
+                "mlp.c_proj linear"
+            )
+        if hidden_block_rotation_stages and incompatible_cproj_addon:
+            raise ValueError(
+                "block-orthogonal hidden rotation cannot be combined with "
+                "a separate c_proj residual add-on"
+            )
+        self.hidden_block_rotation = (
+            LearnedFHTBlockOrthogonalOutputMix(
+                features=4 * config.n_embd,
+                stages=hidden_block_rotation_stages,
+                rotation_block_size=int(
+                    config.block_fht_mlp_hidden_block_rotation_size
+                ),
+                basis_block_size=int(
+                    config.block_fht_mlp_hidden_block_rotation_basis_size
+                ),
+                seed=(
+                    int(config.block_fht_mlp_hidden_block_rotation_seed)
+                    + layer_id * 64
+                ),
+                coordinate_scale=float(
+                    config.block_fht_mlp_hidden_block_rotation_coordinate_scale
+                ),
+            )
+            if hidden_block_rotation_stages
+            else None
+        )
+        self.hidden_gain_scale = float(
+            config.block_fht_mlp_hidden_gain_scale
+        )
+        if (
+            not math.isfinite(self.hidden_gain_scale)
+            or self.hidden_gain_scale <= 0.0
+        ):
+            raise ValueError(
+                "block_fht_mlp_hidden_gain_scale must be positive and finite"
+            )
+        hidden_log_gain_init = float(
+            config.block_fht_mlp_hidden_log_gain_init
+        )
+        if not math.isfinite(hidden_log_gain_init):
+            raise ValueError(
+                "block_fht_mlp_hidden_log_gain_init must be finite"
+            )
+        if (
+            config.block_fht_mlp_hidden_gain
+            and self.activation_chart_channel_log_gain is not None
+        ):
+            raise ValueError(
+                "hidden gain and activation chart channel gain are "
+                "mutually exclusive"
+            )
+        self.hidden_log_gain = (
+            nn.Parameter(
+                torch.full(
+                    (4 * config.n_embd,),
+                    hidden_log_gain_init / self.hidden_gain_scale,
+                )
+            )
+            if config.block_fht_mlp_hidden_gain
+            else None
+        )
+        if self.hidden_log_gain is not None and not isinstance(
+            self.c_proj, (nn.Linear, BlockFHTLinear)
+        ):
+            raise ValueError(
+                "hidden gain requires a plain mlp.c_proj linear"
+            )
+        if self.hidden_log_gain is not None and incompatible_cproj_addon:
+            raise ValueError(
+                "hidden gain cannot be combined with a separate c_proj "
+                "residual add-on"
+            )
         if block_rotation_stages and incompatible_cproj_addon:
             raise ValueError(
                 "block-orthogonal output rotation cannot be combined with "
@@ -1379,10 +1474,30 @@ class MLP(nn.Module):
         self.last_postgelu: torch.Tensor | None = None
         self._cached_charted_cproj_weight: torch.Tensor | None = None
 
+    def has_charted_cproj(self) -> bool:
+        return any(
+            value is not None
+            for value in (
+                self.hidden_block_rotation,
+                self.hidden_log_gain,
+                self.output_block_rotation,
+                self.residual_output_log_gain,
+            )
+        )
+
     def _materialize_charted_cproj_weight(
         self, weight: torch.Tensor
     ) -> torch.Tensor:
-        transposed = weight.transpose(0, 1)
+        charted = weight
+        if self.hidden_block_rotation is not None:
+            rotation = self.hidden_block_rotation.matrix(charted)
+            charted = charted @ rotation.transpose(0, 1)
+        if self.hidden_log_gain is not None:
+            gain = (
+                self.hidden_gain_scale * self.hidden_log_gain
+            ).exp().to(device=weight.device, dtype=weight.dtype)
+            charted = charted * gain
+        transposed = charted.transpose(0, 1)
         if self.residual_output_log_gain is not None:
             gain = (
                 self.residual_output_gain_scale
@@ -1403,10 +1518,7 @@ class MLP(nn.Module):
         its rotation and weight-folding GEMM are repeated for every
         accumulation microbatch.
         """
-        if (
-            self.output_block_rotation is None
-            and self.residual_output_log_gain is None
-        ):
+        if not self.has_charted_cproj():
             return
         if self._cached_charted_cproj_weight is not None:
             return
@@ -1437,6 +1549,17 @@ class MLP(nn.Module):
                 "charted c_proj cache cannot flush without its base cache"
             )
         chart_parameters: list[torch.Tensor] = []
+        if self.hidden_block_rotation is not None:
+            chart_parameters.extend(
+                parameter
+                for parameter in self.hidden_block_rotation.parameters()
+                if parameter.requires_grad
+            )
+        if (
+            self.hidden_log_gain is not None
+            and self.hidden_log_gain.requires_grad
+        ):
+            chart_parameters.append(self.hidden_log_gain)
         if self.output_block_rotation is not None:
             chart_parameters.extend(
                 parameter
@@ -1490,10 +1613,7 @@ class MLP(nn.Module):
         self._cached_charted_cproj_weight = cached
 
     def _charted_cproj(self, activated: torch.Tensor) -> torch.Tensor | None:
-        if (
-            self.output_block_rotation is None
-            and self.residual_output_log_gain is None
-        ):
+        if not self.has_charted_cproj():
             return None
         if self._cached_charted_cproj_weight is not None:
             return F.linear(
@@ -1842,6 +1962,16 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
             ):
                 if parameter is not None:
                     parameter.requires_grad_(True)
+        if (
+            isinstance(module, MLP)
+            and module.hidden_block_rotation is not None
+        ):
+            module.hidden_block_rotation.coordinates.requires_grad_(True)
+        if (
+            isinstance(module, MLP)
+            and module.hidden_log_gain is not None
+        ):
+            module.hidden_log_gain.requires_grad_(True)
         if (
             isinstance(module, MLP)
             and module.output_block_rotation is not None

@@ -780,6 +780,35 @@ def test_mlp_folds_block_rotation_and_output_gain_into_cproj_weight() -> None:
     assert mlp.residual_output_log_gain.grad is not None
 
 
+def test_mlp_folds_hidden_rotation_and_gain_into_cproj_weight() -> None:
+    torch.manual_seed(305)
+    config = GPTConfig(
+        n_embd=8,
+        n_head=1,
+        block_fht_mlp_hidden_block_rotation_stages=2,
+        block_fht_mlp_hidden_block_rotation_size=4,
+        block_fht_mlp_hidden_block_rotation_basis_size=8,
+        block_fht_mlp_hidden_gain=True,
+        block_fht_mlp_hidden_gain_scale=3.0,
+    )
+    mlp = MLP(config, layer_id=0)
+    values = torch.randn(2, 3, 8)
+    with torch.no_grad():
+        mlp.hidden_block_rotation.coordinates.normal_(std=0.05)
+        mlp.hidden_log_gain.normal_(std=0.03)
+    activated = mlp.gelu(mlp.c_fc(values))
+    rotation = mlp.hidden_block_rotation.matrix(mlp.c_proj.weight)
+    gain = (3.0 * mlp.hidden_log_gain).exp()
+    expected_weight = (
+        mlp.c_proj.weight @ rotation.transpose(0, 1)
+    ) * gain
+    expected = F.linear(activated, expected_weight, mlp.c_proj.bias)
+    torch.testing.assert_close(mlp(values), expected)
+    mlp(values).square().mean().backward()
+    assert mlp.hidden_block_rotation.coordinates.grad is not None
+    assert mlp.hidden_log_gain.grad is not None
+
+
 def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
     torch.manual_seed(307)
     config = GPTConfig(
@@ -792,6 +821,13 @@ def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
         block_fht=True,
         block_fht_targets=("mlp.c_proj",),
         block_fht_latent_ratio=0.25,
+        block_fht_mlp_hidden_block_rotation_stages=2,
+        block_fht_mlp_hidden_block_rotation_size=4,
+        block_fht_mlp_hidden_block_rotation_basis_size=8,
+        block_fht_mlp_hidden_block_rotation_coordinate_scale=2.0,
+        block_fht_mlp_hidden_gain=True,
+        block_fht_mlp_hidden_gain_scale=3.0,
+        block_fht_mlp_hidden_log_gain_init=0.05,
         block_fht_mlp_output_block_rotation_stages=2,
         block_fht_mlp_output_block_rotation_size=4,
         block_fht_mlp_output_block_rotation_basis_size=8,
@@ -806,6 +842,10 @@ def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
     with torch.no_grad():
         for model in (live, cached):
             mlp = model.transformer.h[0].mlp
+            mlp.hidden_block_rotation.coordinates.normal_(std=0.02)
+            mlp.hidden_log_gain.add_(
+                torch.linspace(-0.01, 0.01, 4 * config.n_embd)
+            )
             mlp.output_block_rotation.coordinates.normal_(std=0.03)
             mlp.residual_output_log_gain.add_(
                 torch.linspace(-0.02, 0.02, config.n_embd)
@@ -831,6 +871,18 @@ def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
     torch.testing.assert_close(
         cached_mlp.c_proj.generator.latent.grad,
         live.transformer.h[0].mlp.c_proj.generator.latent.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+    torch.testing.assert_close(
+        cached_mlp.hidden_block_rotation.coordinates.grad,
+        live.transformer.h[0].mlp.hidden_block_rotation.coordinates.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+    torch.testing.assert_close(
+        cached_mlp.hidden_log_gain.grad,
+        live.transformer.h[0].mlp.hidden_log_gain.grad,
         atol=2e-6,
         rtol=2e-5,
     )
@@ -871,6 +923,10 @@ def test_freeze_keeps_block_output_chart_trainable() -> None:
         GPTConfig(
             n_embd=8,
             n_head=1,
+            block_fht_mlp_hidden_block_rotation_stages=1,
+            block_fht_mlp_hidden_block_rotation_size=4,
+            block_fht_mlp_hidden_block_rotation_basis_size=8,
+            block_fht_mlp_hidden_gain=True,
             block_fht_mlp_output_block_rotation_stages=1,
             block_fht_mlp_output_block_rotation_size=4,
             block_fht_mlp_output_block_rotation_basis_size=8,
@@ -879,6 +935,8 @@ def test_freeze_keeps_block_output_chart_trainable() -> None:
         layer_id=0,
     )
     freeze_non_block_fht(mlp, train_embeddings=False)
+    assert mlp.hidden_block_rotation.coordinates.requires_grad
+    assert mlp.hidden_log_gain.requires_grad
     assert mlp.output_block_rotation.coordinates.requires_grad
     assert mlp.residual_output_log_gain.requires_grad
     assert not mlp.c_proj.weight.requires_grad
