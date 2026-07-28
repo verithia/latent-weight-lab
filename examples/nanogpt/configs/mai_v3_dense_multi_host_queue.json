@@ -1044,6 +1044,32 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 84,
+      "name": "mai_v3_124m_cproj_blockorth32_s2_gain4_0p5tpp",
+      "stage": "post_manifold_cproj_blockorth32_s2_gain4_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_gain4_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_blockorth32_s2_gain4_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "4234a86f52aaa0867883b265f2e0b6e0903167567342d3df3a2a76e576e31c51",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "7cb2708956869def4afeada74b415c91bf4e4085898a063c5389de4b92a6d69e",
+            "examples/nanogpt/model.py": "93bdbdfa8470f92d43b572c5968ca30bfcbb1aefc8587bb5d321846bbda58eb8",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -1057,7 +1083,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 124M dense Muon trajectory is locally two-PC and globally smooth, but the registered 1% BlockFHT tangent captures only 1.005% of dense displacement energy. Priorities 75-77 and the quadratic priorities 78-80 are terminal negative controls. Fixed-token probes localize the c_proj deficit to residual alignment rather than activation rank. Priorities 81-83 test a metric-scaled paired hidden radial coordinate, an identity-initialized four-stage orthogonal output rotation, and their combination. Promotion remains blocked on matched terminal evidence."
+      "state": "The 124M dense Muon trajectory is locally two-PC and globally smooth, but the registered 1% BlockFHT tangent captures only 1.005% of dense displacement energy. Priorities 75-83 are terminal practical ties or negative controls. A held-out fixed-token oracle shows full output orthogonal-plus-diagonal alignment recovers 52.85% target energy; the fixed-basis 2-stage 32x32 Cayley chart recovers 15.84% with 1.04% c_proj coordinates. Priority 84 is the >=20% MFU-qualified smallest-rung test; the 4-stage form was rejected prelaunch at 14.20% MFU."
     }
   ]
 }

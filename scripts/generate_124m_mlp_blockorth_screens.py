@@ -59,6 +59,7 @@ def build() -> dict[Path, dict]:
             "heldout_cosine": 0.3847886919975281,
             "oracle_coordinate_rms": 0.4779899179935455,
             "oracle_log_gain_rms": 1.9792399406433105,
+            "launch_ready": True,
         },
         {
             "label": "blockorth32_s4_gain4",
@@ -68,6 +69,7 @@ def build() -> dict[Path, dict]:
             "heldout_cosine": 0.49673683047294614,
             "oracle_coordinate_rms": 0.33420037627220156,
             "oracle_log_gain_rms": 1.550129246711731,
+            "launch_ready": False,
         },
     )
     outputs: dict[Path, dict] = {}
@@ -185,10 +187,26 @@ def build() -> dict[Path, dict]:
                     "124M/0.5TPP causal structure screen on fixed evaluation windows"
                 ),
                 "practical_equivalence_nll": 0.02,
-                "launch_ready": True,
-                "launch_block_reason": None,
+                "launch_ready": variant["launch_ready"],
+                "launch_block_reason": (
+                    None
+                    if variant["launch_ready"]
+                    else (
+                        "host-local foreground gate measured 14.2031% MFU, "
+                        "below the mandatory 20% floor"
+                    )
+                ),
             }
         )
+        if not variant["launch_ready"]:
+            config["failed_mfu_preflight"] = {
+                "measured_fraction": 0.14203104592662785,
+                "minimum_fraction": 0.2,
+                "certificate_sha256": (
+                    "dc31e57fb13b6a554bd572f64898b5245d19b45ceabb8af5c9ba041fa732b750"
+                ),
+                "decision": "rejected_before_scientific_training",
+            }
         path = (
             CONFIG_DIR
             / "y400_mai_v3_124m_fullattn_plus_mlp_cproj_"

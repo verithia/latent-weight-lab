@@ -97,6 +97,12 @@
   "eval_seed": 20260715,
   "eval_tokens_per_split": 6553600,
   "eval_total_tokens": 13107200,
+  "failed_mfu_preflight": {
+    "certificate_sha256": "dc31e57fb13b6a554bd572f64898b5245d19b45ceabb8af5c9ba041fa732b750",
+    "decision": "rejected_before_scientific_training",
+    "measured_fraction": 0.14203104592662785,
+    "minimum_fraction": 0.2
+  },
   "fixed_eval_index_runtime_digest": "record train.py rng_eval_metadata.fixed_eval_indices_sha256 before launch; candidate and attention-only control must match",
   "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
   "fixed_eval_indices": true,
@@ -120,8 +126,8 @@
   "ladder_interpretation": "progressive target-replacement screen; this is not a fitted MLP scaling ladder",
   "ladder_role": "mlp_manifold_functional_oracle_screen_provisional",
   "ladder_slot": "cproj_blockorth32_s4_gain4",
-  "launch_block_reason": null,
-  "launch_ready": true,
+  "launch_block_reason": "host-local foreground gate measured 14.2031% MFU, below the mandatory 20% floor",
+  "launch_ready": false,
   "learning_rate": 0.0024,
   "lr_decay_iters": 238,
   "manifold_evidence": {
