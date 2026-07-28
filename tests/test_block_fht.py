@@ -780,6 +780,24 @@ def test_mlp_folds_block_rotation_and_output_gain_into_cproj_weight() -> None:
     assert mlp.residual_output_log_gain.grad is not None
 
 
+def test_mlp_residual_output_gain_init_is_in_effective_log_coordinates() -> None:
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_residual_output_gain=True,
+            block_fht_mlp_residual_output_gain_scale=4.0,
+            block_fht_mlp_residual_output_log_gain_init=0.125,
+        ),
+        layer_id=0,
+    )
+    assert mlp.residual_output_log_gain is not None
+    torch.testing.assert_close(
+        4.0 * mlp.residual_output_log_gain,
+        torch.full((8,), 0.125),
+    )
+
+
 def test_freeze_keeps_block_output_chart_trainable() -> None:
     mlp = MLP(
         GPTConfig(

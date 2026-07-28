@@ -121,6 +121,7 @@ class GPTConfig:
     block_fht_mlp_output_block_rotation_coordinate_scale: float = 1.0
     block_fht_mlp_residual_output_gain: bool = False
     block_fht_mlp_residual_output_gain_scale: float = 1.0
+    block_fht_mlp_residual_output_log_gain_init: float = 0.0
     tie_word_embeddings: bool = True
 
 
@@ -1287,11 +1288,6 @@ class MLP(nn.Module):
             if block_rotation_stages
             else None
         )
-        self.residual_output_log_gain = (
-            nn.Parameter(torch.zeros(config.n_embd))
-            if config.block_fht_mlp_residual_output_gain
-            else None
-        )
         self.residual_output_gain_scale = float(
             config.block_fht_mlp_residual_output_gain_scale
         )
@@ -1303,6 +1299,26 @@ class MLP(nn.Module):
                 "block_fht_mlp_residual_output_gain_scale must be "
                 "positive and finite"
             )
+        residual_output_log_gain_init = float(
+            config.block_fht_mlp_residual_output_log_gain_init
+        )
+        if not math.isfinite(residual_output_log_gain_init):
+            raise ValueError(
+                "block_fht_mlp_residual_output_log_gain_init must be finite"
+            )
+        self.residual_output_log_gain = (
+            nn.Parameter(
+                torch.full(
+                    (config.n_embd,),
+                    (
+                        residual_output_log_gain_init
+                        / self.residual_output_gain_scale
+                    ),
+                )
+            )
+            if config.block_fht_mlp_residual_output_gain
+            else None
+        )
         if self.residual_output_log_gain is not None and not isinstance(
             self.c_proj, (nn.Linear, BlockFHTLinear)
         ):

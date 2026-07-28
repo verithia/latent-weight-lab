@@ -864,6 +864,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-mlp-output-block-rotation-coordinate-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-residual-output-gain", action="store_true")
     parser.add_argument("--block-fht-mlp-residual-output-gain-scale", type=float, default=1.0)
+    parser.add_argument("--block-fht-mlp-residual-output-log-gain-init", type=float, default=0.0)
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -1038,6 +1039,7 @@ def main() -> None:
         block_fht_mlp_output_block_rotation_coordinate_scale=args.block_fht_mlp_output_block_rotation_coordinate_scale,
         block_fht_mlp_residual_output_gain=args.block_fht_mlp_residual_output_gain,
         block_fht_mlp_residual_output_gain_scale=args.block_fht_mlp_residual_output_gain_scale,
+        block_fht_mlp_residual_output_log_gain_init=args.block_fht_mlp_residual_output_log_gain_init,
         tie_word_embeddings=args.tie_word_embeddings,
     )
 
