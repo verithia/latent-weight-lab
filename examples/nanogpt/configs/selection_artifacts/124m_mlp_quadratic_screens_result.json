@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_mlp_manifold_structure_screen_result_v1",
+  "recorded_at": "2026-07-28",
+  "implementation_commit": "5d8686ecd9219226d923e457a33dc11924084b46",
+  "launch_commit": "ec9992ee5c8f8fa3b1ef4b4063a43b22d20b297a",
+  "matched_controls": {
+    "attention_only_validation_loss": 5.4918,
+    "plain_cproj_validation_loss": 5.7394,
+    "linear_muon_chart_validation_loss": 5.7395
+  },
+  "runs": [
+    {
+      "quadratic_scale": 0.25,
+      "config_sha256": "043d19e7eadebe257926ea0337827773a8be71bdf7853fbad5b14b31c37b9f1a",
+      "provenance_sha256": "57a18acc31b3f8984eac138024582eb7d4d0fac28a92ac61c7e6a99515e445b0",
+      "status_sha256": "a08084227f45f549db5324877f0c106bc63677114b7db484d390f296ee30c030",
+      "log_sha256": "28c85b142a0c6ce4c92614f097e294fe02e6c56533debc624edd189818a4fc32",
+      "mfu_certificate_sha256": "6704fe071eb33843ab491bd74722b7a11d29d170ef85d9faf81811243336a0d7",
+      "mfu_fraction": 0.313851718,
+      "terminal_train_loss": 5.7369,
+      "terminal_validation_loss": 5.7415,
+      "exit_code": 0
+    },
+    {
+      "quadratic_scale": 0.5,
+      "config_sha256": "061edd3ea8b6b72b4d30dfe4949ec818d9d5b507ccd66175dceb4c9232abbcc8",
+      "provenance_sha256": "e45ccfa0797ca6bd4c0250ce7e8dc32be449bcac400b78a5d128cc6634b6b8c0",
+      "status_sha256": "630e2375b1895a645822d7b9e4837337dfbc8fea9065729ac246214d2c272bbd",
+      "log_sha256": "f1bf5ef1b7ad23d895993530526f752e1977fbcdcf2686f6121d05ba0c75ec45",
+      "mfu_certificate_sha256": "261d75a606318d5f5db3d68496fd6ebb0ad21ff6c308ad1d5574003e10c1c785",
+      "mfu_fraction": 0.317206145,
+      "terminal_train_loss": 5.7413,
+      "terminal_validation_loss": 5.746,
+      "exit_code": 0
+    },
+    {
+      "quadratic_scale": 1.0,
+      "config_sha256": "2af7f15147875b3bd4745e7214e4fa839f0363363fc6f833891daac6e7ffa30c",
+      "provenance_sha256": "da2b07e5513bbf7a0e7d6926d87c71b0d33a51fb8937fca8189607b391842bf7",
+      "status_sha256": "a041142c117f917819a1828e3e2385a3a7e1aae62e9cbcc5f38d0cd13fd922b4",
+      "log_sha256": "7999bdf2f5be25d736df6bc44230e96bbe5932729dc8b41061bc418bee22a0d1",
+      "mfu_certificate_sha256": "774fa7d6883e0bbe2390b4a1083f731d995adad0bd4b68de351330757f7588d1",
+      "mfu_fraction": 0.315505659,
+      "terminal_train_loss": 5.7432,
+      "terminal_validation_loss": 5.7478,
+      "exit_code": 0
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_NONLINEAR_RANDOM_CHART",
+    "promote_to_5tpp": false,
+    "reason": "All three centered quadratic charts are tied with or worse than the linear generated-c_proj controls. Curvature without a task-aligned tangent does not repair the MLP replacement."
+  }
+}

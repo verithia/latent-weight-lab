@@ -966,6 +966,84 @@
           "checkpoint_budget_bytes": 2147483648
         }
       }
+    },
+    {
+      "priority": 81,
+      "name": "mai_v3_124m_cproj_radial4_0p5tpp",
+      "stage": "post_manifold_cproj_radial4_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "32b52b36372ace73947e5a3f4943867831872042aaba266e12acc94b0a0d6483",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "daebbbb7ed1080a172b4dae37169a9fa7458dfb8d1ae891cd9c6d1746f5ad63c",
+            "examples/nanogpt/model.py": "caf930afd9d0f92c103dea850e1c7b1301ecd2118a66b7860f6231286588c9fa",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 82,
+      "name": "mai_v3_124m_cproj_givens4_0p5tpp",
+      "stage": "post_manifold_cproj_givens4_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_givens4_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_givens4_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "5e7a8b8b92ba14ac49cf0e70f8b27c41c1315c808cbeebafd952ae10e7c929ea",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "daebbbb7ed1080a172b4dae37169a9fa7458dfb8d1ae891cd9c6d1746f5ad63c",
+            "examples/nanogpt/model.py": "caf930afd9d0f92c103dea850e1c7b1301ecd2118a66b7860f6231286588c9fa",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
+    },
+    {
+      "priority": 83,
+      "name": "mai_v3_124m_cproj_radial4_givens4_0p5tpp",
+      "stage": "post_manifold_cproj_radial4_givens4_0p5tpp",
+      "max_iters": 238,
+      "host_preference": [
+        "Y400"
+      ],
+      "variants": {
+        "Y400": {
+          "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_givens4_muonchart154_0p5tpp",
+          "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_radial4_givens4_muonchart154_0p5tpp_lr24e4.json",
+          "config_sha256": "016c6d7a51c0c5a16ccd07b7d4e5452d3a0a8d7218c04ee70577f94d105299a7",
+          "repo_relative": "latent-weight-lab-mlp-geometry",
+          "required_source_hashes": {
+            "examples/nanogpt/train.py": "daebbbb7ed1080a172b4dae37169a9fa7458dfb8d1ae891cd9c6d1746f5ad63c",
+            "examples/nanogpt/model.py": "caf930afd9d0f92c103dea850e1c7b1301ecd2118a66b7860f6231286588c9fa",
+            "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+            "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+          },
+          "resume": false,
+          "expected_checkpoint_next_iter": null,
+          "checkpoint_budget_bytes": 2147483648
+        }
+      }
     }
   ],
   "deferred_stages": [
@@ -979,7 +1057,7 @@
     },
     {
       "name": "mlp_replacement_work",
-      "state": "The 124M dense Muon trajectory is locally two-PC and globally a smooth quadratic/cubic curve, but its temporal directions are high matrix rank. Priorities 75-77 are terminal negative controls: Muon ownership is tied with plain c_proj, the paired diagonal gain adds no benefit, and joint MLP regresses. Priorities 78-80 therefore test a centered variance-preserving quadratic FHT chart at q=0.25,0.50,1.00 on c_proj only. The chart has a latent-dependent tangent and no learned basis or trainable-parameter overhead. Promotion remains blocked on matched terminal evidence."
+      "state": "The 124M dense Muon trajectory is locally two-PC and globally smooth, but the registered 1% BlockFHT tangent captures only 1.005% of dense displacement energy. Priorities 75-77 and the quadratic priorities 78-80 are terminal negative controls. Fixed-token probes localize the c_proj deficit to residual alignment rather than activation rank. Priorities 81-83 test a metric-scaled paired hidden radial coordinate, an identity-initialized four-stage orthogonal output rotation, and their combination. Promotion remains blocked on matched terminal evidence."
     }
   ]
 }
