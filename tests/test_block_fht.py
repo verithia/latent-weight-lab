@@ -721,6 +721,7 @@ def test_fht_block_orthogonal_mix_is_identity_and_norm_preserving() -> None:
     with torch.no_grad():
         mix.coordinates.normal_(std=0.1)
     output = mix(values)
+    torch.testing.assert_close(output, values @ mix.matrix(values))
     torch.testing.assert_close(
         output.norm(dim=-1),
         values.norm(dim=-1),

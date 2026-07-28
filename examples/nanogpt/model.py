@@ -529,6 +529,15 @@ class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
             )
         return result
 
+    def matrix(self, reference: torch.Tensor) -> torch.Tensor:
+        """Materialize the row-vector operator for efficient weight folding."""
+        identity = torch.eye(
+            self.features,
+            device=reference.device,
+            dtype=reference.dtype,
+        )
+        return self(identity)
+
 
 class GroupedInputLinear(nn.Module):
     def __init__(
@@ -1328,9 +1337,10 @@ class MLP(nn.Module):
             if bias is not None:
                 bias = bias * gain
         if self.output_block_rotation is not None:
-            transposed = self.output_block_rotation(transposed)
+            rotation = self.output_block_rotation.matrix(transposed)
+            transposed = transposed @ rotation
             if bias is not None:
-                bias = self.output_block_rotation(bias)
+                bias = bias @ rotation
         return F.linear(activated, transposed.transpose(0, 1), bias)
 
     def _fused_cached_cproj_lowrank(self, activated: torch.Tensor) -> torch.Tensor | None:
