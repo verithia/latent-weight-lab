@@ -29,6 +29,7 @@ from examples.nanogpt.analyze_cproj_manifold import (
     load_model,
 )
 from examples.nanogpt.analyze_residual_compatibility import fixed_validation_batches
+from examples.nanogpt.model import LearnedGivensOutputMix
 
 
 def sha256(path: Path) -> str:
@@ -196,6 +197,83 @@ def fit_oracles(
     return rows
 
 
+def fit_sparse_givens_operator(
+    source_train: torch.Tensor,
+    target_train: torch.Tensor,
+    source_holdout: torch.Tensor,
+    target_holdout: torch.Tensor,
+    stages: int,
+    seed: int,
+    steps: int,
+    learning_rate: float,
+) -> dict[str, float | str]:
+    """Fit a fixed-pair Givens chain to the full diagonal+orthogonal oracle."""
+
+    source_train = source_train.float()
+    target_train = target_train.float()
+    source_holdout = source_holdout.float()
+    target_holdout = target_holdout.float()
+    diagonal, rotation = fit_diagonal_then_orthogonal(
+        source_train, target_train
+    )
+    target_operator = (
+        torch.diag(diagonal) @ rotation.transpose(0, 1)
+    ).detach()
+    mixer = LearnedGivensOutputMix(
+        source_train.shape[-1], int(stages), int(seed)
+    ).to(device=source_train.device, dtype=torch.float32)
+    log_gain = torch.nn.Parameter(
+        torch.zeros(
+            source_train.shape[-1],
+            device=source_train.device,
+            dtype=torch.float32,
+        )
+    )
+    optimizer = torch.optim.Adam(
+        [mixer.angles, log_gain], lr=float(learning_rate)
+    )
+    identity = torch.eye(
+        source_train.shape[-1],
+        device=source_train.device,
+        dtype=torch.float32,
+    )
+    for _ in range(int(steps)):
+        optimizer.zero_grad(set_to_none=True)
+        operator = mixer(identity * log_gain.exp())
+        loss = (operator - target_operator).square().mean()
+        loss.backward()
+        optimizer.step()
+    with torch.no_grad():
+        operator = mixer(identity * log_gain.exp())
+        train_prediction = mixer(source_train * log_gain.exp())
+        holdout_prediction = mixer(source_holdout * log_gain.exp())
+        operator_energy = target_operator.square().sum().clamp_min(1e-30)
+        operator_explained = 1.0 - (
+            target_operator - operator
+        ).square().sum() / operator_energy
+    return {
+        "family": f"givens{int(stages)}_output_diagonal",
+        "operator_explained_energy": float(operator_explained),
+        "parameter_count": float(
+            mixer.angles.numel() + log_gain.numel()
+        ),
+        "angle_rms": float(mixer.angles.detach().square().mean().sqrt()),
+        "log_gain_rms": float(log_gain.detach().square().mean().sqrt()),
+        **{
+            f"train_{key}": value
+            for key, value in metrics(
+                target_train, train_prediction
+            ).items()
+        },
+        **{
+            f"holdout_{key}": value
+            for key, value in metrics(
+                target_holdout, holdout_prediction
+            ).items()
+        },
+    }
+
+
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
     with path.open("w", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
@@ -230,6 +308,10 @@ def main() -> None:
     parser.add_argument("--sample-cap", type=int, default=4096)
     parser.add_argument("--sample-seed", type=int, default=20260716)
     parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
+    parser.add_argument("--givens-stages", default="1,2,4,8,16")
+    parser.add_argument("--givens-fit-steps", type=int, default=400)
+    parser.add_argument("--givens-learning-rate", type=float, default=0.05)
+    parser.add_argument("--givens-seed", type=int, default=271828)
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
@@ -272,14 +354,37 @@ def main() -> None:
     )
 
     rows: list[dict[str, object]] = []
+    givens_stages = [
+        int(part) for part in args.givens_stages.split(",") if part
+    ]
     for layer in layers:
+        source_train = plain_train[(layer, "mlp_out")].to(args.device)
+        target_train = attention_train[(layer, "mlp_out")].to(args.device)
+        source_holdout = plain_holdout[(layer, "mlp_out")].to(args.device)
+        target_holdout = attention_holdout[(layer, "mlp_out")].to(args.device)
         layer_rows = fit_oracles(
-            plain_train[(layer, "mlp_out")].to(args.device),
-            attention_train[(layer, "mlp_out")].to(args.device),
-            plain_holdout[(layer, "mlp_out")].to(args.device),
-            attention_holdout[(layer, "mlp_out")].to(args.device),
+            source_train,
+            target_train,
+            source_holdout,
+            target_holdout,
         )
         rows.extend({"layer": layer, **row} for row in layer_rows)
+        for stages in givens_stages:
+            print(
+                f"fitting layer={layer} givens_stages={stages}",
+                flush=True,
+            )
+            row = fit_sparse_givens_operator(
+                source_train,
+                target_train,
+                source_holdout,
+                target_holdout,
+                stages,
+                args.givens_seed + layer * 64,
+                args.givens_fit_steps,
+                args.givens_learning_rate,
+            )
+            rows.append({"layer": layer, **row})
 
     print("fitting endpoint weight oracles", flush=True)
     attention_model = load_model(args.attention_only, args.device)
@@ -321,6 +426,10 @@ def main() -> None:
         "sample_cap": args.sample_cap,
         "sample_seed": args.sample_seed,
         "holdout_sample_seed": args.holdout_sample_seed,
+        "givens_stages": givens_stages,
+        "givens_fit_steps": args.givens_fit_steps,
+        "givens_learning_rate": args.givens_learning_rate,
+        "givens_seed": args.givens_seed,
         "functional_summary": summarize(rows),
         "weight_summary": summarize(weight_rows),
     }
