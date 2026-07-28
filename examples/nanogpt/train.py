@@ -706,6 +706,38 @@ def freeze_mlp_hidden_chart_gradients(
     return frozen
 
 
+def schedule_mlp_cproj_chart_gradients(
+    model: GPT,
+    *,
+    iter_num: int,
+    start_iter: int,
+    freeze_base_at_start: bool,
+) -> tuple[int, int]:
+    """Stage chart fitting against an optionally fixed generated c_proj."""
+    held_chart = 0
+    frozen_base = 0
+    for name, parameter in model.named_parameters():
+        is_chart = (
+            "hidden_block_rotation." in name
+            or name == "hidden_log_gain"
+            or name.endswith(".hidden_log_gain")
+            or "output_block_rotation." in name
+            or name == "residual_output_log_gain"
+            or name.endswith(".residual_output_log_gain")
+        )
+        if iter_num < start_iter and is_chart:
+            parameter.grad = None
+            held_chart += 1
+        if (
+            freeze_base_at_start
+            and iter_num >= start_iter
+            and name.endswith(".mlp.c_proj.generator.latent")
+        ):
+            parameter.grad = None
+            frozen_base += 1
+    return held_chart, frozen_base
+
+
 def latent_rms_hinge_loss(model: GPT, target: float) -> torch.Tensor:
     losses = []
     for latent in block_fht_latents(model):
@@ -904,6 +936,22 @@ def parse_args() -> argparse.Namespace:
             "optimizer update at this iteration; -1 leaves them active"
         ),
     )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-chart-start-iter",
+        type=int,
+        default=0,
+        help=(
+            "hold hidden/output c_proj chart gradients until this iteration"
+        ),
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-chart-freeze-base-at-start",
+        action="store_true",
+        help=(
+            "freeze generated mlp.c_proj base latents when the delayed chart "
+            "starts; other model parameters continue training"
+        ),
+    )
     parser.add_argument("--block-fht-mlp-output-rotation-stages", type=int, default=0)
     parser.add_argument("--block-fht-mlp-output-rotation-seed", type=int, default=271828)
     parser.add_argument("--block-fht-mlp-output-block-rotation-stages", type=int, default=0)
@@ -953,6 +1001,18 @@ def parse_args() -> argparse.Namespace:
     if namespace.block_fht_mlp_hidden_chart_stop_iter < -1:
         raise ValueError(
             "--block-fht-mlp-hidden-chart-stop-iter must be >= -1"
+        )
+    if namespace.block_fht_mlp_cproj_chart_start_iter < 0:
+        raise ValueError(
+            "--block-fht-mlp-cproj-chart-start-iter must be >= 0"
+        )
+    if (
+        namespace.block_fht_mlp_cproj_chart_freeze_base_at_start
+        and namespace.block_fht_mlp_cproj_chart_start_iter == 0
+    ):
+        raise ValueError(
+            "--block-fht-mlp-cproj-chart-freeze-base-at-start requires "
+            "a positive chart start iteration"
         )
     if namespace.mapping_stability_microbatches < 0:
         raise ValueError("--mapping-stability-microbatches must be >= 0")
@@ -1411,6 +1471,16 @@ def main() -> None:
             iter_num=iter_num,
             stop_iter=args.block_fht_mlp_hidden_chart_stop_iter,
         )
+        held_cproj_chart_parameters, frozen_cproj_base_parameters = (
+            schedule_mlp_cproj_chart_gradients(
+                raw_model,
+                iter_num=iter_num,
+                start_iter=args.block_fht_mlp_cproj_chart_start_iter,
+                freeze_base_at_start=(
+                    args.block_fht_mlp_cproj_chart_freeze_base_at_start
+                ),
+            )
+        )
         if (
             frozen_hidden_chart_parameters
             and iter_num == args.block_fht_mlp_hidden_chart_stop_iter
@@ -1418,6 +1488,17 @@ def main() -> None:
             print(
                 "froze MLP hidden chart at "
                 f"iter={iter_num} parameters={frozen_hidden_chart_parameters}",
+                flush=True,
+            )
+        if (
+            args.block_fht_mlp_cproj_chart_start_iter > 0
+            and iter_num == args.block_fht_mlp_cproj_chart_start_iter
+        ):
+            print(
+                "started delayed MLP c_proj chart at "
+                f"iter={iter_num} held_chart_parameters="
+                f"{held_cproj_chart_parameters} frozen_base_parameters="
+                f"{frozen_cproj_base_parameters}",
                 flush=True,
             )
         section_start = perf_now() if args.perf_profile else 0.0
