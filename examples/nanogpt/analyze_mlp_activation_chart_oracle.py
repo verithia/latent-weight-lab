@@ -80,11 +80,13 @@ class ActivationCollector:
         sample_cap: int,
         collect_pre_gelu: bool,
         collect_residual_in: bool = False,
+        collect_mlp_input: bool = False,
     ) -> None:
         self.layers = set(layers)
         self.sample_cap = int(sample_cap)
         self.collect_pre_gelu = bool(collect_pre_gelu)
         self.collect_residual_in = bool(collect_residual_in)
+        self.collect_mlp_input = bool(collect_mlp_input)
         self.values: dict[tuple[int, str], list[torch.Tensor]] = defaultdict(
             list
         )
@@ -105,6 +107,12 @@ class ActivationCollector:
                         self._hook(index, "pre_gelu")
                     )
                 )
+            if self.collect_mlp_input:
+                self.handles.append(
+                    block.mlp.register_forward_pre_hook(
+                        self._pre_hook(index, "mlp_input")
+                    )
+                )
             self.handles.append(
                 block.mlp.register_forward_hook(
                     self._hook(index, "mlp_out")
@@ -118,6 +126,8 @@ class ActivationCollector:
             points.append("residual_in")
         if self.collect_pre_gelu:
             points.append("pre_gelu")
+        if self.collect_mlp_input:
+            points.append("mlp_input")
         points.append("mlp_out")
         return tuple(points)
 
@@ -180,6 +190,7 @@ def collect_model(
     device: str,
     collect_pre_gelu: bool,
     collect_residual_in: bool = False,
+    collect_mlp_input: bool = False,
 ) -> tuple[
     dict[tuple[int, str], torch.Tensor],
     dict[int, torch.Tensor],
@@ -193,6 +204,7 @@ def collect_model(
         sample_cap,
         collect_pre_gelu,
         collect_residual_in,
+        collect_mlp_input,
     )
     try:
         with torch.no_grad():

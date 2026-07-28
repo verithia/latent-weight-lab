@@ -1,0 +1,528 @@
+"""Screen a token-conditioned MLP output gate before training.
+
+Static bilateral charts have held-out repair capacity, but CE, Muon/pullback
+metrics, and residual summary objectives do not identify the useful chart
+direction.  This probe adds the smallest coordinate family that exposes
+token-conditioned output orientation without a learned basis:
+
+    update' = update * exp(tanh(slope * LN(residual) + bias))
+
+``slope`` and ``bias`` are residual-width vectors per layer and initialize to
+zero, so the gate is exactly identity.  The diagnostic compares causal CE and
+dense-teacher MLP-output MSE gradients in these same gate coordinates on
+fixed fit and held-out tokens.  No parameter update is applied.
+"""
+
+from __future__ import annotations
+
+import argparse
+import csv
+import hashlib
+import json
+import subprocess
+from dataclasses import dataclass
+from pathlib import Path
+
+import torch
+import torch.nn.functional as F
+
+from examples.nanogpt.analyze_mlp_activation_chart_oracle import (
+    collect_model,
+    tensor_sha256,
+)
+from examples.nanogpt.analyze_mlp_chart_gradient_alignment import (
+    load_chart_model,
+    vector_alignment,
+)
+from examples.nanogpt.analyze_residual_compatibility import (
+    fixed_validation_batches,
+)
+
+
+GATE_GROUPS = ("slope", "bias")
+
+
+@dataclass(frozen=True)
+class GateSplitData:
+    name: str
+    batches: list[torch.Tensor]
+    token_sha256: str
+    mlp_input: dict[int, torch.Tensor]
+    pre_gelu: dict[int, torch.Tensor]
+    teacher_mlp_out: dict[int, torch.Tensor]
+    cproj_weight: dict[int, torch.Tensor]
+    cproj_bias: dict[int, torch.Tensor | None]
+
+
+class ResidualConditionedOutputGate(torch.nn.Module):
+    """Identity-initialized token-conditioned residual-width diagonal."""
+
+    def __init__(self, width: int, scale: float = 1.0) -> None:
+        super().__init__()
+        self.slope = torch.nn.Parameter(torch.zeros(int(width)))
+        self.bias = torch.nn.Parameter(torch.zeros(int(width)))
+        self.scale = float(scale)
+
+    def log_gain(self, condition: torch.Tensor) -> torch.Tensor:
+        return self.scale * torch.tanh(
+            condition * self.slope + self.bias
+        )
+
+    def forward(
+        self, condition: torch.Tensor, update: torch.Tensor
+    ) -> torch.Tensor:
+        if condition.shape != update.shape:
+            raise ValueError(
+                "gate condition and update must be aligned, got "
+                f"{tuple(condition.shape)} and {tuple(update.shape)}"
+            )
+        return update * self.log_gain(condition).exp()
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def git_head(root: Path) -> str:
+    return subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=root, text=True
+    ).strip()
+
+
+def gate_key(layer: int, group: str) -> str:
+    if group not in GATE_GROUPS:
+        raise ValueError(f"invalid gate group {group!r}")
+    return f"layer.{int(layer)}.{group}"
+
+
+def split_gate_key(key: str) -> tuple[int, str]:
+    prefix, layer, group = key.split(".", 2)
+    if prefix != "layer" or group not in GATE_GROUPS:
+        raise ValueError(f"invalid gate-gradient key {key!r}")
+    return int(layer), group
+
+
+def flatten(
+    gradients: dict[str, torch.Tensor], selected: list[str]
+) -> torch.Tensor:
+    return torch.cat(
+        [gradients[key].detach().float().reshape(-1).cpu() for key in selected]
+    )
+
+
+def alignment_rows(
+    left: dict[str, torch.Tensor],
+    right: dict[str, torch.Tensor],
+    *,
+    comparison: str,
+    split: str,
+) -> list[dict[str, object]]:
+    if set(left) != set(right):
+        raise ValueError("gradient maps do not have identical keys")
+    keys = sorted(left)
+    layers = sorted({split_gate_key(key)[0] for key in keys})
+    rows: list[dict[str, object]] = []
+
+    def append(scope: str, layer: int | None, group: str | None) -> None:
+        selected = [
+            key
+            for key in keys
+            if (layer is None or split_gate_key(key)[0] == layer)
+            and (group is None or split_gate_key(key)[1] == group)
+        ]
+        rows.append(
+            {
+                "comparison": comparison,
+                "split": split,
+                "scope": scope,
+                "layer": "" if layer is None else layer,
+                "group": "" if group is None else group,
+                **vector_alignment(
+                    flatten(left, selected), flatten(right, selected)
+                ),
+            }
+        )
+
+    append("global", None, None)
+    for group in GATE_GROUPS:
+        append("group", None, group)
+    for layer in layers:
+        append("layer", layer, None)
+        for group in GATE_GROUPS:
+            append("layer_group", layer, group)
+    return rows
+
+
+def load_gate_model(
+    checkpoint: Path,
+    device: str,
+    layers: list[int],
+    initial_output_log_gain: float,
+) -> tuple[
+    torch.nn.Module,
+    dict[int, ResidualConditionedOutputGate],
+    list[torch.utils.hooks.RemovableHandle],
+]:
+    model = load_chart_model(
+        checkpoint, device, layers, initial_output_log_gain
+    )
+    for parameter in model.parameters():
+        parameter.requires_grad_(False)
+    gates: dict[int, ResidualConditionedOutputGate] = {}
+    handles: list[torch.utils.hooks.RemovableHandle] = []
+    for layer in layers:
+        mlp = model.transformer.h[layer].mlp
+        gate = ResidualConditionedOutputGate(model.config.n_embd).to(device)
+        mlp.add_module("residual_conditioned_output_gate_probe", gate)
+
+        def hook(
+            _module,
+            inputs,
+            output,
+            *,
+            selected_gate: ResidualConditionedOutputGate = gate,
+        ):
+            if not inputs:
+                raise RuntimeError("MLP gate hook received no input")
+            return selected_gate(inputs[0], output)
+
+        handles.append(mlp.register_forward_hook(hook))
+        gates[layer] = gate
+    return model, gates, handles
+
+
+def gate_parameters(
+    gates: dict[int, ResidualConditionedOutputGate],
+) -> dict[str, torch.nn.Parameter]:
+    output: dict[str, torch.nn.Parameter] = {}
+    for layer, gate in gates.items():
+        output[gate_key(layer, "slope")] = gate.slope
+        output[gate_key(layer, "bias")] = gate.bias
+    return output
+
+
+def clone_gradients(
+    parameters: dict[str, torch.nn.Parameter],
+) -> dict[str, torch.Tensor]:
+    output: dict[str, torch.Tensor] = {}
+    for key, parameter in parameters.items():
+        if parameter.grad is None:
+            raise RuntimeError(f"gate parameter {key} has no gradient")
+        output[key] = parameter.grad.detach().float().cpu().clone()
+    return output
+
+
+def task_ce_gradients(
+    model: torch.nn.Module,
+    parameters: dict[str, torch.nn.Parameter],
+    batches: list[torch.Tensor],
+    device: str,
+) -> tuple[dict[str, torch.Tensor], float]:
+    model.zero_grad(set_to_none=True)
+    cache_dtype = (
+        torch.bfloat16 if device.startswith("cuda") else torch.float32
+    )
+    model.prepare_block_fht_cache(dtype=cache_dtype)
+    losses: list[float] = []
+    for tokens in batches:
+        inputs = tokens[:, :-1].contiguous().to(device)
+        targets = tokens[:, 1:].contiguous().to(device)
+        context = (
+            torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+            if device.startswith("cuda")
+            else torch.autocast(device_type="cpu", enabled=False)
+        )
+        with context:
+            _, loss = model(inputs, targets)
+        assert loss is not None
+        losses.append(float(loss.detach()))
+        (loss / len(batches)).backward()
+    gradients = clone_gradients(parameters)
+    model.flush_block_fht_cache()
+    return gradients, sum(losses) / len(losses)
+
+
+def teacher_mse_gradients(
+    model: torch.nn.Module,
+    gates: dict[int, ResidualConditionedOutputGate],
+    split: GateSplitData,
+    layers: list[int],
+    device: str,
+) -> tuple[dict[str, torch.Tensor], dict[int, float]]:
+    output: dict[str, torch.Tensor] = {}
+    losses: dict[int, float] = {}
+    for layer in layers:
+        mlp = model.transformer.h[layer].mlp
+        gate = gates[layer]
+        condition = split.mlp_input[layer].to(device)
+        pre_gelu = split.pre_gelu[layer].to(device)
+        target = split.teacher_mlp_out[layer].to(device)
+        weight = split.cproj_weight[layer].to(device)
+        bias = split.cproj_bias[layer]
+        bias = bias.to(device) if bias is not None else None
+        charted_weight = mlp._materialize_charted_cproj_weight(weight)
+        prediction = F.linear(F.gelu(pre_gelu), charted_weight, bias)
+        prediction = gate(condition, prediction)
+        loss = F.mse_loss(prediction, target)
+        gradients = torch.autograd.grad(loss, [gate.slope, gate.bias])
+        losses[layer] = float(loss.detach())
+        for group, gradient in zip(GATE_GROUPS, gradients, strict=True):
+            output[gate_key(layer, group)] = gradient.detach().float().cpu()
+    return output, losses
+
+
+def collect_split(
+    *,
+    name: str,
+    seed: int,
+    attention_only: Path,
+    plain_cproj: Path,
+    data_dir: Path,
+    layers: list[int],
+    batch_size: int,
+    block_size: int,
+    batches_count: int,
+    sample_cap: int,
+    device: str,
+) -> GateSplitData:
+    batches = fixed_validation_batches(
+        data_dir,
+        batch_size,
+        block_size,
+        batches_count,
+        seed,
+    )
+    digest = tensor_sha256(torch.cat(batches))
+    teacher, _, _ = collect_model(
+        attention_only,
+        batches,
+        layers,
+        sample_cap,
+        device,
+        collect_pre_gelu=False,
+    )
+    source, weights, biases = collect_model(
+        plain_cproj,
+        batches,
+        layers,
+        sample_cap,
+        device,
+        collect_pre_gelu=True,
+        collect_mlp_input=True,
+    )
+    return GateSplitData(
+        name=name,
+        batches=batches,
+        token_sha256=digest,
+        mlp_input={
+            layer: source[(layer, "mlp_input")] for layer in layers
+        },
+        pre_gelu={
+            layer: source[(layer, "pre_gelu")] for layer in layers
+        },
+        teacher_mlp_out={
+            layer: teacher[(layer, "mlp_out")] for layer in layers
+        },
+        cproj_weight=weights,
+        cproj_bias=biases,
+    )
+
+
+def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--attention-only", required=True, type=Path)
+    parser.add_argument("--plain-cproj", required=True, type=Path)
+    parser.add_argument("--data-dir", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--layers", default="0,3,6,9,11")
+    parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument("--block-size", type=int, default=256)
+    parser.add_argument("--batches", type=int, default=8)
+    parser.add_argument("--ce-batches", type=int, default=8)
+    parser.add_argument("--sample-cap", type=int, default=2048)
+    parser.add_argument("--sample-seed", type=int, default=20260716)
+    parser.add_argument("--holdout-sample-seed", type=int, default=20260717)
+    parser.add_argument(
+        "--initial-output-log-gain", type=float, default=0.125
+    )
+    parser.add_argument("--device", default="cuda")
+    args = parser.parse_args()
+
+    layers = [int(part) for part in args.layers.split(",") if part]
+    if not layers:
+        raise ValueError("at least one layer is required")
+    if args.sample_cap > args.batch_size * args.block_size * args.batches:
+        raise ValueError("sample cap exceeds the available activation rows")
+    if args.ce_batches <= 0 or args.ce_batches > args.batches:
+        raise ValueError("ce-batches must be in [1, batches]")
+
+    fit = collect_split(
+        name="fit",
+        seed=args.sample_seed,
+        attention_only=args.attention_only,
+        plain_cproj=args.plain_cproj,
+        data_dir=args.data_dir,
+        layers=layers,
+        batch_size=args.batch_size,
+        block_size=args.block_size,
+        batches_count=args.batches,
+        sample_cap=args.sample_cap,
+        device=args.device,
+    )
+    holdout = collect_split(
+        name="holdout",
+        seed=args.holdout_sample_seed,
+        attention_only=args.attention_only,
+        plain_cproj=args.plain_cproj,
+        data_dir=args.data_dir,
+        layers=layers,
+        batch_size=args.batch_size,
+        block_size=args.block_size,
+        batches_count=args.batches,
+        sample_cap=args.sample_cap,
+        device=args.device,
+    )
+
+    model, gates, handles = load_gate_model(
+        args.plain_cproj,
+        args.device,
+        layers,
+        args.initial_output_log_gain,
+    )
+    parameters = gate_parameters(gates)
+    rows: list[dict[str, object]] = []
+    ce_by_split: dict[str, dict[str, torch.Tensor]] = {}
+    teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
+    diagnostics: dict[str, object] = {}
+    try:
+        for split in (fit, holdout):
+            ce_gradient, ce_loss = task_ce_gradients(
+                model,
+                parameters,
+                split.batches[: args.ce_batches],
+                args.device,
+            )
+            teacher_gradient, teacher_losses = teacher_mse_gradients(
+                model, gates, split, layers, args.device
+            )
+            ce_by_split[split.name] = ce_gradient
+            teacher_by_split[split.name] = teacher_gradient
+            comparison_rows = alignment_rows(
+                ce_gradient,
+                teacher_gradient,
+                comparison="task_ce_vs_teacher_mse",
+                split=split.name,
+            )
+            rows.extend(comparison_rows)
+            diagnostics[split.name] = {
+                "task_ce": ce_loss,
+                "teacher_mse_by_layer": {
+                    str(layer): teacher_losses[layer] for layer in layers
+                },
+            }
+            print(
+                f"split={split.name} task_ce={ce_loss:.6f} "
+                f"global_cosine={comparison_rows[0]['cosine']:.6f}",
+                flush=True,
+            )
+        rows.extend(
+            alignment_rows(
+                ce_by_split["fit"],
+                ce_by_split["holdout"],
+                comparison="task_ce_fit_vs_holdout",
+                split="cross_split",
+            )
+        )
+        rows.extend(
+            alignment_rows(
+                teacher_by_split["fit"],
+                teacher_by_split["holdout"],
+                comparison="teacher_mse_fit_vs_holdout",
+                split="cross_split",
+            )
+        )
+    finally:
+        for handle in handles:
+            handle.remove()
+
+    root = Path(__file__).resolve().parents[2]
+    args.output.mkdir(parents=True, exist_ok=True)
+    csv_path = args.output / "mlp_conditioned_gate_alignment.csv"
+    write_csv(csv_path, rows)
+    metadata = {
+        "schema_version": "mlp_conditioned_gate_alignment_v1",
+        "scientific_scope": (
+            "deterministic no-update identity-initialized structural "
+            "gradient diagnostic"
+        ),
+        "attention_only": {
+            "path": str(args.attention_only),
+            "sha256": sha256(args.attention_only),
+        },
+        "plain_cproj": {
+            "path": str(args.plain_cproj),
+            "sha256": sha256(args.plain_cproj),
+        },
+        "data_dir": str(args.data_dir),
+        "layers": layers,
+        "batch_size": args.batch_size,
+        "block_size": args.block_size,
+        "batches": args.batches,
+        "ce_batches": args.ce_batches,
+        "sample_cap": args.sample_cap,
+        "sample_seed": args.sample_seed,
+        "holdout_sample_seed": args.holdout_sample_seed,
+        "fit_token_sha256": fit.token_sha256,
+        "holdout_token_sha256": holdout.token_sha256,
+        "initial_output_log_gain": args.initial_output_log_gain,
+        "gate": {
+            "formula": "update * exp(tanh(slope * mlp_input + bias))",
+            "parameters_per_selected_layer": 2 * model.config.n_embd,
+            "identity_initialized": True,
+            "learned_basis": False,
+            "lora_adapter": False,
+        },
+        "diagnostics": diagnostics,
+        "global_alignment": [
+            row for row in rows if row["scope"] == "global"
+        ],
+        "source": {
+            "path": str(Path(__file__).relative_to(root)),
+            "sha256": sha256(Path(__file__)),
+            "git_commit": git_head(root),
+        },
+        "csv": {"path": str(csv_path), "sha256": sha256(csv_path)},
+    }
+    metadata_path = args.output / "mlp_conditioned_gate_alignment.json"
+    metadata_path.write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    print(
+        json.dumps(
+            {
+                "csv": str(csv_path),
+                "csv_sha256": sha256(csv_path),
+                "metadata": str(metadata_path),
+                "metadata_sha256": sha256(metadata_path),
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+
+
+if __name__ == "__main__":
+    main()
