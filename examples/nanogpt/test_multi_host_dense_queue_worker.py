@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -10,6 +12,7 @@ from examples.nanogpt.multi_host_dense_queue_worker import (
     host_admission_status,
     host_probe_manifest,
     launch,
+    load_manifest,
     load_state,
     mark_probe_failure_notified,
     progress_text,
@@ -34,6 +37,41 @@ class MultiHostDenseQueueWorkerTest(unittest.TestCase):
             state = load_state(path, manifest)
         self.assertEqual(state["paused_hosts"], ["Y400"])
         self.assertEqual(state["entries"]["task"]["state"], "pending")
+
+    def test_manifest_remote_identity_need_not_match_local_control_plane(self) -> None:
+        with TemporaryDirectory() as directory:
+            repo = Path(directory)
+            config = repo / "config.json"
+            config.write_text(
+                json.dumps({"mfu_preflight_required": True, "mfu_min_fraction": 0.20})
+            )
+            queue = repo / "queue.json"
+            queue.write_text(
+                json.dumps(
+                    {
+                        "schema_version": "multi_host_dense_queue_v1",
+                        "required_source_hashes": {"train.py": "a" * 64},
+                        "hosts": {"Y400": {"launch_mode": "tmux-isolated"}},
+                        "entries": [
+                            {
+                                "name": "task",
+                                "host_preference": ["Y400"],
+                                "variants": {
+                                    "Y400": {
+                                        "config": "config.json",
+                                        "config_sha256": hashlib.sha256(
+                                            config.read_bytes()
+                                        ).hexdigest(),
+                                        "checkpoint_budget_bytes": 1,
+                                    }
+                                },
+                            }
+                        ],
+                    }
+                )
+            )
+            manifest = load_manifest(queue, repo)
+        self.assertEqual(manifest["required_source_hashes"], {"train.py": "a" * 64})
 
     def test_load_state_migrates_existing_probe_outage_without_realerting(self) -> None:
         manifest = {"entries": [{"name": "task", "variants": {"Y400": {}}}]}

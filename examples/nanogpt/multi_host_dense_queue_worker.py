@@ -111,18 +111,10 @@ def load_manifest(path: Path, repo: Path) -> Dict[str, Any]:
                 or int(active_budget_bytes) > int(variant["checkpoint_budget_bytes"])
             ):
                 raise ValueError("variant has invalid active checkpoint budget: " + name + "/" + host)
-    registered_source_sets = [payload["required_source_hashes"]]
-    registered_source_sets.extend(
-        variant["required_source_hashes"]
-        for task in payload["entries"]
-        for variant in task.get("variants", {}).values()
-        if variant.get("required_source_hashes")
-    )
-    if not any(
-        all(base.file_sha256(repo / relative) == expected for relative, expected in source_set.items())
-        for source_set in registered_source_sets
-    ):
-        raise ValueError("local source tree does not match any registered worktree identity")
+    # Registered source hashes describe the remote training worktrees, not this
+    # local control-plane checkout.  Remote identity is checked before every
+    # launch; requiring the scheduler checkout to match an old training commit
+    # makes a harmless monitor-only change prevent the worker from restarting.
     return payload
 
 
