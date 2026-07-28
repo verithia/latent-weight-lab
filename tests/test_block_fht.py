@@ -13,7 +13,14 @@ from latent_weight_lab.block_fht import (
     sign_word_for,
     suspend_block_fht_weight_cache,
 )
-from examples.nanogpt.model import FixedFHTMix, GPT, GPTConfig, MLP, freeze_non_block_fht
+from examples.nanogpt.model import (
+    FixedFHTMix,
+    GPT,
+    GPTConfig,
+    LearnedGivensOutputMix,
+    MLP,
+    freeze_non_block_fht,
+)
 
 
 def test_sign_word_uses_32_positions():
@@ -678,3 +685,46 @@ def test_fixed_fht_basis_columns_match_both_lowrank_projection_sides():
     coefficients = torch.randn(7, rank)
     padded = F.pad(coefficients, (0, 5 - rank))
     assert torch.allclose(coefficients.matmul(basis.transpose(0, 1)), mix(padded), atol=1e-6)
+
+
+def test_learned_givens_output_mix_is_identity_at_initialization() -> None:
+    mix = LearnedGivensOutputMix(8, stages=3, seed=19)
+    values = torch.randn(2, 5, 8)
+    torch.testing.assert_close(mix(values), values)
+    assert mix.angles.ndim == 1
+
+
+def test_learned_givens_output_mix_preserves_norm_and_has_angle_gradient() -> None:
+    mix = LearnedGivensOutputMix(8, stages=3, seed=23)
+    with torch.no_grad():
+        mix.angles.copy_(torch.linspace(-0.4, 0.5, mix.angles.numel()))
+    values = torch.randn(4, 7, 8)
+    output = mix(values)
+    torch.testing.assert_close(output.norm(dim=-1), values.norm(dim=-1), atol=1e-5, rtol=1e-5)
+    output[..., 0].sum().backward()
+    assert mix.angles.grad is not None
+    assert float(mix.angles.grad.abs().sum()) > 0.0
+
+
+def test_shared_hidden_gain_coordinate_scale_preserves_identity_and_scales_tangent() -> None:
+    base = MLP(GPTConfig(n_embd=4, n_head=1, block_fht_mlp_shared_hidden_gain=True), layer_id=0)
+    scaled = MLP(
+        GPTConfig(
+            n_embd=4,
+            n_head=1,
+            block_fht_mlp_shared_hidden_gain=True,
+            block_fht_mlp_shared_hidden_gain_scale=4.0,
+        ),
+        layer_id=0,
+    )
+    scaled.load_state_dict(base.state_dict())
+    values = torch.randn(2, 3, 4)
+    torch.testing.assert_close(base(values), scaled(values))
+    base(values).sum().backward()
+    scaled(values).sum().backward()
+    assert base.shared_hidden_log_gain is not None
+    assert scaled.shared_hidden_log_gain is not None
+    torch.testing.assert_close(
+        scaled.shared_hidden_log_gain.grad,
+        4.0 * base.shared_hidden_log_gain.grad,
+    )

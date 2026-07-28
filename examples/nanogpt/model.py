@@ -112,6 +112,9 @@ class GPTConfig:
     block_fht_cproj_spectral_resid_full_core: bool = False
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
+    block_fht_mlp_shared_hidden_gain_scale: float = 1.0
+    block_fht_mlp_output_rotation_stages: int = 0
+    block_fht_mlp_output_rotation_seed: int = 271828
     tie_word_embeddings: bool = True
 
 
@@ -291,6 +294,52 @@ class FixedFHTInputMixLinear(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear(self.mix(x))
+
+
+class LearnedGivensOutputMix(nn.Module):
+    """Identity-initialized compact orthogonal channel mixing."""
+
+    def __init__(self, features: int, stages: int, seed: int) -> None:
+        super().__init__()
+        self.features = int(features)
+        self.stages = int(stages)
+        if self.features <= 0 or self.features % 2:
+            raise ValueError("LearnedGivensOutputMix requires positive even features")
+        if self.stages <= 0:
+            raise ValueError("LearnedGivensOutputMix stages must be positive")
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        permutations = torch.stack(
+            [torch.randperm(self.features, generator=generator) for _ in range(self.stages)]
+        )
+        self.register_buffer("permutations", permutations, persistent=True)
+        self.register_buffer(
+            "inverse_permutations",
+            torch.argsort(permutations, dim=1),
+            persistent=True,
+        )
+        # Keep this one-dimensional so a Muon recipe assigns the angle
+        # coordinate to its AdamW fallback, not to matrix orthogonalization.
+        self.angles = nn.Parameter(torch.zeros(self.stages * (self.features // 2)))
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, got {values.shape[-1]}"
+            )
+        result = values
+        angles = self.angles.view(self.stages, self.features // 2)
+        for stage in range(self.stages):
+            permuted = result.index_select(-1, self.permutations[stage])
+            pairs = permuted.reshape(*permuted.shape[:-1], self.features // 2, 2)
+            angle = angles[stage].to(device=values.device, dtype=values.dtype)
+            cosine = angle.cos()
+            sine = angle.sin()
+            first = cosine * pairs[..., 0] - sine * pairs[..., 1]
+            second = sine * pairs[..., 0] + cosine * pairs[..., 1]
+            rotated = torch.stack((first, second), dim=-1).reshape_as(permuted)
+            result = rotated.index_select(-1, self.inverse_permutations[stage])
+        return result
 
 
 class GroupedInputLinear(nn.Module):
@@ -970,6 +1019,21 @@ class MLP(nn.Module):
             if config.block_fht_mlp_shared_hidden_gain
             else None
         )
+        self.shared_hidden_gain_scale = float(config.block_fht_mlp_shared_hidden_gain_scale)
+        if not math.isfinite(self.shared_hidden_gain_scale) or self.shared_hidden_gain_scale <= 0.0:
+            raise ValueError("block_fht_mlp_shared_hidden_gain_scale must be positive and finite")
+        rotation_stages = int(config.block_fht_mlp_output_rotation_stages)
+        if rotation_stages < 0:
+            raise ValueError("block_fht_mlp_output_rotation_stages must be non-negative")
+        self.output_rotation = (
+            LearnedGivensOutputMix(
+                config.n_embd,
+                rotation_stages,
+                int(config.block_fht_mlp_output_rotation_seed) + layer_id * 64,
+            )
+            if rotation_stages
+            else None
+        )
         self.last_postgelu: torch.Tensor | None = None
 
     def _fused_cached_cproj_lowrank(self, activated: torch.Tensor) -> torch.Tensor | None:
@@ -999,7 +1063,9 @@ class MLP(nn.Module):
             hidden = hidden + self.pregelu_bias.to(dtype=hidden.dtype)
         shared_hidden_gain = None
         if self.shared_hidden_log_gain is not None:
-            shared_hidden_gain = self.shared_hidden_log_gain.exp().to(dtype=hidden.dtype)
+            shared_hidden_gain = (
+                self.shared_hidden_gain_scale * self.shared_hidden_log_gain
+            ).exp().to(dtype=hidden.dtype)
             hidden = hidden * shared_hidden_gain
         activated = self.gelu(hidden)
         if shared_hidden_gain is not None:
@@ -1052,6 +1118,8 @@ class MLP(nn.Module):
                 )
             spectral = F.linear(spectral, self.cproj_spectral_resid_out_basis)
             out = out + self.cproj_spectral_resid_scale.to(dtype=out.dtype) * spectral
+        if self.output_rotation is not None:
+            out = self.output_rotation(out)
         return self.dropout(out)
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:

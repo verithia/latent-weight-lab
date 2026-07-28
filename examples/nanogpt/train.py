@@ -855,6 +855,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--block-fht-mlp-shared-hidden-gain", action="store_true")
+    parser.add_argument("--block-fht-mlp-shared-hidden-gain-scale", type=float, default=1.0)
+    parser.add_argument("--block-fht-mlp-output-rotation-stages", type=int, default=0)
+    parser.add_argument("--block-fht-mlp-output-rotation-seed", type=int, default=271828)
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -1020,6 +1023,9 @@ def main() -> None:
         block_fht_cproj_spectral_resid_full_core=args.block_fht_cproj_spectral_resid_full_core,
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,
+        block_fht_mlp_shared_hidden_gain_scale=args.block_fht_mlp_shared_hidden_gain_scale,
+        block_fht_mlp_output_rotation_stages=args.block_fht_mlp_output_rotation_stages,
+        block_fht_mlp_output_rotation_seed=args.block_fht_mlp_output_rotation_seed,
         tie_word_embeddings=args.tie_word_embeddings,
     )
 
