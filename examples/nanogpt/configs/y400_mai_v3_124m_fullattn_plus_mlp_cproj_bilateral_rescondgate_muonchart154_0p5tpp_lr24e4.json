@@ -196,9 +196,9 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "post_direction_rescondgate_0p5tpp",
-  "implementation_commit": "92384b2155b6b265652e47e2dc49db288cd3aabb",
+  "implementation_commit": "976720d436389d210ffc2690ec6fbd704781f331",
   "implementation_source_hashes": {
-    "examples/nanogpt/model.py": "87a4b38deb091aede6f8938f10b08adb7b98271c61c6826a4efe1cb620f98214",
+    "examples/nanogpt/model.py": "e9afaa3be562b743531586d709d03e8f6b480f0be3defc9ebf145e1a5cfe8a9b",
     "examples/nanogpt/train.py": "017d52317e91af7672002eb40142d5573e4805ba38083a5d2ce68f6af3dbc799",
     "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
   },
