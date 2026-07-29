@@ -1,8 +1,8 @@
 {
   "schema_version": "mai_124m_mlp_fast_fresh_hidden_capacity_holdout_plan_v1",
-  "status": "registered_before_implementation_or_execution",
+  "status": "registered_before_scoring_with_pre_execution_input_correction",
   "registered_at": "2026-07-30",
-  "scientific_question": "On optimizer phases and layers untouched by all prior fresh-chart gates, does a two-pass stateless current-Muon-matched hidden c_proj chart generalize beyond hidden64 strongly enough that the smallest useful depth can be implemented and performance-qualified without a learned dense basis or LoRA?",
+  "scientific_question": "On optimizer phases and validation windows untouched by all prior fresh-chart gates, does a two-pass stateless current-Muon-matched hidden c_proj chart generalize beyond hidden64 strongly enough that the smallest useful depth can be implemented and performance-qualified without a learned dense basis or LoRA?",
   "parameter_updates": 0,
   "parent_results": [
     {
@@ -41,22 +41,14 @@
       165,
       225
     ],
-    "previously_scored_layers": [
+    "optimizer_probe_layers": [
       0,
       3,
       6,
       9,
       11
     ],
-    "heldout_layers": [
-      1,
-      2,
-      4,
-      5,
-      7,
-      8,
-      10
-    ],
+    "layer_holdout_available": false,
     "previous_validation_seeds": [
       20260802,
       20260803
@@ -128,13 +120,13 @@
       "all finite/nonfinite cells",
       "candidate improvement per added coordinate"
     ],
-    "aggregation": "Report all 28 held-out layer/update cells across both validation windows, energy-weighted aggregates, minimum cells, and 8 model-level finite-CE comparisons."
+    "aggregation": "Report all 20 phase-held-out layer/update cells across both new validation windows, energy-weighted aggregates, minimum cells, and 8 model-level finite-CE comparisons."
   },
   "registered_decision_rule": {
     "candidate_pass": [
       "Candidate must improve over hidden64 by at least 1.15x on aggregate current post-GELU positive-line recovery.",
       "Candidate must improve over hidden64 by at least 1.15x on both new fit and new holdout validation-gradient predicted CE decrease.",
-      "Candidate must achieve absolute 15-update future residual positive-line recovery of at least 0.015 and positive future cosine in at least 24 of 28 held-out layer/update cells.",
+      "Candidate must achieve absolute 15-update future residual positive-line recovery of at least 0.015 and positive future cosine in at least 17 of 20 phase-held-out layer/update cells. This preserves the originally registered 85.7 percent positive-cell requirement after the pre-scoring layer-count correction.",
       "Candidate must win at least 7 of 8 model-level finite-step CE comparisons against hidden64.",
       "Candidate must have no nonfinite metric and no negative train-gradient predicted CE decrease cell."
     ],
@@ -152,6 +144,28 @@
     "pro6": false,
     "do_not_disturb": "the running 985M full-attention 20TPP job on Y400 GPU0",
     "workspace_cap_gib": 300
+  },
+  "pre_execution_input_repair": {
+    "classification": "OPTIMIZER_PROBE_LAYER_AVAILABILITY_CORRECTION",
+    "first_attempt_parameter_updates": 0,
+    "first_attempt_candidate_metrics_computed": false,
+    "first_attempt_ce_evaluations_computed": false,
+    "first_attempt_failure": "KeyError on transformer.h.1.mlp.c_proj.weight before candidate construction",
+    "first_attempt_foreground_log_sha256": "fbff8a92d49c6eddb8b0088b633264560e3f9495d30f5e2a26c671647cf13682",
+    "audit": "Every base and future optimizer probe contains exact c_proj state only for layers 0/3/6/9/11. Snapshots contain model weights for all layers, but exact current/future Muon state is unavailable for all other layers, so a causal held-out-layer gate cannot be constructed from this replay.",
+    "corrected_layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "independence_retained": "All base updates, future updates, and validation windows remain untouched by earlier fresh-chart gates.",
+    "positive_cell_threshold_change": "24/28 becomes 17/20, preserving the preregistered 85.7 percent requirement before any candidate metric or CE evaluation.",
+    "other_thresholds_changed": false,
+    "candidate_definitions_changed": false,
+    "future_information_used_for_selection": false,
+    "corrected_output_identity": "fast_fresh_hidden_capacity_holdout_v2"
   },
   "authorization": {
     "this_plan_authorizes": "Implementation, focused tests, and one zero-update directly polled held-out diagnostic after exact-commit deployment.",
