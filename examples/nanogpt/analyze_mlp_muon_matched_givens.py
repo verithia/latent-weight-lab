@@ -333,6 +333,7 @@ def aggregate_rows(
     minimum_future_recovery: float = 0.02,
     minimum_future_over_random: float = 2.0,
     minimum_update_over_coordinate: float = 4.0,
+    minimum_cell_future_cosine: float = 0.0,
 ) -> tuple[list[dict[str, Any]], str]:
     aggregates: list[dict[str, Any]] = []
     for stages in stage_counts:
@@ -406,7 +407,8 @@ def aggregate_rows(
             selected["task_update_recovery_over_coordinate_fraction"]
         )
         >= minimum_update_over_coordinate
-        and int(task["positive_future_cells"]) == int(task["cells"])
+        and float(task["minimum_future_cosine"])
+        >= minimum_cell_future_cosine
     ):
         decision = "PROMOTE_MUON_MATCHED_GIVENS_TO_ALL_CELL_ORACLE"
     else:
@@ -438,6 +440,9 @@ def main() -> None:
     parser.add_argument(
         "--minimum-update-over-coordinate", type=float, default=4.0
     )
+    parser.add_argument(
+        "--minimum-cell-future-cosine", type=float, default=0.0
+    )
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
     started = time.time()
@@ -451,6 +456,7 @@ def main() -> None:
         or args.minimum_future_recovery <= 0.0
         or args.minimum_future_over_random <= 0.0
         or args.minimum_update_over_coordinate <= 0.0
+        or args.minimum_cell_future_cosine < 0.0
     ):
         raise ValueError("invalid stage counts or decision thresholds")
     end_by_start = dict(
@@ -592,6 +598,7 @@ def main() -> None:
         minimum_update_over_coordinate=(
             args.minimum_update_over_coordinate
         ),
+        minimum_cell_future_cosine=args.minimum_cell_future_cosine,
     )
     args.output.mkdir(parents=True, exist_ok=True)
     detail_path = args.output / "muon_matched_givens_pilot.csv"
@@ -619,8 +626,8 @@ def main() -> None:
             f">={args.minimum_future_recovery}, recovery over random "
             f">={args.minimum_future_over_random}x, requested-update "
             "recovery over coordinate fraction "
-            f">={args.minimum_update_over_coordinate}x, and positive future "
-            "cosine in every pilot cell"
+            f">={args.minimum_update_over_coordinate}x, and minimum future "
+            f"cosine >={args.minimum_cell_future_cosine} in every cell"
         ),
         "causal_protocol": (
             "connectivity and angles use only the exact current coherent "

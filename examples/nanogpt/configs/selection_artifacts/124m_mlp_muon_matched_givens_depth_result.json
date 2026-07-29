@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_depth_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_depth_plan.json",
+  "plan_sha256": "38d2df754af8e0b11b8f5b38d71c20faccefa745aa7d403f43783a1ec75d1e9e",
+  "execution_commit": "dde49d72b22ce7da805b1413aafa620efbe7ff05",
+  "execution": "direct foreground Y400 GPU1 diagnostic, polled to exit with no parameter update, language-model training, watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "input_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+  "stage_results": [
+    {
+      "stages": 16,
+      "coordinates_per_layer": 24576,
+      "coordinate_fraction": 0.010416666666666666,
+      "task_matched": {
+        "requested_update_recovery": 0.08517786137333179,
+        "future_recovery": 0.01565450072010374,
+        "future_cosine": 0.12234688910698145,
+        "minimum_future_cosine": 0.09622575691292082,
+        "positive_future_cells": 4
+      },
+      "random": {
+        "requested_update_recovery": 0.00991667280664062,
+        "future_recovery": 0.0018193335614187006,
+        "future_cosine": 0.041672177043556365
+      },
+      "task_over_random_future_recovery": 8.60452478428227,
+      "task_update_recovery_over_coordinate_fraction": 8.177074691839852
+    },
+    {
+      "stages": 32,
+      "coordinates_per_layer": 49152,
+      "coordinate_fraction": 0.020833333333333332,
+      "task_matched": {
+        "requested_update_recovery": 0.1401180206102985,
+        "future_recovery": 0.02568942782302019,
+        "future_cosine": 0.1567017351483294,
+        "minimum_future_cosine": 0.12310328182951212,
+        "positive_future_cells": 4
+      },
+      "random": {
+        "requested_update_recovery": 0.019803623379669986,
+        "future_recovery": 0.0036236562164636043,
+        "future_cosine": 0.05886688294678566
+      },
+      "task_over_random_future_recovery": 7.089366730294023,
+      "task_update_recovery_over_coordinate_fraction": 6.725664989294327
+    }
+  ],
+  "cross_depth": {
+    "task_matched_future_recovery": {
+      "8": 0.00905310216578311,
+      "16": 0.01565450072010374,
+      "32": 0.02568942782302019
+    },
+    "monotonic": true
+  },
+  "decision": {
+    "classification": "PROMOTE_MUON_MATCHED_GIVENS_TO_ALL_CELL_ORACLE",
+    "registered_rule_passed": true,
+    "interpretation": [
+      "The 32-stage task-matched chart clears the 2 percent absolute future-recovery gate at 2.5689 percent.",
+      "Its future recovery is 7.09 times the equal-size random-connectivity control.",
+      "It captures 14.0118 percent of the requested current Muon update, 6.73 times its 2.0833 percent coordinate fraction.",
+      "Future recovery scales monotonically from 0.9053 to 1.5655 to 2.5689 percent at 8, 16, and 32 stages.",
+      "Every pilot cell remains positive and the worst 32-stage future cosine is 0.12310.",
+      "This promotes an all-20-cell no-update validation and a production performance design only. It does not authorize a language-model training run."
+    ],
+    "next_action": "validate the 32-stage causal chart on all five representative layers and all four phases with the same held-out-future protocol; require no layer or phase collapse before designing a refreshable compact training representation"
+  },
+  "immutable_artifacts": {
+    "detail_sha256": "7f561ed31d5476f9def8fad12f136b443e600073b8a57c2bfd333fe8ed8ba960",
+    "matchings_sha256": "79e02e2a2c5f06651688201c34f4f1c61dbe77dfd41cba3004f13a50674798e0",
+    "aggregate_sha256": "32c9b6728f749eb7f31830cb55c356d3ae67542745a8816c66edddb10d268d38",
+    "metadata_sha256": "4a63130263dcbab5d3d8dba0c861fb6281028902b06b3020b6e47b8e4b7235d3"
+  }
+}
