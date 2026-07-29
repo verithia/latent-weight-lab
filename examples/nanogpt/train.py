@@ -1043,6 +1043,10 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
     )
     parser.add_argument(
+        "--block-fht-mlp-residual-conditioned-output-gate-untied-bases",
+        action="store_true",
+    )
+    parser.add_argument(
         "--block-fht-mlp-residual-conditioned-output-gate-basis-block-size",
         type=int,
         default=256,
@@ -1051,6 +1055,16 @@ def parse_args() -> argparse.Namespace:
         "--block-fht-mlp-residual-conditioned-output-gate-basis-seed",
         type=int,
         default=271828,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-residual-conditioned-output-gate-update-basis-seed",
+        type=int,
+        default=376557,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-residual-conditioned-output-gate-output-basis-seed",
+        type=int,
+        default=481286,
     )
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
@@ -1145,11 +1159,20 @@ def conditioned_output_gate_config_kwargs(
         "block_fht_mlp_residual_conditioned_output_gate_fixed_basis": (
             args.block_fht_mlp_residual_conditioned_output_gate_fixed_basis
         ),
+        "block_fht_mlp_residual_conditioned_output_gate_untied_bases": (
+            args.block_fht_mlp_residual_conditioned_output_gate_untied_bases
+        ),
         "block_fht_mlp_residual_conditioned_output_gate_basis_block_size": (
             args.block_fht_mlp_residual_conditioned_output_gate_basis_block_size
         ),
         "block_fht_mlp_residual_conditioned_output_gate_basis_seed": (
             args.block_fht_mlp_residual_conditioned_output_gate_basis_seed
+        ),
+        "block_fht_mlp_residual_conditioned_output_gate_update_basis_seed": (
+            args.block_fht_mlp_residual_conditioned_output_gate_update_basis_seed
+        ),
+        "block_fht_mlp_residual_conditioned_output_gate_output_basis_seed": (
+            args.block_fht_mlp_residual_conditioned_output_gate_output_basis_seed
         ),
     }
 

@@ -139,8 +139,11 @@ class GPTConfig:
     block_fht_mlp_residual_conditioned_output_gate_layers: tuple[int, ...] = ()
     block_fht_mlp_residual_conditioned_output_gate_bias: bool = True
     block_fht_mlp_residual_conditioned_output_gate_fixed_basis: bool = False
+    block_fht_mlp_residual_conditioned_output_gate_untied_bases: bool = False
     block_fht_mlp_residual_conditioned_output_gate_basis_block_size: int = 256
     block_fht_mlp_residual_conditioned_output_gate_basis_seed: int = 271828
+    block_fht_mlp_residual_conditioned_output_gate_update_basis_seed: int = 376557
+    block_fht_mlp_residual_conditioned_output_gate_output_basis_seed: int = 481286
     tie_word_embeddings: bool = True
 
 
@@ -1553,6 +1556,18 @@ class MLP(nn.Module):
             conditioned_gate_enabled
             and config.block_fht_mlp_residual_conditioned_output_gate_fixed_basis
         )
+        if (
+            config.block_fht_mlp_residual_conditioned_output_gate_untied_bases
+            and not config.block_fht_mlp_residual_conditioned_output_gate_fixed_basis
+        ):
+            raise ValueError(
+                "block_fht_mlp_residual_conditioned_output_gate_"
+                "untied_bases requires fixed_basis"
+            )
+        self.residual_conditioned_output_gate_untied_bases = bool(
+            self.residual_conditioned_output_gate_fixed_basis
+            and config.block_fht_mlp_residual_conditioned_output_gate_untied_bases
+        )
         self.residual_conditioned_output_gate_basis_block_size = int(
             config.block_fht_mlp_residual_conditioned_output_gate_basis_block_size
         )
@@ -1569,31 +1584,63 @@ class MLP(nn.Module):
                     "block_fht_mlp_residual_conditioned_output_gate_"
                     "basis_block_size must be a power of two dividing n_embd"
                 )
-            generator = torch.Generator(device="cpu")
-            generator.manual_seed(
-                int(
-                    config.block_fht_mlp_residual_conditioned_output_gate_basis_seed
-                )
-                + layer_id * 64
-            )
-            permutation = torch.randperm(
-                config.n_embd,
-                generator=generator,
-                device="cpu",
-            )
-            signs = (
-                torch.randint(
-                    0,
-                    2,
-                    (config.n_embd,),
+            def make_basis_buffers(
+                seed: int,
+            ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+                generator = torch.Generator(device="cpu")
+                generator.manual_seed(int(seed) + layer_id * 64)
+                selected_permutation = torch.randperm(
+                    config.n_embd,
                     generator=generator,
-                    dtype=torch.float32,
                     device="cpu",
                 )
-                * 2.0
-                - 1.0
+                selected_signs = (
+                    torch.randint(
+                        0,
+                        2,
+                        (config.n_embd,),
+                        generator=generator,
+                        dtype=torch.float32,
+                        device="cpu",
+                    )
+                    * 2.0
+                    - 1.0
+                )
+                return (
+                    selected_permutation,
+                    torch.argsort(selected_permutation),
+                    selected_signs,
+                )
+
+            (
+                permutation,
+                inverse_permutation,
+                signs,
+            ) = make_basis_buffers(
+                config.block_fht_mlp_residual_conditioned_output_gate_basis_seed
             )
-            inverse_permutation = torch.argsort(permutation)
+            if self.residual_conditioned_output_gate_untied_bases:
+                (
+                    update_permutation,
+                    update_inverse_permutation,
+                    update_signs,
+                ) = make_basis_buffers(
+                    config.block_fht_mlp_residual_conditioned_output_gate_update_basis_seed
+                )
+                (
+                    output_permutation,
+                    output_inverse_permutation,
+                    output_signs,
+                ) = make_basis_buffers(
+                    config.block_fht_mlp_residual_conditioned_output_gate_output_basis_seed
+                )
+            else:
+                update_permutation = None
+                update_inverse_permutation = None
+                update_signs = None
+                output_permutation = None
+                output_inverse_permutation = None
+                output_signs = None
             hadamard = normalized_fht_last_dim(
                 torch.eye(basis_block_size, dtype=torch.float32)
             )
@@ -1601,6 +1648,12 @@ class MLP(nn.Module):
             permutation = None
             inverse_permutation = None
             signs = None
+            update_permutation = None
+            update_inverse_permutation = None
+            update_signs = None
+            output_permutation = None
+            output_inverse_permutation = None
+            output_signs = None
             hadamard = None
         self.register_buffer(
             "residual_conditioned_output_permutation",
@@ -1615,6 +1668,36 @@ class MLP(nn.Module):
         self.register_buffer(
             "residual_conditioned_output_signs",
             signs,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_update_permutation",
+            update_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_update_inverse_permutation",
+            update_inverse_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_update_signs",
+            update_signs,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_output_permutation",
+            output_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_output_inverse_permutation",
+            output_inverse_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_output_signs",
+            output_signs,
             persistent=True,
         )
         self.register_buffer(
@@ -1981,6 +2064,7 @@ class MLP(nn.Module):
         condition = self._residual_conditioned_output_basis(
             condition,
             inverse=False,
+            role="condition",
         )
         slope = self.residual_conditioned_output_slope.to(
             dtype=condition.dtype
@@ -2006,12 +2090,28 @@ class MLP(nn.Module):
         values: torch.Tensor,
         *,
         inverse: bool,
+        role: str,
     ) -> torch.Tensor:
-        permutation = self.residual_conditioned_output_permutation
-        inverse_permutation = (
-            self.residual_conditioned_output_inverse_permutation
-        )
-        signs = self.residual_conditioned_output_signs
+        if role == "condition" or not self.residual_conditioned_output_gate_untied_bases:
+            permutation = self.residual_conditioned_output_permutation
+            inverse_permutation = (
+                self.residual_conditioned_output_inverse_permutation
+            )
+            signs = self.residual_conditioned_output_signs
+        elif role == "update":
+            permutation = self.residual_conditioned_output_update_permutation
+            inverse_permutation = (
+                self.residual_conditioned_output_update_inverse_permutation
+            )
+            signs = self.residual_conditioned_output_update_signs
+        elif role == "output":
+            permutation = self.residual_conditioned_output_output_permutation
+            inverse_permutation = (
+                self.residual_conditioned_output_output_inverse_permutation
+            )
+            signs = self.residual_conditioned_output_output_signs
+        else:
+            raise ValueError(f"unsupported residual gate basis role: {role}")
         hadamard = self.residual_conditioned_output_hadamard
         if permutation is None:
             return values
@@ -2064,6 +2164,7 @@ class MLP(nn.Module):
         spectral_update = self._residual_conditioned_output_basis(
             update,
             inverse=False,
+            role="update",
         )
         correction = spectral_update * modulation.to(
             dtype=spectral_update.dtype
@@ -2071,6 +2172,7 @@ class MLP(nn.Module):
         return update + self._residual_conditioned_output_basis(
             correction,
             inverse=True,
+            role="output",
         )
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:

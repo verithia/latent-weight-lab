@@ -1157,6 +1157,67 @@ def test_mlp_residual_conditioned_fixed_basis_gate_matches_diagnostic() -> None:
     assert mlp.residual_conditioned_output_bias.grad is not None
 
 
+def test_mlp_residual_conditioned_untied_fixed_basis_matches_diagnostic() -> None:
+    from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
+        UntiedFixedBasisBilinearOutputGate,
+    )
+
+    torch.manual_seed(503)
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_residual_conditioned_output_gate=True,
+            block_fht_mlp_residual_conditioned_output_gate_fixed_basis=True,
+            block_fht_mlp_residual_conditioned_output_gate_untied_bases=True,
+            block_fht_mlp_residual_conditioned_output_gate_basis_block_size=8,
+            block_fht_mlp_residual_conditioned_output_gate_basis_seed=123,
+            block_fht_mlp_residual_conditioned_output_gate_update_basis_seed=456,
+            block_fht_mlp_residual_conditioned_output_gate_output_basis_seed=789,
+        ),
+        layer_id=0,
+    )
+    diagnostic = UntiedFixedBasisBilinearOutputGate(
+        8,
+        basis_block_size=8,
+        condition_seed=123,
+        update_seed=456,
+        output_seed=789,
+    )
+    assert mlp.residual_conditioned_output_slope is not None
+    assert mlp.residual_conditioned_output_bias is not None
+    with torch.no_grad():
+        mlp.residual_conditioned_output_slope.copy_(
+            torch.randn_like(mlp.residual_conditioned_output_slope)
+        )
+        mlp.residual_conditioned_output_bias.copy_(
+            torch.randn_like(mlp.residual_conditioned_output_bias)
+        )
+        diagnostic.slope.copy_(mlp.residual_conditioned_output_slope)
+        diagnostic.bias.copy_(mlp.residual_conditioned_output_bias)
+    condition = torch.randn(2, 3, 8)
+    update = torch.randn(2, 3, 8)
+    actual = mlp.apply_residual_conditioned_output_gate(condition, update)
+    expected = diagnostic(condition, update)
+    torch.testing.assert_close(actual, expected)
+    actual.square().mean().backward()
+    assert mlp.residual_conditioned_output_slope.grad is not None
+    assert mlp.residual_conditioned_output_bias.grad is not None
+
+
+def test_mlp_residual_conditioned_untied_bases_require_fixed_basis() -> None:
+    with pytest.raises(ValueError, match="untied_bases requires fixed_basis"):
+        MLP(
+            GPTConfig(
+                n_embd=8,
+                n_head=1,
+                block_fht_mlp_residual_conditioned_output_gate=True,
+                block_fht_mlp_residual_conditioned_output_gate_untied_bases=True,
+            ),
+            layer_id=0,
+        )
+
+
 def test_mlp_residual_conditioned_fixed_basis_gate_validates_block_size() -> None:
     with pytest.raises(ValueError, match="power of two dividing n_embd"):
         MLP(
