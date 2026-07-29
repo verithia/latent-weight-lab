@@ -1,0 +1,28 @@
+{
+  "analysis": "future-endpoint minimal principal-angle transport of phase-local post-GELU activation frames",
+  "basis": "deterministic phase-start and phase-end post-GELU PCA on disjoint fit and holdout token windows",
+  "basis_windows": {
+    "fit_seed": 20260729,
+    "holdout_seed": 20260730
+  },
+  "cells": [
+    "layer0:phase0",
+    "layer0:phase180",
+    "layer6:phase60",
+    "layer11:phase120"
+  ],
+  "decision_rule": "select the smallest rank for which both disjoint activation windows recover at least 2.5x the registered random 32-stage Givens aggregate, every pilot cell recovers at least 1.5x, and forward transport is at least 1.25x the positive reverse-direction control",
+  "diagnostic_only": true,
+  "no_learned_dense_basis": true,
+  "no_lora_factor": true,
+  "operator": "minimum-displacement orthogonal T carrying the phase-start activation subspace to the phase-end subspace; predict c_proj endpoint as W0 @ T.T",
+  "random_givens32_recovery": 0.020558347308714874,
+  "ranks": [
+    64,
+    128,
+    256
+  ],
+  "sample_cap_per_window": 1024,
+  "schema_version": "nanogpt_mlp_moving_activation_frame_oracle_plan_v1",
+  "status": "preregistered_before_result"
+}
