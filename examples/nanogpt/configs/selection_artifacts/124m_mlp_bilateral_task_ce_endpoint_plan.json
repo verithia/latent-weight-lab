@@ -1,0 +1,116 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_task_ce_endpoint_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Can the exact production bilateral c_proj chart lower full student LM CE from the terminal plain-cproj endpoint when every learned base parameter is frozen?",
+  "scientific_scope": "causal task-conditioned endpoint optimization; chart-only diagnostic, not continued pretraining and not a deployable selection result",
+  "rationale": {
+    "teacher_endpoint_oracle_result": "The chart recovered 72.3924 percent of held-out teacher MLP-output error on average, but every single fitted layer worsened complete-model CE and the all-layer insertion worsened holdout CE by 5.69498.",
+    "causal_gap": "Teacher-output reconstruction is therefore not a valid task direction in the separately co-adapted student residual frame.",
+    "required_test": "Optimize the same chart directly against student next-token CE while freezing every base parameter."
+  },
+  "inputs": {
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc",
+      "terminal_fixed_val_ce": 5.7394
+    },
+    "data_dir": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    }
+  },
+  "chart": {
+    "implementation": "exact production cached bilateral c_proj chart in all 12 layers",
+    "hidden_rotation_stages": 2,
+    "hidden_rotation_block_size": 32,
+    "hidden_basis_block_size": 256,
+    "hidden_coordinate_scale": 4.0,
+    "hidden_basis_seed": 314159,
+    "hidden_gain": true,
+    "output_rotation_stages": 4,
+    "output_rotation_block_size": 32,
+    "output_basis_block_size": 256,
+    "output_coordinate_scale": 4.0,
+    "output_basis_seed": 271828,
+    "output_gain": true,
+    "initial_effective_output_log_gain": 0.0,
+    "identity_initialization": true,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "optimization_protocol": {
+    "updated_parameters": "only the four exact chart groups in every layer; all checkpoint parameters and generated BlockFHT bases are frozen",
+    "objective": "next-token cross entropy on deterministic fresh train.bin windows",
+    "updates": 120,
+    "evaluation_updates": [
+      0,
+      30,
+      60,
+      120
+    ],
+    "micro_batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "tokens_per_update": 262144,
+    "optimizer": "fused AdamW on CUDA",
+    "learning_rate": 0.00072,
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "weight_decay": 0.0,
+    "learning_rate_rationale": "exact effective chart LR used by the causal Muon runs: 0.0024 main LR times 0.3 AdamW fallback scale times 1.0 chart scale",
+    "train_token_seed": 20260729,
+    "gradient_clipping": null,
+    "learning_rate_schedule": "constant",
+    "teacher_objective": false
+  },
+  "evaluation_protocol": {
+    "data_split": "val.bin only; no validation window participates in optimization",
+    "batch_size": 8,
+    "block_size": 256,
+    "batches_per_seed": 8,
+    "primary_seed": 20260717,
+    "confirmation_seed": 20260718,
+    "selection": "choose the registered evaluation update with lowest primary validation CE, then report the untouched confirmation-seed CE at that same update",
+    "minimum_meaningful_ce_gain": 0.005
+  },
+  "decision_rule": {
+    "positive_task_capacity": "the primary-selected chart state improves both primary and confirmation validation CE by at least 0.005 versus the identity state",
+    "optimization_only_signal": "training CE improves but the registered validation rule does not pass",
+    "reject_bilateral_chart": "the registered validation rule does not pass; close the bilateral chart family and test a jointly learned narrow residual/MLP frame",
+    "no_post_hoc_lr_sweep": true
+  },
+  "performance_gate": {
+    "required_before_scientific_updates": true,
+    "minimum_mfu_fraction": 0.2,
+    "measurement": "same script, model, chart, batch shape, accumulation, cache path, optimizer, and GPU as the scientific run",
+    "numerator": "conventional 6N decoder-model FLOP estimate times measured tokens per second",
+    "denominator": "same-GPU empirical BF16 tensor-core GEMM peak",
+    "preflight_updates": {
+      "warmup": 2,
+      "timed": 3
+    },
+    "policy": "foreground poll the preflight; do not start the scientific run unless the immutable certificate passes"
+  },
+  "execution_policy": {
+    "host": "Y400",
+    "gpu": "one exclusive free GPU among 1,2,3",
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "queue_entry": false,
+    "callbacks": false,
+    "pro6": "operator paused; do not use",
+    "required_artifacts": [
+      "source commit and source SHA-256",
+      "literal commands",
+      "checkpoint and dataset-manifest SHA-256",
+      "preflight MFU certificate and SHA-256",
+      "fixed validation-window digests",
+      "per-update optimization and validation CSV",
+      "chart-only states at every registered evaluation update",
+      "summary JSON and artifact hashes"
+    ]
+  }
+}
