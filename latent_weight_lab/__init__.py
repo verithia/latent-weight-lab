@@ -1,6 +1,7 @@
 from .block_fht import (
     BlockFHT,
     BlockFHTLinear,
+    ProductFHTLinear,
     block_fht_linear_forward,
     block_fht_slice,
     fixed_basis_transform,
@@ -15,6 +16,7 @@ from .block_fht import (
 __all__ = [
     "BlockFHT",
     "BlockFHTLinear",
+    "ProductFHTLinear",
     "block_fht_linear_forward",
     "block_fht_slice",
     "fixed_basis_transform",

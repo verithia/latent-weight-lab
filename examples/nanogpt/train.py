@@ -983,6 +983,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-cproj-spectral-resid-seed", type=int, default=0)
     parser.add_argument("--block-fht-cproj-spectral-resid-muon-matrix", action="store_true")
     parser.add_argument("--block-fht-cproj-spectral-resid-full-core", action="store_true")
+    parser.add_argument("--block-fht-cproj-product-fht-factors", type=int, default=0)
+    parser.add_argument("--block-fht-cproj-product-fht-diagonal-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--block-fht-cproj-product-fht-weight-space-muon",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--block-fht-cproj-product-fht-natural-gradient",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -1421,6 +1433,12 @@ def main() -> None:
         block_fht_cproj_spectral_resid_seed=args.block_fht_cproj_spectral_resid_seed,
         block_fht_cproj_spectral_resid_muon_matrix=args.block_fht_cproj_spectral_resid_muon_matrix,
         block_fht_cproj_spectral_resid_full_core=args.block_fht_cproj_spectral_resid_full_core,
+        block_fht_cproj_product_fht_factors=args.block_fht_cproj_product_fht_factors,
+        block_fht_cproj_product_fht_diagonal_scale=args.block_fht_cproj_product_fht_diagonal_scale,
+        block_fht_cproj_product_fht_weight_space_muon=args.block_fht_cproj_product_fht_weight_space_muon,
+        block_fht_cproj_product_fht_natural_gradient=args.block_fht_cproj_product_fht_natural_gradient,
+        block_fht_cproj_product_fht_muon_momentum=args.muon_momentum,
+        block_fht_cproj_product_fht_muon_ns_steps=args.muon_ns_steps,
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,
         block_fht_mlp_shared_hidden_gain_scale=args.block_fht_mlp_shared_hidden_gain_scale,

@@ -11,6 +11,7 @@ from torch.nn import functional as F
 from examples.nanogpt.muon import Muon
 from latent_weight_lab import (
     BlockFHTLinear,
+    ProductFHTLinear,
     fixed_basis_transform,
     postgelu_multihead_mix,
     flush_block_fht_weight_cache,
@@ -114,6 +115,12 @@ class GPTConfig:
     block_fht_cproj_spectral_resid_seed: int = 0
     block_fht_cproj_spectral_resid_muon_matrix: bool = False
     block_fht_cproj_spectral_resid_full_core: bool = False
+    block_fht_cproj_product_fht_factors: int = 0
+    block_fht_cproj_product_fht_diagonal_scale: float = 1.0
+    block_fht_cproj_product_fht_weight_space_muon: bool = True
+    block_fht_cproj_product_fht_natural_gradient: bool = True
+    block_fht_cproj_product_fht_muon_momentum: float = 0.95
+    block_fht_cproj_product_fht_muon_ns_steps: int = 5
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
@@ -677,6 +684,69 @@ def make_linear(
         target_std = 0.02
         if is_residual_projection_target(target_name):
             target_std = 0.02 / math.sqrt(2 * config.n_layer)
+        product_fht_factors = int(
+            config.block_fht_cproj_product_fht_factors
+        )
+        if target_name == "mlp.c_proj" and product_fht_factors > 0:
+            incompatible = {
+                "affine_delta": (
+                    target_name in config.block_fht_affine_delta_targets
+                ),
+                "quadratic": (
+                    target_name in config.block_fht_quadratic_targets
+                ),
+                "output_gain": (
+                    target_name in config.block_fht_output_gain_targets
+                ),
+                "input_gain": (
+                    target_name in config.block_fht_input_gain_targets
+                ),
+                "residual_base": (
+                    float(config.block_fht_residual_base_scale) != 0.0
+                ),
+                "cproj_lowrank": (
+                    int(config.block_fht_cproj_lowrank_rank) != 0
+                ),
+                "cproj_quarter_diag": bool(
+                    config.block_fht_cproj_quarter_diag
+                ),
+                "cproj_spectral_residual": (
+                    int(config.block_fht_cproj_spectral_resid_rank) != 0
+                ),
+            }
+            enabled = [
+                name for name, active in incompatible.items() if active
+            ]
+            if enabled:
+                raise ValueError(
+                    "product-FHT c_proj cannot be combined with: "
+                    + ", ".join(enabled)
+                )
+            return ProductFHTLinear(
+                in_features,
+                out_features,
+                bias=bias,
+                factors=product_fht_factors,
+                seed=config.block_fht_seed + seed_offset,
+                weight_std=target_std,
+                diagonal_scale=(
+                    config.block_fht_cproj_product_fht_diagonal_scale
+                ),
+                weight_space_muon=(
+                    config
+                    .block_fht_cproj_product_fht_weight_space_muon
+                ),
+                muon_momentum=(
+                    config.block_fht_cproj_product_fht_muon_momentum
+                ),
+                muon_ns_steps=(
+                    config.block_fht_cproj_product_fht_muon_ns_steps
+                ),
+                natural_gradient=(
+                    config
+                    .block_fht_cproj_product_fht_natural_gradient
+                ),
+            )
         if config.block_fht_weight_scale is not None:
             weight_scale = float(config.block_fht_weight_scale)
         elif config.block_fht_match_gpt_init:
@@ -3078,15 +3148,39 @@ class GPT(nn.Module):
         decay = [param for _, param in params.items() if param.dim() >= 2]
         nodecay = [param for _, param in params.items() if param.dim() < 2]
         if optimizer == "muon":
+            product_factor_tokens = (
+                "product_log_diagonals",
+                "product_output_log_gain",
+            )
+            product_factors = [
+                param
+                for name, param in params.items()
+                if any(
+                    token in name for token in product_factor_tokens
+                )
+            ]
+            product_factor_ids = {
+                id(param) for param in product_factors
+            }
             matrix = [
                 param
                 for name, param in params.items()
-                if param.dim() >= 2 and "wte" not in name and "wpe" not in name and "lm_head" not in name
+                if param.dim() >= 2
+                and "wte" not in name
+                and "wpe" not in name
+                and "lm_head" not in name
+                and id(param) not in product_factor_ids
             ]
             other = [
                 param
                 for name, param in params.items()
-                if param.dim() < 2 or "wte" in name or "wpe" in name or "lm_head" in name
+                if (
+                    param.dim() < 2
+                    or "wte" in name
+                    or "wpe" in name
+                    or "lm_head" in name
+                )
+                and id(param) not in product_factor_ids
             ]
             chart_names = (
                 "hidden_block_rotation.coordinates",
@@ -3135,6 +3229,19 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
+            if product_factors:
+                optimizers.append(
+                    torch.optim.SGD(
+                        [
+                            {
+                                "params": product_factors,
+                                "weight_decay": 0.0,
+                                "lr_scale": 1.0,
+                            }
+                        ],
+                        lr=learning_rate,
+                    )
+                )
             if other:
                 fused_available = "fused" in inspect.signature(torch.optim.AdamW).parameters
                 use_fused = fused_available and device_type == "cuda"
@@ -3185,6 +3292,7 @@ class GPT(nn.Module):
                 adamw_lr = learning_rate * float(muon_adamw_lr_scale)
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
+                f"product_fht_factor_tensors={len(product_factors)} "
                 f"mlp_chart_tensors={len(chart_other)} "
                 f"mlp_pregelu_chart_tensors={len(pregelu_chart_other)} "
                 f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
@@ -3212,6 +3320,10 @@ class GPT(nn.Module):
                 modules += 1
                 generated += module.in_features * module.out_features
                 latent += module.generator.latent.numel()
+            elif isinstance(module, ProductFHTLinear):
+                modules += 1
+                generated += module.in_features * module.out_features
+                latent += module.trainable_scalar_count
         return {"modules": modules, "generated": generated, "latent": latent}
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
@@ -3261,6 +3373,11 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 module.spectral_core.requires_grad_(True)
                 module.spectral_log_out_gain.requires_grad_(True)
                 module.spectral_log_in_gain.requires_grad_(True)
+        if isinstance(module, ProductFHTLinear):
+            module.product_log_diagonals.requires_grad_(True)
+            module.product_output_log_gain.requires_grad_(True)
+            if module.bias is not None:
+                module.bias.requires_grad_(True)
         if isinstance(module, MLP) and module.shared_hidden_log_gain is not None:
             module.shared_hidden_log_gain.requires_grad_(True)
         if isinstance(module, MLP):

@@ -5,6 +5,7 @@ import torch.nn.functional as F
 from latent_weight_lab.block_fht import (
     BlockFHT,
     BlockFHTLinear,
+    ProductFHTLinear,
     block_fht_slice_torch,
     flush_block_fht_weight_cache,
     prepare_block_fht_weight_cache,
@@ -46,6 +47,143 @@ def test_slice_matches_full_forward_cpu():
     sliced = bfht.slice(3, 17)
     full = bfht()
     assert torch.allclose(sliced, full[3:17])
+
+
+def test_product_fht_linear_initializes_at_target_scale_without_dense_basis():
+    torch.manual_seed(7)
+    layer = ProductFHTLinear(
+        16,
+        8,
+        factors=3,
+        seed=41,
+        weight_std=0.05,
+        bias=True,
+    )
+    assert layer.weight.shape == (8, 16)
+    assert layer.product_log_diagonals.shape == (3, 16)
+    assert layer.product_output_log_gain.shape == (8,)
+    assert layer.trainable_scalar_count == 3 * 16 + 8 + 8
+    assert not any(
+        parameter.shape == layer.weight.shape
+        for parameter in layer.parameters()
+    )
+    assert layer.weight.std().item() == pytest.approx(0.05, rel=0.2)
+
+
+def test_product_fht_cache_vjp_matches_live_gradient_without_preconditioning():
+    torch.manual_seed(11)
+    live = ProductFHTLinear(
+        8,
+        4,
+        factors=2,
+        seed=97,
+        weight_std=0.04,
+        weight_space_muon=False,
+        natural_gradient=False,
+    )
+    cached = ProductFHTLinear(
+        8,
+        4,
+        factors=2,
+        seed=97,
+        weight_std=0.04,
+        weight_space_muon=False,
+        natural_gradient=False,
+    )
+    cached.load_state_dict(live.state_dict())
+    live_input = torch.randn(3, 8, requires_grad=True)
+    cached_input = live_input.detach().clone().requires_grad_(True)
+    live(live_input).square().mean().backward()
+    cached.materialize_weight_cache()
+    cached(cached_input).square().mean().backward()
+    cached.flush_weight_cache_to_factor_grad()
+    torch.testing.assert_close(
+        cached_input.grad,
+        live_input.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+    torch.testing.assert_close(
+        cached.product_log_diagonals.grad,
+        live.product_log_diagonals.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+    torch.testing.assert_close(
+        cached.product_output_log_gain.grad,
+        live.product_output_log_gain.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+
+
+def test_product_fht_weight_space_muon_projects_finite_factor_gradients():
+    torch.manual_seed(13)
+    layer = ProductFHTLinear(
+        8,
+        4,
+        factors=2,
+        seed=101,
+        weight_std=0.04,
+        weight_space_muon=True,
+        natural_gradient=True,
+    )
+    layer.materialize_weight_cache()
+    layer(torch.randn(3, 8)).square().mean().backward()
+    layer.flush_weight_cache_to_factor_grad()
+    assert layer.weight_space_momentum_buffer.abs().sum() > 0
+    assert layer.product_log_diagonals.grad is not None
+    assert torch.isfinite(layer.product_log_diagonals.grad).all()
+    assert layer.product_log_diagonals.grad.abs().sum() > 0
+    assert layer.product_output_log_gain.grad is not None
+    assert torch.isfinite(layer.product_output_log_gain.grad).all()
+
+
+def test_product_fht_cproj_is_target_selective_and_sgd_owned():
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht=True,
+            block_fht_targets=("attn.c_proj", "mlp.c_proj"),
+            block_fht_latent_ratio=1.0,
+            block_fht_cproj_product_fht_factors=2,
+        )
+    )
+    attention = model.transformer.h[0].attn.c_proj
+    cproj = model.transformer.h[0].mlp.c_proj
+    assert isinstance(attention, BlockFHTLinear)
+    assert isinstance(cproj, ProductFHTLinear)
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+    )
+    factor_ids = {
+        id(cproj.product_log_diagonals),
+        id(cproj.product_output_log_gain),
+    }
+    owners = [
+        child
+        for child in optimizer.optimizers
+        if any(
+            id(parameter) in factor_ids
+            for group in child.param_groups
+            for parameter in group["params"]
+        )
+    ]
+    assert len(owners) == 1
+    assert owners[0].__class__.__name__ == "SGD"
+    assert {
+        id(parameter)
+        for group in owners[0].param_groups
+        for parameter in group["params"]
+    } == factor_ids
 
 
 def test_backward_cpu():

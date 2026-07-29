@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_124m_mlp_blockfht_polar_projection_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_blockfht_polar_projection_plan.json",
+  "source_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_optimizer_state_direction_result.json",
+  "analysis_commit": "78ed4f47260c827addc560934fe0c99f816ed8ae",
+  "production_geometry": {
+    "target": "mlp.c_proj",
+    "weight_shape": [
+      768,
+      3072
+    ],
+    "weight_scalars": 2359296,
+    "latent_shape": [
+      154,
+      154
+    ],
+    "latent_scalars": 23716,
+    "latent_fraction": 0.010052574903356481,
+    "padded_block_size": 32768,
+    "complete_repeated_blocks": 72,
+    "fht_layers": 2,
+    "base_seed": 1000,
+    "cells": 20
+  },
+  "aggregate": {
+    "raw_exact_applied_future_chord_recovery": 0.16469392843418235,
+    "projected_future_chord_recovery": 0.0016745042348182396,
+    "projected_energy_weighted_cosine": 0.039279740134614216,
+    "minimum_projected_cell_cosine": 0.019646743069637564,
+    "positive_projected_cells": 20,
+    "applied_direction_energy_retained": 0.010056494360673948,
+    "maximum_projector_idempotence_relative_error": 5.19139796410628e-07
+  },
+  "decision": {
+    "classification": "REJECT_FIXED_BLOCKFHT_TANGENT_FOR_POLAR_PULLBACK",
+    "registered_rule_passed": false,
+    "interpretation": [
+      "The exact production projector is numerically idempotent and retains 1.006 percent of the dense polar direction, matching the one-percent tangent allocation rather than selecting useful task directions.",
+      "Projecting the promoted coherent Muon direction collapses future-chord recovery from 16.47 percent to 0.167 percent.",
+      "Changing only the optimizer on the existing linear BlockFHT generator cannot solve the c_proj problem because every update remains trapped in the same task-independent fixed tangent.",
+      "The next structure must have a nonlinear task-conditioned moving tangent without introducing a learned dense basis or LoRA factors."
+    ],
+    "next_candidate": "a product of fixed global FHT mixers and learned per-channel diagonal modulations for c_proj, materialized once per optimizer step, with Muon polar geometry applied to the materialized weight gradient before exact VJP to the moving diagonal factors"
+  },
+  "artifacts": {
+    "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/blockfht_polar_projection_v1",
+    "detail_sha256": "c936d39909b8182f63684477f4799c53e48f388ec8ac462490d0143adae309b1",
+    "aggregate_sha256": "50560e0f9cf5dedf63a798e2519f2d0b3b7521ae12cbc63fb45f6067c3628fac",
+    "metadata_sha256": "34203486f5f14f523726ebce0a2434a7256740999f217c0d165b10381a1d5cbd",
+    "analysis_log_sha256": "8b0e1b287983bb8810135c56250e636788de9a956c4919afe47fe63c5fe7ae43"
+  }
+}

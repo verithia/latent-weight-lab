@@ -1040,9 +1040,245 @@ class BlockFHTLinear(nn.Module):
         self._cached_weight = None
 
 
+def _zeropower_via_newtonschulz5(
+    gradient: torch.Tensor,
+    steps: int,
+    eps: float = 1e-7,
+) -> torch.Tensor:
+    """Return the same rectangular polar approximation used by Muon."""
+    if gradient.ndim != 2:
+        raise ValueError("weight-space Muon requires a matrix gradient")
+    original_shape = gradient.shape
+    value = gradient.float()
+    transposed = False
+    if value.size(0) > value.size(1):
+        value = value.T
+        transposed = True
+    value = value / (value.norm() + eps)
+    a, b, c = 3.4445, -4.7750, 2.0315
+    for _ in range(int(steps)):
+        gram = value @ value.T
+        value = a * value + (b * gram + c * gram @ gram) @ value
+    if transposed:
+        value = value.T
+    return value.reshape(original_shape).to(dtype=gradient.dtype)
+
+
+class ProductFHTLinear(nn.Module):
+    """A moving FHT/diagonal product chart with weight-space Muon VJP.
+
+    Unlike ``BlockFHTLinear``'s fixed affine generator ``A z``, this map is a
+    product of fixed global orthogonal mixers and learned channel diagonals.
+    Its tangent therefore changes with the learned diagonal state without a
+    learned dense basis or low-rank factors.
+    """
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        factors: int,
+        seed: int,
+        weight_std: float,
+        bias: bool = False,
+        diagonal_scale: float = 1.0,
+        weight_space_muon: bool = True,
+        muon_momentum: float = 0.95,
+        muon_ns_steps: int = 5,
+        natural_gradient: bool = True,
+    ) -> None:
+        super().__init__()
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.factors = int(factors)
+        self.seed = int(seed)
+        self.weight_std = float(weight_std)
+        self.diagonal_scale = float(diagonal_scale)
+        self.weight_space_muon = bool(weight_space_muon)
+        self.muon_momentum = float(muon_momentum)
+        self.muon_ns_steps = int(muon_ns_steps)
+        self.natural_gradient = bool(natural_gradient)
+        if min(self.in_features, self.out_features, self.factors) <= 0:
+            raise ValueError("product-FHT dimensions and factors must be positive")
+        if not math.isfinite(self.weight_std) or self.weight_std <= 0.0:
+            raise ValueError("product-FHT weight_std must be positive and finite")
+        if not math.isfinite(self.diagonal_scale) or self.diagonal_scale <= 0.0:
+            raise ValueError(
+                "product-FHT diagonal_scale must be positive and finite"
+            )
+        if not 0.0 <= self.muon_momentum < 1.0:
+            raise ValueError("product-FHT Muon momentum must be in [0, 1)")
+        if self.muon_ns_steps <= 0:
+            raise ValueError("product-FHT Muon steps must be positive")
+
+        self.padded_features = next_power_of_two(
+            max(self.in_features, self.out_features)
+        )
+        self.product_log_diagonals = nn.Parameter(
+            torch.zeros(self.factors, self.padded_features)
+        )
+        self.product_output_log_gain = nn.Parameter(
+            torch.zeros(self.out_features)
+        )
+        reference = torch.empty(1)
+        factor_signs = torch.stack(
+            [
+                signs_for(
+                    reference,
+                    block=factor,
+                    layer=factor + 1,
+                    seed=self.seed,
+                    block_size=self.padded_features,
+                )
+                for factor in range(self.factors)
+            ]
+        )
+        self.register_buffer(
+            "product_factor_signs",
+            factor_signs,
+            persistent=False,
+        )
+        self.register_buffer(
+            "weight_space_momentum_buffer",
+            torch.zeros(self.out_features, self.in_features),
+            persistent=True,
+        )
+        self.bias = (
+            nn.Parameter(torch.zeros(self.out_features)) if bias else None
+        )
+        self._cached_weight: torch.Tensor | None = None
+
+    @property
+    def trainable_scalar_count(self) -> int:
+        return (
+            self.product_log_diagonals.numel()
+            + self.product_output_log_gain.numel()
+            + (0 if self.bias is None else self.bias.numel())
+        )
+
+    def _live_weight(self) -> torch.Tensor:
+        dtype = self.product_log_diagonals.dtype
+        device = self.product_log_diagonals.device
+        matrix = torch.eye(
+            self.out_features,
+            self.padded_features,
+            dtype=dtype,
+            device=device,
+        )
+        signs = self.product_factor_signs.to(device=device, dtype=dtype)
+        for factor in range(self.factors):
+            matrix = normalized_fht_last_dim(matrix * signs[factor])
+            diagonal = torch.exp(
+                self.diagonal_scale
+                * self.product_log_diagonals[factor].clamp(-6.0, 6.0)
+            )
+            matrix = matrix * diagonal
+        scale = self.weight_std * math.sqrt(self.padded_features)
+        output_gain = torch.exp(
+            self.product_output_log_gain.clamp(-6.0, 6.0)
+        )
+        return (
+            scale
+            * output_gain.view(-1, 1)
+            * matrix[:, : self.in_features]
+        )
+
+    @property
+    def weight(self) -> torch.Tensor:
+        return self._live_weight()
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        weight = (
+            self._cached_weight
+            if self._cached_weight is not None
+            else self._live_weight()
+        )
+        return F.linear(input, weight.to(dtype=input.dtype), self.bias)
+
+    def materialize_weight_cache(
+        self, dtype: torch.dtype | None = None
+    ) -> None:
+        if self._cached_weight is not None:
+            return
+        with torch.no_grad():
+            weight = self._live_weight()
+            if dtype is not None:
+                weight = weight.to(dtype=dtype)
+        self._cached_weight = weight.detach().requires_grad_(True)
+
+    def _weight_space_direction(
+        self, gradient: torch.Tensor
+    ) -> torch.Tensor:
+        gradient = gradient.float()
+        if not self.weight_space_muon:
+            return gradient
+        with torch.no_grad():
+            buffer = self.weight_space_momentum_buffer
+            buffer.mul_(self.muon_momentum).add_(gradient)
+            combined = gradient + self.muon_momentum * buffer
+            polar = _zeropower_via_newtonschulz5(
+                combined,
+                self.muon_ns_steps,
+            )
+            scale = max(
+                1.0,
+                polar.shape[0]
+                / max(1, polar.numel() / polar.shape[0]),
+            ) ** 0.5
+            return scale * polar
+
+    def flush_weight_cache_to_factor_grad(self) -> None:
+        if self._cached_weight is None:
+            return
+        if self._cached_weight.grad is not None:
+            direction = self._weight_space_direction(
+                self._cached_weight.grad
+            )
+            with torch.enable_grad():
+                live_weight = self._live_weight()
+                diagonal_grad, output_gain_grad = torch.autograd.grad(
+                    live_weight,
+                    (
+                        self.product_log_diagonals,
+                        self.product_output_log_gain,
+                    ),
+                    grad_outputs=direction.to(dtype=live_weight.dtype),
+                    retain_graph=False,
+                    allow_unused=False,
+                )
+            if self.natural_gradient:
+                diagonal_metric = (
+                    self.weight_std
+                    * self.weight_std
+                    * self.out_features
+                    * self.in_features
+                    / self.padded_features
+                )
+                diagonal_grad = diagonal_grad / max(
+                    diagonal_metric, 1e-12
+                )
+                row_metric = (
+                    live_weight.detach().float().square().sum(dim=1)
+                ).clamp_min(1e-12)
+                output_gain_grad = output_gain_grad / row_metric
+            if self.product_log_diagonals.grad is None:
+                self.product_log_diagonals.grad = diagonal_grad
+            else:
+                self.product_log_diagonals.grad.add_(diagonal_grad)
+            if self.product_output_log_gain.grad is None:
+                self.product_output_log_gain.grad = output_gain_grad
+            else:
+                self.product_output_log_gain.grad.add_(output_gain_grad)
+        self._cached_weight = None
+
+
+_CACHEABLE_WEIGHT_MODULES = (BlockFHTLinear, ProductFHTLinear)
+
+
 def prepare_block_fht_weight_cache(model: nn.Module, dtype: torch.dtype | None = None) -> None:
     for module in model.modules():
-        if isinstance(module, BlockFHTLinear):
+        if isinstance(module, _CACHEABLE_WEIGHT_MODULES):
             module.materialize_weight_cache(dtype=dtype)
 
 
@@ -1050,9 +1286,13 @@ def flush_block_fht_weight_cache(model: nn.Module) -> None:
     for module in model.modules():
         if isinstance(module, BlockFHTLinear):
             module.flush_weight_cache_to_latent_grad()
+        elif isinstance(module, ProductFHTLinear):
+            module.flush_weight_cache_to_factor_grad()
 
 
-def suspend_block_fht_weight_cache(model: nn.Module) -> list[tuple[BlockFHTLinear, torch.Tensor]]:
+def suspend_block_fht_weight_cache(
+    model: nn.Module,
+) -> list[tuple[nn.Module, torch.Tensor]]:
     """Temporarily bypass materialized weights for a live-latent forward.
 
     Mapping-stability uses a perturbed latent point.  Its forward must not see
@@ -1061,15 +1301,20 @@ def suspend_block_fht_weight_cache(model: nn.Module) -> list[tuple[BlockFHTLinea
     leaf tensors (and their accumulated CE gradients) for later restoration
     and normal cache-to-latent gradient projection.
     """
-    suspended: list[tuple[BlockFHTLinear, torch.Tensor]] = []
+    suspended: list[tuple[nn.Module, torch.Tensor]] = []
     for module in model.modules():
-        if isinstance(module, BlockFHTLinear) and module._cached_weight is not None:
+        if (
+            isinstance(module, _CACHEABLE_WEIGHT_MODULES)
+            and module._cached_weight is not None
+        ):
             suspended.append((module, module._cached_weight))
             module._cached_weight = None
     return suspended
 
 
-def restore_block_fht_weight_cache(suspended: list[tuple[BlockFHTLinear, torch.Tensor]]) -> None:
+def restore_block_fht_weight_cache(
+    suspended: list[tuple[nn.Module, torch.Tensor]],
+) -> None:
     """Restore a cache suspended by :func:`suspend_block_fht_weight_cache`."""
     for module, weight in suspended:
         if module._cached_weight is not None:
