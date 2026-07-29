@@ -1,0 +1,27 @@
+{
+  "analysis": "exact endpoint recovery of an orthogonal core inside a fixed step-0 post-GELU activation subspace",
+  "basis": "deterministic step-0 post-GELU PCA; fixed and non-trainable",
+  "basis_windows": {
+    "fit_seed": 20260729,
+    "holdout_seed": 20260730
+  },
+  "cells": [
+    "layer0:phase0",
+    "layer0:phase180",
+    "layer6:phase60",
+    "layer11:phase120"
+  ],
+  "decision_rule": "select the smallest rank for which both disjoint step-0 basis windows recover at least 2x the registered random 32-stage Givens aggregate and every pilot cell recovers at least 1.5x that baseline",
+  "no_learned_dense_basis": true,
+  "no_lora_factor": true,
+  "operator": "R = I + V @ (G - I) @ V.T",
+  "random_givens32_recovery": 0.020558347308714874,
+  "ranks": [
+    64,
+    128,
+    256
+  ],
+  "sample_cap_per_window": 1024,
+  "schema_version": "nanogpt_mlp_activation_subspace_core_oracle_plan_v1",
+  "status": "preregistered_before_result"
+}
