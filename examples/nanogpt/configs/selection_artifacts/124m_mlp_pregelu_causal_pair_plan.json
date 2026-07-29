@@ -1,0 +1,130 @@
+{
+  "schema_version": "mai_124m_mlp_pregelu_causal_pair_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Does the endpoint-positive independent pre-GELU orthogonal frame improve causal from-scratch 124M next-token training beyond the same generated-c_proj model with only the accepted post-GELU rotations?",
+  "scientific_scope": "one matched 124M 0.5TPP parent/candidate comparison; no broad ladder, learning-rate sweep, scalar-gain change, residual HyperConnection, or PRO6 execution",
+  "evidence_chain": {
+    "dense_trajectory": "The registered dense 124M Muon trajectory found locally low temporal PC dimension but high matrix-rank terminal displacement and layer-specific tangents; this rules out interpreting low temporal PCA rank as a single shared linear subspace.",
+    "bilateral_task_endpoint": "Task-conditioned hidden/output rotations improved all three registered validation seeds by 0.0083 to 0.0101 CE, while scalar gains were null.",
+    "pregelu_task_endpoint": "With the accepted post-GELU rotations fixed, an independent folded pre-GELU frame improved the three registered validation seeds by 0.0083 to 0.0101 CE at update 120.",
+    "causal_requirement": "Endpoint optimization establishes local task capacity but not from-scratch trainability. Only the matched pair below can promote the structure."
+  },
+  "implementation": {
+    "git_commit": "ce30dccc1114a466d73e0950b30036961d34717c",
+    "source_sha256": {
+      "examples/nanogpt/model.py": "75bfbe186f4dd5774716ec61fa2c33533a7a89818d0aa43c19553a7b72c4106d",
+      "examples/nanogpt/train.py": "18b00c984de511e47fde18ce44374d57a155369d985941b9890ed912b14ca62e",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+    },
+    "tests": "210 passed, 9 skipped",
+    "folding": "For row-vector activations h=xW^T, the pre-GELU frame hR is evaluated by folding R into W^T before F.linear; cached execution retains exact VJP to c_fc and frame coordinates without materializing a 3072x3072 dense matrix."
+  },
+  "shared_training_protocol": {
+    "model": "124M GPT, 12 layers, width 768, 12 heads, context 1024",
+    "dataset": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "tokens_per_parameter": 0.5,
+    "updates": 238,
+    "micro_batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "tokens_per_update": 262144,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_protocol": "mai_ladder_fixed_eval_indices_v2",
+    "optimizer": "Muon for selected matrix parameters plus AdamW fallback",
+    "main_peak_learning_rate": 0.0024,
+    "muon_adamw_lr_scale": 0.3,
+    "postgelu_chart_lr_scale": 1.0,
+    "postgelu_effective_peak_learning_rate": 0.00072,
+    "schedule": "10-update warmup then cosine decay to 0.00024 at update 238",
+    "save_policy": "exact-resume checkpoint at every registered evaluation and terminal update; retain terminal checkpoint and provenance hashes",
+    "matched_attention_reference_terminal_val_ce": 5.4918,
+    "plain_generated_cproj_reference_terminal_val_ce": 5.7394
+  },
+  "shared_structure": {
+    "full_attention_replacement_targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "mlp_replacement_target": "mlp.c_proj",
+    "cproj_muon_latent_rows": 154,
+    "postgelu_hidden_frame": {
+      "features": 3072,
+      "stages": 2,
+      "rotation_block_size": 32,
+      "basis_block_size": 256,
+      "coordinate_scale": 4.0,
+      "seed": 314159
+    },
+    "postgelu_output_frame": {
+      "features": 768,
+      "stages": 4,
+      "rotation_block_size": 32,
+      "basis_block_size": 256,
+      "coordinate_scale": 4.0,
+      "seed": 271828
+    },
+    "hidden_scalar_gain": false,
+    "residual_output_scalar_gain": false,
+    "residual_hyperconnection": false
+  },
+  "arms": {
+    "parent": {
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_matched_0p5tpp_lr24e4.json",
+      "difference": "shared structure only; no pre-GELU frame"
+    },
+    "candidate": {
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_pregelu_s2_postgelu_rotations_matched_0p5tpp_lr24e4.json",
+      "difference": "add an identity-initialized pre-GELU frame in every layer",
+      "pregelu_frame": {
+        "features": 3072,
+        "stages": 2,
+        "rotation_block_size": 32,
+        "basis_block_size": 256,
+        "coordinate_scale": 4.0,
+        "seed": 161803,
+        "per_layer_seed_offset": 64,
+        "effective_peak_learning_rate": 0.000072,
+        "separate_chart_lr_scale": 0.1
+      }
+    }
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "requirement": "Each exact immutable arm config must independently pass the real-training MFU preflight on its selected exclusive Y400 GPU before scientific training.",
+    "measurement": "conventional 6N active-model FLOPs divided by the same-GPU empirical BF16 tensor-core GEMM peak",
+    "polling": "foreground/direct polling only; no watchdog, queue entry, callbacks, or heartbeat for these short runs"
+  },
+  "decision_rule": {
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "promote": "candidate terminal val CE is at least 0.020 lower than the matched parent, both runs exit cleanly, and neither shows numerical instability",
+    "directional_only": "candidate is lower than the matched parent by more than 0 but less than 0.020 CE; record local causal direction but do not launch a larger ladder",
+    "reject": "candidate is tied with or worse than the matched parent, or either run is unstable",
+    "practical_band_ce": 0.02,
+    "no_post_hoc_lr_sweep": true
+  },
+  "execution_policy": {
+    "host": "Y400",
+    "gpus": "two exclusive free GPUs among 1,2,3",
+    "pro6": "operator paused; do not use",
+    "launch": "registered foreground launcher with immutable provenance envelope",
+    "monitoring": "directly poll the two attached foreground processes until terminal status",
+    "required_artifacts": [
+      "config SHA-256",
+      "source commit and source SHA-256",
+      "literal command",
+      "dataset manifest SHA-256",
+      "per-arm MFU certificate and SHA-256",
+      "runtime fixed-evaluation digest",
+      "complete loss logs",
+      "terminal exact-resume checkpoints and SHA-256",
+      "registered launcher provenance and status JSON",
+      "matched-pair result JSON"
+    ]
+  }
+}
