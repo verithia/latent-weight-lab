@@ -1,0 +1,76 @@
+{
+  "schema_version": "mlp_endpoint_residual_direction_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fixed_basis_endpoint_residual_plan.json",
+    "sha256": "13b541f2e87c640b581bd1d0cf6702f01c5cac6666c514677062f12d35b7f1cf"
+  },
+  "execution": {
+    "host": "Y400",
+    "mode": "two_foreground_polled_processes_no_watchdog",
+    "repository_commit": "3ca561bde7ec9ce77ff092bd3ca4c4cfaef28c4c",
+    "implementation_commit": "583bf96eb25e178d4531e1c72f69c17ab8f101c5",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source_sha256": "953fb67449b1f9cddc5e00427feedac32dde7f7c0ecf01859a89364d3a6afda7",
+    "parameter_update_applied": false,
+    "watchdog": false,
+    "callback": false
+  },
+  "inputs": {
+    "attention_only_checkpoint_sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5",
+    "trained_fixed_bilinear_checkpoint_sha256": "906b0b75d470e6610027e50e0e81dfe40d32082df0a5d839cf77c2ef01cdb4a2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_token_sha256": "5ffbcbcb14dd284cded97fef7b9e80fbe4656b8c8de7cdf1beff1bcc6669350b",
+    "holdout_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e"
+  },
+  "shared_probe": {
+    "layer": 0,
+    "coordinate_group": "slope",
+    "coordinates": 768,
+    "teacher_prediction_source": "captured trained-checkpoint MLP output",
+    "identity_initialized": true,
+    "basis_block_size": 256,
+    "task_ce_fit": 5.641683,
+    "task_ce_holdout": 5.690224
+  },
+  "probes": [
+    {
+      "label": "same_basis_residual",
+      "basis_seed": 271828,
+      "task_ce_vs_teacher_mse": {
+        "fit": -0.015459107235074043,
+        "holdout": 0.018284574151039124
+      },
+      "task_ce_fit_vs_holdout": -0.022802602499723434,
+      "teacher_mse_fit_vs_holdout": 0.9578298926353455,
+      "csv_sha256": "828c91a28cef5e910ac96a40e89b83189b441917d1dcf0d0304b6f2f08e1c232",
+      "metadata_sha256": "1239ac96cb4fe35696c43ee5f222c1bf7b960d6d046bed9d16185e59e3e834c4",
+      "decision": "FAIL_NOT_POSITIVE_ON_BOTH_SPLITS"
+    },
+    {
+      "label": "independent_basis_residual",
+      "basis_seed": 376557,
+      "task_ce_vs_teacher_mse": {
+        "fit": -0.04193739965558052,
+        "holdout": 0.00377881177701056
+      },
+      "task_ce_fit_vs_holdout": -0.0140491658821702,
+      "teacher_mse_fit_vs_holdout": 0.9463073015213013,
+      "csv_sha256": "8d90f37046b846d59570651629e6760fcbca91e15b8c2a87e2a923df9737225a",
+      "metadata_sha256": "417bb769bb9af7b2e4c80dc031fb0b71b7602558ed6a63aa3f5f40de01e70ae2",
+      "decision": "FAIL_NOT_POSITIVE_ON_BOTH_SPLITS"
+    }
+  ],
+  "decision": {
+    "classification": "CLOSE_TIED_FIXED_BASIS_DIAGONAL_FAMILY",
+    "implement_second_basis": false,
+    "run_238_step_screen": false,
+    "reasons": [
+      "Neither another step in the trained basis nor an independent fixed basis is CE/teacher aligned on both deterministic token splits.",
+      "The independent basis is worse than the same-basis residual on fit and does not meet the predeclared incremental margin.",
+      "Stable teacher directions but unstable, nearly orthogonal CE directions rule out sampling noise as the explanation.",
+      "Adding more diagonals in fixed orthogonal bases would add runtime and coordinates without a qualifying task direction."
+    ],
+    "next_operator": "Use distinct fixed condition, update, and output bases around one learned diagonal core: u' = u + Q_out^-1[(Q_update u) * (slope * Q_condition r)]. This is non-symmetric and genuinely non-diagonal in any single basis while retaining 768 learned slopes and the same three fixed transforms."
+  }
+}
