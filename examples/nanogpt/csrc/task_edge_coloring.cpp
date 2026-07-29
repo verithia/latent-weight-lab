@@ -1,20 +1,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <unordered_set>
 #include <vector>
 
 namespace {
-
-std::uint64_t edge_key(std::int32_t left, std::int32_t right) {
-    if (left > right) {
-        std::swap(left, right);
-    }
-    return (static_cast<std::uint64_t>(
-                static_cast<std::uint32_t>(left))
-            << 32) |
-        static_cast<std::uint32_t>(right);
-}
 
 std::uint64_t splitmix64(std::uint64_t& state) {
     state += 0x9e3779b97f4a7c15ULL;
@@ -53,8 +42,39 @@ extern "C" int task_edge_color(
     std::vector<std::int32_t> counts(stages, 0);
     std::vector<std::uint8_t> is_candidate(
         static_cast<std::size_t>(target_pairs), 0);
-    std::unordered_set<std::uint64_t> used_edges;
-    used_edges.reserve(static_cast<std::size_t>(target_pairs * 2));
+    const std::size_t edge_slots =
+        static_cast<std::size_t>(width) * width;
+    std::vector<std::uint64_t> used_edge_bits(
+        (edge_slots + 63) / 64, 0);
+    const auto edge_index = [width](
+                                std::int32_t left,
+                                std::int32_t right) {
+        if (left > right) {
+            std::swap(left, right);
+        }
+        return static_cast<std::size_t>(left) * width + right;
+    };
+    const auto edge_is_used = [&used_edge_bits, &edge_index](
+                                  std::int32_t left,
+                                  std::int32_t right) {
+        const std::size_t index = edge_index(left, right);
+        return (used_edge_bits[index >> 6] &
+                (std::uint64_t{1} << (index & 63))) != 0;
+    };
+    const auto set_edge_used = [&used_edge_bits, &edge_index](
+                                   std::int32_t left,
+                                   std::int32_t right) {
+        const std::size_t index = edge_index(left, right);
+        used_edge_bits[index >> 6] |=
+            std::uint64_t{1} << (index & 63);
+    };
+    const auto clear_edge_used = [&used_edge_bits, &edge_index](
+                                     std::int32_t left,
+                                     std::int32_t right) {
+        const std::size_t index = edge_index(left, right);
+        used_edge_bits[index >> 6] &=
+            ~(std::uint64_t{1} << (index & 63));
+    };
     std::fill(candidate_pair_counts, candidate_pair_counts + stages, 0);
 
     std::int64_t assigned_pairs = 0;
@@ -70,8 +90,7 @@ extern "C" int task_edge_color(
         if (left > right) {
             std::swap(left, right);
         }
-        const auto key = edge_key(left, right);
-        if (used_edges.find(key) != used_edges.end()) {
+        if (edge_is_used(left, right)) {
             continue;
         }
         std::uint64_t available =
@@ -80,17 +99,9 @@ extern "C" int task_edge_color(
             continue;
         }
 
-        std::int32_t selected_stage = -1;
-        std::int32_t selected_count = pairs_per_stage + 1;
-        for (std::int32_t stage = 0; stage < stages; ++stage) {
-            if ((available & (std::uint64_t{1} << stage)) != 0 &&
-                counts[stage] < selected_count) {
-                selected_stage = stage;
-                selected_count = counts[stage];
-            }
-        }
-        if (selected_stage < 0 ||
-            counts[selected_stage] >= pairs_per_stage) {
+        const std::int32_t selected_stage =
+            static_cast<std::int32_t>(__builtin_ctzll(available));
+        if (counts[selected_stage] >= pairs_per_stage) {
             continue;
         }
 
@@ -102,7 +113,7 @@ extern "C" int task_edge_color(
         permutations[output_offset + 1] = right;
         occupied[left] |= std::uint64_t{1} << selected_stage;
         occupied[right] |= std::uint64_t{1} << selected_stage;
-        used_edges.insert(key);
+        set_edge_used(left, right);
         is_candidate[
             static_cast<std::size_t>(selected_stage) *
                 pairs_per_stage +
@@ -142,9 +153,7 @@ extern "C" int task_edge_color(
                      static_cast<std::ptrdiff_t>(remaining.size()) - 1;
                  index >= 0;
                  --index) {
-                if (used_edges.find(
-                        edge_key(left, remaining[index])) ==
-                    used_edges.end()) {
+                if (!edge_is_used(left, remaining[index])) {
                     partner_index = index;
                     break;
                 }
@@ -160,7 +169,7 @@ extern "C" int task_edge_color(
                 permutations[output_offset + 1] = right;
                 occupied[left] |= stage_bit;
                 occupied[right] |= stage_bit;
-                used_edges.insert(edge_key(left, right));
+                set_edge_used(left, right);
                 ++assigned_pairs;
                 continue;
             }
@@ -191,22 +200,20 @@ extern "C" int task_edge_color(
                     for (int option = 0;
                          option < 2 && !repaired;
                          ++option) {
-                        const auto first_key =
-                            edge_key(left, first_options[option]);
-                        const auto second_key =
-                            edge_key(right, second_options[option]);
-                        if (first_key == second_key ||
-                            used_edges.find(first_key) !=
-                                used_edges.end() ||
-                            used_edges.find(second_key) !=
-                                used_edges.end()) {
+                        if (edge_index(
+                                left, first_options[option]) ==
+                                edge_index(
+                                    right,
+                                    second_options[option]) ||
+                            edge_is_used(
+                                left, first_options[option]) ||
+                            edge_is_used(
+                                right, second_options[option])) {
                             continue;
                         }
-                        const auto prior_key =
-                            edge_key(prior_left, prior_right);
-                        used_edges.erase(prior_key);
-                        used_edges.insert(first_key);
-                        used_edges.insert(second_key);
+                        clear_edge_used(prior_left, prior_right);
+                        set_edge_used(left, first_options[option]);
+                        set_edge_used(right, second_options[option]);
                         permutations[pair_offset] = left;
                         permutations[pair_offset + 1] =
                             first_options[option];
