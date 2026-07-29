@@ -758,6 +758,8 @@ class FixedEvaluationRngTests(unittest.TestCase):
                 "block_fht_modulation_centered": True,
                 "block_fht_weight_scale": 0.5,
                 "block_fht_residual_base_scale": 0.1,
+                "block_fht_affine_delta_targets": ["attn.c_proj"],
+                "block_fht_affine_delta_scale": 0.5,
                 "block_fht_output_gain_targets": ["attn.c_proj"],
                 "block_fht_input_gain_targets": ["attn.c_proj"],
                 "block_fht_ffn_pregelu_gain": True,

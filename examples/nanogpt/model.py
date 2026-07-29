@@ -83,6 +83,8 @@ class GPTConfig:
     block_fht_match_gpt_init: bool = False
     block_fht_weight_scale: float | None = None
     block_fht_residual_base_scale: float = 0.0
+    block_fht_affine_delta_targets: tuple[str, ...] = ()
+    block_fht_affine_delta_scale: float = 1.0
     block_fht_output_gain_targets: tuple[str, ...] = ()
     block_fht_input_gain_targets: tuple[str, ...] = ()
     block_fht_ffn_pregelu_gain: bool = False
@@ -681,6 +683,19 @@ def make_linear(
             weight_scale = target_std / float(config.block_fht_latent_init_std)
         else:
             weight_scale = 1.0
+        affine_delta = target_name in config.block_fht_affine_delta_targets
+        if affine_delta and config.block_fht_residual_base_scale != 0.0:
+            raise ValueError(
+                "target-selective affine deltas cannot be combined with the "
+                "legacy global residual base"
+            )
+        residual_base_scale = (
+            float(config.block_fht_affine_delta_scale)
+            if affine_delta
+            else float(config.block_fht_residual_base_scale)
+        )
+        if not math.isfinite(residual_base_scale):
+            raise ValueError("BlockFHT residual/affine delta scale must be finite")
         return BlockFHTLinear(
             in_features,
             out_features,
@@ -700,8 +715,9 @@ def make_linear(
                 else 0.0
             ),
             quadratic_seed_offset=config.block_fht_quadratic_seed_offset,
-            residual_base_scale=config.block_fht_residual_base_scale,
+            residual_base_scale=residual_base_scale,
             residual_base_std=target_std,
+            residual_delta_zero_init=affine_delta,
             output_gain=target_name in config.block_fht_output_gain_targets,
             input_gain=target_name in config.block_fht_input_gain_targets,
             spectral_rank=config.block_fht_ffn_spectral_rank if target_name == "mlp.c_fc" else 0,
@@ -2970,6 +2986,19 @@ class Block(nn.Module):
 class GPT(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()
+        affine_delta_targets = set(config.block_fht_affine_delta_targets)
+        if not affine_delta_targets.issubset(config.block_fht_targets):
+            raise ValueError("affine-delta targets must also be BlockFHT targets")
+        if affine_delta_targets and config.block_fht_residual_base_scale != 0.0:
+            raise ValueError(
+                "target-selective affine deltas cannot be combined with the "
+                "legacy global residual base"
+            )
+        if affine_delta_targets and (
+            not math.isfinite(float(config.block_fht_affine_delta_scale))
+            or float(config.block_fht_affine_delta_scale) <= 0.0
+        ):
+            raise ValueError("block_fht_affine_delta_scale must be positive and finite")
         self.config = config
         self.transformer = nn.ModuleDict(
             dict(

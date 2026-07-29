@@ -75,6 +75,8 @@ BLOCK_FHT_STRUCTURE_FIELDS = (
     "block_fht_modulation_centered",
     "block_fht_weight_scale",
     "block_fht_residual_base_scale",
+    "block_fht_affine_delta_targets",
+    "block_fht_affine_delta_scale",
     "block_fht_output_gain_targets",
     "block_fht_input_gain_targets",
     "block_fht_ffn_pregelu_gain",
@@ -132,6 +134,8 @@ REGISTERED_V2_BLOCK_FHT_METHOD_SPEC: dict[str, Any] = {
     "block_fht_modulation_centered": False,
     "block_fht_weight_scale": None,
     "block_fht_residual_base_scale": 0.0,
+    "block_fht_affine_delta_targets": [],
+    "block_fht_affine_delta_scale": 1.0,
     "block_fht_output_gain_targets": [],
     "block_fht_input_gain_targets": [],
     "block_fht_ffn_pregelu_gain": False,
@@ -426,6 +430,15 @@ def _validate_block_fht_structure(structure: object) -> dict[str, Any]:
         "block_fht_residual_base_scale": _nonnegative_number(
             structure["block_fht_residual_base_scale"], "run_contract.block_fht_residual_base_scale"
         ),
+        "block_fht_affine_delta_targets": _string_list(
+            structure["block_fht_affine_delta_targets"],
+            "run_contract.block_fht_affine_delta_targets",
+        ),
+        "block_fht_affine_delta_scale": _finite_number(
+            structure["block_fht_affine_delta_scale"],
+            "run_contract.block_fht_affine_delta_scale",
+            positive=True,
+        ),
         "block_fht_output_gain_targets": _string_list(
             structure["block_fht_output_gain_targets"], "run_contract.block_fht_output_gain_targets"
         ),
@@ -532,6 +545,14 @@ def _validate_block_fht_structure(structure: object) -> dict[str, Any]:
     if structure["block_fht_cproj_lowrank_mode"] not in {"dense", "block_fht"}:
         raise ValueError("run_contract.block_fht_cproj_lowrank_mode is unregistered")
     normalized["block_fht_cproj_lowrank_mode"] = structure["block_fht_cproj_lowrank_mode"]
+    affine_delta_targets = set(normalized["block_fht_affine_delta_targets"])
+    if not affine_delta_targets.issubset(normalized["block_fht_targets"]):
+        raise ValueError("run_contract affine-delta targets must be BlockFHT targets")
+    if affine_delta_targets and normalized["block_fht_residual_base_scale"] != 0.0:
+        raise ValueError(
+            "run_contract target-selective affine deltas cannot be combined with the "
+            "legacy global residual base"
+        )
     for field in boolean_fields:
         normalized[field] = structure[field]
     return {field: normalized[field] for field in BLOCK_FHT_STRUCTURE_FIELDS}

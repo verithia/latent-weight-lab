@@ -739,6 +739,7 @@ class BlockFHTLinear(nn.Module):
         quadratic_seed_offset: int = 104729,
         residual_base_scale: float = 0.0,
         residual_base_std: float = 0.02,
+        residual_delta_zero_init: bool = False,
         output_gain: bool = False,
         input_gain: bool = False,
         spectral_rank: int = 0,
@@ -782,6 +783,14 @@ class BlockFHTLinear(nn.Module):
         if self.quadratic_seed_offset <= 0:
             raise ValueError("quadratic_seed_offset must be positive")
         self.residual_base_scale = float(residual_base_scale)
+        self.residual_delta_zero_init = bool(residual_delta_zero_init)
+        if self.residual_delta_zero_init and self.residual_base_scale == 0.0:
+            raise ValueError(
+                "residual_delta_zero_init requires a nonzero residual base scale"
+            )
+        if self.residual_delta_zero_init:
+            with torch.no_grad():
+                self.generator.latent.zero_()
         self.output_gain = nn.Parameter(torch.ones(self.out_features)) if output_gain else None
         self.input_gain = nn.Parameter(torch.ones(self.in_features)) if input_gain else None
         self.spectral_rank = int(spectral_rank)
@@ -924,7 +933,7 @@ class BlockFHTLinear(nn.Module):
         return out
 
     def materialize_weight_cache(self, dtype: torch.dtype | None = None) -> None:
-        if self.residual_base_weight is not None or self.spectral_core is not None:
+        if self.spectral_core is not None:
             return
         if self._cached_weight is not None:
             return

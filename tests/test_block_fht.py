@@ -268,6 +268,144 @@ def test_quadratic_chart_is_target_selective_in_gpt():
     assert model.transformer.h[0].mlp.c_proj.quadratic_scale == 0.5
 
 
+def test_zero_initialized_affine_delta_starts_at_frozen_dense_base():
+    torch.manual_seed(332)
+    layer = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        latent_shape=(2, 4),
+        layers=2,
+        seed=19,
+        latent_init_std=0.02,
+        weight_scale=0.25,
+        residual_base_scale=1.0,
+        residual_base_std=0.01,
+        residual_delta_zero_init=True,
+    )
+    assert layer.residual_base_weight is not None
+    assert torch.count_nonzero(layer.generator.latent) == 0
+    torch.testing.assert_close(layer.weight, layer.residual_base_weight)
+    inputs = torch.randn(7, 5)
+    loss = layer(inputs).square().mean()
+    loss.backward()
+    assert layer.generator.latent.grad is not None
+    assert torch.count_nonzero(layer.generator.latent.grad) > 0
+    assert layer.residual_base_weight.grad is None
+
+
+def test_affine_delta_is_target_selective_in_gpt():
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            block_fht=True,
+            block_fht_targets=("attn.c_proj", "mlp.c_proj"),
+            block_fht_latent_ratio=1.0,
+            block_fht_match_gpt_init=True,
+            block_fht_affine_delta_targets=("mlp.c_proj",),
+            block_fht_affine_delta_scale=1.0,
+        )
+    )
+    attention = model.transformer.h[0].attn.c_proj
+    projection = model.transformer.h[0].mlp.c_proj
+    assert attention.residual_base_weight is None
+    assert projection.residual_base_weight is not None
+    assert torch.count_nonzero(attention.generator.latent) > 0
+    assert torch.count_nonzero(projection.generator.latent) == 0
+    torch.testing.assert_close(projection.weight, projection.residual_base_weight)
+
+
+@pytest.mark.parametrize(
+    ("config_update", "message"),
+    [
+        (
+            {
+                "block_fht_targets": ("attn.c_proj",),
+                "block_fht_affine_delta_targets": ("mlp.c_proj",),
+            },
+            "must also be BlockFHT targets",
+        ),
+        (
+            {
+                "block_fht_targets": ("mlp.c_proj",),
+                "block_fht_affine_delta_targets": ("mlp.c_proj",),
+                "block_fht_residual_base_scale": 0.5,
+            },
+            "legacy global residual base",
+        ),
+        (
+            {
+                "block_fht_targets": ("mlp.c_proj",),
+                "block_fht_affine_delta_targets": ("mlp.c_proj",),
+                "block_fht_affine_delta_scale": 0.0,
+            },
+            "must be positive and finite",
+        ),
+    ],
+)
+def test_affine_delta_configuration_is_validated(config_update, message):
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        **config_update,
+    )
+    with pytest.raises(ValueError, match=message):
+        GPT(config)
+
+
+def test_affine_delta_cached_gradient_matches_dynamic_gradient():
+    torch.manual_seed(334)
+    dynamic = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        latent_shape=(2, 4),
+        layers=2,
+        seed=23,
+        residual_base_scale=0.5,
+        residual_base_std=0.01,
+        residual_delta_zero_init=True,
+    )
+    cached = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=8,
+        latent_shape=(2, 4),
+        layers=2,
+        seed=23,
+        residual_base_scale=0.5,
+        residual_base_std=0.01,
+        residual_delta_zero_init=True,
+    )
+    cached.load_state_dict(dynamic.state_dict())
+    inputs = torch.randn(7, 5)
+    dynamic_loss = dynamic(inputs).square().mean()
+    dynamic_loss.backward()
+    prepare_block_fht_weight_cache(cached)
+    assert cached._cached_weight is not None
+    cached_loss = cached(inputs).square().mean()
+    cached_loss.backward()
+    flush_block_fht_weight_cache(cached)
+    torch.testing.assert_close(cached_loss, dynamic_loss)
+    torch.testing.assert_close(
+        cached.generator.latent.grad,
+        dynamic.generator.latent.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+
+
 def test_matrix_latent_matches_flat_latent_forward_and_gradient():
     torch.manual_seed(333)
     flat = BlockFHTLinear(5, 3, latent_dim=8, layers=2, seed=19)

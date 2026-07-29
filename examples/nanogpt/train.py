@@ -951,6 +951,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-match-gpt-init", action="store_true")
     parser.add_argument("--block-fht-weight-scale", type=float, default=None)
     parser.add_argument("--block-fht-residual-base-scale", type=float, default=0.0)
+    parser.add_argument("--block-fht-affine-delta-targets", nargs="+", default=[])
+    parser.add_argument("--block-fht-affine-delta-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-output-gain-targets", nargs="+", default=[])
     parser.add_argument("--block-fht-input-gain-targets", nargs="+", default=[])
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
@@ -1387,6 +1389,8 @@ def main() -> None:
         block_fht_match_gpt_init=args.block_fht_match_gpt_init,
         block_fht_weight_scale=args.block_fht_weight_scale,
         block_fht_residual_base_scale=args.block_fht_residual_base_scale,
+        block_fht_affine_delta_targets=tuple(args.block_fht_affine_delta_targets),
+        block_fht_affine_delta_scale=args.block_fht_affine_delta_scale,
         block_fht_output_gain_targets=tuple(args.block_fht_output_gain_targets),
         block_fht_input_gain_targets=tuple(args.block_fht_input_gain_targets),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
