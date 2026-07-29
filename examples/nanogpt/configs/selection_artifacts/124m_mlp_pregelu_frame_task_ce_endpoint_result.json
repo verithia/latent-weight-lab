@@ -1,0 +1,113 @@
+{
+  "schema_version": "mai_124m_mlp_pregelu_frame_task_ce_endpoint_result_v1",
+  "registered_at": "2026-07-29",
+  "decision": "POSITIVE_PRE_GELU_FRAME_CAPACITY",
+  "scientific_conclusion": "An independent pre-GELU orientation chart adds reproducible task-useful capacity beyond the accepted post-GELU rotations at the frozen 124M endpoint. The primary-selected terminal state improves all three preregistered validation windows by 0.0083 to 0.0101 CE. This supports a two-sided activation-frame diagnosis across GELU; it does not support scalar gain or a residual hyperconnection, and it does not yet establish from-scratch trainability.",
+  "source": {
+    "commit": "08d9ee6a9a04f84f15f0389cad2924271c0490e4",
+    "entrypoint": "examples/nanogpt/optimize_mlp_pregelu_frame_endpoint_ce.py",
+    "entrypoint_sha256": "d6af0fbdb5dfc80c45c9341b822d0ac9dafabfaaa1a0279c914e93012c088fe0",
+    "model_source_sha256": "5b68d7b8d16090aee4ffa88ad5ebe4f57ee3e629a895649e0e0a50f8e705f7e8",
+    "tests": "210 passed, 9 skipped locally; 7 exact pre-GELU/cached-chart tests passed on the clean Y400 deployment"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_pregelu_frame_task_ce_endpoint_plan.json",
+    "sha256": "1d4f7020db7ffda029e60cd6c0ab678a85120cb97b7a4efab4b09656067e7bfb"
+  },
+  "inputs": {
+    "plain_cproj_checkpoint_sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc",
+    "identity_bilateral_chart_state_sha256": "2d18703bf53d62ab52a217730a9e63594c331c5a07118b3f79069a18ff91aa01",
+    "accepted_bilateral_chart_state_sha256": "2abeee50138189f055a5462679412965a6c60d524a04c60afda1cdc3877a6b75",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_reference": "accepted hidden_rotation and output_rotation in all 12 layers; identity hidden_gain and output_gain"
+  },
+  "accepted_preflight": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_frame_endpoint/mfu_safety_commit_08d9ee6_gpu1.json",
+    "sha256": "6733caff52501c1156122ef0be97165a1568c18635c4c3a0230f52fbc35baf48",
+    "mfu_fraction": 0.3067192632448392,
+    "tokens_per_second": 269228.63117546187,
+    "mean_iter_ms": 973.6854466609657,
+    "peak_mib": 26969.56689453125,
+    "empirical_bf16_gemm_peak_tflops": 655.6614035611068,
+    "separate_seed_safety": {
+      "seed": 20260801,
+      "token_sha256": "7b84cea367a9291805745cd1a7d67f5ada7c62c1d8322e81f736fcf5c0d5f2ef",
+      "initial_ce": 5.750678062438965,
+      "final_ce": 5.752492904663086,
+      "ce_increase": 0.0018148422241210938,
+      "maximum_allowed_increase": 0.1
+    }
+  },
+  "scientific_run": {
+    "host": "Y400",
+    "gpu": 1,
+    "polling": "attached foreground SSH process with direct process/GPU polling; no watchdog, queue entry, callback, or background worker",
+    "output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_frame_endpoint/run_commit_08d9ee6",
+    "updates": 120,
+    "tokens_per_update": 262144,
+    "total_optimization_tokens": 31457280,
+    "updated_parameter_count": 1142784,
+    "cached_block_fht_modules": 180,
+    "train_token_seed": 20260731,
+    "train_indices_sha256": "52a6d798f241fde3ef19456991cba80ff5d5d1d49b6293b3dfb717ef57071c69",
+    "command": "CUDA_VISIBLE_DEVICES=1 PYTHONPATH=. /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.optimize_mlp_pregelu_frame_endpoint_ce --mode run --checkpoint /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --identity-state /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5/chart_state_step_0000.pt --accepted-state /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5/chart_state_step_0120.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --mfu-certificate /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_frame_endpoint/mfu_safety_commit_08d9ee6_gpu1.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_frame_endpoint/run_commit_08d9ee6"
+  },
+  "validation": [
+    {
+      "update": 0,
+      "primary_ce": 5.7224520444869995,
+      "confirmation_ce": 5.687380135059357,
+      "audit_ce": 5.701757252216339
+    },
+    {
+      "update": 30,
+      "primary_ce": 5.717927098274231,
+      "confirmation_ce": 5.685488164424896,
+      "audit_ce": 5.698077917098999
+    },
+    {
+      "update": 60,
+      "primary_ce": 5.716178119182587,
+      "confirmation_ce": 5.682221472263336,
+      "audit_ce": 5.695454776287079
+    },
+    {
+      "update": 120,
+      "primary_ce": 5.713024377822876,
+      "confirmation_ce": 5.6790483593940735,
+      "audit_ce": 5.691680610179901
+    }
+  ],
+  "selection": {
+    "selected_update": 120,
+    "minimum_marginal_gain": 0.005,
+    "primary_seed": 20260717,
+    "primary_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e",
+    "primary_marginal_gain": 0.009427666664123535,
+    "confirmation_seed": 20260718,
+    "confirmation_token_sha256": "9458b6a1fb470c780cf00b7305122f272d72a7dec4554d99b5dd2523c14cca8d",
+    "confirmation_marginal_gain": 0.008331775665283203,
+    "audit_seed": 20260719,
+    "audit_token_sha256": "ea8d8a77cc46dbf2097574dc2c725f254393900a4dd681102f8c07eb33d39770",
+    "audit_marginal_gain": 0.010076642036437988
+  },
+  "pregelu_displacement": {
+    "coordinates": 1142784,
+    "rms": 0.0007015217561274767,
+    "max_abs": 0.003983564209192991,
+    "layer_rms_range": [
+      0.0006405200692825019,
+      0.0007963147945702076
+    ]
+  },
+  "artifacts": {
+    "optimization_csv_sha256": "0e69a29c6f5d99ebd6d9ec2cf5eb3ebc8cf3c170b8d0b54b496d62ecf6d7e5d9",
+    "validation_csv_sha256": "46e7c5a53c09350c7ae3b04e856f2b8c0a76947a866069c2fce0c1c80b8f90ec",
+    "pregelu_state_step_0000_sha256": "3661e6dab537859c5fe9a29825b1895664f32ecd131f39cb6ddeecc5e4bd0caa",
+    "pregelu_state_step_0030_sha256": "11e07537314a5139be030769213e6676c48575d19b6ec74012414f6c6a5a50c4",
+    "pregelu_state_step_0060_sha256": "54f7e3572f0b52f37be333952fae4e21451b98cb1fa0852579cdda8924a430c7",
+    "pregelu_state_step_0120_sha256": "6751d7e23f22ee0b6f8bbbe831f31eda480721be8fd5603931f5b70ab7066dc9",
+    "remote_summary_sha256": "524ddf32705b7ad40de971031314a9f35e308614ab8e092fcd3cfe895ff83f1b"
+  },
+  "next_required_control": "Promote this exact two-sided activation-frame structure to one performance-gated from-scratch 124M 0.5TPP causal run. Keep scalar gains and residual hyperconnections disabled. Do not start a broader ladder unless that run closes a meaningful fraction of the plain-cproj validation gap."
+}
