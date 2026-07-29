@@ -1,0 +1,173 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_sl2_residual_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "registered_at": "2026-07-30",
+  "scientific_question": "After a stateless current-Muon-matched hidden-side stage-64 Givens chart, does the remaining task-effective c_proj motion require a moving non-orthogonal hidden-pair chart that jointly represents rotation, symmetric shear, and paired anisotropic scale, rather than more sparse orthogonal coordinates?",
+  "parameter_updates": 0,
+  "parent_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_residual_decomposition_result.json",
+    "sha256": "f22b71a7d3cd5b1ef7b4b94751b738581eb816a52bd854839e24418e21446977",
+    "decision": "REJECT_SPARSE_ORTHOGONAL_PLUS_DIAGONAL_EXPANSION"
+  },
+  "existing_evidence_not_to_repeat": {
+    "output_scale_shear": "The earlier output oracle found only a small residual-output scale/shear component, and conditional output rotation plus two-sided diagonal scaling were weaker than equal-coordinate fresh hidden rotations.",
+    "bilateral_orthogonal": "Task-selected bilateral hidden/output Givens charts were already tested and rejected at matched coordinate count.",
+    "orthogonal_hidden": "The fresh hidden64 production candidate is directional but remains 0.1204 CE behind attention-only; fresh hidden80 produced a consistent 1.13-1.14x functional signal but missed its preregistered 1.15x gate.",
+    "novelty": "No prior moving hidden-side chart fitted the complete three-dimensional trace-free 2x2 tangent on each selected channel pair. This test adds symmetric shear and paired anisotropic scale inside the same task-selected local block while preserving determinant one; it is not an output-side diagonal, a global fixed basis, a learned dense basis, or LoRA."
+  },
+  "inputs": {
+    "coherent_dense_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "base_updates": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "future_updates": [
+      15,
+      75,
+      135,
+      195
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "fixed_validation_windows": {
+      "indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "fit_seed": 20260802,
+      "holdout_seed": 20260803,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4
+    }
+  },
+  "chart_definition": {
+    "side": "right multiplication on the 3072 post-GELU hidden channels of each 768x3072 c_proj weight",
+    "per_pair_generator": "B = a*[[0,-1],[1,0]] + s*[[0,1],[1,0]] + d*[[1,0],[0,-1]]",
+    "coordinates": {
+      "a": "skew-symmetric rotation",
+      "s": "symmetric shear",
+      "d": "paired anisotropic log-scale"
+    },
+    "finite_map": "Apply the exact batched matrix exponential exp(B) to each selected 2x2 channel pair. Because trace(B)=0, every block has determinant one.",
+    "fit": "At each stage, solve the exact 3x3 tangent normal equation for every selected pair against the current exact-Muon residual, apply exp(B), update the materialized source, and continue stagewise.",
+    "topology": "Use only current source and current exact-Muon residual. Form a 128-neighbor shortlist per channel from the diagonal three-coordinate projection score, exactly rerank shortlisted edges by their 3x3 projected residual reduction, then use the validated compiled single-pass edge colorer to create unique perfect matchings.",
+    "future_information_used_for_selection": false,
+    "future_information_used_for_scoring_only": true,
+    "learned_dense_basis": false,
+    "dense_residual_adapter": false,
+    "lora_adapter": false,
+    "token_conditioning": false
+  },
+  "causal_protocol": {
+    "parent": "Fit the production-qualified stateless-fresh hidden64 Givens direction from the exact current coherent Muon target.",
+    "residual": "Materialize R = D_muon - D_hidden64.",
+    "sl2": "Select and fit 8-stage and 16-stage trace-free 2x2 residual flows using only R at the same base update.",
+    "equal_coordinate_controls": "Fit fresh residual hidden Givens corrections of 24 and 48 stages after hidden64. Eight SL2 stages and 24 Givens stages each add 36,864 coordinates per layer; sixteen SL2 stages and 48 Givens stages each add 73,728.",
+    "same_topology_attribution": "On each selected SL2 topology, score full SL2, skew-only, and non-orthogonal-only symmetric-shear-plus-anisotropic-scale ablations. These ablations may diagnose the mechanism but cannot substitute for the equal-coordinate control.",
+    "model_parameters_updated": false,
+    "optimizer_state_updated": false
+  },
+  "candidate_cells": [
+    {
+      "name": "fresh_hidden64",
+      "coordinates_per_layer": 98304,
+      "role": "qualified parent"
+    },
+    {
+      "name": "fresh_hidden88",
+      "coordinates_per_layer": 135168,
+      "role": "equal-coordinate control for hidden64_plus_sl2_8"
+    },
+    {
+      "name": "fresh_hidden112",
+      "coordinates_per_layer": 172032,
+      "role": "equal-coordinate control for hidden64_plus_sl2_16"
+    },
+    {
+      "name": "fresh_hidden64_plus_sl2_8",
+      "coordinates_per_layer": 135168,
+      "role": "lower-depth non-orthogonal candidate"
+    },
+    {
+      "name": "fresh_hidden64_plus_sl2_16",
+      "coordinates_per_layer": 172032,
+      "role": "higher-depth non-orthogonal candidate"
+    },
+    {
+      "name": "fresh_hidden64_plus_sl2_8_skew_only",
+      "coordinates_per_layer": 110592,
+      "role": "same-topology attribution ablation"
+    },
+    {
+      "name": "fresh_hidden64_plus_sl2_16_skew_only",
+      "coordinates_per_layer": 122880,
+      "role": "same-topology attribution ablation"
+    },
+    {
+      "name": "fresh_hidden64_plus_sl2_8_nonorthogonal_only",
+      "coordinates_per_layer": 122880,
+      "role": "same-topology attribution ablation"
+    },
+    {
+      "name": "fresh_hidden64_plus_sl2_16_nonorthogonal_only",
+      "coordinates_per_layer": 147456,
+      "role": "same-topology attribution ablation"
+    }
+  ],
+  "metrics": {
+    "weight_space": [
+      "current exact-Muon Frobenius recovery",
+      "current residual Frobenius recovery",
+      "15-update future exact-Muon residual recovery and cosine"
+    ],
+    "functional": [
+      "post-GELU activation-covariance-weighted residual-output fixed-scale recovery",
+      "post-GELU residual-output positive-line recovery",
+      "recorded train-gradient predicted CE decrease",
+      "fixed fit-window validation-gradient predicted CE decrease",
+      "fixed holdout-window validation-gradient predicted CE decrease",
+      "matched finite-step CE change on both fixed windows"
+    ],
+    "mechanism": [
+      "RMS and maximum absolute rotation, symmetric-shear, and anisotropic-scale coordinates",
+      "current and future recovery of full, skew-only, and non-orthogonal-only same-topology ablations",
+      "minimum determinant and maximum condition number of all fitted finite 2x2 blocks"
+    ],
+    "aggregation": "Report every layer/update/window cell, energy-weighted aggregates, minimum cells, coordinate-normalized gains, and all finite/nonfinite cells."
+  },
+  "registered_decision_rule": {
+    "candidate_pass": [
+      "At either 8 or 16 SL2 stages, full SL2 must beat its exact equal-coordinate fresh-hidden Givens control by at least 1.05x on current post-GELU positive-line recovery.",
+      "Full SL2 must beat that control by at least 1.05x on both fit and holdout validation-gradient predicted CE decrease.",
+      "Full SL2 must beat that control by at least 1.10x on 15-update future residual recovery.",
+      "Full SL2 must win at least 7 of 8 fit/holdout finite-step CE comparisons and have no negative current-task-effect cell.",
+      "To attribute the improvement to non-orthogonal coordinates rather than topology alone, full SL2 must beat its same-topology skew-only ablation by at least 1.05x on current post-GELU positive-line recovery and both validation-gradient metrics, and by at least 1.10x on future residual recovery."
+    ],
+    "selection": "If both depths pass, select the lower-coordinate 8-stage chart unless the 16-stage chart improves the conservative minimum of its four functional ratios by at least 1.10x.",
+    "failure": "If neither depth passes every rule, reject sparse trace-free pair blocks as the missing c_proj chart. Do not weaken thresholds, authorize training, or promote a larger rung after observing the result."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": "one idle nonzero GPU",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "do_not_disturb": "the running 985M full-attention 20TPP job on Y400 GPU0",
+    "workspace_cap_gib": 300
+  },
+  "authorization": {
+    "this_plan_authorizes": "Implementation, focused tests, and one zero-update directly polled diagnostic after exact-commit deployment.",
+    "language_model_training_authorized": false,
+    "mfu_preflight_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
