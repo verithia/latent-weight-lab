@@ -329,6 +329,10 @@ def fit_causal_givens_update(
 def aggregate_rows(
     rows: list[dict[str, Any]],
     stage_counts: list[int],
+    *,
+    minimum_future_recovery: float = 0.02,
+    minimum_future_over_random: float = 2.0,
+    minimum_update_over_coordinate: float = 4.0,
 ) -> tuple[list[dict[str, Any]], str]:
     aggregates: list[dict[str, Any]] = []
     for stages in stage_counts:
@@ -395,12 +399,13 @@ def aggregate_rows(
     )
     task = selected["task_matched"]
     if (
-        float(task["future_recovery"]) >= 0.02
-        and float(selected["task_over_random_future_recovery"]) >= 2.0
+        float(task["future_recovery"]) >= minimum_future_recovery
+        and float(selected["task_over_random_future_recovery"])
+        >= minimum_future_over_random
         and float(
             selected["task_update_recovery_over_coordinate_fraction"]
         )
-        >= 4.0
+        >= minimum_update_over_coordinate
         and int(task["positive_future_cells"]) == int(task["cells"])
     ):
         decision = "PROMOTE_MUON_MATCHED_GIVENS_TO_ALL_CELL_ORACLE"
@@ -424,6 +429,15 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=0.001)
     parser.add_argument("--matching-seed", type=int, default=161803)
     parser.add_argument("--random-seed", type=int, default=271828)
+    parser.add_argument(
+        "--minimum-future-recovery", type=float, default=0.02
+    )
+    parser.add_argument(
+        "--minimum-future-over-random", type=float, default=2.0
+    )
+    parser.add_argument(
+        "--minimum-update-over-coordinate", type=float, default=4.0
+    )
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
     started = time.time()
@@ -434,8 +448,11 @@ def main() -> None:
         not stage_counts
         or min(stage_counts) <= 0
         or max(stage_counts) > args.neighbors
+        or args.minimum_future_recovery <= 0.0
+        or args.minimum_future_over_random <= 0.0
+        or args.minimum_update_over_coordinate <= 0.0
     ):
-        raise ValueError("invalid stage counts")
+        raise ValueError("invalid stage counts or decision thresholds")
     end_by_start = dict(
         zip(boundaries[:-1], boundaries[1:], strict=True)
     )
@@ -567,7 +584,15 @@ def main() -> None:
         if "cuda" in args.device:
             torch.cuda.empty_cache()
 
-    aggregates, decision = aggregate_rows(rows, stage_counts)
+    aggregates, decision = aggregate_rows(
+        rows,
+        stage_counts,
+        minimum_future_recovery=args.minimum_future_recovery,
+        minimum_future_over_random=args.minimum_future_over_random,
+        minimum_update_over_coordinate=(
+            args.minimum_update_over_coordinate
+        ),
+    )
     args.output.mkdir(parents=True, exist_ok=True)
     detail_path = args.output / "muon_matched_givens_pilot.csv"
     matching_path = args.output / "muon_matched_givens_matchings.csv"
@@ -590,10 +615,12 @@ def main() -> None:
         "schema_version": "nanogpt_mlp_muon_matched_givens_v1",
         "decision": decision,
         "decision_rule": (
-            "at the largest registered stage count require >=2% future "
-            "recovery, >=2x its random-connectivity control, >=4x ambient "
-            "coordinate enrichment on requested-update recovery, and "
-            "positive future cosine in every pilot cell"
+            "at the largest registered stage count require future recovery "
+            f">={args.minimum_future_recovery}, recovery over random "
+            f">={args.minimum_future_over_random}x, requested-update "
+            "recovery over coordinate fraction "
+            f">={args.minimum_update_over_coordinate}x, and positive future "
+            "cosine in every pilot cell"
         ),
         "causal_protocol": (
             "connectivity and angles use only the exact current coherent "
