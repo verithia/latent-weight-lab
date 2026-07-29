@@ -1,0 +1,238 @@
+{
+  "schema_version": "mai_124m_mlp_pregelu_causal_pair_result_v1",
+  "registered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_pregelu_causal_pair_plan.json",
+    "sha256": "a947681366b627ca3c270f3e785f69138d7e0e56ecc1748babdff782b30c17be"
+  },
+  "execution": {
+    "host": "Y400",
+    "scientific_run_git_commit": "707dfca731c3b28620a56766aa65fe916e04f7e3",
+    "implementation_commit": "4b094c3a2b710933946587ee91faab29fd88bee6",
+    "analysis_commit": "16dc5a6458d82a1e00354f51b6171979f25e6dc5",
+    "monitoring": "registered foreground launcher followed by direct process/log polling; no watchdog, queue entry, heartbeat, callback, or PRO6 execution",
+    "control_channel_note": "Both attached SSH control channels closed after launch, but both registered foreground workers remained alive, GPU-active, directly polled, and wrote clean terminal status.",
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "fixed_eval_match": true,
+    "source_hashes": {
+      "examples/nanogpt/model.py": "da38f61b9901e83b4212fccd04be3c4f445bc7bbafb45bf74310ece802f40803",
+      "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+      "examples/nanogpt/train.py": "7cb4e5a9ba569c6e9569623b0434adeb7fc441a6cd66b6150580149cfcce9111",
+      "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+    }
+  },
+  "performance_gate_history": {
+    "policy_minimum_mfu_fraction": 0.2,
+    "rejected_b32g8_candidate": {
+      "config_sha256": "4d119c3962c9a857c57383e761c14da98ee02096e9865ea26abd5aa20397a88f",
+      "certificate_sha256": "f5f826cd3dbe8fab5718d7ab6f6770231012a92a234b62512e984a3cca562da8",
+      "mfu_fraction": 0.19626070327472764
+    },
+    "rejected_b64g4_candidate_without_graph_reuse": {
+      "config_sha256": "b8cc4d28e55c5d37ae0422b33b9bc68d0cc17239b3663b4b7caaed276e871d91",
+      "certificate_sha256": "5fe71b371f7c783cddc5e6dc378f24b70fa1fecb1db9143c83d7739122ff926d",
+      "mfu_fraction": 0.19557103243394197
+    },
+    "rejected_graph_reuse_candidate_on_gpu2": {
+      "config_sha256": "14d0fb52a3291924ceb91277ae5f3e8b69e62954a5ee2bae565b87a3c6b00ac1",
+      "certificate_sha256": "6e68d71e5e868770091bdd8f845094f5351f2b215f26852e6ba0092d2e8cd412",
+      "mfu_fraction": 0.19772808931551544
+    },
+    "accepted_parent_gpu2": {
+      "config_sha256": "0b0e9384d80b4c5b9358d50bf5ba3792a6caaeeefd66c96a2f9d4375373c7cae",
+      "certificate_sha256": "fd1ab1c202226c80f3124d3deeb58353d24451a355f3e3db04c0338b6e0f3e23",
+      "mfu_fraction": 0.219974088173555,
+      "tokens_per_second": 196946.50666666668,
+      "iter_ms": 1331.05,
+      "peak_mib": 61410.92
+    },
+    "accepted_candidate_gpu1": {
+      "config_sha256": "14d0fb52a3291924ceb91277ae5f3e8b69e62954a5ee2bae565b87a3c6b00ac1",
+      "certificate_sha256": "968c07cb8074eb694deae68ec8800bdce09001e22d316fb599812823014a0296",
+      "mfu_fraction": 0.2051640692468232,
+      "tokens_per_second": 180046.23666666666,
+      "iter_ms": 1455.9833333333333,
+      "peak_mib": 61782.16
+    }
+  },
+  "arms": {
+    "parent": {
+      "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_matched_0p5tpp_lr24e4",
+      "gpu": 2,
+      "started_at": "2026-07-29T12:48:12+08:00",
+      "finished_at": "2026-07-29T12:55:05+08:00",
+      "exit_code": 0,
+      "config": {
+        "path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_matched_0p5tpp_lr24e4.json",
+        "sha256": "0b0e9384d80b4c5b9358d50bf5ba3792a6caaeeefd66c96a2f9d4375373c7cae",
+        "resolved_config_sha256": "601d76c93ca682ef0f4e3c8f77e4c5feb03a6dada6b0686bd15bcb080b2fec58"
+      },
+      "literal_command": [
+        "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_matched_0p5tpp_lr24e4_20260729T044812Z_21086.config.json"
+      ],
+      "evaluation": {
+        "step_0": {
+          "train_ce": 10.9788,
+          "val_ce": 10.9789
+        },
+        "step_60": {
+          "train_ce": 6.3489,
+          "val_ce": 6.3585
+        },
+        "step_120": {
+          "train_ce": 5.9287,
+          "val_ce": 5.9343
+        },
+        "step_180": {
+          "train_ce": 5.7566,
+          "val_ce": 5.761
+        },
+        "step_238": {
+          "train_ce": 5.6926,
+          "val_ce_printed": 5.697,
+          "val_ce_checkpoint": 5.696969509124756
+        }
+      },
+      "checkpoint": {
+        "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_causal_pair/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_matched_0p5tpp_lr24e4/ckpt.pt",
+        "sha256": "69d40fb5d939e7824a671ff03d84f5ee37bd483bcdff93bc89a3f298b60ab991",
+        "size_human": "695M",
+        "schema_version": "nanogpt_exact_resume_v2",
+        "next_iter": 238,
+        "reason": "evaluation",
+        "metadata_sha256": "c08e4aa0ddec2abe3124b781826b57d7a43ed40e16888a454c36619ff826804f"
+      },
+      "registered_artifacts": {
+        "log": {
+          "path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_matched_0p5tpp_lr24e4_20260729T044812Z_21086.log",
+          "sha256": "1cee846a1780d92a228e9e19e011ba6594c5bc3ec3f6c945b5b7aaa3ae734aaf"
+        },
+        "status_sha256": "e4058a8c604ddf6f63944ba5a6836c5677804a12cb83c677ec938f0aa36a029e",
+        "provenance_sha256": "c737a4779a7c506712e546d141a4a8ef8d8349c4847456fd01b74b988d7dbcd3"
+      }
+    },
+    "candidate": {
+      "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_pregelu_s2_postgelu_rotations_matched_0p5tpp_lr24e4",
+      "gpu": 1,
+      "started_at": "2026-07-29T12:48:12+08:00",
+      "finished_at": "2026-07-29T12:55:47+08:00",
+      "exit_code": 0,
+      "config": {
+        "path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_pregelu_s2_postgelu_rotations_matched_0p5tpp_lr24e4.json",
+        "sha256": "14d0fb52a3291924ceb91277ae5f3e8b69e62954a5ee2bae565b87a3c6b00ac1",
+        "resolved_config_sha256": "6f88a3ea0cb8098bcf3ba777e116d3cee894d468c52528894120f0bb1a63482f"
+      },
+      "literal_command": [
+        "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_fullattn_plus_mlp_cproj_pregelu_s2_postgelu_rotations_matched_0p5tpp_lr24e4_20260729T044812Z_20993.config.json"
+      ],
+      "evaluation": {
+        "step_0": {
+          "train_ce": 10.9788,
+          "val_ce": 10.9789
+        },
+        "step_60": {
+          "train_ce": 6.3398,
+          "val_ce": 6.3497
+        },
+        "step_120": {
+          "train_ce": 5.9263,
+          "val_ce": 5.9319
+        },
+        "step_180": {
+          "train_ce": 5.7545,
+          "val_ce": 5.7588
+        },
+        "step_238": {
+          "train_ce": 5.6898,
+          "val_ce_printed": 5.6942,
+          "val_ce_checkpoint": 5.6942009925842285
+        }
+      },
+      "checkpoint": {
+        "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_causal_pair/y400_mai_v3_124m_fullattn_plus_mlp_cproj_pregelu_s2_postgelu_rotations_matched_0p5tpp_lr24e4/ckpt.pt",
+        "sha256": "c55789d84db58600792db82b01b7fd187ce65c8f60b768dc126f177fbdfbd363",
+        "size_human": "710M",
+        "schema_version": "nanogpt_exact_resume_v2",
+        "next_iter": 238,
+        "reason": "evaluation",
+        "metadata_sha256": "7b13e2b235a9f29a28f1887310c8c37f74e018cd3c83cc8b1f513bc8b8b77206"
+      },
+      "registered_artifacts": {
+        "log": {
+          "path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_pregelu_s2_postgelu_rotations_matched_0p5tpp_lr24e4_20260729T044812Z_20993.log",
+          "sha256": "fafa959be412f567b06dd2aa21570e58905fd0ab4e6622138084e4780a4e6aa8"
+        },
+        "status_sha256": "e2d7bab58bfa65d1fa1f169def2e0eb6c60cd3ff6fde0e85946638cf0d973344",
+        "provenance_sha256": "46c9c4f66ceb40feb6698a182973010b85d76717e55bbee0c544d6eee530e98a"
+      }
+    }
+  },
+  "terminal_comparison": {
+    "candidate_minus_parent_val_ce": -0.0027685165405273438,
+    "candidate_gain_ce": 0.0027685165405273438,
+    "registered_promotion_margin_ce": 0.02,
+    "fraction_of_promotion_margin": 0.1384258270263672,
+    "matched_attention_reference_val_ce": 5.4918,
+    "parent_gap_to_attention_reference_ce": 0.20516950912475562,
+    "candidate_gap_to_attention_reference_ce": 0.20240099258422828,
+    "fraction_of_parent_attention_gap_closed": 0.013493801063996873,
+    "plain_generated_cproj_reference_val_ce": 5.7394
+  },
+  "terminal_geometry": {
+    "artifact": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_pregelu_causal_pair/terminal_geometry.json",
+      "sha256": "fc9d1d1bd0a338b40c116b202c58844af0947d26d3504e15d232ac0a1dbf84bd"
+    },
+    "analysis_source": {
+      "path": "examples/nanogpt/analyze_pregelu_causal_pair.py",
+      "sha256": "3a31b1791d7a4b4ffdc5945726e3ba4d8b4a378bba3a7673d82cb13354ca19c3"
+    },
+    "candidate_pregelu_coordinates": {
+      "coordinate_count": 1142784,
+      "rms": 0.0005449557882108527,
+      "max_abs": 0.0032638777047395706,
+      "per_layer_rms_range": [
+        0.0005177219238731572,
+        0.0007018248752532742
+      ]
+    },
+    "paired_terminal_differences": {
+      "c_fc_weight": {
+        "difference_over_parent_norm": 0.08084471875025111,
+        "cosine": 0.9967321218870463
+      },
+      "cproj_latent": {
+        "difference_over_parent_norm": 0.08585954213370132,
+        "cosine": 0.996308838789006
+      },
+      "postgelu_hidden_coordinates": {
+        "difference_over_parent_norm": 0.23257325741132825,
+        "cosine": 0.9726764756299066
+      },
+      "postgelu_output_coordinates": {
+        "difference_over_parent_norm": 0.22138486001285404,
+        "cosine": 0.975209664506945
+      }
+    }
+  },
+  "decision": {
+    "label": "DIRECTIONAL_ONLY",
+    "promote_larger_ladder": false,
+    "reason": "The candidate is consistently but only 0.00277 CE better at terminal evaluation, 13.84 percent of the registered 0.020 promotion margin and only 1.35 percent closure of the remaining gap to the matched attention-only reference.",
+    "structural_interpretation": "The pre-GELU coordinates are nonzero and substantially redirect both post-GELU chart solutions and the dense c_fc/cproj-latent training path, yet add negligible terminal task capacity. The frozen-endpoint gain is therefore mostly locally accessible reparameterization capacity that joint from-scratch optimization absorbs through existing dense c_fc and post-GELU frames.",
+    "next_action": "Do not scale this two-sided orthogonal-frame add-on. Return to the unresolved c_proj/MLP functional gap and test a genuinely non-redundant activation-conditioned structure rather than more orientation or scalar-gain coordinates."
+  }
+}
