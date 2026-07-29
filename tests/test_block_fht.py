@@ -214,6 +214,37 @@ def test_product_fht_closed_form_jvp_matches_autograd():
     torch.testing.assert_close(actual, reference, atol=1e-6, rtol=1e-5)
 
 
+def test_product_fht_reuses_normalization_between_refreshes():
+    torch.manual_seed(23)
+    layer = ProductFHTLinear(
+        8,
+        4,
+        factors=2,
+        seed=109,
+        weight_std=0.04,
+        pullback_normalize=True,
+        pullback_refresh_interval=2,
+    )
+    layer.set_factor_learning_rate(1e-3)
+    layer.materialize_weight_cache()
+    layer(torch.randn(3, 8)).square().mean().backward()
+    layer.flush_weight_cache_to_factor_grad()
+    first_scale = float(layer.pullback_cached_normalization_scale)
+    assert first_scale > 0.0
+    assert int(layer.pullback_step) == 1
+    layer.zero_grad(set_to_none=True)
+
+    def fail_if_refreshed(*_args):
+        raise AssertionError("normalization refreshed before its interval")
+
+    layer._weight_jvp_from_factors = fail_if_refreshed
+    layer.materialize_weight_cache()
+    layer(torch.randn(3, 8)).square().mean().backward()
+    layer.flush_weight_cache_to_factor_grad()
+    assert float(layer.pullback_cached_normalization_scale) == first_scale
+    assert int(layer.pullback_step) == 2
+
+
 def test_product_fht_cproj_is_target_selective_and_sgd_owned():
     model = GPT(
         GPTConfig(

@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_124m_mlp_product_fht_jvpnorm_screen_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_jvpnorm_screen_plan.json",
+  "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_jvpnorm_0p5tpp_lr24e4.json",
+  "scientific_question": "Does the nonlinear product-FHT moving tangent improve c_proj replacement once the materialized update magnitude is exactly calibrated instead of remaining frozen?",
+  "execution": {
+    "run_name": "y400_mai_v3_124m_cproj_productfht6_jvpnorm_0p5tpp_direct",
+    "host": "Y400",
+    "gpu": 1,
+    "git_commit": "1c37ec0b50bcc4b6b5e446f34196d701f8038731",
+    "monitoring": "direct synchronous polling; the foreground SSH transport dropped after step 60, but the sole launcher-owned process group remained healthy and was polled directly to completion; no retry, duplicate, watchdog, callback, queue worker, or PRO6 execution",
+    "status": "clean",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.695,
+    "terminal_validation_loss": 5.6988,
+    "fixed_evaluations": {
+      "0": {
+        "train_loss": 10.9922,
+        "validation_loss": 10.9933
+      },
+      "60": {
+        "train_loss": 6.4502,
+        "validation_loss": 6.461
+      },
+      "120": {
+        "train_loss": 5.9442,
+        "validation_loss": 5.95
+      },
+      "180": {
+        "train_loss": 5.7653,
+        "validation_loss": 5.7693
+      },
+      "238": {
+        "train_loss": 5.695,
+        "validation_loss": 5.6988
+      }
+    }
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction": 0.23165312471670715,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 204234.6033333333,
+    "iter_ms": 1283.5400000000002,
+    "empirical_h100_bf16_gemm_peak_tflops": 658.4574304988321,
+    "model_tflops": 152.53372126798848,
+    "peak_memory_mib": 31478.29,
+    "prepare_ms": 59.86000000000001,
+    "forward_backward_ms": 881.2799999999999,
+    "pullback_flush_ms": 327.6666666666667,
+    "grad_postprocess_ms": 2.2866666666666666,
+    "optimizer_ms": 8.103333333333333,
+    "preflight_log_sha256": "82a0659c091ceed402b74055a6eb40bde5980312462b95fd04602cb05703c7a0",
+    "certificate_sha256": "7c66be2bb7bedc917823d52210fd731fe60269078f9121d613c089c3e4d81da5"
+  },
+  "comparison": {
+    "attention_only_validation_loss": 5.4918,
+    "fixed_tangent_cproj_validation_loss": 5.7395,
+    "uncalibrated_product_fht_validation_loss": 5.809,
+    "candidate_minus_attention_only": 0.207,
+    "candidate_minus_fixed_tangent": -0.0407,
+    "candidate_minus_uncalibrated_product_fht": -0.1102
+  },
+  "endpoint_diagnosis": {
+    "product_relative_displacement_mean": 0.37160849074522656,
+    "dense_relative_displacement_mean": 0.49248722940683365,
+    "factor_log_diagonal_std_mean": 0.14059662104894718,
+    "factor_log_diagonal_max_abs": 0.8583696484565735,
+    "product_dense_delta_cosine_mean": -0.00022149234670602405,
+    "product_initial_spectrum": {
+      "stable_rank": 579.434336344401,
+      "effective_rank": 742.7745819091797,
+      "top64_energy_fraction": 0.10936778349181016,
+      "condition_number": 1.7576503157615662,
+      "column_norm_cv": 0.023044588665167492
+    },
+    "product_final_spectrum": {
+      "stable_rank": 333.42128499348956,
+      "effective_rank": 687.9760284423828,
+      "top64_energy_fraction": 0.16445000966389975,
+      "condition_number": 2.936350186665853,
+      "column_norm_cv": 0.16353364226718745
+    },
+    "dense_final_spectrum": {
+      "stable_rank": 335.91027577718097,
+      "effective_rank": 674.9013163248698,
+      "top64_energy_fraction": 0.1675633266568184,
+      "condition_number": 3.0249584913253784,
+      "column_norm_cv": 0.035071853237847485
+    },
+    "interpretation": "calibration changed the product endpoint from nearly frozen to 37.16 percent relative motion and reproduced the dense endpoint's aggregate singular spectrum closely; the remaining CE gap is therefore directional/orientational, not a missing hard-rank or scalar-spectrum capacity"
+  },
+  "decision": {
+    "classification": "DIRECTIONAL_ONLY_PRODUCT_FHT_MOVING_TANGENT",
+    "registered_endpoint_rule_passed": true,
+    "success_rule_passed": false,
+    "interpretation": [
+      "The calibrated moving chart improves on the fixed-tangent c_proj control by 0.0407 CE and on its own under-scaled predecessor by 0.1102 CE.",
+      "It remains 0.2070 CE behind attention-only and therefore does not satisfy the registered +0.1000 success threshold.",
+      "The generated c_proj now moves substantially and its final stable rank, top-64 energy, and condition number nearly match dense Muon, ruling out the previous frozen-motion and gross spectral-capacity explanations.",
+      "The one-step calibration measured only about 0.10 cosine between the product tangent update and the task-selected materialized Muon direction, matching ambient one-percent geometry.",
+      "The next structural test should increase the depth/dimension of the nonlinear diagonal-FHT tangent under the same exact pullback, and must measure whether direction cosine rises above the square-root ambient prediction before another 238-step run."
+    ],
+    "next_action": "run directly polled one-step direction/performance calibrations for deeper product-FHT charts; promote at most one depth only if it has a materially higher task-direction cosine, exact materialized movement, and at least 20 percent MFU"
+  },
+  "immutable_artifacts": {
+    "candidate_config_sha256": "6a8cab8250f971c3dee8dedacd5839cfc585ee9a974fd29b79271c8dc9a2d86a",
+    "screen_plan_sha256": "19fae8d63e00e60e531ccaed549b3dfebb974035abfb6c819047a5837d37f474",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "fc198af3adcde6a783d61418412dfe26b1dbc60a03edf4cbc477f69be024ecaa",
+    "status_sha256": "d3bb79bb186f87f41b9672a93c215f78f07176698e08edcbe3873df2b2806a65",
+    "log_sha256": "c29d8313eef83ab9596312a68ab76b6ac9ee317bee03e5a5e370e120e1d7d462",
+    "checkpoint_sha256": "2b4b73222046d4c77e949e9431bdb9e0c9f72fe444c84f30132f506bfb799ddc",
+    "checkpoint_metadata_sha256": "eb9e9d7c484dfddbb7096432ac3a3b9c11646a3e7df547e5ca2f189f4dd0a9e1",
+    "endpoint_diagnosis_sha256": "d443536767b262ed2464b3bd98bd5a1e85966afe1266558ebd053656191f18df"
+  }
+}

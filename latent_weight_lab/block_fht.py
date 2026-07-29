@@ -1089,6 +1089,7 @@ class ProductFHTLinear(nn.Module):
         natural_gradient: bool = True,
         pullback_normalize: bool = False,
         pullback_max_coordinate_update: float = 0.02,
+        pullback_refresh_interval: int = 1,
         pullback_probe: bool = False,
     ) -> None:
         super().__init__()
@@ -1105,6 +1106,9 @@ class ProductFHTLinear(nn.Module):
         self.pullback_normalize = bool(pullback_normalize)
         self.pullback_max_coordinate_update = float(
             pullback_max_coordinate_update
+        )
+        self.pullback_refresh_interval = int(
+            pullback_refresh_interval
         )
         self.pullback_probe = bool(pullback_probe)
         if min(self.in_features, self.out_features, self.factors) <= 0:
@@ -1126,6 +1130,10 @@ class ProductFHTLinear(nn.Module):
             raise ValueError(
                 "product-FHT pullback coordinate update cap must be "
                 "positive and finite"
+            )
+        if self.pullback_refresh_interval <= 0:
+            raise ValueError(
+                "product-FHT pullback refresh interval must be positive"
             )
 
         self.padded_features = next_power_of_two(
@@ -1158,6 +1166,16 @@ class ProductFHTLinear(nn.Module):
         self.register_buffer(
             "weight_space_momentum_buffer",
             torch.zeros(self.out_features, self.in_features),
+            persistent=True,
+        )
+        self.register_buffer(
+            "pullback_cached_normalization_scale",
+            torch.zeros(()),
+            persistent=True,
+        )
+        self.register_buffer(
+            "pullback_step",
+            torch.zeros((), dtype=torch.long),
             persistent=True,
         )
         self.bias = (
@@ -1365,13 +1383,36 @@ class ProductFHTLinear(nn.Module):
                         "set the product-FHT factor learning rate before "
                         "flushing a normalized pullback"
                     )
-                raw_jvp = self._weight_jvp_from_factors(
-                    diagonal_grad.detach(),
-                    output_gain_grad.detach(),
+                refresh_normalization = (
+                    self.pullback_probe
+                    or int(self.pullback_step) % (
+                        self.pullback_refresh_interval
+                    )
+                    == 0
+                    or float(self.pullback_cached_normalization_scale)
+                    <= 0.0
                 )
-                direction_norm = direction.float().norm().clamp_min(1e-30)
-                raw_jvp_norm = raw_jvp.float().norm().clamp_min(1e-30)
-                normalization_scale = float(direction_norm / raw_jvp_norm)
+                if refresh_normalization:
+                    raw_jvp = self._weight_jvp_from_factors(
+                        diagonal_grad.detach(),
+                        output_gain_grad.detach(),
+                    )
+                    direction_norm = (
+                        direction.float().norm().clamp_min(1e-30)
+                    )
+                    raw_jvp_norm = (
+                        raw_jvp.float().norm().clamp_min(1e-30)
+                    )
+                    normalization_scale = float(
+                        direction_norm / raw_jvp_norm
+                    )
+                    self.pullback_cached_normalization_scale.fill_(
+                        normalization_scale
+                    )
+                else:
+                    normalization_scale = float(
+                        self.pullback_cached_normalization_scale
+                    )
                 diagonal_grad = diagonal_grad * normalization_scale
                 output_gain_grad = output_gain_grad * normalization_scale
                 largest_coordinate_update = self._factor_learning_rate * max(
@@ -1435,6 +1476,8 @@ class ProductFHTLinear(nn.Module):
                         )
                     ),
                     "factor_learning_rate": self._factor_learning_rate,
+                    "pullback_step": int(self.pullback_step),
+                    "refresh_interval": self.pullback_refresh_interval,
                 }
                 if self.pullback_probe:
                     self._probe_pre_step_weight = (
@@ -1451,6 +1494,8 @@ class ProductFHTLinear(nn.Module):
                 self.product_output_log_gain.grad = output_gain_grad
             else:
                 self.product_output_log_gain.grad.add_(output_gain_grad)
+            if self.pullback_normalize:
+                self.pullback_step.add_(1)
         self._cached_weight = None
 
     def finalize_pullback_probe(self) -> dict[str, float] | None:

@@ -121,6 +121,7 @@ class GPTConfig:
     block_fht_cproj_product_fht_natural_gradient: bool = True
     block_fht_cproj_product_fht_pullback_normalize: bool = False
     block_fht_cproj_product_fht_pullback_max_coordinate_update: float = 0.02
+    block_fht_cproj_product_fht_pullback_refresh_interval: int = 1
     block_fht_cproj_product_fht_pullback_probe: bool = False
     block_fht_cproj_product_fht_muon_momentum: float = 0.95
     block_fht_cproj_product_fht_muon_ns_steps: int = 5
@@ -756,6 +757,10 @@ def make_linear(
                 pullback_max_coordinate_update=(
                     config
                     .block_fht_cproj_product_fht_pullback_max_coordinate_update
+                ),
+                pullback_refresh_interval=(
+                    config
+                    .block_fht_cproj_product_fht_pullback_refresh_interval
                 ),
                 pullback_probe=(
                     config

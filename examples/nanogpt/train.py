@@ -1006,6 +1006,11 @@ def parse_args() -> argparse.Namespace:
         default=0.02,
     )
     parser.add_argument(
+        "--block-fht-cproj-product-fht-pullback-refresh-interval",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
         "--block-fht-cproj-product-fht-pullback-probe",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -1462,6 +1467,10 @@ def main() -> None:
         block_fht_cproj_product_fht_pullback_max_coordinate_update=(
             args
             .block_fht_cproj_product_fht_pullback_max_coordinate_update
+        ),
+        block_fht_cproj_product_fht_pullback_refresh_interval=(
+            args
+            .block_fht_cproj_product_fht_pullback_refresh_interval
         ),
         block_fht_cproj_product_fht_pullback_probe=(
             args.block_fht_cproj_product_fht_pullback_probe
