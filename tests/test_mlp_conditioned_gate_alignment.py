@@ -78,3 +78,22 @@ def test_gate_alignment_rows_include_groups_and_layers() -> None:
     assert len(rows) == 1 + 2 + 2 * 3
     assert rows[0]["scope"] == "global"
     assert rows[0]["cosine"] == 1.0
+
+
+def test_gate_alignment_rows_support_slope_only_probe() -> None:
+    gradients = {
+        "layer.0.slope": torch.tensor([1.0, 2.0]),
+        "layer.2.slope": torch.tensor([3.0, 4.0]),
+    }
+    rows = alignment_rows(
+        gradients,
+        {key: value.clone() for key, value in gradients.items()},
+        comparison="test",
+        split="fit",
+    )
+
+    assert len(rows) == 1 + 1 + 2 * 2
+    assert {row["group"] for row in rows if row["scope"] == "group"} == {
+        "slope"
+    }
+    assert all(abs(row["cosine"] - 1.0) < 1e-6 for row in rows)

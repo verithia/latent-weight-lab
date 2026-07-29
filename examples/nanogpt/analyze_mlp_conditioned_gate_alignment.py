@@ -49,6 +49,7 @@ class GateSplitData:
     batches: list[torch.Tensor]
     token_sha256: str
     mlp_input: dict[int, torch.Tensor]
+    source_mlp_out: dict[int, torch.Tensor]
     pre_gelu: dict[int, torch.Tensor]
     teacher_mlp_out: dict[int, torch.Tensor]
     cproj_weight: dict[int, torch.Tensor]
@@ -233,6 +234,7 @@ def alignment_rows(
         raise ValueError("gradient maps do not have identical keys")
     keys = sorted(left)
     layers = sorted({split_gate_key(key)[0] for key in keys})
+    groups = sorted({split_gate_key(key)[1] for key in keys})
     rows: list[dict[str, object]] = []
 
     def append(scope: str, layer: int | None, group: str | None) -> None:
@@ -256,11 +258,11 @@ def alignment_rows(
         )
 
     append("global", None, None)
-    for group in GATE_GROUPS:
+    for group in groups:
         append("group", None, group)
     for layer in layers:
         append("layer", layer, None)
-        for group in GATE_GROUPS:
+        for group in groups:
             append("layer_group", layer, group)
     return rows
 
@@ -323,11 +325,14 @@ def gate_parameters(
     gates: dict[
         int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
     ],
+    groups: tuple[str, ...] = GATE_GROUPS,
 ) -> dict[str, torch.nn.Parameter]:
+    if not groups or any(group not in GATE_GROUPS for group in groups):
+        raise ValueError(f"invalid gate groups: {groups!r}")
     output: dict[str, torch.nn.Parameter] = {}
     for layer, gate in gates.items():
-        output[gate_key(layer, "slope")] = gate.slope
-        output[gate_key(layer, "bias")] = gate.bias
+        for group in groups:
+            output[gate_key(layer, group)] = getattr(gate, group)
     return output
 
 
@@ -380,6 +385,9 @@ def teacher_mse_gradients(
     split: GateSplitData,
     layers: list[int],
     device: str,
+    *,
+    gate_groups: tuple[str, ...] = GATE_GROUPS,
+    use_source_mlp_out: bool = False,
 ) -> tuple[dict[str, torch.Tensor], dict[int, float]]:
     output: dict[str, torch.Tensor] = {}
     losses: dict[int, float] = {}
@@ -387,18 +395,22 @@ def teacher_mse_gradients(
         mlp = model.transformer.h[layer].mlp
         gate = gates[layer]
         condition = split.mlp_input[layer].to(device)
-        pre_gelu = split.pre_gelu[layer].to(device)
         target = split.teacher_mlp_out[layer].to(device)
-        weight = split.cproj_weight[layer].to(device)
-        bias = split.cproj_bias[layer]
-        bias = bias.to(device) if bias is not None else None
-        charted_weight = mlp._materialize_charted_cproj_weight(weight)
-        prediction = F.linear(F.gelu(pre_gelu), charted_weight, bias)
+        if use_source_mlp_out:
+            prediction = split.source_mlp_out[layer].to(device)
+        else:
+            pre_gelu = split.pre_gelu[layer].to(device)
+            weight = split.cproj_weight[layer].to(device)
+            bias = split.cproj_bias[layer]
+            bias = bias.to(device) if bias is not None else None
+            charted_weight = mlp._materialize_charted_cproj_weight(weight)
+            prediction = F.linear(F.gelu(pre_gelu), charted_weight, bias)
         prediction = gate(condition, prediction)
         loss = F.mse_loss(prediction, target)
-        gradients = torch.autograd.grad(loss, [gate.slope, gate.bias])
+        parameters = [getattr(gate, group) for group in gate_groups]
+        gradients = torch.autograd.grad(loss, parameters)
         losses[layer] = float(loss.detach())
-        for group, gradient in zip(GATE_GROUPS, gradients, strict=True):
+        for group, gradient in zip(gate_groups, gradients, strict=True):
             output[gate_key(layer, group)] = gradient.detach().float().cpu()
     return output, losses
 
@@ -449,6 +461,9 @@ def collect_split(
         mlp_input={
             layer: source[(layer, "mlp_input")] for layer in layers
         },
+        source_mlp_out={
+            layer: source[(layer, "mlp_out")] for layer in layers
+        },
         pre_gelu={
             layer: source[(layer, "pre_gelu")] for layer in layers
         },
@@ -492,12 +507,32 @@ def main() -> None:
     )
     parser.add_argument("--basis-block-size", type=int, default=256)
     parser.add_argument("--basis-seed", type=int, default=271828)
+    parser.add_argument("--gate-groups", default="slope,bias")
+    parser.add_argument(
+        "--teacher-source-output",
+        action="store_true",
+        help=(
+            "apply the zero-initialized probe to the checkpoint's captured "
+            "MLP output instead of reconstructing an identity chart output"
+        ),
+    )
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
     layers = [int(part) for part in args.layers.split(",") if part]
+    gate_groups = tuple(
+        part.strip() for part in args.gate_groups.split(",") if part.strip()
+    )
     if not layers:
         raise ValueError("at least one layer is required")
+    if (
+        not gate_groups
+        or len(set(gate_groups)) != len(gate_groups)
+        or any(group not in GATE_GROUPS for group in gate_groups)
+    ):
+        raise ValueError(
+            f"gate-groups must be unique values from {GATE_GROUPS}"
+        )
     if args.sample_cap > args.batch_size * args.block_size * args.batches:
         raise ValueError("sample cap exceeds the available activation rows")
     if args.ce_batches <= 0 or args.ce_batches > args.batches:
@@ -539,7 +574,7 @@ def main() -> None:
         basis_block_size=args.basis_block_size,
         basis_seed=args.basis_seed,
     )
-    parameters = gate_parameters(gates)
+    parameters = gate_parameters(gates, gate_groups)
     rows: list[dict[str, object]] = []
     ce_by_split: dict[str, dict[str, torch.Tensor]] = {}
     teacher_by_split: dict[str, dict[str, torch.Tensor]] = {}
@@ -553,7 +588,13 @@ def main() -> None:
                 args.device,
             )
             teacher_gradient, teacher_losses = teacher_mse_gradients(
-                model, gates, split, layers, args.device
+                model,
+                gates,
+                split,
+                layers,
+                args.device,
+                gate_groups=gate_groups,
+                use_source_mlp_out=args.teacher_source_output,
             )
             ce_by_split[split.name] = ce_gradient
             teacher_by_split[split.name] = teacher_gradient
@@ -636,6 +677,10 @@ def main() -> None:
                 )
             ),
             "parameters_per_selected_layer": 2 * model.config.n_embd,
+            "selected_parameter_groups": list(gate_groups),
+            "selected_parameters_per_layer": (
+                len(gate_groups) * model.config.n_embd
+            ),
             "identity_initialized": True,
             "learned_basis": False,
             "lora_adapter": False,
@@ -648,6 +693,11 @@ def main() -> None:
                 args.basis_seed
                 if args.gate_kind == "fixed_bilinear"
                 else None
+            ),
+            "teacher_prediction_source": (
+                "captured_checkpoint_mlp_output"
+                if args.teacher_source_output
+                else "reconstructed_identity_bilateral_chart_output"
             ),
         },
         "diagnostics": diagnostics,
