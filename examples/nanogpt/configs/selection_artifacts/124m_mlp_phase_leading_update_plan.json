@@ -1,0 +1,42 @@
+{
+  "schema_version": "mai_124m_mlp_phase_leading_update_plan_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "Does the realized early dense Muon direction at each phase start predict that phase's full c_proj chord strongly enough to justify an exact gradient/update-capture replay?",
+  "evidence_constraints": {
+    "boundary_full_model_states_available": false,
+    "boundary_gradients_available": false,
+    "available_proxy": "exact c_proj displacement over the first 6, 12, and 18 updates of each phase",
+    "proxy_caveat": "The proxy integrates optimizer momentum, weight decay, stochastic batches, and schedule effects; it is not a raw task gradient."
+  },
+  "diagnostic": {
+    "trajectory": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "lookaheads": [
+      6,
+      12,
+      18
+    ],
+    "metric": "squared cosine / optimal one-direction energy capture of the full phase chord",
+    "analysis_dtype": "float64",
+    "execution": "direct foreground diagnostic on Y400 GPU1; no training, queue, watchdog, callback, heartbeat, or PRO6"
+  },
+  "decision_rule": {
+    "replay_with_exact_gradient_capture": "Require energy-weighted 6-step capture >= 0.50, all phase/layer cosines positive, and no severe late-phase collapse.",
+    "reject_single_direction_conditioning": "If 6-step capture < 0.20 or signs are unstable, do not replay solely to test a raw single-gradient direction.",
+    "intermediate": "If 6-step capture is 0.20-0.50 but rises strongly by 12/18 steps, diagnose the required direction-history horizon before replay."
+  }
+}
