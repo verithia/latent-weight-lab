@@ -1,0 +1,199 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_hidden_capacity_holdout_result_v1",
+  "recorded_at": "2026-07-30",
+  "decision": "SELECT_TWO_PASS_FRESH_HIDDEN_FOR_IMPLEMENTATION_PREFLIGHT",
+  "selected_branch": "fresh_hidden88",
+  "passing_depths": [
+    88,
+    112
+  ],
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_hidden_capacity_holdout_plan.json",
+    "original_sha256": "96718c43eb6b81f6a0c4bde5f6eecb832e84f1598f44419522cf8be2c8464f0c",
+    "corrected_sha256": "3657cb1f3eeb648c173bc6d4da346333845138cddb53c7ed6223f99cc67349d9",
+    "original_commit": "6d7c095da789e23517f6d2a9087763c88aa1cf8f",
+    "correction_commit": "5b98d664753daf43dfcb448a43dd168fdbfd96f4"
+  },
+  "implementation": {
+    "initial_commit": "98a14ba6d3400df5e438dce7b0858c811b9d6800",
+    "corrected_commit": "391eba6a05b6fd45c134c4db392733fec3b5b0b1",
+    "entrypoint": "examples/nanogpt/analyze_mlp_fast_fresh_hidden_capacity_holdout.py",
+    "entrypoint_sha256": "f2db493b9f9c1b41eab4523ef00319d95fa01349f48611b6e522f1b57b5a8fc7",
+    "focused_test_sha256": "581b19f01a37bcc1d584005b7ca55f5d8633bec4b585e61289deee6ac48cecb1",
+    "local_focused_tests": "21/21 passed in both project-owned Python environments",
+    "remote_focused_tests": "21/21 passed at the exact corrected execution commit"
+  },
+  "pre_execution_input_repair": {
+    "classification": "OPTIMIZER_PROBE_LAYER_AVAILABILITY_CORRECTION",
+    "first_attempt_parameter_updates": 0,
+    "first_attempt_candidate_metrics_computed": false,
+    "first_attempt_ce_evaluations_computed": false,
+    "first_attempt_foreground_log_sha256": "fbff8a92d49c6eddb8b0088b633264560e3f9495d30f5e2a26c671647cf13682",
+    "reason": "All cadence optimizer probes contain exact c_proj Muon state only for layers 0/3/6/9/11.",
+    "corrected_layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "untouched_base_future_phases_retained": true,
+    "new_validation_windows_retained": true,
+    "positive_cell_fraction_retained": "85.7 percent; 24/28 became 17/20",
+    "other_thresholds_changed": false,
+    "candidate_definitions_changed": false,
+    "result_reused_from_failed_attempt": false
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "git_commit": "391eba6a05b6fd45c134c4db392733fec3b5b0b1",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "wall_seconds": 7.832815408706665,
+    "long_985m_job_disturbed": false,
+    "workspace_after_gib": 239,
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_fast_fresh_hidden_capacity_holdout",
+      "--snapshot-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/parameter_trajectory",
+      "--probe-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/optimizer_probe",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_hidden_capacity_holdout_v2",
+      "--plan",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_hidden_capacity_holdout_plan.json",
+      "--native-cache",
+      "/root/userdata/MappingNetworks/outputs/native_cache",
+      "--neighbors",
+      "64",
+      "--layers",
+      "0,3,6,9,11",
+      "--base-updates",
+      "30,90,150,210",
+      "--future-updates",
+      "45,105,165,225",
+      "--fit-seed",
+      "20260804",
+      "--holdout-seed",
+      "20260805",
+      "--device",
+      "cuda"
+    ],
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "1",
+      "MAPPING_NETWORKS_NATIVE_CACHE": "/root/userdata/MappingNetworks/outputs/native_cache"
+    }
+  },
+  "inputs": {
+    "coherent_dense_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "base_updates": [
+      30,
+      90,
+      150,
+      210
+    ],
+    "future_updates": [
+      45,
+      105,
+      165,
+      225
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "validation_windows": {
+      "fit_seed": 20260804,
+      "holdout_seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4
+    }
+  },
+  "candidate_metrics": {
+    "fresh_hidden64": {
+      "coordinates_per_layer": 98304,
+      "current_weight_recovery": 0.1940555617180748,
+      "current_output_positive_line_recovery": 0.4960375596425555,
+      "fit_validation_gradient_predicted_ce_decrease": 0.008280750124887066,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.0077564663417775195,
+      "future_residual_positive_line_recovery": 0.0
+    },
+    "fresh_hidden88": {
+      "coordinates_per_layer": 135168,
+      "current_weight_recovery": 0.27048098829266976,
+      "current_output_positive_line_recovery": 0.5814567680991317,
+      "fit_validation_gradient_predicted_ce_decrease": 0.009820280277937148,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.009338053392082983,
+      "future_residual_positive_line_recovery": 0.023758850855598205,
+      "positive_future_cells": "20/20",
+      "finite_ce_wins": "8/8",
+      "output_gain_per_added_coordinate": 2.3171443266215327e-6
+    },
+    "fresh_hidden112": {
+      "coordinates_per_layer": 172032,
+      "current_weight_recovery": 0.3127974091450806,
+      "current_output_positive_line_recovery": 0.6263892851222199,
+      "fit_validation_gradient_predicted_ce_decrease": 0.01107317962393803,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.01056619330094609,
+      "future_residual_positive_line_recovery": 0.03699891544117368,
+      "positive_future_cells": "20/20",
+      "finite_ce_wins": "8/8",
+      "output_gain_per_added_coordinate": 1.7680084293574272e-6
+    }
+  },
+  "registered_comparisons": {
+    "hidden88_vs_hidden64": {
+      "current_output_positive_line_ratio": 1.1722031059868314,
+      "fit_validation_gradient_ce_decrease_ratio": 1.1859167502740071,
+      "holdout_validation_gradient_ce_decrease_ratio": 1.2039056163741462,
+      "future_residual_positive_line_recovery": 0.023758850855598205,
+      "positive_future_cells": "20/20",
+      "finite_ce_wins": "8/8",
+      "minimum_train_gradient_predicted_ce_decrease": 5.1478038184703904e-5,
+      "passed": true
+    },
+    "hidden112_vs_hidden64": {
+      "current_output_positive_line_ratio": 1.2627859986521903,
+      "fit_validation_gradient_ce_decrease_ratio": 1.3372193891781088,
+      "holdout_validation_gradient_ce_decrease_ratio": 1.362243170454431,
+      "future_residual_positive_line_recovery": 0.03699891544117368,
+      "positive_future_cells": "20/20",
+      "finite_ce_wins": "8/8",
+      "minimum_train_gradient_predicted_ce_decrease": 5.854093971470959e-5,
+      "passed": true
+    }
+  },
+  "selection_reason": "Both depths pass every held-out rule. The preregistered smallest-pass policy selects hidden88; it also has the larger output gain per added coordinate.",
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_hidden_capacity_holdout_v2",
+    "detail_sha256": "16ddde5d41727fcf49ef32fe019e6d34daeaf7f6a32ae9f9ffdda9a6c41f103d",
+    "aggregate_sha256": "1be5f9d57ba05b354873fe325b3277462678457ab71f8495ec42f019103c1d11",
+    "finite_ce_sha256": "c5ece6bbe9f0a3f6caa4a3653505ff1ebcaafba002a21c6015aec1e4d98136e3",
+    "selections_sha256": "47d69a2db501ad5c3f072bd4a5fc5d93548a6f32928c4ff2029debf4146d6a02",
+    "metadata_sha256": "e133fa5ff5ceccf4abec319d84d78a7a1ef8e515ddfeec85546b7cd5dd054fcd",
+    "foreground_log_sha256": "c3520bbb0b1320205d513a94e30949f99e9d1f01436647035488e6e72a4821e1"
+  },
+  "authorization": {
+    "production_two_pass_hidden88_implementation_authorized": true,
+    "real_training_path_mfu_preflight_authorized_after_preregistration": true,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "minimum_mfu": 0.2
+  }
+}
