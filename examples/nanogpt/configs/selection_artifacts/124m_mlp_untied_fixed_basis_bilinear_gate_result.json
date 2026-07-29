@@ -1,0 +1,170 @@
+{
+  "schema_version": "mai_124m_mlp_untied_fixed_basis_bilinear_gate_result_v1",
+  "recorded_at": "2026-07-29",
+  "hypothesis": {
+    "formula": "u' = u + Q_out^-1[(Q_update u) * (slope * Q_condition r)]",
+    "condition": "layer-normalized identity residual r",
+    "update": "generated MLP c_proj output u",
+    "bases": {
+      "condition_seed": 271828,
+      "update_seed": 376557,
+      "output_seed": 481286,
+      "description": "three independent fixed signed/permuted 256-wide normalized block-Hadamard bases"
+    },
+    "selected_layers": [
+      6
+    ],
+    "trainable_coordinates": 768,
+    "identity_initialization": true,
+    "non_diagonal_in_any_single_basis": true,
+    "nonsymmetric": true,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "direction_gate": {
+    "analysis_commit": "f804c9f066a5b74f94db0fafa630b4a63112dee1",
+    "execution_commit": "4a808dd8389a18f975b2fb2419646ecea567128d",
+    "plan_artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_untied_fixed_basis_direction_plan.json",
+    "result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_untied_fixed_basis_direction_result.json",
+    "result_artifact_sha256": "3d44ef4846bcca33bdc0e98205e3843b6db0700b719036076e5b5c07af06a5e7",
+    "csv_sha256": "dd4a060dc4f0302b14c4ecd97035038d46b10c176bba72008437a4926c95d5d5",
+    "result_metadata_sha256": "c0026d0a400b93ccbb5363a8cebcb7ff36b13efe502d29c9ab98714590bb11a9",
+    "global_fit_teacher_direction_cosine": 0.009625661186873913,
+    "global_holdout_teacher_direction_cosine": 0.015025950968265533,
+    "layer_6_fit_teacher_direction_cosine": 0.08055470883846283,
+    "layer_6_holdout_teacher_direction_cosine": 0.058075133711099625,
+    "teacher_fit_holdout_cosine": 0.8776118159294128,
+    "decision": "PASS_UNTIED_FIXED_BASIS_LAYER_6_CAUSAL_SCREEN"
+  },
+  "execution_identity": {
+    "host": "Y400",
+    "repository_commit": "22f201cf8a1db170e90055cccec117b1279ce30d",
+    "implementation_commit": "b8ee86bd034d443e9942184afa9135324e009cf7",
+    "source_hashes": {
+      "examples/nanogpt/model.py": "b8bfcf02882a26fef424cd3e2b9ee795a7f2a38243562677bc0d437603cd33bb",
+      "examples/nanogpt/train.py": "b0d6d26ac06a2be6751e9fbba7fb6f7c07692e1792c7c6b1ff6c0c0bb8cf3c19",
+      "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+    },
+    "config_source_path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_bilateral_untiedbilinear_l6_muonchart154_0p5tpp_lr24e4.json",
+    "config_source_sha256": "3795ded1b95ef724328a0b0a0b0f29d2a041d3b0b6d2476c335fb6ff8f1df808",
+    "resolved_config_sha256": "d014fffb738c464c01ed1479a3cb8c74a7a965d5eeb3e3f875a9c276194de2b8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "entrypoint": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_cproj_untiedbilinear_l6_0p5tpp_20260729T030322Z_8477.config.json"
+    ]
+  },
+  "performance_gate": {
+    "implementation": "fixed 256x256 block-Hadamard accelerator GEMMs for condition, update, and output bases",
+    "passed": true,
+    "mfu_fraction": 0.21090743780956842,
+    "minimum_fraction": 0.2,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "empirical_peak_tflops": 655.7913754947679,
+    "model_tflops": 138.31127874321407,
+    "iter_ms": 1415.53,
+    "tokens_per_second": 185191.50333333333,
+    "peak_mib": 31630.27,
+    "certificate_sha256": "24d41442a427e3ebb11e9929b3bf84ebceabd2dbe2acf85184c9ab94bfb2c4b2",
+    "full_run_steady_state": {
+      "non_eval_samples": 20,
+      "median_non_eval_iter_ms": 1372.445,
+      "mean_non_eval_iter_ms": 1371.846,
+      "implied_median_mfu_fraction": 0.217529
+    }
+  },
+  "run": {
+    "name": "y400_mai_v3_124m_cproj_untiedbilinear_l6_0p5tpp",
+    "run_id": "y400_mai_v3_124m_cproj_untiedbilinear_l6_0p5tpp_20260729T030322Z_8477",
+    "gpu": 1,
+    "started_at": "2026-07-29T11:03:22+08:00",
+    "finished_at": "2026-07-29T11:10:24+08:00",
+    "exit_code": 0,
+    "max_iters": 238,
+    "tokens_per_iter": 262144,
+    "polling": "direct foreground polling; no watchdog, queue callback, or progress callback",
+    "provenance_sha256": "d18d215239ac8116b05df9bfeb9c66db6d61a38dcf7a9f053ef7ca455160cea6",
+    "status_sha256": "5d2af41ff1bf76ad5725da2478319b7123a1609c57fb795e375e4eca2e70cc22",
+    "log_sha256": "98cc87c787c988a0b3b2ef0f376fc5276151a2310d6003f27f40a92ea9947708",
+    "checkpoint_sha256": "54c1d17ccb8b7e82205f44b721c4a1e91d6c6d7fbdb4a83545a636200ca397cd",
+    "checkpoint_metadata_sha256": "2021f322ba349e6d37d4b399b71a78c9a016f131b730c68d4c836c84f250ed65"
+  },
+  "validation_loss": {
+    "0": 10.9761,
+    "60": 6.349,
+    "120": 5.9342,
+    "180": 5.7627,
+    "238": 5.6989
+  },
+  "train_loss": {
+    "0": 10.976,
+    "60": 6.3395,
+    "120": 5.9287,
+    "180": 5.7584,
+    "238": 5.6946
+  },
+  "learned_slope": {
+    "parameter": "transformer.h.6.mlp.residual_conditioned_output_slope",
+    "numel": 768,
+    "nonzero": 768,
+    "mean": 0.00035656767431646585,
+    "rms": 0.00768508343026042,
+    "l2": 0.21297527849674225,
+    "min": -0.0223587267100811,
+    "max": 0.024268299341201782
+  },
+  "terminal_comparisons": {
+    "attention_only": {
+      "validation_loss": 5.4918,
+      "candidate_delta": 0.2071
+    },
+    "plain_generated_cproj": {
+      "validation_loss": 5.7394,
+      "candidate_delta": -0.0405
+    },
+    "unrestricted_bilateral_parent": {
+      "validation_loss": 5.7001,
+      "candidate_delta": -0.0012
+    },
+    "best_output_plus_activation_chart": {
+      "validation_loss": 5.6832,
+      "candidate_delta": 0.0157
+    },
+    "raw_residual_conditioned_diagonal": {
+      "validation_loss": 5.6983,
+      "candidate_delta": 0.0006
+    },
+    "tied_fixed_basis_bilinear": {
+      "validation_loss": 5.7026,
+      "candidate_delta": -0.0037
+    },
+    "functional_teacher_alignment_lambda20": {
+      "validation_loss": 5.6844,
+      "candidate_delta": 0.0145
+    }
+  },
+  "decision": {
+    "classification": "REJECT_UNTIED_FIXED_BASIS_BILINEAR_PRACTICAL_TIE",
+    "promote_to_5tpp": false,
+    "accepted_attention_gap": 0.1,
+    "observed_attention_gap": 0.2071,
+    "conclusions": [
+      "The non-symmetric untied-basis gate produces a real 0.0405-NLL gain over plain generated c_proj.",
+      "Its 0.0012-NLL gain over the unrestricted bilateral parent and 0.0037 gain over the tied gate are practical ties.",
+      "All 768 layer-6 slopes move, so the null result is not a dead-coordinate or identity-initialization failure.",
+      "Positive initial teacher-direction alignment is not sufficient for CE to realize the missing MLP direction."
+    ],
+    "next_required_diagnostic": "Fit the established bilateral endpoint chart to dense-teacher MLP outputs on deterministic fit tokens, apply that fitted chart to the complete plain-cproj language model, and measure full-model CE on disjoint fit and holdout windows. Run no additional causal training unless the teacher-fitted endpoint chart improves held-out language-model CE."
+  }
+}
