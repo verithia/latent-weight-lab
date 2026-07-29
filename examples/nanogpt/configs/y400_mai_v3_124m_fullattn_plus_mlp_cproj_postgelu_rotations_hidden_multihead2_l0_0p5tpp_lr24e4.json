@@ -201,16 +201,16 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "postgelu_hidden_multihead2_l0_0p5tpp",
-  "implementation_commit": "4c1e7194d615940a31494af76bf8068a7eeacffd",
+  "implementation_commit": "61570b74676a6846a455200cb144580e78246139",
   "implementation_source_hashes": {
     "csrc/block_fht_ext.cpp": "cf3ea15db7f7e41e4e236e6523054ab8c7fc96092ad5f33949ce8608bb1dd284",
-    "csrc/block_fht_ext_cuda.cu": "be009995c9b6ba2b51a9ea166f1d1b83c3bebff40429c382296905dc28a73fd1",
+    "csrc/block_fht_ext_cuda.cu": "cf6e48760d3c30bd9d4d7844d69f450188cf791b886c6624fdc97bb963b9e991",
     "examples/nanogpt/model.py": "ec06a49b061a60e08d9c521956b0fbf063bff5d903e706bbbbd05d9e3e08f752",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
     "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
     "examples/nanogpt/train.py": "62c6d99edcbdeab769b82730f17c15410ba32c44c39009c6833d9034d32f4456",
     "latent_weight_lab/__init__.py": "343f8384a6ac52d99440cbdc389e1b15c954cc73d86dbca78761979b7bd5abd4",
-    "latent_weight_lab/block_fht.py": "9d7a80308925ba70e9171f63b9d7f70748d1edafa1751bbd9f35e7af71e6b2de"
+    "latent_weight_lab/block_fht.py": "6c4edcd263a0d8cc0d4d153d425a310c0ae2bc9277e6f9abb26ef54092d0bf35"
   },
   "inherit_dense_fallback_scale_from": "y400_mai_v2_124m_muon_20tpp_selected",
   "inherit_dense_main_learning_rate_from": "y400_mai_v2_124m_muon_20tpp_selected",
