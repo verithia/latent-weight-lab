@@ -1,0 +1,111 @@
+{
+  "schema_version": "mai_124m_mlp_natural_axis_phase_capture_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_natural_axis_phase_capture_plan.json",
+  "scientific_question": "Does a non-learned c_proj rotation chart aligned to the model's natural expansion/head/channel tensor axes capture dense Muon directional motion more efficiently than the rejected fixed random FHT chart?",
+  "scope": {
+    "trajectory": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "ce812caa6402178b5240490fd8a3943ad7156c5bdeb4a2a1dcdad22051f6615e",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "components": [
+      "total",
+      "singular_value",
+      "in_frame_mixing",
+      "subspace_rotation"
+    ],
+    "analysis_cells": 80,
+    "analysis_dtype": "float64",
+    "execution": "direct foreground diagnostic on Y400 GPU1; no training, queue, watchdog, callback, heartbeat, or PRO6 execution"
+  },
+  "chart": {
+    "formula": "R_out^T D_out W_base R_hidden^T D_hidden",
+    "hidden_layout": "48 contiguous groups x 64 channels = 4 expansion groups x 12 model-head groups x 64 channels",
+    "output_layout": "12 contiguous model-head groups x 64 channels",
+    "rotation_structure": "one independent Cayley SO(64) chart per contiguous group plus one shared Cayley group-axis chart",
+    "coordinate_count": 125994,
+    "ambient_matrix_dimension": 2359296,
+    "coordinate_fraction": 0.053403218587239586,
+    "fixed_random_basis": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "solver": {
+    "system": "(J^T J + damping I) x = J^T target",
+    "jacobian_products": "exact torch.func JVP/VJP",
+    "damping_ratio_to_hutchinson_mean_eigenvalue": 1e-06,
+    "registered_cg_steps": 24,
+    "executed_cg_steps": 64,
+    "maximum_relative_normal_residual": 0.0020498835030804963,
+    "numerical_amendment": "The frozen 8-step and 24-step pilots had relative normal residuals of 0.30-0.38 and 0.069-0.093. Increasing only the solver budget to 64 steps reduced the residual to about 0.00193 while changing recovery by less than 0.00036 from 24 steps. Chart capacity and decision thresholds were not changed."
+  },
+  "energy_weighted_capture": {
+    "total": 0.06031546498850119,
+    "singular_value": 0.9493035081801059,
+    "in_frame_mixing": 0.07914324235293371,
+    "subspace_rotation": 0.04450380496355134,
+    "total_capture_over_coordinate_fraction": 1.1294350150444536
+  },
+  "comparison_to_fixed_random_bilateral": {
+    "fixed_random_total_capture": 0.06911769930807644,
+    "natural_axis_minus_fixed_random_total": -0.00880223431957525,
+    "fixed_random_in_frame_mixing_capture": 0.11451826977566938,
+    "natural_axis_minus_fixed_random_mixing": -0.03537502742273567,
+    "fixed_random_subspace_rotation_capture": 0.0440477683143646,
+    "natural_axis_minus_fixed_random_rotation": 0.0004560366491867384
+  },
+  "total_capture_by_phase": {
+    "0_to_60": 0.06739730306134915,
+    "60_to_120": 0.05441032091248324,
+    "120_to_180": 0.056138627208576014,
+    "180_to_238": 0.05663154232071313
+  },
+  "total_capture_by_layer": {
+    "0": 0.06584117599480131,
+    "3": 0.06136279556197343,
+    "6": 0.05863048253246514,
+    "9": 0.05772855595044395,
+    "11": 0.057137442715035125
+  },
+  "artifacts": {
+    "analysis_commit": "f9468fbc295b31326219cb18c5531efd85663cd5",
+    "analysis_entrypoint": "examples/nanogpt/analyze_mlp_natural_axis_phase_capture.py",
+    "analysis_entrypoint_sha256": "b49049f5d3f7b9d5dd07082736b71b18dbd86f8f7141ea7800847bd7d7fafa5e",
+    "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/natural_axis_phase_capture_v1",
+    "wall_seconds": 63.85181736946106,
+    "detail_csv_sha256": "1dbde8d57bbcd62d4585862d808d20f9665f31143debd7547214250cc744afc1",
+    "aggregate_csv_sha256": "a5a697230d2319052a305be9dcfaf6dc7917027cfc380f951b0b5a3934f84e01",
+    "metadata_sha256": "de26618aa0fbc66c8dbf7177f2039b55717932014235626db8ad2a475cf6c4fd"
+  },
+  "decision": {
+    "classification": "REJECT_NATURAL_AXIS_TENSOR_CHART_NO_DIRECTIONAL_ENRICHMENT",
+    "promotion_rule_passed": false,
+    "interpretation": [
+      "Total recovery is 6.03 percent with 5.34 percent coordinate coverage, only 1.13x dimension-matched generic coverage and below the preregistered 10 percent gate.",
+      "Natural tensor axes reduce total capture by 0.88 percentage points relative to the fixed random FHT chart.",
+      "Subspace-rotation capture is unchanged at about 4.45 percent, while in-frame mixing capture falls from 11.45 to 7.91 percent.",
+      "The missing direction is not explained by the obvious 4 expansion x 12 head x 64 within-channel locality.",
+      "No 124M training run is justified for this candidate."
+    ],
+    "next_required_diagnostic": "Measure whether dense phase chords are predictable from task-gradient/Muon-update statistics at the same phase start. A compact chart now requires task-conditioned direction selection; another static basis family is not supported."
+  },
+  "limitations": [
+    "This measures the exact identity Jacobian, not nonlinear reachability.",
+    "Only one natural contiguous tensor layout was tested.",
+    "The result covers five representative layers rather than all 12.",
+    "Weight-space capture does not itself measure validation loss."
+  ]
+}
