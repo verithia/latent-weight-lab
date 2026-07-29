@@ -64,6 +64,7 @@ def test_color_sorted_edges_is_deterministic_and_complete(
     torch.testing.assert_close(first, second, rtol=0.0, atol=0.0)
     assert first_diagnostics["source_sha256"]
     assert first_diagnostics["native_library_sha256"]
+    assert first_diagnostics["native_output_validated"] is True
     assert (
         first_diagnostics["candidate_edge_fraction"]
         == second_diagnostics["candidate_edge_fraction"]

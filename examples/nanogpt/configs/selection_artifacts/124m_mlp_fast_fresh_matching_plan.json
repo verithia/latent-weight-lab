@@ -28,13 +28,13 @@
   },
   "implementation": {
     "native_source": "examples/nanogpt/csrc/task_edge_coloring.cpp",
-    "native_source_sha256": "1df193b2aa11c630ebd4be39e47ba8619c389a9be1b939b2826b4f4c571a5e6e",
+    "native_source_sha256": "6b9e0c795e601eb0a53934bdaa79f898c7ffcd51988b0e5891f189cc27f2e67e",
     "wrapper": "examples/nanogpt/fast_task_matching.py",
-    "wrapper_sha256": "2858864db759410d9a25c87663d35176fd5a93dbd36661da35ec9dccece58262",
+    "wrapper_sha256": "1e451f3d0309299d8f9dfd4494f1087fb35f282b7a1fca49bb60322dd3529ce1",
     "analyzer": "examples/nanogpt/analyze_mlp_fast_fresh_matching.py",
     "analyzer_sha256": "d58df589a5accce70b48fb23e1c1f2b9a0a1a44ecff71374fa773fbefdee1805",
     "native_test": "examples/nanogpt/test_fast_task_matching.py",
-    "native_test_sha256": "a5d8d1757f8d7fe448c9180c89ba648c8f44613519ec04bd7b6ac5795ab3e83c",
+    "native_test_sha256": "10d4450a7fe9cc0d66e8b69e24b4d26340ff86e56f5e91b39cc70cfee780fb98",
     "analyzer_test": "examples/nanogpt/test_analyze_mlp_fast_fresh_matching.py",
     "analyzer_test_sha256": "1869d315fe0b6e1b3c0a60ceba7163985d5e63962a5623d4d343acc0936cc11f",
     "muon_matching_module": "examples/nanogpt/muon_matched_givens.py",
@@ -154,6 +154,42 @@
       "finite_ce_sha256": "4e3e0b31b6e8294a14e2bd16f41c52e651f0e60b2fa56d0b45f4a244a0773635",
       "timing_sha256": "d55a65837563ef1db05c7abc08c2d39a5ba73b3685064f10bdc0562c2eda944a",
       "metadata_sha256": "48c2864bfee7fa6c0ba72f7687f3a510960f4367737cc3fd5934be5fa427e8be"
+    }
+  },
+  "validation_hot_path_repair": {
+    "pre_repair_commit": "fe7eed0cbca92512cc1bd2df34b16bf90f8e925a",
+    "pre_repair_decision": "REJECT_STATELESS_FRESH_MATCHER",
+    "pre_repair_quality_passes": {
+      "minimum_single_pass_over_greedy_retention": 0.9999172334194134,
+      "minimum_single_pass_over_random_enrichment": 3.143527069192742,
+      "mean_single_pass_minus_greedy_finite_ce": 9.611248970031738e-07,
+      "single_pass_finite_ce_wins_over_greedy": "6/16",
+      "single_pass_finite_ce_wins_over_random": "16/16"
+    },
+    "pre_repair_latency_failures": {
+      "median_seconds_per_layer": 0.1001803339459002,
+      "p95_seconds_per_layer": 0.11461309995502234,
+      "estimated_12_layer_seconds_per_update": 1.2021640073508024
+    },
+    "isolated_profile_median_seconds": {
+      "gpu_preparation": 0.0014376109465956688,
+      "native_assignment": 0.0027742248494178057,
+      "gpu_preparation_plus_native_assignment": 0.004208344966173172,
+      "full_wrapper": 0.08799975365400314
+    },
+    "diagnosis": "the optimized native assignment already meets the latency gate; the remaining overhead is the redundant Python output validator converting all 98304 pairs to Python lists and inserting them into a Python set",
+    "repair": "validate every stage permutation and cross-stage edge uniqueness in the native return path, then remove only the redundant Python hot-path validator",
+    "native_output_validation_removed": false,
+    "quality_thresholds_changed": false,
+    "latency_thresholds_changed": false,
+    "validation_protocol_changed": false,
+    "pre_repair_artifacts": {
+      "analysis_log_sha256": "8b2d6325a374ad9dc0a3fdd7dcdc45a9ed0db0eb4946edbe9c792b3c37329cbb",
+      "detail_sha256": "bdcaa29eab1a8279faa76f443472d48221a0d0dff0ddf1602d624055304292ab",
+      "aggregate_sha256": "261cd785e162493956275485ed17b51f2487c00ac39b30cf67dc2c46ac4b30b2",
+      "finite_ce_sha256": "5fb46f6096a1ab13fe517d26e1cf5cfd4ab2d40e7a757abf7fb82be7e3e4ab0e",
+      "timing_sha256": "8637e74ed9488c62c77d74edffe41e65e0113015c104a688a87601d50fffbcbd",
+      "metadata_sha256": "6edb88b71ab36b202e9f08a3402070e6c9b2a906448560b6c0fe5b09deed6432"
     }
   },
   "authorized_next_action": "Run exactly this no-training matcher comparison from a clean exact-commit Y400 worktree. A passing result authorizes only production integration and a separately foreground-polled real BF16 MFU gate, not a 238-update language-model run."

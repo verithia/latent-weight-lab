@@ -251,5 +251,43 @@ extern "C" int task_edge_color(
             return 3;
         }
     }
-    return assigned_pairs == target_pairs ? 0 : 4;
+    if (assigned_pairs != target_pairs) {
+        return 4;
+    }
+
+    // Validate the production output in native code. This keeps the safety
+    // check in the timed path without converting all pairs to Python lists
+    // and inserting them into a Python set on every training update.
+    std::vector<std::uint64_t> verified_edge_bits(
+        (edge_slots + 63) / 64, 0);
+    std::vector<std::uint8_t> seen_vertex(width, 0);
+    for (std::int32_t stage = 0; stage < stages; ++stage) {
+        std::fill(seen_vertex.begin(), seen_vertex.end(), 0);
+        for (std::int32_t pair_index = 0;
+             pair_index < pairs_per_stage;
+             ++pair_index) {
+            const std::size_t pair_offset =
+                static_cast<std::size_t>(stage) * width +
+                2 * pair_index;
+            const std::int32_t left = permutations[pair_offset];
+            const std::int32_t right = permutations[pair_offset + 1];
+            if (left < 0 || right < 0 || left >= width ||
+                right >= width || left == right) {
+                return 5;
+            }
+            if (seen_vertex[left] != 0 || seen_vertex[right] != 0) {
+                return 6;
+            }
+            seen_vertex[left] = 1;
+            seen_vertex[right] = 1;
+            const std::size_t index = edge_index(left, right);
+            const std::uint64_t bit =
+                std::uint64_t{1} << (index & 63);
+            if ((verified_edge_bits[index >> 6] & bit) != 0) {
+                return 7;
+            }
+            verified_edge_bits[index >> 6] |= bit;
+        }
+    }
+    return 0;
 }
