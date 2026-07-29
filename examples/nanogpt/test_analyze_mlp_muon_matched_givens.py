@@ -4,6 +4,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_muon_matched_givens import (
     aggregate_rows,
+    diagonal_metric_causal_givens_update,
     fit_causal_givens_update,
     muon_matched_permutations,
 )
@@ -53,6 +54,28 @@ def test_causal_fit_recovers_an_in_chart_small_update() -> None:
     )
     assert float(cosine) > 0.999
     assert float(metrics["requested_update_recovery"]) > 0.998
+
+
+def test_diagonal_metric_recovers_an_in_chart_small_update() -> None:
+    torch.manual_seed(13)
+    source = torch.randn(5, 8)
+    permutation = torch.arange(8).view(1, 8)
+    angle = 0.001
+    requested = torch.zeros_like(source)
+    requested[:, 0] = -angle * source[:, 1]
+    requested[:, 1] = angle * source[:, 0]
+    predicted, metrics = diagonal_metric_causal_givens_update(
+        source,
+        requested,
+        stages=1,
+        seed=3,
+        permutations=permutation,
+    )
+    cosine = torch.nn.functional.cosine_similarity(
+        requested.flatten(), predicted.flatten(), dim=0
+    )
+    assert float(cosine) > 0.999999
+    assert float(metrics["requested_update_recovery"]) > 0.99999
 
 
 def test_promotion_rule_requires_task_enrichment_and_all_positive() -> None:

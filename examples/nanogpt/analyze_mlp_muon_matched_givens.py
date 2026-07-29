@@ -326,6 +326,87 @@ def fit_causal_givens_update(
     }
 
 
+def diagonal_metric_causal_givens_update(
+    source: torch.Tensor,
+    requested_update: torch.Tensor,
+    *,
+    stages: int,
+    seed: int,
+    permutations: torch.Tensor | None,
+) -> tuple[torch.Tensor, dict[str, float | int]]:
+    """Apply the closed-form per-angle diagonal metric at identity.
+
+    For pair ``(i, j)``, the tangent column has squared norm
+    ``||W[:, i]||^2 + ||W[:, j]||^2``.  Dividing its requested-update inner
+    product by that norm is the exact one-coordinate least-squares solution
+    and a diagonal approximation to the joint tangent normal equations.
+    """
+    if source.ndim != 2 or source.shape != requested_update.shape:
+        raise ValueError(
+            "source and requested_update must be same-shaped matrices"
+        )
+    if stages <= 0:
+        raise ValueError("stages must be positive")
+    source = source.float()
+    requested_update = requested_update.float()
+    update_energy = requested_update.square().sum().clamp_min(1e-30)
+    flow = LearnedGivensOutputMix(
+        source.shape[-1], int(stages), int(seed)
+    ).to(device=source.device, dtype=torch.float32)
+    if permutations is not None:
+        expected = (int(stages), source.shape[-1])
+        if tuple(permutations.shape) != expected:
+            raise ValueError(
+                f"permutations must have shape {expected}, got "
+                f"{tuple(permutations.shape)}"
+            )
+        with torch.no_grad():
+            flow.permutations.copy_(
+                permutations.to(flow.permutations.device)
+            )
+            flow.inverse_permutations.copy_(
+                torch.argsort(flow.permutations, dim=1)
+            )
+
+    angles = torch.empty_like(flow.angles).view(
+        stages, source.shape[-1] // 2
+    )
+    for stage in range(stages):
+        pairs = flow.permutations[stage].view(-1, 2)
+        left = pairs[:, 0]
+        right = pairs[:, 1]
+        weight_left = source.index_select(-1, left)
+        weight_right = source.index_select(-1, right)
+        update_left = requested_update.index_select(-1, left)
+        update_right = requested_update.index_select(-1, right)
+        coordinate_inner = (
+            (weight_left * update_right).sum(dim=0)
+            - (weight_right * update_left).sum(dim=0)
+        )
+        coordinate_norm = (
+            weight_left.square().sum(dim=0)
+            + weight_right.square().sum(dim=0)
+        ).clamp_min(1e-30)
+        angles[stage] = coordinate_inner / coordinate_norm
+    with torch.no_grad():
+        flow.angles.copy_(angles.reshape(-1))
+        predicted_update = flow(source) - source
+        residual = requested_update - predicted_update
+        recovery = 1.0 - residual.square().sum() / update_energy
+    return predicted_update.detach(), {
+        "stages": int(stages),
+        "coordinates": int(flow.angles.numel()),
+        "coordinate_fraction": float(
+            flow.angles.numel() / source.numel()
+        ),
+        "requested_update_recovery": float(recovery),
+        "angle_rms": float(
+            flow.angles.detach().square().mean().sqrt()
+        ),
+        "angle_max_abs": float(flow.angles.detach().abs().max()),
+    }
+
+
 def aggregate_rows(
     rows: list[dict[str, Any]],
     stage_counts: list[int],
@@ -429,6 +510,11 @@ def main() -> None:
     parser.add_argument("--neighbors", type=int, default=64)
     parser.add_argument("--fit-steps", type=int, default=300)
     parser.add_argument("--learning-rate", type=float, default=0.001)
+    parser.add_argument(
+        "--fit-mode",
+        choices=("adam", "diagonal"),
+        default="adam",
+    )
     parser.add_argument("--matching-seed", type=int, default=161803)
     parser.add_argument("--random-seed", type=int, default=271828)
     parser.add_argument(
@@ -545,15 +631,34 @@ def main() -> None:
                 ("task_matched", permutations[:stages]),
                 ("random", None),
             ):
-                predicted_update, fit = fit_causal_givens_update(
-                    source,
-                    requested_update,
-                    stages=stages,
-                    seed=args.random_seed + 1009 * layer + phase_start,
-                    steps=args.fit_steps,
-                    learning_rate=args.learning_rate,
-                    permutations=selected_permutations,
-                )
+                if args.fit_mode == "adam":
+                    predicted_update, fit = fit_causal_givens_update(
+                        source,
+                        requested_update,
+                        stages=stages,
+                        seed=(
+                            args.random_seed
+                            + 1009 * layer
+                            + phase_start
+                        ),
+                        steps=args.fit_steps,
+                        learning_rate=args.learning_rate,
+                        permutations=selected_permutations,
+                    )
+                else:
+                    predicted_update, fit = (
+                        diagonal_metric_causal_givens_update(
+                            source,
+                            requested_update,
+                            stages=stages,
+                            seed=(
+                                args.random_seed
+                                + 1009 * layer
+                                + phase_start
+                            ),
+                            permutations=selected_permutations,
+                        )
+                    )
                 update_metrics = direction_metrics(
                     requested_update, predicted_update
                 )
@@ -642,6 +747,7 @@ def main() -> None:
         "neighbors": args.neighbors,
         "fit_steps": args.fit_steps,
         "learning_rate": args.learning_rate,
+        "fit_mode": args.fit_mode,
         "matching_seed": args.matching_seed,
         "random_seed": args.random_seed,
         "input_run_identity_sha256": input_run_identity,

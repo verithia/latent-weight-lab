@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_allcell_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_allcell_plan.json",
+  "plan_sha256": "d860b7c3cea8889cfecddd784231d29b05f6b3e3bcda40a33b79ae76c1bbc52b",
+  "execution_commit": "746f018a24195d892828f456c72076fa033985e8",
+  "execution": "direct foreground Y400 GPU1 diagnostic, polled to exit with no parameter update, language-model training, watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "input_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+  "aggregate": {
+    "cells": 20,
+    "stages": 32,
+    "coordinates_per_layer": 49152,
+    "coordinate_fraction": 0.020833333333333332,
+    "task_matched_requested_update_recovery": 0.14051835494788548,
+    "task_matched_future_recovery": 0.023178352047354637,
+    "task_matched_future_cosine": 0.14547455776712598,
+    "task_matched_minimum_future_cosine": 0.07404537904539336,
+    "task_matched_minimum_future_recovery": 0.005482718157975979,
+    "random_requested_update_recovery": 0.020344349195399177,
+    "random_future_recovery": 0.003338756342387821,
+    "random_future_cosine": 0.055320722228024366,
+    "task_over_random_future_recovery": 6.9422113117658295,
+    "task_update_recovery_over_coordinate_fraction": 6.744881037498503,
+    "exact_dense_muon_future_recovery": 0.16469392843398334,
+    "task_matched_fraction_of_exact_dense_muon_future_recovery": 0.14073592310141264,
+    "positive_task_matched_cells": 20
+  },
+  "future_recovery_by_layer": {
+    "0": 0.0204158491119112,
+    "3": 0.022551775047991947,
+    "6": 0.023592554466923578,
+    "9": 0.02472032066204391,
+    "11": 0.02510324725136705
+  },
+  "future_recovery_by_phase_start": {
+    "0": 0.00974077156489538,
+    "60": 0.03274616379307357,
+    "120": 0.03480186146719997,
+    "180": 0.04344739279056183
+  },
+  "future_cosine_by_phase_start": {
+    "0": 0.09702726639982588,
+    "60": 0.18074479825930503,
+    "120": 0.18614143845111844,
+    "180": 0.20822799304680528
+  },
+  "decision": {
+    "classification": "PROMOTE_MUON_MATCHED_GIVENS_TO_PRODUCTION_DESIGN",
+    "registered_rule_passed": true,
+    "interpretation": [
+      "All 20 layer/phase cells have positive task-matched future cosine, and the worst cell clears the registered 0.05 floor at 0.07405.",
+      "Energy-weighted future recovery is 2.3178 percent, 6.94 times the equal-size random-connectivity control.",
+      "The chart captures 14.0518 percent of the requested current Muon update, 6.74 times its 2.0833 percent coordinate fraction.",
+      "Every layer has positive grouped future recovery from 2.0416 to 2.5103 percent.",
+      "Every phase has positive grouped recovery. Step zero is predictably weakest at 0.9741 percent because the coherent Muon direction itself recovers only 7.5628 percent there; later phases reach 3.2746 to 4.3447 percent.",
+      "The sparse chart retains 14.07 percent of the exact dense Muon direction's future recovery while using only 2.08 percent continuous coordinates plus integer pairings.",
+      "This authorizes a compact refresh/serialization design and exact performance implementation. Scientific language-model training remains blocked until the implemented analytic update approximates the oracle and clears 20 percent MFU."
+    ],
+    "next_action": "validate an analytic diagonal-metric angle update against the 300-step fitted oracle, then implement refreshable folded-base training with exact compact provenance and require a directly polled real-training MFU certificate at or above 20 percent"
+  },
+  "immutable_artifacts": {
+    "detail_sha256": "cec4206173ba2c4512c8b1e956968f6da2a196048b03ce80eaf15a8073e2a646",
+    "matchings_sha256": "af1b9792540ff2c81c5df58c2a5d4da5fa5b9a55ecc1616965a1e9f03df7c96b",
+    "aggregate_sha256": "65d36cfd8439eed3174a55ea2005d6e1085c3bf584ad6c8589b3b36d16c58c14",
+    "metadata_sha256": "0c490c0f3b9d2d00e280b09f2120877b9770e29a995275267e271d281f614784"
+  }
+}
