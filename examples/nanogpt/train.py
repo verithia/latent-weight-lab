@@ -1087,6 +1087,21 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=481286,
     )
+    parser.add_argument(
+        "--block-fht-mlp-conditioned-output-gate-source",
+        choices=("residual", "postgelu"),
+        default="residual",
+    )
+    parser.add_argument(
+        "--block-fht-mlp-conditioned-output-gate-projection-seed",
+        type=int,
+        default=586015,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-conditioned-output-gate-rms-epsilon",
+        type=float,
+        default=1e-6,
+    )
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -1194,6 +1209,15 @@ def conditioned_output_gate_config_kwargs(
         ),
         "block_fht_mlp_residual_conditioned_output_gate_output_basis_seed": (
             args.block_fht_mlp_residual_conditioned_output_gate_output_basis_seed
+        ),
+        "block_fht_mlp_conditioned_output_gate_source": (
+            args.block_fht_mlp_conditioned_output_gate_source
+        ),
+        "block_fht_mlp_conditioned_output_gate_projection_seed": (
+            args.block_fht_mlp_conditioned_output_gate_projection_seed
+        ),
+        "block_fht_mlp_conditioned_output_gate_rms_epsilon": (
+            args.block_fht_mlp_conditioned_output_gate_rms_epsilon
         ),
     }
 

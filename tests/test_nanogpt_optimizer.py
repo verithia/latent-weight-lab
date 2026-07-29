@@ -34,6 +34,9 @@ def test_conditioned_output_gate_training_config_is_not_dropped() -> None:
             block_fht_mlp_residual_conditioned_output_gate_basis_seed=123,
             block_fht_mlp_residual_conditioned_output_gate_update_basis_seed=456,
             block_fht_mlp_residual_conditioned_output_gate_output_basis_seed=789,
+            block_fht_mlp_conditioned_output_gate_source="postgelu",
+            block_fht_mlp_conditioned_output_gate_projection_seed=101112,
+            block_fht_mlp_conditioned_output_gate_rms_epsilon=1e-5,
         )
     )
     assert kwargs == {
@@ -47,6 +50,9 @@ def test_conditioned_output_gate_training_config_is_not_dropped() -> None:
         "block_fht_mlp_residual_conditioned_output_gate_basis_seed": 123,
         "block_fht_mlp_residual_conditioned_output_gate_update_basis_seed": 456,
         "block_fht_mlp_residual_conditioned_output_gate_output_basis_seed": 789,
+        "block_fht_mlp_conditioned_output_gate_source": "postgelu",
+        "block_fht_mlp_conditioned_output_gate_projection_seed": 101112,
+        "block_fht_mlp_conditioned_output_gate_rms_epsilon": 1e-5,
     }
 
 

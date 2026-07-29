@@ -150,6 +150,9 @@ class GPTConfig:
     block_fht_mlp_residual_conditioned_output_gate_basis_seed: int = 271828
     block_fht_mlp_residual_conditioned_output_gate_update_basis_seed: int = 376557
     block_fht_mlp_residual_conditioned_output_gate_output_basis_seed: int = 481286
+    block_fht_mlp_conditioned_output_gate_source: str = "residual"
+    block_fht_mlp_conditioned_output_gate_projection_seed: int = 586015
+    block_fht_mlp_conditioned_output_gate_rms_epsilon: float = 1e-6
     tie_word_embeddings: bool = True
 
 
@@ -1585,6 +1588,28 @@ class MLP(nn.Module):
                 "block_fht_mlp_residual_conditioned_output_gate_layers "
                 "contains an invalid layer"
             )
+        self.conditioned_output_gate_source = str(
+            config.block_fht_mlp_conditioned_output_gate_source
+        )
+        if self.conditioned_output_gate_source not in (
+            "residual",
+            "postgelu",
+        ):
+            raise ValueError(
+                "block_fht_mlp_conditioned_output_gate_source must be "
+                "'residual' or 'postgelu'"
+            )
+        self.conditioned_output_gate_rms_epsilon = float(
+            config.block_fht_mlp_conditioned_output_gate_rms_epsilon
+        )
+        if (
+            not math.isfinite(self.conditioned_output_gate_rms_epsilon)
+            or self.conditioned_output_gate_rms_epsilon <= 0.0
+        ):
+            raise ValueError(
+                "block_fht_mlp_conditioned_output_gate_rms_epsilon must "
+                "be positive and finite"
+            )
         conditioned_gate_enabled = (
             config.block_fht_mlp_residual_conditioned_output_gate
             and (
@@ -1621,6 +1646,18 @@ class MLP(nn.Module):
             self.residual_conditioned_output_gate_fixed_basis
             and config.block_fht_mlp_residual_conditioned_output_gate_untied_bases
         )
+        if (
+            conditioned_gate_enabled
+            and self.conditioned_output_gate_source == "postgelu"
+            and (
+                not self.residual_conditioned_output_gate_fixed_basis
+                or not self.residual_conditioned_output_gate_untied_bases
+            )
+        ):
+            raise ValueError(
+                "postgelu conditioned output gate requires fixed_basis "
+                "and untied_bases"
+            )
         self.residual_conditioned_output_gate_basis_block_size = int(
             config.block_fht_mlp_residual_conditioned_output_gate_basis_block_size
         )
@@ -1708,6 +1745,31 @@ class MLP(nn.Module):
             output_inverse_permutation = None
             output_signs = None
             hadamard = None
+        if (
+            conditioned_gate_enabled
+            and self.conditioned_output_gate_source == "postgelu"
+        ):
+            projection_generator = torch.Generator(device="cpu")
+            projection_generator.manual_seed(
+                int(
+                    config.block_fht_mlp_conditioned_output_gate_projection_seed
+                )
+                + layer_id * 64
+            )
+            conditioned_output_projection_signs = (
+                torch.randint(
+                    0,
+                    2,
+                    (4, config.n_embd),
+                    generator=projection_generator,
+                    dtype=torch.float32,
+                    device="cpu",
+                )
+                * 2.0
+                - 1.0
+            )
+        else:
+            conditioned_output_projection_signs = None
         self.register_buffer(
             "residual_conditioned_output_permutation",
             permutation,
@@ -1756,6 +1818,11 @@ class MLP(nn.Module):
         self.register_buffer(
             "residual_conditioned_output_hadamard",
             hadamard,
+            persistent=True,
+        )
+        self.register_buffer(
+            "conditioned_output_projection_signs",
+            conditioned_output_projection_signs,
             persistent=True,
         )
         # Optional non-persistent teacher state is installed by the training
@@ -2332,7 +2399,46 @@ class MLP(nn.Module):
             self.last_cproj_teacher_alignment_loss = (
                 alignment_residual.float().square().mean()
             )
+        if (
+            self.residual_conditioned_output_slope is not None
+            and self.conditioned_output_gate_source == "postgelu"
+        ):
+            out = self.apply_residual_conditioned_output_gate(
+                self.postgelu_conditioned_output_condition(activated),
+                out,
+            )
         return self.dropout(out)
+
+    def postgelu_conditioned_output_condition(
+        self,
+        activated: torch.Tensor,
+    ) -> torch.Tensor:
+        signs = self.conditioned_output_projection_signs
+        if signs is None:
+            raise RuntimeError(
+                "post-GELU conditioned output projection is not configured"
+            )
+        expected = 4 * self.c_proj.out_features
+        if activated.shape[-1] != expected:
+            raise ValueError(
+                "post-GELU condition width mismatch: expected "
+                f"{expected}, got {activated.shape[-1]}"
+            )
+        grouped = activated.reshape(
+            *activated.shape[:-1],
+            4,
+            self.c_proj.out_features,
+        )
+        signs = signs.to(
+            device=activated.device,
+            dtype=activated.dtype,
+        )
+        condition = (grouped * signs).sum(dim=-2) / 2.0
+        rms = condition.float().square().mean(
+            dim=-1,
+            keepdim=True,
+        ).add(self.conditioned_output_gate_rms_epsilon).sqrt()
+        return condition / rms.to(dtype=condition.dtype)
 
     def residual_conditioned_output_modulation(
         self,
@@ -2479,7 +2585,10 @@ class Block(nn.Module):
         x = x + self.attn(self.ln_1(x))
         mlp_input = self.ln_2(x)
         mlp_output = self.mlp(mlp_input)
-        if self.mlp.residual_conditioned_output_slope is None:
+        if (
+            self.mlp.residual_conditioned_output_slope is None
+            or self.mlp.conditioned_output_gate_source == "postgelu"
+        ):
             return x + mlp_output
         return x + self.mlp.apply_residual_conditioned_output_gate(
             mlp_input,
