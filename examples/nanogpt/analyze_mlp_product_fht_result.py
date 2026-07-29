@@ -146,9 +146,11 @@ def main() -> None:
                 ].to(args.device)
             )
             product_final = module.weight.detach().float()
-            final_diagonals = module.product_log_diagonals.detach().float()
+            final_diagonals = (
+                module.product_log_diagonals.detach().float().clone()
+            )
             final_output_gain = (
-                module.product_output_log_gain.detach().float()
+                module.product_output_log_gain.detach().float().clone()
             )
             module.product_log_diagonals.zero_()
             module.product_output_log_gain.zero_()
