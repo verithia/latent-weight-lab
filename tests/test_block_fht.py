@@ -1481,6 +1481,88 @@ def test_mlp_postgelu_conditioned_gate_is_identity_and_dynamic() -> None:
     assert conditioned.residual_conditioned_output_slope.grad.abs().sum() > 0
 
 
+def test_mlp_postgelu_hidden_self_gate_is_identity_and_dynamic() -> None:
+    torch.manual_seed(523)
+    base = MLP(GPTConfig(n_embd=8, n_head=1), layer_id=0)
+    conditioned = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_postgelu_hidden_self_gate=True,
+            block_fht_mlp_postgelu_hidden_self_gate_basis_block_size=8,
+        ),
+        layer_id=0,
+    )
+    conditioned.load_state_dict(base.state_dict(), strict=False)
+    values = torch.randn(2, 3, 8)
+    torch.testing.assert_close(conditioned(values), base(values))
+
+    conditioned(values).square().mean().backward()
+    assert conditioned.postgelu_hidden_self_slope is not None
+    assert conditioned.postgelu_hidden_self_slope.grad is not None
+    assert conditioned.postgelu_hidden_self_slope.grad.abs().sum() > 0
+
+
+def test_mlp_postgelu_hidden_self_gate_selects_layers() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=3,
+            n_head=1,
+            n_embd=8,
+            block_fht_mlp_postgelu_hidden_self_gate=True,
+            block_fht_mlp_postgelu_hidden_self_gate_layers=(0, 2),
+            block_fht_mlp_postgelu_hidden_self_gate_basis_block_size=8,
+        )
+    )
+    assert model.transformer.h[0].mlp.postgelu_hidden_self_slope is not None
+    assert model.transformer.h[1].mlp.postgelu_hidden_self_slope is None
+    assert model.transformer.h[2].mlp.postgelu_hidden_self_slope is not None
+
+
+def test_mlp_postgelu_hidden_self_gate_matches_diagnostic() -> None:
+    from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
+        PostGeluHiddenSelfBilinearGate,
+    )
+
+    torch.manual_seed(541)
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_postgelu_hidden_self_gate=True,
+            block_fht_mlp_postgelu_hidden_self_gate_scale=0.75,
+            block_fht_mlp_postgelu_hidden_self_gate_basis_block_size=8,
+            block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed=123,
+            block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed=456,
+            block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed=789,
+            block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon=1e-5,
+        ),
+        layer_id=0,
+    )
+    diagnostic = PostGeluHiddenSelfBilinearGate(
+        32,
+        scale=0.75,
+        basis_block_size=8,
+        condition_seed=123,
+        update_seed=456,
+        output_seed=789,
+        rms_epsilon=1e-5,
+    )
+    assert mlp.postgelu_hidden_self_slope is not None
+    with torch.no_grad():
+        mlp.postgelu_hidden_self_slope.copy_(
+            torch.randn_like(mlp.postgelu_hidden_self_slope)
+        )
+        diagnostic.slope.copy_(mlp.postgelu_hidden_self_slope)
+        diagnostic.bias.zero_()
+    activated = torch.randn(2, 3, 32)
+    actual = mlp.apply_postgelu_hidden_self_gate(activated)
+    expected = diagnostic(activated)
+    torch.testing.assert_close(actual, expected)
+
+
 def test_mlp_postgelu_conditioned_gate_requires_untied_fixed_bases() -> None:
     with pytest.raises(
         ValueError,

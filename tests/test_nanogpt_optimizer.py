@@ -37,6 +37,14 @@ def test_conditioned_output_gate_training_config_is_not_dropped() -> None:
             block_fht_mlp_conditioned_output_gate_source="postgelu",
             block_fht_mlp_conditioned_output_gate_projection_seed=101112,
             block_fht_mlp_conditioned_output_gate_rms_epsilon=1e-5,
+            block_fht_mlp_postgelu_hidden_self_gate=True,
+            block_fht_mlp_postgelu_hidden_self_gate_scale=0.75,
+            block_fht_mlp_postgelu_hidden_self_gate_layers=[0],
+            block_fht_mlp_postgelu_hidden_self_gate_basis_block_size=4,
+            block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed=13,
+            block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed=17,
+            block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed=19,
+            block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon=2e-5,
         )
     )
     assert kwargs == {
@@ -53,6 +61,14 @@ def test_conditioned_output_gate_training_config_is_not_dropped() -> None:
         "block_fht_mlp_conditioned_output_gate_source": "postgelu",
         "block_fht_mlp_conditioned_output_gate_projection_seed": 101112,
         "block_fht_mlp_conditioned_output_gate_rms_epsilon": 1e-5,
+        "block_fht_mlp_postgelu_hidden_self_gate": True,
+        "block_fht_mlp_postgelu_hidden_self_gate_scale": 0.75,
+        "block_fht_mlp_postgelu_hidden_self_gate_layers": (0,),
+        "block_fht_mlp_postgelu_hidden_self_gate_basis_block_size": 4,
+        "block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed": 13,
+        "block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed": 17,
+        "block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed": 19,
+        "block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon": 2e-5,
     }
 
 

@@ -1102,6 +1102,46 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=1e-6,
     )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-scale",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-layers",
+        nargs="*",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-basis-block-size",
+        type=int,
+        default=256,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-condition-basis-seed",
+        type=int,
+        default=271828,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-update-basis-seed",
+        type=int,
+        default=376557,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-output-basis-seed",
+        type=int,
+        default=481286,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-rms-epsilon",
+        type=float,
+        default=1e-6,
+    )
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -1218,6 +1258,30 @@ def conditioned_output_gate_config_kwargs(
         ),
         "block_fht_mlp_conditioned_output_gate_rms_epsilon": (
             args.block_fht_mlp_conditioned_output_gate_rms_epsilon
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate": (
+            args.block_fht_mlp_postgelu_hidden_self_gate
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_scale": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_scale
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_layers": tuple(
+            args.block_fht_mlp_postgelu_hidden_self_gate_layers
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_basis_block_size": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_basis_block_size
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon
         ),
     }
 

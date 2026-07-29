@@ -153,6 +153,14 @@ class GPTConfig:
     block_fht_mlp_conditioned_output_gate_source: str = "residual"
     block_fht_mlp_conditioned_output_gate_projection_seed: int = 586015
     block_fht_mlp_conditioned_output_gate_rms_epsilon: float = 1e-6
+    block_fht_mlp_postgelu_hidden_self_gate: bool = False
+    block_fht_mlp_postgelu_hidden_self_gate_scale: float = 1.0
+    block_fht_mlp_postgelu_hidden_self_gate_layers: tuple[int, ...] = ()
+    block_fht_mlp_postgelu_hidden_self_gate_basis_block_size: int = 256
+    block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed: int = 271828
+    block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed: int = 376557
+    block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed: int = 481286
+    block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon: float = 1e-6
     tie_word_embeddings: bool = True
 
 
@@ -1825,6 +1833,185 @@ class MLP(nn.Module):
             conditioned_output_projection_signs,
             persistent=True,
         )
+        self.postgelu_hidden_self_gate_scale = float(
+            config.block_fht_mlp_postgelu_hidden_self_gate_scale
+        )
+        if (
+            not math.isfinite(self.postgelu_hidden_self_gate_scale)
+            or self.postgelu_hidden_self_gate_scale <= 0.0
+        ):
+            raise ValueError(
+                "block_fht_mlp_postgelu_hidden_self_gate_scale must be "
+                "positive and finite"
+            )
+        postgelu_hidden_self_gate_layers = tuple(
+            int(layer)
+            for layer in config.block_fht_mlp_postgelu_hidden_self_gate_layers
+        )
+        if any(
+            layer < 0 or layer >= config.n_layer
+            for layer in postgelu_hidden_self_gate_layers
+        ):
+            raise ValueError(
+                "block_fht_mlp_postgelu_hidden_self_gate_layers contains "
+                "an invalid layer"
+            )
+        postgelu_hidden_self_gate_enabled = bool(
+            config.block_fht_mlp_postgelu_hidden_self_gate
+            and (
+                not postgelu_hidden_self_gate_layers
+                or layer_id in postgelu_hidden_self_gate_layers
+            )
+        )
+        self.postgelu_hidden_self_slope = (
+            nn.Parameter(torch.zeros(4 * config.n_embd))
+            if postgelu_hidden_self_gate_enabled
+            else None
+        )
+        self.postgelu_hidden_self_gate_basis_block_size = int(
+            config.block_fht_mlp_postgelu_hidden_self_gate_basis_block_size
+        )
+        self.postgelu_hidden_self_gate_rms_epsilon = float(
+            config.block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon
+        )
+        if (
+            not math.isfinite(self.postgelu_hidden_self_gate_rms_epsilon)
+            or self.postgelu_hidden_self_gate_rms_epsilon <= 0.0
+        ):
+            raise ValueError(
+                "block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon must "
+                "be positive and finite"
+            )
+
+        def make_postgelu_hidden_basis_buffers(
+            seed: int,
+        ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+            width = 4 * config.n_embd
+            generator = torch.Generator(device="cpu")
+            generator.manual_seed(int(seed) + layer_id * 64)
+            selected_permutation = torch.randperm(
+                width,
+                generator=generator,
+                device="cpu",
+            )
+            selected_signs = (
+                torch.randint(
+                    0,
+                    2,
+                    (width,),
+                    generator=generator,
+                    dtype=torch.float32,
+                    device="cpu",
+                )
+                * 2.0
+                - 1.0
+            )
+            return (
+                selected_permutation,
+                torch.argsort(selected_permutation),
+                selected_signs,
+            )
+
+        if postgelu_hidden_self_gate_enabled:
+            basis_block_size = (
+                self.postgelu_hidden_self_gate_basis_block_size
+            )
+            hidden_width = 4 * config.n_embd
+            if (
+                basis_block_size <= 0
+                or basis_block_size & (basis_block_size - 1)
+                or hidden_width % basis_block_size
+            ):
+                raise ValueError(
+                    "block_fht_mlp_postgelu_hidden_self_gate_"
+                    "basis_block_size must be a power of two dividing "
+                    "4 * n_embd"
+                )
+            (
+                postgelu_hidden_condition_permutation,
+                postgelu_hidden_condition_inverse_permutation,
+                postgelu_hidden_condition_signs,
+            ) = make_postgelu_hidden_basis_buffers(
+                config.block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed
+            )
+            (
+                postgelu_hidden_update_permutation,
+                postgelu_hidden_update_inverse_permutation,
+                postgelu_hidden_update_signs,
+            ) = make_postgelu_hidden_basis_buffers(
+                config.block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed
+            )
+            (
+                postgelu_hidden_output_permutation,
+                postgelu_hidden_output_inverse_permutation,
+                postgelu_hidden_output_signs,
+            ) = make_postgelu_hidden_basis_buffers(
+                config.block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed
+            )
+            postgelu_hidden_hadamard = normalized_fht_last_dim(
+                torch.eye(basis_block_size, dtype=torch.float32)
+            )
+        else:
+            postgelu_hidden_condition_permutation = None
+            postgelu_hidden_condition_inverse_permutation = None
+            postgelu_hidden_condition_signs = None
+            postgelu_hidden_update_permutation = None
+            postgelu_hidden_update_inverse_permutation = None
+            postgelu_hidden_update_signs = None
+            postgelu_hidden_output_permutation = None
+            postgelu_hidden_output_inverse_permutation = None
+            postgelu_hidden_output_signs = None
+            postgelu_hidden_hadamard = None
+        self.register_buffer(
+            "postgelu_hidden_condition_permutation",
+            postgelu_hidden_condition_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_condition_inverse_permutation",
+            postgelu_hidden_condition_inverse_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_condition_signs",
+            postgelu_hidden_condition_signs,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_update_permutation",
+            postgelu_hidden_update_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_update_inverse_permutation",
+            postgelu_hidden_update_inverse_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_update_signs",
+            postgelu_hidden_update_signs,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_output_permutation",
+            postgelu_hidden_output_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_output_inverse_permutation",
+            postgelu_hidden_output_inverse_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_output_signs",
+            postgelu_hidden_output_signs,
+            persistent=True,
+        )
+        self.register_buffer(
+            "postgelu_hidden_hadamard",
+            postgelu_hidden_hadamard,
+            persistent=True,
+        )
         # Optional non-persistent teacher state is installed by the training
         # entry point. It is neither trainable nor part of a checkpoint.
         self.register_buffer(
@@ -2321,6 +2508,7 @@ class MLP(nn.Module):
             )
         if shared_hidden_gain is not None:
             activated = activated * shared_hidden_gain
+        activated = self.apply_postgelu_hidden_self_gate(activated)
         if self.training and self.postgelu_std_target > 0.0:
             self.last_postgelu = activated
         else:
@@ -2439,6 +2627,103 @@ class MLP(nn.Module):
             keepdim=True,
         ).add(self.conditioned_output_gate_rms_epsilon).sqrt()
         return condition / rms.to(dtype=condition.dtype)
+
+    def _postgelu_hidden_self_basis(
+        self,
+        values: torch.Tensor,
+        *,
+        inverse: bool,
+        role: str,
+    ) -> torch.Tensor:
+        if role == "condition":
+            permutation = self.postgelu_hidden_condition_permutation
+            inverse_permutation = (
+                self.postgelu_hidden_condition_inverse_permutation
+            )
+            signs = self.postgelu_hidden_condition_signs
+        elif role == "update":
+            permutation = self.postgelu_hidden_update_permutation
+            inverse_permutation = (
+                self.postgelu_hidden_update_inverse_permutation
+            )
+            signs = self.postgelu_hidden_update_signs
+        elif role == "output":
+            permutation = self.postgelu_hidden_output_permutation
+            inverse_permutation = (
+                self.postgelu_hidden_output_inverse_permutation
+            )
+            signs = self.postgelu_hidden_output_signs
+        else:
+            raise ValueError(f"unsupported post-GELU basis role: {role}")
+        hadamard = self.postgelu_hidden_hadamard
+        if permutation is None:
+            return values
+        assert (
+            inverse_permutation is not None
+            and signs is not None
+            and hadamard is not None
+        )
+        signs = signs.to(device=values.device, dtype=values.dtype)
+        hadamard = hadamard.to(device=values.device, dtype=values.dtype)
+        if inverse:
+            values = values * signs
+            grouped = values.reshape(
+                *values.shape[:-1],
+                values.shape[-1]
+                // self.postgelu_hidden_self_gate_basis_block_size,
+                self.postgelu_hidden_self_gate_basis_block_size,
+            )
+            values = F.linear(grouped, hadamard).reshape_as(values)
+            return values.index_select(-1, inverse_permutation)
+        values = values.index_select(-1, permutation)
+        grouped = values.reshape(
+            *values.shape[:-1],
+            values.shape[-1]
+            // self.postgelu_hidden_self_gate_basis_block_size,
+            self.postgelu_hidden_self_gate_basis_block_size,
+        )
+        values = F.linear(grouped, hadamard).reshape_as(values)
+        return values * signs
+
+    def apply_postgelu_hidden_self_gate(
+        self,
+        activated: torch.Tensor,
+    ) -> torch.Tensor:
+        slope = self.postgelu_hidden_self_slope
+        if slope is None:
+            return activated
+        expected = 4 * self.c_proj.out_features
+        if activated.shape[-1] != expected:
+            raise ValueError(
+                "post-GELU hidden self gate width mismatch: expected "
+                f"{expected}, got {activated.shape[-1]}"
+            )
+        rms = activated.float().square().mean(
+            dim=-1,
+            keepdim=True,
+        ).add(self.postgelu_hidden_self_gate_rms_epsilon).sqrt()
+        condition = activated / rms.to(dtype=activated.dtype)
+        spectral_condition = self._postgelu_hidden_self_basis(
+            condition,
+            inverse=False,
+            role="condition",
+        )
+        modulation = (
+            self.postgelu_hidden_self_gate_scale
+            * spectral_condition
+            * slope.to(dtype=spectral_condition.dtype)
+        )
+        spectral_update = self._postgelu_hidden_self_basis(
+            activated,
+            inverse=False,
+            role="update",
+        )
+        correction = spectral_update * modulation
+        return activated + self._postgelu_hidden_self_basis(
+            correction,
+            inverse=True,
+            role="output",
+        )
 
     def residual_conditioned_output_modulation(
         self,
