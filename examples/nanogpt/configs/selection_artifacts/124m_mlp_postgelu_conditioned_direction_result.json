@@ -1,0 +1,74 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_conditioned_direction_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_conditioned_direction_plan.json",
+    "sha256": "5699239f10e5a1c54334be449b58b41154a9d52fc62fc002faf33c557da096ef"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "direct_foreground_polling_no_watchdog_queue_callback_or_parameter_update",
+    "repository_commit": "99529b2fc21ffbaf1a39eaa2085e281c2a431d65",
+    "implementation_commit": "8a8e3abb7b5bfab11ff9268687b339c5cb3f7f3f",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source_sha256": "ab51b5900c6bbc60e10d19fc9665850c637105ad857c10f4929f665a0df2b971",
+    "remote_tests": "9 passed",
+    "exit_code": 0
+  },
+  "inputs": {
+    "attention_only_checkpoint_sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5",
+    "plain_cproj_checkpoint_sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_token_seed": 20260716,
+    "holdout_token_seed": 20260717
+  },
+  "artifacts": {
+    "root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_postgelu_conditioned_direction_v1",
+    "csv_sha256": "1a2be33d20290c939d63aeca0a2346e357f3cf6b870ed0efd59053dfb6fca7d3",
+    "metadata_sha256": "03d62190fcbcd60e90c020e724f7b1875145495f631f946060024781a1b40f65"
+  },
+  "global": {
+    "task_ce_fit": 5.677904,
+    "task_ce_holdout": 5.732306,
+    "task_ce_fit_holdout_cosine": 0.039385925978422165,
+    "task_ce_teacher_cosine_fit": 0.021043168380856514,
+    "task_ce_teacher_cosine_holdout": 0.0223200973123312
+  },
+  "layer_task_ce_fit_holdout_cosine": {
+    "0": 0.03649502247571945,
+    "1": 0.0816899985074997,
+    "2": 0.043392013758420944,
+    "3": 0.04939135164022446,
+    "4": -0.016782455146312714,
+    "5": -0.0031657246872782707,
+    "6": 0.058635417371988297,
+    "7": 0.035081248730421066,
+    "8": 0.018235230818390846,
+    "9": 0.04952097311615944,
+    "10": -0.045669976621866226,
+    "11": 0.018020177260041237
+  },
+  "selection": {
+    "minimum_cosine": 0.05,
+    "passing_layers": [
+      1,
+      6
+    ],
+    "selected_layer": 1,
+    "selected_layer_cosine": 0.0816899985074997,
+    "rule": "maximum task-CE fit/holdout cosine among layers clearing 0.05"
+  },
+  "decision": {
+    "classification": "PASS_POSTGELU_CONDITIONED_LAYER_1_CAUSAL_SCREEN",
+    "implement_production_candidate": true,
+    "scope": "layer 1 only, slope only, exact registered fixed projection and untied bases",
+    "requirements_before_training": [
+      "production formula and seeds exactly match the diagnostic",
+      "identity initialization and no learned basis or LoRA adapter",
+      "measured real-training MFU certificate is at least 20 percent",
+      "the 238-step 124M run is directly polled without the aggregate watchdog or callback"
+    ],
+    "interpretation": "Current-token post-GELU activation provides a reproducible task direction in two layers even though static endpoint charts and residual-conditioned gates were practical ties. The evidence selects a localized non-redundant dynamic operator rather than an all-layer gate."
+  }
+}
