@@ -1,0 +1,153 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_exact_current_matcher_result_v1",
+  "recorded_at": "2026-07-30",
+  "decision": "REJECT_EXACT_CURRENT_SPARSE_CFC_MATCHER",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_exact_current_matcher_plan.json",
+    "sha256": "662146a165d2e1a240afeb81f90098c50c99687632f24a64d0592c278e92acba",
+    "plan_commit": "999a4fa"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "git_commit": "3e80077649661cf994b33d4ac74ff57562d88c87",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py",
+    "entrypoint_sha256": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "command": [
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-cfc-current/examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py",
+      "--checkpoint",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp/ckpt.pt",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-cfc-current/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-cfc-current/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_exact_current_matcher_plan.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_cfc_exact_current_matcher",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/root/userdata/MappingNetworks/native_cache"
+    ],
+    "wall_seconds": 67.30095219612122,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false
+  },
+  "inputs": {
+    "checkpoint": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp/ckpt.pt",
+    "checkpoint_sha256": "423029ea02046b95a5f8f4b9f80c000816b0ebf51f6a9dfd66dcd84da0ed47c6",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "bdbe54a8aaaba713dc76bac41d6a789c6f739cf42351786b185a425956d225ac",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "hidden88_cproj_and_all_non_cfc_parameters_fixed": true,
+    "persisted_cfc_muon_momentum_used": true,
+    "saved_dense_trajectory_tensors_used": false
+  },
+  "protocol": {
+    "layers": 12,
+    "batch_size": 4,
+    "block_size": 1024,
+    "batches_per_window": 4,
+    "fit_train_seed": 20260806,
+    "validation_seeds": [
+      20260807,
+      20260808
+    ],
+    "gradient_protocol": "Each fixed-window loss was averaged before backward. The exact Muon momentum, polar factor, scale, weight decay, and persisted learning rate were then applied. This zero-update diagnostic does not claim to reconstruct the original training microbatch draw or its all-parameter global gradient-clipping factor."
+  },
+  "candidate_metrics": {
+    "fresh_expansion88_dense_fraction": {
+      "validation_a": {
+        "post_gelu_positive_line_recovery": 0.3219634076739124,
+        "fixed_cproj_mlp_output_positive_line_recovery": 0.5240143420885809,
+        "predicted_ce_decrease": 0.31880241093565853
+      },
+      "validation_b": {
+        "post_gelu_positive_line_recovery": 0.3221983990102955,
+        "fixed_cproj_mlp_output_positive_line_recovery": 0.5232036040070237,
+        "predicted_ce_decrease": 0.2939704095313697
+      }
+    },
+    "fresh_expansion88_over_fresh_expansion64": {
+      "validation_a": {
+        "post_gelu_positive_line_recovery": 1.2995615242290333,
+        "fixed_cproj_mlp_output_positive_line_recovery": 1.2093723947490806,
+        "predicted_ce_decrease": 1.1714186699277567
+      },
+      "validation_b": {
+        "post_gelu_positive_line_recovery": 1.300249074856498,
+        "fixed_cproj_mlp_output_positive_line_recovery": 1.2095416300787594,
+        "predicted_ce_decrease": 1.268250770134861
+      }
+    },
+    "fresh_expansion88_over_random_expansion88": {
+      "validation_a": {
+        "post_gelu_positive_line_recovery": 4.910450313371088,
+        "fixed_cproj_mlp_output_positive_line_recovery": 3.7340879392953137,
+        "predicted_ce_decrease": 5.479170299888707
+      },
+      "validation_b": {
+        "post_gelu_positive_line_recovery": 4.949786441872943,
+        "fixed_cproj_mlp_output_positive_line_recovery": 3.7539574356768304,
+        "predicted_ce_decrease": 7.3273153696277085
+      }
+    }
+  },
+  "finite_ce": {
+    "validation_a": {
+      "baseline": 5.598552465438843,
+      "dense_exact": 5.59856641292572,
+      "fresh_expansion64": 5.598565340042114,
+      "fresh_expansion88": 5.598605275154114,
+      "random_expansion88": 5.598495364189148,
+      "fresh88_change_from_baseline": 0.000052809715270996094
+    },
+    "validation_b": {
+      "baseline": 5.457856297492981,
+      "dense_exact": 5.457799315452576,
+      "fresh_expansion64": 5.458018898963928,
+      "fresh_expansion88": 5.458020806312561,
+      "random_expansion88": 5.457845211029053,
+      "fresh88_change_from_baseline": 0.00016450881958007812
+    }
+  },
+  "registered_gates": {
+    "absolute_dense_fraction": true,
+    "fresh88_over_fresh64": true,
+    "fresh88_over_random88": true,
+    "positive_fit_effect_every_layer": true,
+    "all_metrics_finite": true,
+    "finite_ce": false
+  },
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_cfc_exact_current_matcher",
+    "detail_sha256": "6c5d51571506b988bc917f19948073c060cdb3f649c463ed7a092f1433830508",
+    "aggregate_sha256": "96dab68ed8dd5edf5851ec19cdc651eb34ed3a118bdd57ed761208ae50d31f6e",
+    "finite_ce_sha256": "ec32f63e13af5ad5f5ac9e95c9452ee2cc0d7bd88c1111c9aa696e396ea9b57f",
+    "optimizer_sha256": "228c594f55f0de77a2ee3095231d068d7fa80c97695048e62cf8e03723b146cd",
+    "selections_sha256": "a7ae61e93ced56febfd45bf9530522a9058503aa778dbeda0bf345c0167f3703",
+    "metadata_sha256": "c388a9bd2180b4d31c21e3f3ebd2fd12510d51885b8652e9196b2b10cc77a5be",
+    "native_matcher_sha256": "5aead912a93ca2ff4000632cd906b3a6622fa8cba6e82e0aa86a6fae94302e73",
+    "workspace_after_gib": 240
+  },
+  "interpretation": [
+    "The exact-current sparse c_fc chart is not rejected for lack of expansion-side representability. On both independent validation windows it retains about 32 percent of dense post-GELU motion and 52 percent of dense fixed-cproj MLP-output motion.",
+    "Task-selected fresh88 is strongly enriched over equal-coordinate random88, and the residual 24-stage pass adds a real functional gain over fresh64. Static-frame misalignment is therefore not the explanation for this particular rejection.",
+    "The only failed preregistered gate is finite one-step CE. Fresh88 increases CE on both validation windows at the persisted terminal step, while random88 slightly decreases it. Dense exact itself increases CE on validation A, so this terminal stochastic direction is not a uniformly improving finite step.",
+    "Do not weaken the finite-CE gate after observation and do not launch training. The mismatch between positive independent first-order descent and failed finite CE identifies step metric, curvature, or evaluation-scale noise as the next issue to isolate; it does not authorize another coordinate-count or static-structure sweep."
+  ],
+  "authorization": {
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister one zero-update trust-radius diagnostic for the unchanged exact-current fresh88 c_fc chart. Select any radius only on a fit window, freeze it, and require reproducible finite-CE improvement over baseline, dense exact, and random88 on new independent windows using numerically stable evaluation. Do not change connectivity, add coordinates, introduce a learned dense basis or LoRA, or launch training unless that new finite-step gate passes."
+  }
+}
