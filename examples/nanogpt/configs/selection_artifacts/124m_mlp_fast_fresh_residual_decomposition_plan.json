@@ -1,0 +1,174 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_residual_decomposition_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "scientific_question": "After a stateless current-Muon-matched hidden-side stage-64 chart removes topology staleness, which structured tangent best captures the remaining task-effective dense c_proj Muon motion: additional hidden-side rotations, output-side rotations selected on the stage-64 residual, or two-sided diagonal channel/singular scaling?",
+  "parameter_updates": 0,
+  "parent_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_training_result.json",
+    "sha256": "9fa1bea4cc8cb41bdda4a61955818072ab9234d37ae26174e14eb10fe91606d6",
+    "classification": "DIRECTIONAL_ONLY",
+    "terminal_validation": 5.612201690673828,
+    "success_threshold": 5.5918,
+    "candidate_minus_success_threshold": 0.020401690673828687
+  },
+  "existing_evidence_not_to_repeat": {
+    "task_bilateral_equal_budget_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_bilateral_result.json",
+    "finding": "A stale-periodic hidden32-plus-output32 chart was only 1.0303x/1.0016x the equal-coordinate hidden40 control on current/future Frobenius recovery.",
+    "functional_metric_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_functional_metric_result.json",
+    "finding_2": "Extra hidden-side stage64 directions were task-effective under post-GELU output, train-gradient, validation-gradient, and finite-CE metrics; their weak end-to-end gain was not explained by Frobenius-only inactive directions.",
+    "novelty_of_this_plan": "Fit the production-qualified stateless-fresh hidden64 tangent first, form its exact current-direction residual, and select additive output/diagonal coordinates only on that residual. Compare each addition against an equal-or-larger-coordinate fresh hidden-only control."
+  },
+  "inputs": {
+    "coherent_dense_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "base_updates": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "future_updates": [
+      15,
+      75,
+      135,
+      195
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "fixed_validation_windows": "Reuse the disjoint fit and holdout windows pinned by fixed_eval_indices_sha256 5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747."
+  },
+  "causal_protocol": {
+    "dense_target": "Use the exact coherent pre-step Muon polar direction at each base update, including the registered learning-rate schedule and decoupled-weight-decay convention.",
+    "fresh_hidden64": "Select and natively validate 64 edge-disjoint hidden-channel perfect matchings from the exact current dense target, then fit the closed-form diagonal-metric angles.",
+    "residual": "Materialize the actual hidden64 tangent/applied direction in c_proj weight space and define residual R = D_muon - D_hidden64 without using future state.",
+    "output_addition": "Select output-row Givens connectivity and angles from R only, then compose it additively with the already fitted hidden64 direction.",
+    "diagonal_addition": "Fit left/output and right/hidden diagonal scaling tangents to R only, both separately and jointly, then compose them additively with hidden64.",
+    "future_information_used_for_selection": false,
+    "future_information_used_for_scoring_only": true,
+    "model_parameters_updated": false,
+    "optimizer_state_updated": false,
+    "learned_dense_basis": false,
+    "dense_residual_adapter": false,
+    "lora_adapter": false
+  },
+  "candidate_cells": [
+    {
+      "name": "fresh_hidden64",
+      "hidden_stages": 64,
+      "output_stages": 0,
+      "diagonal_coordinates": 0,
+      "coordinates_per_layer": 98304,
+      "role": "qualified parent"
+    },
+    {
+      "name": "fresh_hidden72",
+      "hidden_stages": 72,
+      "output_stages": 0,
+      "diagonal_coordinates": 0,
+      "coordinates_per_layer": 110592,
+      "role": "equal-coordinate control for hidden64_plus_output32"
+    },
+    {
+      "name": "fresh_hidden80",
+      "hidden_stages": 80,
+      "output_stages": 0,
+      "diagonal_coordinates": 0,
+      "coordinates_per_layer": 122880,
+      "role": "equal-coordinate control for hidden64_plus_output64"
+    },
+    {
+      "name": "fresh_hidden64_plus_residual_output32",
+      "hidden_stages": 64,
+      "output_stages": 32,
+      "diagonal_coordinates": 0,
+      "coordinates_per_layer": 110592,
+      "role": "conditional output-side residual test"
+    },
+    {
+      "name": "fresh_hidden64_plus_residual_output64",
+      "hidden_stages": 64,
+      "output_stages": 64,
+      "diagonal_coordinates": 0,
+      "coordinates_per_layer": 122880,
+      "role": "conditional output-side residual depth test"
+    },
+    {
+      "name": "fresh_hidden64_plus_left_diagonal",
+      "hidden_stages": 64,
+      "output_stages": 0,
+      "diagonal_coordinates": 768,
+      "coordinates_per_layer": 99072,
+      "role": "output-channel radial/singular test"
+    },
+    {
+      "name": "fresh_hidden64_plus_right_diagonal",
+      "hidden_stages": 64,
+      "output_stages": 0,
+      "diagonal_coordinates": 3072,
+      "coordinates_per_layer": 101376,
+      "role": "hidden-channel radial/singular test"
+    },
+    {
+      "name": "fresh_hidden64_plus_two_sided_diagonal",
+      "hidden_stages": 64,
+      "output_stages": 0,
+      "diagonal_coordinates": 3840,
+      "coordinates_per_layer": 102144,
+      "role": "joint diagonal residual test; compare conservatively against fresh_hidden72, which has more coordinates"
+    }
+  ],
+  "metrics": {
+    "weight_space": [
+      "current dense-Muon Frobenius recovery",
+      "current residual Frobenius recovery",
+      "15-update future exact-Muon recovery and cosine"
+    ],
+    "functional": [
+      "post-GELU activation-covariance-weighted residual-output fixed-scale recovery",
+      "post-GELU residual-output positive-line recovery",
+      "recorded train-gradient predicted CE decrease",
+      "fixed fit-window validation-gradient predicted CE decrease",
+      "fixed holdout-window validation-gradient predicted CE decrease",
+      "matched finite-step CE change on both fixed windows"
+    ],
+    "aggregation": "Report every layer/update/window cell, energy-weighted aggregate, minimum cell, and coordinate-normalized gain. No aggregate may hide a nonfinite or negative-task-effect cell."
+  },
+  "registered_decision_rule": {
+    "output_branch_pass": [
+      "At either 32 or 64 output stages, the conditional-output candidate must beat its exact equal-coordinate hidden-only control by at least 1.05x on current post-GELU positive-line recovery.",
+      "It must beat the equal-coordinate hidden-only control by at least 1.05x on both fit and holdout validation-gradient predicted CE decrease.",
+      "It must win at least 7 of 8 fit/holdout finite-step CE comparisons and have no negative current-task-effect cell.",
+      "Its 15-update future residual recovery must be at least 1.10x the equal-coordinate hidden-only control."
+    ],
+    "diagonal_branch_pass": [
+      "The joint two-sided diagonal candidate must beat fresh_hidden72, despite using fewer coordinates, by at least 1.05x on current post-GELU positive-line recovery and both validation-gradient predicted CE metrics.",
+      "It must win at least 7 of 8 fit/holdout finite-step CE comparisons and have no negative current-task-effect cell."
+    ],
+    "hidden_capacity_signal": "Fresh hidden80 is a control, not an automatic promotion. Call hidden capacity material only if it improves over fresh hidden64 by at least 1.15x on current post-GELU positive-line recovery and both validation-gradient predicted CE metrics, with at least 7/8 finite-step wins.",
+    "selection": "If multiple branches pass, select only the lowest-coordinate branch with the largest conservative minimum of holdout predicted-CE ratio, finite-step win rate, and future residual-recovery ratio.",
+    "failure": "If no branch passes, reject sparse orthogonal-plus-diagonal c_proj expansion as the next repair and return to a qualitatively different moving task-aligned chart; do not authorize another 124M training run."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": "one idle nonzero GPU",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "do_not_disturb": "the running 985M full-attention 20TPP job on Y400 GPU0",
+    "workspace_cap_gib": 300
+  },
+  "authorization": {
+    "this_plan_authorizes": "Implementation, focused tests, and one zero-update foreground-polled diagnostic execution after exact-commit deployment.",
+    "language_model_training_authorized": false,
+    "mfu_preflight_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
