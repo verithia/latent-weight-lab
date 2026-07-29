@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_hidden_capacity_result_v1",
+  "decision": "SELECT_HIDDEN_64_FOR_EXACT_RESUME_AND_MFU_QUALIFICATION",
+  "training_authorization": false,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden_capacity_plan.json",
+    "sha256": "879a58b8e08a31d68a41f45f2e9c658798a1f3bcc807255d6b77de43cadb23d1",
+    "commit": "313cb771496e84ffb3c6951514bebeb1926c880e"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "foreground_direct_poll_no_watchdog_no_callback",
+    "git_commit": "313cb771496e84ffb3c6951514bebeb1926c880e",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
+    "entrypoint_sha256": "59ee79624d5103df20d994f3c80723ce8e793ae98ffe98f9082fe2794c057d0c",
+    "input_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9"
+  },
+  "stage_results": {
+    "32": {
+      "coordinates_per_layer": 49152,
+      "coordinate_fraction": 0.020833333333333332,
+      "requested_update_recovery": 0.13439268325216358,
+      "future_recovery": 0.022767720629710695,
+      "future_cosine": 0.14417625991968344,
+      "minimum_future_cosine": 0.07342973282367342,
+      "positive_future_cells": 20,
+      "task_over_random_future_recovery": 6.9912730842857265,
+      "update_recovery_over_coordinate_fraction": 6.450848796103852,
+      "projected_mfu": 0.2885606766898234
+    },
+    "40": {
+      "coordinates_per_layer": 61440,
+      "coordinate_fraction": 0.026041666666666668,
+      "requested_update_recovery": 0.1532701160714346,
+      "future_recovery": 0.026268744796467857,
+      "future_cosine": 0.15489115347864763,
+      "minimum_future_cosine": 0.07911950280854842,
+      "positive_future_cells": 20,
+      "task_over_random_future_recovery": 6.489198285576126,
+      "update_recovery_over_coordinate_fraction": 5.8855724571430885,
+      "requested_update_recovery_over_stage32": 1.140464736341717,
+      "future_recovery_over_stage32": 1.15377139520012,
+      "projected_mfu": 0.273063282828,
+      "passes_all_selection_rules": false
+    },
+    "48": {
+      "coordinates_per_layer": 73728,
+      "coordinate_fraction": 0.03125,
+      "requested_update_recovery": 0.169099644529268,
+      "future_recovery": 0.02935008057313549,
+      "future_cosine": 0.1637455933352326,
+      "minimum_future_cosine": 0.08381321231515901,
+      "positive_future_cells": 20,
+      "task_over_random_future_recovery": 6.0917833707982,
+      "update_recovery_over_coordinate_fraction": 5.411188624936576,
+      "requested_update_recovery_over_stage32": 1.258250378199408,
+      "future_recovery_over_stage32": 1.289109307447982,
+      "projected_mfu": 0.259145647834,
+      "passes_all_selection_rules": false
+    },
+    "64": {
+      "coordinates_per_layer": 98304,
+      "coordinate_fraction": 0.041666666666666664,
+      "requested_update_recovery": 0.19358274477513032,
+      "future_recovery": 0.034524540077022006,
+      "future_cosine": 0.17767832748546386,
+      "minimum_future_cosine": 0.09191218305174163,
+      "positive_future_cells": 20,
+      "task_over_random_future_recovery": 5.4466113817904,
+      "update_recovery_over_coordinate_fraction": 4.645985874603128,
+      "requested_update_recovery_over_stage32": 1.440426220316677,
+      "future_recovery_over_stage32": 1.516381048350061,
+      "projected_mfu": 0.235172820425,
+      "passes_all_selection_rules": true
+    }
+  },
+  "selection": {
+    "stages": 64,
+    "refresh_interval_updates": 60,
+    "reason": "64 is the first registered candidate to clear both 1.35x gains over stage32 while also clearing the task/random, coordinate-efficiency, all-cell cosine, and conservative projected-MFU gates.",
+    "limitations": [
+      "This is a no-update causal tangent diagnostic, not language-model training.",
+      "The 23.52 percent MFU value is a conservative projection, not a certificate.",
+      "Only a directly polled real BF16 preflight including update-60 rematching can qualify scientific training."
+    ]
+  },
+  "immutable_remote_artifacts": {
+    "detail_csv": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_hidden_capacity_v1/muon_matched_givens_pilot.csv",
+      "sha256": "0a1d4b50b28b3526f26b816eb60f83efba6889fcffa7a10dc6d592ccc61a712d"
+    },
+    "matchings_csv": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_hidden_capacity_v1/muon_matched_givens_matchings.csv",
+      "sha256": "a821c8e2704e18d4bbbf6700babd826506d47dbd1e16cd205d4eb2a464e4d4cf"
+    },
+    "aggregate_json": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_hidden_capacity_v1/muon_matched_givens_pilot_aggregate.json",
+      "sha256": "fab7bd1e564747251b9b664559e0bc120ee1dd7f9d60759a54eb5bf4565ea2ac"
+    },
+    "metadata_json": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_hidden_capacity_v1/muon_matched_givens_pilot_metadata.json",
+      "sha256": "16ebd4b3140c8eec93ff75b230e178f1106606b0c20fa382c718db7b57dac338"
+    }
+  },
+  "next_action": "Prepare an immutable stage64/r60 config, verify exact resume at that depth, and directly poll a real BF16 1-warmup-plus-61-update MFU preflight including update-60 rematching. Do not launch scientific training yet."
+}
