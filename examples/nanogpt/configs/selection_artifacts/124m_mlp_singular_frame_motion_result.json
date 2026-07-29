@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_124m_mlp_singular_frame_motion_result_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "Are dense Muon MLP phase chords primarily singular-value/radial motion, mixing inside the occupied singular frame, or rotation of the expansion subspace?",
+  "scope": {
+    "trajectory": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "ce812caa6402178b5240490fd8a3943ad7156c5bdeb4a2a1dcdad22051f6615e",
+    "layers": 12,
+    "targets": [
+      "mlp.c_fc",
+      "mlp.c_proj"
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "phase_chords": 96,
+    "source_checkpoint_dtype": "float32",
+    "analysis_dtype": "float64",
+    "execution": "direct foreground diagnostic on Y400 GPU1; no training, queue, watchdog, callback, or PRO6 execution"
+  },
+  "method": {
+    "phase_start_svd": "W = U diag(s) V^T",
+    "singular_value_motion": "U diag(diag(U^T delta V)) V^T",
+    "in_frame_mixing": "U offdiag(U^T delta V) V^T",
+    "subspace_rotation_residual": "delta - U U^T delta V V^T",
+    "c_fc_residual_interpretation": "left expansion-output subspace rotation",
+    "c_proj_residual_interpretation": "right expansion-input row-space rotation",
+    "global_scale": "projection of singular-value motion onto the phase-start singular-value vector",
+    "aggregation": "phase-delta-energy-weighted across all layers and phases"
+  },
+  "all_phase_energy_fractions": {
+    "mlp.c_fc": {
+      "singular_value_motion": 0.018396594069992323,
+      "in_frame_mixing": 0.2558096404388379,
+      "subspace_rotation_residual": 0.725793765491337,
+      "global_scale": 0.01803719306141295,
+      "nonuniform_singular_value_motion": 0.0003594010085793715,
+      "directional_total_mixing_plus_rotation": 0.9816034059301749
+    },
+    "mlp.c_proj": {
+      "singular_value_motion": 0.006754200813875223,
+      "in_frame_mixing": 0.2581817722003717,
+      "subspace_rotation_residual": 0.7350640269859143,
+      "global_scale": 0.0063934936513002395,
+      "nonuniform_singular_value_motion": 0.0003607071625749817,
+      "directional_total_mixing_plus_rotation": 0.993245799186286
+    }
+  },
+  "phase_rotation_residual_fractions": {
+    "mlp.c_fc": {
+      "0_to_60": 0.729478026902176,
+      "60_to_120": 0.7231507356839908,
+      "120_to_180": 0.719529973258074,
+      "180_to_238": 0.7178597661878503
+    },
+    "mlp.c_proj": {
+      "0_to_60": 0.7365283655604205,
+      "60_to_120": 0.7369380291633416,
+      "120_to_180": 0.7258195862297561,
+      "180_to_238": 0.7174253051369613
+    }
+  },
+  "numerical_audit": {
+    "maximum_component_energy_relative_error": 1.9538587492831234e-13,
+    "maximum_reconstruction_relative_error": 2.934815795637068e-17,
+    "maximum_component_absolute_cosine": 1.9531951590817412e-13,
+    "maximum_fraction_sum_error": 1.9539925233402755e-13
+  },
+  "artifacts": {
+    "analysis_commit": "47821347d2f88d1835d8e16e502c66493a40469a",
+    "analysis_entrypoint": "examples/nanogpt/analyze_mlp_singular_frame_motion.py",
+    "analysis_entrypoint_sha256": "818581453585ec3ce8aa76add1821b4c6b5070369a939291407b8e3fce40e343",
+    "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/singular_frame_motion_phase_chords_v2_fp64",
+    "detail_csv_sha256": "7107e86bd2f65b67f82088e9d0b6a971a4598d22c51422689b541da73ba5341e",
+    "aggregate_csv_sha256": "048962f0e116ab9dc301312b90d7765948389693e6bceb17bca232e790ab8917",
+    "metadata_sha256": "1ad753c9e3fd6fc2f69288dcca0f0660da2b9ced37ca946dbb58046cec25a111",
+    "snapshot_sha256": {
+      "step_000000.pt": "7c81197f5b205f4379d219cfe3a86b737d346d9d5f0032108f2f94dd2c0c030f",
+      "step_000060.pt": "b313167b8082b2bb0888fd96f21015db2d3e639f86b503407fb9c6b8da19e65a",
+      "step_000120.pt": "38fb485aec261c7267bd160edefa1453ea2e5dbf871073479dcb7998f33c22e2",
+      "step_000180.pt": "49d90a1d25ba81d2ecc564bf28f9ed698ad2233d2e8a920cb8ab85cbad56ea59",
+      "step_000238.pt": "66f6b3ba33a4aebd150ac82f9b69cd731450577629c9e956e988e741ea51bf19"
+    }
+  },
+  "decision": {
+    "classification": "DIRECTIONAL_ROTATION_DOMINATES",
+    "interpretation": [
+      "Dense Muon does not mainly learn MLP channel norms or singular values. It mostly changes orientation: 98.16 percent of c_fc and 99.32 percent of c_proj phase-chord energy is in mixing plus expansion-subspace rotation.",
+      "The c_proj result directly explains why scalar/channel gain and initialization repairs cannot close the gap: only 0.68 percent of its phase motion changes singular values, and almost all of that is a global scale.",
+      "The existing bilateral c_proj chart targets the correct kind of motion in principle because its hidden-side rotation acts on the same expansion-input row space that carries 73.51 percent of dense c_proj motion.",
+      "The earlier inverse-paired c_fc/c_proj and independent pre-GELU oracles already showed that adding c_fc frame motion does not materially improve the relevant function, so this result is not authorization to relaunch that falsified structure.",
+      "A fixed random affine tangent and a generic random quadratic chart remain misaligned; neither should be repeated."
+    ],
+    "promote_to_training": false,
+    "next_required_diagnostic": "Project every selected dense c_proj phase chord onto the exact identity Jacobian of the production two-hidden-stage/four-output-stage bilateral fixed-FHT Cayley chart. Report total and component-specific recovery before choosing a new structure. Use direct foreground polling and no training."
+  },
+  "limitations": [
+    "This decomposes one optimizer trajectory, not the global low-loss solution manifold.",
+    "Near-degenerate singular values can redistribute diagonal versus in-frame mixing, although occupied-frame total versus residual rotation is invariant to basis changes within the degenerate subspace.",
+    "Energy fractions do not by themselves prove that an optimizer can select or traverse a chart direction.",
+    "The result does not establish that c_fc and c_proj use one shared raw rotation; earlier evidence shows raw directions remain layer- and matrix-specific."
+  ]
+}
