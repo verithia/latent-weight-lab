@@ -1,0 +1,63 @@
+{
+  "candidates": [
+    {
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht12_wsmuon_jvpnorm_depth_calibration.json",
+      "config_sha256": "0826498e34c7d6f9d28c2d9b988f15a7a63d8e2a6a24da8e6166ed7fba18f25f",
+      "factors": 12,
+      "gate": {
+        "actual_to_target_update_norm_ratio_per_layer": [
+          0.8,
+          1.2
+        ],
+        "maximum_coordinate_update": 0.02,
+        "minimum_mfu_fraction": 0.2,
+        "required_mean_task_direction_cosine": 0.16173738046161015,
+        "required_normalized_enrichment_multiplier": 1.15,
+        "six_factor_normalized_enrichment": 0.9668664528979517,
+        "square_root_ambient_cosine": 0.1454608337892598,
+        "trainable_fraction_per_cproj": 0.021158854166666668,
+        "trainable_scalars_per_layer": 49920
+      },
+      "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_product_fht_depth_calibration/performance_preflight_y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht12_wsmuon_jvpnorm_depth_calibration.json",
+      "probe_output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_product_fht_depth_calibration/productfht12_real_batch_probe.json"
+    },
+    {
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht24_wsmuon_jvpnorm_depth_calibration.json",
+      "config_sha256": "06261a4b053917fbe956bd35c4ca9e9a453fae7194cf7f2ee376350b63bd034e",
+      "factors": 24,
+      "gate": {
+        "actual_to_target_update_norm_ratio_per_layer": [
+          0.8,
+          1.2
+        ],
+        "maximum_coordinate_update": 0.02,
+        "minimum_mfu_fraction": 0.2,
+        "required_mean_task_direction_cosine": 0.22784976328129658,
+        "required_normalized_enrichment_multiplier": 1.15,
+        "six_factor_normalized_enrichment": 0.9668664528979517,
+        "square_root_ambient_cosine": 0.2049199538844375,
+        "trainable_fraction_per_cproj": 0.0419921875,
+        "trainable_scalars_per_layer": 99072
+      },
+      "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_product_fht_depth_calibration/performance_preflight_y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht24_wsmuon_jvpnorm_depth_calibration.json",
+      "probe_output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_product_fht_depth_calibration/productfht24_real_batch_probe.json"
+    }
+  ],
+  "decision_rule": {
+    "promote": "candidate passes exact movement and 20-percent MFU gates and its mean task-direction cosine clears its registered 15-percent enrichment threshold",
+    "promote_at_most_one": true,
+    "reject": "candidate fails MFU/movement, or cosine growth is explained by square-root ambient dimension alone"
+  },
+  "hypothesis": "if deeper nonlinear diagonal-FHT products learn task-aligned moving axes rather than merely buying proportional random coordinates, their one-step tangent cosine normalized by the square root of trainable fraction should exceed the six-factor chart by at least 15 percent",
+  "implementation_commit": "14ae8d7897259233f2f1d67373f691647158d239",
+  "implementation_source_hashes": {
+    "examples/nanogpt/model.py": "ce504599da487dd37e8b51df6b5523061d43b5c9c8cdb6ac64e6488d7dd6a48e",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "examples/nanogpt/train.py": "f0edc4fe6c8f61a610a0994c57ea495d554cb012860afa5a54169e8d00493c67",
+    "latent_weight_lab/block_fht.py": "5646a93f518f586417496332196d41ddd547fb8a5606ff308e3b116204482b1b"
+  },
+  "launch_rule": "poll each performance test and one-step diagnostic directly; do not attach short calibrations to a watchdog",
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_jvpnorm_screen_result.json",
+  "schema_version": "mai_124m_mlp_product_fht_depth_calibration_plan_v1",
+  "status": "registered_before_calibration"
+}
