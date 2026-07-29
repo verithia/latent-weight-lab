@@ -1,0 +1,29 @@
+{
+  "analysis": "phase-start task-gradient and stateless Muon direction alignment with the strictly future dense c_proj phase chord",
+  "cells": [
+    "layer0:phase0",
+    "layer0:phase180",
+    "layer6:phase60",
+    "layer11:phase120"
+  ],
+  "decision_rule": "promote the first registered direction with at least 10% energy-weighted positive-step line recovery on both disjoint windows, positive cosine in every cell, and at least 0.25 mean cross-window direction cosine",
+  "diagnostic_only": true,
+  "directions": [
+    "raw_descent",
+    "muon_polar_descent",
+    "raw_right_tangent",
+    "muon_right_tangent"
+  ],
+  "gradient_windows": {
+    "batch_size": 2,
+    "batches": 4,
+    "block_size": 512,
+    "fit_seed": 20260731,
+    "holdout_seed": 20260801,
+    "tokens_per_window": 4096
+  },
+  "no_learned_dense_basis": true,
+  "no_lora_factor": true,
+  "schema_version": "nanogpt_mlp_task_gradient_direction_plan_v1",
+  "status": "preregistered_before_result"
+}
