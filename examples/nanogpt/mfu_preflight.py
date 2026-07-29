@@ -62,6 +62,16 @@ def parse_perf_rows(text: str) -> list[dict[str, float]]:
     return rows
 
 
+def parse_snapshot_elapsed_seconds(text: str) -> list[float]:
+    return [
+        float(value)
+        for value in re.findall(
+            r"parameter trajectory snapshot .* elapsed_s=([0-9.]+)",
+            text,
+        )
+    ]
+
+
 def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> float:
     if not torch.cuda.is_available():
         raise RuntimeError("MFU preflight requires CUDA")
@@ -84,7 +94,14 @@ def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> flo
     return (2.0 * size * size * size * trials) / elapsed / 1e12
 
 
-def make_preflight_config(source: dict[str, Any], temporary_out: Path, warmups: int, timed: int) -> dict[str, Any]:
+def make_preflight_config(
+    source: dict[str, Any],
+    temporary_out: Path,
+    warmups: int,
+    timed: int,
+    *,
+    include_diagnostic_io: bool = False,
+) -> dict[str, Any]:
     config = dict(source)
     # A preflight is never a scientific result.  Keep the real train path but
     # avoid checkpoint/evaluation overhead and any deterministic-run policy
@@ -105,11 +122,13 @@ def make_preflight_config(source: dict[str, Any], temporary_out: Path, warmups: 
     config["eval_seed"] = None
     config["save_checkpoint"] = False
     config["checkpoint_history"] = False
-    # Parameter-trajectory I/O is a scientific sampling side effect, not part
-    # of the steady-state compute gate.  The long run records its cost in wall
-    # time, while the foreground preflight measures the uninstrumented update.
-    config["trajectory_snapshot_interval"] = 0
-    config["optimizer_probe_steps"] = None
+    if not include_diagnostic_io:
+        # Parameter-trajectory I/O is normally a scientific sampling side
+        # effect, not part of the steady-state compute gate.  A diagnostic can
+        # explicitly request the stricter path below when snapshot/probe I/O
+        # is itself frequent enough to affect end-to-end throughput.
+        config["trajectory_snapshot_interval"] = 0
+        config["optimizer_probe_steps"] = None
     # One-shot pullback diagnostics write scientific calibration artifacts.
     # Keep the repaired optimizer active, but suppress that side effect during
     # the performance-only scratch run.
@@ -132,6 +151,14 @@ def main() -> None:
     parser.add_argument("--gemm-size", type=int, default=8192)
     parser.add_argument("--gemm-warmups", type=int, default=4)
     parser.add_argument("--gemm-trials", type=int, default=8)
+    parser.add_argument(
+        "--include-diagnostic-io",
+        action="store_true",
+        help=(
+            "retain registered trajectory snapshots and optimizer probes, "
+            "then charge snapshot serialization to effective iteration time"
+        ),
+    )
     args = parser.parse_args()
     if args.min_fraction < 0.20:
         parser.error("--min-fraction must be at least 0.20")
@@ -173,7 +200,11 @@ def main() -> None:
             "denominator": "empirical_bf16_tensorcore_gemm_peak",
         },
         "hardware": {"cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"), "device": device_name},
-        "preflight": {"warmup_updates": args.warmup_updates, "timed_updates": args.timed_updates},
+        "preflight": {
+            "warmup_updates": args.warmup_updates,
+            "timed_updates": args.timed_updates,
+            "include_diagnostic_io": args.include_diagnostic_io,
+        },
         "passed": False,
     }
     try:
@@ -185,7 +216,11 @@ def main() -> None:
             "empirical_bf16_gemm_peak_tflops": gemm_peak,
         }
         preflight_config = make_preflight_config(
-            source, temporary_root / "run", args.warmup_updates, args.timed_updates
+            source,
+            temporary_root / "run",
+            args.warmup_updates,
+            args.timed_updates,
+            include_diagnostic_io=args.include_diagnostic_io,
         )
         preflight_config_path = temporary_root / "config.json"
         preflight_config_path.write_text(json.dumps(preflight_config, sort_keys=True) + "\n")
@@ -207,8 +242,43 @@ def main() -> None:
         if len(rows) < args.timed_updates:
             raise RuntimeError(f"preflight emitted only {len(rows)} timed perf rows; expected {args.timed_updates}")
         steady = rows[-args.timed_updates:]
-        tokens_per_second = sum(row["tokens_per_s"] for row in steady) / len(steady)
-        iter_ms = sum(row["iter_ms"] for row in steady) / len(steady)
+        base_iter_ms = sum(row["iter_ms"] for row in steady) / len(steady)
+        snapshot_seconds = parse_snapshot_elapsed_seconds(process.stdout)
+        if args.include_diagnostic_io:
+            expected_rows = args.warmup_updates + args.timed_updates
+            if len(rows) < expected_rows:
+                raise RuntimeError(
+                    "I/O-inclusive preflight emitted only "
+                    f"{len(rows)} perf rows; expected {expected_rows}"
+                )
+            if not snapshot_seconds:
+                raise RuntimeError(
+                    "I/O-inclusive preflight emitted no parameter-snapshot "
+                    "timings"
+                )
+            measured = rows[-expected_rows:]
+            # Evaluation is not training work and is excluded. Optimizer-probe
+            # serialization already occurs inside iter_ms; parameter snapshots
+            # occur after the perf row and are charged explicitly here.
+            charged_training_ms = sum(
+                max(row["iter_ms"] - row.get("eval_ms", 0.0), 0.0)
+                for row in measured
+            )
+            charged_snapshot_ms = 1000.0 * sum(snapshot_seconds)
+            iter_ms = (
+                charged_training_ms + charged_snapshot_ms
+            ) / len(measured)
+            tokens_per_iter = (
+                float(source["batch_size"])
+                * float(source["gradient_accumulation_steps"])
+                * float(source["block_size"])
+            )
+            tokens_per_second = tokens_per_iter / (iter_ms / 1000.0)
+        else:
+            iter_ms = base_iter_ms
+            tokens_per_second = (
+                sum(row["tokens_per_s"] for row in steady) / len(steady)
+            )
         active_params = estimate_active_params(source)
         model_tflops = 6.0 * active_params * tokens_per_second / 1e12
         mfu_fraction = model_tflops / gemm_peak
@@ -222,9 +292,18 @@ def main() -> None:
                     "active_params_6n_estimate": active_params,
                     "tokens_per_second": tokens_per_second,
                     "iter_ms": iter_ms,
+                    "base_timed_iter_ms": base_iter_ms,
                     "model_tflops": model_tflops,
                     "mfu_fraction": mfu_fraction,
                     "peak_mib": max(row.get("peak_mib", 0.0) for row in steady),
+                    "diagnostic_io": {
+                        "included": args.include_diagnostic_io,
+                        "snapshot_count": len(snapshot_seconds),
+                        "snapshot_seconds": sum(snapshot_seconds),
+                        "optimizer_probe_io_included_in_iter_ms": (
+                            args.include_diagnostic_io
+                        ),
+                    },
                     "timing_breakdown_ms": {
                         key: sum(row.get(key, 0.0) for row in steady) / len(steady)
                         for key in timing_keys

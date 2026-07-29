@@ -1,0 +1,155 @@
+{
+  "schema_version": "mai_124m_mlp_muon_chart_staleness_plan_v1",
+  "status": "registered_before_execution",
+  "scientific_question": "Does the functionally useful 64-stage c_proj connectivity selected from an exact dense-Muon direction lose task-effective capacity before the current 60-update refresh boundary, and if so is the first defensible shorter cadence 30 or 15 updates?",
+  "triggering_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_functional_metric_result.json",
+    "sha256": "7024792b92e0e82e052bfc5d4217ea05d18584d86093cbc160661b570b63faca",
+    "commit": "70606b08a7daaa18daa7afa1d150026ae932bee5",
+    "classification": "FUNCTIONAL_GAIN_PRESENT_TEST_TEMPORAL_REFRESH",
+    "stage64_over_stage32_current_output_recovery": 1.5144788632258757,
+    "stage64_over_stage32_recorded_task_descent": 1.6753492600851903,
+    "finite_step_ce_wins": "8/8"
+  },
+  "rejected_reuse": {
+    "candidate": "combine the existing per-update c_proj trajectory with the phase-boundary optimizer-state replay",
+    "reason": "the tensors are bit-identical only at initialization and diverge afterward, so the combined trajectory would not be coherent",
+    "run_identity_stepwise": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "run_identity_optimizer_probe": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "step60_mean_absolute_difference_range": [
+      0.00009681976371211931,
+      0.0001070846919901669
+    ],
+    "step60_max_absolute_difference_range": [
+      0.0008091203635558486,
+      0.0009763925336301327
+    ],
+    "future_information_leakage_avoided": true
+  },
+  "coherent_replay": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_cproj_cadence15_optimizer_probe_lr24e4.json",
+    "config_sha256": "7de2a68eb24af9b8224302bc576a69fd54705c0c03610f7eff9e480796019ed2",
+    "model": "dense 124M GPT, Muon, 0.5 TPP, lr 2.4e-3",
+    "max_updates": 238,
+    "all_parameter_snapshot_steps": "0,15,30,...,225,238",
+    "optimizer_probe_steps": "0,15,30,...,225",
+    "optimizer_probe_contents": [
+      "weight_before_step",
+      "gradient_after_clip",
+      "momentum_buffer_before_step",
+      "combined_momentum_update",
+      "polar_update",
+      "applied_direction_per_lr"
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "targets": [
+      "mlp.c_proj"
+    ],
+    "estimated_snapshot_bytes": 8457415680,
+    "estimated_optimizer_probe_bytes": 4529848320,
+    "estimated_total_diagnostic_bytes": 12987264000,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "performance_gate": {
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "entrypoint_sha256": "16faaee73689263366d53c839b89e4b46fd22c6e3c380735ddbb70dd9a6e2aab",
+    "mode": "direct foreground execution and polling",
+    "arguments": [
+      "--include-diagnostic-io",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "59",
+      "--min-fraction",
+      "0.20"
+    ],
+    "coverage": "60 real dense-Muon updates retaining optimizer probes at 0,15,30,45 and all-parameter snapshots at 0,15,30,45,60; optimizer-probe serialization is inside iter_ms and snapshot serialization is explicitly amortized into effective iteration time",
+    "denominator": "same-GPU empirical BF16 tensor-core GEMM peak",
+    "minimum_mfu_fraction": 0.2,
+    "failure_policy": "do not launch the 238-update coherent replay if measured I/O-inclusive MFU is below 20 percent",
+    "watchdog": false,
+    "callback": false
+  },
+  "analysis": {
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_chart_staleness.py",
+    "entrypoint_sha256": "3a0651c9a2fa1ed8bc3fe37799371bd460dcc3d05c6091b09c81a58d98bd663d",
+    "test": "examples/nanogpt/test_analyze_mlp_muon_chart_staleness.py",
+    "test_sha256": "050c944fdf17f5f17bd48bcd3963ade06b3516857df60308ea5445e74e99700d",
+    "focused_tests": "20/20 cadence, functional-metric, MFU, and trajectory tests passed before registration",
+    "phase_anchors": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "ages_updates": [
+      0,
+      15,
+      30,
+      45,
+      60
+    ],
+    "candidate": "64-stage hidden-side Givens connectivity selected causally from the exact phase-start Muon direction",
+    "future_scoring": "at each future probe, refit only diagonal Givens angles to the exact future Muon direction while keeping phase-start connectivity frozen; compare with freshly selected stage64 connectivity at that same future step",
+    "functional_metrics": [
+      "post-GELU residual-output positive-line recovery on two disjoint fixed validation windows",
+      "recorded training-gradient positive predicted CE decrease",
+      "holdout validation-gradient positive predicted CE decrease",
+      "fixed-batch finite-step CE difference between aged and fresh connectivity"
+    ],
+    "causality": "future directions can refit angles and score a phase-start connectivity but cannot alter that connectivity",
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "validation_windows": {
+    "fit_seed": 20260804,
+    "holdout_seed": 20260805,
+    "batch_size": 2,
+    "block_size": 256,
+    "batches": 4,
+    "tokens_per_window": 2048,
+    "disjoint": true
+  },
+  "decision_rule": {
+    "registered_retention_metric": "minimum of aged/fresh post-GELU output positive-line recovery, recorded-training-gradient positive descent, and holdout-validation-gradient positive descent",
+    "stable_retention": 0.9,
+    "stale_retention": 0.8,
+    "r60_connectivity_not_stale": "age-60 registered retention is at least 0.90",
+    "qualify_r30_performance_preflight": "age-30 retention is at least 0.90 and age-45 or age-60 retention is below 0.80",
+    "qualify_r15_performance_preflight": "age-15 retention is at least 0.90 and age-30 retention is below 0.80",
+    "otherwise": "mixed cadence signal; no shorter-refresh training promotion",
+    "no_posthoc_threshold_change": true
+  },
+  "execution_policy": {
+    "host": "Y400",
+    "gpu": "one otherwise idle GPU other than GPU0",
+    "mode": "direct foreground execution and polling to exit",
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "workspace_cap_gib": 300
+  },
+  "authorization": {
+    "authorized": [
+      "one I/O-inclusive performance preflight",
+      "one 238-update coherent dense diagnostic replay if the preflight passes",
+      "one no-training chart-staleness analysis on that replay"
+    ],
+    "not_authorized": [
+      "a shorter-refresh language-model candidate before the staleness decision",
+      "larger stage count",
+      "c_fc replacement",
+      "learning-rate or seed sweep",
+      "PRO6 execution",
+      "watchdog or callback attachment"
+    ]
+  }
+}
