@@ -845,15 +845,22 @@ def make_training_result(
                 ),
                 (
                     "The run leaves c_fc dense, so it does not validate a "
-                    "full MLP replacement or resolve the pre-GELU activation "
-                    "spectrum problem."
+                    "full MLP replacement. This must not be read as saying "
+                    "that static pre-GELU geometry is untested: the prior "
+                    "held-out and causal screens already rejected static "
+                    "c_fc frames, gains, and inverse pairing as the missing "
+                    "repair."
                 ),
             ],
             "next_action": (
-                "Use this two-pass hidden88 c_proj as the fixed reference "
-                "for a separately preregistered no-training c_fc manifold "
-                "gate whose metric is activation/Jacobian-aware before any "
-                "new 124M training run or larger rung."
+                "Do not repeat static c_fc/pre-GELU frame, gain, inverse-"
+                "gauge, or learned-basis tests. Reuse the saved dense c_fc "
+                "trajectory to preregister a no-training exact-current "
+                "coherent-Muon expansion-side matcher, scored after GELU "
+                "with independent task-gradient and finite-CE effects while "
+                "holding the hidden88 c_proj reference fixed. Only "
+                "directional enrichment over equal-coordinate controls may "
+                "authorize implementation."
             ),
         },
         "scope_limit": (

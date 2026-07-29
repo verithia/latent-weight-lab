@@ -39,10 +39,10 @@
       "The held-out-selected residual 24-stage pass causally improves validation CE by 0.0201435 over the exact stateless-fresh64 parent.",
       "The candidate is 0.1002582 CE behind attention-only and misses the fixed +0.1 success boundary by only 0.0002582 CE; this is practically boundary-level but must remain DIRECTIONAL_ONLY under the registered rule.",
       "Hidden-side coordinate capacity was therefore a real part of the c_proj deficit after direction staleness was removed.",
-      "The run leaves c_fc dense, so it does not validate a full MLP replacement or resolve the pre-GELU activation spectrum problem."
+      "The run leaves c_fc dense, so it does not validate a full MLP replacement. This must not be read as saying that static pre-GELU geometry is untested: the prior held-out and causal screens already rejected static c_fc frames, gains, and inverse pairing as the missing repair."
     ],
     "larger_rung_authorized": false,
-    "next_action": "Use this two-pass hidden88 c_proj as the fixed reference for a separately preregistered no-training c_fc manifold gate whose metric is activation/Jacobian-aware before any new 124M training run or larger rung.",
+    "next_action": "Do not repeat static c_fc/pre-GELU frame, gain, inverse-gauge, or learned-basis tests. Reuse the saved dense c_fc trajectory to preregister a no-training exact-current coherent-Muon expansion-side matcher, scored after GELU with independent task-gradient and finite-CE effects while holding the hidden88 c_proj reference fixed. Only directional enrichment over equal-coordinate controls may authorize implementation.",
     "registered_directional_gate_passed": true,
     "registered_success_gate_passed": false
   },
