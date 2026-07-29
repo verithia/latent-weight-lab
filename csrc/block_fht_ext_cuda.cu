@@ -386,7 +386,7 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_kernel(
 }
 
 template <typename scalar_t>
-__global__ __launch_bounds__(128) void fixed_basis_transform_256_kernel(
+__global__ __launch_bounds__(64) void fixed_basis_transform_256_kernel(
     const scalar_t* __restrict__ input,
     const int64_t* __restrict__ permutations,
     const float* __restrict__ signs,
@@ -410,11 +410,11 @@ __global__ __launch_bounds__(128) void fixed_basis_transform_256_kernel(
     int64_t basis_offset = basis * width;
     int64_t input_token_offset =
         (shared_input ? token : basis * tokens + token) * width;
-    int64_t spectral_indices[2];
-    int64_t selected_permutations[2];
+    int64_t spectral_indices[4];
+    int64_t selected_permutations[4];
     #pragma unroll
-    for (int half = 0; half < 2; ++half) {
-      int group = warp + half * 4;
+    for (int quarter = 0; quarter < 4; ++quarter) {
+      int group = warp + quarter * 2;
       int64_t spectral_index =
           transform_block * block_size + group * 32 + warp_lane;
       int64_t permutation = permutations[basis_offset + spectral_index];
@@ -430,18 +430,18 @@ __global__ __launch_bounds__(128) void fixed_basis_transform_256_kernel(
         value =
             (warp_lane & offset) ? partner - value : value + partner;
       }
-      spectral_indices[half] = spectral_index;
-      selected_permutations[half] = permutation;
+      spectral_indices[quarter] = spectral_index;
+      selected_permutations[quarter] = permutation;
       values[group * 33 + warp_lane] = value;
     }
     __syncthreads();
 
     // H256 = H8 (across warps) kron H32 (within each warp). Each thread
-    // computes two H8 rows directly from the eight shared warp values.
+    // computes four H8 rows directly from the eight shared warp values.
     int64_t output_token_offset = (basis * tokens + token) * width;
     #pragma unroll
-    for (int half = 0; half < 2; ++half) {
-      int output_group = warp + half * 4;
+    for (int quarter = 0; quarter < 4; ++quarter) {
+      int output_group = warp + quarter * 2;
       float cross_warp = 0.0f;
       #pragma unroll
       for (int input_group = 0; input_group < 8; ++input_group) {
@@ -451,9 +451,9 @@ __global__ __launch_bounds__(128) void fixed_basis_transform_256_kernel(
             : component;
       }
       float value = cross_warp * 0.0625f;
-      int64_t spectral_index = spectral_indices[half];
+      int64_t spectral_index = spectral_indices[quarter];
       int64_t output_index =
-          inverse ? selected_permutations[half] : spectral_index;
+          inverse ? selected_permutations[quarter] : spectral_index;
       if (!inverse) {
         value *= signs[basis_offset + spectral_index];
       }
@@ -986,9 +986,9 @@ torch::Tensor fixed_basis_transform_cuda(
   C10_CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
   int64_t resident_blocks =
       (int64_t)properties.multiProcessorCount *
-      (block_size == 256 ? 16 : 8);
+      (block_size == 256 ? 32 : 8);
   int grid = (int)std::min(jobs, resident_blocks);
-  int threads = block_size == 256 ? 128 : 256;
+  int threads = block_size == 256 ? 64 : 256;
   size_t smem = padded_shared_size(block_size) * sizeof(float);
   auto stream = at::cuda::getCurrentCUDAStream();
   if (smem >= 48 * 1024) {
