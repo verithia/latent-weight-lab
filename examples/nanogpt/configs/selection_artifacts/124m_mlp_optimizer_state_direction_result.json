@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_mlp_optimizer_state_direction_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_optimizer_state_probe_plan.json",
+  "scientific_question": "Does coherent dense-Muon optimizer state contain a phase-start direction that predicts the strictly future c_proj phase chord?",
+  "scope": {
+    "run_name": "y400_mai_v3_124m_dense_optimizer_state_probe_0p5tpp_lr24e4",
+    "training_commit": "87117f4ec8e6d3e71ab638397e110ebf181e54a2",
+    "analysis_commit": "af794dccd4ada6508f48df8fdb9ed74a26abc6e9",
+    "run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "cells": 20,
+    "execution": "238-step dense-Muon replay on Y400 GPU1, synchronously polled with no watchdog or callback; analysis was a direct foreground diagnostic"
+  },
+  "training_result": {
+    "status": "clean",
+    "exit_code": 0,
+    "wall_seconds": 316,
+    "terminal_train_loss": 5.4857,
+    "terminal_val_loss": 5.4885,
+    "mfu_fraction": 0.33363132244690535,
+    "mfu_minimum": 0.2,
+    "mfu_denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "b7c7156d0bed0497973b615df744a516a5f32d9d0719dad9f1f2c7cca1e6a83d",
+    "resolved_config_sha256": "a3f6a8bf405787d5b44319443a7ee243af230015a9df0ba81e63bdad88c86c11",
+    "mfu_certificate_sha256": "428c8173501e8a96a8900e6ad6a670d17af318c9ee8b575ec6deb52cf0ef2281",
+    "log_sha256": "4cf4ad0dcf748e31db8c386def382ea02f17583c187e543b2fccd01428335194",
+    "status_sha256": "fdaa71dfbd0454936e4e314ba4cea69a2557f5f23a2a8e48cd53544620604b6c"
+  },
+  "aggregate": {
+    "raw_gradient_descent_recovery": 0.0036905548090992364,
+    "combined_momentum_descent_recovery": 0.015120682196925661,
+    "momentum_buffer_descent_recovery_nonzero_cells": 0.026171032854919566,
+    "muon_polar_descent_recovery": 0.16307353411936562,
+    "exact_applied_direction_recovery": 0.16469392843418235,
+    "exact_applied_right_tangent_recovery": 0.10549449297798778,
+    "causal_direction_span_recovery": 0.17381164164299054,
+    "exact_applied_minimum_cell_cosine": 0.20576652162525624,
+    "exact_applied_positive_cells": 20,
+    "exact_applied_cells": 20
+  },
+  "exact_applied_recovery_by_phase_start": {
+    "0": 0.07562768641039033,
+    "60": 0.22767689945509323,
+    "120": 0.24264612839079308,
+    "180": 0.3032936583352636
+  },
+  "exact_applied_recovery_by_layer": {
+    "0": 0.15237473877438515,
+    "3": 0.1605616458835585,
+    "6": 0.1658754574997327,
+    "9": 0.17172659677514013,
+    "11": 0.17542600230152097
+  },
+  "decision": {
+    "classification": "PROMOTE_COHERENT_MUON_DIRECTION_EXACT_APPLIED_DIRECTION",
+    "registered_rule_passed": true,
+    "interpretation": [
+      "The exact applied dense-Muon direction clears the 10 percent rule at 16.47 percent energy-weighted recovery and has positive alignment in all 20 cells.",
+      "Newton-Schulz polar geometry is the decisive operation: raw gradient recovers 0.37 percent, the pre-polar momentum combination 1.51 percent, and the polar direction 16.31 percent.",
+      "Weight decay contributes little because the polar-only and exact-applied results are nearly identical.",
+      "The right-orthogonal tangent of the exact direction independently clears the rule at 10.55 percent, consistent with the earlier high-capacity right-orbit result.",
+      "The five-direction causal span reaches only 17.38 percent, so nearly all useful phase-start information is already concentrated in the polar direction."
+    ],
+    "next_required_diagnostic": "Project the exact coherent weight-space polar directions through the production c_proj BlockFHT generator tangent. If the fixed generator destroys the promoted alignment, implement a task-conditioned moving tangent rather than another static chart; if it retains at least 10 percent future-chord recovery, test a weight-space-Muon pullback optimizer on the 124M ladder."
+  },
+  "artifacts": {
+    "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/optimizer_state_direction_v1",
+    "detail_csv_sha256": "0d5d662b5ae63ecab5a76d2a8dfa1c41acbb8b5b5e7f044c9be7ceb7043a4a57",
+    "aggregate_json_sha256": "3ba383072766662ec403b22504ec0ba45b4357452026d44d0f4a8d12e3885d85",
+    "span_csv_sha256": "c9ac880ecdd23a3d2231dedd1c4d0a39bed42aff3cfd9964d20af3fa8cfc2a82",
+    "metadata_json_sha256": "fd176ec62d28112d59532b189fc215088f0353a8b8d1a1f096f6ce3e5d3ce029",
+    "analysis_log_sha256": "9d9ab822bd4bdc413661a10da29970464f518ec1da193bb72105bf4a16c0e2ea"
+  }
+}

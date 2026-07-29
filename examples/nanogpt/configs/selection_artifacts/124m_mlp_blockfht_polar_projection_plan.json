@@ -1,0 +1,39 @@
+{
+  "schema_version": "mai_124m_mlp_blockfht_polar_projection_plan_v1",
+  "status": "preregistered_before_result",
+  "analysis": "exact orthogonal projection of coherent dense-Muon applied directions into the production 124M c_proj BlockFHT generator tangent",
+  "source_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_optimizer_state_direction_result.json",
+  "production_generator": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonchart154_0p5tpp_lr24e4.json",
+    "target": "mlp.c_proj",
+    "latent_ratio": 0.01,
+    "latent_shape": [
+      154,
+      154
+    ],
+    "latent_scalars": 23716,
+    "weight_scalars": 2359296,
+    "fht_layers": 2,
+    "base_seed": 1000,
+    "learned_basis": false
+  },
+  "cells": {
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "count": 20
+  },
+  "decision_rule": "admit a 124M weight-space-Muon pullback training run only if the exact production tangent projection retains at least 10% energy-weighted positive-step recovery of the future dense phase chord and has positive cosine in all 20 cells; otherwise reject the fixed generator tangent and design a task-conditioned moving tangent",
+  "execution_rule": "direct foreground diagnostic on idle Y400 GPU; no training update, MFU gate, watchdog, callback, queue, or PRO6 execution"
+}
