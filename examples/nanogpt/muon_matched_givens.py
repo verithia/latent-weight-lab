@@ -219,6 +219,40 @@ def muon_matched_permutations(
     )
 
 
+def random_unique_matchings(
+    *,
+    width: int,
+    stages: int,
+    seed: int,
+) -> torch.Tensor:
+    """Return deterministic task-independent edge-disjoint matchings.
+
+    A randomized relabeling followed by the circle-method one-factorization
+    gives ``width - 1`` perfect matchings in which every unordered pair
+    appears exactly once.  This is the equal-coordinate random-connectivity
+    control for task-selected Givens charts.
+    """
+    if width <= 0 or width % 2 or stages <= 0 or stages >= width:
+        raise ValueError("require even width and 0 < stages < width")
+    generator = torch.Generator(device="cpu")
+    generator.manual_seed(int(seed))
+    vertices = torch.randperm(width, generator=generator).tolist()
+    result: list[torch.Tensor] = []
+    for _stage in range(stages):
+        pairs = [
+            (vertices[index], vertices[-index - 1])
+            for index in range(width // 2)
+        ]
+        result.append(
+            torch.tensor(
+                [item for pair in pairs for item in pair],
+                dtype=torch.long,
+            )
+        )
+        vertices = [vertices[0], vertices[-1], *vertices[1:-1]]
+    return torch.stack(result)
+
+
 def diagonal_metric_angles(
     weight: torch.Tensor,
     requested_update: torch.Tensor,

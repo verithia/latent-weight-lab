@@ -10,6 +10,7 @@ from examples.nanogpt.muon_matched_givens import (
     MuonMatchedGivensLinear,
     apply_givens_flow,
     diagonal_metric_angles,
+    random_unique_matchings,
 )
 
 
@@ -66,6 +67,24 @@ def test_diagonal_metric_function_recovers_small_in_chart_update() -> None:
     ).square().sum() / requested.square().sum()
     assert float(cosine) > 0.999999
     assert float(recovery) > 0.99999
+
+
+def test_random_unique_matchings_are_deterministic_and_edge_disjoint() -> None:
+    matchings = random_unique_matchings(width=8, stages=7, seed=29)
+    assert torch.equal(
+        matchings,
+        random_unique_matchings(width=8, stages=7, seed=29),
+    )
+    edges = {
+        tuple(sorted(pair.tolist()))
+        for matching in matchings
+        for pair in matching.view(-1, 2)
+    }
+    assert len(edges) == 8 * 7 // 2
+    assert all(
+        torch.equal(torch.sort(row).values, torch.arange(8))
+        for row in matchings
+    )
 
 
 def test_folded_weight_is_a_buffer_with_compact_coordinate_count() -> None:
