@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_task_ce_attribution_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Which chart groups and depth bands causally carry the cross-seed CE gain in the accepted task-conditioned bilateral endpoint state?",
+  "scientific_scope": "no-update ablation of one preregistered accepted endpoint state",
+  "inputs": {
+    "plain_cproj_checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "identity_chart_state": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5/chart_state_step_0000.pt",
+      "sha256": "2d18703bf53d62ab52a217730a9e63594c331c5a07118b3f79069a18ff91aa01"
+    },
+    "accepted_chart_state": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5/chart_state_step_0120.pt",
+      "sha256": "2abeee50138189f055a5462679412965a6c60d524a04c60afda1cdc3877a6b75"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "evaluation": {
+    "primary_seed": 20260717,
+    "primary_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e",
+    "confirmation_seed": 20260718,
+    "confirmation_token_sha256": "9458b6a1fb470c780cf00b7305122f272d72a7dec4554d99b5dd2523c14cca8d",
+    "batches_per_seed": 8,
+    "batch_size": 8,
+    "token_window_length": 256,
+    "minimum_meaningful_ce_gain": 0.005
+  },
+  "variants": {
+    "controls": [
+      "identity",
+      "accepted_all"
+    ],
+    "groups_only": [
+      "hidden_rotation",
+      "hidden_gain",
+      "output_rotation",
+      "output_gain",
+      "rotations_only",
+      "gains_only"
+    ],
+    "leave_one_group_out": [
+      "without_hidden_rotation",
+      "without_hidden_gain",
+      "without_output_rotation",
+      "without_output_gain"
+    ],
+    "depth_bands_only": {
+      "early": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "middle": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "late": [
+        8,
+        9,
+        10,
+        11
+      ]
+    },
+    "single_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ]
+  },
+  "decision_rule": {
+    "output_frame_supported": "output_rotation or output_gain alone improves both seeds by at least 0.005, or removing either destroys at least half of the accepted-all gain on both seeds",
+    "hidden_frame_supported": "hidden_rotation or hidden_gain alone improves both seeds by at least 0.005, or removing either destroys at least half of the accepted-all gain on both seeds",
+    "distributed_chart": "no single group or depth band passes, while accepted-all does",
+    "hyperconnection_policy": "test a narrow identity-initialized residual/MLP frame only if output-frame attribution is positive; otherwise do not infer a hyperconnection from parameter movement alone"
+  },
+  "execution_policy": {
+    "host": "Y400",
+    "gpu": "one exclusive free GPU among 1,2,3",
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "queue_entry": false,
+    "callbacks": false,
+    "mfu_gate": "not applicable because no parameter update occurs",
+    "pro6": "operator paused; do not use",
+    "required_artifacts": [
+      "literal command and clean source commit",
+      "input and dataset hashes",
+      "variant CE CSV",
+      "summary JSON with decision and artifact hashes"
+    ]
+  }
+}
