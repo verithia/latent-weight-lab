@@ -1,0 +1,135 @@
+{
+  "schema_version": "mai_124m_mlp_product_fht_depth_calibration_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_depth_calibration_plan.json",
+  "plan_sha256": "cae3b1e4e0c2e37414f3be643e947b98d661c35edbcc02748a97fb0fc166ec2a",
+  "execution_commit": "302005860e7b6a169d8576ebab7d4df3dae6c45d",
+  "scientific_question": "Does increasing nonlinear diagonal-FHT product depth create task-enriched c_proj tangent directions beyond square-root ambient capacity while preserving exact materialized movement and at least 20 percent MFU?",
+  "execution_policy": "all performance tests and one-step diagnostics were foreground/directly polled; no watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "candidates": [
+    {
+      "factors": 12,
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht12_wsmuon_jvpnorm_depth_calibration.json",
+      "config_sha256": "0826498e34c7d6f9d28c2d9b988f15a7a63d8e2a6a24da8e6166ed7fba18f25f",
+      "trainable_scalars_per_cproj": 49920,
+      "trainable_fraction_per_cproj": 0.021158854166666668,
+      "performance_gate": {
+        "passed": true,
+        "mfu_fraction": 0.20068256906369897,
+        "minimum_mfu_fraction": 0.2,
+        "tokens_per_second": 176308.30666666664,
+        "iter_ms": 1492.4799999999998,
+        "empirical_h100_bf16_gemm_peak_tflops": 656.1447550955937,
+        "model_tflops": 131.67681513025533,
+        "peak_memory_mib": 31480.55,
+        "prepare_ms": 106.85000000000001,
+        "forward_backward_ms": 880.5099999999999,
+        "pullback_flush_ms": 490.02666666666664,
+        "grad_postprocess_ms": 2.3333333333333335,
+        "optimizer_ms": 7.976666666666667,
+        "preflight_log_sha256": "d4ecc184cdee3c6304b73115b6b399166745ee32c1222a938a8bc1289c286853",
+        "certificate_sha256": "a778d27037efee057027bafce4314cdafe949df4d66bfaec6a78b21888afa1a2"
+      },
+      "one_step_probe": {
+        "run_name": "y400_mai_v3_124m_productfht12_depth_calibration",
+        "host": "Y400",
+        "gpu": 1,
+        "status": "clean",
+        "exit_code": 0,
+        "scheduled_learning_rate": 0.0024,
+        "actual_to_target_update_norm_ratio": {
+          "minimum": 0.9959936141967773,
+          "mean": 0.9970414539178213,
+          "maximum": 1.0009913444519043
+        },
+        "raw_jvp_to_target_norm_ratio": {
+          "minimum": 0.15096083283424377,
+          "mean": 0.17288045336802801,
+          "maximum": 0.19343248009681702
+        },
+        "normalization_scale": {
+          "minimum": 5.16976261138916,
+          "mean": 5.8162007331848145,
+          "maximum": 6.624234676361084
+        },
+        "maximum_coordinate_update": {
+          "minimum": 0.006397760009765625,
+          "mean": 0.007545573949813842,
+          "maximum": 0.009814181900024413,
+          "registered_cap": 0.02
+        },
+        "actual_target_update_cosine": {
+          "minimum": 0.1159258484840393,
+          "mean": 0.1273730800797542,
+          "maximum": 0.142548069357872
+        },
+        "square_root_ambient_cosine": 0.1454608337892598,
+        "normalized_direction_enrichment": 0.875652069094,
+        "six_factor_normalized_enrichment": 0.9668664528979517,
+        "relative_to_six_factor_normalized_enrichment": 0.905659790419,
+        "required_mean_task_direction_cosine": 0.16173738046161015,
+        "mean_cosine_minus_registered_threshold": -0.03436430038185596,
+        "mean_cosine_minus_ambient_prediction": -0.0180877537095056
+      },
+      "decision": {
+        "classification": "REJECT_NO_TASK_ENRICHMENT",
+        "movement_gate_passed": true,
+        "mfu_gate_passed": true,
+        "direction_gate_passed": false,
+        "interpretation": "The exact pullback reproduces the intended materialized update magnitude without hitting the trust cap, but mean task-direction cosine is below both the registered threshold and the square-root ambient prediction. Doubling the product depth buys random-coordinate capacity rather than task-aligned orientation."
+      },
+      "immutable_artifacts": {
+        "probe_sha256": "07465b70906725b6e74302cfaecc0c52fe9bd3393a64d5eccf8d0dbfa442c731",
+        "provenance_sha256": "1c9f9b946a8b4aa74135cc9a9850a8badc5be44f31bbdf4764df21666ce4abf1",
+        "status_sha256": "0ff22b799038a945b094f736cabf7e55c040baf560a0bf4d3e94f56de11886eb",
+        "log_sha256": "398dd1844e5182967c0015c245b33a466b1ffb91cbe8edd666438c85b2b8e718",
+        "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+      }
+    },
+    {
+      "factors": 24,
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht24_wsmuon_jvpnorm_depth_calibration.json",
+      "config_sha256": "06261a4b053917fbe956bd35c4ca9e9a453fae7194cf7f2ee376350b63bd034e",
+      "trainable_scalars_per_cproj": 99072,
+      "trainable_fraction_per_cproj": 0.0419921875,
+      "performance_gate": {
+        "passed": false,
+        "mfu_fraction": 0.14395457516056198,
+        "minimum_mfu_fraction": 0.2,
+        "tokens_per_second": 129077.63666666667,
+        "iter_ms": 2047.57,
+        "empirical_h100_bf16_gemm_peak_tflops": 669.6718944436287,
+        "model_tflops": 96.40233306160128,
+        "peak_memory_mib": 31485.05,
+        "prepare_ms": 200.99,
+        "forward_backward_ms": 877.4033333333333,
+        "pullback_flush_ms": 953.68,
+        "grad_postprocess_ms": 2.3566666666666665,
+        "optimizer_ms": 7.94,
+        "preflight_log_sha256": "2af87b20ff293cf62322e61fa72dd3a7cb8df9bff267e70c3f15cfee9a5e23d2",
+        "certificate_sha256": "40f4e966ae79ffecb3b6c18c7466293ac0be06caf948b0b61e42886ad9f65acb"
+      },
+      "one_step_probe": null,
+      "decision": {
+        "classification": "REJECT_MFU_GATE",
+        "movement_gate_passed": null,
+        "mfu_gate_passed": false,
+        "direction_gate_passed": null,
+        "interpretation": "The preregistered 20 percent MFU policy blocks the scientific one-step launch. The exact refresh update raises pullback flush time to 953.68 ms and lowers measured MFU to 14.40 percent."
+      }
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_PRODUCT_DEPTH_AS_ALIGNMENT_REPAIR",
+    "promoted_candidate": null,
+    "registered_rule_passed": false,
+    "interpretation": [
+      "The 12-factor chart passes exact movement and performance but has only 0.12737 mean task cosine, below its 0.14546 ambient prediction and 0.16174 registered threshold.",
+      "Its normalized direction enrichment is 0.87565, only 90.57 percent of the six-factor chart's already near-random normalized enrichment.",
+      "The 24-factor chart is not launchable at production speed because it reaches only 14.40 percent MFU.",
+      "Simple product depth therefore neither creates task-aligned tangent axes nor preserves the required runtime at the next tested scale.",
+      "Do not run a 238-step deeper-product screen. The next MLP structure must derive its tangent orientation from task-coupled information rather than increasing random structured coordinates."
+    ],
+    "next_action": "close the product-depth line and preregister a task-coupled, non-LoRA MLP chart only after a no-update oracle shows direction recovery above its ambient coordinate fraction"
+  }
+}
