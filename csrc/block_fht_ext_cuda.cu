@@ -424,19 +424,24 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_256_kernel(
       float partner = __shfl_xor_sync(0xffffffff, value, offset);
       value = (lane & offset) ? partner - value : value + partner;
     }
-    values[smem_index((int)lane)] = value;
+    int warp = (int)(lane >> 5);
+    int warp_lane = (int)(lane & 31);
+    values[warp * 33 + warp_lane] = value;
     __syncthreads();
 
-    // Only the three cross-warp stages require shared memory.
+    // H256 = H8 (across warps) kron H32 (within each warp). Each thread
+    // computes one H8 row directly from the eight shared warp values. This
+    // replaces the three cross-warp butterfly stages and six barriers with
+    // one synchronized shared-memory read phase.
+    float cross_warp = 0.0f;
     #pragma unroll
-    for (int offset = 32; offset <= 128; offset <<= 1) {
-      float partner = values[smem_index((int)(lane ^ offset))];
-      __syncthreads();
-      value = (lane & offset) ? partner - value : value + partner;
-      values[smem_index((int)lane)] = value;
-      __syncthreads();
+    for (int input_warp = 0; input_warp < 8; ++input_warp) {
+      float component = values[input_warp * 33 + warp_lane];
+      cross_warp += (__popc(warp & input_warp) & 1)
+          ? -component
+          : component;
     }
-    value *= 0.0625f;
+    value = cross_warp * 0.0625f;
 
     int64_t output_token_offset = (basis * tokens + token) * width;
     int64_t output_index = inverse ? permutation : spectral_index;
