@@ -4,6 +4,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
     FixedBasisBilinearOutputGate,
+    PostGeluConditionedBilinearOutputGate,
     ResidualConditionedOutputGate,
     UntiedFixedBasisBilinearOutputGate,
     alignment_rows,
@@ -104,6 +105,37 @@ def test_untied_fixed_basis_bilinear_gate_has_slope_gradient() -> None:
 
     assert gate.slope.grad is not None
     assert gate.slope.grad.abs().sum() > 0
+
+
+def test_postgelu_conditioned_gate_is_identity_and_has_dynamic_gradient() -> None:
+    gate = PostGeluConditionedBilinearOutputGate(
+        8,
+        basis_block_size=4,
+        condition_seed=11,
+        update_seed=17,
+        output_seed=23,
+        projection_seed=29,
+    )
+    activated = torch.randn(2, 3, 32)
+    update = torch.randn(2, 3, 8)
+
+    torch.testing.assert_close(gate(activated, update), update)
+    gate(activated, update).square().mean().backward()
+
+    assert gate.slope.grad is not None
+    assert gate.slope.grad.abs().sum() > 0
+
+
+def test_postgelu_condition_projection_is_per_token_rms_normalized() -> None:
+    gate = PostGeluConditionedBilinearOutputGate(
+        8,
+        basis_block_size=4,
+        projection_seed=31,
+    )
+    condition = gate.activation_condition(torch.randn(2, 3, 32))
+    rms = condition.float().square().mean(dim=-1).sqrt()
+
+    torch.testing.assert_close(rms, torch.ones_like(rms), atol=2e-5, rtol=0)
 
 
 def test_gate_alignment_rows_include_groups_and_layers() -> None:

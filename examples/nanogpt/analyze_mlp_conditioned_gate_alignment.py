@@ -19,6 +19,7 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
@@ -339,6 +340,100 @@ class UntiedFixedBasisBilinearOutputGate(torch.nn.Module):
         )
 
 
+class PostGeluConditionedBilinearOutputGate(
+    UntiedFixedBasisBilinearOutputGate
+):
+    """Use the current token's post-GELU activation as gate condition.
+
+    A fixed signed four-to-one projection maps the 4x expansion activation
+    back to residual width, then per-token RMS normalization removes a
+    redundant magnitude degree of freedom.  The parent class applies the
+    independently based bilinear output correction.  Only its residual-width
+    slope/bias vectors are trainable.
+    """
+
+    def __init__(
+        self,
+        width: int,
+        scale: float = 1.0,
+        *,
+        basis_block_size: int = 256,
+        condition_seed: int = 271828,
+        update_seed: int = 376557,
+        output_seed: int = 481286,
+        projection_seed: int = 586015,
+        expansion: int = 4,
+        rms_epsilon: float = 1e-6,
+    ) -> None:
+        super().__init__(
+            width,
+            scale,
+            basis_block_size=basis_block_size,
+            condition_seed=condition_seed,
+            update_seed=update_seed,
+            output_seed=output_seed,
+        )
+        self.expansion = int(expansion)
+        self.rms_epsilon = float(rms_epsilon)
+        if self.expansion <= 0:
+            raise ValueError("expansion must be positive")
+        if self.rms_epsilon <= 0.0:
+            raise ValueError("rms_epsilon must be positive")
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(projection_seed))
+        projection_signs = (
+            torch.randint(
+                0,
+                2,
+                (self.expansion, self.width),
+                generator=generator,
+                dtype=torch.float32,
+                device="cpu",
+            )
+            * 2.0
+            - 1.0
+        )
+        self.register_buffer(
+            "projection_signs",
+            projection_signs,
+            persistent=True,
+        )
+
+    def activation_condition(self, activated: torch.Tensor) -> torch.Tensor:
+        expected = self.expansion * self.width
+        if activated.shape[-1] != expected:
+            raise ValueError(
+                "post-GELU condition width mismatch: expected "
+                f"{expected}, got {activated.shape[-1]}"
+            )
+        grouped = activated.reshape(
+            *activated.shape[:-1],
+            self.expansion,
+            self.width,
+        )
+        signs = self.projection_signs.to(
+            device=activated.device,
+            dtype=activated.dtype,
+        )
+        condition = (grouped * signs).sum(dim=-2) / math.sqrt(
+            self.expansion
+        )
+        rms = condition.float().square().mean(
+            dim=-1, keepdim=True
+        ).add(self.rms_epsilon).sqrt()
+        return condition / rms.to(dtype=condition.dtype)
+
+    def forward(
+        self,
+        activated: torch.Tensor,
+        update: torch.Tensor,
+    ) -> torch.Tensor:
+        return super().forward(
+            self.activation_condition(activated),
+            update,
+        )
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -429,12 +524,7 @@ def load_gate_model(
     basis_seed: int = 271828,
 ) -> tuple[
     torch.nn.Module,
-    dict[
-        int,
-        ResidualConditionedOutputGate
-        | FixedBasisBilinearOutputGate
-        | UntiedFixedBasisBilinearOutputGate,
-    ],
+    dict[int, torch.nn.Module],
     list[torch.utils.hooks.RemovableHandle],
 ]:
     model = load_chart_model(
@@ -442,13 +532,9 @@ def load_gate_model(
     )
     for parameter in model.parameters():
         parameter.requires_grad_(False)
-    gates: dict[
-        int,
-        ResidualConditionedOutputGate
-        | FixedBasisBilinearOutputGate
-        | UntiedFixedBasisBilinearOutputGate,
-    ] = {}
+    gates: dict[int, torch.nn.Module] = {}
     handles: list[torch.utils.hooks.RemovableHandle] = []
+    latest_postgelu: dict[int, torch.Tensor] = {}
     for layer in layers:
         mlp = model.transformer.h[layer].mlp
         if gate_kind == "diagonal":
@@ -467,24 +553,52 @@ def load_gate_model(
                 update_seed=basis_seed + 104729 + layer * 64,
                 output_seed=basis_seed + 2 * 104729 + layer * 64,
             )
+        elif gate_kind == "postgelu_bilinear_untied":
+            gate = PostGeluConditionedBilinearOutputGate(
+                model.config.n_embd,
+                basis_block_size=basis_block_size,
+                condition_seed=basis_seed + layer * 64,
+                update_seed=basis_seed + 104729 + layer * 64,
+                output_seed=basis_seed + 2 * 104729 + layer * 64,
+                projection_seed=basis_seed + 3 * 104729 + layer * 64,
+            )
         else:
             raise ValueError(f"unsupported gate kind: {gate_kind}")
         gate = gate.to(device)
         mlp.add_module("residual_conditioned_output_gate_probe", gate)
+
+        if isinstance(gate, PostGeluConditionedBilinearOutputGate):
+            def gelu_hook(
+                _module,
+                _inputs,
+                output,
+                *,
+                selected_layer: int = layer,
+            ) -> None:
+                latest_postgelu[selected_layer] = output
+
+            handles.append(mlp.gelu.register_forward_hook(gelu_hook))
 
         def hook(
             _module,
             inputs,
             output,
             *,
-            selected_gate: (
-                ResidualConditionedOutputGate
-                | FixedBasisBilinearOutputGate
-                | UntiedFixedBasisBilinearOutputGate
-            ) = gate,
+            selected_gate: torch.nn.Module = gate,
+            selected_layer: int = layer,
         ):
             if not inputs:
                 raise RuntimeError("MLP gate hook received no input")
+            if isinstance(
+                selected_gate,
+                PostGeluConditionedBilinearOutputGate,
+            ):
+                activated = latest_postgelu.pop(selected_layer, None)
+                if activated is None:
+                    raise RuntimeError(
+                        "post-GELU gate hook did not capture an activation"
+                    )
+                return selected_gate(activated, output)
             return selected_gate(inputs[0], output)
 
         handles.append(mlp.register_forward_hook(hook))
@@ -493,12 +607,7 @@ def load_gate_model(
 
 
 def gate_parameters(
-    gates: dict[
-        int,
-        ResidualConditionedOutputGate
-        | FixedBasisBilinearOutputGate
-        | UntiedFixedBasisBilinearOutputGate,
-    ],
+    gates: dict[int, torch.nn.Module],
     groups: tuple[str, ...] = GATE_GROUPS,
 ) -> dict[str, torch.nn.Parameter]:
     if not groups or any(group not in GATE_GROUPS for group in groups):
@@ -553,12 +662,7 @@ def task_ce_gradients(
 
 def teacher_mse_gradients(
     model: torch.nn.Module,
-    gates: dict[
-        int,
-        ResidualConditionedOutputGate
-        | FixedBasisBilinearOutputGate
-        | UntiedFixedBasisBilinearOutputGate,
-    ],
+    gates: dict[int, torch.nn.Module],
     split: GateSplitData,
     layers: list[int],
     device: str,
@@ -582,6 +686,8 @@ def teacher_mse_gradients(
             bias = bias.to(device) if bias is not None else None
             charted_weight = mlp._materialize_charted_cproj_weight(weight)
             prediction = F.linear(F.gelu(pre_gelu), charted_weight, bias)
+        if isinstance(gate, PostGeluConditionedBilinearOutputGate):
+            condition = F.gelu(split.pre_gelu[layer].to(device))
         prediction = gate(condition, prediction)
         loss = F.mse_loss(prediction, target)
         parameters = [getattr(gate, group) for group in gate_groups]
@@ -683,6 +789,7 @@ def main() -> None:
             "diagonal",
             "fixed_bilinear",
             "fixed_bilinear_untied",
+            "postgelu_bilinear_untied",
         ),
         default="diagonal",
     )
@@ -857,8 +964,17 @@ def main() -> None:
                     "(slope * Q mlp_input + bias)]"
                     if args.gate_kind == "fixed_bilinear"
                     else (
-                        "update + Q_output^-1[(Q_update update) * "
-                        "(slope * Q_condition mlp_input + bias)]"
+                        (
+                            "update + Q_output^-1[(Q_update update) * "
+                            "(slope * Q_condition "
+                            "rmsnorm(P_fixed postgelu) + bias)]"
+                        )
+                        if args.gate_kind
+                        == "postgelu_bilinear_untied"
+                        else (
+                            "update + Q_output^-1[(Q_update update) * "
+                            "(slope * Q_condition mlp_input + bias)]"
+                        )
                     )
                 )
             ),
@@ -872,7 +988,7 @@ def main() -> None:
             "lora_adapter": False,
             "basis_block_size": (
                 args.basis_block_size
-                if args.gate_kind == "fixed_bilinear"
+                if args.gate_kind != "diagonal"
                 else None
             ),
             "basis_seed": (
@@ -886,7 +1002,21 @@ def main() -> None:
                     "update": args.basis_seed + 104729,
                     "output": args.basis_seed + 2 * 104729,
                 }
-                if args.gate_kind == "fixed_bilinear_untied"
+                if args.gate_kind
+                in (
+                    "fixed_bilinear_untied",
+                    "postgelu_bilinear_untied",
+                )
+                else None
+            ),
+            "condition_source": (
+                "fixed_signed_four_to_one_rms_normalized_postgelu"
+                if args.gate_kind == "postgelu_bilinear_untied"
+                else "layer_normalized_residual"
+            ),
+            "projection_seed": (
+                args.basis_seed + 3 * 104729
+                if args.gate_kind == "postgelu_bilinear_untied"
                 else None
             ),
             "teacher_prediction_source": (
