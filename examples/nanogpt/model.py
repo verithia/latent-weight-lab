@@ -2655,13 +2655,16 @@ class MLP(nn.Module):
             signs = self.postgelu_hidden_output_signs
         else:
             raise ValueError(f"unsupported post-GELU basis role: {role}")
+        hadamard = self.postgelu_hidden_hadamard
         if permutation is None:
             return values
         assert (
             inverse_permutation is not None
             and signs is not None
+            and hadamard is not None
         )
         signs = signs.to(device=values.device, dtype=values.dtype)
+        hadamard = hadamard.to(device=values.device, dtype=values.dtype)
         if inverse:
             values = values * signs
             grouped = values.reshape(
@@ -2670,7 +2673,7 @@ class MLP(nn.Module):
                 // self.postgelu_hidden_self_gate_basis_block_size,
                 self.postgelu_hidden_self_gate_basis_block_size,
             )
-            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            values = F.linear(grouped, hadamard).reshape_as(values)
             return values.index_select(-1, inverse_permutation)
         values = values.index_select(-1, permutation)
         grouped = values.reshape(
@@ -2679,7 +2682,7 @@ class MLP(nn.Module):
             // self.postgelu_hidden_self_gate_basis_block_size,
             self.postgelu_hidden_self_gate_basis_block_size,
         )
-        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        values = F.linear(grouped, hadamard).reshape_as(values)
         return values * signs
 
     def apply_postgelu_hidden_self_gate(
@@ -2695,10 +2698,16 @@ class MLP(nn.Module):
                 "post-GELU hidden self gate width mismatch: expected "
                 f"{expected}, got {activated.shape[-1]}"
             )
-        rms = activated.float().square().mean(
+        norm = torch.linalg.vector_norm(
+            activated,
+            ord=2,
             dim=-1,
             keepdim=True,
-        ).add(self.postgelu_hidden_self_gate_rms_epsilon).sqrt()
+            dtype=torch.float32,
+        )
+        rms = norm.square().div(activated.shape[-1]).add(
+            self.postgelu_hidden_self_gate_rms_epsilon
+        ).sqrt()
         condition = activated / rms.to(dtype=activated.dtype)
         spectral_condition = self._postgelu_hidden_self_basis(
             condition,
