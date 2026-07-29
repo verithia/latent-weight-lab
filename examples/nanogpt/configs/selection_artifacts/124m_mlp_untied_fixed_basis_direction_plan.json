@@ -1,0 +1,113 @@
+{
+  "schema_version": "mlp_untied_fixed_basis_direction_plan_v1",
+  "name": "y400_mai_v3_124m_cproj_untied_fixed_basis_direction",
+  "scientific_scope": "deterministic no-update fit/holdout gradient-alignment screen for a non-symmetric residual-conditioned MLP output correction with distinct fixed condition, update, and output bases",
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "foreground_polled_no_watchdog",
+    "repository": "/root/userdata/MappingNetworks/latent-weight-lab-mlp-geometry",
+    "implementation_commit": "f804c9f066a5b74f94db0fafa630b4a63112dee1",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source": {
+      "path": "examples/nanogpt/analyze_mlp_conditioned_gate_alignment.py",
+      "sha256": "43af76bce8528256b5dfaccfe81a82b8032ed2f1aefdd20a465307bd6a06eaba"
+    }
+  },
+  "inputs": {
+    "attention_only": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "dataset": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "manifest_path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "closed_parent_family": {
+      "result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fixed_basis_endpoint_residual_result.json",
+      "result_artifact_sha256": "c7c35bedbb3ee843d8fe7e496c8a76dfb4487aeb93dc3580268e6978c1c7c4aa"
+    }
+  },
+  "operator": {
+    "formula": "u' = u + Q_output^-1[(Q_update u) * (slope * Q_condition r)]",
+    "condition": "layer-normalized identity residual r",
+    "update": "generated MLP c_proj output u",
+    "basis_block_size": 256,
+    "condition_basis_seed": 271828,
+    "update_basis_seed": 376557,
+    "output_basis_seed": 481286,
+    "trainable_coordinate_group": "slope",
+    "coordinates_per_layer": 768,
+    "identity_initialized": true,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "transform_count": 3,
+    "difference_from_tied_parent": "The condition, update, and correction route through independent fixed orthogonal bases, so the bilinear operator is non-symmetric and non-diagonal in any single basis without increasing learned coordinates or transform count."
+  },
+  "output": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_mlp_untied_fixed_basis_direction",
+  "command": [
+    "CUDA_VISIBLE_DEVICES=1",
+    "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "--attention-only",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+    "--plain-cproj",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+    "--data-dir",
+    "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "--output",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_mlp_untied_fixed_basis_direction",
+    "--layers",
+    "0,3,6,9,11",
+    "--batch-size",
+    "8",
+    "--block-size",
+    "256",
+    "--batches",
+    "8",
+    "--ce-batches",
+    "8",
+    "--sample-cap",
+    "2048",
+    "--sample-seed",
+    "20260716",
+    "--holdout-sample-seed",
+    "20260717",
+    "--initial-output-log-gain",
+    "0.125",
+    "--gate-kind",
+    "fixed_bilinear_untied",
+    "--gate-groups",
+    "slope",
+    "--basis-block-size",
+    "256",
+    "--basis-seed",
+    "271828",
+    "--device",
+    "cuda"
+  ],
+  "decision_rule": {
+    "required_for_production_implementation": [
+      "global task-CE versus teacher-MSE slope cosine is positive on both fit and holdout token splits",
+      "at least one layer has a minimum fit/holdout task-CE versus teacher-MSE slope cosine of at least 0.05"
+    ],
+    "layer_selection_after_pass": "select exactly one layer by maximum minimum fit/holdout cosine, with layer index as the deterministic tie breaker",
+    "after_pass": "implement the selected layer with the same three fixed accelerator transforms, then require at least 20 percent MFU in a foreground-polled real-training preflight before any 238-step run",
+    "after_fail": "reject this non-symmetric diagonal-core bilinear operator and move to a higher-order activation-conditioned mixer rather than another basis seed sweep",
+    "constraints": [
+      "no parameter update in this diagnostic",
+      "fixed bases only",
+      "no learned dense basis",
+      "no LoRA adapter",
+      "no basis-seed sweep",
+      "no watchdog or callback"
+    ]
+  }
+}
