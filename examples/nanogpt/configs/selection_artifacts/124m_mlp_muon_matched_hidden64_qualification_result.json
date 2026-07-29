@@ -1,0 +1,82 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_hidden64_qualification_result_v1",
+  "decision": "QUALIFIED_FOR_ONE_PREREGISTERED_124M_SCIENTIFIC_SCREEN",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden64_qualification_plan.json",
+    "sha256": "ca3eba01237803cc68493eefb914690d1dc760569034362fb8e7865632d099ec",
+    "commit": "af30a91edbbc3c23aba52d570e87ca5c11a8ae45"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json",
+    "config_sha256": "9a03286db56a6edb939a37457c6f11b486e79b432e05df8e24edc9fade3a3a10",
+    "stages": 64,
+    "neighbors": 64,
+    "refresh_interval_updates": 60
+  },
+  "exact_resume_gate": {
+    "passed": true,
+    "targeted_tests": "13 passed",
+    "stage64_test": "examples/nanogpt/test_muon_matched_givens.py::test_stage64_optimizer_state_round_trip",
+    "test_file_sha256": "dcbccbc24073f219f0c35d99fc8f1162160f7c5fe5daa37317693850583ac425",
+    "evidence": "Stage64 folded weight, 64-by-width permutations and inverses, 64-stage angles, optimizer counters, validity, and exact Muon momentum round-trip bit exactly."
+  },
+  "real_training_mfu_gate": {
+    "passed": true,
+    "host": "Y400",
+    "gpu": 1,
+    "hardware": "NVIDIA H100",
+    "execution": "foreground-launched and directly polled; the SSH transport dropped while the child remained alive, after which the same process and atomic certificate were polled to completion; no watchdog, callback, queue worker, heartbeat, or PRO6",
+    "warmup_updates": 1,
+    "timed_updates": 61,
+    "included_refresh_update": 60,
+    "minimum_mfu_fraction": 0.2,
+    "empirical_bf16_gemm_peak_tflops": 657.6642202123505,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 232301.4818032787,
+    "average_iter_ms": 1403.1498360655735,
+    "model_tflops": 173.495621688016,
+    "mfu_fraction": 0.26380577862666255,
+    "headroom_over_gate_percentage_points": 6.380577862666255,
+    "peak_mib": 31674.15,
+    "elapsed_seconds": 113.15302753448486,
+    "timing_breakdown_ms": {
+      "prepare": 8.990655737704918,
+      "forward_backward": 886.2277049180329,
+      "flush": 10.220491803278689,
+      "gradient_postprocess": 2.9009836065573773,
+      "optimizer": 490.7252459016393,
+      "data": 1.7883606557377052,
+      "other": 2.2967213114754093
+    },
+    "refresh_update_60": {
+      "iter_ms": 18928.02,
+      "optimizer_ms": 18012.67,
+      "layer_requested_update_recovery_min": 0.19862395524978638,
+      "layer_requested_update_recovery_max": 0.20304471254348755,
+      "layers": 12,
+      "coordinates_per_layer": 98304
+    },
+    "certificate": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens64_r60.json",
+      "sha256": "db45c4dd558c1e0ba97a72dfbee906c4e017a01e99a71d7282623a91e635630f",
+      "preflight_log_sha256": "d601021759be328a1d26113488f6caf29d89014e5645063b27b8e0315721da8b"
+    }
+  },
+  "comparison_to_projection": {
+    "projected_mfu_fraction": 0.235172820425,
+    "measured_mfu_fraction": 0.26380577862666255,
+    "measured_minus_projected_percentage_points": 2.8632958201662544,
+    "interpretation": "The preregistered stage-linear optimizer projection was conservative."
+  },
+  "scope": {
+    "authorizes": "Preregister and execute at most one directly polled 124M/0.5TPP stage64/r60 scientific screen with immutable provenance.",
+    "does_not_authorize": [
+      "a larger model rung",
+      "c_fc replacement",
+      "a second seed or learning-rate sweep",
+      "PRO6 execution",
+      "watchdog or callback attachment to the short run"
+    ]
+  },
+  "next_action": "Preregister the single stage64/r60 terminal-CE decision against hidden32, attention-only, and plain-cproj controls; then run it directly on an idle Y400 GPU."
+}
