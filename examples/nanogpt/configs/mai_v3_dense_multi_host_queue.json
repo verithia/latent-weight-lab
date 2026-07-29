@@ -589,8 +589,8 @@
           "run_name": "y400_mai_v3_985m_fullattn_20tpp_selected_mult1p00_provisional",
           "config": "examples/nanogpt/configs/y400_mai_v2_985m_fullattn_blockfht_20tpp_selected.json",
           "config_sha256": "d2176cf21e31b30da9d2ec2c1a1b3e57b5c1a8564dbbd8de25ee606fed07ca3f",
-          "resume": false,
-          "expected_checkpoint_next_iter": null,
+          "resume": true,
+          "expected_checkpoint_next_iter": 52675,
           "checkpoint_budget_bytes": 13000000000,
           "active_checkpoint_budget_bytes": 6500000000
         }
