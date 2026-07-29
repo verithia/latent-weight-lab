@@ -362,6 +362,7 @@ class MuonMatchedGivensLinear(nn.Module):
         *,
         bias: bool,
         stages: int,
+        residual_stages: int,
         neighbors: int,
         refresh_interval: int,
         fast_fresh_matching: bool,
@@ -373,6 +374,7 @@ class MuonMatchedGivensLinear(nn.Module):
         self.in_features = int(in_features)
         self.out_features = int(out_features)
         self.stages = int(stages)
+        self.residual_stages = int(residual_stages)
         self.neighbors = int(neighbors)
         self.refresh_interval = int(refresh_interval)
         self.fast_fresh_matching = bool(fast_fresh_matching)
@@ -389,17 +391,27 @@ class MuonMatchedGivensLinear(nn.Module):
             )
         if (
             self.stages <= 0
-            or self.neighbors < self.stages
+            or self.residual_stages < 0
+            or self.residual_stages > 64
+            or self.neighbors < max(
+                self.stages, self.residual_stages
+            )
             or self.neighbors >= self.in_features
         ):
             raise ValueError(
-                "require 0 < stages <= neighbors < in_features"
+                "require 0 < stages, 0 <= residual_stages <= 64, "
+                "and max(stages, residual_stages) <= neighbors "
+                "< in_features"
             )
         if self.refresh_interval <= 0:
             raise ValueError("refresh_interval must be positive")
         if self.fast_fresh_matching and self.refresh_interval != 1:
             raise ValueError(
                 "fast fresh matching requires refresh_interval=1"
+            )
+        if self.residual_stages and not self.fast_fresh_matching:
+            raise ValueError(
+                "residual matching requires fast fresh matching"
             )
         if not math.isfinite(weight_std) or weight_std <= 0.0:
             raise ValueError("weight_std must be positive and finite")
@@ -428,6 +440,27 @@ class MuonMatchedGivensLinear(nn.Module):
             torch.zeros(self.stages, self.in_features // 2),
             persistent=True,
         )
+        if self.residual_stages:
+            residual_initial = torch.arange(self.in_features).repeat(
+                self.residual_stages, 1
+            )
+            self.register_buffer(
+                "residual_selected_permutations",
+                residual_initial,
+                persistent=True,
+            )
+            self.register_buffer(
+                "residual_selected_inverse_permutations",
+                torch.argsort(residual_initial, dim=1),
+                persistent=True,
+            )
+            self.register_buffer(
+                "residual_last_angles",
+                torch.zeros(
+                    self.residual_stages, self.in_features // 2
+                ),
+                persistent=True,
+            )
         self.register_buffer(
             "optimizer_step",
             torch.zeros((), dtype=torch.int64),
@@ -451,7 +484,9 @@ class MuonMatchedGivensLinear(nn.Module):
 
     @property
     def coordinate_count(self) -> int:
-        return self.stages * (self.in_features // 2)
+        return (
+            self.stages + self.residual_stages
+        ) * (self.in_features // 2)
 
     def forward(self, values: torch.Tensor) -> torch.Tensor:
         return F.linear(values, self.weight, self.bias)
@@ -525,6 +560,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     or step_index % module.refresh_interval == 0
                 )
                 matching_summary = None
+                residual_matching_summary = None
                 if refresh:
                     if module.fast_fresh_matching:
                         permutations, matching_diagnostics = (
@@ -622,17 +658,99 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 requested_update = lr * (
                     direction - weight_decay * weight.float()
                 )
-                angles = diagonal_metric_angles(
+                parent_angles = diagonal_metric_angles(
                     weight,
                     requested_update,
                     module.selected_permutations,
                 )
-                rotated = apply_givens_flow(
+                after_parent = apply_givens_flow(
                     weight,
-                    angles,
+                    parent_angles,
                     module.selected_permutations,
                     module.selected_inverse_permutations,
                 )
+                parent_update = after_parent.float() - weight.float()
+                residual_update = (
+                    requested_update.float() - parent_update
+                )
+                residual_angles = None
+                rotated = after_parent
+                if module.residual_stages:
+                    residual_permutations, residual_diagnostics = (
+                        fast_muon_matched_permutations(
+                            after_parent,
+                            residual_update,
+                            stages=module.residual_stages,
+                            neighbors=module.neighbors,
+                            seed=(
+                                module.matching_seed
+                                + step_index
+                                + 1
+                            ),
+                        )
+                    )
+                    module.residual_selected_permutations.copy_(
+                        residual_permutations.to(
+                            device=weight.device,
+                            dtype=torch.long,
+                        )
+                    )
+                    module.residual_selected_inverse_permutations.copy_(
+                        torch.argsort(
+                            module.residual_selected_permutations,
+                            dim=1,
+                        )
+                    )
+                    residual_angles = diagonal_metric_angles(
+                        after_parent,
+                        residual_update,
+                        module.residual_selected_permutations,
+                    )
+                    rotated = apply_givens_flow(
+                        after_parent,
+                        residual_angles,
+                        module.residual_selected_permutations,
+                        module.residual_selected_inverse_permutations,
+                    )
+                    residual_matching_summary = {
+                        "selector": "fast_fresh_residual_pass",
+                        "candidate_edge_fraction": float(
+                            residual_diagnostics[
+                                "candidate_edge_fraction"
+                            ]
+                        ),
+                        "minimum_stage_candidate_edge_fraction": (
+                            float(
+                                residual_diagnostics[
+                                    "minimum_stage_candidate_edge_fraction"
+                                ]
+                            )
+                        ),
+                        "prepared_seconds": float(
+                            residual_diagnostics[
+                                "prepared_seconds"
+                            ]
+                        ),
+                        "native_seconds": float(
+                            residual_diagnostics["native_seconds"]
+                        ),
+                        "total_seconds": float(
+                            residual_diagnostics["total_seconds"]
+                        ),
+                        "native_output_validated": bool(
+                            residual_diagnostics[
+                                "native_output_validated"
+                            ]
+                        ),
+                        "native_library_sha256": str(
+                            residual_diagnostics[
+                                "native_library_sha256"
+                            ]
+                        ),
+                        "native_source_sha256": str(
+                            residual_diagnostics["source_sha256"]
+                        ),
+                    }
                 if weight_decay != 0.0:
                     rotated.mul_(1.0 - lr * weight_decay)
                 update = rotated - weight
@@ -642,9 +760,20 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 ).square().sum()
                 weight.copy_(rotated)
                 module.last_angles.copy_(
-                    angles.to(dtype=module.last_angles.dtype)
+                    parent_angles.to(dtype=module.last_angles.dtype)
                 )
+                if residual_angles is not None:
+                    module.residual_last_angles.copy_(
+                        residual_angles.to(
+                            dtype=module.residual_last_angles.dtype
+                        )
+                    )
                 module.optimizer_step.add_(1)
+                all_angles = (
+                    torch.cat((parent_angles, residual_angles), dim=0)
+                    if residual_angles is not None
+                    else parent_angles
+                )
                 diagnostics.append(
                     {
                         "step": step_index,
@@ -663,15 +792,22 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "refresh_count": int(module.refresh_count),
                         "coordinates": module.coordinate_count,
                         "angle_rms": float(
-                            angles.square().mean().sqrt()
+                            all_angles.square().mean().sqrt()
                         ),
-                        "angle_max_abs": float(angles.abs().max()),
+                        "angle_max_abs": float(
+                            all_angles.abs().max()
+                        ),
+                        "parent_stages": module.stages,
+                        "residual_stages": module.residual_stages,
                         "requested_update_recovery": float(
                             1.0
                             - residual_energy
                             / requested_energy.clamp_min(1e-30)
                         ),
                         "matching": matching_summary,
+                        "residual_matching": (
+                            residual_matching_summary
+                        ),
                     }
                 )
         self.last_step_diagnostics = diagnostics

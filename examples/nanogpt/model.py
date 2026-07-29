@@ -141,6 +141,7 @@ class GPTConfig:
     block_fht_cproj_product_fht_muon_ns_steps: int = 5
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
+    block_fht_mlp_cproj_muon_matched_givens_residual_stages: int = 0
     block_fht_mlp_cproj_muon_matched_givens_neighbors: int = 64
     block_fht_mlp_cproj_muon_matched_givens_refresh_interval: int = 60
     block_fht_mlp_cproj_muon_matched_givens_fast_fresh: bool = False
@@ -1311,6 +1312,10 @@ class MLP(nn.Module):
                 stages=int(
                     config
                     .block_fht_mlp_cproj_muon_matched_givens_stages
+                ),
+                residual_stages=int(
+                    config
+                    .block_fht_mlp_cproj_muon_matched_givens_residual_stages
                 ),
                 neighbors=int(
                     config

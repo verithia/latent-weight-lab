@@ -1034,6 +1034,11 @@ def parse_args() -> argparse.Namespace:
         default=32,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-residual-stages",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-muon-matched-givens-neighbors",
         type=int,
         default=64,
@@ -1306,16 +1311,37 @@ def parse_args() -> argparse.Namespace:
             .block_fht_mlp_cproj_muon_matched_givens_stages
             <= 0
             or namespace
+            .block_fht_mlp_cproj_muon_matched_givens_residual_stages
+            < 0
+            or namespace
+            .block_fht_mlp_cproj_muon_matched_givens_residual_stages
+            > 64
+            or namespace
             .block_fht_mlp_cproj_muon_matched_givens_neighbors
-            < namespace
-            .block_fht_mlp_cproj_muon_matched_givens_stages
+            < max(
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_stages,
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_residual_stages,
+            )
             or namespace
             .block_fht_mlp_cproj_muon_matched_givens_neighbors
             >= 4 * namespace.n_embd
         ):
             raise ValueError(
                 "Muon-matched Givens c_proj requires "
-                "0 < stages <= neighbors < 4*n_embd"
+                "0 < stages, 0 <= residual stages <= 64, and "
+                "max(stages, residual stages) <= neighbors < 4*n_embd"
+            )
+        if (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_residual_stages
+            and not namespace
+            .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
+        ):
+            raise ValueError(
+                "residual Muon-matched Givens c_proj requires "
+                "fast fresh matching"
             )
         if (
             namespace
@@ -1566,6 +1592,10 @@ def main() -> None:
         ),
         block_fht_mlp_cproj_muon_matched_givens_stages=(
             args.block_fht_mlp_cproj_muon_matched_givens_stages
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_residual_stages=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_residual_stages
         ),
         block_fht_mlp_cproj_muon_matched_givens_neighbors=(
             args.block_fht_mlp_cproj_muon_matched_givens_neighbors
