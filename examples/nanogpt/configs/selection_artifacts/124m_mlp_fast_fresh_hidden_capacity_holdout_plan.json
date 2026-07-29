@@ -1,0 +1,162 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_hidden_capacity_holdout_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "registered_at": "2026-07-30",
+  "scientific_question": "On optimizer phases and layers untouched by all prior fresh-chart gates, does a two-pass stateless current-Muon-matched hidden c_proj chart generalize beyond hidden64 strongly enough that the smallest useful depth can be implemented and performance-qualified without a learned dense basis or LoRA?",
+  "parameter_updates": 0,
+  "parent_results": [
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_training_result.json",
+      "sha256": "9fa1bea4cc8cb41bdda4a61955818072ab9234d37ae26174e14eb10fe91606d6",
+      "finding": "Stateless fresh hidden64 improved the stale control but stopped at validation CE 5.6122, 0.0204 above the accepted attention-plus-0.1 boundary."
+    },
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_sl2_residual_result.json",
+      "sha256": "5582a1cfee8821208d2297638262818611d311456528ae4d5972fe5a6adb74ef",
+      "finding": "Equal-coordinate hidden88/112 controls beat trace-free pair blocks on the already-scored phases/layers, but were not preregistered for promotion."
+    }
+  ],
+  "independence": {
+    "previously_scored_base_updates": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "heldout_base_updates": [
+      30,
+      90,
+      150,
+      210
+    ],
+    "previously_scored_future_updates": [
+      15,
+      75,
+      135,
+      195
+    ],
+    "heldout_future_updates": [
+      45,
+      105,
+      165,
+      225
+    ],
+    "previously_scored_layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "heldout_layers": [
+      1,
+      2,
+      4,
+      5,
+      7,
+      8,
+      10
+    ],
+    "previous_validation_seeds": [
+      20260802,
+      20260803
+    ],
+    "heldout_validation_seeds": [
+      20260804,
+      20260805
+    ],
+    "candidate_thresholds_selected_before_heldout_scoring": true
+  },
+  "inputs": {
+    "coherent_dense_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "snapshot_and_probe_presence_verified_before_registration": true,
+    "fixed_validation_windows": {
+      "fit_seed": 20260804,
+      "holdout_seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4
+    }
+  },
+  "causal_protocol": {
+    "hidden64_parent": "At each held-out base update, select 64 edge-disjoint hidden-channel matchings from the exact current coherent Muon direction and fit the closed-form diagonal-metric Givens coordinates.",
+    "two_pass_residual": "Materialize the hidden64 source and current exact-Muon residual. Select a second independent residual topology from current information only and fit 24 or 48 additional stages, producing hidden88 and hidden112.",
+    "future_information_used_for_selection": false,
+    "future_information_used_for_scoring_only": true,
+    "model_parameters_updated": false,
+    "optimizer_state_updated": false,
+    "learned_dense_basis": false,
+    "dense_residual_adapter": false,
+    "lora_adapter": false
+  },
+  "candidate_cells": [
+    {
+      "name": "fresh_hidden64",
+      "coordinates_per_layer": 98304,
+      "role": "qualified production parent"
+    },
+    {
+      "name": "fresh_hidden88",
+      "coordinates_per_layer": 135168,
+      "added_coordinates_over_parent": 36864,
+      "role": "smallest two-pass candidate"
+    },
+    {
+      "name": "fresh_hidden112",
+      "coordinates_per_layer": 172032,
+      "added_coordinates_over_parent": 73728,
+      "role": "higher-capacity two-pass candidate"
+    }
+  ],
+  "metrics": {
+    "weight_space": [
+      "current exact-Muon Frobenius recovery",
+      "current residual fixed-scale recovery",
+      "15-update future exact-Muon residual positive-line recovery and cosine"
+    ],
+    "functional": [
+      "post-GELU residual-output positive-line and fixed-scale recovery",
+      "recorded train-gradient predicted CE decrease",
+      "new fit-window validation-gradient predicted CE decrease",
+      "new holdout-window validation-gradient predicted CE decrease",
+      "matched finite-step CE on both new windows"
+    ],
+    "robustness": [
+      "minimum per-layer/update train-gradient predicted CE decrease",
+      "number of positive future cells",
+      "all finite/nonfinite cells",
+      "candidate improvement per added coordinate"
+    ],
+    "aggregation": "Report all 28 held-out layer/update cells across both validation windows, energy-weighted aggregates, minimum cells, and 8 model-level finite-CE comparisons."
+  },
+  "registered_decision_rule": {
+    "candidate_pass": [
+      "Candidate must improve over hidden64 by at least 1.15x on aggregate current post-GELU positive-line recovery.",
+      "Candidate must improve over hidden64 by at least 1.15x on both new fit and new holdout validation-gradient predicted CE decrease.",
+      "Candidate must achieve absolute 15-update future residual positive-line recovery of at least 0.015 and positive future cosine in at least 24 of 28 held-out layer/update cells.",
+      "Candidate must win at least 7 of 8 model-level finite-step CE comparisons against hidden64.",
+      "Candidate must have no nonfinite metric and no negative train-gradient predicted CE decrease cell."
+    ],
+    "selection": "Select hidden88 if it passes. Hidden112 may be selected only if hidden88 fails and hidden112 passes; do not choose extra coordinates merely because hidden112 has a larger raw aggregate.",
+    "failure": "If neither passes, close sparse fresh hidden-pair depth as insufficient for the remaining c_proj gap. Do not weaken thresholds or authorize training after observing the held-out result."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": "one idle nonzero GPU",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "do_not_disturb": "the running 985M full-attention 20TPP job on Y400 GPU0",
+    "workspace_cap_gib": 300
+  },
+  "authorization": {
+    "this_plan_authorizes": "Implementation, focused tests, and one zero-update directly polled held-out diagnostic after exact-commit deployment.",
+    "if_candidate_passes": "Authorize production two-pass optimizer implementation and a separately preregistered real-training-path MFU preflight only.",
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
