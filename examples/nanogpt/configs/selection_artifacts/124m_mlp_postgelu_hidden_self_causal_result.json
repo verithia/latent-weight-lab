@@ -1,0 +1,168 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_hidden_self_causal_result_v1",
+  "recorded_at": "2026-07-29",
+  "registered_inputs": {
+    "direction_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_hidden_self_direction_result.json",
+      "sha256": "da36d4514077473b618899334abd55f29aee23086a7e1a810bb8a86e1459a449"
+    },
+    "causal_config": {
+      "path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_hidden_self_l0_0p5tpp_lr24e4.json",
+      "sha256": "86a87d87a2156c9a40c1f3a076e515347e75a12ec9336e66619bb3da53f711ca",
+      "resolved_config_sha256": "68681176d252a684eff188489e57fc52a08da411c7f3a2f96d8adcc355287e1d"
+    },
+    "preregistered_decision_rule": {
+      "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+      "promote": "candidate improves on the exact matched post-GELU-frame parent by at least 0.020 CE and is stable",
+      "directional_only": "candidate improvement is positive but below 0.020 CE",
+      "reject": "candidate ties, regresses, is unstable, or does not complete",
+      "practical_margin_ce": 0.02
+    }
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "run_name": "y400_mai_v3_124m_hidden_self_l0_0p5tpp",
+    "started_at": "2026-07-29T14:08:10+08:00",
+    "finished_at": "2026-07-29T14:15:42+08:00",
+    "exit_code": 0,
+    "classification": "clean",
+    "scientific_run_git_commit": "c5abbceb96ee8d78055502c244134cabdb248c06",
+    "implementation_commit": "2eceb58a040fbc43c31a54bb57b9f82e63dc9175",
+    "monitoring": "registered foreground launcher with direct PID, log, GPU, and status polling; no watchdog, queue entry, heartbeat, callback, or PRO6 execution",
+    "control_channel_note": "The attached SSH transport closed after update 50. The registered launcher and child remained alive under PID 1 and were directly polled to clean terminal status without relaunch.",
+    "literal_command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_hidden_self_l0_0p5tpp_20260729T060810Z_33951.config.json"
+    ],
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_evaluation": {
+      "protocol": "mai_ladder_fixed_eval_indices_v2",
+      "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "eval_batch_size": 16,
+      "eval_iters": 400,
+      "eval_seed": 20260715
+    }
+  },
+  "performance_gate": {
+    "classification": "passed",
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.2031518877628431,
+    "tokens_per_second": 178381.55000000002,
+    "iter_ms": 1469.57,
+    "model_tflops": 133.2252281590272,
+    "empirical_bf16_gemm_peak_tflops": 655.7912388909358,
+    "peak_mib": 62950.85,
+    "certificate_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_self_screen/performance_preflight_hidden_self_l0.json",
+    "certificate_sha256": "f75de3d402f1c6cb9b9783f5c575536f0abc2ac18631f185c0c7f51f75361919",
+    "rejected_implementations": [
+      {
+        "name": "dense_hadamard_with_materialized_fp32_rms",
+        "mfu_fraction": 0.198408934046202,
+        "certificate_sha256": "4daa7502d0ed1785166267eb93fb7cba2bc8bec98b839a583353746a8fdef784"
+      },
+      {
+        "name": "iterative_fht",
+        "mfu_fraction": 0.13664865839264626,
+        "certificate_sha256": "e4af20cc71eac6fb67b80d1e383fb7329c3117a4c01044f5fe01bb6b71daa053"
+      }
+    ]
+  },
+  "mechanism": {
+    "selected_layers": [
+      0
+    ],
+    "formula": "h + Q_out^-1[(Q_update h) * (slope * Q_condition rmsnorm(h))]",
+    "location": "after GELU and before c_proj",
+    "condition_width": 3072,
+    "trainable_coordinates": 3072,
+    "identity_initialized": true,
+    "fixed_untied_bases": true,
+    "learned_bias": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "non_redundancy": "the correction is homogeneous quadratic in the current token activation and cannot be absorbed into a static c_proj matrix"
+  },
+  "evaluation": {
+    "step_0": {
+      "train_ce": 10.9788,
+      "val_ce": 10.9789
+    },
+    "step_60": {
+      "train_ce": 6.3399,
+      "val_ce": 6.3497
+    },
+    "step_120": {
+      "train_ce": 5.929,
+      "val_ce": 5.9346
+    },
+    "step_180": {
+      "train_ce": 5.7568,
+      "val_ce": 5.7613
+    },
+    "step_238": {
+      "train_ce": 5.6924,
+      "val_ce_printed": 5.6968,
+      "val_ce_checkpoint": 5.696751117706299
+    }
+  },
+  "learned_coordinate": {
+    "key": "transformer.h.0.mlp.postgelu_hidden_self_slope",
+    "numel": 3072,
+    "l2_norm": 0.5674800276756287,
+    "rms": 0.01023858692497015,
+    "max_abs": 0.041581399738788605,
+    "nonzero": 3072
+  },
+  "matched_comparison": {
+    "exact_postgelu_frame_parent_val_ce": 5.696969509124756,
+    "candidate_val_ce": 5.696751117706299,
+    "candidate_gain_ce": 0.00021839141845703125,
+    "fraction_of_preregistered_margin": 0.010919570922851562,
+    "matched_attention_only_val_ce": 5.4918,
+    "parent_gap_to_attention_ce": 0.2051695091247563,
+    "candidate_gap_to_attention_ce": 0.20495111770629926,
+    "fraction_of_parent_attention_gap_closed": 0.0010644438317792884,
+    "compressed_postgelu_conditioned_candidate_val_ce": 5.6951584815979,
+    "candidate_minus_compressed_conditioned_ce": 0.0015926361083984375,
+    "pregelu_frame_candidate_val_ce": 5.6942009925842285,
+    "candidate_minus_pregelu_frame_ce": 0.0025501251220703125,
+    "best_prior_output_plus_activation_val_ce": 5.6832,
+    "candidate_minus_best_prior_ce": 0.013551117706299242
+  },
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_self_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_hidden_self_l0_0p5tpp",
+    "checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_self_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_hidden_self_l0_0p5tpp/ckpt.pt",
+      "sha256": "6d5eee7ed8e0d728a49d3f98a72e43df771ec6bc8e3ff36869f08b743618e656",
+      "size_bytes": 729071714,
+      "schema_version": "nanogpt_exact_resume_v2",
+      "next_iter": 238,
+      "reason": "evaluation",
+      "metadata_sha256": "3523eef960a92e26d37eaf18c513b603f37356233e4600721dd6ac49114cacb8"
+    },
+    "log": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_124m_hidden_self_l0_0p5tpp_20260729T060810Z_33951.log",
+      "sha256": "1c241c859370ea2acabfcdc1a8c02991ad67ee74d0bb7cb968ee5bf11dfef3c7"
+    },
+    "status_sha256": "91a6ff8d4acd2c9a65acd87d34d119d898399d50188dc4c88b55c1caee57b9e2",
+    "provenance_sha256": "3c3af0eb6cc0479dfc1c3f3c0d53abb605d731ee12bb10d1147fbe0316ff7b04",
+    "archived_config_sha256": "86a87d87a2156c9a40c1f3a076e515347e75a12ec9336e66619bb3da53f711ca",
+    "archived_mfu_certificate_sha256": "f75de3d402f1c6cb9b9783f5c575536f0abc2ac18631f185c0c7f51f75361919"
+  },
+  "decision": {
+    "classification": "DIRECTIONAL_ONLY_PRACTICAL_TIE",
+    "promote_larger_ladder": false,
+    "reason": "The full-width layer-0 gate is active and improves the exact matched parent, but the gain is only 0.000218 CE: 1.092 percent of the preregistered 0.020 margin and 0.106 percent closure of the remaining attention-only gap.",
+    "structural_interpretation": "Retaining all post-GELU coordinates repairs the initial task-gradient alignment but not terminal task capacity. A single fixed-basis diagonal quadratic tensor is still under-capacity, and its locally reproducible initialization direction is largely absorbed by joint optimization.",
+    "next_action": "Do not scale this gate. Measure a small fixed multi-head sum of independently based full-width quadratic mixers, which increases quadratic tensor rank without a learned basis or LoRA adapter. Require a preregistered task-CE direction improvement and the same direct MFU qualification before any causal run."
+  }
+}
