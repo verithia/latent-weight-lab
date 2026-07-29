@@ -122,6 +122,7 @@ class GPTConfig:
     block_fht_mlp_pregelu_block_rotation_basis_size: int = 256
     block_fht_mlp_pregelu_block_rotation_coordinate_scale: float = 1.0
     block_fht_mlp_pregelu_block_rotation_seed: int = 161803
+    block_fht_mlp_pregelu_cache_retain_graph: bool = False
     block_fht_mlp_hidden_block_rotation_stages: int = 0
     block_fht_mlp_hidden_block_rotation_size: int = 32
     block_fht_mlp_hidden_block_rotation_basis_size: int = 256
@@ -1116,7 +1117,18 @@ class MLP(nn.Module):
             if pregelu_rotation_stages
             else None
         )
+        self.pregelu_cache_retain_graph = bool(
+            config.block_fht_mlp_pregelu_cache_retain_graph
+        )
+        if (
+            self.pregelu_cache_retain_graph
+            and self.pregelu_block_rotation is None
+        ):
+            raise ValueError(
+                "pre-GELU cache graph retention requires a pre-GELU frame"
+            )
         self._cached_charted_cfc_weight: torch.Tensor | None = None
+        self._cached_charted_cfc_graph_weight: torch.Tensor | None = None
         self.gelu = nn.GELU()
         grouped_proj_targets = [target for target in MLP_C_PROJ_GROUP_TARGETS if target in config.block_fht_targets]
         out_grouped_proj_targets = [target for target in MLP_C_PROJ_OUT_GROUP_TARGETS if target in config.block_fht_targets]
@@ -1831,14 +1843,26 @@ class MLP(nn.Module):
                 "pre-GELU frame currently requires bias-free c_fc"
             )
         base_weight = self._cfc_base_weight()
-        with torch.no_grad():
-            charted_weight = self._materialize_charted_cfc_weight(
-                base_weight
-            )
         chart_requires_grad = any(
             parameter.requires_grad
             for parameter in self.pregelu_block_rotation.parameters()
         )
+        retain_graph = bool(
+            self.pregelu_cache_retain_graph
+            and (base_weight.requires_grad or chart_requires_grad)
+        )
+        if retain_graph:
+            with torch.enable_grad():
+                charted_weight = self._materialize_charted_cfc_weight(
+                    base_weight
+                )
+            self._cached_charted_cfc_graph_weight = charted_weight
+        else:
+            with torch.no_grad():
+                charted_weight = self._materialize_charted_cfc_weight(
+                    base_weight
+                )
+            self._cached_charted_cfc_graph_weight = None
         self._cached_charted_cfc_weight = (
             charted_weight.detach().requires_grad_(
                 bool(base_weight.requires_grad or chart_requires_grad)
@@ -1849,9 +1873,15 @@ class MLP(nn.Module):
         self, *, project_base_gradient: bool = True
     ) -> None:
         cached = self._cached_charted_cfc_weight
-        if cached is None:
-            return
+        graph_weight = self._cached_charted_cfc_graph_weight
         self._cached_charted_cfc_weight = None
+        self._cached_charted_cfc_graph_weight = None
+        if cached is None:
+            if graph_weight is not None:
+                raise RuntimeError(
+                    "pre-GELU cached graph exists without cached weight"
+                )
+            return
         if cached.grad is None:
             return
         if self.pregelu_block_rotation is None:
@@ -1862,26 +1892,41 @@ class MLP(nn.Module):
             for parameter in self.pregelu_block_rotation.parameters()
             if parameter.requires_grad
         ]
-        with torch.enable_grad():
-            base_proxy = base_weight.detach()
-            if project_base_gradient:
-                base_proxy.requires_grad_(True)
-            charted_proxy = self._materialize_charted_cfc_weight(
-                base_proxy
-            )
+        if graph_weight is not None:
             gradient_targets = (
-                [base_proxy, *chart_parameters]
+                [base_weight, *chart_parameters]
                 if project_base_gradient
                 else chart_parameters
             )
             if not gradient_targets:
                 return
             gradients = torch.autograd.grad(
-                charted_proxy,
+                graph_weight,
                 gradient_targets,
-                grad_outputs=cached.grad.to(dtype=charted_proxy.dtype),
+                grad_outputs=cached.grad.to(dtype=graph_weight.dtype),
                 allow_unused=True,
             )
+        else:
+            with torch.enable_grad():
+                base_proxy = base_weight.detach()
+                if project_base_gradient:
+                    base_proxy.requires_grad_(True)
+                charted_proxy = self._materialize_charted_cfc_weight(
+                    base_proxy
+                )
+                gradient_targets = (
+                    [base_proxy, *chart_parameters]
+                    if project_base_gradient
+                    else chart_parameters
+                )
+                if not gradient_targets:
+                    return
+                gradients = torch.autograd.grad(
+                    charted_proxy,
+                    gradient_targets,
+                    grad_outputs=cached.grad.to(dtype=charted_proxy.dtype),
+                    allow_unused=True,
+                )
         if project_base_gradient:
             base_gradient = gradients[0].to(dtype=base_weight.dtype)
             if base_weight.grad is None:
@@ -1902,21 +1947,35 @@ class MLP(nn.Module):
             else:
                 parameter.grad.add_(gradient)
 
-    def suspend_charted_cfc_cache(self) -> torch.Tensor | None:
+    def suspend_charted_cfc_cache(
+        self,
+    ) -> tuple[torch.Tensor | None, torch.Tensor | None]:
         cached = self._cached_charted_cfc_weight
+        graph_weight = self._cached_charted_cfc_graph_weight
         self._cached_charted_cfc_weight = None
-        return cached
+        self._cached_charted_cfc_graph_weight = None
+        return cached, graph_weight
 
     def restore_charted_cfc_cache(
-        self, cached: torch.Tensor | None
+        self,
+        suspended: tuple[torch.Tensor | None, torch.Tensor | None],
     ) -> None:
+        cached, graph_weight = suspended
         if cached is None:
+            if graph_weight is not None:
+                raise RuntimeError(
+                    "cannot restore pre-GELU graph without cached weight"
+                )
             return
-        if self._cached_charted_cfc_weight is not None:
+        if (
+            self._cached_charted_cfc_weight is not None
+            or self._cached_charted_cfc_graph_weight is not None
+        ):
             raise RuntimeError(
                 "cannot restore a charted c_fc cache over a live cache"
             )
         self._cached_charted_cfc_weight = cached
+        self._cached_charted_cfc_graph_weight = graph_weight
 
     def _charted_cfc(self, values: torch.Tensor) -> torch.Tensor | None:
         if not self.has_charted_cfc():
@@ -2703,6 +2762,11 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
             ):
                 if parameter is not None:
                     parameter.requires_grad_(True)
+        if (
+            isinstance(module, MLP)
+            and module.pregelu_block_rotation is not None
+        ):
+            module.pregelu_block_rotation.coordinates.requires_grad_(True)
         if (
             isinstance(module, MLP)
             and module.hidden_block_rotation is not None

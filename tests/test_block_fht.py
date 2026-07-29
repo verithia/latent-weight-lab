@@ -990,7 +990,10 @@ def test_mlp_folds_pregelu_frame_into_cfc_weight() -> None:
     torch.testing.assert_close(mlp(values), explicit)
 
 
-def test_cached_charted_cfc_matches_live_forward_and_gradients() -> None:
+@pytest.mark.parametrize("retain_graph", [False, True])
+def test_cached_charted_cfc_matches_live_forward_and_gradients(
+    retain_graph: bool,
+) -> None:
     torch.manual_seed(312)
     config = GPTConfig(
         block_size=8,
@@ -999,11 +1002,15 @@ def test_cached_charted_cfc_matches_live_forward_and_gradients() -> None:
         n_head=1,
         n_embd=8,
         bias=False,
+        block_fht_mlp_pregelu_block_rotation_stages=2,
+        block_fht_mlp_pregelu_block_rotation_size=4,
+        block_fht_mlp_pregelu_block_rotation_basis_size=8,
+        block_fht_mlp_pregelu_block_rotation_coordinate_scale=3.0,
+        block_fht_mlp_pregelu_block_rotation_seed=311,
+        block_fht_mlp_pregelu_cache_retain_graph=retain_graph,
     )
     live = GPT(config)
     cached = GPT(config)
-    install_pregelu_frame(live)
-    install_pregelu_frame(cached)
     with torch.no_grad():
         live.transformer.h[
             0
@@ -1019,11 +1026,15 @@ def test_cached_charted_cfc_matches_live_forward_and_gradients() -> None:
     cached.prepare_block_fht_cache()
     cached_mlp = cached.transformer.h[0].mlp
     assert cached_mlp._cached_charted_cfc_weight is not None
+    assert (
+        cached_mlp._cached_charted_cfc_graph_weight is not None
+    ) == retain_graph
     cached_loss = cached(inputs, targets)[1]
     assert cached_loss is not None
     cached_loss.backward()
     cached.flush_block_fht_cache()
     assert cached_mlp._cached_charted_cfc_weight is None
+    assert cached_mlp._cached_charted_cfc_graph_weight is None
 
     torch.testing.assert_close(cached_loss, live_loss)
     torch.testing.assert_close(
