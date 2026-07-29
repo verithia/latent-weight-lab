@@ -1,0 +1,171 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_hidden64_training_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden64_training_plan.json",
+  "plan_sha256": "f4a3ccbe0e2f2653cbd49a55acefefc8ef9e64eb7d78b4a5bfdbe6218e495953",
+  "qualification": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden64_qualification_result.json",
+  "qualification_sha256": "748059b35744455cf38eed20e6043b9e0aa0aa3a37e1a672784a745f3b99a9a8",
+  "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json",
+  "config_sha256": "9a03286db56a6edb939a37457c6f11b486e79b432e05df8e24edc9fade3a3a10",
+  "execution_commit": "8152dc0f750325006b61c9797f14a2129270b556",
+  "implementation_commit": "237189eee1e7f59535b50589e486c840bd48927d",
+  "execution": "direct foreground Y400 GPU1 scientific run, polled through terminal evaluation with no watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "identity": {
+    "run_id": "y400_mai_v3_124m_muonmatchedgivens64_r60_scientific_v1",
+    "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp",
+    "entrypoint": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json"
+    ],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "resolved_config_sha256": "5886045b0be990c6c0b164b1cfdeca481f0b4bb688eebf0efb11bc68ba3c465e",
+    "provenance_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/provenance/y400_mai_v3_124m_muonmatchedgivens64_r60_scientific_v1.json",
+    "provenance_sha256": "c6c083813bb5b554b857dbf5f47e3523b87e6d466e7224d8335ffbf007cee221"
+  },
+  "performance_gate": {
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens64_r60.json",
+    "certificate_sha256": "db45c4dd558c1e0ba97a72dfbee906c4e017a01e99a71d7282623a91e635630f",
+    "mfu_fraction": 0.26380577862666255,
+    "minimum_mfu_fraction": 0.2,
+    "passed": true
+  },
+  "loss": {
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train": 10.9672,
+        "validation": 10.9669
+      },
+      {
+        "step": 60,
+        "train": 6.3708,
+        "validation": 6.3807
+      },
+      {
+        "step": 120,
+        "train": 5.8992,
+        "validation": 5.9041
+      },
+      {
+        "step": 180,
+        "train": 5.7261,
+        "validation": 5.7296
+      },
+      {
+        "step": 238,
+        "train": 5.6592,
+        "validation": 5.662802696228027
+      }
+    ],
+    "attention_only_control_validation": 5.4918,
+    "plain_generated_cproj_control_validation": 5.7395,
+    "hidden32_control_validation": 5.674093246459961,
+    "candidate_minus_attention": 0.17100269622802777,
+    "candidate_minus_plain_generated_cproj": -0.07669730377197226,
+    "candidate_minus_hidden32": -0.011290550231933594,
+    "fraction_of_plain_to_attention_gap_closed": 0.30963788361716693,
+    "fraction_of_hidden32_remaining_gap_closed": 0.061936195943569604,
+    "registered_success_threshold": 5.5918,
+    "candidate_minus_success_threshold": 0.07100269622802724
+  },
+  "refresh_diagnostics": {
+    "steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "layers_per_refresh": 12,
+    "requested_update_recovery": {
+      "0": {
+        "mean": 0.19371135532855988,
+        "minimum": 0.1917436122894287,
+        "maximum": 0.19497710466384888
+      },
+      "60": {
+        "mean": 0.20111146569252014,
+        "minimum": 0.1990504264831543,
+        "maximum": 0.2034701108932495
+      },
+      "120": {
+        "mean": 0.20242839058240256,
+        "minimum": 0.20169192552566528,
+        "maximum": 0.2039104700088501
+      },
+      "180": {
+        "mean": 0.20216224094231924,
+        "minimum": 0.2014217972755432,
+        "maximum": 0.20358425378799438
+      }
+    },
+    "hidden64_over_hidden32_no_training_recovery": {
+      "current_requested_update": 1.4404262196423199,
+      "held_out_future_phase": 1.5163810869072527
+    },
+    "interpretation": "The deeper chart stably captured about 19.2 to 20.4 percent of each exact requested Muon update, but the 44 to 52 percent recovery increase selected by the no-training gate yielded only 0.01129 terminal CE over hidden32."
+  },
+  "terminal_checkpoint": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp/ckpt.pt",
+    "sha256": "bf54472b96e5633ea85d41615c97af0a9b8f8346700de2d05b4ad4355ae971c5",
+    "metadata_sha256": "a13e92e37955e2e479a96b31fc9bf7d014d0317482323d4a1a169a43c355e1ca",
+    "schema": "nanogpt_exact_resume_v2",
+    "next_iter": 238,
+    "checkpoint_reason": "evaluation",
+    "custom_module_count": 12,
+    "custom_optimizer_state_count": 12,
+    "custom_step_values": "12/12 equal 238",
+    "custom_last_refresh_steps": "12/12 equal 180",
+    "custom_refresh_counts": "12/12 equal 4",
+    "custom_matching_valid": "12/12 true",
+    "custom_state_shapes": {
+      "selected_permutations_per_layer": [
+        64,
+        3072
+      ],
+      "selected_inverse_permutations_per_layer": [
+        64,
+        3072
+      ],
+      "last_angles_per_layer": [
+        64,
+        1536
+      ],
+      "exact_muon_momentum_per_layer": [
+        768,
+        3072
+      ]
+    },
+    "serialized_custom_state": "folded weights, selected permutations and inverses, last angles, step/refresh counters, matching-valid flags, and exact Muon momentum buffers all present"
+  },
+  "artifacts": {
+    "foreground_log": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/y400_mai_v3_124m_muonmatchedgivens64_r60_scientific_v1.foreground.log",
+    "foreground_log_sha256": "d41a185a5faff960f5e24861f3cecb4bd78e2e027cc97b9c134e0398446730f7",
+    "status": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/status/y400_mai_v3_124m_muonmatchedgivens64_r60_scientific_v1.json",
+    "status_sha256": "62f51974a67333ca1e1c4c1f5b4bba2dea59758ec0e0aa5b563d86d9b4f78a43",
+    "wall_seconds_to_terminal_checkpoint": 430.0,
+    "workspace_after_run_gib": 225
+  },
+  "decision": {
+    "classification": "DIRECTIONAL_IMPROVEMENT_ONLY",
+    "registered_success_gate_passed": false,
+    "registered_directional_gate_passed": true,
+    "interpretation": [
+      "Stage64 improves terminal validation CE by 0.01129 over stage32 and by 0.07670 over plain generated c_proj, but remains 0.17100 behind attention-only and 0.07100 above the accepted success threshold.",
+      "The added 32 task-selected hidden-side stages close only 6.19 percent of the gap that remained between stage32 and attention-only, despite materially increasing Frobenius recovery of current and held-out Muon motion.",
+      "Sparse hidden-side chart capacity is not the dominant remaining bottleneck; increasing depth again is not justified.",
+      "Frobenius projection onto a dense-Muon update is an insufficient structure-selection endpoint because it does not weight directions by post-GELU activation covariance, residual-stream effect, or task loss."
+    ],
+    "next_action": "preregister a no-training functional-metric diagnostic comparing dense Muon, stage32, stage64, and the incremental stage64-minus-stage32 direction under post-GELU activation-covariance output recovery and fixed-batch CE directional/finite-step effect; do not run another language-model candidate until that diagnostic identifies a qualitatively different task-effective tangent"
+  }
+}
