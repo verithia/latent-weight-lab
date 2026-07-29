@@ -1,0 +1,100 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_functional_metric_plan_v1",
+  "status": "registered_before_execution",
+  "scientific_question": "Why did stage64 produce only 0.01129 CE improvement over stage32 despite 1.44x current-Muon and 1.52x held-out phase recovery: are the additional Frobenius-recovered directions inactive under post-GELU residual-output and task-loss metrics, or are they functionally useful but lost because the tangent is refreshed too slowly?",
+  "triggering_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden64_training_result.json",
+    "sha256": "5d9a28d4b63aecd102208526a76f3f74f7d995d9eb2323c97fe235c789d5e4f8",
+    "commit": "0be1ac05136e9811758affd6bd8ddf0bdac956ee",
+    "classification": "DIRECTIONAL_IMPROVEMENT_ONLY",
+    "hidden32_terminal_validation_ce": 5.674093246459961,
+    "hidden64_terminal_validation_ce": 5.662802696228027,
+    "terminal_improvement": 0.011290550231933594
+  },
+  "implementation": {
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_functional_metric.py",
+    "entrypoint_sha256": "ee9e3196e0005b111fab931b58c7ecb6a23d559d70393fbd55137214e1014d6b",
+    "test": "examples/nanogpt/test_analyze_mlp_muon_matched_functional_metric.py",
+    "test_sha256": "7d9ff0ac904c1103d831cb66bc7fdcadb726e7d07bb9e4c1a55d2797d6bddee3",
+    "focused_tests": "16/16 related tests passed before registration"
+  },
+  "causal_inputs": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "snapshot_steps": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "optimizer_probe_steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "nested_candidates": {
+    "connectivity": "select one 64-stage task-matched hidden-channel sequence from the exact current coherent Muon direction; stage32 is its first 32 stages",
+    "angles": "closed-form diagonal tangent metric using only the exact current requested Muon update",
+    "candidates": [
+      "dense exact requested update",
+      "nested stage32 projection",
+      "nested stage64 projection",
+      "stage64 minus stage32 incremental update"
+    ],
+    "future_information_used_for_selection_or_fitting": false,
+    "future_phase_chord_usage": "scoring only",
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "functional_metrics": {
+    "post_gelu_residual_output": "for activation rows H and weight update D, compare H D^T on two disjoint fixed validation windows",
+    "recorded_training_gradient": "exact clipped gradient from the same pre-step training batch",
+    "validation_gradient": "c_proj gradients on disjoint fixed validation windows",
+    "finite_step_ce": "simultaneously perturb the five registered c_proj layers by each actual scheduled update, evaluate the identical tokens, then exactly restore all weights"
+  },
+  "validation_windows": {
+    "fit_seed": 20260802,
+    "holdout_seed": 20260803,
+    "batch_size": 2,
+    "block_size": 256,
+    "batches": 4,
+    "tokens_per_window": 2048
+  },
+  "decision_rule": {
+    "functional_gain_present_test_temporal_refresh": "stage64/stage32 post-GELU current-output fixed-scale recovery >=1.25, recorded-training-gradient predicted CE decrease >=1.15x, and stage64 has lower fixed-batch CE in at least 6 of 8 phase/window comparisons",
+    "reject_frobenius_stage_depth_functional_mismatch": "post-GELU recovery ratio <1.20, task-descent ratio <1.05, or stage64 wins no more than 2 of 8 finite-step comparisons",
+    "otherwise": "mixed functional signal; do not promote training",
+    "no_posthoc_threshold_change": true
+  },
+  "execution_policy": {
+    "parameter_updates": 0,
+    "host": "Y400",
+    "gpu": "one GPU other than GPU0",
+    "mode": "direct foreground execution and polling to exit",
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false
+  },
+  "authorization": {
+    "authorized": "implement, test, and run this no-training diagnostic once",
+    "not_authorized": [
+      "another 124M language-model candidate",
+      "shorter refresh training",
+      "larger stage count",
+      "c_fc replacement",
+      "learning-rate or seed sweep"
+    ]
+  }
+}
