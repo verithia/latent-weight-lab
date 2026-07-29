@@ -132,7 +132,7 @@ def _load_block_fht_ext():
         except Exception:
             pass
         _BLOCK_FHT_EXT = load(
-            name="latent_weight_lab_block_fht_ext_scaled_v9",
+            name="latent_weight_lab_block_fht_ext_scaled_v10",
             sources=[
                 str(root / "csrc" / "block_fht_ext.cpp"),
                 str(root / "csrc" / "block_fht_ext_cuda.cu"),
