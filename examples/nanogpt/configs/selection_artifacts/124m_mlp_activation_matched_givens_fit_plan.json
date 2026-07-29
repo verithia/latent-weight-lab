@@ -1,0 +1,29 @@
+{
+  "analysis": "fixed sparse Givens connectivity selected from step-0 post-GELU activation correlations",
+  "cells": [
+    "layer0:phase0",
+    "layer0:phase180",
+    "layer6:phase60",
+    "layer11:phase120"
+  ],
+  "connectivity_windows": {
+    "fit_seed": 20260729,
+    "holdout_seed": 20260730
+  },
+  "decision_rule": "promote only if both disjoint connectivity windows at 32 stages recover at least 2x the registered random-connectivity aggregate and every pilot cell recovers at least 1.5x that random aggregate",
+  "fit_steps": 300,
+  "learned_values": "Givens angles only; zero initialized in a training implementation",
+  "learning_rate": 0.01,
+  "neighbors_per_channel": 128,
+  "no_dense_basis": true,
+  "no_lora_factor": true,
+  "random_baseline_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_global_givens_transport_fit_result.json",
+  "sample_cap_per_window": 1024,
+  "schema_version": "nanogpt_mlp_activation_matched_givens_fit_plan_v1",
+  "stages": [
+    8,
+    16,
+    32
+  ],
+  "status": "preregistered_before_result"
+}

@@ -39,6 +39,7 @@ def fit_global_givens_transport(
     seed: int,
     steps: int,
     learning_rate: float,
+    permutations: torch.Tensor | None = None,
 ) -> dict[str, float | int]:
     if source.ndim != 2 or source.shape != target.shape:
         raise ValueError("source and target must be same-shaped matrices")
@@ -50,6 +51,27 @@ def fit_global_givens_transport(
     flow = LearnedGivensOutputMix(
         source.shape[-1], int(stages), int(seed)
     ).to(device=source.device, dtype=torch.float32)
+    if permutations is not None:
+        expected = (int(stages), source.shape[-1])
+        if tuple(permutations.shape) != expected:
+            raise ValueError(
+                f"permutations must have shape {expected}, got "
+                f"{tuple(permutations.shape)}"
+            )
+        ordered = torch.arange(source.shape[-1], dtype=torch.long)
+        for row in permutations.detach().cpu().long():
+            if not torch.equal(torch.sort(row).values, ordered):
+                raise ValueError("each connectivity row must be a permutation")
+        with torch.no_grad():
+            flow.permutations.copy_(
+                permutations.to(
+                    device=flow.permutations.device,
+                    dtype=flow.permutations.dtype,
+                )
+            )
+            flow.inverse_permutations.copy_(
+                torch.argsort(flow.permutations, dim=1)
+            )
     optimizer = torch.optim.Adam(
         [flow.angles], lr=float(learning_rate)
     )
