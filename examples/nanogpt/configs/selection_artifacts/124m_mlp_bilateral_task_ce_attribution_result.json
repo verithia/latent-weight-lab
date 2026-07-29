@@ -1,0 +1,118 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_task_ce_attribution_result_v1",
+  "registered_at": "2026-07-29",
+  "decision": "TEST_HIDDEN_ACTIVATION_FRAME",
+  "scientific_conclusion": "The accepted endpoint gain is carried by hidden-channel orientation distributed across depth, not by scalar gains or a residual-output hyperconnection. Hidden rotation alone passes the cross-seed 0.005 CE threshold; rotations together reproduce the full result, while gains alone are null and no four-layer depth band passes.",
+  "source": {
+    "commit": "940b6ee6a193db59612a1abe470ed1df5fbb1f68",
+    "entrypoint": "examples/nanogpt/analyze_mlp_bilateral_task_ce_attribution.py",
+    "entrypoint_sha256": "7d794c7082ef500df6af4494380fa231d35a40313e6a32aac06821ba64bc1f06",
+    "tests": "203 passed, 9 skipped locally; 4 targeted tests passed on the clean Y400 deployment"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_bilateral_task_ce_attribution_plan.json",
+    "sha256": "e1cc4ec939ea761de0950c84f7d17bf30f8a96dced863b7dc56eba5acc232737"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "polling": "attached foreground process; no watchdog, queue entry, callback, or parameter update",
+    "output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/attribution_commit_940b6ee",
+    "command": "CUDA_VISIBLE_DEVICES=1 PYTHONPATH=. /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_mlp_bilateral_task_ce_attribution --checkpoint /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --identity-state /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5/chart_state_step_0000.pt --accepted-state /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5/chart_state_step_0120.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/attribution_commit_940b6ee",
+    "language_model_parameter_updates": 0
+  },
+  "protocol": {
+    "identity_primary_ce": 5.731858313083649,
+    "identity_confirmation_ce": 5.697322964668274,
+    "minimum_gain": 0.005,
+    "primary_seed": 20260717,
+    "primary_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e",
+    "confirmation_seed": 20260718,
+    "confirmation_token_sha256": "9458b6a1fb470c780cf00b7305122f272d72a7dec4554d99b5dd2523c14cca8d"
+  },
+  "key_variants": [
+    {
+      "variant": "accepted_all",
+      "primary_ce": 5.722150385379791,
+      "confirmation_ce": 5.687591791152954,
+      "primary_gain": 0.009707927703857422,
+      "confirmation_gain": 0.009731173515319824
+    },
+    {
+      "variant": "only_hidden_rotation",
+      "primary_ce": 5.72435450553894,
+      "confirmation_ce": 5.689988970756531,
+      "primary_gain": 0.007503807544708252,
+      "confirmation_gain": 0.007333993911743164,
+      "passes_both": true
+    },
+    {
+      "variant": "only_output_rotation",
+      "primary_ce": 5.727288067340851,
+      "confirmation_ce": 5.692629873752594,
+      "primary_gain": 0.0045702457427978516,
+      "confirmation_gain": 0.004693090915679932,
+      "passes_both": false
+    },
+    {
+      "variant": "rotations_only",
+      "primary_ce": 5.722265303134918,
+      "confirmation_ce": 5.687386095523834,
+      "primary_gain": 0.009593009948730469,
+      "confirmation_gain": 0.009936869144439697,
+      "passes_both": true
+    },
+    {
+      "variant": "gains_only",
+      "primary_ce": 5.731508135795593,
+      "confirmation_ce": 5.697379410266876,
+      "primary_gain": 0.0003501772880554199,
+      "confirmation_gain": -0.00005644559860229492,
+      "passes_both": false
+    },
+    {
+      "variant": "without_hidden_rotation",
+      "primary_ce": 5.727129638195038,
+      "confirmation_ce": 5.692361295223236,
+      "primary_gain": 0.00472867488861084,
+      "confirmation_gain": 0.004961669445037842
+    },
+    {
+      "variant": "without_output_rotation",
+      "primary_ce": 5.72410774230957,
+      "confirmation_ce": 5.689965605735779,
+      "primary_gain": 0.007750570774078369,
+      "confirmation_gain": 0.007357358932495117
+    }
+  ],
+  "depth_attribution": {
+    "early_layers_0_3": {
+      "primary_gain": -0.0009050965309143066,
+      "confirmation_gain": 0.0025191903114318848
+    },
+    "middle_layers_4_7": {
+      "primary_gain": 0.00336456298828125,
+      "confirmation_gain": 0.0023114681243896484
+    },
+    "late_layers_8_11": {
+      "primary_gain": 0.003562450408935547,
+      "confirmation_gain": 0.0011931061744689941
+    },
+    "any_band_passes_both": false,
+    "interpretation": "The hidden-orientation correction is composed across depth rather than localized to one four-layer band."
+  },
+  "decision_detail": {
+    "hidden_frame_supported": true,
+    "output_frame_supported": false,
+    "distributed_chart_by_group": false,
+    "best_group": "only_hidden_rotation",
+    "best_depth_band_by_worst_split": "middle_layers_4_7",
+    "hyperconnection_supported": false,
+    "activation_frame_supported": true
+  },
+  "artifacts": {
+    "attribution_csv_sha256": "aa37d8bb03c15594617b8697e12b2a6a3f02efd8353dba5fc6f2c21754c2ae78",
+    "remote_summary_sha256": "b1a4ba6dc962063116acb1e066810d5520a171d476bab984f7eb3b0aace549ae"
+  },
+  "next_required_structure": "Add an independent identity-initialized fixed-basis orthogonal frame on the c_fc pre-GELU output, folded into the c_fc weight for performance, and compose it with the already causal post-GELU hidden rotation. Test the chart at the frozen 124M endpoint against task CE before any causal-from-scratch run. Do not add a residual hyperconnection or another gain-only coordinate."
+}
