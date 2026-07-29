@@ -58,7 +58,7 @@
   },
   "performance_gate": {
     "entrypoint": "examples/nanogpt/mfu_preflight.py",
-    "entrypoint_sha256": "16faaee73689263366d53c839b89e4b46fd22c6e3c380735ddbb70dd9a6e2aab",
+    "entrypoint_sha256": "31327821eba83af7c75cd273f6daa181b1a9cd8701a7bd49283ef830ad9133f2",
     "mode": "direct foreground execution and polling",
     "arguments": [
       "--include-diagnostic-io",
@@ -69,7 +69,7 @@
       "--min-fraction",
       "0.20"
     ],
-    "coverage": "60 real dense-Muon updates retaining optimizer probes at 0,15,30,45 and all-parameter snapshots at 0,15,30,45,60; optimizer-probe serialization is inside iter_ms and snapshot serialization is explicitly amortized into effective iteration time",
+    "coverage": "60 real dense-Muon updates with all 60 profiler rows retained, optimizer probes at 0,15,30,45, and all-parameter snapshots at 0,15,30,45,60; evaluation time is subtracted, optimizer-probe serialization is inside iter_ms, and snapshot serialization is explicitly amortized into effective iteration time",
     "denominator": "same-GPU empirical BF16 tensor-core GEMM peak",
     "minimum_mfu_fraction": 0.2,
     "failure_policy": "do not launch the 238-update coherent replay if measured I/O-inclusive MFU is below 20 percent",

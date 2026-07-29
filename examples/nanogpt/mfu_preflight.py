@@ -135,7 +135,10 @@ def make_preflight_config(
     config["block_fht_cproj_product_fht_pullback_probe"] = False
     config["block_fht_cproj_product_fht_pullback_probe_output"] = None
     config["perf_profile"] = True
-    config["perf_warmup_iters"] = warmups
+    # Strict diagnostic-I/O accounting needs every update row, including the
+    # update-0 optimizer probe. Evaluation time is emitted separately and
+    # subtracted by the certificate calculation below.
+    config["perf_warmup_iters"] = 0 if include_diagnostic_io else warmups
     config["perf_log_interval"] = 1
     config["log_interval"] = 1
     return config

@@ -43,6 +43,7 @@ class MfuPreflightTest(unittest.TestCase):
         )
         self.assertEqual(probe["trajectory_snapshot_interval"], 15)
         self.assertEqual(probe["optimizer_probe_steps"], [0, 15, 30])
+        self.assertEqual(probe["perf_warmup_iters"], 0)
 
     def test_snapshot_elapsed_parser(self) -> None:
         text = "\n".join(
