@@ -1,0 +1,36 @@
+{
+  "schema_version": "mai_124m_mlp_orthogonal_transport_oracle_plan_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "Is dense c_proj phase motion actually representable as orthogonal transport of its hidden expansion frame, before implementing a compact state-transported butterfly flow?",
+  "trajectory": {
+    "run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ]
+  },
+  "oracles": {
+    "left": "best dense orthogonal transport of the residual-output frame",
+    "right": "best dense orthogonal transport of the 3072-wide post-GELU input frame",
+    "bilateral": "best independent dense orthogonal transport on both sides; residual is exactly singular-value-vector drift"
+  },
+  "implementation_constraint": "compute exact Procrustes objective values in FP64 without materializing a 3072x3072 right rotation",
+  "decision_rule": {
+    "promote_global_hidden_transport": "right-side energy-weighted endpoint recovery >=0.50 and minimum phase aggregate >=0.35",
+    "require_bilateral_transport": "right side fails but bilateral recovery >=0.80",
+    "reject_orthogonal_flow": "bilateral recovery <0.50",
+    "next_structure_if_promoted": "global learned-angle butterfly/Givens flow with fixed connectivity and no learned dense basis or LoRA; its Jacobian rotates with its own state"
+  },
+  "execution": "direct foreground diagnostic on Y400 GPU1; no training, MFU gate, queue, watchdog, callback, heartbeat, or PRO6"
+}
