@@ -129,8 +129,8 @@ def collect_cproj_gradients(
     losses: list[float] = []
     for tokens in batches:
         tokens = tokens.to(device)
-        inputs = tokens[:, :-1]
-        targets = tokens[:, 1:]
+        inputs = tokens[:, :-1].contiguous()
+        targets = tokens[:, 1:].contiguous()
         _logits, loss = model(inputs, targets)
         if loss is None:
             raise RuntimeError("model did not return a task loss")
