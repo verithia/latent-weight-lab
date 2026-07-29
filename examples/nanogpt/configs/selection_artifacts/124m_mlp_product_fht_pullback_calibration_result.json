@@ -1,0 +1,101 @@
+{
+  "schema_version": "mai_124m_mlp_product_fht_pullback_calibration_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_pullback_calibration_plan.json",
+  "config_path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_jvpnorm_calibration.json",
+  "config_sha256": "c4a283f00bc05505c8920c0a110599c8de5a80bcf08044d34809da26795e44c5",
+  "plan_sha256": "182a7962dca451d6cb728a0c38a980150e454fb893eedea1d05d508175ba2d90",
+  "implementation_commit": "efb1b5e",
+  "execution_commit": "c2a7ab5",
+  "run_name": "y400_mai_v3_124m_productfht6_jvpnorm_calibration",
+  "execution": "one real FineWeb-Edu outer update on Y400 GPU1, synchronously polled with no watchdog, callback, queue worker, or PRO6 execution",
+  "performance": {
+    "generic_autodiff_jvp_rejected_mfu_fraction": 0.18867968345807323,
+    "generic_autodiff_jvp_flush_ms": 624.5,
+    "closed_form_jvp_passed": true,
+    "closed_form_jvp_mfu_fraction": 0.2352264503335987,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 203878.63333333333,
+    "iter_ms": 1285.7866666666666,
+    "empirical_bf16_gemm_peak_tflops": 647.3245798963533,
+    "model_tflops": 152.2678631427072,
+    "peak_memory_mib": 31478.29,
+    "prepare_ms": 59.586666666666666,
+    "forward_backward_ms": 882.7366666666667,
+    "pullback_flush_ms": 328.2966666666667,
+    "grad_postprocess_ms": 2.376666666666667,
+    "optimizer_ms": 8.1
+  },
+  "global_gradient_context": {
+    "all_parameter_gradient_norm_before_clip": 499.8990783691406,
+    "non_product_gradient_norm_before_clip": 2.687870979309082,
+    "clip_threshold": 1.0,
+    "non_product_clip_scale": 0.3720416670658241,
+    "interpretation": "including the normalized product factors in the old model-wide clip would have destroyed their materialized-step calibration by another 62.8 percent"
+  },
+  "aggregate": {
+    "layers": 12,
+    "scheduled_learning_rate": 0.0024,
+    "raw_jvp_to_target_norm_ratio": {
+      "minimum": 0.10601497441530228,
+      "mean": 0.10881120711565018,
+      "maximum": 0.11464408040046692
+    },
+    "raw_jvp_target_cosine": {
+      "minimum": 0.09903057664632797,
+      "mean": 0.10021041395763557,
+      "maximum": 0.10270936787128448
+    },
+    "normalization_scale": {
+      "minimum": 8.722648620605469,
+      "mean": 9.194786389668783,
+      "maximum": 9.432629585266113
+    },
+    "coordinate_cap_scale": {
+      "minimum": 1.0,
+      "mean": 1.0,
+      "maximum": 1.0
+    },
+    "maximum_coordinate_update": {
+      "minimum": 0.009754926681518554,
+      "mean": 0.011776135730743409,
+      "maximum": 0.01534760284423828,
+      "registered_cap": 0.02
+    },
+    "effective_jvp_to_target_norm_ratio": {
+      "minimum": 1.0,
+      "mean": 1.0000000198682149,
+      "maximum": 1.0000001192092896
+    },
+    "actual_to_target_update_norm_ratio": {
+      "minimum": 0.9973294734954834,
+      "mean": 0.9998222390810648,
+      "maximum": 1.002163052558899
+    },
+    "actual_target_update_cosine": {
+      "minimum": 0.09900259971618652,
+      "mean": 0.10021409081916015,
+      "maximum": 0.10264912247657776
+    }
+  },
+  "decision": {
+    "classification": "PASS_PULLBACK_MOVEMENT_CALIBRATION",
+    "registered_gate_passed": true,
+    "interpretation": [
+      "All 12 layers satisfy the registered 0.8 to 1.2 actual/target materialized update-norm interval.",
+      "All 12 actual materialized updates have positive cosine with the intended dense-Muon polar step.",
+      "No layer reaches the 0.02 factor-coordinate trust cap at the selected 2.4e-3 learning rate.",
+      "The raw product tangent contains about 10 percent direction cosine, consistent with the earlier right-tangent evidence; JVP normalization corrects update magnitude but does not claim to repair directional capacity.",
+      "The next 238-step run is now a meaningful test of the moving chart because its materialized c_proj weights will no longer remain almost frozen."
+    ],
+    "next_action": "preregister one corrected 124M/0.5TPP screen with exact JVP normalization, the 0.02 coordinate cap, and product factors excluded from the model-wide clip; require a fresh directly polled real-training MFU certificate at or above 20 percent"
+  },
+  "immutable_artifacts": {
+    "probe_sha256": "870e1bf9f37deecd6578efee08e25ed7ce6afe30c4e8ebb8125bfba438815871",
+    "mfu_certificate_sha256": "b92913c01c47a3cfee81f28f40a3719fc7a4526c3c779687aa93bc3e9751aca3",
+    "mfu_preflight_log_sha256": "51416a3b917139d1a1ceb0d9583e062c3aacb42ac4292466d451767abdfcd514",
+    "run_log_sha256": "b5d51fdc7897d4ce9d16850c9b38fffa1b0a321e18451dfc5df68bc7ecb402bd",
+    "status_sha256": "3d4be5ea4bffbcc2a85e5cc0daa5a76652a70a936fc41643cfb296581d01b8c3",
+    "provenance_sha256": "daeaf7f35ed43fc807b676792f229f5c0ed8635d70681a1c928ee94a78e71fb7"
+  }
+}
