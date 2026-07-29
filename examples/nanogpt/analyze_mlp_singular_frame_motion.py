@@ -161,8 +161,11 @@ def analyze_parameter(
         raise ValueError("at least two aligned phase-boundary tensors are required")
     rows: list[dict[str, Any]] = []
     for index, (start, end) in enumerate(zip(steps[:-1], steps[1:], strict=True)):
-        base = tensors[index].to(device=device, dtype=torch.float32)
-        terminal = tensors[index + 1].to(device=device, dtype=torch.float32)
+        # The source checkpoints are FP32, but the SVD/projection algebra is
+        # evaluated in FP64 so the reported orthogonal energy closure is not
+        # dominated by accumulation error over multi-million-element matrices.
+        base = tensors[index].to(device=device, dtype=torch.float64)
+        terminal = tensors[index + 1].to(device=device, dtype=torch.float64)
         delta = terminal - base
         rows.append(
             {
@@ -279,6 +282,10 @@ def main() -> None:
             "subspace_rotation_residual": "delta - U U^T delta V V^T",
             "global_scale": "projection of singular-value motion onto the base singular-value vector",
             "aggregation": "both layer mean/median/range and phase-delta-energy-weighted fractions",
+            "numerical_precision": (
+                "FP32 checkpoint tensors promoted to FP64 before SVD and all "
+                "projection/energy calculations"
+            ),
         },
         "analysis_execution": {
             "git_commit": git_commit(repo),
