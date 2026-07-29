@@ -110,6 +110,11 @@ def make_preflight_config(source: dict[str, Any], temporary_out: Path, warmups: 
     # time, while the foreground preflight measures the uninstrumented update.
     config["trajectory_snapshot_interval"] = 0
     config["optimizer_probe_steps"] = None
+    # One-shot pullback diagnostics write scientific calibration artifacts.
+    # Keep the repaired optimizer active, but suppress that side effect during
+    # the performance-only scratch run.
+    config["block_fht_cproj_product_fht_pullback_probe"] = False
+    config["block_fht_cproj_product_fht_pullback_probe_output"] = None
     config["perf_profile"] = True
     config["perf_warmup_iters"] = warmups
     config["perf_log_interval"] = 1
