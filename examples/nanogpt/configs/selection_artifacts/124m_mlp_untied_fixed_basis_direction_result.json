@@ -1,0 +1,93 @@
+{
+  "schema_version": "mlp_untied_fixed_basis_direction_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_untied_fixed_basis_direction_plan.json",
+    "sha256": "79679196f6c57ea4d74d729274c0774f7f18ac0c525afe1173813dfb310520dd"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "foreground_polled_no_watchdog",
+    "repository_commit": "4a808dd8389a18f975b2fb2419646ecea567128d",
+    "implementation_commit": "f804c9f066a5b74f94db0fafa630b4a63112dee1",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source_sha256": "43af76bce8528256b5dfaccfe81a82b8032ed2f1aefdd20a465307bd6a06eaba",
+    "parameter_update_applied": false,
+    "watchdog": false,
+    "callback": false
+  },
+  "inputs": {
+    "attention_only_checkpoint_sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5",
+    "plain_cproj_checkpoint_sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_token_sha256": "5ffbcbcb14dd284cded97fef7b9e80fbe4656b8c8de7cdf1beff1bcc6669350b",
+    "holdout_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e"
+  },
+  "operator": {
+    "formula": "u' = u + Q_output^-1[(Q_update u) * (slope * Q_condition r)]",
+    "basis_block_size": 256,
+    "condition_basis_seed": 271828,
+    "update_basis_seed": 376557,
+    "output_basis_seed": 481286,
+    "coordinate_group": "slope",
+    "coordinates_per_layer": 768,
+    "identity_initialized": true,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "task_ce": {
+    "fit": 5.677904,
+    "holdout": 5.732306
+  },
+  "task_ce_vs_teacher_mse_cosine": {
+    "global": {
+      "fit": 0.009625661186873913,
+      "holdout": 0.015025950968265533
+    },
+    "layers": {
+      "0": {
+        "fit": 0.008609498851001263,
+        "holdout": 0.015312742441892624
+      },
+      "3": {
+        "fit": -0.018598290160298347,
+        "holdout": 0.00918157771229744
+      },
+      "6": {
+        "fit": 0.08055470883846283,
+        "holdout": 0.058075133711099625
+      },
+      "9": {
+        "fit": 0.07791255414485931,
+        "holdout": 0.006241888739168644
+      },
+      "11": {
+        "fit": -0.039997588843107224,
+        "holdout": 0.01528982724994421
+      }
+    }
+  },
+  "cross_split": {
+    "task_ce_fit_vs_holdout_cosine": 0.12177906930446625,
+    "teacher_mse_fit_vs_holdout_cosine": 0.8776118159294128
+  },
+  "artifacts": {
+    "csv_sha256": "dd4a060dc4f0302b14c4ecd97035038d46b10c176bba72008437a4926c95d5d5",
+    "metadata_sha256": "c0026d0a400b93ccbb5363a8cebcb7ff36b13efe502d29c9ab98714590bb11a9"
+  },
+  "decision": {
+    "classification": "PASS_UNTIED_FIXED_BASIS_LAYER_6_CAUSAL_SCREEN",
+    "global_positive_on_both_splits": true,
+    "selected_layer": 6,
+    "selected_layer_maximin_cosine": 0.058075133711099625,
+    "selection_rule": "maximum minimum fit/holdout cosine among layers clearing 0.05",
+    "implement_production_candidate": true,
+    "requirements_before_training": [
+      "production formula and seeds exactly match this diagnostic",
+      "fixed accelerator transforms only; no learned basis or LoRA",
+      "foreground-polled real-training MFU certificate is at least 20 percent",
+      "238-step run is directly polled rather than attached to the aggregate watchdog"
+    ]
+  }
+}
