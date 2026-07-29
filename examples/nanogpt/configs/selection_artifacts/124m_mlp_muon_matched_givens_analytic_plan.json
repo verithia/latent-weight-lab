@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_analytic_plan_v1",
+  "status": "registered_before_execution",
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_allcell_result.json",
+  "parent_result_sha256": "9f5e61fb0c1be17bc0bd21add1d065b25830a1186883ba91234a795bcce090bb",
+  "scientific_question": "Can a closed-form diagonal approximation to the selected Givens tangent metric preserve most of the 300-step fitted oracle's causal current-update and future-direction recovery across all 20 layer/phase cells?",
+  "implementation": {
+    "commit": "7e9bf0255039ad0b7cac153b76f1265f4b7c4d4d",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
+    "entrypoint_sha256": "36b9b0fcd633f3388e05974b05cf641cca0c62fa71c865351b69208911d3d95a",
+    "test_sha256": "98524a71237d1e558a0ff1d55d843772160454e57b4e00ea870f41f322c77212",
+    "tests": "292 passed, 19 skipped, 45 subtests"
+  },
+  "analytic_update": {
+    "fit_mode": "diagonal",
+    "formula": "For every selected hidden pair (i,j), angle_ij = <requested_update, d(W R_ij)/d angle at zero> / (||W[:,i]||^2 + ||W[:,j]||^2).",
+    "interpretation": "This is the exact one-coordinate least-squares solution at the identity and a diagonal approximation to the joint selected-tangent normal equations.",
+    "optimizer_steps": 0,
+    "future_information_used_for_selection_or_fitting": false
+  },
+  "causal_protocol": "Current exact coherent Muon state selects hidden-channel perfect matchings. Closed-form angles use only the current scheduled Muon update. The future phase chord remains inaccessible until scoring. Equal-size deterministic random matchings use the identical analytic update.",
+  "scope": {
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_starts": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "cells": 20,
+    "stages": [
+      32
+    ],
+    "coordinates_per_layer": 49152,
+    "coordinate_fraction": 0.020833333333333332,
+    "matching_neighbors": 64,
+    "matching_seed": 161803,
+    "random_seed": 271828
+  },
+  "fitted_oracle_reference": {
+    "task_matched_requested_update_recovery": 0.14051835494788548,
+    "task_matched_future_recovery": 0.023178352047354637,
+    "task_matched_minimum_future_cosine": 0.07404537904539336,
+    "task_over_random_future_recovery": 6.9422113117658295
+  },
+  "decision_rule": {
+    "minimum_fraction_of_fitted_requested_update_recovery": 0.8,
+    "minimum_task_matched_requested_update_recovery": 0.11241468395830839,
+    "minimum_fraction_of_fitted_future_recovery": 0.8,
+    "minimum_energy_weighted_future_recovery": 0.01854268163788371,
+    "minimum_future_recovery_over_random_control": 5.0,
+    "minimum_cell_future_cosine": 0.05,
+    "require_positive_grouped_recovery_for_every_layer_and_phase": true,
+    "pass": "implement a refreshable folded-base production representation with exact connectivity, angle, refresh, and serialization provenance, then require a directly polled real-training MFU certificate at or above 20 percent; scientific training remains unauthorized until both are complete",
+    "fail": "do not implement this diagonal approximation as training code; preregister and evaluate a small fixed number of matrix-free normal-equation iterations such as conjugate gradient"
+  },
+  "input_identity": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution_policy": "Run directly in the foreground on one idle Y400 GPU and poll to exit. Do not use a watchdog, callback, queue worker, heartbeat, or PRO6."
+}
