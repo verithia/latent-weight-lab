@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_training_plan_v1",
+  "status": "registered_before_mfu_or_training_execution",
+  "scientific_question": "Does a refreshable task-selected sparse-Givens chart, driven by the exact current Muon direction and folded into the materialized mlp.c_proj base, close the 124M full-attention-plus-c_proj loss gap without a learned dense basis, dense residual, or LoRA adapter?",
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens32_r60_0p5tpp.json",
+    "config_sha256": "ed23de1aae4574230c5b93f66032cd48320234930187b21819f04fed3ba519d4",
+    "implementation_commit": "237189eee1e7f59535b50589e486c840bd48927d",
+    "model_tier": "124m",
+    "planned_tpp": 0.5,
+    "max_iters": 238,
+    "stages": 32,
+    "matching_neighbors": 64,
+    "refresh_interval_updates": 60,
+    "coordinates_per_layer": 49152,
+    "coordinate_fraction_per_cproj": 0.020833333333333332
+  },
+  "causal_optimizer_protocol": {
+    "matching": "At update 0 and every 60 updates, score hidden-channel edges from the exact current coherent Muon polar direction; greedily form 32 unique perfect matchings from 64 neighbors per channel.",
+    "angles": "At every update, compute the closed-form diagonal tangent-metric angle using only the current scheduled Muon update and the currently selected matchings.",
+    "state_transition": "Apply the 32 Givens stages to the materialized c_proj weight, apply decoupled weight decay, and fold the result into the persistent base buffer.",
+    "future_information_used": false,
+    "learned_dense_basis": false,
+    "dense_residual": false,
+    "lora_adapter": false,
+    "mlp_cfc_replaced": false
+  },
+  "parent_evidence": {
+    "analytic_plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_analytic_plan.json",
+    "analytic_plan_sha256": "46b46208ac468299205db53ebc28956bd3a14144c86fc2fc30553ad2b8af6d3d",
+    "analytic_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_analytic_result.json",
+    "analytic_result_sha256": "56a001e0e29f1a6bdf283aa8f82655847830d9776913942b6e7a9ac04091fcc0",
+    "requested_update_recovery": 0.13439268325216358,
+    "future_recovery": 0.022767720629710695,
+    "future_recovery_over_random": 6.9912730842857265,
+    "positive_cells": "20/20"
+  },
+  "serialization_gate": {
+    "required_state": [
+      "folded weight buffer",
+      "selected permutations",
+      "selected inverse permutations",
+      "last angles",
+      "optimizer step",
+      "last refresh step",
+      "refresh count",
+      "matching-valid flag",
+      "exact Muon momentum buffer"
+    ],
+    "test": "A real tiny-GPT forward/backward/custom-optimizer step must round-trip the full model and MultiOptimizer state exactly.",
+    "evidence": "297 passed, 19 skipped, 45 subtests at implementation commit 237189eee1e7f59535b50589e486c840bd48927d"
+  },
+  "mfu_gate": {
+    "minimum_fraction": 0.2,
+    "tool": "examples/nanogpt/mfu_preflight.py",
+    "tool_sha256": "dd17544e8ec52ee27ef8083ec0192b5b7bf84792989f3bbbdd3f11b44cde2ff7",
+    "warmup_updates": 1,
+    "timed_updates": 61,
+    "reason_for_window": "The timed window includes the update-60 task-matching refresh, so refresh cost is amortized at the exact registered scientific-run cadence.",
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens32_r60.json",
+    "fail": "Do not launch scientific training. Optimize the implementation, create a new immutable commit/config/plan identity, and rerun the directly polled gate.",
+    "pass": "Authorize exactly one directly polled 238-update smallest-rung scientific run under the immutable config."
+  },
+  "decision_rule": {
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "accepted_attention_only_control": 5.4918,
+    "accepted_attention_gap": 0.1,
+    "success_ce_maximum": 5.5918,
+    "plain_generated_cproj_control": 5.7395,
+    "directional_only": "stable terminal CE is below 5.7395 but above 5.5918",
+    "reject": "terminal CE is at least 5.7395, the run is unstable/incomplete, exact resume fails, or MFU is below 20 percent",
+    "success": "stable terminal CE is at most 5.5918"
+  },
+  "execution_policy": {
+    "hosts": [
+      "Y400"
+    ],
+    "pro6_allowed": false,
+    "short_run_mode": "foreground direct polling",
+    "watchdog_allowed": false,
+    "callback_allowed": false,
+    "queue_worker_allowed": false,
+    "heartbeat_allowed": false,
+    "do_not_disturb": "the existing 985M full-attention run on Y400 GPU0"
+  },
+  "scope_limit": "This is a trainable-coordinate/manifold test. The dense folded c_proj base remains materialized in checkpoints and forward passes, so it does not claim checkpoint-size or inference-FLOP compression."
+}
