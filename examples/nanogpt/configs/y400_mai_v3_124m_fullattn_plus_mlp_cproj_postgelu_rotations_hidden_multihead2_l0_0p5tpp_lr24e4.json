@@ -190,7 +190,31 @@
   "eval_seed": 20260715,
   "eval_tokens_per_split": 6553600,
   "eval_total_tokens": 13107200,
-  "failed_mfu_preflight": null,
+  "failed_mfu_preflight": [
+    {
+      "classification": "ADMINISTRATIVE_LAUNCH_BLOCK",
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/performance_preflight_hidden_multihead2_l0_launch_blocked_failed.json",
+      "sha256": "3e0e91e0963df2842400c2389aa6cd01d6c94d60116799d42a7d4bf530a16d92"
+    },
+    {
+      "classification": "MFU_BELOW_20_PERCENT",
+      "mfu_fraction": 0.170802657,
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/performance_preflight_hidden_multihead2_l0_generic_fht_failed_17p08.json",
+      "sha256": "6dc08d094c6c1264672e599d60b63589bf7cb89f7b5913234d7f51e1d41814b0"
+    },
+    {
+      "classification": "MFU_BELOW_20_PERCENT",
+      "mfu_fraction": 0.192273007,
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/performance_preflight_hidden_multihead2_l0_warp_butterfly_failed_19p23.json",
+      "sha256": "c95f8823f83678149cd00a833b707832f90e5513a57f5bfbf6a36bad26bc40c5"
+    },
+    {
+      "classification": "MFU_BELOW_20_PERCENT",
+      "mfu_fraction": 0.19334875243269614,
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/performance_preflight_hidden_multihead2_l0_h8xh32_failed_19p33.json",
+      "sha256": "8a61e31997e007e623bde9dbf198467b4287f13c750bbaed5b17d78cf0c7b946"
+    }
+  ],
   "fixed_eval_index_runtime_digest": "record train.py rng_eval_metadata.fixed_eval_indices_sha256 before launch; candidate and attention-only control must match",
   "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
   "fixed_eval_indices": true,
@@ -201,16 +225,16 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "postgelu_hidden_multihead2_l0_0p5tpp",
-  "implementation_commit": "61570b74676a6846a455200cb144580e78246139",
+  "implementation_commit": "fbec97f2d66b0844ca64a82a6fb80f604bf7e60c",
   "implementation_source_hashes": {
-    "csrc/block_fht_ext.cpp": "cf3ea15db7f7e41e4e236e6523054ab8c7fc96092ad5f33949ce8608bb1dd284",
-    "csrc/block_fht_ext_cuda.cu": "cf6e48760d3c30bd9d4d7844d69f450188cf791b886c6624fdc97bb963b9e991",
-    "examples/nanogpt/model.py": "ec06a49b061a60e08d9c521956b0fbf063bff5d903e706bbbbd05d9e3e08f752",
+    "csrc/block_fht_ext.cpp": "6a33aea2332238387decc37f27d1bf6a99c1e523453a7fb88554351d20ed57ae",
+    "csrc/block_fht_ext_cuda.cu": "f1e521e381da8ad859a9f2b45cff568311cc6fc3f9017157429098e248f382f0",
+    "examples/nanogpt/model.py": "526389a4b24bcb3bd2f8f83dcdec1a1411ab9743b5fc046497c1d2ef0f0961da",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
     "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
     "examples/nanogpt/train.py": "62c6d99edcbdeab769b82730f17c15410ba32c44c39009c6833d9034d32f4456",
-    "latent_weight_lab/__init__.py": "343f8384a6ac52d99440cbdc389e1b15c954cc73d86dbca78761979b7bd5abd4",
-    "latent_weight_lab/block_fht.py": "6c4edcd263a0d8cc0d4d153d425a310c0ae2bc9277e6f9abb26ef54092d0bf35"
+    "latent_weight_lab/__init__.py": "9f8ab231c0e9343d0821540e02af7b51cfc978a8d3e97a34f1d9ce80d1938844",
+    "latent_weight_lab/block_fht.py": "0ac614cbff760993dcd05f5eaf7ca757bd5a0a098047d8016e3ccde6ea47a94d"
   },
   "inherit_dense_fallback_scale_from": "y400_mai_v2_124m_muon_20tpp_selected",
   "inherit_dense_main_learning_rate_from": "y400_mai_v2_124m_muon_20tpp_selected",
@@ -326,7 +350,7 @@
     "condition_basis_seed": 271828,
     "condition_width_per_head": 3072,
     "coordinates_total": 6144,
-    "cuda_execution": "three batched signed/permuted block-Hadamard launches with exact autograd inverse bases",
+    "cuda_execution": "two-warp register/shared H8xH32 transforms plus fused correction, head reduction, and analytical VJP kernels",
     "formula": "h + sum_head Q_out_head^-1[(Q_update_head h) * (slope_head * Q_condition_head rmsnorm(h))]",
     "head_seed_stride": 1000003,
     "heads": 2,

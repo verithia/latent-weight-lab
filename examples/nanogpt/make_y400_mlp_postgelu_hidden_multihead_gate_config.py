@@ -118,7 +118,51 @@ def main() -> None:
                 f"{OUTPUT_ROOT}/"
                 "performance_preflight_hidden_multihead2_l0.json"
             ),
-            "failed_mfu_preflight": None,
+            "failed_mfu_preflight": [
+                {
+                    "classification": "ADMINISTRATIVE_LAUNCH_BLOCK",
+                    "path": (
+                        f"{OUTPUT_ROOT}/performance_preflight_"
+                        "hidden_multihead2_l0_launch_blocked_failed.json"
+                    ),
+                    "sha256": (
+                        "3e0e91e0963df2842400c2389aa6cd01d6c94d60116799d42a7d4bf530a16d92"
+                    ),
+                },
+                {
+                    "classification": "MFU_BELOW_20_PERCENT",
+                    "mfu_fraction": 0.170802657,
+                    "path": (
+                        f"{OUTPUT_ROOT}/performance_preflight_"
+                        "hidden_multihead2_l0_generic_fht_failed_17p08.json"
+                    ),
+                    "sha256": (
+                        "6dc08d094c6c1264672e599d60b63589bf7cb89f7b5913234d7f51e1d41814b0"
+                    ),
+                },
+                {
+                    "classification": "MFU_BELOW_20_PERCENT",
+                    "mfu_fraction": 0.192273007,
+                    "path": (
+                        f"{OUTPUT_ROOT}/performance_preflight_"
+                        "hidden_multihead2_l0_warp_butterfly_failed_19p23.json"
+                    ),
+                    "sha256": (
+                        "c95f8823f83678149cd00a833b707832f90e5513a57f5bfbf6a36bad26bc40c5"
+                    ),
+                },
+                {
+                    "classification": "MFU_BELOW_20_PERCENT",
+                    "mfu_fraction": 0.19334875243269614,
+                    "path": (
+                        f"{OUTPUT_ROOT}/performance_preflight_"
+                        "hidden_multihead2_l0_h8xh32_failed_19p33.json"
+                    ),
+                    "sha256": (
+                        "8a61e31997e007e623bde9dbf198467b4287f13c750bbaed5b17d78cf0c7b946"
+                    ),
+                },
+            ],
             "mfu_preflight_required": True,
             "mfu_min_fraction": 0.2,
             "launch_ready": True,
@@ -200,8 +244,8 @@ def main() -> None:
                 "changes_activation_spectrum_before_cproj": True,
                 "non_redundant_with_static_cproj": True,
                 "cuda_execution": (
-                    "three batched signed/permuted block-Hadamard launches "
-                    "with exact autograd inverse bases"
+                    "two-warp register/shared H8xH32 transforms plus fused "
+                    "correction, head reduction, and analytical VJP kernels"
                 ),
             },
             "screen_only_resolution": (
