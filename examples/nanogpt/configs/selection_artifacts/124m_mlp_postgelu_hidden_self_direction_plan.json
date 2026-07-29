@@ -1,0 +1,136 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_hidden_self_direction_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Does preserving the full post-GELU expansion state expose a reproducible task direction that the rejected four-to-one output gate erased?",
+  "hypothesis": {
+    "formula": "h' = h + Q_out^-1[(Q_update h) * (slope * Q_condition rmsnorm(h))]",
+    "location": "after GELU and before c_proj",
+    "condition": "the current token's complete 4*n_embd post-GELU activation",
+    "fixed_bases": "independent signed/permuted 256-wide normalized block-Hadamard transforms for condition, hidden update, and hidden correction output",
+    "trainable_coordinates_per_selected_layer": 3072,
+    "identity_initialization": true,
+    "learned_bias": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "non_redundancy": "the hidden correction is quadratic in the current post-GELU activation and therefore cannot be absorbed into a static c_proj matrix or an endpoint rotation",
+    "difference_from_rejected_output_gate": "no signed four-to-one activation sketch; all 3072 post-GELU coordinates are retained and changed before c_proj"
+  },
+  "evidence_chain": {
+    "dense_trajectory": "Dense Muon MLP trajectories are temporally smooth and locally low-PC but have high-rank matrix displacement, layer-specific tangents, and coupled c_fc-output/c_proj-input salience.",
+    "activation_spectrum": "BlockFHT c_fc has high pre-GELU rank but loses useful rank after GELU; the missing capacity is activation geometry, not a shortage of raw pre-activation rank.",
+    "static_activation_chart": "A full 3072-channel activation chart is causal but secondary; its best composition reaches 5.6832 and remains 0.1914 CE behind attention-only.",
+    "postgelu_output_gate": "The layer-1 current-token output gate was active and causal but improved the exact parent by only 0.001811 CE. Its four-to-one activation sketch and single residual-width diagonal core closed only 0.883 percent of the remaining attention gap.",
+    "required_change": "Preserve the expansion activation and let the nonlinear correction alter its spectrum before the generated c_proj."
+  },
+  "inputs": {
+    "attention_only": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "dataset": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "manifest_path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "rejected_output_gate_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_conditioned_causal_result.json",
+      "sha256": "8f4e4889d70c43f82af4e79900a46e4aaf58ce25db0ee557f1b05d4410236690"
+    }
+  },
+  "implementation": {
+    "repository_commit": "4ad587da7d65578825343569bcef4e6472c82d17",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source_sha256": "8c6ea61b6022b0e90412ce3cb72db073c6eecf3c4acf0f58d5889a14b9916809",
+    "test_sha256": "8f2baef287a0d21e45239e77003bfe5e84fbd5c111fe7c26c6d0519c2089d9a3",
+    "local_validation": "220 passed, 9 skipped, 45 subtests"
+  },
+  "protocol": {
+    "host": "Y400",
+    "execution": "direct foreground polling; no watchdog, queue entry, callback, heartbeat, parameter update, or PRO6",
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "batch_size": 8,
+    "block_size": 256,
+    "batches": 8,
+    "ce_batches": 8,
+    "sample_cap": 2048,
+    "fit_seed": 20260716,
+    "holdout_seed": 20260717,
+    "gate_kind": "postgelu_hidden_bilinear_untied",
+    "gate_groups": [
+      "slope"
+    ],
+    "basis_block_size": 256,
+    "basis_seed": 271828,
+    "condition_seed_per_layer": "271828 + 64*layer",
+    "update_seed_per_layer": "376557 + 64*layer",
+    "output_seed_per_layer": "481286 + 64*layer",
+    "parameter_updates": 0
+  },
+  "selection_rule": {
+    "primary_metric": "per-layer cosine between task-CE slope gradients on fixed fit and holdout token windows",
+    "minimum_cosine": 0.1,
+    "comparison_floor": "must exceed the rejected output gate's selected-layer cosine of 0.081690",
+    "choice": "the layer with maximum task-CE fit/holdout cosine among layers clearing 0.10",
+    "failure": "if no layer clears 0.10, reject this one-branch full-width self-bilinear family without a training run",
+    "success": "implement only the selected layer and slope group, require measured exact real-training MFU >=20 percent, then run one directly polled 124M 0.5TPP causal screen",
+    "no_basis_seed_sweep": true,
+    "no_learning_rate_sweep": true
+  },
+  "command": [
+    "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "--attention-only",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+    "--plain-cproj",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+    "--data-dir",
+    "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "--output",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_postgelu_hidden_self_direction_v1",
+    "--layers",
+    "0,1,2,3,4,5,6,7,8,9,10,11",
+    "--batch-size",
+    "8",
+    "--block-size",
+    "256",
+    "--batches",
+    "8",
+    "--ce-batches",
+    "8",
+    "--sample-cap",
+    "2048",
+    "--sample-seed",
+    "20260716",
+    "--holdout-sample-seed",
+    "20260717",
+    "--gate-kind",
+    "postgelu_hidden_bilinear_untied",
+    "--gate-groups",
+    "slope",
+    "--basis-block-size",
+    "256",
+    "--basis-seed",
+    "271828",
+    "--device",
+    "cuda"
+  ]
+}
