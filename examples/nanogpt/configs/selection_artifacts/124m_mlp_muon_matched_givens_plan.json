@@ -1,0 +1,89 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_plan_v1",
+  "status": "registered_before_execution",
+  "scientific_question": "Can a compact hidden-side Givens chart recover task-enriched directions when its discrete connectivity and angles are selected causally from the exact current coherent Muon update instead of fixed random or activation-only axes?",
+  "hypothesis": "The dense c_proj path lies predominantly on a hidden-side orthogonal orbit, but prior compact charts failed because their axes were task-independent. Pairing hidden channels by the exact current identity-angle Muon coordinate gradient should retain materially more of the causal dense update and its future-chord alignment than equal-size random connectivity.",
+  "implementation": {
+    "commit": "432dd244afa030883794bf46d0f89568d3727e96",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
+    "entrypoint_sha256": "e963ba9526cacaa3ddef6876bcab15f2db6a6796067f3ca67f4b8799ec079591",
+    "tests": "291 passed, 19 skipped, 45 subtests",
+    "learned_dense_basis": false,
+    "lora_factor": false
+  },
+  "causal_protocol": {
+    "connectivity_score": "absolute exact identity-angle derivative inner product |<W_i,D_j>-<W_j,D_i>| using the coherent applied dense-Muon direction D at the phase start",
+    "connectivity": "greedy unique-edge perfect matchings; integer pairings only",
+    "angle_fit_target": "the exact current scheduled dense-Muon update lr*D",
+    "future_information_policy": "the future phase chord is never used to select connectivity or fit angles; it is used only after fitting to score causal recovery",
+    "random_control": "same coordinate count and angle-fit protocol with deterministic random perfect matchings",
+    "training": false,
+    "parameter_update": false
+  },
+  "scope": {
+    "cells": [
+      {
+        "layer": 0,
+        "phase_start": 0
+      },
+      {
+        "layer": 0,
+        "phase_start": 180
+      },
+      {
+        "layer": 6,
+        "phase_start": 60
+      },
+      {
+        "layer": 11,
+        "phase_start": 120
+      }
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "stages": [
+      1,
+      4,
+      8
+    ],
+    "coordinates_per_layer": {
+      "1": 1536,
+      "4": 6144,
+      "8": 12288
+    },
+    "coordinate_fraction": {
+      "1": 0.0006510416666666666,
+      "4": 0.0026041666666666665,
+      "8": 0.005208333333333333
+    },
+    "matching_neighbors": 64,
+    "angle_fit_steps": 300,
+    "angle_fit_learning_rate": 0.001,
+    "matching_seed": 161803,
+    "random_seed": 271828
+  },
+  "input_identity": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "optimizer_state_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_optimizer_state_direction_result.json",
+    "orthogonal_orbit_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_orthogonal_transport_oracle_result.json",
+    "fixed_connectivity_control_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_global_givens_transport_fit_result.json",
+    "product_depth_rejection": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_depth_calibration_result.json"
+  },
+  "decision_rule": {
+    "evaluated_at_stages": 8,
+    "minimum_energy_weighted_future_recovery": 0.02,
+    "minimum_future_recovery_over_random_control": 2.0,
+    "minimum_requested_update_recovery_over_coordinate_fraction": 4.0,
+    "require_positive_future_cosine_in_every_cell": true,
+    "pass": "promote only to an all-20-cell no-update oracle, not directly to language-model training",
+    "fail": "reject sparse Muon-matched pair rewiring and do not implement a causal training structure"
+  },
+  "execution_policy": "Run directly in the foreground on one idle Y400 GPU and poll to exit. Do not use a watchdog, callback, queue worker, heartbeat, or PRO6."
+}
