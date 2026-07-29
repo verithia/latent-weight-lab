@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_mlp_stepwise_direction_history_result_v1",
+  "recorded_at": "2026-07-29",
+  "decision": "NO_CAUSAL_HISTORY_WITHIN_12_UPDATES",
+  "scientific_conclusion": "Dense Muon c_proj updates are locally smooth but their useful direction is transported throughout training. Full-chord capture is inflated by the updates included in the chord; no history through 12 updates captures half of the future-only chord.",
+  "trajectory_run": {
+    "source_commit": "9161c7ffd742e62b3c006af035a075edd4055227",
+    "config_sha256": "3966c6b8505ab9dc79370fe65cde5b6415a8ed19266e68dc8e687f50e9e2d2d8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "05d36b8642052a760c553ae0e0bf6ecd1a30853fe9267f9eb20824adbfd544f5",
+    "status_sha256": "53662950ea54a882d98de4c8c918e7332c6c9756b8f5da248a53eed5fc66f224",
+    "log_sha256": "e9c5d96a5160ffa28ac5b63fc0c2cddec4fe2157612dba761185dcb0450169ea",
+    "checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608",
+    "checkpoint_metadata_sha256": "c8f47c55e4ccff39b861b3c8134682a58958b86217bffe26d7c1ab7781000d37",
+    "mfu_fraction": 0.3345354382234241,
+    "mfu_certificate_sha256": "247af491c0b7fecaf235e6a0a76b6c47ebb2107f6cc15f6fbc786e891721a91a",
+    "terminal_train_loss": 5.4856,
+    "terminal_validation_loss": 5.4884,
+    "snapshots": 239,
+    "snapshot_layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "first_snapshot_sha256": "b9bbd91588fe1bcc29a54ace66ea7ad11622066f333c4c23babbc19fa252735b",
+    "last_snapshot_sha256": "8b5ad35b58b437f899e5735b6a66e74219fda113834a4c5a16be97db48499275"
+  },
+  "analysis": {
+    "source_commit": "57928957c6b933efd4a5e2151ebd3de62ca2e53c",
+    "entrypoint_sha256": "df64825d1c81403639246ef5f1cc17524ee342fb8dc7afffe4519fb9988dbecf",
+    "detail_sha256": "99bba5c07385bd7df11d88903bd779c31f6988317ee65baf42df3b394a0e5887",
+    "aggregate_sha256": "daa1fbbf7d12cd45a9144a9bcb92ee5efcf1ef317bae456fb696ec81c42cdc9b",
+    "metadata_sha256": "7bad7a4f1d9228e35499dadf0f376194d06aae6e5c91e12320d2bcc45b724f48",
+    "analysis_seconds": 4.179158449172974,
+    "cells_per_horizon": 20,
+    "analysis_dtype": "float64"
+  },
+  "milestones": [
+    {
+      "horizon": 1,
+      "cumulative_full_capture": 0.17033217545908766,
+      "cumulative_future_capture": 0.15436897801253957,
+      "future_span_capture": 0.15436897801253957,
+      "minimum_future_span_capture": 0.041318160867149796,
+      "minimum_future_cosine": 0.2032686913106635,
+      "first_to_current_update_cosine": 0.9999999999999998,
+      "previous_to_current_update_cosine": 1.0
+    },
+    {
+      "horizon": 6,
+      "cumulative_full_capture": 0.34812387515399673,
+      "cumulative_future_capture": 0.2603608696117526,
+      "future_span_capture": 0.31015589045428266,
+      "minimum_future_span_capture": 0.18976874889316478,
+      "minimum_future_cosine": 0.4197459192146402,
+      "first_to_current_update_cosine": 0.5802903659191363,
+      "previous_to_current_update_cosine": 0.8393387629048087
+    },
+    {
+      "horizon": 12,
+      "cumulative_full_capture": 0.5165427450524895,
+      "cumulative_future_capture": 0.3383018758694326,
+      "future_span_capture": 0.38864099204281205,
+      "minimum_future_span_capture": 0.210849659274318,
+      "minimum_future_cosine": 0.40059051732710166,
+      "first_to_current_update_cosine": 0.3637851827088597,
+      "previous_to_current_update_cosine": 0.8385847537872871
+    }
+  ],
+  "phase_future_span_capture": {
+    "horizon_1": {
+      "0": 0.074439,
+      "60": 0.215838,
+      "120": 0.215066,
+      "180": 0.269695
+    },
+    "horizon_6": {
+      "0": 0.373012,
+      "60": 0.244546,
+      "120": 0.276705,
+      "180": 0.324056
+    },
+    "horizon_12": {
+      "0": 0.501763,
+      "60": 0.271838,
+      "120": 0.295317,
+      "180": 0.342611
+    }
+  },
+  "decision_rule_evaluation": {
+    "instantaneous_direction_supported": false,
+    "compact_history_supported": false,
+    "positive_future_cosine_fraction_at_all_horizons": 1.0,
+    "next_action": "Do not implement another static or short-history c_proj chart. The next structure must transport its structured Jacobian with model state; a raw-gradient replay is useful only to identify the transport signal, not to justify one fixed direction."
+  }
+}
