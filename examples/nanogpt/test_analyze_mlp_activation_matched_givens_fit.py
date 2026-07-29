@@ -71,3 +71,20 @@ def test_custom_connectivity_recovers_exact_flow() -> None:
         permutations=permutations,
     )
     assert result["endpoint_recovery"] > 0.999
+
+
+def test_activation_matching_can_exhaust_complete_small_graph() -> None:
+    values = torch.randn(64, 8, generator=torch.Generator().manual_seed(23))
+    permutations, _diagnostics = activation_matched_permutations(
+        values,
+        stages=7,
+        neighbors=7,
+        seed=29,
+    )
+    edges = [
+        tuple(sorted(pair.tolist()))
+        for row in permutations
+        for pair in row.reshape(-1, 2)
+    ]
+    assert len(edges) == 28
+    assert len(set(edges)) == 28

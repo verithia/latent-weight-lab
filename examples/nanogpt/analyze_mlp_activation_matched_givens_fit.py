@@ -142,9 +142,71 @@ def activation_matched_permutations(
                 None,
             )
             if partner_index is None:
-                raise RuntimeError(
-                    "could not complete a unique activation matching"
-                )
+                # The strong-edge greedy pass can leave two vertices whose
+                # edge appeared in an earlier stage.  Repair one current-stage
+                # pair with a two-edge swap.  The complement of at most
+                # ``stage`` used partners per vertex is extremely dense, so
+                # this deterministic 2-opt repair is sufficient without
+                # weakening the no-reused-pair invariant.
+                repaired = False
+                for right_index, right in enumerate(remaining):
+                    for pair_index, (
+                        prior_left,
+                        prior_right,
+                        _prior_score,
+                        _prior_candidate,
+                    ) in enumerate(pairs):
+                        prior_edge = (
+                            min(prior_left, prior_right),
+                            max(prior_left, prior_right),
+                        )
+                        for first, second in (
+                            (prior_left, prior_right),
+                            (prior_right, prior_left),
+                        ):
+                            first_edge = (
+                                min(left, first),
+                                max(left, first),
+                            )
+                            second_edge = (
+                                min(right, second),
+                                max(right, second),
+                            )
+                            if (
+                                first_edge in used_edges
+                                or second_edge in used_edges
+                                or first_edge == second_edge
+                            ):
+                                continue
+                            used_edges.remove(prior_edge)
+                            used_edges.add(first_edge)
+                            used_edges.add(second_edge)
+                            pairs[pair_index] = (
+                                left,
+                                first,
+                                edge_scores.get(first_edge, 0.0),
+                                first_edge in edge_scores,
+                            )
+                            pairs.append(
+                                (
+                                    right,
+                                    second,
+                                    edge_scores.get(second_edge, 0.0),
+                                    second_edge in edge_scores,
+                                )
+                            )
+                            remaining.pop(right_index)
+                            repaired = True
+                            break
+                        if repaired:
+                            break
+                    if repaired:
+                        break
+                if not repaired:
+                    raise RuntimeError(
+                        "could not complete a unique activation matching"
+                    )
+                continue
             right = remaining.pop(partner_index)
             edge = (min(left, right), max(left, right))
             used_edges.add(edge)
