@@ -1,0 +1,30 @@
+{
+  "analysis": "coherent phase-boundary Muon optimizer-state directions against future c_proj phase chords",
+  "layers": [
+    0,
+    3,
+    6,
+    9,
+    11
+  ],
+  "optimizer_probe_steps": [
+    0,
+    60,
+    120,
+    180
+  ],
+  "probe_tensors": [
+    "weight_before_step",
+    "gradient_after_clip",
+    "momentum_buffer_before_step",
+    "combined_momentum_update",
+    "polar_update",
+    "applied_direction_per_lr"
+  ],
+  "replay_max_iters": 238,
+  "replay_token_budget": 62390272,
+  "schema_version": "nanogpt_mlp_optimizer_state_probe_plan_v1",
+  "status": "preregistered_before_result",
+  "storage_dtype": "float32",
+  "training_launch_rule": "the exact committed training config must pass a directly polled real-training MFU gate at or above 20% before launch; the 238-step replay is directly polled with no watchdog or callback"
+}

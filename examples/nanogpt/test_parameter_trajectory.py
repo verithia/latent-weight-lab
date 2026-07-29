@@ -8,12 +8,16 @@ from pathlib import Path
 import torch
 
 from examples.nanogpt.parameter_trajectory import (
+    OPTIMIZER_PROBE_SCHEMA_VERSION,
     SCHEMA_VERSION,
     collect_parameters,
+    optimizer_probe_path,
     snapshot_path,
     validate_arguments,
+    write_optimizer_probe,
     write_parameter_snapshot,
 )
+from examples.nanogpt.muon import Muon
 
 
 class MLP(torch.nn.Module):
@@ -170,6 +174,91 @@ class ParameterTrajectoryTest(unittest.TestCase):
                     trajectory_snapshot_targets=[],
                     trajectory_snapshot_layers=[0],
                     trajectory_snapshot_all_parameters=True,
+                )
+            )
+
+    def test_optimizer_probe_captures_exact_muon_pre_step_state(self) -> None:
+        model = TinyModel()
+        selected = [
+            model.transformer.h[0].mlp.c_proj.weight,
+            model.transformer.h[1].mlp.c_proj.weight,
+        ]
+        optimizer = Muon(
+            selected,
+            lr=0.02,
+            momentum=0.9,
+            weight_decay=0.1,
+            ns_steps=3,
+        )
+        for index, parameter in enumerate(selected):
+            parameter.grad = torch.full_like(parameter, 0.2 + index)
+            optimizer.state[parameter]["momentum_buffer"] = torch.full_like(
+                parameter, 0.05 + index
+            )
+        identity = {
+            "config_sha256": "a" * 64,
+            "data_manifest": {"sha256": "b" * 64},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            out_dir = Path(raw)
+            path = write_optimizer_probe(
+                model=model,
+                optimizer=optimizer,
+                out_dir=out_dir,
+                step=60,
+                targets=["mlp.c_proj"],
+                dtype="float32",
+                layers=[0, 1],
+                model_config=config_as_dataclass(),
+                run_identity=identity,
+                execution_provenance={"git_commit": "c" * 40},
+            )
+            self.assertEqual(path, optimizer_probe_path(out_dir, 60))
+            payload = torch.load(
+                path, map_location="cpu", weights_only=False
+            )
+            self.assertEqual(
+                payload["schema_version"],
+                OPTIMIZER_PROBE_SCHEMA_VERSION,
+            )
+            self.assertEqual(len(payload["parameters"]), 2)
+            first = payload["parameters"][
+                "transformer.h.0.mlp.c_proj.weight"
+            ]
+            expected = 0.2 + 0.9 * (0.9 * 0.05 + 0.2)
+            torch.testing.assert_close(
+                first["combined_momentum_update"],
+                torch.full_like(
+                    first["combined_momentum_update"], expected
+                ),
+            )
+            self.assertFalse(list(path.parent.glob("*.part")))
+
+    def test_validation_rejects_bad_optimizer_probe(self) -> None:
+        base = dict(
+            trajectory_snapshot_interval=0,
+            trajectory_snapshot_targets=["mlp.c_proj"],
+            trajectory_snapshot_layers=None,
+            trajectory_snapshot_all_parameters=False,
+            optimizer_probe_targets=["mlp.c_proj"],
+            optimizer_probe_layers=[0],
+            optimizer_probe_dtype="float32",
+        )
+        with self.assertRaisesRegex(ValueError, "sorted unique"):
+            validate_arguments(
+                argparse.Namespace(
+                    **base,
+                    optimizer_probe_steps=[60, 0],
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "probe-layers"):
+            validate_arguments(
+                argparse.Namespace(
+                    **{
+                        **base,
+                        "optimizer_probe_layers": None,
+                    },
+                    optimizer_probe_steps=[0, 60],
                 )
             )
 

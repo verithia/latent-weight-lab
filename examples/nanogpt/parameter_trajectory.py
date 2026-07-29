@@ -16,6 +16,7 @@ import torch
 
 
 SCHEMA_VERSION = "nanogpt_parameter_trajectory_v1"
+OPTIMIZER_PROBE_SCHEMA_VERSION = "nanogpt_optimizer_probe_v1"
 DTYPES = {
     "float32": torch.float32,
     "bfloat16": torch.bfloat16,
@@ -94,6 +95,12 @@ def snapshot_path(out_dir: Path, step: int) -> Path:
     if step < 0:
         raise ValueError("trajectory snapshot step must be non-negative")
     return out_dir / "parameter_trajectory" / f"step_{step:06d}.pt"
+
+
+def optimizer_probe_path(out_dir: Path, step: int) -> Path:
+    if step < 0:
+        raise ValueError("optimizer probe step must be non-negative")
+    return out_dir / "optimizer_probe" / f"step_{step:06d}.pt"
 
 
 def _atomic_torch_save(path: Path, payload: dict[str, Any]) -> None:
@@ -181,6 +188,146 @@ def write_parameter_snapshot(
     return destination
 
 
+def write_optimizer_probe(
+    *,
+    model: torch.nn.Module,
+    optimizer: Any,
+    out_dir: Path,
+    step: int,
+    targets: list[str],
+    dtype: str,
+    layers: list[int],
+    model_config: Any,
+    run_identity: dict[str, Any],
+    execution_provenance: dict[str, Any] | None,
+) -> Path:
+    """Atomically capture pre-step gradients and exact Muon state directions."""
+    from examples.nanogpt.muon import Muon, zeropower_via_newtonschulz5
+
+    destination = optimizer_probe_path(out_dir, step)
+    run_identity_sha256 = canonical_digest(run_identity)
+    if destination.exists():
+        observed = torch.load(
+            destination, map_location="cpu", weights_only=False
+        )
+        if (
+            not isinstance(observed, dict)
+            or observed.get("schema_version")
+            != OPTIMIZER_PROBE_SCHEMA_VERSION
+            or observed.get("step") != step
+            or observed.get("run_identity_sha256") != run_identity_sha256
+        ):
+            raise ValueError(
+                f"existing optimizer probe identity mismatch: {destination}"
+            )
+        return destination
+    if dtype not in DTYPES:
+        raise ValueError(f"unsupported optimizer probe dtype: {dtype}")
+    if not targets or not layers:
+        raise ValueError("optimizer probe targets and layers must be non-empty")
+
+    suboptimizers = getattr(optimizer, "optimizers", [optimizer])
+    owners: dict[int, tuple[Muon, dict[str, Any]]] = {}
+    for candidate in suboptimizers:
+        if not isinstance(candidate, Muon):
+            continue
+        for group in candidate.param_groups:
+            for parameter in group["params"]:
+                owners[id(parameter)] = (candidate, group)
+
+    tensors: dict[str, dict[str, torch.Tensor]] = {}
+    hyperparameters: dict[str, dict[str, float | int]] = {}
+    selected_parameters = {
+        name: parameter
+        for name, parameter in model.named_parameters()
+        if parameter_matches(name, targets, layers)
+    }
+    if not selected_parameters:
+        raise ValueError("no parameters matched the optimizer probe")
+    storage_dtype = DTYPES[dtype]
+    for name, parameter in sorted(selected_parameters.items()):
+        owner = owners.get(id(parameter))
+        if owner is None:
+            raise ValueError(f"optimizer probe parameter is not Muon-owned: {name}")
+        muon, group = owner
+        if parameter.grad is None:
+            raise ValueError(f"optimizer probe parameter has no gradient: {name}")
+        gradient = parameter.grad.detach().float()
+        state = muon.state.get(parameter, {})
+        buffer = state.get("momentum_buffer")
+        if buffer is None:
+            buffer = torch.zeros_like(gradient)
+        else:
+            buffer = buffer.detach().float()
+        momentum = float(group["momentum"])
+        ns_steps = int(group["ns_steps"])
+        weight_decay = float(group["weight_decay"])
+        new_buffer = momentum * buffer + gradient
+        combined = gradient + momentum * new_buffer
+        polar = zeropower_via_newtonschulz5(
+            combined, steps=ns_steps
+        ).float()
+        scale = max(
+            1.0,
+            polar.shape[0] / max(1, polar.numel() / polar.shape[0]),
+        ) ** 0.5
+        applied_direction = (
+            -weight_decay * parameter.detach().float()
+            - scale * polar
+        )
+
+        def cpu(value: torch.Tensor) -> torch.Tensor:
+            return value.to(
+                device="cpu", dtype=storage_dtype
+            ).contiguous()
+
+        tensors[name] = {
+            "weight_before_step": cpu(parameter.detach()),
+            "gradient_after_clip": cpu(gradient),
+            "momentum_buffer_before_step": cpu(buffer),
+            "combined_momentum_update": cpu(combined),
+            "polar_update": cpu(polar),
+            "applied_direction_per_lr": cpu(applied_direction),
+        }
+        hyperparameters[name] = {
+            "lr": float(group["lr"]),
+            "momentum": momentum,
+            "weight_decay": weight_decay,
+            "ns_steps": ns_steps,
+            "polar_scale": scale,
+        }
+
+    inventory = {
+        name: {
+            key: {
+                "shape": list(value.shape),
+                "dtype": str(value.dtype),
+                "numel": value.numel(),
+                "bytes": value.numel() * value.element_size(),
+            }
+            for key, value in values.items()
+        }
+        for name, values in tensors.items()
+    }
+    payload = {
+        "schema_version": OPTIMIZER_PROBE_SCHEMA_VERSION,
+        "step": step,
+        "targets": list(targets),
+        "layers": list(layers),
+        "storage_dtype": dtype,
+        "model_config": asdict(model_config),
+        "run_identity": run_identity,
+        "run_identity_sha256": run_identity_sha256,
+        "execution_provenance": execution_provenance,
+        "tensor_inventory": inventory,
+        "hyperparameters": hyperparameters,
+        "parameters": tensors,
+        "created_at_unix": time.time(),
+    }
+    _atomic_torch_save(destination, payload)
+    return destination
+
+
 def add_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--trajectory-snapshot-interval", type=int, default=0)
     parser.add_argument(
@@ -208,6 +355,29 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
             "store every unique named model parameter; intended for sparse "
             "model-state trajectory checkpoints, not per-update traces"
         ),
+    )
+    parser.add_argument(
+        "--optimizer-probe-steps",
+        nargs="+",
+        type=int,
+        default=None,
+        help="outer optimizer steps at which to capture pre-step Muon state",
+    )
+    parser.add_argument(
+        "--optimizer-probe-targets",
+        nargs="+",
+        default=["mlp.c_proj"],
+    )
+    parser.add_argument(
+        "--optimizer-probe-layers",
+        nargs="+",
+        type=int,
+        default=None,
+    )
+    parser.add_argument(
+        "--optimizer-probe-dtype",
+        choices=sorted(DTYPES),
+        default="float32",
     )
 
 
@@ -242,3 +412,41 @@ def validate_arguments(args: argparse.Namespace) -> None:
                 )
             if len(set(layers)) != len(layers):
                 raise ValueError("--trajectory-snapshot-layers must be unique")
+    probe_steps = getattr(args, "optimizer_probe_steps", None)
+    if probe_steps is not None:
+        if (
+            not isinstance(probe_steps, list)
+            or not probe_steps
+            or any(not isinstance(step, int) or step < 0 for step in probe_steps)
+            or probe_steps != sorted(set(probe_steps))
+        ):
+            raise ValueError(
+                "--optimizer-probe-steps must contain sorted unique "
+                "non-negative integers"
+            )
+        probe_targets = getattr(args, "optimizer_probe_targets", None)
+        if (
+            not isinstance(probe_targets, list)
+            or not probe_targets
+            or any(
+                not isinstance(target, str) or not target
+                for target in probe_targets
+            )
+        ):
+            raise ValueError(
+                "--optimizer-probe-targets must contain non-empty strings"
+            )
+        probe_layers = getattr(args, "optimizer_probe_layers", None)
+        if (
+            not isinstance(probe_layers, list)
+            or not probe_layers
+            or any(
+                not isinstance(layer, int) or layer < 0
+                for layer in probe_layers
+            )
+            or len(set(probe_layers)) != len(probe_layers)
+        ):
+            raise ValueError(
+                "--optimizer-probe-layers must contain unique non-negative "
+                "integers"
+            )
