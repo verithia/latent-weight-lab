@@ -1804,8 +1804,17 @@ class MLP(nn.Module):
             charted_weight.detach().requires_grad_(True)
         )
 
-    def flush_charted_cproj_cache(self) -> None:
-        """Project a cached charted-weight gradient to base and chart params."""
+    def flush_charted_cproj_cache(
+        self, *, project_base_gradient: bool = True
+    ) -> None:
+        """Project a cached charted-weight gradient to chart/base parameters.
+
+        Endpoint chart diagnostics freeze the generated base completely.  In
+        that case, omitting the unused base-weight VJP avoids both a dense
+        gradient and a later cache-to-latent projection while preserving the
+        exact chart-coordinate VJP.  Normal training retains the historical
+        default and projects both.
+        """
         cached = self._cached_charted_cproj_weight
         if cached is None:
             return
@@ -1841,22 +1850,33 @@ class MLP(nn.Module):
         ):
             chart_parameters.append(self.residual_output_log_gain)
         with torch.enable_grad():
-            base_proxy = base_weight.detach().requires_grad_(True)
+            base_proxy = base_weight.detach()
+            if project_base_gradient:
+                base_proxy.requires_grad_(True)
             charted_proxy = self._materialize_charted_cproj_weight(base_proxy)
+            gradient_targets = (
+                [base_proxy, *chart_parameters]
+                if project_base_gradient
+                else chart_parameters
+            )
             gradients = torch.autograd.grad(
                 charted_proxy,
-                [base_proxy, *chart_parameters],
+                gradient_targets,
                 grad_outputs=cached.grad.to(dtype=charted_proxy.dtype),
                 allow_unused=True,
             )
-        base_gradient = gradients[0]
-        if base_weight.grad is None:
-            base_weight.grad = base_gradient.to(dtype=base_weight.dtype)
+        if project_base_gradient:
+            base_gradient = gradients[0]
+            if base_weight.grad is None:
+                base_weight.grad = base_gradient.to(dtype=base_weight.dtype)
+            else:
+                base_weight.grad.add_(
+                    base_gradient.to(dtype=base_weight.dtype)
+                )
+            chart_gradients = gradients[1:]
         else:
-            base_weight.grad.add_(
-                base_gradient.to(dtype=base_weight.dtype)
-            )
-        for parameter, gradient in zip(chart_parameters, gradients[1:]):
+            chart_gradients = gradients
+        for parameter, gradient in zip(chart_parameters, chart_gradients):
             if gradient is None:
                 continue
             gradient = gradient.to(dtype=parameter.dtype)

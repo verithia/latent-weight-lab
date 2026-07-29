@@ -1018,6 +1018,54 @@ def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
     )
 
 
+def test_cached_charted_cproj_can_skip_frozen_base_vjp() -> None:
+    torch.manual_seed(308)
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=1,
+        n_embd=8,
+        bias=False,
+        block_fht=True,
+        block_fht_targets=("mlp.c_proj",),
+        block_fht_latent_ratio=0.25,
+        block_fht_mlp_hidden_block_rotation_stages=1,
+        block_fht_mlp_hidden_block_rotation_size=4,
+        block_fht_mlp_hidden_block_rotation_basis_size=8,
+        block_fht_mlp_hidden_gain=True,
+        block_fht_mlp_output_block_rotation_stages=1,
+        block_fht_mlp_output_block_rotation_size=4,
+        block_fht_mlp_output_block_rotation_basis_size=8,
+        block_fht_mlp_residual_output_gain=True,
+    )
+    model = GPT(config)
+    for parameter in model.parameters():
+        parameter.requires_grad_(False)
+    mlp = model.transformer.h[0].mlp
+    chart = (
+        mlp.hidden_block_rotation.coordinates,
+        mlp.hidden_log_gain,
+        mlp.output_block_rotation.coordinates,
+        mlp.residual_output_log_gain,
+    )
+    for parameter in chart:
+        parameter.requires_grad_(True)
+    model.prepare_block_fht_cache()
+    base_weight = mlp.c_proj._cached_weight
+    assert base_weight is not None
+    base_weight.requires_grad_(False)
+    inputs = torch.randint(0, config.vocab_size, (2, config.block_size))
+    targets = torch.randint(0, config.vocab_size, inputs.shape)
+    loss = model(inputs, targets)[1]
+    assert loss is not None
+    loss.backward()
+    mlp.flush_charted_cproj_cache(project_base_gradient=False)
+    assert base_weight.grad is None
+    assert mlp.c_proj.generator.latent.grad is None
+    assert all(parameter.grad is not None for parameter in chart)
+
+
 def test_mlp_residual_output_gain_init_is_in_effective_log_coordinates() -> None:
     mlp = MLP(
         GPTConfig(
