@@ -1,0 +1,154 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_phase_capture_result_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "Does the exact local Jacobian of the production bilateral fixed-FHT/Cayley c_proj chart span the directional phase motion measured in the dense Muon trajectory?",
+  "scope": {
+    "trajectory": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "ce812caa6402178b5240490fd8a3943ad7156c5bdeb4a2a1dcdad22051f6615e",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "components": [
+      "total",
+      "singular_value",
+      "in_frame_mixing",
+      "subspace_rotation"
+    ],
+    "analysis_cells": 80,
+    "source_checkpoint_dtype": "float32",
+    "analysis_dtype": "float64",
+    "execution": "direct foreground diagnostic on Y400 GPU1; no training, queue, watchdog, callback, heartbeat, or PRO6 execution"
+  },
+  "chart": {
+    "formula": "R_out^T D_out W_base R_hidden^T D_hidden",
+    "hidden_rotation_stages": 2,
+    "output_rotation_stages": 4,
+    "rotation_block_size": 32,
+    "fixed_fht_basis_block_size": 256,
+    "hidden_seed": 314159,
+    "output_seed": 271828,
+    "layer_seed_stride": 64,
+    "coordinate_scale": 4.0,
+    "gain_scale": 4.0,
+    "initialization": "exact identity",
+    "coordinate_count": 146688,
+    "ambient_matrix_dimension": 2359296,
+    "coordinate_to_ambient_fraction": 0.062174479166666664,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "production_parity_test": "The isolated chart is tested against MLP._materialize_charted_cproj_weight with nonzero rotation and gain coordinates."
+  },
+  "solver": {
+    "system": "(J^T J + damping I) x = J^T target",
+    "jacobian_products": "exact torch.func JVP/VJP",
+    "damping_ratio_to_hutchinson_mean_eigenvalue": 1e-06,
+    "cg_steps": 24,
+    "maximum_relative_normal_residual": 0.0010010804269840069,
+    "pilot": {
+      "layers": [
+        0
+      ],
+      "phases": [
+        "0_to_60",
+        "60_to_120"
+      ],
+      "cg8_recovery": [
+        0.0819040693453168,
+        0.06296436015392703
+      ],
+      "cg24_recovery": [
+        0.0825820804205023,
+        0.06353401308865625
+      ],
+      "interpretation": "Increasing from 8 to 24 steps changes recovery by less than 0.0007 absolute while reducing the normal residual from about 0.05 to below 0.001; low capture is not premature CG termination."
+    }
+  },
+  "energy_weighted_capture": {
+    "total": 0.06911769930807644,
+    "singular_value": 0.9493050782498909,
+    "in_frame_mixing": 0.11451826977566938,
+    "subspace_rotation": 0.0440477683143646,
+    "total_capture_over_coordinate_fraction": 1.1116731532691668
+  },
+  "component_energy_and_capture_contribution": {
+    "singular_value": {
+      "target_energy_fraction": 0.007237020062829966,
+      "captured_total_energy_fraction": 0.006870139897040833
+    },
+    "in_frame_mixing": {
+      "target_energy_fraction": 0.2587113086702892,
+      "captured_total_energy_fraction": 0.029627171440320656
+    },
+    "subspace_rotation": {
+      "target_energy_fraction": 0.7340516712670425,
+      "captured_total_energy_fraction": 0.03233333794674281
+    },
+    "sum_of_component_capture_contributions": 0.0688306492841043
+  },
+  "total_capture_by_phase": {
+    "0_to_60": 0.07547284045200403,
+    "60_to_120": 0.06359832931764905,
+    "120_to_180": 0.0660162151303184,
+    "180_to_238": 0.0666488014507703
+  },
+  "total_capture_by_layer": {
+    "0": 0.07420663554126058,
+    "3": 0.06994293719021742,
+    "6": 0.06781512511691344,
+    "9": 0.06664691427822178,
+    "11": 0.06616662052687505
+  },
+  "artifacts": {
+    "analysis_commit": "c24b2a54e0ce0b589e8dd085863cca83d659a638",
+    "analysis_entrypoint": "examples/nanogpt/analyze_mlp_bilateral_phase_capture.py",
+    "analysis_entrypoint_sha256": "3122d2a1b53ee7f40a6356d4e742de1fbde996b53bc5a9815822c289f4cb8253",
+    "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/bilateral_phase_capture_v1",
+    "wall_seconds": 172.97486209869385,
+    "detail_csv_sha256": "9a78c58cdcf6440523ca57d6c33ee45f2dfd6a2c13f9d769f5b8c50cd95503dd",
+    "aggregate_csv_sha256": "f15732eb49cd5bc00e013a9072532a203cdf5c8a1bc01e4e495b81f65cfc0a44",
+    "metadata_sha256": "1bfbb3a236680d79009eac267f604c8d92ae417fdefa5f7d6edc2fdc8fd26950",
+    "snapshot_sha256": {
+      "step_000000.pt": "7c81197f5b205f4379d219cfe3a86b737d346d9d5f0032108f2f94dd2c0c030f",
+      "step_000060.pt": "b313167b8082b2bb0888fd96f21015db2d3e639f86b503407fb9c6b8da19e65a",
+      "step_000120.pt": "38fb485aec261c7267bd160edefa1453ea2e5dbf871073479dcb7998f33c22e2",
+      "step_000180.pt": "49d90a1d25ba81d2ecc564bf28f9ed698ad2233d2e8a920cb8ab85cbad56ea59",
+      "step_000238.pt": "66f6b3ba33a4aebd150ac82f9b69cd731450577629c9e956e988e741ea51bf19"
+    }
+  },
+  "decision": {
+    "classification": "FIXED_BILATERAL_TANGENT_STRUCTURALLY_MISALIGNED",
+    "interpretation": [
+      "The chart recovers 6.91 percent of the dense c_proj phase chord with coordinates occupying 6.22 percent of the ambient matrix dimension. Its directional span is only marginally better than a dimension-matched generic subspace.",
+      "The chart captures 94.93 percent of singular-value motion, but singular-value motion is only 0.72 percent of the selected chord energy. Its gain coordinates solve the small radial problem that is not limiting MLP replacement.",
+      "It captures only 11.45 percent of in-frame mixing and 4.40 percent of expansion-input subspace rotation. Those two components carry 99.28 percent of the selected dense c_proj motion.",
+      "The low capture is stable across phases and layers and remains after a converged FP64 normal-equation solve, so optimizer assignment, learning rate, or extra CG steps cannot repair this identity tangent.",
+      "The earlier nonlinear endpoint oracle and this local result are compatible: finite chart reachability does not provide a locally aligned path that gradient training can follow."
+    ],
+    "promote_current_chart_to_training": false,
+    "rejected_followups": [
+      "more channel gains or singular-value scaling",
+      "more optimizer or learning-rate tuning of the same fixed tangent",
+      "another fixed random affine or generic random quadratic chart",
+      "a learned dense basis or LoRA-like adapter"
+    ],
+    "next_required_diagnostic": "Test a non-learned natural-axis tensor/Kronecker rotation chart against the same exact phase chords. It must show direction-selective enrichment over its coordinate fraction, particularly on subspace rotation, before any 124M training run is admissible."
+  },
+  "limitations": [
+    "This measures the exact identity Jacobian, not the full nonlinear reachable set.",
+    "The representative-layer aggregate covers layers 0,3,6,9,11 rather than all 12 layers.",
+    "Weight-space capture does not by itself establish validation-loss improvement.",
+    "The dense phase chord is one Muon optimizer trajectory and is not a proof about the global solution manifold."
+  ]
+}
