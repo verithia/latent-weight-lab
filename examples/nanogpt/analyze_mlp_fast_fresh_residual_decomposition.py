@@ -602,8 +602,8 @@ def main() -> None:
     parser.add_argument(
         "--expected-run-identity",
         default=(
-            "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed"
-            "451247b9"
+            "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f"
+            "1631aecdf"
         ),
     )
     parser.add_argument("--layers", default="0,3,6,9,11")

@@ -19,7 +19,7 @@
     "novelty_of_this_plan": "Fit the production-qualified stateless-fresh hidden64 tangent first, form its exact current-direction residual, and select additive output/diagonal coordinates only on that residual. Compare each addition against an equal-or-larger-coordinate fresh hidden-only control."
   },
   "inputs": {
-    "coherent_dense_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "coherent_dense_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "base_updates": [
       0,
@@ -164,6 +164,15 @@
     "pro6": false,
     "do_not_disturb": "the running 985M full-attention 20TPP job on Y400 GPU0",
     "workspace_cap_gib": 300
+  },
+  "pre_execution_input_repair": {
+    "classification": "COHERENT_CADENCE_INPUT_IDENTITY_CORRECTION",
+    "parameter_updates_before_repair": 0,
+    "reason": "The initially named 17ef replay has only 60-update optimizer probes and cannot supply the preregistered +15 future exact-Muon directions. The a801 cadence-15 replay contains complete-model snapshots and exact probes for every registered base/future pair and is also the parent stateless-matcher qualification trajectory.",
+    "cross_trajectory_splice": false,
+    "candidate_definitions_changed": false,
+    "metrics_changed": false,
+    "thresholds_changed": false
   },
   "authorization": {
     "this_plan_authorizes": "Implementation, focused tests, and one zero-update foreground-polled diagnostic execution after exact-commit deployment.",
