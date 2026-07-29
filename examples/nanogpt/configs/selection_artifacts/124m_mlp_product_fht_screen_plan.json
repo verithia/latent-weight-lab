@@ -1,0 +1,36 @@
+{
+  "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_0p5tpp_lr24e4.json",
+  "candidate_config_sha256": "b49880d641334c0e8bf02504a3cf283c35fcc0f8d24389c8e36d0d90de7bb645",
+  "decision_rule": {
+    "acceptable_attention_gap_ce": 0.1,
+    "attention_only_validation_ce": 5.4918,
+    "directional_only": "stable candidate improves on 5.7395 CE but remains above the +0.1000 attention-control gap",
+    "fixed_tangent_cproj_validation_ce": 5.7395,
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "reject": "candidate ties or regresses versus 5.7395 CE, is unstable, fails the 20-percent MFU gate, or does not complete",
+    "success": "stable candidate finishes at or below 5.5918 CE, within +0.1000 of the accepted attention-only control"
+  },
+  "frozen_hyperparameters": {
+    "adamw_fallback_scale": 0.3,
+    "diagonal_scale": 1.0,
+    "main_learning_rate": 0.0024,
+    "max_iters": 238,
+    "muon_momentum": 0.95,
+    "muon_ns_steps": 5,
+    "natural_gradient": true,
+    "product_fht_factors": 6,
+    "tokens": 62390272,
+    "weight_space_muon": true
+  },
+  "hypothesis": "a nonlinear product of fixed global FHT mixers and learned channel diagonals supplies a moving tangent that can preserve more of dense Muon's coherent polar direction than the rejected fixed BlockFHT tangent",
+  "implementation_commit": "006d61290f840d651585e6356884804747598582",
+  "implementation_source_hashes": {
+    "examples/nanogpt/model.py": "77e4d60b76603c516ce644ac346b2c0249564ee1cc26c1208e18ab7184841ed5",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "examples/nanogpt/train.py": "eb07661ab5391dc4dc28993d7b785cfdc8166951eda94a7529f9677d2e46896e",
+    "latent_weight_lab/block_fht.py": "1bc2d4315eba925308dfd0587024722458be15c0314ede5cee4fff0b0f21eb5d"
+  },
+  "launch_rule": "do not launch unless this exact committed config passes a directly polled real-training MFU gate at or above 20 percent on Y400; train only on Y400 and poll directly",
+  "schema_version": "mai_124m_mlp_product_fht_screen_plan_v1",
+  "status": "preregistered_before_result"
+}
