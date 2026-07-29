@@ -1,0 +1,231 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_endpoint_ce_oracle_result_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_scope": "teacher-guided endpoint oracle; no language-model parameter update and not a deployable teacher-free method",
+  "execution_identity": {
+    "host": "Y400",
+    "gpu": 1,
+    "repository_commit": "3ea018cc08612c0881c67b48e813998cd53a03d7",
+    "source_path": "examples/nanogpt/analyze_mlp_bilateral_endpoint_ce_oracle.py",
+    "source_sha256": "1861714df0be159ede9abf953fd59948a9cde10e519f0775a081fb073b9f6030",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_bilateral_endpoint_ce_oracle_plan.json",
+    "plan_sha256": "20d2cae8820ab3f84774d16cf7310229343ee2ef511da2b559ea73f7a04f1289",
+    "entrypoint": "examples.nanogpt.analyze_mlp_bilateral_endpoint_ce_oracle",
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_bilateral_endpoint_ce_oracle",
+      "--attention-only",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "--plain-cproj",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_endpoint_bilateral_ce_oracle/commit_3ea018c_all12",
+      "--layers",
+      "0,1,2,3,4,5,6,7,8,9,10,11",
+      "--batch-size",
+      "8",
+      "--block-size",
+      "256",
+      "--batches",
+      "8",
+      "--sample-cap",
+      "2048",
+      "--fit-token-seed",
+      "20260716",
+      "--holdout-token-seed",
+      "20260717",
+      "--fit-steps",
+      "300",
+      "--fit-batch-size",
+      "256",
+      "--fit-learning-rate",
+      "0.02",
+      "--fit-seed",
+      "314159",
+      "--initial-output-log-gain",
+      "0.0",
+      "--minimum-ce-gain",
+      "0.005",
+      "--device",
+      "cuda"
+    ],
+    "polling": "attached foreground process plus direct PID/GPU polling; no watchdog, queue entry, or callback",
+    "language_model_parameter_updates": 0
+  },
+  "inputs": {
+    "attention_only_checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj_checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fit_token_sha256": "5ffbcbcb14dd284cded97fef7b9e80fbe4656b8c8de7cdf1beff1bcc6669350b",
+    "holdout_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e"
+  },
+  "fit_protocol": {
+    "chart": "exact production bilateral c_proj chart with two hidden and four output fixed-basis rotation stages plus channel gains",
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "steps_per_layer": 300,
+    "fit_batch_size": 256,
+    "learning_rate": 0.02,
+    "sample_cap": 2048,
+    "fit_error_recovery": {
+      "mean": 0.8237430800994238,
+      "min": 0.7954990863800049,
+      "max": 0.8671796321868896
+    },
+    "holdout_error_recovery": {
+      "mean": 0.7239243487517039,
+      "min": 0.6751545071601868,
+      "max": 0.8001178503036499
+    }
+  },
+  "full_lm_ce": {
+    "plain_cproj_identity": {
+      "fit": 5.6770408153533936,
+      "holdout": 5.731858313083649
+    },
+    "attention_only_reference": {
+      "fit": 5.467920899391174,
+      "holdout": 5.511322021484375
+    },
+    "fitted_single_layers": [
+      {
+        "layer": 0,
+        "fit": 7.748234510421753,
+        "holdout": 7.851741373538971,
+        "holdout_delta_vs_identity": 2.1198830604553223
+      },
+      {
+        "layer": 1,
+        "fit": 6.489984571933746,
+        "holdout": 6.540241241455078,
+        "holdout_delta_vs_identity": 0.8083829283714294
+      },
+      {
+        "layer": 2,
+        "fit": 5.988032341003418,
+        "holdout": 6.043172776699066,
+        "holdout_delta_vs_identity": 0.3113144636154175
+      },
+      {
+        "layer": 3,
+        "fit": 5.861605763435364,
+        "holdout": 5.934433460235596,
+        "holdout_delta_vs_identity": 0.20257514715194702
+      },
+      {
+        "layer": 4,
+        "fit": 5.7814032435417175,
+        "holdout": 5.842606782913208,
+        "holdout_delta_vs_identity": 0.11074846982955933
+      },
+      {
+        "layer": 5,
+        "fit": 5.77686071395874,
+        "holdout": 5.840009987354279,
+        "holdout_delta_vs_identity": 0.10815167427062988
+      },
+      {
+        "layer": 6,
+        "fit": 5.763740718364716,
+        "holdout": 5.822993218898773,
+        "holdout_delta_vs_identity": 0.09113490581512451
+      },
+      {
+        "layer": 7,
+        "fit": 5.74319726228714,
+        "holdout": 5.800862431526184,
+        "holdout_delta_vs_identity": 0.0690041184425354
+      },
+      {
+        "layer": 8,
+        "fit": 5.763236999511719,
+        "holdout": 5.824504554271698,
+        "holdout_delta_vs_identity": 0.09264624118804932
+      },
+      {
+        "layer": 9,
+        "fit": 5.771307349205017,
+        "holdout": 5.82980614900589,
+        "holdout_delta_vs_identity": 0.09794783592224121
+      },
+      {
+        "layer": 10,
+        "fit": 5.790281355381012,
+        "holdout": 5.846039235591888,
+        "holdout_delta_vs_identity": 0.11418092250823975
+      },
+      {
+        "layer": 11,
+        "fit": 5.814240515232086,
+        "holdout": 5.86936891078949,
+        "holdout_delta_vs_identity": 0.13751059770584106
+      }
+    ],
+    "fit_selected_best_single_layer": {
+      "layer": 7,
+      "fit_delta_vs_identity": 0.06615644693374634,
+      "holdout_delta_vs_identity": 0.0690041184425354
+    },
+    "fitted_all_layers": {
+      "fit": 11.477033615112305,
+      "holdout": 11.426838278770447,
+      "fit_delta_vs_identity": 5.799992799758911,
+      "holdout_delta_vs_identity": 5.694979965686798
+    }
+  },
+  "artifacts": {
+    "mlp_fit_csv": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_endpoint_bilateral_ce_oracle/commit_3ea018c_all12/bilateral_endpoint_mlp_fit.csv",
+      "sha256": "2e601f4482eb3915a14284fa1c6c24a62ff156710c5674affbbde0f892fe77f2"
+    },
+    "full_lm_ce_csv": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_endpoint_bilateral_ce_oracle/commit_3ea018c_all12/bilateral_endpoint_full_lm_ce.csv",
+      "sha256": "88a6cb22b0db0f1385e01f07371dfcd76348f00374f1c34d50c19bbdbb901e04"
+    },
+    "chart_state": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_endpoint_bilateral_ce_oracle/commit_3ea018c_all12/bilateral_endpoint_chart_state.pt",
+      "sha256": "57873d1b1f33e8d259b9bf4d0456dfc82f24dfc4dc355a8c6535e30891f6c0a8"
+    },
+    "summary": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_endpoint_bilateral_ce_oracle/commit_3ea018c_all12/bilateral_endpoint_ce_summary.json",
+      "sha256": "a3a400c58c1626cb2f473b2207f4f3b512f458175cbf73e9aa8492467f53da70"
+    }
+  },
+  "decision": {
+    "classification": "REJECT_SEPARATE_TEACHER_MLP_ENDPOINT_AS_TASK_DIRECTION",
+    "launch_teacher_prefit_training": false,
+    "conclusions": [
+      "The fit is valid: the exact production chart recovers 67.5 to 80.0 percent of held-out teacher MLP-output error in every layer.",
+      "Every single fitted layer worsens both fit and holdout full-model CE, so the negative result is not caused by all-layer rollout covariate shift alone.",
+      "The separately trained attention-only teacher and plain-cproj student occupy co-adapted residual representations; matching raw teacher MLP updates does not transport them into the student's task-useful frame.",
+      "The all-layer rollout explosion is a consequence of compounding this residual-frame and activation-distribution mismatch.",
+      "Prior teacher-gradient alignment, teacher-alignment training, and endpoint-manifold coverage must be interpreted as proxy diagnostics, not causal evidence that the corresponding teacher direction is useful to the student."
+    ],
+    "next_required_diagnostic": "Optimize only the exact production bilateral chart against full student language-model CE at the plain-cproj endpoint, with every base parameter frozen, deterministic train windows, untouched validation windows, direct polling, and a measured >=20% MFU gate before the update run. This uses the correct task direction. If it generalizes, the remaining problem is entry into or retention of the chart basin during joint training; if it does not, close the bilateral chart and test a jointly learned residual/MLP frame rather than another teacher endpoint proxy."
+  }
+}
