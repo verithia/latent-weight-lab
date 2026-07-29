@@ -1,0 +1,82 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_hidden64_training_plan_v1",
+  "status": "registered_before_execution",
+  "scientific_question": "Does doubling the causally selected hidden-side Givens depth from 32 to 64 convert its 44 percent higher current-Muon recovery and 52 percent higher held-out phase recovery into enough terminal language-model improvement to reach the accepted plus-0.10 CE gap from attention-only?",
+  "qualification": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden64_qualification_result.json",
+    "sha256": "748059b35744455cf38eed20e6043b9e0aa0aa3a37e1a672784a745f3b99a9a8",
+    "commit": "71625787564dd9f923c656af313f7bf00573d635",
+    "decision": "QUALIFIED_FOR_ONE_PREREGISTERED_124M_SCIENTIFIC_SCREEN"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json",
+    "config_sha256": "9a03286db56a6edb939a37457c6f11b486e79b432e05df8e24edc9fade3a3a10",
+    "stages": 64,
+    "neighbors": 64,
+    "refresh_interval_updates": 60,
+    "learning_rate": 0.0024,
+    "optimizer": "muon",
+    "max_updates": 238,
+    "tokens_per_parameter": 0.5,
+    "model_tier": "124m",
+    "mlp_cfc": "dense",
+    "attention": "selected full BlockFHT replacement",
+    "learned_dense_basis": false,
+    "dense_residual": false,
+    "lora_adapter": false
+  },
+  "controls": {
+    "attention_only": {
+      "terminal_validation_ce": 5.4918
+    },
+    "hidden32_r60": {
+      "terminal_validation_ce": 5.674093246459961
+    },
+    "plain_generated_cproj": {
+      "terminal_validation_ce": 5.7395
+    }
+  },
+  "decision_rule": {
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "success_threshold": 5.5918,
+    "success": "stable terminal validation CE at or below 5.5918, within plus 0.1000 CE of attention-only",
+    "directional_only": "stable terminal validation CE below 5.674093246459961 but above 5.5918",
+    "reject": "terminal validation CE at or above 5.674093246459961, NaN/Inf/divergence, incomplete terminal evaluation, provenance mismatch, or incomplete exact-resume state",
+    "no_posthoc_hpo": true
+  },
+  "immutable_execution": {
+    "run_id": "y400_mai_v3_124m_muonmatchedgivens64_r60_scientific_v1",
+    "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp",
+    "host": "Y400",
+    "gpu_policy": "one otherwise idle GPU",
+    "mode": "foreground direct polling with no watchdog, callback, queue worker, or heartbeat",
+    "provenance_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/provenance/y400_mai_v3_124m_muonmatchedgivens64_r60_scientific_v1.json",
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json"
+    ],
+    "required_bindings": {
+      "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "mfu_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens64_r60.json",
+      "mfu_certificate_sha256": "db45c4dd558c1e0ba97a72dfbee906c4e017a01e99a71d7282623a91e635630f",
+      "mfu_fraction": 0.26380577862666255,
+      "minimum_mfu_fraction": 0.2
+    }
+  },
+  "authorization": {
+    "authorized_runs": 1,
+    "scope": "exactly the immutable 124M/0.5TPP stage64/r60 candidate above",
+    "not_authorized": [
+      "larger rungs",
+      "c_fc replacement",
+      "learning-rate or seed sweep",
+      "PRO6",
+      "watchdog or callback attachment"
+    ]
+  }
+}
