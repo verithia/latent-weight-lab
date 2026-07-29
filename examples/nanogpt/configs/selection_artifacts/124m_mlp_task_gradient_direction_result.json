@@ -1,0 +1,33 @@
+{
+  "analysis_commit": "48dfc3c18e2fd4dcae6ffa57a7477de561fe893f",
+  "decision": "REJECT_STATELESS_PHASE_START_TASK_GRADIENT_DIRECTIONS",
+  "failed_administrative_attempt": {
+    "classification": "non-contiguous shifted targets were incompatible with the model loss view; no result produced",
+    "output_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/task_gradient_direction_v1",
+    "resolution_commit": "48dfc3c18e2fd4dcae6ffa57a7477de561fe893f"
+  },
+  "fit": {
+    "all_direction_span_recovery": 0.004772774851274754,
+    "muon_polar_descent_recovery": 0.00275354320165418,
+    "muon_right_tangent_recovery": 0.0014975313068723319,
+    "raw_descent_recovery": 0.0030086182602717107,
+    "raw_right_tangent_recovery": 0.0019699199244129634
+  },
+  "holdout": {
+    "all_direction_span_recovery": 0.0055393797564923155,
+    "muon_polar_descent_recovery": 0.0032289196177541775,
+    "muon_right_tangent_recovery": 0.0018037790339015115,
+    "raw_descent_recovery": 0.0034942702638757098,
+    "raw_right_tangent_recovery": 0.00227468382087013
+  },
+  "outputs": {
+    "aggregate_sha256": "3483eb3a6b3059ad37a3ccab8dc83c09eb054859c3864d749fe1829e7d50c30e",
+    "analysis_log_sha256": "19c9a3398f89c0ca94bb34a1afdaa0ad64b4ccb3db3d6c54810cc844ee1f58dc",
+    "detail_sha256": "4ed39a173e435f3111d316f928d1fb608c67c311aaa847f1438a6a39f75598ab",
+    "gradients_sha256": "bf56148be2e6fb6b4072650c360b39d5603def270a2d78c2cac06d7ba2423cb7",
+    "metadata_sha256": "7073cf20ae26022fc89be578dc67b06fe4195bb001994e37eb2e6489da4ef4e2",
+    "remote_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/task_gradient_direction_v2"
+  },
+  "scientific_conclusion": "A fixed validation-window task gradient has the correct sign in every pilot cell but explains less than 0.35% of the future phase chord. Stateless Muon polar orthogonalization does not repair this and destroys cross-window stability. The next exact observable to test is the real training Muon momentum buffer and its realized polar update at phase boundaries, captured in the same replay as the target weights.",
+  "schema_version": "nanogpt_mlp_task_gradient_direction_result_v1"
+}
