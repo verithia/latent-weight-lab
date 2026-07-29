@@ -1,0 +1,198 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_hidden_multihead_causal_result_v1",
+  "recorded_at": "2026-07-29",
+  "registered_inputs": {
+    "direction_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_hidden_multihead_direction_result.json",
+      "sha256": "4b54388275566d297c1096971db013efb7c0ab289e03475ae70da28c8418a2c2"
+    },
+    "single_head_causal_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_hidden_self_causal_result.json",
+      "sha256": "25d1c478ea71321401589e516edf3e4db20e3a2f04cedb56e70de00a3dc3db43"
+    },
+    "causal_config": {
+      "path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_hidden_multihead2_l0_0p5tpp_lr24e4.json",
+      "sha256": "746dfa3ed48dbad4ca52b95f90741ef2e676a5c87acc8d92d806db569f133fe7",
+      "resolved_config_sha256": "67a9cce52dbe0fdec86a9ecb2ddb687c3fccc8bfab3f5185b943f4242f6030fe"
+    },
+    "preregistered_decision_rule": {
+      "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+      "promote": "candidate improves on the exact matched post-GELU-frame parent by at least 0.020 CE and is stable",
+      "directional_only": "candidate improvement is positive but below 0.020 CE",
+      "reject": "candidate ties, regresses, is unstable, or does not complete",
+      "practical_margin_ce": 0.02
+    }
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "run_name": "y400_mai_v3_124m_hidden_multihead2_l0_0p5tpp",
+    "started_at": "2026-07-29T15:29:20+08:00",
+    "finished_at": "2026-07-29T15:37:10+08:00",
+    "exit_code": 0,
+    "classification": "clean",
+    "scientific_run_git_commit": "133db70f88798fc677c31ef537c7542f12a618c7",
+    "implementation_commit": "fbec97f2d66b0844ca64a82a6fb80f604bf7e60c",
+    "monitoring": "registered foreground launcher inside tmux with direct status, log, GPU, and process polling; no watchdog, queue entry, heartbeat, callback, or PRO6 execution",
+    "literal_command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_hidden_multihead2_l0_0p5tpp_20260729T072920Z_44297.config.json"
+    ],
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_evaluation": {
+      "protocol": "mai_ladder_fixed_eval_indices_v2",
+      "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "eval_batch_size": 16,
+      "eval_iters": 400,
+      "eval_seed": 20260715
+    }
+  },
+  "performance_gate": {
+    "classification": "passed",
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.20285448579186152,
+    "tokens_per_second": 176273.13999999998,
+    "iter_ms": 1487.1499999999999,
+    "model_tflops": 131.65055071451135,
+    "empirical_bf16_gemm_peak_tflops": 648.9900886371878,
+    "peak_mib": 63332.22,
+    "certificate_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/performance_preflight_hidden_multihead2_l0.json",
+    "certificate_sha256": "ad74b0aae0647167c8124973a5c9eb688a24f372e2874e34862dd8f95b7f023b",
+    "rejected_implementations": [
+      {
+        "name": "generic_batched_cuda_fht",
+        "mfu_fraction": 0.170802657,
+        "certificate_sha256": "6dc08d094c6c1264672e599d60b63589bf7cb89f7b5913234d7f51e1d41814b0"
+      },
+      {
+        "name": "warp_butterfly_256",
+        "mfu_fraction": 0.192273007,
+        "certificate_sha256": "c95f8823f83678149cd00a833b707832f90e5513a57f5bfbf6a36bad26bc40c5"
+      },
+      {
+        "name": "cross_warp_h8xh32",
+        "mfu_fraction": 0.19334875243269614,
+        "certificate_sha256": "8a61e31997e007e623bde9dbf198467b4287f13c750bbaed5b17d78cf0c7b946"
+      }
+    ]
+  },
+  "mechanism": {
+    "selected_layers": [
+      0
+    ],
+    "formula": "h + sum_head Q_out_head^-1[(Q_update_head h) * (slope_head * Q_condition_head rmsnorm(h))]",
+    "location": "after GELU and before c_proj",
+    "heads": 2,
+    "condition_width_per_head": 3072,
+    "trainable_coordinates": 6144,
+    "identity_initialized": true,
+    "fixed_untied_bases": true,
+    "learned_bias": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "non_redundancy": "each correction is homogeneous quadratic in the current token activation and cannot be absorbed into a static c_proj matrix"
+  },
+  "evaluation": {
+    "step_0": {
+      "train_ce": 10.9788,
+      "val_ce": 10.9789
+    },
+    "step_60": {
+      "train_ce": 6.3373,
+      "val_ce": 6.3469
+    },
+    "step_120": {
+      "train_ce": 5.9257,
+      "val_ce": 5.9312
+    },
+    "step_180": {
+      "train_ce": 5.7536,
+      "val_ce": 5.758
+    },
+    "step_238": {
+      "train_ce": 5.6897,
+      "val_ce_printed": 5.6941,
+      "val_ce_checkpoint": 5.694058895111084
+    }
+  },
+  "learned_coordinate": {
+    "key": "transformer.h.0.mlp.postgelu_hidden_self_slope",
+    "shape": [
+      2,
+      3072
+    ],
+    "numel": 6144,
+    "l2_norm": 0.25304314494132996,
+    "rms": 0.0032282641623169184,
+    "max_abs": 0.06381264328956604,
+    "nonzero": 6144,
+    "headwise": [
+      {
+        "head": 0,
+        "l2_norm": 0.17929387092590332,
+        "rms": 0.0032348553650081158,
+        "max_abs": 0.06381264328956604,
+        "nonzero": 3072
+      },
+      {
+        "head": 1,
+        "l2_norm": 0.1785624623298645,
+        "rms": 0.0032216596882790327,
+        "max_abs": 0.060470376163721085,
+        "nonzero": 3072
+      }
+    ]
+  },
+  "matched_comparison": {
+    "exact_postgelu_frame_parent_val_ce": 5.696969509124756,
+    "single_head_candidate_val_ce": 5.696751117706299,
+    "candidate_val_ce": 5.694058895111084,
+    "candidate_gain_vs_parent_ce": 0.002910614013671875,
+    "candidate_gain_vs_single_head_ce": 0.0026922225952148438,
+    "fraction_of_preregistered_margin": 0.14553070068359375,
+    "matched_attention_only_val_ce": 5.4918,
+    "parent_gap_to_attention_ce": 0.2051695091247563,
+    "candidate_gap_to_attention_ce": 0.2022588951110844,
+    "fraction_of_parent_attention_gap_closed": 0.014186386788604314,
+    "compressed_postgelu_conditioned_candidate_val_ce": 5.6951584815979,
+    "candidate_minus_compressed_conditioned_ce": -0.0010995864868164062,
+    "pregelu_frame_candidate_val_ce": 5.6942009925842285,
+    "candidate_minus_pregelu_frame_ce": -0.00014209747314453125,
+    "best_prior_output_plus_activation_val_ce": 5.6832,
+    "candidate_minus_best_prior_ce": 0.010858895111083733
+  },
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_hidden_multihead2_l0_0p5tpp",
+    "checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_hidden_multihead_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_hidden_multihead2_l0_0p5tpp/ckpt.pt",
+      "sha256": "d512d9190837ee977129700de7d4aaf0e2f61413f6943da7f5dd65a81331d406",
+      "size_bytes": 729270372,
+      "schema_version": "nanogpt_exact_resume_v2",
+      "next_iter": 238,
+      "metadata_sha256": "1fff0f3e37baf0e7768bb1ad939d54ec4315cd40881f0c5e6336619abdd16b49"
+    },
+    "log": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_124m_hidden_multihead2_l0_0p5tpp_20260729T072920Z_44297.log",
+      "sha256": "eadd8890de70e0584a0fda8a723a45ff5eff4d5cdf4a72ba5bf32ec582cb2653"
+    },
+    "status_sha256": "95a2d0dce8ad2e0a6de596e957c58bdfb5f60cdd0989127fcf756e27c016671d",
+    "provenance_sha256": "18c479741fe599ad5fecc8f1aa360f78cbf1cc2745655253ca59be1db7472020",
+    "archived_config_sha256": "746dfa3ed48dbad4ca52b95f90741ef2e676a5c87acc8d92d806db569f133fe7",
+    "archived_mfu_certificate_sha256": "ad74b0aae0647167c8124973a5c9eb688a24f372e2874e34862dd8f95b7f023b"
+  },
+  "decision": {
+    "classification": "DIRECTIONAL_ONLY",
+    "promote_larger_ladder": false,
+    "reason": "Both independently based heads are active and improve the exact matched parent by 0.002911 CE, but that is only 14.553 percent of the preregistered 0.020 margin and closes 1.419 percent of the remaining attention-only gap.",
+    "structural_interpretation": "Increasing fixed quadratic tensor rank from one head to two produces a real, reproducible gain but does not convert the strong initialization task-gradient cosine into sufficient terminal capacity. The bottleneck is therefore not just one-head direction misalignment; a static diagonal quadratic chart remains too restrictive along the training path.",
+    "next_action": "Do not scale this two-head gate or spend another run on additional fixed diagonal heads. Use the saved dense trajectory to measure tangent-subspace drift across checkpoints and register the next smallest structure only if it represents that time-varying path without a learned dense basis or LoRA adapter."
+  }
+}
