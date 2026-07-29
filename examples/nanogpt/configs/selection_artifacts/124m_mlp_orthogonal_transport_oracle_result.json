@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_mlp_orthogonal_transport_oracle_result_v1",
+  "recorded_at": "2026-07-29",
+  "decision": "PROMOTE_GLOBAL_HIDDEN_ORTHOGONAL_TRANSPORT",
+  "scientific_conclusion": "Dense c_proj phase motion is overwhelmingly transport of the 3072-wide post-GELU input frame. Output-side transport alone is weak; independent transport on both sides nearly saturates endpoint recovery.",
+  "analysis": {
+    "source_commit": "097582b15d135deaae940407ec426b920e2c13f1",
+    "entrypoint_sha256": "1335fac41209c3554abc072a98faed6bd72a8ee86d4c25a00521496c099bfd25",
+    "detail_sha256": "a8188727ca6eb573c2301ac9def0ea0807a2e0bfff9ec4b990b88a3c4c3c307e",
+    "aggregate_sha256": "7bf5ddc30a9dd067546ab33c82308f672916d1ca334fdcb34416f224bcdd9480",
+    "metadata_sha256": "76e48f6bb679bb0892db686919f6f186a44d831c4819af177296965d78fe3412",
+    "analysis_seconds": 5.4573564529418945,
+    "cells": 20,
+    "analysis_dtype": "float64"
+  },
+  "aggregate": {
+    "left_output_frame_endpoint_recovery": 0.12740524506895673,
+    "right_hidden_frame_endpoint_recovery": 0.8572206806474874,
+    "bilateral_endpoint_recovery": 0.9908753176437582,
+    "singular_value_drift_fraction": 0.009124682356241576,
+    "minimum_right_endpoint_recovery": 0.8380711217769145,
+    "maximum_right_endpoint_recovery": 0.8720824748579616,
+    "minimum_bilateral_endpoint_recovery": 0.9788713844707895,
+    "maximum_bilateral_endpoint_recovery": 0.9996526239795425
+  },
+  "phase_recovery": {
+    "0": {
+      "left": 0.122224,
+      "right": 0.86488,
+      "bilateral": 0.99931
+    },
+    "60": {
+      "left": 0.129716,
+      "right": 0.851582,
+      "bilateral": 0.982358
+    },
+    "120": {
+      "left": 0.135774,
+      "right": 0.850873,
+      "bilateral": 0.990016
+    },
+    "180": {
+      "left": 0.140333,
+      "right": 0.850062,
+      "bilateral": 0.996275
+    }
+  },
+  "layer_right_recovery": {
+    "0": 0.851873,
+    "3": 0.859677,
+    "6": 0.858146,
+    "9": 0.857975,
+    "11": 0.858866
+  },
+  "interpretation": {
+    "hyperconnection": "not selected: residual-output transport is only 12.74% and prior scalar/dynamic residual gates were practical ties",
+    "selected_geometry": "global orthogonal transport of the 3072-wide post-GELU frame with optional smaller output-frame correction",
+    "deployable_family": "learned-angle global butterfly/Givens flow with fixed connectivity; no learned dense basis and no LoRA",
+    "required_next_gate": "fit the fixed-connectivity nonlinear flow to dense phase endpoints and measure recovery relative to the 85.72% right-orbit oracle before any training run"
+  }
+}
