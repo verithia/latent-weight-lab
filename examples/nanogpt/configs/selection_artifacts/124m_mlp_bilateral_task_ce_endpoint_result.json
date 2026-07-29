@@ -1,0 +1,154 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_task_ce_endpoint_result_v1",
+  "registered_at": "2026-07-29",
+  "decision": "POSITIVE_TASK_CONDITIONED_CHART_CAPACITY",
+  "scientific_conclusion": "The exact bilateral chart contains a small task-useful local direction at the frozen plain-cproj endpoint, but the joint-training learning rate is catastrophically too large in this all-layer frozen-endpoint geometry. A tenfold lower chart LR produces monotone cross-seed validation improvement. The chart recovers only about 4.4 percent of the primary attention-only CE gap, so this diagnoses an optimization failure without establishing sufficient MLP replacement capacity.",
+  "source": {
+    "commit": "113cf8d3c722f557ed6732993095a8f338efd431",
+    "entrypoint": "examples/nanogpt/optimize_mlp_bilateral_endpoint_ce.py",
+    "entrypoint_sha256": "6911fec7c95c6911ec405e9d787bfa626f2b2d60dc147ee01b09084db4d356fa",
+    "model_source_sha256": "3c7e55bacdc5a44bcb6a9bb24eb6881a1f48fe61f1b018760124c1c1cf6f3ab9",
+    "tests": "199 passed, 9 skipped locally; 7 targeted tests passed on the clean Y400 deployment"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_bilateral_task_ce_endpoint_plan.json",
+    "sha256": "ba570646318704a701230e36379cfd2bb7f579413e5233f2068b2c584919ea60",
+    "amendment": "The original 0.00072 endpoint LR was rejected before the scientific run by an exact performance preflight plus zero-update control. Version 2 preregistered a tenfold trust reduction and a separate-seed CE safety gate."
+  },
+  "inputs": {
+    "plain_cproj_checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    }
+  },
+  "rejected_preflight": {
+    "commit": "bf730b4928b7880267dd343971db413643282069",
+    "learning_rate": 0.00072,
+    "mfu_certificate_sha256": "abe14bb7af971bd81a3f6df95ba6cf4eb3817892b076787bdd3d1eeb6dfaa5e3",
+    "mfu_fraction": 0.25493786299713533,
+    "updated_batch_losses": [
+      5.772774,
+      7.489599,
+      7.278591,
+      7.649678,
+      6.380461
+    ],
+    "zero_update_control_sha256": "23aa1f6f42d5cc6366e1d49db889b0714e4885d0bdeda3e63b98f36bdf1cff64",
+    "zero_update_batch_losses": [
+      5.772774,
+      5.726672,
+      5.703432,
+      5.754378,
+      5.751963
+    ],
+    "interpretation": "The loss jump is first-step damage, not deterministic-batch variance. No scientific run was launched at this LR."
+  },
+  "accepted_preflight": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/mfu_safety_commit_113cf8d_gpu1.json",
+    "sha256": "6740ba54da4e8126ef75fcd24a818d83e4fa9e8acd15d00b5f75b939fff11da5",
+    "learning_rate": 0.000072,
+    "mfu_fraction": 0.25817684804235197,
+    "tokens_per_second": 226736.32127467252,
+    "mean_iter_ms": 1156.1623586652179,
+    "peak_mib": 28341.43603515625,
+    "empirical_bf16_gemm_peak_tflops": 655.9040930502681,
+    "separate_seed_safety": {
+      "seed": 20260730,
+      "token_sha256": "b40439a93c2b6768d6907532be89802ca423ef4be4e1aa8bfa60910525ac31a2",
+      "initial_ce": 5.685522079467773,
+      "final_ce": 5.688480377197266,
+      "ce_increase": 0.0029582977294921875,
+      "maximum_allowed_increase": 0.1
+    }
+  },
+  "scientific_run": {
+    "host": "Y400",
+    "gpu": 1,
+    "polling": "attached foreground process with direct process/GPU polling; no watchdog, queue entry, callback, or background worker",
+    "output": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5",
+    "updates": 120,
+    "tokens_per_update": 262144,
+    "total_optimization_tokens": 31457280,
+    "updated_parameter_count": 1760256,
+    "cached_block_fht_modules": 180,
+    "train_token_seed": 20260729,
+    "train_indices_sha256": "b50b0e959929d2841833f6e6dd93201c06b6065be0766f4f231f06b93c538dae",
+    "command": "CUDA_VISIBLE_DEVICES=1 PYTHONPATH=. /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.optimize_mlp_bilateral_endpoint_ce --mode run --checkpoint /root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt --data-dir /root/userdata/MappingNetworks/data/finewebedu_20b --mfu-certificate /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/mfu_safety_commit_113cf8d_gpu1.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_task_ce_endpoint/run_commit_113cf8d_lr7p2e5"
+  },
+  "validation": [
+    {
+      "update": 0,
+      "primary_ce": 5.731858313083649,
+      "confirmation_ce": 5.697322964668274
+    },
+    {
+      "update": 30,
+      "primary_ce": 5.729212164878845,
+      "confirmation_ce": 5.697055637836456
+    },
+    {
+      "update": 60,
+      "primary_ce": 5.727380394935608,
+      "confirmation_ce": 5.692734658718109
+    },
+    {
+      "update": 120,
+      "primary_ce": 5.722150385379791,
+      "confirmation_ce": 5.687591791152954
+    }
+  ],
+  "selection": {
+    "selected_update": 120,
+    "minimum_gain": 0.005,
+    "primary_seed": 20260717,
+    "primary_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e",
+    "primary_gain": 0.009707927703857422,
+    "confirmation_seed": 20260718,
+    "confirmation_token_sha256": "9458b6a1fb470c780cf00b7305122f272d72a7dec4554d99b5dd2523c14cca8d",
+    "confirmation_gain": 0.009731173515319824,
+    "primary_attention_only_reference_ce": 5.511322021484375,
+    "primary_plain_cproj_gap": 0.22053629159927368,
+    "fraction_of_primary_gap_recovered": 0.04401963791745102
+  },
+  "chart_displacement": {
+    "hidden_rotation": {
+      "coordinates": 1142784,
+      "rms": 0.000599058112129569,
+      "max_abs": 0.003926504869014025
+    },
+    "hidden_gain": {
+      "coordinates": 36864,
+      "rms": 0.0006684380350634456,
+      "max_abs": 0.0032992749474942684
+    },
+    "output_rotation": {
+      "coordinates": 571392,
+      "rms": 0.0004985710256733,
+      "max_abs": 0.003188369097188115
+    },
+    "output_gain": {
+      "coordinates": 9216,
+      "rms": 0.000786700751632452,
+      "max_abs": 0.0036271652206778526
+    },
+    "layer_rms_range": [
+      0.0005191578529775143,
+      0.0006649419665336609
+    ],
+    "pattern": "all groups and all layers moved; displacement grows again in the final layers and is largest in layer 11"
+  },
+  "artifacts": {
+    "optimization_csv_sha256": "6efa4633b0097d2b57e158941375d1a67015f3038803bd215dadaf1cc8d3d80c",
+    "validation_csv_sha256": "ded8488e64b602812eb397b2c823ef74455001fbdb836f198a121552ec271b5c",
+    "chart_state_step_0000_sha256": "2d18703bf53d62ab52a217730a9e63594c331c5a07118b3f79069a18ff91aa01",
+    "chart_state_step_0030_sha256": "1887bdc821fd680f0de7d7b134ec7884d5390a60f23654765bbedfabf6656f54",
+    "chart_state_step_0060_sha256": "35ff654832492a9c23df9e64a50f60cbb611c1a3dd6369fd70e98c33dedc49ef",
+    "chart_state_step_0120_sha256": "2abeee50138189f055a5462679412965a6c60d524a04c60afda1cdc3877a6b75",
+    "remote_summary_sha256": "3596d61e1c82a4289b3f35ad30f738fae438cd7d348ba4382238713eb3e99627"
+  },
+  "next_required_diagnostic": "Perform no-update causal attribution of the accepted endpoint state by chart group and depth band on both fixed validation seeds. If the gain is concentrated in output-frame coordinates, test the smallest identity-initialized jointly learned residual/MLP frame; if it is distributed, retain the full chart only as a low-LR late-stage optimization control and close it as a sufficient MLP replacement."
+}
