@@ -28,13 +28,13 @@
   },
   "implementation": {
     "native_source": "examples/nanogpt/csrc/task_edge_coloring.cpp",
-    "native_source_sha256": "0dbda9b83a0a63ba95958153f96bec862b3e5084025fd97f362b49a99709659b",
+    "native_source_sha256": "1c052b09fff8038e393f5bf0254fdc90d832c0e739609f9c8d993e05e4e2ddc0",
     "wrapper": "examples/nanogpt/fast_task_matching.py",
     "wrapper_sha256": "2858864db759410d9a25c87663d35176fd5a93dbd36661da35ec9dccece58262",
     "analyzer": "examples/nanogpt/analyze_mlp_fast_fresh_matching.py",
     "analyzer_sha256": "d58df589a5accce70b48fb23e1c1f2b9a0a1a44ecff71374fa773fbefdee1805",
     "native_test": "examples/nanogpt/test_fast_task_matching.py",
-    "native_test_sha256": "353854651b9fef9da3d794bcc3d27a3bc49393db5be33df7a924e1f28223f777",
+    "native_test_sha256": "a5d8d1757f8d7fe448c9180c89ba648c8f44613519ec04bd7b6ac5795ab3e83c",
     "analyzer_test": "examples/nanogpt/test_analyze_mlp_fast_fresh_matching.py",
     "analyzer_test_sha256": "1869d315fe0b6e1b3c0a60ceba7163985d5e63962a5623d4d343acc0936cc11f",
     "muon_matching_module": "examples/nanogpt/muon_matched_givens.py",
@@ -107,6 +107,17 @@
     "pro6": false,
     "do_not_disturb_gpu0_long_run": true,
     "no_language_model_training": true
+  },
+  "measurement_repair": {
+    "first_attempt_classification": "ANALYSIS_ABORTED_NATIVE_REPAIR_LOOP_MEMORY_SAFETY",
+    "first_attempt_parameter_updates": 0,
+    "first_attempt_result_emitted": false,
+    "issue": "the rare leftover-pair repair loop could execute its second swap orientation after the first orientation had already succeeded, erasing the same vector element twice",
+    "repair": "stop the orientation loop immediately after a successful repair and add an empty-candidate 64-channel/32-stage forced-completion stress test",
+    "thresholds_changed": false,
+    "protocol_changed": false,
+    "failed_analysis_log": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_matching_v1.analysis.log",
+    "failed_analysis_log_sha256": "ad2b75d820ade3deb7f5a2fca85c60bb393158497e88c3e01896864541a69dbd"
   },
   "authorized_next_action": "Run exactly this no-training matcher comparison from a clean exact-commit Y400 worktree. A passing result authorizes only production integration and a separately foreground-polled real BF16 MFU gate, not a 238-update language-model run."
 }

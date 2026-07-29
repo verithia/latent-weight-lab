@@ -90,6 +90,20 @@ def test_fast_muon_matching_returns_valid_task_matchings(
     assert diagnostics["total_seconds"] > 0.0
 
 
+def test_empty_candidates_force_valid_completion(
+    tmp_path: Path,
+) -> None:
+    permutations, diagnostics = color_sorted_edges(
+        torch.empty(0, 2, dtype=torch.int32),
+        width=64,
+        stages=32,
+        seed=31,
+        cache_dir=tmp_path,
+    )
+    assert_unique_perfect_matchings(permutations)
+    assert diagnostics["candidate_edge_fraction"] == 0.0
+
+
 @pytest.mark.parametrize(
     "width,stages",
     [(7, 2), (8, 0), (8, 65)],

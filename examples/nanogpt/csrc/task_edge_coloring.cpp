@@ -188,7 +188,9 @@ extern "C" int task_edge_color(
                         prior_left, prior_right};
                     const std::int32_t second_options[2] = {
                         prior_right, prior_left};
-                    for (int option = 0; option < 2; ++option) {
+                    for (int option = 0;
+                         option < 2 && !repaired;
+                         ++option) {
                         const auto first_key =
                             edge_key(left, first_options[option]);
                         const auto second_key =
