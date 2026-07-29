@@ -1,0 +1,57 @@
+{
+  "schema_version": "mai_124m_mlp_natural_axis_phase_capture_plan_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "Does a non-learned c_proj rotation chart aligned to the model's natural expansion/head/channel tensor axes capture dense Muon directional motion more efficiently than the rejected fixed random FHT chart?",
+  "parent_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_bilateral_phase_capture_result.json",
+    "classification": "FIXED_BILATERAL_TANGENT_STRUCTURALLY_MISALIGNED",
+    "total_capture": 0.06911769930807644,
+    "coordinate_fraction": 0.062174479166666664,
+    "subspace_rotation_capture": 0.0440477683143646
+  },
+  "candidate": {
+    "target": "mlp.c_proj",
+    "formula": "R_out^T D_out W_base R_hidden^T D_hidden",
+    "hidden_layout": "4 expansion groups x 12 model-head groups x 64 within channels",
+    "output_layout": "12 model-head groups x 64 within channels",
+    "rotation_structure": "one independent Cayley SO(64) chart per contiguous group plus one shared Cayley group-axis chart",
+    "gains": "per hidden and output channel, retained as the radial control",
+    "coordinate_count": 125994,
+    "ambient_matrix_dimension": 2359296,
+    "coordinate_fraction": 0.053403218587239586,
+    "fixed_random_basis": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "diagnostic": {
+    "trajectory": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "components": [
+      "total",
+      "singular_value",
+      "in_frame_mixing",
+      "subspace_rotation"
+    ],
+    "analysis_dtype": "float64",
+    "solver": "exact JVP/VJP with 24-step damped CG",
+    "execution": "foreground-polled Y400 diagnostic; no training, watchdog, callback, queue, or PRO6"
+  },
+  "decision_rule": {
+    "promote_to_smallest_rung_training": "Require total capture >= 0.10, total capture / coordinate fraction >= 1.75, and subspace-rotation capture >= 0.08 without a severe layer or phase collapse.",
+    "reject": "Reject if total capture is below 0.10 or directional capture remains near dimension-matched generic coverage.",
+    "no_posthoc_capacity_change": true
+  }
+}
