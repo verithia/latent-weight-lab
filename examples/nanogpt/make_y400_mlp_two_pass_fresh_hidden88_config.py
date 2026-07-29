@@ -26,6 +26,14 @@ OUTPUT_PLAN = (
     ARTIFACTS
     / "124m_mlp_two_pass_fresh_hidden88_mfu_plan.json"
 )
+OUTPUT_MFU_RESULT = (
+    ARTIFACTS
+    / "124m_mlp_two_pass_fresh_hidden88_mfu_result.json"
+)
+OUTPUT_TRAINING_PLAN = (
+    ARTIFACTS
+    / "124m_mlp_two_pass_fresh_hidden88_training_plan.json"
+)
 IMPLEMENTATION_COMMIT = (
     "1f7e1c6640450b0938545bc7efe3c911f1e0ac33"
 )
@@ -75,6 +83,12 @@ RUN_NAME = (
 )
 CERTIFICATE = (
     f"{OUTPUT_ROOT}/performance_preflight_two_pass_fresh_hidden88.json"
+)
+CERTIFICATE_SHA256 = (
+    "b459a0c0baf5b0b3b0b7df47d3b2e233f37a07e85f3ce917c8183cb4dce7904c"
+)
+MFU_PLAN_SHA256 = (
+    "530be5283129ea3fa84d1725355fa2dcacbea4ff531f4f19c1fd7b8e9a5a816c"
 )
 
 
@@ -351,6 +365,249 @@ def make_plan(config_sha256: str) -> dict[str, Any]:
     }
 
 
+def make_mfu_result(config_sha256: str) -> dict[str, Any]:
+    return {
+        "schema_version": (
+            "mai_124m_mlp_two_pass_fresh_hidden88_mfu_result_v1"
+        ),
+        "recorded_at": "2026-07-30",
+        "plan": {
+            "path": str(OUTPUT_PLAN.relative_to(ROOT)),
+            "sha256": MFU_PLAN_SHA256,
+        },
+        "config": {
+            "path": str(OUTPUT_CONFIG.relative_to(ROOT)),
+            "sha256": config_sha256,
+        },
+        "implementation_commit": IMPLEMENTATION_COMMIT,
+        "execution": (
+            "Direct foreground Y400 GPU1 real CUDA BF16 training-path "
+            "preflight, polled through exit; no watchdog, callback, queue "
+            "worker, heartbeat, or PRO6 execution."
+        ),
+        "certificate": {
+            "path": CERTIFICATE,
+            "sha256": CERTIFICATE_SHA256,
+            "preflight_log_sha256": (
+                "bdeeb86f903dfa7d9d040eb2b94a047580bd5269782ceb233e150846dacdb8d0"
+            ),
+            "schema_version": "nanogpt_mfu_preflight_v1",
+        },
+        "protocol": {
+            "warmup_updates": 1,
+            "timed_updates": 8,
+            "parent_matching_stages": 64,
+            "residual_matching_stages": 24,
+            "matching_refresh_interval_updates": 1,
+            "minimum_mfu_fraction": 0.2,
+            "denominator": (
+                "same-host empirical BF16 8192-square tensor-core GEMM peak"
+            ),
+        },
+        "measurement": {
+            "passed": True,
+            "empirical_bf16_peak_tflops": 657.0719597441285,
+            "active_params_6n_estimate": 124475904,
+            "tokens_per_second": 199744.51875,
+            "average_iter_ms": 1312.44375,
+            "model_tflops": 149.18027724270718,
+            "mfu_fraction": 0.22703795989224637,
+            "headroom_over_gate_percentage_points": (
+                2.7037959892246364
+            ),
+            "peak_mib": 31688.21,
+            "timing_breakdown_ms": {
+                "data": 1.65375,
+                "flush": 9.96375,
+                "forward_backward": 883.2487500000001,
+                "gradient_postprocess": 2.84375,
+                "optimizer": 404.25499999999994,
+                "other": 2.0237499999999997,
+                "prepare": 8.458749999999998,
+            },
+        },
+        "native_confirmation": {
+            "parent_selector": "fast_fresh_single_pass",
+            "residual_selector": "fast_fresh_residual_pass",
+            "parent_and_residual_output_validated": True,
+            "source_sha256": SOURCE_HASHES[
+                "examples/nanogpt/csrc/task_edge_coloring.cpp"
+            ],
+            "library_sha256": (
+                "5aead912a93ca2ff4000632cd906b3a6622fa8cba6e82e0aa86a6fae94302e73"
+            ),
+            "coordinates_per_layer": 88 * 1536,
+        },
+        "decision": {
+            "classification": (
+                "AUTHORIZE_ONE_124M_0P5TPP_TWO_PASS_FRESH_HIDDEN88_RUN"
+            ),
+            "registered_mfu_gate_passed": True,
+            "scope": (
+                "Exactly one directly polled 238-update run under the "
+                "immutable config and a separately registered terminal-CE "
+                "plan; no other MLP structure or larger rung is authorized."
+            ),
+        },
+    }
+
+
+def make_training_plan(
+    config_sha256: str,
+    mfu_result_sha256: str,
+) -> dict[str, Any]:
+    remote_repo = (
+        "/root/userdata/MappingNetworks/"
+        "latent-weight-lab-mlp-product-fht"
+    )
+    remote_config = (
+        f"{remote_repo}/examples/nanogpt/configs/{OUTPUT_CONFIG.name}"
+    )
+    run_id = "y400_mai_v3_124m_twopassfresh88_scientific_v1"
+    command = [
+        "env",
+        (
+            "PYTHON_BIN=/root/userdata/MappingNetworks/"
+            ".venv-gpt2/bin/python"
+        ),
+        "bash",
+        f"{remote_repo}/examples/nanogpt/launch_y400_ladder_detached.sh",
+        "--foreground",
+        remote_config,
+        "1",
+        run_id,
+        "/root/userdata/MappingNetworks",
+    ]
+    return {
+        "schema_version": (
+            "mai_124m_mlp_two_pass_fresh_hidden88_training_plan_v1"
+        ),
+        "status": (
+            "registered_after_heldout_geometry_and_exact_config_mfu_"
+            "qualification_before_scientific_training"
+        ),
+        "scientific_question": (
+            "Does the held-out-selected two-pass fresh hidden88 c_proj "
+            "chart close the remaining 124M loss gap to within +0.1 CE of "
+            "the accepted full-attention-only control without a learned "
+            "dense basis, dense residual, or LoRA adapter?"
+        ),
+        "candidate": {
+            "config": str(OUTPUT_CONFIG.relative_to(ROOT)),
+            "config_sha256": config_sha256,
+            "implementation_commit": IMPLEMENTATION_COMMIT,
+            "model_tier": "124m",
+            "planned_tpp": 0.5,
+            "max_iters": 238,
+            "parent_stages": 64,
+            "residual_stages": 24,
+            "matching_neighbors": 64,
+            "refresh_interval_updates": 1,
+            "coordinates_per_layer": 88 * 1536,
+            "coordinate_fraction_per_cproj": 88 / 1536,
+        },
+        "causal_optimizer_protocol": {
+            "matching": (
+                "At every update, score hidden-channel edges from that "
+                "update's exact coherent Muon polar direction, select and "
+                "fit 64 parent stages, materialize the finite parent update, "
+                "then select and fit 24 new stages from its exact residual."
+            ),
+            "state_transition": (
+                "Apply both finite Givens flows, apply decoupled weight "
+                "decay, and fold the result into the persistent base buffer."
+            ),
+            "future_information_used": False,
+            "persistent_selected_connectivity": False,
+            "native_output_validation": True,
+            "learned_dense_basis": False,
+            "dense_residual": False,
+            "lora_adapter": False,
+            "mlp_cfc_replaced": False,
+        },
+        "parent_evidence": {
+            "heldout_capacity_result": CAPACITY_RESULT,
+            "heldout_capacity_result_sha256": CAPACITY_RESULT_SHA256,
+            "mfu_result": str(OUTPUT_MFU_RESULT.relative_to(ROOT)),
+            "mfu_result_sha256": mfu_result_sha256,
+            "stateless_fresh64_training_result": (
+                "examples/nanogpt/configs/selection_artifacts/"
+                "124m_mlp_fast_fresh_training_result.json"
+            ),
+            "stateless_fresh64_validation_ce": 5.612201690673828,
+        },
+        "mfu_gate": {
+            "minimum_fraction": 0.2,
+            "result": str(OUTPUT_MFU_RESULT.relative_to(ROOT)),
+            "result_sha256": mfu_result_sha256,
+            "certificate": CERTIFICATE,
+            "certificate_sha256": CERTIFICATE_SHA256,
+            "measured_fraction": 0.22703795989224637,
+            "passed": True,
+        },
+        "decision_rule": {
+            "primary_metric": (
+                "terminal fixed-window validation cross entropy at update 238"
+            ),
+            "accepted_attention_only_control": 5.4918,
+            "accepted_attention_gap": 0.1,
+            "success_ce_maximum": 5.5918,
+            "stateless_fresh64_control": 5.612201690673828,
+            "success": (
+                "Stable terminal validation CE at most 5.5918."
+            ),
+            "directional_only": (
+                "Stable terminal validation CE below 5.612201690673828 "
+                "but above 5.5918."
+            ),
+            "reject": (
+                "Terminal validation CE at least 5.612201690673828, "
+                "NaN/Inf/divergence, incomplete terminal evaluation, "
+                "provenance mismatch, or incomplete exact-resume state."
+            ),
+            "threshold_changes_after_result": False,
+        },
+        "execution": {
+            "run_name": run_id,
+            "host": "Y400",
+            "gpu": 1,
+            "command": command,
+            "entrypoint": "examples.nanogpt.train",
+            "launcher": (
+                "examples/nanogpt/launch_y400_ladder_detached.sh "
+                "--foreground"
+            ),
+            "artifact_prefix": (
+                "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/"
+                f"{{logs,status,provenance}}/{run_id}_"
+            ),
+            "direct_foreground_polling": True,
+            "watchdog": False,
+            "callback": False,
+            "queue_worker": False,
+            "heartbeat": False,
+            "pro6": False,
+            "do_not_disturb": (
+                "existing 985M full-attention run on Y400 GPU0"
+            ),
+        },
+        "authorization": {
+            "scope": (
+                "Exactly one immutable 124M/0.5TPP two-pass fresh hidden88 "
+                "candidate."
+            ),
+            "larger_rung_authorized": False,
+            "additional_structure_authorized": False,
+        },
+        "scope_limit": (
+            "This is a trainable-coordinate/manifold test. The dense folded "
+            "c_proj base remains materialized in checkpoints and forward "
+            "passes, so it does not claim checkpoint-size or inference-FLOP "
+            "compression."
+        ),
+    }
+
+
 def main() -> None:
     validate_inputs()
     config = make_config()
@@ -358,6 +615,16 @@ def main() -> None:
     OUTPUT_CONFIG.write_bytes(config_data)
     plan = make_plan(sha256_bytes(config_data))
     OUTPUT_PLAN.write_bytes(json_bytes(plan))
+    if sha256_file(OUTPUT_PLAN) != MFU_PLAN_SHA256:
+        raise RuntimeError("registered MFU plan hash drifted")
+    mfu_result = make_mfu_result(sha256_bytes(config_data))
+    mfu_result_data = json_bytes(mfu_result)
+    OUTPUT_MFU_RESULT.write_bytes(mfu_result_data)
+    training_plan = make_training_plan(
+        sha256_bytes(config_data),
+        sha256_bytes(mfu_result_data),
+    )
+    OUTPUT_TRAINING_PLAN.write_bytes(json_bytes(training_plan))
     print(
         json.dumps(
             {
@@ -365,6 +632,16 @@ def main() -> None:
                 "config_sha256": sha256_bytes(config_data),
                 "plan": str(OUTPUT_PLAN.relative_to(ROOT)),
                 "plan_sha256": sha256_file(OUTPUT_PLAN),
+                "mfu_result": str(
+                    OUTPUT_MFU_RESULT.relative_to(ROOT)
+                ),
+                "mfu_result_sha256": sha256_file(OUTPUT_MFU_RESULT),
+                "training_plan": str(
+                    OUTPUT_TRAINING_PLAN.relative_to(ROOT)
+                ),
+                "training_plan_sha256": sha256_file(
+                    OUTPUT_TRAINING_PLAN
+                ),
             },
             indent=2,
             sort_keys=True,

@@ -1,0 +1,90 @@
+{
+  "authorization": {
+    "additional_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "scope": "Exactly one immutable 124M/0.5TPP two-pass fresh hidden88 candidate."
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "config_sha256": "bdbe54a8aaaba713dc76bac41d6a789c6f739cf42351786b185a425956d225ac",
+    "coordinate_fraction_per_cproj": 0.057291666666666664,
+    "coordinates_per_layer": 135168,
+    "implementation_commit": "1f7e1c6640450b0938545bc7efe3c911f1e0ac33",
+    "matching_neighbors": 64,
+    "max_iters": 238,
+    "model_tier": "124m",
+    "parent_stages": 64,
+    "planned_tpp": 0.5,
+    "refresh_interval_updates": 1,
+    "residual_stages": 24
+  },
+  "causal_optimizer_protocol": {
+    "dense_residual": false,
+    "future_information_used": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "matching": "At every update, score hidden-channel edges from that update's exact coherent Muon polar direction, select and fit 64 parent stages, materialize the finite parent update, then select and fit 24 new stages from its exact residual.",
+    "mlp_cfc_replaced": false,
+    "native_output_validation": true,
+    "persistent_selected_connectivity": false,
+    "state_transition": "Apply both finite Givens flows, apply decoupled weight decay, and fold the result into the persistent base buffer."
+  },
+  "decision_rule": {
+    "accepted_attention_gap": 0.1,
+    "accepted_attention_only_control": 5.4918,
+    "directional_only": "Stable terminal validation CE below 5.612201690673828 but above 5.5918.",
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "reject": "Terminal validation CE at least 5.612201690673828, NaN/Inf/divergence, incomplete terminal evaluation, provenance mismatch, or incomplete exact-resume state.",
+    "stateless_fresh64_control": 5.612201690673828,
+    "success": "Stable terminal validation CE at most 5.5918.",
+    "success_ce_maximum": 5.5918,
+    "threshold_changes_after_result": false
+  },
+  "execution": {
+    "artifact_prefix": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/{logs,status,provenance}/y400_mai_v3_124m_twopassfresh88_scientific_v1_",
+    "callback": false,
+    "command": [
+      "env",
+      "PYTHON_BIN=/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "bash",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+      "1",
+      "y400_mai_v3_124m_twopassfresh88_scientific_v1",
+      "/root/userdata/MappingNetworks"
+    ],
+    "direct_foreground_polling": true,
+    "do_not_disturb": "existing 985M full-attention run on Y400 GPU0",
+    "entrypoint": "examples.nanogpt.train",
+    "gpu": 1,
+    "heartbeat": false,
+    "host": "Y400",
+    "launcher": "examples/nanogpt/launch_y400_ladder_detached.sh --foreground",
+    "pro6": false,
+    "queue_worker": false,
+    "run_name": "y400_mai_v3_124m_twopassfresh88_scientific_v1",
+    "watchdog": false
+  },
+  "mfu_gate": {
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/performance_preflight_two_pass_fresh_hidden88.json",
+    "certificate_sha256": "b459a0c0baf5b0b3b0b7df47d3b2e233f37a07e85f3ce917c8183cb4dce7904c",
+    "measured_fraction": 0.22703795989224637,
+    "minimum_fraction": 0.2,
+    "passed": true,
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_mfu_result.json",
+    "result_sha256": "fdbaef81e8c4ab6ea9eb4b4faf14a7c49327466c72906598de0ddd38b61c79ff"
+  },
+  "parent_evidence": {
+    "heldout_capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_hidden_capacity_holdout_result.json",
+    "heldout_capacity_result_sha256": "cab549170a3cbfb1a0228e374bca056834f0d64e6a242632783e511520b437b3",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_mfu_result.json",
+    "mfu_result_sha256": "fdbaef81e8c4ab6ea9eb4b4faf14a7c49327466c72906598de0ddd38b61c79ff",
+    "stateless_fresh64_training_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_training_result.json",
+    "stateless_fresh64_validation_ce": 5.612201690673828
+  },
+  "schema_version": "mai_124m_mlp_two_pass_fresh_hidden88_training_plan_v1",
+  "scientific_question": "Does the held-out-selected two-pass fresh hidden88 c_proj chart close the remaining 124M loss gap to within +0.1 CE of the accepted full-attention-only control without a learned dense basis, dense residual, or LoRA adapter?",
+  "scope_limit": "This is a trainable-coordinate/manifold test. The dense folded c_proj base remains materialized in checkpoints and forward passes, so it does not claim checkpoint-size or inference-FLOP compression.",
+  "status": "registered_after_heldout_geometry_and_exact_config_mfu_qualification_before_scientific_training"
+}
