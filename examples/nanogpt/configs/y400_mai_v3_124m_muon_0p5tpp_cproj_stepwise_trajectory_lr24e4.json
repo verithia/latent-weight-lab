@@ -39,6 +39,7 @@
   "max_iters": 238,
   "method": "baseline",
   "mfu_min_fraction": 0.2,
+  "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/mfu_preflight/y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4_v1.json",
   "mfu_preflight_required": true,
   "min_lr": 0.00023999999999999998,
   "mixed_continuation_provenance": {
