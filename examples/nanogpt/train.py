@@ -668,6 +668,16 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
         or mlp_chart_lr_scale <= 0.0
     ):
         raise ValueError("block_fht_mlp_chart_lr_scale must be positive and finite")
+    mlp_pregelu_chart_lr_scale = float(
+        getattr(args, "block_fht_mlp_pregelu_chart_lr_scale", 1.0)
+    )
+    if (
+        not math.isfinite(mlp_pregelu_chart_lr_scale)
+        or mlp_pregelu_chart_lr_scale <= 0.0
+    ):
+        raise ValueError(
+            "block_fht_mlp_pregelu_chart_lr_scale must be positive and finite"
+        )
     validate_dense_fit_gate(config, args)
     return None
 
@@ -915,6 +925,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--muon-ns-steps", type=int, default=5)
     parser.add_argument("--muon-adamw-lr-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-chart-lr-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--block-fht-mlp-pregelu-chart-lr-scale",
+        type=float,
+        default=1.0,
+    )
     parser.add_argument("--beta1", type=float, default=0.9)
     parser.add_argument("--beta2", type=float, default=0.95)
     parser.add_argument("--grad-clip", type=float, default=1.0)
@@ -976,6 +991,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-mlp-activation-chart-channel-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-activation-chart-common-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-activation-chart-gauge-scale", type=float, default=1.0)
+    parser.add_argument("--block-fht-mlp-pregelu-block-rotation-stages", type=int, default=0)
+    parser.add_argument("--block-fht-mlp-pregelu-block-rotation-size", type=int, default=32)
+    parser.add_argument("--block-fht-mlp-pregelu-block-rotation-basis-size", type=int, default=256)
+    parser.add_argument("--block-fht-mlp-pregelu-block-rotation-coordinate-scale", type=float, default=1.0)
+    parser.add_argument("--block-fht-mlp-pregelu-block-rotation-seed", type=int, default=161803)
     parser.add_argument("--block-fht-mlp-hidden-block-rotation-stages", type=int, default=0)
     parser.add_argument("--block-fht-mlp-hidden-block-rotation-size", type=int, default=32)
     parser.add_argument("--block-fht-mlp-hidden-block-rotation-basis-size", type=int, default=256)
@@ -1298,6 +1318,11 @@ def main() -> None:
         block_fht_mlp_activation_chart_channel_scale=args.block_fht_mlp_activation_chart_channel_scale,
         block_fht_mlp_activation_chart_common_scale=args.block_fht_mlp_activation_chart_common_scale,
         block_fht_mlp_activation_chart_gauge_scale=args.block_fht_mlp_activation_chart_gauge_scale,
+        block_fht_mlp_pregelu_block_rotation_stages=args.block_fht_mlp_pregelu_block_rotation_stages,
+        block_fht_mlp_pregelu_block_rotation_size=args.block_fht_mlp_pregelu_block_rotation_size,
+        block_fht_mlp_pregelu_block_rotation_basis_size=args.block_fht_mlp_pregelu_block_rotation_basis_size,
+        block_fht_mlp_pregelu_block_rotation_coordinate_scale=args.block_fht_mlp_pregelu_block_rotation_coordinate_scale,
+        block_fht_mlp_pregelu_block_rotation_seed=args.block_fht_mlp_pregelu_block_rotation_seed,
         block_fht_mlp_hidden_block_rotation_stages=args.block_fht_mlp_hidden_block_rotation_stages,
         block_fht_mlp_hidden_block_rotation_size=args.block_fht_mlp_hidden_block_rotation_size,
         block_fht_mlp_hidden_block_rotation_basis_size=args.block_fht_mlp_hidden_block_rotation_basis_size,
@@ -1377,6 +1402,7 @@ def main() -> None:
         muon_ns_steps=args.muon_ns_steps,
         muon_adamw_lr_scale=args.muon_adamw_lr_scale,
         block_fht_mlp_chart_lr_scale=args.block_fht_mlp_chart_lr_scale,
+        block_fht_mlp_pregelu_chart_lr_scale=args.block_fht_mlp_pregelu_chart_lr_scale,
     )
     if args.init_from == "resume":
         optimizer.load_state_dict(checkpoint["optimizer"])

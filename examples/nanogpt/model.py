@@ -117,6 +117,11 @@ class GPTConfig:
     block_fht_mlp_activation_chart_channel_scale: float = 1.0
     block_fht_mlp_activation_chart_common_scale: float = 1.0
     block_fht_mlp_activation_chart_gauge_scale: float = 1.0
+    block_fht_mlp_pregelu_block_rotation_stages: int = 0
+    block_fht_mlp_pregelu_block_rotation_size: int = 32
+    block_fht_mlp_pregelu_block_rotation_basis_size: int = 256
+    block_fht_mlp_pregelu_block_rotation_coordinate_scale: float = 1.0
+    block_fht_mlp_pregelu_block_rotation_seed: int = 161803
     block_fht_mlp_hidden_block_rotation_stages: int = 0
     block_fht_mlp_hidden_block_rotation_size: int = 32
     block_fht_mlp_hidden_block_rotation_basis_size: int = 256
@@ -1076,12 +1081,41 @@ class MLP(nn.Module):
             )
         else:
             self.c_fc = make_linear(config.n_embd, 4 * config.n_embd, config.bias, config, "mlp.c_fc", layer_id * 4 + 2)
-        # Installed only by the preregistered endpoint activation-frame
-        # diagnostic for now.  It is kept out of GPTConfig until the causal
-        # endpoint test establishes task capacity.
-        self.pregelu_block_rotation: (
-            LearnedFHTBlockOrthogonalOutputMix | None
-        ) = None
+        pregelu_rotation_stages = int(
+            config.block_fht_mlp_pregelu_block_rotation_stages
+        )
+        if pregelu_rotation_stages < 0:
+            raise ValueError(
+                "block_fht_mlp_pregelu_block_rotation_stages must be "
+                "non-negative"
+            )
+        if pregelu_rotation_stages and not isinstance(
+            self.c_fc, (nn.Linear, BlockFHTLinear)
+        ):
+            raise ValueError(
+                "pre-GELU block rotation requires a plain mlp.c_fc linear"
+            )
+        self.pregelu_block_rotation = (
+            LearnedFHTBlockOrthogonalOutputMix(
+                features=4 * config.n_embd,
+                stages=pregelu_rotation_stages,
+                rotation_block_size=int(
+                    config.block_fht_mlp_pregelu_block_rotation_size
+                ),
+                basis_block_size=int(
+                    config.block_fht_mlp_pregelu_block_rotation_basis_size
+                ),
+                seed=(
+                    int(config.block_fht_mlp_pregelu_block_rotation_seed)
+                    + layer_id * 64
+                ),
+                coordinate_scale=float(
+                    config.block_fht_mlp_pregelu_block_rotation_coordinate_scale
+                ),
+            )
+            if pregelu_rotation_stages
+            else None
+        )
         self._cached_charted_cfc_weight: torch.Tensor | None = None
         self.gelu = nn.GELU()
         grouped_proj_targets = [target for target in MLP_C_PROJ_GROUP_TARGETS if target in config.block_fht_targets]
@@ -2470,6 +2504,7 @@ class GPT(nn.Module):
         muon_ns_steps: int = 5,
         muon_adamw_lr_scale: float = 1.0,
         block_fht_mlp_chart_lr_scale: float = 1.0,
+        block_fht_mlp_pregelu_chart_lr_scale: float = 1.0,
     ):
         params = {name: param for name, param in self.named_parameters() if param.requires_grad}
         decay = [param for _, param in params.items() if param.dim() >= 2]
@@ -2504,8 +2539,20 @@ class GPT(nn.Module):
                 and any(token in name for token in chart_names)
             ]
             chart_parameter_ids = {id(param) for param in chart_other}
+            pregelu_chart_other = [
+                param
+                for name, param in params.items()
+                if id(param) in other_parameter_ids
+                and "pregelu_block_rotation.coordinates" in name
+            ]
+            pregelu_chart_parameter_ids = {
+                id(param) for param in pregelu_chart_other
+            }
             regular_other = [
-                param for param in other if id(param) not in chart_parameter_ids
+                param
+                for param in other
+                if id(param) not in chart_parameter_ids
+                and id(param) not in pregelu_chart_parameter_ids
             ]
             optimizers = []
             if matrix:
@@ -2545,6 +2592,19 @@ class GPT(nn.Module):
                             ),
                         }
                     )
+                if pregelu_chart_other:
+                    fallback_groups.append(
+                        {
+                            "params": pregelu_chart_other,
+                            "weight_decay": 0.0,
+                            "lr_scale": (
+                                float(muon_adamw_lr_scale)
+                                * float(
+                                    block_fht_mlp_pregelu_chart_lr_scale
+                                )
+                            ),
+                        }
+                    )
                 optimizers.append(
                     torch.optim.AdamW(
                         fallback_groups,
@@ -2558,9 +2618,12 @@ class GPT(nn.Module):
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
                 f"mlp_chart_tensors={len(chart_other)} "
+                f"mlp_pregelu_chart_tensors={len(pregelu_chart_other)} "
                 f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
                 f"adamw_lr_scale={float(muon_adamw_lr_scale)} "
                 f"mlp_chart_lr_scale={float(block_fht_mlp_chart_lr_scale)} "
+                f"mlp_pregelu_chart_lr_scale="
+                f"{float(block_fht_mlp_pregelu_chart_lr_scale)} "
                 f"adamw_lr={adamw_lr}"
             )
             return MultiOptimizer(optimizers)

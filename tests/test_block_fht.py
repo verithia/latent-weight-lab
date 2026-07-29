@@ -508,6 +508,9 @@ def test_mlp_chart_lr_scale_only_scales_chart_adamw_group():
             block_fht_latent_ratio=1.0,
             block_fht_muon_latent_targets=("mlp.c_proj",),
             block_fht_muon_latent_rows=4,
+            block_fht_mlp_pregelu_block_rotation_stages=1,
+            block_fht_mlp_pregelu_block_rotation_size=4,
+            block_fht_mlp_pregelu_block_rotation_basis_size=8,
             block_fht_mlp_hidden_block_rotation_stages=1,
             block_fht_mlp_hidden_block_rotation_size=4,
             block_fht_mlp_hidden_block_rotation_basis_size=8,
@@ -526,6 +529,7 @@ def test_mlp_chart_lr_scale_only_scales_chart_adamw_group():
         optimizer="muon",
         muon_adamw_lr_scale=0.3,
         block_fht_mlp_chart_lr_scale=5.0,
+        block_fht_mlp_pregelu_chart_lr_scale=0.1,
     )
     adamw = next(
         child
@@ -537,6 +541,9 @@ def test_mlp_chart_lr_scale_only_scales_chart_adamw_group():
         id(mlp.output_block_rotation.coordinates),
         id(mlp.residual_output_log_gain),
     }
+    pregelu_chart_parameters = {
+        id(mlp.pregelu_block_rotation.coordinates),
+    }
     chart_group = next(
         group
         for group in adamw.param_groups
@@ -545,13 +552,31 @@ def test_mlp_chart_lr_scale_only_scales_chart_adamw_group():
     regular_group = next(
         group
         for group in adamw.param_groups
-        if not any(id(parameter) in chart_parameters for parameter in group["params"])
+        if not any(
+            id(parameter) in chart_parameters | pregelu_chart_parameters
+            for parameter in group["params"]
+        )
+    )
+    pregelu_chart_group = next(
+        group
+        for group in adamw.param_groups
+        if any(
+            id(parameter) in pregelu_chart_parameters
+            for parameter in group["params"]
+        )
     )
     assert chart_group["lr_scale"] == pytest.approx(1.5)
+    assert pregelu_chart_group["lr_scale"] == pytest.approx(0.03)
     assert regular_group["lr_scale"] == pytest.approx(0.3)
     assert {
         id(parameter) for parameter in chart_group["params"]
     }.issuperset(chart_parameters)
+    assert {
+        id(parameter) for parameter in pregelu_chart_group["params"]
+    } == pregelu_chart_parameters
+    assert {
+        id(parameter) for parameter in chart_group["params"]
+    }.isdisjoint(pregelu_chart_parameters)
 
 
 def test_spectral_zero_correction_matches_same_seed_block_fht():
