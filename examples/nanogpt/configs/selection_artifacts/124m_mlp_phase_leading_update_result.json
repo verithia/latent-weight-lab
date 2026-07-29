@@ -1,0 +1,130 @@
+{
+  "schema_version": "mai_124m_mlp_phase_leading_update_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_phase_leading_update_plan.json",
+  "scientific_question": "Does the realized early dense Muon direction at each phase start predict that phase's full c_proj chord strongly enough to justify an exact update-history replay?",
+  "scope": {
+    "trajectory": "y400_mai_v3_124m_dense_mlp_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "ce812caa6402178b5240490fd8a3943ad7156c5bdeb4a2a1dcdad22051f6615e",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "lookaheads": [
+      6,
+      12,
+      18
+    ],
+    "cells": 60,
+    "analysis_dtype": "float64",
+    "execution": "direct foreground diagnostic on Y400 GPU1; no training, queue, watchdog, callback, heartbeat, or PRO6 execution"
+  },
+  "aggregate": {
+    "6": {
+      "energy_weighted_capture": 0.35166360724556145,
+      "energy_weighted_cosine": 0.591772124032624,
+      "minimum_capture": 0.2943668985339591,
+      "maximum_capture": 0.5082750855478707,
+      "minimum_cosine": 0.5425558943868909,
+      "positive_cosine_fraction": 1.0
+    },
+    "12": {
+      "energy_weighted_capture": 0.5185260998239816,
+      "energy_weighted_cosine": 0.7193475522678596,
+      "minimum_capture": 0.4306038535684736,
+      "maximum_capture": 0.6324577044512413,
+      "minimum_cosine": 0.6562041249249151,
+      "positive_cosine_fraction": 1.0
+    },
+    "18": {
+      "energy_weighted_capture": 0.6212298540306976,
+      "energy_weighted_cosine": 0.7877194267297231,
+      "minimum_capture": 0.5441648014637119,
+      "maximum_capture": 0.7319711480978428,
+      "minimum_cosine": 0.7376752683015149,
+      "positive_cosine_fraction": 1.0
+    }
+  },
+  "capture_by_phase": {
+    "6": {
+      "0_to_60": 0.31049069932263584,
+      "60_to_120": 0.36757196892399907,
+      "120_to_180": 0.4246610400354677,
+      "180_to_238": 0.48138136726034875
+    },
+    "12": {
+      "0_to_60": 0.5465405820214838,
+      "60_to_120": 0.475162976146089,
+      "120_to_180": 0.5566027477395651,
+      "180_to_238": 0.609446948875513
+    },
+    "18": {
+      "0_to_60": 0.641209737155321,
+      "60_to_120": 0.5848125214813041,
+      "120_to_180": 0.6635950029588907,
+      "180_to_238": 0.7134617678013558
+    }
+  },
+  "capture_by_layer": {
+    "6": {
+      "0": 0.313275851228707,
+      "3": 0.35354668746951745,
+      "6": 0.362199748905802,
+      "9": 0.3667861357775249,
+      "11": 0.3673666276253196
+    },
+    "12": {
+      "0": 0.4937215176336024,
+      "3": 0.5437912145915543,
+      "6": 0.534694528578481,
+      "9": 0.5158565853143563,
+      "11": 0.5031783788150934
+    },
+    "18": {
+      "0": 0.6072778968283944,
+      "3": 0.6439931724703173,
+      "6": 0.6337261510735214,
+      "9": 0.6153743460633756,
+      "11": 0.6033732902011921
+    }
+  },
+  "artifacts": {
+    "analysis_commit": "19a63de1259671038f7c8f736b0b663f06d2cc04",
+    "analysis_entrypoint": "examples/nanogpt/analyze_mlp_phase_leading_update.py",
+    "analysis_entrypoint_sha256": "a42b1e33f14a9a4bbf37e3d5f8ac592c6a6754f8d83464cba37ab7273717ba8b",
+    "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/phase_leading_update_v1",
+    "wall_seconds": 2.703425645828247,
+    "detail_csv_sha256": "1f2d1b3dd75f492f9b631a8ae92d0c07075848b7b0ea529bef7b3da5b2543463",
+    "aggregate_csv_sha256": "4c8ad797c21ffd4d81fca44b0317f51d08deebd7c48fc3f121238c818372d751",
+    "metadata_sha256": "fc907cf6524ff7c85f5f39e9612ea46f9d47277bdc17cbae75258852ef1691dd"
+  },
+  "decision": {
+    "classification": "TASK_CONDITIONED_DIRECTION_WITH_SHORT_HISTORY_HORIZON",
+    "single_direction_replay_rule_passed": false,
+    "intermediate_rule_triggered": true,
+    "interpretation": [
+      "The first six realized Muon updates capture 35.17 percent of the full phase chord, five times the best static-chart capture, and every layer/phase cosine is positive.",
+      "Six updates are not sufficient for the preregistered single-direction threshold, but capture rises to 51.85 percent at 12 updates and 62.12 percent at 18.",
+      "The useful dense direction is task-conditioned and evolves on a short optimizer-history horizon; it is neither a fixed tangent nor unpredictable noise.",
+      "The result does not prove that a raw gradient has the same alignment because the saved displacement includes momentum, weight decay, stochastic batches, and the schedule."
+    ],
+    "next_required_diagnostic": "Replay the exact 238-step dense 124M control with c_proj-only parameter snapshots every update. Measure 1-12-step horizon, per-step direction autocorrelation, and the smallest history rank that predicts each phase chord before designing a task-conditioned compact chart."
+  },
+  "limitations": [
+    "The earliest saved direction integrates six updates.",
+    "No boundary raw gradients or optimizer states were saved.",
+    "One-direction capture ignores curved multi-direction history.",
+    "Only five representative layers are included."
+  ]
+}
