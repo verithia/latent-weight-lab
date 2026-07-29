@@ -364,6 +364,7 @@ class MuonMatchedGivensLinear(nn.Module):
         stages: int,
         neighbors: int,
         refresh_interval: int,
+        fast_fresh_matching: bool,
         matching_seed: int,
         weight_std: float,
         layer_id: int = -1,
@@ -374,6 +375,7 @@ class MuonMatchedGivensLinear(nn.Module):
         self.stages = int(stages)
         self.neighbors = int(neighbors)
         self.refresh_interval = int(refresh_interval)
+        self.fast_fresh_matching = bool(fast_fresh_matching)
         self.matching_seed = int(matching_seed)
         self.layer_id = int(layer_id)
         if (
@@ -395,6 +397,10 @@ class MuonMatchedGivensLinear(nn.Module):
             )
         if self.refresh_interval <= 0:
             raise ValueError("refresh_interval must be positive")
+        if self.fast_fresh_matching and self.refresh_interval != 1:
+            raise ValueError(
+                "fast fresh matching requires refresh_interval=1"
+            )
         if not math.isfinite(weight_std) or weight_std <= 0.0:
             raise ValueError("weight_std must be positive and finite")
 
@@ -514,20 +520,90 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 direction = -scale * polar
                 step_index = int(module.optimizer_step)
                 refresh = (
-                    not bool(module.matching_valid)
+                    module.fast_fresh_matching
+                    or not bool(module.matching_valid)
                     or step_index % module.refresh_interval == 0
                 )
                 matching_summary = None
                 if refresh:
-                    permutations, matching_diagnostics = (
-                        muon_matched_permutations(
-                            weight,
-                            direction,
-                            stages=module.stages,
-                            neighbors=module.neighbors,
-                            seed=module.matching_seed,
+                    if module.fast_fresh_matching:
+                        permutations, matching_diagnostics = (
+                            fast_muon_matched_permutations(
+                                weight,
+                                direction,
+                                stages=module.stages,
+                                neighbors=module.neighbors,
+                                seed=module.matching_seed + step_index,
+                            )
                         )
-                    )
+                        matching_summary = {
+                            "selector": "fast_fresh_single_pass",
+                            "candidate_edge_fraction": float(
+                                matching_diagnostics[
+                                    "candidate_edge_fraction"
+                                ]
+                            ),
+                            "minimum_stage_candidate_edge_fraction": (
+                                float(
+                                    matching_diagnostics[
+                                        "minimum_stage_candidate_edge_fraction"
+                                    ]
+                                )
+                            ),
+                            "prepared_seconds": float(
+                                matching_diagnostics[
+                                    "prepared_seconds"
+                                ]
+                            ),
+                            "native_seconds": float(
+                                matching_diagnostics["native_seconds"]
+                            ),
+                            "total_seconds": float(
+                                matching_diagnostics["total_seconds"]
+                            ),
+                            "native_output_validated": bool(
+                                matching_diagnostics[
+                                    "native_output_validated"
+                                ]
+                            ),
+                            "native_library_sha256": str(
+                                matching_diagnostics[
+                                    "native_library_sha256"
+                                ]
+                            ),
+                            "native_source_sha256": str(
+                                matching_diagnostics["source_sha256"]
+                            ),
+                        }
+                    else:
+                        permutations, matching_diagnostics = (
+                            muon_matched_permutations(
+                                weight,
+                                direction,
+                                stages=module.stages,
+                                neighbors=module.neighbors,
+                                seed=module.matching_seed,
+                            )
+                        )
+                        matching_summary = {
+                            "selector": "legacy_greedy",
+                            "mean_candidate_edge_fraction": sum(
+                                float(
+                                    row["candidate_edge_fraction"]
+                                )
+                                for row in matching_diagnostics
+                            )
+                            / len(matching_diagnostics),
+                            "mean_abs_coordinate_gradient": sum(
+                                float(
+                                    row[
+                                        "mean_abs_coordinate_gradient"
+                                    ]
+                                )
+                                for row in matching_diagnostics
+                            )
+                            / len(matching_diagnostics),
+                        }
                     module.selected_permutations.copy_(
                         permutations.to(
                             device=weight.device,
@@ -543,24 +619,6 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     module.matching_valid.fill_(True)
                     module.last_refresh_step.fill_(step_index)
                     module.refresh_count.add_(1)
-                    matching_summary = {
-                        "mean_candidate_edge_fraction": sum(
-                            float(
-                                row["candidate_edge_fraction"]
-                            )
-                            for row in matching_diagnostics
-                        )
-                        / len(matching_diagnostics),
-                        "mean_abs_coordinate_gradient": sum(
-                            float(
-                                row[
-                                    "mean_abs_coordinate_gradient"
-                                ]
-                            )
-                            for row in matching_diagnostics
-                        )
-                        / len(matching_diagnostics),
-                    }
                 requested_update = lr * (
                     direction - weight_decay * weight.float()
                 )
@@ -592,6 +650,16 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "step": step_index,
                         "layer": module.layer_id,
                         "refresh": refresh,
+                        "report_refresh": (
+                            refresh
+                            and (
+                                not module.fast_fresh_matching
+                                or step_index == 0
+                            )
+                        ),
+                        "fast_fresh_matching": (
+                            module.fast_fresh_matching
+                        ),
                         "refresh_count": int(module.refresh_count),
                         "coordinates": module.coordinate_count,
                         "angle_rms": float(

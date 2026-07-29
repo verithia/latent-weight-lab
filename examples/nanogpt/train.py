@@ -68,6 +68,8 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/model.py",
         root / "examples/nanogpt/muon.py",
         root / "examples/nanogpt/muon_matched_givens.py",
+        root / "examples/nanogpt/fast_task_matching.py",
+        root / "examples/nanogpt/csrc/task_edge_coloring.cpp",
         root / "examples/nanogpt/parameter_trajectory.py",
         root / "latent_weight_lab/block_fht.py",
     )
@@ -1042,6 +1044,11 @@ def parse_args() -> argparse.Namespace:
         default=60,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-fast-fresh",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-muon-matched-givens-seed",
         type=int,
         default=161803,
@@ -1319,6 +1326,17 @@ def parse_args() -> argparse.Namespace:
                 "Muon-matched Givens c_proj refresh interval must be "
                 "positive"
             )
+        if (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
+            and namespace
+            .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
+            != 1
+        ):
+            raise ValueError(
+                "fast fresh Muon-matched Givens c_proj requires "
+                "refresh interval 1"
+            )
     if namespace.mapping_stability_microbatches < 0:
         raise ValueError("--mapping-stability-microbatches must be >= 0")
     if namespace.mapping_stability_microbatches > namespace.gradient_accumulation_steps:
@@ -1555,6 +1573,10 @@ def main() -> None:
         block_fht_mlp_cproj_muon_matched_givens_refresh_interval=(
             args
             .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_fast_fresh=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
         ),
         block_fht_mlp_cproj_muon_matched_givens_seed=(
             args.block_fht_mlp_cproj_muon_matched_givens_seed
@@ -2043,7 +2065,7 @@ def main() -> None:
         )
         if consume_givens_diagnostics is not None:
             for row in consume_givens_diagnostics():
-                if row.get("refresh"):
+                if row.get("report_refresh", row.get("refresh")):
                     print(
                         "muon_matched_givens_refresh "
                         + json.dumps(

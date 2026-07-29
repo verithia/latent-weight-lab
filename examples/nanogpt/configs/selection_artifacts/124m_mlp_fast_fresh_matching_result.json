@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_matching_result_v1",
+  "recorded_at": "2026-07-29",
+  "decision": "QUALIFY_STATELESS_FRESH_MATCHER_PRODUCTION_PREFLIGHT",
+  "scope": "No-training comparison of current-direction c_proj connectivity at eight exact dense-Muon endpoints and five representative layers. This result authorizes production integration and one separately polled real BF16 MFU preflight only.",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_matching_plan.json",
+    "sha256": "0df7058fa1f6223503966239e84ff1c2326d6c4a0fa77c3a5467f2954a4a4e49"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "git_commit": "47f4121b16978c7451d6ba57a0bbd8dd5198d668",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "pro6": false
+  },
+  "inputs": {
+    "run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "steps": [
+      0,
+      15,
+      60,
+      75,
+      120,
+      135,
+      180,
+      195
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ]
+  },
+  "registered_thresholds": {
+    "minimum_single_pass_over_greedy_retention": 0.85,
+    "minimum_single_pass_over_random_enrichment": 3.0,
+    "maximum_median_seconds_per_layer": 0.03,
+    "maximum_p95_seconds_per_layer": 0.06,
+    "maximum_mean_single_pass_minus_greedy_finite_ce": 0.00025,
+    "all_thresholds_required": true
+  },
+  "measurement": {
+    "minimum_single_pass_over_greedy_retention": 0.9999172334194134,
+    "minimum_single_pass_over_random_enrichment": 3.143527069192742,
+    "mean_single_pass_minus_greedy_finite_ce": 9.611248970031738e-07,
+    "single_pass_finite_ce_wins_over_greedy": "6/16",
+    "single_pass_finite_ce_wins_over_random": "16/16",
+    "median_seconds_per_layer": 0.005909809842705727,
+    "p95_seconds_per_layer": 0.025545472744852304,
+    "maximum_seconds_per_layer": 0.0404705828987062,
+    "estimated_12_layer_seconds_per_update": 0.07091771811246872,
+    "mean_candidate_edge_fraction": 0.8497670491536459,
+    "all_registered_gates_passed": true
+  },
+  "implementation": {
+    "native_source_sha256": "6b9e0c795e601eb0a53934bdaa79f898c7ffcd51988b0e5891f189cc27f2e67e",
+    "native_library_sha256": "5aead912a93ca2ff4000632cd906b3a6622fa8cba6e82e0aa86a6fae94302e73",
+    "native_output_validation": "Every stage permutation and cross-stage edge uniqueness are verified before the native function returns.",
+    "persistent_selected_connectivity": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "artifacts": {
+    "analysis_log_sha256": "eaabce2361d049de935744a3e0be8137c7310af189a06144926b03bfd643591d",
+    "detail_sha256": "bdcaa29eab1a8279faa76f443472d48221a0d0dff0ddf1602d624055304292ab",
+    "aggregate_sha256": "83e9156f49561b03e18a3f5885b98c4929477fff5c8b8e2b6a33cb0f9ff74421",
+    "finite_ce_sha256": "5fb46f6096a1ab13fe517d26e1cf5cfd4ab2d40e7a757abf7fb82be7e3e4ab0e",
+    "timing_sha256": "c1697ceb476d4034c79f153fd23a50fe7d2afeb80335a76a2ed8a15265a04c5a",
+    "metadata_sha256": "de01e651c38e64c74167adef90814d4d24ff9a98a62c6d26a0c0c71899d464ce"
+  },
+  "authorized_next_action": "Integrate the exact current-direction matcher behind an explicit every-update config flag, then run one foreground-polled real BF16 MFU preflight with a minimum measured MFU of 20 percent. Do not launch language-model training from this result alone."
+}

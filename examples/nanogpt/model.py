@@ -143,6 +143,7 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
     block_fht_mlp_cproj_muon_matched_givens_neighbors: int = 64
     block_fht_mlp_cproj_muon_matched_givens_refresh_interval: int = 60
+    block_fht_mlp_cproj_muon_matched_givens_fast_fresh: bool = False
     block_fht_mlp_cproj_muon_matched_givens_seed: int = 161803
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
@@ -1318,6 +1319,10 @@ class MLP(nn.Module):
                 refresh_interval=int(
                     config
                     .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
+                ),
+                fast_fresh_matching=bool(
+                    config
+                    .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
                 ),
                 matching_seed=(
                     int(

@@ -23,6 +23,7 @@ def make_module(*, layer_id: int = 0) -> MuonMatchedGivensLinear:
         stages=1,
         neighbors=2,
         refresh_interval=3,
+        fast_fresh_matching=False,
         matching_seed=23,
         weight_std=0.02,
         layer_id=layer_id,
@@ -42,6 +43,7 @@ def make_gpt_config() -> GPTConfig:
         block_fht_mlp_cproj_muon_matched_givens_stages=1,
         block_fht_mlp_cproj_muon_matched_givens_neighbors=2,
         block_fht_mlp_cproj_muon_matched_givens_refresh_interval=3,
+        block_fht_mlp_cproj_muon_matched_givens_fast_fresh=False,
     )
 
 
@@ -140,6 +142,77 @@ def test_optimizer_refreshes_folds_and_round_trips_exact_state() -> None:
     assert torch.equal(original_momentum, restored_momentum)
 
 
+def test_fast_fresh_optimizer_reselects_every_step(
+    monkeypatch,
+) -> None:
+    calls: list[int] = []
+
+    def fake_fast_matching(
+        weight: torch.Tensor,
+        direction: torch.Tensor,
+        *,
+        stages: int,
+        neighbors: int,
+        seed: int,
+    ):
+        del direction, neighbors
+        calls.append(seed)
+        return (
+            torch.arange(weight.shape[1]).repeat(stages, 1),
+            {
+                "candidate_edge_fraction": 1.0,
+                "minimum_stage_candidate_edge_fraction": 1.0,
+                "prepared_seconds": 0.001,
+                "native_seconds": 0.002,
+                "total_seconds": 0.003,
+                "native_output_validated": True,
+                "native_library_sha256": "library",
+                "source_sha256": "source",
+            },
+        )
+
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens."
+        "fast_muon_matched_permutations",
+        fake_fast_matching,
+    )
+    module = MuonMatchedGivensLinear(
+        8,
+        4,
+        bias=False,
+        stages=1,
+        neighbors=2,
+        refresh_interval=1,
+        fast_fresh_matching=True,
+        matching_seed=23,
+        weight_std=0.02,
+        layer_id=3,
+    )
+    optimizer = MuonMatchedGivens(
+        [module],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    report_flags: list[bool] = []
+    for _step in range(2):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()
+        assert len(diagnostics) == 1
+        assert diagnostics[0]["fast_fresh_matching"] is True
+        assert diagnostics[0]["refresh"] is True
+        assert diagnostics[0]["matching"]["selector"] == (
+            "fast_fresh_single_pass"
+        )
+        report_flags.append(bool(diagnostics[0]["report_refresh"]))
+    assert calls == [23, 24]
+    assert report_flags == [True, False]
+    assert int(module.last_refresh_step) == 1
+    assert int(module.refresh_count) == 2
+
+
 def test_stage64_optimizer_state_round_trip() -> None:
     torch.manual_seed(31)
     module = MuonMatchedGivensLinear(
@@ -149,6 +222,7 @@ def test_stage64_optimizer_state_round_trip() -> None:
         stages=64,
         neighbors=64,
         refresh_interval=60,
+        fast_fresh_matching=False,
         matching_seed=161803,
         weight_std=0.02,
         layer_id=7,
@@ -179,6 +253,7 @@ def test_stage64_optimizer_state_round_trip() -> None:
         stages=64,
         neighbors=64,
         refresh_interval=60,
+        fast_fresh_matching=False,
         matching_seed=161803,
         weight_std=0.02,
         layer_id=7,
