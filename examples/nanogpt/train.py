@@ -66,6 +66,8 @@ def source_hashes() -> dict[str, str]:
     paths = (
         root / "examples/nanogpt/train.py",
         root / "examples/nanogpt/model.py",
+        root / "examples/nanogpt/muon.py",
+        root / "examples/nanogpt/muon_matched_givens.py",
         root / "examples/nanogpt/parameter_trajectory.py",
         root / "latent_weight_lab/block_fht.py",
     )
@@ -1019,6 +1021,31 @@ def parse_args() -> argparse.Namespace:
         "--block-fht-cproj-product-fht-pullback-probe-output",
         default=None,
     )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-stages",
+        type=int,
+        default=32,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-neighbors",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-refresh-interval",
+        type=int,
+        default=60,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-seed",
+        type=int,
+        default=161803,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -1253,6 +1280,45 @@ def parse_args() -> argparse.Namespace:
             "--block-fht-mlp-cproj-chart-freeze-base-at-start requires "
             "a positive chart start iteration"
         )
+    if namespace.block_fht_mlp_cproj_muon_matched_givens:
+        if namespace.method != "block_fht":
+            raise ValueError(
+                "Muon-matched Givens c_proj requires method=block_fht"
+            )
+        if namespace.optimizer != "muon":
+            raise ValueError(
+                "Muon-matched Givens c_proj requires optimizer=muon"
+            )
+        if "mlp.c_proj" not in namespace.block_fht_targets:
+            raise ValueError(
+                "Muon-matched Givens c_proj requires the mlp.c_proj "
+                "BlockFHT target"
+            )
+        if (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_stages
+            <= 0
+            or namespace
+            .block_fht_mlp_cproj_muon_matched_givens_neighbors
+            < namespace
+            .block_fht_mlp_cproj_muon_matched_givens_stages
+            or namespace
+            .block_fht_mlp_cproj_muon_matched_givens_neighbors
+            >= 4 * namespace.n_embd
+        ):
+            raise ValueError(
+                "Muon-matched Givens c_proj requires "
+                "0 < stages <= neighbors < 4*n_embd"
+            )
+        if (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
+            <= 0
+        ):
+            raise ValueError(
+                "Muon-matched Givens c_proj refresh interval must be "
+                "positive"
+            )
     if namespace.mapping_stability_microbatches < 0:
         raise ValueError("--mapping-stability-microbatches must be >= 0")
     if namespace.mapping_stability_microbatches > namespace.gradient_accumulation_steps:
@@ -1477,6 +1543,22 @@ def main() -> None:
         ),
         block_fht_cproj_product_fht_muon_momentum=args.muon_momentum,
         block_fht_cproj_product_fht_muon_ns_steps=args.muon_ns_steps,
+        block_fht_mlp_cproj_muon_matched_givens=(
+            args.block_fht_mlp_cproj_muon_matched_givens
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_stages=(
+            args.block_fht_mlp_cproj_muon_matched_givens_stages
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_neighbors=(
+            args.block_fht_mlp_cproj_muon_matched_givens_neighbors
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_refresh_interval=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_seed=(
+            args.block_fht_mlp_cproj_muon_matched_givens_seed
+        ),
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,
         block_fht_mlp_shared_hidden_gain_scale=args.block_fht_mlp_shared_hidden_gain_scale,
@@ -1954,6 +2036,23 @@ def main() -> None:
             section_start = perf_now()
         scaler.step(optimizer)
         scaler.update()
+        consume_givens_diagnostics = getattr(
+            optimizer,
+            "consume_muon_matched_givens_diagnostics",
+            None,
+        )
+        if consume_givens_diagnostics is not None:
+            for row in consume_givens_diagnostics():
+                if row.get("refresh"):
+                    print(
+                        "muon_matched_givens_refresh "
+                        + json.dumps(
+                            row,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        ),
+                        flush=True,
+                    )
         pullback_probe_rows = (
             raw_model.finalize_product_fht_pullback_probes()
         )

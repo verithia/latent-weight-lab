@@ -9,6 +9,10 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from examples.nanogpt.muon import Muon
+from examples.nanogpt.muon_matched_givens import (
+    MuonMatchedGivens,
+    MuonMatchedGivensLinear,
+)
 from latent_weight_lab import (
     BlockFHTLinear,
     ProductFHTLinear,
@@ -46,6 +50,16 @@ class MultiOptimizer:
     def step(self) -> None:
         for optimizer in self.optimizers:
             optimizer.step()
+
+    def consume_muon_matched_givens_diagnostics(
+        self,
+    ) -> list[dict[str, object]]:
+        diagnostics: list[dict[str, object]] = []
+        for optimizer in self.optimizers:
+            consume = getattr(optimizer, "consume_diagnostics", None)
+            if consume is not None:
+                diagnostics.extend(consume())
+        return diagnostics
 
 
 class LayerNorm(nn.Module):
@@ -125,6 +139,11 @@ class GPTConfig:
     block_fht_cproj_product_fht_pullback_probe: bool = False
     block_fht_cproj_product_fht_muon_momentum: float = 0.95
     block_fht_cproj_product_fht_muon_ns_steps: int = 5
+    block_fht_mlp_cproj_muon_matched_givens: bool = False
+    block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
+    block_fht_mlp_cproj_muon_matched_givens_neighbors: int = 64
+    block_fht_mlp_cproj_muon_matched_givens_refresh_interval: int = 60
+    block_fht_mlp_cproj_muon_matched_givens_seed: int = 161803
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
@@ -1267,7 +1286,52 @@ class MLP(nn.Module):
             raise ValueError("Use exactly one grouped mlp.c_proj target per run")
         if structured_proj_count and "mlp.c_proj" in config.block_fht_targets:
             raise ValueError("Use either plain mlp.c_proj or grouped mlp.c_proj, not both")
-        if grouped_proj_targets:
+        muon_matched_cproj = bool(
+            config.block_fht_mlp_cproj_muon_matched_givens
+        )
+        if muon_matched_cproj and structured_proj_count:
+            raise ValueError(
+                "Muon-matched Givens c_proj requires the plain "
+                "mlp.c_proj target"
+            )
+        if (
+            muon_matched_cproj
+            and "mlp.c_proj" not in config.block_fht_targets
+        ):
+            raise ValueError(
+                "Muon-matched Givens c_proj requires mlp.c_proj in "
+                "block_fht_targets"
+            )
+        if muon_matched_cproj:
+            self.c_proj = MuonMatchedGivensLinear(
+                4 * config.n_embd,
+                config.n_embd,
+                bias=config.bias,
+                stages=int(
+                    config
+                    .block_fht_mlp_cproj_muon_matched_givens_stages
+                ),
+                neighbors=int(
+                    config
+                    .block_fht_mlp_cproj_muon_matched_givens_neighbors
+                ),
+                refresh_interval=int(
+                    config
+                    .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
+                ),
+                matching_seed=(
+                    int(
+                        config
+                        .block_fht_mlp_cproj_muon_matched_givens_seed
+                    )
+                    + layer_id * 64
+                ),
+                weight_std=(
+                    0.02 / math.sqrt(2 * config.n_layer)
+                ),
+                layer_id=layer_id,
+            )
+        elif grouped_proj_targets:
             target = grouped_proj_targets[0]
             self.c_proj = GroupedInputLinear(
                 4 * config.n_embd,
@@ -3167,6 +3231,15 @@ class GPT(nn.Module):
         params = {name: param for name, param in self.named_parameters() if param.requires_grad}
         decay = [param for _, param in params.items() if param.dim() >= 2]
         nodecay = [param for _, param in params.items() if param.dim() < 2]
+        muon_matched_givens_modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, MuonMatchedGivensLinear)
+        ]
+        if muon_matched_givens_modules and optimizer != "muon":
+            raise ValueError(
+                "Muon-matched Givens c_proj requires optimizer='muon'"
+            )
         if optimizer == "muon":
             product_factor_tokens = (
                 "product_log_diagonals",
@@ -3262,6 +3335,18 @@ class GPT(nn.Module):
                         lr=learning_rate,
                     )
                 )
+            if muon_matched_givens_modules:
+                optimizers.append(
+                    MuonMatchedGivens(
+                        muon_matched_givens_modules,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
             if other:
                 fused_available = "fused" in inspect.signature(torch.optim.AdamW).parameters
                 use_fused = fused_available and device_type == "cuda"
@@ -3313,6 +3398,8 @@ class GPT(nn.Module):
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
                 f"product_fht_factor_tensors={len(product_factors)} "
+                "muon_matched_givens_tensors="
+                f"{len(muon_matched_givens_modules)} "
                 f"mlp_chart_tensors={len(chart_other)} "
                 f"mlp_pregelu_chart_tensors={len(pregelu_chart_other)} "
                 f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
@@ -3344,6 +3431,10 @@ class GPT(nn.Module):
                 modules += 1
                 generated += module.in_features * module.out_features
                 latent += module.trainable_scalar_count
+            elif isinstance(module, MuonMatchedGivensLinear):
+                modules += 1
+                generated += module.in_features * module.out_features
+                latent += module.coordinate_count
         return {"modules": modules, "generated": generated, "latent": latent}
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
@@ -3378,11 +3469,17 @@ class GPT(nn.Module):
                 module.product_output_log_gain,
             )
         }
-        return [
+        parameters = [
             parameter
             for parameter in self.parameters()
             if id(parameter) not in excluded
         ]
+        parameters.extend(
+            module.weight
+            for module in self.modules()
+            if isinstance(module, MuonMatchedGivensLinear)
+        )
+        return parameters
 
     def finalize_product_fht_pullback_probes(
         self,

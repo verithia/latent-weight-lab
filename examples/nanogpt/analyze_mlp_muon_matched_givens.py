@@ -35,221 +35,14 @@ from examples.nanogpt.analyze_parameter_trajectory import (
     write_csv,
 )
 from examples.nanogpt.model import LearnedGivensOutputMix
+from examples.nanogpt.muon_matched_givens import (
+    apply_givens_flow,
+    diagonal_metric_angles,
+    muon_matched_permutations,
+)
 from examples.nanogpt.parameter_trajectory import (
     OPTIMIZER_PROBE_SCHEMA_VERSION,
 )
-
-
-def _complete_unique_matchings(
-    edge_scores: dict[tuple[int, int], float],
-    *,
-    width: int,
-    stages: int,
-    seed: int,
-) -> tuple[torch.Tensor, list[dict[str, float | int]]]:
-    """Greedily edge-color scores into unique perfect matchings."""
-    ordered_edges = sorted(
-        (
-            (score, left, right)
-            for (left, right), score in edge_scores.items()
-        ),
-        key=lambda item: (-item[0], item[1], item[2]),
-    )
-    used_edges: set[tuple[int, int]] = set()
-    generator = torch.Generator(device="cpu")
-    generator.manual_seed(int(seed))
-    permutations: list[torch.Tensor] = []
-    diagnostics: list[dict[str, float | int]] = []
-    for stage in range(stages):
-        occupied = [False] * width
-        pairs: list[tuple[int, int, float, bool]] = []
-        for score, left, right in ordered_edges:
-            edge = (left, right)
-            if edge in used_edges or occupied[left] or occupied[right]:
-                continue
-            occupied[left] = occupied[right] = True
-            used_edges.add(edge)
-            pairs.append((left, right, score, True))
-            if len(pairs) == width // 2:
-                break
-
-        remaining = [
-            index for index, is_occupied in enumerate(occupied)
-            if not is_occupied
-        ]
-        if remaining:
-            order = torch.randperm(
-                len(remaining), generator=generator
-            ).tolist()
-            remaining = [remaining[index] for index in order]
-        while remaining:
-            left = remaining.pop()
-            partner_index = next(
-                (
-                    index
-                    for index, right in enumerate(remaining)
-                    if (min(left, right), max(left, right))
-                    not in used_edges
-                ),
-                None,
-            )
-            if partner_index is None:
-                repaired = False
-                for right_index, right in enumerate(remaining):
-                    for pair_index, (
-                        prior_left,
-                        prior_right,
-                        _prior_score,
-                        _prior_candidate,
-                    ) in enumerate(pairs):
-                        prior_edge = (
-                            min(prior_left, prior_right),
-                            max(prior_left, prior_right),
-                        )
-                        for first, second in (
-                            (prior_left, prior_right),
-                            (prior_right, prior_left),
-                        ):
-                            first_edge = (
-                                min(left, first), max(left, first)
-                            )
-                            second_edge = (
-                                min(right, second), max(right, second)
-                            )
-                            if (
-                                first_edge in used_edges
-                                or second_edge in used_edges
-                                or first_edge == second_edge
-                            ):
-                                continue
-                            used_edges.remove(prior_edge)
-                            used_edges.add(first_edge)
-                            used_edges.add(second_edge)
-                            pairs[pair_index] = (
-                                left,
-                                first,
-                                edge_scores.get(first_edge, 0.0),
-                                first_edge in edge_scores,
-                            )
-                            pairs.append(
-                                (
-                                    right,
-                                    second,
-                                    edge_scores.get(second_edge, 0.0),
-                                    second_edge in edge_scores,
-                                )
-                            )
-                            remaining.pop(right_index)
-                            repaired = True
-                            break
-                        if repaired:
-                            break
-                    if repaired:
-                        break
-                if not repaired:
-                    raise RuntimeError(
-                        "could not complete a unique task matching"
-                    )
-                continue
-            right = remaining.pop(partner_index)
-            edge = (min(left, right), max(left, right))
-            used_edges.add(edge)
-            pairs.append(
-                (
-                    left,
-                    right,
-                    edge_scores.get(edge, 0.0),
-                    edge in edge_scores,
-                )
-            )
-
-        if len(pairs) != width // 2:
-            raise RuntimeError("task matching is incomplete")
-        permutation = torch.tensor(
-            [
-                index
-                for left, right, _score, _candidate in pairs
-                for index in (left, right)
-            ],
-            dtype=torch.long,
-        )
-        if not torch.equal(
-            torch.sort(permutation).values, torch.arange(width)
-        ):
-            raise RuntimeError("task matching is not a permutation")
-        permutations.append(permutation)
-        diagnostics.append(
-            {
-                "stage": stage,
-                "pairs": len(pairs),
-                "candidate_edge_fraction": (
-                    sum(candidate for *_rest, candidate in pairs)
-                    / len(pairs)
-                ),
-                "mean_abs_coordinate_gradient": (
-                    sum(
-                        score
-                        for _left, _right, score, _candidate in pairs
-                    )
-                    / len(pairs)
-                ),
-            }
-        )
-    return torch.stack(permutations), diagnostics
-
-
-def muon_matched_permutations(
-    weight: torch.Tensor,
-    direction: torch.Tensor,
-    *,
-    stages: int,
-    neighbors: int,
-    seed: int,
-) -> tuple[torch.Tensor, list[dict[str, float | int]]]:
-    """Select hidden-channel pairs from the exact identity-angle gradient.
-
-    For a pair ``(i, j)``, the identity-angle derivative has columns
-    ``(-W[:, j], W[:, i])``.  Its inner product with the requested
-    materialized direction is
-    ``<W[:, i], D[:, j]> - <W[:, j], D[:, i]>``.
-    """
-    if (
-        weight.ndim != 2
-        or weight.shape != direction.shape
-        or weight.shape[1] <= 0
-        or weight.shape[1] % 2
-    ):
-        raise ValueError(
-            "weight and direction must be same-shaped matrices with even width"
-        )
-    width = int(weight.shape[1])
-    if stages <= 0 or neighbors < stages or neighbors >= width:
-        raise ValueError("require 0 < stages <= neighbors < width")
-    weight = weight.float()
-    direction = direction.float()
-    cross = weight.T @ direction
-    scores = (cross - cross.T).abs()
-    scores.fill_diagonal_(-1.0)
-    top_scores, top_indices = torch.topk(scores, k=neighbors, dim=1)
-    top_scores = top_scores.cpu()
-    top_indices = top_indices.cpu()
-    del cross, scores
-
-    edge_scores: dict[tuple[int, int], float] = {}
-    for left in range(width):
-        for raw_score, raw_right in zip(
-            top_scores[left].tolist(),
-            top_indices[left].tolist(),
-            strict=True,
-        ):
-            right = int(raw_right)
-            edge = (left, right) if left < right else (right, left)
-            edge_scores[edge] = max(
-                float(raw_score), edge_scores.get(edge, -1.0)
-            )
-    return _complete_unique_matchings(
-        edge_scores, width=width, stages=stages, seed=seed
-    )
 
 
 def fit_causal_givens_update(
@@ -368,29 +161,16 @@ def diagonal_metric_causal_givens_update(
                 torch.argsort(flow.permutations, dim=1)
             )
 
-    angles = torch.empty_like(flow.angles).view(
-        stages, source.shape[-1] // 2
+    angles = diagonal_metric_angles(
+        source,
+        requested_update,
+        flow.permutations,
     )
-    for stage in range(stages):
-        pairs = flow.permutations[stage].view(-1, 2)
-        left = pairs[:, 0]
-        right = pairs[:, 1]
-        weight_left = source.index_select(-1, left)
-        weight_right = source.index_select(-1, right)
-        update_left = requested_update.index_select(-1, left)
-        update_right = requested_update.index_select(-1, right)
-        coordinate_inner = (
-            (weight_left * update_right).sum(dim=0)
-            - (weight_right * update_left).sum(dim=0)
-        )
-        coordinate_norm = (
-            weight_left.square().sum(dim=0)
-            + weight_right.square().sum(dim=0)
-        ).clamp_min(1e-30)
-        angles[stage] = coordinate_inner / coordinate_norm
     with torch.no_grad():
         flow.angles.copy_(angles.reshape(-1))
-        predicted_update = flow(source) - source
+        predicted_update = apply_givens_flow(
+            source, angles, flow.permutations
+        ) - source
         residual = requested_update - predicted_update
         recovery = 1.0 - residual.square().sum() / update_energy
     return predicted_update.detach(), {
