@@ -434,6 +434,64 @@ class PostGeluConditionedBilinearOutputGate(
         )
 
 
+class PostGeluHiddenSelfBilinearGate(
+    UntiedFixedBasisBilinearOutputGate
+):
+    """Apply a full-width token-conditioned mixer before ``c_proj``.
+
+    Unlike :class:`PostGeluConditionedBilinearOutputGate`, this operator
+    preserves every post-GELU expansion coordinate and changes the hidden
+    activation itself:
+
+        h' = h + Q_out^-1[
+            (Q_update h) *
+            (slope * Q_condition rmsnorm(h) + bias)
+        ].
+
+    The three bases are fixed and independently seeded.  Only the
+    expansion-width slope/bias vectors are trainable, with an exact identity
+    at zero initialization.
+    """
+
+    def __init__(
+        self,
+        width: int,
+        scale: float = 1.0,
+        *,
+        basis_block_size: int = 256,
+        condition_seed: int = 271828,
+        update_seed: int = 376557,
+        output_seed: int = 481286,
+        rms_epsilon: float = 1e-6,
+    ) -> None:
+        super().__init__(
+            width,
+            scale,
+            basis_block_size=basis_block_size,
+            condition_seed=condition_seed,
+            update_seed=update_seed,
+            output_seed=output_seed,
+        )
+        self.rms_epsilon = float(rms_epsilon)
+        if self.rms_epsilon <= 0.0:
+            raise ValueError("rms_epsilon must be positive")
+
+    def activation_condition(
+        self, activated: torch.Tensor
+    ) -> torch.Tensor:
+        rms = activated.float().square().mean(
+            dim=-1,
+            keepdim=True,
+        ).add(self.rms_epsilon).sqrt()
+        return activated / rms.to(dtype=activated.dtype)
+
+    def forward(self, activated: torch.Tensor) -> torch.Tensor:
+        return super().forward(
+            self.activation_condition(activated),
+            activated,
+        )
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -562,11 +620,34 @@ def load_gate_model(
                 output_seed=basis_seed + 2 * 104729 + layer * 64,
                 projection_seed=basis_seed + 3 * 104729 + layer * 64,
             )
+        elif gate_kind == "postgelu_hidden_bilinear_untied":
+            gate = PostGeluHiddenSelfBilinearGate(
+                4 * model.config.n_embd,
+                basis_block_size=basis_block_size,
+                condition_seed=basis_seed + layer * 64,
+                update_seed=basis_seed + 104729 + layer * 64,
+                output_seed=basis_seed + 2 * 104729 + layer * 64,
+            )
         else:
             raise ValueError(f"unsupported gate kind: {gate_kind}")
         gate = gate.to(device)
         mlp.add_module("residual_conditioned_output_gate_probe", gate)
 
+        if isinstance(gate, PostGeluHiddenSelfBilinearGate):
+            def hidden_gate_hook(
+                _module,
+                _inputs,
+                output,
+                *,
+                selected_gate: PostGeluHiddenSelfBilinearGate = gate,
+            ) -> torch.Tensor:
+                return selected_gate(output)
+
+            handles.append(
+                mlp.gelu.register_forward_hook(hidden_gate_hook)
+            )
+            gates[layer] = gate
+            continue
         if isinstance(gate, PostGeluConditionedBilinearOutputGate):
             def gelu_hook(
                 _module,
@@ -677,18 +758,27 @@ def teacher_mse_gradients(
         gate = gates[layer]
         condition = split.mlp_input[layer].to(device)
         target = split.teacher_mlp_out[layer].to(device)
+        pre_gelu = split.pre_gelu[layer].to(device)
+        activated = F.gelu(pre_gelu)
+        if isinstance(gate, PostGeluHiddenSelfBilinearGate):
+            if use_source_mlp_out:
+                raise ValueError(
+                    "post-GELU hidden gate requires reconstructed c_proj "
+                    "output"
+                )
+            activated = gate(activated)
         if use_source_mlp_out:
             prediction = split.source_mlp_out[layer].to(device)
         else:
-            pre_gelu = split.pre_gelu[layer].to(device)
             weight = split.cproj_weight[layer].to(device)
             bias = split.cproj_bias[layer]
             bias = bias.to(device) if bias is not None else None
             charted_weight = mlp._materialize_charted_cproj_weight(weight)
-            prediction = F.linear(F.gelu(pre_gelu), charted_weight, bias)
+            prediction = F.linear(activated, charted_weight, bias)
         if isinstance(gate, PostGeluConditionedBilinearOutputGate):
-            condition = F.gelu(split.pre_gelu[layer].to(device))
-        prediction = gate(condition, prediction)
+            condition = activated
+        if not isinstance(gate, PostGeluHiddenSelfBilinearGate):
+            prediction = gate(condition, prediction)
         loss = F.mse_loss(prediction, target)
         parameters = [getattr(gate, group) for group in gate_groups]
         gradients = torch.autograd.grad(loss, parameters)
@@ -790,6 +880,7 @@ def main() -> None:
             "fixed_bilinear",
             "fixed_bilinear_untied",
             "postgelu_bilinear_untied",
+            "postgelu_hidden_bilinear_untied",
         ),
         default="diagonal",
     )
@@ -972,16 +1063,33 @@ def main() -> None:
                         if args.gate_kind
                         == "postgelu_bilinear_untied"
                         else (
-                            "update + Q_output^-1[(Q_update update) * "
-                            "(slope * Q_condition mlp_input + bias)]"
+                            "hidden + Q_output^-1[(Q_update hidden) * "
+                            "(slope * Q_condition rmsnorm(hidden) + bias)]"
+                            if args.gate_kind
+                            == "postgelu_hidden_bilinear_untied"
+                            else (
+                                "update + Q_output^-1[(Q_update update) * "
+                                "(slope * Q_condition mlp_input + bias)]"
+                            )
                         )
                     )
                 )
             ),
-            "parameters_per_selected_layer": 2 * model.config.n_embd,
+            "parameters_per_selected_layer": (
+                8 * model.config.n_embd
+                if args.gate_kind
+                == "postgelu_hidden_bilinear_untied"
+                else 2 * model.config.n_embd
+            ),
             "selected_parameter_groups": list(gate_groups),
             "selected_parameters_per_layer": (
-                len(gate_groups) * model.config.n_embd
+                len(gate_groups)
+                * (
+                    4 * model.config.n_embd
+                    if args.gate_kind
+                    == "postgelu_hidden_bilinear_untied"
+                    else model.config.n_embd
+                )
             ),
             "identity_initialized": True,
             "learned_basis": False,
@@ -1006,13 +1114,19 @@ def main() -> None:
                 in (
                     "fixed_bilinear_untied",
                     "postgelu_bilinear_untied",
+                    "postgelu_hidden_bilinear_untied",
                 )
                 else None
             ),
             "condition_source": (
                 "fixed_signed_four_to_one_rms_normalized_postgelu"
                 if args.gate_kind == "postgelu_bilinear_untied"
-                else "layer_normalized_residual"
+                else (
+                    "full_width_rms_normalized_postgelu"
+                    if args.gate_kind
+                    == "postgelu_hidden_bilinear_untied"
+                    else "layer_normalized_residual"
+                )
             ),
             "projection_seed": (
                 args.basis_seed + 3 * 104729
