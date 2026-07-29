@@ -119,12 +119,12 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "cproj_product_fht_pullback_calibration",
-  "implementation_commit": "eb32e712375ba489e8e2c25159a292b28ad99d96",
+  "implementation_commit": "efb1b5e5fbcabda1d58050f172efe986b0fffcd6",
   "implementation_source_hashes": {
     "examples/nanogpt/model.py": "686a4e4536d712c474c686f9cb8392473e85ea4b0585f62aad1ec87dfa336745",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
     "examples/nanogpt/train.py": "4121cbd0f39c3c78122e3d84665aa4c8b458d443510aa1152b12f96746a0b6a1",
-    "latent_weight_lab/block_fht.py": "2709b59181f3ca644f8f8732df2f20f622512216c6deda973edf6bf01c383e7b"
+    "latent_weight_lab/block_fht.py": "62b2c94a82798b7efe65ce0c414763b1383f368e3b105763bbe6b0a8a703aa1a"
   },
   "inherit_dense_fallback_scale_from": "y400_mai_v2_124m_muon_20tpp_selected",
   "inherit_dense_main_learning_rate_from": "y400_mai_v2_124m_muon_20tpp_selected",

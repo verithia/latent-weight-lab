@@ -9,18 +9,18 @@
     "scientific_run_blocked_until_pass": true
   },
   "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_jvpnorm_calibration.json",
-  "candidate_config_sha256": "682426e547a3833029a26de0ea9e6de9aab976dd31a48bfa4b12eed121ce6258",
+  "candidate_config_sha256": "c4a283f00bc05505c8920c0a110599c8de5a80bcf08044d34809da26795e44c5",
   "failed_run_diagnosis": {
     "dense_relative_displacement_mean": 0.492487,
     "endpoint_diagnosis_sha256": "eb7fcf48407b4c86627f9b83a65b5af75938fbc599b0c02fbeeb485efef85ddd",
     "product_relative_displacement_mean": 0.00231545
   },
-  "implementation_commit": "eb32e712375ba489e8e2c25159a292b28ad99d96",
+  "implementation_commit": "efb1b5e5fbcabda1d58050f172efe986b0fffcd6",
   "implementation_source_hashes": {
     "examples/nanogpt/model.py": "686a4e4536d712c474c686f9cb8392473e85ea4b0585f62aad1ec87dfa336745",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
     "examples/nanogpt/train.py": "4121cbd0f39c3c78122e3d84665aa4c8b458d443510aa1152b12f96746a0b6a1",
-    "latent_weight_lab/block_fht.py": "2709b59181f3ca644f8f8732df2f20f622512216c6deda973edf6bf01c383e7b"
+    "latent_weight_lab/block_fht.py": "62b2c94a82798b7efe65ce0c414763b1383f368e3b105763bbe6b0a8a703aa1a"
   },
   "launch_rule": "run only this exact committed diagnostic configuration on an idle Y400 GPU; inspect its one-step JSON synchronously before preregistering any further 238-step candidate",
   "schema_version": "mai_124m_mlp_product_fht_pullback_calibration_plan_v1",
