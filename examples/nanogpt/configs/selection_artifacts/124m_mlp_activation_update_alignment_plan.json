@@ -1,0 +1,38 @@
+{
+  "analysis": "causal phase-start activation PCA versus future dense-Muon c_proj endpoint update",
+  "decision_rule": {
+    "partial": "post-GELU rank64 mean minimum-window update-energy enrichment >=1.5 and at least 10/20 cells >=1.5",
+    "promote": "post-GELU rank64 mean minimum-window update-energy enrichment >=2; mean cross-window subspace enrichment >=2; at least 15/20 cells have minimum-window enrichment >=1.5; post-GELU mean >=1.2x pre-GELU mean",
+    "reject": "neither threshold is met"
+  },
+  "fit_seed": 20260729,
+  "holdout_seed": 20260730,
+  "layers": [
+    0,
+    3,
+    6,
+    9,
+    11
+  ],
+  "no_learned_basis": true,
+  "phase_boundaries": [
+    0,
+    60,
+    120,
+    180,
+    238
+  ],
+  "points": [
+    "pre_gelu",
+    "post_gelu"
+  ],
+  "random_reference": "rank / 3072",
+  "ranks": [
+    16,
+    64,
+    128
+  ],
+  "sample_cap_per_window": 1024,
+  "schema_version": "nanogpt_mlp_activation_update_alignment_plan_v1",
+  "status": "preregistered_before_result"
+}
