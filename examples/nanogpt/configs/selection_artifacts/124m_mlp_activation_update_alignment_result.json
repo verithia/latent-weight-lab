@@ -1,0 +1,45 @@
+{
+  "analysis_commit": "4b55f2325eb58f7c7c4360fc4dd67346e9a822f2",
+  "analysis_entrypoint": "examples/nanogpt/analyze_mlp_activation_update_alignment.py",
+  "decision": "PARTIAL_POSTGELU_SIGNAL_REQUIRES_STABILITY_FIX",
+  "interpretation": "The preregistered promotion rule fails only its post-vs-pre specificity clause: post-GELU rank-64 activation PCs are causal, cross-window-stable, and aligned with future c_proj motion, but pre-GELU PCs carry nearly the same signal. Activation covariance supplies task-aligned axes; post-GELU PCA alone is not the full structural answer.",
+  "metrics": {
+    "post_gelu_rank64": {
+      "cells": 20,
+      "cells_minimum_window_enrichment_ge_1p5": 20,
+      "mean_fit_holdout_subspace_overlap": 0.6207307636737823,
+      "mean_minimum_window_update_energy_capture": 0.08031018767505885,
+      "mean_minimum_window_update_energy_enrichment": 3.8548890084028242,
+      "minimum_cell_enrichment": 1.5769420266151428
+    },
+    "post_to_pre_rank64_enrichment_ratio": 1.0855580122670192,
+    "pre_gelu_rank64": {
+      "cells": 20,
+      "cells_minimum_window_enrichment_ge_1p5": 20,
+      "mean_fit_holdout_subspace_overlap": 0.6835612669587136,
+      "mean_minimum_window_update_energy_capture": 0.07398036718368531,
+      "mean_minimum_window_update_energy_enrichment": 3.5510576248168944,
+      "minimum_cell_enrichment": 1.555437684059143
+    }
+  },
+  "outputs": {
+    "aggregate_sha256": "b35ae4f5607deac1737b997cbb6501ae5468834f922bd616a102ccd76ece0cc2",
+    "analysis_log_sha256": "34abd52b1543f5847e7cb8981174f97ce406370f6c3ade1637cacb151faad003",
+    "detail_sha256": "af1dedaf334ff8aace5f7f4ef696c4ff4d530713a97a976c4520b4686b263461",
+    "metadata_sha256": "9e3a092212164eec9b1fcbbe33c6819c395d6d3582357633c654a1b24f986964",
+    "remote_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/activation_update_alignment_v1"
+  },
+  "plan_artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_activation_update_alignment_plan.json",
+  "random_reference": "rank / 3072",
+  "replay": {
+    "config_sha256": "e5cfd92100eaee73f2e9c499d7eda34e96985b8b928cc980b2623a80d0dc6512",
+    "mfu_certificate_sha256": "e64be1ae4e7b0e49dc22532118db68ab89137edb6f4e9f7bd297d020a7cadc4e",
+    "mfu_fraction": 0.33480796064494833,
+    "provenance_sha256": "c8909024548b20cf8f593244ba99041acb7d173c85fea9e18133e48d07bd0a6c",
+    "status_sha256": "1c183183fec9597d8c39768d3124149ecdb84591afa5ed0e2b3084f93137b318",
+    "terminal_train_loss": 5.4866,
+    "terminal_val_loss": 5.4894,
+    "training_commit": "5c14e855dc943e81f663ea8ebd1ded30f4162ad7"
+  },
+  "schema_version": "nanogpt_mlp_activation_update_alignment_result_v1"
+}
