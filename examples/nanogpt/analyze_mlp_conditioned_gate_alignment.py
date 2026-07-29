@@ -492,6 +492,107 @@ class PostGeluHiddenSelfBilinearGate(
         )
 
 
+class MultiHeadPostGeluHiddenSelfBilinearGate(torch.nn.Module):
+    """Sum independent fixed-basis quadratic hidden mixers.
+
+    Each head contributes one diagonal core in its own three fixed bases.
+    The bases remain non-learned; increasing ``heads`` raises the quadratic
+    tensor rank without introducing a dense basis or LoRA adapter.
+    """
+
+    def __init__(
+        self,
+        width: int,
+        heads: int,
+        scale: float = 1.0,
+        *,
+        basis_block_size: int = 256,
+        condition_seed: int = 271828,
+        update_seed: int = 376557,
+        output_seed: int = 481286,
+        head_seed_stride: int = 1000003,
+        rms_epsilon: float = 1e-6,
+    ) -> None:
+        super().__init__()
+        self.width = int(width)
+        self.head_count = int(heads)
+        self.scale = float(scale)
+        self.head_seed_stride = int(head_seed_stride)
+        self.rms_epsilon = float(rms_epsilon)
+        if self.head_count <= 1:
+            raise ValueError("multi-head gate requires at least two heads")
+        if self.rms_epsilon <= 0.0:
+            raise ValueError("rms_epsilon must be positive")
+        self.condition_bases = torch.nn.ModuleList(
+            [
+                _FixedBlockHadamardBasis(
+                    self.width,
+                    basis_block_size=basis_block_size,
+                    seed=condition_seed + head * self.head_seed_stride,
+                )
+                for head in range(self.head_count)
+            ]
+        )
+        self.update_bases = torch.nn.ModuleList(
+            [
+                _FixedBlockHadamardBasis(
+                    self.width,
+                    basis_block_size=basis_block_size,
+                    seed=update_seed + head * self.head_seed_stride,
+                )
+                for head in range(self.head_count)
+            ]
+        )
+        self.output_bases = torch.nn.ModuleList(
+            [
+                _FixedBlockHadamardBasis(
+                    self.width,
+                    basis_block_size=basis_block_size,
+                    seed=output_seed + head * self.head_seed_stride,
+                )
+                for head in range(self.head_count)
+            ]
+        )
+        self.slope = torch.nn.Parameter(
+            torch.zeros(self.head_count, self.width)
+        )
+        self.bias = torch.nn.Parameter(
+            torch.zeros(self.head_count, self.width)
+        )
+
+    def activation_condition(
+        self, activated: torch.Tensor
+    ) -> torch.Tensor:
+        rms = activated.float().square().mean(
+            dim=-1,
+            keepdim=True,
+        ).add(self.rms_epsilon).sqrt()
+        return activated / rms.to(dtype=activated.dtype)
+
+    def forward(self, activated: torch.Tensor) -> torch.Tensor:
+        condition = self.activation_condition(activated)
+        correction = torch.zeros_like(activated)
+        for head in range(self.head_count):
+            spectral_condition = self.condition_bases[head].transform(
+                condition,
+                inverse=False,
+            )
+            modulation = self.scale * torch.addcmul(
+                self.bias[head].to(dtype=activated.dtype),
+                spectral_condition,
+                self.slope[head].to(dtype=activated.dtype),
+            )
+            spectral_update = self.update_bases[head].transform(
+                activated,
+                inverse=False,
+            )
+            correction = correction + self.output_bases[head].transform(
+                spectral_update * modulation,
+                inverse=True,
+            )
+        return activated + correction
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -578,6 +679,7 @@ def load_gate_model(
     initial_output_log_gain: float,
     *,
     gate_kind: str = "diagonal",
+    gate_heads: int = 1,
     basis_block_size: int = 256,
     basis_seed: int = 271828,
 ) -> tuple[
@@ -628,18 +730,33 @@ def load_gate_model(
                 update_seed=basis_seed + 104729 + layer * 64,
                 output_seed=basis_seed + 2 * 104729 + layer * 64,
             )
+        elif gate_kind == "postgelu_hidden_multihead_untied":
+            gate = MultiHeadPostGeluHiddenSelfBilinearGate(
+                4 * model.config.n_embd,
+                gate_heads,
+                basis_block_size=basis_block_size,
+                condition_seed=basis_seed + layer * 64,
+                update_seed=basis_seed + 104729 + layer * 64,
+                output_seed=basis_seed + 2 * 104729 + layer * 64,
+            )
         else:
             raise ValueError(f"unsupported gate kind: {gate_kind}")
         gate = gate.to(device)
         mlp.add_module("residual_conditioned_output_gate_probe", gate)
 
-        if isinstance(gate, PostGeluHiddenSelfBilinearGate):
+        if isinstance(
+            gate,
+            (
+                PostGeluHiddenSelfBilinearGate,
+                MultiHeadPostGeluHiddenSelfBilinearGate,
+            ),
+        ):
             def hidden_gate_hook(
                 _module,
                 _inputs,
                 output,
                 *,
-                selected_gate: PostGeluHiddenSelfBilinearGate = gate,
+                selected_gate: torch.nn.Module = gate,
             ) -> torch.Tensor:
                 return selected_gate(output)
 
@@ -760,7 +877,13 @@ def teacher_mse_gradients(
         target = split.teacher_mlp_out[layer].to(device)
         pre_gelu = split.pre_gelu[layer].to(device)
         activated = F.gelu(pre_gelu)
-        if isinstance(gate, PostGeluHiddenSelfBilinearGate):
+        if isinstance(
+            gate,
+            (
+                PostGeluHiddenSelfBilinearGate,
+                MultiHeadPostGeluHiddenSelfBilinearGate,
+            ),
+        ):
             if use_source_mlp_out:
                 raise ValueError(
                     "post-GELU hidden gate requires reconstructed c_proj "
@@ -777,7 +900,13 @@ def teacher_mse_gradients(
             prediction = F.linear(activated, charted_weight, bias)
         if isinstance(gate, PostGeluConditionedBilinearOutputGate):
             condition = activated
-        if not isinstance(gate, PostGeluHiddenSelfBilinearGate):
+        if not isinstance(
+            gate,
+            (
+                PostGeluHiddenSelfBilinearGate,
+                MultiHeadPostGeluHiddenSelfBilinearGate,
+            ),
+        ):
             prediction = gate(condition, prediction)
         loss = F.mse_loss(prediction, target)
         parameters = [getattr(gate, group) for group in gate_groups]
@@ -881,9 +1010,11 @@ def main() -> None:
             "fixed_bilinear_untied",
             "postgelu_bilinear_untied",
             "postgelu_hidden_bilinear_untied",
+            "postgelu_hidden_multihead_untied",
         ),
         default="diagonal",
     )
+    parser.add_argument("--gate-heads", type=int, default=1)
     parser.add_argument("--basis-block-size", type=int, default=256)
     parser.add_argument("--basis-seed", type=int, default=271828)
     parser.add_argument("--gate-groups", default="slope,bias")
@@ -916,6 +1047,11 @@ def main() -> None:
         raise ValueError("sample cap exceeds the available activation rows")
     if args.ce_batches <= 0 or args.ce_batches > args.batches:
         raise ValueError("ce-batches must be in [1, batches]")
+    if args.gate_kind == "postgelu_hidden_multihead_untied":
+        if args.gate_heads <= 1:
+            raise ValueError("multi-head gate requires gate-heads > 1")
+    elif args.gate_heads != 1:
+        raise ValueError("gate-heads is only valid for the multi-head gate")
 
     fit = collect_split(
         name="fit",
@@ -950,6 +1086,7 @@ def main() -> None:
         layers,
         args.initial_output_log_gain,
         gate_kind=args.gate_kind,
+        gate_heads=args.gate_heads,
         basis_block_size=args.basis_block_size,
         basis_seed=args.basis_seed,
     )
@@ -1015,6 +1152,27 @@ def main() -> None:
         for handle in handles:
             handle.remove()
 
+    multihead_task_ce_fit_holdout: dict[str, list[dict[str, float]]] | None
+    if args.gate_kind == "postgelu_hidden_multihead_untied":
+        multihead_task_ce_fit_holdout = {}
+        for layer in layers:
+            fit_gradient = ce_by_split["fit"][gate_key(layer, "slope")]
+            holdout_gradient = ce_by_split["holdout"][
+                gate_key(layer, "slope")
+            ]
+            multihead_task_ce_fit_holdout[str(layer)] = [
+                {
+                    "head": head,
+                    **vector_alignment(
+                        fit_gradient[head],
+                        holdout_gradient[head],
+                    ),
+                }
+                for head in range(args.gate_heads)
+            ]
+    else:
+        multihead_task_ce_fit_holdout = None
+
     root = Path(__file__).resolve().parents[2]
     args.output.mkdir(parents=True, exist_ok=True)
     csv_path = args.output / "mlp_conditioned_gate_alignment.csv"
@@ -1063,10 +1221,25 @@ def main() -> None:
                         if args.gate_kind
                         == "postgelu_bilinear_untied"
                         else (
-                            "hidden + Q_output^-1[(Q_update hidden) * "
-                            "(slope * Q_condition rmsnorm(hidden) + bias)]"
+                            (
+                                "hidden + sum_head Q_output_head^-1["
+                                "(Q_update_head hidden) * "
+                                "(slope_head * Q_condition_head "
+                                "rmsnorm(hidden) + bias_head)]"
+                                if args.gate_kind
+                                == "postgelu_hidden_multihead_untied"
+                                else (
+                                    "hidden + Q_output^-1["
+                                    "(Q_update hidden) * "
+                                    "(slope * Q_condition "
+                                    "rmsnorm(hidden) + bias)]"
+                                )
+                            )
                             if args.gate_kind
-                            == "postgelu_hidden_bilinear_untied"
+                            in (
+                                "postgelu_hidden_bilinear_untied",
+                                "postgelu_hidden_multihead_untied",
+                            )
                             else (
                                 "update + Q_output^-1[(Q_update update) * "
                                 "(slope * Q_condition mlp_input + bias)]"
@@ -1078,8 +1251,17 @@ def main() -> None:
             "parameters_per_selected_layer": (
                 8 * model.config.n_embd
                 if args.gate_kind
-                == "postgelu_hidden_bilinear_untied"
+                in (
+                    "postgelu_hidden_bilinear_untied",
+                    "postgelu_hidden_multihead_untied",
+                )
                 else 2 * model.config.n_embd
+            )
+            * (
+                args.gate_heads
+                if args.gate_kind
+                == "postgelu_hidden_multihead_untied"
+                else 1
             ),
             "selected_parameter_groups": list(gate_groups),
             "selected_parameters_per_layer": (
@@ -1087,9 +1269,25 @@ def main() -> None:
                 * (
                     4 * model.config.n_embd
                     if args.gate_kind
-                    == "postgelu_hidden_bilinear_untied"
+                    in (
+                        "postgelu_hidden_bilinear_untied",
+                        "postgelu_hidden_multihead_untied",
+                    )
                     else model.config.n_embd
                 )
+            )
+            * (
+                args.gate_heads
+                if args.gate_kind
+                == "postgelu_hidden_multihead_untied"
+                else 1
+            ),
+            "heads": args.gate_heads,
+            "head_seed_stride": (
+                1000003
+                if args.gate_kind
+                == "postgelu_hidden_multihead_untied"
+                else None
             ),
             "identity_initialized": True,
             "learned_basis": False,
@@ -1115,6 +1313,7 @@ def main() -> None:
                     "fixed_bilinear_untied",
                     "postgelu_bilinear_untied",
                     "postgelu_hidden_bilinear_untied",
+                    "postgelu_hidden_multihead_untied",
                 )
                 else None
             ),
@@ -1124,7 +1323,10 @@ def main() -> None:
                 else (
                     "full_width_rms_normalized_postgelu"
                     if args.gate_kind
-                    == "postgelu_hidden_bilinear_untied"
+                    in (
+                        "postgelu_hidden_bilinear_untied",
+                        "postgelu_hidden_multihead_untied",
+                    )
                     else "layer_normalized_residual"
                 )
             ),
@@ -1137,6 +1339,9 @@ def main() -> None:
                 "captured_checkpoint_mlp_output"
                 if args.teacher_source_output
                 else "reconstructed_identity_bilateral_chart_output"
+            ),
+            "headwise_task_ce_fit_holdout": (
+                multihead_task_ce_fit_holdout
             ),
         },
         "diagnostics": diagnostics,

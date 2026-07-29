@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import pytest
 import torch
 
 from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
     FixedBasisBilinearOutputGate,
+    MultiHeadPostGeluHiddenSelfBilinearGate,
     PostGeluConditionedBilinearOutputGate,
     PostGeluHiddenSelfBilinearGate,
     ResidualConditionedOutputGate,
@@ -165,6 +167,35 @@ def test_postgelu_hidden_self_condition_is_per_token_rms_normalized() -> None:
     rms = condition.float().square().mean(dim=-1).sqrt()
 
     torch.testing.assert_close(rms, torch.ones_like(rms), atol=2e-5, rtol=0)
+
+
+def test_multihead_postgelu_hidden_self_gate_is_identity_and_dynamic() -> None:
+    gate = MultiHeadPostGeluHiddenSelfBilinearGate(
+        16,
+        2,
+        basis_block_size=4,
+        condition_seed=11,
+        update_seed=17,
+        output_seed=23,
+    )
+    activated = torch.randn(2, 3, 16)
+
+    torch.testing.assert_close(gate(activated), activated)
+    gate(activated).square().mean().backward()
+
+    assert gate.slope.shape == (2, 16)
+    assert gate.slope.grad is not None
+    assert gate.slope.grad[0].abs().sum() > 0
+    assert gate.slope.grad[1].abs().sum() > 0
+    assert not torch.equal(
+        gate.condition_bases[0].permutation,
+        gate.condition_bases[1].permutation,
+    )
+
+
+def test_multihead_postgelu_hidden_self_gate_validates_head_count() -> None:
+    with pytest.raises(ValueError, match="at least two heads"):
+        MultiHeadPostGeluHiddenSelfBilinearGate(16, 1, basis_block_size=4)
 
 
 def test_gate_alignment_rows_include_groups_and_layers() -> None:
