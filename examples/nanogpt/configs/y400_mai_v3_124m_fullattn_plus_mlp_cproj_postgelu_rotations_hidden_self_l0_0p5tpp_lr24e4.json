@@ -182,9 +182,9 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "postgelu_hidden_self_l0_0p5tpp",
-  "implementation_commit": "5dfb47a095d3780429eb63046928e7bae08afd4b",
+  "implementation_commit": "2eceb5849355c4e7c82ec6e2b63d240d9f749847",
   "implementation_source_hashes": {
-    "examples/nanogpt/model.py": "6e77ba9ac79d0d8f1635095fdb531b6fabb33a6a2692ba14fdcc77173515f9b3",
+    "examples/nanogpt/model.py": "a4652b49faca08bba75ba544a450cc74298f32711893ab9eee5924df3f2d109a",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
     "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
     "examples/nanogpt/train.py": "db4c7635220f857106bbfcae0d5aa62d282e52ba86cef6a2b43722b9ec13ee64",
