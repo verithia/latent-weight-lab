@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_training_plan_v1",
+  "status": "registered_after_no_training_geometry_and_mfu_qualification_before_scientific_training",
+  "scientific_question": "Does eliminating discrete topology staleness by recomputing a stage-64 c_proj Givens topology from the exact current Muon direction on every update close the 124M full-attention-plus-c_proj loss gap without a learned dense basis, dense residual, or LoRA adapter?",
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp.json",
+    "config_sha256": "9051dc9535f5a543d006dad458f25190a81592a1166f3df9694f2e734723e1d4",
+    "implementation_commit": "681f8e1386f1c8caeee8657011db09a9b99ad857",
+    "model_tier": "124m",
+    "planned_tpp": 0.5,
+    "max_iters": 238,
+    "stages": 64,
+    "matching_neighbors": 64,
+    "refresh_interval_updates": 1,
+    "coordinates_per_layer": 98304,
+    "coordinate_fraction_per_cproj": 0.041666666666666664
+  },
+  "causal_optimizer_protocol": {
+    "matching": "At every update, score hidden-channel edges from that update's exact coherent Muon polar direction and construct 64 edge-disjoint perfect matchings with the qualified compiled single-pass selector.",
+    "angles": "At the same update, compute closed-form diagonal tangent-metric angles using only the current scheduled Muon update and freshly selected matchings.",
+    "state_transition": "Apply the 64 Givens stages to the materialized c_proj weight, apply decoupled weight decay, and fold the result into the persistent base buffer.",
+    "future_information_used": false,
+    "persistent_selected_connectivity": false,
+    "native_output_validation": true,
+    "learned_dense_basis": false,
+    "dense_residual": false,
+    "lora_adapter": false,
+    "mlp_cfc_replaced": false
+  },
+  "parent_evidence": {
+    "matching_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_matching_result.json",
+    "matching_result_sha256": "2f891d7054d866d2c395f9cc4257b3abc02025272f26c14acbba75e8cbc5e4da",
+    "minimum_retention_vs_greedy": 0.9999172334194134,
+    "minimum_enrichment_vs_random": 3.143527069192742,
+    "mean_finite_ce_delta_vs_greedy": 9.611248970031738e-07,
+    "median_matching_seconds_per_layer": 0.005909809842705727,
+    "p95_matching_seconds_per_layer": 0.025545472744852304,
+    "staleness_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_chart_staleness_result.json",
+    "staleness_result_sha256": "dd089f0f5995fc95d0dae7f8d70e0bf05145ce0417dd1e53c9d20d5810d86b3e"
+  },
+  "mfu_gate": {
+    "minimum_fraction": 0.2,
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_mfu_result.json",
+    "result_sha256": "cdafab9add0c85051060bf1b7117d26f3eea3a2c5472e5c2b61cb7934644d7c8",
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/performance_preflight_stateless_fresh_stage64.json",
+    "certificate_sha256": "7de08053f2531b493f8b39ce9d280feb78e7175de27772bbca45984039edef55",
+    "measured_fraction": 0.2513189662788884,
+    "passed": true
+  },
+  "decision_rule": {
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "accepted_attention_only_control": 5.4918,
+    "accepted_attention_gap": 0.1,
+    "success_ce_maximum": 5.5918,
+    "stale_stage64_control": 5.662802696228027,
+    "success": "Stable terminal validation CE at most 5.5918.",
+    "directional_only": "Stable terminal validation CE below 5.662802696228027 but above 5.5918.",
+    "reject": "Terminal validation CE at least 5.662802696228027, NaN/Inf/divergence, incomplete terminal evaluation, provenance mismatch, or incomplete exact-resume state."
+  },
+  "execution": {
+    "run_id": "y400_mai_v3_124m_statelessfresh64_scientific_v1",
+    "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp",
+    "host": "Y400",
+    "gpu": 1,
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp.json"
+    ],
+    "foreground_log": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/y400_mai_v3_124m_statelessfresh64_scientific_v1.foreground.log",
+    "status": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/status/y400_mai_v3_124m_statelessfresh64_scientific_v1.json",
+    "provenance": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/provenance/y400_mai_v3_124m_statelessfresh64_scientific_v1.json",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "do_not_disturb": "the existing 985M full-attention run on Y400 GPU0"
+  },
+  "authorization": {
+    "scope": "Exactly one immutable 124M/0.5TPP stateless-fresh stage-64 candidate.",
+    "larger_rung_authorized": false,
+    "additional_structure_authorized": false
+  },
+  "scope_limit": "This is a trainable-coordinate/manifold test. The dense folded c_proj base remains materialized in checkpoints and forward passes, so it does not claim checkpoint-size or inference-FLOP compression."
+}
