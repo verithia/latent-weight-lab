@@ -5,9 +5,9 @@
   "parent_result_sha256": "fb1ee8f4b9791690b2ae0848b9b94bcd1c914c56e088f8522cdfc97d527f9a89",
   "scientific_question": "Does the approximately tenfold causal enrichment of Muon-selected hidden-channel pairings scale to useful absolute future recovery at 16 or 32 Givens stages?",
   "implementation": {
-    "commit": "432dd244afa030883794bf46d0f89568d3727e96",
+    "commit": "6af3d3f6e94f15a231923e9c775bfdfb116194f2",
     "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
-    "entrypoint_sha256": "e963ba9526cacaa3ddef6876bcab15f2db6a6796067f3ca67f4b8799ec079591"
+    "entrypoint_sha256": "2d4f7d18b1115c18d4eeb890cb44d8e9d44b829ddc10abf9c5e49cdb6b6d6663"
   },
   "causal_protocol": "identical to the registered 1/4/8-stage pilot: current exact coherent Muon state selects pairings and fits angles; future phase chords are held out until scoring",
   "scope": {
