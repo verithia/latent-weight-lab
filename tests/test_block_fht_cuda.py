@@ -106,14 +106,16 @@ def test_cuda_fused_linear_forward_supports_bfloat16():
 
 @pytest.mark.parametrize("inverse", [False, True])
 @pytest.mark.parametrize("shared_input", [False, True])
+@pytest.mark.parametrize("basis_block_size", [8, 256])
 def test_cuda_fixed_basis_transform_matches_reference_and_gradient(
     inverse: bool,
     shared_input: bool,
+    basis_block_size: int,
 ) -> None:
     torch.manual_seed(1234)
     bases = 2
     tokens = 7
-    width = 32
+    width = 512 if basis_block_size == 256 else 32
     permutations = torch.stack(
         [torch.randperm(width) for _ in range(bases)]
     )
@@ -125,7 +127,7 @@ def test_cuda_fixed_basis_transform_matches_reference_and_gradient(
         reference_values,
         permutations,
         signs,
-        8,
+        basis_block_size,
         inverse=inverse,
         shared_input=shared_input,
     )
@@ -134,7 +136,7 @@ def test_cuda_fixed_basis_transform_matches_reference_and_gradient(
         actual_values,
         permutations.cuda(),
         signs.cuda(),
-        8,
+        basis_block_size,
         inverse=inverse,
         shared_input=shared_input,
     )

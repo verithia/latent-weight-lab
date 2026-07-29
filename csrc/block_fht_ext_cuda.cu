@@ -385,6 +385,69 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_kernel(
   }
 }
 
+template <typename scalar_t>
+__global__ __launch_bounds__(256) void fixed_basis_transform_256_kernel(
+    const scalar_t* __restrict__ input,
+    const int64_t* __restrict__ permutations,
+    const float* __restrict__ signs,
+    scalar_t* __restrict__ output,
+    int64_t tokens,
+    int64_t width,
+    int64_t bases,
+    int64_t jobs,
+    bool inverse,
+    bool shared_input) {
+  extern __shared__ float values[];
+  constexpr int64_t block_size = 256;
+  int64_t blocks_per_token = width / block_size;
+  int64_t lane = threadIdx.x;
+  for (int64_t job = blockIdx.x; job < jobs; job += gridDim.x) {
+    int64_t basis = job / (tokens * blocks_per_token);
+    int64_t residual = job - basis * tokens * blocks_per_token;
+    int64_t token = residual / blocks_per_token;
+    int64_t transform_block = residual - token * blocks_per_token;
+    int64_t spectral_index = transform_block * block_size + lane;
+    int64_t basis_offset = basis * width;
+    int64_t permutation = permutations[basis_offset + spectral_index];
+    int64_t input_token_offset =
+        (shared_input ? token : basis * tokens + token) * width;
+    int64_t input_index = inverse ? spectral_index : permutation;
+    float value = scalar_to_float(input[input_token_offset + input_index]);
+    if (inverse) {
+      value *= signs[basis_offset + spectral_index];
+    }
+
+    // The first five butterflies are entirely warp-local. Keeping them in a
+    // register removes ten shared-memory rounds and their barriers.
+    #pragma unroll
+    for (int offset = 1; offset <= 16; offset <<= 1) {
+      float partner = __shfl_xor_sync(0xffffffff, value, offset);
+      value = (lane & offset) ? partner - value : value + partner;
+    }
+    values[smem_index((int)lane)] = value;
+    __syncthreads();
+
+    // Only the three cross-warp stages require shared memory.
+    #pragma unroll
+    for (int offset = 32; offset <= 128; offset <<= 1) {
+      float partner = values[smem_index((int)(lane ^ offset))];
+      __syncthreads();
+      value = (lane & offset) ? partner - value : value + partner;
+      values[smem_index((int)lane)] = value;
+      __syncthreads();
+    }
+    value *= 0.0625f;
+
+    int64_t output_token_offset = (basis * tokens + token) * width;
+    int64_t output_index = inverse ? permutation : spectral_index;
+    if (!inverse) {
+      value *= signs[basis_offset + spectral_index];
+    }
+    output[output_token_offset + output_index] =
+        float_to_scalar<scalar_t>(value);
+  }
+}
+
 __global__ void init_forward_blocks_kernel(
     const float* __restrict__ latent,
     float* __restrict__ work,
@@ -808,7 +871,21 @@ torch::Tensor fixed_basis_transform_cuda(
         smem));
   }
   if (input.scalar_type() == torch::kFloat32) {
-    fixed_basis_transform_kernel<float><<<grid, threads, smem, stream>>>(
+    if (block_size == 256) {
+      fixed_basis_transform_256_kernel<float>
+          <<<grid, threads, smem, stream>>>(
+              input.data_ptr<float>(),
+              permutations.data_ptr<int64_t>(),
+              signs.data_ptr<float>(),
+              output.data_ptr<float>(),
+              tokens,
+              width,
+              bases,
+              jobs,
+              inverse,
+              shared_input);
+    } else {
+      fixed_basis_transform_kernel<float><<<grid, threads, smem, stream>>>(
         input.data_ptr<float>(),
         permutations.data_ptr<int64_t>(),
         signs.data_ptr<float>(),
@@ -820,9 +897,24 @@ torch::Tensor fixed_basis_transform_cuda(
         jobs,
         inverse,
         shared_input);
+    }
   } else if (input.scalar_type() == torch::kFloat16) {
-    fixed_basis_transform_kernel<at::Half>
-        <<<grid, threads, smem, stream>>>(
+    if (block_size == 256) {
+      fixed_basis_transform_256_kernel<at::Half>
+          <<<grid, threads, smem, stream>>>(
+              input.data_ptr<at::Half>(),
+              permutations.data_ptr<int64_t>(),
+              signs.data_ptr<float>(),
+              output.data_ptr<at::Half>(),
+              tokens,
+              width,
+              bases,
+              jobs,
+              inverse,
+              shared_input);
+    } else {
+      fixed_basis_transform_kernel<at::Half>
+          <<<grid, threads, smem, stream>>>(
             input.data_ptr<at::Half>(),
             permutations.data_ptr<int64_t>(),
             signs.data_ptr<float>(),
@@ -834,9 +926,24 @@ torch::Tensor fixed_basis_transform_cuda(
             jobs,
             inverse,
             shared_input);
+    }
   } else if (input.scalar_type() == torch::kBFloat16) {
-    fixed_basis_transform_kernel<at::BFloat16>
-        <<<grid, threads, smem, stream>>>(
+    if (block_size == 256) {
+      fixed_basis_transform_256_kernel<at::BFloat16>
+          <<<grid, threads, smem, stream>>>(
+              input.data_ptr<at::BFloat16>(),
+              permutations.data_ptr<int64_t>(),
+              signs.data_ptr<float>(),
+              output.data_ptr<at::BFloat16>(),
+              tokens,
+              width,
+              bases,
+              jobs,
+              inverse,
+              shared_input);
+    } else {
+      fixed_basis_transform_kernel<at::BFloat16>
+          <<<grid, threads, smem, stream>>>(
             input.data_ptr<at::BFloat16>(),
             permutations.data_ptr<int64_t>(),
             signs.data_ptr<float>(),
@@ -848,6 +955,7 @@ torch::Tensor fixed_basis_transform_cuda(
             jobs,
             inverse,
             shared_input);
+    }
   } else {
     TORCH_CHECK(
         false,
