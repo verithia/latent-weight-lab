@@ -1,0 +1,84 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_bilateral_plan_v1",
+  "status": "registered_before_execution",
+  "scientific_question": "After the successful causal hidden-side correction, does a task-selected output-side residual correction capture materially more current Muon motion and held-out future phase motion than spending the identical coordinate budget on additional hidden-side stages?",
+  "implementation": {
+    "commit": "629ca06c0badc152c74b736204df3732a0571bc9",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_bilateral.py",
+    "entrypoint_sha256": "9f1f82b9b242ec896cd3fd821c5d57754f8bb5b25ab0b1cb4d863ecf547e1505",
+    "test": "examples/nanogpt/test_analyze_mlp_muon_matched_bilateral.py",
+    "test_sha256": "64fd32ed0cfff9724d7c5be6ec3a5c125128248effc7a6c1c4bf3176e9c020ce",
+    "tests": "300 passed, 19 skipped, 45 subtests"
+  },
+  "parent_training_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_training_result.json",
+    "sha256": "95a3084c0e51d77011e345d6ad3240285d4c9c4a53368ae9e6a1f363177f694c",
+    "classification": "DIRECTIONAL_IMPROVEMENT_ONLY",
+    "terminal_validation_ce": 5.674093246459961,
+    "plain_cproj_improvement": 0.06540675354003866,
+    "fraction_of_gap_closed": 0.2640563324184039
+  },
+  "prior_geometry_evidence": {
+    "right_hidden_dense_orbit_endpoint_recovery": 0.8572206806474874,
+    "left_output_dense_orbit_endpoint_recovery": 0.12740524506895673,
+    "bilateral_dense_orbit_endpoint_recovery": 0.9908753176437582,
+    "singular_value_drift_fraction": 0.009124682356241576,
+    "phase_chord_singular_value_energy_fraction": 0.006754200813875223,
+    "interpretation": "Output-side correction is a plausible residual term, whereas nonuniform singular-value motion is too small to justify another gain/spectral structure."
+  },
+  "causal_protocol": {
+    "hidden": "Select hidden-channel connectivity and closed-form angles from the exact current coherent Muon update.",
+    "output": "After applying the hidden correction, select output-channel connectivity and closed-form angles only from the remaining current requested-update residual.",
+    "solver": "one deployable closed-form diagonal Gauss-Seidel sweep, hidden then output; not an exact joint normal-equation oracle",
+    "future_information_used_for_selection_or_fitting": false,
+    "future_phase_chord_usage": "scoring only",
+    "learned_dense_basis": false,
+    "dense_residual": false,
+    "lora_adapter": false
+  },
+  "scope": {
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_starts": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "cells": 20,
+    "task_hidden_stages": 32,
+    "task_output_stages": 32,
+    "task_hidden_same_coordinate_control_stages": 40,
+    "matching_neighbors_per_side": 64,
+    "bilateral_coordinates_per_layer": 61440,
+    "hidden40_coordinates_per_layer": 61440,
+    "coordinate_fraction": 0.026041666666666668,
+    "random_control": "edge-disjoint task-independent one-factorized hidden/output matchings with the same coordinate count"
+  },
+  "decision_rule": {
+    "minimum_bilateral_over_hidden40_requested_update_recovery": 1.1,
+    "minimum_bilateral_over_hidden40_future_recovery": 1.2,
+    "minimum_task_bilateral_over_random_bilateral_future_recovery": 3.0,
+    "minimum_cell_future_cosine": 0.05,
+    "require_positive_future_cosine_in_all_20_cells": true,
+    "pass": "implement the task-selected bilateral folded-base optimizer and require exact state/resume tests plus a directly polled real-training MFU certificate of at least 20 percent before one new 124M run",
+    "fail": "reject output-side correction as an inefficient use of coordinates; do not train it, and compare higher-capacity hidden-only task-selected charts under an exact coordinate/MFU gate"
+  },
+  "excluded_followups": [
+    "per-channel or singular-value gain sweeps, because singular-value motion is less than one percent of dense c_proj phase energy and the earlier production bilateral chart already captured 94.93 percent of that small component",
+    "fixed random bilateral charts, already shown structurally misaligned",
+    "learned dense bases or LoRA-like adapters",
+    "any 124M language-model run before this no-training gate"
+  ],
+  "input_identity": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution_policy": "Run directly in the foreground on one idle Y400 GPU and poll to exit. Do not use a watchdog, callback, queue worker, heartbeat, or PRO6."
+}
