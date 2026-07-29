@@ -1,0 +1,28 @@
+{
+  "analysis_commit": "9c1f5c3152003cee7826edddb5c79c976506caf6",
+  "decision": "REJECT_MOVING_ACTIVATION_FRAME_TRANSPORT",
+  "outputs": {
+    "aggregate_sha256": "1b1a5b521d9c3cb4d2dedf2c792660c3654bb3c5d83857953aecd86429a8e158",
+    "analysis_log_sha256": "87c79f5a060cc66bcb0cff612294400b0588dc7340f4b9224d69a7d3bea5b1eb",
+    "basis_sha256": "446ddeda18b0c7d666fab8988a046c251b8ba97e28980cf13dc26ede96835fe2",
+    "detail_sha256": "192de856e3babf1d2c6e3af3d5b080bed0c29ab2e56f208043cab612f30370c1",
+    "metadata_sha256": "943a1fe185e4dc04224e78972f94c4869889a6a5777c970c50e8557ef6e6c803",
+    "remote_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/moving_activation_frame_oracle_v1"
+  },
+  "rank64": {
+    "fit": {
+      "forward_transport_recovery": -0.3385613967269199,
+      "mean_subspace_overlap": 0.6526618206223316,
+      "minimum_cell_recovery": -0.5809926784163495,
+      "reverse_transport_recovery": -0.2903504668340248
+    },
+    "holdout": {
+      "forward_transport_recovery": -0.32515816649665974,
+      "mean_subspace_overlap": 0.6612033105490608,
+      "minimum_cell_recovery": -0.5559634602628165,
+      "reverse_transport_recovery": -0.27861544936218363
+    }
+  },
+  "scientific_conclusion": "Post-GELU activation PCA supplies a stable energy-bearing subspace, but the temporal rotation of that subspace is not the c_proj weight transport. The minimal forward and reverse frame transports both move the weight farther from its true endpoint, and error increases with rank. Activation covariance alone omits the backpropagated task-error factor that selects the signed weight direction; the next diagnostic must use task gradients or activation-error cross-covariance.",
+  "schema_version": "nanogpt_mlp_moving_activation_frame_oracle_result_v1"
+}
