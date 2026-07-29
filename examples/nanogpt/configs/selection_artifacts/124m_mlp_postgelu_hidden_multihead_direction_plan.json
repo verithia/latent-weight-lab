@@ -1,0 +1,137 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_hidden_multihead_direction_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Does a second independently based full-width quadratic head expose a reproducible task direction beyond the terminally absorbed single-head gate?",
+  "hypothesis": {
+    "formula": "h' = h + sum_head Q_out_head^-1[(Q_update_head h) * (slope_head * Q_condition_head rmsnorm(h))]",
+    "location": "after GELU and before c_proj",
+    "selected_layer": 0,
+    "heads": 2,
+    "condition": "the current token's complete 4*n_embd post-GELU activation",
+    "fixed_bases": "each head has independent signed/permuted 256-wide normalized block-Hadamard condition, update, and output bases",
+    "trainable_coordinates": 6144,
+    "identity_initialization": true,
+    "learned_bias": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "structural_change": "raise the fixed quadratic tensor rank from one diagonal core to two without changing the parent c_proj or adding a learned basis"
+  },
+  "evidence_chain": {
+    "single_head_direction": "The full-width single head has global task-CE fit/holdout cosine 0.552825 and layer-0 cosine 0.773702.",
+    "single_head_causal_result": "Despite strong initial alignment and active slopes, terminal validation CE improved the exact parent by only 0.000218, a practical tie.",
+    "diagnosis": "Preserving the full activation repairs direction alignment, but one diagonal core in fixed bases remains under-capacity and is absorbed by joint training.",
+    "required_change": "Increase the quadratic interaction tensor rank while retaining fixed bases, input dependence, exact identity initialization, and no LoRA-like learned basis."
+  },
+  "inputs": {
+    "attention_only": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "dataset": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "manifest_path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "single_head_causal_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_hidden_self_causal_result.json",
+      "sha256": "25d1c478ea71321401589e516edf3e4db20e3a2f04cedb56e70de00a3dc3db43"
+    }
+  },
+  "implementation": {
+    "repository_commit": "44dcca351726e812576beaab2df43b78a3b67dd2",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source_sha256": "d023c636fc93e0dc348e5eb2767e6f60914f666f4b2b4284521853045ee6faec",
+    "test_sha256": "955726b3fba1046fd89c544c5a08eae5b6a0e9b9f83da76591082697d1d5bd34",
+    "local_validation": "225 passed, 9 skipped, 45 subtests"
+  },
+  "protocol": {
+    "host": "Y400",
+    "execution": "direct foreground polling; no watchdog, queue entry, callback, heartbeat, parameter update, or PRO6",
+    "layers": [
+      0
+    ],
+    "batch_size": 8,
+    "block_size": 256,
+    "batches": 8,
+    "ce_batches": 8,
+    "sample_cap": 2048,
+    "fit_seed": 20260716,
+    "holdout_seed": 20260717,
+    "gate_kind": "postgelu_hidden_multihead_untied",
+    "gate_heads": 2,
+    "gate_groups": [
+      "slope"
+    ],
+    "basis_block_size": 256,
+    "basis_seed": 271828,
+    "head_seed_stride": 1000003,
+    "head_0_seeds": {
+      "condition": 271828,
+      "update": 376557,
+      "output": 481286
+    },
+    "head_1_seeds": {
+      "condition": 1271831,
+      "update": 1376560,
+      "output": 1481289
+    },
+    "parameter_updates": 0
+  },
+  "selection_rule": {
+    "primary_metric": "cosine between the concatenated two-head task-CE slope gradients on the fixed fit and holdout token windows",
+    "combined_minimum_cosine": 0.5,
+    "head_0_reproduction_floor": 0.7,
+    "head_1_minimum_cosine": 0.1,
+    "success": "all three floors pass; implement exactly two heads on layer 0, then require a measured exact real-training MFU >=20 percent before one directly polled 124M/0.5TPP causal run",
+    "failure": "reject the two-head family without a training run if any floor fails",
+    "no_head_count_sweep": true,
+    "no_basis_seed_sweep": true,
+    "no_learning_rate_sweep": true
+  },
+  "command": [
+    "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "--attention-only",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+    "--plain-cproj",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+    "--data-dir",
+    "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "--output",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_postgelu_hidden_multihead2_direction_v1",
+    "--layers",
+    "0",
+    "--batch-size",
+    "8",
+    "--block-size",
+    "256",
+    "--batches",
+    "8",
+    "--ce-batches",
+    "8",
+    "--sample-cap",
+    "2048",
+    "--sample-seed",
+    "20260716",
+    "--holdout-sample-seed",
+    "20260717",
+    "--gate-kind",
+    "postgelu_hidden_multihead_untied",
+    "--gate-heads",
+    "2",
+    "--gate-groups",
+    "slope",
+    "--basis-block-size",
+    "256",
+    "--basis-seed",
+    "271828",
+    "--device",
+    "cuda"
+  ]
+}
