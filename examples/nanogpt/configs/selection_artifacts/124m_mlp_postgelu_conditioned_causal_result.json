@@ -1,0 +1,165 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_conditioned_causal_result_v1",
+  "recorded_at": "2026-07-29",
+  "registered_inputs": {
+    "direction_plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_conditioned_direction_plan.json",
+      "sha256": "5699239f10e5a1c54334be449b58b41154a9d52fc62fc002faf33c557da096ef"
+    },
+    "direction_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_postgelu_conditioned_direction_result.json",
+      "sha256": "e8ce23c7ff85c638dbb11da5b8563c6867d5f20bd5f1725f757f63aa9ac67fa9"
+    },
+    "causal_config": {
+      "path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_postgelucond_untied_l1_0p5tpp_lr24e4.json",
+      "sha256": "8641a6d77d2e59fab5f86bff338c6c2a08c28e737813416c0e63a3afa1cfa4f1",
+      "resolved_config_sha256": "b7542e65400d895cf36e1097089da261c08a28071573167cba2e0c34a9b11adc"
+    },
+    "preregistered_decision_rule": {
+      "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+      "promote": "candidate improves on the exact matched post-GELU-frame parent by at least 0.020 CE and is stable",
+      "directional_only": "candidate improvement is positive but below 0.020 CE",
+      "reject": "candidate ties, regresses, is unstable, or does not complete",
+      "practical_margin_ce": 0.02
+    }
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "run_name": "y400_mai_v3_124m_postgelucond_untied_l1_0p5tpp",
+    "started_at": "2026-07-29T13:26:37+08:00",
+    "finished_at": "2026-07-29T13:33:41+08:00",
+    "exit_code": 0,
+    "classification": "clean",
+    "scientific_run_git_commit": "5cf15809db17068fc30cd450b4839ce0a363a9e1",
+    "implementation_commit": "47d784097b3d3a644ee28507887dee312bd8c001",
+    "monitoring": "registered foreground launcher with direct process, log, GPU, and status polling; no watchdog, queue entry, heartbeat, callback, or PRO6 execution",
+    "control_channel_note": "The attached SSH transport closed after approximately one third of the run. The registered foreground launcher and child remained alive under PID 1, were directly polled without relaunch, and wrote clean terminal status.",
+    "literal_command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_postgelucond_untied_l1_0p5tpp_20260729T052636Z_26873.config.json"
+    ],
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_evaluation": {
+      "protocol": "mai_ladder_fixed_eval_indices_v2",
+      "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "eval_batch_size": 16,
+      "eval_iters": 400,
+      "eval_seed": 20260715
+    },
+    "source_hashes": {
+      "examples/nanogpt/model.py": "43f8a79605405eb4dd65d10de05acc32a586ee4f3b67c5e873e8bcbbc316c609",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/parameter_trajectory.py": "897e4aa4007d8f8b1cf56891f0cfe2a3a4dc0807eaa456ba70b096429ec022b6",
+      "examples/nanogpt/train.py": "40143b38f4af14cfaa0d2104b72176cc9305a022d7bf135302b88bb4d65f82ff",
+      "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
+    }
+  },
+  "performance_gate": {
+    "classification": "passed",
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.21534990198685527,
+    "tokens_per_second": 189244.74333333332,
+    "iter_ms": 1385.2266666666667,
+    "model_tflops": 141.33846302198782,
+    "empirical_bf16_gemm_peak_tflops": 656.320071279229,
+    "peak_mib": 61989.87,
+    "certificate_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_conditioned_screen/performance_preflight_postgelucond_untied_l1.json",
+    "certificate_sha256": "bac9978d244373423ffaed7cbd56569e00a2a5ce351b091888ff052a906f9a5d"
+  },
+  "mechanism": {
+    "selected_layers": [
+      1
+    ],
+    "formula": "u + Q_out^-1[(Q_update u) * (slope * Q_condition rmsnorm(P_fixed postgelu))]",
+    "condition": "current-token post-GELU activation after a fixed signed four-to-one projection",
+    "trainable_coordinates": 768,
+    "identity_initialized": true,
+    "fixed_untied_bases": true,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "non_redundancy": "the correction is bilinear in the current activation and MLP update and cannot be absorbed into a static c_proj matrix"
+  },
+  "evaluation": {
+    "step_0": {
+      "train_ce": 10.9788,
+      "val_ce": 10.9789
+    },
+    "step_60": {
+      "train_ce": 6.3402,
+      "val_ce": 6.3497
+    },
+    "step_120": {
+      "train_ce": 5.9274,
+      "val_ce": 5.9329
+    },
+    "step_180": {
+      "train_ce": 5.7552,
+      "val_ce": 5.7596
+    },
+    "step_238": {
+      "train_ce": 5.6908,
+      "val_ce_printed": 5.6952,
+      "val_ce_checkpoint": 5.6951584815979
+    }
+  },
+  "learned_coordinate": {
+    "key": "transformer.h.1.mlp.residual_conditioned_output_slope",
+    "numel": 768,
+    "l2_norm": 0.2241673767566681,
+    "rms": 0.008088943548500538,
+    "max_abs": 0.02685387246310711,
+    "nonzero": 768
+  },
+  "matched_comparison": {
+    "exact_postgelu_frame_parent_val_ce": 5.696969509124756,
+    "candidate_val_ce": 5.6951584815979,
+    "candidate_gain_ce": 0.0018110275268554688,
+    "fraction_of_preregistered_margin": 0.09055137634277344,
+    "matched_attention_only_val_ce": 5.4918,
+    "parent_gap_to_attention_ce": 0.20516950912475562,
+    "candidate_gap_to_attention_ce": 0.20335848159790016,
+    "fraction_of_parent_attention_gap_closed": 0.008826978881236428,
+    "pregelu_frame_candidate_val_ce": 5.6942009925842285,
+    "candidate_minus_pregelu_frame_ce": 0.000957489013671875,
+    "best_prior_output_plus_activation_val_ce": 5.6832,
+    "candidate_minus_best_prior_ce": 0.01195848159790039,
+    "functional_teacher_alignment_lambda20_val_ce": 5.6844,
+    "candidate_minus_functional_teacher_alignment_ce": 0.01075848159790005
+  },
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_conditioned_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_postgelucond_untied_l1_0p5tpp",
+    "checkpoint": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_postgelu_conditioned_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_postgelu_rotations_postgelucond_untied_l1_0p5tpp/ckpt.pt",
+      "sha256": "2510a858f2c8340886c76cce763afaf9188ac7bac00be999f446aaddf0cea497",
+      "size_bytes": 728917089,
+      "schema_version": "nanogpt_exact_resume_v2",
+      "next_iter": 238,
+      "reason": "evaluation",
+      "metadata_sha256": "b08015d0ffc74ba640c4b2a8d3f3743ee9fdebb5f4d3d8f3081cb6e5fbe3ad70"
+    },
+    "log": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_124m_postgelucond_untied_l1_0p5tpp_20260729T052636Z_26873.log",
+      "sha256": "ea66c30e54a3490f93ce5ff545249e3e62b3c3788be41fe35df9f814f9fdf3b2"
+    },
+    "status_sha256": "26d69a20b58b30c26751ec01354721bb5ca2e43e4a350620276c06f2e0db39d6",
+    "provenance_sha256": "801065f84b01a5a26a4b4a11d0a630b5da0b3bdc160d74f8d42c4c34b688f376",
+    "archived_config_sha256": "8641a6d77d2e59fab5f86bff338c6c2a08c28e737813416c0e63a3afa1cfa4f1",
+    "archived_mfu_certificate_sha256": "bac9978d244373423ffaed7cbd56569e00a2a5ce351b091888ff052a906f9a5d"
+  },
+  "decision": {
+    "classification": "DIRECTIONAL_ONLY",
+    "promote_larger_ladder": false,
+    "reason": "The localized dynamic gate is active and improves the exact matched parent, but the gain is only 0.001811 CE: 9.06 percent of the preregistered 0.020 margin and 0.883 percent closure of the remaining attention-only gap.",
+    "structural_interpretation": "The early step-60 advantage shrinks to a practical tie by terminal evaluation. Current-token conditioning is a real causal direction, but the signed four-to-one condition sketch and one diagonal bilinear core do not supply enough cross-channel activation capacity. The failure is not dormancy, numerical instability, or a static-weight reparameterization.",
+    "next_action": "Do not scale this layer-1 output gate. Preserve the full 3072-wide post-GELU state and screen an identity-initialized untied fixed-basis hidden self-bilinear mixer before c_proj. This directly changes activation spectra without a learned dense basis or LoRA adapter; require reproducible task-CE direction, measured MFU >=20 percent, and direct foreground polling before any causal run."
+  }
+}
