@@ -1,0 +1,121 @@
+{
+  "schema_version": "mai_124m_mlp_postgelu_conditioned_direction_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Can current-token post-GELU activation expose a reproducible task direction that the static bilateral chart and residual-conditioned gates cannot represent?",
+  "hypothesis": {
+    "formula": "u' = u + Q_out^-1[(Q_update u) * (slope * Q_condition rmsnorm(P_fixed gelu(c_fc(x))))]",
+    "condition": "current token post-GELU activation",
+    "fixed_projection": "signed four-to-one projection from 4*n_embd to n_embd followed by per-token RMS normalization",
+    "fixed_bases": "independent signed/permuted 256-wide normalized block-Hadamard transforms for condition, update, and output",
+    "trainable_coordinates_per_selected_layer": 768,
+    "identity_initialization": true,
+    "learned_basis": false,
+    "lora_adapter": false,
+    "non_redundancy": "the correction is bilinear in the current activation and MLP update, so no static c_proj weight or fixed endpoint rotation can absorb it"
+  },
+  "inputs": {
+    "attention_only": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "dataset": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "manifest_path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "causal_parent_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_pregelu_causal_pair_result.json",
+      "sha256": "3c019bee2841cbce320b6d08e366844fc5dc4cb4313d67e1accf9dc8f7ade2fc"
+    }
+  },
+  "implementation": {
+    "repository_commit": "8a8e3abb7b5bfab11ff9268687b339c5cb3f7f3f",
+    "entrypoint": "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "source_sha256": "ab51b5900c6bbc60e10d19fc9665850c637105ad857c10f4929f665a0df2b971",
+    "test_sha256": "e3f851e3ac0abdf6971353981614e876b6841103ffb3222a87b288419ddca972",
+    "local_validation": "215 passed, 9 skipped, 45 subtests"
+  },
+  "protocol": {
+    "host": "Y400",
+    "execution": "direct foreground polling; no watchdog, queue entry, callback, or PRO6",
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "batch_size": 8,
+    "block_size": 256,
+    "batches": 8,
+    "ce_batches": 8,
+    "sample_cap": 2048,
+    "fit_seed": 20260716,
+    "holdout_seed": 20260717,
+    "gate_kind": "postgelu_bilinear_untied",
+    "gate_groups": [
+      "slope"
+    ],
+    "basis_block_size": 256,
+    "basis_seed": 271828,
+    "parameter_updates": 0
+  },
+  "selection_rule": {
+    "metric": "cosine between task-CE slope gradients on the fixed fit and holdout token windows",
+    "minimum_cosine": 0.05,
+    "choice": "the layer with maximum fit/holdout cosine among layers clearing 0.05",
+    "failure": "if no layer clears 0.05, close this activation-conditioned bilinear family without a training run",
+    "success": "implement only the selected layer, require measured real-training MFU >=20%, then run one directly polled 124M 0.5TPP causal screen"
+  },
+  "command": [
+    "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.analyze_mlp_conditioned_gate_alignment",
+    "--attention-only",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+    "--plain-cproj",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+    "--data-dir",
+    "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "--output",
+    "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/124m_postgelu_conditioned_direction_v1",
+    "--layers",
+    "0,1,2,3,4,5,6,7,8,9,10,11",
+    "--batch-size",
+    "8",
+    "--block-size",
+    "256",
+    "--batches",
+    "8",
+    "--ce-batches",
+    "8",
+    "--sample-cap",
+    "2048",
+    "--sample-seed",
+    "20260716",
+    "--holdout-sample-seed",
+    "20260717",
+    "--gate-kind",
+    "postgelu_bilinear_untied",
+    "--gate-groups",
+    "slope",
+    "--basis-block-size",
+    "256",
+    "--basis-seed",
+    "271828",
+    "--device",
+    "cuda"
+  ]
+}
