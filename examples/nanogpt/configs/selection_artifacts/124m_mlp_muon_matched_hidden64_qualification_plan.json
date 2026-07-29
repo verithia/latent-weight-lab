@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_hidden64_qualification_plan_v1",
+  "status": "registered_before_execution",
+  "parent_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden_capacity_result.json",
+    "sha256": "ce4547170f377f73f90962595322f89d67cf519e6ae6e2bf5032eb39137cc57b",
+    "commit": "983e9156c54a097f107dd453fbb3204a18a1ff36",
+    "decision": "SELECT_HIDDEN_64_FOR_EXACT_RESUME_AND_MFU_QUALIFICATION"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json",
+    "config_sha256": "9a03286db56a6edb939a37457c6f11b486e79b432e05df8e24edc9fade3a3a10",
+    "stages": 64,
+    "neighbors": 64,
+    "refresh_interval_updates": 60,
+    "coordinates_per_layer": 98304,
+    "coordinate_fraction_per_cproj": 0.041666666666666664,
+    "scientific_training_authorized": false
+  },
+  "exact_resume_gate": {
+    "test": "examples/nanogpt/test_muon_matched_givens.py::test_stage64_optimizer_state_round_trip",
+    "test_file_sha256": "dcbccbc24073f219f0c35d99fc8f1162160f7c5fe5daa37317693850583ac425",
+    "requirements": [
+      "stage64 permutations and inverse permutations have shape 64 by input width",
+      "all 64-stage angle state is serialized",
+      "folded base, counters, validity, and exact Muon momentum round-trip bit exactly",
+      "the complete targeted Muon-matched Givens test file passes on the execution commit"
+    ]
+  },
+  "real_training_mfu_gate": {
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "warmup_updates": 1,
+    "timed_updates": 61,
+    "included_refresh_update": 60,
+    "minimum_mfu_fraction": 0.2,
+    "gemm_size": 8192,
+    "gemm_warmups": 4,
+    "gemm_trials": 8,
+    "denominator": "same-host empirical BF16 tensor-core GEMM peak",
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens64_r60.json",
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens64_r60_0p5tpp.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens64_r60.json",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "61",
+      "--gemm-size",
+      "8192",
+      "--gemm-warmups",
+      "4",
+      "--gemm-trials",
+      "8"
+    ]
+  },
+  "decision_rule": {
+    "pass": "Both exact-resume and real-training MFU gates pass. Record their immutable evidence, then preregister at most one directly polled 124M/0.5TPP scientific comparison against hidden32, attention-only, and plain-cproj controls.",
+    "fail": "Do not launch scientific training. A resume failure requires implementation repair; MFU below 20 percent closes stage64 under the performance policy."
+  },
+  "execution_policy": "Deploy through the exact Git commit. Run the targeted test, then run the real preflight on one otherwise idle Y400 GPU and poll it directly to exit. Do not attach a watchdog, callback, queue worker, or heartbeat. Do not use PRO6."
+}

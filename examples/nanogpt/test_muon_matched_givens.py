@@ -140,6 +140,66 @@ def test_optimizer_refreshes_folds_and_round_trips_exact_state() -> None:
     assert torch.equal(original_momentum, restored_momentum)
 
 
+def test_stage64_optimizer_state_round_trip() -> None:
+    torch.manual_seed(31)
+    module = MuonMatchedGivensLinear(
+        128,
+        16,
+        bias=False,
+        stages=64,
+        neighbors=64,
+        refresh_interval=60,
+        matching_seed=161803,
+        weight_std=0.02,
+        layer_id=7,
+    )
+    optimizer = MuonMatchedGivens(
+        [module],
+        lr=0.0024,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    assert module.selected_permutations.shape == (64, 128)
+    assert module.selected_inverse_permutations.shape == (64, 128)
+    assert module.last_angles.shape == (64, 64)
+    assert module.coordinate_count == 4096
+    assert int(module.optimizer_step) == 1
+    assert int(module.refresh_count) == 1
+    assert bool(module.matching_valid)
+
+    module_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = MuonMatchedGivensLinear(
+        128,
+        16,
+        bias=False,
+        stages=64,
+        neighbors=64,
+        refresh_interval=60,
+        matching_seed=161803,
+        weight_std=0.02,
+        layer_id=7,
+    )
+    restored.load_state_dict(module_state)
+    restored_optimizer = MuonMatchedGivens(
+        [restored],
+        lr=0.0024,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    restored_optimizer.load_state_dict(optimizer_state)
+    for key, value in module_state.items():
+        assert torch.equal(value, restored.state_dict()[key])
+    assert torch.equal(
+        optimizer.state[module.weight]["momentum_buffer"],
+        restored_optimizer.state[restored.weight]["momentum_buffer"],
+    )
+
+
 def test_gpt_wires_custom_cproj_into_muon_optimizer_and_stats() -> None:
     model = GPT(make_gpt_config())
     modules = [
