@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_bilateral_result_v1",
+  "decision": "REJECT_TASK_SELECTED_OUTPUT_CORRECTION",
+  "scientific_interpretation": "Task-selected output-side residual motion is real, but at an identical 61,440-coordinate budget it does not materially improve either current exact-Muon update recovery or held-out future phase-chord recovery over allocating the same coordinates to additional task-selected hidden-side stages.",
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "foreground_direct_poll_no_watchdog_no_callback",
+    "git_commit": "526477316d1cf1b0b243d3e0ff2d17ff86b86b3c",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_bilateral.py",
+    "entrypoint_sha256": "9f1f82b9b242ec896cd3fd821c5d57754f8bb5b25ab0b1cb4d863ecf547e1505",
+    "input_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_bilateral_plan.json",
+    "plan_sha256": "8b7847723eb2cdd09bc330b0bad73cab5eb404985a61ba4a8cb75004c736dc3d",
+    "elapsed_seconds": 33.17725110054016
+  },
+  "scope": {
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "cells": 20,
+    "task_hidden_32_coordinates_per_layer": 49152,
+    "task_hidden_40_coordinates_per_layer": 61440,
+    "task_bilateral_32x32_coordinates_per_layer": 61440,
+    "random_bilateral_32x32_coordinates_per_layer": 61440
+  },
+  "aggregate": {
+    "task_hidden_32": {
+      "requested_update_recovery": 0.13439224993966986,
+      "future_recovery": 0.022771567873476603,
+      "future_cosine": 0.14418102478281622,
+      "minimum_future_cosine": 0.07342973282367342,
+      "positive_future_cells": 20
+    },
+    "task_hidden_40": {
+      "requested_update_recovery": 0.15327757666070965,
+      "future_recovery": 0.0262729166054181,
+      "future_cosine": 0.1549023726995891,
+      "minimum_future_cosine": 0.07911950280854842,
+      "positive_future_cells": 20
+    },
+    "task_bilateral_32x32": {
+      "requested_update_recovery": 0.15791953650498478,
+      "future_recovery": 0.02631410821374775,
+      "future_cosine": 0.15504396609073773,
+      "minimum_future_cosine": 0.07925011568740839,
+      "positive_future_cells": 20,
+      "left_incremental_recovery": 0.02352728854853421
+    },
+    "random_bilateral_32x32": {
+      "requested_update_recovery": 0.025281248527110715,
+      "future_recovery": 0.004071806476334587,
+      "future_cosine": 0.061113943356707535,
+      "minimum_future_cosine": 0.03224302616109519,
+      "positive_future_cells": 20
+    },
+    "bilateral_over_same_coordinate_hidden_current": 1.0302846635848792,
+    "bilateral_over_same_coordinate_hidden_future": 1.0015678353853243,
+    "task_bilateral_over_random_bilateral_future": 6.462514455607314
+  },
+  "preregistered_thresholds": {
+    "minimum_bilateral_over_hidden40_requested_update_recovery": 1.1,
+    "minimum_bilateral_over_hidden40_future_recovery": 1.2,
+    "minimum_task_bilateral_over_random_bilateral_future_recovery": 3.0,
+    "minimum_cell_future_cosine": 0.05,
+    "require_positive_future_cosine_in_all_20_cells": true
+  },
+  "threshold_outcomes": {
+    "current_ratio": false,
+    "future_ratio": false,
+    "task_over_random": true,
+    "minimum_future_cosine": true,
+    "all_future_cosines_positive": true
+  },
+  "immutable_remote_artifacts": {
+    "detail_csv": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_bilateral_v1/muon_matched_bilateral.csv",
+      "sha256": "02adc75a9059e951b56705e3b61eb9b643655a2c0c5f13c7f1ffc2cfea03b8d6"
+    },
+    "aggregate_json": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_bilateral_v1/muon_matched_bilateral_aggregate.json",
+      "sha256": "dfa892e265101f553d6664dd68f68d2d0e147704ce7b51d41e5a3d7c8e7c0029"
+    },
+    "metadata_json": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_bilateral_v1/muon_matched_bilateral_metadata.json",
+      "sha256": "1df6c3311d2c3c9e3a4e79c7d17230ee24abb2718e50351f952259548288cd1a"
+    }
+  },
+  "training_authorization": false,
+  "next_action": "Reject output-side production correction. Before any further language-model run, preregister and run a no-training hidden-only capacity/refresh diagnostic under explicit coordinate and projected MFU budgets."
+}
