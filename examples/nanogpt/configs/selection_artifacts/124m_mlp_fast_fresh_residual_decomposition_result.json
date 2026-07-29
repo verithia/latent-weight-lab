@@ -1,0 +1,215 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_residual_decomposition_result_v1",
+  "recorded_at": "2026-07-30",
+  "decision": "REJECT_SPARSE_ORTHOGONAL_PLUS_DIAGONAL_EXPANSION",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_residual_decomposition_plan.json",
+    "sha256": "b596d26b0209d7141952e77bf377d0edb7d060e72fc9e19461a417c8d6e98f13"
+  },
+  "parent_training_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_training_result.json",
+    "sha256": "9fa1bea4cc8cb41bdda4a61955818072ab9234d37ae26174e14eb10fe91606d6",
+    "classification": "DIRECTIONAL_ONLY",
+    "terminal_validation": 5.612201690673828
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "git_commit": "b92152f8ddaeeeaf13f1b39c37519f80bba881f8",
+    "entrypoint": "examples/nanogpt/analyze_mlp_fast_fresh_residual_decomposition.py",
+    "entrypoint_sha256": "9c0670208862f08bf0f2e02edd037504346054db8e54cdb22b6104e1a7bf58b8",
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_fast_fresh_residual_decomposition",
+      "--snapshot-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/parameter_trajectory",
+      "--probe-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/optimizer_probe",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_residual_decomposition_v1",
+      "--plan",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_residual_decomposition_plan.json",
+      "--native-cache",
+      "/root/userdata/MappingNetworks/outputs/native_cache",
+      "--device",
+      "cuda"
+    ],
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "1",
+      "MAPPING_NETWORKS_NATIVE_CACHE": "/root/userdata/MappingNetworks/outputs/native_cache"
+    },
+    "wall_seconds": 11.788063287734985,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false
+  },
+  "inputs": {
+    "coherent_dense_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "base_updates": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "future_updates": [
+      15,
+      75,
+      135,
+      195
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "validation_windows": {
+      "fit_seed": 20260802,
+      "holdout_seed": 20260803,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4
+    },
+    "snapshot_and_probe_hashes_pinned_in_metadata": true
+  },
+  "input_repair": {
+    "classification": "COHERENT_CADENCE_INPUT_IDENTITY_CORRECTION",
+    "parameter_updates_before_repair": 0,
+    "initial_identity": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "final_identity": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "reason": "The initial replay has only 60-update probes. The corrected cadence-15 replay has complete-model snapshots and exact probes at every preregistered base/future pair.",
+    "cross_trajectory_splice": false,
+    "candidate_definitions_changed": false,
+    "metrics_changed": false,
+    "thresholds_changed": false
+  },
+  "implementation": {
+    "native_matcher_library": "/root/userdata/MappingNetworks/outputs/native_cache/task_edge_coloring_6b9e0c795e601eb0.so",
+    "native_matcher_library_sha256": "5aead912a93ca2ff4000632cd906b3a6622fa8cba6e82e0aa86a6fae94302e73",
+    "fresh_hidden64": "Production-qualified current-direction hidden-side stage-64 chart.",
+    "hidden_controls": "Fresh residual hidden-side 8/16-stage corrections after hidden64, yielding equal-coordinate hidden72/80 controls.",
+    "output_candidates": "Fresh residual output-side 32/64-stage corrections after hidden64.",
+    "diagonal_candidates": "Closed-form left, right, and right-then-left diagonal residual fits after hidden64.",
+    "learned_dense_basis": false,
+    "dense_residual_adapter": false,
+    "lora_adapter": false,
+    "local_and_remote_focused_tests": "14/14 passed"
+  },
+  "candidate_metrics": {
+    "fresh_hidden64": {
+      "coordinates_per_layer": 98304,
+      "current_weight_recovery": 0.19611517027764913,
+      "current_output_positive_line_recovery": 0.456110974292977,
+      "fit_validation_gradient_predicted_ce_decrease": 0.004692816223217093,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.00486814978915244
+    },
+    "fresh_hidden72": {
+      "coordinates_per_layer": 110592,
+      "current_weight_recovery": 0.22908030925857126,
+      "current_output_positive_line_recovery": 0.49430309262534633,
+      "future_residual_positive_line_recovery": 0.006929234424775889,
+      "fit_validation_gradient_predicted_ce_decrease": 0.005049787393197132,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.005242530072669957
+    },
+    "fresh_hidden80": {
+      "coordinates_per_layer": 122880,
+      "current_weight_recovery": 0.25332488403839054,
+      "current_output_positive_line_recovery": 0.5203376057573873,
+      "future_residual_positive_line_recovery": 0.011676161376109358,
+      "fit_validation_gradient_predicted_ce_decrease": 0.005307578319711843,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.005548002763812618
+    },
+    "hidden64_plus_output32": {
+      "coordinates_per_layer": 110592,
+      "current_weight_recovery": 0.21889077603925805,
+      "current_output_positive_line_recovery": 0.4983085482586832,
+      "future_residual_positive_line_recovery": 0.005377462412337016,
+      "fit_validation_gradient_predicted_ce_decrease": 0.004909042550643028,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.005120827293008836
+    },
+    "hidden64_plus_output64": {
+      "coordinates_per_layer": 122880,
+      "current_weight_recovery": 0.23159030155888927,
+      "current_output_positive_line_recovery": 0.5213924274250736,
+      "future_residual_positive_line_recovery": 0.00836788030756027,
+      "fit_validation_gradient_predicted_ce_decrease": 0.005020364692207918,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.005212287322870183
+    },
+    "hidden64_plus_two_sided_diagonal": {
+      "coordinates_per_layer": 102144,
+      "current_weight_recovery": 0.20262291832949378,
+      "current_output_positive_line_recovery": 0.46123371229762056,
+      "future_residual_positive_line_recovery": 0.00226816265266986,
+      "fit_validation_gradient_predicted_ce_decrease": 0.004743283860212871,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.0049241254510691375
+    }
+  },
+  "registered_comparisons": {
+    "output32_vs_equal_coordinate_hidden72": {
+      "current_output_positive_line_ratio": 1.008103238059999,
+      "future_residual_recovery_ratio": 0.7760543348208251,
+      "fit_validation_gradient_ce_decrease_ratio": 0.9721285607501596,
+      "holdout_validation_gradient_ce_decrease_ratio": 0.9767854875462565,
+      "finite_ce_wins": "1/8",
+      "passed": false
+    },
+    "output64_vs_equal_coordinate_hidden80": {
+      "current_output_positive_line_ratio": 1.002027187072422,
+      "future_residual_recovery_ratio": 0.7166636395315522,
+      "fit_validation_gradient_ce_decrease_ratio": 0.945886125422353,
+      "holdout_validation_gradient_ce_decrease_ratio": 0.939488955713546,
+      "finite_ce_wins": "2/8",
+      "passed": false
+    },
+    "two_sided_diagonal_vs_larger_hidden72": {
+      "current_output_positive_line_ratio": 0.9330989815336024,
+      "future_residual_recovery_ratio": 0.3273323593382712,
+      "fit_validation_gradient_ce_decrease_ratio": 0.9393036757553059,
+      "holdout_validation_gradient_ce_decrease_ratio": 0.9392650843796381,
+      "finite_ce_wins": "1/8",
+      "passed": false
+    },
+    "hidden80_vs_hidden64_control_signal": {
+      "current_output_positive_line_ratio": 1.1408136069603867,
+      "fit_validation_gradient_ce_decrease_ratio": 1.131000675767633,
+      "holdout_validation_gradient_ce_decrease_ratio": 1.1396532572138751,
+      "finite_ce_wins": "7/8",
+      "registered_minimum_ratios": 1.15,
+      "passed": false
+    }
+  },
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_residual_decomposition_v1",
+    "detail_sha256": "97c3678a90d7d4c54d2bd45e1d647279d4e51db40e85c00fffee62d6d0d9a0ea",
+    "aggregate_sha256": "c777cbe413bbf9f876b1328bacb380ea57de3069324e25e05f34c3560c4c62c3",
+    "finite_ce_sha256": "e831cc7148c08825a233020a7155adc54e520d7507a7bad869c59dac7c8ce1ff",
+    "selections_sha256": "62e2d203bb2c625cfd3b69169f0267243bbc8957515b2eedc6080ce5a6ebc163",
+    "metadata_sha256": "ada3db8f2d71507de8ee4cebdb5083628ef42e17f04c2e9468a33914dd545bb5",
+    "foreground_log_sha256": "28a0ec1cb3b62910425a85022cc5117212664a8b9ccb080227650eae8d4644d3",
+    "workspace_after_gib": 239
+  },
+  "interpretation": [
+    "Conditional output-side correction is not a new task-effective axis at matched coordinate count. It is effectively tied on current output recovery but worse on both validation-gradient descent, short-future residual recovery, and finite CE.",
+    "Two-sided diagonal scaling is weaker than spending even more coordinates on fresh hidden-side rotations, confirming that channel/singular scaling is not the dominant remaining c_proj repair.",
+    "Increasing fresh hidden-side coordinates from 64 to 80 stages gives a consistent but preregistered-subthreshold signal: 1.1408x output recovery, 1.1310x/1.1397x validation-gradient descent, and 7/8 finite wins, all below the required 1.15 functional ratios.",
+    "Do not weaken the gate after seeing the result. No output, diagonal, or hidden-depth branch is promoted.",
+    "The remaining c_proj deficit is not explained by stale direction, missing output-side rotation, or diagonal spectral/channel motion within this sparse orthogonal family. A qualitatively different moving task-aligned coordinate chart is required before another 124M training run."
+  ],
+  "authorization": {
+    "language_model_training_authorized": false,
+    "mfu_preflight_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Return to no-training structure design. Require a moving task-aligned chart to beat the fresh hidden80 functional control and the existing 5.6122 training endpoint without introducing a learned dense basis or LoRA."
+  }
+}
