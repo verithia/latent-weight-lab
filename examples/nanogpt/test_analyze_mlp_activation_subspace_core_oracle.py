@@ -32,3 +32,11 @@ def test_fixed_subspace_core_rejects_orthogonal_complement_motion() -> None:
     result = fixed_subspace_core_metrics(source, target, basis)
     assert abs(float(result["orthogonal_core_recovery"])) < 1e-12
     assert abs(float(result["projection_upper_recovery"])) < 1e-12
+
+
+def test_fixed_subspace_core_accepts_float32_qr_roundoff() -> None:
+    source = torch.randn(24, 32)
+    target = source + 0.01 * torch.randn_like(source)
+    basis = torch.linalg.qr(torch.randn(32, 16)).Q.float()
+    result = fixed_subspace_core_metrics(source, target, basis)
+    assert 0.0 <= float(result["projection_upper_recovery"]) <= 1.0

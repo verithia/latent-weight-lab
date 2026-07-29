@@ -68,7 +68,7 @@ def fixed_subspace_core_metrics(
         basis.T @ basis
         - torch.eye(basis.shape[1], device=basis.device, dtype=basis.dtype)
     ).abs().max()
-    if float(orthogonality_error) > 1e-5:
+    if float(orthogonality_error) > 1e-4:
         raise ValueError("basis is not orthonormal")
     delta = target - source
     chord_energy = delta.square().sum().clamp_min(1e-30)
@@ -311,6 +311,13 @@ def main() -> None:
                     center=True,
                     seed=args.pca_seed + 1009 * layer + window_index,
                 )
+                # CUDA's randomized/SVD path can leave O(1e-5) loss of
+                # orthogonality at rank 256.  Re-QR once in FP64 so the
+                # operator tested below is exactly an orthogonal subspace
+                # core rather than a numerically oblique approximation.
+                basis = torch.linalg.qr(
+                    basis.double(), mode="reduced"
+                ).Q.float()
                 bases[(window, layer)] = basis.cpu()
                 basis_metadata[f"{window}_layer{layer}"] = {
                     "sha256": tensor_sha256(basis),
