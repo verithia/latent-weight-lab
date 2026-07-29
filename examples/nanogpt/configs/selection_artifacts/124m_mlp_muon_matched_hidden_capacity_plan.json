@@ -1,0 +1,118 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_hidden_capacity_plan_v1",
+  "status": "registered_before_execution",
+  "scientific_question": "After rejecting output-side correction at equal coordinate count, what is the smallest task-selected hidden-only Givens depth that materially increases both current exact-Muon update recovery and held-out phase-chord recovery while retaining a conservative projected MFU above the 20 percent launch floor?",
+  "parent_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_bilateral_result.json",
+    "sha256": "71a668a4c86b0954f1d74c084a2eda41e9d4cdd73c313d4bc71808331d2c894b",
+    "commit": "cab95acadc37f63b9434277a0afd66c96511f288",
+    "decision": "REJECT_TASK_SELECTED_OUTPUT_CORRECTION"
+  },
+  "implementation": {
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
+    "entrypoint_sha256": "59ee79624d5103df20d994f3c80723ce8e793ae98ffe98f9082fe2794c057d0c",
+    "fit_mode": "diagonal",
+    "matching_seed": 161803,
+    "random_seed": 271828,
+    "matching_neighbors": 64
+  },
+  "causal_protocol": {
+    "selection_and_angle_fit": "current exact coherent Muon update only",
+    "held_out_scoring": "the dense c_proj phase chord from the current boundary to the next registered boundary",
+    "future_information_used_for_selection_or_fitting": false,
+    "refresh_cadence_interpretation": "Each cell selects connectivity at a registered 60-update phase boundary, matching the production r60 cadence. No r120 claim is made because optimizer-state probes exist only at these boundaries."
+  },
+  "scope": {
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "cells": 20,
+    "stages": [
+      32,
+      40,
+      48,
+      64
+    ],
+    "coordinates_per_layer": {
+      "32": 49152,
+      "40": 61440,
+      "48": 73728,
+      "64": 98304
+    },
+    "coordinate_fraction": {
+      "32": 0.020833333333333332,
+      "40": 0.026041666666666668,
+      "48": 0.03125,
+      "64": 0.041666666666666664
+    },
+    "controls": [
+      "equal-depth task-independent random connectivity",
+      "the established 32-stage task-selected chart"
+    ]
+  },
+  "performance_budget": {
+    "source_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens32_r60.json",
+    "source_certificate_sha256": "08f39cec4c3050bada8734f2b3a89a10c913dc2b0bcac2828ac77e3440125070",
+    "measured_stage32_average_iter_ms": 1181.4370491803281,
+    "measured_stage32_optimizer_ms": 268.20442622950816,
+    "measured_stage32_mfu": 0.2885606766898234,
+    "projection": "Conservatively hold all non-optimizer time fixed and scale the entire measured optimizer time linearly with stage count. This over-attributes fixed optimizer work to Givens depth.",
+    "projected": {
+      "32": {
+        "average_iter_ms": 1181.4370491803281,
+        "mfu": 0.2885606766898234
+      },
+      "40": {
+        "average_iter_ms": 1248.488155737705,
+        "mfu": 0.273063282828
+      },
+      "48": {
+        "average_iter_ms": 1315.539262295082,
+        "mfu": 0.259145647834
+      },
+      "64": {
+        "average_iter_ms": 1449.641475409836,
+        "mfu": 0.235172820425
+      }
+    },
+    "minimum_projected_mfu": 0.22,
+    "minimum_exact_real_training_mfu_before_scientific_training": 0.2
+  },
+  "selection_rule": {
+    "reference_stages": 32,
+    "candidate_order": [
+      40,
+      48,
+      64
+    ],
+    "select_the_smallest_candidate_satisfying_all": {
+      "minimum_requested_update_recovery_over_stage32": 1.35,
+      "minimum_future_recovery_over_stage32": 1.35,
+      "minimum_task_over_random_future_recovery": 5.0,
+      "minimum_requested_update_recovery_over_coordinate_fraction": 4.0,
+      "minimum_cell_future_cosine": 0.05,
+      "require_positive_future_cosine_in_all_20_cells": true,
+      "minimum_projected_mfu": 0.22
+    },
+    "pass": "Prepare an immutable selected-depth r60 config, verify exact resume at that depth, and directly poll a real BF16 1-warmup-plus-61-update MFU preflight that includes update-60 rematching. Do not launch scientific training until those checks and a separate immutable training decision are recorded.",
+    "fail": "Close stage-count expansion as an insufficient structural fix; do not run another language-model candidate, and return to a qualitatively different hidden-direction generator rather than output, gain, or low-rank residual additions."
+  },
+  "input_identity": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "training_authorization": false,
+  "execution_policy": "Run directly in the foreground on one idle Y400 GPU and poll to exit. Do not use a watchdog, callback, queue worker, heartbeat, or PRO6."
+}
