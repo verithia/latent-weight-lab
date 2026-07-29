@@ -75,6 +75,10 @@ def main() -> None:
             "block_fht_cproj_product_fht_pullback_probe_output": (
                 probe_output
             ),
+            "mfu_preflight_certificate": (
+                f"{OUTPUT_ROOT}/performance_preflight_{STEM}.json"
+            ),
+            "failed_mfu_preflight": None,
             "max_iters": 1,
             "warmup_iters": 0,
             "lr_decay_iters": 1,

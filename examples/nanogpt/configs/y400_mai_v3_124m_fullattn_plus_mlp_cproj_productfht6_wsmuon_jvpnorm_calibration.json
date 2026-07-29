@@ -119,7 +119,7 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "cproj_product_fht_pullback_calibration",
-  "implementation_commit": "842785ef1f0dea3761ee03820dbacccb9e7e25e7",
+  "implementation_commit": "eb32e712375ba489e8e2c25159a292b28ad99d96",
   "implementation_source_hashes": {
     "examples/nanogpt/model.py": "686a4e4536d712c474c686f9cb8392473e85ea4b0585f62aad1ec87dfa336745",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
@@ -154,7 +154,7 @@
   "max_iters": 1,
   "method": "block_fht",
   "mfu_min_fraction": 0.2,
-  "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_product_fht_screen/performance_preflight_y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_0p5tpp.json",
+  "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_product_fht_pullback_calibration/performance_preflight_y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_jvpnorm_calibration.json",
   "mfu_preflight_required": true,
   "min_lr": 0.00024,
   "mixed_continuation_provenance": {

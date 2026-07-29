@@ -9,13 +9,13 @@
     "scientific_run_blocked_until_pass": true
   },
   "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_jvpnorm_calibration.json",
-  "candidate_config_sha256": "2b087d5ef44fe3b32e0cdc5ba009b5d2936f0d5e46147c032f4d89d8b5792dfd",
+  "candidate_config_sha256": "682426e547a3833029a26de0ea9e6de9aab976dd31a48bfa4b12eed121ce6258",
   "failed_run_diagnosis": {
     "dense_relative_displacement_mean": 0.492487,
     "endpoint_diagnosis_sha256": "eb7fcf48407b4c86627f9b83a65b5af75938fbc599b0c02fbeeb485efef85ddd",
     "product_relative_displacement_mean": 0.00231545
   },
-  "implementation_commit": "842785ef1f0dea3761ee03820dbacccb9e7e25e7",
+  "implementation_commit": "eb32e712375ba489e8e2c25159a292b28ad99d96",
   "implementation_source_hashes": {
     "examples/nanogpt/model.py": "686a4e4536d712c474c686f9cb8392473e85ea4b0585f62aad1ec87dfa336745",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
