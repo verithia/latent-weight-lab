@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_124m_mlp_global_givens_transport_fit_plan_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "Can a compact fixed-connectivity global Givens flow realize enough of the 85.72% right-orthogonal c_proj orbit to justify production training?",
+  "candidate": {
+    "action": "post-GELU hidden-frame transport folded into the materialized c_proj weight",
+    "features": 3072,
+    "connectivity": "independently fixed random perfect matching at each stage",
+    "learned_values": "one angle per matched channel pair",
+    "forbidden_components": [
+      "learned dense basis",
+      "LoRA factor",
+      "tokenwise dense transform",
+      "residual HyperConnection"
+    ]
+  },
+  "pilot": {
+    "cells": [
+      {
+        "layer": 0,
+        "phase_start": 0
+      },
+      {
+        "layer": 0,
+        "phase_start": 180
+      },
+      {
+        "layer": 6,
+        "phase_start": 60
+      },
+      {
+        "layer": 11,
+        "phase_start": 120
+      }
+    ],
+    "stages": [
+      8,
+      16,
+      32
+    ],
+    "fit_steps": 300,
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "initialization": "all angles exactly zero",
+    "metric": "phase-chord endpoint recovery and fraction of the exact right-orthogonal oracle"
+  },
+  "decision_rule": {
+    "promote": "smallest stage count with energy-weighted recovery >=0.20 and minimum-cell recovery >=0.10",
+    "all_cell_validation": "required after pilot promotion and before implementation in the training model",
+    "reject": "if 32 stages fail the pilot threshold, close shallow fixed-connectivity Givens transport; the dense right-orbit upper bound then requires a richer structured factorization"
+  },
+  "execution": "direct foreground analysis on Y400 GPU1; no training, MFU gate, queue, watchdog, callback, heartbeat, or PRO6"
+}
