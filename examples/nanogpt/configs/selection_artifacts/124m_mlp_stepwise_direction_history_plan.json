@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_124m_mlp_stepwise_direction_history_plan_v1",
+  "recorded_at": "2026-07-29",
+  "scientific_question": "What is the shortest causal history of realized dense Muon c_proj updates that remains aligned with the future phase chord?",
+  "trajectory": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_cproj_stepwise_trajectory_lr24e4.json",
+    "target": "mlp.c_proj",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "saved_steps": "every optimizer update from 0 through 238",
+    "optimizer": "Muon",
+    "execution": "Y400 foreground runner in one tmux session, direct operator polling, no watchdog, callback, queue, heartbeat, or PRO6",
+    "required_real_training_mfu_fraction": 0.2
+  },
+  "diagnostic": {
+    "horizons": "1 through 12 optimizer updates",
+    "full_chord_metric": "squared cosine of cumulative early displacement and optimal capture by the span of individual early updates",
+    "causal_metric": "squared cosine of cumulative early displacement against the future-only chord W_end-W_start+h and optimal capture of that future-only chord by the early-update span",
+    "autocorrelation": "cosine of update h with update 1 and update h-1",
+    "analysis_dtype": "float64"
+  },
+  "decision_rule": {
+    "instantaneous_direction_supported": "horizon-1 future capture >= 0.50 with positive cosine in every phase/layer cell",
+    "compact_history_supported": "select the shortest horizon <=12 whose energy-weighted future-span capture is >=0.50, whose cumulative future cosine is positive in every cell, and whose minimum cell future-span capture is >=0.20",
+    "no_short_history": "if no horizon qualifies, do not implement a static or short-history c_proj chart; capture raw gradients/optimizer state or move to activation-conditioned structure"
+  },
+  "caveats": [
+    "Realized updates contain momentum, weight decay, stochastic batches, and the learning-rate schedule.",
+    "History-span capture is an in-sample local direction diagnostic and does not itself define a deployable parameterization.",
+    "The replay is one short optimizer trajectory, not a global solution-manifold estimate."
+  ]
+}
