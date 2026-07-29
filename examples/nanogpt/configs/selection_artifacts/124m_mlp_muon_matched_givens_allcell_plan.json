@@ -1,0 +1,55 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_allcell_plan_v1",
+  "status": "registered_before_execution",
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_depth_result.json",
+  "parent_result_sha256": "da4620ce2bfff9c0bb7a0da8b16123429c19a7514308e762897f899f4466c071",
+  "scientific_question": "Does the causal enrichment of the 32-stage Muon-selected hidden Givens chart generalize across all five representative c_proj layers and all four training phases without a weak or sign-flipped cell?",
+  "implementation": {
+    "commit": "7cb4797a7e92301b7f8ff30e6a499832a7cbcea5",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
+    "entrypoint_sha256": "062ea8c13496c6fe39d3e1746281e96ab0ffcec7347bcece9ed8cae943a87046",
+    "tests": "291 passed, 19 skipped, 45 subtests"
+  },
+  "causal_protocol": "Current exact coherent Muon state selects hidden-channel perfect matchings and fits angles to the current scheduled update only. The future phase chord is inaccessible until scoring. Equal-size deterministic random matchings remain the control.",
+  "scope": {
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_starts": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "cells": 20,
+    "stages": [
+      32
+    ],
+    "coordinates_per_layer": 49152,
+    "coordinate_fraction": 0.020833333333333332,
+    "matching_neighbors": 64,
+    "angle_fit_steps": 300,
+    "angle_fit_learning_rate": 0.001,
+    "matching_seed": 161803,
+    "random_seed": 271828
+  },
+  "decision_rule": {
+    "minimum_energy_weighted_future_recovery": 0.02,
+    "minimum_future_recovery_over_random_control": 5.0,
+    "minimum_requested_update_recovery_over_coordinate_fraction": 6.0,
+    "minimum_cell_future_cosine": 0.05,
+    "require_positive_grouped_recovery_for_every_layer_and_phase": true,
+    "pass": "promote to a compact refresh/serialization design and an exact production MFU implementation; language-model training remains blocked until that exact implementation passes at least 20 percent MFU",
+    "fail": "reject dynamic Muon-selected Givens as non-generalizing and do not implement training"
+  },
+  "input_identity": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution_policy": "Run directly in the foreground on one idle Y400 GPU and poll to exit. Do not use a watchdog, callback, queue worker, heartbeat, or PRO6."
+}
