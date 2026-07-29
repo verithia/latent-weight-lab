@@ -89,6 +89,7 @@ def make_arm(source: dict, *, name: str, pregelu_stages: int) -> dict:
             "block_fht_mlp_pregelu_block_rotation_coordinate_scale": 4.0,
             "block_fht_mlp_pregelu_block_rotation_seed": 161803,
             "block_fht_mlp_pregelu_chart_lr_scale": 0.1,
+            "batch_size": 64,
             "checkpoint_history": False,
             "checkpoint_wall_clock_seconds": 7200,
             "candidate_scope": (
@@ -100,6 +101,7 @@ def make_arm(source: dict, *, name: str, pregelu_stages: int) -> dict:
                 )
             ),
             "failed_mfu_preflight": None,
+            "gradient_accumulation_steps": 4,
             "hpo_stage": "pregelu_causal_pair_preregistered_0p5tpp",
             "implementation_commit": IMPLEMENTATION_COMMIT,
             "implementation_source_hashes": {
