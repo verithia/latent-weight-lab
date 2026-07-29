@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_analytic_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_analytic_plan.json",
+  "plan_sha256": "46b46208ac468299205db53ebc28956bd3a14144c86fc2fc30553ad2b8af6d3d",
+  "execution_commit": "15eee1ed8c824572f1727da9c373a596964ff0d3",
+  "execution": "direct foreground Y400 GPU1 diagnostic, polled to exit in 21.76 seconds with no parameter update, language-model training, watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "input_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+  "aggregate": {
+    "cells": 20,
+    "stages": 32,
+    "coordinates_per_layer": 49152,
+    "coordinate_fraction": 0.020833333333333332,
+    "task_matched_requested_update_recovery": 0.13439268325216358,
+    "fitted_oracle_requested_update_recovery": 0.14051835494788548,
+    "fraction_of_fitted_requested_update_recovery": 0.9564066082470597,
+    "task_matched_future_recovery": 0.022767720629710695,
+    "fitted_oracle_future_recovery": 0.023178352047354637,
+    "fraction_of_fitted_future_recovery": 0.9822838389543398,
+    "task_matched_future_cosine": 0.14417625991968344,
+    "task_matched_minimum_future_cosine": 0.07342973282367342,
+    "task_matched_minimum_future_recovery": 0.005391925662556061,
+    "random_requested_update_recovery": 0.01982574160844885,
+    "random_future_recovery": 0.0032565915184869067,
+    "random_future_cosine": 0.05462467461767382,
+    "task_over_random_future_recovery": 6.9912730842857265,
+    "task_update_recovery_over_coordinate_fraction": 6.450848796103852,
+    "exact_dense_muon_future_recovery": 0.16469392843398334,
+    "task_matched_fraction_of_exact_dense_muon_future_recovery": 0.13824262282283836,
+    "positive_task_matched_cells": 20
+  },
+  "future_recovery_by_layer": {
+    "0": 0.020041248844814622,
+    "3": 0.0221648069238716,
+    "6": 0.023156039914453953,
+    "9": 0.02430304369546373,
+    "11": 0.024658188083798525
+  },
+  "future_recovery_by_phase_start": {
+    "0": 0.009565813349779942,
+    "60": 0.032172520120854364,
+    "120": 0.0341708821654316,
+    "180": 0.04267995121902236
+  },
+  "decision": {
+    "classification": "PROMOTE_ANALYTIC_MUON_MATCHED_GIVENS_TO_PRODUCTION_IMPLEMENTATION",
+    "registered_rule_passed": true,
+    "interpretation": [
+      "The closed-form diagonal tangent metric retains 95.64 percent of the fitted oracle's current-update recovery and 98.23 percent of its held-out future recovery.",
+      "Energy-weighted future recovery is 2.2768 percent, 6.99 times the equal-size random-connectivity control.",
+      "The analytic chart captures 13.4393 percent of the requested current Muon update, 6.45 times its 2.0833 percent coordinate fraction.",
+      "All 20 cells are positive and the worst future cosine is 0.07343, above the registered 0.05 floor.",
+      "Every representative layer and phase has positive grouped future recovery.",
+      "No iterative angle optimizer is needed: the full 20-cell diagnostic completed in 21.76 seconds.",
+      "This authorizes only the refreshable folded-base production implementation and exact MFU preflight. Scientific language-model training remains blocked until serialization/provenance are verified and real-training MFU is at least 20 percent."
+    ],
+    "next_action": "implement a refreshable folded-base representation with exact connectivity, angle, refresh, and resume provenance; test state round trips and require a directly polled real-training MFU certificate at or above 20 percent before any 238-step scientific run"
+  },
+  "immutable_artifacts": {
+    "detail_sha256": "46845dff1e85514811d18ae03ef9dc3e0957336e61c3d7d1e34b309099f556d6",
+    "matchings_sha256": "af1b9792540ff2c81c5df58c2a5d4da5fa5b9a55ecc1616965a1e9f03df7c96b",
+    "aggregate_sha256": "6e90eeca7e8dceb118419e08e5f7ade919e389302bb70778d7572e7c9814148b",
+    "metadata_sha256": "6ac2b64b28209b14f7b2a8863e61a0434febd251f5b3be7d8a26709d0991aeb1"
+  }
+}
