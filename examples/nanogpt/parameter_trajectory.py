@@ -33,9 +33,19 @@ def canonical_digest(value: Any) -> str:
     return hashlib.sha256(encoded).hexdigest()
 
 
-def parameter_matches(name: str, targets: Iterable[str]) -> bool:
+def parameter_matches(
+    name: str,
+    targets: Iterable[str],
+    layers: Iterable[int] | None = None,
+) -> bool:
     if not name.startswith("transformer.h."):
         return False
+    if layers is not None:
+        components = name.split(".")
+        if len(components) < 3 or not components[2].isdigit():
+            return False
+        if int(components[2]) not in set(layers):
+            return False
     return any(name.endswith(f".{target}.weight") for target in targets)
 
 
@@ -44,6 +54,7 @@ def collect_parameters(
     *,
     targets: list[str],
     dtype: str,
+    layers: list[int] | None = None,
 ) -> dict[str, torch.Tensor]:
     if not targets or any(not isinstance(target, str) or not target for target in targets):
         raise ValueError("trajectory snapshot targets must be non-empty strings")
@@ -52,7 +63,7 @@ def collect_parameters(
     selected = {
         name: parameter.detach().to(device="cpu", dtype=DTYPES[dtype]).contiguous()
         for name, parameter in model.named_parameters()
-        if parameter_matches(name, targets)
+        if parameter_matches(name, targets, layers)
     }
     if not selected:
         raise ValueError(f"no parameters matched trajectory targets: {targets}")
@@ -96,6 +107,7 @@ def write_parameter_snapshot(
     step: int,
     targets: list[str],
     dtype: str,
+    layers: list[int] | None,
     model_config: Any,
     run_identity: dict[str, Any],
     execution_provenance: dict[str, Any] | None,
@@ -113,7 +125,12 @@ def write_parameter_snapshot(
             raise ValueError(f"existing trajectory snapshot identity mismatch: {destination}")
         return destination
 
-    parameters = collect_parameters(model, targets=targets, dtype=dtype)
+    parameters = collect_parameters(
+        model,
+        targets=targets,
+        dtype=dtype,
+        layers=layers,
+    )
     inventory = {
         name: {
             "shape": list(value.shape),
@@ -127,6 +144,7 @@ def write_parameter_snapshot(
         "schema_version": SCHEMA_VERSION,
         "step": step,
         "targets": list(targets),
+        "layers": None if layers is None else list(layers),
         "storage_dtype": dtype,
         "model_config": asdict(model_config),
         "run_identity": run_identity,
@@ -152,6 +170,13 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         choices=sorted(DTYPES),
         default="float32",
     )
+    parser.add_argument(
+        "--trajectory-snapshot-layers",
+        nargs="+",
+        type=int,
+        default=None,
+        help="optional zero-based transformer layers to retain",
+    )
 
 
 def validate_arguments(args: argparse.Namespace) -> None:
@@ -163,3 +188,15 @@ def validate_arguments(args: argparse.Namespace) -> None:
             raise ValueError("--trajectory-snapshot-targets must be non-empty")
         if any(not isinstance(target, str) or not target for target in targets):
             raise ValueError("--trajectory-snapshot-targets must contain non-empty strings")
+        layers = getattr(args, "trajectory_snapshot_layers", None)
+        if layers is not None:
+            if (
+                not isinstance(layers, list)
+                or not layers
+                or any(not isinstance(layer, int) or layer < 0 for layer in layers)
+            ):
+                raise ValueError(
+                    "--trajectory-snapshot-layers must contain non-negative integers"
+                )
+            if len(set(layers)) != len(layers):
+                raise ValueError("--trajectory-snapshot-layers must be unique")

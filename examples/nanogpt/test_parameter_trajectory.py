@@ -62,6 +62,18 @@ class ParameterTrajectoryTest(unittest.TestCase):
         )
         self.assertTrue(all(value.dtype == torch.float32 for value in selected.values()))
 
+    def test_collects_only_requested_transformer_layers(self) -> None:
+        selected = collect_parameters(
+            TinyModel(),
+            targets=["mlp.c_proj"],
+            dtype="float32",
+            layers=[1],
+        )
+        self.assertEqual(
+            set(selected),
+            {"transformer.h.1.mlp.c_proj.weight"},
+        )
+
     def test_snapshot_is_atomic_identity_bound_and_idempotent(self) -> None:
         model = TinyModel()
         identity = {"config_sha256": "a" * 64, "data_manifest": {"sha256": "b" * 64}}
@@ -73,6 +85,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 step=6,
                 targets=["mlp.c_fc", "mlp.c_proj"],
                 dtype="float32",
+                layers=[0],
                 model_config=config_as_dataclass(),
                 run_identity=identity,
                 execution_provenance={"git_commit": "c" * 40},
@@ -83,6 +96,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 step=6,
                 targets=["mlp.c_fc", "mlp.c_proj"],
                 dtype="float32",
+                layers=[0],
                 model_config=config_as_dataclass(),
                 run_identity=identity,
                 execution_provenance={"git_commit": "c" * 40},
@@ -93,7 +107,8 @@ class ParameterTrajectoryTest(unittest.TestCase):
             payload = torch.load(first, map_location="cpu", weights_only=False)
             self.assertEqual(payload["schema_version"], SCHEMA_VERSION)
             self.assertEqual(payload["step"], 6)
-            self.assertEqual(len(payload["parameters"]), 4)
+            self.assertEqual(payload["layers"], [0])
+            self.assertEqual(len(payload["parameters"]), 2)
             self.assertEqual(payload["execution_provenance"]["git_commit"], "c" * 40)
 
     def test_validation_rejects_bad_interval_and_empty_targets(self) -> None:
@@ -102,6 +117,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 argparse.Namespace(
                     trajectory_snapshot_interval=-1,
                     trajectory_snapshot_targets=["mlp.c_fc"],
+                    trajectory_snapshot_layers=None,
                 )
             )
         with self.assertRaisesRegex(ValueError, "non-empty"):
@@ -109,6 +125,15 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 argparse.Namespace(
                     trajectory_snapshot_interval=1,
                     trajectory_snapshot_targets=[],
+                    trajectory_snapshot_layers=None,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "unique"):
+            validate_arguments(
+                argparse.Namespace(
+                    trajectory_snapshot_interval=1,
+                    trajectory_snapshot_targets=["mlp.c_proj"],
+                    trajectory_snapshot_layers=[0, 0],
                 )
             )
 
