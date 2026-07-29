@@ -1,0 +1,244 @@
+{
+  "schema_version": "mai_124m_mlp_muon_chart_staleness_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_chart_staleness_plan.json",
+  "plan_sha256": "80b414e38333e8ada9fc4409f0b21eedd784e464c27b2ae2e7547d8451d6d097",
+  "qualification": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_chart_staleness_qualification_result.json",
+  "qualification_sha256": "b45f4e2df563d26e16d9212c7bf5bfeaecddea86d3b57c3e9945e0ba5202d273",
+  "execution_commit": "67b2e6edd9912496dcbf8174d11c09a63e8d1a69",
+  "training": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "direct foreground execution and polling to exit",
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "pro6": false,
+    "run_name": "y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4_v1",
+    "run_id": "y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4_v1_20260729T193348Z_100777",
+    "source_commit": "67b2e6edd9912496dcbf8174d11c09a63e8d1a69",
+    "worktree_dirty": false,
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4_v1_20260729T193348Z_100777.config.json"
+    ],
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_cproj_cadence15_optimizer_probe_lr24e4.json",
+    "config_sha256": "7de2a68eb24af9b8224302bc576a69fd54705c0c03610f7eff9e480796019ed2",
+    "dataset_manifest": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "started_at": "2026-07-30T03:33:48+08:00",
+    "finished_at": "2026-07-30T03:39:19+08:00",
+    "updates": 238,
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train_loss": 11.0027,
+        "validation_loss": 11.002
+      },
+      {
+        "step": 60,
+        "train_loss": 6.227,
+        "validation_loss": 6.2365
+      },
+      {
+        "step": 120,
+        "train_loss": 5.7433,
+        "validation_loss": 5.7481
+      },
+      {
+        "step": 180,
+        "train_loss": 5.5581,
+        "validation_loss": 5.5612
+      },
+      {
+        "step": 238,
+        "train_loss": 5.4856,
+        "validation_loss": 5.4883
+      }
+    ],
+    "performance_preflight_sha256": "ae3906ae2d72bf04521bcdb3ad62c48504e529a67efc477aac20371e54d34a1b",
+    "mfu_fraction": 0.29410457667598877,
+    "status_sha256": "bb335d859f9ff64c11117119a39c200759ae6efcc9342c23acce3817366c097c",
+    "provenance_sha256": "ba2fd30de70f59b8b050538fd2b5891732c32d5dc0c1d8229ebc54c20e114df6",
+    "log_sha256": "4ecbc53c4c952adbf4cb9a47fe4897743d9d5677a8eca42d45536987946a36b3",
+    "input_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "snapshots": {
+      "count": 17,
+      "steps": [
+        0,
+        15,
+        30,
+        45,
+        60,
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225,
+        238
+      ],
+      "terminal_sha256": "07c16eb9463308eb523ffcfd68a62be0487bb3eed3792d2991c9f148012f294b"
+    },
+    "optimizer_probes": {
+      "count": 16,
+      "steps": [
+        0,
+        15,
+        30,
+        45,
+        60,
+        75,
+        90,
+        105,
+        120,
+        135,
+        150,
+        165,
+        180,
+        195,
+        210,
+        225
+      ],
+      "terminal_sha256": "646d4ca6a07d71b74fab3480a87e2e3a04b75d8937a0d0da4f25a82708209d29"
+    }
+  },
+  "analysis": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "direct foreground execution and polling to exit",
+    "parameter_updates": 0,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "pro6": false,
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_chart_staleness.py",
+    "entrypoint_sha256": "3a0651c9a2fa1ed8bc3fe37799371bd460dcc3d05c6091b09c81a58d98bd663d",
+    "source_commit": "67b2e6edd9912496dcbf8174d11c09a63e8d1a69",
+    "started_at_unix": 1785354014.207859,
+    "finished_at_unix": 1785354191.0170069,
+    "wall_seconds": 176.80914783477783,
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_anchors": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "ages": [
+      0,
+      15,
+      30,
+      45,
+      60
+    ],
+    "stage_count": 64,
+    "neighbors": 64,
+    "causal_protocol": "phase-start connectivity uses only the exact phase-start Muon direction; future directions refit angles and score the fixed connectivity but never change it",
+    "future_information_used_for_connectivity": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "retention_by_age": {
+    "0": {
+      "minimum_registered_metric": 1.0,
+      "output_positive_line": 1.0,
+      "recorded_train_positive_descent": 1.0,
+      "holdout_validation_positive_descent": 1.0,
+      "aged_better_than_fresh_finite_ce": 0,
+      "finite_ce_comparisons": 8,
+      "mean_aged_minus_fresh_loss": 0.0
+    },
+    "15": {
+      "minimum_registered_metric": 0.13725052815723585,
+      "output_positive_line": 0.24808401578170816,
+      "recorded_train_positive_descent": 0.13897261076467615,
+      "holdout_validation_positive_descent": 0.13725052815723585,
+      "aged_better_than_fresh_finite_ce": 0,
+      "finite_ce_comparisons": 8,
+      "mean_aged_minus_fresh_loss": 0.0013401210308074951
+    },
+    "30": {
+      "minimum_registered_metric": 0.14384815107777738,
+      "output_positive_line": 0.3052172272515934,
+      "recorded_train_positive_descent": 0.15667927941805812,
+      "holdout_validation_positive_descent": 0.14384815107777738,
+      "aged_better_than_fresh_finite_ce": 0,
+      "finite_ce_comparisons": 8,
+      "mean_aged_minus_fresh_loss": 0.0016012638807296753
+    },
+    "45": {
+      "minimum_registered_metric": 0.1311179240472994,
+      "output_positive_line": 0.30147278348337975,
+      "recorded_train_positive_descent": 0.14304489698698036,
+      "holdout_validation_positive_descent": 0.1311179240472994,
+      "aged_better_than_fresh_finite_ce": 1,
+      "finite_ce_comparisons": 8,
+      "mean_aged_minus_fresh_loss": 0.0012384653091430664
+    },
+    "60": {
+      "minimum_registered_metric": 0.15064264065865363,
+      "output_positive_line": 0.28137998077058557,
+      "recorded_train_positive_descent": 0.15064264065865363,
+      "holdout_validation_positive_descent": 0.15561014609934112,
+      "aged_better_than_fresh_finite_ce": 0,
+      "finite_ce_comparisons": 6,
+      "mean_aged_minus_fresh_loss": 0.0007141232490539551
+    }
+  },
+  "registered_thresholds": {
+    "stable_retention": 0.9,
+    "stale_retention": 0.8
+  },
+  "artifacts": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_chart_staleness_v1",
+    "analysis_log_sha256": "e6f10896985f3e4140d37ef1826175faef2a56bd1e319cf6329c851e60d9a709",
+    "detail_csv_sha256": "e0bd2baad876b214b2c5550b3b6f679cfa3d9ce683fcf01d436d412d9eb7e2c0",
+    "finite_ce_csv_sha256": "21ae6e402d1a2f283929a1853a71a24a9f453cb4485bf798866c34bd2d67796f",
+    "matchings_csv_sha256": "36ffbd0b9b526ec459b3a38258beb82f730d59b777868263426aa235e53dcb68",
+    "aggregate_json_sha256": "e7c83d4b97837e5b222e310cedb885a135faab309a129ebd08b74eb7b434da22",
+    "metadata_json_sha256": "ece6c7fdac5b38236367e1237c5fb8f46d0a69532781865c042842d74219f276"
+  },
+  "decision": {
+    "classification": "MIXED_CADENCE_SIGNAL_NO_TRAINING_PROMOTION",
+    "registered_branch": "otherwise",
+    "training_promotion": false,
+    "interpretation": [
+      "The label is the preregistered fallback branch, not evidence that the measurements are ambiguous.",
+      "The fixed connectivity is already severely stale by 15 updates: minimum registered retention is 0.1373, far below the 0.80 stale threshold and the 0.90 stable threshold.",
+      "Refitting the continuous diagonal angles cannot repair the topology: at age 15 the aged chart retains only 0.2481 of fresh output-line recovery, 0.1390 of recorded-training-gradient descent, and 0.1373 of holdout-validation-gradient descent.",
+      "Fresh connectivity wins all 8/8 age-15 finite-step CE comparisons; the aged intervention has 0.001340 higher loss on average.",
+      "Age 30, 45, and 60 remain comparably stale, so the evidence does not identify an r15 or r30 refresh cadence worth an end-to-end training run.",
+      "The causal failure is rapidly rotating discrete connectivity, not merely stale angle values."
+    ],
+    "next_action": "Do not train r15 or r30 refresh candidates. Replace the discrete periodically selected connectivity with a continuously adaptable high-rank structured tangent, then preregister a no-training task-direction test and a separate real MFU gate before any new language-model run.",
+    "not_authorized": [
+      "r15 or r30 language-model training",
+      "larger stage count in the same periodically rematched chart",
+      "c_fc replacement",
+      "learning-rate or seed sweep",
+      "PRO6 execution"
+    ]
+  },
+  "limitations": [
+    "The diagnostic measures five representative c_proj layers on one dense-Muon trajectory and does not estimate a global solution-manifold dimension.",
+    "Future exact directions refit diagonal angles, so fixed-connectivity scores are an upper-bound test of topology capacity rather than replayed optimizer states.",
+    "The shortest observed age is 15 updates; the data show that the useful connectivity half-life is below 15 but do not resolve its exact value.",
+    "No shorter-refresh language-model candidate was trained."
+  ]
+}
