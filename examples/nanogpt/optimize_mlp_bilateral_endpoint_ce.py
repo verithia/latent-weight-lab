@@ -152,6 +152,19 @@ def protocol_identity(
             "dtype": "bfloat16",
             "base_parameters_frozen": True,
         },
+        "evaluation": {
+            "batch_size": args.eval_batch_size,
+            "token_window_length": args.eval_block_size,
+            "batches": args.eval_batches,
+            "primary_seed": args.primary_eval_seed,
+            "confirmation_seed": args.confirmation_eval_seed,
+            "minimum_ce_gain": args.minimum_ce_gain,
+        },
+        "preflight_safety": {
+            "seed": args.preflight_safety_eval_seed,
+            "batches": args.preflight_safety_eval_batches,
+            "maximum_ce_increase": args.preflight_max_ce_increase,
+        },
     }
     value["identity_sha256"] = stable_json_sha256(value)
     return value
@@ -176,6 +189,13 @@ def validate_mfu_certificate(
         )
     if certificate.get("passed") is not True:
         raise ValueError("MFU certificate is not marked passed")
+    stability = certificate.get("stability", {})
+    increase = float(stability.get("ce_increase"))
+    maximum = float(stability.get("maximum_ce_increase"))
+    if not math.isfinite(increase) or increase > maximum:
+        raise ValueError(
+            "MFU certificate failed its endpoint CE safety gate"
+        )
 
 
 def write_csv(path: Path, rows: list[dict[str, object]]) -> None:
@@ -431,6 +451,14 @@ def run_preflight(args: argparse.Namespace) -> None:
         block_size=args.block_size,
         seed=args.train_token_seed + 1000003,
     )
+    safety_batches = fixed_validation_batches(
+        args.data_dir,
+        args.eval_batch_size,
+        args.eval_block_size,
+        args.preflight_safety_eval_batches,
+        args.preflight_safety_eval_seed,
+    )
+    safety_digest = tensor_sha256(torch.cat(safety_batches))
     certificate: dict[str, Any] = {
         "schema_version": "mai_124m_mlp_bilateral_task_ce_mfu_v1",
         "identity": identity,
@@ -445,6 +473,11 @@ def run_preflight(args: argparse.Namespace) -> None:
             "timed_updates": args.preflight_timed_updates,
             "train_indices_sha256": indices_digest(indices),
         },
+        "stability": {
+            "seed": args.preflight_safety_eval_seed,
+            "token_sha256": safety_digest,
+            "maximum_ce_increase": args.preflight_max_ce_increase,
+        },
         "runtime": {
             "cached_block_fht_modules": runtime[
                 "cached_block_fht_modules"
@@ -455,6 +488,9 @@ def run_preflight(args: argparse.Namespace) -> None:
     }
     error: Exception | None = None
     try:
+        initial_safety_ce = evaluate_ce(
+            model, safety_batches, args.device
+        )
         peak_tflops = empirical_bf16_gemm_peak_tflops(
             args.gemm_size,
             args.gemm_warmups,
@@ -490,6 +526,10 @@ def run_preflight(args: argparse.Namespace) -> None:
         active_params = estimate_active_params(runtime["model_config"])
         model_tflops = 6.0 * active_params * tokens_per_second / 1e12
         mfu = model_tflops / peak_tflops
+        final_safety_ce = evaluate_ce(
+            model, safety_batches, args.device
+        )
+        safety_increase = final_safety_ce - initial_safety_ce
         certificate["calibration"] = {
             "bf16_gemm_size": args.gemm_size,
             "bf16_gemm_warmups": args.gemm_warmups,
@@ -506,8 +546,27 @@ def run_preflight(args: argparse.Namespace) -> None:
             "mean_loss": float(np.mean(losses)),
             "peak_mib": torch.cuda.max_memory_allocated() / 1024**2,
         }
-        certificate["passed"] = bool(mfu >= args.minimum_mfu)
+        certificate["stability"].update(
+            {
+                "initial_ce": initial_safety_ce,
+                "final_ce": final_safety_ce,
+                "ce_increase": safety_increase,
+                "passed": bool(
+                    safety_increase <= args.preflight_max_ce_increase
+                ),
+            }
+        )
+        certificate["passed"] = bool(
+            mfu >= args.minimum_mfu
+            and safety_increase <= args.preflight_max_ce_increase
+        )
         if not certificate["passed"]:
+            if safety_increase > args.preflight_max_ce_increase:
+                raise RuntimeError(
+                    "endpoint CE safety gate rejected: "
+                    f"increase {safety_increase:+.6f} > "
+                    f"{args.preflight_max_ce_increase:+.6f}"
+                )
             raise RuntimeError(
                 f"MFU gate rejected: {mfu:.2%} < "
                 f"{args.minimum_mfu:.2%}"
@@ -772,7 +831,7 @@ def main() -> None:
         "--gradient-accumulation-steps", type=int, default=8
     )
     parser.add_argument("--block-size", type=int, default=1024)
-    parser.add_argument("--learning-rate", type=float, default=0.00072)
+    parser.add_argument("--learning-rate", type=float, default=0.000072)
     parser.add_argument("--beta1", type=float, default=0.9)
     parser.add_argument("--beta2", type=float, default=0.95)
     parser.add_argument("--weight-decay", type=float, default=0.0)
@@ -794,6 +853,15 @@ def main() -> None:
     )
     parser.add_argument(
         "--preflight-timed-updates", type=int, default=3
+    )
+    parser.add_argument(
+        "--preflight-safety-eval-seed", type=int, default=20260730
+    )
+    parser.add_argument(
+        "--preflight-safety-eval-batches", type=int, default=2
+    )
+    parser.add_argument(
+        "--preflight-max-ce-increase", type=float, default=0.1
     )
     parser.add_argument("--gemm-size", type=int, default=8192)
     parser.add_argument("--gemm-warmups", type=int, default=4)

@@ -54,6 +54,10 @@ def test_validate_mfu_certificate_is_identity_bound() -> None:
         "schema_version": "mai_124m_mlp_bilateral_task_ce_mfu_v1",
         "identity": identity,
         "measurement": {"mfu_fraction": 0.21},
+        "stability": {
+            "ce_increase": 0.01,
+            "maximum_ce_increase": 0.1,
+        },
         "passed": True,
     }
     validate_mfu_certificate(certificate, identity, 0.2)
@@ -94,10 +98,19 @@ def test_protocol_identity_hash_covers_update_shape(
         batch_size=32,
         gradient_accumulation_steps=8,
         block_size=1024,
-        learning_rate=0.00072,
+        learning_rate=0.000072,
         beta1=0.9,
         beta2=0.95,
         weight_decay=0.0,
+        eval_batch_size=8,
+        eval_block_size=256,
+        eval_batches=8,
+        primary_eval_seed=20260717,
+        confirmation_eval_seed=20260718,
+        minimum_ce_gain=0.005,
+        preflight_safety_eval_seed=20260730,
+        preflight_safety_eval_batches=2,
+        preflight_max_ce_increase=0.1,
     )
     first = protocol_identity(
         args,
