@@ -1114,6 +1114,63 @@ def test_mlp_residual_conditioned_output_gate_can_reuse_static_gain() -> None:
     assert mlp.residual_conditioned_output_slope.grad.abs().sum() > 0
 
 
+def test_mlp_residual_conditioned_fixed_basis_gate_matches_diagnostic() -> None:
+    from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
+        FixedBasisBilinearOutputGate,
+    )
+
+    torch.manual_seed(491)
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_residual_conditioned_output_gate=True,
+            block_fht_mlp_residual_conditioned_output_gate_fixed_basis=True,
+            block_fht_mlp_residual_conditioned_output_gate_basis_block_size=8,
+            block_fht_mlp_residual_conditioned_output_gate_basis_seed=123,
+        ),
+        layer_id=0,
+    )
+    diagnostic = FixedBasisBilinearOutputGate(
+        8,
+        basis_block_size=8,
+        seed=123,
+    )
+    assert mlp.residual_conditioned_output_slope is not None
+    assert mlp.residual_conditioned_output_bias is not None
+    with torch.no_grad():
+        mlp.residual_conditioned_output_slope.copy_(
+            torch.randn_like(mlp.residual_conditioned_output_slope)
+        )
+        mlp.residual_conditioned_output_bias.copy_(
+            torch.randn_like(mlp.residual_conditioned_output_bias)
+        )
+        diagnostic.slope.copy_(mlp.residual_conditioned_output_slope)
+        diagnostic.bias.copy_(mlp.residual_conditioned_output_bias)
+    condition = torch.randn(2, 3, 8)
+    update = torch.randn(2, 3, 8)
+    actual = mlp.apply_residual_conditioned_output_gate(condition, update)
+    expected = diagnostic(condition, update)
+    torch.testing.assert_close(actual, expected)
+    actual.square().mean().backward()
+    assert mlp.residual_conditioned_output_slope.grad is not None
+    assert mlp.residual_conditioned_output_bias.grad is not None
+
+
+def test_mlp_residual_conditioned_fixed_basis_gate_validates_block_size() -> None:
+    with pytest.raises(ValueError, match="power of two dividing n_embd"):
+        MLP(
+            GPTConfig(
+                n_embd=8,
+                n_head=1,
+                block_fht_mlp_residual_conditioned_output_gate=True,
+                block_fht_mlp_residual_conditioned_output_gate_fixed_basis=True,
+                block_fht_mlp_residual_conditioned_output_gate_basis_block_size=3,
+            ),
+            layer_id=0,
+        )
+
+
 def test_freeze_keeps_block_output_chart_trainable() -> None:
     mlp = MLP(
         GPTConfig(

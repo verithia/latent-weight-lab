@@ -138,6 +138,9 @@ class GPTConfig:
     block_fht_mlp_residual_conditioned_output_gate_scale: float = 1.0
     block_fht_mlp_residual_conditioned_output_gate_layers: tuple[int, ...] = ()
     block_fht_mlp_residual_conditioned_output_gate_bias: bool = True
+    block_fht_mlp_residual_conditioned_output_gate_fixed_basis: bool = False
+    block_fht_mlp_residual_conditioned_output_gate_basis_block_size: int = 256
+    block_fht_mlp_residual_conditioned_output_gate_basis_seed: int = 271828
     tie_word_embeddings: bool = True
 
 
@@ -1546,6 +1549,70 @@ class MLP(nn.Module):
             )
             else None
         )
+        self.residual_conditioned_output_gate_fixed_basis = bool(
+            conditioned_gate_enabled
+            and config.block_fht_mlp_residual_conditioned_output_gate_fixed_basis
+        )
+        self.residual_conditioned_output_gate_basis_block_size = int(
+            config.block_fht_mlp_residual_conditioned_output_gate_basis_block_size
+        )
+        if self.residual_conditioned_output_gate_fixed_basis:
+            basis_block_size = (
+                self.residual_conditioned_output_gate_basis_block_size
+            )
+            if (
+                basis_block_size <= 0
+                or basis_block_size & (basis_block_size - 1)
+                or config.n_embd % basis_block_size
+            ):
+                raise ValueError(
+                    "block_fht_mlp_residual_conditioned_output_gate_"
+                    "basis_block_size must be a power of two dividing n_embd"
+                )
+            generator = torch.Generator(device="cpu")
+            generator.manual_seed(
+                int(
+                    config.block_fht_mlp_residual_conditioned_output_gate_basis_seed
+                )
+                + layer_id * 64
+            )
+            permutation = torch.randperm(
+                config.n_embd,
+                generator=generator,
+                device="cpu",
+            )
+            signs = (
+                torch.randint(
+                    0,
+                    2,
+                    (config.n_embd,),
+                    generator=generator,
+                    dtype=torch.float32,
+                    device="cpu",
+                )
+                * 2.0
+                - 1.0
+            )
+            inverse_permutation = torch.argsort(permutation)
+        else:
+            permutation = None
+            inverse_permutation = None
+            signs = None
+        self.register_buffer(
+            "residual_conditioned_output_permutation",
+            permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_inverse_permutation",
+            inverse_permutation,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_signs",
+            signs,
+            persistent=True,
+        )
         # Optional non-persistent teacher state is installed by the training
         # entry point. It is neither trainable nor part of a checkpoint.
         self.register_buffer(
@@ -1902,6 +1969,10 @@ class MLP(nn.Module):
     ) -> torch.Tensor | None:
         if self.residual_conditioned_output_slope is None:
             return None
+        condition = self._residual_conditioned_output_basis(
+            condition,
+            inverse=False,
+        )
         slope = self.residual_conditioned_output_slope.to(
             dtype=condition.dtype
         )
@@ -1920,6 +1991,72 @@ class MLP(nn.Module):
                 self.residual_conditioned_output_gate_scale * modulation
             )
         return modulation
+
+    def _residual_conditioned_output_basis(
+        self,
+        values: torch.Tensor,
+        *,
+        inverse: bool,
+    ) -> torch.Tensor:
+        permutation = self.residual_conditioned_output_permutation
+        inverse_permutation = (
+            self.residual_conditioned_output_inverse_permutation
+        )
+        signs = self.residual_conditioned_output_signs
+        if permutation is None:
+            return values
+        assert inverse_permutation is not None and signs is not None
+        signs = signs.to(device=values.device, dtype=values.dtype)
+        if inverse:
+            values = values * signs
+            grouped = values.reshape(
+                *values.shape[:-1],
+                values.shape[-1]
+                // self.residual_conditioned_output_gate_basis_block_size,
+                self.residual_conditioned_output_gate_basis_block_size,
+            )
+            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            return values.index_select(-1, inverse_permutation)
+        values = values.index_select(-1, permutation)
+        grouped = values.reshape(
+            *values.shape[:-1],
+            values.shape[-1]
+            // self.residual_conditioned_output_gate_basis_block_size,
+            self.residual_conditioned_output_gate_basis_block_size,
+        )
+        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        return values * signs
+
+    def apply_residual_conditioned_output_gate(
+        self,
+        condition: torch.Tensor,
+        update: torch.Tensor,
+    ) -> torch.Tensor:
+        if condition.shape != update.shape:
+            raise ValueError(
+                "gate condition and update must be aligned, got "
+                f"{tuple(condition.shape)} and {tuple(update.shape)}"
+            )
+        modulation = self.residual_conditioned_output_modulation(condition)
+        if modulation is None:
+            return update
+        if not self.residual_conditioned_output_gate_fixed_basis:
+            return torch.addcmul(
+                update,
+                update,
+                modulation.to(dtype=update.dtype),
+            )
+        spectral_update = self._residual_conditioned_output_basis(
+            update,
+            inverse=False,
+        )
+        correction = spectral_update * modulation.to(
+            dtype=spectral_update.dtype
+        )
+        return update + self._residual_conditioned_output_basis(
+            correction,
+            inverse=True,
+        )
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:
         if self.last_postgelu is None or self.postgelu_std_target <= 0.0:
@@ -1948,12 +2085,9 @@ class Block(nn.Module):
         mlp_output = self.mlp(mlp_input)
         if self.mlp.residual_conditioned_output_slope is None:
             return x + mlp_output
-        modulation = self.mlp.residual_conditioned_output_modulation(mlp_input)
-        assert modulation is not None
-        return torch.addcmul(
-            x + mlp_output,
+        return x + self.mlp.apply_residual_conditioned_output_gate(
+            mlp_input,
             mlp_output,
-            modulation.to(dtype=mlp_output.dtype),
         )
 
 

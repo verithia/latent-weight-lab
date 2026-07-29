@@ -1038,6 +1038,20 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=True,
     )
+    parser.add_argument(
+        "--block-fht-mlp-residual-conditioned-output-gate-fixed-basis",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--block-fht-mlp-residual-conditioned-output-gate-basis-block-size",
+        type=int,
+        default=256,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-residual-conditioned-output-gate-basis-seed",
+        type=int,
+        default=271828,
+    )
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -1127,6 +1141,15 @@ def conditioned_output_gate_config_kwargs(
         ),
         "block_fht_mlp_residual_conditioned_output_gate_bias": (
             args.block_fht_mlp_residual_conditioned_output_gate_bias
+        ),
+        "block_fht_mlp_residual_conditioned_output_gate_fixed_basis": (
+            args.block_fht_mlp_residual_conditioned_output_gate_fixed_basis
+        ),
+        "block_fht_mlp_residual_conditioned_output_gate_basis_block_size": (
+            args.block_fht_mlp_residual_conditioned_output_gate_basis_block_size
+        ),
+        "block_fht_mlp_residual_conditioned_output_gate_basis_seed": (
+            args.block_fht_mlp_residual_conditioned_output_gate_basis_seed
         ),
     }
 
