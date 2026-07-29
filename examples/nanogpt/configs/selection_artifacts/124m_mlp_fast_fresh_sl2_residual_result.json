@@ -1,0 +1,202 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_sl2_residual_result_v1",
+  "recorded_at": "2026-07-30",
+  "decision": "REJECT_SPARSE_TRACEFREE_PAIR_BLOCKS",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_sl2_residual_plan.json",
+    "sha256": "ba705d51cc57194a2569511f85a4efc0d74252735d58e64f1f941cde88d9eaa6",
+    "commit": "997a6c22c20421dfef5ad98c3f8f41597fe7fc3e"
+  },
+  "implementation": {
+    "commit": "b524eaf34728b68b6f46caa357085079164aad5f",
+    "entrypoint": "examples/nanogpt/analyze_mlp_fast_fresh_sl2_residual.py",
+    "entrypoint_sha256": "8954c3f69c552328c155bdbaae5f2a290b7bc192e425735ba7f0208e440a9816",
+    "shared_runner_sha256": "addc42fd8f33d1a4b73cfb3cc021aad1c8f83868904309247d46210325fbf7fc",
+    "focused_test_sha256": "e4186736c9d3a81829d4313da482e205ff97afe7a59a1dfcd82a9e3b63c0d56a",
+    "local_focused_tests": "18/18 passed in both project-owned Python environments",
+    "remote_focused_tests": "18/18 passed at the exact execution commit"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "wall_seconds": 15.829931735992432,
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_fast_fresh_sl2_residual",
+      "--snapshot-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/parameter_trajectory",
+      "--probe-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/optimizer_probe",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_sl2_residual_v1",
+      "--plan",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_sl2_residual_plan.json",
+      "--native-cache",
+      "/root/userdata/MappingNetworks/outputs/native_cache",
+      "--neighbors",
+      "128",
+      "--device",
+      "cuda"
+    ],
+    "environment": {
+      "CUDA_VISIBLE_DEVICES": "1",
+      "MAPPING_NETWORKS_NATIVE_CACHE": "/root/userdata/MappingNetworks/outputs/native_cache"
+    },
+    "long_985m_job_disturbed": false,
+    "workspace_after_gib": 239
+  },
+  "inputs": {
+    "coherent_dense_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "base_updates": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "future_updates": [
+      15,
+      75,
+      135,
+      195
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "validation_windows": {
+      "fit_seed": 20260802,
+      "holdout_seed": 20260803,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4
+    }
+  },
+  "registered_comparisons": {
+    "sl2_8_vs_equal_coordinate_hidden88": {
+      "current_output_positive_line_ratio": 0.9532926752687828,
+      "fit_validation_gradient_ce_decrease_ratio": 0.979359386547733,
+      "holdout_validation_gradient_ce_decrease_ratio": 0.9794507898566547,
+      "future_residual_recovery_ratio": 0.43674681474410015,
+      "finite_ce_wins": "2/8",
+      "passed": false
+    },
+    "sl2_16_vs_equal_coordinate_hidden112": {
+      "current_output_positive_line_ratio": 0.943858582244049,
+      "fit_validation_gradient_ce_decrease_ratio": 0.945735312010197,
+      "holdout_validation_gradient_ce_decrease_ratio": 0.942200092944369,
+      "future_residual_recovery_ratio": 0.4777863266788,
+      "finite_ce_wins": "1/8",
+      "passed": false
+    },
+    "sl2_8_vs_same_topology_skew": {
+      "current_output_positive_line_ratio": 1.0799155848696598,
+      "fit_validation_gradient_ce_decrease_ratio": 1.1120799857913843,
+      "holdout_validation_gradient_ce_decrease_ratio": 1.1239225734254308,
+      "future_residual_recovery_ratio": 2.264362225817414,
+      "finite_ce_wins": "8/8",
+      "attribution_gate_passed": true
+    },
+    "sl2_16_vs_same_topology_skew": {
+      "current_output_positive_line_ratio": 1.1180231533226896,
+      "fit_validation_gradient_ce_decrease_ratio": 1.17926768824611,
+      "holdout_validation_gradient_ce_decrease_ratio": 1.1893018773159045,
+      "future_residual_recovery_ratio": 2.1063632026624712,
+      "finite_ce_wins": "7/8",
+      "attribution_gate_passed": true
+    }
+  },
+  "candidate_metrics": {
+    "fresh_hidden64": {
+      "current_weight_recovery": 0.20094678221248502,
+      "current_output_positive_line_recovery": 0.46195980497700595,
+      "future_residual_positive_line_recovery": 0.0,
+      "fit_validation_gradient_predicted_ce_decrease": 0.004793916725113211,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.0049702318529200595
+    },
+    "fresh_hidden88": {
+      "current_weight_recovery": 0.278097324617149,
+      "current_output_positive_line_recovery": 0.5466749832433432,
+      "future_residual_positive_line_recovery": 0.01605481345301387,
+      "fit_validation_gradient_predicted_ce_decrease": 0.00567195870162763,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.005951343172011717
+    },
+    "fresh_hidden112": {
+      "current_weight_recovery": 0.32158332488036107,
+      "current_output_positive_line_recovery": 0.5917738144514006,
+      "future_residual_positive_line_recovery": 0.025155711273951258,
+      "fit_validation_gradient_predicted_ce_decrease": 0.006443471252322782,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.0067452643040107774
+    },
+    "fresh_hidden64_plus_sl2_8": {
+      "current_weight_recovery": 0.2499195404302079,
+      "current_output_positive_line_recovery": 0.5211412572785636,
+      "future_residual_positive_line_recovery": 0.007011888636914536,
+      "fit_validation_gradient_predicted_ce_decrease": 0.005554885994550111,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.0058290477705348846
+    },
+    "fresh_hidden64_plus_sl2_16": {
+      "current_weight_recovery": 0.28376785038680696,
+      "current_output_positive_line_recovery": 0.5585507935172519,
+      "future_residual_positive_line_recovery": 0.012019054884573648,
+      "fit_validation_gradient_predicted_ce_decrease": 0.0060938182952442205,
+      "holdout_validation_gradient_predicted_ce_decrease": 0.006355388654173289
+    }
+  },
+  "mechanism": {
+    "full_sl2_8_requested_residual_recovery": 0.06178090265138218,
+    "full_sl2_16_requested_residual_recovery": 0.10493276465363491,
+    "skew_8_requested_residual_recovery": 0.01947185075945051,
+    "skew_16_requested_residual_recovery": 0.0366117603481687,
+    "nonorthogonal_8_requested_residual_recovery": 0.043225963931786196,
+    "nonorthogonal_16_requested_residual_recovery": 0.07204272574049375,
+    "full_sl2_8_coordinate_rms": {
+      "rotation": 0.0001858532863499373,
+      "symmetric_shear": 0.00027171252488432894,
+      "anisotropic_scale": 0.00006107083363437329
+    },
+    "full_sl2_16_coordinate_rms": {
+      "rotation": 0.00017753072400613937,
+      "symmetric_shear": 0.00024806675924462834,
+      "anisotropic_scale": 0.00004386224634208885
+    },
+    "minimum_block_determinant": 0.9999998868519369,
+    "maximum_block_determinant_error": 1.1477361461231794e-7,
+    "maximum_block_condition_number": 1.0027780493211012
+  },
+  "artifacts": {
+    "output_root": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/fast_fresh_sl2_residual_v1",
+    "detail_sha256": "9697cd88ba4d48add306cab928f6102fe8b4310863348f3399bf04e70508d859",
+    "aggregate_sha256": "935ddd013a452160e0c2f4b6147e3cd820d9cf5ee020df4b8b573174c957b229",
+    "finite_ce_sha256": "8a310d1ce7a7192170fc9b177e0f3522a82295a81a2ee66d65fa8d562f3e766c",
+    "selections_sha256": "1331446dc8a19fda301acac35b6c1e8340ed5d229db3730c4a1316606a537e70",
+    "metadata_sha256": "17a68f00f2867af7faebd4f4a6ffbb0db67e25c8be9c3a721ac71fc4249a6f8f",
+    "foreground_log_sha256": "764707e1390270beff6bd9736b41dcc43d0dd0184797f8ed0ffd6a2527521336"
+  },
+  "interpretation": [
+    "Symmetric shear and paired anisotropic scale are causal within a fixed task-selected topology: full SL2 consistently beats the same-topology skew-only ablation.",
+    "That benefit is not coordinate-efficient. Spending the same coordinates on more fresh task-selected Givens pairs gives higher current output recovery, both validation-gradient metrics, much higher short-future recovery, and almost all finite-CE wins.",
+    "The remaining c_proj deficit is therefore not a missing local non-orthogonal pair degree of freedom. Pair coverage and moving task-aligned orientation remain more valuable than enriching each selected pair.",
+    "Fresh hidden88/112 control improvements are descriptive because this experiment did not preregister them for promotion. Any next capacity gate must use unscored held-out phase/layer cells rather than retroactively weakening or redefining this decision."
+  ],
+  "authorization": {
+    "language_model_training_authorized": false,
+    "mfu_preflight_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Use previously unscored cadence-15 base/future phases and held-out layers to preregister a two-pass fresh hidden112 capacity gate. Require generalization and coordinate-normalized advantage before implementing a production optimizer path."
+  }
+}
