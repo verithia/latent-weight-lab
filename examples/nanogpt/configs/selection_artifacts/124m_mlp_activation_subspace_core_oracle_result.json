@@ -1,0 +1,39 @@
+{
+  "analysis_commit": "c92b1bc844ac745031a0483ae4bf8274498d6cfb",
+  "analysis_entrypoint_sha256": "f9326412bd7aa9a5b1fe7d48297ca972c825546fe54616b65a31f876f464bd22",
+  "decision": "REJECT_FIXED_ACTIVATION_SUBSPACE_CORE",
+  "failed_administrative_attempt": {
+    "classification": "rank-256 CUDA PCA basis exceeded the strict orthogonality tolerance; no result produced",
+    "output_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/activation_subspace_core_oracle_v1",
+    "resolution_commit": "c92b1bc844ac745031a0483ae4bf8274498d6cfb"
+  },
+  "outputs": {
+    "aggregate_sha256": "62e12bdf798dca87521086c791c6b31aec8058f8b4dc40beab8d224e877486bc",
+    "analysis_log_sha256": "9c0d7c28edaed6f2014ee8a541cb53a7b3000bc49c8c26b5b440aa6602ee4841",
+    "basis_sha256": "a8ea88a361473d729e200d426e2006df90a2bb4d97975ef0bd6f221907afb097",
+    "detail_sha256": "8ed6cadb9330b010271e59de2f1f751f10ab74858f6b29e28c451bad34c53e09",
+    "metadata_sha256": "97a39ae0670d7f477754c718342a857b2e6bf4a8083c9e5771b51ea375033b02",
+    "remote_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/activation_subspace_core_oracle_v2"
+  },
+  "rank256": {
+    "basis_storage_fraction_of_cproj": 0.3333333333333333,
+    "fit": {
+      "minimum_cell_recovery": 0.020530266293970367,
+      "orthogonal_core_recovery": 0.037469236986631786,
+      "projection_upper_recovery": 0.2462489213218649,
+      "recovery_over_random_givens32": 1.8225802115303418,
+      "unconstrained_core_recovery": 0.08851639784668372
+    },
+    "holdout": {
+      "minimum_cell_recovery": 0.02036638374930866,
+      "orthogonal_core_recovery": 0.037392114719069135,
+      "projection_upper_recovery": 0.2470664707096363,
+      "recovery_over_random_givens32": 1.8188288269270687,
+      "unconstrained_core_recovery": 0.08899739441336277
+    },
+    "orthogonal_core_coordinates_per_layer": 32640,
+    "orthogonal_core_trainable_fraction_of_cproj": 0.013834635416666666
+  },
+  "scientific_conclusion": "A fixed step-0 post-GELU activation subspace contains useful update energy, but the trained c_proj path is not primarily an orthogonal rotation within that subspace. Even rank 256 realizes only about 15% of the projection upper bound and misses the registered promotion threshold in both disjoint activation windows. The next valid test is transport of a moving activation frame through its orthogonal complement, not a larger static core.",
+  "schema_version": "nanogpt_mlp_activation_subspace_core_oracle_result_v1"
+}
