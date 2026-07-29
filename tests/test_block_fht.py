@@ -139,6 +139,48 @@ def test_product_fht_weight_space_muon_projects_finite_factor_gradients():
     assert torch.isfinite(layer.product_output_log_gain.grad).all()
 
 
+def test_product_fht_normalized_pullback_matches_materialized_step_norm():
+    torch.manual_seed(17)
+    layer = ProductFHTLinear(
+        8,
+        4,
+        factors=2,
+        seed=103,
+        weight_std=0.04,
+        weight_space_muon=True,
+        natural_gradient=True,
+        pullback_normalize=True,
+        pullback_max_coordinate_update=10.0,
+        pullback_probe=True,
+    )
+    learning_rate = 1e-3
+    layer.set_factor_learning_rate(learning_rate)
+    layer.materialize_weight_cache()
+    layer(torch.randn(3, 8)).square().mean().backward()
+    layer.flush_weight_cache_to_factor_grad()
+    assert layer._last_pullback_diagnostics is not None
+    assert (
+        layer._last_pullback_diagnostics[
+            "effective_jvp_to_target_norm_ratio"
+        ]
+        == pytest.approx(1.0, rel=1e-5)
+    )
+    optimizer = torch.optim.SGD(
+        [
+            layer.product_log_diagonals,
+            layer.product_output_log_gain,
+        ],
+        lr=learning_rate,
+    )
+    optimizer.step()
+    diagnostics = layer.finalize_pullback_probe()
+    assert diagnostics is not None
+    assert diagnostics["actual_to_target_update_norm_ratio"] == (
+        pytest.approx(1.0, rel=0.02)
+    )
+    assert diagnostics["actual_target_update_cosine"] > 0.0
+
+
 def test_product_fht_cproj_is_target_selective_and_sgd_owned():
     model = GPT(
         GPTConfig(
@@ -151,6 +193,7 @@ def test_product_fht_cproj_is_target_selective_and_sgd_owned():
             block_fht_targets=("attn.c_proj", "mlp.c_proj"),
             block_fht_latent_ratio=1.0,
             block_fht_cproj_product_fht_factors=2,
+            block_fht_cproj_product_fht_pullback_normalize=True,
         )
     )
     attention = model.transformer.h[0].attn.c_proj
@@ -184,6 +227,10 @@ def test_product_fht_cproj_is_target_selective_and_sgd_owned():
         for group in owners[0].param_groups
         for parameter in group["params"]
     } == factor_ids
+    clipped_ids = {
+        id(parameter) for parameter in model.product_fht_clip_parameters()
+    }
+    assert clipped_ids.isdisjoint(factor_ids)
 
 
 def test_backward_cpu():

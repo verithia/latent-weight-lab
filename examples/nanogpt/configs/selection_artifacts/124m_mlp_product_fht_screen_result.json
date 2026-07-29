@@ -1,0 +1,104 @@
+{
+  "schema_version": "mai_124m_mlp_product_fht_screen_result_v1",
+  "recorded_at": "2026-07-29",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_screen_plan.json",
+  "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_0p5tpp_lr24e4.json",
+  "scientific_question": "Can a nonlinear product of fixed global signed-FHT mixers and learned channel diagonals supply a useful moving c_proj tangent when the exact materialized gradient is Muon-polarized before VJP?",
+  "execution": {
+    "run_name": "y400_mai_v3_124m_cproj_productfht6_wsmuon_0p5tpp_direct",
+    "host": "Y400",
+    "gpu": 1,
+    "training_commit": "0e936fbde670405a8e8022dd704d1499c9b977f8",
+    "monitoring": "foreground launch followed by direct polling; no watchdog, callback, queue heartbeat, or PRO6 execution",
+    "status": "clean",
+    "exit_code": 0,
+    "max_iters": 238,
+    "terminal_train_loss": 5.8044,
+    "terminal_validation_loss": 5.809,
+    "fixed_evaluations": {
+      "0": {
+        "train_loss": 10.9922,
+        "validation_loss": 10.9933
+      },
+      "60": {
+        "train_loss": 6.6657,
+        "validation_loss": 6.6773
+      },
+      "120": {
+        "train_loss": 6.0682,
+        "validation_loss": 6.0752
+      },
+      "180": {
+        "train_loss": 5.8727,
+        "validation_loss": 5.8773
+      },
+      "238": {
+        "train_loss": 5.8044,
+        "validation_loss": 5.809
+      }
+    }
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction": 0.254221,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 224152,
+    "seconds_per_update": 1.1695,
+    "peak_memory_mib": 31478.29,
+    "empirical_h100_bf16_gemm_peak_tflops": 658.518,
+    "nominal_model_tflops": 167.409,
+    "prepare_ms": 58.41,
+    "forward_backward_ms": 880.65,
+    "pullback_flush_ms": 216.03,
+    "optimizer_ms": 8.06,
+    "certificate_sha256": "d6b8e3377ecaaad07115711751cabdab0d68f0503ca19a701f5e9ba48b1f4d72"
+  },
+  "decision": {
+    "classification": "REJECT_CURRENT_PULLBACK_SCALING_NOT_PRODUCT_CHART_CAPACITY",
+    "registered_endpoint_rule_passed": false,
+    "attention_only_validation_loss": 5.4918,
+    "fixed_tangent_cproj_validation_loss": 5.7395,
+    "candidate_minus_attention_only": 0.3172,
+    "candidate_minus_fixed_tangent": 0.0695,
+    "interpretation": [
+      "The candidate regressed versus the fixed-tangent c_proj control and therefore fails its registered endpoint rule.",
+      "Endpoint diagnosis shows the generated c_proj moved only 0.2315 percent from initialization, versus 49.25 percent for the matched dense-Muon trajectory.",
+      "The product spectrum was numerically unchanged from initialization, so this run did not meaningfully test whether a moving product tangent can fit the MLP trajectory.",
+      "The immediate failure is pullback scale: exact VJP plus approximate diagonal metric, global clipping, and plain SGD under-scaled materialized motion by roughly two orders of magnitude.",
+      "Do not launch another 238-step screen until a real-batch one-step probe verifies the exact JVP and actual materialized update against the intended dense-Muon polar step."
+    ],
+    "next_gate": "exact per-layer JVP-normalized pullback with a finite coordinate trust cap; exclude normalized product factors from the unrelated global clip; require a directly polled real-batch calibration showing materialized update norm near the registered target and positive direction cosine"
+  },
+  "endpoint_diagnosis": {
+    "analysis_commit": "72e860b",
+    "product_relative_displacement_mean": 0.00231545,
+    "dense_relative_displacement_mean": 0.492487,
+    "factor_log_diagonal_std_mean": 0.00023643,
+    "factor_log_diagonal_max_abs": 0.0032458,
+    "product_dense_delta_cosine_mean": -0.0000461,
+    "product_initial_stable_rank_mean": 579.434,
+    "product_final_stable_rank_mean": 579.429,
+    "product_initial_effective_rank_mean": 742.775,
+    "product_final_effective_rank_mean": 742.775,
+    "product_initial_top64_energy_fraction_mean": 0.1093678,
+    "product_final_top64_energy_fraction_mean": 0.1093679,
+    "product_initial_condition_number_mean": 1.75765,
+    "product_final_condition_number_mean": 1.75765,
+    "dense_final_stable_rank_mean": 335.91,
+    "dense_final_effective_rank_mean": 674.9,
+    "dense_final_top64_energy_fraction_mean": 0.16756,
+    "dense_final_condition_number_mean": 3.025,
+    "diagnosis_sha256": "eb7fcf48407b4c86627f9b83a65b5af75938fbc599b0c02fbeeb485efef85ddd"
+  },
+  "immutable_artifacts": {
+    "candidate_config_sha256": "b49880d641334c0e8bf02504a3cf283c35fcc0f8d24389c8e36d0d90de7bb645",
+    "plan_sha256": "9bbb99002643a49f5345738204c14ed9d8bddc6a25b1a69d5046930a1581ef19",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "c2949ae98abd7bdbf54e1df1572b729d4956391147fbbae34e1482d5884126ae",
+    "status_sha256": "759b2ba70b1816f4fbd2d92458b7e1a531428cd4ac2b255c513ac4eb45e4dceb",
+    "log_sha256": "a79e52fe59e0deb1d269cf0830c1cf50b6016cf2df558f5894e14696012f9357",
+    "checkpoint_sha256": "5bb5318977cf89876c409eaa2b4aef6b600f1b88084aa0d957922d2a406008ff",
+    "checkpoint_metadata_sha256": "388794dc9e4a91a57199a1ebf713b1274ddaa453ad8293533404c420e91f9691"
+  }
+}

@@ -119,6 +119,9 @@ class GPTConfig:
     block_fht_cproj_product_fht_diagonal_scale: float = 1.0
     block_fht_cproj_product_fht_weight_space_muon: bool = True
     block_fht_cproj_product_fht_natural_gradient: bool = True
+    block_fht_cproj_product_fht_pullback_normalize: bool = False
+    block_fht_cproj_product_fht_pullback_max_coordinate_update: float = 0.02
+    block_fht_cproj_product_fht_pullback_probe: bool = False
     block_fht_cproj_product_fht_muon_momentum: float = 0.95
     block_fht_cproj_product_fht_muon_ns_steps: int = 5
     block_fht_ffn_postgelu_std_target: float = 0.0
@@ -745,6 +748,18 @@ def make_linear(
                 natural_gradient=(
                     config
                     .block_fht_cproj_product_fht_natural_gradient
+                ),
+                pullback_normalize=(
+                    config
+                    .block_fht_cproj_product_fht_pullback_normalize
+                ),
+                pullback_max_coordinate_update=(
+                    config
+                    .block_fht_cproj_product_fht_pullback_max_coordinate_update
+                ),
+                pullback_probe=(
+                    config
+                    .block_fht_cproj_product_fht_pullback_probe
                 ),
             )
         if config.block_fht_weight_scale is not None:
@@ -3337,6 +3352,45 @@ class GPT(nn.Module):
             block.mlp.flush_charted_cfc_cache()
             block.mlp.flush_charted_cproj_cache()
         flush_block_fht_weight_cache(self)
+
+    def set_product_fht_factor_learning_rate(
+        self, learning_rate: float
+    ) -> None:
+        for module in self.modules():
+            if isinstance(module, ProductFHTLinear):
+                module.set_factor_learning_rate(learning_rate)
+
+    def product_fht_clip_parameters(self) -> list[torch.Tensor]:
+        excluded = {
+            id(parameter)
+            for module in self.modules()
+            if (
+                isinstance(module, ProductFHTLinear)
+                and module.pullback_normalize
+            )
+            for parameter in (
+                module.product_log_diagonals,
+                module.product_output_log_gain,
+            )
+        }
+        return [
+            parameter
+            for parameter in self.parameters()
+            if id(parameter) not in excluded
+        ]
+
+    def finalize_product_fht_pullback_probes(
+        self,
+    ) -> list[dict[str, float]]:
+        diagnostics = []
+        for layer, block in enumerate(self.transformer.h):
+            module = block.mlp.c_proj
+            if not isinstance(module, ProductFHTLinear):
+                continue
+            row = module.finalize_pullback_probe()
+            if row is not None:
+                diagnostics.append({"layer": layer, **row})
+        return diagnostics
 
     def suspend_block_fht_cache(self):
         charted = [

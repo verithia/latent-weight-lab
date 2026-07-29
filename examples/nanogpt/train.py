@@ -995,6 +995,25 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=True,
     )
+    parser.add_argument(
+        "--block-fht-cproj-product-fht-pullback-normalize",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-cproj-product-fht-pullback-max-coordinate-update",
+        type=float,
+        default=0.02,
+    )
+    parser.add_argument(
+        "--block-fht-cproj-product-fht-pullback-probe",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-cproj-product-fht-pullback-probe-output",
+        default=None,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -1437,6 +1456,16 @@ def main() -> None:
         block_fht_cproj_product_fht_diagonal_scale=args.block_fht_cproj_product_fht_diagonal_scale,
         block_fht_cproj_product_fht_weight_space_muon=args.block_fht_cproj_product_fht_weight_space_muon,
         block_fht_cproj_product_fht_natural_gradient=args.block_fht_cproj_product_fht_natural_gradient,
+        block_fht_cproj_product_fht_pullback_normalize=(
+            args.block_fht_cproj_product_fht_pullback_normalize
+        ),
+        block_fht_cproj_product_fht_pullback_max_coordinate_update=(
+            args
+            .block_fht_cproj_product_fht_pullback_max_coordinate_update
+        ),
+        block_fht_cproj_product_fht_pullback_probe=(
+            args.block_fht_cproj_product_fht_pullback_probe
+        ),
         block_fht_cproj_product_fht_muon_momentum=args.muon_momentum,
         block_fht_cproj_product_fht_muon_ns_steps=args.muon_ns_steps,
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
@@ -1650,6 +1679,7 @@ def main() -> None:
         checkpoint_succeeded_this_iteration = False
         lr = cosine_lr(iter_num, args)
         apply_scheduled_lr(optimizer, lr)
+        raw_model.set_product_fht_factor_learning_rate(lr)
         # The final post-update iteration must be evaluated even when it falls
         # between periodic intervals; the OR avoids a duplicate at a boundary.
         if iter_num % args.eval_interval == 0 or iter_num == args.max_iters:
@@ -1836,9 +1866,54 @@ def main() -> None:
                 flush=True,
             )
         section_start = perf_now() if args.perf_profile else 0.0
+        pullback_probe_context = None
         if args.grad_clip != 0:
             scaler.unscale_(optimizer)
-            torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_clip)
+        if (
+            args.block_fht_cproj_product_fht_pullback_probe_output
+            and args.block_fht_cproj_product_fht_pullback_probe
+        ):
+            all_gradient_square_sum = sum(
+                (
+                    parameter.grad.detach().float().square().sum()
+                    for parameter in raw_model.parameters()
+                    if parameter.grad is not None
+                ),
+                torch.zeros((), device=args.device),
+            )
+            clip_gradient_square_sum = sum(
+                (
+                    parameter.grad.detach().float().square().sum()
+                    for parameter in raw_model.product_fht_clip_parameters()
+                    if parameter.grad is not None
+                ),
+                torch.zeros((), device=args.device),
+            )
+            pullback_probe_context = {
+                "all_parameter_gradient_norm_before_clip": float(
+                    all_gradient_square_sum.sqrt()
+                ),
+                "non_product_gradient_norm_before_clip": float(
+                    clip_gradient_square_sum.sqrt()
+                ),
+            }
+        if args.grad_clip != 0:
+            clipped_gradient_norm = torch.nn.utils.clip_grad_norm_(
+                raw_model.product_fht_clip_parameters(),
+                args.grad_clip,
+            )
+            if pullback_probe_context is not None:
+                pullback_probe_context["clip_threshold"] = float(
+                    args.grad_clip
+                )
+                pullback_probe_context[
+                    "non_product_gradient_norm_reported_by_clip"
+                ] = float(clipped_gradient_norm)
+                pullback_probe_context["non_product_clip_scale"] = min(
+                    1.0,
+                    float(args.grad_clip)
+                    / max(float(clipped_gradient_norm), 1e-30),
+                )
         if args.block_fht_latent_grad_normalize:
             for latent in block_fht_latents(raw_model):
                 if latent.grad is None:
@@ -1870,6 +1945,44 @@ def main() -> None:
             section_start = perf_now()
         scaler.step(optimizer)
         scaler.update()
+        pullback_probe_rows = (
+            raw_model.finalize_product_fht_pullback_probes()
+        )
+        if (
+            pullback_probe_rows
+            and args.block_fht_cproj_product_fht_pullback_probe_output
+        ):
+            pullback_probe_path = Path(
+                args.block_fht_cproj_product_fht_pullback_probe_output
+            )
+            pullback_probe_path.parent.mkdir(parents=True, exist_ok=True)
+            pullback_probe_payload = {
+                "schema_version": (
+                    "product_fht_real_batch_pullback_probe_v1"
+                ),
+                "iteration": iter_num,
+                "scheduled_learning_rate": lr,
+                "global_gradient_context": pullback_probe_context,
+                "layers": pullback_probe_rows,
+            }
+            temporary_probe_path = pullback_probe_path.with_suffix(
+                pullback_probe_path.suffix + ".part"
+            )
+            temporary_probe_path.write_text(
+                json.dumps(
+                    pullback_probe_payload,
+                    indent=2,
+                    sort_keys=True,
+                    allow_nan=False,
+                )
+                + "\n"
+            )
+            temporary_probe_path.replace(pullback_probe_path)
+            print(
+                "product-FHT pullback probe "
+                f"path={pullback_probe_path}",
+                flush=True,
+            )
         optimizer.zero_grad(set_to_none=True)
         if args.perf_profile:
             optimizer_ms += (perf_now() - section_start) * 1000.0

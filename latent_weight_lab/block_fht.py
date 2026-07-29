@@ -1087,6 +1087,9 @@ class ProductFHTLinear(nn.Module):
         muon_momentum: float = 0.95,
         muon_ns_steps: int = 5,
         natural_gradient: bool = True,
+        pullback_normalize: bool = False,
+        pullback_max_coordinate_update: float = 0.02,
+        pullback_probe: bool = False,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -1099,6 +1102,11 @@ class ProductFHTLinear(nn.Module):
         self.muon_momentum = float(muon_momentum)
         self.muon_ns_steps = int(muon_ns_steps)
         self.natural_gradient = bool(natural_gradient)
+        self.pullback_normalize = bool(pullback_normalize)
+        self.pullback_max_coordinate_update = float(
+            pullback_max_coordinate_update
+        )
+        self.pullback_probe = bool(pullback_probe)
         if min(self.in_features, self.out_features, self.factors) <= 0:
             raise ValueError("product-FHT dimensions and factors must be positive")
         if not math.isfinite(self.weight_std) or self.weight_std <= 0.0:
@@ -1111,6 +1119,14 @@ class ProductFHTLinear(nn.Module):
             raise ValueError("product-FHT Muon momentum must be in [0, 1)")
         if self.muon_ns_steps <= 0:
             raise ValueError("product-FHT Muon steps must be positive")
+        if (
+            not math.isfinite(self.pullback_max_coordinate_update)
+            or self.pullback_max_coordinate_update <= 0.0
+        ):
+            raise ValueError(
+                "product-FHT pullback coordinate update cap must be "
+                "positive and finite"
+            )
 
         self.padded_features = next_power_of_two(
             max(self.in_features, self.out_features)
@@ -1148,6 +1164,10 @@ class ProductFHTLinear(nn.Module):
             nn.Parameter(torch.zeros(self.out_features)) if bias else None
         )
         self._cached_weight: torch.Tensor | None = None
+        self._factor_learning_rate = 0.0
+        self._last_pullback_diagnostics: dict[str, float] | None = None
+        self._probe_pre_step_weight: torch.Tensor | None = None
+        self._probe_target_direction: torch.Tensor | None = None
 
     @property
     def trainable_scalar_count(self) -> int:
@@ -1157,9 +1177,13 @@ class ProductFHTLinear(nn.Module):
             + (0 if self.bias is None else self.bias.numel())
         )
 
-    def _live_weight(self) -> torch.Tensor:
-        dtype = self.product_log_diagonals.dtype
-        device = self.product_log_diagonals.device
+    def _weight_from_factors(
+        self,
+        log_diagonals: torch.Tensor,
+        output_log_gain: torch.Tensor,
+    ) -> torch.Tensor:
+        dtype = log_diagonals.dtype
+        device = log_diagonals.device
         matrix = torch.eye(
             self.out_features,
             self.padded_features,
@@ -1171,18 +1195,32 @@ class ProductFHTLinear(nn.Module):
             matrix = normalized_fht_last_dim(matrix * signs[factor])
             diagonal = torch.exp(
                 self.diagonal_scale
-                * self.product_log_diagonals[factor].clamp(-6.0, 6.0)
+                * log_diagonals[factor].clamp(-6.0, 6.0)
             )
             matrix = matrix * diagonal
         scale = self.weight_std * math.sqrt(self.padded_features)
         output_gain = torch.exp(
-            self.product_output_log_gain.clamp(-6.0, 6.0)
+            output_log_gain.clamp(-6.0, 6.0)
         )
         return (
             scale
             * output_gain.view(-1, 1)
             * matrix[:, : self.in_features]
         )
+
+    def _live_weight(self) -> torch.Tensor:
+        return self._weight_from_factors(
+            self.product_log_diagonals,
+            self.product_output_log_gain,
+        )
+
+    def set_factor_learning_rate(self, learning_rate: float) -> None:
+        learning_rate = float(learning_rate)
+        if not math.isfinite(learning_rate) or learning_rate <= 0.0:
+            raise ValueError(
+                "product-FHT factor learning rate must be positive and finite"
+            )
+        self._factor_learning_rate = learning_rate
 
     @property
     def weight(self) -> torch.Tensor:
@@ -1262,6 +1300,102 @@ class ProductFHTLinear(nn.Module):
                     live_weight.detach().float().square().sum(dim=1)
                 ).clamp_min(1e-12)
                 output_gain_grad = output_gain_grad / row_metric
+            raw_jvp = None
+            normalization_scale = 1.0
+            coordinate_cap_scale = 1.0
+            if self.pullback_normalize:
+                if self._factor_learning_rate <= 0.0:
+                    raise RuntimeError(
+                        "set the product-FHT factor learning rate before "
+                        "flushing a normalized pullback"
+                    )
+                _, raw_jvp = torch.autograd.functional.jvp(
+                    self._weight_from_factors,
+                    (
+                        self.product_log_diagonals.detach(),
+                        self.product_output_log_gain.detach(),
+                    ),
+                    (
+                        diagonal_grad.detach(),
+                        output_gain_grad.detach(),
+                    ),
+                    create_graph=False,
+                    strict=True,
+                )
+                direction_norm = direction.float().norm().clamp_min(1e-30)
+                raw_jvp_norm = raw_jvp.float().norm().clamp_min(1e-30)
+                normalization_scale = float(direction_norm / raw_jvp_norm)
+                diagonal_grad = diagonal_grad * normalization_scale
+                output_gain_grad = output_gain_grad * normalization_scale
+                largest_coordinate_update = self._factor_learning_rate * max(
+                    float(diagonal_grad.detach().abs().max()),
+                    float(output_gain_grad.detach().abs().max()),
+                )
+                if (
+                    largest_coordinate_update
+                    > self.pullback_max_coordinate_update
+                ):
+                    coordinate_cap_scale = (
+                        self.pullback_max_coordinate_update
+                        / largest_coordinate_update
+                    )
+                    diagonal_grad = diagonal_grad * coordinate_cap_scale
+                    output_gain_grad = (
+                        output_gain_grad * coordinate_cap_scale
+                    )
+            if raw_jvp is not None:
+                direction_float = direction.detach().float()
+                raw_jvp_float = raw_jvp.detach().float()
+                effective_scale = (
+                    normalization_scale * coordinate_cap_scale
+                )
+                effective_jvp = raw_jvp_float * effective_scale
+                self._last_pullback_diagnostics = {
+                    "target_direction_norm": float(direction_float.norm()),
+                    "raw_jvp_norm": float(raw_jvp_float.norm()),
+                    "raw_jvp_to_target_norm_ratio": float(
+                        raw_jvp_float.norm()
+                        / direction_float.norm().clamp_min(1e-30)
+                    ),
+                    "raw_jvp_target_cosine": float(
+                        torch.sum(raw_jvp_float * direction_float)
+                        / (
+                            raw_jvp_float.norm()
+                            * direction_float.norm()
+                        ).clamp_min(1e-30)
+                    ),
+                    "normalization_scale": normalization_scale,
+                    "coordinate_cap_scale": coordinate_cap_scale,
+                    "effective_jvp_to_target_norm_ratio": float(
+                        effective_jvp.norm()
+                        / direction_float.norm().clamp_min(1e-30)
+                    ),
+                    "factor_gradient_norm": float(
+                        torch.sqrt(
+                            diagonal_grad.detach().float().square().sum()
+                            + output_gain_grad.detach().float().square().sum()
+                        )
+                    ),
+                    "maximum_coordinate_update": (
+                        self._factor_learning_rate
+                        * max(
+                            float(
+                                diagonal_grad.detach().abs().max()
+                            ),
+                            float(
+                                output_gain_grad.detach().abs().max()
+                            ),
+                        )
+                    ),
+                    "factor_learning_rate": self._factor_learning_rate,
+                }
+                if self.pullback_probe:
+                    self._probe_pre_step_weight = (
+                        live_weight.detach().float().clone()
+                    )
+                    self._probe_target_direction = (
+                        direction_float.clone()
+                    )
             if self.product_log_diagonals.grad is None:
                 self.product_log_diagonals.grad = diagonal_grad
             else:
@@ -1271,6 +1405,48 @@ class ProductFHTLinear(nn.Module):
             else:
                 self.product_output_log_gain.grad.add_(output_gain_grad)
         self._cached_weight = None
+
+    def finalize_pullback_probe(self) -> dict[str, float] | None:
+        if (
+            self._last_pullback_diagnostics is None
+            or self._probe_pre_step_weight is None
+            or self._probe_target_direction is None
+        ):
+            return None
+        with torch.no_grad():
+            actual_delta = (
+                self._live_weight().detach().float()
+                - self._probe_pre_step_weight
+            )
+            target_delta = (
+                -self._factor_learning_rate
+                * self._probe_target_direction
+            )
+            diagnostics = dict(self._last_pullback_diagnostics)
+            diagnostics.update(
+                {
+                    "actual_weight_update_norm": float(
+                        actual_delta.norm()
+                    ),
+                    "target_weight_update_norm": float(
+                        target_delta.norm()
+                    ),
+                    "actual_to_target_update_norm_ratio": float(
+                        actual_delta.norm()
+                        / target_delta.norm().clamp_min(1e-30)
+                    ),
+                    "actual_target_update_cosine": float(
+                        torch.sum(actual_delta * target_delta)
+                        / (
+                            actual_delta.norm() * target_delta.norm()
+                        ).clamp_min(1e-30)
+                    ),
+                }
+            )
+        self._probe_pre_step_weight = None
+        self._probe_target_direction = None
+        self.pullback_probe = False
+        return diagnostics
 
 
 _CACHEABLE_WEIGHT_MODULES = (BlockFHTLinear, ProductFHTLinear)
