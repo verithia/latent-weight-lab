@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_mlp_bilateral_endpoint_ce_oracle_plan_v1",
+  "registered_at": "2026-07-29",
+  "question": "Does the teacher-fitted bilateral c_proj endpoint repair improve complete language-model CE, or is the high held-out MLP-output recovery pointed in a task-irrelevant direction?",
+  "scientific_scope": "teacher-guided endpoint oracle; no language-model training update and not a deployable teacher-free method",
+  "inputs": {
+    "attention_only": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/diagnostics/124m_cproj_terminal_matched/checkpoints/attention_only_0p5tpp.model-only.pt",
+      "sha256": "56e72a50831342bf6fde75d8678fde2e5c14bef8413e48b20b5f0f17b1e1dbe5"
+    },
+    "plain_cproj": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_scaling_ladder_v3/y400_mai_v3_124m_fullattn_plus_mlp_cproj_0p5tpp_lr24e4_provisional/ckpt.pt",
+      "sha256": "7e450e2f78fa33a049ea990386e0c7b8f9b139ddb174e4d1bfc76dd0ff0ebcdc"
+    },
+    "data_dir": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    }
+  },
+  "chart": {
+    "implementation": "exact production cached bilateral c_proj chart",
+    "hidden_rotation_stages": 2,
+    "hidden_rotation_block_size": 32,
+    "hidden_basis_block_size": 256,
+    "hidden_coordinate_scale": 4.0,
+    "hidden_basis_seed": 314159,
+    "hidden_gain": true,
+    "output_rotation_stages": 4,
+    "output_rotation_block_size": 32,
+    "output_basis_block_size": 256,
+    "output_coordinate_scale": 4.0,
+    "output_basis_seed": 271828,
+    "output_gain": true,
+    "initial_effective_output_log_gain": 0.0,
+    "identity_initialization": true,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "fit_protocol": {
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "objective": "per-layer MSE between charted plain-cproj MLP output and frozen attention-only MLP output",
+    "source_inputs": "fixed plain-cproj pre-GELU activations",
+    "steps_per_layer": 300,
+    "batch_size": 256,
+    "optimizer": "Adam",
+    "learning_rate": 0.02,
+    "seed": 314159,
+    "sample_cap": 2048,
+    "fit_token_seed": 20260716,
+    "holdout_token_seed": 20260717,
+    "fit_token_sha256": "5ffbcbcb14dd284cded97fef7b9e80fbe4656b8c8de7cdf1beff1bcc6669350b",
+    "holdout_token_sha256": "6f80d31cc9e111edcfe46a71efbaaa3332e651a78c109bba095b919379cd8d4e"
+  },
+  "full_lm_evaluation": {
+    "batch_size": 8,
+    "block_size": 256,
+    "batches_per_split": 8,
+    "variants": [
+      "plain-cproj identity chart",
+      "attention-only reference",
+      "each fitted layer alone with every other chart at identity",
+      "all twelve fitted layers together"
+    ],
+    "fit_and_holdout_required": true,
+    "language_model_parameter_updates": 0
+  },
+  "decision_rule": {
+    "minimum_meaningful_ce_gain": 0.005,
+    "positive_task_direction": "all-layer rollout improves holdout CE by at least 0.005, or a layer selected by fit CE independently improves holdout CE by at least 0.005",
+    "noncompositional_teacher_target": "one or more fit-selected single layers improve holdout CE, but all-layer rollout does not",
+    "reject_teacher_repair_direction": "neither all-layer rollout nor any fit-selected single layer improves holdout CE by 0.005",
+    "causal_training_policy": "do not launch another 238-step training screen unless the endpoint oracle establishes a positive complete-model CE direction"
+  },
+  "execution_policy": {
+    "host": "Y400",
+    "gpu": "any exclusive free GPU among 1,2,3",
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "queue_entry": false,
+    "callbacks": false,
+    "mfu_gate": "not applicable because this diagnostic performs no language-model training update",
+    "required_artifacts": [
+      "per-layer MLP fit/holdout metrics CSV",
+      "complete-model CE variants CSV",
+      "fitted chart state",
+      "summary JSON with code commit, command, source hashes, checkpoint hashes, dataset identity, and artifact hashes"
+    ]
+  }
+}
