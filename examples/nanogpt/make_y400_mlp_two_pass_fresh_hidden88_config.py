@@ -34,6 +34,10 @@ OUTPUT_TRAINING_PLAN = (
     ARTIFACTS
     / "124m_mlp_two_pass_fresh_hidden88_training_plan.json"
 )
+OUTPUT_TRAINING_RESULT = (
+    ARTIFACTS
+    / "124m_mlp_two_pass_fresh_hidden88_training_result.json"
+)
 IMPLEMENTATION_COMMIT = (
     "1f7e1c6640450b0938545bc7efe3c911f1e0ac33"
 )
@@ -89,6 +93,9 @@ CERTIFICATE_SHA256 = (
 )
 MFU_PLAN_SHA256 = (
     "530be5283129ea3fa84d1725355fa2dcacbea4ff531f4f19c1fd7b8e9a5a816c"
+)
+TRAINING_PLAN_SHA256 = (
+    "17156740a9d8fa54857cccb53521ac770bff67c1a3138ff29036b728c95fbb84"
 )
 
 
@@ -608,6 +615,256 @@ def make_training_plan(
     }
 
 
+def make_training_result(
+    config_sha256: str,
+    mfu_result_sha256: str,
+) -> dict[str, Any]:
+    run = (
+        "y400_mai_v3_124m_twopassfresh88_scientific_v1_"
+        "20260729T215022Z_114146"
+    )
+    ladder_root = (
+        "/root/userdata/MappingNetworks/outputs/y400_ladder_runs"
+    )
+    output = (
+        "/root/userdata/MappingNetworks/outputs/"
+        "y400_mai_v3_mlp_two_pass_fresh_screen/"
+        f"{RUN_NAME}"
+    )
+    terminal = 5.592058181762695
+    attention = 5.4918
+    threshold = 5.5918
+    parent = 5.612201690673828
+    return {
+        "schema_version": (
+            "mai_124m_mlp_two_pass_fresh_hidden88_training_result_v1"
+        ),
+        "recorded_at": "2026-07-30",
+        "plan": {
+            "path": str(OUTPUT_TRAINING_PLAN.relative_to(ROOT)),
+            "sha256": TRAINING_PLAN_SHA256,
+        },
+        "parent_evidence": {
+            "heldout_capacity_result": CAPACITY_RESULT,
+            "heldout_capacity_result_sha256": CAPACITY_RESULT_SHA256,
+            "mfu_result": str(OUTPUT_MFU_RESULT.relative_to(ROOT)),
+            "mfu_result_sha256": mfu_result_sha256,
+            "stateless_fresh64_validation": parent,
+        },
+        "config": {
+            "path": str(OUTPUT_CONFIG.relative_to(ROOT)),
+            "sha256": config_sha256,
+        },
+        "implementation_commit": IMPLEMENTATION_COMMIT,
+        "execution_commit": (
+            "c2cb932a29b2aafca58315d487937b36b8296e15"
+        ),
+        "execution": {
+            "run_id": run,
+            "run_name": (
+                "y400_mai_v3_124m_twopassfresh88_scientific_v1"
+            ),
+            "host": "Y400",
+            "gpu": 1,
+            "mode": (
+                "provenance-enforcing foreground run, directly polled "
+                "through terminal evaluation"
+            ),
+            "watchdog": False,
+            "callback": False,
+            "queue_worker": False,
+            "heartbeat": False,
+            "pro6": False,
+            "parameter_updates": 238,
+            "entrypoint": "examples.nanogpt.train",
+            "command": [
+                "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+                "-u",
+                "-m",
+                "examples.nanogpt.train",
+                "--config",
+                f"{ladder_root}/provenance/{run}.config.json",
+            ],
+            "polling_transport_events": [
+                {
+                    "event": (
+                        "the originating SSH polling connection closed "
+                        "after step 60"
+                    ),
+                    "training_process_interrupted": False,
+                    "resume_or_relaunch": False,
+                    "evidence": (
+                        "the same PID/PGID continued through step 238 and "
+                        "the launcher recorded one clean execution"
+                    ),
+                }
+            ],
+        },
+        "identity": {
+            "repository": (
+                "/root/userdata/MappingNetworks/"
+                "latent-weight-lab-mlp-product-fht"
+            ),
+            "dataset_manifest": (
+                "/root/userdata/MappingNetworks/data/"
+                "finewebedu_20b/manifest.json"
+            ),
+            "dataset_manifest_sha256": (
+                "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+            ),
+            "fixed_eval_indices_sha256": (
+                "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+            ),
+            "resolved_config_sha256": (
+                "6837049deeb66455fbb298f645be02e5bb15f1088399f3f524aae22c715a989c"
+            ),
+            "provenance": f"{ladder_root}/provenance/{run}.json",
+            "provenance_sha256": (
+                "d51b762d873b1d0eca12fd09be09bc552369e2cb7ff77588ddf92da4e175c865"
+            ),
+            "runtime_source_hashes": SOURCE_HASHES,
+        },
+        "performance_gate": {
+            "certificate": CERTIFICATE,
+            "certificate_sha256": CERTIFICATE_SHA256,
+            "minimum_mfu_fraction": 0.2,
+            "measured_mfu_fraction": 0.22703795989224637,
+            "tokens_per_second": 199744.51875,
+            "average_iter_ms": 1312.44375,
+            "optimizer_ms": 404.25499999999994,
+            "peak_mib": 31688.21,
+            "passed": True,
+        },
+        "loss": {
+            "fixed_evaluations": [
+                {"step": 0, "train": 10.9672, "validation": 10.9669},
+                {"step": 60, "train": 6.3043, "validation": 6.3141},
+                {"step": 120, "train": 5.8487, "validation": 5.8533},
+                {"step": 180, "train": 5.6699, "validation": 5.6733},
+                {
+                    "step": 238,
+                    "train": 5.5889,
+                    "validation": terminal,
+                },
+            ],
+            "attention_only_control_validation": attention,
+            "accepted_attention_gap": 0.1,
+            "registered_success_threshold": threshold,
+            "stateless_fresh64_control_validation": parent,
+            "candidate_minus_attention": terminal - attention,
+            "candidate_minus_success_threshold": terminal - threshold,
+            "candidate_minus_stateless_fresh64": terminal - parent,
+            "fraction_of_stateless_fresh64_to_attention_gap_closed": (
+                (parent - terminal) / (parent - attention)
+            ),
+        },
+        "causal_structure": {
+            "mlp_cfc_replaced": False,
+            "mlp_cproj_replaced": True,
+            "matching_refresh_interval_updates": 1,
+            "parent_stages": 64,
+            "residual_stages": 24,
+            "matching_neighbors": 64,
+            "coordinates_per_layer": 88 * 1536,
+            "coordinate_fraction_per_cproj": 88 / 1536,
+            "persistent_selected_connectivity": False,
+            "learned_dense_basis": False,
+            "dense_residual": False,
+            "lora_adapter": False,
+            "terminal_optimizer_steps": "12/12 equal 238",
+            "terminal_refresh_counts": "12/12 equal 238",
+            "terminal_last_refresh_steps": "12/12 equal 237",
+            "terminal_matching_valid": "12/12 true",
+        },
+        "terminal_checkpoint": {
+            "path": f"{output}/ckpt.pt",
+            "sha256": (
+                "423029ea02046b95a5f8f4b9f80c000816b0ebf51f6a9dfd66dcd84da0ed47c6"
+            ),
+            "metadata_sha256": (
+                "b2930a84113e5d25f1302c81d966eb5b34e5155b752b7a39b15dcfa7219c4458"
+            ),
+            "schema": "nanogpt_exact_resume_v2",
+            "next_iter": 238,
+            "checkpoint_reason": "evaluation",
+            "best_val_loss": terminal,
+            "custom_module_count": 12,
+            "parent_selected_permutations_per_layer_shape": [
+                64,
+                3072,
+            ],
+            "residual_selected_permutations_per_layer_shape": [
+                24,
+                3072,
+            ],
+            "parent_last_angles_per_layer_shape": [64, 1536],
+            "residual_last_angles_per_layer_shape": [24, 1536],
+            "recursive_momentum_buffer_count": 24,
+            "exact_resume_state_complete": True,
+            "execution_provenance_embedded": True,
+        },
+        "artifacts": {
+            "foreground_log": f"{ladder_root}/logs/{run}.log",
+            "foreground_log_sha256": (
+                "ad5e68882af61af7cff7f8330b5da9d413c7178b90d2e22a5cf4f6f6ab27d304"
+            ),
+            "status": f"{ladder_root}/status/{run}.json",
+            "status_sha256": (
+                "7da7ef75d7d1f12d8b02d0a8c23506b0733849fa762b1a252d90e0cb9699f902"
+            ),
+            "archived_config": f"{ladder_root}/provenance/{run}.config.json",
+            "archived_config_sha256": config_sha256,
+            "archived_mfu_certificate": (
+                f"{ladder_root}/provenance/{run}.mfu.json"
+            ),
+            "archived_mfu_certificate_sha256": CERTIFICATE_SHA256,
+            "workspace_after_run_gib": 240,
+        },
+        "decision": {
+            "classification": "DIRECTIONAL_ONLY",
+            "registered_success_gate_passed": False,
+            "registered_directional_gate_passed": True,
+            "larger_rung_authorized": False,
+            "additional_training_candidate_authorized": False,
+            "interpretation": [
+                (
+                    "The held-out-selected residual 24-stage pass causally "
+                    "improves validation CE by 0.0201435 over the exact "
+                    "stateless-fresh64 parent."
+                ),
+                (
+                    "The candidate is 0.1002582 CE behind attention-only "
+                    "and misses the fixed +0.1 success boundary by only "
+                    "0.0002582 CE; this is practically boundary-level but "
+                    "must remain DIRECTIONAL_ONLY under the registered rule."
+                ),
+                (
+                    "Hidden-side coordinate capacity was therefore a real "
+                    "part of the c_proj deficit after direction staleness "
+                    "was removed."
+                ),
+                (
+                    "The run leaves c_fc dense, so it does not validate a "
+                    "full MLP replacement or resolve the pre-GELU activation "
+                    "spectrum problem."
+                ),
+            ],
+            "next_action": (
+                "Use this two-pass hidden88 c_proj as the fixed reference "
+                "for a separately preregistered no-training c_fc manifold "
+                "gate whose metric is activation/Jacobian-aware before any "
+                "new 124M training run or larger rung."
+            ),
+        },
+        "scope_limit": (
+            "The folded c_proj base remains materialized in checkpoints and "
+            "forward passes; this result concerns trainable-coordinate "
+            "geometry and does not claim checkpoint-size or inference-FLOP "
+            "compression."
+        ),
+    }
+
+
 def main() -> None:
     validate_inputs()
     config = make_config()
@@ -625,6 +882,13 @@ def main() -> None:
         sha256_bytes(mfu_result_data),
     )
     OUTPUT_TRAINING_PLAN.write_bytes(json_bytes(training_plan))
+    if sha256_file(OUTPUT_TRAINING_PLAN) != TRAINING_PLAN_SHA256:
+        raise RuntimeError("registered training plan hash drifted")
+    training_result = make_training_result(
+        sha256_bytes(config_data),
+        sha256_bytes(mfu_result_data),
+    )
+    OUTPUT_TRAINING_RESULT.write_bytes(json_bytes(training_result))
     print(
         json.dumps(
             {
@@ -641,6 +905,12 @@ def main() -> None:
                 ),
                 "training_plan_sha256": sha256_file(
                     OUTPUT_TRAINING_PLAN
+                ),
+                "training_result": str(
+                    OUTPUT_TRAINING_RESULT.relative_to(ROOT)
+                ),
+                "training_result_sha256": sha256_file(
+                    OUTPUT_TRAINING_RESULT
                 ),
             },
             indent=2,
