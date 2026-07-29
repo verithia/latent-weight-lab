@@ -21,6 +21,15 @@
     "polar_update",
     "applied_direction_per_lr"
   ],
+  "registered_direction_order": [
+    "exact_applied_direction",
+    "exact_applied_right_tangent",
+    "muon_polar_descent",
+    "muon_polar_right_tangent",
+    "combined_momentum_descent",
+    "raw_gradient_descent"
+  ],
+  "decision_rule": "promote the first registered direction with at least 10% energy-weighted positive-step line recovery and positive cosine in every one of the 20 layer/phase cells; momentum-buffer-only is descriptive because the step-0 buffer is exactly zero",
   "replay_max_iters": 238,
   "replay_token_budget": 62390272,
   "schema_version": "nanogpt_mlp_optimizer_state_probe_plan_v1",
