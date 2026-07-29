@@ -1,0 +1,43 @@
+{
+  "schema_version": "mai_124m_mlp_global_givens_transport_fit_result_v1",
+  "recorded_at": "2026-07-29",
+  "decision": "REJECT_SHALLOW_FIXED_CONNECTIVITY_GIVENS_TRANSPORT",
+  "scientific_conclusion": "A global right-orthogonal orbit is the correct dense geometry, but a compact fixed random matching network captures only its ambient coordinate fraction. State transport alone does not create task alignment when the transported axes remain task-independent.",
+  "analysis": {
+    "source_commit": "6ee7e2df62ad4d99fce6fc20184c7f4ce540f746",
+    "entrypoint_sha256": "4f9d6f9f6b0f572d633714e87a2ee0fdec74f3338ef9ed83046c81e287cbca2b",
+    "detail_sha256": "d79e8331cbf5aaf4ec5f8f539812d6673490328d7240ae3741efe1fc8755de3a",
+    "aggregate_sha256": "765d0ab6959bcbc9d91f007714cf9f767e4e0b40847ffcc0cb46d28ecfab3e3d",
+    "metadata_sha256": "8ef1c84e1d434f4b629821dbd34f73025a9a9a6e3412a439cca795b4417f1ff8",
+    "analysis_seconds": 32.86315870285034,
+    "pilot_cells": 4,
+    "fit_steps": 300
+  },
+  "stage_results": [
+    {
+      "stages": 8,
+      "coordinates_per_layer": 12288,
+      "coordinate_fraction": 0.005208333333333333,
+      "endpoint_recovery": 0.005192742770692878,
+      "fraction_of_right_oracle": 0.00609492870806194,
+      "minimum_cell_recovery": 0.00506359338760376
+    },
+    {
+      "stages": 16,
+      "coordinates_per_layer": 24576,
+      "coordinate_fraction": 0.010416666666666666,
+      "endpoint_recovery": 0.01036702612531659,
+      "fraction_of_right_oracle": 0.012167899717295821,
+      "minimum_cell_recovery": 0.010064542293548584
+    },
+    {
+      "stages": 32,
+      "coordinates_per_layer": 49152,
+      "coordinate_fraction": 0.020833333333333332,
+      "endpoint_recovery": 0.020558347308714874,
+      "fraction_of_right_oracle": 0.024129813220039684,
+      "minimum_cell_recovery": 0.019965291023254395
+    }
+  ],
+  "next_action": "Do not implement or train this flow. Test whether post-GELU activation eigenspaces provide the missing task-aligned hidden-frame axes; a richer task-independent fixed factorization is not justified by the linear scaling with coordinate count."
+}
