@@ -1,0 +1,110 @@
+{
+  "schema_version": "mai_124m_mlp_muon_chart_staleness_qualification_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_chart_staleness_plan.json",
+  "plan_sha256": "80b414e38333e8ada9fc4409f0b21eedd784e464c27b2ae2e7547d8451d6d097",
+  "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_cproj_cadence15_optimizer_probe_lr24e4.json",
+  "config_sha256": "7de2a68eb24af9b8224302bc576a69fd54705c0c03610f7eff9e480796019ed2",
+  "implementation_commit": "6c1f96062886035520fc68ec9252c0ea5b01d478",
+  "performance_tool": {
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "entrypoint_sha256": "31327821eba83af7c75cd273f6daa181b1a9cd8701a7bd49283ef830ad9133f2",
+    "test": "examples/nanogpt/test_mfu_preflight.py",
+    "test_sha256": "6bfb9b5af5618d29aad2220c7072917ea8cfaac3cf7878c2433404dd4d143eeb",
+    "focused_tests": "20/20 cadence, functional-metric, MFU, and trajectory tests passed locally and on Y400"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "direct foreground execution and polling to exit",
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "pro6": false,
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_cproj_cadence15_optimizer_probe_lr24e4.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/mfu_preflight/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4_v1.json",
+      "--min-fraction",
+      "0.20",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "59",
+      "--gemm-size",
+      "8192",
+      "--gemm-warmups",
+      "4",
+      "--gemm-trials",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "elapsed_seconds": 65.75978708267212
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_gemm_peak_tflops": 657.6165509977978,
+    "base_timed_iter_ms": 921.4274576271184,
+    "io_inclusive_iter_ms": 1012.2829999999997,
+    "tokens_per_second": 258963.1555602535,
+    "model_tflops": 193.4080373463311,
+    "mfu_fraction": 0.29410457667598877,
+    "minimum_mfu_fraction": 0.2,
+    "margin_percentage_points": 9.410457667598877,
+    "peak_allocated_mib": 31291.89,
+    "snapshot_count": 5,
+    "snapshot_seconds": 4.795,
+    "optimizer_probe_serialization_included_in_iter_ms": true,
+    "evaluation_time_excluded": true
+  },
+  "coverage": {
+    "real_dense_muon_updates": 60,
+    "profile_rows": 60,
+    "optimizer_probe_steps": [
+      0,
+      15,
+      30,
+      45
+    ],
+    "all_parameter_snapshot_steps": [
+      0,
+      15,
+      30,
+      45,
+      60
+    ],
+    "diagnostic_io_matches_scientific_cadence": true
+  },
+  "artifacts": {
+    "certificate": "/root/userdata/MappingNetworks/outputs/mfu_preflight/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4_v1.json",
+    "certificate_sha256": "ae3906ae2d72bf04521bcdb3ad62c48504e529a67efc477aac20371e54d34a1b",
+    "foreground_log": "/root/userdata/MappingNetworks/outputs/mfu_preflight/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4_v1.log",
+    "foreground_log_sha256": "024bb72890917ca789ec3d1d43d4eed11f0818b79af4592d9aaf460522d10c28"
+  },
+  "measurement_repair": {
+    "first_attempt_classification": "CERTIFICATE_REJECTED_MEASUREMENT_ROW_COUNT_BUG",
+    "first_attempt_training_exit_code": 0,
+    "issue": "strict mode expected 60 profiler rows while perf_warmup_iters suppressed update 0, so the certificate rejected a completed run before computing MFU",
+    "repair": "strict diagnostic-I/O mode now profiles all 60 updates and subtracts evaluation time explicitly",
+    "failed_certificate_sha256": "be4cf29d3adc46a8fab5ffa1b9178bed8cdcbe525d09aa795e662dce8f033393",
+    "failed_log_sha256": "fb144d8cb5629738721c6c4732d8adbea226c24702741b1962936cbde62b12e2",
+    "threshold_or_formula_changed": false
+  },
+  "decision": {
+    "classification": "QUALIFIED_FOR_ONE_COHERENT_CADENCE15_REPLAY",
+    "passed": true,
+    "authorized_next_action": "run exactly one 238-update coherent dense-Muon replay from the registered config, foreground-polled with no watchdog or callbacks, then execute the preregistered no-training chart-staleness analysis",
+    "not_authorized": [
+      "shorter-refresh language-model training before the staleness result",
+      "larger stage count",
+      "c_fc replacement",
+      "learning-rate or seed sweep",
+      "PRO6 execution"
+    ]
+  }
+}
