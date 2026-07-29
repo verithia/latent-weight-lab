@@ -1,0 +1,57 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_mfu_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_training_plan.json",
+  "plan_sha256": "be1208eaf9ee7fe49d9d5288385721bd3cefc7445d559587fe32a4c796658520",
+  "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_muonmatchedgivens32_r60_0p5tpp.json",
+  "config_sha256": "ed23de1aae4574230c5b93f66032cd48320234930187b21819f04fed3ba519d4",
+  "execution_commit": "50f6f15d5f390b3c6933524951f0fd9e67a39213",
+  "execution": "direct foreground Y400 GPU1 real BF16 training-path preflight, polled to exit; no watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "certificate": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_muon_matched_givens_screen/performance_preflight_muonmatchedgivens32_r60.json",
+    "sha256": "08f39cec4c3050bada8734f2b3a89a10c913dc2b0bcac2828ac77e3440125070",
+    "preflight_log_sha256": "0a083b6e8a7ef73a6643726a001bf55a99e0a1ce83f844055c00387d4be0b405"
+  },
+  "protocol": {
+    "warmup_updates": 1,
+    "timed_updates": 61,
+    "included_refresh_update": 60,
+    "minimum_mfu_fraction": 0.2,
+    "denominator": "same-host empirical BF16 8192-square tensor-core GEMM peak"
+  },
+  "measurement": {
+    "passed": true,
+    "empirical_bf16_peak_tflops": 655.5858966221338,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 253297.09590163932,
+    "average_iter_ms": 1181.4370491803281,
+    "model_tflops": 189.1763099575875,
+    "mfu_fraction": 0.2885606766898234,
+    "peak_mib": 31655.52,
+    "timing_breakdown_ms": {
+      "data": 1.7349180327868847,
+      "flush": 9.761475409836065,
+      "forward_backward": 888.6911475409836,
+      "gradient_postprocess": 2.864262295081968,
+      "optimizer": 268.20442622950816,
+      "other": 2.0665573770491803,
+      "prepare": 8.113934426229505
+    }
+  },
+  "refresh_observation": {
+    "refresh_iter_ms": 10894.31,
+    "refresh_optimizer_ms": 9979.46,
+    "normal_iter_ms_approx": 1020.0,
+    "layer_requested_update_recovery_range": [
+      0.138627827167511,
+      0.14217233657836914
+    ],
+    "interpretation": "The expensive rematching step is visible and included in the registered 61-update average; the preflight does not hide refresh overhead."
+  },
+  "decision": {
+    "classification": "AUTHORIZE_ONE_124M_0P5TPP_MUON_MATCHED_GIVENS_RUN",
+    "registered_mfu_gate_passed": true,
+    "headroom_over_gate_percentage_points": 8.85606766898234,
+    "scope": "exactly one directly polled 238-update run under the immutable config; no other MLP structure or larger rung is authorized"
+  }
+}
