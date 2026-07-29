@@ -188,6 +188,157 @@ class FixedBasisBilinearOutputGate(torch.nn.Module):
         return update + self._basis(correction, inverse=True)
 
 
+class _FixedBlockHadamardBasis(torch.nn.Module):
+    """One fixed signed/permuted normalized block-Hadamard basis."""
+
+    def __init__(
+        self,
+        width: int,
+        *,
+        basis_block_size: int,
+        seed: int,
+    ) -> None:
+        super().__init__()
+        self.width = int(width)
+        self.basis_block_size = int(basis_block_size)
+        if (
+            self.basis_block_size <= 0
+            or self.basis_block_size & (self.basis_block_size - 1)
+            or self.width % self.basis_block_size
+        ):
+            raise ValueError(
+                "basis_block_size must be a power of two dividing width"
+            )
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        permutation = torch.randperm(
+            self.width, generator=generator, device="cpu"
+        )
+        signs = (
+            torch.randint(
+                0,
+                2,
+                (self.width,),
+                generator=generator,
+                dtype=torch.float32,
+                device="cpu",
+            )
+            * 2.0
+            - 1.0
+        )
+        self.register_buffer("permutation", permutation, persistent=True)
+        self.register_buffer(
+            "inverse_permutation",
+            torch.argsort(permutation),
+            persistent=True,
+        )
+        self.register_buffer("signs", signs, persistent=True)
+
+    def transform(
+        self,
+        values: torch.Tensor,
+        *,
+        inverse: bool,
+    ) -> torch.Tensor:
+        signs = self.signs.to(device=values.device, dtype=values.dtype)
+        if inverse:
+            values = values * signs
+            grouped = values.reshape(
+                *values.shape[:-1],
+                self.width // self.basis_block_size,
+                self.basis_block_size,
+            )
+            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            return values.index_select(-1, self.inverse_permutation)
+        values = values.index_select(-1, self.permutation)
+        grouped = values.reshape(
+            *values.shape[:-1],
+            self.width // self.basis_block_size,
+            self.basis_block_size,
+        )
+        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        return values * signs
+
+
+class UntiedFixedBasisBilinearOutputGate(torch.nn.Module):
+    """Non-symmetric fixed-basis bilinear token-conditioned mixer.
+
+    The condition, update, and output correction use independent fixed
+    orthogonal bases:
+
+        update + Q_out^-1[
+            (Q_update update) *
+            (slope * Q_condition condition + bias)
+        ].
+
+    Only ``slope`` and ``bias`` are trainable.  Untying the fixed bases makes
+    the bilinear operator non-diagonal in any single basis without adding a
+    learned basis or increasing the number of learned coordinates.
+    """
+
+    def __init__(
+        self,
+        width: int,
+        scale: float = 1.0,
+        *,
+        basis_block_size: int = 256,
+        condition_seed: int = 271828,
+        update_seed: int = 376557,
+        output_seed: int = 481286,
+    ) -> None:
+        super().__init__()
+        self.width = int(width)
+        self.scale = float(scale)
+        self.condition_basis = _FixedBlockHadamardBasis(
+            self.width,
+            basis_block_size=basis_block_size,
+            seed=condition_seed,
+        )
+        self.update_basis = _FixedBlockHadamardBasis(
+            self.width,
+            basis_block_size=basis_block_size,
+            seed=update_seed,
+        )
+        self.output_basis = _FixedBlockHadamardBasis(
+            self.width,
+            basis_block_size=basis_block_size,
+            seed=output_seed,
+        )
+        self.slope = torch.nn.Parameter(torch.zeros(self.width))
+        self.bias = torch.nn.Parameter(torch.zeros(self.width))
+
+    def modulation(self, condition: torch.Tensor) -> torch.Tensor:
+        spectral_condition = self.condition_basis.transform(
+            condition,
+            inverse=False,
+        )
+        return self.scale * torch.addcmul(
+            self.bias.to(dtype=condition.dtype),
+            spectral_condition,
+            self.slope.to(dtype=condition.dtype),
+        )
+
+    def forward(
+        self,
+        condition: torch.Tensor,
+        update: torch.Tensor,
+    ) -> torch.Tensor:
+        if condition.shape != update.shape:
+            raise ValueError(
+                "gate condition and update must be aligned, got "
+                f"{tuple(condition.shape)} and {tuple(update.shape)}"
+            )
+        spectral_update = self.update_basis.transform(
+            update,
+            inverse=False,
+        )
+        correction = spectral_update * self.modulation(condition)
+        return update + self.output_basis.transform(
+            correction,
+            inverse=True,
+        )
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -278,7 +429,12 @@ def load_gate_model(
     basis_seed: int = 271828,
 ) -> tuple[
     torch.nn.Module,
-    dict[int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate],
+    dict[
+        int,
+        ResidualConditionedOutputGate
+        | FixedBasisBilinearOutputGate
+        | UntiedFixedBasisBilinearOutputGate,
+    ],
     list[torch.utils.hooks.RemovableHandle],
 ]:
     model = load_chart_model(
@@ -287,7 +443,10 @@ def load_gate_model(
     for parameter in model.parameters():
         parameter.requires_grad_(False)
     gates: dict[
-        int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
+        int,
+        ResidualConditionedOutputGate
+        | FixedBasisBilinearOutputGate
+        | UntiedFixedBasisBilinearOutputGate,
     ] = {}
     handles: list[torch.utils.hooks.RemovableHandle] = []
     for layer in layers:
@@ -300,6 +459,14 @@ def load_gate_model(
                 basis_block_size=basis_block_size,
                 seed=basis_seed + layer * 64,
             )
+        elif gate_kind == "fixed_bilinear_untied":
+            gate = UntiedFixedBasisBilinearOutputGate(
+                model.config.n_embd,
+                basis_block_size=basis_block_size,
+                condition_seed=basis_seed + layer * 64,
+                update_seed=basis_seed + 104729 + layer * 64,
+                output_seed=basis_seed + 2 * 104729 + layer * 64,
+            )
         else:
             raise ValueError(f"unsupported gate kind: {gate_kind}")
         gate = gate.to(device)
@@ -310,7 +477,11 @@ def load_gate_model(
             inputs,
             output,
             *,
-            selected_gate: ResidualConditionedOutputGate = gate,
+            selected_gate: (
+                ResidualConditionedOutputGate
+                | FixedBasisBilinearOutputGate
+                | UntiedFixedBasisBilinearOutputGate
+            ) = gate,
         ):
             if not inputs:
                 raise RuntimeError("MLP gate hook received no input")
@@ -323,7 +494,10 @@ def load_gate_model(
 
 def gate_parameters(
     gates: dict[
-        int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
+        int,
+        ResidualConditionedOutputGate
+        | FixedBasisBilinearOutputGate
+        | UntiedFixedBasisBilinearOutputGate,
     ],
     groups: tuple[str, ...] = GATE_GROUPS,
 ) -> dict[str, torch.nn.Parameter]:
@@ -380,7 +554,10 @@ def task_ce_gradients(
 def teacher_mse_gradients(
     model: torch.nn.Module,
     gates: dict[
-        int, ResidualConditionedOutputGate | FixedBasisBilinearOutputGate
+        int,
+        ResidualConditionedOutputGate
+        | FixedBasisBilinearOutputGate
+        | UntiedFixedBasisBilinearOutputGate,
     ],
     split: GateSplitData,
     layers: list[int],
@@ -502,7 +679,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--gate-kind",
-        choices=("diagonal", "fixed_bilinear"),
+        choices=(
+            "diagonal",
+            "fixed_bilinear",
+            "fixed_bilinear_untied",
+        ),
         default="diagonal",
     )
     parser.add_argument("--basis-block-size", type=int, default=256)
@@ -674,6 +855,11 @@ def main() -> None:
                 else (
                     "update + Q^-1[(Q update) * "
                     "(slope * Q mlp_input + bias)]"
+                    if args.gate_kind == "fixed_bilinear"
+                    else (
+                        "update + Q_output^-1[(Q_update update) * "
+                        "(slope * Q_condition mlp_input + bias)]"
+                    )
                 )
             ),
             "parameters_per_selected_layer": 2 * model.config.n_embd,
@@ -691,7 +877,16 @@ def main() -> None:
             ),
             "basis_seed": (
                 args.basis_seed
-                if args.gate_kind == "fixed_bilinear"
+                if args.gate_kind != "diagonal"
+                else None
+            ),
+            "basis_seeds": (
+                {
+                    "condition": args.basis_seed,
+                    "update": args.basis_seed + 104729,
+                    "output": args.basis_seed + 2 * 104729,
+                }
+                if args.gate_kind == "fixed_bilinear_untied"
                 else None
             ),
             "teacher_prediction_source": (

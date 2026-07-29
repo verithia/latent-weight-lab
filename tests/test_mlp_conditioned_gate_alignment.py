@@ -5,6 +5,7 @@ import torch
 from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
     FixedBasisBilinearOutputGate,
     ResidualConditionedOutputGate,
+    UntiedFixedBasisBilinearOutputGate,
     alignment_rows,
 )
 
@@ -59,6 +60,50 @@ def test_fixed_basis_bilinear_gate_has_dynamic_and_static_gradients() -> None:
     assert gate.bias.grad is not None
     assert gate.slope.grad.abs().sum() > 0
     assert gate.bias.grad.abs().sum() > 0
+
+
+def test_untied_fixed_basis_bilinear_gate_is_identity_and_routes_channels() -> None:
+    gate = UntiedFixedBasisBilinearOutputGate(
+        8,
+        basis_block_size=4,
+        condition_seed=11,
+        update_seed=17,
+        output_seed=23,
+    )
+    condition = torch.randn(2, 3, 8)
+    update = torch.randn(2, 3, 8)
+
+    torch.testing.assert_close(gate(condition, update), update)
+    with torch.no_grad():
+        gate.slope.fill_(1.0)
+    correction = gate(condition, update) - update
+
+    assert correction.abs().sum() > 0
+    assert not torch.equal(
+        gate.condition_basis.permutation,
+        gate.update_basis.permutation,
+    )
+    assert not torch.equal(
+        gate.update_basis.permutation,
+        gate.output_basis.permutation,
+    )
+
+
+def test_untied_fixed_basis_bilinear_gate_has_slope_gradient() -> None:
+    gate = UntiedFixedBasisBilinearOutputGate(
+        8,
+        basis_block_size=4,
+        condition_seed=29,
+        update_seed=31,
+        output_seed=37,
+    )
+    condition = torch.randn(2, 3, 8)
+    update = torch.randn(2, 3, 8)
+
+    gate(condition, update).square().mean().backward()
+
+    assert gate.slope.grad is not None
+    assert gate.slope.grad.abs().sum() > 0
 
 
 def test_gate_alignment_rows_include_groups_and_layers() -> None:
