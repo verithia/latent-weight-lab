@@ -328,6 +328,63 @@ __global__ __launch_bounds__(256) void block_fht_linear_forward_kernel(
   }
 }
 
+template <typename scalar_t>
+__global__ __launch_bounds__(256) void fixed_basis_transform_kernel(
+    const scalar_t* __restrict__ input,
+    const int64_t* __restrict__ permutations,
+    const float* __restrict__ signs,
+    scalar_t* __restrict__ output,
+    int64_t tokens,
+    int64_t width,
+    int64_t block_size,
+    int64_t bases,
+    int64_t jobs,
+    bool inverse,
+    bool shared_input) {
+  extern __shared__ float values[];
+  int64_t blocks_per_token = width / block_size;
+  for (int64_t job = blockIdx.x; job < jobs; job += gridDim.x) {
+    int64_t basis = job / (tokens * blocks_per_token);
+    int64_t residual = job - basis * tokens * blocks_per_token;
+    int64_t token = residual / blocks_per_token;
+    int64_t transform_block = residual - token * blocks_per_token;
+    int64_t spectral_start = transform_block * block_size;
+    int64_t basis_offset = basis * width;
+    int64_t input_token_offset =
+        (shared_input ? token : basis * tokens + token) * width;
+    int64_t output_token_offset = (basis * tokens + token) * width;
+
+    for (int64_t lane = threadIdx.x; lane < block_size;
+         lane += blockDim.x) {
+      int64_t spectral_index = spectral_start + lane;
+      int64_t permutation = permutations[basis_offset + spectral_index];
+      int64_t input_index = inverse ? spectral_index : permutation;
+      float value = scalar_to_float(input[input_token_offset + input_index]);
+      if (inverse) {
+        value *= signs[basis_offset + spectral_index];
+      }
+      values[smem_index((int)lane)] = value;
+    }
+    __syncthreads();
+
+    fht_inplace(values, (int)block_size);
+
+    for (int64_t lane = threadIdx.x; lane < block_size;
+         lane += blockDim.x) {
+      int64_t spectral_index = spectral_start + lane;
+      int64_t permutation = permutations[basis_offset + spectral_index];
+      int64_t output_index = inverse ? permutation : spectral_index;
+      float value = values[smem_index((int)lane)];
+      if (!inverse) {
+        value *= signs[basis_offset + spectral_index];
+      }
+      output[output_token_offset + output_index] =
+          float_to_scalar<scalar_t>(value);
+    }
+    __syncthreads();
+  }
+}
+
 __global__ void init_forward_blocks_kernel(
     const float* __restrict__ latent,
     float* __restrict__ work,
@@ -678,4 +735,124 @@ torch::Tensor block_fht_linear_forward_cuda(
   }
   C10_CUDA_KERNEL_LAUNCH_CHECK();
   return out;
+}
+
+torch::Tensor fixed_basis_transform_cuda(
+    torch::Tensor input,
+    torch::Tensor permutations,
+    torch::Tensor signs,
+    int64_t block_size,
+    bool inverse,
+    bool shared_input) {
+  TORCH_CHECK(input.is_contiguous(), "input must be contiguous");
+  TORCH_CHECK(
+      permutations.is_contiguous(), "permutations must be contiguous");
+  TORCH_CHECK(signs.is_contiguous(), "signs must be contiguous");
+  TORCH_CHECK(input.dim() == 2, "input must be 2D or flattened to 2D");
+  TORCH_CHECK(
+      permutations.dim() == 2,
+      "permutations must have shape [bases, width]");
+  TORCH_CHECK(signs.dim() == 2, "signs must have shape [bases, width]");
+  TORCH_CHECK(
+      permutations.sizes() == signs.sizes(),
+      "permutations and signs must have identical shapes");
+  TORCH_CHECK(
+      block_size > 0 && (block_size & (block_size - 1)) == 0,
+      "block_size must be a positive power of two");
+  TORCH_CHECK(
+      block_size <= kSharedMaxBlockSize,
+      "fixed basis transform requires shared-memory block_size <= 16384");
+  int64_t bases = permutations.size(0);
+  int64_t width = permutations.size(1);
+  TORCH_CHECK(width > 0, "width must be positive");
+  TORCH_CHECK(
+      width % block_size == 0, "block_size must divide width");
+  int64_t tokens;
+  if (shared_input) {
+    TORCH_CHECK(
+        input.size(1) == width,
+        "shared input must have shape [tokens, width]");
+    tokens = input.size(0);
+  } else {
+    TORCH_CHECK(
+        input.size(0) % bases == 0 && input.size(1) == width,
+        "per-basis input must flatten [bases, tokens, width]");
+    tokens = input.size(0) / bases;
+  }
+  auto output = torch::empty({bases, tokens, width}, input.options());
+  int64_t jobs = bases * tokens * (width / block_size);
+  if (jobs == 0) {
+    return output;
+  }
+  int device = -1;
+  C10_CUDA_CHECK(cudaGetDevice(&device));
+  cudaDeviceProp properties;
+  C10_CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
+  int64_t resident_blocks = (int64_t)properties.multiProcessorCount * 8;
+  int grid = (int)std::min(jobs, resident_blocks);
+  int threads = 256;
+  size_t smem = padded_shared_size(block_size) * sizeof(float);
+  auto stream = at::cuda::getCurrentCUDAStream();
+  if (smem >= 48 * 1024) {
+    C10_CUDA_CHECK(cudaFuncSetAttribute(
+        fixed_basis_transform_kernel<float>,
+        cudaFuncAttributeMaxDynamicSharedMemorySize,
+        smem));
+    C10_CUDA_CHECK(cudaFuncSetAttribute(
+        fixed_basis_transform_kernel<at::Half>,
+        cudaFuncAttributeMaxDynamicSharedMemorySize,
+        smem));
+    C10_CUDA_CHECK(cudaFuncSetAttribute(
+        fixed_basis_transform_kernel<at::BFloat16>,
+        cudaFuncAttributeMaxDynamicSharedMemorySize,
+        smem));
+  }
+  if (input.scalar_type() == torch::kFloat32) {
+    fixed_basis_transform_kernel<float><<<grid, threads, smem, stream>>>(
+        input.data_ptr<float>(),
+        permutations.data_ptr<int64_t>(),
+        signs.data_ptr<float>(),
+        output.data_ptr<float>(),
+        tokens,
+        width,
+        block_size,
+        bases,
+        jobs,
+        inverse,
+        shared_input);
+  } else if (input.scalar_type() == torch::kFloat16) {
+    fixed_basis_transform_kernel<at::Half>
+        <<<grid, threads, smem, stream>>>(
+            input.data_ptr<at::Half>(),
+            permutations.data_ptr<int64_t>(),
+            signs.data_ptr<float>(),
+            output.data_ptr<at::Half>(),
+            tokens,
+            width,
+            block_size,
+            bases,
+            jobs,
+            inverse,
+            shared_input);
+  } else if (input.scalar_type() == torch::kBFloat16) {
+    fixed_basis_transform_kernel<at::BFloat16>
+        <<<grid, threads, smem, stream>>>(
+            input.data_ptr<at::BFloat16>(),
+            permutations.data_ptr<int64_t>(),
+            signs.data_ptr<float>(),
+            output.data_ptr<at::BFloat16>(),
+            tokens,
+            width,
+            block_size,
+            bases,
+            jobs,
+            inverse,
+            shared_input);
+  } else {
+    TORCH_CHECK(
+        false,
+        "fixed basis transform supports float32, float16, and bfloat16");
+  }
+  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  return output;
 }

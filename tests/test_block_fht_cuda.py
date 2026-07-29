@@ -1,7 +1,13 @@
 import pytest
 import torch
 
-from latent_weight_lab.block_fht import BlockFHT, BlockFHTLinear, block_fht_slice_torch
+from latent_weight_lab.block_fht import (
+    BlockFHT,
+    BlockFHTLinear,
+    _fixed_basis_transform_torch,
+    block_fht_slice_torch,
+    fixed_basis_transform,
+)
 
 
 pytestmark = pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA unavailable")
@@ -96,3 +102,53 @@ def test_cuda_fused_linear_forward_supports_bfloat16():
     torch.cuda.synchronize()
     assert fused.dtype == torch.bfloat16
     assert torch.allclose(fused, materialized, atol=2e-2, rtol=2e-2)
+
+
+@pytest.mark.parametrize("inverse", [False, True])
+@pytest.mark.parametrize("shared_input", [False, True])
+def test_cuda_fixed_basis_transform_matches_reference_and_gradient(
+    inverse: bool,
+    shared_input: bool,
+) -> None:
+    torch.manual_seed(1234)
+    bases = 2
+    tokens = 7
+    width = 32
+    permutations = torch.stack(
+        [torch.randperm(width) for _ in range(bases)]
+    )
+    signs = torch.randint(0, 2, (bases, width)).float().mul_(2).sub_(1)
+    shape = (tokens, width) if shared_input else (bases, tokens, width)
+    values = torch.randn(shape, dtype=torch.float32, requires_grad=True)
+    reference_values = values.detach().clone().requires_grad_(True)
+    reference = _fixed_basis_transform_torch(
+        reference_values,
+        permutations,
+        signs,
+        8,
+        inverse=inverse,
+        shared_input=shared_input,
+    )
+    actual_values = values.detach().cuda().requires_grad_(True)
+    actual = fixed_basis_transform(
+        actual_values,
+        permutations.cuda(),
+        signs.cuda(),
+        8,
+        inverse=inverse,
+        shared_input=shared_input,
+    )
+    gradient = torch.randn_like(reference)
+    reference.backward(gradient)
+    actual.backward(gradient.cuda())
+    torch.cuda.synchronize()
+
+    assert torch.allclose(
+        actual.detach().cpu(), reference.detach(), atol=2e-6, rtol=2e-6
+    )
+    assert torch.allclose(
+        actual_values.grad.detach().cpu(),
+        reference_values.grad,
+        atol=2e-5,
+        rtol=2e-5,
+    )

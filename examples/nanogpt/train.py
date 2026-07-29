@@ -1118,6 +1118,16 @@ def parse_args() -> argparse.Namespace:
         default=[],
     )
     parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-heads",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-postgelu-hidden-self-gate-head-seed-stride",
+        type=int,
+        default=1000003,
+    )
+    parser.add_argument(
         "--block-fht-mlp-postgelu-hidden-self-gate-basis-block-size",
         type=int,
         default=256,
@@ -1267,6 +1277,12 @@ def conditioned_output_gate_config_kwargs(
         ),
         "block_fht_mlp_postgelu_hidden_self_gate_layers": tuple(
             args.block_fht_mlp_postgelu_hidden_self_gate_layers
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_heads": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_heads
+        ),
+        "block_fht_mlp_postgelu_hidden_self_gate_head_seed_stride": (
+            args.block_fht_mlp_postgelu_hidden_self_gate_head_seed_stride
         ),
         "block_fht_mlp_postgelu_hidden_self_gate_basis_block_size": (
             args.block_fht_mlp_postgelu_hidden_self_gate_basis_block_size

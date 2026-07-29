@@ -25,6 +25,14 @@ torch::Tensor block_fht_linear_forward_cuda(
     int64_t seed,
     double weight_scale);
 
+torch::Tensor fixed_basis_transform_cuda(
+    torch::Tensor input,
+    torch::Tensor permutations,
+    torch::Tensor signs,
+    int64_t block_size,
+    bool inverse,
+    bool shared_input);
+
 std::vector<torch::Tensor> block_fht_forward(
     torch::Tensor latent,
     int64_t output_size,
@@ -66,8 +74,43 @@ torch::Tensor block_fht_linear_forward(
   return block_fht_linear_forward_cuda(input, latent, out_features, layers, seed, weight_scale);
 }
 
+torch::Tensor fixed_basis_transform(
+    torch::Tensor input,
+    torch::Tensor permutations,
+    torch::Tensor signs,
+    int64_t block_size,
+    bool inverse,
+    bool shared_input) {
+  TORCH_CHECK(input.is_cuda(), "fixed_basis_transform: input must be CUDA");
+  TORCH_CHECK(permutations.is_cuda(),
+              "fixed_basis_transform: permutations must be CUDA");
+  TORCH_CHECK(signs.is_cuda(), "fixed_basis_transform: signs must be CUDA");
+  TORCH_CHECK(
+      input.scalar_type() == torch::kFloat32 ||
+          input.scalar_type() == torch::kFloat16 ||
+          input.scalar_type() == torch::kBFloat16,
+      "fixed_basis_transform: input must be float32, float16, or bfloat16");
+  TORCH_CHECK(
+      permutations.scalar_type() == torch::kInt64,
+      "fixed_basis_transform: permutations must be int64");
+  TORCH_CHECK(
+      signs.scalar_type() == torch::kFloat32,
+      "fixed_basis_transform: signs must be float32");
+  return fixed_basis_transform_cuda(
+      input,
+      permutations,
+      signs,
+      block_size,
+      inverse,
+      shared_input);
+}
+
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("forward", &block_fht_forward, "Block-FHT slice forward (CUDA)");
   m.def("backward", &block_fht_backward, "Block-FHT slice backward (CUDA)");
   m.def("linear_forward", &block_fht_linear_forward, "Block-FHT fused linear forward (CUDA)");
+  m.def(
+      "fixed_basis_transform",
+      &fixed_basis_transform,
+      "Batched fixed signed/permuted block-Hadamard transform (CUDA)");
 }

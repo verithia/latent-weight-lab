@@ -1563,6 +1563,57 @@ def test_mlp_postgelu_hidden_self_gate_matches_diagnostic() -> None:
     torch.testing.assert_close(actual, expected)
 
 
+def test_mlp_multihead_postgelu_hidden_self_gate_matches_diagnostic() -> None:
+    from examples.nanogpt.analyze_mlp_conditioned_gate_alignment import (
+        MultiHeadPostGeluHiddenSelfBilinearGate,
+    )
+
+    torch.manual_seed(547)
+    mlp = MLP(
+        GPTConfig(
+            n_embd=8,
+            n_head=1,
+            block_fht_mlp_postgelu_hidden_self_gate=True,
+            block_fht_mlp_postgelu_hidden_self_gate_scale=0.75,
+            block_fht_mlp_postgelu_hidden_self_gate_heads=2,
+            block_fht_mlp_postgelu_hidden_self_gate_head_seed_stride=1000003,
+            block_fht_mlp_postgelu_hidden_self_gate_basis_block_size=8,
+            block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed=123,
+            block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed=456,
+            block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed=789,
+            block_fht_mlp_postgelu_hidden_self_gate_rms_epsilon=1e-5,
+        ),
+        layer_id=0,
+    )
+    diagnostic = MultiHeadPostGeluHiddenSelfBilinearGate(
+        32,
+        2,
+        scale=0.75,
+        basis_block_size=8,
+        condition_seed=123,
+        update_seed=456,
+        output_seed=789,
+        head_seed_stride=1000003,
+        rms_epsilon=1e-5,
+    )
+    assert mlp.postgelu_hidden_self_slope is not None
+    with torch.no_grad():
+        mlp.postgelu_hidden_self_slope.copy_(
+            torch.randn_like(mlp.postgelu_hidden_self_slope)
+        )
+        diagnostic.slope.copy_(mlp.postgelu_hidden_self_slope)
+        diagnostic.bias.zero_()
+    activated = torch.randn(2, 3, 32)
+    actual = mlp.apply_postgelu_hidden_self_gate(activated)
+    expected = diagnostic(activated)
+    torch.testing.assert_close(actual, expected)
+    assert mlp.postgelu_hidden_condition_permutation.shape == (2, 32)
+    assert not torch.equal(
+        mlp.postgelu_hidden_condition_permutation[0],
+        mlp.postgelu_hidden_condition_permutation[1],
+    )
+
+
 def test_mlp_postgelu_conditioned_gate_requires_untied_fixed_bases() -> None:
     with pytest.raises(
         ValueError,

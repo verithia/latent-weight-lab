@@ -132,7 +132,7 @@ def _load_block_fht_ext():
         except Exception:
             pass
         _BLOCK_FHT_EXT = load(
-            name="latent_weight_lab_block_fht_ext_scaled_v2",
+            name="latent_weight_lab_block_fht_ext_scaled_v3",
             sources=[
                 str(root / "csrc" / "block_fht_ext.cpp"),
                 str(root / "csrc" / "block_fht_ext_cuda.cu"),
@@ -212,6 +212,185 @@ def block_fht_slice(
         int(seed),
         int(start),
         int(stop),
+    )
+
+
+def _fixed_basis_transform_torch(
+    values: torch.Tensor,
+    permutations: torch.Tensor,
+    signs: torch.Tensor,
+    block_size: int,
+    *,
+    inverse: bool,
+    shared_input: bool,
+) -> torch.Tensor:
+    """Reference fixed signed/permuted block-Hadamard transform."""
+
+    if permutations.dim() == 1:
+        permutations = permutations.unsqueeze(0)
+    if signs.dim() == 1:
+        signs = signs.unsqueeze(0)
+    if permutations.shape != signs.shape:
+        raise ValueError("permutations and signs must have identical shapes")
+    bases, width = permutations.shape
+    if values.shape[-1] != width:
+        raise ValueError(
+            f"basis width mismatch: expected {width}, got {values.shape[-1]}"
+        )
+    if block_size <= 0 or block_size & (block_size - 1):
+        raise ValueError("block_size must be a positive power of two")
+    if width % block_size:
+        raise ValueError("block_size must divide the basis width")
+    if not shared_input and values.shape[0] != bases:
+        raise ValueError(
+            "per-basis values must have the basis count as their first axis"
+        )
+    outputs = []
+    for basis in range(bases):
+        selected = values if shared_input else values[basis]
+        permutation = permutations[basis].to(device=values.device)
+        sign = signs[basis].to(device=values.device, dtype=values.dtype)
+        if inverse:
+            transformed = selected * sign
+            grouped = transformed.reshape(
+                *transformed.shape[:-1], width // block_size, block_size
+            )
+            transformed = normalized_fht_last_dim(grouped).reshape_as(
+                selected
+            )
+            inverse_permutation = torch.argsort(permutation)
+            outputs.append(
+                transformed.index_select(-1, inverse_permutation)
+            )
+        else:
+            transformed = selected.index_select(-1, permutation)
+            grouped = transformed.reshape(
+                *transformed.shape[:-1], width // block_size, block_size
+            )
+            transformed = normalized_fht_last_dim(grouped).reshape_as(
+                selected
+            )
+            outputs.append(transformed * sign)
+    return torch.stack(outputs, dim=0)
+
+
+class _FixedBasisTransformFn(torch.autograd.Function):
+    @staticmethod
+    def forward(
+        ctx,
+        values: torch.Tensor,
+        permutations: torch.Tensor,
+        signs: torch.Tensor,
+        block_size: int,
+        inverse: bool,
+        shared_input: bool,
+    ) -> torch.Tensor:
+        ext = _load_block_fht_ext()
+        if ext is None:
+            raise RuntimeError(
+                "fixed basis CUDA transform extension failed to load"
+            )
+        ctx.block_size = int(block_size)
+        ctx.inverse = bool(inverse)
+        ctx.shared_input = bool(shared_input)
+        ctx.save_for_backward(permutations, signs)
+        return ext.fixed_basis_transform(
+            values.contiguous(),
+            permutations.contiguous(),
+            signs.contiguous(),
+            ctx.block_size,
+            ctx.inverse,
+            ctx.shared_input,
+        )
+
+    @staticmethod
+    def backward(ctx, grad_output: torch.Tensor):
+        permutations, signs = ctx.saved_tensors
+        ext = _load_block_fht_ext()
+        if ext is None:
+            raise RuntimeError(
+                "fixed basis CUDA transform extension failed to load"
+            )
+        bases = permutations.shape[0]
+        width = permutations.shape[1]
+        flat_grad = grad_output.reshape(-1, width).contiguous()
+        grad_values = ext.fixed_basis_transform(
+            flat_grad,
+            permutations.contiguous(),
+            signs.contiguous(),
+            ctx.block_size,
+            not ctx.inverse,
+            False,
+        )
+        if ctx.shared_input:
+            grad_values = grad_values.sum(dim=0)
+        else:
+            grad_values = grad_values.reshape(
+                bases, *grad_output.shape[1:]
+            )
+        return grad_values, None, None, None, None, None
+
+
+def fixed_basis_transform(
+    values: torch.Tensor,
+    permutations: torch.Tensor,
+    signs: torch.Tensor,
+    block_size: int,
+    *,
+    inverse: bool = False,
+    shared_input: bool = False,
+) -> torch.Tensor:
+    """Apply one or more fixed signed/permuted block-Hadamard bases.
+
+    A shared input has shape ``[..., width]`` and produces
+    ``[bases, ..., width]``. A per-basis input has shape
+    ``[bases, ..., width]`` and preserves that shape. CUDA uses one batched
+    extension launch; CPU uses the exact PyTorch reference.
+    """
+
+    if permutations.dim() == 1:
+        permutations = permutations.unsqueeze(0)
+    if signs.dim() == 1:
+        signs = signs.unsqueeze(0)
+    bases, width = permutations.shape
+    if values.shape[-1] != width:
+        raise ValueError(
+            f"basis width mismatch: expected {width}, got {values.shape[-1]}"
+        )
+    if not shared_input and values.shape[0] != bases:
+        raise ValueError(
+            "per-basis values must have the basis count as their first axis"
+        )
+    if values.is_cuda:
+        leading = values.shape[:-1]
+        if shared_input:
+            flattened = values.reshape(-1, width)
+            transformed = _FixedBasisTransformFn.apply(
+                flattened,
+                permutations,
+                signs,
+                int(block_size),
+                bool(inverse),
+                True,
+            )
+            return transformed.reshape(bases, *leading, width)
+        flattened = values.reshape(bases * math.prod(leading[1:]), width)
+        transformed = _FixedBasisTransformFn.apply(
+            flattened,
+            permutations,
+            signs,
+            int(block_size),
+            bool(inverse),
+            False,
+        )
+        return transformed.reshape(*leading, width)
+    return _fixed_basis_transform_torch(
+        values,
+        permutations,
+        signs,
+        int(block_size),
+        inverse=bool(inverse),
+        shared_input=bool(shared_input),
     )
 
 

@@ -11,6 +11,7 @@ from torch.nn import functional as F
 from examples.nanogpt.muon import Muon
 from latent_weight_lab import (
     BlockFHTLinear,
+    fixed_basis_transform,
     flush_block_fht_weight_cache,
     prepare_block_fht_weight_cache,
     restore_block_fht_weight_cache,
@@ -156,6 +157,8 @@ class GPTConfig:
     block_fht_mlp_postgelu_hidden_self_gate: bool = False
     block_fht_mlp_postgelu_hidden_self_gate_scale: float = 1.0
     block_fht_mlp_postgelu_hidden_self_gate_layers: tuple[int, ...] = ()
+    block_fht_mlp_postgelu_hidden_self_gate_heads: int = 1
+    block_fht_mlp_postgelu_hidden_self_gate_head_seed_stride: int = 1000003
     block_fht_mlp_postgelu_hidden_self_gate_basis_block_size: int = 256
     block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed: int = 271828
     block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed: int = 376557
@@ -1863,8 +1866,33 @@ class MLP(nn.Module):
                 or layer_id in postgelu_hidden_self_gate_layers
             )
         )
+        self.postgelu_hidden_self_gate_heads = int(
+            config.block_fht_mlp_postgelu_hidden_self_gate_heads
+        )
+        if self.postgelu_hidden_self_gate_heads < 1:
+            raise ValueError(
+                "block_fht_mlp_postgelu_hidden_self_gate_heads must be "
+                "at least one"
+            )
+        self.postgelu_hidden_self_gate_head_seed_stride = int(
+            config.block_fht_mlp_postgelu_hidden_self_gate_head_seed_stride
+        )
+        if self.postgelu_hidden_self_gate_head_seed_stride <= 0:
+            raise ValueError(
+                "block_fht_mlp_postgelu_hidden_self_gate_head_seed_stride "
+                "must be positive"
+            )
         self.postgelu_hidden_self_slope = (
-            nn.Parameter(torch.zeros(4 * config.n_embd))
+            nn.Parameter(
+                torch.zeros(
+                    (
+                        self.postgelu_hidden_self_gate_heads,
+                        4 * config.n_embd,
+                    )
+                    if self.postgelu_hidden_self_gate_heads > 1
+                    else (4 * config.n_embd,)
+                )
+            )
             if postgelu_hidden_self_gate_enabled
             else None
         )
@@ -1912,6 +1940,29 @@ class MLP(nn.Module):
                 selected_signs,
             )
 
+        def make_postgelu_hidden_basis_stack(
+            seed: int,
+        ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+            head_buffers = [
+                make_postgelu_hidden_basis_buffers(
+                    int(seed)
+                    + head
+                    * self.postgelu_hidden_self_gate_head_seed_stride
+                )
+                for head in range(self.postgelu_hidden_self_gate_heads)
+            ]
+            if self.postgelu_hidden_self_gate_heads == 1:
+                return head_buffers[0]
+            return tuple(
+                torch.stack(
+                    [head_buffers[head][index] for head in range(
+                        self.postgelu_hidden_self_gate_heads
+                    )],
+                    dim=0,
+                )
+                for index in range(3)
+            )
+
         if postgelu_hidden_self_gate_enabled:
             basis_block_size = (
                 self.postgelu_hidden_self_gate_basis_block_size
@@ -1931,21 +1982,21 @@ class MLP(nn.Module):
                 postgelu_hidden_condition_permutation,
                 postgelu_hidden_condition_inverse_permutation,
                 postgelu_hidden_condition_signs,
-            ) = make_postgelu_hidden_basis_buffers(
+            ) = make_postgelu_hidden_basis_stack(
                 config.block_fht_mlp_postgelu_hidden_self_gate_condition_basis_seed
             )
             (
                 postgelu_hidden_update_permutation,
                 postgelu_hidden_update_inverse_permutation,
                 postgelu_hidden_update_signs,
-            ) = make_postgelu_hidden_basis_buffers(
+            ) = make_postgelu_hidden_basis_stack(
                 config.block_fht_mlp_postgelu_hidden_self_gate_update_basis_seed
             )
             (
                 postgelu_hidden_output_permutation,
                 postgelu_hidden_output_inverse_permutation,
                 postgelu_hidden_output_signs,
-            ) = make_postgelu_hidden_basis_buffers(
+            ) = make_postgelu_hidden_basis_stack(
                 config.block_fht_mlp_postgelu_hidden_self_gate_output_basis_seed
             )
             postgelu_hidden_hadamard = normalized_fht_last_dim(
@@ -2655,35 +2706,31 @@ class MLP(nn.Module):
             signs = self.postgelu_hidden_output_signs
         else:
             raise ValueError(f"unsupported post-GELU basis role: {role}")
-        hadamard = self.postgelu_hidden_hadamard
         if permutation is None:
             return values
-        assert (
-            inverse_permutation is not None
-            and signs is not None
-            and hadamard is not None
-        )
-        signs = signs.to(device=values.device, dtype=values.dtype)
-        hadamard = hadamard.to(device=values.device, dtype=values.dtype)
-        if inverse:
-            values = values * signs
-            grouped = values.reshape(
-                *values.shape[:-1],
-                values.shape[-1]
-                // self.postgelu_hidden_self_gate_basis_block_size,
+        assert inverse_permutation is not None and signs is not None
+        multihead = permutation.dim() == 2
+        if inverse and not multihead:
+            transformed = fixed_basis_transform(
+                values.unsqueeze(0),
+                permutation,
+                signs,
                 self.postgelu_hidden_self_gate_basis_block_size,
+                inverse=True,
+                shared_input=False,
             )
-            values = F.linear(grouped, hadamard).reshape_as(values)
-            return values.index_select(-1, inverse_permutation)
-        values = values.index_select(-1, permutation)
-        grouped = values.reshape(
-            *values.shape[:-1],
-            values.shape[-1]
-            // self.postgelu_hidden_self_gate_basis_block_size,
+            return transformed[0]
+        transformed = fixed_basis_transform(
+            values,
+            permutation,
+            signs,
             self.postgelu_hidden_self_gate_basis_block_size,
+            inverse=inverse,
+            shared_input=not inverse,
         )
-        values = F.linear(grouped, hadamard).reshape_as(values)
-        return values * signs
+        if not multihead:
+            return transformed[0]
+        return transformed
 
     def apply_postgelu_hidden_self_gate(
         self,
@@ -2714,10 +2761,17 @@ class MLP(nn.Module):
             inverse=False,
             role="condition",
         )
+        slope_for_modulation = slope.to(dtype=spectral_condition.dtype)
+        if slope_for_modulation.dim() == 2:
+            slope_for_modulation = slope_for_modulation.reshape(
+                slope_for_modulation.shape[0],
+                *([1] * (spectral_condition.dim() - 2)),
+                slope_for_modulation.shape[1],
+            )
         modulation = (
             self.postgelu_hidden_self_gate_scale
             * spectral_condition
-            * slope.to(dtype=spectral_condition.dtype)
+            * slope_for_modulation
         )
         spectral_update = self._postgelu_hidden_self_basis(
             activated,
@@ -2725,11 +2779,14 @@ class MLP(nn.Module):
             role="update",
         )
         correction = spectral_update * modulation
-        return activated + self._postgelu_hidden_self_basis(
+        transformed = self._postgelu_hidden_self_basis(
             correction,
             inverse=True,
             role="output",
         )
+        if transformed.dim() == activated.dim() + 1:
+            transformed = transformed.sum(dim=0)
+        return activated + transformed
 
     def residual_conditioned_output_modulation(
         self,
