@@ -82,7 +82,7 @@ def main() -> None:
             "mfu_preflight_certificate": (
                 "/root/userdata/MappingNetworks/outputs/"
                 "y400_mai_v3_mlp_fixed_basis_bilinear_screens/"
-                "performance_preflight_fixedbilinear_l0.json"
+                "performance_preflight_fixedbilinear_l0_blockgemm.json"
             ),
             "failed_mfu_preflight": None,
             "launch_ready": True,
@@ -113,6 +113,9 @@ def main() -> None:
                 "basis": (
                     "fixed signed/permuted 256-wide normalized "
                     "block-Hadamard"
+                ),
+                "basis_execution": (
+                    "fixed 256x256 block-Hadamard accelerator GEMM"
                 ),
                 "basis_seed": 271828,
                 "fit_teacher_direction_cosine": 0.1229742094874382,

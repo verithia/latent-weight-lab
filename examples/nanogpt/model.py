@@ -1594,10 +1594,14 @@ class MLP(nn.Module):
                 - 1.0
             )
             inverse_permutation = torch.argsort(permutation)
+            hadamard = normalized_fht_last_dim(
+                torch.eye(basis_block_size, dtype=torch.float32)
+            )
         else:
             permutation = None
             inverse_permutation = None
             signs = None
+            hadamard = None
         self.register_buffer(
             "residual_conditioned_output_permutation",
             permutation,
@@ -1611,6 +1615,11 @@ class MLP(nn.Module):
         self.register_buffer(
             "residual_conditioned_output_signs",
             signs,
+            persistent=True,
+        )
+        self.register_buffer(
+            "residual_conditioned_output_hadamard",
+            hadamard,
             persistent=True,
         )
         # Optional non-persistent teacher state is installed by the training
@@ -2003,10 +2012,16 @@ class MLP(nn.Module):
             self.residual_conditioned_output_inverse_permutation
         )
         signs = self.residual_conditioned_output_signs
+        hadamard = self.residual_conditioned_output_hadamard
         if permutation is None:
             return values
-        assert inverse_permutation is not None and signs is not None
+        assert (
+            inverse_permutation is not None
+            and signs is not None
+            and hadamard is not None
+        )
         signs = signs.to(device=values.device, dtype=values.dtype)
+        hadamard = hadamard.to(device=values.device, dtype=values.dtype)
         if inverse:
             values = values * signs
             grouped = values.reshape(
@@ -2015,7 +2030,7 @@ class MLP(nn.Module):
                 // self.residual_conditioned_output_gate_basis_block_size,
                 self.residual_conditioned_output_gate_basis_block_size,
             )
-            values = normalized_fht_last_dim(grouped).reshape_as(values)
+            values = F.linear(grouped, hadamard).reshape_as(values)
             return values.index_select(-1, inverse_permutation)
         values = values.index_select(-1, permutation)
         grouped = values.reshape(
@@ -2024,7 +2039,7 @@ class MLP(nn.Module):
             // self.residual_conditioned_output_gate_basis_block_size,
             self.residual_conditioned_output_gate_basis_block_size,
         )
-        values = normalized_fht_last_dim(grouped).reshape_as(values)
+        values = F.linear(grouped, hadamard).reshape_as(values)
         return values * signs
 
     def apply_residual_conditioned_output_gate(
