@@ -1,0 +1,80 @@
+{
+  "authorization": {
+    "additional_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "scientific_training_authorized": false,
+    "scope": "exactly one directly polled MFU preflight under the pinned hidden88 config"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "config_sha256": "bdbe54a8aaaba713dc76bac41d6a789c6f739cf42351786b185a425956d225ac",
+    "coordinate_fraction_per_cproj": 0.057291666666666664,
+    "coordinates_per_layer": 135168,
+    "implementation_commit": "1f7e1c6640450b0938545bc7efe3c911f1e0ac33",
+    "matching_neighbors": 64,
+    "model_tier": "124m",
+    "parent_stages": 64,
+    "planned_tpp": 0.5,
+    "residual_stages": 24
+  },
+  "decision_rule": {
+    "pass": "exit zero, finite complete certificate bound to the exact config hash, all 8 timed real-training updates present, native matcher outputs validated for both passes, and measured MFU >= 0.20",
+    "reject": "MFU < 0.20, nonfinite/divergent training path, incomplete timing, native validation failure, provenance mismatch, or nonzero exit",
+    "threshold_changes_after_measurement": false
+  },
+  "measured_path": {
+    "dense_residual": false,
+    "forward_backward": "real CUDA BF16 124M training batches",
+    "future_information_used": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "optimizer": "exact Muon momentum and polar direction",
+    "parent": "fresh 64-stage native-selected hidden chart and diagonal-metric finite rotation",
+    "residual": "materialize parent, subtract it from the exact scheduled update, then fresh-select and fit 24 residual stages",
+    "weight_decay": "same decoupled folded-weight path as control"
+  },
+  "parent_evidence": {
+    "decision": "SELECT_TWO_PASS_FRESH_HIDDEN_FOR_IMPLEMENTATION_PREFLIGHT",
+    "heldout_capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_hidden_capacity_holdout_result.json",
+    "heldout_capacity_result_sha256": "cab549170a3cbfb1a0228e374bca056834f0d64e6a242632783e511520b437b3",
+    "scope": "authorizes production implementation and this MFU preflight only, not scientific training",
+    "selected_candidate": "fresh_hidden88"
+  },
+  "protocol": {
+    "callback": false,
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/performance_preflight_two_pass_fresh_hidden88.json",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=1",
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/performance_preflight_two_pass_fresh_hidden88.json",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "denominator": "same-host empirical BF16 8192-square tensor-core GEMM peak",
+    "do_not_disturb": "existing 985M full-attention run on Y400 GPU0",
+    "execution": "direct foreground process polled by the agent through terminal exit",
+    "gpu": 1,
+    "heartbeat": false,
+    "host": "Y400",
+    "minimum_mfu_fraction": 0.2,
+    "pro6": false,
+    "queue_worker": false,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "watchdog": false
+  },
+  "schema_version": "mai_124m_mlp_two_pass_fresh_hidden88_mfu_plan_v1",
+  "scientific_question": "Can the held-out-selected two-pass fresh hidden88 c_proj optimizer execute its complete real training update at or above the mandatory 20% model-FLOP utilization floor?",
+  "status": "registered_after_heldout_geometry_selection_and_production_implementation_before_real_training_path_mfu_measurement"
+}
