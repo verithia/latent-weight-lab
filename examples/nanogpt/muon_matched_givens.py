@@ -10,6 +10,9 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from examples.nanogpt.muon import zeropower_via_newtonschulz5
+from examples.nanogpt.fast_task_matching import (
+    fast_muon_matched_permutations,
+)
 
 
 def _complete_unique_matchings(

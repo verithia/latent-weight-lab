@@ -1,0 +1,112 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_matching_plan_v1",
+  "registered_at": "2026-07-30",
+  "question": "Can the exact current Muon direction select a fresh 64-stage c_proj topology every update quickly enough to eliminate measured sub-15-update staleness, while retaining the task effectiveness of the legacy greedy matcher?",
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_chart_staleness_result.json",
+  "parent_result_sha256": "dd089f0f5995fc95d0dae7f8d70e0bf05145ce0417dd1e53c9d20d5810d86b3e",
+  "causal_motivation": {
+    "age_15_minimum_registered_retention": 0.13725052815723585,
+    "age_15_output_positive_line_retention": 0.24808401578170816,
+    "age_15_recorded_train_descent_retention": 0.13897261076467615,
+    "age_15_holdout_validation_descent_retention": 0.13725052815723585,
+    "finding": "periodically stored connectivity is already severely stale at the shortest observed age even when future angles are refit exactly",
+    "structural_response": "make connectivity stateless and current-direction-selected on every optimizer update instead of storing it across updates"
+  },
+  "candidate": {
+    "name": "single_pass_task_edge_coloring",
+    "description": "Sort the current top-64 antisymmetric weight-direction edges once, then use a compiled single-pass edge-coloring algorithm to distribute those edges across 64 edge-disjoint perfect matchings.",
+    "persistent_selected_connectivity": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "dense_residual_adapter": false,
+    "future_information_for_selection": false,
+    "comparison_candidates": [
+      "legacy 64-pass greedy task matching",
+      "single-pass fresh task matching",
+      "equal-coordinate random unique matching"
+    ]
+  },
+  "implementation": {
+    "native_source": "examples/nanogpt/csrc/task_edge_coloring.cpp",
+    "native_source_sha256": "0dbda9b83a0a63ba95958153f96bec862b3e5084025fd97f362b49a99709659b",
+    "wrapper": "examples/nanogpt/fast_task_matching.py",
+    "wrapper_sha256": "2858864db759410d9a25c87663d35176fd5a93dbd36661da35ec9dccece58262",
+    "analyzer": "examples/nanogpt/analyze_mlp_fast_fresh_matching.py",
+    "analyzer_sha256": "d58df589a5accce70b48fb23e1c1f2b9a0a1a44ecff71374fa773fbefdee1805",
+    "native_test": "examples/nanogpt/test_fast_task_matching.py",
+    "native_test_sha256": "353854651b9fef9da3d794bcc3d27a3bc49393db5be33df7a924e1f28223f777",
+    "analyzer_test": "examples/nanogpt/test_analyze_mlp_fast_fresh_matching.py",
+    "analyzer_test_sha256": "1869d315fe0b6e1b3c0a60ceba7163985d5e63962a5623d4d343acc0936cc11f",
+    "muon_matching_module": "examples/nanogpt/muon_matched_givens.py",
+    "muon_matching_module_sha256": "9c7e3159907ccc99863b311ec1e19d994257f519acf6260ae36673cce3a68c93"
+  },
+  "inputs": {
+    "host": "Y400",
+    "snapshot_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/parameter_trajectory",
+    "optimizer_probe_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_cadence15_optimizer_probe_0p5tpp_lr24e4/optimizer_probe",
+    "input_run_identity_sha256": "a801a6e24a071abedaa120b4161065118ae8c85e24b22e810c8666f1631aecdf",
+    "dataset_manifest": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "steps": [
+      0,
+      15,
+      60,
+      75,
+      120,
+      135,
+      180,
+      195
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ]
+  },
+  "protocol": {
+    "stages": 64,
+    "neighbors": 64,
+    "matching_seed": 271828,
+    "fit_validation_seed": 20260806,
+    "holdout_validation_seed": 20260807,
+    "validation_batches": 4,
+    "validation_batch_size": 2,
+    "block_size": 256,
+    "metrics": [
+      "exact requested-Muon-update recovery",
+      "post-GELU residual-output fixed-scale and positive-line recovery",
+      "recorded training-gradient predicted CE descent",
+      "disjoint holdout-validation-gradient predicted CE descent",
+      "simultaneous five-layer fixed-batch finite-step CE",
+      "end-to-end matching latency including score construction, top-k, sorting, host transfer, and native edge coloring"
+    ],
+    "native_build_timing": "excluded after one explicit warm build; the source and resulting shared-library hashes are recorded",
+    "parameter_updates": 0
+  },
+  "registered_thresholds": {
+    "minimum_single_pass_over_greedy_retention": 0.85,
+    "minimum_single_pass_over_random_enrichment": 3.0,
+    "maximum_median_seconds_per_layer": 0.03,
+    "maximum_p95_seconds_per_layer": 0.06,
+    "maximum_mean_single_pass_minus_greedy_finite_ce": 0.00025,
+    "all_thresholds_required": true
+  },
+  "decision_rule": {
+    "pass": "QUALIFY_STATELESS_FRESH_MATCHER_PRODUCTION_PREFLIGHT only if all registered retention, enrichment, latency, and finite-CE thresholds pass",
+    "fail": "REJECT_STATELESS_FRESH_MATCHER and do not integrate or train it"
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": 1,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "pro6": false,
+    "do_not_disturb_gpu0_long_run": true,
+    "no_language_model_training": true
+  },
+  "authorized_next_action": "Run exactly this no-training matcher comparison from a clean exact-commit Y400 worktree. A passing result authorizes only production integration and a separately foreground-polled real BF16 MFU gate, not a 238-update language-model run."
+}
