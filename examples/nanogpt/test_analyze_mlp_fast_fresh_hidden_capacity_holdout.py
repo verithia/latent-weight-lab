@@ -12,8 +12,8 @@ def synthetic_rows(
     ratio112: float,
     future88: float,
     future112: float,
-    positive88: int = 28,
-    positive112: int = 28,
+    positive88: int = 20,
+    positive112: int = 20,
 ) -> tuple[list[dict], list[dict]]:
     values = {
         "dense_exact": 2.0,
@@ -28,14 +28,14 @@ def synthetic_rows(
         "fresh_hidden112": future112,
     }
     positives = {
-        "dense_exact": 28,
+        "dense_exact": 20,
         "fresh_hidden64": 0,
         "fresh_hidden88": positive88,
         "fresh_hidden112": positive112,
     }
     rows = []
     for window in ("fit", "holdout"):
-        for cell in range(28):
+        for cell in range(20):
             for candidate in CANDIDATES:
                 rows.append(
                     {
@@ -129,8 +129,8 @@ def test_rejects_insufficient_positive_future_cells() -> None:
         ratio112=1.20,
         future88=0.020,
         future112=0.020,
-        positive88=23,
-        positive112=23,
+        positive88=16,
+        positive112=16,
     )
     result = aggregate_results(rows, finite)
     assert result["passing_depths"] == []

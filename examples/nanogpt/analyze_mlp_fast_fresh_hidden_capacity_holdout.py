@@ -253,8 +253,8 @@ def aggregate_results(
                 "future_residual_positive_line_recovery"
             ]
             >= 0.015
-            and record["positive_future_cells"] >= 24
-            and record["future_cells"] == 28
+            and record["positive_future_cells"] >= 17
+            and record["future_cells"] == 20
             and record["finite_ce"]["wins"] >= 7
             and record[
                 "minimum_train_gradient_predicted_ce_decrease"
