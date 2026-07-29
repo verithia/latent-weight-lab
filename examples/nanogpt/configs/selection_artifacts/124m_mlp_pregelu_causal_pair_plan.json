@@ -10,15 +10,16 @@
     "causal_requirement": "Endpoint optimization establishes local task capacity but not from-scratch trainability. Only the matched pair below can promote the structure."
   },
   "implementation": {
-    "git_commit": "ce30dccc1114a466d73e0950b30036961d34717c",
+    "git_commit": "4b094c3a2b710933946587ee91faab29fd88bee6",
     "source_sha256": {
-      "examples/nanogpt/model.py": "75bfbe186f4dd5774716ec61fa2c33533a7a89818d0aa43c19553a7b72c4106d",
-      "examples/nanogpt/train.py": "18b00c984de511e47fde18ce44374d57a155369d985941b9890ed912b14ca62e",
+      "examples/nanogpt/model.py": "da38f61b9901e83b4212fccd04be3c4f445bc7bbafb45bf74310ece802f40803",
+      "examples/nanogpt/train.py": "7cb4e5a9ba569c6e9569623b0434adeb7fc441a6cd66b6150580149cfcce9111",
       "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
       "latent_weight_lab/block_fht.py": "003d041159cf6b57575ac2ffcee06db9fddbb7b13cb80788f0c21e432b0bf393"
     },
-    "tests": "210 passed, 9 skipped",
-    "folding": "For row-vector activations h=xW^T, the pre-GELU frame hR is evaluated by folding R into W^T before F.linear; cached execution retains exact VJP to c_fc and frame coordinates without materializing a 3072x3072 dense matrix."
+    "tests": "211 passed, 9 skipped",
+    "folding": "For row-vector activations h=xW^T, the pre-GELU frame hR is evaluated by folding R into W^T before F.linear; cached execution retains exact VJP to c_fc and frame coordinates without materializing a 3072x3072 dense matrix.",
+    "performance_path": "The opt-in cache retains the exact fold autograd graph from prepare through flush, so VJP reuses the existing fold instead of recomputing it. The detached materialized weight still serves every training microbatch."
   },
   "shared_training_protocol": {
     "model": "124M GPT, 12 layers, width 768, 12 heads, context 1024",
@@ -98,12 +99,18 @@
     "minimum_mfu_fraction": 0.2,
     "requirement": "Each exact immutable arm config must independently pass the real-training MFU preflight on its selected exclusive Y400 GPU before scientific training.",
     "measurement": "conventional 6N active-model FLOPs divided by the same-GPU empirical BF16 tensor-core GEMM peak",
-    "prelaunch_amendment": "The first immutable b32/g8 candidate measurement was 19.6261 percent MFU, below the gate, while its matched parent measured 22.1625 percent. Before either scientific arm ran, both arms were changed together to b64/g4. This preserves 262144 tokens per update and all seeds while amortizing one cache prepare/flush over larger microbatches.",
+    "prelaunch_amendment": "The first immutable b32/g8 candidate measurement was 19.6261 percent MFU, below the gate, while its matched parent measured 22.1625 percent. Before either scientific arm ran, both arms were changed together to b64/g4. This preserves 262144 tokens per update and all seeds. That exact b64/g4 candidate still measured only 19.5571 percent because cache prepare/flush is once per optimizer update rather than per microbatch. Before either scientific arm ran, candidate execution was amended to retain the exact pre-GELU fold graph through flush and reuse it for VJP, eliminating one recomputation without changing the function or gradients.",
     "rejected_candidate_certificate": {
       "config_sha256": "4d119c3962c9a857c57383e761c14da98ee02096e9865ea26abd5aa20397a88f",
       "mfu_fraction": 0.19626070327472764,
       "iter_ms": 1490.4333333333334,
       "tokens_per_second": 175884.33
+    },
+    "rejected_b64g4_candidate_certificate": {
+      "config_sha256": "b8cc4d28e55c5d37ae0422b33b9bc68d0cc17239b3663b4b7caaed276e871d91",
+      "mfu_fraction": 0.19557103243394197,
+      "iter_ms": 1499.0433333333333,
+      "tokens_per_second": 174874.80666666667
     },
     "polling": "foreground/direct polling only; no watchdog, queue entry, callbacks, or heartbeat for these short runs"
   },

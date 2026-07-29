@@ -17,7 +17,7 @@ SOURCE = CONFIG_DIR / (
     "cachevjp_muonchart154_0p5tpp_lr24e4.json"
 )
 PLAN = CONFIG_DIR / "selection_artifacts" / "124m_mlp_pregelu_causal_pair_plan.json"
-IMPLEMENTATION_COMMIT = "ce30dccc1114a466d73e0950b30036961d34717c"
+IMPLEMENTATION_COMMIT = "4b094c3a2b710933946587ee91faab29fd88bee6"
 SOURCE_FILES = (
     "examples/nanogpt/model.py",
     "examples/nanogpt/train.py",
@@ -88,6 +88,9 @@ def make_arm(source: dict, *, name: str, pregelu_stages: int) -> dict:
             "block_fht_mlp_pregelu_block_rotation_basis_size": 256,
             "block_fht_mlp_pregelu_block_rotation_coordinate_scale": 4.0,
             "block_fht_mlp_pregelu_block_rotation_seed": 161803,
+            "block_fht_mlp_pregelu_cache_retain_graph": bool(
+                pregelu_stages
+            ),
             "block_fht_mlp_pregelu_chart_lr_scale": 0.1,
             "batch_size": 64,
             "checkpoint_history": False,
