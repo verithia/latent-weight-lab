@@ -1,0 +1,119 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "candidate_family": {
+    "dense_exact": "The exact coherent Muon c_fc update reconstructed from the terminal hidden88 checkpoint, current task gradient, and persisted Muon momentum.",
+    "fresh_expansion64": "Transpose c_fc to [768,3072], select 64 edge-disjoint expansion-channel Givens matchings from the exact current direction, fit finite angles, and transpose the fitted update back.",
+    "fresh_expansion88": "Fit fresh_expansion64, materialize its finite residual, then select and fit a new 24-stage expansion-channel residual chart.",
+    "random_expansion88": "Use 88 deterministic edge-disjoint random expansion-channel matchings and fit their finite angles to the same exact current update. This is the equal-coordinate task-independent control."
+  },
+  "decision_rule": {
+    "absolute_dense_fraction_floor": {
+      "independent_validation_gradient_predicted_ce_decrease": 0.15,
+      "post_gelu_positive_line_recovery_each_window": 0.15,
+      "post_gelu_then_fixed_cproj_output_positive_line_recovery_each_window": 0.15
+    },
+    "all_metrics_finite": true,
+    "finite_ce": {
+      "fresh88_beats_baseline_on_both_validation_windows": true,
+      "fresh88_beats_random88_on_both_validation_windows": true
+    },
+    "fresh88_over_fresh64_floor": {
+      "independent_validation_gradient_predicted_ce_decrease_each_window": 1.1,
+      "post_gelu_positive_line_recovery_each_window": 1.1,
+      "post_gelu_then_fixed_cproj_output_positive_line_recovery_each_window": 1.1
+    },
+    "fresh88_over_random88_floor": {
+      "independent_validation_gradient_predicted_ce_decrease_each_window": 1.25,
+      "post_gelu_positive_line_recovery_each_window": 1.5,
+      "post_gelu_then_fixed_cproj_output_positive_line_recovery_each_window": 1.5
+    },
+    "minimum_fit_gradient_predicted_ce_decrease_per_layer": 0.0,
+    "on_fail": "REJECT_EXACT_CURRENT_SPARSE_CFC_MATCHER",
+    "on_pass": "SELECT_EXACT_CURRENT_CFC_MATCHER_FOR_PRODUCTION_IMPLEMENTATION_AND_SEPARATE_MFU_GATE",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command_template": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_exact_current_matcher",
+      "--checkpoint",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp/ckpt.pt",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_exact_current_matcher_plan.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_cfc_exact_current_matcher",
+      "--device",
+      "cuda"
+    ],
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py",
+    "foreground_direct_polling": true,
+    "heartbeat": false,
+    "host": "Y400",
+    "preferred_gpu": 1,
+    "pro6": false,
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "batches_per_window": 4,
+    "block_size": 1024,
+    "fit_train_seed": 20260806,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260806,
+    "validation_seeds": [
+      20260807,
+      20260808
+    ]
+  },
+  "hypothesis": "Static c_fc frames and gains were already falsified. The remaining distinct hypothesis is that a stateless chart selected from the exact current coherent Muon direction can follow the rotating expansion-side c_fc frame. The metric must be evaluated after GELU and after the fixed hidden88 c_proj, not by c_fc Frobenius recovery alone.",
+  "identity": {
+    "checkpoint": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_two_pass_fresh_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp/ckpt.pt",
+    "checkpoint_sha256": "423029ea02046b95a5f8f4b9f80c000816b0ebf51f6a9dfd66dcd84da0ed47c6",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "config_sha256": "bdbe54a8aaaba713dc76bac41d6a789c6f739cf42351786b185a425956d225ac",
+    "dataset_manifest": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "hidden88_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_training_result.json",
+    "hidden88_result_sha256": "c04fadf6cd0b5ff5d0e99d9b7d580d2e168d9e0a5dd73ab89af47f045a5dc008",
+    "preregistration_commit": "3a552aff1020f260a1d65a2637ee962e30c8ccc3"
+  },
+  "limitations": [
+    "This is a terminal local-tangent diagnostic, not evidence for the global solution manifold.",
+    "The dense exact update is reconstructed at the trained hidden88 terminal state; it is not a future endpoint oracle.",
+    "The materialized hidden88 c_proj weights, all other model weights, and the residual path remain fixed during every intervention.",
+    "Passing authorizes production implementation and a separate measured MFU gate only; it does not authorize training.",
+    "No learned dense basis, dense residual adapter, LoRA factor, scalar-gain retry, inverse-gauge retry, or static pre-GELU frame is permitted."
+  ],
+  "recorded_at": "2026-07-30",
+  "schema_version": "mai_124m_mlp_cfc_exact_current_matcher_plan_v1"
+}
