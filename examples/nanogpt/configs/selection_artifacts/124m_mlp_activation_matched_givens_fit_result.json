@@ -1,0 +1,33 @@
+{
+  "analysis_commit": "7706b21a96e8aa8d1fdf17c3b4dcb42245151de4",
+  "analysis_entrypoint_sha256": "196d50f9f5ce5a1421820bec175f12235257876e07dc76972fde7da2994f93f3",
+  "decision": "REJECT_SPARSE_ACTIVATION_MATCHED_GIVENS",
+  "failed_administrative_attempt": {
+    "classification": "matching_completion_bug; no result produced",
+    "output_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/activation_matched_givens_fit_v1",
+    "resolution_commit": "7706b21a96e8aa8d1fdf17c3b4dcb42245151de4"
+  },
+  "outputs": {
+    "aggregate_sha256": "d8bd760d8682fb7190039d8cb3af103431e2436ec32551481c259a5a4f3b1f20",
+    "analysis_log_sha256": "ce1f02635a490e0a932a9b8f66defe451f87aaaf40458992db1d94eaed74dd99",
+    "connectivity_sha256": "a5d0ad4b1aa39e66ebef792074ea5d9bf81e8e41c88890b94901c02222dac5ca",
+    "detail_sha256": "15c47280dae2fc8b1d66bfd6e8cc436d0e274671c142adf0a38c7d6db49f45de",
+    "metadata_sha256": "c3433eb1e23593ebe72ff00b60dedc15e0df35803fe882d3f83e06883cb22135",
+    "remote_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/activation_matched_givens_fit_v2"
+  },
+  "scientific_conclusion": "Selecting sparse coordinate pairs by strong step-0 post-GELU correlations does not recover the dense activation-PC directions. At every tested budget, endpoint recovery remains at or slightly below the registered task-independent random matching flow. Do not train this structure.",
+  "stage32": {
+    "fit": {
+      "endpoint_recovery": 0.020261399011803013,
+      "minimum_cell_recovery": 0.019953787326812744,
+      "recovery_over_random_connectivity": 0.985555828372158
+    },
+    "holdout": {
+      "endpoint_recovery": 0.02038772649691634,
+      "minimum_cell_recovery": 0.020147323608398438,
+      "recovery_over_random_connectivity": 0.9917006552503271
+    },
+    "random_connectivity_recovery": 0.020558347308714874
+  },
+  "schema_version": "nanogpt_mlp_activation_matched_givens_fit_result_v1"
+}
