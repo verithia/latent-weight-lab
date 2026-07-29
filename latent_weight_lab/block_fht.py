@@ -311,7 +311,6 @@ class _FixedBasisTransformFn(torch.autograd.Function):
             raise RuntimeError(
                 "fixed basis CUDA transform extension failed to load"
             )
-        bases = permutations.shape[0]
         width = permutations.shape[1]
         flat_grad = grad_output.reshape(-1, width).contiguous()
         grad_values = ext.fixed_basis_transform(
@@ -325,9 +324,7 @@ class _FixedBasisTransformFn(torch.autograd.Function):
         if ctx.shared_input:
             grad_values = grad_values.sum(dim=0)
         else:
-            grad_values = grad_values.reshape(
-                bases, *grad_output.shape[1:]
-            )
+            grad_values = grad_values.reshape(-1, width)
         return grad_values, None, None, None, None, None
 
 
