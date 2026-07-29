@@ -68,6 +68,16 @@ from examples.nanogpt.parameter_trajectory import (
 
 
 WINDOWS = ("fit", "holdout")
+OUTPUT_STEM = "fast_fresh_residual_decomposition"
+METADATA_SCHEMA_VERSION = (
+    "nanogpt_mlp_fast_fresh_residual_decomposition_v1"
+)
+METADATA_LIMITATIONS = [
+    "This is a zero-update causal tangent diagnostic, not training.",
+    "Finite-step CE perturbs five representative c_proj layers only.",
+    "The dense Muon replay is one optimizer path, not the global low-loss manifold.",
+    "Hidden72/80 use a fresh residual correction after production hidden64; pair reuse across the two sequential sweeps is allowed.",
+]
 CANDIDATES = (
     "dense_exact",
     "fresh_hidden64",
@@ -887,16 +897,10 @@ def main() -> None:
 
     aggregate = aggregate_results(rows, finite_rows)
     args.output.mkdir(parents=True, exist_ok=True)
-    detail_path = args.output / "fast_fresh_residual_decomposition.csv"
-    finite_path = (
-        args.output / "fast_fresh_residual_decomposition_finite_ce.csv"
-    )
-    selection_path = (
-        args.output / "fast_fresh_residual_decomposition_selections.csv"
-    )
-    aggregate_path = (
-        args.output / "fast_fresh_residual_decomposition_aggregate.json"
-    )
+    detail_path = args.output / f"{OUTPUT_STEM}.csv"
+    finite_path = args.output / f"{OUTPUT_STEM}_finite_ce.csv"
+    selection_path = args.output / f"{OUTPUT_STEM}_selections.csv"
+    aggregate_path = args.output / f"{OUTPUT_STEM}_aggregate.json"
     write_csv(detail_path, rows)
     write_csv(finite_path, finite_rows)
     write_csv(selection_path, selection_rows)
@@ -906,9 +910,7 @@ def main() -> None:
     )
     script = Path(__file__).resolve()
     metadata = {
-        "schema_version": (
-            "nanogpt_mlp_fast_fresh_residual_decomposition_v1"
-        ),
+        "schema_version": METADATA_SCHEMA_VERSION,
         "decision": aggregate["decision"],
         "parameter_updates": 0,
         "learned_dense_basis": False,
@@ -957,16 +959,9 @@ def main() -> None:
             "selections_sha256": file_sha256(selection_path),
             "aggregate_sha256": file_sha256(aggregate_path),
         },
-        "limitations": [
-            "This is a zero-update causal tangent diagnostic, not training.",
-            "Finite-step CE perturbs five representative c_proj layers only.",
-            "The dense Muon replay is one optimizer path, not the global low-loss manifold.",
-            "Hidden72/80 use a fresh residual correction after production hidden64; pair reuse across the two sequential sweeps is allowed.",
-        ],
+        "limitations": METADATA_LIMITATIONS,
     }
-    metadata_path = (
-        args.output / "fast_fresh_residual_decomposition_metadata.json"
-    )
+    metadata_path = args.output / f"{OUTPUT_STEM}_metadata.json"
     metadata_path.write_text(
         json.dumps(metadata, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
