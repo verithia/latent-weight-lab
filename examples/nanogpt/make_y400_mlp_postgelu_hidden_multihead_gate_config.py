@@ -121,10 +121,8 @@ def main() -> None:
             "failed_mfu_preflight": None,
             "mfu_preflight_required": True,
             "mfu_min_fraction": 0.2,
-            "launch_ready": False,
-            "launch_block_reason": (
-                "exact real-training MFU preflight has not yet passed"
-            ),
+            "launch_ready": True,
+            "launch_block_reason": None,
             "recipe_resolution_required": False,
             "recipe_resolution_stage": (
                 "postgelu_hidden_multihead_task_direction_smallest_rung"

@@ -201,7 +201,7 @@
   "historical_mlp_target_ordering_artifact": "examples/nanogpt/configs/selection_artifacts/mlp_target_ordering_y800_1b_v3.json",
   "historical_mlp_target_ordering_artifact_sha256": "7f54c4af747f139be71cf470b262eec895ba5941049c2c5a569f616ec2cc65af",
   "hpo_stage": "postgelu_hidden_multihead2_l0_0p5tpp",
-  "implementation_commit": "6be6c76162cea255fa41d6198839a681f08fa029",
+  "implementation_commit": "7a06ea9c52dbf607b9f6989e3c4de58aef956fd8",
   "implementation_source_hashes": {
     "csrc/block_fht_ext.cpp": "cf3ea15db7f7e41e4e236e6523054ab8c7fc96092ad5f33949ce8608bb1dd284",
     "csrc/block_fht_ext_cuda.cu": "334eb007501695ae6f8fa7d00443cc22448df1525910fee27f8feeee4b12303e",
@@ -218,8 +218,8 @@
   "ladder_interpretation": "single preregistered causal matched pair; not a fitted MLP scaling ladder",
   "ladder_role": "mlp_task_aligned_quadratic_tensor_rank_screen",
   "ladder_slot": "postgelu_hidden_multihead2_untied_fixed_basis_layer0",
-  "launch_block_reason": "exact real-training MFU preflight has not yet passed",
-  "launch_ready": false,
+  "launch_block_reason": null,
+  "launch_ready": true,
   "learning_rate": 0.0024,
   "lr_decay_iters": 238,
   "manifold_evidence": {
