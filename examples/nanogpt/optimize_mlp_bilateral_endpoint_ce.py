@@ -237,13 +237,22 @@ def clear_frozen_base_cache(model: GPT) -> None:
 
 def prepare_chart_caches(model: GPT) -> None:
     for block in model.transformer.h:
+        block.mlp.prepare_charted_cfc_cache()
         block.mlp.prepare_charted_cproj_cache()
+        if (
+            block.mlp.has_charted_cfc()
+            and block.mlp._cached_charted_cfc_weight is None
+        ):
+            raise RuntimeError("failed to prepare a charted c_fc cache")
         if block.mlp._cached_charted_cproj_weight is None:
             raise RuntimeError("failed to prepare a charted c_proj cache")
 
 
 def flush_chart_caches(model: GPT) -> None:
     for block in model.transformer.h:
+        block.mlp.flush_charted_cfc_cache(
+            project_base_gradient=False
+        )
         block.mlp.flush_charted_cproj_cache(
             project_base_gradient=False
         )
@@ -251,6 +260,7 @@ def flush_chart_caches(model: GPT) -> None:
 
 def discard_chart_caches(model: GPT) -> None:
     for block in model.transformer.h:
+        block.mlp._cached_charted_cfc_weight = None
         block.mlp._cached_charted_cproj_weight = None
 
 

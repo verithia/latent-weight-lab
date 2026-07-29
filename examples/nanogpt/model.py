@@ -1076,6 +1076,13 @@ class MLP(nn.Module):
             )
         else:
             self.c_fc = make_linear(config.n_embd, 4 * config.n_embd, config.bias, config, "mlp.c_fc", layer_id * 4 + 2)
+        # Installed only by the preregistered endpoint activation-frame
+        # diagnostic for now.  It is kept out of GPTConfig until the causal
+        # endpoint test establishes task capacity.
+        self.pregelu_block_rotation: (
+            LearnedFHTBlockOrthogonalOutputMix | None
+        ) = None
+        self._cached_charted_cfc_weight: torch.Tensor | None = None
         self.gelu = nn.GELU()
         grouped_proj_targets = [target for target in MLP_C_PROJ_GROUP_TARGETS if target in config.block_fht_targets]
         out_grouped_proj_targets = [target for target in MLP_C_PROJ_OUT_GROUP_TARGETS if target in config.block_fht_targets]
@@ -1754,6 +1761,148 @@ class MLP(nn.Module):
             )
         )
 
+    def has_charted_cfc(self) -> bool:
+        return self.pregelu_block_rotation is not None
+
+    def _cfc_base_weight(self) -> torch.Tensor:
+        weight = getattr(self.c_fc, "_cached_weight", None)
+        if weight is not None:
+            return weight
+        if not hasattr(self.c_fc, "weight"):
+            raise RuntimeError(
+                "pre-GELU frame requires a plain c_fc weight"
+            )
+        return self.c_fc.weight
+
+    def _materialize_charted_cfc_weight(
+        self, weight: torch.Tensor
+    ) -> torch.Tensor:
+        if self.pregelu_block_rotation is None:
+            return weight
+        # Row activations use h' = h @ R.  Since h = x @ W^T, folding the
+        # frame into F.linear requires W' = R^T @ W.  Apply R to W^T and
+        # transpose the result instead of materializing the O(hidden^2)
+        # rotation matrix.
+        return self.pregelu_block_rotation(
+            weight.transpose(0, 1)
+        ).transpose(0, 1).contiguous()
+
+    def prepare_charted_cfc_cache(self) -> None:
+        if not self.has_charted_cfc():
+            return
+        if self._cached_charted_cfc_weight is not None:
+            return
+        if getattr(self.c_fc, "bias", None) is not None:
+            raise ValueError(
+                "pre-GELU frame currently requires bias-free c_fc"
+            )
+        base_weight = self._cfc_base_weight()
+        with torch.no_grad():
+            charted_weight = self._materialize_charted_cfc_weight(
+                base_weight
+            )
+        chart_requires_grad = any(
+            parameter.requires_grad
+            for parameter in self.pregelu_block_rotation.parameters()
+        )
+        self._cached_charted_cfc_weight = (
+            charted_weight.detach().requires_grad_(
+                bool(base_weight.requires_grad or chart_requires_grad)
+            )
+        )
+
+    def flush_charted_cfc_cache(
+        self, *, project_base_gradient: bool = True
+    ) -> None:
+        cached = self._cached_charted_cfc_weight
+        if cached is None:
+            return
+        self._cached_charted_cfc_weight = None
+        if cached.grad is None:
+            return
+        if self.pregelu_block_rotation is None:
+            raise RuntimeError("cached pre-GELU frame is missing")
+        base_weight = self._cfc_base_weight()
+        chart_parameters = [
+            parameter
+            for parameter in self.pregelu_block_rotation.parameters()
+            if parameter.requires_grad
+        ]
+        with torch.enable_grad():
+            base_proxy = base_weight.detach()
+            if project_base_gradient:
+                base_proxy.requires_grad_(True)
+            charted_proxy = self._materialize_charted_cfc_weight(
+                base_proxy
+            )
+            gradient_targets = (
+                [base_proxy, *chart_parameters]
+                if project_base_gradient
+                else chart_parameters
+            )
+            if not gradient_targets:
+                return
+            gradients = torch.autograd.grad(
+                charted_proxy,
+                gradient_targets,
+                grad_outputs=cached.grad.to(dtype=charted_proxy.dtype),
+                allow_unused=True,
+            )
+        if project_base_gradient:
+            base_gradient = gradients[0].to(dtype=base_weight.dtype)
+            if base_weight.grad is None:
+                base_weight.grad = base_gradient
+            else:
+                base_weight.grad.add_(base_gradient)
+            chart_gradients = gradients[1:]
+        else:
+            chart_gradients = gradients
+        for parameter, gradient in zip(
+            chart_parameters, chart_gradients
+        ):
+            if gradient is None:
+                continue
+            gradient = gradient.to(dtype=parameter.dtype)
+            if parameter.grad is None:
+                parameter.grad = gradient
+            else:
+                parameter.grad.add_(gradient)
+
+    def suspend_charted_cfc_cache(self) -> torch.Tensor | None:
+        cached = self._cached_charted_cfc_weight
+        self._cached_charted_cfc_weight = None
+        return cached
+
+    def restore_charted_cfc_cache(
+        self, cached: torch.Tensor | None
+    ) -> None:
+        if cached is None:
+            return
+        if self._cached_charted_cfc_weight is not None:
+            raise RuntimeError(
+                "cannot restore a charted c_fc cache over a live cache"
+            )
+        self._cached_charted_cfc_weight = cached
+
+    def _charted_cfc(self, values: torch.Tensor) -> torch.Tensor | None:
+        if not self.has_charted_cfc():
+            return None
+        if self._cached_charted_cfc_weight is not None:
+            return F.linear(
+                values, self._cached_charted_cfc_weight, None
+            )
+        if getattr(self.c_fc, "bias", None) is not None:
+            raise ValueError(
+                "pre-GELU frame currently requires bias-free c_fc"
+            )
+        return F.linear(
+            values,
+            self._materialize_charted_cfc_weight(
+                self._cfc_base_weight()
+            ),
+            None,
+        )
+
     def _materialize_charted_cproj_weight(
         self, weight: torch.Tensor
     ) -> torch.Tensor:
@@ -1778,6 +1927,33 @@ class MLP(nn.Module):
             transposed = transposed @ rotation
         return transposed.transpose(0, 1).contiguous()
 
+    def _cproj_chart_parameters(
+        self, *, require_grad_only: bool
+    ) -> list[torch.Tensor]:
+        parameters: list[torch.Tensor] = []
+        if self.hidden_block_rotation is not None:
+            parameters.extend(
+                parameter
+                for parameter in self.hidden_block_rotation.parameters()
+                if not require_grad_only or parameter.requires_grad
+            )
+        if self.hidden_log_gain is not None and (
+            not require_grad_only or self.hidden_log_gain.requires_grad
+        ):
+            parameters.append(self.hidden_log_gain)
+        if self.output_block_rotation is not None:
+            parameters.extend(
+                parameter
+                for parameter in self.output_block_rotation.parameters()
+                if not require_grad_only or parameter.requires_grad
+            )
+        if self.residual_output_log_gain is not None and (
+            not require_grad_only
+            or self.residual_output_log_gain.requires_grad
+        ):
+            parameters.append(self.residual_output_log_gain)
+        return parameters
+
     def prepare_charted_cproj_cache(self) -> None:
         """Materialize the complete generated c_proj chart once per step.
 
@@ -1800,8 +1976,16 @@ class MLP(nn.Module):
             charted_weight = self._materialize_charted_cproj_weight(
                 base_weight
             )
+        chart_requires_grad = any(
+            parameter.requires_grad
+            for parameter in self._cproj_chart_parameters(
+                require_grad_only=False
+            )
+        )
         self._cached_charted_cproj_weight = (
-            charted_weight.detach().requires_grad_(True)
+            charted_weight.detach().requires_grad_(
+                bool(base_weight.requires_grad or chart_requires_grad)
+            )
         )
 
     def flush_charted_cproj_cache(
@@ -1826,29 +2010,9 @@ class MLP(nn.Module):
             raise RuntimeError(
                 "charted c_proj cache cannot flush without its base cache"
             )
-        chart_parameters: list[torch.Tensor] = []
-        if self.hidden_block_rotation is not None:
-            chart_parameters.extend(
-                parameter
-                for parameter in self.hidden_block_rotation.parameters()
-                if parameter.requires_grad
-            )
-        if (
-            self.hidden_log_gain is not None
-            and self.hidden_log_gain.requires_grad
-        ):
-            chart_parameters.append(self.hidden_log_gain)
-        if self.output_block_rotation is not None:
-            chart_parameters.extend(
-                parameter
-                for parameter in self.output_block_rotation.parameters()
-                if parameter.requires_grad
-            )
-        if (
-            self.residual_output_log_gain is not None
-            and self.residual_output_log_gain.requires_grad
-        ):
-            chart_parameters.append(self.residual_output_log_gain)
+        chart_parameters = self._cproj_chart_parameters(
+            require_grad_only=True
+        )
         with torch.enable_grad():
             base_proxy = base_weight.detach()
             if project_base_gradient:
@@ -1970,7 +2134,9 @@ class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         self.last_cproj_teacher_alignment_loss = None
-        hidden = self.c_fc(x)
+        hidden = self._charted_cfc(x)
+        if hidden is None:
+            hidden = self.c_fc(x)
         if self.lowrank_left is not None and self.lowrank_right is not None:
             residual = x.matmul(self.lowrank_left.to(dtype=x.dtype)).matmul(self.lowrank_right.to(dtype=x.dtype))
             hidden = hidden + self.lowrank_scale * residual
@@ -2420,16 +2586,22 @@ class GPT(nn.Module):
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
         prepare_block_fht_weight_cache(self, dtype=dtype)
         for block in self.transformer.h:
+            block.mlp.prepare_charted_cfc_cache()
             block.mlp.prepare_charted_cproj_cache()
 
     def flush_block_fht_cache(self) -> None:
         for block in self.transformer.h:
+            block.mlp.flush_charted_cfc_cache()
             block.mlp.flush_charted_cproj_cache()
         flush_block_fht_weight_cache(self)
 
     def suspend_block_fht_cache(self):
         charted = [
-            (block.mlp, block.mlp.suspend_charted_cproj_cache())
+            (
+                block.mlp,
+                block.mlp.suspend_charted_cfc_cache(),
+                block.mlp.suspend_charted_cproj_cache(),
+            )
             for block in self.transformer.h
         ]
         return suspend_block_fht_weight_cache(self), charted
@@ -2437,8 +2609,9 @@ class GPT(nn.Module):
     def restore_block_fht_cache(self, suspended) -> None:
         block_fht, charted = suspended
         restore_block_fht_weight_cache(block_fht)
-        for mlp, cached in charted:
-            mlp.restore_charted_cproj_cache(cached)
+        for mlp, cfc_cached, cproj_cached in charted:
+            mlp.restore_charted_cfc_cache(cfc_cached)
+            mlp.restore_charted_cproj_cache(cproj_cached)
 
 
 def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> None:

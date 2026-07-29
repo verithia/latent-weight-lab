@@ -927,6 +927,125 @@ def test_mlp_folds_hidden_rotation_and_gain_into_cproj_weight() -> None:
     assert mlp.hidden_log_gain.grad is not None
 
 
+def install_pregelu_frame(model: GPT) -> None:
+    for layer_id, block in enumerate(model.transformer.h):
+        block.mlp.pregelu_block_rotation = (
+            LearnedFHTBlockOrthogonalOutputMix(
+                features=4 * model.config.n_embd,
+                stages=2,
+                rotation_block_size=4,
+                basis_block_size=8,
+                seed=311 + layer_id,
+                coordinate_scale=3.0,
+            )
+        )
+
+
+def test_mlp_folds_pregelu_frame_into_cfc_weight() -> None:
+    torch.manual_seed(309)
+    config = GPTConfig(n_embd=8, n_head=1, bias=False)
+    mlp = MLP(config, layer_id=0)
+    mlp.pregelu_block_rotation = LearnedFHTBlockOrthogonalOutputMix(
+        features=4 * config.n_embd,
+        stages=2,
+        rotation_block_size=4,
+        basis_block_size=8,
+        seed=310,
+        coordinate_scale=3.0,
+    )
+    values = torch.randn(2, 3, config.n_embd)
+    identity_expected = mlp.c_proj(mlp.gelu(mlp.c_fc(values)))
+    torch.testing.assert_close(mlp(values), identity_expected)
+
+    with torch.no_grad():
+        mlp.pregelu_block_rotation.coordinates.normal_(std=0.03)
+    explicit = mlp.c_proj(
+        mlp.gelu(mlp.pregelu_block_rotation(mlp.c_fc(values)))
+    )
+    torch.testing.assert_close(mlp(values), explicit)
+
+
+def test_cached_charted_cfc_matches_live_forward_and_gradients() -> None:
+    torch.manual_seed(312)
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=1,
+        n_embd=8,
+        bias=False,
+    )
+    live = GPT(config)
+    cached = GPT(config)
+    install_pregelu_frame(live)
+    install_pregelu_frame(cached)
+    with torch.no_grad():
+        live.transformer.h[
+            0
+        ].mlp.pregelu_block_rotation.coordinates.normal_(std=0.02)
+    cached.load_state_dict(live.state_dict())
+    inputs = torch.randint(0, config.vocab_size, (2, config.block_size))
+    targets = torch.randint(0, config.vocab_size, inputs.shape)
+
+    live_loss = live(inputs, targets)[1]
+    assert live_loss is not None
+    live_loss.backward()
+
+    cached.prepare_block_fht_cache()
+    cached_mlp = cached.transformer.h[0].mlp
+    assert cached_mlp._cached_charted_cfc_weight is not None
+    cached_loss = cached(inputs, targets)[1]
+    assert cached_loss is not None
+    cached_loss.backward()
+    cached.flush_block_fht_cache()
+    assert cached_mlp._cached_charted_cfc_weight is None
+
+    torch.testing.assert_close(cached_loss, live_loss)
+    torch.testing.assert_close(
+        cached_mlp.c_fc.weight.grad,
+        live.transformer.h[0].mlp.c_fc.weight.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+    torch.testing.assert_close(
+        cached_mlp.pregelu_block_rotation.coordinates.grad,
+        live.transformer.h[
+            0
+        ].mlp.pregelu_block_rotation.coordinates.grad,
+        atol=2e-6,
+        rtol=2e-5,
+    )
+
+
+def test_cached_charted_cfc_can_skip_frozen_base_vjp() -> None:
+    torch.manual_seed(313)
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=1,
+        n_embd=8,
+        bias=False,
+    )
+    model = GPT(config)
+    install_pregelu_frame(model)
+    for parameter in model.parameters():
+        parameter.requires_grad_(False)
+    mlp = model.transformer.h[0].mlp
+    coordinates = mlp.pregelu_block_rotation.coordinates
+    coordinates.requires_grad_(True)
+    model.prepare_block_fht_cache()
+    assert mlp._cached_charted_cfc_weight is not None
+    inputs = torch.randint(0, config.vocab_size, (2, config.block_size))
+    targets = torch.randint(0, config.vocab_size, inputs.shape)
+    loss = model(inputs, targets)[1]
+    assert loss is not None
+    loss.backward()
+    mlp.flush_charted_cfc_cache(project_base_gradient=False)
+    assert mlp.c_fc.weight.grad is None
+    assert coordinates.grad is not None
+
+
 def test_cached_charted_cproj_matches_live_forward_and_gradients() -> None:
     torch.manual_seed(307)
     config = GPTConfig(
