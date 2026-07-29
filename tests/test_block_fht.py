@@ -181,6 +181,39 @@ def test_product_fht_normalized_pullback_matches_materialized_step_norm():
     assert diagnostics["actual_target_update_cosine"] > 0.0
 
 
+def test_product_fht_closed_form_jvp_matches_autograd():
+    torch.manual_seed(19)
+    layer = ProductFHTLinear(
+        8,
+        4,
+        factors=3,
+        seed=107,
+        weight_std=0.04,
+    )
+    with torch.no_grad():
+        layer.product_log_diagonals.normal_(std=0.1)
+        layer.product_output_log_gain.normal_(std=0.1)
+    diagonal_direction = torch.randn_like(
+        layer.product_log_diagonals
+    )
+    output_direction = torch.randn_like(
+        layer.product_output_log_gain
+    )
+    _, reference = torch.autograd.functional.jvp(
+        layer._weight_from_factors,
+        (
+            layer.product_log_diagonals.detach(),
+            layer.product_output_log_gain.detach(),
+        ),
+        (diagonal_direction, output_direction),
+        strict=True,
+    )
+    actual = layer._weight_jvp_from_factors(
+        diagonal_direction, output_direction
+    )
+    torch.testing.assert_close(actual, reference, atol=1e-6, rtol=1e-5)
+
+
 def test_product_fht_cproj_is_target_selective_and_sgd_owned():
     model = GPT(
         GPTConfig(

@@ -1214,6 +1214,62 @@ class ProductFHTLinear(nn.Module):
             self.product_output_log_gain,
         )
 
+    def _weight_jvp_from_factors(
+        self,
+        log_diagonal_direction: torch.Tensor,
+        output_log_gain_direction: torch.Tensor,
+    ) -> torch.Tensor:
+        """Apply the exact product-chart Jacobian without double backward."""
+        log_diagonals = self.product_log_diagonals.detach()
+        output_log_gain = self.product_output_log_gain.detach()
+        dtype = log_diagonals.dtype
+        device = log_diagonals.device
+        matrix = torch.eye(
+            self.out_features,
+            self.padded_features,
+            dtype=dtype,
+            device=device,
+        )
+        tangent = torch.zeros_like(matrix)
+        signs = self.product_factor_signs.to(device=device, dtype=dtype)
+        for factor in range(self.factors):
+            matrix = normalized_fht_last_dim(matrix * signs[factor])
+            tangent = normalized_fht_last_dim(tangent * signs[factor])
+            coordinates = log_diagonals[factor]
+            clamped = coordinates.clamp(-6.0, 6.0)
+            diagonal = torch.exp(self.diagonal_scale * clamped)
+            active = ((coordinates > -6.0) & (coordinates < 6.0)).to(
+                dtype=dtype
+            )
+            diagonal_tangent = (
+                diagonal
+                * self.diagonal_scale
+                * log_diagonal_direction[factor].to(dtype=dtype)
+                * active
+            )
+            tangent = (
+                tangent * diagonal + matrix * diagonal_tangent
+            )
+            matrix = matrix * diagonal
+        output_clamped = output_log_gain.clamp(-6.0, 6.0)
+        output_gain = torch.exp(output_clamped)
+        output_active = (
+            (output_log_gain > -6.0) & (output_log_gain < 6.0)
+        ).to(dtype=dtype)
+        output_tangent = (
+            output_gain
+            * output_log_gain_direction.to(dtype=dtype)
+            * output_active
+        )
+        scale = self.weight_std * math.sqrt(self.padded_features)
+        return (
+            scale
+            * (
+                output_gain.view(-1, 1) * tangent
+                + output_tangent.view(-1, 1) * matrix
+            )[:, : self.in_features]
+        )
+
     def set_factor_learning_rate(self, learning_rate: float) -> None:
         learning_rate = float(learning_rate)
         if not math.isfinite(learning_rate) or learning_rate <= 0.0:
@@ -1309,18 +1365,9 @@ class ProductFHTLinear(nn.Module):
                         "set the product-FHT factor learning rate before "
                         "flushing a normalized pullback"
                     )
-                _, raw_jvp = torch.autograd.functional.jvp(
-                    self._weight_from_factors,
-                    (
-                        self.product_log_diagonals.detach(),
-                        self.product_output_log_gain.detach(),
-                    ),
-                    (
-                        diagonal_grad.detach(),
-                        output_gain_grad.detach(),
-                    ),
-                    create_graph=False,
-                    strict=True,
+                raw_jvp = self._weight_jvp_from_factors(
+                    diagonal_grad.detach(),
+                    output_gain_grad.detach(),
                 )
                 direction_norm = direction.float().norm().clamp_min(1e-30)
                 raw_jvp_norm = raw_jvp.float().norm().clamp_min(1e-30)
