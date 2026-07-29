@@ -521,7 +521,7 @@ __global__ void postgelu_slope_backward_kernel(
     int64_t width,
     int64_t token_chunks,
     float scale) {
-  int64_t width_blocks = width / blockDim.x;
+  int64_t width_blocks = (width + blockDim.x - 1) / blockDim.x;
   int64_t basis = blockIdx.x / (width_blocks * token_chunks);
   int64_t residual =
       blockIdx.x - basis * width_blocks * token_chunks;
