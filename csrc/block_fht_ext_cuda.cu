@@ -386,7 +386,7 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_kernel(
 }
 
 template <typename scalar_t>
-__global__ __launch_bounds__(64) void fixed_basis_transform_256_kernel(
+__global__ __launch_bounds__(32) void fixed_basis_transform_256_kernel(
     const scalar_t* __restrict__ input,
     const int64_t* __restrict__ permutations,
     const float* __restrict__ signs,
@@ -397,10 +397,8 @@ __global__ __launch_bounds__(64) void fixed_basis_transform_256_kernel(
     int64_t jobs,
     bool inverse,
     bool shared_input) {
-  extern __shared__ float values[];
   constexpr int64_t block_size = 256;
   int64_t blocks_per_token = width / block_size;
-  int warp = (int)(threadIdx.x >> 5);
   int warp_lane = (int)(threadIdx.x & 31);
   for (int64_t job = blockIdx.x; job < jobs; job += gridDim.x) {
     int64_t basis = job / (tokens * blocks_per_token);
@@ -410,11 +408,11 @@ __global__ __launch_bounds__(64) void fixed_basis_transform_256_kernel(
     int64_t basis_offset = basis * width;
     int64_t input_token_offset =
         (shared_input ? token : basis * tokens + token) * width;
-    int64_t spectral_indices[4];
-    int64_t selected_permutations[4];
+    float local_values[8];
+    int64_t spectral_indices[8];
+    int64_t selected_permutations[8];
     #pragma unroll
-    for (int quarter = 0; quarter < 4; ++quarter) {
-      int group = warp + quarter * 2;
+    for (int group = 0; group < 8; ++group) {
       int64_t spectral_index =
           transform_block * block_size + group * 32 + warp_lane;
       int64_t permutation = permutations[basis_offset + spectral_index];
@@ -430,38 +428,35 @@ __global__ __launch_bounds__(64) void fixed_basis_transform_256_kernel(
         value =
             (warp_lane & offset) ? partner - value : value + partner;
       }
-      spectral_indices[quarter] = spectral_index;
-      selected_permutations[quarter] = permutation;
-      values[group * 33 + warp_lane] = value;
+      local_values[group] = value;
+      spectral_indices[group] = spectral_index;
+      selected_permutations[group] = permutation;
     }
-    __syncthreads();
 
-    // H256 = H8 (across warps) kron H32 (within each warp). Each thread
-    // computes four H8 rows directly from the eight shared warp values.
+    // H256 = H8 (across register-held groups) kron H32 (across lanes).
+    // One warp owns the complete transform, so no shared memory or barriers
+    // are required.
     int64_t output_token_offset = (basis * tokens + token) * width;
     #pragma unroll
-    for (int quarter = 0; quarter < 4; ++quarter) {
-      int output_group = warp + quarter * 2;
+    for (int output_group = 0; output_group < 8; ++output_group) {
       float cross_warp = 0.0f;
       #pragma unroll
       for (int input_group = 0; input_group < 8; ++input_group) {
-        float component = values[input_group * 33 + warp_lane];
+        float component = local_values[input_group];
         cross_warp += (__popc(output_group & input_group) & 1)
             ? -component
             : component;
       }
       float value = cross_warp * 0.0625f;
-      int64_t spectral_index = spectral_indices[quarter];
+      int64_t spectral_index = spectral_indices[output_group];
       int64_t output_index =
-          inverse ? selected_permutations[quarter] : spectral_index;
+          inverse ? selected_permutations[output_group] : spectral_index;
       if (!inverse) {
         value *= signs[basis_offset + spectral_index];
       }
       output[output_token_offset + output_index] =
           float_to_scalar<scalar_t>(value);
     }
-    // The persistent CTA reuses the same shared rows for its next job.
-    __syncthreads();
   }
 }
 
@@ -988,8 +983,10 @@ torch::Tensor fixed_basis_transform_cuda(
       (int64_t)properties.multiProcessorCount *
       (block_size == 256 ? 32 : 8);
   int grid = (int)std::min(jobs, resident_blocks);
-  int threads = block_size == 256 ? 64 : 256;
-  size_t smem = padded_shared_size(block_size) * sizeof(float);
+  int threads = block_size == 256 ? 32 : 256;
+  size_t smem = block_size == 256
+      ? 0
+      : padded_shared_size(block_size) * sizeof(float);
   auto stream = at::cuda::getCurrentCUDAStream();
   if (smem >= 48 * 1024) {
     C10_CUDA_CHECK(cudaFuncSetAttribute(
