@@ -1612,6 +1612,7 @@ def main() -> None:
             targets=list(args.trajectory_snapshot_targets),
             dtype=args.trajectory_snapshot_dtype,
             layers=args.trajectory_snapshot_layers,
+            all_parameters=args.trajectory_snapshot_all_parameters,
             model_config=gpt_config,
             run_identity=run_identity,
             execution_provenance=trajectory_execution_provenance,

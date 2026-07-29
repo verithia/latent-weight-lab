@@ -74,6 +74,27 @@ class ParameterTrajectoryTest(unittest.TestCase):
             {"transformer.h.1.mlp.c_proj.weight"},
         )
 
+    def test_collects_all_unique_named_parameters(self) -> None:
+        model = TinyModel()
+        selected = collect_parameters(
+            model,
+            targets=[],
+            dtype="float32",
+            all_parameters=True,
+        )
+        self.assertEqual(
+            set(selected),
+            {name for name, _parameter in model.named_parameters()},
+        )
+        with self.assertRaisesRegex(ValueError, "cannot filter"):
+            collect_parameters(
+                model,
+                targets=[],
+                dtype="float32",
+                layers=[0],
+                all_parameters=True,
+            )
+
     def test_snapshot_is_atomic_identity_bound_and_idempotent(self) -> None:
         model = TinyModel()
         identity = {"config_sha256": "a" * 64, "data_manifest": {"sha256": "b" * 64}}
@@ -86,6 +107,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 targets=["mlp.c_fc", "mlp.c_proj"],
                 dtype="float32",
                 layers=[0],
+                all_parameters=False,
                 model_config=config_as_dataclass(),
                 run_identity=identity,
                 execution_provenance={"git_commit": "c" * 40},
@@ -97,6 +119,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 targets=["mlp.c_fc", "mlp.c_proj"],
                 dtype="float32",
                 layers=[0],
+                all_parameters=False,
                 model_config=config_as_dataclass(),
                 run_identity=identity,
                 execution_provenance={"git_commit": "c" * 40},
@@ -108,6 +131,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
             self.assertEqual(payload["schema_version"], SCHEMA_VERSION)
             self.assertEqual(payload["step"], 6)
             self.assertEqual(payload["layers"], [0])
+            self.assertFalse(payload["all_parameters"])
             self.assertEqual(len(payload["parameters"]), 2)
             self.assertEqual(payload["execution_provenance"]["git_commit"], "c" * 40)
 
@@ -118,6 +142,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                     trajectory_snapshot_interval=-1,
                     trajectory_snapshot_targets=["mlp.c_fc"],
                     trajectory_snapshot_layers=None,
+                    trajectory_snapshot_all_parameters=False,
                 )
             )
         with self.assertRaisesRegex(ValueError, "non-empty"):
@@ -126,6 +151,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
                     trajectory_snapshot_interval=1,
                     trajectory_snapshot_targets=[],
                     trajectory_snapshot_layers=None,
+                    trajectory_snapshot_all_parameters=False,
                 )
             )
         with self.assertRaisesRegex(ValueError, "unique"):
@@ -134,6 +160,16 @@ class ParameterTrajectoryTest(unittest.TestCase):
                     trajectory_snapshot_interval=1,
                     trajectory_snapshot_targets=["mlp.c_proj"],
                     trajectory_snapshot_layers=[0, 0],
+                    trajectory_snapshot_all_parameters=False,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "cannot be combined"):
+            validate_arguments(
+                argparse.Namespace(
+                    trajectory_snapshot_interval=60,
+                    trajectory_snapshot_targets=[],
+                    trajectory_snapshot_layers=[0],
+                    trajectory_snapshot_all_parameters=True,
                 )
             )
 

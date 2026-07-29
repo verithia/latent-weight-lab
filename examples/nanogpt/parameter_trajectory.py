@@ -37,7 +37,11 @@ def parameter_matches(
     name: str,
     targets: Iterable[str],
     layers: Iterable[int] | None = None,
+    *,
+    all_parameters: bool = False,
 ) -> bool:
+    if all_parameters:
+        return True
     if not name.startswith("transformer.h."):
         return False
     if layers is not None:
@@ -55,15 +59,31 @@ def collect_parameters(
     targets: list[str],
     dtype: str,
     layers: list[int] | None = None,
+    all_parameters: bool = False,
 ) -> dict[str, torch.Tensor]:
-    if not targets or any(not isinstance(target, str) or not target for target in targets):
+    if (
+        not all_parameters
+        and (
+            not targets
+            or any(not isinstance(target, str) or not target for target in targets)
+        )
+    ):
         raise ValueError("trajectory snapshot targets must be non-empty strings")
+    if all_parameters and layers is not None:
+        raise ValueError(
+            "all-parameter trajectory snapshots cannot filter transformer layers"
+        )
     if dtype not in DTYPES:
         raise ValueError(f"unsupported trajectory snapshot dtype: {dtype}")
     selected = {
         name: parameter.detach().to(device="cpu", dtype=DTYPES[dtype]).contiguous()
         for name, parameter in model.named_parameters()
-        if parameter_matches(name, targets, layers)
+        if parameter_matches(
+            name,
+            targets,
+            layers,
+            all_parameters=all_parameters,
+        )
     }
     if not selected:
         raise ValueError(f"no parameters matched trajectory targets: {targets}")
@@ -108,6 +128,7 @@ def write_parameter_snapshot(
     targets: list[str],
     dtype: str,
     layers: list[int] | None,
+    all_parameters: bool = False,
     model_config: Any,
     run_identity: dict[str, Any],
     execution_provenance: dict[str, Any] | None,
@@ -130,6 +151,7 @@ def write_parameter_snapshot(
         targets=targets,
         dtype=dtype,
         layers=layers,
+        all_parameters=all_parameters,
     )
     inventory = {
         name: {
@@ -145,6 +167,7 @@ def write_parameter_snapshot(
         "step": step,
         "targets": list(targets),
         "layers": None if layers is None else list(layers),
+        "all_parameters": bool(all_parameters),
         "storage_dtype": dtype,
         "model_config": asdict(model_config),
         "run_identity": run_identity,
@@ -177,6 +200,15 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         default=None,
         help="optional zero-based transformer layers to retain",
     )
+    parser.add_argument(
+        "--trajectory-snapshot-all-parameters",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "store every unique named model parameter; intended for sparse "
+            "model-state trajectory checkpoints, not per-update traces"
+        ),
+    )
 
 
 def validate_arguments(args: argparse.Namespace) -> None:
@@ -184,11 +216,21 @@ def validate_arguments(args: argparse.Namespace) -> None:
         raise ValueError("--trajectory-snapshot-interval must be non-negative")
     if args.trajectory_snapshot_interval > 0:
         targets = args.trajectory_snapshot_targets
-        if not isinstance(targets, list) or not targets:
+        all_parameters = bool(
+            getattr(args, "trajectory_snapshot_all_parameters", False)
+        )
+        if not all_parameters and (not isinstance(targets, list) or not targets):
             raise ValueError("--trajectory-snapshot-targets must be non-empty")
-        if any(not isinstance(target, str) or not target for target in targets):
+        if not all_parameters and any(
+            not isinstance(target, str) or not target for target in targets
+        ):
             raise ValueError("--trajectory-snapshot-targets must contain non-empty strings")
         layers = getattr(args, "trajectory_snapshot_layers", None)
+        if all_parameters and layers is not None:
+            raise ValueError(
+                "--trajectory-snapshot-all-parameters cannot be combined with "
+                "--trajectory-snapshot-layers"
+            )
         if layers is not None:
             if (
                 not isinstance(layers, list)
