@@ -1,0 +1,86 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_pilot_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_plan.json",
+  "plan_sha256": "899188055783a210285e7aada02a3efa3cf40ec6eaf0d69e261bddb570d9d271",
+  "execution_commit": "18a0a53e14727d0d3f3ba34aaf83d61dfc508f3a",
+  "execution": "direct foreground Y400 GPU1 diagnostic, polled to exit with no parameter update, language-model training, watchdog, callback, queue worker, heartbeat, or PRO6 execution",
+  "input_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+  "stage_results": [
+    {
+      "stages": 1,
+      "coordinates_per_layer": 1536,
+      "coordinate_fraction": 0.0006510416666666666,
+      "task_matched": {
+        "requested_update_recovery": 0.007961061311616642,
+        "future_recovery": 0.0014641068050190663,
+        "future_cosine": 0.03740990130663953,
+        "minimum_future_cosine": 0.029381162010789393,
+        "positive_future_cells": 4
+      },
+      "random": {
+        "requested_update_recovery": 0.0006135374223331643,
+        "future_recovery": 0.00010742226602091325,
+        "future_cosine": 0.010140837156794983
+      },
+      "task_over_random_future_recovery": 13.629453736658563,
+      "task_update_recovery_over_coordinate_fraction": 12.228190174643164
+    },
+    {
+      "stages": 4,
+      "coordinates_per_layer": 6144,
+      "coordinate_fraction": 0.0026041666666666665,
+      "task_matched": {
+        "requested_update_recovery": 0.027649505082969008,
+        "future_recovery": 0.005067006682628181,
+        "future_cosine": 0.06954092733972318,
+        "minimum_future_cosine": 0.0543513736170656,
+        "positive_future_cells": 4
+      },
+      "random": {
+        "requested_update_recovery": 0.002448574306264779,
+        "future_recovery": 0.0004320440221293334,
+        "future_cosine": 0.020299249436334342
+      },
+      "task_over_random_future_recovery": 11.727987017747374,
+      "task_update_recovery_over_coordinate_fraction": 10.6174099518601
+    },
+    {
+      "stages": 8,
+      "coordinates_per_layer": 12288,
+      "coordinate_fraction": 0.005208333333333333,
+      "task_matched": {
+        "requested_update_recovery": 0.049434432705342195,
+        "future_recovery": 0.00905310216578311,
+        "future_cosine": 0.09295238432033094,
+        "minimum_future_cosine": 0.07267790392051357,
+        "positive_future_cells": 4
+      },
+      "random": {
+        "requested_update_recovery": 0.0049335660604162045,
+        "future_recovery": 0.0009010442736299857,
+        "future_cosine": 0.02936838700421004
+      },
+      "task_over_random_future_recovery": 10.047344432156917,
+      "task_update_recovery_over_coordinate_fraction": 9.491411079425703
+    }
+  ],
+  "decision": {
+    "classification": "REJECT_EIGHT_STAGE_ABSOLUTE_RECOVERY_BUT_TASK_SELECTION_IS_ENRICHED",
+    "registered_rule_passed": false,
+    "interpretation": [
+      "The eight-stage arm fails the preregistered 2 percent absolute future-recovery floor, reaching only 0.9053 percent, so it cannot be promoted.",
+      "Connectivity selected from current coherent Muon state is nevertheless causally informative: eight-stage requested-update recovery is 9.49 times coordinate fraction and future recovery is 10.05 times the equal-size random control.",
+      "Every task-matched cell has positive future cosine, with the eight-stage minimum at 0.07268.",
+      "This is qualitatively different from fixed random, natural-axis, activation-matched, and product-FHT charts, whose direction recovery tracked ambient dimension.",
+      "A preregistered 16/32-stage no-update extension is justified to determine whether the enriched causal curve reaches useful absolute recovery. No language-model training structure is yet authorized."
+    ],
+    "next_action": "run the registered 16/32-stage four-cell causal extension; require at least 2 percent absolute future recovery at 32 stages while preserving strong enrichment and all-cell positive alignment"
+  },
+  "immutable_artifacts": {
+    "detail_sha256": "fa22ade6e0dbe315bf0a3d83bed9b6bcffa62241fee737bd0c59098fe04cf7cb",
+    "matchings_sha256": "c8d544050283f9f38ccb89a088d42585c70be30a33da9a78f87798d63286c3bc",
+    "aggregate_sha256": "228e33498aaee0a9f5b1836836f9ad463ae127d40b0dac734a279c192296a1ba",
+    "metadata_sha256": "6851ce3bca59c7a7b96728b91b3a9953e5d531540a85fb316ec3eaf5a6272612"
+  }
+}

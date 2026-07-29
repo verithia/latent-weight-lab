@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_givens_depth_plan_v1",
+  "status": "registered_before_execution",
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_givens_pilot_result.json",
+  "parent_result_sha256": "fb1ee8f4b9791690b2ae0848b9b94bcd1c914c56e088f8522cdfc97d527f9a89",
+  "scientific_question": "Does the approximately tenfold causal enrichment of Muon-selected hidden-channel pairings scale to useful absolute future recovery at 16 or 32 Givens stages?",
+  "implementation": {
+    "commit": "432dd244afa030883794bf46d0f89568d3727e96",
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_givens.py",
+    "entrypoint_sha256": "e963ba9526cacaa3ddef6876bcab15f2db6a6796067f3ca67f4b8799ec079591"
+  },
+  "causal_protocol": "identical to the registered 1/4/8-stage pilot: current exact coherent Muon state selects pairings and fits angles; future phase chords are held out until scoring",
+  "scope": {
+    "cells": [
+      {
+        "layer": 0,
+        "phase_start": 0
+      },
+      {
+        "layer": 0,
+        "phase_start": 180
+      },
+      {
+        "layer": 6,
+        "phase_start": 60
+      },
+      {
+        "layer": 11,
+        "phase_start": 120
+      }
+    ],
+    "stages": [
+      16,
+      32
+    ],
+    "coordinates_per_layer": {
+      "16": 24576,
+      "32": 49152
+    },
+    "coordinate_fraction": {
+      "16": 0.010416666666666666,
+      "32": 0.020833333333333332
+    },
+    "matching_neighbors": 64,
+    "angle_fit_steps": 300,
+    "angle_fit_learning_rate": 0.001,
+    "matching_seed": 161803,
+    "random_seed": 271828
+  },
+  "decision_rule": {
+    "evaluated_at_stages": 32,
+    "minimum_energy_weighted_future_recovery": 0.02,
+    "minimum_future_recovery_over_random_control": 5.0,
+    "minimum_requested_update_recovery_over_coordinate_fraction": 6.0,
+    "require_positive_future_cosine_in_every_cell": true,
+    "require_monotonic_task_matched_future_recovery_from_8_to_16_to_32_stages": true,
+    "pass": "promote to an all-20-cell no-update validation and production performance design; do not launch language-model training",
+    "fail": "close sparse task-selected Givens depth as insufficient absolute capacity"
+  },
+  "input_identity": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution_policy": "Run directly in the foreground on one idle Y400 GPU and poll to exit. Do not use a watchdog, callback, queue worker, heartbeat, or PRO6."
+}
