@@ -1,0 +1,194 @@
+{
+  "schema_version": "mai_124m_mlp_fast_fresh_training_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_training_plan.json",
+    "sha256": "d327144c8449a7dded8ed2fad90a3d4d7f6b9d6e7810d2d7cd55b61956aed005"
+  },
+  "parent_evidence": {
+    "matching_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_matching_result.json",
+    "matching_result_sha256": "2f891d7054d866d2c395f9cc4257b3abc02025272f26c14acbba75e8cbc5e4da",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_mfu_result.json",
+    "mfu_result_sha256": "cdafab9add0c85051060bf1b7117d26f3eea3a2c5472e5c2b61cb7934644d7c8",
+    "stale_stage64_control": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_hidden64_training_result.json",
+    "stale_stage64_control_validation": 5.662802696228027
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp.json",
+    "sha256": "9051dc9535f5a543d006dad458f25190a81592a1166f3df9694f2e734723e1d4"
+  },
+  "implementation_commit": "681f8e1386f1c8caeee8657011db09a9b99ad857",
+  "execution_commit": "f1433e870cd880eb0988159ffc91dba4e2dc1a29",
+  "execution": {
+    "run_id": "y400_mai_v3_124m_statelessfresh64_scientific_v1",
+    "run_name": "y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp",
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "direct foreground scientific run, polled through terminal evaluation",
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "pro6": false,
+    "parameter_updates": 238,
+    "entrypoint": "examples.nanogpt.train",
+    "command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp.json"
+    ]
+  },
+  "identity": {
+    "repository": "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht",
+    "dataset_manifest": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/provenance/y400_mai_v3_124m_statelessfresh64_scientific_v1.json",
+    "provenance_sha256": "117422f5b85df3f4499cff2e97abc114a403bc738132a8aed1f4f749f4541bae",
+    "runtime_source_hashes": {
+      "examples/nanogpt/csrc/task_edge_coloring.cpp": "6b9e0c795e601eb0a53934bdaa79f898c7ffcd51988b0e5891f189cc27f2e67e",
+      "examples/nanogpt/fast_task_matching.py": "1e451f3d0309299d8f9dfd4494f1087fb35f282b7a1fca49bb60322dd3529ce1",
+      "examples/nanogpt/model.py": "02289803f735ecb393148eee26c9d158f8bb01a074ac3c13837d0583ea651b8a",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "6138e09e30f0f08d432801ff8493105f76e6a39fd06924982c82da1cb876180c",
+      "examples/nanogpt/parameter_trajectory.py": "2bcbcb806d0e52652f2ac0ecbcc9ae9b8ca51800bfa8a57cfcc4cb0ac5113f1d",
+      "examples/nanogpt/train.py": "4ea3d3b4fd8e3e3778860dc07e5909d905e212d815d80c5e9e5a900952dd3f17",
+      "latent_weight_lab/block_fht.py": "5646a93f518f586417496332196d41ddd547fb8a5606ff308e3b116204482b1b"
+    }
+  },
+  "performance_gate": {
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/performance_preflight_stateless_fresh_stage64.json",
+    "certificate_sha256": "7de08053f2531b493f8b39ce9d280feb78e7175de27772bbca45984039edef55",
+    "minimum_mfu_fraction": 0.2,
+    "measured_mfu_fraction": 0.2513189662788884,
+    "tokens_per_second": 221451.26375,
+    "average_iter_ms": 1183.83,
+    "optimizer_ms": 275.28499999999997,
+    "peak_mib": 31672.65,
+    "passed": true
+  },
+  "loss": {
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train": 10.9672,
+        "validation": 10.9669
+      },
+      {
+        "step": 60,
+        "train": 6.3214,
+        "validation": 6.3313
+      },
+      {
+        "step": 120,
+        "train": 5.8612,
+        "validation": 5.8658
+      },
+      {
+        "step": 180,
+        "train": 5.685,
+        "validation": 5.6884
+      },
+      {
+        "step": 238,
+        "train": 5.609,
+        "validation": 5.612201690673828
+      }
+    ],
+    "attention_only_control_validation": 5.4918,
+    "accepted_attention_gap": 0.1,
+    "registered_success_threshold": 5.5918,
+    "stale_stage64_control_validation": 5.662802696228027,
+    "candidate_minus_attention": 0.12040169067382855,
+    "candidate_minus_success_threshold": 0.020401690673828687,
+    "candidate_minus_stale_stage64": -0.05060100555419922,
+    "fraction_of_stale_stage64_to_attention_gap_closed": 0.2959076474836634
+  },
+  "causal_structure": {
+    "mlp_cfc_replaced": false,
+    "mlp_cproj_replaced": true,
+    "matching_refresh_interval_updates": 1,
+    "stages": 64,
+    "matching_neighbors": 64,
+    "coordinates_per_layer": 98304,
+    "coordinate_fraction_per_cproj": 0.041666666666666664,
+    "persistent_selected_connectivity": false,
+    "learned_dense_basis": false,
+    "dense_residual": false,
+    "lora_adapter": false,
+    "terminal_optimizer_steps": "12/12 equal 238",
+    "terminal_refresh_counts": "12/12 equal 238",
+    "terminal_last_refresh_steps": "12/12 equal 237",
+    "terminal_matching_valid": "12/12 true"
+  },
+  "terminal_checkpoint": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/y400_mai_v3_124m_fullattn_plus_mlp_cproj_statelessfresh64_0p5tpp/ckpt.pt",
+    "sha256": "8b8c636b87058cb035b88a2ebc66f7e9ebdae5e6656ee861087ec45378fbc035",
+    "metadata_sha256": "bca0ae7ffb2421b5e00a4d02db454fc575c25efbfa91778c1930536ef940d245",
+    "schema": "nanogpt_exact_resume_v2",
+    "next_iter": 238,
+    "checkpoint_reason": "evaluation",
+    "best_val_loss": 5.612201690673828,
+    "custom_module_count": 12,
+    "selected_permutations_per_layer_shape": [
+      64,
+      3072
+    ],
+    "last_angles_per_layer_shape": [
+      64,
+      1536
+    ],
+    "recursive_momentum_buffer_count": 24,
+    "exact_resume_state_complete": true,
+    "execution_provenance_embedded": true
+  },
+  "artifacts": {
+    "foreground_log": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/y400_mai_v3_124m_statelessfresh64_scientific_v1.foreground.log",
+    "foreground_log_sha256": "43495f8507ec96fc69106407e46caa0395b7e0ab20f50a47c429f47204a2a21f",
+    "status": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_fast_fresh_screen/status/y400_mai_v3_124m_statelessfresh64_scientific_v1.json",
+    "status_sha256": "60d5a0cf475fd3a0221b236343bc4c00b8593628b201fe19f5d0c70c191db95d",
+    "workspace_after_run_gib": 239
+  },
+  "launch_repairs": [
+    {
+      "attempt": 1,
+      "classification": "PRE_MODEL_PROVENANCE_ENV_OMISSION",
+      "parameter_updates": 0,
+      "exit_code": 1,
+      "repair": "export the immutable provenance path and SHA-256"
+    },
+    {
+      "attempt": 2,
+      "classification": "PRE_MODEL_PROVENANCE_SCHEMA_MISMATCH",
+      "parameter_updates": 0,
+      "exit_code": 1,
+      "repair": "add the legacy repository.git_commit and entrypoint aliases required by the trainer",
+      "scientific_settings_changed": false,
+      "thresholds_changed": false
+    },
+    {
+      "attempt": 3,
+      "parameter_updates": 238,
+      "exit_code": 0
+    }
+  ],
+  "decision": {
+    "classification": "DIRECTIONAL_ONLY",
+    "registered_success_gate_passed": false,
+    "registered_directional_gate_passed": true,
+    "larger_rung_authorized": false,
+    "additional_training_candidate_authorized": false,
+    "interpretation": [
+      "Recomputing connectivity from the exact current Muon direction every update causally removes 0.05060 CE of the stale stage-64 penalty.",
+      "The candidate remains 0.12040 CE behind attention-only and 0.02040 CE outside the user-accepted plus-0.1 boundary.",
+      "The run leaves c_fc dense, so the residual deficit is specifically evidence that the current sparse hidden-side c_proj coordinate family still cannot express enough task-effective motion after direction staleness is eliminated.",
+      "The no-training matcher and first-update diagnostics recover only about 19.2 to 19.5 percent of the requested dense Muon update, consistent with a remaining coordinate-capacity or functional-metric mismatch rather than a remaining stale-direction bug.",
+      "Do not promote to 5TPP and do not launch another training structure from this result alone."
+    ],
+    "next_action": "Run a preregistered no-training functional decomposition of the remaining dense-c_proj Muon motion under post-GELU activation covariance and residual-stream task effect. Separate missing hidden-side orientation, output-side orientation, and singular/channel scaling before authorizing another 124M candidate; retain c_fc as dense during this isolation."
+  },
+  "scope_limit": "This is a trainable-coordinate/manifold test. The folded c_proj base remains materialized in checkpoints and forward passes, so this result does not claim checkpoint-size or inference-FLOP compression."
+}
