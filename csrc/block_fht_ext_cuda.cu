@@ -453,6 +453,122 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_256_kernel(
   }
 }
 
+template <typename scalar_t>
+__global__ void postgelu_mix_forward_kernel(
+    const scalar_t* __restrict__ update,
+    const scalar_t* __restrict__ condition,
+    const float* __restrict__ slope,
+    scalar_t* __restrict__ correction,
+    int64_t elements,
+    int64_t tokens,
+    int64_t width,
+    float scale) {
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x;
+       index < elements;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t spectral = index % width;
+    int64_t basis = index / (tokens * width);
+    float update_value = scalar_to_float(update[index]);
+    float condition_value = scalar_to_float(condition[index]);
+    float slope_value =
+        scalar_to_float(float_to_scalar<scalar_t>(
+            slope[basis * width + spectral]));
+    float first = scalar_to_float(
+        float_to_scalar<scalar_t>(update_value * condition_value));
+    correction[index] =
+        float_to_scalar<scalar_t>(scale * first * slope_value);
+  }
+}
+
+template <typename scalar_t>
+__global__ void postgelu_mix_backward_kernel(
+    const scalar_t* __restrict__ grad_correction,
+    const scalar_t* __restrict__ update,
+    const scalar_t* __restrict__ condition,
+    const float* __restrict__ slope,
+    scalar_t* __restrict__ grad_update,
+    scalar_t* __restrict__ grad_condition,
+    int64_t elements,
+    int64_t tokens,
+    int64_t width,
+    float scale) {
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x;
+       index < elements;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    int64_t spectral = index % width;
+    int64_t basis = index / (tokens * width);
+    float grad_value = scalar_to_float(grad_correction[index]);
+    float update_value = scalar_to_float(update[index]);
+    float condition_value = scalar_to_float(condition[index]);
+    float slope_value =
+        scalar_to_float(float_to_scalar<scalar_t>(
+            slope[basis * width + spectral]));
+    grad_update[index] = float_to_scalar<scalar_t>(
+        scale * grad_value * condition_value * slope_value);
+    grad_condition[index] = float_to_scalar<scalar_t>(
+        scale * grad_value * update_value * slope_value);
+  }
+}
+
+template <typename scalar_t>
+__global__ void postgelu_slope_backward_kernel(
+    const scalar_t* __restrict__ grad_correction,
+    const scalar_t* __restrict__ update,
+    const scalar_t* __restrict__ condition,
+    float* __restrict__ grad_slope,
+    int64_t bases,
+    int64_t tokens,
+    int64_t width,
+    int64_t token_chunks,
+    float scale) {
+  int64_t width_blocks = width / blockDim.x;
+  int64_t basis = blockIdx.x / (width_blocks * token_chunks);
+  int64_t residual =
+      blockIdx.x - basis * width_blocks * token_chunks;
+  int64_t width_block = residual / token_chunks;
+  int64_t token_chunk = residual - width_block * token_chunks;
+  int64_t spectral = width_block * blockDim.x + threadIdx.x;
+  if (basis >= bases || spectral >= width) {
+    return;
+  }
+  int64_t token_start = tokens * token_chunk / token_chunks;
+  int64_t token_stop = tokens * (token_chunk + 1) / token_chunks;
+  int64_t basis_offset = basis * tokens * width;
+  float total = 0.0f;
+  for (int64_t token = token_start; token < token_stop; ++token) {
+    int64_t index = basis_offset + token * width + spectral;
+    float grad_value = scalar_to_float(grad_correction[index]);
+    float update_value = scalar_to_float(update[index]);
+    float condition_value = scalar_to_float(condition[index]);
+    float first = scalar_to_float(
+        float_to_scalar<scalar_t>(grad_value * update_value));
+    total += scalar_to_float(
+        float_to_scalar<scalar_t>(first * condition_value));
+  }
+  atomicAdd(grad_slope + basis * width + spectral, scale * total);
+}
+
+template <typename scalar_t>
+__global__ void postgelu_sum_heads_kernel(
+    const scalar_t* __restrict__ per_head,
+    const scalar_t* __restrict__ residual,
+    scalar_t* __restrict__ output,
+    int64_t bases,
+    int64_t tokens,
+    int64_t width,
+    bool add_residual) {
+  int64_t elements = tokens * width;
+  for (int64_t index = blockIdx.x * blockDim.x + threadIdx.x;
+       index < elements;
+       index += (int64_t)blockDim.x * gridDim.x) {
+    float total = add_residual ? scalar_to_float(residual[index]) : 0.0f;
+    for (int64_t basis = 0; basis < bases; ++basis) {
+      total += scalar_to_float(per_head[basis * elements + index]);
+    }
+    output[index] = float_to_scalar<scalar_t>(total);
+  }
+}
+
 __global__ void init_forward_blocks_kernel(
     const float* __restrict__ latent,
     float* __restrict__ work,
@@ -966,6 +1082,147 @@ torch::Tensor fixed_basis_transform_cuda(
         false,
         "fixed basis transform supports float32, float16, and bfloat16");
   }
+  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  return output;
+}
+
+torch::Tensor postgelu_mix_forward_cuda(
+    torch::Tensor update,
+    torch::Tensor condition,
+    torch::Tensor slope,
+    double scale) {
+  TORCH_CHECK(
+      update.is_contiguous() && condition.is_contiguous() &&
+          slope.is_contiguous(),
+      "postgelu_mix_forward inputs must be contiguous");
+  TORCH_CHECK(
+      update.dim() == 3 && condition.sizes() == update.sizes(),
+      "postgelu_mix_forward expects matching [bases, tokens, width] tensors");
+  TORCH_CHECK(
+      slope.dim() == 2 && slope.size(0) == update.size(0) &&
+          slope.size(1) == update.size(2),
+      "postgelu_mix_forward slope must have shape [bases, width]");
+  auto correction = torch::empty_like(update);
+  int64_t elements = update.numel();
+  int threads = 256;
+  int blocks = (int)std::min<int64_t>(
+      (elements + threads - 1) / threads, 65535);
+  auto stream = at::cuda::getCurrentCUDAStream();
+  AT_DISPATCH_FLOATING_TYPES_AND2(
+      at::ScalarType::Half,
+      at::ScalarType::BFloat16,
+      update.scalar_type(),
+      "postgelu_mix_forward_cuda",
+      [&] {
+        postgelu_mix_forward_kernel<scalar_t>
+            <<<blocks, threads, 0, stream>>>(
+                update.data_ptr<scalar_t>(),
+                condition.data_ptr<scalar_t>(),
+                slope.data_ptr<float>(),
+                correction.data_ptr<scalar_t>(),
+                elements,
+                update.size(1),
+                update.size(2),
+                (float)scale);
+      });
+  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  return correction;
+}
+
+std::vector<torch::Tensor> postgelu_mix_backward_cuda(
+    torch::Tensor grad_correction,
+    torch::Tensor update,
+    torch::Tensor condition,
+    torch::Tensor slope,
+    double scale) {
+  TORCH_CHECK(
+      grad_correction.is_contiguous() && update.is_contiguous() &&
+          condition.is_contiguous() && slope.is_contiguous(),
+      "postgelu_mix_backward inputs must be contiguous");
+  TORCH_CHECK(
+      grad_correction.sizes() == update.sizes() &&
+          condition.sizes() == update.sizes(),
+      "postgelu_mix_backward activation shapes must match");
+  auto grad_update = torch::empty_like(update);
+  auto grad_condition = torch::empty_like(condition);
+  auto grad_slope = torch::zeros_like(slope);
+  int64_t elements = update.numel();
+  int threads = 256;
+  int blocks = (int)std::min<int64_t>(
+      (elements + threads - 1) / threads, 65535);
+  constexpr int64_t token_chunks = 16;
+  int64_t slope_blocks =
+      update.size(0) * (update.size(2) + threads - 1) / threads *
+      token_chunks;
+  auto stream = at::cuda::getCurrentCUDAStream();
+  AT_DISPATCH_FLOATING_TYPES_AND2(
+      at::ScalarType::Half,
+      at::ScalarType::BFloat16,
+      update.scalar_type(),
+      "postgelu_mix_backward_cuda",
+      [&] {
+        postgelu_mix_backward_kernel<scalar_t>
+            <<<blocks, threads, 0, stream>>>(
+                grad_correction.data_ptr<scalar_t>(),
+                update.data_ptr<scalar_t>(),
+                condition.data_ptr<scalar_t>(),
+                slope.data_ptr<float>(),
+                grad_update.data_ptr<scalar_t>(),
+                grad_condition.data_ptr<scalar_t>(),
+                elements,
+                update.size(1),
+                update.size(2),
+                (float)scale);
+        postgelu_slope_backward_kernel<scalar_t>
+            <<<slope_blocks, threads, 0, stream>>>(
+                grad_correction.data_ptr<scalar_t>(),
+                update.data_ptr<scalar_t>(),
+                condition.data_ptr<scalar_t>(),
+                grad_slope.data_ptr<float>(),
+                update.size(0),
+                update.size(1),
+                update.size(2),
+                token_chunks,
+                (float)scale);
+      });
+  C10_CUDA_KERNEL_LAUNCH_CHECK();
+  return {grad_update, grad_condition, grad_slope};
+}
+
+torch::Tensor postgelu_sum_heads_cuda(
+    torch::Tensor per_head,
+    torch::Tensor residual,
+    bool add_residual) {
+  TORCH_CHECK(
+      per_head.is_contiguous() && residual.is_contiguous(),
+      "postgelu_sum_heads inputs must be contiguous");
+  TORCH_CHECK(
+      per_head.dim() == 3 && residual.dim() == 2 &&
+          per_head.size(1) == residual.size(0) &&
+          per_head.size(2) == residual.size(1),
+      "postgelu_sum_heads expects [bases, tokens, width] and [tokens, width]");
+  auto output = torch::empty_like(residual);
+  int64_t elements = residual.numel();
+  int threads = 256;
+  int blocks = (int)std::min<int64_t>(
+      (elements + threads - 1) / threads, 65535);
+  auto stream = at::cuda::getCurrentCUDAStream();
+  AT_DISPATCH_FLOATING_TYPES_AND2(
+      at::ScalarType::Half,
+      at::ScalarType::BFloat16,
+      per_head.scalar_type(),
+      "postgelu_sum_heads_cuda",
+      [&] {
+        postgelu_sum_heads_kernel<scalar_t>
+            <<<blocks, threads, 0, stream>>>(
+                per_head.data_ptr<scalar_t>(),
+                residual.data_ptr<scalar_t>(),
+                output.data_ptr<scalar_t>(),
+                per_head.size(0),
+                per_head.size(1),
+                per_head.size(2),
+                add_residual);
+      });
   C10_CUDA_KERNEL_LAUNCH_CHECK();
   return output;
 }

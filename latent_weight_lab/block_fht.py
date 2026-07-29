@@ -132,7 +132,7 @@ def _load_block_fht_ext():
         except Exception:
             pass
         _BLOCK_FHT_EXT = load(
-            name="latent_weight_lab_block_fht_ext_scaled_v5",
+            name="latent_weight_lab_block_fht_ext_scaled_v6",
             sources=[
                 str(root / "csrc" / "block_fht_ext.cpp"),
                 str(root / "csrc" / "block_fht_ext_cuda.cu"),
@@ -388,6 +388,184 @@ def fixed_basis_transform(
         int(block_size),
         inverse=bool(inverse),
         shared_input=bool(shared_input),
+    )
+
+
+class _PostGeluMultiheadMixFn(torch.autograd.Function):
+    @staticmethod
+    def forward(
+        ctx,
+        activated: torch.Tensor,
+        condition: torch.Tensor,
+        slope: torch.Tensor,
+        condition_permutations: torch.Tensor,
+        condition_signs: torch.Tensor,
+        update_permutations: torch.Tensor,
+        update_signs: torch.Tensor,
+        output_permutations: torch.Tensor,
+        output_signs: torch.Tensor,
+        block_size: int,
+        scale: float,
+    ) -> torch.Tensor:
+        ext = _load_block_fht_ext()
+        if ext is None:
+            raise RuntimeError("post-GELU CUDA mixer extension failed to load")
+        condition_spectral = ext.fixed_basis_transform(
+            condition.reshape(-1, condition.shape[-1]).contiguous(),
+            condition_permutations.contiguous(),
+            condition_signs.contiguous(),
+            int(block_size),
+            False,
+            True,
+        )
+        update_spectral = ext.fixed_basis_transform(
+            activated.reshape(-1, activated.shape[-1]).contiguous(),
+            update_permutations.contiguous(),
+            update_signs.contiguous(),
+            int(block_size),
+            False,
+            True,
+        )
+        correction = ext.postgelu_mix_forward(
+            update_spectral,
+            condition_spectral,
+            slope.contiguous(),
+            float(scale),
+        )
+        transformed = ext.fixed_basis_transform(
+            correction.reshape(-1, correction.shape[-1]).contiguous(),
+            output_permutations.contiguous(),
+            output_signs.contiguous(),
+            int(block_size),
+            True,
+            False,
+        )
+        output = ext.postgelu_sum_heads(
+            transformed,
+            activated.reshape(-1, activated.shape[-1]).contiguous(),
+            True,
+        )
+        ctx.block_size = int(block_size)
+        ctx.scale = float(scale)
+        ctx.activated_shape = tuple(activated.shape)
+        ctx.save_for_backward(
+            update_spectral,
+            condition_spectral,
+            slope,
+            condition_permutations,
+            condition_signs,
+            update_permutations,
+            update_signs,
+            output_permutations,
+            output_signs,
+        )
+        return output.reshape_as(activated)
+
+    @staticmethod
+    def backward(ctx, grad_output: torch.Tensor):
+        (
+            update_spectral,
+            condition_spectral,
+            slope,
+            condition_permutations,
+            condition_signs,
+            update_permutations,
+            update_signs,
+            output_permutations,
+            output_signs,
+        ) = ctx.saved_tensors
+        ext = _load_block_fht_ext()
+        if ext is None:
+            raise RuntimeError("post-GELU CUDA mixer extension failed to load")
+        width = grad_output.shape[-1]
+        flat_grad = grad_output.reshape(-1, width).contiguous()
+        grad_correction = ext.fixed_basis_transform(
+            flat_grad,
+            output_permutations.contiguous(),
+            output_signs.contiguous(),
+            ctx.block_size,
+            False,
+            True,
+        )
+        (
+            grad_update_spectral,
+            grad_condition_spectral,
+            grad_slope,
+        ) = ext.postgelu_mix_backward(
+            grad_correction,
+            update_spectral,
+            condition_spectral,
+            slope.contiguous(),
+            ctx.scale,
+        )
+        grad_activated_heads = ext.fixed_basis_transform(
+            grad_update_spectral.reshape(-1, width).contiguous(),
+            update_permutations.contiguous(),
+            update_signs.contiguous(),
+            ctx.block_size,
+            True,
+            False,
+        )
+        grad_condition_heads = ext.fixed_basis_transform(
+            grad_condition_spectral.reshape(-1, width).contiguous(),
+            condition_permutations.contiguous(),
+            condition_signs.contiguous(),
+            ctx.block_size,
+            True,
+            False,
+        )
+        grad_activated = ext.postgelu_sum_heads(
+            grad_activated_heads,
+            flat_grad,
+            True,
+        ).reshape(ctx.activated_shape)
+        grad_condition = ext.postgelu_sum_heads(
+            grad_condition_heads,
+            flat_grad,
+            False,
+        ).reshape(ctx.activated_shape)
+        return (
+            grad_activated,
+            grad_condition,
+            grad_slope,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
+
+
+def postgelu_multihead_mix(
+    activated: torch.Tensor,
+    condition: torch.Tensor,
+    slope: torch.Tensor,
+    condition_permutations: torch.Tensor,
+    condition_signs: torch.Tensor,
+    update_permutations: torch.Tensor,
+    update_signs: torch.Tensor,
+    output_permutations: torch.Tensor,
+    output_signs: torch.Tensor,
+    block_size: int,
+    scale: float,
+) -> torch.Tensor:
+    """Apply the exact fixed-basis multihead mixer with a fused CUDA VJP."""
+
+    return _PostGeluMultiheadMixFn.apply(
+        activated,
+        condition,
+        slope,
+        condition_permutations,
+        condition_signs,
+        update_permutations,
+        update_signs,
+        output_permutations,
+        output_signs,
+        int(block_size),
+        float(scale),
     )
 
 

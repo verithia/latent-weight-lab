@@ -12,6 +12,7 @@ from examples.nanogpt.muon import Muon
 from latent_weight_lab import (
     BlockFHTLinear,
     fixed_basis_transform,
+    postgelu_multihead_mix,
     flush_block_fht_weight_cache,
     prepare_block_fht_weight_cache,
     restore_block_fht_weight_cache,
@@ -2756,6 +2757,28 @@ class MLP(nn.Module):
             self.postgelu_hidden_self_gate_rms_epsilon
         ).sqrt()
         condition = activated / rms.to(dtype=activated.dtype)
+        if slope.dim() == 2 and activated.is_cuda:
+            assert (
+                self.postgelu_hidden_condition_permutation is not None
+                and self.postgelu_hidden_condition_signs is not None
+                and self.postgelu_hidden_update_permutation is not None
+                and self.postgelu_hidden_update_signs is not None
+                and self.postgelu_hidden_output_permutation is not None
+                and self.postgelu_hidden_output_signs is not None
+            )
+            return postgelu_multihead_mix(
+                activated,
+                condition,
+                slope,
+                self.postgelu_hidden_condition_permutation,
+                self.postgelu_hidden_condition_signs,
+                self.postgelu_hidden_update_permutation,
+                self.postgelu_hidden_update_signs,
+                self.postgelu_hidden_output_permutation,
+                self.postgelu_hidden_output_signs,
+                self.postgelu_hidden_self_gate_basis_block_size,
+                self.postgelu_hidden_self_gate_scale,
+            )
         spectral_condition = self._postgelu_hidden_self_basis(
             condition,
             inverse=False,

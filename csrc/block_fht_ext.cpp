@@ -33,6 +33,24 @@ torch::Tensor fixed_basis_transform_cuda(
     bool inverse,
     bool shared_input);
 
+torch::Tensor postgelu_mix_forward_cuda(
+    torch::Tensor update,
+    torch::Tensor condition,
+    torch::Tensor slope,
+    double scale);
+
+std::vector<torch::Tensor> postgelu_mix_backward_cuda(
+    torch::Tensor grad_correction,
+    torch::Tensor update,
+    torch::Tensor condition,
+    torch::Tensor slope,
+    double scale);
+
+torch::Tensor postgelu_sum_heads_cuda(
+    torch::Tensor per_head,
+    torch::Tensor residual,
+    bool add_residual);
+
 std::vector<torch::Tensor> block_fht_forward(
     torch::Tensor latent,
     int64_t output_size,
@@ -105,6 +123,62 @@ torch::Tensor fixed_basis_transform(
       shared_input);
 }
 
+torch::Tensor postgelu_mix_forward(
+    torch::Tensor update,
+    torch::Tensor condition,
+    torch::Tensor slope,
+    double scale) {
+  TORCH_CHECK(update.is_cuda(), "postgelu_mix_forward: update must be CUDA");
+  TORCH_CHECK(
+      condition.is_cuda(), "postgelu_mix_forward: condition must be CUDA");
+  TORCH_CHECK(slope.is_cuda(), "postgelu_mix_forward: slope must be CUDA");
+  TORCH_CHECK(
+      update.scalar_type() == condition.scalar_type(),
+      "postgelu_mix_forward: update and condition dtypes must match");
+  TORCH_CHECK(
+      slope.scalar_type() == torch::kFloat32,
+      "postgelu_mix_forward: slope must be float32");
+  return postgelu_mix_forward_cuda(update, condition, slope, scale);
+}
+
+std::vector<torch::Tensor> postgelu_mix_backward(
+    torch::Tensor grad_correction,
+    torch::Tensor update,
+    torch::Tensor condition,
+    torch::Tensor slope,
+    double scale) {
+  TORCH_CHECK(
+      grad_correction.is_cuda(),
+      "postgelu_mix_backward: grad_correction must be CUDA");
+  TORCH_CHECK(update.is_cuda(), "postgelu_mix_backward: update must be CUDA");
+  TORCH_CHECK(
+      condition.is_cuda(), "postgelu_mix_backward: condition must be CUDA");
+  TORCH_CHECK(slope.is_cuda(), "postgelu_mix_backward: slope must be CUDA");
+  TORCH_CHECK(
+      grad_correction.scalar_type() == update.scalar_type() &&
+          update.scalar_type() == condition.scalar_type(),
+      "postgelu_mix_backward: activation dtypes must match");
+  TORCH_CHECK(
+      slope.scalar_type() == torch::kFloat32,
+      "postgelu_mix_backward: slope must be float32");
+  return postgelu_mix_backward_cuda(
+      grad_correction, update, condition, slope, scale);
+}
+
+torch::Tensor postgelu_sum_heads(
+    torch::Tensor per_head,
+    torch::Tensor residual,
+    bool add_residual) {
+  TORCH_CHECK(
+      per_head.is_cuda(), "postgelu_sum_heads: per_head must be CUDA");
+  TORCH_CHECK(
+      residual.is_cuda(), "postgelu_sum_heads: residual must be CUDA");
+  TORCH_CHECK(
+      per_head.scalar_type() == residual.scalar_type(),
+      "postgelu_sum_heads: per_head and residual dtypes must match");
+  return postgelu_sum_heads_cuda(per_head, residual, add_residual);
+}
+
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("forward", &block_fht_forward, "Block-FHT slice forward (CUDA)");
   m.def("backward", &block_fht_backward, "Block-FHT slice backward (CUDA)");
@@ -113,4 +187,16 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
       "fixed_basis_transform",
       &fixed_basis_transform,
       "Batched fixed signed/permuted block-Hadamard transform (CUDA)");
+  m.def(
+      "postgelu_mix_forward",
+      &postgelu_mix_forward,
+      "Fused post-GELU multihead correction (CUDA)");
+  m.def(
+      "postgelu_mix_backward",
+      &postgelu_mix_backward,
+      "Fused post-GELU multihead correction backward (CUDA)");
+  m.def(
+      "postgelu_sum_heads",
+      &postgelu_sum_heads,
+      "Fused post-GELU head reduction with optional residual (CUDA)");
 }

@@ -7,6 +7,7 @@ from latent_weight_lab.block_fht import (
     _fixed_basis_transform_torch,
     block_fht_slice_torch,
     fixed_basis_transform,
+    postgelu_multihead_mix,
 )
 
 
@@ -153,4 +154,93 @@ def test_cuda_fixed_basis_transform_matches_reference_and_gradient(
         reference_values.grad,
         atol=2e-5,
         rtol=2e-5,
+    )
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA required")
+@pytest.mark.parametrize("dtype", [torch.float32, torch.bfloat16])
+def test_cuda_postgelu_multihead_mix_matches_eager(dtype: torch.dtype) -> None:
+    torch.manual_seed(123)
+    heads, tokens, width, block_size = 2, 7, 32, 8
+    permutations = [
+        torch.stack([torch.randperm(width) for _ in range(heads)])
+        for _ in range(3)
+    ]
+    signs = [
+        torch.randint(0, 2, (heads, width)).float().mul_(2).sub_(1)
+        for _ in range(3)
+    ]
+    activated = torch.randn(tokens, width, dtype=dtype, requires_grad=True)
+    condition = torch.randn(tokens, width, dtype=dtype, requires_grad=True)
+    slope = torch.randn(heads, width, dtype=torch.float32, requires_grad=True)
+    reference_activated = activated.detach().clone().requires_grad_(True)
+    reference_condition = condition.detach().clone().requires_grad_(True)
+    reference_slope = slope.detach().clone().requires_grad_(True)
+    condition_spectral = fixed_basis_transform(
+        reference_condition.cuda(),
+        permutations[0].cuda(),
+        signs[0].cuda(),
+        block_size,
+        shared_input=True,
+    )
+    update_spectral = fixed_basis_transform(
+        reference_activated.cuda(),
+        permutations[1].cuda(),
+        signs[1].cuda(),
+        block_size,
+        shared_input=True,
+    )
+    correction = (
+        update_spectral
+        * condition_spectral
+        * reference_slope.cuda().to(dtype=dtype)[:, None, :]
+    )
+    transformed = fixed_basis_transform(
+        correction,
+        permutations[2].cuda(),
+        signs[2].cuda(),
+        block_size,
+        inverse=True,
+        shared_input=False,
+    )
+    reference = reference_activated.cuda() + transformed.sum(dim=0)
+    actual_activated = activated.detach().cuda().requires_grad_(True)
+    actual_condition = condition.detach().cuda().requires_grad_(True)
+    actual_slope = slope.detach().cuda().requires_grad_(True)
+    actual = postgelu_multihead_mix(
+        actual_activated,
+        actual_condition,
+        actual_slope,
+        permutations[0].cuda(),
+        signs[0].cuda(),
+        permutations[1].cuda(),
+        signs[1].cuda(),
+        permutations[2].cuda(),
+        signs[2].cuda(),
+        block_size,
+        1.0,
+    )
+    gradient = torch.randn_like(reference)
+    reference.backward(gradient)
+    actual.backward(gradient)
+    atol = 3e-2 if dtype == torch.bfloat16 else 2e-5
+    rtol = 3e-2 if dtype == torch.bfloat16 else 2e-5
+    assert torch.allclose(actual, reference, atol=atol, rtol=rtol)
+    assert torch.allclose(
+        actual_activated.grad,
+        reference_activated.grad.cuda(),
+        atol=atol,
+        rtol=rtol,
+    )
+    assert torch.allclose(
+        actual_condition.grad,
+        reference_condition.grad.cuda(),
+        atol=atol,
+        rtol=rtol,
+    )
+    assert torch.allclose(
+        actual_slope.grad,
+        reference_slope.grad.cuda(),
+        atol=atol,
+        rtol=rtol,
     )
