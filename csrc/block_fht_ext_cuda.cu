@@ -386,7 +386,7 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_kernel(
 }
 
 template <typename scalar_t>
-__global__ __launch_bounds__(256) void fixed_basis_transform_256_kernel(
+__global__ __launch_bounds__(128) void fixed_basis_transform_256_kernel(
     const scalar_t* __restrict__ input,
     const int64_t* __restrict__ permutations,
     const float* __restrict__ signs,
@@ -400,56 +400,68 @@ __global__ __launch_bounds__(256) void fixed_basis_transform_256_kernel(
   extern __shared__ float values[];
   constexpr int64_t block_size = 256;
   int64_t blocks_per_token = width / block_size;
-  int64_t lane = threadIdx.x;
+  int warp = (int)(threadIdx.x >> 5);
+  int warp_lane = (int)(threadIdx.x & 31);
   for (int64_t job = blockIdx.x; job < jobs; job += gridDim.x) {
     int64_t basis = job / (tokens * blocks_per_token);
     int64_t residual = job - basis * tokens * blocks_per_token;
     int64_t token = residual / blocks_per_token;
     int64_t transform_block = residual - token * blocks_per_token;
-    int64_t spectral_index = transform_block * block_size + lane;
     int64_t basis_offset = basis * width;
-    int64_t permutation = permutations[basis_offset + spectral_index];
     int64_t input_token_offset =
         (shared_input ? token : basis * tokens + token) * width;
-    int64_t input_index = inverse ? spectral_index : permutation;
-    float value = scalar_to_float(input[input_token_offset + input_index]);
-    if (inverse) {
-      value *= signs[basis_offset + spectral_index];
-    }
-
-    // The first five butterflies are entirely warp-local. Keeping them in a
-    // register removes ten shared-memory rounds and their barriers.
+    int64_t spectral_indices[2];
+    int64_t selected_permutations[2];
     #pragma unroll
-    for (int offset = 1; offset <= 16; offset <<= 1) {
-      float partner = __shfl_xor_sync(0xffffffff, value, offset);
-      value = (lane & offset) ? partner - value : value + partner;
+    for (int half = 0; half < 2; ++half) {
+      int group = warp + half * 4;
+      int64_t spectral_index =
+          transform_block * block_size + group * 32 + warp_lane;
+      int64_t permutation = permutations[basis_offset + spectral_index];
+      int64_t input_index = inverse ? spectral_index : permutation;
+      float value =
+          scalar_to_float(input[input_token_offset + input_index]);
+      if (inverse) {
+        value *= signs[basis_offset + spectral_index];
+      }
+      #pragma unroll
+      for (int offset = 1; offset <= 16; offset <<= 1) {
+        float partner = __shfl_xor_sync(0xffffffff, value, offset);
+        value =
+            (warp_lane & offset) ? partner - value : value + partner;
+      }
+      spectral_indices[half] = spectral_index;
+      selected_permutations[half] = permutation;
+      values[group * 33 + warp_lane] = value;
     }
-    int warp = (int)(lane >> 5);
-    int warp_lane = (int)(lane & 31);
-    values[warp * 33 + warp_lane] = value;
     __syncthreads();
 
     // H256 = H8 (across warps) kron H32 (within each warp). Each thread
-    // computes one H8 row directly from the eight shared warp values. This
-    // replaces the three cross-warp butterfly stages and six barriers with
-    // one synchronized shared-memory read phase.
-    float cross_warp = 0.0f;
-    #pragma unroll
-    for (int input_warp = 0; input_warp < 8; ++input_warp) {
-      float component = values[input_warp * 33 + warp_lane];
-      cross_warp += (__popc(warp & input_warp) & 1)
-          ? -component
-          : component;
-    }
-    value = cross_warp * 0.0625f;
-
+    // computes two H8 rows directly from the eight shared warp values.
     int64_t output_token_offset = (basis * tokens + token) * width;
-    int64_t output_index = inverse ? permutation : spectral_index;
-    if (!inverse) {
-      value *= signs[basis_offset + spectral_index];
+    #pragma unroll
+    for (int half = 0; half < 2; ++half) {
+      int output_group = warp + half * 4;
+      float cross_warp = 0.0f;
+      #pragma unroll
+      for (int input_group = 0; input_group < 8; ++input_group) {
+        float component = values[input_group * 33 + warp_lane];
+        cross_warp += (__popc(output_group & input_group) & 1)
+            ? -component
+            : component;
+      }
+      float value = cross_warp * 0.0625f;
+      int64_t spectral_index = spectral_indices[half];
+      int64_t output_index =
+          inverse ? selected_permutations[half] : spectral_index;
+      if (!inverse) {
+        value *= signs[basis_offset + spectral_index];
+      }
+      output[output_token_offset + output_index] =
+          float_to_scalar<scalar_t>(value);
     }
-    output[output_token_offset + output_index] =
-        float_to_scalar<scalar_t>(value);
+    // The persistent CTA reuses the same shared rows for its next job.
+    __syncthreads();
   }
 }
 
@@ -972,9 +984,11 @@ torch::Tensor fixed_basis_transform_cuda(
   C10_CUDA_CHECK(cudaGetDevice(&device));
   cudaDeviceProp properties;
   C10_CUDA_CHECK(cudaGetDeviceProperties(&properties, device));
-  int64_t resident_blocks = (int64_t)properties.multiProcessorCount * 8;
+  int64_t resident_blocks =
+      (int64_t)properties.multiProcessorCount *
+      (block_size == 256 ? 16 : 8);
   int grid = (int)std::min(jobs, resident_blocks);
-  int threads = 256;
+  int threads = block_size == 256 ? 128 : 256;
   size_t smem = padded_shared_size(block_size) * sizeof(float);
   auto stream = at::cuda::getCurrentCUDAStream();
   if (smem >= 48 * 1024) {
