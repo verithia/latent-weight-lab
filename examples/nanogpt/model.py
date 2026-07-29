@@ -2655,16 +2655,13 @@ class MLP(nn.Module):
             signs = self.postgelu_hidden_output_signs
         else:
             raise ValueError(f"unsupported post-GELU basis role: {role}")
-        hadamard = self.postgelu_hidden_hadamard
         if permutation is None:
             return values
         assert (
             inverse_permutation is not None
             and signs is not None
-            and hadamard is not None
         )
         signs = signs.to(device=values.device, dtype=values.dtype)
-        hadamard = hadamard.to(device=values.device, dtype=values.dtype)
         if inverse:
             values = values * signs
             grouped = values.reshape(
@@ -2673,7 +2670,7 @@ class MLP(nn.Module):
                 // self.postgelu_hidden_self_gate_basis_block_size,
                 self.postgelu_hidden_self_gate_basis_block_size,
             )
-            values = F.linear(grouped, hadamard).reshape_as(values)
+            values = normalized_fht_last_dim(grouped).reshape_as(values)
             return values.index_select(-1, inverse_permutation)
         values = values.index_select(-1, permutation)
         grouped = values.reshape(
@@ -2682,7 +2679,7 @@ class MLP(nn.Module):
             // self.postgelu_hidden_self_gate_basis_block_size,
             self.postgelu_hidden_self_gate_basis_block_size,
         )
-        values = F.linear(grouped, hadamard).reshape_as(values)
+        values = normalized_fht_last_dim(grouped).reshape_as(values)
         return values * signs
 
     def apply_postgelu_hidden_self_gate(
