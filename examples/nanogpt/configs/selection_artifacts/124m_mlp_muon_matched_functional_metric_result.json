@@ -1,0 +1,196 @@
+{
+  "schema_version": "mai_124m_mlp_muon_matched_functional_metric_result_v1",
+  "recorded_at": "2026-07-30",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_functional_metric_plan.json",
+  "plan_sha256": "bd67f3fd98f26a188fb1d76721120ddd6c68e8b194ec2de18fc348d9a481d50c",
+  "execution_commit": "4c9a6912d6c266686a16b79f52d8ff12c6a9f0df",
+  "implementation": {
+    "entrypoint": "examples/nanogpt/analyze_mlp_muon_matched_functional_metric.py",
+    "entrypoint_sha256": "ee9e3196e0005b111fab931b58c7ecb6a23d559d70393fbd55137214e1014d6b",
+    "test": "examples/nanogpt/test_analyze_mlp_muon_matched_functional_metric.py",
+    "test_sha256": "7d9ff0ac904c1103d831cb66bc7fdcadb726e7d07bb9e4c1a55d2797d6bddee3",
+    "focused_tests": "16/16 passed locally and on Y400 before execution"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "mode": "direct foreground execution and polling to exit",
+    "parameter_updates": 0,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "pro6": false,
+    "started_at_unix": 1785351989.9382546,
+    "finished_at_unix": 1785352029.2953415,
+    "wall_seconds": 39.35708689689636,
+    "command": [
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/analyze_mlp_muon_matched_functional_metric.py",
+      "--snapshot-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_optimizer_state_probe_0p5tpp_lr24e4/parameter_trajectory",
+      "--probe-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_optimizer_state_probe_0p5tpp_lr24e4/optimizer_probe",
+      "--data-dir",
+      "/root/userdata/MappingNetworks/data/finewebedu_20b",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_functional_metric_v1",
+      "--plan",
+      "/root/userdata/MappingNetworks/latent-weight-lab-mlp-product-fht/examples/nanogpt/configs/selection_artifacts/124m_mlp_muon_matched_functional_metric_plan.json",
+      "--layers",
+      "0,3,6,9,11",
+      "--phase-boundaries",
+      "0,60,120,180,238",
+      "--stages",
+      "32,64",
+      "--neighbors",
+      "64",
+      "--batch-size",
+      "2",
+      "--block-size",
+      "256",
+      "--batches",
+      "4",
+      "--fit-seed",
+      "20260802",
+      "--holdout-seed",
+      "20260803",
+      "--matching-seed",
+      "161803",
+      "--device",
+      "cuda"
+    ]
+  },
+  "causal_inputs": {
+    "dense_optimizer_state_run_identity_sha256": "17ef857848993596463bea9b8026375cc599902fb6b12317136341ed451247b9",
+    "training_commit": "87117f4ec8e6d3e71ab638397e110ebf181e54a2",
+    "training_provenance": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/provenance/y400_mai_v3_124m_dense_optimizer_state_probe_0p5tpp_lr24e4_20260729T151723Z_75927.json",
+    "training_provenance_sha256": "b7c7156d0bed0497973b615df744a516a5f32d9d0719dad9f1f2c7cca1e6a83d",
+    "archived_config_sha256": "a3f6a8bf405787d5b44319443a7ee243af230015a9df0ba81e63bdad88c86c11",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "snapshot_steps": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "snapshot_sha256": [
+      "20a69c6aa7793b2084355eee07b0c7c5f435f45e7e7438e8a7d52ddad1ac80b6",
+      "a8152e9daa326ccfcc3e0890cf420a3030fc33b2793bd95b3f8d61dde8b16a69",
+      "fa295039d553e75aedf80727feb902ee913989dddc4ec44271e42cfe3bc7344a",
+      "21bbc6a7f1a03443af90ce665747f52d437420e816955661697ae89be23566a3",
+      "5ebcb3d9242b7bb59edb8da70ee625da05951847179fb09cd3838faf317bb644"
+    ],
+    "optimizer_probe_steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "optimizer_probe_sha256": [
+      "17788c3f22ce6b447542816a96f27b155f3f40f35dffd56a86e97ff5710b62b7",
+      "6185bb08506d57bf9602bf5646c286cc29e56c9cd9c10bfc20312573ef7c268c",
+      "ed6b6792825b8b08cd5a84b58e0d4aa70709488c49be72bb0afbfe7038b371ad",
+      "cbee5735230d39399c70fac9aa1b58ef31419ff99ca78a49c44665a4cc815f4e"
+    ],
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "future_information_used_for_selection_or_fitting": false
+  },
+  "validation_windows": {
+    "fit_seed": 20260802,
+    "holdout_seed": 20260803,
+    "tokens_per_window": 2048,
+    "disjoint": true
+  },
+  "aggregate_metrics": {
+    "dense_exact": {
+      "current_output_fixed_scale_recovery": 1.0,
+      "future_output_positive_line_recovery": 0.31035986512303043,
+      "recorded_train_gradient_predicted_ce_decrease": 0.01566099359202608,
+      "validation_gradient_predicted_ce_decrease_fit": 0.01579508782679184,
+      "validation_gradient_predicted_ce_decrease_holdout": 0.01632027615220495
+    },
+    "stage32": {
+      "current_output_fixed_scale_recovery": 0.26330312011456425,
+      "current_output_positive_line_recovery": 0.35633985658275075,
+      "future_output_positive_line_recovery": 0.1422198483626029,
+      "recorded_train_gradient_predicted_ce_decrease": 0.002920796564539989,
+      "validation_gradient_predicted_ce_decrease_fit": 0.0029759235877659914,
+      "validation_gradient_predicted_ce_decrease_holdout": 0.0029559851950053577
+    },
+    "stage64": {
+      "current_output_fixed_scale_recovery": 0.3987670100349315,
+      "current_output_positive_line_recovery": 0.4592019717451498,
+      "future_output_positive_line_recovery": 0.1751091228514578,
+      "recorded_train_gradient_predicted_ce_decrease": 0.004893354363261436,
+      "validation_gradient_predicted_ce_decrease_fit": 0.005000326307132861,
+      "validation_gradient_predicted_ce_decrease_holdout": 0.004936833156593569
+    },
+    "incremental_stage64_minus_stage32": {
+      "current_output_fixed_scale_recovery": 0.18710696413206734,
+      "current_output_positive_line_recovery": 0.28196887192464404,
+      "future_output_positive_line_recovery": 0.1235473736622475,
+      "recorded_train_gradient_predicted_ce_decrease": 0.001972557798718985,
+      "validation_gradient_predicted_ce_decrease_fit": 0.002024402719376214,
+      "validation_gradient_predicted_ce_decrease_holdout": 0.0019808479615907506
+    },
+    "stage64_over_stage32": {
+      "current_output_fixed_scale_recovery_ratio": 1.5144788632258757,
+      "recorded_train_gradient_predicted_ce_decrease_ratio": 1.6753492600851903,
+      "finite_step_ce_wins": 8,
+      "finite_step_ce_comparisons": 8
+    },
+    "stage32_minus_stage64_fixed_batch_ce": [
+      {
+        "phase_start": 0,
+        "fit": 0.0005309581756591797,
+        "holdout": 0.0005364418029785156
+      },
+      {
+        "phase_start": 60,
+        "fit": 0.0010901689529418945,
+        "holdout": 0.0008881092071533203
+      },
+      {
+        "phase_start": 120,
+        "fit": 0.00021827220916748047,
+        "holdout": 0.0003781318664550781
+      },
+      {
+        "phase_start": 180,
+        "fit": 0.00004684925079345703,
+        "holdout": 0.000038743019104003906
+      }
+    ]
+  },
+  "artifacts": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/muon_matched_functional_metric_v1",
+    "analysis_log_sha256": "8895e0904fd91306439721538d2934266cdd6d307f53b22bc7de66b382bc939b",
+    "finite_ce_csv_sha256": "ba12a52013d2f9ecc251aa4653b36e8145a90314345b29ed3b154722e1d77dee",
+    "matchings_csv_sha256": "ff3d00483497542156d6c8c3a282ca641bee81bf901222f3e9d9f8d39448c712",
+    "detail_csv_sha256": "1522b6d2e0e106d6a91471eae237d61d8c0c8ffadeccfd0af5599e59b28da91d",
+    "aggregate_json_sha256": "48fb0c47037a6806da590ce353fdd9f35474e051135269d6f10a7f0a51dee503",
+    "metadata_json_sha256": "f068063f3ad6cb28aead4cd13baa53b4f7172c41a8aab97bb9e2c647545162dc"
+  },
+  "decision": {
+    "classification": "FUNCTIONAL_GAIN_PRESENT_TEST_TEMPORAL_REFRESH",
+    "registered_gate_passed": true,
+    "interpretation": [
+      "The additional 32 hidden-side stages are active at the post-GELU residual link: stage64 raises fixed-scale residual-output recovery by 1.5145x over stage32.",
+      "They are task-useful rather than merely Frobenius-aligned: stage64 raises the recorded-training-gradient predicted CE decrease by 1.6753x and wins every one of the eight disjoint fixed-batch finite-step comparisons.",
+      "The inactive-direction explanation for the weak terminal training gain is rejected.",
+      "Future-phase recovery remains much lower than current recovery, so the next causal question is how quickly the exact task-conditioned Muon chart becomes stale between refreshes."
+    ],
+    "next_action": "measure stage64 chart staleness on one coherent dense Muon trajectory at sub-60-update cadence before authorizing shorter-refresh training; do not combine trajectories unless shared tensors are exactly equal"
+  },
+  "limitations": [
+    "The finite-step CE intervention covers five representative c_proj layers, not all model parameters.",
+    "The result diagnoses one dense-Muon optimizer trajectory and is not a global solution-manifold dimension estimate.",
+    "It establishes functional utility at refresh points but does not yet identify the chart half-life."
+  ]
+}
