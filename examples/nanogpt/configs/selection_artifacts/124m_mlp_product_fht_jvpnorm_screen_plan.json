@@ -1,0 +1,44 @@
+{
+  "calibration_result": {
+    "movement_gate_passed": true,
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_product_fht_pullback_calibration_result.json",
+    "probe_sha256": "870e1bf9f37deecd6578efee08e25ed7ce6afe30c4e8ebb8125bfba438815871"
+  },
+  "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_productfht6_wsmuon_jvpnorm_0p5tpp_lr24e4.json",
+  "candidate_config_sha256": "6a8cab8250f971c3dee8dedacd5839cfc585ee9a974fd29b79271c8dc9a2d86a",
+  "decision_rule": {
+    "acceptable_attention_gap_ce": 0.1,
+    "attention_only_validation_ce": 5.4918,
+    "directional_only": "stable candidate improves on 5.7395 CE but remains above the +0.1000 attention-control gap",
+    "fixed_tangent_cproj_validation_ce": 5.7395,
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "reject": "candidate ties or regresses versus 5.7395 CE, is unstable, fails the 20-percent MFU gate, or does not complete",
+    "success": "stable candidate finishes at or below 5.5918 CE, within +0.1000 of the accepted attention-only control"
+  },
+  "frozen_hyperparameters": {
+    "adamw_fallback_scale": 0.3,
+    "diagonal_scale": 1.0,
+    "global_clip_non_product_only": 1.0,
+    "main_learning_rate": 0.0024,
+    "max_iters": 238,
+    "muon_momentum": 0.95,
+    "muon_ns_steps": 5,
+    "natural_gradient": true,
+    "product_fht_factors": 6,
+    "pullback_max_coordinate_update": 0.02,
+    "pullback_normalize": true,
+    "tokens": 62390272,
+    "weight_space_muon": true
+  },
+  "hypothesis": "the first product-FHT endpoint was rejected because c_proj weights stayed almost frozen; exact JVP norm calibration now makes the selected learning rate a meaningful test of whether the nonlinear moving tangent can improve over the fixed tangent",
+  "implementation_commit": "b39a209520b56d3e99de755bc8d42be932fb6c21",
+  "implementation_source_hashes": {
+    "examples/nanogpt/model.py": "686a4e4536d712c474c686f9cb8392473e85ea4b0585f62aad1ec87dfa336745",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "examples/nanogpt/train.py": "4121cbd0f39c3c78122e3d84665aa4c8b458d443510aa1152b12f96746a0b6a1",
+    "latent_weight_lab/block_fht.py": "62b2c94a82798b7efe65ce0c414763b1383f368e3b105763bbe6b0a8a703aa1a"
+  },
+  "launch_rule": "do not launch unless this exact committed config passes a fresh directly polled real-training MFU gate at or above 20 percent on Y400; poll the 238-step run directly",
+  "schema_version": "mai_124m_mlp_product_fht_jvpnorm_screen_plan_v1",
+  "status": "preregistered_before_result"
+}
