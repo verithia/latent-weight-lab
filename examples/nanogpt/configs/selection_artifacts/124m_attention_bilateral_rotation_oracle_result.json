@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_attention_bilateral_rotation_oracle_result_v1",
+  "recorded_at": "2026-07-30",
+  "analysis": {
+    "source_commit": "314f3966cbf9acbcc1218e70bd42f9b7b22ac542",
+    "entrypoint": "examples.nanogpt.analyze_attention_rotation_oracle",
+    "result_sha256": "d76e3074196f92dcc93ee13113adb9b1b003e1dbd12d54651716e7e76136f706",
+    "cells_csv_sha256": "c0747cdcdc0ba68d6feb27662b19b9ebb41232e69b92f5bce7bada9e011e0af3",
+    "optimizer_probe_run_identity_sha256": "a0c3e16632a58698f00dea45e4c94920bf127b8f67a5a8543b3db7b79826594e",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "cells": 60
+  },
+  "rank4_recovery": {
+    "qk_shared": {
+      "selected_left": 0.2770230890252956,
+      "bilateral_span": 0.27717008299485674,
+      "full_left_orbit": 0.4942514239408854
+    },
+    "v": {
+      "selected_right": 0.3967117222381777,
+      "bilateral_span": 0.41489929282508275,
+      "full_right_orbit": 0.41641311488368155
+    },
+    "cproj": {
+      "selected_right": 0.33073350070676527,
+      "bilateral_span": 0.37856948902033644,
+      "full_right_orbit": 0.345211053126096
+    },
+    "aggregate_selected_right_reference": 0.3340789962857251,
+    "aggregate_bilateral_span": 0.3804330008607956
+  },
+  "qk_left_rank_curve": {
+    "skew_rank2": 0.2220886510155861,
+    "skew_rank4": 0.2770230890252956,
+    "skew_rank8": 0.3402792853533203,
+    "skew_rank16": 0.38440659440578134,
+    "skew_rank32": 0.41968292788316985,
+    "skew_rank64": 0.4461372015887379,
+    "skew_rank128": 0.46502404210204745,
+    "full_left_orbit": 0.4942514239408854
+  },
+  "decision": {
+    "classification": "REJECT_UNIFORM_BILATERAL_RANK4_AND_ISOLATE_QK_RANK",
+    "reason": "Adding the opposite rank-4 orbit barely changes QK recovery and raises aggregate recovery by only 0.046. V is already near its full selected-side orbit at rank 4. The largest compact capacity deficit is QK left/output rank.",
+    "next_gate": "Measure admission and the 0.5-TPP loss curve for a target-specific chart that increases QK pair rank only. Do not spend bilateral compute on V unless a later oracle or training result justifies it."
+  },
+  "limitations": [
+    "This is an oracle on dense Muon task gradients, not a trained generated model.",
+    "The two-direction least-squares span is a lower-bound oracle, not the exact nonlinear optimum of two trainable Cayley factors.",
+    "Orthogonal charts rotate singular vectors but do not add independent singular-value degrees of freedom."
+  ]
+}
