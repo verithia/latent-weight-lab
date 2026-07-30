@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_attention_gain_repair_0p5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "implementation_commit": "f77595277aa692998a49b95b9da9f72e9daa9c33",
+  "control": {
+    "name": "y400_mai_v3_124m_fullattn_prefit_mult1p00",
+    "terminal_validation_loss": 5.4918
+  },
+  "candidates": [
+    {
+      "slot": "outputgain",
+      "config_sha256": "8011bcbba511ead5805f7cab0b6c0ec518ac8607d264375f9d2b688a17f356e3",
+      "provenance_sha256": "145735a84c3538129f4bb47bfbe8ab014bc3db48a25a883e6721389866012241",
+      "status_sha256": "0a7340c78b475e3dd8d26246cd66494366bae0d7b9f3957027b7357ae02a2211",
+      "log_sha256": "a1a747c16f9f5ba326c3a62f1eef4cda5088b6de804a11847cff0ea5a32dc72c",
+      "mfu_certificate_sha256": "b195c0101f1a88ebebf01bc54ef4b2cfd0613682d1eb269e91ede7001209ead4",
+      "mfu_fraction": 0.31581,
+      "ordinary_iter_ms": 940.56,
+      "terminal_train_loss": 5.4862,
+      "terminal_validation_loss": 5.4890,
+      "delta_to_control": -0.0028,
+      "exit_code": 0
+    },
+    {
+      "slot": "inputgain",
+      "config_sha256": "c5824d4202d09f6fd454a217fa85abb27fe3f5e057bffa6a3dbafcd017a98a2f",
+      "provenance_sha256": "eb0a27c7d20d323d9bad420b0164956ccc68aefba3c2af163272e6a0fa0d8d84",
+      "status_sha256": "9aaeae9f02e23dd0ed0841704b1780252c92668879e9d8eae313895093ec5c7f",
+      "log_sha256": "b4533c50b17504be4ce64088ce7e94687d6c6fe95a8f938cab3b3a2ecf49984c",
+      "mfu_certificate_sha256": "f1d596eccbd691d3e5227cad0cf582737d5f3f7b44d7e26b34df7267a644b893",
+      "mfu_fraction": 0.30990,
+      "ordinary_iter_ms": 941.2266666666668,
+      "terminal_train_loss": 5.4863,
+      "terminal_validation_loss": 5.4891,
+      "delta_to_control": -0.0027,
+      "exit_code": 0
+    },
+    {
+      "slot": "dualgain",
+      "config_sha256": "5e489cace8be1db8e210b8f01908f9a4969b905306df199167651cc57b1a26e9",
+      "provenance_sha256": "4b68bb1e7d1b0105618c62e0aa51e4cc408cf3eb4c940defc16a5dcaaca20d15",
+      "status_sha256": "0cc35365ad991d9213a283a0fc79a19a2037409037aecdad08b2de98ec013764",
+      "log_sha256": "2baa5be7007a9dfa602793f8cfb726d2759b732d151517edf58016f6de005b0d",
+      "mfu_certificate_sha256": "7ec32ce92f3e66e652b54be6c58476571b1ca4eca190c95adb03cfe15d8fbd4e",
+      "mfu_fraction": 0.30856,
+      "ordinary_iter_ms": 954.12,
+      "terminal_train_loss": 5.4834,
+      "terminal_validation_loss": 5.4863,
+      "delta_to_control": -0.0055,
+      "exit_code": 0
+    }
+  ],
+  "decision": {
+    "classification": "PRACTICAL_TIE_SELECT_SIMPLEST",
+    "selected": "outputgain",
+    "promote_to_124m_5tpp": true,
+    "reason": "All three candidates are stable and within 0.01 validation CE. The preregistered simplicity rule therefore selects output-only over the bilateral chart despite the latter's immaterial 0.0027 edge.",
+    "selected_5tpp_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_outputgain_5tpp_lr24e4.json",
+    "closure_rule": "At 5TPP compare with dense validation CE 3.5401 and base attention-only CE 3.6744. The requested threshold is a gap no larger than +0.10 to dense."
+  }
+}

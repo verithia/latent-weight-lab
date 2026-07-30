@@ -9,6 +9,9 @@ BASE_PATH = (
     CONFIG_DIR
     / "y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult1p00.json"
 )
+BASE_5TPP_PATH = (
+    CONFIG_DIR / "y400_mai_v2_124m_fullattn_blockfht_5tpp_top1.json"
+)
 OUTPUT_ROOT = (
     "/root/userdata/MappingNetworks/outputs/"
     "y400_mai_v3_attention_gain_repairs"
@@ -104,6 +107,63 @@ def make_config(slot: str, updates: dict[str, object]) -> dict[str, object]:
     return config
 
 
+def make_outputgain_5tpp_config() -> dict[str, object]:
+    config = json.loads(BASE_5TPP_PATH.read_text(encoding="utf-8"))
+    stem = "y400_mai_v3_124m_fullattn_outputgain_5tpp_lr24e4"
+    config.update(
+        {
+            "block_fht_output_gain_targets": TARGETS,
+            "block_fht_input_gain_targets": [],
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "candidate_scope": (
+                "selected attention-only BlockFHT chart plus "
+                "per-output-channel multiplicative gain on QK-headwise, V, "
+                "and c_proj; no MLP replacement"
+            ),
+            "candidate_learning_rate_resolution": (
+                "hold the selected attention-only 5TPP recipe at 2.4e-3; "
+                "the 124M/0.5TPP gain screen selected output-only by the "
+                "preregistered simplicity rule"
+            ),
+            "confirmation_source": (
+                "2026-07-30 registered attention-gain screen: output val "
+                "5.4890, input 5.4891, bilateral 5.4863, base attention "
+                "5.4918; output selected because all are inside 0.01"
+            ),
+            "hpo_stage": (
+                "attention_direction_repair_outputgain_confirmation_5tpp"
+            ),
+            "ladder_role": "attention_direction_repair_confirmation",
+            "ladder_slot": "outputgain",
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "The exact production tangent captured only equal-rank "
+                    "Haar energy. The registered 0.5TPP diagonal-gain screen "
+                    "selected output-only for the informative 5TPP test."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP output-channel gain attention-only "
+                    "confirmation"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "compare terminal fixed validation CE against dense 3.5401 "
+                "and base attention-only 3.6744; target gap <=0.10 to dense "
+                "and require a material improvement over base attention "
+                "before any 20TPP promotion"
+            ),
+            "prelaunch_provenance_requirements": (
+                "record commit, entrypoint, literal command, archived config "
+                "SHA256, source hashes, dataset manifest SHA256, runtime fixed "
+                "evaluation digest, and MFU certificate"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     for slot, updates in SPECS.items():
         path = CONFIG_DIR / (
@@ -116,6 +176,16 @@ def main() -> None:
             encoding="utf-8",
         )
         print(path)
+    selected = (
+        CONFIG_DIR
+        / "y400_mai_v3_124m_fullattn_outputgain_5tpp_lr24e4.json"
+    )
+    selected.write_text(
+        json.dumps(make_outputgain_5tpp_config(), indent=2, sort_keys=True)
+        + "\n",
+        encoding="utf-8",
+    )
+    print(selected)
 
 
 if __name__ == "__main__":
