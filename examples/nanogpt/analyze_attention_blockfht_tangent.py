@@ -343,6 +343,23 @@ def geometry_dimensions(geometry: dict[str, Any]) -> tuple[int, int]:
     return int(latent_dim), int(total_size)
 
 
+def resolve_probe_steps(
+    boundaries: list[int],
+    requested: list[int],
+) -> list[int]:
+    phases = len(boundaries) - 1
+    if phases <= 0:
+        raise ValueError("phase boundaries require at least two steps")
+    probe_steps = requested or boundaries[:-1]
+    if len(probe_steps) != phases:
+        raise ValueError(
+            "probe steps must contain exactly one step per phase"
+        )
+    if probe_steps != sorted(probe_steps):
+        raise ValueError("probe steps must be sorted")
+    return probe_steps
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot-dir", required=True, type=Path)
@@ -351,6 +368,14 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--layers", default="0,3,6,9,11")
     parser.add_argument("--phase-boundaries", default="0,60,120,180,238")
+    parser.add_argument(
+        "--probe-steps",
+        default="",
+        help=(
+            "optional comma-separated probe step per phase; defaults to "
+            "the phase starts"
+        ),
+    )
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
 
@@ -360,6 +385,10 @@ def main() -> None:
     phases = list(zip(boundaries[:-1], boundaries[1:], strict=True))
     if not layers or not phases:
         raise ValueError("layers and phase boundaries must be non-empty")
+    probe_steps = resolve_probe_steps(
+        boundaries,
+        parse_int_list(args.probe_steps),
+    )
     config = json.loads(args.production_config.read_text())
     expected = {
         "attn.c_attn.qk_headwise",
@@ -375,7 +404,8 @@ def main() -> None:
         args.snapshot_dir / f"step_{step:06d}.pt" for step in boundaries
     ]
     probe_paths = [
-        args.probe_dir / f"step_{start:06d}.pt" for start, _ in phases
+        args.probe_dir / f"step_{step:06d}.pt"
+        for step in probe_steps
     ]
     missing = [
         str(path)
@@ -396,8 +426,10 @@ def main() -> None:
     rows: list[dict[str, Any]] = []
     run_identity_sha256: str | None = None
     geometries: dict[str, Any] = {}
-    for phase_start, phase_end in phases:
-        probe_path = args.probe_dir / f"step_{phase_start:06d}.pt"
+    for (phase_start, phase_end), probe_step in zip(
+        phases, probe_steps, strict=True
+    ):
+        probe_path = args.probe_dir / f"step_{probe_step:06d}.pt"
         probe = torch.load(probe_path, map_location="cpu", weights_only=False)
         if probe.get("schema_version") != OPTIMIZER_PROBE_SCHEMA_VERSION:
             raise ValueError("unexpected optimizer probe schema")
@@ -459,6 +491,7 @@ def main() -> None:
                     "layer": layer,
                     "phase_start": phase_start,
                     "phase_end": phase_end,
+                    "probe_step": probe_step,
                     "latent_dim": latent_dim,
                     "target_size": total_size,
                     "haar_rank_fraction": haar_fraction,
@@ -532,6 +565,7 @@ def main() -> None:
         ],
         "layers": layers,
         "phase_boundaries": boundaries,
+        "probe_steps": probe_steps,
         "geometry": geometries,
         "by_target": by_target,
         "aggregate": aggregate,

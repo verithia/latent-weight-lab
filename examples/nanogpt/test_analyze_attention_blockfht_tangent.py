@@ -7,6 +7,7 @@ from examples.nanogpt.analyze_attention_blockfht_tangent import (
     latent_geometry,
     project_c_attn,
     projection_metrics,
+    resolve_probe_steps,
     task_gradient_projection_metrics,
 )
 
@@ -66,3 +67,12 @@ def test_task_gradient_projection_metrics_reports_orthogonal_capture() -> None:
     metrics = task_gradient_projection_metrics(gradient, projected)
     assert metrics["task_gradient_tangent_energy_fraction"] == 9.0 / 25.0
     assert abs(metrics["task_gradient_tangent_cosine"] - 3.0 / 5.0) < 1e-7
+
+
+def test_probe_steps_can_lag_snapshot_phase_boundaries() -> None:
+    boundaries = [0, 600, 1200, 1800, 2373]
+    assert resolve_probe_steps(boundaries, []) == boundaries[:-1]
+    assert resolve_probe_steps(
+        boundaries,
+        [0, 594, 1188, 1782],
+    ) == [0, 594, 1188, 1782]
