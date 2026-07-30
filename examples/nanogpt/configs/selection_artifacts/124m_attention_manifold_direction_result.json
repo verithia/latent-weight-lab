@@ -1,5 +1,5 @@
 {
-  "schema_version": "mai_124m_attention_manifold_direction_result_v1",
+  "schema_version": "mai_124m_attention_manifold_direction_result_v2",
   "recorded_at": "2026-07-30",
   "trajectory": {
     "source_commit": "e5cd8c3b9a920a4d1d1712da9a25c05b5f00df79",
@@ -58,10 +58,25 @@
     "projected_positive_step_line_recovery": 0.0019196610947059749,
     "classification": "BLOCKFHT_TANGENT_NOT_ALIGNED_ABOVE_EQUAL_RANK_HAAR"
   },
+  "task_gradient_tangent_check": {
+    "analysis_source_commit": "cd19ebd1c51bb0a4d9e2e7636180064efc62dae3",
+    "result_sha256": "b36a73db8c08f0363e680dacfe99e107feb57090257ac8670165ed770714d18b",
+    "cells_csv_sha256": "d1453962965c86f7c894f46575277686fc87841fb906c86f626079911dd83233",
+    "cells": 40,
+    "attn_c_attn_gradient_energy_fraction": 0.00992538588576456,
+    "attn_c_attn_gradient_projection_cosine": 0.09962533187883607,
+    "attn_c_proj_gradient_energy_fraction": 0.010080997097891063,
+    "attn_c_proj_gradient_projection_cosine": 0.10039826104396464,
+    "aggregate_gradient_energy_fraction": 0.010072234452676868,
+    "aggregate_gradient_projection_cosine": 0.10035473651923939,
+    "minimum_cell_gradient_energy_fraction": 0.009455198379413858,
+    "maximum_cell_gradient_energy_fraction": 0.010391522900826067,
+    "interpretation": "The clipped task gradient removes infinitesimal function-preserving attention gauge directions. Its capture is still exactly the nominal one-percent random-subspace share, so Q/K and V/O gauge freedom does not explain away the deployed chart's direction deficit."
+  },
   "decision": {
     "direction_problem_resolved_by_deployed_chart": false,
     "blockfht_uniquely_at_fault": false,
-    "reason": "The deployed chart preserves only its nominal one-percent random-subspace share of both dense phase chords and exact Muon directions. This directly implicates the fixed one-percent chart, but an equal-rank arbitrary random linear chart has the same expected limitation, so the result does not isolate BlockFHT locality from rank/orientation.",
+    "reason": "The deployed chart preserves only its nominal one-percent random-subspace share of dense phase chords, exact Muon directions, and the instantaneous clipped task gradient. The task-gradient test rules out attention gauge freedom as the explanation. This directly implicates the fixed one-percent chart, but an equal-rank arbitrary random linear chart has the same expected limitation, so the result does not isolate BlockFHT locality from rank/orientation.",
     "next_screen": "Add state-dependent output, input, and bilateral channel gains to the exact selected attention chart at 124M/0.5TPP. These diagonal multiplicative coordinates rotate the tangent with the generated weight without a learned dense basis. Promote at most one stable candidate to 124M/5TPP, where the attention-only gap is measurable.",
     "rejected_shortcuts": [
       "Do not claim the two-to-three-dimensional temporal PCA path is contained in the production chart.",
