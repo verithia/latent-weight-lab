@@ -102,6 +102,10 @@ class GPTConfig:
     block_fht_affine_delta_scale: float = 1.0
     block_fht_output_gain_targets: tuple[str, ...] = ()
     block_fht_input_gain_targets: tuple[str, ...] = ()
+    block_fht_attn_cayley_targets: tuple[str, ...] = ()
+    block_fht_attn_cayley_rank: int = 0
+    block_fht_attn_cayley_scale: float = 1.0
+    block_fht_attn_cayley_seed: int = 618033
     block_fht_ffn_pregelu_gain: bool = False
     block_fht_ffn_pregelu_bias: bool = False
     block_fht_ffn_pregelu_bias_init: float = 0.0
@@ -424,6 +428,110 @@ class LearnedGivensOutputMix(nn.Module):
             rotated = torch.stack((first, second), dim=-1).reshape_as(permuted)
             result = rotated.index_select(-1, self.inverse_permutations[stage])
         return result
+
+
+class LearnedLowRankCayleyMix(nn.Module):
+    """Identity-initialized low-rank orthogonal channel chart.
+
+    The skew generator is ``K = scale * (U V^T - V U^T)`` and the applied
+    row-vector operator is the exact Cayley transform
+    ``R = (I-K)^-1 (I+K)``.  ``U`` starts at zero, so the initial function is
+    exactly unchanged; ``V`` starts as a seeded unit frame, which gives
+    ``U`` a nonzero first-order task gradient.  Only two thin channel factors
+    are learned—there is no learned dense basis or additive weight residual.
+
+    Applying the transform uses a ``2r x 2r`` Woodbury solve and two thin
+    matrix products, avoiding a materialized ``features x features`` rotation.
+    """
+
+    def __init__(
+        self,
+        features: int,
+        rank: int,
+        seed: int,
+        coordinate_scale: float = 1.0,
+    ) -> None:
+        super().__init__()
+        self.features = int(features)
+        self.rank = int(rank)
+        self.coordinate_scale = float(coordinate_scale)
+        if self.features <= 0:
+            raise ValueError("features must be positive")
+        if self.rank <= 0 or self.rank > self.features:
+            raise ValueError("rank must be in [1, features]")
+        if (
+            not math.isfinite(self.coordinate_scale)
+            or self.coordinate_scale <= 0.0
+        ):
+            raise ValueError("coordinate_scale must be positive and finite")
+
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        right = torch.randn(
+            self.features,
+            self.rank,
+            generator=generator,
+            dtype=torch.float32,
+        )
+        right = F.normalize(right, dim=0)
+        # Keep chart coordinates one-dimensional so the Muon recipe assigns
+        # them to its AdamW fallback instead of orthogonalizing thin factors.
+        self.left = nn.Parameter(torch.zeros(self.features * self.rank))
+        self.right = nn.Parameter(right.reshape(-1))
+
+        identity = torch.eye(self.rank, dtype=torch.float32)
+        zero = torch.zeros_like(identity)
+        symplectic = torch.cat(
+            (
+                torch.cat((zero, identity), dim=1),
+                torch.cat((-identity, zero), dim=1),
+            ),
+            dim=0,
+        )
+        self.register_buffer("symplectic", symplectic, persistent=False)
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, "
+                f"got {values.shape[-1]}"
+            )
+        solve_dtype = (
+            torch.float32
+            if values.dtype in (torch.float16, torch.bfloat16)
+            else values.dtype
+        )
+        left = (
+            self.coordinate_scale
+            * self.left.to(device=values.device, dtype=solve_dtype)
+        ).view(self.features, self.rank)
+        right = F.normalize(
+            self.right.to(device=values.device, dtype=solve_dtype).view(
+                self.features, self.rank
+            ),
+            dim=0,
+        )
+        factors = torch.cat((left, right), dim=1)
+        symplectic = self.symplectic.to(
+            device=values.device, dtype=solve_dtype
+        )
+        gram = factors.transpose(0, 1) @ factors
+        identity = torch.eye(
+            2 * self.rank, device=values.device, dtype=solve_dtype
+        )
+        middle = torch.linalg.solve(
+            identity - symplectic @ gram,
+            symplectic,
+        )
+
+        factors_compute = factors.to(dtype=values.dtype)
+        middle_compute = middle.to(dtype=values.dtype)
+        projected = values @ factors_compute
+        correction = (
+            (projected @ middle_compute)
+            @ factors_compute.transpose(0, 1)
+        )
+        return values + 2.0 * correction
 
 
 class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
@@ -1108,6 +1216,67 @@ class CausalSelfAttention(nn.Module):
             self.qk_mix_alpha = 0.0
             self.qk_tied_sign = None
         self.c_proj = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_proj", layer_id * 4 + 1)
+        cayley_targets = set(config.block_fht_attn_cayley_targets)
+        supported_cayley_targets = {
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        }
+        unknown_cayley_targets = cayley_targets - supported_cayley_targets
+        if unknown_cayley_targets:
+            raise ValueError(
+                "unsupported attention Cayley targets: "
+                + ", ".join(sorted(unknown_cayley_targets))
+            )
+        if not cayley_targets.issubset(set(config.block_fht_targets)):
+            raise ValueError(
+                "attention Cayley targets must also be BlockFHT targets"
+            )
+        cayley_rank = int(config.block_fht_attn_cayley_rank)
+        if cayley_targets and cayley_rank <= 0:
+            raise ValueError(
+                "block_fht_attn_cayley_rank must be positive when targets "
+                "are enabled"
+            )
+        if not cayley_targets and cayley_rank != 0:
+            raise ValueError(
+                "block_fht_attn_cayley_rank must be zero when no targets "
+                "are enabled"
+            )
+        if (
+            "attn.c_attn.qk_headwise" in cayley_targets
+            and not self.qk_headwise_c_attn
+        ):
+            raise ValueError(
+                "the shared QK Cayley chart requires "
+                "attn.c_attn.qk_headwise"
+            )
+
+        def cayley_mix(seed_offset: int) -> LearnedLowRankCayleyMix:
+            return LearnedLowRankCayleyMix(
+                config.n_embd,
+                cayley_rank,
+                int(config.block_fht_attn_cayley_seed)
+                + layer_id * 64
+                + seed_offset,
+                coordinate_scale=float(config.block_fht_attn_cayley_scale),
+            )
+
+        self.qk_input_cayley = (
+            cayley_mix(0)
+            if "attn.c_attn.qk_headwise" in cayley_targets
+            else None
+        )
+        self.v_input_cayley = (
+            cayley_mix(1)
+            if "attn.c_attn.v" in cayley_targets
+            else None
+        )
+        self.cproj_input_cayley = (
+            cayley_mix(2)
+            if "attn.c_proj" in cayley_targets
+            else None
+        )
         self.attn_dropout = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
         self.n_head = config.n_head
@@ -1122,6 +1291,16 @@ class CausalSelfAttention(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         bsz, seq_len, channels = x.size()
+        qk_input = (
+            self.qk_input_cayley(x)
+            if self.qk_input_cayley is not None
+            else x
+        )
+        v_input = (
+            self.v_input_cayley(x)
+            if self.v_input_cayley is not None
+            else x
+        )
         if self.split_c_attn:
             assert self.c_attn_q is not None and self.c_attn_k is not None and self.c_attn_v is not None
             q = self.c_attn_q(x)
@@ -1138,8 +1317,10 @@ class CausalSelfAttention(nn.Module):
             v = self.c_attn_v(x)
         elif self.qk_headwise_c_attn:
             assert self.c_attn_qk_headwise is not None and self.c_attn_v is not None
-            q, k = self.c_attn_qk_headwise(x).split(self.n_embd, dim=2)
-            v = self.c_attn_v(x)
+            q, k = self.c_attn_qk_headwise(qk_input).split(
+                self.n_embd, dim=2
+            )
+            v = self.c_attn_v(v_input)
         elif self.qk_tied_c_attn or self.qk_tied_sign_c_attn:
             assert self.c_attn_qk_tied is not None and self.c_attn_v is not None
             q = self.c_attn_qk_tied(x)
@@ -1196,6 +1377,8 @@ class CausalSelfAttention(nn.Module):
             att = self.attn_dropout(att)
             y = att @ v
         y = y.transpose(1, 2).contiguous().view(bsz, seq_len, channels)
+        if self.cproj_input_cayley is not None:
+            y = self.cproj_input_cayley(y)
         return self.resid_dropout(self.c_proj(y))
 
 

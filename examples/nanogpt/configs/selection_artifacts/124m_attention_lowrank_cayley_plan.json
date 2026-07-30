@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_attention_lowrank_cayley_plan_v1",
+  "recorded_at": "2026-07-30",
+  "scientific_question": "Can a state-dependent low-rank orthogonal chart recover the task-descent directions missing from the fixed one-percent BlockFHT tangent and reduce attention-only validation CE?",
+  "evidence": {
+    "production_tangent_task_gradient_energy_fraction": 0.010072234452676868,
+    "output_gain_5tpp_step594_delta_to_attention_control": -0.0091,
+    "output_gain_5tpp_step1188_delta_to_attention_control": -0.0044,
+    "dense_orbit_oracle": {
+      "shared_qk_right_orbit_recovery": 0.20727267547606346,
+      "v_right_orbit_recovery": 0.4164131148836816,
+      "cproj_right_orbit_recovery": 0.345211053126096,
+      "shared_qk_rank4_skew_recovery": 0.1173,
+      "v_rank4_skew_recovery": 0.3967,
+      "cproj_rank4_skew_recovery": 0.3307
+    }
+  },
+  "implementation": {
+    "module": "examples.nanogpt.model.LearnedLowRankCayleyMix",
+    "analysis_entrypoint": "examples.nanogpt.analyze_attention_rotation_oracle",
+    "training_entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json",
+    "targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "cayley_pair_rank": 2,
+    "initialization": "U=0 and seeded unit V, giving an exact identity function with a live U gradient",
+    "parameterization": "K=UV^T-VU^T and R=(I-K)^-1(I+K), applied with a 2r-dimensional Woodbury solve",
+    "exclusions": [
+      "no learned dense mapping basis",
+      "no additive LoRA residual",
+      "no MLP replacement",
+      "no blind LR sweep"
+    ]
+  },
+  "admission": {
+    "model": "124M",
+    "budget_tpp": 0.5,
+    "max_iters": 238,
+    "minimum_mfu_fraction": 0.2,
+    "polling": "direct foreground polling; no watchdog callbacks",
+    "host": "Y400",
+    "pro6": "operator paused"
+  },
+  "decision": {
+    "attention_control_validation_ce": 5.4918,
+    "dense_validation_ce": 5.4890,
+    "stability_margin_ce": 0.02,
+    "promote_to_5tpp": "only if stable and terminal validation CE improves the attention control; require a material trend because diagonal gains failed at the informative budget",
+    "five_tpp_closure_threshold": 3.6401
+  }
+}
