@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_attention_targetwise_qkrank4_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_targetwise_qkrank4_0p5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 1,
+    "source_commit": "c7b79d47e47dc48bbb4a62615242be9e22d7e44a",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_targetwise_qkrank4_0p5tpp_lr24e4.json",
+    "config_sha256": "f8966a7e8aaac7321d998ecc625eaa5f01d1f0c1b8b50c1de007a80cbb32d080",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "769a7b93fc21b387f4543cf63cc1e7564b4551c0a68e3f9bdd3ccbb267e84a29",
+    "status_sha256": "6e1afbbcd7b91fc122b5393320ea7314bf402a50f578b5a3f45655c251b8aa83",
+    "log_sha256": "fdcf9c8aff75f971ee8ad492210eceab81c13649d5f9232bc4fb2e1955d96ce7",
+    "checkpoint_metadata_sha256": "9e076437aa28503e41a1239fc74e49c63536257a03ae862259ad5000fb017898",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.2520504077134833,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "iter_ms_first_certificate": 1191.9766666666667,
+    "peak_mib_first_certificate": 33966.53,
+    "live_median_iter_ms_10_to_230": 1176.8
+  },
+  "fixed_evaluations": [
+    {
+      "step": 60,
+      "validation_loss": 6.2132,
+      "delta_to_targetwise_rank2": -0.0004
+    },
+    {
+      "step": 120,
+      "validation_loss": 5.7895,
+      "delta_to_targetwise_rank2": -0.0021
+    },
+    {
+      "step": 180,
+      "validation_loss": 5.5611,
+      "delta_to_targetwise_rank2": -0.0060
+    },
+    {
+      "step": 238,
+      "train_loss": 5.4650,
+      "validation_loss": 5.4677,
+      "delta_to_targetwise_rank2": -0.0061
+    }
+  ],
+  "comparison": {
+    "targetwise_rank2_validation_loss": 5.4738,
+    "uniform_right_cayley_validation_loss": 5.4822,
+    "attention_control_validation_loss": 5.4918,
+    "dense_validation_loss": 5.4890,
+    "terminal_delta_to_targetwise_rank2": -0.0061,
+    "terminal_delta_to_attention_control": -0.0241,
+    "terminal_delta_to_dense": -0.0213
+  },
+  "decision": {
+    "classification": "PROMOTE_QK_RANK_ONLY_TO_124M_5TPP",
+    "reason": "The QK-rank-only change is supported by the measured task-gradient rank curve, clears the 20% MFU gate, and exceeds the preregistered 0.005 terminal improvement over targetwise rank-2."
+  }
+}
