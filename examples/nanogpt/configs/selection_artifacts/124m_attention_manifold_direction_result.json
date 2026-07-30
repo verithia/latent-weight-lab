@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_attention_manifold_direction_result_v1",
+  "recorded_at": "2026-07-30",
+  "trajectory": {
+    "source_commit": "e5cd8c3b9a920a4d1d1712da9a25c05b5f00df79",
+    "config_sha256": "3c712e68108fec9a71064ed8b8a5fb836992d266f0d56b86fbe413c5ebd4a892",
+    "provenance_sha256": "1f908dc96e5ffd09354e6a8ff2b139b6f93b2efeed231058bfd645a17b064324",
+    "status_sha256": "953e1208a9fdf92294296390d0504dc04e28379e9e2356442d0133d74d67d596",
+    "log_sha256": "db9178f8a71b4144ee397e0464c043a4af05723d29e4452b70b654123337d3a8",
+    "checkpoint_metadata_sha256": "60a2fa19717fbedee1538b218d599e8dcba69016d555d2123de52b5f82d16af7",
+    "strict_io_mfu_certificate_sha256": "91f794ec9c494cc868c2376b6cb7ed3c5ba140a20bb5be3948eaedcadfabeb37",
+    "strict_io_mfu_fraction": 0.2580478688206707,
+    "strict_io_iter_ms": 1153.5244444444445,
+    "terminal_train_loss": 5.4848,
+    "terminal_validation_loss": 5.4876,
+    "exit_code": 0
+  },
+  "paper_style_temporal_analysis": {
+    "analysis_metadata_sha256": "a6ed7de53599e1dd065798e9ccc9caef514e3fa639ce323543900ffaa18a45b9",
+    "summary_csv_sha256": "4cca1617b43d106312633c30d1422a64039868780dbc30f49055b0c5283379ec",
+    "sampled_layers": [0, 3, 6, 9, 11],
+    "snapshot_count": 41,
+    "attn_c_attn": {
+      "mean_pc1_energy": 0.8329951774455471,
+      "mean_pc1_pc2_energy": 0.9407865854394761,
+      "dimension_90pct": 2,
+      "dimension_95pct": 3,
+      "dimension_99pct_range": [5, 6],
+      "mean_path_length_over_chord": 1.9907227754592896,
+      "mean_median_relative_chord_residual": 0.3720866084098816,
+      "mean_median_turn_degrees": 38.63188552856445
+    },
+    "attn_c_proj": {
+      "mean_pc1_energy": 0.8286284963599232,
+      "mean_pc1_pc2_energy": 0.9364218008603007,
+      "dimension_90pct": 2,
+      "dimension_95pct": 3,
+      "dimension_99pct": 6,
+      "mean_path_length_over_chord": 2.086812162399292,
+      "mean_median_relative_chord_residual": 0.3754546880722046,
+      "mean_median_turn_degrees": 40.13254623413086
+    },
+    "interpretation": "The sampled optimizer paths are smooth and temporally low-dimensional, but curved; this does not imply alignment with a fixed random chart or estimate the global dimension of good solutions."
+  },
+  "exact_production_tangent": {
+    "analysis_source_commit": "7c289a97da13eb7eb6966ef25288f7d14b63d2ee",
+    "result_sha256": "edefbb53c0e84736630ee20600f8f50d7ecf905ff878de1f3b183a481c41313d",
+    "cells_csv_sha256": "aa84f437fdcdf49079a1b97c866d899a9efbb15e7eb0a0157fff330368a07e92",
+    "cells": 40,
+    "equal_rank_haar_expected_energy_fraction": 0.009999593098958336,
+    "tangent_chord_energy_fraction": 0.010015747188004322,
+    "minimum_cell_tangent_chord_energy_fraction": 0.009756032207111975,
+    "maximum_cell_tangent_chord_energy_fraction": 0.010208971688172213,
+    "dense_muon_direction_chord_cosine": 0.42606925168956994,
+    "dense_muon_positive_step_line_recovery": 0.18937861848134208,
+    "projected_direction_energy_fraction": 0.010045939597084727,
+    "projected_direction_chord_cosine": 0.042845004828780724,
+    "projected_positive_step_line_recovery": 0.0019196610947059749,
+    "classification": "BLOCKFHT_TANGENT_NOT_ALIGNED_ABOVE_EQUAL_RANK_HAAR"
+  },
+  "decision": {
+    "direction_problem_resolved_by_deployed_chart": false,
+    "blockfht_uniquely_at_fault": false,
+    "reason": "The deployed chart preserves only its nominal one-percent random-subspace share of both dense phase chords and exact Muon directions. This directly implicates the fixed one-percent chart, but an equal-rank arbitrary random linear chart has the same expected limitation, so the result does not isolate BlockFHT locality from rank/orientation.",
+    "next_screen": "Add state-dependent output, input, and bilateral channel gains to the exact selected attention chart at 124M/0.5TPP. These diagonal multiplicative coordinates rotate the tangent with the generated weight without a learned dense basis. Promote at most one stable candidate to 124M/5TPP, where the attention-only gap is measurable.",
+    "rejected_shortcuts": [
+      "Do not claim the two-to-three-dimensional temporal PCA path is contained in the production chart.",
+      "Do not repeat the scalar row-additive modulation; it adds only a global all-ones direction.",
+      "Do not add a learned dense basis or LoRA-like residual.",
+      "Do not infer that a same-rank global random orthogonal chart will solve an orientation problem without a controlled screen."
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": "mai_124m_attention_gain_repair_plan_v1",
+  "recorded_at": "2026-07-30",
+  "evidence": "examples/nanogpt/configs/selection_artifacts/124m_attention_manifold_direction_result.json",
+  "scientific_question": "Can a tiny state-dependent diagonal chart extension recover useful attention directions that the fixed one-percent BlockFHT tangent misses?",
+  "control": {
+    "config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult1p00.json",
+    "terminal_validation_loss": 5.4918
+  },
+  "candidates": [
+    {
+      "slot": "outputgain",
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_outputgain_0p5tpp_lr24e4.json"
+    },
+    {
+      "slot": "inputgain",
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_inputgain_0p5tpp_lr24e4.json"
+    },
+    {
+      "slot": "dualgain",
+      "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_dualgain_0p5tpp_lr24e4.json"
+    }
+  ],
+  "fixed_controls": {
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "learning_rate": 0.0024,
+    "optimizer": "muon",
+    "scheduled_tpp": 0.5016353288667963,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution": {
+    "performance_gate": "synchronously polled exact real-training preflight with MFU >= 20%",
+    "scientific_run": "dedicated persistent tmux supervisor with direct foreground polling; no watchdog and no callbacks",
+    "gpus": "idle Y400 GPUs only",
+    "provenance": "commit, entrypoint, literal command, archived config SHA256, source hashes, dataset manifest, runtime evaluation digest, and MFU certificate"
+  },
+  "decision_rule": {
+    "hard_reject": "NaN, Inf, nonzero exit, or terminal validation CE more than 0.02 worse than 5.4918",
+    "selection": "Among stable candidates at or within 0.02 of the control, prefer the lowest terminal validation CE; within 0.01 prefer output-only over input-only and either one-sided chart over bilateral.",
+    "promotion": "Promote at most one candidate to 124M/5TPP. The 0.5TPP rung is a stability/early-fit screen because the base attention replacement is already tied with dense there; closure must be judged at 5TPP and then 20TPP."
+  },
+  "forbidden": [
+    "no learned dense basis",
+    "no LoRA-like residual",
+    "no blind learning-rate sweep",
+    "no PRO6 use"
+  ]
+}
