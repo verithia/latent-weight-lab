@@ -1,0 +1,41 @@
+{
+  "schema_version": "mai_124m_attention_manifold_direction_plan_v1",
+  "recorded_at": "2026-07-30",
+  "scientific_question": "Does the deployed one-percent qk-headwise/v/c_proj BlockFHT chart contain the dense Muon attention optimizer path and exact applied directions on the smallest MAI ladder?",
+  "registered_order": [
+    "run a fresh matched 124M dense Muon 0.5TPP attention trajectory with exact phase-boundary optimizer probes",
+    "run quantitative layerwise PCA/curvature analysis on attn.c_attn and attn.c_proj",
+    "project dense phase chords and exact Muon directions into the production BlockFHT tangent",
+    "compare exact tangent chord energy against the equal-rank Haar expectation",
+    "select at most one smallest repair from the measured failure mode"
+  ],
+  "trajectory_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_attention_trajectory_lr24e4.json",
+  "trajectory_entrypoint": "examples/nanogpt/train.py",
+  "trajectory_command_template": "CUDA_VISIBLE_DEVICES=<idle-y400-gpu> /root/userdata/MappingNetworks/.venv-gpt2/bin/python -m examples.nanogpt.train --config examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_attention_trajectory_lr24e4.json",
+  "trajectory_polling": "foreground poll to terminal because this is a 238-update 124M diagnostic; do not attach it to the long-run watchdog",
+  "analysis_entrypoints": [
+    "examples/nanogpt/analyze_parameter_trajectory.py",
+    "examples/nanogpt/analyze_attention_blockfht_tangent.py"
+  ],
+  "production_attention_config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult1p00.json",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "admission": {
+    "mfu_min_fraction": 0.2,
+    "performance_test": "synchronously polled foreground real-training preflight",
+    "workspace_headroom_gib": 12,
+    "do_not_disturb": "the running 985M full-attention 20TPP job"
+  },
+  "decision_rule": {
+    "blockfht_specific": "If exact tangent chord energy is not above the equal-rank Haar expectation, treat BlockFHT orientation/local repetition as implicated and test one equal-coordinate global orthogonal chart.",
+    "capacity_specific": "If capture is above Haar but materially below 10%, increase or reallocate only the deficient QK/V/c_proj coordinates according to measured target-level capture.",
+    "optimizer_specific": "If chord capture is adequate but projected exact Muon-direction recovery is poor, test weight-space Muon pullback/preconditioning rather than more random capacity.",
+    "paper_recipe_specific": "Only after tangent fit is established, test one paper-derived local-geometry term: meaningful centered per-output modulation or attention-logit stability, not the paper's degenerate scalar row modulation."
+  },
+  "forbidden_shortcuts": [
+    "no blind learning-rate sweep",
+    "no learned dense basis or LoRA-like adapter",
+    "no conclusion from PCA alone",
+    "no long-run promotion before a stable terminal 124M gain"
+  ]
+}

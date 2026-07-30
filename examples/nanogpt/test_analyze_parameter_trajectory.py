@@ -43,6 +43,18 @@ class AnalyzeParameterTrajectoryTest(unittest.TestCase):
         self.assertGreater(summary["median_turn_degrees"], 1.0)
         self.assertGreater(summary["path_length_over_chord"], 1.0)
 
+    def test_attention_parameter_names_are_supported(self) -> None:
+        direction = torch.arange(24, dtype=torch.float32).reshape(6, 4) + 1
+        summary, coordinates, _ = summarize_parameter(
+            name="transformer.h.3.attn.c_attn.weight",
+            steps=[0, 1, 2],
+            tensors=[direction * scale for scale in (0.0, 0.5, 1.0)],
+            device="cpu",
+        )
+        self.assertEqual(summary["target"], "attn.c_attn")
+        self.assertEqual(summary["layer"], 3)
+        self.assertEqual(len(coordinates), 3)
+
 
 if __name__ == "__main__":
     unittest.main()

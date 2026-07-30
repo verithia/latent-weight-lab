@@ -22,7 +22,9 @@ from examples.nanogpt.parameter_trajectory import SCHEMA_VERSION
 
 
 PARAMETER_PATTERN = re.compile(
-    r"^transformer\.h\.(?P<layer>\d+)\.(?P<target>mlp\.(?:c_fc|c_proj))\.weight$"
+    r"^transformer\.h\.(?P<layer>\d+)\."
+    r"(?P<target>(?:mlp\.(?:c_fc|c_proj)|attn\.(?:c_attn|c_proj)))"
+    r"\.weight$"
 )
 
 
@@ -470,7 +472,7 @@ def main() -> None:
             "The sampled trajectory rank is bounded by snapshot_count - 1.",
             "High PCA concentration can reflect schedule, weight decay, or a directed optimizer path.",
             "t-SNE does not establish intrinsic dimension, smoothness, or affine structure.",
-            "Token Geometry's 1D ray was measured per token under Ember and is not assumed for MLP matrices.",
+            "Token Geometry's 1D ray was measured per token under Ember and is not assumed for transformer matrices.",
         ],
     }
     (args.output / "analysis_metadata.json").write_text(
