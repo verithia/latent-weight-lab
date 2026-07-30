@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_attention_targetwise_cayley_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_0p5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 3,
+    "source_commit": "fc28f171178d3a80a994ae34659afdb4a61231a2",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_0p5tpp_lr24e4.json",
+    "config_sha256": "dc7d881d0c6e74389844f857eefd495b051d6253266c3985dc01627e17fc2f5f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "8887dc1126e0befaadf5b5f8ddf489f13f20c2c23e259dff997fa03bcca0e1f3",
+    "status_sha256": "9ff04da3d0699aba028b11a074564fcd0f32c200ab17722648ffcff7ecafad08",
+    "log_sha256": "6daf975af12ca5d70aa5642f96237cea5e02220082ff859c92382939ca68bf7d",
+    "checkpoint_metadata_sha256": "72532b697f8c3c061c9c65f922e9349075864fb1776faefaef7df4b52215fd8d",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272
+  },
+  "admission": {
+    "passed": true,
+    "empirical_bf16_gemm_peak_tflops": 651.9362616606733,
+    "model_tflops": 162.6664955192525,
+    "mfu_fraction": 0.2495128819877163,
+    "iter_ms": 1203.6033333333332,
+    "peak_mib": 33958.98
+  },
+  "fixed_evaluations": [
+    {
+      "step": 60,
+      "validation_loss": 6.2136,
+      "delta_to_uniform_right": -0.0004
+    },
+    {
+      "step": 120,
+      "validation_loss": 5.7916,
+      "delta_to_uniform_right": -0.0012
+    },
+    {
+      "step": 180,
+      "validation_loss": 5.5671,
+      "delta_to_uniform_right": -0.0085
+    },
+    {
+      "step": 238,
+      "train_loss": 5.4711,
+      "validation_loss": 5.4738,
+      "delta_to_uniform_right": -0.0084
+    }
+  ],
+  "comparison": {
+    "uniform_right_cayley_validation_loss": 5.4822,
+    "attention_control_validation_loss": 5.4918,
+    "dense_validation_loss": 5.4890,
+    "terminal_delta_to_uniform_right": -0.0084,
+    "terminal_delta_to_attention_control": -0.0180,
+    "terminal_delta_to_dense": -0.0152,
+    "iteration_time_delta_vs_uniform_right_fraction": 0.01758775821201597
+  },
+  "decision": {
+    "classification": "PROMOTE_TARGETWISE_TO_124M_5TPP",
+    "reason": "The measured target-specific orbit allocation is stable, clears the MFU gate, and materially improves uniform-right Cayley, attention control, and dense at the screen budget.",
+    "five_tpp_closure_threshold": 3.6401
+  }
+}

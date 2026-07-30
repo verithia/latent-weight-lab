@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_attention_cayley_5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_rank2_5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 2,
+    "source_commit": "95957894ed43f36656554196f4bbe39c616bf3de",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_rank2_5tpp_lr24e4.json",
+    "config_sha256": "6c2b0a7c0a2286f077d4ce4edbf78a2ffda41134af17f71fd6e0e79a0e5a5d6c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "dd73e530911e302bdc5ceb8375ee532223253bf75310a5805a415a5706010924",
+    "status_sha256": "c457a3f0c2bd7b477449d1698b26ae6e8bddde0a011bbd26e89bbae117e0b1b6",
+    "log_sha256": "528c07bf3c07e7359e087820ed9203552c546f2aed466c9b429ea024cada624c",
+    "checkpoint_metadata_sha256": "bba4a64a5c396b1d4b8d234f1852fcb7eab1ea2ebf173a396717d3d4e94c8d18",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "empirical_bf16_gemm_peak_tflops": 669.2560391074323,
+    "model_tflops": 165.52916746426365,
+    "mfu_fraction": 0.24733309494677877,
+    "iter_ms": 1182.78,
+    "peak_mib": 33378.34
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "validation_loss": 4.3095,
+      "delta_to_attention_control": -0.0028
+    },
+    {
+      "step": 1188,
+      "validation_loss": 3.8862,
+      "delta_to_attention_control": 0.0015
+    },
+    {
+      "step": 1782,
+      "validation_loss": 3.7358,
+      "delta_to_attention_control": 0.0007
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.6907,
+      "validation_loss": 3.6748,
+      "delta_to_attention_control": 0.0004
+    }
+  ],
+  "comparison": {
+    "attention_control_validation_loss": 3.6744,
+    "output_gain_validation_loss": 3.6712,
+    "dense_validation_loss": 3.5401,
+    "terminal_delta_to_attention_control": 0.0004,
+    "terminal_delta_to_output_gain": 0.0036,
+    "terminal_delta_to_dense": 0.1347,
+    "closure_threshold": 3.6401
+  },
+  "decision": {
+    "classification": "NO_LONG_HORIZON_TRANSFER",
+    "reason": "The uniform-right orbit produced an early-screen gain but became statistically tied with the unrotated attention control by 5 TPP and missed the closure threshold."
+  }
+}

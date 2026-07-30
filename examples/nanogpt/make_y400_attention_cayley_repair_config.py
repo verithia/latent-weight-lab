@@ -191,6 +191,59 @@ def make_targetwise_config() -> dict[str, object]:
     return config
 
 
+def make_targetwise_promotion_config() -> dict[str, object]:
+    config = make_targetwise_config()
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_"
+        "5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "eval_interval": 594,
+            "max_iters": 2373,
+            "lr_decay_iters": 2373,
+            "warmup_iters": 23,
+            "planned_tokens": 621868800,
+            "planned_tpp": 5.0,
+            "scheduled_tokens": 622067712,
+            "scheduled_tpp": 5.001599308407175,
+            "hpo_stage": (
+                "attention_direction_repair_targetwise_cayley_124m_5tpp"
+            ),
+            "ladder_role": "attention_direction_repair_confirmation",
+            "ladder_slot": "targetwise_cayley_rank2_top1",
+            "screen_only": False,
+            "screen_only_resolution": None,
+            "confirmation_slot": "top1",
+            "confirmation_source": (
+                "registered 124M/0.5TPP targetwise screen: val 5.4738, "
+                "uniform-right Cayley 5.4822, attention control 5.4918, "
+                "dense 5.4890"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "The targetwise left-QK/right-V/right-cproj screen "
+                    "finished at val 5.4738, improving uniform-right Cayley "
+                    "by 0.0084, attention control by 0.0180, and dense by "
+                    "0.0152. Promote to the informative 5TPP budget."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP targetwise Cayley attention-only confirmation"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "compare terminal fixed validation CE against dense 3.5401, "
+                "attention control 3.6744, output gain 3.6712, and "
+                "uniform-right Cayley 3.6748; closure requires val <=3.6401"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -199,6 +252,8 @@ def main() -> None:
             make_promotion_config(),
         "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_0p5tpp_lr24e4.json":
             make_targetwise_config(),
+        "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_5tpp_lr24e4.json":
+            make_targetwise_promotion_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename
