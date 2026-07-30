@@ -431,6 +431,89 @@ def make_horizon_capacity_targeted_bilateral_outputgain_config() -> dict[str, ob
     return config
 
 
+def make_horizon_capacity_targeted_bilateral_full_lr_screen_config() -> dict[str, object]:
+    """Screen full main-LR AdamW on the Cayley coordinates at 0.5 TPP."""
+    config = make_horizon_capacity_targeted_bilateral_config()
+    base = json.loads(BASE_PATH.read_text(encoding="utf-8"))
+    for key in (
+        "max_iters",
+        "lr_decay_iters",
+        "eval_interval",
+        "planned_tokens",
+        "planned_tpp",
+        "scheduled_tokens",
+        "scheduled_tpp",
+    ):
+        config[key] = base[key]
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_"
+        "qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_attn_cayley_lr_scale": 10.0 / 3.0,
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_targeted_bilateral_full_"
+                "cayley_lr_124m_0p5tpp"
+            ),
+            "ladder_role": "attention_direction_repair_screen",
+            "ladder_slot": (
+                "horizon_capacity_targeted_bilateral_full_cayley_lr"
+            ),
+            "confirmation_slot": (
+                "targeted_bilateral_full_cayley_lr_screen"
+            ),
+            "screen_only": True,
+            "screen_only_resolution": (
+                "directly poll the 238-update screen without a watchdog; "
+                "promote only if stable and better than the matched "
+                "attention control by at least 0.01 CE"
+            ),
+            "confirmation_source": (
+                "all Cayley coordinates are intentionally one-dimensional "
+                "and therefore use Muon's AdamW fallback at 0.3 times the "
+                "main LR; direction-correct capacity improves CE but "
+                "plateaus, so test exactly the main LR on Cayley coordinates "
+                "while leaving BlockFHT latents and every other parameter "
+                "group unchanged"
+            ),
+            "candidate_scope": (
+                "the targeted bilateral pair-rank 32/16/8 attention chart "
+                "with Cayley-only AdamW LR multiplier 10/3, which cancels "
+                "the registered 0.3 fallback and gives these orthogonal "
+                "coordinates the main 2.4e-3 LR; no change to BlockFHT "
+                "latent LR, model/data seed, decoder, MLP, or schedule"
+            ),
+            "candidate_learning_rate_resolution": (
+                "keep registered main LR 2.4e-3 and global AdamW fallback "
+                "0.3; change only the explicit attention-Cayley subgroup "
+                "scale from 1 to 10/3"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "Cayley thin factors were deliberately routed to AdamW, "
+                    "not Muon, but inherited only 0.3 of the main LR. The "
+                    "one-sided high-capacity chart's persistent but "
+                    "insufficient gain motivates a smallest-rung optimizer-"
+                    "conditioning test before any 5TPP promotion."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/0.5TPP targeted bilateral attention Cayley "
+                    "coordinate-LR screen"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "hard reject NaN, Inf, or terminal val >5.5118; promote only "
+                "if terminal val <=5.4818 and exact-config MFU >=20%"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -447,6 +530,8 @@ def main() -> None:
             make_horizon_capacity_targeted_bilateral_config(),
         "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_outputgain_5tpp_lr24e4.json":
             make_horizon_capacity_targeted_bilateral_outputgain_config(),
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json":
+            make_horizon_capacity_targeted_bilateral_full_lr_screen_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename

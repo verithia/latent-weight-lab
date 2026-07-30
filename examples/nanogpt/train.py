@@ -673,6 +673,16 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
         or mlp_chart_lr_scale <= 0.0
     ):
         raise ValueError("block_fht_mlp_chart_lr_scale must be positive and finite")
+    attn_cayley_lr_scale = float(
+        getattr(args, "block_fht_attn_cayley_lr_scale", 1.0)
+    )
+    if (
+        not math.isfinite(attn_cayley_lr_scale)
+        or attn_cayley_lr_scale <= 0.0
+    ):
+        raise ValueError(
+            "block_fht_attn_cayley_lr_scale must be positive and finite"
+        )
     mlp_pregelu_chart_lr_scale = float(
         getattr(args, "block_fht_mlp_pregelu_chart_lr_scale", 1.0)
     )
@@ -979,6 +989,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--block-fht-attn-cayley-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-attn-cayley-seed", type=int, default=618033)
+    parser.add_argument(
+        "--block-fht-attn-cayley-lr-scale",
+        type=float,
+        default=1.0,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -1732,6 +1747,7 @@ def main() -> None:
         muon_momentum=args.muon_momentum,
         muon_ns_steps=args.muon_ns_steps,
         muon_adamw_lr_scale=args.muon_adamw_lr_scale,
+        block_fht_attn_cayley_lr_scale=args.block_fht_attn_cayley_lr_scale,
         block_fht_mlp_chart_lr_scale=args.block_fht_mlp_chart_lr_scale,
         block_fht_mlp_pregelu_chart_lr_scale=args.block_fht_mlp_pregelu_chart_lr_scale,
     )

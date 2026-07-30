@@ -3539,6 +3539,7 @@ class GPT(nn.Module):
         muon_momentum: float = 0.95,
         muon_ns_steps: int = 5,
         muon_adamw_lr_scale: float = 1.0,
+        block_fht_attn_cayley_lr_scale: float = 1.0,
         block_fht_mlp_chart_lr_scale: float = 1.0,
         block_fht_mlp_pregelu_chart_lr_scale: float = 1.0,
     ):
@@ -3617,11 +3618,29 @@ class GPT(nn.Module):
             pregelu_chart_parameter_ids = {
                 id(param) for param in pregelu_chart_other
             }
+            attention_cayley_tokens = (
+                ".qk_input_cayley.",
+                ".qk_output_cayley.",
+                ".v_input_cayley.",
+                ".v_output_cayley.",
+                ".cproj_input_cayley.",
+                ".cproj_output_cayley.",
+            )
+            attention_cayley_other = [
+                param
+                for name, param in params.items()
+                if id(param) in other_parameter_ids
+                and any(token in name for token in attention_cayley_tokens)
+            ]
+            attention_cayley_parameter_ids = {
+                id(param) for param in attention_cayley_other
+            }
             regular_other = [
                 param
                 for param in other
                 if id(param) not in chart_parameter_ids
                 and id(param) not in pregelu_chart_parameter_ids
+                and id(param) not in attention_cayley_parameter_ids
             ]
             optimizers = []
             if matrix:
@@ -3699,6 +3718,17 @@ class GPT(nn.Module):
                             ),
                         }
                     )
+                if attention_cayley_other:
+                    fallback_groups.append(
+                        {
+                            "params": attention_cayley_other,
+                            "weight_decay": 0.0,
+                            "lr_scale": (
+                                float(muon_adamw_lr_scale)
+                                * float(block_fht_attn_cayley_lr_scale)
+                            ),
+                        }
+                    )
                 optimizers.append(
                     torch.optim.AdamW(
                         fallback_groups,
@@ -3721,6 +3751,9 @@ class GPT(nn.Module):
                 f"mlp_chart_lr_scale={float(block_fht_mlp_chart_lr_scale)} "
                 f"mlp_pregelu_chart_lr_scale="
                 f"{float(block_fht_mlp_pregelu_chart_lr_scale)} "
+                f"attn_cayley_tensors={len(attention_cayley_other)} "
+                f"attn_cayley_lr_scale="
+                f"{float(block_fht_attn_cayley_lr_scale)} "
                 f"adamw_lr={adamw_lr}"
             )
             return MultiOptimizer(optimizers)
