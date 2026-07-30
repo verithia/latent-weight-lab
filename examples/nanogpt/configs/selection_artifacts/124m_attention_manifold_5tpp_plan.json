@@ -1,0 +1,37 @@
+{
+  "schema_version": "mai_124m_attention_manifold_5tpp_plan_v1",
+  "recorded_at": "2026-07-30",
+  "scientific_question": "Does the dense attention trajectory and useful task-gradient/Muon tangent change over the 5-TPP horizon where short-screen Cayley gains disappear?",
+  "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_5tpp_attention_trajectory_lr24e4.json",
+  "entrypoint": "examples.nanogpt.train",
+  "analysis_entrypoints": [
+    "examples.nanogpt.analyze_parameter_trajectory",
+    "examples.nanogpt.analyze_attention_rotation_oracle",
+    "examples.nanogpt.analyze_attention_blockfht_tangent"
+  ],
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "protocol": {
+    "model": "124M dense Muon",
+    "scheduled_tokens": 622067712,
+    "max_iters": 2373,
+    "trajectory_snapshot_interval": 60,
+    "optimizer_probe_steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2372
+    ],
+    "targets": [
+      "attn.c_attn",
+      "attn.c_proj"
+    ],
+    "layers": "all 12 retained; causal summaries sample the preregistered 0/3/6/9/11 layers",
+    "polling": "foreground direct polling; no watchdog"
+  },
+  "decision": {
+    "classification": "REGISTERED_LONG_HORIZON_MANIFOLD_DIAGNOSTIC",
+    "reason": "The 0.5-TPP dense trajectory proved initial fixed-chart misalignment, but uniform-right and targetwise Cayley screen gains vanished by 5 TPP. A repair selected only from the early dense tangent is therefore insufficient evidence.",
+    "next_structure_rule": "Use the long-horizon per-phase tangent/rank result to select at most one new adaptive chart. Do not promote another short-screen-only orbit or learning-rate sweep."
+  }
+}
