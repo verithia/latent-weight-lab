@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_124m_attention_horizon_capacity_stability_5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_stability_5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 2,
+    "source_commit": "8f26d30deeb280c35c6270bdb46a085a64ba43cb",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_stability_5tpp_lr24e4.json",
+    "config_sha256": "5d4b3cce84d8d455ee04f9f69c3ff0b24dfac69140c88843775203148e0fb4e5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "59b00c5fd340473296a08436b1962161cf9eb2586f5de4d31ff7088022178c3c",
+    "status_sha256": "569010e0ec6491e04d2da620f3a3831073d73207dbcffa2a4178556cba1cdc24",
+    "mfu_certificate_sha256": "6cbd54b5d2b5b68b87112ab8fcb8f02069d7cbebde9b432c7f6988ef4e4b2b97",
+    "log_sha256": "1b617c2cd46979133fc11a3092a7a196369504d4b56e2f75f2271f288cbe20da",
+    "checkpoint_metadata_sha256": "9350856588f08c947c251cf99f808ee196888ca1b59a966471792a232f9c0713",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.2078549738151595,
+    "iter_ms": 1407.3999999999999,
+    "tokens_per_second": 186261.55000000002,
+    "peak_mib": 37398.39
+  },
+  "regularizer": {
+    "kind": "attention_logit_kl_under_latent_perturbation",
+    "lambda": 0.001,
+    "sigma": 0.001,
+    "microbatch_period": 8,
+    "sampled_token_rows": 512
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "train_loss": 4.3168,
+      "validation_loss": 4.3088
+    },
+    {
+      "step": 1188,
+      "train_loss": 3.9519,
+      "validation_loss": 3.9394
+    },
+    {
+      "step": 1782,
+      "train_loss": 3.8003,
+      "validation_loss": 3.7859
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.7368,
+      "validation_loss": 3.7214
+    }
+  ],
+  "comparison": {
+    "matched_task_only_validation_loss": 3.6579,
+    "attention_control_validation_loss": 3.6744,
+    "dense_validation_loss": 3.5401,
+    "terminal_delta_to_matched_task_only": 0.0635,
+    "terminal_delta_to_attention_control": 0.047,
+    "terminal_delta_to_dense": 0.1813
+  },
+  "decision": {
+    "classification": "FIXED_PAPER_STYLE_STABILITY_ANALOGUE_HURTS",
+    "reason": "The fixed KL stability analogue is worse than the identical task-only chart at every fixed evaluation, adds 16.9 percent iteration time, and finishes 0.0635 CE worse. Do not transfer this literal fixed-coefficient regularizer to the next attention candidates."
+  }
+}
