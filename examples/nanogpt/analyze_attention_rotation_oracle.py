@@ -185,6 +185,42 @@ def low_rank_left_recovery(
     return output
 
 
+def low_rank_bilateral_span_recovery(
+    weight: torch.Tensor,
+    gradient: torch.Tensor,
+    ranks: list[int],
+) -> dict[int, float]:
+    """Recover the gradient from matched-rank left and right skew orbits."""
+
+    left_skew = 0.5 * (
+        gradient @ weight.transpose(0, 1)
+        - weight @ gradient.transpose(0, 1)
+    )
+    right_skew = 0.5 * (
+        weight.transpose(0, 1) @ gradient
+        - gradient.transpose(0, 1) @ weight
+    )
+    left_u, left_s, left_vh = torch.linalg.svd(
+        left_skew, full_matrices=False
+    )
+    right_u, right_s, right_vh = torch.linalg.svd(
+        right_skew, full_matrices=False
+    )
+    output: dict[int, float] = {}
+    for rank in ranks:
+        left_direction = (
+            (left_u[:, :rank] * left_s[:rank]) @ left_vh[:rank]
+        ) @ weight
+        right_direction = weight @ (
+            (right_u[:, :rank] * right_s[:rank]) @ right_vh[:rank]
+        )
+        output[rank] = direction_span_recovery(
+            gradient,
+            [left_direction, right_direction],
+        )
+    return output
+
+
 def cell_metrics(
     *,
     step: int,
@@ -202,6 +238,9 @@ def cell_metrics(
     right = right_orthogonal_direction(weight, gradient)
     low_rank_left = low_rank_left_recovery(weight, gradient, ranks)
     low_rank = low_rank_right_recovery(weight, gradient, ranks)
+    low_rank_bilateral = low_rank_bilateral_span_recovery(
+        weight, gradient, ranks
+    )
     return {
         "step": step,
         "layer": layer,
@@ -222,6 +261,10 @@ def cell_metrics(
         **{
             f"right_skew_rank{rank}_recovery": value
             for rank, value in low_rank.items()
+        },
+        **{
+            f"bilateral_skew_rank{rank}_span_recovery": value
+            for rank, value in low_rank_bilateral.items()
         },
     }
 
@@ -338,6 +381,10 @@ def main() -> None:
         "radial_bilateral_orbit_span_recovery",
         *[f"left_skew_rank{rank}_recovery" for rank in ranks],
         *[f"right_skew_rank{rank}_recovery" for rank in ranks],
+        *[
+            f"bilateral_skew_rank{rank}_span_recovery"
+            for rank in ranks
+        ],
     ]
     targets = ("qk_shared_input", "v_input", "cproj_input")
     by_target = {
@@ -417,6 +464,11 @@ def main() -> None:
             "left_skew_rank_recovery": (
                 "recovery after truncating skew(G W^T) to the stated even "
                 "matrix rank; skew rank 2r maps to r Cayley vector pairs"
+            ),
+            "bilateral_skew_rank_span_recovery": (
+                "least-squares span recovery from matched-rank truncated "
+                "left and right skew directions; this is a lower-bound "
+                "oracle for a two-sided Cayley chart"
             ),
         },
         "limitations": [
