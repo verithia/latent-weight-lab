@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_124m_attention_targeted_bilateral_full_cayley_lr_0p5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 3,
+    "source_commit": "752524f46cef19a57e1bd3b44ba5ff903a08d1a1",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json",
+    "config_sha256": "0c1bf038cbcf2f3d81570987912a5d1fe9a338b1b2ce4cb0e5ed2c54926660de",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "75cc95bd361f5127c1cfa1f3a7a49c4f3c11bbcf7d83b6f50583b550717bea2a",
+    "status_sha256": "6d4e3f29aadfa03c5a113dd39245e1b6dddab0cafa69df308726a9d7fef54f69",
+    "mfu_certificate_sha256": "f7080671510150ce279b433aff97bd455e13aed2f12de7710e67514e3a72d85c",
+    "log_sha256": "8c2710f3d7e1a23c9eee610b7a9eba2fe80879472a7b5705fa2d48c5fcbf1ff1",
+    "checkpoint_metadata_sha256": "889ca8feac19a282ae29c1c15785b933907c1e1279c711af9742827190d46889",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.21579632633151855,
+    "iter_ms": 1393.2166666666665,
+    "tokens_per_second": 188157.99,
+    "peak_mib": 35466.64
+  },
+  "optimizer_change": {
+    "global_muon_adamw_lr_scale": 0.3,
+    "attention_cayley_subgroup_scale": 3.3333333333333335,
+    "attention_cayley_effective_lr": 0.0024,
+    "block_fht_latent_effective_lr": 0.00072
+  },
+  "fixed_evaluations": [
+    {
+      "step": 60,
+      "train_loss": 6.2787,
+      "validation_loss": 6.2887
+    },
+    {
+      "step": 120,
+      "train_loss": 5.7714,
+      "validation_loss": 5.7764
+    },
+    {
+      "step": 180,
+      "train_loss": 5.5018,
+      "validation_loss": 5.5048
+    },
+    {
+      "step": 238,
+      "train_loss": 5.4,
+      "validation_loss": 5.4024
+    }
+  ],
+  "comparison": {
+    "attention_control_validation_loss": 5.4918,
+    "dense_validation_loss": 5.489,
+    "terminal_delta_to_attention_control": -0.0894,
+    "terminal_delta_to_dense": -0.0866
+  },
+  "decision": {
+    "classification": "PROMOTE_CAYLEY_ONLY_MAIN_LR_TO_5TPP",
+    "reason": "The optimizer-isolated screen is stable and improves the matched attention control by 0.0894 CE. The prior orthogonal coordinates inherited only 0.3 times the main LR; giving only Cayley coordinates the main LR resolves a substantial optimization-conditioning deficit without changing the BlockFHT decoder or structural chart."
+  }
+}

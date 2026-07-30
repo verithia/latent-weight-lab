@@ -514,6 +514,73 @@ def make_horizon_capacity_targeted_bilateral_full_lr_screen_config() -> dict[str
     return config
 
 
+def make_horizon_capacity_targeted_bilateral_full_lr_promotion_config() -> dict[str, object]:
+    """Promote the successful Cayley-only full-LR screen to 5 TPP."""
+    config = make_horizon_capacity_targeted_bilateral_config()
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_"
+        "qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_attn_cayley_lr_scale": 10.0 / 3.0,
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_targeted_bilateral_full_"
+                "cayley_lr_124m_5tpp"
+            ),
+            "ladder_role": "attention_direction_repair_confirmation",
+            "ladder_slot": (
+                "horizon_capacity_targeted_bilateral_full_cayley_lr"
+            ),
+            "confirmation_slot": (
+                "targeted_bilateral_full_cayley_lr_promotion"
+            ),
+            "screen_only": False,
+            "screen_only_resolution": None,
+            "confirmation_source": (
+                "registered 124M/0.5TPP screen terminal validation: "
+                "full-Cayley-LR 5.4024, matched attention control 5.4918, "
+                "dense 5.4890; promote the isolated optimizer correction "
+                "without changing any structural coordinate"
+            ),
+            "candidate_scope": (
+                "the targeted bilateral pair-rank 32/16/8 attention chart "
+                "with Cayley-only AdamW LR multiplier 10/3, canceling the "
+                "registered 0.3 fallback and giving only these orthogonal "
+                "coordinates the main 2.4e-3 LR; no output gain, stability "
+                "penalty, learned dense basis, additive residual, or MLP "
+                "replacement"
+            ),
+            "candidate_learning_rate_resolution": (
+                "the registered smallest-rung screen selected exactly the "
+                "main LR for Cayley coordinates; keep main LR 2.4e-3, "
+                "global AdamW fallback 0.3, and Cayley subgroup scale 10/3"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "The optimizer-isolated 0.5TPP screen improved the "
+                    "matched attention control by 0.0894 CE and dense by "
+                    "0.0866 without instability. Promote exactly this "
+                    "setting to the preregistered informative 5TPP endpoint."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP targeted bilateral attention Cayley "
+                    "coordinate-LR confirmation"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "hard reject NaN or Inf; compare every fixed checkpoint with "
+                "dense, original attention, one-sided capacity, and targeted "
+                "bilateral; closure requires terminal val <=3.6401"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -532,6 +599,8 @@ def main() -> None:
             make_horizon_capacity_targeted_bilateral_outputgain_config(),
         "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json":
             make_horizon_capacity_targeted_bilateral_full_lr_screen_config(),
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json":
+            make_horizon_capacity_targeted_bilateral_full_lr_promotion_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename
