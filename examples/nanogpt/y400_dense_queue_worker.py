@@ -32,6 +32,14 @@ root = pathlib.Path(sys.argv[1])
 payload = json.loads(sys.argv[2])
 repo = root / "latent-weight-lab"
 
+try:
+    root.stat()
+    with os.scandir(root) as entries:
+        next(entries, None)
+except OSError as exc:
+    print(f"workspace unavailable: {type(exc).__name__}: {exc}", file=sys.stderr)
+    raise SystemExit(2)
+
 def command(argv, default=""):
     try:
         return subprocess.check_output(argv, text=True, stderr=subprocess.DEVNULL, timeout=30).strip()

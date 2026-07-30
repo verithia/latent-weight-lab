@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -23,11 +25,25 @@ from examples.nanogpt.multi_host_dense_queue_worker import (
     submitted_text,
     validate_pending_variant,
 )
+from examples.nanogpt.y400_dense_queue_worker import REMOTE_SNAPSHOT
 from unittest import mock
 
 
 class MultiHostDenseQueueWorkerTest(unittest.TestCase):
     GIB = 1024**3
+
+    def test_remote_snapshot_rejects_unavailable_workspace(self) -> None:
+        with TemporaryDirectory() as directory:
+            missing = Path(directory) / "missing"
+            completed = subprocess.run(
+                [sys.executable, "-", str(missing), '{"source_paths":[],"entries":[]}'],
+                input=REMOTE_SNAPSHOT,
+                text=True,
+                capture_output=True,
+                check=False,
+            )
+        self.assertEqual(completed.returncode, 2)
+        self.assertIn("workspace unavailable", completed.stderr)
 
     def test_load_state_preserves_operator_host_pause(self) -> None:
         manifest = {"entries": [{"name": "task", "variants": {"Y400": {}}}]}
