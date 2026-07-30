@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_attention_targetwise_cayley_5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 3,
+    "source_commit": "e5315fb55d9f0801df63266f3c1fd68284205732",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_5tpp_lr24e4.json",
+    "config_sha256": "c7a08338dd55c2db61c402ebfa1f53ead4441d8766c99092c53acaf570ec2dd0",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "331610b2d024ea102597205086a7602ebbba1733ca982a2f8cb59f0905c36424",
+    "status_sha256": "bdb718fe33eb8ee35d7a614b5a2b9f406ae7a3fcca327369f49295e325ece155",
+    "mfu_certificate_sha256": "f402b5690bf719d7d318b23f5d9b122b8b693c0c67986a40b8ca1b6ce1c2adb2",
+    "log_sha256": "1816a2fe3b1f43846b5debb3c1df15ab422b537edff707d666008047b6c9b149",
+    "checkpoint_metadata_sha256": "cad79f1c4e560efe52ac893a867651ad28d1ad27aefea2e00cca2c0e01c328fc",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.247691,
+    "iter_ms": 1200.07,
+    "peak_mib": 33958.98
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "validation_loss": 4.3118,
+      "delta_to_attention_control": -0.0005
+    },
+    {
+      "step": 1188,
+      "validation_loss": 3.8865,
+      "delta_to_attention_control": 0.0018
+    },
+    {
+      "step": 1782,
+      "validation_loss": 3.7344,
+      "delta_to_attention_control": -0.0007
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.6888,
+      "validation_loss": 3.6731,
+      "delta_to_attention_control": -0.0013
+    }
+  ],
+  "comparison": {
+    "attention_control_validation_loss": 3.6744,
+    "output_gain_validation_loss": 3.6712,
+    "uniform_right_cayley_validation_loss": 3.6748,
+    "dense_validation_loss": 3.5401,
+    "terminal_delta_to_attention_control": -0.0013,
+    "terminal_delta_to_output_gain": 0.0019,
+    "terminal_delta_to_dense": 0.1330,
+    "closure_threshold": 3.6401
+  },
+  "decision": {
+    "classification": "TARGET_SIDE_CORRECTION_DOES_NOT_TRANSFER",
+    "reason": "The target-specific chart materially improved the 0.5-TPP screen but was statistically tied with the original attention chart at 5 TPP and missed the closure threshold."
+  }
+}
