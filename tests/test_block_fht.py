@@ -354,6 +354,78 @@ def test_block_fht_linear_cached_grad_matches_dynamic():
     assert torch.allclose(cached.bias.grad, dynamic.bias.grad, atol=1e-6)
 
 
+def test_global_output_fht_is_a_single_variance_matched_orthogonal_chart():
+    generator = BlockFHT(
+        2,
+        size=8,
+        layers=2,
+        seed=37,
+        global_output=True,
+    )
+    columns = []
+    with torch.no_grad():
+        for index in range(generator.latent_size):
+            generator.latent.zero_()
+            generator.latent[index] = 1.0
+            columns.append(generator().clone())
+    chart = torch.stack(columns, dim=1)
+    expected_frame_bound = (
+        generator.block_size / generator.latent_size
+    )
+    torch.testing.assert_close(
+        chart.transpose(0, 1).matmul(chart),
+        expected_frame_bound * torch.eye(generator.latent_size),
+        atol=1e-6,
+        rtol=1e-6,
+    )
+
+
+def test_global_output_fht_cached_grad_matches_dynamic():
+    torch.manual_seed(127)
+    dynamic = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=4,
+        layers=2,
+        seed=29,
+        global_output=True,
+    )
+    cached = BlockFHTLinear(
+        5,
+        3,
+        bias=True,
+        latent_dim=4,
+        layers=2,
+        seed=29,
+        global_output=True,
+    )
+    cached.load_state_dict(dynamic.state_dict())
+    x = torch.randn(4, 5)
+
+    dynamic_loss = dynamic(x).square().mean()
+    dynamic_loss.backward()
+
+    prepare_block_fht_weight_cache(cached)
+    cached_loss = cached(x).square().mean()
+    cached_loss.backward()
+    flush_block_fht_weight_cache(cached)
+
+    torch.testing.assert_close(cached_loss, dynamic_loss)
+    torch.testing.assert_close(
+        cached.generator.latent.grad,
+        dynamic.generator.latent.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+    torch.testing.assert_close(
+        cached.bias.grad,
+        dynamic.bias.grad,
+        atol=1e-6,
+        rtol=1e-5,
+    )
+
+
 def test_block_fht_linear_cached_grad_matches_dynamic_with_channel_gains():
     torch.manual_seed(321)
     dynamic = BlockFHTLinear(

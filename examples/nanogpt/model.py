@@ -89,6 +89,7 @@ class GPTConfig:
     block_fht_muon_latent_rows: int = 32
     block_fht_layers: int = 2
     block_fht_seed: int = 1000
+    block_fht_global_output: bool = False
     block_fht_latent_init_std: float = 0.02
     block_fht_modulation_alpha: float = 0.0
     block_fht_modulation_centered: bool = False
@@ -945,6 +946,7 @@ def make_linear(
             spectral_rank=config.block_fht_ffn_spectral_rank if target_name == "mlp.c_fc" else 0,
             spectral_out_groups=config.block_fht_ffn_spectral_out_groups if target_name == "mlp.c_fc" else 1,
             spectral_in_groups=config.block_fht_ffn_spectral_in_groups if target_name == "mlp.c_fc" else 1,
+            global_output=config.block_fht_global_output,
         )
     return nn.Linear(in_features, out_features, bias=bias)
 

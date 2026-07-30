@@ -1264,6 +1264,11 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=1e-6,
     )
+    parser.add_argument(
+        "--block-fht-global-output",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
     parser.add_argument("--freeze-non-block-fht", action="store_true")
@@ -1561,6 +1566,7 @@ def main() -> None:
         block_fht_muon_latent_rows=args.block_fht_muon_latent_rows,
         block_fht_layers=args.block_fht_layers,
         block_fht_seed=args.block_fht_seed,
+        block_fht_global_output=args.block_fht_global_output,
         block_fht_latent_init_std=args.block_fht_latent_init_std,
         block_fht_modulation_alpha=args.block_fht_modulation_alpha,
         block_fht_modulation_centered=args.block_fht_modulation_centered,

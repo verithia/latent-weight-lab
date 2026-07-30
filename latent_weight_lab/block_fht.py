@@ -745,6 +745,7 @@ class BlockFHTLinear(nn.Module):
         spectral_rank: int = 0,
         spectral_out_groups: int = 1,
         spectral_in_groups: int = 1,
+        global_output: bool = False,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -767,6 +768,7 @@ class BlockFHTLinear(nn.Module):
             layers=layers,
             seed=seed,
             latent_init_std=latent_init_std,
+            global_output=global_output,
         )
         self.bias = nn.Parameter(torch.zeros(self.out_features)) if bias else None
         self._cached_weight: torch.Tensor | None = None
@@ -778,6 +780,10 @@ class BlockFHTLinear(nn.Module):
         self.quadratic_seed_offset = int(quadratic_seed_offset)
         if not math.isfinite(self.quadratic_scale):
             raise ValueError("quadratic_scale must be finite")
+        if global_output and self.quadratic_scale != 0.0:
+            raise ValueError(
+                "global-output FHT does not yet support the quadratic chart"
+            )
         if self.quadratic_scale != 0.0 and self.latent_init_std <= 0.0:
             raise ValueError("latent_init_std must be positive for a quadratic FHT chart")
         if self.quadratic_seed_offset <= 0:
@@ -896,7 +902,7 @@ class BlockFHTLinear(nn.Module):
     def forward(self, input: torch.Tensor) -> torch.Tensor:
         if self._cached_weight is not None:
             return F.linear(input, self._cached_weight, self.bias)
-        if self.residual_base_weight is not None or self.modulation_centered or self.quadratic_scale != 0.0 or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+        if self.generator.global_output or self.residual_base_weight is not None or self.modulation_centered or self.quadratic_scale != 0.0 or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
             return F.linear(input, self.weight.to(dtype=input.dtype), self.bias)
         return _BlockFHTLinearFn.apply(
             input,
@@ -912,7 +918,7 @@ class BlockFHTLinear(nn.Module):
         )
 
     def forward_fused(self, input: torch.Tensor, weight_scale: float = 1.0) -> torch.Tensor:
-        if self.quadratic_scale != 0.0 or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
+        if self.generator.global_output or self.quadratic_scale != 0.0 or self.output_gain is not None or self.input_gain is not None or self.spectral_core is not None:
             return F.linear(input, self.weight.to(dtype=input.dtype), self.bias)
         out = block_fht_linear_forward(
             input,
@@ -974,12 +980,8 @@ class BlockFHTLinear(nn.Module):
             if self.residual_base_weight is not None:
                 generated_grad_weight = generated_grad_weight * self.residual_base_scale
             if self.quadratic_scale == 0.0:
-                grad_latent = self.weight_scale * block_fht_grad_latent(
-                    self.generator.latent,
+                grad_latent = self.weight_scale * self.generator.adjoint(
                     generated_grad_weight,
-                    self.generator.size,
-                    self.generator.layers,
-                    self.generator.seed,
                 )
             else:
                 with torch.no_grad():
@@ -1598,6 +1600,7 @@ class BlockFHT(nn.Module):
         layers: int = 3,
         seed: int = 0,
         latent_init_std: float = 0.02,
+        global_output: bool = False,
     ) -> None:
         super().__init__()
         if size <= 0:
@@ -1625,17 +1628,78 @@ class BlockFHT(nn.Module):
         self.size = int(size)
         self.layers = int(layers)
         self.seed = int(seed)
-        self.block_size = next_power_of_two(self.latent_size)
+        self.global_output = bool(global_output)
+        self.block_size = next_power_of_two(
+            self.size if self.global_output else self.latent_size
+        )
+        self.global_variance_scale = (
+            math.sqrt(self.block_size / self.latent_size)
+            if self.global_output
+            else 1.0
+        )
 
     def extra_repr(self) -> str:
         return (
             f"latent_size={self.latent_size}, latent_shape={tuple(self.latent.shape)}, "
             f"size={self.size}, layers={self.layers}, "
-            f"seed={self.seed}, block_size={self.block_size}"
+            f"seed={self.seed}, block_size={self.block_size}, "
+            f"global_output={self.global_output}"
         )
 
     def slice(self, start: int, stop: int) -> torch.Tensor:
-        return block_fht_slice(self.latent, self.size, self.layers, self.seed, start, stop)
+        if not 0 <= start <= stop <= self.size:
+            raise ValueError(
+                f"invalid slice [{start}, {stop}) for size {self.size}"
+            )
+        if not self.global_output:
+            return block_fht_slice(
+                self.latent,
+                self.size,
+                self.layers,
+                self.seed,
+                start,
+                stop,
+            )
+        padded = F.pad(
+            self.latent.reshape(-1),
+            (0, self.block_size - self.latent_size),
+        )
+        return self.global_variance_scale * block_fht_slice(
+            padded,
+            self.block_size,
+            self.layers,
+            self.seed,
+            start,
+            stop,
+        )
+
+    def adjoint(self, grad_out: torch.Tensor) -> torch.Tensor:
+        if grad_out.numel() != self.size:
+            raise ValueError(
+                f"gradient size mismatch: expected {self.size}, "
+                f"got {grad_out.numel()}"
+            )
+        if not self.global_output:
+            return block_fht_grad_latent(
+                self.latent,
+                grad_out.reshape(-1),
+                self.size,
+                self.layers,
+                self.seed,
+            )
+        padded = F.pad(
+            self.latent.reshape(-1),
+            (0, self.block_size - self.latent_size),
+        )
+        padded_grad = block_fht_grad_latent(
+            padded,
+            self.global_variance_scale * grad_out.reshape(-1),
+            self.block_size,
+            self.layers,
+            self.seed,
+            stop=self.size,
+        )
+        return padded_grad[: self.latent_size].reshape_as(self.latent)
 
     def forward(self) -> torch.Tensor:
         return self.slice(0, self.size)
