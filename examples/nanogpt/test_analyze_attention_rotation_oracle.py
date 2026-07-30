@@ -3,7 +3,9 @@ from __future__ import annotations
 import torch
 
 from examples.nanogpt.analyze_attention_rotation_oracle import (
+    low_rank_left_recovery,
     low_rank_right_recovery,
+    left_orthogonal_direction,
     positive_line_recovery,
     right_orthogonal_direction,
 )
@@ -34,4 +36,26 @@ def test_rank_two_skew_recovers_rank_two_right_orbit_direction() -> None:
     assert positive_line_recovery(
         gradient,
         right_orthogonal_direction(weight, gradient),
+    ) > 0.0
+
+
+def test_rank_two_skew_recovers_rank_two_left_orbit_direction() -> None:
+    torch.manual_seed(20260731)
+    weight, _ = torch.linalg.qr(
+        torch.randn(6, 6, dtype=torch.float64)
+    )
+    first = torch.randn(6, dtype=torch.float64)
+    second = torch.randn(6, dtype=torch.float64)
+    skew = torch.outer(first, second) - torch.outer(second, first)
+    gradient = skew @ weight
+    recovery = low_rank_left_recovery(
+        weight,
+        gradient,
+        [2, 4],
+    )
+    assert recovery[2] > 0.999999
+    assert recovery[4] > 0.999999
+    assert positive_line_recovery(
+        gradient,
+        left_orthogonal_direction(weight, gradient),
     ) > 0.0

@@ -8,7 +8,7 @@ fitting a dense additive residual:
 
 * output/input channel gains (radial directions);
 * left/right orthogonal orbits;
-* low-rank truncations of the right-orbit skew generator.
+* low-rank truncations of the left- and right-orbit skew generators.
 
 Q/K are evaluated as one layer-shared input rotation, matching the proposed
 implementation.  V and c_proj receive their own input rotations.  The result
@@ -161,6 +161,30 @@ def low_rank_right_recovery(
     return output
 
 
+def low_rank_left_recovery(
+    weight: torch.Tensor,
+    gradient: torch.Tensor,
+    ranks: list[int],
+) -> dict[int, float]:
+    skew = 0.5 * (
+        gradient @ weight.transpose(0, 1)
+        - weight @ gradient.transpose(0, 1)
+    )
+    left, singular, right_h = torch.linalg.svd(
+        skew, full_matrices=False
+    )
+    output: dict[int, float] = {}
+    for rank in ranks:
+        truncated = (
+            (left[:, :rank] * singular[:rank]) @ right_h[:rank]
+        )
+        output[rank] = positive_line_recovery(
+            gradient,
+            truncated @ weight,
+        )
+    return output
+
+
 def cell_metrics(
     *,
     step: int,
@@ -176,6 +200,7 @@ def cell_metrics(
     column = column_gain_direction(weight, gradient)
     left = left_orthogonal_direction(weight, gradient)
     right = right_orthogonal_direction(weight, gradient)
+    low_rank_left = low_rank_left_recovery(weight, gradient, ranks)
     low_rank = low_rank_right_recovery(weight, gradient, ranks)
     return {
         "step": step,
@@ -190,6 +215,10 @@ def cell_metrics(
             gradient,
             [row, column, left, right],
         ),
+        **{
+            f"left_skew_rank{rank}_recovery": value
+            for rank, value in low_rank_left.items()
+        },
         **{
             f"right_skew_rank{rank}_recovery": value
             for rank, value in low_rank.items()
@@ -307,6 +336,7 @@ def main() -> None:
         "left_orbit_recovery",
         "right_orbit_recovery",
         "radial_bilateral_orbit_span_recovery",
+        *[f"left_skew_rank{rank}_recovery" for rank in ranks],
         *[f"right_skew_rank{rank}_recovery" for rank in ranks],
     ]
     targets = ("qk_shared_input", "v_input", "cproj_input")
@@ -382,6 +412,10 @@ def main() -> None:
             ),
             "right_skew_rank_recovery": (
                 "recovery after truncating skew(W^T G) to the stated even "
+                "matrix rank; skew rank 2r maps to r Cayley vector pairs"
+            ),
+            "left_skew_rank_recovery": (
+                "recovery after truncating skew(G W^T) to the stated even "
                 "matrix rank; skew rank 2r maps to r Cayley vector pairs"
             ),
         },
