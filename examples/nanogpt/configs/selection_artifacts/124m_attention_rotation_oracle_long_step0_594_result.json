@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_attention_rotation_oracle_long_step0_594_v1",
+  "recorded_at": "2026-07-30",
+  "analysis": {
+    "source_commit": "fb0a79fdb60b0dc3e8210c9abe19f748063f49d7",
+    "entrypoint": "examples.nanogpt.analyze_attention_rotation_oracle",
+    "result_sha256": "a7a2af86133adfe15edabf3398c992bbf46bd191077f76e66adee187255c4441",
+    "cells_csv_sha256": "a52ce0c4dc4db9744475b47dc21ec5d556697375fc1ca671b02fcd95c4e68deb",
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "42363bec8143315a37b1210d6b2fed395cf180baf54f6ab145a1c9082bdf0a69",
+      "step_000594.pt": "bbd88e2da2693ade96d24592e260491411ace875e0643bf69211bf16930ae990"
+    },
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "steps": [
+      0,
+      594
+    ],
+    "cells": 30
+  },
+  "rank4_recovery_by_step": {
+    "step0": {
+      "qk_left": 0.204222,
+      "qk_right": 0.084035,
+      "v_left": 0.331924,
+      "v_right": 0.330362,
+      "cproj_left": 0.329329,
+      "cproj_right": 0.331743
+    },
+    "step594": {
+      "qk_left": 0.317923,
+      "qk_right": 0.240508,
+      "v_left": 0.217586,
+      "v_right": 0.366224,
+      "cproj_left": 0.533273,
+      "cproj_right": 0.103708
+    }
+  },
+  "rank8_recovery_by_step": {
+    "step0": {
+      "qk_left": 0.277120,
+      "qk_right": 0.112681
+    },
+    "step594": {
+      "qk_left": 0.363099,
+      "qk_right": 0.259113
+    }
+  },
+  "decision": {
+    "classification": "USE_HORIZON_QK_LEFT_V_RIGHT_CPROJ_LEFT",
+    "reason": "QK consistently favors the left/output orbit and benefits from skew rank 8. V favors right/input by step 594. c_proj changes from side-neutral at initialization to overwhelmingly left/output by step 594, explaining why an early-trajectory right-sided c_proj selection fails to transfer.",
+    "next_candidate": "QK output pair rank 4, V input pair rank 2, c_proj output pair rank 2; hold all other recipe and generator fields fixed."
+  },
+  "limitations": [
+    "The full 5-TPP trajectory is still running; later probes may reveal another side change.",
+    "This is a dense task-gradient oracle, not evidence that the generated model optimizer reaches the oracle direction.",
+    "Cayley rotations preserve singular values and cannot repair a purely radial/singular-value deficit."
+  ]
+}
