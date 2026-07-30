@@ -18,6 +18,10 @@ TARGETS = [
     "attn.c_attn.v",
     "attn.c_proj",
 ]
+HORIZON_CAPACITY_PATH = (
+    CONFIG_DIR
+    / "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_5tpp_lr24e4.json"
+)
 
 
 def make_config() -> dict[str, object]:
@@ -244,6 +248,60 @@ def make_targetwise_promotion_config() -> dict[str, object]:
     return config
 
 
+def make_horizon_capacity_chartseed2_config() -> dict[str, object]:
+    """Repeat the admitted capacity chart with a new Cayley frame only."""
+    config = json.loads(HORIZON_CAPACITY_PATH.read_text(encoding="utf-8"))
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_"
+        "qk32_v16_cproj8_chartseed271828_5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_attn_cayley_seed": 271828,
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_horizon_capacity_chartseed2_"
+                "124m_5tpp"
+            ),
+            "ladder_slot": (
+                "horizon_capacity_qk32_v16_cproj8_chartseed271828"
+            ),
+            "confirmation_slot": "horizon_capacity_chartseed2",
+            "confirmation_source": (
+                "the primary direction-correct pair-rank 32/16/8 chart "
+                "reduced the matched step-594 gap from +0.1384 to +0.0833; "
+                "change only its identity-initialized fixed Cayley frame"
+            ),
+            "candidate_scope": (
+                "exact chart-seed replication of the terminal-oracle-selected "
+                "QK-output pair-rank 32, V-input pair-rank 16, and c-proj-"
+                "output pair-rank 8 candidate; same model/data seeds, "
+                "BlockFHT decoder, optimizer, schedule, and initial function"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "The primary high-capacity chart crossed the requested "
+                    "+0.10 gap threshold at step 594. A second fixed Cayley "
+                    "frame tests whether that gain is structural rather than "
+                    "specific to one random identity-initialized orbit basis."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP direction-correct high-capacity attention "
+                    "chart-seed replication"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "compare every fixed validation checkpoint with the primary "
+                "pair-rank 32/16/8 run, dense 3.5401, and attention control "
+                "3.6744; terminal closure requires val <=3.6401"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -254,6 +312,8 @@ def main() -> None:
             make_targetwise_config(),
         "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_5tpp_lr24e4.json":
             make_targetwise_promotion_config(),
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_chartseed271828_5tpp_lr24e4.json":
+            make_horizon_capacity_chartseed2_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename

@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_124m_attention_blockfht_tangent_long_full_result_v1",
+  "recorded_at": "2026-07-30",
+  "scientific_question": "Does the deployed one-percent QK-headwise/V/c-proj BlockFHT tangent become aligned with useful dense attention directions over the full 5-TPP horizon?",
+  "analysis": {
+    "source_commit": "fb0a79fdb60b0dc3e8210c9abe19f748063f49d7",
+    "entrypoint": "examples/nanogpt/analyze_attention_blockfht_tangent.py",
+    "entrypoint_sha256": "c2bffbe68c59dd2aef9e74dbf8b77e6f18bb55310b443820adb8bdd5ea54d042",
+    "production_config_sha256": "a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7",
+    "snapshot_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "result_sha256": "9e386369722be4b5880f80742338aa2ab02428b73bd15c173354721a37d68ffd",
+    "cells_sha256": "5c2dda4bc340ba2fdff0c531e62324363e932dc24b876b3afb2f546b28102eee",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "phase_boundaries": [
+      0,
+      600,
+      1200,
+      1800,
+      2373
+    ],
+    "probe_steps": [
+      0,
+      594,
+      1188,
+      1782
+    ]
+  },
+  "aggregate": {
+    "cells": 40,
+    "haar_rank_fraction": 0.009999593098958334,
+    "tangent_chord_energy_fraction": 0.010004623177547687,
+    "projected_direction_energy_fraction": 0.010020949799620846,
+    "task_gradient_tangent_energy_fraction": 0.009941109086863836,
+    "tangent_chord_cosine": 0.10002144662140738,
+    "projected_direction_chord_cosine": 0.010370478672350726,
+    "projected_positive_step_line_recovery": 0.00012374050688613358,
+    "task_gradient_tangent_cosine": 0.0996966189382644,
+    "minimum_tangent_chord_energy_fraction": 0.009721141317617794,
+    "maximum_tangent_chord_energy_fraction": 0.010358011104123701,
+    "minimum_task_gradient_tangent_energy_fraction": 0.009455261821804605,
+    "maximum_task_gradient_tangent_energy_fraction": 0.010389031696459508
+  },
+  "phase_chord_and_gradient_energy": [
+    {
+      "phase": "0-600",
+      "chord": 0.010018855034699741,
+      "task_gradient": 0.009947247214136977
+    },
+    {
+      "phase": "600-1200",
+      "chord": 0.009959541044686078,
+      "task_gradient": 0.00973070389225362
+    },
+    {
+      "phase": "1200-1800",
+      "chord": 0.010086158930933429,
+      "task_gradient": 0.010194018760757982
+    },
+    {
+      "phase": "1800-2373",
+      "chord": 0.009963453491505184,
+      "task_gradient": 0.00995492045135609
+    }
+  ],
+  "by_target": {
+    "attn.c_attn": {
+      "chord_energy": 0.010015417526979615,
+      "task_gradient_energy": 0.01007798806931157
+    },
+    "attn.c_proj": {
+      "chord_energy": 0.009941174941958095,
+      "task_gradient_energy": 0.009925026193010144
+    }
+  },
+  "decision": {
+    "classification": "BLOCKFHT_TANGENT_NOT_ALIGNED_ABOVE_EQUAL_RANK_HAAR_AT_ANY_PHASE",
+    "reason": "Both dense phase chords and gauge-invariant task gradients remain at the nominal one-percent random-subspace share in every 5-TPP phase. The original fixed affine chart does not become better aligned as training proceeds.",
+    "limitation": "This rejects the deployed BlockFHT tangent, not BlockFHT locality in isolation; a same-coordinate global orthogonal decoder remains the matched locality control."
+  }
+}

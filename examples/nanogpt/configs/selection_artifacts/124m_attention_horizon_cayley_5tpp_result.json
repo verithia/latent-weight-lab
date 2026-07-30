@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_attention_horizon_cayley_5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_horizon_qkleft_vright_cprojleft_5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 3,
+    "source_commit": "7b4b8970aeccdf3f684614d1d3f4b33ac2521df4",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_qkleft_vright_cprojleft_5tpp_lr24e4.json",
+    "config_sha256": "78d0cdd425939bf9620ae844677807cce98760c2b2a155d8c9ff0e02d24bb5d0",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "ac3ba8dc820f377e36a9c9fd329a8aab1c10142e99e4530cfb566475188bc03c",
+    "status_sha256": "8ba55598983860401b83ff7167b8255c38eb43259b8d0fd1bc677c20c916329d",
+    "mfu_certificate_sha256": "4cc8e07758a793eb62876415b3b971b21b6ff9f6ff228ada918bd44673e4343f",
+    "log_sha256": "1458ad0ec3f728f8927b54842c47f86ea8cda2f989e33a6297e9c12b695f2144",
+    "checkpoint_metadata_sha256": "429b1cb150e3bededf5f0f0b5dd1ab8037beeec367a7a10062464351b971881c",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.25015,
+    "iter_ms": 1196.52,
+    "tokens_per_second": 219089,
+    "peak_mib": 33966.0
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "train_loss": 4.3141,
+      "validation_loss": 4.3062
+    },
+    {
+      "step": 1188,
+      "train_loss": 3.9014,
+      "validation_loss": 3.8885
+    },
+    {
+      "step": 1782,
+      "train_loss": 3.7512,
+      "validation_loss": 3.7366
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.6903,
+      "validation_loss": 3.6746
+    }
+  ],
+  "comparison": {
+    "attention_control_validation_loss": 3.6744,
+    "dense_validation_loss": 3.5401,
+    "terminal_delta_to_attention_control": 0.0002,
+    "terminal_delta_to_dense": 0.1345,
+    "closure_threshold": 3.6401
+  },
+  "decision": {
+    "classification": "HORIZON_CORRECT_SIDE_WITH_LOW_CAPACITY_DOES_NOT_CLOSE_GAP",
+    "reason": "The horizon-matched side correction is effectively tied with the original attention chart. Target-side correctness is necessary for the larger repair but pair ranks 4/2/2 do not contain enough of the late-horizon useful orbit."
+  }
+}
