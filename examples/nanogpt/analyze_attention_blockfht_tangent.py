@@ -236,6 +236,34 @@ def projection_metrics(
     }
 
 
+def task_gradient_projection_metrics(
+    task_gradient: torch.Tensor,
+    projected_gradient: torch.Tensor,
+) -> dict[str, float]:
+    """Measure instantaneous task-descent capacity of the fixed tangent.
+
+    The task gradient already quotients out infinitesimal attention gauge
+    directions: directions that do not change the loss have zero inner
+    product with it.  Its projection therefore complements raw weight-path
+    capture without requiring an arbitrary Q/K or V/O gauge choice.
+    """
+
+    gradient = task_gradient.double()
+    projected = projected_gradient.double()
+    gradient_energy = gradient.square().sum().clamp_min(1e-30)
+    projected_energy = projected.square().sum()
+    denominator = gradient_energy.sqrt() * projected_energy.sqrt()
+    return {
+        "task_gradient_tangent_energy_fraction": float(
+            projected_energy / gradient_energy
+        ),
+        "task_gradient_tangent_cosine": float(
+            (gradient * projected).sum() / denominator.clamp_min(1e-30)
+        ),
+        "task_gradient_fro": float(gradient_energy.sqrt()),
+    }
+
+
 def weighted_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     weights = torch.tensor(
         [float(row["chord_fro"]) ** 2 for row in rows], dtype=torch.float64
@@ -265,6 +293,37 @@ def weighted_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "maximum_tangent_chord_energy_fraction": max(
             float(row["tangent_chord_energy_fraction"]) for row in rows
+        ),
+    }
+
+
+def gradient_weighted_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    weights = torch.tensor(
+        [float(row["task_gradient_fro"]) ** 2 for row in rows],
+        dtype=torch.float64,
+    )
+
+    def weighted(key: str) -> float:
+        values = torch.tensor(
+            [float(row[key]) for row in rows], dtype=torch.float64
+        )
+        return float((weights * values).sum() / weights.sum())
+
+    return {
+        "cells": len(rows),
+        "task_gradient_tangent_energy_fraction": weighted(
+            "task_gradient_tangent_energy_fraction"
+        ),
+        "task_gradient_tangent_cosine": weighted(
+            "task_gradient_tangent_cosine"
+        ),
+        "minimum_task_gradient_tangent_energy_fraction": min(
+            float(row["task_gradient_tangent_energy_fraction"])
+            for row in rows
+        ),
+        "maximum_task_gradient_tangent_energy_fraction": max(
+            float(row["task_gradient_tangent_energy_fraction"])
+            for row in rows
         ),
     }
 
@@ -355,6 +414,9 @@ def main() -> None:
                 dense_direction = probe["parameters"][name][
                     "applied_direction_per_lr"
                 ].to(args.device)
+                task_gradient = probe["parameters"][name][
+                    "gradient_after_clip"
+                ].to(args.device)
                 projected_chord, geometry = project_attention_target(
                     chord,
                     target=target,
@@ -369,8 +431,20 @@ def main() -> None:
                         layer=layer,
                     )
                 )
+                projected_task_gradient, gradient_geometry = (
+                    project_attention_target(
+                        task_gradient,
+                        target=target,
+                        config=config,
+                        layer=layer,
+                    )
+                )
                 if geometry != observed_geometry:
                     raise ValueError("projection geometry changed within one cell")
+                if geometry != gradient_geometry:
+                    raise ValueError(
+                        "task-gradient projection geometry changed within one cell"
+                    )
                 latent_dim, total_size = geometry_dimensions(geometry)
                 haar_fraction = latent_dim / total_size
                 haar_sd = math.sqrt(
@@ -395,11 +469,16 @@ def main() -> None:
                         projected_chord,
                         projected_direction,
                     ),
+                    **task_gradient_projection_metrics(
+                        task_gradient,
+                        projected_task_gradient,
+                    ),
                 }
                 rows.append(row)
                 geometries[f"layer{layer}.{target}"] = geometry
-                del source, terminal, chord, dense_direction
+                del source, terminal, chord, dense_direction, task_gradient
                 del projected_chord, projected_direction
+                del projected_task_gradient
                 if args.device.startswith("cuda"):
                     torch.cuda.empty_cache()
 
@@ -410,6 +489,13 @@ def main() -> None:
         for target in ("attn.c_attn", "attn.c_proj")
     }
     aggregate = weighted_summary(rows)
+    task_gradient_by_target = {
+        target: gradient_weighted_summary(
+            [row for row in rows if row["target"] == target]
+        )
+        for target in ("attn.c_attn", "attn.c_proj")
+    }
+    task_gradient_aggregate = gradient_weighted_summary(rows)
     aggregate["decision"] = (
         "BLOCKFHT_TANGENT_ALIGNED_ABOVE_EQUAL_RANK_HAAR"
         if aggregate["tangent_chord_energy_fraction"]
@@ -449,6 +535,8 @@ def main() -> None:
         "geometry": geometries,
         "by_target": by_target,
         "aggregate": aggregate,
+        "task_gradient_by_target": task_gradient_by_target,
+        "task_gradient_aggregate": task_gradient_aggregate,
         "interpretation": {
             "tangent_chord_energy_fraction": (
                 "best Euclidean fit of the realized dense phase chord inside "
@@ -462,6 +550,11 @@ def main() -> None:
                 "expected projection energy for an equal-rank Haar-random "
                 "subspace; comparison isolates BlockFHT orientation/locality"
             ),
+            "task_gradient_tangent_energy_fraction": (
+                "fraction of clipped task-gradient energy available inside "
+                "the production tangent; this is invariant to infinitesimal "
+                "function-preserving attention gauge directions"
+            ),
         },
         "limitations": [
             "One optimizer path is not the global manifold of good solutions.",
@@ -474,7 +567,15 @@ def main() -> None:
         json.dumps(result, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    print(json.dumps(result["aggregate"], sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "path": result["aggregate"],
+                "task_gradient": result["task_gradient_aggregate"],
+            },
+            sort_keys=True,
+        )
+    )
 
 
 if __name__ == "__main__":

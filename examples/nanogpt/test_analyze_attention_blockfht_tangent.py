@@ -7,6 +7,7 @@ from examples.nanogpt.analyze_attention_blockfht_tangent import (
     latent_geometry,
     project_c_attn,
     projection_metrics,
+    task_gradient_projection_metrics,
 )
 
 
@@ -57,3 +58,11 @@ def test_projection_metrics_reports_exact_tangent_capture() -> None:
     assert metrics["tangent_chord_energy_fraction"] == 1.0
     assert metrics["projected_direction_energy_fraction"] == 1.0
     assert metrics["projected_positive_step_line_recovery"] > 0.999999
+
+
+def test_task_gradient_projection_metrics_reports_orthogonal_capture() -> None:
+    gradient = torch.tensor([3.0, 4.0])
+    projected = torch.tensor([3.0, 0.0])
+    metrics = task_gradient_projection_metrics(gradient, projected)
+    assert metrics["task_gradient_tangent_energy_fraction"] == 9.0 / 25.0
+    assert abs(metrics["task_gradient_tangent_cosine"] - 3.0 / 5.0) < 1e-7
