@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_attention_horizon_capacity_5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 1,
+    "source_commit": "876513ee2ecf962c218e4c2a4080aaafa70c5f65",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_5tpp_lr24e4.json",
+    "config_sha256": "34bf42a9c2e9566952ed06aa9e41d81e551a2665f20cb085d83d37749cb4632e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "47ca647fff3d352e8c609cb2a5e800d30c20d717d21920a932e1cfe658d00826",
+    "status_sha256": "6dc3e5bc30de5862f4b4fe979d1e62f077fc35c25baa8034e82122aaed654685",
+    "mfu_certificate_sha256": "c45ea15f5a6aba01fab6acffa675043e50280aad1ea587934d9bb3e4ebee5f11",
+    "log_sha256": "d46b41e69163acd65ede4676cd28a4cdadafa8a56f72db42cc014b9166cd1f4d",
+    "checkpoint_metadata_sha256": "47bf6997bb35947cb1ab2a73689e4dedbf0d1d93754ff1c93fddc6e486490661",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.24714935466373963,
+    "iter_ms": 1204.1933333333334,
+    "tokens_per_second": 217692.06666666665,
+    "peak_mib": 34145.54
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "train_loss": 4.2668,
+      "validation_loss": 4.2572
+    },
+    {
+      "step": 1188,
+      "train_loss": 3.8826,
+      "validation_loss": 3.8693
+    },
+    {
+      "step": 1782,
+      "train_loss": 3.7346,
+      "validation_loss": 3.7192
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.6743,
+      "validation_loss": 3.6579
+    }
+  ],
+  "comparison": {
+    "attention_control_validation_loss": 3.6744,
+    "dense_validation_loss": 3.5401,
+    "terminal_delta_to_attention_control": -0.0165,
+    "terminal_delta_to_dense": 0.1178,
+    "closure_threshold": 3.6401,
+    "terminal_excess_over_closure_threshold": 0.0178
+  },
+  "decision": {
+    "classification": "DIRECTION_CORRECT_HIGHER_ONE_SIDED_CAPACITY_IMPROVES_BUT_DOES_NOT_CLOSE_GAP",
+    "reason": "The terminal-oracle pair-rank 32/16/8 chart improves the original attention control by 0.0165 CE and briefly enters the accepted band at step 594, but the terminal dense gap remains 0.1178. Direction and capacity are causal, yet the one-sided Cayley orbit omits useful opposite-side QK and V directions measured by the dense terminal oracle."
+  }
+}
