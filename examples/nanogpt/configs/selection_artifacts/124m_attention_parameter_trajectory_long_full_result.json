@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_attention_parameter_trajectory_long_full_v1",
+  "recorded_at": "2026-07-30",
+  "analysis": {
+    "source_commit": "fb0a79fdb60b0dc3e8210c9abe19f748063f49d7",
+    "entrypoint": "examples.nanogpt.analyze_parameter_trajectory",
+    "execution_metadata_sha256": "2f17f5f961ec93fe2503aef2611cfee474650052609d3f0a072fb57482496864",
+    "layerwise_pca_coordinates_sha256": "13039fc0ae17b836432cd338f2101ce3c51736fdde235e28243a9db8409b2ddd",
+    "layerwise_trajectory_summary_sha256": "5183c421ebf37d49a71dd571444cee192886683760f5e8f94fd974d1fda9ea88",
+    "matrix_axis_norms_sha256": "8852d0271fc4fd8a820e1c2e3e8898ba0495b63136c23247fea806aff7902918",
+    "selected_step_spectra_sha256": "11bdfd41dc4d73ba1e1c876afe223013a8eac01fc60dd5ef6ea28e35c30a5ce6",
+    "temporal_polynomial_fits_sha256": "2dcb0ec645a726421ef6cc1c5b07cb23d3a79229f7dac616ed974d5f7c518a0d",
+    "trajectory_source_commit": "c39002d12655e105deb2fbb68c63c5fb3f46f8fb",
+    "trajectory_config_sha256": "098270b7aec843b35328b0867f7c14062729b1c9b8b6783ee03d0c2495bf3b86",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "snapshots": 41,
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ]
+  },
+  "target_summary": {
+    "attn.c_attn": {
+      "pc1_energy_mean": 0.740892,
+      "pc1_pc2_energy_mean": 0.881522,
+      "dimension_90pct_mean": 3.0,
+      "dimension_95pct_mean": 4.6,
+      "dimension_99pct_mean": 13.8,
+      "participation_dimension_mean": 1.752045,
+      "path_length_over_chord_mean": 3.649146,
+      "median_relative_chord_residual_mean": 0.279290,
+      "median_turn_degrees_mean": 79.632489,
+      "monotone_chord_progress_fraction_mean": 1.0
+    },
+    "attn.c_proj": {
+      "pc1_energy_mean": 0.622110,
+      "pc1_pc2_energy_mean": 0.802306,
+      "dimension_90pct_mean": 4.4,
+      "dimension_95pct_mean": 7.4,
+      "dimension_99pct_mean": 19.2,
+      "participation_dimension_mean": 2.358680,
+      "path_length_over_chord_mean": 5.394316,
+      "median_relative_chord_residual_mean": 0.353411,
+      "median_turn_degrees_mean": 82.022652,
+      "monotone_chord_progress_fraction_mean": 0.940000
+    }
+  },
+  "comparison_to_0p5tpp": {
+    "attn.c_attn_pc1_energy": {
+      "early": 0.8330,
+      "long": 0.740892
+    },
+    "attn.c_proj_pc1_energy": {
+      "early": 0.8286,
+      "long": 0.622110
+    },
+    "attn.c_attn_path_length_over_chord": {
+      "early": 1.9907,
+      "long": 3.649146
+    },
+    "attn.c_proj_path_length_over_chord": {
+      "early": 2.0868,
+      "long": 5.394316
+    }
+  },
+  "decision": {
+    "classification": "LOW_DIMENSIONAL_BUT_CURVED_AND_HORIZON_DEPENDENT",
+    "reason": "The 5-TPP dense attention trajectories occupy a small temporal subspace relative to the full matrices, but c_proj in particular is not close to one affine line: PC1 explains only 62.2%, the 99% dimension is about 19, the path is 5.39 times its endpoint chord, and the median turn is 82 degrees. Early 0.5-TPP PCA therefore cannot select a static long-horizon chart.",
+    "implication": "Use horizon-matched task-gradient oracles and moving orthogonal coordinates; do not infer fit from low PCA dimension alone."
+  },
+  "limitations": [
+    "This is one optimizer trajectory, not the manifold of all good solutions.",
+    "The sampled path rank is bounded by 40.",
+    "PCA concentration can reflect the optimizer, schedule, or weight decay.",
+    "No t-SNE plot was requested because it would not establish intrinsic dimension or chart fit."
+  ]
+}
