@@ -104,6 +104,7 @@ class GPTConfig:
     block_fht_input_gain_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_output_targets: tuple[str, ...] = ()
+    block_fht_attn_cayley_bilateral_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_rank: int = 0
     block_fht_attn_cayley_ranks: dict[str, int] | None = None
     block_fht_attn_cayley_scale: float = 1.0
@@ -1222,6 +1223,9 @@ class CausalSelfAttention(nn.Module):
         cayley_output_targets = set(
             config.block_fht_attn_cayley_output_targets
         )
+        cayley_bilateral_targets = set(
+            config.block_fht_attn_cayley_bilateral_targets
+        )
         supported_cayley_targets = {
             "attn.c_attn.qk_headwise",
             "attn.c_attn.v",
@@ -1240,6 +1244,11 @@ class CausalSelfAttention(nn.Module):
         if not cayley_output_targets.issubset(cayley_targets):
             raise ValueError(
                 "attention Cayley output targets must also be enabled "
+                "attention Cayley targets"
+            )
+        if not cayley_bilateral_targets.issubset(cayley_targets):
+            raise ValueError(
+                "attention Cayley bilateral targets must also be enabled "
                 "attention Cayley targets"
             )
         default_cayley_rank = int(config.block_fht_attn_cayley_rank)
@@ -1323,8 +1332,12 @@ class CausalSelfAttention(nn.Module):
             )
             if (
                 "attn.c_attn.qk_headwise" in cayley_targets
-                and "attn.c_attn.qk_headwise"
-                not in cayley_output_targets
+                and (
+                    "attn.c_attn.qk_headwise"
+                    not in cayley_output_targets
+                    or "attn.c_attn.qk_headwise"
+                    in cayley_bilateral_targets
+                )
             )
             else None
         )
@@ -1334,33 +1347,49 @@ class CausalSelfAttention(nn.Module):
                 3,
                 "attn.c_attn.qk_headwise",
             )
-            if "attn.c_attn.qk_headwise" in cayley_output_targets
+            if (
+                "attn.c_attn.qk_headwise" in cayley_output_targets
+                or "attn.c_attn.qk_headwise"
+                in cayley_bilateral_targets
+            )
             else None
         )
         self.v_input_cayley = (
             cayley_mix(config.n_embd, 1, "attn.c_attn.v")
             if (
                 "attn.c_attn.v" in cayley_targets
-                and "attn.c_attn.v" not in cayley_output_targets
+                and (
+                    "attn.c_attn.v" not in cayley_output_targets
+                    or "attn.c_attn.v" in cayley_bilateral_targets
+                )
             )
             else None
         )
         self.v_output_cayley = (
             cayley_mix(config.n_embd, 4, "attn.c_attn.v")
-            if "attn.c_attn.v" in cayley_output_targets
+            if (
+                "attn.c_attn.v" in cayley_output_targets
+                or "attn.c_attn.v" in cayley_bilateral_targets
+            )
             else None
         )
         self.cproj_input_cayley = (
             cayley_mix(config.n_embd, 2, "attn.c_proj")
             if (
                 "attn.c_proj" in cayley_targets
-                and "attn.c_proj" not in cayley_output_targets
+                and (
+                    "attn.c_proj" not in cayley_output_targets
+                    or "attn.c_proj" in cayley_bilateral_targets
+                )
             )
             else None
         )
         self.cproj_output_cayley = (
             cayley_mix(config.n_embd, 5, "attn.c_proj")
-            if "attn.c_proj" in cayley_output_targets
+            if (
+                "attn.c_proj" in cayley_output_targets
+                or "attn.c_proj" in cayley_bilateral_targets
+            )
             else None
         )
         self.attn_dropout = nn.Dropout(config.dropout)

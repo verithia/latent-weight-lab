@@ -966,6 +966,11 @@ def parse_args() -> argparse.Namespace:
         nargs="+",
         default=[],
     )
+    parser.add_argument(
+        "--block-fht-attn-cayley-bilateral-targets",
+        nargs="+",
+        default=[],
+    )
     parser.add_argument("--block-fht-attn-cayley-rank", type=int, default=0)
     parser.add_argument(
         "--block-fht-attn-cayley-ranks",
@@ -1557,6 +1562,9 @@ def main() -> None:
         block_fht_attn_cayley_targets=tuple(args.block_fht_attn_cayley_targets),
         block_fht_attn_cayley_output_targets=tuple(
             args.block_fht_attn_cayley_output_targets
+        ),
+        block_fht_attn_cayley_bilateral_targets=tuple(
+            args.block_fht_attn_cayley_bilateral_targets
         ),
         block_fht_attn_cayley_rank=args.block_fht_attn_cayley_rank,
         block_fht_attn_cayley_ranks=args.block_fht_attn_cayley_ranks,

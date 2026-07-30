@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_attention_targeted_bilateral_capacity_plan_v1",
+  "recorded_at": "2026-07-30",
+  "scientific_question": "After correcting target sides and raising one-sided Cayley capacity, does the remaining 5-TPP attention gap require the opposite orthogonal side for QK and V?",
+  "trigger": {
+    "primary_candidate": "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_5tpp_lr24e4",
+    "step_1188_gap_to_dense": 0.1071,
+    "step_1782_gap_to_dense": 0.1154,
+    "closure_gap": 0.1,
+    "launch_condition": "primary terminal validation gap remains above +0.10"
+  },
+  "terminal_dense_oracle": {
+    "step": 2372,
+    "qk": {
+      "selected_left_high_capacity_recovery": 0.301349,
+      "bilateral_rank64_span_recovery": 0.346504,
+      "increment": 0.045155
+    },
+    "v": {
+      "selected_right_high_capacity_recovery": 0.334736,
+      "bilateral_rank32_span_recovery": 0.352361,
+      "increment": 0.017625
+    },
+    "cproj": {
+      "selected_left_high_capacity_recovery": 0.459039,
+      "bilateral_rank16_span_recovery": 0.462657,
+      "increment": 0.003618
+    },
+    "row_gain_recovery": 0.003325,
+    "column_gain_recovery": 0.001174,
+    "interpretation": "The missing compact structured direction is concentrated in the opposite QK and V orthogonal sides. A c-proj bilateral chart and standard-axis gains have negligible incremental oracle value."
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_5tpp_lr24e4.json",
+    "base_pair_ranks": {
+      "attn.c_attn.qk_headwise": 32,
+      "attn.c_attn.v": 16,
+      "attn.c_proj": 8
+    },
+    "primary_sides": {
+      "attn.c_attn.qk_headwise": "output",
+      "attn.c_attn.v": "input",
+      "attn.c_proj": "output"
+    },
+    "added_opposite_sides": [
+      "attn.c_attn.qk_headwise.input",
+      "attn.c_attn.v.output"
+    ],
+    "unchanged": [
+      "BlockFHT decoder and latent ratio",
+      "model and data seeds",
+      "optimizer and learning rate",
+      "token budget and fixed evaluation windows",
+      "c-proj one-sided chart"
+    ],
+    "excluded": [
+      "learned dense basis",
+      "additive low-rank residual",
+      "LoRA-like branch",
+      "channel gain",
+      "MLP replacement"
+    ]
+  },
+  "admission": {
+    "foreground_polling": true,
+    "watchdog": false,
+    "minimum_mfu_fraction": 0.2,
+    "require_exact_config_certificate": true,
+    "reject_on": [
+      "MFU below 20%",
+      "NaN or Inf",
+      "initial-function mismatch",
+      "source or dataset provenance mismatch"
+    ]
+  },
+  "decision": {
+    "success": "terminal fixed validation CE <= 3.6401 and better than the one-sided high-capacity run",
+    "failure": "close the compact orthogonal-orbit family and test a non-orthogonal singular-value coordinate versus a same-coordinate global orthogonal decoder"
+  }
+}

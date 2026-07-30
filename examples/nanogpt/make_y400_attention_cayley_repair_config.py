@@ -302,6 +302,68 @@ def make_horizon_capacity_chartseed2_config() -> dict[str, object]:
     return config
 
 
+def make_horizon_capacity_targeted_bilateral_config() -> dict[str, object]:
+    """Add the missing terminal-oracle side only for QK and V."""
+    config = json.loads(HORIZON_CAPACITY_PATH.read_text(encoding="utf-8"))
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_"
+        "qk32_v16_cproj8_targeted_bilateral_5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_attn_cayley_bilateral_targets": [
+                "attn.c_attn.qk_headwise",
+                "attn.c_attn.v",
+            ],
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_horizon_capacity_targeted_"
+                "bilateral_124m_5tpp"
+            ),
+            "ladder_slot": (
+                "horizon_capacity_qk32_v16_cproj8_targeted_bilateral"
+            ),
+            "confirmation_slot": "horizon_capacity_targeted_bilateral",
+            "confirmation_source": (
+                "terminal dense task-gradient oracle: at matched truncation "
+                "ranks the bilateral span adds about 0.045 QK and 0.018 V "
+                "recovery, while c-proj gains only about 0.004; add the "
+                "second side only to QK and V"
+            ),
+            "candidate_scope": (
+                "terminal-oracle-selected QK-output pair-rank 32, V-input "
+                "pair-rank 16, and c-proj-output pair-rank 8 chart plus the "
+                "independent identity-initialized opposite Cayley side for "
+                "QK and V only; no learned dense basis, additive residual, "
+                "channel gain, MLP replacement, or c-proj bilateral blanket"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "At step 1188 the one-sided high-capacity chart remains "
+                    "+0.1071 behind dense. The terminal dense oracle places "
+                    "the remaining compact structured descent primarily in "
+                    "the opposite QK/V orthogonal sides, whereas diagonal "
+                    "row/column gains recover only 0.0033/0.0012."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP targeted bilateral high-capacity attention "
+                    "fallback; launch only if the primary terminal gap "
+                    "remains above +0.10"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "launch only after a synchronous exact-config MFU >=20%; "
+                "compare terminal fixed validation CE against dense 3.5401, "
+                "attention control 3.6744, and the one-sided capacity run; "
+                "closure requires val <=3.6401"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -314,6 +376,8 @@ def main() -> None:
             make_targetwise_promotion_config(),
         "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_chartseed271828_5tpp_lr24e4.json":
             make_horizon_capacity_chartseed2_config(),
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_5tpp_lr24e4.json":
+            make_horizon_capacity_targeted_bilateral_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename
