@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_attention_rotation_oracle_result_v1",
+  "recorded_at": "2026-07-30",
+  "analysis": {
+    "source_commit": "14cf8a4cbb089a81a1ec292a4ccae25b3c6559c9",
+    "source_sha256": "8fcb71b5037f082448d529a7fba699b046f11beae4689ce755c053da9e7adcf8",
+    "result_sha256": "8169171f847f0856ab852a8545b48ce699e37dfe538a2eb1f2e025db46684e31",
+    "cells_csv_sha256": "0987c171a9150ea825ffcce49a40c96a6e03752843341abf137cf5c5b95218af",
+    "optimizer_probe_run_identity_sha256": "a0c3e16632a58698f00dea45e4c94920bf127b8f67a5a8543b3db7b79826594e",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "e5c81f80a41f6e02574f4f1f16375ae479b37ec36729d23c6b725eb11592971e",
+      "step_000060.pt": "e1bffed8c0c4a43e9c2878e5ed9aa8610eeb04aa3fcd6de90fcbaf2acb02f520",
+      "step_000120.pt": "63e1636bdcdc21add284f2f15304d932ad33446189fd45449f025299fa86725a",
+      "step_000180.pt": "21921a5faf7550812ad85dcfc5a9db09eb36b07b34436f9a209c4a6592876f15"
+    },
+    "cells": 60,
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "steps": [
+      0,
+      60,
+      120,
+      180
+    ]
+  },
+  "aggregate": {
+    "row_gain_recovery": 0.0012937445648910561,
+    "column_gain_recovery": 0.0017906825950333792,
+    "left_orbit_recovery": 0.3026438769798144,
+    "right_orbit_recovery": 0.3489437611820206,
+    "radial_bilateral_orbit_span_recovery": 0.40250767258464476,
+    "right_skew_rank2_recovery": 0.323201835925936,
+    "right_skew_rank4_recovery": 0.3340789962857251
+  },
+  "by_target": {
+    "qk_shared_input": {
+      "row_gain_recovery": 0.0016854394262252289,
+      "column_gain_recovery": 0.0007674182739049674,
+      "right_orbit_recovery": 0.2072726754760635,
+      "right_skew_rank2_recovery": 0.09425905247463981,
+      "right_skew_rank4_recovery": 0.11725458510401267
+    },
+    "v_input": {
+      "row_gain_recovery": 0.001434284610043409,
+      "column_gain_recovery": 0.0018753835582479932,
+      "right_orbit_recovery": 0.41641311488368155,
+      "right_skew_rank2_recovery": 0.385440196862245,
+      "right_skew_rank4_recovery": 0.3967117222381777
+    },
+    "cproj_input": {
+      "row_gain_recovery": 0.0012850061647878305,
+      "column_gain_recovery": 0.0017871820700323434,
+      "right_orbit_recovery": 0.345211053126096,
+      "right_skew_rank2_recovery": 0.31989631311231786,
+      "right_skew_rank4_recovery": 0.33073350070676527
+    }
+  },
+  "decision": {
+    "classification": "PROMOTE_LOW_RANK_CAYLEY_SMALLEST_SCREEN",
+    "threshold": 0.1,
+    "selected_skew_rank": 4,
+    "selected_cayley_pair_rank": 2,
+    "reason": "Radial gain directions recover only about 0.1-0.2 percent, explaining the weak output-gain training result. A rank-4 right-skew direction is the smallest tested orthogonal chart clearing 10 percent task-gradient line recovery for shared QK, V, and c_proj.",
+    "limitation": "This is a causal task-gradient oracle on dense Muon weights. The identity-initialized moving Cayley chart must still demonstrate that optimization reaches the oracle direction."
+  }
+}
