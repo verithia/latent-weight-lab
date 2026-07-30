@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_124m_attention_lowrank_cayley_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 2,
+    "source_commit": "1ba72196a6afc2fab3c543f2fba11ebad30e3108",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json",
+    "config_sha256": "b7ea6270e754794d6dcacb7372e6c74213323ce01700c8c6ee5b0d9c18d1d241",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "8388f148523bebfbed58347500fe0edce1d59c92186f610bb5bfd8b7da9fbabc",
+    "status_sha256": "ee3f188a0a7e8f5f2d072546fd62b8bac4faef8e12ee8d3ad4dc69bfc5a4dda1",
+    "log_sha256": "ff3f08cc067a1df7720532bc7cae67f7de944a4579c7fe707b89561ed12d76dd",
+    "checkpoint_metadata_sha256": "993cf2642f9a3fb677c5e78748751def7cf6f262b623c43c5eaf7d7685f1e961",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272
+  },
+  "admission": {
+    "passed": true,
+    "empirical_bf16_gemm_peak_tflops": 671.4135154591407,
+    "model_tflops": 164.57376760022015,
+    "mfu_fraction": 0.24511536305264528,
+    "iter_ms": 1189.68,
+    "peak_mib": 33378.34
+  },
+  "fixed_evaluations": [
+    {
+      "step": 60,
+      "train_loss": 6.2045,
+      "validation_loss": 6.2140,
+      "delta_to_attention_control": -0.0044
+    },
+    {
+      "step": 120,
+      "train_loss": 5.7880,
+      "validation_loss": 5.7928,
+      "delta_to_attention_control": -0.0030
+    },
+    {
+      "step": 180,
+      "train_loss": 5.5726,
+      "validation_loss": 5.5756,
+      "delta_to_attention_control": -0.0099
+    },
+    {
+      "step": 238,
+      "train_loss": 5.4795,
+      "validation_loss": 5.4822,
+      "delta_to_attention_control": -0.0096
+    }
+  ],
+  "comparison": {
+    "attention_control_validation_loss": 5.4918,
+    "dense_validation_loss": 5.4890,
+    "terminal_delta_to_attention_control": -0.0096,
+    "terminal_delta_to_dense": -0.0068,
+    "iteration_time_delta_vs_output_gain_fraction": 0.2648689269964704
+  },
+  "decision": {
+    "classification": "PROMOTE_TO_124M_5TPP",
+    "reason": "The exact-orthogonal chart is stable, passes the 20% MFU gate, improves the matched attention control materially, and slightly exceeds dense at the screen budget.",
+    "five_tpp_closure_threshold": 3.6401
+  }
+}

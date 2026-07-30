@@ -87,16 +87,74 @@ def make_config() -> dict[str, object]:
     return config
 
 
+def make_promotion_config() -> dict[str, object]:
+    config = make_config()
+    stem = "y400_mai_v3_124m_fullattn_cayley_rank2_5tpp_lr24e4"
+    config.update(
+        {
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "eval_interval": 594,
+            "max_iters": 2373,
+            "lr_decay_iters": 2373,
+            "warmup_iters": 23,
+            "planned_tokens": 621868800,
+            "planned_tpp": 5.0,
+            "scheduled_tokens": 622067712,
+            "scheduled_tpp": 5.001599308407175,
+            "hpo_stage": (
+                "attention_direction_repair_lowrank_cayley_124m_5tpp"
+            ),
+            "ladder_role": "attention_direction_repair_confirmation",
+            "ladder_slot": "lowrank_cayley_rank2_top1",
+            "screen_only": False,
+            "screen_only_resolution": None,
+            "confirmation_slot": "top1",
+            "confirmation_source": (
+                "registered 124M/0.5TPP screen: Cayley val 5.4822, "
+                "attention control 5.4918, dense 5.4890"
+            ),
+            "candidate_learning_rate_resolution": (
+                "hold the selected attention-only 5TPP recipe at 2.4e-3 "
+                "and AdamW fallback multiplier at 0.3; change only the "
+                "task-gradient-oracle-selected orthogonal chart"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "The exact 124M/0.5TPP rank-2-pair Cayley screen "
+                    "finished at val 5.4822, improving the attention control "
+                    "by 0.0096 and dense by 0.0068. Promote to the informative "
+                    "5TPP budget to test closure of the long-horizon gap."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP low-rank Cayley attention-only confirmation"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "compare terminal fixed validation CE against dense 3.5401 "
+                "and attention control 3.6744; closure requires val <=3.6401 "
+                "and a material improvement over the control"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
-    path = (
-        CONFIG_DIR
-        / "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json"
-    )
-    path.write_text(
-        json.dumps(make_config(), indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    print(path)
+    configs = {
+        "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
+            make_config(),
+        "y400_mai_v3_124m_fullattn_cayley_rank2_5tpp_lr24e4.json":
+            make_promotion_config(),
+    }
+    for filename, config in configs.items():
+        path = CONFIG_DIR / filename
+        path.write_text(
+            json.dumps(config, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        print(path)
 
 
 if __name__ == "__main__":
