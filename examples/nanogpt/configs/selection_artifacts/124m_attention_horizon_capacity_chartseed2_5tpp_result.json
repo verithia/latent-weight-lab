@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_attention_horizon_capacity_chartseed2_5tpp_result_v1",
+  "recorded_at": "2026-07-30",
+  "run": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_chartseed271828_5tpp_lr24e4",
+    "host": "Y400",
+    "gpu": 3,
+    "source_commit": "5f51e4000ad35dbbe5b7e8dbab89108bc01f3362",
+    "entrypoint": "examples.nanogpt.train",
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_chartseed271828_5tpp_lr24e4.json",
+    "config_sha256": "6271adf3b5036f1ab64c4016762b0b1f2689379ed1152060dffc70d0daac3cb6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "cb5b0a11cc58682f2857c1f09a74e4f2ce01b527cab6c72bea1d80f5b9c0ac6e",
+    "status_sha256": "10d8a4344c25035ec2bfadd0d5103015ec016ec2f21c7c1855aa36c11f544980",
+    "mfu_certificate_sha256": "088c3b2f239175f4521ce03f3273245e51f2874a35bd4dac85c580332bbade7c",
+    "log_sha256": "839f6a9b5a0b7c443783cca70476065da02f900f5ba2c7f07dbb0c99eb3efe6d",
+    "checkpoint_metadata_sha256": "d765110f7b9ccb297f4ac6bb7526e3f60f873d0980fa47c3a21a88853ab4d4cf",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.2471520420583827,
+    "iter_ms": 1220.5333333333333,
+    "tokens_per_second": 214778.54,
+    "peak_mib": 34145.54
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "train_loss": 4.2957,
+      "validation_loss": 4.2875
+    },
+    {
+      "step": 1188,
+      "train_loss": 3.8861,
+      "validation_loss": 3.8725
+    },
+    {
+      "step": 1782,
+      "train_loss": 3.735,
+      "validation_loss": 3.7194
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.6735,
+      "validation_loss": 3.6572
+    }
+  ],
+  "comparison": {
+    "primary_capacity_validation_loss": 3.6579,
+    "attention_control_validation_loss": 3.6744,
+    "dense_validation_loss": 3.5401,
+    "terminal_delta_to_primary_capacity": -0.0007,
+    "terminal_delta_to_attention_control": -0.0172,
+    "terminal_delta_to_dense": 0.1171
+  },
+  "decision": {
+    "classification": "CAPACITY_GAIN_AND_REMAINING_GAP_REPLICATE_ACROSS_CAYLEY_FRAME",
+    "reason": "Changing only the fixed identity-initialized Cayley frame changes terminal validation CE by 0.0007. The approximately 0.017 CE improvement over the original attention chart is robust, but the approximately 0.117 dense gap is equally reproducible."
+  }
+}
