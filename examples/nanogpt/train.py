@@ -967,6 +967,11 @@ def parse_args() -> argparse.Namespace:
         default=[],
     )
     parser.add_argument("--block-fht-attn-cayley-rank", type=int, default=0)
+    parser.add_argument(
+        "--block-fht-attn-cayley-ranks",
+        type=json.loads,
+        default=None,
+    )
     parser.add_argument("--block-fht-attn-cayley-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-attn-cayley-seed", type=int, default=618033)
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
@@ -1554,6 +1559,7 @@ def main() -> None:
             args.block_fht_attn_cayley_output_targets
         ),
         block_fht_attn_cayley_rank=args.block_fht_attn_cayley_rank,
+        block_fht_attn_cayley_ranks=args.block_fht_attn_cayley_ranks,
         block_fht_attn_cayley_scale=args.block_fht_attn_cayley_scale,
         block_fht_attn_cayley_seed=args.block_fht_attn_cayley_seed,
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,

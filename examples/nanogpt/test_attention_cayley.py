@@ -129,3 +129,41 @@ def test_qk_output_cayley_preserves_initial_gpt_function() -> None:
     assert len(cayley_parameters) == 6
     assert any("qk_output_cayley" in name for name in cayley_parameters)
     assert not any("qk_input_cayley" in name for name in cayley_parameters)
+
+
+def test_attention_cayley_accepts_target_specific_ranks() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+        block_fht_attn_cayley_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+        ),
+        block_fht_attn_cayley_rank=1,
+        block_fht_attn_cayley_ranks={
+            "attn.c_attn.qk_headwise": 3,
+        },
+    )
+    model = GPT(config)
+    assert model.transformer.h[0].attn.qk_output_cayley is not None
+    assert model.transformer.h[0].attn.v_input_cayley is not None
+    assert model.transformer.h[0].attn.cproj_input_cayley is not None
+    assert model.transformer.h[0].attn.qk_output_cayley.rank == 3
+    assert model.transformer.h[0].attn.v_input_cayley.rank == 1
+    assert model.transformer.h[0].attn.cproj_input_cayley.rank == 1

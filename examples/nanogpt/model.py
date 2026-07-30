@@ -105,6 +105,7 @@ class GPTConfig:
     block_fht_attn_cayley_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_output_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_rank: int = 0
+    block_fht_attn_cayley_ranks: dict[str, int] | None = None
     block_fht_attn_cayley_scale: float = 1.0
     block_fht_attn_cayley_seed: int = 618033
     block_fht_ffn_pregelu_gain: bool = False
@@ -1241,15 +1242,56 @@ class CausalSelfAttention(nn.Module):
                 "attention Cayley output targets must also be enabled "
                 "attention Cayley targets"
             )
-        cayley_rank = int(config.block_fht_attn_cayley_rank)
-        if cayley_targets and cayley_rank <= 0:
+        default_cayley_rank = int(config.block_fht_attn_cayley_rank)
+        cayley_rank_overrides = {
+            str(target): int(rank)
+            for target, rank in (
+                config.block_fht_attn_cayley_ranks or {}
+            ).items()
+        }
+        unknown_rank_targets = (
+            set(cayley_rank_overrides) - supported_cayley_targets
+        )
+        if unknown_rank_targets:
             raise ValueError(
-                "block_fht_attn_cayley_rank must be positive when targets "
-                "are enabled"
+                "unsupported attention Cayley rank targets: "
+                + ", ".join(sorted(unknown_rank_targets))
             )
-        if not cayley_targets and cayley_rank != 0:
+        if not set(cayley_rank_overrides).issubset(cayley_targets):
             raise ValueError(
-                "block_fht_attn_cayley_rank must be zero when no targets "
+                "attention Cayley rank overrides must target enabled "
+                "attention Cayley targets"
+            )
+        cayley_ranks = {
+            target: cayley_rank_overrides.get(
+                target, default_cayley_rank
+            )
+            for target in cayley_targets
+        }
+        invalid_cayley_ranks = {
+            target: rank
+            for target, rank in cayley_ranks.items()
+            if rank <= 0
+        }
+        if invalid_cayley_ranks:
+            raise ValueError(
+                "attention Cayley ranks must be positive: "
+                + ", ".join(
+                    f"{target}={rank}"
+                    for target, rank in sorted(
+                        invalid_cayley_ranks.items()
+                    )
+                )
+            )
+        if (
+            not cayley_targets
+            and (
+                default_cayley_rank != 0
+                or cayley_rank_overrides
+            )
+        ):
+            raise ValueError(
+                "attention Cayley ranks must be empty/zero when no targets "
                 "are enabled"
             )
         if (
@@ -1264,10 +1306,11 @@ class CausalSelfAttention(nn.Module):
         def cayley_mix(
             features: int,
             seed_offset: int,
+            target: str,
         ) -> LearnedLowRankCayleyMix:
             return LearnedLowRankCayleyMix(
                 features,
-                cayley_rank,
+                cayley_ranks[target],
                 int(config.block_fht_attn_cayley_seed)
                 + layer_id * 64
                 + seed_offset,
@@ -1275,7 +1318,9 @@ class CausalSelfAttention(nn.Module):
             )
 
         self.qk_input_cayley = (
-            cayley_mix(config.n_embd, 0)
+            cayley_mix(
+                config.n_embd, 0, "attn.c_attn.qk_headwise"
+            )
             if (
                 "attn.c_attn.qk_headwise" in cayley_targets
                 and "attn.c_attn.qk_headwise"
@@ -1284,12 +1329,16 @@ class CausalSelfAttention(nn.Module):
             else None
         )
         self.qk_output_cayley = (
-            cayley_mix(2 * config.n_embd, 3)
+            cayley_mix(
+                2 * config.n_embd,
+                3,
+                "attn.c_attn.qk_headwise",
+            )
             if "attn.c_attn.qk_headwise" in cayley_output_targets
             else None
         )
         self.v_input_cayley = (
-            cayley_mix(config.n_embd, 1)
+            cayley_mix(config.n_embd, 1, "attn.c_attn.v")
             if (
                 "attn.c_attn.v" in cayley_targets
                 and "attn.c_attn.v" not in cayley_output_targets
@@ -1297,12 +1346,12 @@ class CausalSelfAttention(nn.Module):
             else None
         )
         self.v_output_cayley = (
-            cayley_mix(config.n_embd, 4)
+            cayley_mix(config.n_embd, 4, "attn.c_attn.v")
             if "attn.c_attn.v" in cayley_output_targets
             else None
         )
         self.cproj_input_cayley = (
-            cayley_mix(config.n_embd, 2)
+            cayley_mix(config.n_embd, 2, "attn.c_proj")
             if (
                 "attn.c_proj" in cayley_targets
                 and "attn.c_proj" not in cayley_output_targets
@@ -1310,7 +1359,7 @@ class CausalSelfAttention(nn.Module):
             else None
         )
         self.cproj_output_cayley = (
-            cayley_mix(config.n_embd, 5)
+            cayley_mix(config.n_embd, 5, "attn.c_proj")
             if "attn.c_proj" in cayley_output_targets
             else None
         )
