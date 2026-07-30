@@ -269,6 +269,21 @@ def weighted_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def geometry_dimensions(geometry: dict[str, Any]) -> tuple[int, int]:
+    """Return coordinate and ambient dimensions for simple or QK/V charts."""
+    latent_dim = (
+        geometry["total_latent_dim"]
+        if "total_latent_dim" in geometry
+        else geometry["latent_dim"]
+    )
+    total_size = (
+        geometry["total_size"]
+        if "total_size" in geometry
+        else geometry["size"]
+    )
+    return int(latent_dim), int(total_size)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot-dir", required=True, type=Path)
@@ -356,12 +371,7 @@ def main() -> None:
                 )
                 if geometry != observed_geometry:
                     raise ValueError("projection geometry changed within one cell")
-                latent_dim = int(
-                    geometry.get("total_latent_dim", geometry["latent_dim"])
-                )
-                total_size = int(
-                    geometry.get("total_size", geometry["size"])
-                )
+                latent_dim, total_size = geometry_dimensions(geometry)
                 haar_fraction = latent_dim / total_size
                 haar_sd = math.sqrt(
                     2.0

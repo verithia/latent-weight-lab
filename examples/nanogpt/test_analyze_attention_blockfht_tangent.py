@@ -3,10 +3,18 @@ from __future__ import annotations
 import torch
 
 from examples.nanogpt.analyze_attention_blockfht_tangent import (
+    geometry_dimensions,
     latent_geometry,
     project_c_attn,
     projection_metrics,
 )
+
+
+def test_geometry_dimensions_supports_simple_and_composite_charts() -> None:
+    assert geometry_dimensions({"latent_dim": 3, "size": 12}) == (3, 12)
+    assert geometry_dimensions(
+        {"total_latent_dim": 7, "total_size": 40, "qk_head": {}}
+    ) == (7, 40)
 
 
 def test_latent_geometry_matches_one_percent_complete_blocks() -> None:
