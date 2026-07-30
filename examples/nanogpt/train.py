@@ -961,6 +961,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-output-gain-targets", nargs="+", default=[])
     parser.add_argument("--block-fht-input-gain-targets", nargs="+", default=[])
     parser.add_argument("--block-fht-attn-cayley-targets", nargs="+", default=[])
+    parser.add_argument(
+        "--block-fht-attn-cayley-output-targets",
+        nargs="+",
+        default=[],
+    )
     parser.add_argument("--block-fht-attn-cayley-rank", type=int, default=0)
     parser.add_argument("--block-fht-attn-cayley-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-attn-cayley-seed", type=int, default=618033)
@@ -1545,6 +1550,9 @@ def main() -> None:
         block_fht_output_gain_targets=tuple(args.block_fht_output_gain_targets),
         block_fht_input_gain_targets=tuple(args.block_fht_input_gain_targets),
         block_fht_attn_cayley_targets=tuple(args.block_fht_attn_cayley_targets),
+        block_fht_attn_cayley_output_targets=tuple(
+            args.block_fht_attn_cayley_output_targets
+        ),
         block_fht_attn_cayley_rank=args.block_fht_attn_cayley_rank,
         block_fht_attn_cayley_scale=args.block_fht_attn_cayley_scale,
         block_fht_attn_cayley_seed=args.block_fht_attn_cayley_seed,

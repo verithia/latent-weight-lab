@@ -84,3 +84,48 @@ def test_attention_cayley_preserves_initial_gpt_function() -> None:
         if "input_cayley" in name
     ]
     assert len(cayley_parameters) == 6
+
+
+def test_qk_output_cayley_preserves_initial_gpt_function() -> None:
+    base = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+    )
+    cayley = replace(
+        base,
+        block_fht_attn_cayley_targets=base.block_fht_targets,
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+        ),
+        block_fht_attn_cayley_rank=1,
+    )
+    torch.manual_seed(20260730)
+    control = GPT(base).eval()
+    torch.manual_seed(20260730)
+    candidate = GPT(cayley).eval()
+    tokens = torch.randint(0, base.vocab_size, (2, base.block_size))
+    with torch.no_grad():
+        control_logits, _ = control(tokens)
+        candidate_logits, _ = candidate(tokens)
+    torch.testing.assert_close(candidate_logits, control_logits)
+
+    cayley_parameters = [
+        name
+        for name, _parameter in candidate.named_parameters()
+        if "cayley" in name
+    ]
+    assert len(cayley_parameters) == 6
+    assert any("qk_output_cayley" in name for name in cayley_parameters)
+    assert not any("qk_input_cayley" in name for name in cayley_parameters)

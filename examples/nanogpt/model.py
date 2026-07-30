@@ -103,6 +103,7 @@ class GPTConfig:
     block_fht_output_gain_targets: tuple[str, ...] = ()
     block_fht_input_gain_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_targets: tuple[str, ...] = ()
+    block_fht_attn_cayley_output_targets: tuple[str, ...] = ()
     block_fht_attn_cayley_rank: int = 0
     block_fht_attn_cayley_scale: float = 1.0
     block_fht_attn_cayley_seed: int = 618033
@@ -1217,6 +1218,9 @@ class CausalSelfAttention(nn.Module):
             self.qk_tied_sign = None
         self.c_proj = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_proj", layer_id * 4 + 1)
         cayley_targets = set(config.block_fht_attn_cayley_targets)
+        cayley_output_targets = set(
+            config.block_fht_attn_cayley_output_targets
+        )
         supported_cayley_targets = {
             "attn.c_attn.qk_headwise",
             "attn.c_attn.v",
@@ -1231,6 +1235,11 @@ class CausalSelfAttention(nn.Module):
         if not cayley_targets.issubset(set(config.block_fht_targets)):
             raise ValueError(
                 "attention Cayley targets must also be BlockFHT targets"
+            )
+        if not cayley_output_targets.issubset(cayley_targets):
+            raise ValueError(
+                "attention Cayley output targets must also be enabled "
+                "attention Cayley targets"
             )
         cayley_rank = int(config.block_fht_attn_cayley_rank)
         if cayley_targets and cayley_rank <= 0:
@@ -1252,9 +1261,12 @@ class CausalSelfAttention(nn.Module):
                 "attn.c_attn.qk_headwise"
             )
 
-        def cayley_mix(seed_offset: int) -> LearnedLowRankCayleyMix:
+        def cayley_mix(
+            features: int,
+            seed_offset: int,
+        ) -> LearnedLowRankCayleyMix:
             return LearnedLowRankCayleyMix(
-                config.n_embd,
+                features,
                 cayley_rank,
                 int(config.block_fht_attn_cayley_seed)
                 + layer_id * 64
@@ -1263,18 +1275,43 @@ class CausalSelfAttention(nn.Module):
             )
 
         self.qk_input_cayley = (
-            cayley_mix(0)
-            if "attn.c_attn.qk_headwise" in cayley_targets
+            cayley_mix(config.n_embd, 0)
+            if (
+                "attn.c_attn.qk_headwise" in cayley_targets
+                and "attn.c_attn.qk_headwise"
+                not in cayley_output_targets
+            )
+            else None
+        )
+        self.qk_output_cayley = (
+            cayley_mix(2 * config.n_embd, 3)
+            if "attn.c_attn.qk_headwise" in cayley_output_targets
             else None
         )
         self.v_input_cayley = (
-            cayley_mix(1)
-            if "attn.c_attn.v" in cayley_targets
+            cayley_mix(config.n_embd, 1)
+            if (
+                "attn.c_attn.v" in cayley_targets
+                and "attn.c_attn.v" not in cayley_output_targets
+            )
+            else None
+        )
+        self.v_output_cayley = (
+            cayley_mix(config.n_embd, 4)
+            if "attn.c_attn.v" in cayley_output_targets
             else None
         )
         self.cproj_input_cayley = (
-            cayley_mix(2)
-            if "attn.c_proj" in cayley_targets
+            cayley_mix(config.n_embd, 2)
+            if (
+                "attn.c_proj" in cayley_targets
+                and "attn.c_proj" not in cayley_output_targets
+            )
+            else None
+        )
+        self.cproj_output_cayley = (
+            cayley_mix(config.n_embd, 5)
+            if "attn.c_proj" in cayley_output_targets
             else None
         )
         self.attn_dropout = nn.Dropout(config.dropout)
@@ -1317,10 +1354,13 @@ class CausalSelfAttention(nn.Module):
             v = self.c_attn_v(x)
         elif self.qk_headwise_c_attn:
             assert self.c_attn_qk_headwise is not None and self.c_attn_v is not None
-            q, k = self.c_attn_qk_headwise(qk_input).split(
-                self.n_embd, dim=2
-            )
+            qk = self.c_attn_qk_headwise(qk_input)
+            if self.qk_output_cayley is not None:
+                qk = self.qk_output_cayley(qk)
+            q, k = qk.split(self.n_embd, dim=2)
             v = self.c_attn_v(v_input)
+            if self.v_output_cayley is not None:
+                v = self.v_output_cayley(v)
         elif self.qk_tied_c_attn or self.qk_tied_sign_c_attn:
             assert self.c_attn_qk_tied is not None and self.c_attn_v is not None
             q = self.c_attn_qk_tied(x)
@@ -1379,7 +1419,10 @@ class CausalSelfAttention(nn.Module):
         y = y.transpose(1, 2).contiguous().view(bsz, seq_len, channels)
         if self.cproj_input_cayley is not None:
             y = self.cproj_input_cayley(y)
-        return self.resid_dropout(self.c_proj(y))
+        y = self.c_proj(y)
+        if self.cproj_output_cayley is not None:
+            y = self.cproj_output_cayley(y)
+        return self.resid_dropout(y)
 
 
 class MLP(nn.Module):

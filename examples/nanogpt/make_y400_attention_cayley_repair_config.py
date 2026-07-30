@@ -141,12 +141,64 @@ def make_promotion_config() -> dict[str, object]:
     return config
 
 
+def make_targetwise_config() -> dict[str, object]:
+    config = make_config()
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_"
+        "0p5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_attn_cayley_output_targets": [
+                "attn.c_attn.qk_headwise",
+            ],
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_targetwise_cayley_124m_0p5tpp"
+            ),
+            "ladder_slot": "targetwise_cayley_rank2",
+            "candidate_scope": (
+                "task-gradient-oracle-selected rank-2-pair Cayley side per "
+                "target: output/left orbit for shared QK and input/right "
+                "orbit for V and c_proj; no MLP replacement, learned dense "
+                "basis, or additive low-rank residual"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "Exact rank-4 skew recovery is 0.2770 left versus "
+                    "0.1173 right for QK, while V favors right "
+                    "0.3967 versus left 0.2837 and c_proj favors right "
+                    "0.3307 versus left 0.2826. Replace only the "
+                    "misallocated QK input chart."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/0.5TPP targetwise left/right Cayley allocation"
+                ),
+            },
+            "screen_only_resolution": (
+                "poll this 238-update run directly; compare with uniform-right "
+                "Cayley 5.4822, attention control 5.4918, and dense 5.4890"
+            ),
+            "practical_equivalence_policy": (
+                "require MFU >=20%, stability, and terminal validation CE "
+                "better than uniform-right Cayley 5.4822 before any 5TPP "
+                "promotion"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
             make_config(),
         "y400_mai_v3_124m_fullattn_cayley_rank2_5tpp_lr24e4.json":
             make_promotion_config(),
+        "y400_mai_v3_124m_fullattn_cayley_targetwise_rank2_0p5tpp_lr24e4.json":
+            make_targetwise_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename
