@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_attention_rotation_oracle_long_step0_594_1188_v1",
+  "recorded_at": "2026-07-30",
+  "analysis": {
+    "source_commit": "fb0a79fdb60b0dc3e8210c9abe19f748063f49d7",
+    "entrypoint": "examples.nanogpt.analyze_attention_rotation_oracle",
+    "result_sha256": "d3de69b651161b0b9460b504d85d6498a3fd15719657a13764fb64274f7e368c",
+    "cells_csv_sha256": "cd6e6a09eb05c843f8eec4c262ae357b8771e6d097860f8ebae8adbbcaa158c0",
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "42363bec8143315a37b1210d6b2fed395cf180baf54f6ab145a1c9082bdf0a69",
+      "step_000594.pt": "bbd88e2da2693ade96d24592e260491411ace875e0643bf69211bf16930ae990",
+      "step_001188.pt": "3015e7ffaad8a409f0b2bbdd69a7bf315e2651cb2f7ba799a88f703f2586ae81"
+    },
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "steps": [
+      0,
+      594,
+      1188
+    ],
+    "cells": 45,
+    "weighting": "gradient_fro_squared"
+  },
+  "rank4_recovery_by_step": {
+    "step0": {
+      "qk_left": 0.204219,
+      "qk_right": 0.084035,
+      "v_left": 0.331921,
+      "v_right": 0.330363,
+      "cproj_left": 0.329338,
+      "cproj_right": 0.331749
+    },
+    "step594": {
+      "qk_left": 0.317922,
+      "qk_right": 0.240509,
+      "v_left": 0.217581,
+      "v_right": 0.366222,
+      "cproj_left": 0.533274,
+      "cproj_right": 0.103719
+    },
+    "step1188": {
+      "qk_left": 0.190764,
+      "qk_right": 0.182630,
+      "v_left": 0.170022,
+      "v_right": 0.316054,
+      "cproj_left": 0.520813,
+      "cproj_right": 0.110154
+    }
+  },
+  "rank8_recovery_by_step": {
+    "step0": {
+      "qk_left": 0.277114,
+      "qk_right": 0.112681
+    },
+    "step594": {
+      "qk_left": 0.363098,
+      "qk_right": 0.259114
+    },
+    "step1188": {
+      "qk_left": 0.244031,
+      "qk_right": 0.208790
+    }
+  },
+  "decision": {
+    "classification": "KEEP_HORIZON_QK_LEFT_V_RIGHT_CPROJ_LEFT",
+    "reason": "The step-1188 probe confirms that c_proj remains overwhelmingly left/output aligned and V remains right/input aligned. QK still favors left/output at rank 4 and rank 8, although the left/right margin narrows at the middle horizon.",
+    "active_candidate": "QK output pair rank 4, V input pair rank 2, c_proj output pair rank 2; hold all other recipe and generator fields fixed."
+  },
+  "limitations": [
+    "The step-1782 and step-2372 probes are not yet available.",
+    "The oracle uses dense task gradients and does not prove that the generated-model optimizer reaches the oracle direction.",
+    "Cayley rotations preserve singular values and cannot repair a radial or singular-value deficit."
+  ]
+}
