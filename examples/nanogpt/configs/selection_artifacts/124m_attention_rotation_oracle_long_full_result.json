@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_attention_rotation_oracle_long_full_v1",
+  "recorded_at": "2026-07-30",
+  "analysis": {
+    "source_commit": "fb0a79fdb60b0dc3e8210c9abe19f748063f49d7",
+    "entrypoint": "examples.nanogpt.analyze_attention_rotation_oracle",
+    "result_sha256": "e135530a4934404cd18ee8004d5098a70a2eb9c96f6f7403da9ddf2d8606160a",
+    "cells_csv_sha256": "d071fbbfe68bf193192fc6abeac1008c867e158faf4d005cf9765108a13c3bb7",
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "42363bec8143315a37b1210d6b2fed395cf180baf54f6ab145a1c9082bdf0a69",
+      "step_000594.pt": "bbd88e2da2693ade96d24592e260491411ace875e0643bf69211bf16930ae990",
+      "step_001188.pt": "3015e7ffaad8a409f0b2bbdd69a7bf315e2651cb2f7ba799a88f703f2586ae81",
+      "step_001782.pt": "83e0bc5c54ed630296dd3175e4ccf82fbc4def46f2ce9927914dbfeb70c86fe5",
+      "step_002372.pt": "a10296b79be6f270d4f1ba8ce2631f30e850b9b1b2b357dd316e0153953ff434"
+    },
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2372
+    ],
+    "cells": 75,
+    "weighting": "gradient_fro_squared"
+  },
+  "terminal_orbit_recovery": {
+    "qk": {
+      "selected_side": "left",
+      "left_full": 0.339350,
+      "right_full": 0.253255,
+      "active_skew_rank": 8,
+      "active_recovery": 0.213188,
+      "active_fraction_of_selected_full": 0.628225
+    },
+    "v": {
+      "selected_side": "right",
+      "left_full": 0.161299,
+      "right_full": 0.371710,
+      "active_skew_rank": 4,
+      "active_recovery": 0.261635,
+      "active_fraction_of_selected_full": 0.703869
+    },
+    "cproj": {
+      "selected_side": "left",
+      "left_full": 0.512522,
+      "right_full": 0.138157,
+      "active_skew_rank": 4,
+      "active_recovery": 0.412181,
+      "active_fraction_of_selected_full": 0.804221
+    }
+  },
+  "near_90_percent_capacity_allocation": {
+    "qk": {
+      "cayley_pair_rank": 32,
+      "skew_rank": 64,
+      "recovery": 0.301349,
+      "fraction_of_selected_full": 0.888020
+    },
+    "v": {
+      "cayley_pair_rank": 16,
+      "skew_rank": 32,
+      "recovery": 0.334736,
+      "fraction_of_selected_full": 0.900529
+    },
+    "cproj": {
+      "cayley_pair_rank": 8,
+      "skew_rank": 16,
+      "recovery": 0.459039,
+      "fraction_of_selected_full": 0.895647
+    }
+  },
+  "decision": {
+    "classification": "TEST_DIRECTION_CORRECT_HIGHER_ORBIT_CAPACITY",
+    "reason": "The correct QK-left, V-right, and c_proj-left sides persist at the terminal dense probe, but the active low-rank truncations capture only 62.8%, 70.4%, and 80.4% of those full orbits. A QK/V/c_proj pair-rank allocation of 32/16/8 raises terminal coverage to approximately 89%/90%/90% without adding a learned dense basis or additive low-rank residual.",
+    "next_candidate": "QK output pair rank 32, V input pair rank 16, c_proj output pair rank 8; hold the BlockFHT decoder, learning rate, data, schedule, and all other fields fixed."
+  },
+  "limitations": [
+    "The oracle uses dense task gradients and does not prove that generated-model AdamW coordinates learn the oracle orbit.",
+    "The chosen QK rank is the smallest practical allocation near 90%; pair rank 64 is required to exceed 90% exactly at the terminal probe.",
+    "Cayley rotations preserve singular values and cannot repair a radial or singular-value deficit.",
+    "A same-coordinate global random-orthogonal decoder remains necessary to isolate BlockFHT locality."
+  ]
+}
