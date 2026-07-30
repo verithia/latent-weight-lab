@@ -364,6 +364,73 @@ def make_horizon_capacity_targeted_bilateral_config() -> dict[str, object]:
     return config
 
 
+def make_horizon_capacity_targeted_bilateral_outputgain_config() -> dict[str, object]:
+    """Add singular-value freedom to the targeted bilateral chart."""
+    config = make_horizon_capacity_targeted_bilateral_config()
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_"
+        "qk32_v16_cproj8_targeted_bilateral_outputgain_5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_output_gain_targets": [
+                "attn.c_attn.qk_headwise",
+                "attn.c_attn.v",
+                "attn.c_proj",
+            ],
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_horizon_capacity_targeted_"
+                "bilateral_outputgain_124m_5tpp"
+            ),
+            "ladder_slot": (
+                "horizon_capacity_qk32_v16_cproj8_targeted_bilateral_"
+                "outputgain"
+            ),
+            "confirmation_slot": (
+                "horizon_capacity_targeted_bilateral_outputgain"
+            ),
+            "confirmation_source": (
+                "the one-sided pair-rank 32/16/8 chart finished +0.1178 "
+                "behind dense; Cayley coordinates rotate singular vectors "
+                "but cannot change singular values, while the terminal "
+                "oracle shows an additional radial-plus-bilateral span and "
+                "the independent output-gain confirmation was stable"
+            ),
+            "candidate_scope": (
+                "the terminal-oracle-targeted bilateral QK/V chart plus "
+                "per-output-channel multiplicative gains on QK-headwise, V, "
+                "and c-proj; no learned dense basis, additive residual, "
+                "LoRA-like branch, MLP replacement, or stability penalty"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "The primary direction-correct high-capacity chart "
+                    "improved the original control by 0.0165 CE but missed "
+                    "the accepted terminal threshold by 0.0178. The targeted "
+                    "bilateral arm supplies missing singular-vector sides; "
+                    "this matched parallel arm tests the remaining "
+                    "singular-value restriction with the previously stable "
+                    "output-channel gain."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/5TPP targeted bilateral plus output-gain "
+                    "attention-only fallback"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "launch only after a synchronous exact-config MFU >=20%; "
+                "compare terminal fixed validation CE against dense 3.5401, "
+                "attention control 3.6744, one-sided capacity 3.6579, and "
+                "targeted bilateral; closure requires val <=3.6401"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -378,6 +445,8 @@ def main() -> None:
             make_horizon_capacity_chartseed2_config(),
         "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_5tpp_lr24e4.json":
             make_horizon_capacity_targeted_bilateral_config(),
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_outputgain_5tpp_lr24e4.json":
+            make_horizon_capacity_targeted_bilateral_outputgain_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename
