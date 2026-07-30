@@ -581,6 +581,80 @@ def make_horizon_capacity_targeted_bilateral_full_lr_promotion_config() -> dict[
     return config
 
 
+def make_horizon_capacity_one_sided_full_lr_screen_config() -> dict[str, object]:
+    """Isolate Cayley LR from the targeted bilateral structural addition."""
+    config = json.loads(HORIZON_CAPACITY_PATH.read_text(encoding="utf-8"))
+    base = json.loads(BASE_PATH.read_text(encoding="utf-8"))
+    for key in (
+        "max_iters",
+        "lr_decay_iters",
+        "eval_interval",
+        "planned_tokens",
+        "planned_tpp",
+        "scheduled_tokens",
+        "scheduled_tpp",
+    ):
+        config[key] = base[key]
+    stem = (
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_"
+        "qk32_v16_cproj8_one_sided_fullcayleylr_0p5tpp_lr24e4"
+    )
+    config.update(
+        {
+            "block_fht_attn_cayley_lr_scale": 10.0 / 3.0,
+            "out_dir": f"{OUTPUT_ROOT}/{stem}",
+            "hpo_stage": (
+                "attention_direction_repair_one_sided_full_cayley_lr_"
+                "124m_0p5tpp"
+            ),
+            "ladder_role": "attention_direction_repair_control",
+            "ladder_slot": (
+                "horizon_capacity_one_sided_full_cayley_lr"
+            ),
+            "confirmation_slot": (
+                "one_sided_full_cayley_lr_attribution"
+            ),
+            "screen_only": True,
+            "screen_only_resolution": (
+                "directly poll the 238-update control without a watchdog; "
+                "compare against targeted-bilateral full-Cayley-LR 5.4024 "
+                "to separate optimizer correction from structural direction"
+            ),
+            "confirmation_source": (
+                "the targeted-bilateral full-Cayley-LR screen reached "
+                "validation 5.4024; remove only the second QK/V sides while "
+                "retaining the pair-rank 32/16/8 chart and Cayley main LR"
+            ),
+            "candidate_scope": (
+                "the original one-sided terminal-oracle pair-rank 32/16/8 "
+                "chart with Cayley-only AdamW LR multiplier 10/3; no "
+                "bilateral orbit, output gain, stability penalty, learned "
+                "basis, additive residual, or MLP replacement"
+            ),
+            "operator_override": {
+                "accepted_as_formal_dense_fit_conditioned_result": False,
+                "reason": (
+                    "This smallest-rung attribution control is required to "
+                    "decide whether the 0.0894 screen gain came from fixing "
+                    "Cayley optimizer conditioning alone or from its "
+                    "interaction with the dense-oracle bilateral direction."
+                ),
+                "recorded_at": "2026-07-30",
+                "scope": (
+                    "124M/0.5TPP one-sided high-capacity Cayley-LR "
+                    "attribution control"
+                ),
+            },
+            "practical_equivalence_policy": (
+                "compare terminal validation with bilateral full-Cayley-LR "
+                "5.4024, dense 5.4890, and attention control 5.4918; do not "
+                "promote until the active bilateral 5TPP result is available"
+            ),
+        }
+    )
+    return config
+
+
 def main() -> None:
     configs = {
         "y400_mai_v3_124m_fullattn_cayley_rank2_0p5tpp_lr24e4.json":
@@ -601,6 +675,8 @@ def main() -> None:
             make_horizon_capacity_targeted_bilateral_full_lr_screen_config(),
         "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json":
             make_horizon_capacity_targeted_bilateral_full_lr_promotion_config(),
+        "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_one_sided_fullcayleylr_0p5tpp_lr24e4.json":
+            make_horizon_capacity_one_sided_full_lr_screen_config(),
     }
     for filename, config in configs.items():
         path = CONFIG_DIR / filename
