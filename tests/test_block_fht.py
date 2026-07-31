@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 import torch
 import torch.nn.functional as F
@@ -6,6 +8,7 @@ from latent_weight_lab.block_fht import (
     BlockFHT,
     BlockFHTLinear,
     ProductFHTLinear,
+    _discover_cuda_home,
     block_fht_slice_torch,
     flush_block_fht_weight_cache,
     prepare_block_fht_weight_cache,
@@ -40,6 +43,34 @@ def test_vectorized_signs_match_scalar_hash_bits():
         [1.0 if ((sign_word_for(999, 3, 2, pos >> 5) >> (pos & 31)) & 1) else -1.0 for pos in range(size)]
     )
     assert torch.equal(got, expected)
+
+
+def test_cuda_home_discovery_prefers_explicit_environment(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    explicit = tmp_path / "explicit-cuda"
+    bundled = tmp_path / ".cuda-12.8"
+    for toolkit in (explicit, bundled):
+        (toolkit / "bin").mkdir(parents=True)
+        (toolkit / "bin" / "nvcc").touch()
+    monkeypatch.setenv("CUDA_HOME", str(explicit))
+    monkeypatch.setattr("shutil.which", lambda _name: None)
+
+    assert _discover_cuda_home(tmp_path) == str(explicit)
+
+
+def test_cuda_home_discovery_finds_project_sibling_toolkit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    checkout = tmp_path / "latent-weight-lab"
+    checkout.mkdir()
+    toolkit = tmp_path / ".cuda-12.8"
+    (toolkit / "bin").mkdir(parents=True)
+    (toolkit / "bin" / "nvcc").touch()
+    monkeypatch.delenv("CUDA_HOME", raising=False)
+    monkeypatch.setattr("shutil.which", lambda _name: None)
+
+    assert _discover_cuda_home(checkout) == str(toolkit.resolve())
 
 
 def test_slice_matches_full_forward_cpu():

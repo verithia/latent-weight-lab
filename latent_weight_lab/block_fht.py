@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 import os
+import shutil
 from pathlib import Path
 
 import torch
@@ -114,24 +115,55 @@ _BLOCK_FHT_EXT = None
 _BLOCK_FHT_EXT_ERROR: Exception | None = None
 
 
+def _discover_cuda_home(root: Path) -> str | None:
+    """Find a CUDA toolkit before importing ``torch.utils.cpp_extension``.
+
+    Training deployments keep a project-local toolkit next to the
+    ``latent-weight-lab`` checkout.  PyTorch snapshots ``CUDA_HOME`` when its
+    extension module is imported, so setting it after importing ``load`` is
+    too late and silently forces BlockFHT onto the very slow eager fallback.
+    """
+    explicit = os.environ.get("CUDA_HOME")
+    if explicit:
+        return explicit
+
+    nvcc = shutil.which("nvcc")
+    if nvcc:
+        return str(Path(nvcc).resolve().parents[1])
+
+    candidates = [Path("/usr/local/cuda"), Path("/opt/cuda")]
+    for parent in (root, root.parent):
+        candidates.extend(sorted(parent.glob(".cuda-*"), reverse=True))
+    for candidate in candidates:
+        if (candidate / "bin" / "nvcc").is_file():
+            return str(candidate.resolve())
+    return None
+
+
 def _load_block_fht_ext():
     global _BLOCK_FHT_EXT, _BLOCK_FHT_EXT_ERROR
     if _BLOCK_FHT_EXT is not None or _BLOCK_FHT_EXT_ERROR is not None:
         return _BLOCK_FHT_EXT
     try:
-        from torch.utils.cpp_extension import load
-
         root = Path(__file__).resolve().parents[1]
-        cuda_home = os.environ.get("CUDA_HOME")
+        cuda_home = _discover_cuda_home(root)
         if cuda_home:
+            os.environ["CUDA_HOME"] = cuda_home
             os.environ["PATH"] = f"{cuda_home}/bin:" + os.environ.get("PATH", "")
+        from torch.utils import cpp_extension
+
+        # Another import may have initialized cpp_extension before this
+        # loader.  Keep its cached value consistent with the toolkit that was
+        # just discovered.
+        if cpp_extension.CUDA_HOME is None and cuda_home:
+            cpp_extension.CUDA_HOME = cuda_home
         try:
             import ninja
 
             os.environ["PATH"] = f"{ninja.BIN_DIR}:" + os.environ.get("PATH", "")
         except Exception:
             pass
-        _BLOCK_FHT_EXT = load(
+        _BLOCK_FHT_EXT = cpp_extension.load(
             name="latent_weight_lab_block_fht_ext_scaled_v10",
             sources=[
                 str(root / "csrc" / "block_fht_ext.cpp"),
