@@ -1,0 +1,185 @@
+{
+  "schema_version": "mai_124m_attention_pro6_recovery_result_v1",
+  "recorded_at": "2026-07-31",
+  "controls": {
+    "dense_0p5tpp_validation_ce": 5.489,
+    "dense_5tpp_validation_ce": 3.5401,
+    "original_attention_0p5tpp_validation_ce": 5.4918,
+    "original_attention_5tpp_validation_ce": 3.6744,
+    "accepted_terminal_gap_to_dense": 0.1
+  },
+  "runs": {
+    "targeted_bilateral_full_cayley_lr_5tpp": {
+      "run_name": "pro6_mai_v3_124m_targeted_bilateral_fullcayleylr_5tpp_recovery2",
+      "git_commit": "ed7cc68c5b7f2e6a16327ccbf0c8177ef59beba5",
+      "command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_targeted_bilateral_fullcayleylr_5tpp_recovery2_20260731T080629Z_1561520.config.json"
+      ],
+      "config_sha256": "d605621e54f81e9336439012ebaea470812bfd0b52de05a140ee732262ad3fd7",
+      "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "provenance_sha256": "b965ddf23a3d2b6e5561ee56a72de0698e0de1e3965155b2bf8f0536eed66235",
+      "status_sha256": "e3cee1c9fbb808f21ccac370d989f1a6881a5f0ee6d0add222715a16dd732b41",
+      "log_sha256": "b34b193b1199bb3728c194ad5501b03fbc7a56e2b58bf6daa579469e7b160255",
+      "mfu_certificate_sha256": "96c5616bccd43215c2e7bca364fed2757dbcf5b370e0bd3ee556dcfd536db3fb",
+      "checkpoint_sha256": "df03f93533c9d3542137a46d3a875c4d748bacefc602c832e0441e77435c3db5",
+      "checkpoint_metadata_sha256": "3ce8720b34970d96de47cd0fb44f6780147fb3f5ad6997eb72aa7374b6f4d25b",
+      "exit_code": 0,
+      "mfu_fraction": 0.280508546051453,
+      "iter_ms": 1676.5133333333333,
+      "tokens_per_second": 156362.42333333334,
+      "peak_mib": 35419.52,
+      "fixed_evaluations": [
+        {
+          "step": 0,
+          "train_ce": 10.9991,
+          "validation_ce": 10.9991
+        },
+        {
+          "step": 594,
+          "train_ce": 4.2257,
+          "validation_ce": 4.2151
+        },
+        {
+          "step": 1188,
+          "train_ce": 3.8553,
+          "validation_ce": 3.8411
+        },
+        {
+          "step": 1782,
+          "train_ce": 3.7065,
+          "validation_ce": 3.6907
+        },
+        {
+          "step": 2373,
+          "train_ce": 3.6442,
+          "validation_ce": 3.6278
+        }
+      ],
+      "terminal_delta_to_original_attention": -0.0466,
+      "terminal_delta_to_dense": 0.0877,
+      "closure_met": true
+    },
+    "one_sided_full_cayley_lr_0p5tpp": {
+      "run_name": "pro6_mai_v3_124m_one_sided_fullcayleylr_0p5tpp_attribution1",
+      "git_commit": "284035caa46c200300f253ede2ba0a75782799e5",
+      "command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_one_sided_fullcayleylr_0p5tpp_attribution1_20260731T091757Z_1581576.config.json"
+      ],
+      "config_sha256": "e59875bad34f993df665791430230463f969addedcdc67c42cf2a9a8b044e286",
+      "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "provenance_sha256": "6f8469e668b27f065dab34fc63649141ad6d8ef6b04d8da597d3487fffb51834",
+      "status_sha256": "6f1fb604ef8669f09b0fa2eb71f220b0090509b3136d7114d1b8a21ee3514dd8",
+      "log_sha256": "5259ca70925b19a136f8b7a0342ca0b8dd43facf8d68cdb8d59e1002b6d76fb2",
+      "mfu_certificate_sha256": "6662beb09af9e606f474f33f55ce728fce324fdc30423662ba358e9ee4a363e4",
+      "checkpoint_sha256": "5fd431210c7aa2c812fbd6d7e54d0328f9dbefb6e022d9145a0359f11f6f50a6",
+      "checkpoint_metadata_sha256": "36b636da0b400cfbd1d44cb9c1231ce2b018eac4b6344039ac0fd2cc8ff22ab2",
+      "exit_code": 0,
+      "mfu_fraction": 0.31113109298676794,
+      "iter_ms": 1516.4800000000002,
+      "tokens_per_second": 172863.84,
+      "peak_mib": 34097.85,
+      "fixed_evaluations": [
+        {
+          "step": 0,
+          "train_ce": 10.9991,
+          "validation_ce": 10.9991
+        },
+        {
+          "step": 60,
+          "train_ce": 6.267,
+          "validation_ce": 6.2769
+        },
+        {
+          "step": 120,
+          "train_ce": 5.78,
+          "validation_ce": 5.7852
+        },
+        {
+          "step": 180,
+          "train_ce": 5.5171,
+          "validation_ce": 5.5203
+        },
+        {
+          "step": 238,
+          "train_ce": 5.4195,
+          "validation_ce": 5.4222
+        }
+      ],
+      "terminal_delta_to_original_attention": -0.0696,
+      "terminal_delta_to_dense": -0.0668
+    },
+    "global_fht_0p5tpp": {
+      "run_name": "pro6_mai_v3_124m_fullattn_globalfht_0p5tpp_locality1",
+      "git_commit": "284035caa46c200300f253ede2ba0a75782799e5",
+      "command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_globalfht_0p5tpp_locality1_20260731T092734Z_1584585.config.json"
+      ],
+      "config_sha256": "86b1b1a333db76e655f099eda1167fd0916b2193d2a955685df5cd7abd73043e",
+      "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "provenance_sha256": "8a469e9c1ff3155db523df2d06c31a518936bce70077c1675d103bebcb398986",
+      "status_sha256": "0234aff60031fffcbc7c01db88d18237e334514fed704874d5d2ec87d01b04e3",
+      "log_sha256": "edbc21073aceeb8c916c7489a46151e78c9168660e52b121967794b105f490e4",
+      "mfu_certificate_sha256": "0e57038cfada174f5ca921d386672ca5ac710f657ce9e3f9d5d6bbce2c50e54d",
+      "checkpoint_sha256": "cc2b54d19db661a6daf1a6d66a0bddf99655e27506bd0d4d42dfaa2df6c32303",
+      "checkpoint_metadata_sha256": "5b72d2f5d97dada513a9fff429c200307063561ac6dbefc053f55b1d312de533",
+      "exit_code": 0,
+      "mfu_fraction": 0.38295282898976185,
+      "iter_ms": 1238.6066666666666,
+      "tokens_per_second": 211645.14,
+      "peak_mib": 31584.31,
+      "fixed_evaluations": [
+        {
+          "step": 0,
+          "train_ce": 11.0093,
+          "validation_ce": 11.0098
+        },
+        {
+          "step": 60,
+          "train_ce": 6.2467,
+          "validation_ce": 6.2571
+        },
+        {
+          "step": 120,
+          "train_ce": 5.7942,
+          "validation_ce": 5.7993
+        },
+        {
+          "step": 180,
+          "train_ce": 5.5898,
+          "validation_ce": 5.5932
+        },
+        {
+          "step": 238,
+          "train_ce": 5.494,
+          "validation_ce": 5.4971
+        }
+      ],
+      "terminal_delta_to_original_attention": 0.0053,
+      "terminal_delta_to_dense": 0.0081
+    }
+  },
+  "attribution": {
+    "targeted_bilateral_0p5tpp_validation_ce": 5.4024,
+    "optimizer_correction_gain": 0.0696,
+    "opposite_side_orbit_incremental_gain": 0.0198,
+    "optimizer_fraction_of_total_short_horizon_gain": 0.7785234899328859,
+    "opposite_side_orbit_fraction_of_total_short_horizon_gain": 0.2214765100671141,
+    "blockfht_locality_is_supported_as_gap_cause": false
+  },
+  "decision": "Promote targeted bilateral qk32/v16/cproj8 with full Cayley learning rate as the attention-only structure. The 5-TPP terminal gap is +0.0877 CE and meets the requested +0.10 criterion. Do not replace deployed BlockFHT with the same-coordinate global-FHT decoder; its terminal control is 0.0053 CE worse than deployed BlockFHT attention."
+}
