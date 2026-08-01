@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_output_general_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "OUTPUT_GENERAL_SKEW_SHEAR_REQUIRED",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_output_general_pro6_plan.json",
+    "sha256": "b38ad71f0b26f2cf39974872c3b3b6379e986b89b3897f1fe1303009805e4f96"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9679c094b7de7aa9f17920dd9a31ef52018196fe",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_output_general.py",
+    "entrypoint_sha256": "a8a74d35843c70f88d06440ab35e0e966382f47fb13fa57bfbdadad6e66cde46",
+    "wall_seconds": 1242.020762205124,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_generator_spectrum_result_sha256": "6f81e86796ec2e2ac6d6cd13513167cad6c5d88b9040bf14c4d9ba38d66a8b93"
+  },
+  "registered_gates": {
+    "numerically_stable": true,
+    "dense_beats_fresh_every_window": true,
+    "output_general_action_well_conditioned": true
+  },
+  "held_out_gap_recovery": {
+    "fresh_plus_output_skew": {
+      "minimum": 0.437847866419295,
+      "median": 0.4621336575791165,
+      "by_window": [0.5341176470588235, 0.437847866419295, 0.45597775718257644, 0.46828955797565663],
+      "sufficient": false
+    },
+    "fresh_plus_output_symmetric_shear": {
+      "minimum": 0.5746316463805253,
+      "median": 0.5949621233614348,
+      "by_window": [0.5976470588235294, 0.5949288806431664, 0.5949953660797034, 0.5746316463805253],
+      "sufficient": false
+    },
+    "fresh_plus_output_skew_shear": {
+      "minimum": 0.9694117647058823,
+      "median": 0.9940139936936863,
+      "by_window": [0.9694117647058823, 0.9944341372912802, 0.9981464318813716, 0.9935938500960922],
+      "sufficient": true
+    }
+  },
+  "weight_space_recovery": {
+    "output_skew_range": [0.5978156434162992, 0.6068458868858776],
+    "output_symmetric_shear_range": [0.6854165882103347, 0.6894344953182241],
+    "output_skew_shear_range": [0.9975531488328379, 0.9987039492841931]
+  },
+  "conditioning": {
+    "maximum_weight_condition_number": 3.093093156814575,
+    "maximum_general_reconstruction_error": 0.00000778953472035937,
+    "maximum_component_reconstruction_error": 0.000007789568371663336,
+    "maximum_skew_shear_bilateral_error": 0.000007789666597091127,
+    "maximum_general_operator_spectral_norm": 0.0008666781359352171,
+    "maximum_skew_operator_spectral_norm": 0.0004799588059540838,
+    "maximum_symmetric_operator_spectral_norm": 0.0005139259737916291
+  },
+  "operator_spectra": {
+    "general_rank90_range": [503, 505],
+    "skew_rank90_range": [809, 814],
+    "symmetric_rank90_range": [758, 763],
+    "observation": "All components are high-rank. The repair needs a dense structured basis, not a direct low-rank factor or LoRA adapter."
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_output_general1",
+    "aggregate_sha256": "1ad544a715191d7fe72e92b574963b8cfb048b54c488df5d7141a77a54abbf59",
+    "diagnostics_sha256": "521c2d07ebee1f346a9c23f8bea1a5e4845bb9d63599a6e1aff62dc140bf5132",
+    "losses_sha256": "835d73b08a5adc93ad7e09a60b128a938506e5fd29f7a9800cff1f2b00a140ee",
+    "metadata_sha256": "be190708d68978b7af420b7bba738e2e818a63ee52f792aff1c5208422cf5481",
+    "metrics_sha256": "b20b05c6f6aff7935ef80203ec76a4cde7338b99eee611b8134c30c8d46b0159",
+    "spectra_sha256": "ed9ca1b951cce80870cb782d50c01399c045ae1772cd025ab7c0fef5f16d3eb9"
+  },
+  "interpretation": [
+    "The dense-minus-fresh residual is stably representable as a single output-side general action A W, with operator norm below 8.7e-4 and float32 reconstruction error below 7.8e-6. This avoids the singular-gap cancellation of coupled Q_out W Q_in generators.",
+    "Pure output rotation recovers only 43.8-53.4% of held-out CE value; pure symmetric shear recovers 57.5-59.8%. Neither passes the registered structural gate.",
+    "Their combination recovers 96.9-99.8% per window (99.4% median) and 99.76-99.87% of residual energy. The missing c_fc direction is specifically a coupled skew-plus-symmetric-shear output action.",
+    "The operator components are high rank, so a learned rank-64 basis, direct low-rank skew factor, LoRA adapter, diagonal channel gain, or HyperConnection is structurally mismatched.",
+    "The next equal-coordinate screen should replace the canonical sparse Givens tangent with fixed global FHT-conjugated general 2x2 blocks: 22 stages x 1536 pairs x 4 coordinates = 135,168 coordinates per layer, exactly matching fresh88."
+  ],
+  "authorization": {
+    "equal_coordinate_fht_conjugated_general_screen_authorized": true,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "At zero updates, compare fresh88 with equal-coordinate fixed FHT-conjugated orthogonal88 and general2x2-22 output charts, applying decoupled weight decay once and requiring held-out CE recovery before production integration."
+  }
+}
