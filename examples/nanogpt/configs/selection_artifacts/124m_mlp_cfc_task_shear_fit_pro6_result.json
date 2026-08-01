@@ -1,0 +1,84 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_task_shear_fit_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "PROMOTE_TASK_MATCHED_SHEAR_TO_HELDOUT_CE",
+  "selected_candidate": "fresh64_shear24",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_task_shear_fit_pro6_plan.json",
+    "sha256": "2fa255270ccc11bdd975828016b349c8eefce156bed99174f780f7bf6d3fa945"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "7048f9c9d3aa61d9c415a1c441029337c36dbf12",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_task_shear_fit.py",
+    "entrypoint_sha256": "8537295ee3859135506f9158cb60ffc7601a0216a2cb3ed5c74e0d4c4c5f048a",
+    "wall_seconds": 66.52341985702515,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_conjugated_result_sha256": "778ad405e35f130e3233632ee1988ba431e05dd0a90786bc4bac049f61eea66a"
+  },
+  "candidate_results": {
+    "fresh88": {
+      "aggregate_fixed_scale_recovery": 0.28043252675797525,
+      "minimum_layer_fixed_scale_recovery": 0.27853087351021755
+    },
+    "fresh64_shear24": {
+      "aggregate_fixed_scale_recovery": 0.29749412884954307,
+      "aggregate_ratio_vs_fresh88": 1.0608403108184832,
+      "minimum_layer_delta_vs_fresh88": 0.016645763785503753,
+      "maximum_layer_delta_vs_fresh88": 0.017446467840130264,
+      "minimum_layer_fixed_scale_recovery": 0.2959773413503478,
+      "passes_fit_gate": true
+    },
+    "fresh64_skew_shear12": {
+      "aggregate_fixed_scale_recovery": 0.27026138620923534,
+      "aggregate_ratio_vs_fresh88": 0.9637305248919359,
+      "minimum_layer_delta_vs_fresh88": -0.010748624083985803,
+      "passes_fit_gate": false
+    },
+    "fresh48_skew_shear20": {
+      "aggregate_fixed_scale_recovery": 0.2806853454006575,
+      "aggregate_ratio_vs_fresh88": 1.000901531094146,
+      "minimum_layer_delta_vs_fresh88": -0.0003653792736412198,
+      "passes_fit_gate": false
+    }
+  },
+  "selected_fit_conditioning": {
+    "residual_recovery_range": [0.12002484641557787, 0.12135644089384023],
+    "symmetric_shear_rms_range": [0.000025947922421002733, 0.000027264268010330764],
+    "maximum_determinant_error": 3.3845078961647346e-09,
+    "maximum_condition_number": 1.0001163598163154
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_task_shear_fit1",
+    "aggregate_sha256": "1de73db31acd314607c43c4373234de0112adc5cec0339ddf049f18566431ba7",
+    "fits_sha256": "a289b95a95fc362976f5bdeb640ca5491147095fca4b701ba6cbcc1205ede29e",
+    "metadata_sha256": "20deda60b3bc77e10dcb181bc44129bd9db8f5659461cce1925020d5730512bd",
+    "metrics_sha256": "0d4d3aa5cdf253ff509fcd20c2869400ea3f31cd38f08bb8e053777bd3fa5306",
+    "optimizer_sha256": "8cd84ce8c68bf44fbd77a128b92d77b02bbf38d663c5eda2c553e23374ade961"
+  },
+  "interpretation": [
+    "Replacing the 24 residual rotational stages after the qualified fresh64 parent with 24 task-matched symmetric-shear stages improves exact-current dense Muon recovery from 28.04% to 29.75%, a 1.0608x gain.",
+    "The improvement is uniform across all 12 layers: every layer gains 0.01665-0.01745 absolute recovery, so the registered all-layer gate passes without relying on an aggregate-only effect.",
+    "Joint skew-plus-shear residual blocks are less coordinate-efficient: 64+12 loses to fresh88, while 48+20 is effectively tied and fails one layer. The useful allocation is a rotational parent followed by shear-only residual correction.",
+    "The selected maps are extremely local and well conditioned, with determinant error below 3.4e-9 and condition number below 1.00012. This is not a numerical or large-step artifact.",
+    "The result is fit-only. It establishes local manifold capacity but does not yet establish held-out CE value or trainability."
+  ],
+  "authorization": {
+    "heldout_ce_diagnostic_authorized": true,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister and directly poll a zero-update held-out CE comparison of fresh64_shear24 against fresh88 and dense exact on untouched validation windows."
+  }
+}
