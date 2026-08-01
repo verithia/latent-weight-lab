@@ -1,0 +1,103 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "decision_rule": {
+    "adaptive_dense_gate": "if low rank fails and either side has median cosine <0.50, the conjugated basis must be latent/task-adaptive rather than a static fitted basis",
+    "low_rank_gate": "both sides must fit their all-budget direct skew rank caps in every layer; this is deliberately generous because a real bilateral budget split is stricter",
+    "maximum_reconstruction_error": 2e-05,
+    "minimum_median_reference_cosine": 0.5,
+    "stable_dense_gate": "if low rank fails but both generator sides have median cross-window cosine >=0.50, test a fixed global FHT-conjugated dense tangent basis next",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_generator_spectrum",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_generator_spectrum_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_generator_spectrum1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "block_size": 1024,
+    "equal_coordinates_per_layer": 135168,
+    "fit_batches": 4,
+    "fit_train_seeds": [
+      20260820,
+      20260821,
+      20260822,
+      20260823
+    ],
+    "input_width": 768,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "output_width": 3072,
+    "parent_stages": 64,
+    "reference_fit_seed": 20260820,
+    "residual_stages": 24,
+    "spectrum": "exact nonzero singular values of the coupled skew generators; the 3072-square left generator is represented exactly in a <=1536 compressed orthonormal basis; singular-gap conditioning is recorded",
+    "stability": "Frobenius cosine from the reference generator to three independent fixed task-gradient windows, using exact compact inner products"
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_generator_spectrum.py",
+    "entrypoint_sha256": "3b98c328a478d424bc647ceb1ae8300337304421abf4a6e900b84274d2f1b6d0",
+    "parent_joint_result_sha256": "27ed72c062a4781f2690e5d13dc89aa34c0e442c992d321e013925458e9e99be",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a zero-update local geometry diagnostic, not language-model training.",
+    "Cross-window stability is measured at one terminal checkpoint and includes the persisted Muon momentum state; it is not cross-checkpoint or cross-seed solution-manifold evidence.",
+    "A favorable singular spectrum is only an oracle capacity condition. Any production factorization still needs a separate held-out CE tangent gate and >=20% host-local measured MFU.",
+    "No learned basis, LoRA, dense residual adapter, channel gain, radial parameter, optimizer update, or model update is introduced."
+  ],
+  "question": "Are the exact bilateral c_fc skew generators low-rank and stable enough for a direct compact factorization, or do they require a dense conjugated orthogonal basis?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_generator_spectrum_pro6_plan_v1"
+}
