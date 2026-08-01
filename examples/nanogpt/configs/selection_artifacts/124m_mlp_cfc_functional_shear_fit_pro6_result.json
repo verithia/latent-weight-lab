@@ -1,0 +1,119 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_fit_pro6_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "REJECT_ACTIVATION_WEIGHTED_SHEAR",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_fit_pro6_plan.json",
+    "sha256": "ea98462bc379ead6ba782cafd8402ab14224d7f906215f9d28491a028f3134f7"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "05b7ae983e49c9bd6c4f4c380f6516d5324c4312",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_fit.py",
+    "entrypoint_sha256": "463d8ed7f18a64125a1e9c20b0293602a6d5b3eb5205d9e5804c5a8435aab281",
+    "wall_seconds": 34.943198442459106,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_task_shear_ce_result_sha256": "36c12d7911e485397b7c1a624bd60cfb34b22c64c9fe26f1df2a66fdf0227593"
+  },
+  "candidate_results": {
+    "fresh88": {
+      "fit_mlp_output_recovery": 0.4780772089623936,
+      "holdout_mlp_output_recovery": 0.47284858423276244,
+      "fit_post_gelu_recovery": 0.33004840081723114,
+      "holdout_post_gelu_recovery": 0.3222771060522229,
+      "fit_predicted_ce_decrease": 0.003096239879987444,
+      "holdout_predicted_ce_decrease": 0.000052669626871854976,
+      "weight_recovery": 0.28041234262817477
+    },
+    "fresh64_weight_shear24": {
+      "fit_mlp_output_recovery": 0.5114145155146917,
+      "holdout_mlp_output_recovery": 0.5057153349525957,
+      "fit_post_gelu_recovery": 0.35433327141608734,
+      "holdout_post_gelu_recovery": 0.34587010922614525,
+      "fit_predicted_ce_decrease": 0.00336441919143095,
+      "holdout_predicted_ce_decrease": 0.000056123582553502986,
+      "weight_recovery": 0.29751485321412136
+    },
+    "fresh64_functional_topology_weight_fit24": {
+      "fit_mlp_output_recovery": 0.522832539979827,
+      "holdout_mlp_output_recovery": 0.5143375174437318,
+      "fit_post_gelu_recovery": 0.3451308910016117,
+      "holdout_post_gelu_recovery": 0.33348067880862614,
+      "fit_predicted_ce_decrease": 0.002828899094375739,
+      "holdout_predicted_ce_decrease": 0.00005601862710786786,
+      "weight_recovery": 0.21656749243517626
+    },
+    "fresh64_weight_topology_functional_fit24": {
+      "fit_mlp_output_recovery": 0.7003093521861514,
+      "holdout_mlp_output_recovery": 0.6562652643631484,
+      "fit_post_gelu_recovery": 0.08205421280205803,
+      "holdout_post_gelu_recovery": 0.0169918310036814,
+      "fit_predicted_ce_decrease": 0.0046533528556108456,
+      "holdout_predicted_ce_decrease": 0.000114479946128527,
+      "weight_recovery": -0.6000283066581662
+    },
+    "fresh64_functional_shear24": {
+      "fit_mlp_output_recovery": 0.48749178567689344,
+      "holdout_mlp_output_recovery": 0.39922359520177053,
+      "fit_post_gelu_recovery": -0.7039063063311396,
+      "holdout_post_gelu_recovery": -0.8433307168919333,
+      "fit_predicted_ce_decrease": 0.004128416982410047,
+      "holdout_predicted_ce_decrease": 0.00010559471613665138,
+      "weight_recovery": -2.2189366693545045
+    }
+  },
+  "primary_ratios_vs_weight_shear": {
+    "fit_mlp_output": 0.953222426990125,
+    "holdout_mlp_output": 0.7894235503837206,
+    "fit_predicted_ce_decrease": 1.2270816291040576,
+    "holdout_predicted_ce_decrease": 1.881467848849229,
+    "weight_recovery": -7.458238287543702
+  },
+  "fit_conditioning": {
+    "weight_topology_functional_fit": {
+      "functional_requested_recovery_range": [0.40075557009327534, 0.5388658811403574],
+      "mean_functional_requested_recovery": 0.5035984092303852,
+      "maximum_condition_number": 1.0018778200095106,
+      "maximum_determinant_error": 1.191e-07
+    },
+    "functional_topology_functional_fit": {
+      "functional_requested_recovery_range": [-0.20104257982556017, 0.3235532544845686],
+      "mean_functional_requested_recovery": 0.14629431548488794,
+      "maximum_condition_number": 1.003738913455166,
+      "maximum_determinant_error": 1.191e-07
+    }
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_fit1",
+    "aggregate_sha256": "5eaac84e24c4f8d050497123cdce459c5b52775be00a7f7780d9f0766d57e26a",
+    "fits_sha256": "30dd43c2f2f7f55d86b9da9acfe8dbd1706087244d94cb9fd53e1b309f6e4170",
+    "metadata_sha256": "60176b1b5ab00f3c6c01df90e28ac7de80e75e95c74a7c6337fbb2716f5037e9",
+    "metrics_sha256": "9625d18836b6643afb0a0dfba3b54f7f964b60678b5e17851d0a38e24388eced",
+    "optimizer_sha256": "5be4b695d180f15569537c6b4374afb122ba84723f1fa26ac73d8d5f1c5f39b6"
+  },
+  "interpretation": [
+    "The registered function-topology plus function-fit primary fails: held-out MLP-output recovery is only 0.789x the qualified weight-shear control and weight recovery becomes strongly negative.",
+    "Function-space pair ranking is not a stable sparse topology criterion. Independent pair fits interfere across stages; some layers lose functional recovery even on the fit window despite numerically well-conditioned finite maps.",
+    "The 2x2 attribution isolates one non-primary positive direction: keeping weight-selected topology while fitting only its coordinates in function space raises MLP-output recovery from 0.511 to 0.700 on fit and from 0.506 to 0.656 on holdout, while predicted CE descent improves on both windows.",
+    "That positive ablation cannot be promoted post hoc because it destroys weight recovery and almost all post-GELU hidden recovery. It motivates only a newly preregistered coordinate trust-radius diagnostic on the unchanged weight topology, not held-out CE or training."
+  ],
+  "authorization": {
+    "functional_topology_rejected": true,
+    "heldout_ce_diagnostic_authorized": false,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister a zero-update trust-radius screen that scales only function-fitted shear coordinates on the fixed task-selected topology and evaluates exact nonlinear post-GELU/MLP-output behavior on fit and independent train holdout windows."
+  }
+}
