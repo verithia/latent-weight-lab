@@ -1,0 +1,114 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "decision_rule": {
+    "capacity_gate": "candidate must beat diagonal_output88 on every held-out window and recover at least 50% of its dense CE gap in the worst window and 65% at the median",
+    "maximum_replicate_range": 2e-07,
+    "median_recovery": 0.65,
+    "minimum_recovery": 0.5,
+    "positive_control": "dense_exact must beat diagonal_output88 on every held-out window",
+    "selection": "among qualifying bilateral candidates, maximize minimum recovery then median recovery; otherwise attribute sufficiency to joint output-only solver if it alone passes",
+    "threshold_change_after_observation": false,
+    "topology_gate": "a bilateral candidate is selected only if it also beats joint_output88 on every held-out window"
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_joint_tangent",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_joint_tangent_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_joint_tangent1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "block_size": 1024,
+    "candidates": {
+      "diagonal_output88": "registered one-sweep control",
+      "joint_output72_input64": "72 output plus 64 input stages solved jointly",
+      "joint_output80_input32": "80 output plus 32 input stages solved jointly",
+      "joint_output88": "88 output stages solved jointly"
+    },
+    "cg_damping": 0.0001,
+    "cg_iterations": 8,
+    "connectivity": "select a shared output parent64 and output residual24 exactly as the diagonal output88 control; select one input residual64 after that control; joint candidates use fixed prefixes",
+    "coordinate_formula": "every non-dense candidate has 135168 continuous coordinates per layer",
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "finite_update": "apply the solved linear tangent and then decoupled weight decay once; angles are approximately 1e-5 so finite-rotation disagreement is second order",
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "solver": "eight iterations of diagonal-preconditioned conjugate gradients on (J^T J + 1e-4 diag(J^T J)) x = J^T target, using exact dense-GEMM matrix-free JVP/VJP",
+    "validation_batches_per_window": 8,
+    "validation_seeds": [
+      20260901,
+      20260902,
+      20260903,
+      20260904
+    ]
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_joint_tangent.py",
+    "entrypoint_sha256": "9b81845bd299067429dbdfd43b7560af163238b979423d4b54b05c77175b5bf9",
+    "parent_structured_result_sha256": "28c1efea5b9a903b15a8a9ba4a6e3651e924fa0d861de097f261509cb7b6dc96",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a zero-update local tangent-capacity diagnostic, not language-model training.",
+    "The linear tangent is the first-order form of Q_out W Q_in; finite-rotation error is measured only indirectly through the small solved coordinate scale.",
+    "Passing proves fixed sparse connectivity capacity but does not prove an eight-CG-step production optimizer will meet the MFU gate.",
+    "No learned basis, LoRA, dense residual adapter, channel gain, or radial singular-value parameter is introduced."
+  ],
+  "question": "Does joint solution of fixed sparse output/input tangent coordinates recover the bilateral value that one diagonal Gauss-Seidel sweep missed?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_joint_tangent_pro6_plan_v1",
+  "status": "registered_before_zero_update_diagnostic"
+}
