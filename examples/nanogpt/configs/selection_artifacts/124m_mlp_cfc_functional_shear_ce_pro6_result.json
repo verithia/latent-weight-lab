@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_ce_pro6_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "REJECT_FUNCTIONAL_COORDINATE_MIX_HELDOUT_CE",
+  "selected_beta": 0.125,
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_ce_pro6_plan.json",
+    "sha256": "20ee0cccc230eb2fc5782467d661b5ddd9cb0924b2eb1f1e07923a1c1cf1d823"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "623ecadf6ff71bc67fc3f02431e70946536f43ba",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce.py",
+    "entrypoint_sha256": "91ca216f4333773450431adc2592a495f6f154fad1b1c6dc5261b8c79f0d6989",
+    "wall_seconds": 20.305519819259644,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_pareto_result_sha256": "f453925b196649e81662e2311bee6c11de22831ebb54e8702f9cdb4f1da4f925"
+  },
+  "finite_ce": {
+    "beats_weight_shear_every_window": true,
+    "beats_fresh88_every_window": true,
+    "dense_beats_weight_shear_every_window": true,
+    "numerically_stable": true,
+    "recovery_over_weight_shear_by_window": {
+      "validation_1": 0.029980657640232108,
+      "validation_2": 0.01615508885298869,
+      "validation_3": 0.07446808510638298,
+      "validation_4": 0.055762081784386616
+    },
+    "minimum_recovery": 0.01615508885298869,
+    "median_recovery": 0.042871369712309364,
+    "required_minimum": 0.05,
+    "required_median": 0.1
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_ce1",
+    "aggregate_sha256": "0ea5f82ea337bf13629a4d6f5331591d8158ab4f0ec37a98a10956c868388c4b",
+    "fits_sha256": "cc1ba9906d5da9ebb47c916cc5bcc8a742f43627eccce9f2b977ecca4bcbe02f",
+    "losses_sha256": "727e605053b6371552f4c9ec25363ab13213922ec1dad925897f56a1c831a162",
+    "metadata_sha256": "f8220128c0e85a3a332e88e317fe3d009c905af7060ba4ea7d5b8a1f1a328a13"
+  },
+  "interpretation": [
+    "Beta 0.125 has real finite-task value: it beats the qualified weight-shear chart and fresh88 on every untouched validation window with exact float32 replicate stability.",
+    "The effect is too small for promotion. It recovers only 1.62-7.45% of the remaining dense-over-weight-shear CE gap, with 4.29% median versus the preregistered 10% threshold.",
+    "The direction conflict is therefore partially resolved, but the weight-recovery gate selected a conservative beta. A finite-CE-selected beta may legitimately differ because weight Frobenius recovery is only a proxy for task value.",
+    "Do not weaken the observed gate or promote beta 0.125. The next admissible discriminator is a preregistered finite-CE beta selection on one new validation window followed by evaluation on separate untouched windows."
+  ],
+  "authorization": {
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "finite_ce_beta_selection_diagnostic_authorized": true,
+    "next_action": "Preregister beta selection from a fixed coordinate-mix grid on one new validation window, freeze the winner, and require the unchanged 5% worst/10% median dense-gap gate on four further untouched validation windows."
+  }
+}
