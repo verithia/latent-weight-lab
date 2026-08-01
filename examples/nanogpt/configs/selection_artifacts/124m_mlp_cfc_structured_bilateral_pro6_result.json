@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_structured_bilateral_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "REJECT_STRUCTURED_BILATERAL_STAGE_ALLOCATIONS",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_structured_bilateral_pro6_plan.json",
+    "sha256": "549c27e0988c86c0cbef8be27cba723eb078a1f6930a10f1b2e03b639febda2e"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "4d04146c27e607be94d234e73deeb92a06ca5299",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_structured_bilateral.py",
+    "entrypoint_sha256": "cf507a4aa9b41d194782e8c8534603b350039c924960b3add99c0cc4d93bf0d0",
+    "wall_seconds": 1404.416517,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "registered_gates": {
+    "numerically_stable": true,
+    "dense_beats_output88_every_window": true,
+    "equal_coordinate_budget": true,
+    "selected_candidate": null
+  },
+  "equal_coordinates_per_layer": 135168,
+  "candidate_results": {
+    "output80_input32": {
+      "minimum_ce_gap_recovery": -0.005576208178438661,
+      "median_ce_gap_recovery": 0.001396414729859432,
+      "mean_dense_update_energy_recovery": 0.2794308128129113,
+      "beats_output88_every_window": false
+    },
+    "output72_input64": {
+      "minimum_ce_gap_recovery": -0.027881040892193308,
+      "median_ce_gap_recovery": -0.013054740051149406,
+      "mean_dense_update_energy_recovery": 0.2675581826635189,
+      "beats_output88_every_window": false
+    },
+    "output64_input96": {
+      "minimum_ce_gap_recovery": -0.06691449814126393,
+      "median_ce_gap_recovery": -0.04934893038563354,
+      "mean_dense_update_energy_recovery": 0.2485077755566972,
+      "beats_output88_every_window": false
+    },
+    "output56_input128": {
+      "minimum_ce_gap_recovery": -0.08192090395480225,
+      "median_ce_gap_recovery": -0.07799031494385492,
+      "mean_dense_update_energy_recovery": 0.24520302455642184,
+      "beats_output88_every_window": false
+    },
+    "output88_input0_control": {
+      "mean_dense_update_energy_recovery": 0.2804369980396353
+    }
+  },
+  "solver_diagnostics": {
+    "input_pass_mean_requested_residual_recovery_range": [
+      0.0257528821627299,
+      0.04147994518280029
+    ],
+    "input_angle_rms_range": [
+      8.750366229529996e-06,
+      1.0467280390002998e-05
+    ],
+    "observation": "Input-side sparse coordinates have nonzero local residual capacity, but the value gained is smaller than the value lost by removing equal-coordinate output stages. A single diagonal output-then-input Gauss-Seidel sweep does not realize the exact bilateral-orbit interaction."
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_structured_bilateral1",
+    "aggregate_sha256": "952de45aed8507710d4cbc7323e168bf8ede9e9101530ac0b7f331d58dab3a27",
+    "losses_sha256": "0a421a6eede2cafe4914a02c785b3600991fce63a4b55942f021961d61a8aafc",
+    "metadata_sha256": "613f03e4b29f5a7cd21adb2d4ddee5360989cd10b910577242325ecc55a46269",
+    "metrics_sha256": "4d223ce135a792ad7987e9602055f1d277c20192f84acd3f589d81420a568572",
+    "selections_sha256": "b09b0e2e9afd56a0d93eaa0efc1645de2519d85de3dfe7f95d78da12b2ac6260"
+  },
+  "interpretation": [
+    "The failure is not evidence against the exact bilateral orbit: that upper bound used the coupled least-squares tangent, whereas this screen used one diagonal output-then-input sweep.",
+    "The monotonic degradation as output coordinates are replaced by input coordinates shows that sparse input coordinates are complementary but not independently valuable enough under the current solver.",
+    "The next diagnostic must hold the coordinate budget fixed and solve the selected output/input tangent coordinates jointly. This separates connectivity capacity from diagonal-solver error before any training implementation.",
+    "The stage-by-stage diagnostic took 23.4 minutes despite cheap connectivity selection. Production application must be fused or otherwise cached and must still pass measured host-local MFU >=20%."
+  ],
+  "authorization": {
+    "joint_tangent_solver_diagnostic_authorized": true,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister a zero-update matrix-free joint tangent solve on fixed equal-coordinate output/input connectivity, with output-only joint-solver and dense-exact controls."
+  }
+}
