@@ -1,0 +1,88 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_ce_pro6_plan_v1",
+  "recorded_at": "2026-08-02",
+  "question": "Does the selected beta=0.125 coordinate mix deliver additional finite held-out CE value beyond the qualified weight-shear chart?",
+  "authorization": {
+    "parameter_updates": 0,
+    "single_directly_polled_ce_diagnostic": true,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "scientific_training": false,
+    "larger_rung": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce.py",
+    "entrypoint_sha256": "91ca216f4333773450431adc2592a495f6f154fad1b1c6dc5261b8c79f0d6989",
+    "implementation_commit": "7789f0ff99a5b5537c52bfebba8d37f39c34d037",
+    "parent_pareto_result_sha256": "f453925b196649e81662e2311bee6c11de22831ebb54e8702f9cdb4f1da4f925"
+  },
+  "fixed_protocol": {
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "batch_size": 4,
+    "block_size": 1024,
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "functional_sample_cap": 2048,
+    "functional_sample_seed": 20261250,
+    "matching_seed": 20260820,
+    "matching_neighbors": 64,
+    "selected_beta": 0.125,
+    "selected_candidate": "functional_mix_0p125000",
+    "control": "fresh64_weight_shear24",
+    "secondary_control": "fresh88",
+    "dense_reference": "dense_exact",
+    "equal_coordinates_per_layer": 135168,
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "validation_batches_per_window": 8,
+    "validation_seeds": [20261105, 20261106, 20261107, 20261108]
+  },
+  "decision_rule": {
+    "maximum_replicate_range": 0.0000002,
+    "minimum_recovery": 0.05,
+    "median_recovery": 0.1,
+    "selection": "The beta=0.125 mix must beat weight-shear24 and fresh88 on every untouched validation window and recover at least 5% of the dense-over-weight-shear CE gap in the worst window and 10% at the median. Dense exact must beat weight-shear24 on every window. No threshold changes after observation.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "foreground_direct_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_functional_shear_ce",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_ce_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_ce1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ]
+  },
+  "limitations": [
+    "This is a zero-update held-out finite-CE diagnostic, not language-model training.",
+    "The topology and endpoint coordinates are fitted on the fixed train window; beta was frozen by the preceding train-window Pareto gate. The four validation windows are new and scoring-only.",
+    "Passing establishes local held-out task value and authorizes only production implementation plus a separately measured >=20% host-local MFU preflight.",
+    "No learned basis, LoRA, dense residual adapter, HyperConnection, optimizer update, or model update is introduced."
+  ]
+}
