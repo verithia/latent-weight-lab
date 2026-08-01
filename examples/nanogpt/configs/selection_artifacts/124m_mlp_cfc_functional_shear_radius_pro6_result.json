@@ -1,0 +1,125 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_radius_pro6_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "REJECT_FUNCTIONAL_COORDINATE_TRUST_RADIUS",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_radius_pro6_plan.json",
+    "sha256": "49a6caaa9d7a682b0abc01f7a72257051ac49ebf1abdd0af2d296c35dd3ffc34"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "8a7886dbf8efa95749fcf924f9d31a15d48daaba",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_radius.py",
+    "entrypoint_sha256": "99d9af6753ae224bc634ad1da84f9963c1af43cac341092ea09357e951d09113",
+    "wall_seconds": 14.42765998840332,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_functional_shear_result_sha256": "8f1646b77b55caac13a48b5c454d9cc5ade7044633ed5d29021197dc37391457"
+  },
+  "control": {
+    "fit_mlp_output_recovery": 0.5111329584345028,
+    "holdout_mlp_output_recovery": 0.5045806214981332,
+    "fit_post_gelu_recovery": 0.35537146903414074,
+    "holdout_post_gelu_recovery": 0.34600912853584004,
+    "fit_predicted_ce_decrease": 0.0033651867509012826,
+    "holdout_predicted_ce_decrease": 0.0000596154412530571,
+    "weight_recovery": 0.29751857769946816
+  },
+  "radius_results": {
+    "0.0625": {
+      "fit_mlp_output_ratio": 0.8717111640994808,
+      "holdout_mlp_output_ratio": 0.8698642135566105,
+      "fit_post_gelu_ratio": 0.8329379462279841,
+      "holdout_post_gelu_ratio": 0.8274565138487674,
+      "fit_ce_descent_ratio": 0.7953144422183835,
+      "holdout_ce_descent_ratio": 0.8007122325630656,
+      "weight_recovery_ratio": 0.7229773310207946
+    },
+    "0.125": {
+      "fit_mlp_output_ratio": 0.9591689208799948,
+      "holdout_mlp_output_ratio": 0.9550990845796566,
+      "fit_post_gelu_ratio": 0.9355769528650157,
+      "holdout_post_gelu_ratio": 0.9268450200704832,
+      "fit_ce_descent_ratio": 0.8341924705951055,
+      "holdout_ce_descent_ratio": 0.8375916520812566,
+      "weight_recovery_ratio": 0.7364137610224858
+    },
+    "0.25": {
+      "fit_mlp_output_ratio": 1.110931497928903,
+      "holdout_mlp_output_ratio": 1.1014189592561707,
+      "fit_post_gelu_ratio": 1.0793946413800082,
+      "holdout_post_gelu_ratio": 1.060351122395859,
+      "fit_ce_descent_ratio": 0.911949409661883,
+      "holdout_ce_descent_ratio": 0.9113719171464869,
+      "weight_recovery_ratio": 0.6770828005452746
+    },
+    "0.375": {
+      "fit_mlp_output_ratio": 1.2318272866204243,
+      "holdout_mlp_output_ratio": 1.2155423849370497,
+      "fit_post_gelu_ratio": 1.1412685571825998,
+      "holdout_post_gelu_ratio": 1.1068331572043735,
+      "fit_ce_descent_ratio": 0.9897056497897241,
+      "holdout_ce_descent_ratio": 0.9852069978448089,
+      "weight_recovery_ratio": 0.5028148797932502
+    },
+    "0.5": {
+      "fit_mlp_output_ratio": 1.321857225356866,
+      "holdout_mlp_output_ratio": 1.297469814652996,
+      "fit_post_gelu_ratio": 1.1211988120541532,
+      "holdout_post_gelu_ratio": 1.0662909663319953,
+      "fit_ce_descent_ratio": 1.0674622607300706,
+      "holdout_ce_descent_ratio": 1.0590199444905746,
+      "weight_recovery_ratio": 0.2136076782210696
+    },
+    "0.75": {
+      "fit_mlp_output_ratio": 1.4093193266500461,
+      "holdout_mlp_output_ratio": 1.3647372290506268,
+      "fit_post_gelu_ratio": 0.8352307952525202,
+      "holdout_post_gelu_ratio": 0.7241378287597557,
+      "fit_ce_descent_ratio": 1.2229741039619215,
+      "holdout_ce_descent_ratio": 1.206598832801368,
+      "weight_recovery_ratio": -0.7096191875249092
+    },
+    "1.0": {
+      "fit_mlp_output_ratio": 1.3733216305105702,
+      "holdout_mlp_output_ratio": 1.303226949340377,
+      "fit_post_gelu_ratio": 0.22150067188909292,
+      "holdout_post_gelu_ratio": 0.03390554668291877,
+      "fit_ce_descent_ratio": 1.3784869272952804,
+      "holdout_ce_descent_ratio": 1.3542395849202964,
+      "weight_recovery_ratio": -2.0925915521343756
+    }
+  },
+  "passing_scales": [],
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_radius1",
+    "aggregate_sha256": "7cf1010a2ac12670c4443aaaf20886f77d46378e58935b7125d7f2b5b65a6817",
+    "fits_sha256": "6ffee1c5ff07c0a442f005661eaa07516a4a650593deb9e3bfe17c78fe22dd34",
+    "metadata_sha256": "e9b7b6ce3e8da7856ddc17a581fda55b78d8bbafb68e1365cde5dff5280693c6",
+    "metrics_sha256": "a2730cdce0c4b70c4bd82f0ce89287f12069d10dc0beeb203bf4f0d2b3e0eabb",
+    "optimizer_sha256": "fd2330cc32a9d394efedd14163079a428d71adb393de78c5356cd7357284ac2b"
+  },
+  "interpretation": [
+    "Pure function-fitted coordinates are not repaired by shrinking them toward the rotational parent. The smallest radius already retains only 0.723x the weight recovery of task/weight shear.",
+    "Radius 0.25 is the first point to meet the 1.10x MLP-output gate on both windows and it improves post-GELU recovery, but CE descent is only about 0.91x and weight recovery 0.677x.",
+    "Radius 0.50 improves MLP-output, post-GELU, and CE descent on both windows, but weight recovery collapses to 0.214x. The functional and weight objectives therefore form a genuine Pareto tradeoff, not a scalar overshoot artifact.",
+    "The next admissible test is not another radius around zero. It is a preregistered stagewise interpolation between weight-fitted and function-fitted coordinates on the same fixed topology, so beta=0 exactly recovers the qualified control and beta=1 the rejected functional endpoint."
+  ],
+  "authorization": {
+    "finite_ce_diagnostic_authorized": false,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister a zero-update Pareto interpolation of weight-fit and function-fit shear coordinates on the unchanged task-selected topology, using a new scoring-only train holdout."
+  }
+}
