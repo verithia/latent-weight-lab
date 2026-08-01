@@ -1,0 +1,106 @@
+{
+  "authorization": {
+    "finite_ce": false,
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_functional_diagnostic": true
+  },
+  "decision_rule": {
+    "maximum_condition_number": 1.01,
+    "maximum_determinant_error": 2e-06,
+    "minimum_ce_descent_ratio": 1.0,
+    "minimum_functional_ratio": 1.1,
+    "minimum_weight_ratio": 0.9,
+    "selection": "Functional topology plus functional coordinate fitting must beat both weight-shear24 and fresh88 MLP-output recovery by at least 1.10x on fit and independent holdout train windows, not reduce predicted CE descent relative to weight-shear24 on either window, and retain at least 0.90x of weight recovery.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_functional_shear_fit",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_fit_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_fit1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "attribution_grid": [
+      "weight topology + weight fit",
+      "functional topology + weight fit",
+      "weight topology + functional fit",
+      "functional topology + functional fit"
+    ],
+    "batch_size": 4,
+    "batches_per_window": 4,
+    "block_size": 1024,
+    "equal_coordinates_per_layer": 135168,
+    "evaluation_dtype": "float32",
+    "finite_map": "exact determinant-one exp(s*[[0,1],[1,0]]) per selected pair",
+    "fit_train_seed": 20260820,
+    "functional_metric": "exact first-order MLP-output displacement under observed input activations, exact GELU slopes, and fixed c_proj; fit and holdout use disjoint train-token windows",
+    "functional_sample_cap": 2048,
+    "functional_sample_seed": 20261220,
+    "holdout_train_seed": 20261202,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "parent_rotational_stages": 64,
+    "residual_shear_stages": 24
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_fit.py",
+    "entrypoint_sha256": "463d8ed7f18a64125a1e9c20b0293602a6d5b3eb5205d9e5804c5a8435aab281",
+    "parent_task_shear_ce_result_sha256": "36c12d7911e485397b7c1a624bd60cfb34b22c64c9fe26f1df2a66fdf0227593"
+  },
+  "limitations": [
+    "This is a zero-update linearized function-space fit/holdout diagnostic, not finite CE or language-model training.",
+    "The functional metric uses observed train activations only; no validation CE window from the preceding gate is reused for selection or fitting.",
+    "The earlier c_proj activation-weighted inverse-metric and activation-correlation rejections remain valid. This test differs by fitting the newly identified c_fc symmetric-shear residual directly in MLP-output space rather than reweighting an existing c_proj chart or using raw activation correlation.",
+    "Passing authorizes only a separately preregistered held-out finite-CE diagnostic, not production integration, MFU testing, training, or a larger rung."
+  ],
+  "question": "Can the same equal-coordinate shear24 residual become materially more task-effective when pair topology and coordinates are fitted in the observed post-GELU/c_proj function metric rather than weight Frobenius geometry?",
+  "recorded_at": "2026-08-02",
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_fit_pro6_plan_v1"
+}
