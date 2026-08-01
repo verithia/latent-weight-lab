@@ -1,0 +1,114 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "decision_rule": {
+    "general_selection": "otherwise both independent general bases must pass the CE gate and beat the orthogonal arm on every window",
+    "maximum_replicate_range": 2e-07,
+    "median_recovery": 0.65,
+    "minimum_recovery": 0.5,
+    "orthogonal_selection": "select the simpler dense orthogonal family if it passes the CE gate",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_conjugated_general",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_conjugated_general_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_conjugated_general1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "basis_block_size": 256,
+    "batch_size": 4,
+    "block_size": 1024,
+    "control_parent_stages": 64,
+    "control_residual_stages": 24,
+    "coordinate_identity": "orthogonal: 88*1536*1=135168; each general arm: 22*1536*4=135168",
+    "equal_coordinates_per_layer": 135168,
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "fit": "causal block-coordinate least squares in fixed random permutation/sign/FHT bases; orthogonal uses one skew coordinate per pair, general uses all four 2x2 coordinates; decoupled weight decay is applied once after the fitted transform",
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "general_damping": 1e-06,
+    "general_seeds": [
+      20261011,
+      20261012
+    ],
+    "general_stages": 22,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "orthogonal_seed": 20261001,
+    "orthogonal_stages": 88,
+    "validation_batches_per_window": 8,
+    "validation_seeds": [
+      20260901,
+      20260902,
+      20260903,
+      20260904
+    ]
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_conjugated_general.py",
+    "entrypoint_sha256": "dd650bdc0ed27d74a38fdb19feaad6aecb65e25901ba979ec100fb6188898609",
+    "parent_output_general_result_sha256": "7e17f9a35c5068fe1c724d68094b9a4e72c9ffebcd30bae5bd689f5216da24e1",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a zero-update local capacity screen, not language-model training.",
+    "The coordinates are oracle-fitted to one exact-current Muon update. Passing proves fixed-basis span and held-out finite-CE value, not that task-gradient training will find the same coordinates.",
+    "Causal block-coordinate fitting is a lower bound on the fixed basis span; no post-observation solver tuning is allowed.",
+    "A selected arm still requires production integration and >=20% host-local measured MFU before the smallest training rung.",
+    "No learned basis, LoRA, dense residual adapter, HyperConnection, optimizer update, or model update is introduced."
+  ],
+  "question": "At the exact fresh88 coordinate budget, can fixed global FHT-conjugated 2x2 output blocks recover the missing c_fc direction, and is general shear required beyond dense orthogonal connectivity?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_conjugated_general_pro6_plan_v1"
+}
