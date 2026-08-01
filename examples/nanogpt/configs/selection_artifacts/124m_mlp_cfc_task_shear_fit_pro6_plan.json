@@ -1,0 +1,100 @@
+{
+  "authorization": {
+    "heldout_ce": false,
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_fit_diagnostic": true
+  },
+  "decision_rule": {
+    "maximum_condition_number": 1.01,
+    "maximum_determinant_error": 2e-06,
+    "minimum_aggregate_ratio": 1.05,
+    "minimum_layer_delta": 0.0,
+    "selection": "A candidate advances to a separately preregistered held-out CE gate only if it is no worse than fresh88 in every layer and improves aggregate exact-current dense-update recovery by at least 5%. Choose by the best minimum layer delta, then aggregate recovery.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_task_shear_fit",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_task_shear_fit_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_task_shear_fit1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "block_size": 1024,
+    "candidate_fresh48_skew_shear20": "48*1536 skew coordinates + 20*1536*2 skew-plus-shear coordinates = 135168",
+    "candidate_fresh64_shear24": "64*1536 skew coordinates + 24*1536 symmetric-shear coordinates = 135168",
+    "candidate_fresh64_skew_shear12": "64*1536 skew coordinates + 12*1536*2 skew-plus-shear coordinates = 135168",
+    "control": "fresh64 rotational stages + fresh residual24 rotational stages",
+    "equal_coordinates_per_layer": 135168,
+    "evaluation_dtype": "float32",
+    "fit": "causal local least squares with fresh task-matched pair selection at each parent/residual chart; decoupled weight decay applied exactly once after the fitted map",
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "pair_map": "exact exp(s*[[0,1],[1,0]] + a*[[0,-1],[1,0]]) with determinant one"
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_task_shear_fit.py",
+    "entrypoint_sha256": "8537295ee3859135506f9158cb60ffc7601a0216a2cb3ed5c74e0d4c4c5f048a",
+    "parent_conjugated_result_sha256": "778ad405e35f130e3233632ee1988ba431e05dd0a90786bc4bac049f61eea66a",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a zero-update fit-only local capacity screen, not language-model training.",
+    "The coordinates are oracle-fitted to one exact-current Muon update; no held-out CE is measured in this gate.",
+    "The earlier c_proj SL2 rejection remains valid. This c_fc test is justified only because the new one-sided c_fc attribution shows a different 99% skew-plus-shear residual mechanism and negligible radial value.",
+    "Passing authorizes only a separately preregistered held-out CE diagnostic, not production integration, MFU testing, training, or a larger rung.",
+    "No learned basis, LoRA, dense residual adapter, HyperConnection, optimizer update, or model update is introduced."
+  ],
+  "question": "At the exact fresh88 coordinate budget, can task-selected c_fc output pairs use symmetric shear more efficiently than additional rotation stages?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_task_shear_fit_pro6_plan_v1"
+}
