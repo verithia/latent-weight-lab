@@ -5,6 +5,7 @@ from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import (
     apply_pair_stage,
     fit_pair_coordinates,
     fit_pair_flow,
+    fit_pair_recipe,
 )
 
 
@@ -52,6 +53,17 @@ def test_pair_flow_reports_exact_coordinate_count() -> None:
     )
     assert diagnostics["coordinates"] == 16
     assert diagnostics["requested_update_recovery"] > 0.0
+
+    recipe_update, recipe_diagnostics, recipe = fit_pair_recipe(
+        source,
+        requested,
+        permutations,
+        stages=2,
+        family="skew_shear",
+    )
+    torch.testing.assert_close(recipe_update, _update)
+    assert recipe_diagnostics == diagnostics
+    assert len(recipe) == 2
 
 
 def test_aggregate_requires_all_layer_nonnegative_delta() -> None:

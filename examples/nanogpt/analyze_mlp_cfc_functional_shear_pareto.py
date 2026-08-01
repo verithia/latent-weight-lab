@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Screen trust radii for function-fitted c_fc shear coordinates.
+"""Interpolate weight-fit and function-fit c_fc shear coordinates.
 
-The sparse pair topology is fixed by the task/weight residual.  Functional
-coordinates are fitted once on a registered train window, then only those
-coordinates are scaled and replayed through the exact determinant-one maps.
-Exact nonlinear post-GELU and MLP-output effects are scored on fit and a new
-independent train holdout.  This is a zero-update diagnostic, not CE training.
+Both endpoint recipes use the same task/weight-selected pair topology after
+the qualified fresh64 rotational parent.  The exact stage coordinates are
+interpolated before replaying determinant-one maps.  Exact nonlinear GELU and
+MLP-output effects are scored on fit and a new independent train holdout.
+This is a zero-update Pareto diagnostic, not finite CE or training.
 """
 
 from __future__ import annotations
@@ -41,24 +41,29 @@ from examples.nanogpt.analyze_mlp_cfc_functional_shear_fit import (
     _fit_rotational_parent,
     fit_functional_shear_recipe,
     pair_matched_permutations,
-    replay_functional_shear_recipe,
     sample_aligned,
-    safe_ratio,
-    weighted,
+)
+from examples.nanogpt.analyze_mlp_cfc_functional_shear_radius import (
+    aggregate_radius,
+    scale_name,
 )
 from examples.nanogpt.analyze_mlp_cfc_residual_structure import (
     validate_identity,
     write_csv,
 )
-from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import fit_pair_flow
+from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import (
+    apply_pair_stage,
+    fit_pair_recipe,
+)
 from examples.nanogpt.analyze_mlp_muon_matched_givens import (
     diagonal_metric_causal_givens_update,
 )
 from examples.nanogpt.fast_task_matching import fast_muon_matched_permutations
 
 
-SCHEMA_VERSION = "nanogpt_mlp_cfc_functional_shear_radius_v1"
+SCHEMA_VERSION = "nanogpt_mlp_cfc_functional_shear_pareto_v1"
 WINDOWS = ("fit", "holdout")
+PREFIX = "functional_mix"
 
 
 def git_commit(repo: Path) -> str:
@@ -67,12 +72,57 @@ def git_commit(repo: Path) -> str:
     ).strip()
 
 
-def scale_name(scale: float, *, prefix: str = "functional_radius") -> str:
-    return f"{prefix}_{scale:.6f}".replace(".", "p")
+@torch.no_grad()
+def replay_blended_recipes(
+    source: torch.Tensor,
+    weight_recipe: list[tuple[torch.Tensor, torch.Tensor]],
+    functional_recipe: list[tuple[torch.Tensor, torch.Tensor]],
+    *,
+    beta: float,
+) -> tuple[torch.Tensor, dict[str, float]]:
+    """Replay stage coordinates `(1-beta)*weight + beta*functional`."""
+    if not 0.0 <= float(beta) <= 1.0:
+        raise ValueError("beta must be in [0, 1]")
+    if len(weight_recipe) != len(functional_recipe):
+        raise ValueError("recipe lengths differ")
+    current = source.float().clone()
+    minimum_determinant = float("inf")
+    maximum_determinant_error = 0.0
+    maximum_condition_number = 0.0
+    for (weight_pairs, weight_coordinates), (
+        functional_pairs,
+        functional_coordinates,
+    ) in zip(weight_recipe, functional_recipe, strict=True):
+        if not torch.equal(weight_pairs.cpu(), functional_pairs.cpu()):
+            raise ValueError("recipe pair topology differs")
+        coordinates = (
+            (1.0 - float(beta)) * weight_coordinates
+            + float(beta) * functional_coordinates
+        )
+        current, finite = apply_pair_stage(
+            current,
+            weight_pairs.to(device=source.device),
+            coordinates.to(device=source.device),
+        )
+        minimum_determinant = min(
+            minimum_determinant, finite["minimum_determinant"]
+        )
+        maximum_determinant_error = max(
+            maximum_determinant_error, finite["maximum_determinant_error"]
+        )
+        maximum_condition_number = max(
+            maximum_condition_number, finite["maximum_condition_number"]
+        )
+    return current - source.float(), {
+        "beta": float(beta),
+        "minimum_determinant": minimum_determinant,
+        "maximum_determinant_error": maximum_determinant_error,
+        "maximum_condition_number": maximum_condition_number,
+    }
 
 
 @torch.no_grad()
-def build_radius_candidates(
+def build_pareto_candidates(
     weight: torch.Tensor,
     dense_update: torch.Tensor,
     polar_descent_per_lr: torch.Tensor,
@@ -80,7 +130,7 @@ def build_radius_candidates(
     pre_gelu: torch.Tensor,
     cproj_weight: torch.Tensor,
     *,
-    scales: list[float],
+    betas: list[float],
     neighbors: int,
     seed: int,
     learning_rate: float,
@@ -124,35 +174,40 @@ def build_radius_candidates(
         family="shear",
         native_cache=native_cache,
     )
-    weight_residual, weight_fit = fit_pair_flow(
+    weight_residual, weight_fit, weight_recipe = fit_pair_recipe(
         after_parent,
         residual,
         weight_permutations,
         stages=24,
         family="shear",
     )
-    _full, functional_fit, recipe = fit_functional_shear_recipe(
-        after_parent,
-        residual,
-        inputs,
-        pre_gelu,
-        cproj_weight,
-        weight_permutations,
-        stages=24,
+    _functional_residual, functional_fit, functional_recipe = (
+        fit_functional_shear_recipe(
+            after_parent,
+            residual,
+            inputs,
+            pre_gelu,
+            cproj_weight,
+            weight_permutations,
+            stages=24,
+        )
     )
     rotations = {
         CONTROL: parent + control_residual,
         WEIGHT_SHEAR: parent + weight_residual,
     }
-    replay_diagnostics: list[dict[str, Any]] = []
-    for scale in scales:
-        fitted, finite = replay_functional_shear_recipe(
-            after_parent, recipe, coordinate_scale=scale
+    blend_diagnostics: list[dict[str, Any]] = []
+    for beta in betas:
+        blended, finite = replay_blended_recipes(
+            after_parent,
+            weight_recipe,
+            functional_recipe,
+            beta=beta,
         )
-        name = scale_name(scale)
-        rotations[name] = parent + fitted
-        replay_diagnostics.append(
-            {"candidate": name, "scale": scale, "finite": finite}
+        name = scale_name(beta, prefix=PREFIX)
+        rotations[name] = parent + blended
+        blend_diagnostics.append(
+            {"candidate": name, "beta": beta, "finite": finite}
         )
     candidates = {
         name: _weight_decay_after_rotation(
@@ -166,149 +221,20 @@ def build_radius_candidates(
     }
     diagnostics = [
         {"candidate": "fresh64_parent", **parent_diagnostics},
-        {
-            "candidate": CONTROL,
-            "selection": control_selection,
-            "fit": control_fit,
-        },
+        {"candidate": CONTROL, "selection": control_selection, "fit": control_fit},
         {
             "candidate": WEIGHT_SHEAR,
             "selection": weight_selection,
             "fit": weight_fit,
         },
         {
-            "candidate": "functional_coordinate_fit",
+            "candidate": "functional_coordinate_endpoint",
             "selection": weight_selection,
             "fit": functional_fit,
         },
-        *replay_diagnostics,
+        *blend_diagnostics,
     ]
     return candidates, diagnostics
-
-
-def aggregate_radius(
-    metric_rows: list[dict[str, Any]],
-    fit_rows: list[dict[str, Any]],
-    *,
-    scales: list[float],
-    minimum_mlp_output_ratio: float,
-    minimum_post_gelu_ratio: float,
-    minimum_ce_descent_ratio: float,
-    minimum_weight_ratio: float,
-    maximum_determinant_error: float,
-    maximum_condition_number: float,
-    candidate_prefix: str = "functional_radius",
-) -> dict[str, Any]:
-    names = (
-        CONTROL,
-        WEIGHT_SHEAR,
-        *(scale_name(scale, prefix=candidate_prefix) for scale in scales),
-    )
-    metrics: dict[str, dict[str, dict[str, float]]] = {}
-    for name in names:
-        metrics[name] = {}
-        for window in WINDOWS:
-            rows = [
-                row
-                for row in metric_rows
-                if row["candidate"] == name and row["window"] == window
-            ]
-            metrics[name][window] = {
-                "weight_fixed_scale_recovery": weighted(
-                    rows, "weight_fixed_scale_recovery", "weight_target_energy"
-                ),
-                "post_gelu_fixed_scale_recovery": weighted(
-                    rows, "post_gelu_fixed_scale_recovery", "post_gelu_target_energy"
-                ),
-                "mlp_output_fixed_scale_recovery": weighted(
-                    rows, "mlp_output_fixed_scale_recovery", "mlp_output_target_energy"
-                ),
-                "predicted_ce_decrease": sum(
-                    float(row["predicted_ce_decrease"]) for row in rows
-                ),
-            }
-    control = metrics[WEIGHT_SHEAR]
-    ratios: dict[str, dict[str, dict[str, float]]] = {}
-    passing: list[float] = []
-    stable_by_name: dict[str, bool] = {}
-    for scale in scales:
-        name = scale_name(scale, prefix=candidate_prefix)
-        finite_rows = [row["finite"] for row in fit_rows if row["candidate"] == name]
-        stable = bool(
-            finite_rows
-            and max(float(row["maximum_determinant_error"]) for row in finite_rows)
-            <= maximum_determinant_error
-            and max(float(row["maximum_condition_number"]) for row in finite_rows)
-            <= maximum_condition_number
-        )
-        stable_by_name[name] = stable
-        ratios[name] = {}
-        for window in WINDOWS:
-            ratios[name][window] = {
-                "mlp_output_vs_weight_shear": safe_ratio(
-                    metrics[name][window]["mlp_output_fixed_scale_recovery"],
-                    control[window]["mlp_output_fixed_scale_recovery"],
-                ),
-                "post_gelu_vs_weight_shear": safe_ratio(
-                    metrics[name][window]["post_gelu_fixed_scale_recovery"],
-                    control[window]["post_gelu_fixed_scale_recovery"],
-                ),
-                "ce_descent_vs_weight_shear": safe_ratio(
-                    metrics[name][window]["predicted_ce_decrease"],
-                    control[window]["predicted_ce_decrease"],
-                ),
-                "weight_vs_weight_shear": safe_ratio(
-                    metrics[name][window]["weight_fixed_scale_recovery"],
-                    control[window]["weight_fixed_scale_recovery"],
-                ),
-            }
-        passes = bool(
-            stable
-            and min(
-                ratios[name][window]["mlp_output_vs_weight_shear"]
-                for window in WINDOWS
-            )
-            >= minimum_mlp_output_ratio
-            and min(
-                ratios[name][window]["post_gelu_vs_weight_shear"]
-                for window in WINDOWS
-            )
-            >= minimum_post_gelu_ratio
-            and min(
-                ratios[name][window]["ce_descent_vs_weight_shear"]
-                for window in WINDOWS
-            )
-            >= minimum_ce_descent_ratio
-            and min(
-                ratios[name][window]["weight_vs_weight_shear"]
-                for window in WINDOWS
-            )
-            >= minimum_weight_ratio
-        )
-        if passes:
-            passing.append(scale)
-    selected = min(passing) if passing else None
-    return {
-        "decision": (
-            "PROMOTE_FUNCTIONAL_COORDINATE_RADIUS_TO_FINITE_CE"
-            if selected is not None
-            else "REJECT_FUNCTIONAL_COORDINATE_TRUST_RADIUS"
-        ),
-        "parameter_updates": 0,
-        "selected_scale": selected,
-        "passing_scales": passing,
-        "metrics": metrics,
-        "ratios": ratios,
-        "stable_by_candidate": stable_by_name,
-        "thresholds": {
-            "minimum_mlp_output_ratio": minimum_mlp_output_ratio,
-            "minimum_post_gelu_ratio": minimum_post_gelu_ratio,
-            "minimum_ce_descent_ratio": minimum_ce_descent_ratio,
-            "minimum_weight_ratio": minimum_weight_ratio,
-            "maximum_determinant_error": maximum_determinant_error,
-            "maximum_condition_number": maximum_condition_number,
-        },
-    }
 
 
 def main() -> None:
@@ -326,7 +252,7 @@ def main() -> None:
     protocol = plan["fixed_protocol"]
     rule = plan["decision_rule"]
     layers = [int(layer) for layer in protocol["layers"]]
-    scales = [float(scale) for scale in protocol["coordinate_scales"]]
+    betas = [float(beta) for beta in protocol["coordinate_mix_betas"]]
     config = json.loads(args.config.read_text(encoding="utf-8"))
     batches = {
         "fit": fixed_batches(
@@ -378,7 +304,11 @@ def main() -> None:
             sampled[window]["inputs"][layer] = inputs
             sampled[window]["pre_gelu"][layer] = pre_gelu
             sample_sha[f"{window}_layer{layer}"] = sha
-    candidate_names = (CONTROL, WEIGHT_SHEAR, *(scale_name(scale) for scale in scales))
+    candidate_names = (
+        CONTROL,
+        WEIGHT_SHEAR,
+        *(scale_name(beta, prefix=PREFIX) for beta in betas),
+    )
     updates: dict[str, dict[int, torch.Tensor]] = {
         name: {} for name in candidate_names
     }
@@ -401,14 +331,14 @@ def main() -> None:
             ns_steps=int(group["ns_steps"]),
         )
         polar_descent = descent + float(group["weight_decay"]) * weight.detach().float()
-        fitted, diagnostics = build_radius_candidates(
+        fitted, diagnostics = build_pareto_candidates(
             weight.detach(),
             dense_update,
             polar_descent,
             sampled["fit"]["inputs"][layer],
             sampled["fit"]["pre_gelu"][layer],
             model.transformer.h[layer].mlp.c_proj.weight.detach(),
-            scales=scales,
+            betas=betas,
             neighbors=int(protocol["matching_neighbors"]),
             seed=int(protocol["matching_seed"]) + layer * 1009,
             learning_rate=float(group["lr"]),
@@ -456,22 +386,30 @@ def main() -> None:
     result = aggregate_radius(
         metric_rows,
         fit_rows,
-        scales=scales,
+        scales=betas,
         minimum_mlp_output_ratio=float(rule["minimum_mlp_output_ratio"]),
         minimum_post_gelu_ratio=float(rule["minimum_post_gelu_ratio"]),
         minimum_ce_descent_ratio=float(rule["minimum_ce_descent_ratio"]),
         minimum_weight_ratio=float(rule["minimum_weight_ratio"]),
         maximum_determinant_error=float(rule["maximum_determinant_error"]),
         maximum_condition_number=float(rule["maximum_condition_number"]),
+        candidate_prefix=PREFIX,
     )
+    result["decision"] = (
+        "PROMOTE_FUNCTIONAL_COORDINATE_MIX_TO_FINITE_CE"
+        if result["selected_scale"] is not None
+        else "REJECT_FUNCTIONAL_COORDINATE_PARETO_MIX"
+    )
+    result["selected_beta"] = result.pop("selected_scale")
+    result["passing_betas"] = result.pop("passing_scales")
     result["fit_loss_bfloat16"] = float(collected["fit"]["loss"])
     result["holdout_loss_bfloat16"] = float(collected["holdout"]["loss"])
     args.output.mkdir(parents=True, exist_ok=True)
     paths = {
-        "metrics": args.output / "cfc_functional_shear_radius_metrics.csv",
-        "fits": args.output / "cfc_functional_shear_radius_fits.json",
-        "optimizer": args.output / "cfc_functional_shear_radius_optimizer.csv",
-        "aggregate": args.output / "cfc_functional_shear_radius_aggregate.json",
+        "metrics": args.output / "cfc_functional_shear_pareto_metrics.csv",
+        "fits": args.output / "cfc_functional_shear_pareto_fits.json",
+        "optimizer": args.output / "cfc_functional_shear_pareto_optimizer.csv",
+        "aggregate": args.output / "cfc_functional_shear_pareto_aggregate.json",
     }
     write_csv(paths["metrics"], metric_rows)
     paths["fits"].write_text(json.dumps(fit_rows, indent=2, sort_keys=True) + "\n")
@@ -503,7 +441,7 @@ def main() -> None:
         "outputs": {f"{name}_sha256": file_sha256(path) for name, path in paths.items()},
         "limitations": plan["limitations"],
     }
-    metadata_path = args.output / "cfc_functional_shear_radius_metadata.json"
+    metadata_path = args.output / "cfc_functional_shear_pareto_metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")
     print(json.dumps({"decision": result["decision"], "aggregate": str(paths["aggregate"]), "metadata": str(metadata_path)}, sort_keys=True), flush=True)
 

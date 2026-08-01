@@ -163,15 +163,19 @@ def apply_pair_stage(
 
 
 @torch.no_grad()
-def fit_pair_flow(
+def fit_pair_recipe(
     source: torch.Tensor,
     requested_update: torch.Tensor,
     permutations: torch.Tensor,
     *,
     stages: int,
     family: Family,
-) -> tuple[torch.Tensor, dict[str, Any]]:
-    """Causally fit and apply a task-selected pair flow."""
+) -> tuple[
+    torch.Tensor,
+    dict[str, Any],
+    list[tuple[torch.Tensor, torch.Tensor]],
+]:
+    """Causally fit a task-selected pair flow and return its recipe."""
     if (
         source.ndim != 2
         or source.shape != requested_update.shape
@@ -188,6 +192,7 @@ def fit_pair_flow(
     minimum_determinant = float("inf")
     maximum_determinant_error = 0.0
     maximum_condition_number = 0.0
+    recipe: list[tuple[torch.Tensor, torch.Tensor]] = []
     for stage in range(stages):
         residual_before = target - current
         pairs = (
@@ -204,6 +209,7 @@ def fit_pair_flow(
         stage_recovery.append(float(1.0 - after_energy / before_energy))
         current = updated
         coordinate_rows.append(coordinates)
+        recipe.append((pairs.detach().clone(), coordinates.detach().clone()))
         minimum_determinant = min(
             minimum_determinant, finite["minimum_determinant"]
         )
@@ -231,7 +237,27 @@ def fit_pair_flow(
         "minimum_determinant": minimum_determinant,
         "maximum_determinant_error": maximum_determinant_error,
         "maximum_condition_number": maximum_condition_number,
-    }
+    }, recipe
+
+
+@torch.no_grad()
+def fit_pair_flow(
+    source: torch.Tensor,
+    requested_update: torch.Tensor,
+    permutations: torch.Tensor,
+    *,
+    stages: int,
+    family: Family,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Causally fit and apply a task-selected pair flow."""
+    update, diagnostics, _recipe = fit_pair_recipe(
+        source,
+        requested_update,
+        permutations,
+        stages=stages,
+        family=family,
+    )
+    return update, diagnostics
 
 
 @torch.no_grad()
