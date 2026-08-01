@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_conjugated_general_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "REJECT_EQUAL_COORDINATE_CONJUGATED_CHARTS",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_conjugated_general_pro6_plan.json",
+    "sha256": "88b4ca282a4b1c579ae853f89521ea65cc85642216cde3db4f214e92fcda38d1"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "05980540d17f2f4993522bed2f34619f0346e7e4",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_conjugated_general.py",
+    "entrypoint_sha256": "dd650bdc0ed27d74a38fdb19feaad6aecb65e25901ba979ec100fb6188898609",
+    "wall_seconds": 1224.8727297782898,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_output_general_result_sha256": "7e17f9a35c5068fe1c724d68094b9a4e72c9ffebcd30bae5bd689f5216da24e1"
+  },
+  "registered_gates": {
+    "numerically_stable": true,
+    "dense_beats_fresh_every_window": true,
+    "orthogonal_sufficient": false,
+    "general_reproducible": false
+  },
+  "held_out_gap_recovery": {
+    "conjugated_orthogonal88": {
+      "minimum": -0.6380510440835266,
+      "median": -0.5623307855460312,
+      "by_window": [-0.6380510440835266, -0.48445273631840796, -0.6278625954198473, -0.4967989756722151],
+      "beats_fresh_every_window": false,
+      "sufficient": false
+    },
+    "conjugated_general22_seed0": {
+      "minimum": -0.607824427480916,
+      "median": -0.5341410411424463,
+      "by_window": [-0.5823665893271461, -0.47699004975124376, -0.607824427480916, -0.4859154929577465],
+      "beats_fresh_every_window": false,
+      "beats_orthogonal_every_window": true,
+      "sufficient": false
+    },
+    "conjugated_general22_seed1": {
+      "minimum": -0.6259541984732825,
+      "median": -0.5005086227793746,
+      "by_window": [-0.5290023201856149, -0.47201492537313433, -0.6259541984732825, -0.4622279129321383],
+      "beats_fresh_every_window": false,
+      "beats_orthogonal_every_window": true,
+      "sufficient": false
+    }
+  },
+  "fit_recovery": {
+    "conjugated_orthogonal88": {
+      "final_update_energy_range": [0.05450022220611572, 0.05511587858200073],
+      "mean_stage_requested_recovery_range": [0.000636631114916368, 0.0006440275094725869]
+    },
+    "conjugated_general22_seed0": {
+      "final_update_energy_range": [0.05502724647521973, 0.05748826265335083],
+      "mean_stage_requested_recovery_range": [0.0025693774223327637, 0.002687570723620328]
+    },
+    "conjugated_general22_seed1": {
+      "final_update_energy_range": [0.055158257484436035, 0.05697476863861084],
+      "mean_stage_requested_recovery_range": [0.002575681968168779, 0.0026628727262670345]
+    }
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_conjugated_general1",
+    "aggregate_sha256": "deba40ce3111f366183a6d527aa6a13a0ac131e48b61000166a0a8b6449dedce",
+    "fits_sha256": "f12eb5439f84cc258b65cb4b27c98dbe23672db618bdf059f61dfa533178b0e7",
+    "losses_sha256": "824530ccc42c1c50b2e9829a43da86fa25013cb075af24c0989bfc0fda7da801",
+    "metadata_sha256": "a868d68fa8384abed2fc39467d05eb13ec3f10e3743d670f83eb6788d907e8c8",
+    "metrics_sha256": "9c1f5d71aba729e23103126564884012cbdffc16c0f8644a8318a046142ac8de"
+  },
+  "interpretation": [
+    "At exactly 135,168 coordinates per layer, neither a fixed random FHT-conjugated orthogonal chart nor either independent general-2x2 chart recovers the task-selected fresh88 direction.",
+    "All three random conjugated candidates are worse than fresh88 in every held-out validation window. Their negative dense-over-fresh recovery excludes production integration and training.",
+    "Both general-2x2 seeds beat the orthogonal arm in every window and recover slightly more update energy. This independently confirms that symmetric shear adds useful capacity beyond rotation.",
+    "The candidates capture only about 5.5-5.7% of the dense Muon update. The dominant failure is fixed random basis alignment, not coordinate count or a missing least-squares solve.",
+    "The next admissible diagnostic must preserve task-selected connectivity while adding shear at the same coordinate budget; a random FHT basis should not be promoted or scaled."
+  ],
+  "authorization": {
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "task_matched_equal_coordinate_shear_fit_screen_authorized": true,
+    "next_action": "At zero updates, compare fresh88 with a task-matched 44-stage two-coordinate skew-plus-offdiagonal-shear chart, requiring improved all-layer dense-update recovery before any held-out CE run."
+  }
+}
