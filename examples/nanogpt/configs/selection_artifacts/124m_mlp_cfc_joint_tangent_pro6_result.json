@@ -1,0 +1,99 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_joint_tangent_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "REJECT_FIXED_SPARSE_JOINT_TANGENT_CAPACITY",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_joint_tangent_pro6_plan_v2.json",
+    "sha256": "98c7fba952f325646e3ab2631cd338172a14d6500c41df643cc195612a5d8f92"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "baeda96aa9016e683f8d19e1e0d679e53d98b9cd",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_joint_tangent.py",
+    "entrypoint_sha256": "096af4d8bedcfbeb04d7927652042d662ec8bd0825970f413ee6e4ec6ba061a9",
+    "wall_seconds": 1223.0351281166077,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "registered_gates": {
+    "numerically_stable": true,
+    "dense_beats_diagonal_output88_every_window": true,
+    "equal_coordinate_budget": true,
+    "selected_candidate": null
+  },
+  "equal_coordinates_per_layer": 135168,
+  "candidate_results": {
+    "joint_output88": {
+      "minimum_ce_gap_recovery_vs_diagonal": -0.10613207547169812,
+      "median_ce_gap_recovery_vs_diagonal": -0.07845285317715797,
+      "beats_diagonal_output88_every_window": false,
+      "sufficient": false
+    },
+    "joint_output80_input32": {
+      "minimum_ce_gap_recovery_vs_diagonal": -0.11556603773584906,
+      "median_ce_gap_recovery_vs_diagonal": -0.07225182783635517,
+      "beats_diagonal_output88_every_window": false,
+      "beats_joint_output88_every_window": false,
+      "sufficient": false
+    },
+    "joint_output72_input64": {
+      "minimum_ce_gap_recovery_vs_diagonal": -0.10141509433962265,
+      "median_ce_gap_recovery_vs_diagonal": -0.09114620472401018,
+      "beats_diagonal_output88_every_window": false,
+      "beats_joint_output88_every_window": false,
+      "sufficient": false
+    }
+  },
+  "solver_diagnostics": {
+    "cg_iterations": 8,
+    "relative_diagonal_damping": 0.0001,
+    "layer0_final_relative_normal_residual": {
+      "joint_output88": 0.00009275884076487273,
+      "joint_output80_input32": 0.00011813789751613513
+    },
+    "load_model_and_optimizer_seconds": 1.4807601360371336,
+    "collect_gradient_window_seconds": 62.56118650501594,
+    "typical_per_layer_joint_solver_seconds": "0.012-0.015 per candidate after the first layer",
+    "observation": "The joint normal equations converge tightly and cheaply, but all fixed sparse candidates are worse than the registered diagonal output-only control. This is a connectivity/capacity rejection, not a CG convergence or observability failure."
+  },
+  "held_out_ce": {
+    "validation_1": {"diagonal_output88": 5.605002999305725, "dense_exact": 5.60497772693634, "joint_output88": 5.60500568151474, "joint_output80_input32": 5.605005919933319, "joint_output72_input64": 5.60500556230545},
+    "validation_2": {"diagonal_output88": 5.502974271774292, "dense_exact": 5.5028780698776245, "joint_output88": 5.50298148393631, "joint_output80_input32": 5.502981960773468, "joint_output72_input64": 5.5029836893081665},
+    "validation_3": {"diagonal_output88": 5.5913748145103455, "dense_exact": 5.591310799121857, "joint_output88": 5.591380059719086, "joint_output80_input32": 5.591378629207611, "joint_output72_input64": 5.591380000114441},
+    "validation_4": {"diagonal_output88": 5.561929523944855, "dense_exact": 5.561836302280426, "joint_output88": 5.5619359612464905, "joint_output80_input32": 5.561935544013977, "joint_output72_input64": 5.561937391757965}
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_joint_tangent2",
+    "aggregate_sha256": "0037d53034b257ad52809ae1a2cd8421f827ed27d912c906b7ba694608731943",
+    "losses_sha256": "40a9fd3d2b25237b0ddea4a66ebd8c7cf3f43384c31042c686fba8eb07099e1c",
+    "metadata_sha256": "56a7b1eaa0a23aad9a543d118472a940467288141474f4b85a1957563d2e5301",
+    "metrics_sha256": "2c908be019c91b0a9c264c3e9a4e1f2de3d4d918d5d2642a6c24e1702f8d9ed4",
+    "selections_sha256": "3e1ff2ec0f4c5579c9d8c32e003af7d09dd0b485aaf6b01284c3e0d8bbc7d748",
+    "solvers_sha256": "ffaa944f09c406392660fed315066ff63f3748b262cfa3b48fa7a653d5840b8c"
+  },
+  "interpretation": [
+    "Joint PCG is not the missing repair: every joint candidate is worse than the diagonal output88 control on every held-out window despite approximately 1e-4 final normal-equation residual.",
+    "Reallocating the fixed 135,168-coordinate budget from output to input sparse Givens edges remains harmful even when output and input coordinates are optimized jointly.",
+    "Together with the exact bilateral orbit upper bound, the result identifies a basis/connectivity mismatch: useful input-side complementarity exists in a dense layer-specific generator but is not captured by the registered sparse task-matched edge family.",
+    "Do not tune CG, trust radius, stage allocation, diagonal gains, radial spectrum, or add a learned dense basis from this result. Measure the dense skew-generator spectrum and test a structured dense generator factorization at zero updates first."
+  ],
+  "authorization": {
+    "dense_generator_spectrum_diagnostic_authorized": true,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Measure per-layer left/right skew-generator spectra and cross-window stability, then preregister a zero-update structured dense generator factorization only if the spectrum supports a compact non-LoRA chart."
+  }
+}
