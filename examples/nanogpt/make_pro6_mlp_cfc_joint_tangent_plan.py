@@ -12,9 +12,9 @@ ROOT = Path(__file__).resolve().parents[2]
 WORKSPACE = Path("/home/pro6000-9980x/MappingNetworks")
 ENTRYPOINT = ROOT / "examples/nanogpt/analyze_mlp_cfc_joint_tangent.py"
 CONFIG = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json"
-PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_joint_tangent_pro6_plan.json"
+PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_joint_tangent_pro6_plan_v2.json"
 CHECKPOINT = WORKSPACE / "outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt"
-OUTPUT = WORKSPACE / "outputs/pro6_mai_v3_mlp_cfc_joint_tangent1"
+OUTPUT = WORKSPACE / "outputs/pro6_mai_v3_mlp_cfc_joint_tangent2"
 
 
 def sha256_file(path: Path) -> str:
@@ -29,9 +29,9 @@ def main() -> None:
     replay = WORKSPACE / "latent-weight-lab-hidden88-replay"
     python = WORKSPACE / ".venv/bin/python"
     payload = {
-        "schema_version": "mai_124m_mlp_cfc_joint_tangent_pro6_plan_v1",
+        "schema_version": "mai_124m_mlp_cfc_joint_tangent_pro6_plan_v2",
         "recorded_at": "2026-08-01",
-        "status": "registered_before_zero_update_diagnostic",
+        "status": "supersedes_v1_after_two_zero-update_attempts_were_stopped_before_layer0_completion_for_missing_phase_observability",
         "question": "Does joint solution of fixed sparse output/input tangent coordinates recover the bilateral value that one diagonal Gauss-Seidel sweep missed?",
         "authorization": {
             "parameter_updates": 0,
@@ -51,6 +51,7 @@ def main() -> None:
             "entrypoint": str(ENTRYPOINT.relative_to(ROOT)),
             "entrypoint_sha256": sha256_file(ENTRYPOINT),
             "parent_structured_result_sha256": "28c1efea5b9a903b15a8a9ba4a6e3651e924fa0d861de097f261509cb7b6dc96",
+            "superseded_plan_sha256": "5f27dd12edbd2241c9e2b9cd8cff002e462ce519ca4e341e89f768b4b4be5026",
             "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15",
         },
         "fixed_protocol": {
@@ -77,6 +78,7 @@ def main() -> None:
             "coordinate_formula": "every non-dense candidate has 135168 continuous coordinates per layer",
             "solver": "eight iterations of diagonal-preconditioned conjugate gradients on (J^T J + 1e-4 diag(J^T J)) x = J^T target, using exact dense-GEMM matrix-free JVP/VJP",
             "finite_update": "apply the solved linear tangent and then decoupled weight decay once; angles are approximately 1e-5 so finite-rotation disagreement is second order",
+            "observability": "CUDA-synchronized timings are emitted after model load, gradient collection, connectivity selection, each joint solve, and each layer; synchronization changes scheduling only, not the fixed numerical protocol",
         },
         "decision_rule": {
             "maximum_replicate_range": 0.0000002,

@@ -449,6 +449,7 @@ def main() -> None:
     parser.add_argument("--native-cache", type=Path)
     args = parser.parse_args()
     started = time.time()
+    phase_started = time.perf_counter()
     plan = validate_identity(args.checkpoint, args.config, args.data_dir, args.plan)
     protocol = plan["fixed_protocol"]
     rule = plan["decision_rule"]
@@ -482,12 +483,37 @@ def main() -> None:
     model, optimizer, checkpoint = load_model_and_optimizer(
         args.checkpoint, config, args.device
     )
+    if args.device.startswith("cuda"):
+        torch.cuda.synchronize()
+    print(
+        json.dumps(
+            {
+                "phase_complete": "load_model_and_optimizer",
+                "seconds": time.perf_counter() - phase_started,
+            },
+            sort_keys=True,
+        ),
+        flush=True,
+    )
+    phase_started = time.perf_counter()
     fit_loss, gradients = collect_gradient_window(
         model,
         fit_batches,
         layers,
         device=args.device,
         dtype=torch.bfloat16,
+    )
+    if args.device.startswith("cuda"):
+        torch.cuda.synchronize()
+    print(
+        json.dumps(
+            {
+                "phase_complete": "collect_gradient_window",
+                "seconds": time.perf_counter() - phase_started,
+            },
+            sort_keys=True,
+        ),
+        flush=True,
     )
     updates: dict[str, dict[int, torch.Tensor]] = {
         candidate: {} for candidate in CANDIDATES
@@ -496,6 +522,14 @@ def main() -> None:
     selection_rows: list[dict[str, Any]] = []
     solver_rows: list[dict[str, Any]] = []
     for layer in layers:
+        layer_started = time.perf_counter()
+        print(
+            json.dumps(
+                {"layer_started": layer, "layers_total": len(layers)},
+                sort_keys=True,
+            ),
+            flush=True,
+        )
         weight = model.transformer.h[layer].mlp.c_fc.weight
         owner, group = _optimizer_and_group_for_parameter(optimizer, weight)
         buffer = owner.state[weight].get("momentum_buffer")
@@ -522,6 +556,21 @@ def main() -> None:
             neighbors=int(protocol["matching_neighbors"]),
             seed=int(protocol["matching_seed"]) + layer * 1009,
             native_cache=args.native_cache,
+        )
+        if args.device.startswith("cuda"):
+            torch.cuda.synchronize()
+        print(
+            json.dumps(
+                {
+                    "layer": layer,
+                    "phase_complete": "select_shared_connectivity",
+                    "seconds_from_layer_start": (
+                        time.perf_counter() - layer_started
+                    ),
+                },
+                sort_keys=True,
+            ),
+            flush=True,
         )
         selection_rows.extend(
             {"layer": layer, **selection} for selection in selections
@@ -558,6 +607,7 @@ def main() -> None:
         updates[DIAGONAL_CONTROL][layer] = diagonal_update.cpu()
         updates[DENSE][layer] = dense_update.float().cpu()
         for candidate, (output_pairs, input_pairs) in candidate_pairs.items():
+            solver_started = time.perf_counter()
             tangent, solver = solve_joint_tangent(
                 weight.detach().float(),
                 rotation_target.float(),
@@ -566,6 +616,9 @@ def main() -> None:
                 iterations=int(protocol["cg_iterations"]),
                 damping=float(protocol["cg_damping"]),
             )
+            if args.device.startswith("cuda"):
+                torch.cuda.synchronize()
+            solver["wall_seconds"] = time.perf_counter() - solver_started
             update = _weight_decay_after_rotation(
                 weight.detach(),
                 tangent,
@@ -574,6 +627,18 @@ def main() -> None:
             )
             updates[candidate][layer] = update.cpu()
             solver_rows.append({"layer": layer, "candidate": candidate, **solver})
+            print(
+                json.dumps(
+                    {
+                        "candidate": candidate,
+                        "layer": layer,
+                        "phase_complete": "joint_solver",
+                        "seconds": solver["wall_seconds"],
+                    },
+                    sort_keys=True,
+                ),
+                flush=True,
+            )
         for candidate in CANDIDATES:
             candidate_update = updates[candidate][layer].to(weight.device)
             coordinates = (
@@ -599,6 +664,7 @@ def main() -> None:
                 {
                     "layer_complete": layer,
                     "layers_total": len(layers),
+                    "seconds": time.perf_counter() - layer_started,
                 },
                 sort_keys=True,
             ),
