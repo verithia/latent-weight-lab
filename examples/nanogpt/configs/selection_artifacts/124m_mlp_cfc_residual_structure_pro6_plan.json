@@ -33,7 +33,7 @@
       "--plan",
       "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_residual_structure_pro6_plan.json",
       "--output",
-      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_residual_structure1",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_residual_structure2",
       "--device",
       "cuda",
       "--native-cache",
@@ -92,7 +92,7 @@
     "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "entrypoint": "examples/nanogpt/analyze_mlp_cfc_residual_structure.py",
-    "entrypoint_sha256": "272e570cb6f44b9f91aeff7de436139091a2b181e8325f9fd62d16ceb3eac46b",
+    "entrypoint_sha256": "8167eb197a815ffccb3032b9cb8cbb164f3f7faf4e644a6b430374646388a57e",
     "parent_trust_result_sha256": "299098e6c1f08d07bb7c40a2a84099720b25192399420f7576f2f11e439fefa2",
     "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
   },

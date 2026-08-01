@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import csv
+import tempfile
+from pathlib import Path
+
 import torch
 
 from examples.nanogpt.analyze_mlp_cfc_residual_structure import (
@@ -7,7 +11,19 @@ from examples.nanogpt.analyze_mlp_cfc_residual_structure import (
     fit_bilateral_diagonal,
     fit_expansion_diagonal,
     fit_input_diagonal,
+    write_csv,
 )
+
+
+def test_write_csv_accepts_heterogeneous_metric_fields() -> None:
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "metrics.csv"
+        write_csv(path, [{"layer": 0, "a": 1}, {"layer": 1, "b": 2}])
+        with path.open(newline="", encoding="utf-8") as handle:
+            rows = list(csv.DictReader(handle))
+    assert list(rows[0]) == ["layer", "a", "b"]
+    assert rows[0] == {"layer": "0", "a": "1", "b": ""}
+    assert rows[1] == {"layer": "1", "a": "", "b": "2"}
 
 
 def test_diagonal_fits_recover_their_exact_families() -> None:

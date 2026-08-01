@@ -14,7 +14,7 @@ ENTRYPOINT = ROOT / "examples/nanogpt/analyze_mlp_cfc_residual_structure.py"
 CONFIG = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json"
 PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_residual_structure_pro6_plan.json"
 CHECKPOINT = WORKSPACE / "outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt"
-OUTPUT = WORKSPACE / "outputs/pro6_mai_v3_mlp_cfc_residual_structure1"
+OUTPUT = WORKSPACE / "outputs/pro6_mai_v3_mlp_cfc_residual_structure2"
 
 
 def sha256_file(path: Path) -> str:
