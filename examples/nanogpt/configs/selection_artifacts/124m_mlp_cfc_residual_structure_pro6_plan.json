@@ -1,0 +1,109 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "decision_rule": {
+    "maximum_replicate_range": 2e-07,
+    "minimum_gap_recovery_every_window": 0.5,
+    "minimum_median_gap_recovery": 0.8,
+    "on_none": "Report the highest worst-window recovery but authorize no structure.",
+    "positive_control": "dense_exact must beat fresh88 on all four windows; otherwise residual attribution is rejected.",
+    "qualification": "With the dense positive control satisfied, candidate must beat fresh88 and baseline on all four windows, recover at least 50% of the dense-over-fresh CE gap on every window, and recover at least 80% at the median window.",
+    "selection": "Select the qualifying candidate with fewest coordinates per layer; ties use fixed family priority input, expansion, bilateral, spectral.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_residual_structure",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_residual_structure_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_residual_structure1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "bilateral_fit_iterations": 32,
+    "block_size": 1024,
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "low_rank_bracket": [
+      1,
+      4,
+      16,
+      64
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "validation_batches_per_window": 8,
+    "validation_seeds": [
+      20260821,
+      20260822,
+      20260823,
+      20260824
+    ]
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_residual_structure.py",
+    "entrypoint_sha256": "272e570cb6f44b9f91aeff7de436139091a2b181e8325f9fd62d16ceb3eac46b",
+    "parent_trust_result_sha256": "299098e6c1f08d07bb7c40a2a84099720b25192399420f7576f2f11e439fefa2",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a no-update local residual attribution, not a trained architecture result.",
+    "All residual structures are fit only to the exact-current fit-window direction and evaluated on new validation windows.",
+    "Diagonal candidates are additive tangent projections; low-rank candidates use the best truncated SVD of the fit residual.",
+    "No result directly authorizes training; the selected family requires a separate production design and MFU gate."
+  ],
+  "question": "Which fixed structural family captures the held-out finite-CE value in dense_exact minus fresh88: input-channel diagonal, expansion-channel diagonal, bilateral diagonal, or low-rank spectral residual?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_residual_structure_pro6_plan_v1",
+  "status": "registered_before_zero_update_diagnostic"
+}
