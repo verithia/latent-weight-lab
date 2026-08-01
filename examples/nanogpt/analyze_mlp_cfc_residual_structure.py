@@ -53,8 +53,15 @@ def git_commit(repo: Path) -> str:
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise ValueError(f"refusing to write empty CSV: {path}")
+    fieldnames = list(rows[0])
+    known = set(fieldnames)
+    for row in rows[1:]:
+        for field in row:
+            if field not in known:
+                fieldnames.append(field)
+                known.add(field)
     with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(rows)
 
