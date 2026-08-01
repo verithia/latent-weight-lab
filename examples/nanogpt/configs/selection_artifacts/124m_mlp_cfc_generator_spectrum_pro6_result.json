@@ -1,0 +1,108 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_generator_spectrum_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "GENERATOR_RECONSTRUCTION_INVALID",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_generator_spectrum_pro6_plan.json",
+    "sha256": "867e5f6b94f50a0badda0fb0ba5bae4a8f312d64201635425d83f30538d74f46"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "cd74b2de0f0139636dc852e9b7bf60ebc258beb2",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_generator_spectrum.py",
+    "entrypoint_sha256": "3b98c328a478d424bc647ceb1ae8300337304421abf4a6e900b84274d2f1b6d0",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_joint_result_sha256": "27ed72c062a4781f2690e5d13dc89aa34c0e442c992d321e013925458e9e99be"
+  },
+  "registered_gates": {
+    "generator_reconstruction_stable": false,
+    "direct_low_rank_supported": false,
+    "cross_window_generator_stable": false
+  },
+  "reconstruction": {
+    "registered_maximum_relative_error": 0.00002,
+    "reference_window_observed_range": [
+      0.000025085369998123497,
+      0.00009579184552421793
+    ],
+    "all_window_observed_maximum": 0.00015216406609397382,
+    "minimum_relative_squared_singular_gap_range_reference": [
+      0.0000017438599115848774,
+      0.00005406024502008222
+    ]
+  },
+  "spectra": {
+    "left_output_generator": {
+      "median_stable_rank": 7.480344068312334,
+      "median_entropy_effective_rank": 75.48304543914476,
+      "rank90_range": [2, 263],
+      "median_rank90": 173,
+      "top_singular_value_range": [0.07015734910964966, 1.344539761543274]
+    },
+    "right_input_generator": {
+      "median_stable_rank": 7.476067019100251,
+      "median_entropy_effective_rank": 75.25734792734923,
+      "rank90_range": [2, 262],
+      "median_rank90": 172,
+      "top_singular_value_range": [0.07015559077262878, 1.3445532321929932]
+    },
+    "generous_all_budget_direct_skew_rank_caps": {
+      "coordinates_per_layer": 135168,
+      "left": 44,
+      "right": 176,
+      "bilateral_split_is_stricter": true
+    }
+  },
+  "cross_window_stability": {
+    "left_generator_cosine": {
+      "minimum": -0.9501358270645142,
+      "median": 0.13787531107664108,
+      "mean": 0.10450723857179077
+    },
+    "right_generator_cosine": {
+      "minimum": -0.950176477432251,
+      "median": 0.13787801563739777,
+      "mean": 0.10452042924912854
+    },
+    "bilateral_update_cosine": {
+      "minimum": 0.11845438927412033,
+      "median": 0.13511428236961365,
+      "mean": 0.1344988259176413
+    },
+    "reference_seed": 20260820,
+    "candidate_seeds": [20260821, 20260822, 20260823]
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_generator_spectrum1",
+    "aggregate_sha256": "a9f8a5900a7c8aa6d573aad6b524baf7554fa419df81027900e1e2b8164d1e2f",
+    "metadata_sha256": "a49c61324cfd74c8ed2ad88888a6492a6ba719da8aefa5b12abb2eaa866801cc",
+    "spectra_sha256": "c4763c4e268b52ba9062a7e05af6990db612c1adc8f4b2ea3f2ebe450394c7bb",
+    "stability_sha256": "3b9adebee512206fd770f56543ce9e67b03f6a6850396e6dfd4eac4adf065811"
+  },
+  "interpretation": [
+    "The exact residual-minus-radial matrix is a valid fixed-singular tangent upper bound, but realizing it as coupled left/right orthogonal generators is numerically ill-conditioned because many current singular values are close.",
+    "A single tiny dense weight update can require opposing generator singular values as large as 1.34. Float32 cancellation then fails the preregistered reconstruction invariant by up to 7.6x.",
+    "The direct low-rank skew family is rejected even under the unrealistically generous all-budget-per-side cap: difficult layers require rank 262-263 for 90% energy.",
+    "The coupled generators are strongly task-window dependent and can reverse sign. A static fitted generator basis is unsupported.",
+    "The bilateral CE upper bound does not authorize a production Q_out W Q_in chart. The next diagnostic should represent the same residual as a well-conditioned one-sided general output action and attribute its skew versus symmetric-shear components."
+  ],
+  "authorization": {
+    "one_sided_general_output_decomposition_authorized": true,
+    "coupled_bilateral_orthogonal_production_chart_authorized": false,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "At zero updates, form A = residual W^+ so A W exactly represents the dense-minus-fresh residual; decompose A into skew and symmetric shear, evaluate held-out CE attribution and conditioning, and only then select a structured general linear chart."
+  }
+}
