@@ -1,0 +1,96 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "new_structure": false,
+    "scope": "one exact-source 124M/0.5TPP hidden88 checkpoint replay",
+    "source_recovery": false
+  },
+  "decision_rule": {
+    "faithful_replay": "exit zero, complete exact-resume custom state, fixed-eval digest match, absolute terminal CE delta <= 0.03, and validation-curve MAE <= 0.03",
+    "reject": "MFU < 0.20, nonzero exit, nonfinite loss, missing terminal evaluation, fixed-eval mismatch, incomplete custom state, or terminal CE > 5.65",
+    "threshold_changes_after_result": false,
+    "usable_recovery_reference": "exit zero, complete exact-resume custom state, fixed-eval digest match, finite terminal CE <= 5.65; downstream tests must calibrate against this new checkpoint and may not mix it with Y400 endpoint values"
+  },
+  "identity": {
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15",
+    "original_checkpoint_available_on_pro6": false,
+    "original_checkpoint_sha256": "423029ea02046b95a5f8f4b9f80c000816b0ebf51f6a9dfd66dcd84da0ed47c6",
+    "registration_branch": "experiment/pro6-hidden88-replay-20260801",
+    "replay_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "replay_config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "source_config_sha256": "bdbe54a8aaaba713dc76bac41d6a789c6f739cf42351786b185a425956d225ac"
+  },
+  "invariants": {
+    "checkpoint_identity": "new PRO6 replay; never label it as the Y400 checkpoint",
+    "execution_stack": "eager PyTorch/CUDA BF16 with CUDA_HOME set to the bundled toolkit",
+    "fixed_eval_index_runtime_sha256_expected": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "fixed_eval_protocol": "mai_ladder_fixed_eval_indices_v2",
+    "implementation_source_hashes": "must match the source config exactly",
+    "scientific_hyperparameters": "byte-equivalent values to the source config"
+  },
+  "mfu_gate": {
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/performance_preflight_hidden88_replay1.json",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/performance_preflight_hidden88_replay1.json",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "gpu": 0,
+    "host": "PRO6",
+    "minimum_fraction": 0.2,
+    "polling": "direct foreground polling; no watchdog or callback",
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "reason": "Treat the Y400 filesystem and its checkpoint as unavailable. Generate a fresh PRO6 reference before the preregistered c_fc direction/trust-radius diagnostic.",
+  "reference": {
+    "original_terminal_validation_ce": 5.592058181762695,
+    "original_validation_curve": {
+      "0": 10.9669,
+      "120": 5.8533,
+      "180": 5.6733,
+      "238": 5.592058181762695,
+      "60": 6.3141
+    }
+  },
+  "replay": {
+    "callback": false,
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "bash",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "0",
+      "pro6_mai_v3_124m_twopassfresh88_replay1",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "gpu": 0,
+    "host": "PRO6",
+    "max_iters": 238,
+    "polling": "direct foreground polling through terminal evaluation",
+    "run_name": "pro6_mai_v3_124m_twopassfresh88_replay1",
+    "watchdog": false
+  },
+  "schema_version": "mai_124m_mlp_hidden88_pro6_replay_plan_v1",
+  "status": "registered_before_host_preflight_and_replay"
+}
