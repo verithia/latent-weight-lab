@@ -3,7 +3,7 @@
 
 The successful bilateral-orbit oracle implies a tangent
 ``Omega_out W + W Omega_in``.  This zero-update diagnostic recovers the
-minimum-norm skew generators, measures their nonzero singular spectra, and
+coupled skew generators, measures their nonzero singular spectra, and
 compares them across independent task-gradient windows.  It decides whether
 a direct low-rank skew factorization is plausible before any new chart is
 implemented or trained.
