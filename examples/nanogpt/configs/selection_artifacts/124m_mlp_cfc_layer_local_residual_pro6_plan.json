@@ -1,0 +1,110 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "decision_rule": {
+    "concentration": "If no subspace qualifies, call the deficit top-3 concentrated only if exact top-3 recovers at least 50% on every window; otherwise top-6 concentrated only if exact top-6 recovers at least 75% on every window; otherwise call it distributed.",
+    "maximum_replicate_range": 2e-07,
+    "minimum_subspace_median_recovery": 0.65,
+    "minimum_subspace_recovery_every_window": 0.5,
+    "positive_control": "dense_exact must beat fresh88 on every held-out validation window.",
+    "subspace_selection": "A top-3 or all-layer left/right/joint candidate qualifies only if it beats fresh88 and recovers at least 50% of dense-over-fresh CE on every window and 65% at the median. Select fewest added coordinates; ties prefer joint, left, right.",
+    "threshold_change_after_observation": false,
+    "top3_minimum_recovery_for_concentration": 0.5,
+    "top6_minimum_recovery_for_concentration": 0.75
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_layer_local_residual",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_layer_local_residual_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_layer_local_residual1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "block_size": 1024,
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "existing_weight_subspace_rank": 64,
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "layer_ordering": "Rank exact single-layer dense rescues by mean fit-window CE improvement over fresh88; ties use ascending layer index; freeze before validation.",
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "registered_subsets": [
+      1,
+      3,
+      6
+    ],
+    "validation_batches_per_window": 8,
+    "validation_seeds": [
+      20260831,
+      20260832,
+      20260833,
+      20260834
+    ]
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_layer_local_residual.py",
+    "entrypoint_sha256": "d44cc2d462dfe0f6fca91b1544a433a4705587e904c6fe705082e4119a274e55",
+    "parent_residual_structure_result_sha256": "2e641c8d6724b1fc16fdada2a97960ee2b986348ac937759c8d83fe36d3ad016",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a zero-update local tangent attribution, not a trained architecture result.",
+    "The current dense c_fc weight singular frame is fixed; no learned basis, LoRA, or dense adapter is introduced.",
+    "Layer order is selected only on the fit window and frozen before four new validation windows.",
+    "No result directly authorizes training; a selected topology still requires production implementation and a host-local MFU gate."
+  ],
+  "question": "Is dense-over-fresh c_fc value concentrated in a few layers, and can current-weight left, right, or joint rank-64 subspaces recover it?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_layer_local_residual_pro6_plan_v1",
+  "status": "registered_before_zero_update_diagnostic"
+}
