@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_mlp_hidden88_pro6_replay_result_v1",
+  "recorded_at": "2026-08-01",
+  "classification": "FAITHFUL_REPLAY",
+  "decision": {
+    "faithful_replay_passed": true,
+    "usable_recovery_reference_passed": true,
+    "reject": false,
+    "downstream_policy": "Use this PRO6 checkpoint and its own fixed-window controls for all subsequent MLP diagnostics; do not claim it is the unavailable Y400 checkpoint."
+  },
+  "registration": {
+    "branch": "experiment/pro6-hidden88-replay-20260801",
+    "execution_commit": "01a28631124a3f7b1f4bc013723295079a7ceb40",
+    "source_execution_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_pro6_replay_plan.json",
+    "plan_sha256": "6ef05428b7fc5c12e19f9aeec4a4a4917b31c6f1faaa21abea994a3f09ee69f7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "performance_gate": {
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/performance_preflight_hidden88_replay1.json",
+    "certificate_sha256": "1b682856d892523b3dd0a715b84d47277822e9b3111292d33bbef2243f0f5a24",
+    "passed": true,
+    "minimum_mfu_fraction": 0.2,
+    "measured_mfu_fraction": 0.31593993493562816,
+    "tokens_per_second": 176248.4625,
+    "iter_ms": 1487.35875,
+    "peak_mib": 31639.52,
+    "denominator": "same-host empirical BF16 8192-square tensor-core GEMM peak"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling through terminal exit; no watchdog, callback, queue worker, or heartbeat",
+    "started_at": "2026-08-01T19:10:47+08:00",
+    "finished_at": "2026-08-01T19:18:23+08:00",
+    "exit_code": 0,
+    "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_twopassfresh88_replay1_20260801T111047Z_1911802.json",
+    "status_sha256": "7622701c2b4301f0833f1d768ae795560011fadf1422a7c01d2b8cd5d95e1e32",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_twopassfresh88_replay1_20260801T111047Z_1911802.log",
+    "log_sha256": "fc8194447a1a469996b70eb14d12e4d33d9324ab925d52b3e64145c8413f0beb",
+    "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_twopassfresh88_replay1_20260801T111047Z_1911802.json",
+    "provenance_sha256": "6d4772c1cedf368aaebbffb1a92b7de7ac947869413efd6a11f8556f4f8c2a35"
+  },
+  "evaluation": {
+    "protocol": "mai_ladder_fixed_eval_indices_v2",
+    "terminal_update": 238,
+    "terminal_train_ce": 5.5892,
+    "terminal_validation_ce_exact": 5.5923542976379395,
+    "original_y400_terminal_validation_ce": 5.592058181762695,
+    "terminal_absolute_delta_ce": 0.0002961158752441406,
+    "rounded_validation_curve": {
+      "0": 10.9669,
+      "60": 6.3142,
+      "120": 5.8534,
+      "180": 5.6735,
+      "238": 5.5924
+    },
+    "original_rounded_validation_curve": {
+      "0": 10.9669,
+      "60": 6.3141,
+      "120": 5.8533,
+      "180": 5.6733,
+      "238": 5.592058181762695
+    },
+    "rounded_curve_mae_ce": 0.00014836364746066976,
+    "faithful_terminal_tolerance_ce": 0.03,
+    "faithful_curve_mae_tolerance_ce": 0.03,
+    "usable_recovery_maximum_ce": 5.65
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "bytes": 988392593,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.meta.json",
+    "metadata_sha256": "9d204fb548207ca4f0f2cc6b537511354e73ce199dac90c3002f7cf4d02c0649",
+    "schema": "nanogpt_exact_resume_v2",
+    "next_iter": 238,
+    "checkpoint_reason": "evaluation",
+    "execution_provenance_embedded": true,
+    "exact_resume_envelope_verified": true
+  },
+  "custom_state": {
+    "module_count": 12,
+    "parent_last_angles_per_layer_shape": [64, 1536],
+    "parent_selected_permutations_per_layer_shape": [64, 3072],
+    "residual_last_angles_per_layer_shape": [24, 1536],
+    "residual_selected_permutations_per_layer_shape": [24, 3072],
+    "all_angles_finite": true,
+    "all_matching_valid": true,
+    "refresh_count_per_layer": 238,
+    "last_refresh_step_per_layer": 237,
+    "recursive_momentum_buffer_count": 24,
+    "exact_resume_state_complete": true
+  }
+}
