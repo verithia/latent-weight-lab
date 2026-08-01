@@ -1,0 +1,112 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_trust_radius_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "REJECT_TRUST_SCALED_FRESH88_CFC",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_trust_radius_pro6_plan.json",
+    "sha256": "a74ece2ed0667cdc1775d36bf2d89795b0995da9576d056980886740bfd0d00d"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "5c5c3241a9c4c1faad88ec04e8030f6cd9031464",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_trust_radius.py",
+    "entrypoint_sha256": "31030ab1189ed885198c52db301890d1d9ac91b1bf9fb039f12d8f936dafe493",
+    "wall_seconds": 18.999796152114868,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "protocol": {
+    "fit_train_seed": 20260806,
+    "fit_batches": 4,
+    "validation_seeds": [20260811, 20260812, 20260813, 20260814],
+    "validation_batches_per_window": 8,
+    "batch_size": 4,
+    "block_size": 1024,
+    "evaluation_repeats": 3,
+    "gradient_dtype": "bfloat16",
+    "evaluation_dtype": "float32",
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "matching_neighbors": 64,
+    "trust_scales": [0.015625, 0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0]
+  },
+  "fit_selection": {
+    "baseline_ce": 5.7133941650390625,
+    "selected_scale": 1.0,
+    "selected_ce": 5.710508584976196,
+    "fit_ce_improvement": 0.002885580062866211,
+    "fit_gate_passed": true,
+    "monotone_improvement_through_full_scale": true,
+    "interpretation": "The optimum is the largest registered radius. Shrinking the finite step cannot explain or repair the prior failure."
+  },
+  "validation": {
+    "all_replicate_ranges": 0.0,
+    "numerical_stability_gate_passed": true,
+    "fresh88_beats_baseline_every_window": true,
+    "fresh88_beats_random88_every_window": true,
+    "fresh88_beats_dense_exact_every_window": false,
+    "fresh88_ce_margins": {
+      "validation_1": {
+        "over_baseline": 0.000009775161743164062,
+        "over_dense_exact": -0.00000858306884765625,
+        "over_random88": 0.000007808208465576172
+      },
+      "validation_2": {
+        "over_baseline": 0.000054895877838134766,
+        "over_dense_exact": -0.00008046627044677734,
+        "over_random88": 0.00004667043685913086
+      },
+      "validation_3": {
+        "over_baseline": 0.000027835369110107422,
+        "over_dense_exact": -0.000036776065826416016,
+        "over_random88": 0.000022590160369873047
+      },
+      "validation_4": {
+        "over_baseline": 0.00004184246063232422,
+        "over_dense_exact": -0.00006437301635742188,
+        "over_random88": 0.00003421306610107422
+      }
+    }
+  },
+  "registered_gates": {
+    "fit_improvement": true,
+    "numerically_stable": true,
+    "all_losses_finite": true,
+    "fresh88_beats_baseline_dense_and_random_on_every_window": false
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_trust_radius1",
+    "aggregate_sha256": "9cd2e3304ddd64c8e662215c95b3bd50c244de1808aad23eb309ac3ae8f0fdc5",
+    "losses_sha256": "c39943f1c94b17dc3451d217bc8f755f31488a944acdc4bf51d2015f0d09af29",
+    "metadata_sha256": "6d31cafd581399980a6123cb445718c6e7e13365839bcc6ffba41c6ea1d843e6",
+    "optimizer_sha256": "629a3d5556ac3fc56dce5109bccc714ce3ba864eec9f15728303a0d2da027d3d",
+    "selections_sha256": "c34c1cd69f92926adc0f094027b78fa2e9ef7502c132d03009afda3c7f170ee9"
+  },
+  "interpretation": [
+    "The exact-current fresh88 chart is a real task-aligned direction: at its full registered scale it lowers finite CE relative to zero-step and equal-coordinate random88 on all four new validation windows.",
+    "The prior positive-gradient/failed-finite-step discrepancy was caused by small BF16-window evaluation sensitivity, not by a need to shrink the step. Repeated float32 losses are exactly stable here.",
+    "Dense exact lowers CE more than fresh88 on all four windows. The remaining deficit is therefore missing useful dense direction in the 64+24 expansion-side chart, not trust radius, optimizer step magnitude, random connectivity, or numerical instability.",
+    "Do not launch a trust-scaled training run and do not increase chart stages blindly. The next no-update study should attribute the dense-minus-fresh residual by input-side, expansion-side, and low-rank/spectral structure before preregistering a different manifold parameterization."
+  ],
+  "authorization": {
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister a zero-update structural attribution of the held-out dense-minus-fresh c_fc residual. It must determine whether the missing finite-CE direction is input-side, expansion-side, bilateral, or low-rank/spectral before any topology or coordinate change is proposed."
+  }
+}
