@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_pareto_pro6_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "PROMOTE_FUNCTIONAL_COORDINATE_MIX_TO_FINITE_CE",
+  "selected_beta": 0.125,
+  "passing_betas": [0.125],
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_pareto_pro6_plan.json",
+    "sha256": "34f90942476dc6f045e4d8bb49cb7ec2a693c28f89d823020a05bfa044a26a88"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "360583ffcb115599faee52e427d0338771a81291",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_pareto.py",
+    "entrypoint_sha256": "7406990eee49c160f22553b4c4b0c45e29b6e8fa541adf5ec2b0a6c5000902dc",
+    "wall_seconds": 14.17882752418518,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_radius_result_sha256": "698bfccb749337c8dd01579e85fbb310bdaa9e85bafa0cdcbcf83c5682ea7a69"
+  },
+  "selected_metrics": {
+    "fit": {
+      "mlp_output_recovery": 0.5760124260141332,
+      "mlp_output_ratio_vs_weight_shear": 1.1282460665983345,
+      "post_gelu_recovery": 0.3998932845636251,
+      "post_gelu_ratio_vs_weight_shear": 1.1305383896182726,
+      "predicted_ce_decrease": 0.0035227990141720586,
+      "ce_descent_ratio_vs_weight_shear": 1.0470801353654606
+    },
+    "holdout": {
+      "mlp_output_recovery": 0.5692218631080921,
+      "mlp_output_ratio_vs_weight_shear": 1.1251686645809493,
+      "post_gelu_recovery": 0.3902152874382588,
+      "post_gelu_ratio_vs_weight_shear": 1.1250881259225465,
+      "predicted_ce_decrease": 0.00007587278335462817,
+      "ce_descent_ratio_vs_weight_shear": 1.0730831050523142
+    },
+    "weight_recovery": 0.2827093630002475,
+    "weight_recovery_ratio_vs_weight_shear": 0.950247828039281
+  },
+  "controls": {
+    "weight_shear": {
+      "fit_mlp_output_recovery": 0.5105379429779999,
+      "holdout_mlp_output_recovery": 0.5058991429699026,
+      "fit_post_gelu_recovery": 0.3537193325196586,
+      "holdout_post_gelu_recovery": 0.34683086457631146,
+      "fit_predicted_ce_decrease": 0.003364402489540595,
+      "holdout_predicted_ce_decrease": 0.00007070541228111991,
+      "weight_recovery": 0.2975111909317208
+    },
+    "fresh88": {
+      "fit_mlp_output_recovery": 0.47771735756823647,
+      "holdout_mlp_output_recovery": 0.4733447888445474,
+      "fit_predicted_ce_decrease": 0.003097799499936258,
+      "holdout_predicted_ce_decrease": 0.0000677576959714295,
+      "weight_recovery": 0.28044276313247113
+    }
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_pareto1",
+    "aggregate_sha256": "eb9f9d0ac87799a92cb177d8a55aa770c9d729693e65bb17af4d6e9b863dad10",
+    "fits_sha256": "ec031f734e262d0d5a1cdb7b3c4570c28b129206a1be6f9e790d7506bc34188e",
+    "metadata_sha256": "2cdf6a1196cc1cd7b8b966b16fba3ed421ed2a533574cdc1a77929f9cfd5d5d0",
+    "metrics_sha256": "56d63cef5632ba53794f836d8bd67520b176864fc8eff4b885efd148e43ef6ce",
+    "optimizer_sha256": "e8a115152a6e3870644c76c1d140927a6178eaa5298b3245d4bad70b5590ad7c"
+  },
+  "interpretation": [
+    "The direction problem is not solved by function-space topology or pure function-space coordinates. It is solved locally by keeping the task/weight topology and mixing only 12.5% of the function-fit coordinate endpoint into the weight-fit coordinates.",
+    "Beta 0.125 is the only preregistered Pareto point that satisfies every gate. It improves exact nonlinear MLP-output and post-GELU recovery by about 12.5-13.1% on both windows, improves predicted CE descent, and retains 95.0% of weight recovery.",
+    "The candidate uses the same 135,168 coordinates per layer and the same ordered pair topology as weight-shear24. The improvement is therefore metric-aware coordinate allocation, not added trainable capacity, a learned basis, or a LoRA-like residual.",
+    "The result remains a zero-update local structural gate. It requires held-out finite-CE confirmation before production implementation or MFU measurement."
+  ],
+  "authorization": {
+    "heldout_finite_ce_diagnostic_authorized": true,
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister and directly poll a zero-update finite-CE comparison of beta=0.125 against weight-shear24, fresh88, and dense exact on untouched validation windows."
+  }
+}
