@@ -1,0 +1,92 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_pareto_pro6_plan_v1",
+  "recorded_at": "2026-08-02",
+  "question": "Does a stagewise Pareto interpolation between weight-fit and function-fit shear coordinates preserve the qualified weight geometry while adding transferable nonlinear MLP-output and CE-gradient value?",
+  "authorization": {
+    "parameter_updates": 0,
+    "single_directly_polled_diagnostic": true,
+    "finite_ce": false,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "scientific_training": false,
+    "larger_rung": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_pareto.py",
+    "entrypoint_sha256": "7406990eee49c160f22553b4c4b0c45e29b6e8fa541adf5ec2b0a6c5000902dc",
+    "implementation_commit": "774a9449e787f8ee1dff91db1454590f052c5d05",
+    "parent_radius_result_sha256": "698bfccb749337c8dd01579e85fbb310bdaa9e85bafa0cdcbcf83c5682ea7a69"
+  },
+  "fixed_protocol": {
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "batch_size": 4,
+    "block_size": 1024,
+    "batches_per_window": 4,
+    "fit_train_seed": 20260820,
+    "holdout_train_seed": 20261204,
+    "functional_sample_cap": 2048,
+    "functional_sample_seed": 20261250,
+    "matching_seed": 20260820,
+    "matching_neighbors": 64,
+    "parent_rotational_stages": 64,
+    "residual_shear_stages": 24,
+    "equal_coordinates_per_layer": 135168,
+    "coordinate_mix_betas": [0.0625, 0.125, 0.25, 0.375, 0.5, 0.75, 1.0],
+    "topology": "one unchanged task/weight-selected shear24 pair topology after the qualified fresh64 rotational parent",
+    "coordinate_mix": "for every stage and pair, s_beta=(1-beta)*s_weight+beta*s_function; replay the mixed coordinates through the exact determinant-one maps",
+    "endpoints": "beta=0 is exactly the qualified weight-fit shear recipe; beta=1 is exactly the rejected function-fit recipe on the same topology",
+    "scoring": "exact nonlinear GELU and fixed-c_proj MLP-output effects, weight recovery, and predicted CE descent on fit plus a new independent train holdout",
+    "evaluation_dtype": "float32"
+  },
+  "decision_rule": {
+    "minimum_mlp_output_ratio": 1.1,
+    "minimum_post_gelu_ratio": 0.9,
+    "minimum_ce_descent_ratio": 1.0,
+    "minimum_weight_ratio": 0.9,
+    "maximum_determinant_error": 0.000002,
+    "maximum_condition_number": 1.01,
+    "selection": "A beta passes only if the same preregistered beta beats the beta=0 weight-shear control MLP-output recovery by at least 1.10x on both fit and new holdout, retains at least 0.90x post-GELU and weight recovery, does not reduce predicted CE descent on either window, and passes finite-map conditioning. If multiple betas pass, select the smallest. No threshold changes after observation.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "foreground_direct_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_functional_shear_pareto",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_pareto_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_pareto1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ]
+  },
+  "limitations": [
+    "This is a zero-update structural diagnostic; no validation CE, parameter update, optimizer update, or training is performed.",
+    "The fit window and both endpoint recipes were observed in parent diagnostics. The holdout train seed is new and scoring-only; the complete beta grid and gates are frozen before reading it.",
+    "This test changes neither topology nor coordinate count. It only interpolates two existing coordinate solutions on identical ordered pairs.",
+    "Passing authorizes only a separately preregistered finite-CE gate. It does not authorize production integration, MFU testing, scientific training, or a larger rung."
+  ]
+}
