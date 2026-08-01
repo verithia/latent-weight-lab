@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_task_shear_ce_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "REJECT_TASK_MATCHED_SHEAR_HELDOUT_CE",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_task_shear_ce_pro6_plan.json",
+    "sha256": "ffa5e7420f9503dd6630768ddff67142ae47573fe371892f8b7d394ef8b9d683"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "4297a4e4e86919096d5b7820aee025cfe6b1bd00",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_task_shear_ce.py",
+    "entrypoint_sha256": "064ac3d0e2b4ea5e4f161286e455cdf60fb0f408bc79d5b8522ca784af358965",
+    "wall_seconds": 841.9218938350677,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_task_shear_fit_result_sha256": "691da0a1f7cd6acc1ee586575f01d64669bfe355748ed5f7e8ba5c5c109941de"
+  },
+  "registered_gates": {
+    "numerically_stable": true,
+    "dense_beats_fresh_every_window": true,
+    "selected_beats_fresh_every_window": true,
+    "minimum_recovery_passed": false,
+    "median_recovery_passed": false
+  },
+  "held_out_dense_gap_recovery": {
+    "minimum": 0.038193018480492814,
+    "median": 0.06782252632164726,
+    "by_window": [
+      0.038193018480492814,
+      0.054636951833213515,
+      0.081008100810081,
+      0.09116809116809117
+    ],
+    "required_minimum": 0.05,
+    "required_median": 0.1
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_task_shear_ce1",
+    "aggregate_sha256": "f9ddedf1c20cc31a7129c67292fcd262471345319b893db9e54f78e47c3a69f9",
+    "fits_sha256": "e4059afaf857f2fd51d199bae8f936ab53e62e254359749dc2abc75d1d526c5f",
+    "losses_sha256": "d5e071c75e8ee3fd77286037f1e5ffbbf6f24106d23b26b1db69ba2db27b7513",
+    "metadata_sha256": "49ca703c77fb9ed5b45ca130f5b14ea6494403386cddd7f9423f310718a9588e"
+  },
+  "interpretation": [
+    "The task-matched shear chart generalizes in sign: it lowers finite CE relative to fresh88 on all four untouched validation windows, and dense exact beats fresh88 on all four.",
+    "The magnitude is insufficient under the preregistered rule. It recovers only 3.82-9.12% of the dense-over-fresh gap, with 6.78% median, below the fixed 5% worst-window and 10% median thresholds.",
+    "The prior fit gate recovered 6.08% more dense-update Frobenius energy than fresh88 in every layer, but that weight-space gain becomes only a small CE gain. The remaining bottleneck is therefore activation/task metric alignment, not missing symmetric-shear capacity or numerical conditioning.",
+    "The threshold is not weakened after observation. fresh64_shear24 is not authorized for production integration, MFU preflight, training, or a larger rung.",
+    "The next admissible zero-update test should keep the same coordinate budget but select and fit shear pairs using the post-GELU-and-c_proj functional metric on a train-only fit window, then score on new untouched validation windows."
+  ],
+  "authorization": {
+    "production_training_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "activation_weighted_zero_update_gate_authorized": true,
+    "next_action": "Preregister a fit-only functional-metric shear gate that compares weight-space pair selection with post-GELU/c_proj activation-weighted pair selection at the same 135,168 coordinates."
+  }
+}
