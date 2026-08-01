@@ -224,7 +224,7 @@ def functional_matched_permutations(
 
 
 @torch.no_grad()
-def fit_functional_shear_flow(
+def fit_functional_shear_recipe(
     source: torch.Tensor,
     requested_update: torch.Tensor,
     inputs: torch.Tensor,
@@ -233,8 +233,12 @@ def fit_functional_shear_flow(
     permutations: torch.Tensor,
     *,
     stages: int,
-) -> tuple[torch.Tensor, dict[str, Any]]:
-    """Causally fit exact shear maps in linearized MLP-output geometry."""
+) -> tuple[
+    torch.Tensor,
+    dict[str, Any],
+    list[tuple[torch.Tensor, torch.Tensor]],
+]:
+    """Fit exact shears and return their ordered finite-map recipe."""
     if (
         source.ndim != 2
         or source.shape != requested_update.shape
@@ -258,6 +262,7 @@ def fit_functional_shear_flow(
     stage_recovery: list[float] = []
     maximum_determinant_error = 0.0
     maximum_condition_number = 0.0
+    recipe: list[tuple[torch.Tensor, torch.Tensor]] = []
     for stage in range(stages):
         pairs = (
             permutations[stage]
@@ -297,6 +302,7 @@ def fit_functional_shear_flow(
         current = updated
         projected = projected_updated
         coordinates_all.append(coordinates)
+        recipe.append((pairs.detach().clone(), coordinates.detach().clone()))
         maximum_determinant_error = max(
             maximum_determinant_error, finite["maximum_determinant_error"]
         )
@@ -317,7 +323,70 @@ def fit_functional_shear_flow(
         "shear_max_abs": float(coordinates[:, 0].abs().max()),
         "maximum_determinant_error": maximum_determinant_error,
         "maximum_condition_number": maximum_condition_number,
+    }, recipe
+
+
+@torch.no_grad()
+def replay_functional_shear_recipe(
+    source: torch.Tensor,
+    recipe: list[tuple[torch.Tensor, torch.Tensor]],
+    *,
+    coordinate_scale: float,
+) -> tuple[torch.Tensor, dict[str, float]]:
+    """Replay one fitted recipe after scaling only its shear coordinates."""
+    if coordinate_scale < 0.0 or not math.isfinite(float(coordinate_scale)):
+        raise ValueError("coordinate_scale must be finite and non-negative")
+    current = source.float().clone()
+    maximum_determinant_error = 0.0
+    maximum_condition_number = 0.0
+    minimum_determinant = float("inf")
+    for pairs, coordinates in recipe:
+        current, finite = apply_pair_stage(
+            current,
+            pairs.to(device=source.device),
+            coordinates.to(device=source.device) * float(coordinate_scale),
+        )
+        minimum_determinant = min(
+            minimum_determinant, finite["minimum_determinant"]
+        )
+        maximum_determinant_error = max(
+            maximum_determinant_error, finite["maximum_determinant_error"]
+        )
+        maximum_condition_number = max(
+            maximum_condition_number, finite["maximum_condition_number"]
+        )
+    if not recipe:
+        minimum_determinant = 1.0
+    return current - source.float(), {
+        "coordinate_scale": float(coordinate_scale),
+        "minimum_determinant": minimum_determinant,
+        "maximum_determinant_error": maximum_determinant_error,
+        "maximum_condition_number": maximum_condition_number,
     }
+
+
+@torch.no_grad()
+def fit_functional_shear_flow(
+    source: torch.Tensor,
+    requested_update: torch.Tensor,
+    inputs: torch.Tensor,
+    pre_gelu: torch.Tensor,
+    cproj_weight: torch.Tensor,
+    permutations: torch.Tensor,
+    *,
+    stages: int,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Causally fit exact shear maps in linearized MLP-output geometry."""
+    update, diagnostics, _recipe = fit_functional_shear_recipe(
+        source,
+        requested_update,
+        inputs,
+        pre_gelu,
+        cproj_weight,
+        permutations,
+        stages=stages,
+    )
+    return update, diagnostics
 
 
 @torch.no_grad()

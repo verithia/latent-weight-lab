@@ -1,5 +1,6 @@
 import torch
 
+from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import apply_pair_stage
 from examples.nanogpt.analyze_mlp_cfc_functional_shear_fit import (
     CONTROL,
     FUNCTIONAL_BOTH,
@@ -8,8 +9,10 @@ from examples.nanogpt.analyze_mlp_cfc_functional_shear_fit import (
     WEIGHT_SHEAR,
     aggregate,
     fit_functional_shear_flow,
+    fit_functional_shear_recipe,
     functional_shear_scores,
     gelu_derivative,
+    replay_functional_shear_recipe,
 )
 
 
@@ -66,8 +69,6 @@ def test_functional_flow_recovers_single_shear_stage() -> None:
     cproj = torch.eye(2)
     coordinates = torch.tensor([[0.02, 0.0]], dtype=torch.float64)
     pairs = torch.tensor([[0, 1]])
-    from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import apply_pair_stage
-
     target, _diagnostics = apply_pair_stage(source, pairs, coordinates)
     requested = target - source
     fitted, diagnostics = fit_functional_shear_flow(
@@ -81,6 +82,36 @@ def test_functional_flow_recovers_single_shear_stage() -> None:
     )
     assert diagnostics["functional_requested_recovery"] > 0.999
     torch.testing.assert_close(fitted, requested, atol=1e-4, rtol=5e-3)
+
+
+def test_functional_recipe_replays_scaled_coordinates() -> None:
+    source = torch.tensor([[1.0, 0.0], [0.0, 1.0]])
+    inputs = torch.tensor([[1.0, 0.5], [-0.5, 1.0], [0.7, -1.2]])
+    pre = torch.zeros(3, 2)
+    cproj = torch.eye(2)
+    target, _ = apply_pair_stage(
+        source,
+        torch.tensor([[0, 1]]),
+        torch.tensor([[0.02, 0.0]], dtype=torch.float64),
+    )
+    fitted, _diagnostics, recipe = fit_functional_shear_recipe(
+        source,
+        target - source,
+        inputs,
+        pre,
+        cproj,
+        torch.tensor([[0, 1]]),
+        stages=1,
+    )
+    replayed, finite = replay_functional_shear_recipe(
+        source, recipe, coordinate_scale=1.0
+    )
+    zero, _ = replay_functional_shear_recipe(
+        source, recipe, coordinate_scale=0.0
+    )
+    torch.testing.assert_close(replayed, fitted)
+    torch.testing.assert_close(zero, torch.zeros_like(source))
+    assert finite["maximum_condition_number"] < 1.1
 
 
 def _metric_rows(functional_value: float) -> list[dict]:
