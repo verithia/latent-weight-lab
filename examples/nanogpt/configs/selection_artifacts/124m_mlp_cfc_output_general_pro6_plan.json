@@ -1,0 +1,110 @@
+{
+  "authorization": {
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "parameter_updates": 0,
+    "production_implementation": false,
+    "scientific_training": false,
+    "single_directly_polled_diagnostic": true
+  },
+  "decision_rule": {
+    "maximum_operator_norm": 0.05,
+    "maximum_reconstruction_error": 2e-05,
+    "maximum_replicate_range": 2e-07,
+    "selection": "select skew or symmetric shear alone only if it passes sufficiency; otherwise require their combined general output action if that passes; stop on any numerical gate failure",
+    "sufficient_median_recovery": 0.85,
+    "sufficient_minimum_recovery": 0.75,
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_output_general",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_output_general_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_output_general1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ],
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "fixed_protocol": {
+    "batch_size": 4,
+    "block_size": 1024,
+    "candidates": [
+      "fresh88",
+      "dense_exact",
+      "fresh_plus_output_skew",
+      "fresh_plus_output_symmetric_shear",
+      "fresh_plus_output_skew_shear"
+    ],
+    "decomposition": "A = residual W^+; output skew = (A-A^T)W/2; output symmetric = (A+A^T)W/2; subtract the exact SVD-radial term from symmetric to isolate off-diagonal shear",
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "matching_neighbors": 64,
+    "matching_seed": 20260820,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "validation_batches_per_window": 8,
+    "validation_seeds": [
+      20260901,
+      20260902,
+      20260903,
+      20260904
+    ]
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_output_general.py",
+    "entrypoint_sha256": "a8a74d35843c70f88d06440ab35e0e966382f47fb13fa57bfbdadad6e66cde46",
+    "parent_generator_spectrum_result_sha256": "6f81e86796ec2e2ac6d6cd13513167cad6c5d88b9040bf14c4d9ba38d66a8b93",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "limitations": [
+    "This is a zero-update local structural attribution, not language-model training.",
+    "The exact A = residual W^+ operator is an oracle. Passing identifies a general output-side family but does not identify a compact fixed basis.",
+    "A selected family still requires a separate equal-coordinate FHT-conjugated capacity screen, production implementation, and >=20% host-local measured MFU before training.",
+    "No learned basis, LoRA, dense residual adapter, HyperConnection, optimizer update, or model update is introduced."
+  ],
+  "question": "Can the dense-minus-fresh c_fc residual be represented stably as one output-side general action, and is its missing held-out value specifically symmetric shear rather than rotation or radial scale?",
+  "recorded_at": "2026-08-01",
+  "schema_version": "mai_124m_mlp_cfc_output_general_pro6_plan_v1"
+}
