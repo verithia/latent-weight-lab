@@ -1,0 +1,158 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_residual_structure_pro6_result_v1",
+  "recorded_at": "2026-08-01",
+  "decision": "NO_REGISTERED_RESIDUAL_FAMILY_SUFFICIENT",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_residual_structure_pro6_plan.json",
+    "sha256": "b4a51a02a0143a8abef0255b28a25d06b4f7bda95b0ed115d07fd4c7fdfa7a4a"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "de41859fedcf2e0aa5328a4756725da5b644dddf",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_residual_structure.py",
+    "entrypoint_sha256": "8167eb197a815ffccb3032b9cb8cbb164f3f7faf4e644a6b430374646388a57e",
+    "wall_seconds": 32.26254653930664,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "failed_attempt": {
+      "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_residual_structure1",
+      "failure": "CSV serialization rejected heterogeneous structural metric fields before held-out loss evaluation",
+      "scientific_decision_produced": false,
+      "source_commit": "ea85f9c0f3117b71c7a7651407e259d31bf58a4c"
+    }
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "scientific_source_base_commit": "c2cb932a29b2aafca58315d487937b36b8296e15"
+  },
+  "registered_gates": {
+    "numerically_stable": true,
+    "dense_beats_fresh_every_window": true,
+    "selected_candidate_beats_fresh_every_window": true,
+    "selected_candidate_beats_baseline_every_window": true,
+    "selected_candidate_minimum_gap_recovery_at_least_0p50": false,
+    "selected_candidate_median_gap_recovery_at_least_0p80": false
+  },
+  "held_out_validation": {
+    "validation_1": {
+      "baseline_ce": 5.586326062679291,
+      "fresh88_ce": 5.586254596710205,
+      "dense_exact_ce": 5.5861358642578125,
+      "fresh_plus_lowrank64_ce": 5.586241066455841,
+      "dense_over_fresh_gain": 0.00011873245239257812,
+      "lowrank64_over_fresh_gain": 0.000013530254364013672,
+      "lowrank64_gap_recovery": 0.11395582329317269
+    },
+    "validation_2": {
+      "baseline_ce": 5.638737440109253,
+      "fresh88_ce": 5.638688147068024,
+      "dense_exact_ce": 5.638611555099487,
+      "fresh_plus_lowrank64_ce": 5.638680636882782,
+      "dense_over_fresh_gain": 0.00007659196853637695,
+      "lowrank64_over_fresh_gain": 0.000007510185241699219,
+      "lowrank64_gap_recovery": 0.0980544747081712
+    },
+    "validation_3": {
+      "baseline_ce": 5.519240021705627,
+      "fresh88_ce": 5.519166827201843,
+      "dense_exact_ce": 5.519048035144806,
+      "fresh_plus_lowrank64_ce": 5.519155859947205,
+      "dense_over_fresh_gain": 0.00011879205703735352,
+      "lowrank64_over_fresh_gain": 0.000010967254638671875,
+      "lowrank64_gap_recovery": 0.09232313095835425
+    },
+    "validation_4": {
+      "baseline_ce": 5.608306467533112,
+      "fresh88_ce": 5.608259618282318,
+      "dense_exact_ce": 5.608190536499023,
+      "fresh_plus_lowrank64_ce": 5.608254253864288,
+      "dense_over_fresh_gain": 0.00006908178329467773,
+      "lowrank64_over_fresh_gain": 0.000005364418029785156,
+      "lowrank64_gap_recovery": 0.07765314926660914
+    }
+  },
+  "candidate_summary": {
+    "fresh_plus_input_diag": {
+      "coordinates_per_layer": 768,
+      "minimum_gap_recovery": 0.0008628127696289905,
+      "median_gap_recovery": 0.007656110824621443,
+      "mean_residual_energy_recovery": 0.0010395032010142486,
+      "qualifies": false
+    },
+    "fresh_plus_expansion_diag": {
+      "coordinates_per_layer": 3072,
+      "minimum_gap_recovery": 0.012451361867704281,
+      "median_gap_recovery": 0.016114641105820327,
+      "mean_residual_energy_recovery": 0.0022608226116950883,
+      "qualifies": false
+    },
+    "fresh_plus_bilateral_diag": {
+      "coordinates_per_layer": 3840,
+      "minimum_gap_recovery": 0.00933852140077821,
+      "median_gap_recovery": 0.01500095026293494,
+      "mean_residual_energy_recovery": 0.0027505943987028067,
+      "qualifies": false
+    },
+    "fresh_plus_lowrank1": {
+      "coordinates_per_layer": 3840,
+      "minimum_gap_recovery": -0.0008628127696289905,
+      "median_gap_recovery": 0.0023346303501945525,
+      "mean_residual_energy_recovery": 0.002722095036611897,
+      "qualifies": false
+    },
+    "fresh_plus_lowrank4": {
+      "coordinates_per_layer": 15360,
+      "minimum_gap_recovery": 0.005447470817120622,
+      "median_gap_recovery": 0.008029987486322611,
+      "mean_residual_energy_recovery": 0.010767938025583096,
+      "qualifies": false
+    },
+    "fresh_plus_lowrank16": {
+      "coordinates_per_layer": 61440,
+      "minimum_gap_recovery": 0.0060396893874029335,
+      "median_gap_recovery": 0.02108081095077752,
+      "mean_residual_energy_recovery": 0.04197468085401901,
+      "qualifies": false
+    },
+    "fresh_plus_lowrank64": {
+      "coordinates_per_layer": 245760,
+      "minimum_gap_recovery": 0.07765314926660914,
+      "median_gap_recovery": 0.09518880283326273,
+      "mean_residual_energy_recovery": 0.15704778424913612,
+      "mean_residual_cosine": 0.39629170733905017,
+      "qualifies": false
+    }
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_residual_structure2",
+    "aggregate_sha256": "c66d44c6226de8200991a430d28f7df911164b6c140628ba409724d7f9e16097",
+    "losses_sha256": "5835789d37a74cc6d5b4c9c278d8ace2423aa5ef19d82526468759dbbcae7791",
+    "metadata_sha256": "61afbbe21d31f730ad7d53af9e59f695878ce8eb3cc1c549b813a5dff63221d4",
+    "selections_sha256": "ced1f1479dc5f5f21f046952c0f57b76ad63b31b9110745a4d82800376f8a1c7",
+    "spectra_sha256": "84789ae48ce16799db185a13f12eee0d9aace3b311dc0bfb6e97d4a1a0b6b6a9",
+    "weight_metrics_sha256": "b5ca315cf92e0495046fcf11b4a4ad721982a2595fe4fe19758ab7ef7b97410c"
+  },
+  "interpretation": [
+    "The exact dense residual is a valid positive control: it improves on fresh88 on all four new validation windows with exactly repeatable float32 losses.",
+    "Simple input-, expansion-, and bilateral-channel scaling capture only 0.10%, 0.23%, and 0.28% of residual Frobenius energy on average, and recover at most about 1.6% median held-out CE gap. Per-channel modulation is not the missing c_fc direction.",
+    "The best tested rank-64 residual uses 245,760 coordinates per layer, captures 15.70% residual energy, but recovers only 7.77% to 11.40% of the held-out dense-over-fresh CE gap. It is a weak attribution, not a sufficient architecture.",
+    "The missing useful direction is distributed and layer-specific rather than a shared diagonal rescaling or a small global spectral correction. The present fresh88 topology genuinely aligns with task descent but does not span enough of the dense finite-step tangent.",
+    "Do not launch a diagonal-gain or rank-64 residual training run from this result. The next no-update study should localize the deficit by layer and by left/right singular subspace before specifying a new trainable chart."
+  ],
+  "authorization": {
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister a layer-local residual attribution that measures each layer's dense-over-fresh held-out CE contribution and tests whether layer-specific left, right, or joint singular subspaces recover it."
+  }
+}
