@@ -33,7 +33,7 @@
     "command": [
       "env",
       "CUDA_VISIBLE_DEVICES=0",
-      "/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
       "-u",
       "-m",
       "examples.nanogpt.mfu_preflight",
