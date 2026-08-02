@@ -14,7 +14,7 @@
     "gpu": 0,
     "host": "PRO6",
     "performance_gate_owner": "foreground operator poll, never watchdog",
-    "python": "/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
     "remote_repository": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay",
     "workspace": "/home/pro6000-9980x/MappingNetworks",
     "workspace_cap_bytes": 274877906944
@@ -55,8 +55,8 @@
         "matched_parent_gap_ceiling": 0.1,
         "success": "terminal validation CE <= min(parent terminal validation CE + 0.1000, 4.5629)"
       },
-      "long_run_command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json 0 pro6_mai_v3_350m_full_mlp_conditioned_0p5tpp /home/pro6000-9980x/MappingNetworks",
-      "performance_command": "CUDA_VISIBLE_DEVICES=0 MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25 /home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 24",
+      "long_run_command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json 0 pro6_mai_v3_350m_full_mlp_conditioned_0p5tpp /home/pro6000-9980x/MappingNetworks",
+      "performance_command": "CUDA_VISIBLE_DEVICES=0 MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25 /home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 24",
       "performance_rule": "MFU >= 20%, all losses finite, exactly 600 c_fc diagnostic rows, internal limiter exercised, zero fallback, every post-projection log-condition <= log(1.01), and finite bounded weight norms"
     },
     "cproj_hidden88_parent": {
@@ -67,8 +67,8 @@
         "directional_ceiling": 4.5629,
         "success_ceiling": 4.4629
       },
-      "long_run_command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json 0 pro6_mai_v3_350m_cproj_hidden88_0p5tpp /home/pro6000-9980x/MappingNetworks",
-      "performance_command": "CUDA_VISIBLE_DEVICES=0 /home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 8",
+      "long_run_command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json 0 pro6_mai_v3_350m_cproj_hidden88_0p5tpp /home/pro6000-9980x/MappingNetworks",
+      "performance_command": "CUDA_VISIBLE_DEVICES=0 /home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 8",
       "performance_rule": "MFU >= 20%, all real-training losses finite, exclusive GPU, exact config hash, and complete certificate"
     }
   },
