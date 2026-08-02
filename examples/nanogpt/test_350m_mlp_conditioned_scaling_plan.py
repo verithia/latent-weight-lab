@@ -272,3 +272,11 @@ def test_v2_preflight_result_authorizes_only_the_registered_candidate() -> None:
         terminal["attention_only_absolute_ceiling"],
         terminal["matched_parent_plus_0p1_ceiling"],
     )
+
+
+def test_detached_launcher_can_bind_a_fresh_certificate_without_mutating_config() -> None:
+    launcher = (REPO / "examples/nanogpt/launch_y400_ladder_detached.sh").read_text()
+    assert (
+        'MEASURED_MFU_CERTIFICATE="${MFU_PREFLIGHT_CERTIFICATE_OVERRIDE:-${MFU_CONFIG[1]}}"'
+        in launcher
+    )

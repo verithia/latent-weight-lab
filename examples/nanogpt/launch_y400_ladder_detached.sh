@@ -301,7 +301,10 @@ print(config.get("mfu_preflight_certificate") or "")
 PY
 )
 MFU_MIN_FRACTION="${MFU_CONFIG[0]}"
-MEASURED_MFU_CERTIFICATE="${MFU_CONFIG[1]}"
+# A registered rerun may need to preserve an immutable scientific config while
+# binding provenance to a fresher certificate for that exact config.  Keep the
+# config value as the default, but permit an explicit launcher-only override.
+MEASURED_MFU_CERTIFICATE="${MFU_PREFLIGHT_CERTIFICATE_OVERRIDE:-${MFU_CONFIG[1]}}"
 if [[ -n "$MEASURED_MFU_CERTIFICATE" ]]; then
   [[ "$MEASURED_MFU_CERTIFICATE" = /* ]] \
     || { echo "refusing launch: mfu_preflight_certificate must be absolute" >&2; exit 2; }
