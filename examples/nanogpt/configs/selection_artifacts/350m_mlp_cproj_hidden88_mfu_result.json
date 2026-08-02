@@ -1,0 +1,46 @@
+{
+  "artifact_kind": "350m_mlp_cproj_hidden88_mfu_result",
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.json",
+    "sha256": "f73f0e4af965c541005e8d45cd6bb7dedaaaf60ec91622ca0f15c34e9cd77be2"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "sha256": "f59803d0cca73bc87a7ca3f9170aa2d09c92a4fd6498f3eca36394bfb1d45321"
+  },
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "decision": "PASS_MFU_GATE",
+  "execution_commit": "793f435a3faa0c276ac90d6bac0b6bb261a52247",
+  "hardware": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+  "literal_command": "CUDA_VISIBLE_DEVICES=0 /home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 8",
+  "log": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.log",
+    "sha256": "128eebcaadfc320dc592f0e2ef61ebfcbafd47ee85541d4d6b1d38919301e408"
+  },
+  "measurement": {
+    "elapsed_seconds": 37.16213083267212,
+    "empirical_bf16_gemm_peak_tflops": 416.7234855049167,
+    "iter_ms": 3649.535,
+    "mfu_fraction": 0.367011652997048,
+    "model_tflops": 152.94237525785087,
+    "peak_mib": 52547.29,
+    "timed_updates": 8,
+    "tokens_per_second": 71829.97375,
+    "warmup_updates": 1
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_scaling_plan.json",
+    "sha256": "406cae6fc38d2ef9b64ed56f612e4d00614a8934cf555ba2342926527cba0615"
+  },
+  "schema_version": "350m_mlp_performance_result_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "train_exit_code": 0
+  },
+  "threshold": {
+    "headroom_percentage_points": 16.7011652997048,
+    "minimum_mfu_fraction": 0.2
+  }
+}

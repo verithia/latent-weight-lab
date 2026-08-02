@@ -137,3 +137,18 @@ def test_candidate_admission_is_sequential_and_performance_gated() -> None:
     assert "MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25" in candidate["performance_command"]
     assert "--warmup-updates 1 --timed-updates 24" in candidate["performance_command"]
     assert "exactly 600 c_fc diagnostic rows" in candidate["performance_rule"]
+
+
+def test_parent_mfu_result_is_bound_to_plan_and_config() -> None:
+    result_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_hidden88_mfu_result.json"
+    )
+    result = load(result_path)
+    assert result["schema_version"] == "350m_mlp_performance_result_v1"
+    assert result["decision"] == "PASS_MFU_GATE"
+    assert result["measurement"]["mfu_fraction"] >= result["threshold"]["minimum_mfu_fraction"]
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["stability"]["train_exit_code"] == 0
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
