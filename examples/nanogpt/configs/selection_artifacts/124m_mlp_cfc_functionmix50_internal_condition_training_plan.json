@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_internal_condition_training_plan_v1",
+  "recorded_at": "2026-08-02",
+  "status": "preregistered",
+  "scientific_question": "Can the direction-aligned c_fc functional chart, with its 1.01 condition budget enforced inside the recursive fit and on the final mixed map, replace the remaining dense MLP matrix within 0.1 CE of the qualified hidden88 parent?",
+  "authorization": {
+    "scope": "exactly one 124M/0.5TPP internally conditioned beta-0.5 function-aware full-MLP replacement run",
+    "additional_candidates_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "implementation_commit": "9931db68572173325310fa5cf706cfb88354e30b",
+    "prelaunch_evidence_commit": "e0797d85d7d6ea8fcfe5dbcd717c8b8f0ecebc58",
+    "model_tier": "124m",
+    "planned_tpp": 0.5,
+    "functional_coordinate_mix_beta": 0.5,
+    "maximum_condition_number": 1.01,
+    "cfc_coordinates_per_layer": 135168,
+    "cproj_coordinates_per_layer": 135168
+  },
+  "parent_evidence": {
+    "finite_ce_decision": "PROMOTE_INTERNAL_CONDITIONED_FUNCTION_MIX_TO_STABILITY_PREFLIGHT",
+    "finite_ce_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_ce_result.json",
+    "finite_ce_result_sha256": "5b5c1c435577926dab73cf057901aa3e898d29791c17ddf33fb730c8a470513c",
+    "stability_mfu_decision": "PASS_INTERNAL_CONDITIONED_FUNCTION_MIX_STABILITY_AND_MFU",
+    "stability_mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_stability_result.json",
+    "stability_mfu_result_sha256": "88655efa5387093d381cc64da72d224d769fba3b1ba6cfb5b610a8193090d819",
+    "mfu_certificate_sha256": "4910c336720940d5325d998e25f261183197f469f434044f3eaa9147f8df7af5",
+    "mfu_complete_log_sha256": "d38a9b29aea9287ec9c778e7bed4351f774240a626ebc04dad39e4d793e5ac94"
+  },
+  "decision_rule": {
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "parent_validation_ce": 5.5923542976379395,
+    "success": "stable terminal validation CE <= 5.6923543, limiting the c_fc replacement penalty over hidden88 to <= 0.1 CE",
+    "directional": "stable terminal validation CE is above 5.6923543 and at or below 5.7923543",
+    "reject": "terminal validation CE above 5.7923543, nonfinite/divergent loss, condition-bound violation, incomplete terminal evaluation/checkpoint, or any provenance mismatch",
+    "threshold_changes_after_observation": false
+  },
+  "protocol": {
+    "host": "PRO6",
+    "gpu": 0,
+    "max_iters": 238,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "execution": "direct foreground process polled by the agent through terminal exit",
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "bash",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_functionmix50_internalcondition1p01_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "monitoring": {
+      "watchdog": false,
+      "callback": false,
+      "queue_worker": false,
+      "heartbeat": false
+    },
+    "required_outputs": [
+      "complete launcher log and status",
+      "terminal fixed-window update-238 train and validation CE",
+      "atomic terminal checkpoint with exact Muon custom state",
+      "provenance sidecar containing run commit, source hashes, config hash, command, and dataset manifest hash"
+    ]
+  },
+  "post_run": "Record immutable log, status, checkpoint, and provenance hashes and update the active project note. Do not promote to a larger rung from this screen alone."
+}
