@@ -1123,6 +1123,11 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-max-condition-number",
+        type=float,
+        default=0.0,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cfc-functional-shear-sample-cap",
         type=int,
         default=2048,
@@ -1483,6 +1488,18 @@ def parse_args() -> argparse.Namespace:
             namespace.block_fht_mlp_cfc_functional_shear_beta
         ) <= 1.0:
             raise ValueError("functional-shear beta must be in [0, 1]")
+        maximum_condition = float(
+            namespace
+            .block_fht_mlp_cfc_functional_shear_max_condition_number
+        )
+        if maximum_condition != 0.0 and (
+            not math.isfinite(maximum_condition)
+            or maximum_condition <= 1.0
+        ):
+            raise ValueError(
+                "functional-shear max condition must be zero/disabled "
+                "or finite and greater than one"
+            )
         if (
             namespace.block_fht_mlp_cfc_functional_shear_sample_cap
             <= 0
@@ -1781,6 +1798,10 @@ def main() -> None:
         block_fht_mlp_cfc_functional_shear_weight_norm_projection=(
             args
             .block_fht_mlp_cfc_functional_shear_weight_norm_projection
+        ),
+        block_fht_mlp_cfc_functional_shear_max_condition_number=(
+            args
+            .block_fht_mlp_cfc_functional_shear_max_condition_number
         ),
         block_fht_mlp_cfc_functional_shear_sample_cap=(
             args.block_fht_mlp_cfc_functional_shear_sample_cap

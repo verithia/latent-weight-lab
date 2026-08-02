@@ -646,6 +646,7 @@ def test_functional_coordinate_diagnostics_bound_pair_condition() -> None:
         seed=109,
         beta=0.5,
         project_to_weight_norm=False,
+        max_condition_number=None,
         learning_rate=0.001,
         weight_decay=0.1,
     )
@@ -669,6 +670,7 @@ def test_mixed_functional_direction_projects_to_weight_recipe_norm() -> None:
         functional_recipe,
         beta=0.5,
         project_to_weight_norm=True,
+        max_condition_number=None,
     )
     raw = 0.5 * weight_recipe[0][1] + 0.5 * functional_recipe[0][1]
     projected = mixed[0][1]
@@ -676,6 +678,40 @@ def test_mixed_functional_direction_projects_to_weight_recipe_norm() -> None:
     assert torch.allclose(projected.norm(), weight_recipe[0][1].norm())
     assert diagnostics["coordinate_norm_projection_active"] is True
     assert diagnostics["coordinate_norm_projection_scale"] < 1.0
+
+
+def test_mixed_direction_respects_composed_condition_bound() -> None:
+    pairs = torch.tensor([[0, 1], [2, 3]])
+    weight_recipe = [
+        (pairs, torch.tensor([0.002, -0.001])),
+        (pairs.flip(0), torch.tensor([0.001, 0.002])),
+    ]
+    functional_recipe = [
+        (pairs, torch.tensor([1.0, 0.5])),
+        (pairs.flip(0), torch.tensor([0.75, -1.0])),
+    ]
+    mixed, diagnostics = mix_shear_recipes(
+        weight_recipe,
+        functional_recipe,
+        beta=0.5,
+        project_to_weight_norm=False,
+        max_condition_number=1.01,
+    )
+    raw = torch.cat(
+        [
+            0.5 * weight_coordinates + 0.5 * functional_coordinates
+            for (_pairs, weight_coordinates), (
+                _functional_pairs,
+                functional_coordinates,
+            ) in zip(weight_recipe, functional_recipe, strict=True)
+        ]
+    )
+    projected = torch.cat([coordinates for _pairs, coordinates in mixed])
+    assert torch.allclose(projected / projected.norm(), raw / raw.norm())
+    assert diagnostics["condition_projection_active"] is True
+    assert diagnostics["mixed_log_condition_bound_after_projection"] <= (
+        math.log(1.01) + 1e-12
+    )
 
 
 def test_gpt_wires_functional_cfc_and_consumes_bounded_context(

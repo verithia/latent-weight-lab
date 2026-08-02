@@ -162,6 +162,7 @@ class GPTConfig:
     block_fht_mlp_cfc_functional_shear_neighbors: int = 64
     block_fht_mlp_cfc_functional_shear_beta: float = 0.5
     block_fht_mlp_cfc_functional_shear_weight_norm_projection: bool = False
+    block_fht_mlp_cfc_functional_shear_max_condition_number: float = 0.0
     block_fht_mlp_cfc_functional_shear_sample_cap: int = 2048
     block_fht_mlp_cfc_functional_shear_seed: int = 20260820
     block_fht_ffn_postgelu_std_target: float = 0.0
@@ -1553,6 +1554,13 @@ class MLP(nn.Module):
                 project_to_weight_norm=bool(
                     config
                     .block_fht_mlp_cfc_functional_shear_weight_norm_projection
+                ),
+                max_condition_number=(
+                    float(
+                        config
+                        .block_fht_mlp_cfc_functional_shear_max_condition_number
+                    )
+                    or None
                 ),
                 functional_sample_cap=int(
                     config.block_fht_mlp_cfc_functional_shear_sample_cap

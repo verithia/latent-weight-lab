@@ -190,6 +190,11 @@ def main() -> None:
             project_to_weight_norm=bool(
                 protocol.get("weight_norm_projection", False)
             ),
+            max_condition_number=(
+                float(protocol["max_condition_number"])
+                if protocol.get("max_condition_number") is not None
+                else None
+            ),
         )
         updates[CONTROL][layer] = fitted[CONTROL].cpu()
         updates[WEIGHT_SHEAR][layer] = fitted[WEIGHT_SHEAR].cpu()

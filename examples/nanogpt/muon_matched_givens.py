@@ -525,6 +525,7 @@ def mix_shear_recipes(
     *,
     beta: float,
     project_to_weight_norm: bool,
+    max_condition_number: float | None = None,
 ) -> tuple[list[tuple[torch.Tensor, torch.Tensor]], dict[str, float | bool]]:
     """Mix recipe directions, optionally retaining weight-fit L2 magnitude.
 
@@ -555,6 +556,10 @@ def mix_shear_recipes(
         mixed_energy += float(coordinates.double().square().sum())
     weight_norm = math.sqrt(weight_energy)
     mixed_norm_before = math.sqrt(mixed_energy)
+    mixed_log_condition_before = sum(
+        2.0 * float(coordinates.abs().max())
+        for _pairs, coordinates in mixed
+    )
     coordinate_scale = 1.0
     if (
         project_to_weight_norm
@@ -562,6 +567,20 @@ def mix_shear_recipes(
         and mixed_norm_before > 0.0
     ):
         coordinate_scale = weight_norm / mixed_norm_before
+    condition_scale = 1.0
+    if max_condition_number is not None:
+        if (
+            not math.isfinite(float(max_condition_number))
+            or float(max_condition_number) <= 1.0
+        ):
+            raise ValueError("max condition number must be finite and > 1")
+        maximum_log_condition = math.log(float(max_condition_number))
+        if mixed_log_condition_before > maximum_log_condition:
+            condition_scale = (
+                maximum_log_condition / mixed_log_condition_before
+            )
+            coordinate_scale = min(coordinate_scale, condition_scale)
+    if coordinate_scale < 1.0:
         mixed = [
             (pairs, coordinates * coordinate_scale)
             for pairs, coordinates in mixed
@@ -574,8 +593,22 @@ def mix_shear_recipes(
         ),
         "coordinate_norm_projection_scale": coordinate_scale,
         "coordinate_norm_projection_active": bool(
-            coordinate_scale < 1.0
+            project_to_weight_norm
+            and mixed_norm_before > weight_norm
         ),
+        "mixed_log_condition_bound_before_projection": (
+            mixed_log_condition_before
+        ),
+        "mixed_log_condition_bound_after_projection": (
+            mixed_log_condition_before * coordinate_scale
+        ),
+        "maximum_condition_number": (
+            0.0
+            if max_condition_number is None
+            else float(max_condition_number)
+        ),
+        "condition_projection_scale": condition_scale,
+        "condition_projection_active": bool(condition_scale < 1.0),
     }
 
 
@@ -594,6 +627,7 @@ def functional_coordinate_mix_update(
     seed: int,
     beta: float,
     project_to_weight_norm: bool,
+    max_condition_number: float | None,
     learning_rate: float,
     weight_decay: float,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
@@ -643,6 +677,7 @@ def functional_coordinate_mix_update(
         functional_recipe,
         beta=beta,
         project_to_weight_norm=project_to_weight_norm,
+        max_condition_number=max_condition_number,
     )
     current = after_parent
     mixed_coordinates: list[torch.Tensor] = []
@@ -866,6 +901,7 @@ class MuonFunctionalShearLinear(nn.Module):
         neighbors: int,
         coordinate_mix_beta: float,
         project_to_weight_norm: bool,
+        max_condition_number: float | None,
         functional_sample_cap: int,
         matching_seed: int,
         weight_std: float,
@@ -879,6 +915,11 @@ class MuonFunctionalShearLinear(nn.Module):
         self.neighbors = int(neighbors)
         self.coordinate_mix_beta = float(coordinate_mix_beta)
         self.project_to_weight_norm = bool(project_to_weight_norm)
+        self.max_condition_number = (
+            None
+            if max_condition_number is None
+            else float(max_condition_number)
+        )
         self.functional_sample_cap = int(functional_sample_cap)
         self.matching_seed = int(matching_seed)
         self.layer_id = int(layer_id)
@@ -1048,6 +1089,9 @@ class MuonFunctionalShear(torch.optim.Optimizer):
                     beta=module.coordinate_mix_beta,
                     project_to_weight_norm=(
                         module.project_to_weight_norm
+                    ),
+                    max_condition_number=(
+                        module.max_condition_number
                     ),
                     learning_rate=lr,
                     weight_decay=weight_decay,

@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_direction_only_ce_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "REJECT_WEIGHT_NORM_PROJECTION",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "478303f799c5b6dd6f3b8a48500ecb2251a82627",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce_select.py",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "aggregate_sha256": "1ca022e8b29d78870aedd252c54398ab6ccaf6aa1c046bbe83e278d3c5448cd0",
+    "fits_sha256": "0e5601ae02bb89053cf9afb2d797d80883bededca215b32e9bbd72e30727edee",
+    "losses_sha256": "4e0bde5ae0795c9ea67a0d05e283c754d1ebafd973768dae490e88d4d58c2e18",
+    "metadata_sha256": "c8014f752c748cd68bb6d2337b7f14b67ff87437627b26b2010f764b0149f3f0"
+  },
+  "projection": {
+    "active_every_layer": true,
+    "minimum_scale": 0.4841730897938993,
+    "maximum_scale": 0.5623924492720288,
+    "maximum_observed_pair_condition_number": 1.0005771495340952,
+    "numerically_stable": true
+  },
+  "selection": {
+    "candidate_mean_ce": 5.600616812705994,
+    "weight_shear_mean_ce": 5.600614845752716,
+    "candidate_beats_weight_shear": false
+  },
+  "heldout": {
+    "beats_fresh88_every_window": true,
+    "beats_weight_shear_every_window": false,
+    "recovery_over_weight_shear_by_window": {
+      "validation_1": 0.06487804878048781,
+      "validation_2": -0.004548900682335102,
+      "validation_3": 0.020121951219512196,
+      "validation_4": 0.0826536160957042
+    },
+    "minimum_recovery": -0.004548900682335102,
+    "median_recovery": 0.0425,
+    "required_minimum": 0.05,
+    "required_median": 0.1
+  },
+  "interpretation": [
+    "The global weight-norm projection is geometrically stable but over-constrains every layer, scaling the beta-0.5 coordinate vector by approximately one half.",
+    "The projected direction retains weak benefit on three of four held-out windows and beats fresh88 everywhere, but fails the unchanged weight-shear and recovery gates.",
+    "The raw finite-CE gain therefore depends on preserving normal safe-regime magnitude. Stabilization must be inactive in that regime and activate only when map conditioning becomes unsafe.",
+    "The prior functional-shear radius plan preregistered maximum condition number 1.01 before the training failure was observed; reuse that geometric bound rather than tune a threshold from this result."
+  ],
+  "authorization": {
+    "weight_norm_projection_training_authorized": false,
+    "larger_rung_authorized": false,
+    "condition_limited_direction_design_authorized": true,
+    "next_action": "Implement uniform direction-preserving coordinate scaling only when the conservative composed shear condition bound exceeds 1.01; require the original finite-CE gates and a separate 25-update stability gate."
+  }
+}

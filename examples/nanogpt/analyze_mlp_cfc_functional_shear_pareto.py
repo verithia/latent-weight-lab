@@ -81,6 +81,7 @@ def replay_blended_recipes(
     *,
     beta: float,
     project_to_weight_norm: bool = False,
+    max_condition_number: float | None = None,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     """Replay stage coordinates `(1-beta)*weight + beta*functional`."""
     if not 0.0 <= float(beta) <= 1.0:
@@ -92,6 +93,7 @@ def replay_blended_recipes(
         functional_recipe,
         beta=beta,
         project_to_weight_norm=project_to_weight_norm,
+        max_condition_number=max_condition_number,
     )
     current = source.float().clone()
     minimum_determinant = float("inf")
@@ -137,6 +139,7 @@ def build_pareto_candidates(
     weight_decay: float,
     native_cache: Path | None,
     project_to_weight_norm: bool = False,
+    max_condition_number: float | None = None,
 ) -> tuple[dict[str, torch.Tensor], list[dict[str, Any]]]:
     source = weight.float().T.contiguous()
     target = dense_update.float().T.contiguous()
@@ -205,6 +208,7 @@ def build_pareto_candidates(
             functional_recipe,
             beta=beta,
             project_to_weight_norm=project_to_weight_norm,
+            max_condition_number=max_condition_number,
         )
         name = scale_name(beta, prefix=PREFIX)
         rotations[name] = parent + blended
