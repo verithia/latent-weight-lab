@@ -39,7 +39,6 @@ from examples.nanogpt.analyze_mlp_cfc_functional_shear_fit import (
     CONTROL,
     WEIGHT_SHEAR,
     _fit_rotational_parent,
-    fit_functional_shear_recipe,
     pair_matched_permutations,
     sample_aligned,
 )
@@ -59,7 +58,10 @@ from examples.nanogpt.analyze_mlp_muon_matched_givens import (
     diagonal_metric_causal_givens_update,
 )
 from examples.nanogpt.fast_task_matching import fast_muon_matched_permutations
-from examples.nanogpt.muon_matched_givens import mix_shear_recipes
+from examples.nanogpt.muon_matched_givens import (
+    _fit_functional_shear_recipe,
+    mix_shear_recipes,
+)
 
 
 SCHEMA_VERSION = "nanogpt_mlp_cfc_functional_shear_pareto_v1"
@@ -185,17 +187,45 @@ def build_pareto_candidates(
         stages=24,
         family="shear",
     )
-    _functional_residual, functional_fit, functional_recipe = (
-        fit_functional_shear_recipe(
-            after_parent,
-            residual,
-            inputs,
-            pre_gelu,
-            cproj_weight,
-            weight_permutations,
-            stages=24,
-        )
+    functional_fit_diagnostics: dict[str, float | bool] = {}
+    functional_recipe = _fit_functional_shear_recipe(
+        after_parent,
+        residual,
+        inputs,
+        pre_gelu,
+        cproj_weight,
+        weight_permutations,
+        max_condition_number=max_condition_number,
+        fit_diagnostics=functional_fit_diagnostics,
     )
+    functional_current = after_parent.float()
+    maximum_determinant_error = 0.0
+    maximum_pair_condition = 0.0
+    for pairs, coordinates in functional_recipe:
+        functional_current, finite = apply_pair_stage(
+            functional_current,
+            pairs.to(device=after_parent.device),
+            coordinates.to(device=after_parent.device),
+        )
+        maximum_determinant_error = max(
+            maximum_determinant_error,
+            float(finite["maximum_determinant_error"]),
+        )
+        maximum_pair_condition = max(
+            maximum_pair_condition,
+            float(finite["maximum_condition_number"]),
+        )
+    functional_fit = {
+        "family": "production_functional_shear",
+        "coordinates": sum(
+            int(coordinates.numel())
+            for _pairs, coordinates in functional_recipe
+        ),
+        "stages": len(functional_recipe),
+        "maximum_determinant_error": maximum_determinant_error,
+        "maximum_condition_number": maximum_pair_condition,
+        **functional_fit_diagnostics,
+    }
     rotations = {
         CONTROL: parent + control_residual,
         WEIGHT_SHEAR: parent + weight_residual,
