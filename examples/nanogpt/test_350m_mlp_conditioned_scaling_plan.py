@@ -10,6 +10,10 @@ PLAN_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_scaling_plan.json"
 )
+VALIDATOR_CONTRACT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_mlp_functional_shear_stability_validator_contract.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -152,3 +156,33 @@ def test_parent_mfu_result_is_bound_to_plan_and_config() -> None:
     assert result["stability"]["train_exit_code"] == 0
     assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
     assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+
+
+def test_candidate_stability_validator_contract_is_frozen() -> None:
+    contract = load(VALIDATOR_CONTRACT_PATH)
+    assert (
+        contract["schema_version"]
+        == "350m_conditioned_full_mlp_stability_validator_contract_v1"
+    )
+    assert sha256(REPO / contract["paired_plan"]["path"]) == contract["paired_plan"]["sha256"]
+    assert sha256(REPO / contract["candidate"]["config"]) == contract["candidate"]["config_sha256"]
+    assert sha256(REPO / contract["validator"]["path"]) == contract["validator"]["sha256"]
+    assert contract["paired_plan"]["sha256"] == (
+        "406cae6fc38d2ef9b64ed56f612e4d00614a8934cf555ba2342926527cba0615"
+    )
+    rules = contract["registered_rules"]
+    assert rules["expected_layers"] == 24
+    assert rules["expected_steps"] == 25
+    assert rules["expected_rows"] == 600
+    assert rules["maximum_condition_number"] == 1.01
+    assert rules["maximum_weight_rms_ratio"] == 2.0
+    assert rules["maximum_weight_abs_growth"] == 2.0
+    assert rules["maximum_weight_abs_floor"] == 1.0
+    assert rules["require_internal_limiter_every_row"] is True
+    assert rules["require_zero_fallback"] is True
+    command = contract["execution"]["command"]
+    assert "--expected-layers 24 --expected-steps 25" in command
+    assert "--maximum-condition-number 1.01" in command
+    assert "--maximum-weight-rms-ratio 2" in command
+    assert "--maximum-weight-abs-growth 2" in command
+    assert "--maximum-weight-abs-floor 1" in command

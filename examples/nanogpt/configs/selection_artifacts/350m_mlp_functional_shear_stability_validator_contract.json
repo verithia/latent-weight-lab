@@ -1,0 +1,38 @@
+{
+  "artifact_kind": "350m_conditioned_full_mlp_stability_validator_contract",
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594"
+  },
+  "created_at": "2026-08-02",
+  "execution": {
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.validate_functional_shear_stability_log --log /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.log --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/functional_shear_stability_validation.json --expected-layers 24 --expected-steps 25 --maximum-condition-number 1.01 --maximum-weight-rms-ratio 2 --maximum-weight-abs-growth 2 --maximum-weight-abs-floor 1",
+    "host": "PRO6",
+    "owner": "foreground operator poll",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python"
+  },
+  "paired_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_scaling_plan.json",
+    "sha256": "406cae6fc38d2ef9b64ed56f612e4d00614a8934cf555ba2342926527cba0615"
+  },
+  "registered_rules": {
+    "expected_layers": 24,
+    "expected_rows": 600,
+    "expected_steps": 25,
+    "maximum_condition_number": 1.01,
+    "maximum_weight_abs_floor": 1.0,
+    "maximum_weight_abs_growth": 2.0,
+    "maximum_weight_rms_ratio": 2.0,
+    "require_all_diagnostic_numbers_finite": true,
+    "require_all_logged_losses_finite": true,
+    "require_exact_unique_step_layer_grid": true,
+    "require_internal_limiter_every_row": true,
+    "require_zero_fallback": true
+  },
+  "relationship_to_plan": "This fail-closed parser makes the already frozen candidate performance rule executable. It does not change the paired plan, stage order, scientific loss thresholds, or MFU threshold.",
+  "schema_version": "350m_conditioned_full_mlp_stability_validator_contract_v1",
+  "validator": {
+    "path": "examples/nanogpt/validate_functional_shear_stability_log.py",
+    "sha256": "bf28638029192bd97cd9ef6e71fcf6f2a1a2ffb5c21985b9515d00eddfff5838"
+  }
+}
