@@ -6,11 +6,23 @@ import torch
 
 from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_matched_givens import (
+    MuonFunctionalShear,
+    MuonFunctionalShearLinear,
     MuonMatchedGivens,
     MuonMatchedGivensLinear,
+    _apply_symmetric_shear_stage,
+    _fit_functional_shear_recipe,
+    _fit_weight_shear_recipe,
     apply_givens_flow,
     diagonal_metric_angles,
     random_unique_matchings,
+)
+from examples.nanogpt.analyze_mlp_cfc_functional_shear_fit import (
+    fit_functional_shear_recipe,
+)
+from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import (
+    apply_pair_stage,
+    fit_pair_recipe,
 )
 
 
@@ -536,4 +548,168 @@ def test_gpt_backward_step_and_full_checkpoint_round_trip() -> None:
             restored_custom.state[restored_module.weight][
                 "momentum_buffer"
             ],
+        )
+
+
+def test_production_shear_recipes_match_registered_diagnostic() -> None:
+    torch.manual_seed(101)
+    source = torch.randn(5, 8) * 0.02
+    requested = torch.randn_like(source) * 0.001
+    inputs = torch.randn(11, 5)
+    pre_gelu = inputs @ source
+    cproj = torch.randn(5, 8) * 0.02
+    permutations = random_unique_matchings(
+        width=8, stages=2, seed=103
+    )
+    production_weight = _fit_weight_shear_recipe(
+        source, requested, permutations
+    )
+    _update, _diagnostics, registered_weight = fit_pair_recipe(
+        source,
+        requested,
+        permutations,
+        stages=2,
+        family="shear",
+    )
+    production_function = _fit_functional_shear_recipe(
+        source,
+        requested,
+        inputs,
+        pre_gelu,
+        cproj,
+        permutations,
+    )
+    _update, _diagnostics, registered_function = (
+        fit_functional_shear_recipe(
+            source,
+            requested,
+            inputs,
+            pre_gelu,
+            cproj,
+            permutations,
+            stages=2,
+        )
+    )
+    for production, registered in (
+        (production_weight, registered_weight),
+        (production_function, registered_function),
+    ):
+        current_production = source
+        current_registered = source
+        for (pairs_a, coordinate_a), (pairs_b, coordinate_b) in zip(
+            production, registered, strict=True
+        ):
+            assert torch.equal(pairs_a, pairs_b)
+            assert torch.allclose(
+                coordinate_a,
+                coordinate_b[:, 0],
+                rtol=2e-6,
+                atol=2e-9,
+            )
+            current_production = _apply_symmetric_shear_stage(
+                current_production, pairs_a, coordinate_a
+            )
+            current_registered, _finite = apply_pair_stage(
+                current_registered, pairs_b, coordinate_b
+            )
+        assert torch.allclose(
+            current_production,
+            current_registered,
+            rtol=2e-6,
+            atol=2e-7,
+        )
+
+
+def test_gpt_wires_functional_cfc_and_consumes_bounded_context(
+    monkeypatch,
+) -> None:
+    config = make_gpt_config()
+    config.block_fht_mlp_cfc_functional_shear = True
+    config.block_fht_mlp_cfc_functional_shear_parent_stages = 2
+    config.block_fht_mlp_cfc_functional_shear_stages = 1
+    config.block_fht_mlp_cfc_functional_shear_neighbors = 2
+    config.block_fht_mlp_cfc_functional_shear_sample_cap = 5
+    model = GPT(config)
+    modules = [
+        block.mlp.c_fc for block in model.transformer.h
+    ]
+    assert all(
+        isinstance(module, MuonFunctionalShearLinear)
+        for module in modules
+    )
+    assert all(module.coordinate_count == 48 for module in modules)
+
+    observed_samples: list[int] = []
+
+    def fake_update(
+        weight,
+        requested_update,
+        selection_direction,
+        inputs,
+        pre_gelu,
+        cproj_weight,
+        **kwargs,
+    ):
+        del selection_direction, pre_gelu, cproj_weight, kwargs
+        observed_samples.append(int(inputs.shape[0]))
+        return requested_update.to(weight), {
+            "coordinates": 48,
+            "functional_samples": int(inputs.shape[0]),
+        }
+
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens."
+        "functional_coordinate_mix_update",
+        fake_update,
+    )
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+    )
+    functional_optimizer = next(
+        candidate
+        for candidate in optimizer.optimizers
+        if isinstance(candidate, MuonFunctionalShear)
+    )
+    cproj_optimizer = next(
+        candidate
+        for candidate in optimizer.optimizers
+        if isinstance(candidate, MuonMatchedGivens)
+    )
+    assert optimizer.optimizers.index(functional_optimizer) < (
+        optimizer.optimizers.index(cproj_optimizer)
+    )
+    tokens = torch.randint(0, config.vocab_size, (2, config.block_size))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad(set_to_none=True)
+    assert observed_samples == [5, 5]
+    assert all(int(module.optimizer_step) == 1 for module in modules)
+    assert all(module._functional_inputs is None for module in modules)
+    assert model.block_fht_stats()["latent"] == 2 * (48 + 16)
+
+
+def test_functional_cfc_preserves_dense_paired_seed_initialization() -> None:
+    dense_config = make_gpt_config()
+    functional_config = copy.deepcopy(dense_config)
+    functional_config.block_fht_mlp_cfc_functional_shear = True
+    functional_config.block_fht_mlp_cfc_functional_shear_parent_stages = 2
+    functional_config.block_fht_mlp_cfc_functional_shear_stages = 1
+    functional_config.block_fht_mlp_cfc_functional_shear_neighbors = 2
+    functional_config.block_fht_mlp_cfc_functional_shear_sample_cap = 5
+    torch.manual_seed(211)
+    dense = GPT(dense_config)
+    torch.manual_seed(211)
+    functional = GPT(functional_config)
+    for dense_block, functional_block in zip(
+        dense.transformer.h, functional.transformer.h, strict=True
+    ):
+        assert torch.equal(
+            dense_block.mlp.c_fc.weight,
+            functional_block.mlp.c_fc.weight,
         )

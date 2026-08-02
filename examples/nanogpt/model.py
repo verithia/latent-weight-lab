@@ -10,6 +10,8 @@ from torch.nn import functional as F
 
 from examples.nanogpt.muon import Muon
 from examples.nanogpt.muon_matched_givens import (
+    MuonFunctionalShear,
+    MuonFunctionalShearLinear,
     MuonMatchedGivens,
     MuonMatchedGivensLinear,
 )
@@ -154,6 +156,13 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_refresh_interval: int = 60
     block_fht_mlp_cproj_muon_matched_givens_fast_fresh: bool = False
     block_fht_mlp_cproj_muon_matched_givens_seed: int = 161803
+    block_fht_mlp_cfc_functional_shear: bool = False
+    block_fht_mlp_cfc_functional_shear_parent_stages: int = 64
+    block_fht_mlp_cfc_functional_shear_stages: int = 24
+    block_fht_mlp_cfc_functional_shear_neighbors: int = 64
+    block_fht_mlp_cfc_functional_shear_beta: float = 0.5
+    block_fht_mlp_cfc_functional_shear_sample_cap: int = 2048
+    block_fht_mlp_cfc_functional_shear_seed: int = 20260820
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
@@ -1513,7 +1522,44 @@ class MLP(nn.Module):
             raise ValueError("Use exactly one grouped mlp.c_fc target per run")
         if grouped_targets and "mlp.c_fc" in config.block_fht_targets:
             raise ValueError("Use either plain mlp.c_fc or grouped mlp.c_fc, not both")
-        if grouped_targets:
+        functional_shear_cfc = bool(
+            config.block_fht_mlp_cfc_functional_shear
+        )
+        if functional_shear_cfc and (
+            grouped_targets or "mlp.c_fc" in config.block_fht_targets
+        ):
+            raise ValueError(
+                "functional-shear c_fc requires the materialized plain "
+                "c_fc path"
+            )
+        if functional_shear_cfc:
+            self.c_fc = MuonFunctionalShearLinear(
+                config.n_embd,
+                4 * config.n_embd,
+                bias=config.bias,
+                parent_stages=int(
+                    config.block_fht_mlp_cfc_functional_shear_parent_stages
+                ),
+                shear_stages=int(
+                    config.block_fht_mlp_cfc_functional_shear_stages
+                ),
+                neighbors=int(
+                    config.block_fht_mlp_cfc_functional_shear_neighbors
+                ),
+                coordinate_mix_beta=float(
+                    config.block_fht_mlp_cfc_functional_shear_beta
+                ),
+                functional_sample_cap=int(
+                    config.block_fht_mlp_cfc_functional_shear_sample_cap
+                ),
+                matching_seed=(
+                    int(config.block_fht_mlp_cfc_functional_shear_seed)
+                    + layer_id * 1009
+                ),
+                weight_std=0.02,
+                layer_id=layer_id,
+            )
+        elif grouped_targets:
             target = grouped_targets[0]
             groups = MLP_C_FC_GROUP_TARGETS[target]
             out_features = 4 * config.n_embd
@@ -3039,6 +3085,11 @@ class MLP(nn.Module):
                 self.shared_hidden_gain_scale * self.shared_hidden_log_gain
             ).exp().to(dtype=hidden.dtype)
             hidden = hidden * shared_hidden_gain
+        record_functional_context = getattr(
+            self.c_fc, "record_functional_context", None
+        )
+        if record_functional_context is not None:
+            record_functional_context(x, hidden)
         activated = self.gelu(hidden)
         if activation_chart is not None:
             activated = activated * post_log_gain.exp().to(
@@ -3492,6 +3543,12 @@ class GPT(nn.Module):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
                 nn.init.zeros_(module.bias)
+        elif isinstance(module, MuonFunctionalShearLinear):
+            nn.init.normal_(
+                module.weight, mean=0.0, std=module.weight_std
+            )
+            if module.bias is not None:
+                nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
 
@@ -3553,9 +3610,16 @@ class GPT(nn.Module):
             for module in self.modules()
             if isinstance(module, MuonMatchedGivensLinear)
         ]
-        if muon_matched_givens_modules and optimizer != "muon":
+        functional_shear_pairs = [
+            (block.mlp.c_fc, block.mlp.c_proj)
+            for block in self.transformer.h
+            if isinstance(block.mlp.c_fc, MuonFunctionalShearLinear)
+        ]
+        if (
+            muon_matched_givens_modules or functional_shear_pairs
+        ) and optimizer != "muon":
             raise ValueError(
-                "Muon-matched Givens c_proj requires optimizer='muon'"
+                "Muon chart optimizers require optimizer='muon'"
             )
         if optimizer == "muon":
             product_factor_tokens = (
@@ -3670,6 +3734,18 @@ class GPT(nn.Module):
                         lr=learning_rate,
                     )
                 )
+            if functional_shear_pairs:
+                optimizers.append(
+                    MuonFunctionalShear(
+                        functional_shear_pairs,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
             if muon_matched_givens_modules:
                 optimizers.append(
                     MuonMatchedGivens(
@@ -3746,6 +3822,8 @@ class GPT(nn.Module):
                 f"product_fht_factor_tensors={len(product_factors)} "
                 "muon_matched_givens_tensors="
                 f"{len(muon_matched_givens_modules)} "
+                "muon_functional_shear_tensors="
+                f"{len(functional_shear_pairs)} "
                 f"mlp_chart_tensors={len(chart_other)} "
                 f"mlp_pregelu_chart_tensors={len(pregelu_chart_other)} "
                 f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
@@ -3781,6 +3859,10 @@ class GPT(nn.Module):
                 generated += module.in_features * module.out_features
                 latent += module.trainable_scalar_count
             elif isinstance(module, MuonMatchedGivensLinear):
+                modules += 1
+                generated += module.in_features * module.out_features
+                latent += module.coordinate_count
+            elif isinstance(module, MuonFunctionalShearLinear):
                 modules += 1
                 generated += module.in_features * module.out_features
                 latent += module.coordinate_count
@@ -3826,7 +3908,10 @@ class GPT(nn.Module):
         parameters.extend(
             module.weight
             for module in self.modules()
-            if isinstance(module, MuonMatchedGivensLinear)
+            if isinstance(
+                module,
+                (MuonMatchedGivensLinear, MuonFunctionalShearLinear),
+            )
         )
         return parameters
 

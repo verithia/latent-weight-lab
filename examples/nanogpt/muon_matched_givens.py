@@ -11,6 +11,7 @@ from torch.nn import functional as F
 
 from examples.nanogpt.muon import zeropower_via_newtonschulz5
 from examples.nanogpt.fast_task_matching import (
+    color_sorted_edges,
     fast_muon_matched_permutations,
 )
 
@@ -345,6 +346,276 @@ def apply_givens_flow(
     return result
 
 
+def _gelu_derivative(values: torch.Tensor) -> torch.Tensor:
+    """Derivative of the exact erf GELU used by ``torch.nn.GELU``."""
+    values = values.float()
+    return 0.5 * (1.0 + torch.erf(values / math.sqrt(2.0))) + (
+        values
+        * torch.exp(-0.5 * values.square())
+        / math.sqrt(2.0 * math.pi)
+    )
+
+
+@torch.no_grad()
+def _weight_shear_permutations(
+    source: torch.Tensor,
+    residual: torch.Tensor,
+    *,
+    stages: int,
+    neighbors: int,
+    seed: int,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Select sparse symmetric-shear pairs in weight Frobenius geometry."""
+    source = source.float()
+    residual = residual.float()
+    width = int(source.shape[1])
+    cross = source.T @ residual
+    norm = source.square().sum(dim=0)
+    scores = (cross + cross.T).square() / (
+        norm[:, None] + norm[None, :]
+    ).clamp_min(1e-30)
+    scores.fill_diagonal_(-1.0)
+    top_scores, top_indices = torch.topk(scores, k=neighbors, dim=1)
+    order = torch.argsort(top_scores.reshape(-1), descending=True)
+    left = (
+        torch.arange(width, device=source.device)
+        .repeat_interleave(neighbors)
+        .index_select(0, order)
+    )
+    right = top_indices.reshape(-1).index_select(0, order)
+    edges = torch.stack(
+        (torch.minimum(left, right), torch.maximum(left, right)), dim=1
+    ).to(device="cpu", dtype=torch.int32)
+    permutations, diagnostics = color_sorted_edges(
+        edges,
+        width=width,
+        stages=stages,
+        seed=seed,
+    )
+    diagnostics.update(
+        {
+            "candidate_edges": int(edges.shape[0]),
+            "preselection_neighbors": int(neighbors),
+            "score_family": "weight_frobenius_symmetric_shear",
+        }
+    )
+    return permutations, diagnostics
+
+
+def _shear_coordinates(
+    source: torch.Tensor,
+    residual: torch.Tensor,
+    pairs: torch.Tensor,
+) -> torch.Tensor:
+    """Exact one-coordinate tangent fit for disjoint symmetric shears."""
+    left, right = pairs.unbind(dim=1)
+    source_left = source[:, left].double()
+    source_right = source[:, right].double()
+    residual_left = residual[:, left].double()
+    residual_right = residual[:, right].double()
+    numerator = (
+        (source_right * residual_left).sum(dim=0)
+        + (source_left * residual_right).sum(dim=0)
+    )
+    denominator = (
+        source_left.square().sum(dim=0)
+        + source_right.square().sum(dim=0)
+    ).clamp_min(1e-30)
+    return numerator / denominator
+
+
+def _apply_symmetric_shear_stage(
+    source: torch.Tensor,
+    pairs: torch.Tensor,
+    coordinates: torch.Tensor,
+) -> torch.Tensor:
+    """Apply exact determinant-one ``exp([[0,s],[s,0]])`` pair maps."""
+    left, right = pairs.unbind(dim=1)
+    coordinate = coordinates.to(device=source.device, dtype=source.dtype)
+    cosine = torch.cosh(coordinate)
+    sine = torch.sinh(coordinate)
+    source_left = source[:, left]
+    source_right = source[:, right]
+    result = source.clone()
+    result[:, left] = cosine * source_left + sine * source_right
+    result[:, right] = sine * source_left + cosine * source_right
+    return result
+
+
+@torch.no_grad()
+def _fit_weight_shear_recipe(
+    source: torch.Tensor,
+    requested_update: torch.Tensor,
+    permutations: torch.Tensor,
+) -> list[tuple[torch.Tensor, torch.Tensor]]:
+    current = source.float().clone()
+    target = source.float() + requested_update.float()
+    recipe: list[tuple[torch.Tensor, torch.Tensor]] = []
+    for permutation in permutations:
+        pairs = permutation.to(source.device).reshape(-1, 2)
+        coordinates = _shear_coordinates(
+            current, target - current, pairs
+        )
+        current = _apply_symmetric_shear_stage(
+            current, pairs, coordinates
+        )
+        recipe.append((pairs, coordinates))
+    return recipe
+
+
+@torch.no_grad()
+def _fit_functional_shear_recipe(
+    source: torch.Tensor,
+    requested_update: torch.Tensor,
+    inputs: torch.Tensor,
+    pre_gelu: torch.Tensor,
+    cproj_weight: torch.Tensor,
+    permutations: torch.Tensor,
+) -> list[tuple[torch.Tensor, torch.Tensor]]:
+    """Fit the registered exact linearized post-GELU/``c_proj`` metric."""
+    current = source.float().clone()
+    inputs = inputs.to(device=source.device, dtype=torch.float32)
+    pre_gelu = pre_gelu.to(device=source.device, dtype=torch.float32)
+    cproj = cproj_weight.to(device=source.device, dtype=torch.float32)
+    slopes = _gelu_derivative(pre_gelu)
+    projected = inputs @ current
+    target_output = (
+        slopes * (inputs @ requested_update.float())
+    ) @ cproj.T
+    residual_output = target_output.clone()
+    cproj_gram = cproj.T @ cproj
+    cproj_norm = cproj_gram.diagonal()
+    recipe: list[tuple[torch.Tensor, torch.Tensor]] = []
+    for permutation in permutations:
+        pairs = permutation.to(source.device).reshape(-1, 2)
+        left, right = pairs.unbind(dim=1)
+        projected_target = residual_output @ cproj
+        left_direction = slopes[:, left] * projected[:, right]
+        right_direction = slopes[:, right] * projected[:, left]
+        numerator = (
+            left_direction * projected_target[:, left]
+            + right_direction * projected_target[:, right]
+        ).sum(dim=0)
+        denominator = (
+            cproj_norm[left] * left_direction.square().sum(dim=0)
+            + cproj_norm[right] * right_direction.square().sum(dim=0)
+            + 2.0
+            * cproj_gram[left, right]
+            * (left_direction * right_direction).sum(dim=0)
+        ).clamp_min(1e-30)
+        coordinates = numerator.double() / denominator.double()
+        projected_updated = _apply_symmetric_shear_stage(
+            projected, pairs, coordinates
+        )
+        residual_output.sub_(
+            (slopes * (projected_updated - projected)) @ cproj.T
+        )
+        current = _apply_symmetric_shear_stage(
+            current, pairs, coordinates
+        )
+        projected = projected_updated
+        recipe.append((pairs, coordinates))
+    return recipe
+
+
+@torch.no_grad()
+def functional_coordinate_mix_update(
+    weight: torch.Tensor,
+    requested_update: torch.Tensor,
+    selection_direction: torch.Tensor,
+    inputs: torch.Tensor,
+    pre_gelu: torch.Tensor,
+    cproj_weight: torch.Tensor,
+    *,
+    parent_stages: int,
+    shear_stages: int,
+    neighbors: int,
+    seed: int,
+    beta: float,
+    learning_rate: float,
+    weight_decay: float,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Reproduce the promoted fixed-topology mixed-coordinate ``c_fc`` step."""
+    source = weight.float().T.contiguous()
+    target = requested_update.float().T.contiguous()
+    selection = selection_direction.float().T.contiguous()
+    parent_permutations, parent_selection = fast_muon_matched_permutations(
+        source,
+        selection,
+        stages=parent_stages,
+        neighbors=neighbors,
+        seed=seed,
+    )
+    parent_angles = diagonal_metric_angles(
+        source, target, parent_permutations.to(source.device)
+    )
+    after_parent = apply_givens_flow(
+        source,
+        parent_angles,
+        parent_permutations.to(source.device),
+    )
+    parent_update = after_parent - source
+    residual = target - parent_update
+    shear_permutations, shear_selection = _weight_shear_permutations(
+        after_parent,
+        residual,
+        stages=shear_stages,
+        neighbors=neighbors,
+        seed=seed + 2,
+    )
+    shear_permutations = shear_permutations.to(source.device)
+    weight_recipe = _fit_weight_shear_recipe(
+        after_parent, residual, shear_permutations
+    )
+    functional_recipe = _fit_functional_shear_recipe(
+        after_parent,
+        residual,
+        inputs,
+        pre_gelu,
+        cproj_weight,
+        shear_permutations,
+    )
+    current = after_parent
+    mixed_coordinates: list[torch.Tensor] = []
+    for (weight_pairs, weight_coordinates), (
+        functional_pairs,
+        functional_coordinates,
+    ) in zip(weight_recipe, functional_recipe, strict=True):
+        if not torch.equal(weight_pairs, functional_pairs):
+            raise RuntimeError("functional and weight shear topology differs")
+        coordinates = (
+            (1.0 - float(beta)) * weight_coordinates
+            + float(beta) * functional_coordinates
+        )
+        current = _apply_symmetric_shear_stage(
+            current, weight_pairs, coordinates
+        )
+        mixed_coordinates.append(coordinates)
+    current.mul_(1.0 - float(learning_rate) * float(weight_decay))
+    update = current.T.contiguous() - weight.float()
+    requested_energy = requested_update.float().square().sum().clamp_min(1e-30)
+    residual_energy = (
+        requested_update.float() - update
+    ).square().sum()
+    all_shears = torch.cat(mixed_coordinates)
+    return update, {
+        "coordinates": int(
+            (parent_stages + shear_stages) * source.shape[1] // 2
+        ),
+        "parent_stages": int(parent_stages),
+        "shear_stages": int(shear_stages),
+        "functional_coordinate_mix_beta": float(beta),
+        "functional_samples": int(inputs.shape[0]),
+        "angle_rms": float(parent_angles.square().mean().sqrt()),
+        "shear_rms": float(all_shears.square().mean().sqrt()),
+        "requested_update_recovery": float(
+            1.0 - residual_energy / requested_energy
+        ),
+        "parent_matching": parent_selection,
+        "shear_matching": shear_selection,
+    }
+
+
 class MuonMatchedGivensLinear(nn.Module):
     """Dense folded base updated through sparse task-selected rotations.
 
@@ -490,6 +761,232 @@ class MuonMatchedGivensLinear(nn.Module):
 
     def forward(self, values: torch.Tensor) -> torch.Tensor:
         return F.linear(values, self.weight, self.bias)
+
+
+class MuonFunctionalShearLinear(nn.Module):
+    """Materialized ``c_fc`` base updated by a bounded functional chart.
+
+    The dense tensor is a persistent buffer owned by the custom optimizer,
+    exactly as for :class:`MuonMatchedGivensLinear`.  Forward activations are
+    detached into a bounded per-step sample used only to define the update
+    metric; they are not learned parameters and are never checkpointed.
+    """
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        bias: bool,
+        parent_stages: int,
+        shear_stages: int,
+        neighbors: int,
+        coordinate_mix_beta: float,
+        functional_sample_cap: int,
+        matching_seed: int,
+        weight_std: float,
+        layer_id: int,
+    ) -> None:
+        super().__init__()
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.parent_stages = int(parent_stages)
+        self.shear_stages = int(shear_stages)
+        self.neighbors = int(neighbors)
+        self.coordinate_mix_beta = float(coordinate_mix_beta)
+        self.functional_sample_cap = int(functional_sample_cap)
+        self.matching_seed = int(matching_seed)
+        self.layer_id = int(layer_id)
+        if (
+            self.in_features <= 0
+            or self.out_features <= 0
+            or self.out_features % 2
+            or self.parent_stages <= 0
+            or self.shear_stages <= 0
+            or self.parent_stages > 64
+            or self.shear_stages > 64
+            or self.neighbors < max(self.parent_stages, self.shear_stages)
+            or self.neighbors >= self.out_features
+            or not 0.0 <= self.coordinate_mix_beta <= 1.0
+            or self.functional_sample_cap <= 0
+            or not math.isfinite(weight_std)
+            or weight_std <= 0.0
+        ):
+            raise ValueError("invalid functional-shear c_fc configuration")
+        self.weight_std = float(weight_std)
+        weight = torch.empty(self.out_features, self.in_features)
+        # Match ``nn.Linear`` constructor RNG consumption. GPT's shared
+        # initializer replaces this with the configured normal distribution,
+        # preserving paired-seed initialization against the dense control.
+        nn.init.kaiming_uniform_(weight, a=math.sqrt(5.0))
+        self.register_buffer("weight", weight, persistent=True)
+        if bias:
+            bound = 1.0 / math.sqrt(self.in_features)
+            self.bias = nn.Parameter(
+                torch.empty(self.out_features).uniform_(-bound, bound)
+            )
+        else:
+            self.bias = None
+        self.register_buffer(
+            "optimizer_step",
+            torch.zeros((), dtype=torch.int64),
+            persistent=True,
+        )
+        self._functional_inputs: torch.Tensor | None = None
+        self._functional_pre_gelu: torch.Tensor | None = None
+
+    @property
+    def coordinate_count(self) -> int:
+        return (
+            (self.parent_stages + self.shear_stages)
+            * (self.out_features // 2)
+        )
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        return F.linear(values, self.weight, self.bias)
+
+    @torch.no_grad()
+    def record_functional_context(
+        self, inputs: torch.Tensor, pre_gelu: torch.Tensor
+    ) -> None:
+        if not self.training or self._functional_inputs is not None:
+            return
+        if inputs.shape[:-1] != pre_gelu.shape[:-1]:
+            raise ValueError("functional c_fc context is not aligned")
+        flat_inputs = inputs.detach().reshape(-1, self.in_features)
+        flat_pre = pre_gelu.detach().reshape(-1, self.out_features)
+        count = min(self.functional_sample_cap, flat_inputs.shape[0])
+        self._functional_inputs = flat_inputs[:count].contiguous()
+        self._functional_pre_gelu = flat_pre[:count].contiguous()
+
+    def consume_functional_context(
+        self,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        inputs = self._functional_inputs
+        pre_gelu = self._functional_pre_gelu
+        self._functional_inputs = None
+        self._functional_pre_gelu = None
+        if inputs is None or pre_gelu is None:
+            raise RuntimeError(
+                f"missing functional c_fc context for layer {self.layer_id}"
+            )
+        return inputs, pre_gelu
+
+    def clear_functional_context(self) -> None:
+        self._functional_inputs = None
+        self._functional_pre_gelu = None
+
+
+class MuonFunctionalShear(torch.optim.Optimizer):
+    """Muon state with the promoted mixed functional/weight ``c_fc`` step."""
+
+    def __init__(
+        self,
+        module_pairs: list[tuple[MuonFunctionalShearLinear, nn.Module]],
+        *,
+        lr: float,
+        momentum: float,
+        weight_decay: float,
+        ns_steps: int,
+    ) -> None:
+        if not module_pairs:
+            raise ValueError("MuonFunctionalShear requires at least one module")
+        modules = [module for module, _cproj in module_pairs]
+        for module in modules:
+            module.weight.requires_grad_(True)
+        self.modules_by_id = {id(module.weight): module for module in modules}
+        self.cproj_by_id = {
+            id(module.weight): cproj for module, cproj in module_pairs
+        }
+        self.last_step_diagnostics: list[dict[str, Any]] = []
+        defaults = {
+            "lr": float(lr),
+            "momentum": float(momentum),
+            "weight_decay": float(weight_decay),
+            "ns_steps": int(ns_steps),
+        }
+        super().__init__(
+            [{"params": [module.weight for module in modules]}], defaults
+        )
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+        diagnostics: list[dict[str, Any]] = []
+        for group in self.param_groups:
+            lr = float(group["lr"])
+            momentum = float(group["momentum"])
+            weight_decay = float(group["weight_decay"])
+            ns_steps = int(group["ns_steps"])
+            for weight in group["params"]:
+                gradient = weight.grad
+                if gradient is None:
+                    continue
+                module = self.modules_by_id[id(weight)]
+                cproj = self.cproj_by_id[id(weight)]
+                cproj_weight = getattr(cproj, "weight", None)
+                if cproj_weight is None:
+                    raise RuntimeError("functional c_fc requires c_proj.weight")
+                state = self.state[weight]
+                if "momentum_buffer" not in state:
+                    state["momentum_buffer"] = torch.zeros_like(weight)
+                buffer = state["momentum_buffer"]
+                buffer.mul_(momentum).add_(gradient)
+                combined = gradient.add(buffer, alpha=momentum)
+                polar = zeropower_via_newtonschulz5(
+                    combined, steps=ns_steps
+                ).float()
+                scale = max(
+                    1.0,
+                    polar.shape[0]
+                    / max(1, polar.numel() / polar.shape[0]),
+                ) ** 0.5
+                direction = -scale * polar
+                requested_update = lr * (
+                    direction - weight_decay * weight.float()
+                )
+                inputs, pre_gelu = module.consume_functional_context()
+                update, row = functional_coordinate_mix_update(
+                    weight,
+                    requested_update,
+                    direction,
+                    inputs,
+                    pre_gelu,
+                    cproj_weight,
+                    parent_stages=module.parent_stages,
+                    shear_stages=module.shear_stages,
+                    neighbors=module.neighbors,
+                    seed=module.matching_seed + int(module.optimizer_step),
+                    beta=module.coordinate_mix_beta,
+                    learning_rate=lr,
+                    weight_decay=weight_decay,
+                )
+                weight.add_(update.to(dtype=weight.dtype))
+                row.update(
+                    {
+                        "step": int(module.optimizer_step),
+                        "layer": module.layer_id,
+                        "report_refresh": int(module.optimizer_step) == 0,
+                        "optimizer": "muon_functional_shear",
+                    }
+                )
+                diagnostics.append(row)
+                module.optimizer_step.add_(1)
+        self.last_step_diagnostics = diagnostics
+        return loss
+
+    def zero_grad(self, set_to_none: bool = True) -> None:
+        super().zero_grad(set_to_none=set_to_none)
+        for module in self.modules_by_id.values():
+            module.clear_functional_context()
+
+    def consume_diagnostics(self) -> list[dict[str, Any]]:
+        diagnostics = self.last_step_diagnostics
+        self.last_step_diagnostics = []
+        return diagnostics
 
 
 class MuonMatchedGivens(torch.optim.Optimizer):

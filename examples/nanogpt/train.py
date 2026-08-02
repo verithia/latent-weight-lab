@@ -1092,6 +1092,41 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=161803,
     )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-parent-stages",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-stages",
+        type=int,
+        default=24,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-neighbors",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-beta",
+        type=float,
+        default=0.5,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-sample-cap",
+        type=int,
+        default=2048,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-seed",
+        type=int,
+        default=20260820,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -1402,6 +1437,67 @@ def parse_args() -> argparse.Namespace:
                 "fast fresh Muon-matched Givens c_proj requires "
                 "refresh interval 1"
             )
+    if namespace.block_fht_mlp_cfc_functional_shear:
+        if namespace.method != "block_fht" or namespace.optimizer != "muon":
+            raise ValueError(
+                "functional-shear c_fc requires method=block_fht and "
+                "optimizer=muon"
+            )
+        if "mlp.c_fc" in namespace.block_fht_targets:
+            raise ValueError(
+                "functional-shear c_fc replaces, rather than wraps, the "
+                "mlp.c_fc BlockFHT target"
+            )
+        if not namespace.block_fht_mlp_cproj_muon_matched_givens:
+            raise ValueError(
+                "functional-shear c_fc currently requires the qualified "
+                "materialized Muon-matched c_proj"
+            )
+        parent_stages = int(
+            namespace.block_fht_mlp_cfc_functional_shear_parent_stages
+        )
+        shear_stages = int(
+            namespace.block_fht_mlp_cfc_functional_shear_stages
+        )
+        neighbors = int(
+            namespace.block_fht_mlp_cfc_functional_shear_neighbors
+        )
+        if (
+            parent_stages <= 0
+            or parent_stages > 64
+            or shear_stages <= 0
+            or shear_stages > 64
+            or neighbors < max(parent_stages, shear_stages)
+            or neighbors >= 4 * namespace.n_embd
+        ):
+            raise ValueError(
+                "functional-shear c_fc requires 0 < stages <= 64 and "
+                "max(stages) <= neighbors < 4*n_embd"
+            )
+        if not 0.0 <= float(
+            namespace.block_fht_mlp_cfc_functional_shear_beta
+        ) <= 1.0:
+            raise ValueError("functional-shear beta must be in [0, 1]")
+        if (
+            namespace.block_fht_mlp_cfc_functional_shear_sample_cap
+            <= 0
+        ):
+            raise ValueError("functional-shear sample cap must be positive")
+        incompatible_cfc_addon = any(
+            (
+                namespace.block_fht_ffn_lowrank_rank > 0,
+                namespace.block_fht_ffn_pregelu_gain,
+                namespace.block_fht_ffn_pregelu_bias,
+                namespace.block_fht_mlp_shared_hidden_gain,
+                namespace.block_fht_mlp_activation_chart,
+                namespace.block_fht_mlp_pregelu_block_rotation_stages > 0,
+            )
+        )
+        if incompatible_cfc_addon:
+            raise ValueError(
+                "functional-shear c_fc requires the unmodified pre-GELU "
+                "path used by its registered metric"
+            )
     if namespace.mapping_stability_microbatches < 0:
         raise ValueError("--mapping-stability-microbatches must be >= 0")
     if namespace.mapping_stability_microbatches > namespace.gradient_accumulation_steps:
@@ -1661,6 +1757,27 @@ def main() -> None:
         ),
         block_fht_mlp_cproj_muon_matched_givens_seed=(
             args.block_fht_mlp_cproj_muon_matched_givens_seed
+        ),
+        block_fht_mlp_cfc_functional_shear=(
+            args.block_fht_mlp_cfc_functional_shear
+        ),
+        block_fht_mlp_cfc_functional_shear_parent_stages=(
+            args.block_fht_mlp_cfc_functional_shear_parent_stages
+        ),
+        block_fht_mlp_cfc_functional_shear_stages=(
+            args.block_fht_mlp_cfc_functional_shear_stages
+        ),
+        block_fht_mlp_cfc_functional_shear_neighbors=(
+            args.block_fht_mlp_cfc_functional_shear_neighbors
+        ),
+        block_fht_mlp_cfc_functional_shear_beta=(
+            args.block_fht_mlp_cfc_functional_shear_beta
+        ),
+        block_fht_mlp_cfc_functional_shear_sample_cap=(
+            args.block_fht_mlp_cfc_functional_shear_sample_cap
+        ),
+        block_fht_mlp_cfc_functional_shear_seed=(
+            args.block_fht_mlp_cfc_functional_shear_seed
         ),
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,
