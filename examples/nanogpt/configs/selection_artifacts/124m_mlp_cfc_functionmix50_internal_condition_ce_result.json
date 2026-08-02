@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_internal_condition_ce_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "PROMOTE_INTERNAL_CONDITIONED_FUNCTION_MIX_TO_STABILITY_PREFLIGHT",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "c1b83b7aeb9761b2841b25f79e1edcc920840143",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce_select.py",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan_sha256": "2ed3c28686e8a55de0cfd917400df74c0819c1357f3916d55c414974425a8e61",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "aggregate_sha256": "db4c979b7d09fdf8ed63beccb77fe60177f3b471e5a8ec8610e2a2eff68bb731",
+    "fits_sha256": "429a831e1476a55bf4f5880c91cc43baaa33469edbe200a689139e4ab5161dd9",
+    "losses_sha256": "0a4af3fd3f22fb8f7791d88741ae2065bbc164115c767044762a9c77968dd9e4",
+    "metadata_sha256": "feb03dfc5a891a0717a2ace8adc4af62ec22d3a8fc7cb253d141a78b1a66fb56"
+  },
+  "internal_fit": {
+    "maximum_condition_number": 1.01,
+    "maximum_log_condition_bound": 0.009950330853168092,
+    "condition_projection_active_every_layer": true,
+    "minimum_projection_scale": 0.0,
+    "context_finite_every_layer": true,
+    "coordinate_finite_fraction_every_layer": 1.0,
+    "functional_fallback_active_any_layer": false,
+    "interpretation": "The recursive fitter consumed the registered condition budget and zeroed later provisional stages only after the budget was exhausted; the exact final beta mix remained finite and required no outer projection in this safe validation regime."
+  },
+  "selection": {
+    "candidate_mean_ce": 5.600613117218018,
+    "weight_shear_mean_ce": 5.600614130496979,
+    "candidate_beats_weight_shear": true,
+    "candidate_beats_fresh88_every_window": true,
+    "candidate_beats_weight_shear_every_window": true
+  },
+  "heldout": {
+    "recovery_over_weight_shear_by_window": {
+      "validation_1": 0.21998078770413065,
+      "validation_2": 0.11210762331838565,
+      "validation_3": 0.14285714285714285,
+      "validation_4": 0.265905383360522
+    },
+    "minimum_recovery": 0.11210762331838565,
+    "median_recovery": 0.18141896528063675,
+    "required_minimum": 0.05,
+    "required_median": 0.1,
+    "deterministic_replicate_range": 0.0
+  },
+  "interpretation": [
+    "Conditioning the provisional functional recurrence reduces but does not erase the finite-CE advantage over the task/weight shear control.",
+    "The repair is inactive with respect to fallback on this gate: every functional recipe is finite, so the measured improvement is not a disguised weight-only update.",
+    "This result authorizes only another deterministic 25-update scratch stability/MFU gate. It does not authorize the 238-update run by itself."
+  ],
+  "authorization": {
+    "larger_rung_authorized": false,
+    "scientific_training_authorized": false,
+    "internal_conditioned_stability_preflight_authorized": true,
+    "next_action": "Run one exact-config 25-update scratch gate with repaired nonfinite-loss MFU validation and require all registered stability conditions before a full smallest-rung run."
+  }
+}
