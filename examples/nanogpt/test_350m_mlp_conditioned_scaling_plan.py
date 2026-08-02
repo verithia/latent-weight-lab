@@ -242,3 +242,33 @@ def test_v2_requalification_is_distinct_and_prior_anchored() -> None:
     assert plan["rules"]["minimum_mfu_fraction"] == 0.2
     assert "full_mlp_conditioned_v2" in plan["execution"]["performance_command"]
     assert "validate_functional_shear_stability_log_v2" in plan["execution"]["stability_command"]
+
+
+def test_v2_preflight_result_authorizes_only_the_registered_candidate() -> None:
+    result_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_preflight_v2_pass_result.json"
+    )
+    result = load(result_path)
+    assert result["schema_version"] == "350m_conditioned_full_mlp_preflight_result_v2"
+    assert result["decision"] == "PASS_V2_PERFORMANCE_AND_STABILITY_GATES"
+    assert result["authorization"]["candidate_long_run"] is True
+    assert sha256(REPO / result["candidate"]["config"]) == result["candidate"]["config_sha256"]
+    assert sha256(REPO / result["requalification_plan"]["path"]) == (
+        result["requalification_plan"]["sha256"]
+    )
+    assert sha256(REPO / result["validator"]["path"]) == result["validator"]["sha256"]
+    assert result["performance"]["mfu_fraction"] >= result["performance"]["minimum_mfu_fraction"]
+    stability = result["stability"]
+    assert stability["observed_rows"] == stability["expected_rows"] == 600
+    assert stability["unique_step_layer_coordinates"] == 600
+    assert stability["finite_rows"] == 600
+    assert stability["internal_limiter_active_rows"] >= 1
+    assert stability["fallback_rows"] == 0
+    assert stability["condition_bound_violations"] == 0
+    assert stability["weight_growth_violations"] == 0
+    terminal = result["preregistered_terminal_gate"]
+    assert terminal["effective_ceiling"] == min(
+        terminal["attention_only_absolute_ceiling"],
+        terminal["matched_parent_plus_0p1_ceiling"],
+    )

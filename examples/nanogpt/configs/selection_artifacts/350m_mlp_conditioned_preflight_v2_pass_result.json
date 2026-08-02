@@ -1,0 +1,68 @@
+{
+  "artifact_kind": "350m_conditioned_full_mlp_preflight_result",
+  "authorization": {
+    "candidate_long_run": true,
+    "effective_terminal_validation_ce_ceiling": 4.5557,
+    "statement": "This fresh V2 measurement passes every preregistered performance and stability predicate and authorizes exactly the registered 677-update candidate run."
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": "PASS_V2_PERFORMANCE_AND_STABILITY_GATES",
+  "execution": {
+    "direct_foreground_polling": true,
+    "git_commit": "13cc24e644614b33c6796c631997552b1e735fc4",
+    "gpu": 0,
+    "host": "PRO6",
+    "parameter_updates": 25,
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "performance": {
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/performance_and_stability_preflight.json",
+    "certificate_sha256": "f50c3ee600a9430c3ed2b2eb3bc0a671ecd8fb9e17756ccbe2fb34defd9e3653",
+    "elapsed_seconds": 134.42273378372192,
+    "iter_ms": 5204.452916666666,
+    "mfu_fraction": 0.257630788971985,
+    "minimum_mfu_fraction": 0.2,
+    "model_tflops": 107.24916936434687,
+    "peak_mib": 61763.3,
+    "tokens_per_second": 50369.98416666666
+  },
+  "preregistered_terminal_gate": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_only_absolute_ceiling": 4.5629,
+    "effective_ceiling": 4.5557,
+    "matched_parent_plus_0p1_ceiling": 4.5557,
+    "matched_parent_validation_ce": 4.4557
+  },
+  "requalification_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_functional_shear_stability_requalification_v2_plan.json",
+    "sha256": "27471247b1e37a124aed4a755d704cefd8099aee78a394330adb2cc2b4f362e5"
+  },
+  "schema_version": "350m_conditioned_full_mlp_preflight_result_v2",
+  "stability": {
+    "condition_bound_violations": 0,
+    "expected_rows": 600,
+    "fallback_rows": 0,
+    "finite_loss_values": 29,
+    "finite_rows": 600,
+    "internal_limiter_active_rows": 599,
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/performance_and_stability_preflight.log",
+    "log_sha256": "5e36b7c341017f082b206ebdfde929eea9339d2e899384a7a38269be816df2db",
+    "observed_rows": 600,
+    "unique_step_layer_coordinates": 600,
+    "validation_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/functional_shear_stability_validation.json",
+    "validation_sha256": "bac5bc2c6fc7de3a5bea0f294b595bffe2fece14ee6b6a0e966043f226d99148",
+    "weight_growth_violations": 0
+  },
+  "validator": {
+    "path": "examples/nanogpt/validate_functional_shear_stability_log_v2.py",
+    "sha256": "7dd2ed07b5eec08122cd4937b7e541bb96eda28dd0a9be16f44595578c7db717"
+  }
+}
