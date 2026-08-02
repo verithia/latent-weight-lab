@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_ce_select_pro6_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "PROMOTE_FUNCTIONAL_COORDINATE_MIX_TO_PRODUCTION_PREFLIGHT",
+  "selected_beta": 0.5,
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_ce_select_pro6_plan.json",
+    "sha256": "d6e6865d0610478e960e77156a7b4930ad6f8e45c51e1c14fb7457ff7b124f65"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "37b793cdb95ccee85e108344abe4b45559492163",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce_select.py",
+    "entrypoint_sha256": "e188a37e7295b82bdeda26051ac87568c77d0a26dab830eb388c9a9b988fa39d",
+    "wall_seconds": 27.279653549194336,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "checkpoint_next_iter": 238,
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_beta0125_ce_result_sha256": "56680109b9f5f8d74a8068853947a201d28a023bf3bb030c5e80d121091f3944"
+  },
+  "selection": {
+    "seed": 20261109,
+    "candidate_betas": [0.125, 0.25, 0.375, 0.5],
+    "mean_ce": {
+      "0.125": 5.60061377286911,
+      "0.25": 5.600612938404083,
+      "0.375": 5.600612223148346,
+      "0.5": 5.600611627101898
+    },
+    "weight_shear_mean_ce": 5.600614845752716,
+    "selected_beta": 0.5
+  },
+  "heldout": {
+    "beats_weight_shear_every_window": true,
+    "beats_fresh88_every_window": true,
+    "dense_beats_weight_shear_every_window": true,
+    "numerically_stable": true,
+    "recovery_over_weight_shear_by_window": {
+      "validation_1": 0.24890617403986387,
+      "validation_2": 0.12340105342362678,
+      "validation_3": 0.18902439024390244,
+      "validation_4": 0.3041125541125541
+    },
+    "minimum_recovery": 0.12340105342362678,
+    "median_recovery": 0.21896528214188316,
+    "required_minimum": 0.05,
+    "required_median": 0.1
+  },
+  "artifacts": {
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_ce_select1",
+    "aggregate_sha256": "94013329e920e7eab464b264ff621abb63bc415e89493c6ee73ecceb384c5512",
+    "fits_sha256": "9f7630c345f426d7eca5b4c3159e37eeeaa397555bcd512d8fcfa24046308517",
+    "losses_sha256": "4a11555c3e420c69cd870bdb19399e285d1bf070f1e03e307ebc86b18ce0299f",
+    "metadata_sha256": "9cc6555e99d78c32f6fad2f112dae96235a6fde4c11453ea785c2a22d0414848"
+  },
+  "interpretation": [
+    "Finite CE selects beta 0.5 rather than the weight-proxy-constrained beta 0.125. This confirms that Frobenius weight recovery was over-constraining the task-useful function-space coordinate component.",
+    "The frozen beta 0.5 winner beats both weight-shear24 and fresh88 on all four untouched held-out windows and recovers 12.3-30.4% of the remaining dense-over-weight-shear CE gap, with 21.9% median.",
+    "The candidate retains the same task-selected pair topology and 135,168 coordinates per layer. The improvement comes from the coordinate objective: an equal stagewise mix of weight-fit and activation/c_proj-function-fit shear coordinates.",
+    "This passes the local task-value gate but remains a one-step oracle-derived update rule. Production implementation must reproduce the mixed pullback without materializing a dense learned basis and must demonstrate at least 20% host-local MFU before scientific training."
+  ],
+  "authorization": {
+    "production_implementation_authorized": true,
+    "mfu_preflight_authorized": true,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Implement beta=0.5 mixed weight/function shear coordinates in the existing task-selected c_fc chart path, preserve provenance and fixed coordinate count, and run a host-local MFU preflight. Training is authorized only if measured MFU is at least 20%."
+  }
+}
