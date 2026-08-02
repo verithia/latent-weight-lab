@@ -472,12 +472,61 @@ def _fit_functional_shear_recipe(
     pre_gelu: torch.Tensor,
     cproj_weight: torch.Tensor,
     permutations: torch.Tensor,
+    *,
+    max_condition_number: float | None = None,
+    fit_diagnostics: dict[str, float | bool] | None = None,
 ) -> list[tuple[torch.Tensor, torch.Tensor]]:
-    """Fit the registered exact linearized post-GELU/``c_proj`` metric."""
+    """Fit the linearized post-GELU metric inside a bounded map chart.
+
+    The provisional functional recipe is recursive: every fitted shear is
+    applied before the next coordinate is estimated.  Bounding only the
+    eventual weight update is therefore too late to prevent this internal
+    recurrence from overflowing.  When a condition limit is configured, use
+    the same composed log-condition budget while constructing the recipe.
+    """
     current = source.float().clone()
     inputs = inputs.to(device=source.device, dtype=torch.float32)
     pre_gelu = pre_gelu.to(device=source.device, dtype=torch.float32)
     cproj = cproj_weight.to(device=source.device, dtype=torch.float32)
+    maximum_log_condition = math.inf
+    if max_condition_number is not None:
+        if (
+            not math.isfinite(float(max_condition_number))
+            or float(max_condition_number) <= 1.0
+        ):
+            raise ValueError("max condition number must be finite and > 1")
+        maximum_log_condition = math.log(float(max_condition_number))
+    context_finite = bool(
+        torch.isfinite(current).all()
+        and torch.isfinite(requested_update).all()
+        and torch.isfinite(inputs).all()
+        and torch.isfinite(pre_gelu).all()
+        and torch.isfinite(cproj).all()
+    )
+    if not context_finite:
+        recipe = [
+            (
+                permutation.to(source.device).reshape(-1, 2),
+                torch.full(
+                    (permutation.numel() // 2,),
+                    float("nan"),
+                    dtype=torch.float64,
+                    device=source.device,
+                ),
+            )
+            for permutation in permutations
+        ]
+        if fit_diagnostics is not None:
+            fit_diagnostics.update(
+                {
+                    "functional_fit_context_finite": False,
+                    "functional_fit_coordinate_finite_fraction": 0.0,
+                    "functional_fit_condition_projection_active": False,
+                    "functional_fit_condition_projection_min_scale": 1.0,
+                    "functional_fit_log_condition_bound": 0.0,
+                }
+            )
+        return recipe
     slopes = _gelu_derivative(pre_gelu)
     projected = inputs @ current
     target_output = (
@@ -487,6 +536,11 @@ def _fit_functional_shear_recipe(
     cproj_gram = cproj.T @ cproj
     cproj_norm = cproj_gram.diagonal()
     recipe: list[tuple[torch.Tensor, torch.Tensor]] = []
+    used_log_condition = 0.0
+    finite_coordinates = 0
+    total_coordinates = 0
+    condition_projection_active = False
+    minimum_condition_scale = 1.0
     for permutation in permutations:
         pairs = permutation.to(source.device).reshape(-1, 2)
         left, right = pairs.unbind(dim=1)
@@ -505,6 +559,32 @@ def _fit_functional_shear_recipe(
             * (left_direction * right_direction).sum(dim=0)
         ).clamp_min(1e-30)
         coordinates = numerator.double() / denominator.double()
+        coordinate_is_finite = torch.isfinite(coordinates)
+        finite_coordinates += int(coordinate_is_finite.sum())
+        total_coordinates += int(coordinates.numel())
+        if not bool(coordinate_is_finite.all()):
+            recipe.append((pairs, coordinates))
+            continue
+        stage_log_condition = 2.0 * float(coordinates.abs().max())
+        remaining_log_condition = max(
+            maximum_log_condition - used_log_condition,
+            0.0,
+        )
+        condition_scale = 1.0
+        if stage_log_condition > remaining_log_condition:
+            condition_scale = (
+                remaining_log_condition / stage_log_condition
+                if stage_log_condition > 0.0
+                else 1.0
+            )
+            coordinates = coordinates * condition_scale
+            stage_log_condition *= condition_scale
+            condition_projection_active = True
+            minimum_condition_scale = min(
+                minimum_condition_scale,
+                condition_scale,
+            )
+        used_log_condition += stage_log_condition
         projected_updated = _apply_symmetric_shear_stage(
             projected, pairs, coordinates
         )
@@ -516,6 +596,22 @@ def _fit_functional_shear_recipe(
         )
         projected = projected_updated
         recipe.append((pairs, coordinates))
+    if fit_diagnostics is not None:
+        fit_diagnostics.update(
+            {
+                "functional_fit_context_finite": context_finite,
+                "functional_fit_coordinate_finite_fraction": (
+                    finite_coordinates / max(total_coordinates, 1)
+                ),
+                "functional_fit_condition_projection_active": (
+                    condition_projection_active
+                ),
+                "functional_fit_condition_projection_min_scale": (
+                    minimum_condition_scale
+                ),
+                "functional_fit_log_condition_bound": used_log_condition,
+            }
+        )
     return recipe
 
 
@@ -541,16 +637,35 @@ def mix_shear_recipes(
     mixed: list[tuple[torch.Tensor, torch.Tensor]] = []
     weight_energy = 0.0
     mixed_energy = 0.0
+    weight_finite = 0
+    functional_finite = 0
+    total_coordinates = 0
+    functional_fallback = False
     for (weight_pairs, weight_coordinates), (
         functional_pairs,
         functional_coordinates,
     ) in zip(weight_recipe, functional_recipe, strict=True):
         if not torch.equal(weight_pairs, functional_pairs):
             raise RuntimeError("functional and weight shear topology differs")
-        coordinates = (
-            (1.0 - float(beta)) * weight_coordinates
-            + float(beta) * functional_coordinates
+        weight_finite += int(torch.isfinite(weight_coordinates).sum())
+        functional_finite += int(
+            torch.isfinite(functional_coordinates).sum()
         )
+        total_coordinates += int(weight_coordinates.numel())
+    if weight_finite != total_coordinates:
+        raise FloatingPointError("weight shear recipe is nonfinite")
+    functional_fallback = functional_finite != total_coordinates
+    for (weight_pairs, weight_coordinates), (
+        functional_pairs,
+        functional_coordinates,
+    ) in zip(weight_recipe, functional_recipe, strict=True):
+        if functional_fallback:
+            coordinates = weight_coordinates
+        else:
+            coordinates = (
+                (1.0 - float(beta)) * weight_coordinates
+                + float(beta) * functional_coordinates
+            )
         mixed.append((weight_pairs, coordinates))
         weight_energy += float(weight_coordinates.double().square().sum())
         mixed_energy += float(coordinates.double().square().sum())
@@ -609,6 +724,13 @@ def mix_shear_recipes(
         ),
         "condition_projection_scale": condition_scale,
         "condition_projection_active": bool(condition_scale < 1.0),
+        "weight_recipe_finite_fraction": (
+            weight_finite / max(total_coordinates, 1)
+        ),
+        "functional_recipe_finite_fraction": (
+            functional_finite / max(total_coordinates, 1)
+        ),
+        "functional_fallback_to_weight_recipe": functional_fallback,
     }
 
 
@@ -664,6 +786,7 @@ def functional_coordinate_mix_update(
     weight_recipe = _fit_weight_shear_recipe(
         after_parent, residual, shear_permutations
     )
+    functional_fit_diagnostics: dict[str, float | bool] = {}
     functional_recipe = _fit_functional_shear_recipe(
         after_parent,
         residual,
@@ -671,6 +794,8 @@ def functional_coordinate_mix_update(
         pre_gelu,
         cproj_weight,
         shear_permutations,
+        max_condition_number=max_condition_number,
+        fit_diagnostics=functional_fit_diagnostics,
     )
     mixed_recipe, projection_diagnostics = mix_shear_recipes(
         weight_recipe,
@@ -713,6 +838,7 @@ def functional_coordinate_mix_update(
         "shear_stages": int(shear_stages),
         "functional_coordinate_mix_beta": float(beta),
         **projection_diagnostics,
+        **functional_fit_diagnostics,
         "functional_samples": int(inputs.shape[0]),
         "angle_rms": float(parent_angles.square().mean().sqrt()),
         "shear_rms": float(all_shears.square().mean().sqrt()),

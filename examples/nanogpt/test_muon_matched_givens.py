@@ -714,6 +714,52 @@ def test_mixed_direction_respects_composed_condition_bound() -> None:
     )
 
 
+def test_functional_fit_is_bounded_inside_recursive_chart() -> None:
+    torch.manual_seed(113)
+    source = torch.randn(5, 8) * 0.02
+    requested = torch.randn_like(source) * 2.0
+    inputs = torch.randn(17, 5)
+    pre_gelu = inputs @ source
+    cproj = torch.randn(5, 8) * 0.02
+    permutations = random_unique_matchings(width=8, stages=4, seed=127)
+    diagnostics: dict[str, float | bool] = {}
+    recipe = _fit_functional_shear_recipe(
+        source,
+        requested,
+        inputs,
+        pre_gelu,
+        cproj,
+        permutations,
+        max_condition_number=1.01,
+        fit_diagnostics=diagnostics,
+    )
+    assert all(
+        torch.isfinite(coordinates).all()
+        for _pairs, coordinates in recipe
+    )
+    assert diagnostics["functional_fit_condition_projection_active"] is True
+    assert diagnostics["functional_fit_log_condition_bound"] <= (
+        math.log(1.01) + 1e-12
+    )
+
+
+def test_nonfinite_functional_recipe_falls_back_to_weight_recipe() -> None:
+    pairs = torch.tensor([[0, 1], [2, 3]])
+    weight_recipe = [(pairs, torch.tensor([0.002, -0.001]))]
+    functional_recipe = [(pairs, torch.tensor([float("nan"), 1.0]))]
+    mixed, diagnostics = mix_shear_recipes(
+        weight_recipe,
+        functional_recipe,
+        beta=0.5,
+        project_to_weight_norm=False,
+        max_condition_number=1.01,
+    )
+    assert torch.equal(mixed[0][1], weight_recipe[0][1])
+    assert diagnostics["functional_fallback_to_weight_recipe"] is True
+    assert diagnostics["weight_recipe_finite_fraction"] == 1.0
+    assert diagnostics["functional_recipe_finite_fraction"] == 0.5
+
+
 def test_gpt_wires_functional_cfc_and_consumes_bounded_context(
     monkeypatch,
 ) -> None:

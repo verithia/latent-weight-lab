@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import math
 import unittest
 from pathlib import Path
 
 from examples.nanogpt.mfu_preflight import (
     make_preflight_config,
     parse_snapshot_elapsed_seconds,
+    parse_training_loss_values,
 )
 
 
@@ -54,6 +56,20 @@ class MfuPreflightTest(unittest.TestCase):
             ]
         )
         self.assertEqual(parse_snapshot_elapsed_seconds(text), [1.25, 0.75])
+
+    def test_training_loss_parser_exposes_nonfinite_values(self) -> None:
+        text = "\n".join(
+            [
+                "step 0: train loss 10.5, val loss 10.4",
+                "iter 0: loss 10.3, time 1.0ms",
+                "iter 1: loss nan, time 1.0ms",
+                "step 2: train loss inf, val loss -inf",
+            ]
+        )
+        values = parse_training_loss_values(text)
+        self.assertEqual(len(values), 6)
+        self.assertTrue(math.isfinite(values[0]))
+        self.assertFalse(math.isfinite(values[-1]))
 
 
 if __name__ == "__main__":

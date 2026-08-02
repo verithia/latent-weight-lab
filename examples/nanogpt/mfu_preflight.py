@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -70,6 +71,32 @@ def parse_snapshot_elapsed_seconds(text: str) -> list[float]:
             text,
         )
     ]
+
+
+def parse_training_loss_values(text: str) -> list[float]:
+    """Read only the explicit iteration/evaluation loss fields."""
+    token = r"(?:nan|[-+]?inf|[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)"
+    values: list[float] = []
+    for line in text.splitlines():
+        iteration = re.match(
+            rf"^iter\s+\d+:\s+loss\s+({token})(?:,|\s|$)",
+            line,
+            flags=re.IGNORECASE,
+        )
+        if iteration is not None:
+            values.append(float(iteration.group(1)))
+            continue
+        evaluation = re.match(
+            rf"^step\s+\d+:\s+train loss\s+({token}),\s+"
+            rf"val loss\s+({token})(?:\s|$)",
+            line,
+            flags=re.IGNORECASE,
+        )
+        if evaluation is not None:
+            values.extend(
+                (float(evaluation.group(1)), float(evaluation.group(2)))
+            )
+    return values
 
 
 def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> float:
@@ -249,6 +276,19 @@ def main() -> None:
         certificate["train_exit_code"] = process.returncode
         if process.returncode != 0:
             raise RuntimeError(f"real-training preflight failed (exit={process.returncode}); log={log_path}")
+        loss_values = parse_training_loss_values(process.stdout)
+        finite_loss_values = sum(math.isfinite(value) for value in loss_values)
+        certificate["stability"] = {
+            "logged_loss_values": len(loss_values),
+            "finite_loss_values": finite_loss_values,
+            "all_logged_losses_finite": (
+                bool(loss_values) and finite_loss_values == len(loss_values)
+            ),
+        }
+        if not loss_values:
+            raise RuntimeError("real-training preflight emitted no loss values")
+        if finite_loss_values != len(loss_values):
+            raise RuntimeError("real-training preflight emitted nonfinite loss")
         rows = parse_perf_rows(process.stdout)
         if len(rows) < args.timed_updates:
             raise RuntimeError(f"preflight emitted only {len(rows)} timed perf rows; expected {args.timed_updates}")
