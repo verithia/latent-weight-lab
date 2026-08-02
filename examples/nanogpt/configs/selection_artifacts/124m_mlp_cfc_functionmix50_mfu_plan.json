@@ -1,0 +1,65 @@
+{
+  "authorization": {
+    "larger_rung_authorized": false,
+    "scientific_training_authorized": false,
+    "scope": "exactly one directly polled PRO6 MFU preflight"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_mfu.json",
+    "config_sha256": "ed987e69c6a3a751d385f0235b5f8f78dfb47b235595fda519bda9e532827417",
+    "coordinates_per_cfc_layer": 135168,
+    "functional_coordinate_mix_beta": 0.5,
+    "functional_sample_cap": 2048,
+    "implementation_commit": "93308fd59654cfa522555aeaa9310acfaa27df92",
+    "model_tier": "124m",
+    "parent_stages": 64,
+    "shear_stages": 24,
+    "topology": "task-selected in weight geometry; no learned basis, residual adapter, or added coordinates"
+  },
+  "decision_rule": {
+    "pass": "exit zero, finite certificate bound to the exact config hash, all eight timed real-training updates present, and host-local MFU >= 0.20",
+    "reject": "MFU < 0.20, any nonfinite/divergent update, incomplete timing, missing activation context, native matching failure, or provenance mismatch",
+    "threshold_changes_after_measurement": false
+  },
+  "parent_evidence": {
+    "decision": "PROMOTE_FUNCTIONAL_COORDINATE_MIX_TO_PRODUCTION_PREFLIGHT",
+    "finite_ce_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_ce_select_pro6_result.json",
+    "minimum_dense_gap_recovery": 0.123401,
+    "median_dense_gap_recovery": 0.218965
+  },
+  "protocol": {
+    "callback": false,
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50/performance_preflight_functionmix50.json",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_mfu.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50/performance_preflight_functionmix50.json",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "denominator": "same-host empirical BF16 8192-square tensor-core GEMM peak",
+    "execution": "direct foreground process polled by the agent through terminal exit",
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "minimum_mfu_fraction": 0.2,
+    "queue_worker": false,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "watchdog": false
+  },
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_mfu_plan_v1",
+  "scientific_question": "Can the finite-CE-selected beta-0.5 function-aware c_fc chart execute the full 124M training path at at least 20 percent host-local MFU?",
+  "status": "preregistered"
+}
