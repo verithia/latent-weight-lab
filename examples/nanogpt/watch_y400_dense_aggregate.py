@@ -21,7 +21,7 @@ from pathlib import Path
 
 CALLBACK_URL = "http://127.0.0.1:8766/send-opencode-test"
 AGENT_MENTION = "@Codex"
-CALLBACK_TIMEOUT_SECONDS = 90
+CALLBACK_TIMEOUT_SECONDS = 300
 
 REMOTE_PROBE = r'''python3 - "$1" <<'PY'
 import json, pathlib, re, subprocess, sys

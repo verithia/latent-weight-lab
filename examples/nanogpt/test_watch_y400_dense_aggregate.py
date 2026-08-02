@@ -20,7 +20,7 @@ def test_send_allows_slow_bridge_ack_and_mentions_agent(monkeypatch) -> None:
 
     monkeypatch.setattr(watcher.urllib.request, "build_opener", lambda *_args: Opener())
     assert watcher.send("chat", "PROGRESS: run 20%") is True
-    assert observed["timeout"] == 90
+    assert observed["timeout"] == 300
     assert observed["body"] == {
         "chat_id": "chat",
         "text": "@Codex PROGRESS: run 20%",

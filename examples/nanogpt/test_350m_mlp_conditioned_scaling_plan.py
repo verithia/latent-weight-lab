@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 from pathlib import Path
 
 
@@ -186,3 +187,32 @@ def test_candidate_stability_validator_contract_is_frozen() -> None:
     assert "--maximum-weight-rms-ratio 2" in command
     assert "--maximum-weight-abs-growth 2" in command
     assert "--maximum-weight-abs-floor 1" in command
+
+
+def test_parent_terminal_result_passes_frozen_gate() -> None:
+    result_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_hidden88_terminal_result.json"
+    )
+    result = load(result_path)
+    assert result["schema_version"] == "350m_mlp_cproj_hidden88_terminal_result_v1"
+    assert result["decision"] == "PASS_PARENT_GATE"
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    measurement = result["measurement"]
+    assert measurement["terminal_step"] == 677
+    assert measurement["terminal_validation_ce"] <= measurement["parent_success_ceiling"]
+    assert math.isclose(
+        measurement["attention_gap_ce"],
+        measurement["terminal_validation_ce"] - measurement["attention_control_validation_ce"],
+        abs_tol=1e-12,
+    )
+    assert math.isclose(
+        measurement["success_margin_ce"],
+        measurement["parent_success_ceiling"] - measurement["terminal_validation_ce"],
+        abs_tol=1e-12,
+    )
+    assert result["checkpoint"]["next_iter"] == 677
+    assert result["checkpoint"]["exact_resume_schema"] == "nanogpt_exact_resume_v2"
+    assert result["callback"]["sent_milestones"] == [20, 50]
+    assert result["callback"]["terminal_signature"][0:2] == ["finished", 0]

@@ -1,0 +1,73 @@
+{
+  "artifact_kind": "350m_mlp_cproj_hidden88_terminal_result",
+  "callback": {
+    "last_callback_at_unix": 1785680979.990444,
+    "sent_milestones": [
+      20,
+      50
+    ],
+    "state_key": "pro6_350m_cproj_hidden88_20260802a_v2",
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-02T22:27:59+08:00"
+    ]
+  },
+  "checkpoint": {
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/run/ckpt.meta.json",
+    "metadata_sha256": "33ab4b4db2aa215fe6595ea42790d1ee856429510525d65f8e5ec0bb51a84b01",
+    "next_iter": 677,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/run/ckpt.pt",
+    "sha256": "e94e46283941f0c81287cf3d4c7d4b1fb8bdfb74cb741ae5b2fddcc770602d16",
+    "size_bytes": 2410466296
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "sha256": "f59803d0cca73bc87a7ca3f9170aa2d09c92a4fd6498f3eca36394bfb1d45321"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": "PASS_PARENT_GATE",
+  "host": "PRO6",
+  "measurement": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_gap_ce": 0.0928,
+    "parent_success_ceiling": 4.4629,
+    "success_margin_ce": 0.0072,
+    "terminal_step": 677,
+    "terminal_train_ce": 4.4608,
+    "terminal_validation_ce": 4.4557
+  },
+  "performance_gate": {
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.json",
+    "certificate_sha256": "f73f0e4af965c541005e8d45cd6bb7dedaaaf60ec91622ca0f15c34e9cd77be2",
+    "mfu_fraction": 0.367011653,
+    "minimum_mfu_fraction": 0.2
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_scaling_plan.json",
+    "sha256": "406cae6fc38d2ef9b64ed56f612e4d00614a8934cf555ba2342926527cba0615"
+  },
+  "provenance": {
+    "git_commit": "f282f4d874f6b73b89050ebfb0bc07353118ce71",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_cproj_hidden88_0p5tpp_20260802a_20260802T134313Z_2604007.log",
+    "log_sha256": "fddd8b4957bdff427e82108c076d017da2deb9d945cfc03bb1192f33108c6bf5",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_cproj_hidden88_0p5tpp_20260802a_20260802T134313Z_2604007.json",
+    "sha256": "33edf06e9150443fc31a3f028602e95db6b6fbfc321f04ef5493eb303cbe498f",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_cproj_hidden88_0p5tpp_20260802a_20260802T134313Z_2604007.json",
+    "status_sha256": "5bb682b4a7b3653954dcf6188c47e0a4fe7581a89bdfdfb186f47b09018adaf2"
+  },
+  "runtime_evaluation": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "protocol": "mai_ladder_fixed_eval_indices_v2"
+  },
+  "schema_version": "350m_mlp_cproj_hidden88_terminal_result_v1",
+  "workspace_after_run": {
+    "available_bytes": 1791131492352,
+    "cap_bytes": 274877906944,
+    "used_bytes": 118408042071
+  }
+}
