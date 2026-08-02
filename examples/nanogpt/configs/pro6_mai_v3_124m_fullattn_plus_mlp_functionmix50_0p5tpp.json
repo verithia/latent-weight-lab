@@ -75,7 +75,6 @@
   "method": "block_fht",
   "mfu_min_fraction": 0.2,
   "mfu_preflight_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50/performance_preflight_functionmix50.json",
-  "mfu_preflight_certificate_sha256": "1212c390a49c2625cb7268056a907f052e16b3a035401be399d0068b21df5849",
   "mfu_preflight_required": true,
   "min_lr": 0.00024,
   "model_seed": 1337,

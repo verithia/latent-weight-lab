@@ -6,7 +6,7 @@
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_0p5tpp.json",
-    "config_sha256": "f0fe9b19c1bcef5b9ce40ac51a18ac1444d6a82cbafcf7c261ed26c02f0e3a69",
+    "config_sha256": "27290d37cb1f7bf986ccee07f97a3486a265e5d17f64b24751abdf4e6d9be465",
     "cfc_coordinates_per_layer": 135168,
     "cproj_coordinates_per_layer": 135168,
     "functional_coordinate_mix_beta": 0.5,
@@ -34,13 +34,14 @@
     "callback": false,
     "command": [
       "env",
-      "CUDA_VISIBLE_DEVICES=0",
-      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
-      "-u",
-      "-m",
-      "examples.nanogpt.train",
-      "--config",
-      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_0p5tpp.json"
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "bash",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_functionmix50_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
     ],
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "execution": "direct foreground process polled by the agent through terminal exit",
