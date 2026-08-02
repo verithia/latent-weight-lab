@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_direction_only_ce_plan_v1",
+  "recorded_at": "2026-08-02",
+  "question": "Does the beta-0.5 function-aware direction retain held-out finite-CE value after projecting only its coordinate magnitude onto the per-step weight-fit L2 norm?",
+  "authorization": {
+    "parameter_updates": 0,
+    "single_directly_polled_ce_diagnostic": true,
+    "production_training": false,
+    "mfu_preflight": false,
+    "larger_rung": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce_select.py",
+    "entrypoint_sha256": "9dcba65d6e91128d8b6f8d7cf0f0671abe28801a4a0c07ed093996ca1bf16acf",
+    "implementation_commit": "f2b05f33e2bfce05125c6d07a81f206d449370df",
+    "stability_diagnostic_result_sha256": "9a0cd6fa190bfcaf1a0191b8552e6c8a2f76600e1206f94392c3d69ef2096061",
+    "unprojected_finite_ce_result_sha256": "2eb51769aa1e6401dfcd5574a51214dc5296a98c71c8440978c33bbbab44d6a6"
+  },
+  "fixed_protocol": {
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "batch_size": 4,
+    "block_size": 1024,
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "functional_sample_cap": 2048,
+    "functional_sample_seed": 20261250,
+    "matching_seed": 20260820,
+    "matching_neighbors": 64,
+    "candidate_betas": [0.5],
+    "weight_norm_projection": true,
+    "projection": "If the global L2 norm of all beta-0.5 mixed shear coordinates exceeds the weight-fit recipe norm, multiply the complete mixed vector by weight_norm/mixed_norm; otherwise leave it unchanged.",
+    "selection_seed": 20261109,
+    "selection_batches": 8,
+    "control": "fresh64_weight_shear24",
+    "secondary_control": "fresh88",
+    "dense_reference": "dense_exact",
+    "equal_coordinates_per_layer": 135168,
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "validation_batches_per_window": 8,
+    "validation_seeds": [20261110, 20261111, 20261112, 20261113]
+  },
+  "decision_rule": {
+    "selection_tie_tolerance": 0.00000001,
+    "maximum_replicate_range": 0.0000002,
+    "minimum_recovery": 0.05,
+    "median_recovery": 0.1,
+    "selection": "The sole preregistered beta-0.5 norm-projected candidate must beat weight-shear24 and fresh88 on the selection window and every held-out window, recover at least 5% of the dense-over-weight-shear CE gap in the worst held-out window and 10% at the median, remain finite, and preserve deterministic replicate range. No beta, radius, or threshold changes after observation.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "foreground_direct_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_functional_shear_ce_select",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_direction_only_ce_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_direction_only_ce1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ]
+  },
+  "limitations": [
+    "This is a zero-update finite-CE diagnostic on the trained hidden88 parent, not language-model training.",
+    "The validation windows are reused from the prior beta selection because the candidate transformation was fixed only after an independent from-scratch stability trace exposed magnitude failure. Results are confirmatory for direction retention but not a new blind beta selection.",
+    "Passing authorizes only a separate 25-update from-scratch stability gate and exact-config MFU gate before another smallest-rung training run."
+  ]
+}
