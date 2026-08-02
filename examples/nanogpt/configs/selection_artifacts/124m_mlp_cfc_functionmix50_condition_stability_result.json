@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_condition_stability_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "REJECT_POST_FIT_CONDITION_LIMITER",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "896f8a4da315d693a03ef182b04ba6d48272d182",
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "parameter_updates": 25,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "config_sha256": "003ded85b40e7b8c8104b2c9572361bfe921939033373a1913dfea1133ae2365",
+    "plan_sha256": "4ce1921c98dd94e074eb625cc4b72a5d2d190e693d93516ce26ef67ec6edee31",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate_sha256": "ca06eee8add6fff2076238ac235009aac2de49c6f4a4401dfc23a549f47e4f07",
+    "complete_log_sha256": "c21e323553a9bead87063fab355d22a1e06c9299aeffe7289df169d36d46a9ce"
+  },
+  "performance_only_measurement": {
+    "certificate_passed_field": true,
+    "mfu_fraction": 0.23381017409715887,
+    "tokens_per_second": 130578.16375,
+    "iteration_ms": 2007.88875,
+    "optimizer_ms": 845.9525,
+    "peak_mib": 35097.59,
+    "minimum_mfu_fraction": 0.2,
+    "scientific_gate_passed": false,
+    "interpretation": "The existing certificate evaluated performance only and incorrectly left passed=true despite nonfinite loss. The preregistered stability gate takes precedence."
+  },
+  "loss_trace": {
+    "initial_train_ce": 10.9639,
+    "initial_validation_ce": 10.9608,
+    "iter_8_train_ce": 8.8216,
+    "first_nonfinite_train_iter": 9,
+    "terminal_train_ce": null,
+    "terminal_validation_ce": null
+  },
+  "causal_trace": {
+    "condition_limiter_first_active_step": 1,
+    "minimum_condition_scale_step_6": 0.0012903649375279758,
+    "maximum_raw_log_condition_step_6": 7.711253277100427,
+    "minimum_condition_scale_step_7": 0.0003981516987029518,
+    "maximum_raw_log_condition_step_7": 24.99130579018756,
+    "maximum_raw_log_condition_step_8_finite_layers": 29.829933003073396,
+    "maximum_post_projection_log_condition_through_finite_rows": 0.009950330853168094,
+    "maximum_weight_rms_ratio_through_finite_rows": 0.9999719858169556,
+    "first_nonfinite_optimizer_step": 8,
+    "first_nonfinite_layers": [10, 11],
+    "layer_10_weight_recipe_l2": 0.019806160517687896,
+    "layer_11_weight_recipe_l2": 0.01913984033973104,
+    "first_failure_location": "recursive functional shear recipe construction before the mixed recipe and its post-fit condition limiter",
+    "fail_open_mechanism": "NaN mixed_log_condition_bound makes the greater-than-threshold comparison false, leaving condition_projection_scale=1.0 and applying a partially nonfinite recipe."
+  },
+  "interpretation": [
+    "The outer composed-condition limiter did prevent hyperbolic weight growth whenever the functional recipe remained finite; all finite post-projection bounds met log(1.01), and weight RMS did not grow.",
+    "The functional fitter itself recursively applies its unconstrained provisional symmetric shears to projected activations. In the deepest layers this internal path overflowed before the final beta mix could be bounded.",
+    "The same-step weight-space recipe and rotational parent remained finite. A fail-closed fallback can therefore retain the qualified finite update rather than applying NaNs.",
+    "The next repair must enforce the same preregistered 1.01 budget during the functional fitting recurrence, remain exactly inactive in its safe regime, and fall back to the finite weight recipe if functional fitting is undefined.",
+    "The generic MFU preflight must also reject any nonfinite logged train/evaluation loss so performance qualification cannot mask scientific instability."
+  ],
+  "authorization": {
+    "full_238_update_run_authorized": false,
+    "larger_rung_authorized": false,
+    "unchanged_retry_authorized": false,
+    "internal_fit_conditioning_repair_authorized": true,
+    "next_action": "Implement internal recurrence conditioning and nonfinite fallback, repair MFU loss validation, rerun focused/full tests, then preregister a fresh zero-update finite-CE retention gate before any further training."
+  }
+}
