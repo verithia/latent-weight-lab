@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import math
+import os
 from typing import Any
 
 import torch
@@ -536,7 +537,8 @@ def functional_coordinate_mix_update(
     weight_decay: float,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
     """Reproduce the promoted fixed-topology mixed-coordinate ``c_fc`` step."""
-    source = weight.float().T.contiguous()
+    weight_before = weight.float()
+    source = weight_before.T.contiguous()
     target = requested_update.float().T.contiguous()
     selection = selection_direction.float().T.contiguous()
     parent_permutations, parent_selection = fast_muon_matched_permutations(
@@ -592,12 +594,24 @@ def functional_coordinate_mix_update(
         )
         mixed_coordinates.append(coordinates)
     current.mul_(1.0 - float(learning_rate) * float(weight_decay))
-    update = current.T.contiguous() - weight.float()
+    weight_after = current.T.contiguous()
+    update = weight_after - weight_before
     requested_energy = requested_update.float().square().sum().clamp_min(1e-30)
     residual_energy = (
         requested_update.float() - update
     ).square().sum()
     all_shears = torch.cat(mixed_coordinates)
+    finite_coordinates = torch.isfinite(all_shears)
+    finite_update = torch.isfinite(update)
+    source_rms = weight_before.square().mean().sqrt()
+    result_rms = weight_after.square().mean().sqrt()
+    # Each exp([[0,s],[s,0]]) has singular values exp(+/-s).  The sum of
+    # per-stage maxima is a conservative log-condition-growth bound for the
+    # composed shear map, even when pairings change between stages.
+    shear_log_condition_bound = sum(
+        float(coordinates.abs().max()) * 2.0
+        for coordinates in mixed_coordinates
+    )
     return update, {
         "coordinates": int(
             (parent_stages + shear_stages) * source.shape[1] // 2
@@ -608,6 +622,16 @@ def functional_coordinate_mix_update(
         "functional_samples": int(inputs.shape[0]),
         "angle_rms": float(parent_angles.square().mean().sqrt()),
         "shear_rms": float(all_shears.square().mean().sqrt()),
+        "shear_max_abs": float(all_shears.abs().max()),
+        "shear_log_condition_bound": shear_log_condition_bound,
+        "coordinate_finite_fraction": float(finite_coordinates.float().mean()),
+        "update_finite_fraction": float(finite_update.float().mean()),
+        "weight_rms_before": float(source_rms),
+        "weight_rms_after": float(result_rms),
+        "weight_rms_ratio": float(result_rms / source_rms.clamp_min(1e-30)),
+        "weight_max_abs_before": float(weight_before.abs().max()),
+        "weight_max_abs_after": float(weight_after.abs().max()),
+        "update_rms": float(update.square().mean().sqrt()),
         "requested_update_recovery": float(
             1.0 - residual_energy / requested_energy
         ),
@@ -969,7 +993,16 @@ class MuonFunctionalShear(torch.optim.Optimizer):
                     {
                         "step": int(module.optimizer_step),
                         "layer": module.layer_id,
-                        "report_refresh": int(module.optimizer_step) == 0,
+                        "report_refresh": (
+                            int(module.optimizer_step) == 0
+                            or int(module.optimizer_step)
+                            < int(
+                                os.environ.get(
+                                    "MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS",
+                                    "0",
+                                )
+                            )
+                        ),
                         "optimizer": "muon_functional_shear",
                     }
                 )

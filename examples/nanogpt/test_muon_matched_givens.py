@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+import math
 
 import torch
 
@@ -618,6 +619,43 @@ def test_production_shear_recipes_match_registered_diagnostic() -> None:
             rtol=2e-6,
             atol=2e-7,
         )
+
+
+def test_functional_coordinate_diagnostics_bound_pair_condition() -> None:
+    torch.manual_seed(107)
+    source = torch.randn(8, 5) * 0.02
+    requested = torch.randn_like(source) * 0.0001
+    inputs = torch.randn(11, 5)
+    pre_gelu = inputs @ source.T
+    cproj = torch.randn(5, 8) * 0.02
+    from examples.nanogpt.muon_matched_givens import (
+        functional_coordinate_mix_update,
+    )
+
+    update, diagnostics = functional_coordinate_mix_update(
+        source,
+        requested,
+        requested,
+        inputs,
+        pre_gelu,
+        cproj,
+        parent_stages=2,
+        shear_stages=1,
+        neighbors=2,
+        seed=109,
+        beta=0.5,
+        learning_rate=0.001,
+        weight_decay=0.1,
+    )
+    assert torch.isfinite(update).all()
+    assert diagnostics["coordinate_finite_fraction"] == 1.0
+    assert diagnostics["update_finite_fraction"] == 1.0
+    assert diagnostics["shear_max_abs"] >= diagnostics["shear_rms"]
+    assert diagnostics["shear_log_condition_bound"] >= (
+        2.0 * diagnostics["shear_max_abs"]
+    )
+    assert math.isfinite(diagnostics["weight_rms_ratio"])
+    assert diagnostics["weight_rms_ratio"] > 0.0
 
 
 def test_gpt_wires_functional_cfc_and_consumes_bounded_context(
