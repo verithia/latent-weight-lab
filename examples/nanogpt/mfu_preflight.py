@@ -162,6 +162,14 @@ def main() -> None:
             "then charge snapshot serialization to effective iteration time"
         ),
     )
+    parser.add_argument(
+        "--log-output",
+        type=Path,
+        help=(
+            "optional durable copy of the complete scratch-training log; "
+            "use for directly polled stability diagnostics"
+        ),
+    )
     args = parser.parse_args()
     if args.min_fraction < 0.20:
         parser.error("--min-fraction must be at least 0.20")
@@ -327,6 +335,15 @@ def main() -> None:
         certificate["elapsed_seconds"] = certificate["finished_at_unix"] - start
         temporary_log = log_path.read_text(errors="replace") if log_path.exists() else ""
         certificate["preflight_log_sha256"] = hashlib.sha256(temporary_log.encode()).hexdigest()
+        if args.log_output is not None:
+            durable_log = args.log_output.resolve()
+            durable_log.parent.mkdir(parents=True, exist_ok=True)
+            temporary_durable_log = durable_log.with_suffix(
+                durable_log.suffix + ".part"
+            )
+            temporary_durable_log.write_text(temporary_log)
+            os.replace(temporary_durable_log, durable_log)
+            certificate["preflight_log_path"] = str(durable_log)
         # Failed qualification must be diagnosable after its temporary working
         # tree is removed. Keep only a bounded tail in the durable certificate.
         certificate["preflight_log_tail"] = temporary_log[-12000:]

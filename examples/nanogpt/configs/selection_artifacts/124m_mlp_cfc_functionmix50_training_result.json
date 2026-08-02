@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_training_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "REJECT_UNBOUNDED_FUNCTIONAL_SHEAR_TRAINING",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_training_plan.json",
+    "sha256": "71a232c4d1fec4443cf30ae7028dc9304f969bea6f0a55c4b43277e8b3646e62"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "43115cc280e3c421583d3a5b8d7ad6e96c73cf10",
+    "entrypoint": "examples/nanogpt/train.py",
+    "launcher": "examples/nanogpt/launch_y400_ladder_detached.sh --foreground",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "operator_terminated": true,
+    "termination_reason": "training CE became NaN at iteration 20 and remained NaN"
+  },
+  "identity": {
+    "config_sha256": "27290d37cb1f7bf986ccee07f97a3486a265e5d17f64b24751abdf4e6d9be465",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "238b60362349017f4886c82197dc52633b3d0e2e099579fbda0c5e56a3040f15",
+    "log_sha256": "7cb2c4b2e9aaef60ae0e844eed1666304bfb50b26f145cdfecc93298e980c767",
+    "scratch_checkpoint_sha256": "67f89f695a1b45f6adc00cf90a05539d0c1c2549e0cae5daa2f70909c6ec06f0",
+    "scratch_checkpoint_next_iter": 0
+  },
+  "observations": {
+    "initial_train_ce": 10.9672,
+    "initial_validation_ce": 10.9669,
+    "iter_0_train_ce": 10.9662,
+    "iter_10_train_ce": 8.2124,
+    "first_nonfinite_iter": 20,
+    "last_observed_iter": 40,
+    "terminal_validation_ce": null,
+    "preregistered_gate_evaluable": false,
+    "mfu_preflight_updates": 9,
+    "mfu_preflight_last_train_ce": 8.8186,
+    "mfu_preflight_terminal_validation_ce": 8.5839
+  },
+  "interpretation": [
+    "The nine-update MFU preflight ended before the instability appeared; MFU qualification did not establish optimizer stability.",
+    "The finite-CE beta selection was a one-step local diagnostic on a trained parent checkpoint. It did not qualify repeated unconstrained hyperbolic shear updates from scratch.",
+    "The production chart composes determinant-one exp([[0,s],[s,0]]) maps. Determinant preservation does not bound singular-value growth, so repeated shears require direct condition and norm diagnostics before a stabilizer is selected.",
+    "No larger rung or retry of the unchanged optimizer is authorized."
+  ],
+  "authorization": {
+    "unchanged_retry_authorized": false,
+    "larger_rung_authorized": false,
+    "stability_diagnostic_authorized": true,
+    "next_action": "Run one directly polled 25-update scratch diagnostic with unchanged optimizer behavior and per-layer shear maximum, conservative log-condition bound, weight norm, update norm, and finite-state traces."
+  }
+}
