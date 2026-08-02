@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_internal_condition_stability_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "PASS_INTERNAL_CONDITIONED_FUNCTION_MIX_STABILITY_AND_MFU",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_stability_plan.json",
+    "sha256": "41402cc7a279dc1dc911a1f5dd2de1ab357ef466747f920e1f8909df8940b168"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "16e26ce08091f5e2543a1843fd1b84a0a415a391",
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 25,
+    "train_exit_code": 0
+  },
+  "identity": {
+    "production_config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate_sha256": "4910c336720940d5325d998e25f261183197f469f434044f3eaa9147f8df7af5",
+    "complete_log_sha256": "d38a9b29aea9287ec9c778e7bed4351f774240a626ebc04dad39e4d793e5ac94"
+  },
+  "performance": {
+    "certificate_passed": true,
+    "mfu_fraction": 0.22523429447923074,
+    "tokens_per_second": 125859.40458333334,
+    "milliseconds_per_update": 2082.8525,
+    "optimizer_milliseconds_per_update": 884.0920833333333,
+    "peak_mib": 35097.59,
+    "minimum_mfu_fraction": 0.2
+  },
+  "stability": {
+    "expected_diagnostic_rows": 300,
+    "observed_diagnostic_rows": 300,
+    "exact_step_layer_grid": true,
+    "steps": [0, 24],
+    "layers_per_step": 12,
+    "all_coordinate_finite_fractions_one": true,
+    "all_update_finite_fractions_one": true,
+    "all_functional_fit_contexts_finite": true,
+    "all_functional_fit_coordinate_finite_fractions_one": true,
+    "all_weight_and_functional_recipes_finite": true,
+    "functional_fit_internal_condition_projection_active_rows": 300,
+    "outer_condition_projection_active_rows": 195,
+    "functional_fallback_rows": 0,
+    "minimum_internal_projection_scale": 0.0,
+    "maximum_internal_log_condition_bound": 0.009950330853168094,
+    "maximum_mixed_log_condition_bound": 0.009950330853168092,
+    "maximum_shear_log_condition_bound": 0.009950330853168094,
+    "registered_log_condition_limit": 0.009950330853168092,
+    "weight_rms_ratio_minimum": 0.9997093081474304,
+    "weight_rms_ratio_maximum": 0.9999723434448242,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 29,
+    "initial_train_ce": 10.9639,
+    "initial_validation_ce": 10.9608,
+    "terminal_train_ce": 7.4758,
+    "terminal_validation_ce": 7.5655,
+    "terminal_train_below_initial": true,
+    "failed_checks": 0
+  },
+  "interpretation": [
+    "Moving the condition limiter inside the recursive functional fitter eliminates the step-8 recipe corruption seen when only the final mixed recipe was bounded.",
+    "The recursive fitter consumes the registered condition budget at every layer/update; later provisional stages can be reduced to zero without producing nonfinite state.",
+    "The fail-closed functional-to-weight fallback was not needed in this deterministic gate, so the pass reflects finite functional fitting rather than recovery after corruption.",
+    "The additional recursive projection preserves acceptable throughput: measured host-local MFU remains above the preregistered 20% floor."
+  ],
+  "authorization": {
+    "one_238_update_smallest_rung_run": true,
+    "additional_candidate_runs": false,
+    "larger_rung": false,
+    "next_action": "Preregister one exact-config 238-update foreground-polled scientific run with the existing hidden88 terminal validation CE thresholds, then run it once on an idle PRO6 GPU0."
+  }
+}
