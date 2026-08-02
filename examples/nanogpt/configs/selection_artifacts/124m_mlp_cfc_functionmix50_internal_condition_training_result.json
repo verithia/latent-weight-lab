@@ -1,0 +1,109 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_internal_condition_training_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "PASS_FULL_MLP_SMALLEST_RUNG_WITHIN_0P1_CE",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_training_plan.json",
+    "sha256": "44d71fcfa90e22880fdda63b2bac264f8b85ff1496321b89f811260b93f269e8"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "ba259eea1f32c0929670b7acd63de1cb7d989aea",
+    "entrypoint": "examples/nanogpt/train.py",
+    "launcher": "examples/nanogpt/launch_y400_ladder_detached.sh --foreground",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-02T14:07:09+08:00",
+    "finished_at": "2026-08-02T14:17:04+08:00",
+    "wall_seconds": 595,
+    "exit_code": 0,
+    "classification": "clean"
+  },
+  "identity": {
+    "source_config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "resolved_checkpoint_config_sha256": "fa512e7210eeef36e966fe1362574c4986ee4e15190b6066c3811666f716db0c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_stability_result_sha256": "88655efa5387093d381cc64da72d224d769fba3b1ba6cfb5b610a8193090d819",
+    "mfu_certificate_sha256": "4910c336720940d5325d998e25f261183197f469f434044f3eaa9147f8df7af5",
+    "log_sha256": "72b22a20fdfe937d4becded8e75b9bdb2ddea0e0afb4eaf7dbbe0eab6e8770d7",
+    "status_sha256": "df5ea73fa72014c0c1b7773400c480fd7ec9bc7afb59b7cfd38a4f2889f394c9",
+    "provenance_sha256": "bd0238ce368d773ae210d57f5a449c93ec8d79a7e6c4020bbc0d90266726db78",
+    "checkpoint_sha256": "9309dc737795f60b44c230f776cc257c36a31b6060f732c50b9f382c1dea079e",
+    "checkpoint_metadata_sha256": "71a647fe722738e5c35c6a09945d3095ba68944cf54269d9e70e22f522cb44b6"
+  },
+  "losses": {
+    "initial_train_ce": 10.9672,
+    "initial_validation_ce": 10.9669,
+    "update_60_train_ce": 6.4144,
+    "update_60_validation_ce": 6.425,
+    "update_120_train_ce": 5.9141,
+    "update_120_validation_ce": 5.9192,
+    "update_180_train_ce": 5.7385,
+    "update_180_validation_ce": 5.7421,
+    "terminal_update": 238,
+    "terminal_train_ce": 5.6726,
+    "terminal_validation_ce_printed": 5.6761,
+    "terminal_validation_ce_checkpoint": 5.6761274337768555,
+    "hidden88_dense_cfc_parent_validation_ce": 5.5923542976379395,
+    "validation_gap_over_parent": 0.08377313613891602,
+    "success_threshold": 5.6923543,
+    "margin_inside_success_threshold": 0.01622686622314462,
+    "all_24_logged_iteration_losses_and_10_evaluation_losses_finite": true
+  },
+  "runtime": {
+    "preflight_mfu_fraction": 0.22523429447923074,
+    "preflight_tokens_per_second": 125859.40458333334,
+    "preflight_peak_mib": 35097.59,
+    "observed_steady_iteration_milliseconds_mean": 2071.748,
+    "observed_steady_iteration_milliseconds_min": 2055.02,
+    "observed_steady_iteration_milliseconds_max": 2106.92,
+    "observed_gpu_utilization_percent": "99-100 during steady training",
+    "observed_training_vram_mib": 45560
+  },
+  "checkpoint_validation": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "checkpoint_reason": "evaluation",
+    "next_iter": 238,
+    "best_val_loss": 5.6761274337768555,
+    "cache_state": "flushed_not_serialized",
+    "all_model_float_tensors_finite": true,
+    "cfc_folded_weight_count": 12,
+    "cproj_folded_weight_count": 12,
+    "all_cfc_optimizer_steps": 238,
+    "all_cproj_optimizer_steps": 238,
+    "optimizer_count": 3,
+    "cfc_muon_momentum_buffers": 12,
+    "cfc_muon_momentum_shape": [3072, 768],
+    "cproj_muon_momentum_buffers": 12,
+    "cproj_muon_momentum_shape": [768, 3072],
+    "adamw_state_entries": 195,
+    "nonfinite_optimizer_state_tensors": 0,
+    "rng_and_dedicated_train_generator_state_present": true
+  },
+  "condition_evidence": {
+    "full_run_step0_functional_rows": 12,
+    "full_run_step0_rows_finite": true,
+    "full_run_step0_fallback_rows": 0,
+    "full_run_step0_maximum_internal_log_condition": 0.009950330853168092,
+    "full_run_step0_maximum_final_log_condition": 0.005654680763405836,
+    "separate_25_update_gate_rows": 300,
+    "separate_25_update_gate_fallback_rows": 0,
+    "separate_25_update_gate_all_finite": true
+  },
+  "interpretation": [
+    "The earlier MLP failure was not evidence that the selected functional direction was unusable; it was caused by applying the condition bound only after an unbounded recursive functional fit had already corrupted its recipe.",
+    "Enforcing the same small condition budget inside the recurrence preserves the held-out direction advantage, prevents nonfinite state, and closes the full-MLP 124M gap to 0.0838 CE over the hidden88 dense-c_fc parent.",
+    "The repair adds no learned basis, LoRA residual, or trainable coordinate. It changes the trust-region geometry of the fixed sparse shear chart and retains 22.5% measured MFU.",
+    "This is one smallest-rung seed. It validates the concrete structure and stability mechanism but does not by itself establish scaling or justify a larger rung."
+  ],
+  "authorization": {
+    "unchanged_retry": false,
+    "additional_candidate": false,
+    "larger_rung": false,
+    "next_action": "Preserve this checkpoint and use it as the qualified full-MLP 124M result. Preregister an independent confirmation or scaling decision before any additional training."
+  }
+}
