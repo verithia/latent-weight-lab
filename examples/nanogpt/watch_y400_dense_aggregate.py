@@ -21,6 +21,7 @@ from pathlib import Path
 
 CALLBACK_URL = "http://127.0.0.1:8766/send-opencode-test"
 AGENT_MENTION = "@Codex"
+CALLBACK_TIMEOUT_SECONDS = 300
 
 REMOTE_PROBE = r'''python3 - "$1" <<'PY'
 import json, pathlib, re, subprocess, sys
@@ -101,7 +102,10 @@ def send(chat_id: str, text: str) -> bool:
         method="POST",
     )
     try:
-        urllib.request.build_opener(urllib.request.ProxyHandler({})).open(request, timeout=20).read()
+        urllib.request.build_opener(urllib.request.ProxyHandler({})).open(
+            request,
+            timeout=CALLBACK_TIMEOUT_SECONDS,
+        ).read()
     except OSError:
         return False
     return True
