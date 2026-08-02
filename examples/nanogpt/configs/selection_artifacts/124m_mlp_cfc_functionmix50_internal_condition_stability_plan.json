@@ -1,0 +1,88 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_internal_condition_stability_plan_v1",
+  "recorded_at": "2026-08-02",
+  "question": "Does enforcing the 1.01 condition budget inside every recursive functional-fit stage prevent the previously observed step-8 recipe corruption while preserving finite learning and at least 20% MFU for 25 deterministic scratch updates?",
+  "authorization": {
+    "parameter_updates": 25,
+    "scratch_only": true,
+    "scientific_training": false,
+    "checkpoint_resume": false,
+    "larger_rung": false,
+    "single_directly_polled_preflight": true
+  },
+  "identity": {
+    "implementation_commit": "9931db68572173325310fa5cf706cfb88354e30b",
+    "preregistered_candidate_commit": "8b8e6735920560f23d0953548cf01fecfaf89198",
+    "production_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "production_config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "condition_ce_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_ce_result.json",
+    "condition_ce_result_sha256": "5b5c1c435577926dab73cf057901aa3e898d29791c17ddf33fb730c8a470513c",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_protocol": {
+    "host": "PRO6",
+    "gpu": 0,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "updates": 25,
+    "warmup_updates": 1,
+    "timed_updates": 24,
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "functional_shear_diagnostic_steps": 25,
+    "maximum_condition_number": 1.01,
+    "maximum_log_condition_bound": 0.009950330853168092,
+    "unchanged_scientific_optimizer_and_schedule": true,
+    "evaluation": "scratch evaluation at update 0 and terminal update 25; this is not a scientific result",
+    "polling": "foreground process polled directly to exit; no watchdog, callback, heartbeat, or queue worker"
+  },
+  "decision_rule": {
+    "pass": [
+      "The process exits zero and the exact-config certificate passes host-local MFU >= 0.20.",
+      "The certificate's stability section confirms that every parsed train and validation loss is finite.",
+      "All 300 expected c_fc muon_functional_shear diagnostic rows for updates 0-24 are present; coordinate_finite_fraction and update_finite_fraction equal 1.0 in every row.",
+      "functional_fit_context_finite is true and functional_fit_coordinate_finite_fraction equals 1.0 in every row.",
+      "functional_fit_internal_log_condition_bound, mixed_log_condition_bound_after_projection, and shear_log_condition_bound are <= log(1.01)+1e-9 in every finite row.",
+      "functional_fit_internal_condition_projection_active is true for at least one row, proving the recursive limiter is exercised.",
+      "A functional-fit fallback is permitted only when the functional recipe is nonfinite and the weight recipe is finite; its exact count must be recorded. Every final recipe and update must remain finite.",
+      "weight_rms_ratio is finite and <= 1.01 for every layer/update.",
+      "Training and validation CE remain finite through terminal update 25, and terminal training CE is below update-0 training CE."
+    ],
+    "reject": "Any failed pass condition, missing diagnostic row, nonfinite final state, condition violation, non-exercised recursive limiter, invalid fallback, weight RMS jump above 1%, terminal CE regression, MFU below 20%, or identity mismatch rejects the candidate without a full run.",
+    "threshold_changes_after_observation": false
+  },
+  "execution": {
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/performance_and_stability_25steps.json",
+    "complete_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/performance_and_stability_25steps.log",
+    "command": [
+      "env",
+      "MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/performance_and_stability_25steps.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/performance_and_stability_25steps.log",
+      "--min-fraction",
+      "0.20",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "24"
+    ],
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false
+  },
+  "next_action": "Commit this immutable plan, fast-forward PRO6 to that exact commit, verify source/config/dataset identity and an idle GPU0, then run once. Only a full pass authorizes a separately preregistered 238-update smallest-rung run."
+}
