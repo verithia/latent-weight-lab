@@ -16,6 +16,7 @@ from examples.nanogpt.muon_matched_givens import (
     _fit_weight_shear_recipe,
     apply_givens_flow,
     diagonal_metric_angles,
+    mix_shear_recipes,
     random_unique_matchings,
 )
 from examples.nanogpt.analyze_mlp_cfc_functional_shear_fit import (
@@ -644,6 +645,7 @@ def test_functional_coordinate_diagnostics_bound_pair_condition() -> None:
         neighbors=2,
         seed=109,
         beta=0.5,
+        project_to_weight_norm=False,
         learning_rate=0.001,
         weight_decay=0.1,
     )
@@ -656,6 +658,24 @@ def test_functional_coordinate_diagnostics_bound_pair_condition() -> None:
     )
     assert math.isfinite(diagnostics["weight_rms_ratio"])
     assert diagnostics["weight_rms_ratio"] > 0.0
+
+
+def test_mixed_functional_direction_projects_to_weight_recipe_norm() -> None:
+    pairs = torch.tensor([[0, 1], [2, 3]])
+    weight_recipe = [(pairs, torch.tensor([0.2, -0.1]))]
+    functional_recipe = [(pairs, torch.tensor([1.0, 0.5]))]
+    mixed, diagnostics = mix_shear_recipes(
+        weight_recipe,
+        functional_recipe,
+        beta=0.5,
+        project_to_weight_norm=True,
+    )
+    raw = 0.5 * weight_recipe[0][1] + 0.5 * functional_recipe[0][1]
+    projected = mixed[0][1]
+    assert torch.allclose(projected / projected.norm(), raw / raw.norm())
+    assert torch.allclose(projected.norm(), weight_recipe[0][1].norm())
+    assert diagnostics["coordinate_norm_projection_active"] is True
+    assert diagnostics["coordinate_norm_projection_scale"] < 1.0
 
 
 def test_gpt_wires_functional_cfc_and_consumes_bounded_context(

@@ -59,6 +59,7 @@ from examples.nanogpt.analyze_mlp_muon_matched_givens import (
     diagonal_metric_causal_givens_update,
 )
 from examples.nanogpt.fast_task_matching import fast_muon_matched_permutations
+from examples.nanogpt.muon_matched_givens import mix_shear_recipes
 
 
 SCHEMA_VERSION = "nanogpt_mlp_cfc_functional_shear_pareto_v1"
@@ -79,26 +80,24 @@ def replay_blended_recipes(
     functional_recipe: list[tuple[torch.Tensor, torch.Tensor]],
     *,
     beta: float,
+    project_to_weight_norm: bool = False,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     """Replay stage coordinates `(1-beta)*weight + beta*functional`."""
     if not 0.0 <= float(beta) <= 1.0:
         raise ValueError("beta must be in [0, 1]")
     if len(weight_recipe) != len(functional_recipe):
         raise ValueError("recipe lengths differ")
+    mixed_recipe, projection_diagnostics = mix_shear_recipes(
+        weight_recipe,
+        functional_recipe,
+        beta=beta,
+        project_to_weight_norm=project_to_weight_norm,
+    )
     current = source.float().clone()
     minimum_determinant = float("inf")
     maximum_determinant_error = 0.0
     maximum_condition_number = 0.0
-    for (weight_pairs, weight_coordinates), (
-        functional_pairs,
-        functional_coordinates,
-    ) in zip(weight_recipe, functional_recipe, strict=True):
-        if not torch.equal(weight_pairs.cpu(), functional_pairs.cpu()):
-            raise ValueError("recipe pair topology differs")
-        coordinates = (
-            (1.0 - float(beta)) * weight_coordinates
-            + float(beta) * functional_coordinates
-        )
+    for weight_pairs, coordinates in mixed_recipe:
         current, finite = apply_pair_stage(
             current,
             weight_pairs.to(device=source.device),
@@ -115,6 +114,7 @@ def replay_blended_recipes(
         )
     return current - source.float(), {
         "beta": float(beta),
+        **projection_diagnostics,
         "minimum_determinant": minimum_determinant,
         "maximum_determinant_error": maximum_determinant_error,
         "maximum_condition_number": maximum_condition_number,
@@ -136,6 +136,7 @@ def build_pareto_candidates(
     learning_rate: float,
     weight_decay: float,
     native_cache: Path | None,
+    project_to_weight_norm: bool = False,
 ) -> tuple[dict[str, torch.Tensor], list[dict[str, Any]]]:
     source = weight.float().T.contiguous()
     target = dense_update.float().T.contiguous()
@@ -203,6 +204,7 @@ def build_pareto_candidates(
             weight_recipe,
             functional_recipe,
             beta=beta,
+            project_to_weight_norm=project_to_weight_norm,
         )
         name = scale_name(beta, prefix=PREFIX)
         rotations[name] = parent + blended

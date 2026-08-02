@@ -519,6 +519,66 @@ def _fit_functional_shear_recipe(
     return recipe
 
 
+def mix_shear_recipes(
+    weight_recipe: list[tuple[torch.Tensor, torch.Tensor]],
+    functional_recipe: list[tuple[torch.Tensor, torch.Tensor]],
+    *,
+    beta: float,
+    project_to_weight_norm: bool,
+) -> tuple[list[tuple[torch.Tensor, torch.Tensor]], dict[str, float | bool]]:
+    """Mix recipe directions, optionally retaining weight-fit L2 magnitude.
+
+    The projection is global across every registered stage/pair coordinate.
+    It therefore preserves the selected mixed direction exactly and changes
+    only magnitude.  The weight-fit recipe supplies a parameter-free,
+    optimizer-step-local radius.
+    """
+    if not 0.0 <= float(beta) <= 1.0:
+        raise ValueError("beta must be in [0, 1]")
+    if len(weight_recipe) != len(functional_recipe):
+        raise ValueError("recipe lengths differ")
+    mixed: list[tuple[torch.Tensor, torch.Tensor]] = []
+    weight_energy = 0.0
+    mixed_energy = 0.0
+    for (weight_pairs, weight_coordinates), (
+        functional_pairs,
+        functional_coordinates,
+    ) in zip(weight_recipe, functional_recipe, strict=True):
+        if not torch.equal(weight_pairs, functional_pairs):
+            raise RuntimeError("functional and weight shear topology differs")
+        coordinates = (
+            (1.0 - float(beta)) * weight_coordinates
+            + float(beta) * functional_coordinates
+        )
+        mixed.append((weight_pairs, coordinates))
+        weight_energy += float(weight_coordinates.double().square().sum())
+        mixed_energy += float(coordinates.double().square().sum())
+    weight_norm = math.sqrt(weight_energy)
+    mixed_norm_before = math.sqrt(mixed_energy)
+    coordinate_scale = 1.0
+    if (
+        project_to_weight_norm
+        and mixed_norm_before > weight_norm
+        and mixed_norm_before > 0.0
+    ):
+        coordinate_scale = weight_norm / mixed_norm_before
+        mixed = [
+            (pairs, coordinates * coordinate_scale)
+            for pairs, coordinates in mixed
+        ]
+    return mixed, {
+        "weight_coordinate_l2": weight_norm,
+        "mixed_coordinate_l2_before_projection": mixed_norm_before,
+        "mixed_coordinate_l2_after_projection": (
+            mixed_norm_before * coordinate_scale
+        ),
+        "coordinate_norm_projection_scale": coordinate_scale,
+        "coordinate_norm_projection_active": bool(
+            coordinate_scale < 1.0
+        ),
+    }
+
+
 @torch.no_grad()
 def functional_coordinate_mix_update(
     weight: torch.Tensor,
@@ -533,6 +593,7 @@ def functional_coordinate_mix_update(
     neighbors: int,
     seed: int,
     beta: float,
+    project_to_weight_norm: bool,
     learning_rate: float,
     weight_decay: float,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
@@ -577,18 +638,15 @@ def functional_coordinate_mix_update(
         cproj_weight,
         shear_permutations,
     )
+    mixed_recipe, projection_diagnostics = mix_shear_recipes(
+        weight_recipe,
+        functional_recipe,
+        beta=beta,
+        project_to_weight_norm=project_to_weight_norm,
+    )
     current = after_parent
     mixed_coordinates: list[torch.Tensor] = []
-    for (weight_pairs, weight_coordinates), (
-        functional_pairs,
-        functional_coordinates,
-    ) in zip(weight_recipe, functional_recipe, strict=True):
-        if not torch.equal(weight_pairs, functional_pairs):
-            raise RuntimeError("functional and weight shear topology differs")
-        coordinates = (
-            (1.0 - float(beta)) * weight_coordinates
-            + float(beta) * functional_coordinates
-        )
+    for weight_pairs, coordinates in mixed_recipe:
         current = _apply_symmetric_shear_stage(
             current, weight_pairs, coordinates
         )
@@ -619,6 +677,7 @@ def functional_coordinate_mix_update(
         "parent_stages": int(parent_stages),
         "shear_stages": int(shear_stages),
         "functional_coordinate_mix_beta": float(beta),
+        **projection_diagnostics,
         "functional_samples": int(inputs.shape[0]),
         "angle_rms": float(parent_angles.square().mean().sqrt()),
         "shear_rms": float(all_shears.square().mean().sqrt()),
@@ -806,6 +865,7 @@ class MuonFunctionalShearLinear(nn.Module):
         shear_stages: int,
         neighbors: int,
         coordinate_mix_beta: float,
+        project_to_weight_norm: bool,
         functional_sample_cap: int,
         matching_seed: int,
         weight_std: float,
@@ -818,6 +878,7 @@ class MuonFunctionalShearLinear(nn.Module):
         self.shear_stages = int(shear_stages)
         self.neighbors = int(neighbors)
         self.coordinate_mix_beta = float(coordinate_mix_beta)
+        self.project_to_weight_norm = bool(project_to_weight_norm)
         self.functional_sample_cap = int(functional_sample_cap)
         self.matching_seed = int(matching_seed)
         self.layer_id = int(layer_id)
@@ -985,6 +1046,9 @@ class MuonFunctionalShear(torch.optim.Optimizer):
                     neighbors=module.neighbors,
                     seed=module.matching_seed + int(module.optimizer_step),
                     beta=module.coordinate_mix_beta,
+                    project_to_weight_norm=(
+                        module.project_to_weight_norm
+                    ),
                     learning_rate=lr,
                     weight_decay=weight_decay,
                 )

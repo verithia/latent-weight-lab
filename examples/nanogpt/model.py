@@ -161,6 +161,7 @@ class GPTConfig:
     block_fht_mlp_cfc_functional_shear_stages: int = 24
     block_fht_mlp_cfc_functional_shear_neighbors: int = 64
     block_fht_mlp_cfc_functional_shear_beta: float = 0.5
+    block_fht_mlp_cfc_functional_shear_weight_norm_projection: bool = False
     block_fht_mlp_cfc_functional_shear_sample_cap: int = 2048
     block_fht_mlp_cfc_functional_shear_seed: int = 20260820
     block_fht_ffn_postgelu_std_target: float = 0.0
@@ -1548,6 +1549,10 @@ class MLP(nn.Module):
                 ),
                 coordinate_mix_beta=float(
                     config.block_fht_mlp_cfc_functional_shear_beta
+                ),
+                project_to_weight_norm=bool(
+                    config
+                    .block_fht_mlp_cfc_functional_shear_weight_norm_projection
                 ),
                 functional_sample_cap=int(
                     config.block_fht_mlp_cfc_functional_shear_sample_cap

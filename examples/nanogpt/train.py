@@ -1118,6 +1118,11 @@ def parse_args() -> argparse.Namespace:
         default=0.5,
     )
     parser.add_argument(
+        "--block-fht-mlp-cfc-functional-shear-weight-norm-projection",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cfc-functional-shear-sample-cap",
         type=int,
         default=2048,
@@ -1772,6 +1777,10 @@ def main() -> None:
         ),
         block_fht_mlp_cfc_functional_shear_beta=(
             args.block_fht_mlp_cfc_functional_shear_beta
+        ),
+        block_fht_mlp_cfc_functional_shear_weight_norm_projection=(
+            args
+            .block_fht_mlp_cfc_functional_shear_weight_norm_projection
         ),
         block_fht_mlp_cfc_functional_shear_sample_cap=(
             args.block_fht_mlp_cfc_functional_shear_sample_cap

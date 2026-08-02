@@ -187,6 +187,9 @@ def main() -> None:
             learning_rate=float(group["lr"]),
             weight_decay=float(group["weight_decay"]),
             native_cache=args.native_cache,
+            project_to_weight_norm=bool(
+                protocol.get("weight_norm_projection", False)
+            ),
         )
         updates[CONTROL][layer] = fitted[CONTROL].cpu()
         updates[WEIGHT_SHEAR][layer] = fitted[WEIGHT_SHEAR].cpu()

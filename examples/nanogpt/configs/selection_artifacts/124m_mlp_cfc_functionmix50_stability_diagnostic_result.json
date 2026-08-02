@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_stability_diagnostic_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "MAP_CONDITION_FAILURE",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_stability_diagnostic_plan.json"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "557d28f44af6742bbc183a6c3f93fbfb34c1d6ae",
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "parameter_updates": 25,
+    "wall_seconds": 53.34766125679016,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "config_sha256": "27290d37cb1f7bf986ccee07f97a3486a265e5d17f64b24751abdf4e6d9be465",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate_sha256": "962f73ec8a523c923523aea57eba96a399b5c7765b7abbe081a4bb881116ec3b",
+    "complete_log_sha256": "d490898c34190337485a0ecf9f4cd2b55f34af31f6ce3a3393257558af6c2175"
+  },
+  "performance": {
+    "mfu_fraction": 0.23488713429088987,
+    "tokens_per_second": 131005.89958333333,
+    "iteration_ms": 2001.5295833333332,
+    "optimizer_ms": 836.9466666666667,
+    "peak_mib": 35097.59,
+    "minimum_mfu_fraction": 0.2,
+    "passed": true
+  },
+  "causal_trace": [
+    {
+      "step": 5,
+      "maximum_shear_abs": 0.007065257207265266,
+      "maximum_log_condition_bound": 0.11680868180542615,
+      "maximum_weight_rms_ratio": 0.999822199344635,
+      "minimum_requested_update_recovery": -6.927867889404297,
+      "train_ce": 9.9267,
+      "finite": true
+    },
+    {
+      "step": 6,
+      "maximum_shear_abs": 0.7550877220991481,
+      "maximum_log_condition_bound": 9.810616262933385,
+      "maximum_weight_rms_ratio": 1.1082075834274292,
+      "maximum_update_rms": 0.0070958612486720085,
+      "minimum_requested_update_recovery": -77028.515625,
+      "train_ce": 9.5665,
+      "finite": true
+    },
+    {
+      "step": 7,
+      "maximum_shear_abs": 2.089327064934226,
+      "maximum_log_condition_bound": 27.334487888110868,
+      "maximum_weight_rms_ratio": 1.5463875532150269,
+      "maximum_weight_abs_after": 0.5289821028709412,
+      "maximum_update_rms": 0.02113308012485504,
+      "minimum_requested_update_recovery": -544867.875,
+      "train_ce": 9.1954,
+      "finite": true
+    },
+    {
+      "step": 8,
+      "maximum_shear_abs": 1.4557849021468405,
+      "maximum_log_condition_bound": 24.335101793856015,
+      "maximum_weight_rms_ratio": 1.4074875116348267,
+      "maximum_update_rms": 0.026987368240952492,
+      "minimum_requested_update_recovery": -697810.1875,
+      "train_ce": 8.8217,
+      "finite": true
+    },
+    {
+      "step": 9,
+      "minimum_coordinate_finite_fraction": 0.0833333358168602,
+      "minimum_update_finite_fraction": 0.0,
+      "first_nonfinite_layers": [11, 7],
+      "train_ce": 8.526,
+      "finite": false
+    },
+    {
+      "step": 10,
+      "train_ce": null,
+      "all_functional_shear_layers_nonfinite": true
+    }
+  ],
+  "interpretation": [
+    "The failure begins as finite but explosive hyperbolic map conditioning in the deepest layers, before CE becomes nonfinite.",
+    "Determinant-one symmetric shears are not norm- or condition-preserving. The one-step finite-CE gate established a useful coordinate direction but did not constrain repeated-update magnitude.",
+    "The failure is localized to the new c_fc function-fit shear path; the same attention and c_proj structures passed prior full 124M runs.",
+    "A scalar beta change would confound direction and magnitude. The next candidate must preserve the selected beta-0.5 direction while bounding its coordinate norm by the qualified weight-fit recipe."
+  ],
+  "authorization": {
+    "unchanged_retry_authorized": false,
+    "larger_rung_authorized": false,
+    "direction_only_norm_projection_design_authorized": true,
+    "scientific_training_authorized": false,
+    "next_action": "Implement a parameter-free L2 projection of the mixed shear-coordinate vector onto the per-step weight-fit coordinate norm, then require a preregistered finite-CE direction gate, 25-update stability gate, and exact-config MFU gate before another 238-update run."
+  }
+}
