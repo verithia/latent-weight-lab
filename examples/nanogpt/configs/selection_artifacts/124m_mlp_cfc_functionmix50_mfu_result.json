@@ -1,0 +1,62 @@
+{
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50/performance_preflight_functionmix50.json",
+    "preflight_log_sha256": "cd56818c2ee379813d8f3ea5f2119f83868c021ca91709a02674293fc93fdeea",
+    "sha256": "1212c390a49c2625cb7268056a907f052e16b3a035401be399d0068b21df5849"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_mfu.json",
+    "sha256": "ed987e69c6a3a751d385f0235b5f8f78dfb47b235595fda519bda9e532827417"
+  },
+  "decision": {
+    "classification": "AUTHORIZE_ONE_124M_0P5TPP_FUNCTION_MIX_RUN",
+    "registered_mfu_gate_passed": true,
+    "scope": "one separately registered 238-update smallest-rung run; no larger rung"
+  },
+  "execution": {
+    "callback": false,
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false
+  },
+  "execution_commit": "e0ec5476fa1c2450a78c38142887224959ee04cb",
+  "implementation_commit": "93308fd59654cfa522555aeaa9310acfaa27df92",
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_peak_tflops": 400.0959649886134,
+    "headroom_over_gate_percentage_points": 4.158876236182947,
+    "iter_ms": 2025.5275000000001,
+    "mfu_fraction": 0.24158876236182947,
+    "model_tflops": 96.65868900756097,
+    "passed": true,
+    "peak_mib": 35097.59,
+    "timing_breakdown_ms": {
+      "data": 0.57625,
+      "flush": 4.13,
+      "forward_backward": 1188.19375,
+      "gradient_postprocess": 1.5350000000000001,
+      "optimizer": 826.5600000000001,
+      "other": 0.73125,
+      "prepare": 3.80625
+    },
+    "tokens_per_second": 129420.88375000001
+  },
+  "parent_comparison": {
+    "hidden88_iter_ms": 1487.35875,
+    "hidden88_optimizer_ms": 288.9925,
+    "hidden88_tokens_per_second": 176248.4625,
+    "iteration_slowdown_fraction": 0.3618305315674889,
+    "optimizer_extra_ms": 537.5675000000001,
+    "throughput_degradation_fraction": 0.2656918735718462,
+    "older_higher_peak_tflops": 416.63653636127145,
+    "mfu_against_older_higher_peak": 0.23199763000080925,
+    "interpretation": "forward/backward is unchanged; the bounded functional-coordinate fit accounts for the additional optimizer time"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_mfu_plan.json",
+    "sha256": "6ef9c715e04b88f03082b3d357a57f08faec79945c76cd6a516de625a27f7be7"
+  },
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_mfu_result_v1"
+}

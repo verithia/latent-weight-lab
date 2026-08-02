@@ -1,0 +1,60 @@
+{
+  "authorization": {
+    "additional_candidates_authorized": false,
+    "larger_rung_authorized": false,
+    "scope": "exactly one 124M/0.5TPP beta-0.5 function-aware full-MLP replacement run"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_0p5tpp.json",
+    "config_sha256": "f0fe9b19c1bcef5b9ce40ac51a18ac1444d6a82cbafcf7c261ed26c02f0e3a69",
+    "cfc_coordinates_per_layer": 135168,
+    "cproj_coordinates_per_layer": 135168,
+    "functional_coordinate_mix_beta": 0.5,
+    "implementation_commit": "93308fd59654cfa522555aeaa9310acfaa27df92",
+    "model_tier": "124m",
+    "planned_tpp": 0.5
+  },
+  "decision_rule": {
+    "directional": "stable terminal validation CE is above 5.6923543 and at or below 5.7923543",
+    "parent_validation_ce": 5.5923542976379395,
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "reject": "terminal validation CE above 5.7923543, nonfinite/divergent loss, incomplete terminal evaluation/checkpoint, or any provenance mismatch",
+    "success": "stable terminal validation CE <= 5.6923543, limiting the c_fc replacement penalty over hidden88 to <= 0.1 CE",
+    "threshold_changes_after_observation": false
+  },
+  "parent_evidence": {
+    "finite_ce_decision": "PROMOTE_FUNCTIONAL_COORDINATE_MIX_TO_PRODUCTION_PREFLIGHT",
+    "finite_ce_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_ce_select_pro6_result.json",
+    "finite_ce_result_sha256": "2eb51769aa1e6401dfcd5574a51214dc5296a98c71c8440978c33bbbab44d6a6",
+    "mfu_decision": "AUTHORIZE_ONE_124M_0P5TPP_FUNCTION_MIX_RUN",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_mfu_result.json",
+    "mfu_result_sha256": "26832a191ba6ba2b033464eaff755c6f6aa1f6246413d2e840b11422261be9b5"
+  },
+  "protocol": {
+    "callback": false,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_0p5tpp.json"
+    ],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution": "direct foreground process polled by the agent through terminal exit",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "gpu": 0,
+    "host": "PRO6",
+    "max_iters": 238,
+    "monitoring": {
+      "heartbeat": false,
+      "queue_worker": false,
+      "watchdog": false
+    }
+  },
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_training_plan_v1",
+  "scientific_question": "Can the finite-CE-selected function-aware c_fc chart replace the remaining dense MLP matrix while staying within 0.1 CE of the qualified hidden88 parent?",
+  "status": "preregistered"
+}
