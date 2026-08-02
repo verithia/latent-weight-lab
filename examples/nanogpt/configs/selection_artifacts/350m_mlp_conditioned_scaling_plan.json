@@ -1,0 +1,76 @@
+{
+  "artifact_kind": "350m_conditioned_full_mlp_scaling_plan",
+  "created_at": "2026-08-02",
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "training_sampling_protocol": "dedicated_cpu_generator_train_data_seed_v1",
+    "validation_protocol": "mai_ladder_fixed_eval_indices_v2",
+    "validation_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52"
+  },
+  "execution": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_policy": "one aggregate monitor per admitted long run; 20%, 50%, and terminal callbacks; 90-minute heartbeat reset by delivered progress; persisted idempotency; explicit @Codex mention",
+    "gpu": 0,
+    "host": "PRO6",
+    "performance_gate_owner": "foreground operator poll, never watchdog",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python",
+    "remote_repository": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay",
+    "workspace": "/home/pro6000-9980x/MappingNetworks",
+    "workspace_cap_bytes": 274877906944
+  },
+  "historical_attention_control": {
+    "config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult1p00.json",
+    "config_sha256": "dcefa50f197cf7b2516ca4357900b5cf9e5d67284cbb99a560226bba706535a3",
+    "ranking_artifact": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_0p5tpp_provisional_ranking.json",
+    "ranking_artifact_sha256": "f19284da78dac9e1a22292802579e61b066b1289ab2ce876d955caab9f6022a4",
+    "terminal_train_ce": 4.3693,
+    "terminal_validation_ce": 4.3629
+  },
+  "implementation": {
+    "causal_repair_commit": "9931db68572173325310fa5cf706cfb88354e30b",
+    "source_hashes": {
+      "examples/nanogpt/csrc/task_edge_coloring.cpp": "6b9e0c795e601eb0a53934bdaa79f898c7ffcd51988b0e5891f189cc27f2e67e",
+      "examples/nanogpt/fast_task_matching.py": "1e451f3d0309299d8f9dfd4494f1087fb35f282b7a1fca49bb60322dd3529ce1",
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "0e900ed9519f9d350e7fe4eecfdb36b180da4c5ad3fd0f5f8d5037ee0d4a437a",
+      "examples/nanogpt/train.py": "fee5513ba7fd329e29ce38cd38114d31ba6247532d6cac93eee62f43b49bf29e",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "order": [
+    "cproj_hidden88_parent",
+    "conditioned_full_mlp_candidate"
+  ],
+  "schema_version": "350m_conditioned_full_mlp_scaling_plan_v1",
+  "stages": {
+    "conditioned_full_mlp_candidate": {
+      "admission_dependency": "cproj_hidden88_parent must finish cleanly with terminal validation CE <= 4.4629",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+      "config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594",
+      "decision_rule": {
+        "absolute_ceiling": 4.5629,
+        "matched_parent_gap_ceiling": 0.1,
+        "success": "terminal validation CE <= min(parent terminal validation CE + 0.1000, 4.5629)"
+      },
+      "long_run_command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json 0 pro6_mai_v3_350m_full_mlp_conditioned_0p5tpp /home/pro6000-9980x/MappingNetworks",
+      "performance_command": "CUDA_VISIBLE_DEVICES=0 MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25 /home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 24",
+      "performance_rule": "MFU >= 20%, all losses finite, exactly 600 c_fc diagnostic rows, internal limiter exercised, zero fallback, every post-projection log-condition <= log(1.01), and finite bounded weight norms"
+    },
+    "cproj_hidden88_parent": {
+      "admission_dependency": "none",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+      "config_sha256": "f59803d0cca73bc87a7ca3f9170aa2d09c92a4fd6498f3eca36394bfb1d45321",
+      "decision_rule": {
+        "directional_ceiling": 4.5629,
+        "success_ceiling": 4.4629
+      },
+      "long_run_command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json 0 pro6_mai_v3_350m_cproj_hidden88_0p5tpp /home/pro6000-9980x/MappingNetworks",
+      "performance_command": "CUDA_VISIBLE_DEVICES=0 /home/pro6000-9980x/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/performance_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 8",
+      "performance_rule": "MFU >= 20%, all real-training losses finite, exclusive GPU, exact config hash, and complete certificate"
+    }
+  },
+  "threshold_freeze": "all thresholds and the stage order are immutable before either 350M performance gate or scientific result is observed"
+}
