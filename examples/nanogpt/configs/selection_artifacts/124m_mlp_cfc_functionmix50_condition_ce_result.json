@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_condition_ce_result_v1",
+  "recorded_at": "2026-08-02",
+  "decision": "PROMOTE_CONDITION_LIMITED_FUNCTION_MIX_TO_STABILITY_PREFLIGHT",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "4d83bccb41c00b33d3bdd75c2d4d30ffcdeaa1eb",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce_select.py",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan_sha256": "3a506abaf595bec9b8082564cb6cbc68bc812e673013e22cdb14425fbb3727d0",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "aggregate_sha256": "257abc993323e91956384ab8a74fc750341ef63a408a66ec2795296c01a739b7",
+    "fits_sha256": "632800c44a0342c90bcab0e355661ad82f96c7a58b3fd18267b8830fcc141e0e",
+    "losses_sha256": "976771e74dadfa63a4eab6b39922b12613f64f3a0188b581dbddbcb803160d1b",
+    "metadata_sha256": "e7a5a977118d64f893c7c121e2d3f921795a590a2efca42ab818cfe818f310fa"
+  },
+  "condition_limiter": {
+    "maximum_condition_number": 1.01,
+    "maximum_allowed_log_condition_bound": 0.009950330853168092,
+    "active_any_layer": false,
+    "minimum_projection_scale": 1.0,
+    "minimum_raw_log_condition_bound": 0.006642333426677413,
+    "maximum_raw_log_condition_bound": 0.008452083088125771,
+    "weight_norm_projection": false,
+    "interpretation": "The preregistered limiter is exactly inactive for all ordinary finite-CE updates, so the qualified beta-0.5 direction and magnitude are unchanged in the safe regime."
+  },
+  "selection": {
+    "candidate_mean_ce": 5.600613176822662,
+    "weight_shear_mean_ce": 5.600615203380585,
+    "candidate_beats_weight_shear": true,
+    "candidate_beats_fresh88_every_window": true,
+    "candidate_beats_weight_shear_every_window": true
+  },
+  "heldout": {
+    "recovery_over_weight_shear_by_window": {
+      "validation_1": 0.25819070904645475,
+      "validation_2": 0.12252663622526636,
+      "validation_3": 0.1947174447174447,
+      "validation_4": 0.3087757313109426
+    },
+    "minimum_recovery": 0.12252663622526636,
+    "median_recovery": 0.22645407688194974,
+    "required_minimum": 0.05,
+    "required_median": 0.1,
+    "deterministic_replicate_range": 0.0
+  },
+  "interpretation": [
+    "The condition limiter retains the selected beta-0.5 finite-CE advantage without the roughly one-half magnitude shrinkage caused by the rejected L2 weight-norm projection.",
+    "Passing this zero-update gate establishes only safe-regime direction retention. It does not establish repeated-update stability from scratch.",
+    "The deterministic unbounded run first exceeded the same condition bound before update 6 and became nonfinite at update 9, so the next gate must verify that the limiter activates and prevents that causal chain."
+  ],
+  "authorization": {
+    "unchanged_unbounded_retry_authorized": false,
+    "larger_rung_authorized": false,
+    "scientific_training_authorized": false,
+    "condition_limited_stability_preflight_authorized": true,
+    "next_action": "Preregister and run exactly one directly polled 25-update scratch stability/MFU preflight. Require finite CE and optimizer state, limiter activation, condition-bound compliance, non-explosive weight norms, CE descent, and MFU >= 20%."
+  }
+}

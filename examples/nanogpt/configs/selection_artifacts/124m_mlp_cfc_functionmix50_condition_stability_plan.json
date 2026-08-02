@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functionmix50_condition_stability_plan_v1",
+  "recorded_at": "2026-08-02",
+  "question": "Does the preregistered 1.01 composed-condition limiter preserve the safe beta-0.5 direction, activate before the known hyperbolic failure, and keep 25 deterministic scratch updates finite and performant?",
+  "authorization": {
+    "parameter_updates": 25,
+    "scratch_only": true,
+    "scientific_training": false,
+    "checkpoint_resume": false,
+    "larger_rung": false,
+    "single_directly_polled_preflight": true
+  },
+  "identity": {
+    "implementation_commit": "9672f63cb80638ae656eaa98053d580d7fdab23a",
+    "production_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_condition1p01_0p5tpp.json",
+    "production_config_sha256": "003ded85b40e7b8c8104b2c9572361bfe921939033373a1913dfea1133ae2365",
+    "condition_ce_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_condition_ce_result.json",
+    "condition_ce_result_sha256": "d6d4820f4c3129bb8c5b24c9aefabf7c118158cc01c1830d9c8065f8b98081de",
+    "unbounded_stability_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_stability_diagnostic_result.json",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_protocol": {
+    "host": "PRO6",
+    "gpu": 0,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "updates": 25,
+    "warmup_updates": 1,
+    "timed_updates": 24,
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "functional_shear_diagnostic_steps": 25,
+    "maximum_condition_number": 1.01,
+    "maximum_log_condition_bound": 0.009950330853168092,
+    "unchanged_scientific_optimizer_and_schedule": true,
+    "evaluation": "scratch evaluation at update 0 and terminal update 25; this is not a scientific result",
+    "polling": "foreground process polled directly to exit; no watchdog, callback, heartbeat, or queue worker"
+  },
+  "decision_rule": {
+    "pass": [
+      "The process exits zero and the exact-config certificate passes host-local MFU >= 0.20.",
+      "All 300 expected per-layer diagnostic rows for updates 0-24 are present; coordinate_finite_fraction and update_finite_fraction equal 1.0 in every row.",
+      "mixed_log_condition_bound_after_projection and shear_log_condition_bound are <= log(1.01)+1e-9 in every row.",
+      "condition_projection_active is true for at least one row, proving the limiter intercepted the deterministic unsafe regime rather than merely remaining dormant.",
+      "weight_rms_ratio is finite and <= 1.01 for every layer/update.",
+      "Training and validation CE remain finite through terminal update 25, and terminal training CE is below update-0 training CE."
+    ],
+    "reject": "Any failed pass condition, missing diagnostic row, nonfinite state, condition violation, non-exercised limiter, weight RMS jump above 1%, terminal CE regression, MFU below 20%, or identity mismatch rejects the candidate without a full run.",
+    "threshold_changes_after_observation": false
+  },
+  "execution": {
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_condition/performance_and_stability_25steps.json",
+    "complete_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_condition/performance_and_stability_25steps.log",
+    "command": [
+      "env",
+      "MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_condition1p01_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_condition/performance_and_stability_25steps.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_condition/performance_and_stability_25steps.log",
+      "--min-fraction",
+      "0.20",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "24"
+    ],
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false
+  },
+  "next_action": "Run once on an otherwise idle PRO6 GPU0. Preserve the exact log/certificate and derive the gate result without changing thresholds. Only a full pass authorizes one separately recorded 238-update smallest-rung run."
+}
