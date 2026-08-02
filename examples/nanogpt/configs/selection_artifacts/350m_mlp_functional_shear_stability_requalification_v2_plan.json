@@ -1,0 +1,58 @@
+{
+  "artifact_kind": "350m_conditioned_full_mlp_stability_requalification_plan",
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594",
+    "scientific_config_changed_from_v1": false
+  },
+  "created_at": "2026-08-02",
+  "execution": {
+    "performance_command": "CUDA_VISIBLE_DEVICES=0 MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25 /home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/performance_and_stability_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/performance_and_stability_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 24",
+    "polling": "foreground operator polling only; no watchdog or callback",
+    "stability_command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.validate_functional_shear_stability_log_v2 --log /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/performance_and_stability_preflight.log --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/functional_shear_stability_validation.json --expected-layers 24 --expected-steps 25 --maximum-condition-number 1.01 --maximum-weight-rms-ratio 2 --maximum-weight-abs-growth 2 --maximum-weight-abs-floor 1"
+  },
+  "historical_basis": {
+    "preexisting_124m_plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_stability_plan.json",
+    "preexisting_124m_plan_first_commit": "896f8a4da315d693a03ef182b04ba6d48272d182",
+    "preexisting_124m_plan_sha256": "41402cc7a279dc1dc911a1f5dd2de1ab357ef466747f920e1f8909df8940b168",
+    "preexisting_rule": "the internal condition projection must be active for at least one row, while every row remains finite and bounded",
+    "source_semantics": "functional_fit_condition_projection_active records an actual coordinate rescaling, not whether the limiter is configured"
+  },
+  "parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_hidden88_terminal_result.json",
+    "result_sha256": "c785605d9c167407d9c45f7324fdf784a43c348ca4f165753046a7f8349eedb7",
+    "terminal_validation_ce": 4.4557
+  },
+  "registration_integrity": {
+    "reuse_v1_preflight": false,
+    "scientific_ce_thresholds_changed": false,
+    "statement": "V1 remains a registered rejection. V2 is a separate deterministic rerun, registered after V1 solely to restore the clip-activity semantics already frozen by the earlier 124M plan; no V1 measurement may authorize training."
+  },
+  "rules": {
+    "expected_layers": 24,
+    "expected_rows": 600,
+    "expected_steps": 25,
+    "maximum_condition_number": 1.01,
+    "maximum_weight_abs_floor": 1.0,
+    "maximum_weight_abs_growth": 2.0,
+    "maximum_weight_rms_ratio": 2.0,
+    "minimum_internal_limiter_active_rows": 1,
+    "minimum_mfu_fraction": 0.2,
+    "require_all_diagnostic_numbers_finite": true,
+    "require_all_logged_losses_finite": true,
+    "require_exact_unique_step_layer_grid": true,
+    "require_internal_activity_scale_consistency": true,
+    "require_zero_condition_bound_violations": true,
+    "require_zero_fallback": true,
+    "require_zero_weight_growth_violations": true
+  },
+  "schema_version": "350m_conditioned_full_mlp_stability_requalification_plan_v2",
+  "v1_rejection": {
+    "result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_preflight_v1_reject_result.json",
+    "result_sha256": "0572043b90ad0fdeedcdf739998f95aee8c44728ae27f3947ebb630b5da7f250"
+  },
+  "validator": {
+    "path": "examples/nanogpt/validate_functional_shear_stability_log_v2.py",
+    "sha256": "7dd2ed07b5eec08122cd4937b7e541bb96eda28dd0a9be16f44595578c7db717"
+  }
+}

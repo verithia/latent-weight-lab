@@ -216,3 +216,29 @@ def test_parent_terminal_result_passes_frozen_gate() -> None:
     assert result["checkpoint"]["exact_resume_schema"] == "nanogpt_exact_resume_v2"
     assert result["callback"]["sent_milestones"] == [20, 50]
     assert result["callback"]["terminal_signature"][0:2] == ["finished", 0]
+
+
+def test_v2_requalification_is_distinct_and_prior_anchored() -> None:
+    plan_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_mlp_functional_shear_stability_requalification_v2_plan.json"
+    )
+    plan = load(plan_path)
+    assert (
+        plan["schema_version"]
+        == "350m_conditioned_full_mlp_stability_requalification_plan_v2"
+    )
+    assert plan["registration_integrity"]["reuse_v1_preflight"] is False
+    assert plan["registration_integrity"]["scientific_ce_thresholds_changed"] is False
+    assert plan["candidate"]["scientific_config_changed_from_v1"] is False
+    assert sha256(REPO / plan["candidate"]["config"]) == plan["candidate"]["config_sha256"]
+    assert sha256(REPO / plan["parent"]["result"]) == plan["parent"]["result_sha256"]
+    assert sha256(REPO / plan["v1_rejection"]["result"]) == plan["v1_rejection"]["result_sha256"]
+    assert sha256(REPO / plan["validator"]["path"]) == plan["validator"]["sha256"]
+    basis = plan["historical_basis"]
+    assert sha256(REPO / basis["preexisting_124m_plan"]) == basis["preexisting_124m_plan_sha256"]
+    assert plan["rules"]["minimum_internal_limiter_active_rows"] == 1
+    assert plan["rules"]["expected_rows"] == 600
+    assert plan["rules"]["minimum_mfu_fraction"] == 0.2
+    assert "full_mlp_conditioned_v2" in plan["execution"]["performance_command"]
+    assert "validate_functional_shear_stability_log_v2" in plan["execution"]["stability_command"]

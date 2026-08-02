@@ -1,0 +1,66 @@
+{
+  "artifact_kind": "350m_conditioned_full_mlp_preflight_result",
+  "authorization": {
+    "candidate_long_run": false,
+    "reuse_this_preflight_for_a_revised_gate": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594"
+  },
+  "decision": "REJECT_REGISTERED_STABILITY_GATE",
+  "diagnosis": {
+    "code_semantics": "functional_fit_condition_projection_active is true only when a provisional stage exceeds the remaining log-condition budget and its coordinates are rescaled; it is false for an already-safe no-op projection",
+    "failed_predicate": "internal limiter active on every one of 600 rows",
+    "offending_coordinate": {
+      "functional_fit_condition_projection_active": false,
+      "functional_fit_condition_projection_min_scale": 1.0,
+      "functional_fit_log_condition_bound": 0.0098130622653012,
+      "layer": 0,
+      "mixed_log_condition_bound_after_projection": 0.005447129059849858,
+      "step": 0
+    },
+    "registered_log_condition_limit": 0.009950330853168092,
+    "scientific_interpretation": "The row is finite and within the registered condition budget, but the frozen every-row activity predicate failed. The V1 preflight cannot authorize a long run."
+  },
+  "execution": {
+    "direct_foreground_polling": true,
+    "git_commit": "c35a15f5bbcfbd4a9ef4d8db76391b97be4a89d3",
+    "gpu": 0,
+    "host": "PRO6",
+    "parameter_updates": 25,
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "performance": {
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.json",
+    "certificate_sha256": "9cb1426b71d28edcac2da8dafa2e908f72a03da190206022369200a3e43e70e4",
+    "elapsed_seconds": 134.2851197719574,
+    "iter_ms": 5202.596666666666,
+    "mfu_fraction": 0.25743816821660576,
+    "minimum_mfu_fraction": 0.2,
+    "model_tflops": 107.28661360914431,
+    "peak_mib": 61763.3,
+    "tokens_per_second": 50387.57
+  },
+  "schema_version": "350m_conditioned_full_mlp_preflight_result_v1",
+  "stability": {
+    "condition_bound_violations": 0,
+    "expected_rows": 600,
+    "fallback_rows": 0,
+    "finite_loss_values": 29,
+    "finite_rows": 600,
+    "internal_limiter_active_rows": 599,
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/performance_and_stability_preflight.log",
+    "log_sha256": "e570086609246ff2740381b94ebb1389e79f4cec7403f45749c7f62699497ea9",
+    "observed_rows": 600,
+    "unique_step_layer_coordinates": 600,
+    "validation_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/functional_shear_stability_validation.json",
+    "validation_sha256": "a8b8289f643b5a01fe69819699a7808cea857fa3d11452981dd6f079877fc4c0",
+    "weight_growth_violations": 0
+  },
+  "validator_contract": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_functional_shear_stability_validator_contract.json",
+    "sha256": "78c4a0a5feb3aa5268a76dae8a2b14bcea9301ab5264231d117732bcdd4d4850"
+  }
+}
