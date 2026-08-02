@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_124m_mlp_cfc_functional_shear_ce_select_pro6_plan_v1",
+  "recorded_at": "2026-08-02",
+  "question": "Did the weight-recovery proxy choose a beta that is too conservative, and can a finite-CE-selected coordinate mix close a meaningful fraction of the remaining c_fc gap on separate held-out windows?",
+  "authorization": {
+    "parameter_updates": 0,
+    "single_directly_polled_ce_diagnostic": true,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "scientific_training": false,
+    "larger_rung": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+    "checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+    "config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_functional_shear_ce_select.py",
+    "entrypoint_sha256": "e188a37e7295b82bdeda26051ac87568c77d0a26dab830eb388c9a9b988fa39d",
+    "implementation_commit": "87ab5b178ce2406c423a5725b35574f5fcb1e101",
+    "parent_beta0125_ce_result_sha256": "56680109b9f5f8d74a8068853947a201d28a023bf3bb030c5e80d121091f3944"
+  },
+  "fixed_protocol": {
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "batch_size": 4,
+    "block_size": 1024,
+    "fit_batches": 4,
+    "fit_train_seed": 20260820,
+    "functional_sample_cap": 2048,
+    "functional_sample_seed": 20261250,
+    "matching_seed": 20260820,
+    "matching_neighbors": 64,
+    "candidate_betas": [0.125, 0.25, 0.375, 0.5],
+    "selection_seed": 20261109,
+    "selection_batches": 8,
+    "control": "fresh64_weight_shear24",
+    "secondary_control": "fresh88",
+    "dense_reference": "dense_exact",
+    "equal_coordinates_per_layer": 135168,
+    "evaluation_dtype": "float32",
+    "evaluation_repeats": 3,
+    "validation_batches_per_window": 8,
+    "validation_seeds": [20261110, 20261111, 20261112, 20261113]
+  },
+  "decision_rule": {
+    "selection_tie_tolerance": 0.00000001,
+    "maximum_replicate_range": 0.0000002,
+    "minimum_recovery": 0.05,
+    "median_recovery": 0.1,
+    "selection": "On validation seed 20261109 choose the candidate beta with minimum mean finite CE; within 1e-8 choose the smallest beta. Freeze it before reading the four held-out windows. The winner must beat weight-shear24 and fresh88 on every held-out window and recover at least 5% of the dense-over-weight-shear CE gap in the worst window and 10% at the median. Dense exact must beat weight-shear24 on every window. No threshold changes after observation.",
+    "threshold_change_after_observation": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "foreground_direct_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cfc_functional_shear_ce_select",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functional_shear_ce_select_pro6_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functional_shear_ce_select1",
+      "--device",
+      "cuda",
+      "--native-cache",
+      "/home/pro6000-9980x/MappingNetworks/native_cache"
+    ]
+  },
+  "limitations": [
+    "This is a zero-update finite-CE selection plus holdout diagnostic, not language-model training.",
+    "The beta grid is motivated by the preceding train-window Pareto curve. Beta 0.75 and 1.0 are excluded because they already failed the nonlinear post-GELU gate; beta 0.0625 is dominated by beta 0.125 in the preregistered structural metrics.",
+    "The single selection window is disjoint from all four held-out validation windows. The selected beta is frozen before held-out losses are read.",
+    "Passing establishes local held-out task value and authorizes only production implementation plus a separately measured >=20% host-local MFU preflight. It does not authorize training or a larger rung."
+  ]
+}
