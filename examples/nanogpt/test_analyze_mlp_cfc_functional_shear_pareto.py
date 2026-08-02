@@ -2,6 +2,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_cfc_functional_shear_pareto import (
     replay_blended_recipes,
+    symmetric_recipe_to_pair_recipe,
 )
 from examples.nanogpt.analyze_mlp_cfc_task_shear_fit import apply_pair_stage
 
@@ -40,3 +41,13 @@ def test_blended_recipe_interpolates_coordinates_not_updates() -> None:
     )
     torch.testing.assert_close(actual, expected - source)
     assert finite["maximum_condition_number"] < 1.1
+
+
+def test_production_symmetric_recipe_adapts_to_pair_coordinates() -> None:
+    pairs = torch.tensor([[0, 1], [2, 3]])
+    coordinates = torch.tensor([0.01, -0.02], dtype=torch.float64)
+    adapted = symmetric_recipe_to_pair_recipe([(pairs, coordinates)])
+    assert torch.equal(adapted[0][0], pairs)
+    assert adapted[0][1].shape == (2, 2)
+    assert torch.equal(adapted[0][1][:, 0], coordinates)
+    assert torch.equal(adapted[0][1][:, 1], torch.zeros_like(coordinates))

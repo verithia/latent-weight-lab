@@ -75,6 +75,19 @@ def git_commit(repo: Path) -> str:
     ).strip()
 
 
+def symmetric_recipe_to_pair_recipe(
+    recipe: list[tuple[torch.Tensor, torch.Tensor]],
+) -> list[tuple[torch.Tensor, torch.Tensor]]:
+    """Adapt production 1-D symmetric coordinates to `[shear, skew]`."""
+    return [
+        (
+            pairs,
+            torch.stack((coordinates, torch.zeros_like(coordinates)), dim=1),
+        )
+        for pairs, coordinates in recipe
+    ]
+
+
 @torch.no_grad()
 def replay_blended_recipes(
     source: torch.Tensor,
@@ -188,7 +201,7 @@ def build_pareto_candidates(
         family="shear",
     )
     functional_fit_diagnostics: dict[str, float | bool] = {}
-    functional_recipe = _fit_functional_shear_recipe(
+    production_functional_recipe = _fit_functional_shear_recipe(
         after_parent,
         residual,
         inputs,
@@ -197,6 +210,9 @@ def build_pareto_candidates(
         weight_permutations,
         max_condition_number=max_condition_number,
         fit_diagnostics=functional_fit_diagnostics,
+    )
+    functional_recipe = symmetric_recipe_to_pair_recipe(
+        production_functional_recipe
     )
     functional_current = after_parent.float()
     maximum_determinant_error = 0.0
