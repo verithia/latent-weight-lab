@@ -1,0 +1,62 @@
+{
+  "artifact_kind": "124m_mlp_cproj_error_feedback_step60_exact_config_mfu_result",
+  "certificate": {
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_step60/performance_preflight.log",
+    "log_sha256": "a888e0731f27949f055156e522d75b766a02d190a9c9e363b48434cf756c71c6",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_step60/performance_preflight.json",
+    "sha256": "06ba71980c2e5f0ea46ea370af6bc3e310331edad7e687c2c666ce441f570512"
+  },
+  "classification": "CPROJ_ERROR_FEEDBACK_EXACT_CONFIG_MFU_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_step60.json",
+    "sha256": "59070611ab16bfc39709ae5f5e3e0a0b4f01da3af71393901018782631ce7ce2"
+  },
+  "decision": {
+    "full_238_update_run_authorized": false,
+    "reason": "The exact registered c_proj error-feedback path is finite and exceeds the frozen 20 percent MFU floor.",
+    "scientific_step60_run_authorized": true
+  },
+  "execution": {
+    "callback": false,
+    "direct_foreground_polling": true,
+    "git_commit": "a5530c3ec250b9eb31e2d44355928f220445d99e",
+    "gpu": 0,
+    "host": "PRO6",
+    "native_extension_required": true,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "average_iter_ms": 1492.42,
+    "empirical_bf16_peak_tflops": 415.11968710295406,
+    "mfu_fraction": 0.3160255678790404,
+    "minimum_required_mfu_fraction": 0.2,
+    "model_tflops": 131.18843485448062,
+    "peak_mib": 31748.09,
+    "timing_breakdown_ms": {
+      "data_ms": 0.735,
+      "eval_ms": 0.0,
+      "flush_ms": 4.5425,
+      "fwbw_ms": 1188.36125,
+      "grad_ms": 1.7375,
+      "opt_ms": 291.72125,
+      "other_ms": 1.5375,
+      "prepare_ms": 3.78125
+    },
+    "tokens_per_second": 175654.39125
+  },
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_step60_plan.json",
+    "sha256": "a87d1463f0666853bf6c43bf3b9be09d9b70a9545d1348a6901081007360f6cd"
+  },
+  "recorded_at": "2026-08-03",
+  "schema_version": "mai_124m_mlp_cproj_error_feedback_step60_exact_config_mfu_result_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13
+  }
+}
