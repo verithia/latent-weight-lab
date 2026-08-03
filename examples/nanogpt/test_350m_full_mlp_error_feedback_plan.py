@@ -15,6 +15,10 @@ V2_PLAN_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v2_plan.json"
 )
+V2_RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v2_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -206,3 +210,35 @@ def test_v2_mfu_result_authorizes_exactly_one_scientific_run() -> None:
     assert result["decision"]["one_full_677_update_run_authorized"] is True
     assert result["decision"]["automatic_rerun_authorized"] is False
     assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_v2_terminal_result_rejects_nontransfer_and_preserves_provenance() -> None:
+    result = load(V2_RESULT_PATH)
+    assert result["classification"] == "REJECT_350M_FULL_MLP_ERROR_FEEDBACK_NONTRANSFER"
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert result["dataset"]["manifest_sha256"] == (
+        "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    )
+    assert result["run"]["train_exit_code"] == 0
+    assert result["checkpoint"]["exact_resume_schema"] == "nanogpt_exact_resume_v2"
+    assert result["checkpoint"]["next_iter"] == 677
+    assert result["measurement"]["terminal_validation_ce"] == 4.6874
+    assert result["measurement"]["terminal_validation_ce"] > result["measurement"]["success_ceiling"]
+    assert result["decision"]["selected_for_scaling"] is False
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_v2_terminal_residual_audit_registers_cproj_first_isolation() -> None:
+    result = load(V2_RESULT_PATH)
+    cfc = result["candidate"]["cfc"]["terminal_compression_residual"]
+    cproj = result["candidate"]["cproj"]["terminal_compression_residual"]
+    assert cfc["finite"] is True and cproj["finite"] is True
+    assert cfc["layer_count"] == cproj["layer_count"] == 24
+    assert cproj["frobenius_norm_mean"] > 400 * cfc["frobenius_norm_mean"]
+    diagnosis = result["residual_diagnosis"]
+    assert diagnosis["cfc_residual_remains_small"] is True
+    assert diagnosis["cproj_350m_vs_124m_frobenius_ratio"] > 4.0
+    assert diagnosis["first_isolation_target"].startswith("cproj temporal error feedback")
+    assert "c_proj-only temporal-error-feedback isolation" in result["decision"]["next_action"]

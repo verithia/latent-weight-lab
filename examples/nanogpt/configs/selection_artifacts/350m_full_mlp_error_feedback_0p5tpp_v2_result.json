@@ -1,0 +1,122 @@
+{
+  "artifact_kind": "350m_full_mlp_error_feedback_0p5tpp_v2_training_result",
+  "schema_version": "mai_350m_full_mlp_error_feedback_0p5tpp_v2_result_v1",
+  "classification": "REJECT_350M_FULL_MLP_ERROR_FEEDBACK_NONTRANSFER",
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 805306368,
+    "additional_trainable_parameters": 0,
+    "cfc": {
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "schedule": [30, 30, 29, 29, 29, 29],
+      "terminal_compression_residual": {
+        "finite": true,
+        "frobenius_norm_max": 0.01419,
+        "frobenius_norm_mean": 0.0136934,
+        "frobenius_norm_min": 0.01012,
+        "layer_count": 24,
+        "rms_mean": 0.000006686,
+        "shape_per_layer": [4096, 1024]
+      }
+    },
+    "cproj": {
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "matching_neighbors": 64,
+      "parent_stages": 64,
+      "residual_stages": 53,
+      "terminal_compression_residual": {
+        "finite": true,
+        "frobenius_norm_max": 6.201,
+        "frobenius_norm_mean": 5.79446,
+        "frobenius_norm_min": 3.086,
+        "layer_count": 24,
+        "max_abs": 0.019067,
+        "rms_mean": 0.00282933,
+        "shape_per_layer": [1024, 4096]
+      }
+    }
+  },
+  "checkpoint": {
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp_v2/scientific/ckpt.meta.json",
+    "metadata_sha256": "3b74a74f2415d62d9dda4b2e53909f5d09ddb04f444bf2be51faf007184fc5e6",
+    "next_iter": 677,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp_v2/scientific/ckpt.pt",
+    "sha256": "ac1d4eb0588488ec3c7d17fd0c551551736c7e92b8582fa2963246490fb21f77",
+    "size_bytes": 3267111984
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp_v2.json",
+    "sha256": "e51f0bad45546d74e79c6257619c8c6369fa37fc3b2b738e79f541546db88306"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "next_action": "Register one 350M c_proj-only temporal-error-feedback isolation using the accepted memoryless c_proj parent chart 64+24 with dense c_fc. Do not change chart capacity, dataset, token budget, optimizer, or endpoint.",
+    "selected_for_scaling": false
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 11.0780, "validation_ce": 11.0774},
+    {"step": 170, "train_ce": 5.4159, "validation_ce": 5.4175},
+    {"step": 340, "train_ce": 4.8812, "validation_ce": 4.8781},
+    {"step": 510, "train_ce": 4.7464, "validation_ce": 4.7430},
+    {"step": 677, "train_ce": 4.6907, "validation_ce": 4.6874}
+  ],
+  "measurement": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_gap_ce": 0.3245,
+    "conditioned_full_mlp_validation_ce": 4.5834,
+    "candidate_minus_conditioned_full_mlp_ce": 0.1040,
+    "candidate_minus_memoryless_cproj_ce": 0.2317,
+    "memoryless_cproj_validation_ce": 4.4557,
+    "success_ceiling": 4.4629,
+    "success_ceiling_miss_ce": 0.2245,
+    "terminal_step": 677,
+    "terminal_train_ce": 4.6907,
+    "terminal_validation_ce": 4.6874
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.2816817858546746,
+    "ordinary_logged_update_ms_mean": 4774.357,
+    "tokens_per_second": 55000.586
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v2_plan.json",
+    "sha256": "9f80f27749a07c2aa1823a2ed9f8a4ee7dcb988668696dccea92a2261ced4841"
+  },
+  "provenance": {
+    "config_archive_sha256": "e51f0bad45546d74e79c6257619c8c6369fa37fc3b2b738e79f541546db88306",
+    "git_commit": "7c2ffb63677f002bab40d92b6f2ce365f9bd8e5b",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_full_mlp_errorfeedback_0p5tpp_v2_20260803T112819Z_3226050.log",
+    "log_sha256": "42f1ddbe315907ddd2597c02df8dba610e42f8a0bee7f49b59f9d5740996b81a",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_full_mlp_errorfeedback_0p5tpp_v2_20260803T112819Z_3226050.json",
+    "sha256": "f34900e63e64a7f84e56267eac776a9d31b01f5cb07af99b9acfd5324fa72250",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_full_mlp_errorfeedback_0p5tpp_v2_20260803T112819Z_3226050.json",
+    "status_sha256": "57579ddbd5f5077bc2254a1fdcaadb10c852b0aa34e96a34ff8396ba807bcd2f"
+  },
+  "residual_diagnosis": {
+    "cfc_350m_vs_124m_frobenius_ratio": 1.106809,
+    "cfc_residual_remains_small": true,
+    "cproj_350m_vs_124m_frobenius_ratio": 4.498263,
+    "cproj_350m_vs_124m_rms_ratio": 3.373566,
+    "first_isolation_target": "cproj temporal error feedback at parent chart 64+24 with dense c_fc",
+    "interpretation": "The full composition does not identify which replacement caused the non-transfer. The c_proj residual grew sharply with model size while c_fc stayed near the accepted 124M scale, making c_proj decay-1 temporal carry the first causal isolation."
+  },
+  "run": {
+    "finished_at": "2026-08-03T20:25:57+08:00",
+    "host": "PRO6",
+    "run_id": "pro6_mai_v3_350m_full_mlp_errorfeedback_0p5tpp_v2_20260803T112819Z_3226050",
+    "status": "clean",
+    "train_exit_code": 0
+  },
+  "watchdog": {
+    "callback_milestones_sent": [20, 50, 100],
+    "duplicate_terminal_callbacks": 0,
+    "terminal_signature": ["finished", 0, "2026-08-03T20:25:57+08:00"]
+  }
+}
