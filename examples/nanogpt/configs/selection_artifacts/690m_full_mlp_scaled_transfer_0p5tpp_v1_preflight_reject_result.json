@@ -1,0 +1,40 @@
+{
+  "artifact_kind": "690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_result",
+  "schema_version": "mai_690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_v1",
+  "classification": "REJECT_PRETRAIN_CONFIG_INVARIANT_CPROJ_NEIGHBORS_BELOW_STAGES",
+  "candidate": {
+    "config_git_commit": "66e18dedcaac838719abff57f7f45e10856eeb61",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_plus_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+    "config_sha256": "43d2fcd7d3ffb25cb840fa6ba3ac1f8d790ab10d93fa7c726a218f02f2a0f683",
+    "cproj_matching_neighbors": 64,
+    "cproj_parent_stages": 80,
+    "cproj_residual_stages": 30,
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_plan.json",
+    "plan_sha256": "e6466de7bbae22b80efa03d92fd0f18cd19db8e4ffd5a6c8cc1c091fa219fe70"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "corrective_action": "Re-register c_proj matching_neighbors=80, scaling it by the same 1280/1024 width ratio as parent stages; rerun all lineage/config tests before a new foreground MFU gate.",
+    "scientific_run_authorized": false
+  },
+  "measurement": {
+    "elapsed_seconds": 1.0019302368164062,
+    "gpu_training_updates_executed": 0,
+    "mfu_measured": false,
+    "passed": false,
+    "preflight_exit_code": 1,
+    "reason": "Muon-matched Givens requires max(stages, residual_stages) <= neighbors; 80 <= 64 is false"
+  },
+  "provenance": {
+    "host": "PRO6",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.log",
+    "log_sha256": "49865da8a54d4f4a3fa8aaeb4aea924e88d0fb7e5ae842239cae7d583835117f",
+    "output_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.json",
+    "output_sha256": "ad15dfb7c7f8f74cc377dcbf0496145e6158a9dbcea5f25555098108a5d6f327"
+  },
+  "runtime": {
+    "callback_or_watchdog_attached": false,
+    "direct_foreground_polling": true,
+    "gpu_idle_after_rejection": true
+  }
+}

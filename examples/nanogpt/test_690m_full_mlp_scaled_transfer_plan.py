@@ -3,15 +3,21 @@ from __future__ import annotations
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
+from unittest.mock import patch
 
-from examples.nanogpt.train import load_config
+from examples.nanogpt.train import load_config, parse_args
 
 
 REPO = Path(__file__).resolve().parents[2]
 PLAN_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_plan.json"
+)
+V1_REJECT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_result.json"
 )
 
 
@@ -42,6 +48,9 @@ def test_plan_binds_config_control_parent_and_implementation() -> None:
         assert sha256(REPO / identity[path_field]) == identity[hash_field]
     for relative, expected in identity["implementation_source_hashes"].items():
         assert git_blob_sha256(identity["implementation_commit"], relative) == expected
+    assert sha256(REPO / plan["v1_preflight_reject_result"]) == (
+        plan["v1_preflight_reject_result_sha256"]
+    )
 
 
 def test_width_scaling_preserves_selected_coordinate_fraction() -> None:
@@ -57,6 +66,7 @@ def test_width_scaling_preserves_selected_coordinate_fraction() -> None:
     assert config["block_fht_mlp_cfc_directed_product_schedule"] == [37, 37, 37, 37, 36, 36]
     assert config["block_fht_mlp_cproj_muon_matched_givens_stages"] == 80
     assert config["block_fht_mlp_cproj_muon_matched_givens_residual_stages"] == 30
+    assert config["block_fht_mlp_cproj_muon_matched_givens_neighbors"] == 80
     assert config["directed_product_representation"]["coordinate_fraction_per_cfc"] == 11 / 256
     assert config["muon_matched_givens_representation"]["coordinate_fraction_per_cproj"] == 11 / 256
 
@@ -101,6 +111,14 @@ def test_config_is_accepted_by_production_loader() -> None:
     assert config["max_iters"] == 1326
     assert config["terminal_eval_required"] is True
     assert config["block_fht_native_extension_required"] is True
+    with patch.object(
+        sys,
+        "argv",
+        ["train.py", "--config", str(REPO / plan["identity"]["config"])],
+    ):
+        parsed = parse_args()
+    assert parsed.block_fht_mlp_cproj_muon_matched_givens_stages == 80
+    assert parsed.block_fht_mlp_cproj_muon_matched_givens_neighbors == 80
 
 
 def test_endpoint_performance_gate_monitoring_and_authorization_are_frozen() -> None:
@@ -118,3 +136,18 @@ def test_endpoint_performance_gate_monitoring_and_authorization_are_frozen() -> 
     assert plan["execution"]["heartbeat_minutes"] == 90
     assert plan["authorization"]["automatic_rerun_authorized"] is False
     assert plan["authorization"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_v1_preflight_rejection_is_preserved_and_non_scientific() -> None:
+    result = load(V1_REJECT_PATH)
+    assert result["classification"] == (
+        "REJECT_PRETRAIN_CONFIG_INVARIANT_CPROJ_NEIGHBORS_BELOW_STAGES"
+    )
+    candidate = result["candidate"]
+    assert git_blob_sha256(candidate["config_git_commit"], candidate["config_path"]) == (
+        candidate["config_sha256"]
+    )
+    assert result["measurement"]["gpu_training_updates_executed"] == 0
+    assert result["measurement"]["mfu_measured"] is False
+    assert result["decision"]["scientific_run_authorized"] is False
+    assert result["runtime"]["callback_or_watchdog_attached"] is False

@@ -1,10 +1,14 @@
 {
   "schema_version": "mai_690m_full_mlp_scaled_transfer_0p5tpp_plan_v1",
   "created_at": "2026-08-03",
+  "revision": 2,
+  "supersedes_invalid_config_commit": "66e18dedcaac838719abff57f7f45e10856eeb61",
+  "v1_preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_result.json",
+  "v1_preflight_reject_result_sha256": "77edd0be175f72a960bae922df908bbf5f7fbf7edc4cd10174000a724b40fa42",
   "question": "Does the selected full-MLP replacement transfer from 350M to 690M at fixed 0.5TPP when both structured chart capacities are scaled in direct proportion to model width?",
   "identity": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_plus_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp.json",
-    "config_sha256": "43d2fcd7d3ffb25cb840fa6ba3ac1f8d790ab10d93fa7c726a218f02f2a0f683",
+    "config_sha256": "a3061cc4d5f1935105662ed0e7b24ef815910f8bc186f2679647a5353fe25d33",
     "attention_control_config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_0p5tpp_mult1p00.json",
     "attention_control_config_sha256": "55ffa3633068998ad9d82b79dcd05d55c676d3992e5ba243e9ffc6e89b34f483",
     "attention_control_ranking": "examples/nanogpt/configs/selection_artifacts/690m_fullattn_0p5tpp_provisional_ranking.json",
@@ -35,13 +39,15 @@
     "cfc_error_feedback_decay": 1.0,
     "cproj_parent_stages_350m": 64,
     "cproj_parent_stages_690m": 80,
+    "cproj_matching_neighbors_350m": 64,
+    "cproj_matching_neighbors_690m": 80,
     "cproj_residual_stages_350m": 24,
     "cproj_residual_stages_690m": 30,
     "cproj_error_feedback_decay": 0.5,
     "total_additional_trainable_parameters": 0,
     "total_additional_dense_optimizer_state_bytes": 1677721600,
     "inference_parameter_or_flop_change_vs_materialized_attention_parent": 0,
-    "scaling_rule": "multiply the selected 350M chart stage totals by 1280/1024 and distribute c_fc's integer total as evenly as possible over the unchanged six-stage topology"
+    "scaling_rule": "multiply the selected 350M chart stage totals and c_proj matching-neighborhood width by 1280/1024 and distribute c_fc's integer total as evenly as possible over the unchanged six-stage topology"
   },
   "controls": {
     "attention_only_terminal_validation_ce": 3.7003,
@@ -107,5 +113,5 @@
     "automatic_rerun_authorized": false,
     "larger_model_or_token_rung_authorized": false
   },
-  "status": "registered_before_exact_config_mfu_and_training"
+  "status": "revision_2_registered_after_v1_preflight_invariant_rejection_before_exact_config_mfu_and_training"
 }
