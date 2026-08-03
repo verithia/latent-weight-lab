@@ -46,3 +46,30 @@ def test_activity_must_agree_with_projection_scale() -> None:
     result = run(rows)
     assert result["passed"] is False
     assert "activity/scale disagreed" in " ".join(result["failures"])
+
+
+def test_registered_single_decay_application_is_fail_closed() -> None:
+    rows = [row(step, layer) for step in range(2) for layer in range(2)]
+    for value in rows:
+        value["decoupled_weight_decay_applications"] = 1
+        value.setdefault(
+            "functional_fit_condition_projection_min_scale", 0.5
+        )
+    kwargs = {
+        "expected_layers": 2,
+        "expected_steps": 2,
+        "maximum_condition_number": 1.01,
+        "maximum_weight_rms_ratio": 2.0,
+        "maximum_weight_abs_growth": 2.0,
+        "maximum_weight_abs_floor": 1.0,
+        "required_decoupled_weight_decay_applications": 1,
+    }
+    passed = validate(text(rows), **kwargs)
+    assert passed["passed"] is True
+    assert passed["observed"]["weight_decay_application_violations"] == 0
+
+    rows[0]["decoupled_weight_decay_applications"] = 2
+    rejected = validate(text(rows), **kwargs)
+    assert rejected["passed"] is False
+    assert rejected["observed"]["weight_decay_application_violations"] == 1
+    assert "decoupled-weight-decay" in " ".join(rejected["failures"])

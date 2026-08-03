@@ -25,6 +25,7 @@ def validate(
     maximum_weight_rms_ratio: float,
     maximum_weight_abs_growth: float,
     maximum_weight_abs_floor: float,
+    required_decoupled_weight_decay_applications: int | None = None,
 ) -> dict[str, Any]:
     rows = parse_functional_rows(text)
     losses = parse_losses(text)
@@ -55,6 +56,7 @@ def validate(
     )
     bound_violations = 0
     weight_growth_violations = 0
+    weight_decay_application_violations = 0
     for row in rows:
         if not all_numbers_finite(row):
             continue
@@ -105,6 +107,12 @@ def validate(
             or after_abs > max(maximum_weight_abs_floor, maximum_weight_abs_growth * before_abs)
         ):
             weight_growth_violations += 1
+        if (
+            required_decoupled_weight_decay_applications is not None
+            and row.get("decoupled_weight_decay_applications")
+            != required_decoupled_weight_decay_applications
+        ):
+            weight_decay_application_violations += 1
     if finite_rows != len(rows):
         failures.append("one or more functional diagnostic rows contain nonfinite numbers")
     if internal_limiter_rows < 1:
@@ -115,6 +123,11 @@ def validate(
         failures.append("one or more functional rows exceeded the registered condition bound")
     if weight_growth_violations:
         failures.append("one or more functional rows exceeded the registered weight-growth bound")
+    if weight_decay_application_violations:
+        failures.append(
+            "one or more functional rows violated the registered "
+            "decoupled-weight-decay application count"
+        )
 
     return {
         "schema_version": "functional_shear_stability_validation_v2",
@@ -131,6 +144,9 @@ def validate(
             "maximum_weight_abs_floor": maximum_weight_abs_floor,
             "require_internal_limiter_at_least_one_row": True,
             "require_zero_fallback": True,
+            "required_decoupled_weight_decay_applications": (
+                required_decoupled_weight_decay_applications
+            ),
         },
         "observed": {
             "rows": len(rows),
@@ -140,6 +156,9 @@ def validate(
             "fallback_rows": fallback_rows,
             "condition_bound_violations": bound_violations,
             "weight_growth_violations": weight_growth_violations,
+            "weight_decay_application_violations": (
+                weight_decay_application_violations
+            ),
             "loss_values": len(losses),
             "finite_loss_values": sum(math.isfinite(value) for value in losses),
         },
@@ -157,6 +176,11 @@ def main() -> None:
     parser.add_argument("--maximum-weight-rms-ratio", type=float, default=2.0)
     parser.add_argument("--maximum-weight-abs-growth", type=float, default=2.0)
     parser.add_argument("--maximum-weight-abs-floor", type=float, default=1.0)
+    parser.add_argument(
+        "--required-decoupled-weight-decay-applications",
+        type=int,
+        default=None,
+    )
     args = parser.parse_args()
     if args.expected_layers < 1 or args.expected_steps < 1:
         parser.error("expected layers and steps must be positive")
@@ -164,6 +188,11 @@ def main() -> None:
         parser.error("maximum condition number must exceed one")
     if args.maximum_weight_rms_ratio < 1.0 or args.maximum_weight_abs_growth < 1.0:
         parser.error("weight-growth multipliers must be at least one")
+    if (
+        args.required_decoupled_weight_decay_applications is not None
+        and args.required_decoupled_weight_decay_applications < 0
+    ):
+        parser.error("required decay application count must be nonnegative")
     result = validate(
         args.log.read_text(errors="replace"),
         expected_layers=args.expected_layers,
@@ -172,6 +201,9 @@ def main() -> None:
         maximum_weight_rms_ratio=args.maximum_weight_rms_ratio,
         maximum_weight_abs_growth=args.maximum_weight_abs_growth,
         maximum_weight_abs_floor=args.maximum_weight_abs_floor,
+        required_decoupled_weight_decay_applications=(
+            args.required_decoupled_weight_decay_applications
+        ),
     )
     atomic_json(args.output, result)
     print(json.dumps(result, sort_keys=True), flush=True)
