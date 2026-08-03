@@ -1,0 +1,110 @@
+{
+  "artifact_kind": "350m_mlp_cfc_checkpoint_splice_plan",
+  "decision_rule": {
+    "coadaptation_dominates": "parent-c_fc-in-candidate recovers at most 25% of the parent/candidate CE gap on both validation windows",
+    "direction_dominates": "parent-c_fc-in-candidate recovers at least 50% of the parent/candidate CE gap on both validation windows",
+    "mixed": "all other finite positive-gap outcomes",
+    "statement": "This is a causal endpoint attribution, not a new trained candidate and not evidence that endpoint splicing itself is a deployable architecture."
+  },
+  "execution": {
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.analyze_mlp_cfc_checkpoint_splice --parent-checkpoint /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/run/ckpt.pt --candidate-checkpoint /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/run/ckpt.pt --data-dir /home/pro6000-9980x/MappingNetworks/data/finewebedu_20b --plan examples/nanogpt/configs/selection_artifacts/350m_mlp_cfc_checkpoint_splice_plan.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cfc_checkpoint_splice_v1 --device cuda --batch-size 2 --block-size 512 --batches 32 --seeds 20260831,20260832 --activation-layers 0,3,7,11,15,19,23",
+    "gpu": 0,
+    "host": "PRO6",
+    "monitoring": "foreground direct polling; no watchdog or callback",
+    "parameter_updates": 0
+  },
+  "inputs": {
+    "candidate_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/run/ckpt.pt",
+    "candidate_checkpoint_sha256": "9405949fa0ed34c63e3476c093fd4343e9457dd3171ee14cef2c2116c2f21a0b",
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "candidate_config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594",
+    "candidate_terminal_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_terminal_result.json",
+    "candidate_terminal_result_sha256": "3524d7dce204eba941cc8a6f98310e966e96b304751aeaeb65043cb06d84b454",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/run/ckpt.pt",
+    "parent_checkpoint_sha256": "e94e46283941f0c81287cf3d4c7d4b1fb8bdfb74cb741ae5b2fddcc770602d16",
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+    "parent_config_sha256": "f59803d0cca73bc87a7ca3f9170aa2d09c92a4fd6498f3eca36394bfb1d45321",
+    "parent_terminal_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_hidden88_terminal_result.json",
+    "parent_terminal_result_sha256": "c785605d9c167407d9c45f7324fdf784a43c348ca4f165753046a7f8349eedb7"
+  },
+  "protocol": {
+    "activation_layers": [
+      0,
+      3,
+      7,
+      11,
+      15,
+      19,
+      23
+    ],
+    "batch_size": 2,
+    "batches_per_window": 32,
+    "block_size": 512,
+    "dtype": "bfloat16",
+    "validation_seeds": [
+      20260831,
+      20260832
+    ]
+  },
+  "questions": [
+    "Does transplanting the parent's terminal dense c_fc into the candidate recover the CE gap on two held-out windows?",
+    "Which depth band supplies the recovery?",
+    "Does the converse candidate-c_fc transplant damage the parent?",
+    "How do c_fc spectra, GELU statistics, and residual-update compatibility differ?"
+  ],
+  "schema_version": "350m_mlp_cfc_checkpoint_splice_plan_v1",
+  "source": "examples/nanogpt/analyze_mlp_cfc_checkpoint_splice.py",
+  "source_sha256": "ce5677b3efa12651af6ece86f198f7b7e7566d58c60b2000c0cd172cceddc4d8",
+  "variants": [
+    {
+      "base": "parent",
+      "name": "parent",
+      "parent_cfc_layers": []
+    },
+    {
+      "base": "candidate",
+      "name": "candidate",
+      "parent_cfc_layers": []
+    },
+    {
+      "base": "candidate",
+      "name": "candidate_parent_cfc_all",
+      "parent_cfc_layers": [
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
+      ]
+    },
+    {
+      "base": "candidate",
+      "name": "candidate_parent_cfc_early",
+      "parent_cfc_layers": [
+        0, 1, 2, 3, 4, 5, 6, 7
+      ]
+    },
+    {
+      "base": "candidate",
+      "name": "candidate_parent_cfc_middle",
+      "parent_cfc_layers": [
+        8, 9, 10, 11, 12, 13, 14, 15
+      ]
+    },
+    {
+      "base": "candidate",
+      "name": "candidate_parent_cfc_late",
+      "parent_cfc_layers": [
+        16, 17, 18, 19, 20, 21, 22, 23
+      ]
+    },
+    {
+      "base": "parent",
+      "candidate_cfc_layers": [
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+        12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23
+      ],
+      "name": "parent_candidate_cfc_all",
+      "parent_cfc_layers": []
+    }
+  ]
+}
