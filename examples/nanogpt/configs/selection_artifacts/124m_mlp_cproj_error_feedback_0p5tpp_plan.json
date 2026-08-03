@@ -1,0 +1,112 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "cfc_error_feedback_combination_authorized": false,
+    "exact_config_mfu_run_authorized": true,
+    "full_238_update_scientific_run_authorized_after_exact_mfu_pass": true,
+    "larger_rung_authorized": false
+  },
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 113246208,
+    "additional_trainable_parameters": 0,
+    "algorithm": [
+      "form the exact current dense Muon c_proj request including weight decay",
+      "add the prior full-precision compression residual",
+      "select and fit the existing fresh hidden64 parent chart",
+      "select and fit the existing fresh hidden24 post-parent residual chart",
+      "apply the folded structured update and store corrected target minus applied update"
+    ],
+    "cfc_structure": "dense control for causal isolation",
+    "error_feedback": true,
+    "error_feedback_decay": 1.0,
+    "forward_structure_changed": false,
+    "parent_stages": 64,
+    "residual_stages": 24
+  },
+  "controls": {
+    "accepted_attention_gap": 0.1,
+    "attention_only_terminal_validation_ce": 5.4918,
+    "cproj_without_error_feedback_terminal_validation_ce": 5.592058181762695,
+    "global_success_ceiling": 5.5918,
+    "step60_error_feedback_validation_ce": 6.262904644012451,
+    "step60_gap_fraction_recovered": 0.5349566989294522
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "if validation CE exceeds 5.5918, do not combine with c_fc error feedback or promote; compare the fixed loss trajectory and residual-state growth with the matched c_proj control before registering another structural test",
+    "pass": "if stable terminal validation CE is at most 5.5918, register one combined c_fc plus c_proj error-feedback 124M run; no larger rung is automatically authorized",
+    "pass_validation_ce_maximum": 5.5918,
+    "primary_metric": "fixed-window terminal step-238 validation cross entropy",
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "callback": false,
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "lr_decay_iters": 238,
+    "max_iters": 238,
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "training_launcher_command": [
+      "env",
+      "PYTHON_BIN=/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_cproj_twopassfresh88_errorfeedback_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+    "config_sha256": "fb7d8f5b4e5f8a98a30fa6216080146622f018403a5b7f8dddc1875803a81cd9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "25b1f807f3db05f272320242212e269d443f098d",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "9d32e2263d8672ae5fe1ea51fe02e1332ffcfe12bc8564b74c4291b6da18b33b",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "9a8928fd28225b7d174f0ccb9576c910922e4c98171fa54a3711e42f9e453446",
+      "examples/nanogpt/test_muon_matched_givens.py": "ca199a421f38aead8a56fbb953875e79928b364027f4749baa10b2707849eb98",
+      "examples/nanogpt/train.py": "8682b3831450f30dd0b0dd2b31fb1cb47011d1a985129a97f07b01b172a98e6d",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    },
+    "matched_control_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_training_result.json",
+    "matched_control_result_sha256": "c04fadf6cd0b5ff5d0e99d9b7d580d2e168d9e0a5dd73ab89af47f045a5dc008",
+    "parent_screen_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_step60_result.json",
+    "parent_screen_result_sha256": "536e5dd67dbde78b81b99eb8b090b49b87e09101804d35ef473e8c6af30d18e1"
+  },
+  "question": "Does c_proj temporal error feedback preserve its step-60 causal gain through the complete 124M 0.5-TPP trajectory and close the accepted plus-0.10 attention-only gap?",
+  "schema_version": "mai_124m_mlp_cproj_error_feedback_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
