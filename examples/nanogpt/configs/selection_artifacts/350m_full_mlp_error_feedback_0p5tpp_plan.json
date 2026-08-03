@@ -1,0 +1,147 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "exact_config_mfu_run_authorized": true,
+    "full_677_update_scientific_run_authorized_after_exact_mfu_pass": true,
+    "larger_model_or_token_rung_authorized": false
+  },
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 805306368,
+    "additional_trainable_parameters": 0,
+    "cfc": {
+      "coordinates_per_layer": 720896,
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "family_radius_ratio": 1.0,
+      "incoming_coordinate_fraction": 0.04296875,
+      "schedule": [
+        30,
+        30,
+        29,
+        29,
+        29,
+        29
+      ],
+      "structure": "six-stage directed-product Muon chart"
+    },
+    "cproj": {
+      "coordinates_per_layer": 239616,
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "matching_neighbors": 85,
+      "parent_stages": 85,
+      "residual_stages": 32,
+      "structure": "fresh two-pass Givens Muon chart"
+    },
+    "forward_structure_changed": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "transformer_residual_topology_changed": false
+  },
+  "controls": {
+    "accepted_attention_gap": 0.1,
+    "attention_only_config": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult1p00.json",
+    "attention_only_config_sha256": "dcefa50f197cf7b2516ca4357900b5cf9e5d67284cbb99a560226bba706535a3",
+    "attention_only_ranking": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_0p5tpp_provisional_ranking.json",
+    "attention_only_ranking_sha256": "f19284da78dac9e1a22292802579e61b066b1289ab2ce876d955caab9f6022a4",
+    "attention_only_terminal_validation_ce": 4.3629,
+    "conditioned_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_terminal_result.json",
+    "conditioned_full_mlp_result_sha256": "3524d7dce204eba941cc8a6f98310e966e96b304751aeaeb65043cb06d84b454",
+    "conditioned_full_mlp_terminal_validation_ce": 4.5834,
+    "global_success_ceiling": 4.4629,
+    "memoryless_cproj_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_hidden88_terminal_result.json",
+    "memoryless_cproj_result_sha256": "c785605d9c167407d9c45f7324fdf784a43c348ca4f165753046a7f8349eedb7",
+    "memoryless_cproj_terminal_validation_ce": 4.4557,
+    "smallest_rung_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_error_feedback_0p5tpp_result.json",
+    "smallest_rung_full_mlp_result_sha256": "bec53473035d0128df566be4c20bde563167a6fd4296adf9b58618e3698d6b83",
+    "smallest_rung_full_mlp_terminal_validation_ce": 5.529316425323486
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "if terminal validation CE exceeds 4.4629, reject 350M accepted-gap full-MLP closure and analyze size-transfer error before any larger model or token rung",
+    "pass": "if stable terminal validation CE is at most 4.4629, record accepted-gap full attention plus full MLP replacement at 350M/0.5 TPP",
+    "pass_validation_ce_maximum": 4.4629,
+    "primary_metric": "fixed-window terminal step-677 validation cross entropy",
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "callback_milestones": [
+      20,
+      50,
+      100
+    ],
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "heartbeat_minutes": 90,
+    "host": "PRO6",
+    "lr_decay_iters": 677,
+    "max_iters": 677,
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_polling": "foreground operator polling only; no watchdog or callback",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "training_launcher_command": [
+      "env",
+      "PYTHON_BIN=/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_350m_full_mlp_errorfeedback_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "watchdog": "one local aggregate examples.nanogpt.watch_y400_dense_aggregate process, started only after launch identity is known; progress callbacks reset the 90-minute heartbeat clock and terminal ownership is persisted before exit",
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+    "config_sha256": "3262168fcc3fae6d0ef0ffca0ebbcf1a5447856453b46657b6dbc125ba646a3f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "25b1f807f3db05f272320242212e269d443f098d",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "9d32e2263d8672ae5fe1ea51fe02e1332ffcfe12bc8564b74c4291b6da18b33b",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "9a8928fd28225b7d174f0ccb9576c910922e4c98171fa54a3711e42f9e453446",
+      "examples/nanogpt/test_muon_directed_product.py": "17a0310c1c46147f65ef21968d7bc29397d14b86371235fde64ebd2674258885",
+      "examples/nanogpt/test_muon_matched_givens.py": "ca199a421f38aead8a56fbb953875e79928b364027f4749baa10b2707849eb98",
+      "examples/nanogpt/train.py": "8682b3831450f30dd0b0dd2b31fb1cb47011d1a985129a97f07b01b172a98e6d",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "question": "Does temporal error feedback, with chart coordinate fractions preserved across width, close the full-MLP accepted-gap target at 350M/0.5 TPP?",
+  "scale_transfer": {
+    "cfc_derivation": "124M sum(schedule)=132 at FFN width 3072; preserve 132/3072=0.04296875 at width 4096, giving sum(schedule)=176 and the balanced integer schedule [30,30,29,29,29,29]",
+    "cproj_derivation": "scale hidden64 and residual24 by 1024/768=4/3, round to hidden85 and residual32; scale matching neighbors64 to85 by the same rule",
+    "dense_residual_state_derivation": "each family stores 24 layers x 4194304 float32 residual values = 402653184 bytes; c_fc plus c_proj totals 805306368 bytes",
+    "token_schedule_derivation": "ceil(177299968 / 262144)=677 updates, scheduling 177471488 tokens"
+  },
+  "schema_version": "mai_350m_full_mlp_error_feedback_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
