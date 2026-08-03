@@ -1178,6 +1178,16 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=0.6589686140591383,
     )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product-error-feedback-decay",
+        type=float,
+        default=1.0,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -1540,6 +1550,14 @@ def parse_args() -> argparse.Namespace:
             raise ValueError("directed-product chunk size must be positive")
         if not math.isfinite(radius) or radius <= 0.0:
             raise ValueError("directed-product family radius ratio must be positive")
+        feedback_decay = float(
+            namespace
+            .block_fht_mlp_cfc_directed_product_error_feedback_decay
+        )
+        if not math.isfinite(feedback_decay) or not 0.0 <= feedback_decay <= 1.0:
+            raise ValueError(
+                "directed-product error-feedback decay must be in [0, 1]"
+            )
         incompatible_cfc_addon = any(
             (
                 namespace.block_fht_ffn_lowrank_rank > 0,
@@ -1935,6 +1953,12 @@ def main() -> None:
         ),
         block_fht_mlp_cfc_directed_product_family_radius_ratio=(
             args.block_fht_mlp_cfc_directed_product_family_radius_ratio
+        ),
+        block_fht_mlp_cfc_directed_product_error_feedback=(
+            args.block_fht_mlp_cfc_directed_product_error_feedback
+        ),
+        block_fht_mlp_cfc_directed_product_error_feedback_decay=(
+            args.block_fht_mlp_cfc_directed_product_error_feedback_decay
         ),
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,

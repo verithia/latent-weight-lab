@@ -19,7 +19,12 @@ from examples.nanogpt.muon_matched_givens import (
 )
 
 
-def make_module(*, layer_id: int = 0) -> MuonDirectedProductLinear:
+def make_module(
+    *,
+    layer_id: int = 0,
+    error_feedback: bool = False,
+    error_feedback_decay: float = 1.0,
+) -> MuonDirectedProductLinear:
     torch.manual_seed(301 + layer_id)
     return MuonDirectedProductLinear(
         4,
@@ -29,6 +34,8 @@ def make_module(*, layer_id: int = 0) -> MuonDirectedProductLinear:
         ridge_ratio=1e-6,
         chunk_size=3,
         family_radius_ratio=0.65,
+        error_feedback=error_feedback,
+        error_feedback_decay=error_feedback_decay,
         weight_std=0.02,
         layer_id=layer_id,
     )
@@ -65,6 +72,8 @@ def make_gpt_config() -> GPTConfig:
         block_fht_mlp_cfc_directed_product_ridge_ratio=1e-6,
         block_fht_mlp_cfc_directed_product_chunk_size=5,
         block_fht_mlp_cfc_directed_product_family_radius_ratio=0.65,
+        block_fht_mlp_cfc_directed_product_error_feedback=False,
+        block_fht_mlp_cfc_directed_product_error_feedback_decay=1.0,
     )
 
 
@@ -162,6 +171,116 @@ def test_optimizer_resume_is_exact() -> None:
     for original, restored in zip(modules, resumed, strict=True):
         assert torch.equal(original.weight, restored.weight)
         assert torch.equal(original.optimizer_step, restored.optimizer_step)
+
+
+def test_error_feedback_carries_exact_compression_residual() -> None:
+    modules = [
+        make_module(layer_id=index, error_feedback=True)
+        for index in range(2)
+    ]
+    optimizer = make_optimizer(modules)
+    generator = torch.Generator().manual_seed(314)
+    first_gradients = [
+        torch.randn(module.weight.shape, generator=generator)
+        for module in modules
+    ]
+    for module, gradient in zip(modules, first_gradients, strict=True):
+        module.weight.grad = gradient
+    optimizer.step()
+    first_rows = optimizer.consume_diagnostics()
+    assert all(row["error_feedback"] is True for row in first_rows)
+    assert all(row["feedback_input_fro"] == 0.0 for row in first_rows)
+    assert all(row["feedback_output_fro"] > 0.0 for row in first_rows)
+    stored = [
+        optimizer.state[module.weight]["compression_residual"].clone()
+        for module in modules
+    ]
+
+    for module in modules:
+        module.weight.grad = torch.zeros_like(module.weight)
+    optimizer.step()
+    second_rows = optimizer.consume_diagnostics()
+    for row, residual in zip(second_rows, stored, strict=True):
+        assert torch.allclose(
+            torch.tensor(row["feedback_input_fro"]),
+            residual.norm(),
+            atol=1e-7,
+            rtol=2e-5,
+        )
+
+
+def test_error_feedback_first_step_matches_uncompensated_path() -> None:
+    baseline = [make_module(layer_id=index) for index in range(2)]
+    feedback = [
+        make_module(layer_id=index, error_feedback=True)
+        for index in range(2)
+    ]
+    for source, target in zip(baseline, feedback, strict=True):
+        target.load_state_dict(copy.deepcopy(source.state_dict()))
+    baseline_optimizer = make_optimizer(baseline)
+    feedback_optimizer = make_optimizer(feedback)
+    generator = torch.Generator().manual_seed(316)
+    gradients = [
+        torch.randn(module.weight.shape, generator=generator)
+        for module in baseline
+    ]
+    for plain, compensated, gradient in zip(
+        baseline, feedback, gradients, strict=True
+    ):
+        plain.weight.grad = gradient.clone()
+        compensated.weight.grad = gradient.clone()
+    baseline_optimizer.step()
+    feedback_optimizer.step()
+    for plain, compensated in zip(baseline, feedback, strict=True):
+        assert torch.equal(plain.weight, compensated.weight)
+        assert torch.equal(
+            baseline_optimizer.state[plain.weight]["momentum_buffer"],
+            feedback_optimizer.state[compensated.weight]["momentum_buffer"],
+        )
+
+
+def test_error_feedback_optimizer_resume_is_exact() -> None:
+    modules = [
+        make_module(layer_id=index, error_feedback=True)
+        for index in range(2)
+    ]
+    optimizer = make_optimizer(modules)
+    generator = torch.Generator().manual_seed(315)
+    for module in modules:
+        module.weight.grad = torch.randn(
+            module.weight.shape, generator=generator
+        )
+    optimizer.step()
+    module_states = [copy.deepcopy(module.state_dict()) for module in modules]
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    resumed = [
+        make_module(layer_id=index, error_feedback=True)
+        for index in range(2)
+    ]
+    resumed_optimizer = make_optimizer(resumed)
+    for module, state in zip(resumed, module_states, strict=True):
+        module.load_state_dict(state)
+    resumed_optimizer.load_state_dict(optimizer_state)
+
+    next_gradients = [
+        torch.randn(module.weight.shape, generator=generator)
+        for module in modules
+    ]
+    for original, restored, gradient in zip(
+        modules, resumed, next_gradients, strict=True
+    ):
+        original.weight.grad = gradient.clone()
+        restored.weight.grad = gradient.clone()
+    optimizer.step()
+    resumed_optimizer.step()
+    for original, restored in zip(modules, resumed, strict=True):
+        assert torch.equal(original.weight, restored.weight)
+        assert torch.equal(original.optimizer_step, restored.optimizer_step)
+        assert torch.equal(
+            optimizer.state[original.weight]["compression_residual"],
+            resumed_optimizer.state[restored.weight]["compression_residual"],
+        )
 
 
 def test_gpt_wiring_optimizer_assignment_and_stats() -> None:

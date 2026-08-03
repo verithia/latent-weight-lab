@@ -172,6 +172,8 @@ class GPTConfig:
     block_fht_mlp_cfc_directed_product_ridge_ratio: float = 1e-6
     block_fht_mlp_cfc_directed_product_chunk_size: int = 256
     block_fht_mlp_cfc_directed_product_family_radius_ratio: float = 0.6589686140591383
+    block_fht_mlp_cfc_directed_product_error_feedback: bool = False
+    block_fht_mlp_cfc_directed_product_error_feedback_decay: float = 1.0
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
@@ -1565,6 +1567,13 @@ class MLP(nn.Module):
                 ),
                 family_radius_ratio=float(
                     config.block_fht_mlp_cfc_directed_product_family_radius_ratio
+                ),
+                error_feedback=bool(
+                    config.block_fht_mlp_cfc_directed_product_error_feedback
+                ),
+                error_feedback_decay=float(
+                    config
+                    .block_fht_mlp_cfc_directed_product_error_feedback_decay
                 ),
                 weight_std=0.02,
                 layer_id=layer_id,

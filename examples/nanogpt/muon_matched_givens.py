@@ -1382,6 +1382,8 @@ class MuonDirectedProductLinear(nn.Module):
         ridge_ratio: float,
         chunk_size: int,
         family_radius_ratio: float,
+        error_feedback: bool,
+        error_feedback_decay: float,
         weight_std: float,
         layer_id: int,
     ) -> None:
@@ -1394,6 +1396,8 @@ class MuonDirectedProductLinear(nn.Module):
         self.ridge_ratio = float(ridge_ratio)
         self.chunk_size = int(chunk_size)
         self.family_radius_ratio = float(family_radius_ratio)
+        self.error_feedback = bool(error_feedback)
+        self.error_feedback_decay = float(error_feedback_decay)
         self.weight_std = float(weight_std)
         self.layer_id = int(layer_id)
         if (
@@ -1409,6 +1413,8 @@ class MuonDirectedProductLinear(nn.Module):
             or self.chunk_size <= 0
             or not math.isfinite(self.family_radius_ratio)
             or self.family_radius_ratio <= 0.0
+            or not math.isfinite(self.error_feedback_decay)
+            or not 0.0 <= self.error_feedback_decay <= 1.0
             or not math.isfinite(self.weight_std)
             or self.weight_std <= 0.0
         ):
@@ -1459,6 +1465,8 @@ class MuonDirectedProduct(torch.optim.Optimizer):
             or module.ridge_ratio != reference.ridge_ratio
             or module.chunk_size != reference.chunk_size
             or module.family_radius_ratio != reference.family_radius_ratio
+            or module.error_feedback != reference.error_feedback
+            or module.error_feedback_decay != reference.error_feedback_decay
             for module in modules
         ):
             raise ValueError("directed-product modules must share one geometry")
@@ -1524,10 +1532,28 @@ class MuonDirectedProduct(torch.optim.Optimizer):
             source = torch.stack(
                 [weight.float().T for weight in active_weights], dim=0
             ).contiguous()
-            target = torch.stack(
+            requested_target = torch.stack(
                 [update.T for update in requested], dim=0
             ).contiguous()
             reference = modules[0]
+            if reference.error_feedback:
+                feedback = []
+                for weight in active_weights:
+                    state = self.state[weight]
+                    if "compression_residual" not in state:
+                        state["compression_residual"] = torch.zeros_like(
+                            weight, dtype=torch.float32
+                        )
+                    feedback.append(
+                        state["compression_residual"].float().T
+                    )
+                feedback_target = torch.stack(feedback, dim=0).contiguous()
+                target = requested_target + (
+                    reference.error_feedback_decay * feedback_target
+                )
+            else:
+                feedback_target = torch.zeros_like(requested_target)
+                target = requested_target
             raw_prediction, stage_rows = (
                 batched_multistage_directed_sparse_update(
                     source,
@@ -1538,21 +1564,30 @@ class MuonDirectedProduct(torch.optim.Optimizer):
                 )
             )
             raw_family_norm = raw_prediction.square().sum().sqrt()
-            dense_family_norm = target.square().sum().sqrt()
+            dense_family_norm = requested_target.square().sum().sqrt()
+            corrected_family_norm = target.square().sum().sqrt()
             target_family_norm = (
-                reference.family_radius_ratio * dense_family_norm
+                reference.family_radius_ratio * corrected_family_norm
             )
             family_scale = target_family_norm / raw_family_norm.clamp_min(
                 1e-30
             )
             prediction = raw_prediction * family_scale
-            residual = target - prediction
+            compression_residual = target - prediction
+            requested_residual = requested_target - prediction
             for index, (weight, module) in enumerate(
                 zip(active_weights, modules, strict=True)
             ):
                 update = prediction[index].T.contiguous()
                 weight.add_(update.to(dtype=weight.dtype))
-                target_energy = target[index].square().sum().clamp_min(1e-30)
+                if module.error_feedback:
+                    self.state[weight]["compression_residual"] = (
+                        compression_residual[index].T.contiguous()
+                    )
+                target_energy = (
+                    requested_target[index].square().sum().clamp_min(1e-30)
+                )
+                corrected_energy = target[index].square().sum().clamp_min(1e-30)
                 diagnostics.append(
                     {
                         "optimizer": "muon_directed_product",
@@ -1565,24 +1600,42 @@ class MuonDirectedProduct(torch.optim.Optimizer):
                         "ridge_ratio": module.ridge_ratio,
                         "solver_chunk_size": module.chunk_size,
                         "family_radius_ratio": module.family_radius_ratio,
+                        "error_feedback": module.error_feedback,
+                        "error_feedback_decay": module.error_feedback_decay,
                         "family_scale": float(family_scale),
                         "dense_family_fro": float(dense_family_norm),
+                        "corrected_family_fro": float(
+                            corrected_family_norm
+                        ),
                         "raw_prediction_family_fro": float(
                             raw_family_norm
                         ),
                         "target_family_fro": float(target_family_norm),
                         "update_fro": float(update.float().norm()),
+                        "feedback_input_fro": float(
+                            feedback_target[index].norm()
+                        ),
+                        "feedback_output_fro": float(
+                            compression_residual[index].norm()
+                        ),
                         "requested_update_recovery": float(
-                            1.0
-                            - residual[index].square().sum()
+                            1.0 - requested_residual[index].square().sum()
                             / target_energy
                         ),
                         "requested_update_cosine": float(
-                            (prediction[index] * target[index]).sum()
+                            (
+                                prediction[index]
+                                * requested_target[index]
+                            ).sum()
                             / (
                                 prediction[index].norm()
-                                * target[index].norm()
+                                * requested_target[index].norm()
                             ).clamp_min(1e-30)
+                        ),
+                        "corrected_target_recovery": float(
+                            1.0
+                            - compression_residual[index].square().sum()
+                            / corrected_energy
                         ),
                         "stage_rows": [
                             {
