@@ -7,7 +7,7 @@
     "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
     "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
-    "entrypoint_sha256": "874c70ec45ad2c757b484a54d73e9a419bae406bca8e2b96febd0512ec702dc5"
+    "entrypoint_sha256": "fa56f82ddde1c31afbc8bb9714eb1ca54590d6a934b17a07c80875dc244fcaf3"
   },
   "protocol": {
     "checkpoint_next_iter": 120,
