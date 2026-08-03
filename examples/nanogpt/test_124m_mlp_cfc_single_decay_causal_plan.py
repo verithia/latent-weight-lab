@@ -11,6 +11,10 @@ PLAN = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_single_decay_causal_plan.json"
 )
+RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_single_decay_causal_result.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -83,3 +87,35 @@ def test_single_decay_promotion_is_stricter_than_original_success_gate() -> None
         decision["matched_hidden88_dense_cfc_parent_validation_ce"] + 0.1
     )
     assert "no watchdog" in plan["execution"]["monitoring"]
+
+
+def test_single_decay_result_rejects_350m_promotion_without_rewriting_plan() -> None:
+    plan = json.loads(PLAN.read_text())
+    result = json.loads(RESULT.read_text())
+    assert result["schema_version"] == "124m_mlp_cfc_single_decay_causal_result_v1"
+    assert result["decision"] == "TECHNICAL_CORRECTION_ONLY_NO_350M_PROMOTION"
+    assert sha256(PLAN) == result["plan"]["sha256"]
+    assert result["execution"]["exit_code"] == 0
+    assert result["execution"]["direct_foreground_polling"] is True
+    assert result["execution"]["watchdog"] is False
+    assert result["performance_gate"]["mfu_fraction"] >= (
+        result["performance_gate"]["minimum_mfu_fraction"]
+    )
+    stability = result["stability_gate"]
+    assert stability["passed"] is True
+    assert stability["observed_rows"] == stability["expected_rows"] == 300
+    assert stability["weight_decay_application_violations"] == 0
+    assert stability["required_decoupled_weight_decay_applications"] == 1
+    measurement = result["measurement"]
+    assert math.isclose(
+        measurement["promotion_ceiling"],
+        plan["decision_rule"]["promote_to_350m_ceiling"],
+        rel_tol=0.0,
+        abs_tol=1e-12,
+    )
+    assert measurement["terminal_validation_ce"] > measurement["promotion_ceiling"]
+    assert measurement["terminal_validation_ce"] <= (
+        measurement["technical_correction_upper_ceiling"]
+    )
+    assert measurement["improvement_vs_original_candidate_ce"] < 0.005
+    assert result["authorization"]["rerun_350m"] is False

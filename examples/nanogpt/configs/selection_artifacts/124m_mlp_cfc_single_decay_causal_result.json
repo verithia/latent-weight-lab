@@ -1,0 +1,82 @@
+{
+  "artifact_kind": "124m_mlp_cfc_single_decay_causal_result",
+  "schema_version": "124m_mlp_cfc_single_decay_causal_result_v1",
+  "created_at": "2026-08-03",
+  "decision": "TECHNICAL_CORRECTION_ONLY_NO_350M_PROMOTION",
+  "causal_conclusion": "Applying decoupled weight decay exactly once repairs a real optimizer-semantic defect, but does not improve terminal validation CE by the preregistered 0.005 minimum. The double-decay defect is not the cause of the conditioned c_fc quality gap.",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_single_decay_causal_plan.json",
+    "sha256": "f7d7d808f2a98cae2c437a4269a826e98f6c9fab52dc953795bbb2fbe0d32c2c"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "05e7c4769799c62d124bafd597f0f7d68bf76dd0",
+    "run_id": "pro6_mai_v3_124m_functionmix50_internalcondition1p01_singledecay_0p5tpp_20260803T023145Z_2948125",
+    "started_at": "2026-08-03T10:31:45+08:00",
+    "finished_at": "2026-08-03T10:41:40+08:00",
+    "exit_code": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "inputs": {
+    "config_sha256": "0ad6474e19c690efbd2516bc444bf58b6631d74ef2920cf1a67b769d2230cc2e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "muon_matched_givens_sha256": "191d4a17c22fb8d19cc2e666dfc87a53f0183ded90244ea7127ffeae02d6604c",
+    "stability_validator_sha256": "c303a68be4fc177b8219fcdc4e3d5a0acd471ecc766029726c87f7f3f947af15"
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction": 0.2254362561099029,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 125478.98541666666,
+    "iter_ms": 2089.181666666667,
+    "model_tflops": 93.71466085645439,
+    "peak_mib": 35096.09,
+    "certificate_sha256": "a9b9976dc6f5f879c182d7dca6190a717385d6714157a33e95f35723d4e7b11f",
+    "log_sha256": "6cfc9e7051320531330c71d80343c75697b813c364859d4d5d8e965546e7c00e"
+  },
+  "stability_gate": {
+    "passed": true,
+    "expected_rows": 300,
+    "observed_rows": 300,
+    "finite_rows": 300,
+    "internal_limiter_active_rows": 300,
+    "fallback_rows": 0,
+    "condition_bound_violations": 0,
+    "weight_growth_violations": 0,
+    "weight_decay_application_violations": 0,
+    "required_decoupled_weight_decay_applications": 1,
+    "validation_sha256": "13595e209b017d581b6a0b959e81bfda4730a97661ec7ca03c030d5ec07eb0c4"
+  },
+  "measurement": {
+    "terminal_step": 238,
+    "terminal_train_ce": 5.6728,
+    "terminal_validation_ce": 5.6764,
+    "original_double_counted_candidate_validation_ce": 5.6761274337768555,
+    "matched_hidden88_dense_cfc_parent_validation_ce": 5.5923542976379395,
+    "improvement_vs_original_candidate_ce": -0.0002725662231446435,
+    "gap_vs_matched_parent_ce": 0.08404570236206066,
+    "promotion_ceiling": 5.671127433776856,
+    "promotion_ceiling_excess": 0.005272566223144537,
+    "technical_correction_upper_ceiling": 5.692354297637939,
+    "technical_correction_upper_margin": 0.015954297637938986
+  },
+  "artifacts": {
+    "log_sha256": "21f1d1dc885d4bc46283ee3a060376da78a73d72e80eca59e59f3e1ae06febe1",
+    "status_sha256": "c73716cb5847ab1886305feab6b92e20acbf4d0cd946283ab2cd7efb4c363640",
+    "provenance_sha256": "e77b580b5e541ad2594c9bf680824fa42a522e7994d6c0161c13588061287c8c",
+    "archived_config_sha256": "0ad6474e19c690efbd2516bc444bf58b6631d74ef2920cf1a67b769d2230cc2e",
+    "checkpoint_sha256": "b83739e3fd67f57c53baa34845d96a14cbb350cab1214b5a2a06f4473a1fe219",
+    "checkpoint_bytes": 988392761,
+    "checkpoint_metadata_sha256": "a2d264125e1d6def60b533a5c6aef384949918abea4ee6953065b3abd939b8eb",
+    "checkpoint_metadata_bytes": 16177,
+    "checkpoint_next_iter": 238,
+    "checkpoint_schema_version": "nanogpt_exact_resume_v2"
+  },
+  "authorization": {
+    "rerun_350m": false,
+    "reason": "Terminal validation CE did not improve the original conditioned 124M candidate by at least 0.005 CE."
+  }
+}
