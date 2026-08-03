@@ -1,0 +1,108 @@
+{
+  "artifact_kind": "350m_mlp_cfc_checkpoint_splice_result",
+  "decision": {
+    "classification": "DOWNSTREAM_COADAPTATION_DOMINATES",
+    "recovery_by_window": {
+      "seed20260831": -2.851556411308927,
+      "seed20260832": -2.965970987414137
+    },
+    "registered_boundaries": {
+      "coadaptation_dominates_maximum_each_window": 0.25,
+      "direction_dominates_minimum_each_window": 0.5
+    }
+  },
+  "execution": {
+    "elapsed_seconds": 20.975167512893677,
+    "host": "PRO6",
+    "monitoring": "direct foreground polling; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates": 0,
+    "repository_commit": "db9d8ba8c8a7d6443b8a956d2e738ad7f0be4db2"
+  },
+  "inputs": {
+    "candidate_checkpoint_sha256": "9405949fa0ed34c63e3476c093fd4343e9457dd3171ee14cef2c2116c2f21a0b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_checkpoint_sha256": "e94e46283941f0c81287cf3d4c7d4b1fb8bdfb74cb741ae5b2fddcc770602d16",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cfc_checkpoint_splice_plan.json",
+    "plan_sha256": "09af27957784c0f9cdef0a75a774cd57559def06747d2ea1809f4636ccc665d0",
+    "source_path": "examples/nanogpt/analyze_mlp_cfc_checkpoint_splice.py",
+    "source_sha256": "ce5677b3efa12651af6ece86f198f7b7e7566d58c60b2000c0cd172cceddc4d8"
+  },
+  "measurements": {
+    "activation_means": {
+      "candidate": {
+        "post_nearzero_fraction": 0.287949073371322,
+        "post_rms": 0.3471996834982555,
+        "pre_rms": 0.5855438319516612,
+        "residual_update_cosine": 0.01825881680863711,
+        "update_to_residual_rms": 0.4747333241778598
+      },
+      "candidate_with_parent_cfc_all": {
+        "post_nearzero_fraction": 0.2756497492695575,
+        "post_rms": 0.37106723782088435,
+        "pre_rms": 0.6267417492219787,
+        "residual_update_cosine": 0.0678562674070491,
+        "update_to_residual_rms": 0.475147908768303
+      },
+      "parent": {
+        "post_nearzero_fraction": 0.27725235296755424,
+        "post_rms": 0.3643539729682686,
+        "pre_rms": 0.6246029167038294,
+        "residual_update_cosine": 0.07194732426597247,
+        "update_to_residual_rms": 0.4877041224342728
+      }
+    },
+    "depth_band_transplant_delta_ce_vs_candidate": {
+      "early_layers_0_7": 0.3406655825674534,
+      "late_layers_16_23": 0.03299055993556976,
+      "middle_layers_8_15": 0.055936507880687714
+    },
+    "mean_validation_ce": {
+      "candidate": 4.61720447614789,
+      "candidate_parent_cfc_all": 4.983639948070049,
+      "parent": 4.491230048239231,
+      "parent_candidate_cfc_all": 5.268918469548225
+    },
+    "weight_means": {
+      "candidate_parent_frobenius_ratio": 0.940869653447261,
+      "candidate_parent_frobenius_ratio_layer0": 1.0109490400940315,
+      "candidate_parent_frobenius_ratio_layer23": 0.9283644448960122,
+      "candidate_row_norm_cv": 0.022700366486484807,
+      "candidate_soft_rank": 906.5144170125326,
+      "candidate_stable_rank": 463.0117950439453,
+      "candidate_top1_energy": 0.002159825691099589,
+      "frobenius_distance_to_parent": 0.31213465705513954,
+      "parent_row_norm_cv": 0.029055026825517416,
+      "parent_soft_rank": 900.7240549723307,
+      "parent_stable_rank": 445.27404657999676,
+      "parent_top1_energy": 0.0022472188090129444,
+      "weight_cosine": 0.95039002597332
+    },
+    "windows": {
+      "seed20260831": {
+        "candidate": 4.652055956423283,
+        "candidate_parent_cfc_all": 5.01099856197834,
+        "parent": 4.526179924607277,
+        "parent_candidate_cfc_all": 5.302068322896957
+      },
+      "seed20260832": {
+        "candidate": 4.582352995872498,
+        "candidate_parent_cfc_all": 4.956281334161758,
+        "parent": 4.456280171871185,
+        "parent_candidate_cfc_all": 5.235768616199493
+      }
+    }
+  },
+  "raw_artifacts": {
+    "activation_residual_csv_sha256": "fae3c63fba1166f0d3d2c582f4cf21d95d3590ddbc66884fd1d17c455d32ef6a",
+    "cfc_weight_metrics_csv_sha256": "eec691f8eda6fdfbf9ca3de078fde2aeaf627c7dd934c6abff8893c6fbb675a6",
+    "evaluation_csv_sha256": "7e7f8322911c08e613f3dbe08a57d453f70452bdbca61ce95291f525eb397e24",
+    "remote_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cfc_checkpoint_splice_v1",
+    "summary_json_sha256": "33c0283b5b6c37b394a5e3e94022b50c78ee8b9b7dbe745ca84d60372f0e1c0a"
+  },
+  "registered_interpretation": {
+    "endpoint_direction": "The terminal c_fc matrices are close in angle but are not interchangeable between the separately co-adapted c_proj/residual frames.",
+    "next_gate": "Audit the functional-shear optimizer's decoupled-weight-decay semantics before changing chart capacity. It currently fits a requested update containing weight decay and then applies decay again, a radial term symmetric shear can represent.",
+    "transplant": "All-layer parent c_fc transplantation worsens the candidate on both windows; the converse splice is still more damaging. Early layers dominate the incompatibility."
+  },
+  "schema_version": "350m_mlp_cfc_checkpoint_splice_result_v1"
+}
