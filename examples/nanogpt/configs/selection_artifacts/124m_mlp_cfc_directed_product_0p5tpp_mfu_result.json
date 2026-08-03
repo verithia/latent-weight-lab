@@ -1,0 +1,69 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_0p5tpp_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cfc_directed_product_0p5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "EXACT_TRAINING_CONFIG_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_0p5tpp_plan.json",
+    "sha256": "195ac60798f6f4f8950667ab3ddebbed0ca37ed095487b21a7c8295548649df5"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
+    "sha256": "80c3cd31d1494799c19c1083504231819caefda33f917d6e48fa96c73257ed7b"
+  },
+  "implementation_commit": "29d5e90ff419cde1b13fc5541aff79b12ec49f27",
+  "execution_commit": "7240c61b48d070d6f7604e37de8a37793b4b36b0",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "native_extension_required": true,
+    "native_extension_loaded": true
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/performance_preflight.json",
+    "sha256": "0d281424612c6c1b76810dadbc7861f769a555bd6058222cd68644d45114af55",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/performance_preflight.log",
+    "preflight_log_sha256": "00fc66af413fe16d7a49b0c47a17e62dacdd98349d97173e0522a042842014b5"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 415.908542703083,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 160424.67375000002,
+    "average_iter_ms": 1634.09,
+    "model_tflops": 119.81403773361794,
+    "mfu_fraction": 0.28807784748762216,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31640.09,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "timing_breakdown_ms": {
+      "prepare": 3.9025,
+      "forward_backward": 1188.645,
+      "flush": 4.29875,
+      "gradient": 1.58375,
+      "optimizer": 433.6025,
+      "data": 0.86125,
+      "other": 1.1975
+    }
+  },
+  "stability": {
+    "train_exit_code": 0,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "config_identity_matched": true,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "single_124m_0p5tpp_training_authorized": true,
+    "training_started_by_this_artifact": false,
+    "larger_rung_authorized": false,
+    "automatic_rerun_authorized": false
+  }
+}
