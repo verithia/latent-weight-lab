@@ -1,0 +1,70 @@
+{
+  "artifact_kind": "124m_mlp_cfc_single_decay_causal_plan",
+  "causal_hypothesis": "The non-orthogonal functional c_fc chart was allowed to fit the radial weight-decay term and then received decoupled decay again. Applying decay exactly once should reduce the depth-growing norm and CE deficit without changing chart direction, coordinates, conditioning, data, optimizer, or schedule.",
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "matched_hidden88_dense_cfc_parent_validation_ce": 5.5923542976379395,
+    "original_double_counted_candidate_validation_ce": 5.6761274337768555,
+    "promote_to_350m_ceiling": 5.671127433776855,
+    "promotion": "stable terminal CE at or below the promotion ceiling, at least 0.005 better than the original candidate and within +0.1 CE of the matched parent",
+    "rejection": "terminal CE above 5.6923542976379395, instability, incomplete state, or provenance mismatch",
+    "technical_only": "stable terminal CE above the promotion ceiling and at or below 5.6923542976379395; record the correction but do not rerun 350M"
+  },
+  "execution": {
+    "gpu": 0,
+    "host": "PRO6",
+    "monitoring": "direct foreground polling for both the performance/stability gate and the 238-update scientific run; no watchdog, callback, queue worker, or heartbeat",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "remote_repository": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-hidden88-replay",
+    "workspace": "/home/pro6000-9980x/MappingNetworks",
+    "workspace_cap_bytes": 274877906944
+  },
+  "frozen_inputs": {
+    "dataset_manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "old_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "old_config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "old_training_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_training_result.json",
+    "old_training_result_sha256": "c0a3605bf2c38bf3a03da0a5a81b9f80a067dfe27d6bd0a0dfedcabdfd7cb605",
+    "parent_replay_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_pro6_replay_result.json",
+    "parent_replay_result_sha256": "cc0c50e4876a5aa60d9c87a3465495dc56caa6d9a7225094e0e383bc7dd46439"
+  },
+  "implementation": {
+    "causal_fix_commit": "0a55fa2f613bad118d026d8b2eb21788f02c9643",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_singledecay_0p5tpp.json",
+    "config_sha256": "0ad6474e19c690efbd2516bc444bf58b6631d74ef2920cf1a67b769d2230cc2e",
+    "muon_matched_givens_sha256": "191d4a17c22fb8d19cc2e666dfc87a53f0183ded90244ea7127ffeae02d6604c",
+    "stability_validator": "examples/nanogpt/validate_functional_shear_stability_log_v2.py",
+    "stability_validator_sha256": "c303a68be4fc177b8219fcdc4e3d5a0acd471ecc766029726c87f7f3f947af15",
+    "validator_commit": "2aaac3b66452dc6e6a90b081f885fc08700dbf16"
+  },
+  "order": [
+    "performance_and_stability_gate",
+    "scientific_run"
+  ],
+  "performance_and_stability_gate": {
+    "command": "CUDA_VISIBLE_DEVICES=0 MUON_FUNCTIONAL_SHEAR_DIAGNOSTIC_STEPS=25 /home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_singledecay_0p5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_single_decay_124m/performance_and_stability_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_single_decay_124m/performance_and_stability_preflight.log --min-fraction 0.20 --warmup-updates 1 --timed-updates 24",
+    "requirements": {
+      "all_losses_finite": true,
+      "condition_number_maximum": 1.01,
+      "decoupled_weight_decay_applications_every_row": 1,
+      "expected_diagnostic_rows": 300,
+      "internal_condition_limiter_active_rows_minimum": 1,
+      "maximum_weight_abs_growth": 2.0,
+      "maximum_weight_abs_floor": 1.0,
+      "maximum_weight_rms_ratio": 2.0,
+      "minimum_mfu_fraction": 0.2,
+      "zero_functional_fallback": true
+    },
+    "validator_command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.validate_functional_shear_stability_log_v2 --log /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_single_decay_124m/performance_and_stability_preflight.log --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_single_decay_124m/stability_validation.json --expected-layers 12 --expected-steps 25 --maximum-condition-number 1.01 --maximum-weight-rms-ratio 2.0 --maximum-weight-abs-growth 2.0 --maximum-weight-abs-floor 1.0 --required-decoupled-weight-decay-applications 1"
+  },
+  "scientific_run": {
+    "admission": "performance certificate and V2 stability validation must both pass from fresh output paths",
+    "command": "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python bash examples/nanogpt/launch_y400_ladder_detached.sh --foreground examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_singledecay_0p5tpp.json 0 pro6_mai_v3_124m_functionmix50_internalcondition1p01_singledecay_0p5tpp /home/pro6000-9980x/MappingNetworks",
+    "maximum_updates": 238,
+    "parameter_changes_vs_old_candidate": "none except the causal optimizer semantics; exact architecture, chart coordinates, initialization, Muon settings, LR schedule, seeds, data, and fixed evaluation are unchanged"
+  },
+  "schema_version": "124m_mlp_cfc_single_decay_causal_plan_v1",
+  "threshold_freeze": "All gates and classifications are frozen before the fresh preflight or scientific run is observed. No 350M rerun is permitted unless the promotion rule passes."
+}
