@@ -1,0 +1,118 @@
+{
+  "authorization": {
+    "additional_structure_authorized": false,
+    "automatic_rerun_authorized": false,
+    "full_238_update_run_authorized": false,
+    "larger_rung_authorized": false,
+    "scientific_step60_run_authorized_after_exact_mfu_pass": true
+  },
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 113246208,
+    "additional_trainable_parameters": 0,
+    "algorithm": [
+      "form exact current dense Muon update including weight decay",
+      "add the prior full-precision compression residual",
+      "fit and full-radius scale the unchanged 22x6 directed product",
+      "apply the structured update",
+      "store corrected target minus applied update in optimizer state"
+    ],
+    "error_feedback": true,
+    "error_feedback_decay": 1.0,
+    "family_radius_ratio": 1.0,
+    "forward_structure_changed": false,
+    "schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ]
+  },
+  "control": {
+    "dense_cfc_step60_validation_ce": 6.3141,
+    "error_feedback": false,
+    "remaining_gap": 0.03364398803710955,
+    "step60_validation_ce": 6.347743988037109
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "reject accumulated compression residual as the main cause and move to a different static action family",
+    "minimum_remaining_gap_fraction_to_recover": 0.5,
+    "pass": "register one full 238-update error-feedback config and measure its exact-config MFU before training",
+    "pass_validation_ce_maximum": 6.330921994018555,
+    "primary_metric": "fixed-window step-60 validation cross entropy",
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "callback": false,
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "lr_decay_iters": 238,
+    "max_iters": 60,
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_error_feedback_step60/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_errorfeedback_step60.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_error_feedback_step60/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_error_feedback_step60/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_error_feedback_step60/performance_preflight.log",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_errorfeedback_step60.json"
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "identity": {
+    "base_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_step60.json",
+    "base_config_sha256": "9337216260b6d6b8bf42895f5dd1b179714fa396f215da0681194f822e3f1619",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_errorfeedback_step60.json",
+    "config_sha256": "ae556855c64458a8151d2072da8363d147358428e1e3afd2789f28344a55c832",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "34b07c80dfa4d45bd11ec449afa36eb756ceb48a",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "c472a236ad61e529fe7a8939adc09529aea1fead0f8c937be02f77c3c7d53d5f",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "d7780984879999c509972c87fa9c1e7dc4fa6634c661642f0a3df013813f99b0",
+      "examples/nanogpt/test_muon_directed_product.py": "17a0310c1c46147f65ef21968d7bc29397d14b86371235fde64ebd2674258885",
+      "examples/nanogpt/train.py": "b6b82e2ca74f80a085cfddbd6846de90d9e301b7431b91eac704ff5de6990886",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    },
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_2x_radius1p00_step60_result.json",
+    "parent_result_sha256": "f8da32f130ef8a4c77f7e7ca6a7a26cd2abc411ad8426eda9337b3a643155552"
+  },
+  "question": "Is the remaining c_fc trajectory gap caused by repeatedly discarding the directed-product compression residual?",
+  "schema_version": "mai_124m_mlp_cfc_error_feedback_step60_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
