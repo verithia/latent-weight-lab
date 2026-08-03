@@ -1,0 +1,141 @@
+{
+  "artifact_kind": "690m_full_mlp_scaled_transfer_0p5tpp_training_result",
+  "schema_version": "mai_690m_full_mlp_scaled_transfer_0p5tpp_result_v1",
+  "classification": "PASS_FULL_MLP_WIDTH_SCALED_TRANSFER_690M_WITHIN_0P10_ATTENTION_GAP",
+  "created_at": "2026-08-04",
+  "question": "Does the selected c_fc decay-1 plus bounded c_proj decay-0.5 full-MLP replacement transfer from 350M to 690M at fixed 0.5TPP under width-proportional chart scaling?",
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 1677721600,
+    "additional_inference_parameters": 0,
+    "additional_trainable_parameters": 0,
+    "coordinate_fraction_per_matrix": 0.04296875,
+    "cfc": {
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "family_radius_ratio": 1.0,
+      "schedule": [37, 37, 37, 37, 36, 36],
+      "terminal_compression_residual": {
+        "finite": true,
+        "frobenius_norm_max": 0.016740920022130013,
+        "frobenius_norm_mean": 0.015581220824969932,
+        "frobenius_norm_min": 0.01375920046120882,
+        "layer_count": 32,
+        "max_abs": 0.00003725205533555709,
+        "rms_max": 0.000006540742560900981,
+        "rms_mean": 0.000006087441718705122,
+        "rms_min": 0.000005375809450924862,
+        "shape_per_layer": [5120, 1280]
+      }
+    },
+    "cproj": {
+      "error_feedback": true,
+      "error_feedback_decay": 0.5,
+      "matching_neighbors": 80,
+      "parent_stages": 80,
+      "residual_stages": 30,
+      "terminal_compression_residual": {
+        "finite": true,
+        "frobenius_norm_max": 0.011708014644682407,
+        "frobenius_norm_mean": 0.011154575302498415,
+        "frobenius_norm_min": 0.010071156546473503,
+        "layer_count": 32,
+        "max_abs": 0.000028588379791472107,
+        "rms_max": 0.000004574313152261311,
+        "rms_mean": 0.000004358007771543271,
+        "rms_min": 0.000003934813321393449,
+        "shape_per_layer": [1280, 5120]
+      }
+    }
+  },
+  "config": {
+    "archived_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_690m_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T161952Z_3373811.config.json",
+    "path": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_plus_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+    "resolved_config_identity_sha256": "7c363a538f9bc3f4421a0ae24474cd2bd93c3ab6015a5b74d0739308d2d0516f",
+    "sha256": "5403a0bf2905b43f2bfbf8179dd55f2d4d2db1c1c318096260471947a24d4e8d"
+  },
+  "dataset": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "attention_gap_ce_exact": 0.0585775157928465,
+    "attention_gap_maximum": 0.1,
+    "pass_validation_ce_maximum": 3.8003,
+    "result": "PASS",
+    "success_ceiling_margin_exact": 0.04142248420715333,
+    "threshold_changed_after_measurement": false,
+    "token_rung_promotion_authorized": false
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 11.1811, "validation_ce": 11.1810},
+    {"step": 332, "train_ce": 4.7387, "validation_ce": 4.7347},
+    {"step": 664, "train_ce": 4.1141, "validation_ce": 4.1021},
+    {"step": 996, "train_ce": 3.8637, "validation_ce": 3.8490},
+    {"step": 1326, "train_ce": 3.7742, "validation_ce": 3.7589}
+  ],
+  "measurement": {
+    "attention_control_terminal_train_ce": 3.7162,
+    "attention_control_terminal_validation_ce": 3.7003,
+    "candidate_terminal_train_ce_log": 3.7742,
+    "candidate_terminal_validation_ce_exact": 3.7588775157928467,
+    "candidate_terminal_validation_ce_log": 3.7589,
+    "gap_change_versus_selected_350m_exact": -0.003678600692749423,
+    "selected_350m_attention_gap_ce_exact": 0.062256116485595925,
+    "terminal_step": 1326
+  },
+  "performance": {
+    "actual_wall_seconds": 12556,
+    "empirical_bf16_gemm_peak_tflops": 417.30947762640074,
+    "mfu_fraction": 0.2847733101603887,
+    "mfu_minimum_fraction": 0.2,
+    "mfu_passed": true,
+    "observed_gpu_memory_mib": 51726,
+    "preflight_iter_ms": 9203.605,
+    "preflight_model_tflops": 118.83860130497281,
+    "preflight_tokens_per_second": 28482.8725,
+    "steady_iter_ms_range": [9120, 9324]
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_plan.json",
+    "sha256": "7235002c549c3f7963219e519e8cb5c32b8798f5c39f8d1b9355d6ba7c65ce2d"
+  },
+  "provenance": {
+    "git_commit": "9d74b9a1b3a5816927da7cd092dc7ee25c0ab4ea",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_690m_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T161952Z_3373811.log",
+    "log_sha256": "80a14944d05fb5dcec3b91145c31a3d3a4c9c0930f6a047eeae60d02547c3ee8",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_mfu_result.json",
+    "mfu_result_sha256": "54bd56074744b6d52cdcdb5947264a056c62e51d2b2376532ef46072cab89c91",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_690m_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T161952Z_3373811.json",
+    "sha256": "a4f5c08385ca57e0fd93486437ae07007bfa2eb6aea72eeab681fa43ae4a2f4e",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_690m_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T161952Z_3373811.json",
+    "status_sha256": "5b60c3ff1e55f48d3526341e0264a17ad41e435ddaeec1281a4caddba73aef94"
+  },
+  "run": {
+    "finished_at": "2026-08-04T03:49:09+08:00",
+    "host": "PRO6",
+    "run_id": "pro6_mai_v3_690m_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T161952Z_3373811",
+    "started_at": "2026-08-04T00:19:53+08:00",
+    "status": "clean",
+    "train_exit_code": 0
+  },
+  "checkpoint": {
+    "best_validation_ce_exact": 3.7588775157928467,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "1d45bbe33bc16cccb1e7287dd80689ff80f2eb3cd29be208ca14811be6415661",
+    "next_iter": 1326,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp/scientific/ckpt.pt",
+    "schema_version": "nanogpt_exact_resume_v2",
+    "sha256": "cd918e8e491a1264b3db68ad67379563076469cab7bc27a3bd8f7f4bb950b4b5",
+    "size_bytes": 6173384752
+  },
+  "watchdog": {
+    "callback_events": ["20_percent", "50_percent", "terminal"],
+    "callback_events_delivered_once": true,
+    "gpu_released_after_exit": true,
+    "launchd_service": "com.mappingnetworks.pro6-690m-fullmlp-scaled-transfer",
+    "service_exit_code": 0,
+    "terminal_signature": ["finished", 0, "2026-08-04T03:49:09+08:00"],
+    "terminal_signature_persisted": true
+  }
+}
