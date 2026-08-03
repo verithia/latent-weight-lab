@@ -659,6 +659,105 @@ def test_functional_coordinate_diagnostics_bound_pair_condition() -> None:
     )
     assert math.isfinite(diagnostics["weight_rms_ratio"])
     assert diagnostics["weight_rms_ratio"] > 0.0
+    assert diagnostics["decoupled_weight_decay_applications"] == 1
+
+
+def test_functional_coordinate_zero_chart_update_applies_decay_once() -> None:
+    torch.manual_seed(108)
+    source = torch.randn(8, 5) * 0.02
+    requested = torch.zeros_like(source)
+    inputs = torch.randn(11, 5)
+    pre_gelu = inputs @ source.T
+    cproj = torch.randn(5, 8) * 0.02
+    from examples.nanogpt.muon_matched_givens import (
+        functional_coordinate_mix_update,
+    )
+
+    learning_rate = 0.1
+    weight_decay = 0.2
+    update, diagnostics = functional_coordinate_mix_update(
+        source,
+        requested,
+        requested,
+        inputs,
+        pre_gelu,
+        cproj,
+        parent_stages=2,
+        shear_stages=1,
+        neighbors=2,
+        seed=110,
+        beta=0.5,
+        project_to_weight_norm=False,
+        max_condition_number=1.01,
+        learning_rate=learning_rate,
+        weight_decay=weight_decay,
+    )
+    expected = source * (1.0 - learning_rate * weight_decay)
+    assert torch.allclose(source + update, expected, rtol=1e-6, atol=1e-8)
+    assert diagnostics["decoupled_weight_decay_applications"] == 1
+
+
+def test_functional_optimizer_excludes_decay_from_chart_request(
+    monkeypatch,
+) -> None:
+    torch.manual_seed(111)
+    module = MuonFunctionalShearLinear(
+        4,
+        8,
+        bias=False,
+        parent_stages=2,
+        shear_stages=1,
+        neighbors=2,
+        coordinate_mix_beta=0.5,
+        project_to_weight_norm=False,
+        max_condition_number=1.01,
+        functional_sample_cap=8,
+        matching_seed=113,
+        weight_std=0.02,
+        layer_id=0,
+    )
+    cproj = torch.nn.Linear(8, 4, bias=False)
+    learning_rate = 0.1
+    weight_decay = 0.2
+    optimizer = MuonFunctionalShear(
+        [(module, cproj)],
+        lr=learning_rate,
+        momentum=0.0,
+        weight_decay=weight_decay,
+        ns_steps=1,
+    )
+    before = module.weight.detach().clone()
+    module.weight.grad = torch.ones_like(module.weight)
+    inputs = torch.randn(8, 4)
+    module.record_functional_context(inputs, inputs @ module.weight.T)
+    observed: list[torch.Tensor] = []
+
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens.zeropower_via_newtonschulz5",
+        lambda gradient, steps: torch.zeros_like(gradient),
+    )
+
+    def fake_update(weight, requested_update, *args, **kwargs):
+        del args
+        observed.append(requested_update.detach().clone())
+        update = -(
+            float(kwargs["learning_rate"])
+            * float(kwargs["weight_decay"])
+            * weight.float()
+        )
+        return update, {"decoupled_weight_decay_applications": 1}
+
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens.functional_coordinate_mix_update",
+        fake_update,
+    )
+    optimizer.step()
+    assert len(observed) == 1
+    assert torch.count_nonzero(observed[0]) == 0
+    assert torch.allclose(
+        module.weight,
+        before * (1.0 - learning_rate * weight_decay),
+    )
 
 
 def test_mixed_functional_direction_projects_to_weight_recipe_norm() -> None:

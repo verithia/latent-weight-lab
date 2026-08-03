@@ -753,7 +753,13 @@ def functional_coordinate_mix_update(
     learning_rate: float,
     weight_decay: float,
 ) -> tuple[torch.Tensor, dict[str, Any]]:
-    """Reproduce the promoted fixed-topology mixed-coordinate ``c_fc`` step."""
+    """Apply one chart update followed by one decoupled-decay application.
+
+    ``requested_update`` is the Muon direction step only.  Weight decay must
+    not be embedded in the fitted non-orthogonal chart: symmetric shears can
+    represent radial motion, so fitting decay into the chart and then
+    applying decoupled decay would shrink the matrix twice.
+    """
     weight_before = weight.float()
     source = weight_before.T.contiguous()
     target = requested_update.float().T.contiguous()
@@ -811,12 +817,26 @@ def functional_coordinate_mix_update(
             current, weight_pairs, coordinates
         )
         mixed_coordinates.append(coordinates)
+    weight_before_decay = current.T.contiguous()
+    chart_update = weight_before_decay - weight_before
     current.mul_(1.0 - float(learning_rate) * float(weight_decay))
     weight_after = current.T.contiguous()
     update = weight_after - weight_before
-    requested_energy = requested_update.float().square().sum().clamp_min(1e-30)
+    chart_requested_energy = (
+        requested_update.float().square().sum().clamp_min(1e-30)
+    )
+    chart_residual_energy = (
+        requested_update.float() - chart_update
+    ).square().sum()
+    total_requested_update = (
+        requested_update.float()
+        - float(learning_rate) * float(weight_decay) * weight_before
+    )
+    requested_energy = (
+        total_requested_update.square().sum().clamp_min(1e-30)
+    )
     residual_energy = (
-        requested_update.float() - update
+        total_requested_update - update
     ).square().sum()
     all_shears = torch.cat(mixed_coordinates)
     finite_coordinates = torch.isfinite(all_shears)
@@ -852,9 +872,13 @@ def functional_coordinate_mix_update(
         "weight_max_abs_before": float(weight_before.abs().max()),
         "weight_max_abs_after": float(weight_after.abs().max()),
         "update_rms": float(update.square().mean().sqrt()),
+        "chart_requested_update_recovery": float(
+            1.0 - chart_residual_energy / chart_requested_energy
+        ),
         "requested_update_recovery": float(
             1.0 - residual_energy / requested_energy
         ),
+        "decoupled_weight_decay_applications": 1,
         "parent_matching": parent_selection,
         "shear_matching": shear_selection,
     }
@@ -1197,9 +1221,10 @@ class MuonFunctionalShear(torch.optim.Optimizer):
                     / max(1, polar.numel() / polar.shape[0]),
                 ) ** 0.5
                 direction = -scale * polar
-                requested_update = lr * (
-                    direction - weight_decay * weight.float()
-                )
+                # Decoupled weight decay is applied exactly once inside
+                # ``functional_coordinate_mix_update`` after the chart move.
+                # Do not include its radial term in a symmetric-shear fit.
+                requested_update = lr * direction
                 inputs, pre_gelu = module.consume_functional_context()
                 update, row = functional_coordinate_mix_update(
                     weight,
