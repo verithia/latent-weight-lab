@@ -1,0 +1,52 @@
+{
+  "artifact_kind": "350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_exact_config_mfu_result",
+  "schema_version": "mai_350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_exact_config_mfu_result_v1",
+  "classification": "FULL_MLP_CFC_ON_BOUNDED_CPROJ_350M_0P5TPP_EXACT_CONFIG_MFU_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+    "sha256": "a316a887a84c8ebe7b2037f3d0fe3b9d3ac1cbad1695b305b550f0e6fe9db250"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "one_full_677_update_run_authorized": true
+  },
+  "execution": {
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "measurement": {
+    "active_params_6n_estimate": 354871296,
+    "empirical_bf16_gemm_peak_tflops": 416.5456966300474,
+    "fwbw_ms": 2781.9725,
+    "iter_ms": 4555.226250000001,
+    "mfu_fraction": 0.2941649868231919,
+    "model_tflops": 122.53315936043519,
+    "optimizer_ms": 1745.5325,
+    "peak_mib": 53317.05,
+    "tokens_per_second": 57548.16875
+  },
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_plan.json",
+    "sha256": "93115f6466fdac39f68a1944d5c32d0a939525fa6b885a4d5ecbaad0f9bd987a"
+  },
+  "preflight": {
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.json",
+    "certificate_sha256": "b2ff44a9ac8161b751db0c5683460272910dfb2d842f7675b79677d334a2ba42",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.log",
+    "log_sha256": "ac12dbb11a27864f87ed58c018bd4abc5197837e6e4d398f23832e75a8c4f9bd",
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "native_matching_validated": true
+  }
+}
