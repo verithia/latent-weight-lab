@@ -1,0 +1,102 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "checkpoint_mutation_authorized": false,
+    "follow_up": "freeze the diagnostic result and use it to preregister one structural smallest-rung repair; do not train from this plan",
+    "larger_rung_authorized": false,
+    "training_authorized": false
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "confidence_z": 2.5758293035489004,
+    "mixed": "both same-radius dense direction and an alternative product radius have strictly negative 99% paired CE-difference upper bounds",
+    "not_discriminating": "neither comparison is reliably better on the frozen windows",
+    "paired_unit": "same validation window and batch index",
+    "residual_direction_limited": "same-radius dense direction has a strictly negative 99% paired CE-difference upper bound while no alternative product radius does",
+    "threshold_changes_after_measurement": false,
+    "trust_radius_limited": "at least one alternative product radius has a strictly negative 99% paired CE-difference upper bound while the same-radius dense direction does not"
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_0p5tpp/ckpt.pt",
+    "checkpoint_next_iter": 238,
+    "checkpoint_sha256": "aaf00e4b36489fb4eb0d720cc821e401579c3d00c917489ea86a4eb61b278f1a",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
+    "config_sha256": "80c3cd31d1494799c19c1083504231819caefda33f917d6e48fa96c73257ed7b",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_directed_product_terminal.py",
+    "entrypoint_sha256": "38d79db3b5aedb4484811abe10b3983a9d0255c3b78da99c73764b52225b4e15",
+    "implementation_commit": "5b25516e6c2e418a3086c8f821229bd0e4f6cc81",
+    "superseded_execution_observation": "failed before candidate evaluation because the V1 entrypoint used a functional-shear-only weight adapter; zero checkpoint updates and zero candidate CE measurements occurred",
+    "superseded_plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_plan.json",
+    "superseded_plan_sha256": "aa2e64ac2e310e61709f84bcf131b241f43a6467ca7ec5306350519c50ee3ae9",
+    "training_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_0p5tpp_result.json",
+    "training_result_sha256": "411e7081502bdb2b22f157d658733955fe7ea1ec9d8e565f73ffd0f877f2f17b"
+  },
+  "protocol": {
+    "callback": false,
+    "candidate_controls": [
+      "unchanged_terminal_checkpoint",
+      "registered_product_update",
+      "same_dense_direction_at_registered_radius",
+      "full_dense_direction",
+      "duplicate_registered_radius_idempotence_control"
+    ],
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/analyze_mlp_cfc_directed_product_terminal.py",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_0p5tpp/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_plan_v2.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_diag_v2",
+      "--device",
+      "cuda"
+    ],
+    "evaluation_batch_size": 4,
+    "evaluation_split": "val",
+    "execution": "direct foreground polling through process exit",
+    "gpu": 0,
+    "gradient_accumulation_steps": 8,
+    "gradient_batch_size": 4,
+    "gradient_seed": 2026080301,
+    "gradient_split": "train",
+    "heartbeat": false,
+    "host": "PRO6",
+    "output_directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_diag_v2",
+    "parameter_updates_to_checkpoint": 0,
+    "queue_worker": false,
+    "radius_ratios": [
+      0.5,
+      0.6589686140591383,
+      0.75,
+      1.0
+    ],
+    "registered_radius_ratio": 0.6589686140591383,
+    "residual_fractions": [
+      0.25,
+      0.5,
+      1.0
+    ],
+    "validation_batches_per_window": 8,
+    "validation_seeds": [
+      2026080311,
+      2026080329
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "question": "At the rejected 124M terminal checkpoint, is the next c_fc step limited primarily by the directed-product trust radius or by its unrepresented dense residual direction?",
+  "schema_version": "mai_124m_mlp_cfc_terminal_discriminator_plan_v2",
+  "status": "registered_after_pre_evaluation_adapter_failure"
+}

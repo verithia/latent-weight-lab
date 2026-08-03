@@ -27,6 +27,11 @@ TRAINING_RESULT = (
 OUTPUT = (
     ROOT
     / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cfc_directed_product_terminal_plan_v2.json"
+)
+FAILED_PLAN = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cfc_directed_product_terminal_plan.json"
 )
 
@@ -46,7 +51,7 @@ REMOTE_PLAN = f"{REMOTE_ROOT}/{OUTPUT.relative_to(ROOT)}"
 REMOTE_ENTRYPOINT = f"{REMOTE_ROOT}/{ENTRYPOINT.relative_to(ROOT)}"
 OUTPUT_DIR = (
     "/home/pro6000-9980x/MappingNetworks/outputs/"
-    "pro6_mai_v3_mlp_cfc_directed_product_terminal_diag"
+    "pro6_mai_v3_mlp_cfc_directed_product_terminal_diag_v2"
 )
 
 CONFIG_SHA256 = (
@@ -59,12 +64,15 @@ DATASET_MANIFEST_SHA256 = (
     "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
 )
 ENTRYPOINT_SHA256 = (
-    "b827759891bef7e2e9724280adbdd6b11d6615b726fa44a5da6128e9a488695b"
+    "38d79db3b5aedb4484811abe10b3983a9d0255c3b78da99c73764b52225b4e15"
 )
 TRAINING_RESULT_SHA256 = (
     "411e7081502bdb2b22f157d658733955fe7ea1ec9d8e565f73ffd0f877f2f17b"
 )
-IMPLEMENTATION_COMMIT = "8397a22d2a3a2a170c152fb7eb77914a40919cce"
+IMPLEMENTATION_COMMIT = "5b25516e6c2e418a3086c8f821229bd0e4f6cc81"
+FAILED_PLAN_SHA256 = (
+    "aa2e64ac2e310e61709f84bcf131b241f43a6467ca7ec5306350519c50ee3ae9"
+)
 
 
 def sha256_file(path: Path) -> str:
@@ -76,6 +84,7 @@ def validate_inputs() -> None:
         CONFIG: CONFIG_SHA256,
         ENTRYPOINT: ENTRYPOINT_SHA256,
         TRAINING_RESULT: TRAINING_RESULT_SHA256,
+        FAILED_PLAN: FAILED_PLAN_SHA256,
     }
     for path, digest in expected.items():
         if sha256_file(path) != digest:
@@ -105,9 +114,9 @@ def make_plan() -> dict[str, Any]:
         "cuda",
     ]
     return {
-        "schema_version": "mai_124m_mlp_cfc_terminal_discriminator_plan_v1",
+        "schema_version": "mai_124m_mlp_cfc_terminal_discriminator_plan_v2",
         "created_at": "2026-08-03",
-        "status": "registered_before_terminal_discriminator_execution",
+        "status": "registered_after_pre_evaluation_adapter_failure",
         "question": (
             "At the rejected 124M terminal checkpoint, is the next c_fc step "
             "limited primarily by the directed-product trust radius or by its "
@@ -126,6 +135,13 @@ def make_plan() -> dict[str, Any]:
             "implementation_commit": IMPLEMENTATION_COMMIT,
             "training_result": str(TRAINING_RESULT.relative_to(ROOT)),
             "training_result_sha256": TRAINING_RESULT_SHA256,
+            "superseded_plan": str(FAILED_PLAN.relative_to(ROOT)),
+            "superseded_plan_sha256": FAILED_PLAN_SHA256,
+            "superseded_execution_observation": (
+                "failed before candidate evaluation because the V1 entrypoint "
+                "used a functional-shear-only weight adapter; zero checkpoint "
+                "updates and zero candidate CE measurements occurred"
+            ),
         },
         "protocol": {
             "parameter_updates_to_checkpoint": 0,
