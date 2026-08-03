@@ -1,0 +1,87 @@
+{
+  "artifact_kind": "124m_mlp_cfc_product_directed_result",
+  "schema_version": "mlp_cfc_product_directed_result_v1",
+  "created_at": "2026-08-03",
+  "classification": "PRODUCT_DIRECTED_CFC_GAIN_TOO_SMALL",
+  "interpretation": "A two-stage directed sparse residual product improves both weight-direction recovery and held-out CE over one-stage directed mixing at matched coordinate budgets. The 44+44 candidate is reliable alone and beside production c_proj, but recovers 35.94% and 37.12% of the same-window dense c_fc oracle gaps, narrowly below the preregistered 40% mean gate. Nonlinear composition is useful, but two stages remain insufficient for training.",
+  "identity": {
+    "git_commit": "d0ebf35d085696e21429121bd68240335c3b9d2c",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "e8db55648382953f703aa61f544d521a9602b5b217e58d4d3129f7791c579754",
+    "entrypoint_sha256": "4ccf379d30dee3ccbac8792eaada4db92b13b41234e4f197516bc8078d92ccc3"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 119.1713707447052,
+    "monitoring": "direct foreground polling; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 2
+  },
+  "validity": {
+    "production_cfc_reconstruction_max_abs_error": 0.0,
+    "maximum_relative_radius_error": 1.990556880346845e-08,
+    "dense_cfc_oracle_valid_singleton_and_hybrid": true,
+    "product44x2_negative_on_every_window_singleton_and_hybrid": true
+  },
+  "direction_recovery_against_equal_radius_dense_cfc": {
+    "directed44_cosine": 0.5460540944002841,
+    "product22x2_cosine": 0.5671848570646022,
+    "directed88_cosine": 0.6728106682147397,
+    "product44x2_cosine": 0.7037905488912686,
+    "product44x2_fixed_scale_recovery": 0.4075811224389847,
+    "product44x2_per_layer_target_recovery_range": [
+      0.49197638034820557,
+      0.5016133189201355
+    ]
+  },
+  "heldout_ce": {
+    "production_cfc": 5.854956179857254,
+    "directed88_cfc": 5.8547900300472975,
+    "product44x2_cfc": 5.854683978483081,
+    "dense_norm_cfc": 5.854198856279254,
+    "production_joint": 5.853201376274228,
+    "hybrid_directed88_cfc": 5.85308194719255,
+    "hybrid_product44x2_cfc": 5.85306035540998,
+    "hybrid_norm_cfc": 5.852821435779333
+  },
+  "registered_comparisons": {
+    "product22x2_single_minus_production": {
+      "mean": -0.00004886463284492493,
+      "ci99": [-0.000117665608298276, 0.000019936342608426147],
+      "reliable": false,
+      "dense_oracle_gap_fraction": 0.0645227935118118
+    },
+    "product22x2_hybrid_minus_production_joint": {
+      "mean": -0.00008832663297653198,
+      "ci99": [-0.0001639154417094954, -0.000012737824243568577],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.23247491163306028
+    },
+    "product44x2_single_minus_production": {
+      "mean": -0.00027220137417316437,
+      "ci99": [-0.000357960386717138, -0.00018644236162919072],
+      "window_means": [-0.00028907880187034607, -0.00025532394647598267],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.3594254583912343
+    },
+    "product44x2_hybrid_minus_production_joint": {
+      "mean": -0.00014102086424827576,
+      "ci99": [-0.0002299969353100885, -0.00005204479318646301],
+      "window_means": [-0.00017627328634262085, -0.00010576844215393066],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.3711656592100167
+    },
+    "dense_single_minus_production": -0.0007573235780000687,
+    "dense_hybrid_minus_production_joint": -0.0003799404948949814
+  },
+  "raw_outputs": {
+    "summary_sha256": "039e12e887bf0257c570ec9d6f17ad73bacee2a0938bfda3b84469fcf3957eb9",
+    "heldout_ce_sha256": "b05116e832ce79d236a603dc419dd63f69f5887be3eeabc15e9a6a9ba4fb19d7",
+    "product_directed_fits_sha256": "b7d0cc6d2b50667add1f00af2842fafa0ab7c83ef5d0d149018a6dbeceea2c07",
+    "prospective_step_metadata_sha256": "cebbc219586828bb74566e392129cb546179ee8a1c084f3d8894c060c10f7fbb"
+  },
+  "next_action": "Do not train the two-stage family. Test a three-stage directed residual product with exactly matched total coordinates: schedules 15+15+14 (44 total per target, 135,168 coordinates) and 30+29+29 (88 total, 270,336 coordinates). Recompute one- and two-stage matched-budget controls on the same replay and windows. This isolates depth/compositional reachability from coordinate count; retain final-radius normalization and singleton plus production-cproj hybrid gates."
+}
