@@ -1,0 +1,151 @@
+{
+  "arms": {
+    "radius0p82": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius0p82_step60.json",
+      "config_sha256": "6a2bdc55c7adb55ad3b69ede01b33b2f542e0dfe6bcf621a69152b4239dcf580",
+      "lr_decay_iters": 238,
+      "max_iters": 60,
+      "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius0p82/performance_preflight.json",
+      "mfu_command": [
+        "env",
+        "CUDA_VISIBLE_DEVICES=0",
+        "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+        "PYTHONPATH=.",
+        "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.mfu_preflight",
+        "--config",
+        "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius0p82_step60.json",
+        "--output",
+        "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius0p82/performance_preflight.json",
+        "--log-output",
+        "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius0p82/performance_preflight.log",
+        "--min-fraction",
+        "0.2",
+        "--warmup-updates",
+        "1",
+        "--timed-updates",
+        "8"
+      ],
+      "mfu_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius0p82/performance_preflight.log",
+      "radius": 0.82,
+      "training_command": [
+        "env",
+        "CUDA_VISIBLE_DEVICES=0",
+        "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+        "PYTHONPATH=.",
+        "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius0p82_step60.json"
+      ]
+    },
+    "radius1p00": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_step60.json",
+      "config_sha256": "9337216260b6d6b8bf42895f5dd1b179714fa396f215da0681194f822e3f1619",
+      "lr_decay_iters": 238,
+      "max_iters": 60,
+      "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius1p00/performance_preflight.json",
+      "mfu_command": [
+        "env",
+        "CUDA_VISIBLE_DEVICES=0",
+        "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+        "PYTHONPATH=.",
+        "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.mfu_preflight",
+        "--config",
+        "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_step60.json",
+        "--output",
+        "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius1p00/performance_preflight.json",
+        "--log-output",
+        "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius1p00/performance_preflight.log",
+        "--min-fraction",
+        "0.2",
+        "--warmup-updates",
+        "1",
+        "--timed-updates",
+        "8"
+      ],
+      "mfu_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius1p00/performance_preflight.log",
+      "radius": 1.0,
+      "training_command": [
+        "env",
+        "CUDA_VISIBLE_DEVICES=0",
+        "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+        "PYTHONPATH=.",
+        "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+        "-u",
+        "-m",
+        "examples.nanogpt.train",
+        "--config",
+        "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_step60.json"
+      ]
+    }
+  },
+  "authorization": {
+    "additional_structure_authorized": false,
+    "automatic_rerun_authorized": false,
+    "full_238_update_run_authorized": false,
+    "larger_rung_authorized": false,
+    "scientific_arms_authorized_after_each_exact_mfu_pass": [
+      "radius0p82",
+      "radius1p00"
+    ]
+  },
+  "control": {
+    "dense_cfc_step60_validation_ce": 6.3141,
+    "gap_to_dense_cfc": 0.0688,
+    "radius": 0.6589686140591383,
+    "step60_validation_ce": 6.3829
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "if neither arm reaches CE <= 6.3485, reject scalar-radius recalibration as the main repair",
+    "minimum_gap_fraction_to_recover": 0.5,
+    "pass_validation_ce_maximum": 6.3485,
+    "primary_metric": "fixed-window step-60 validation cross entropy",
+    "selection": "select the lowest-CE passing arm; if arm CEs differ by less than 0.005, select radius 0.82 as the smaller trust radius",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "base_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_0p5tpp.json",
+    "base_config_sha256": "0405340d2ea327331f983662c2da3db48c803271cec4861779948884abc1d21f",
+    "control_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_0p5tpp_result.json",
+    "control_result_sha256": "9758b4a4bd9ef2929f3a052fed6b2565fd1b3f2e15f3c664ee0ec1563e23c2c9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "07602c5045077a848ab1e0a176431dde6b15c07be08b271a56276e91ad13ceae",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b2973183268673859272837c80a13a8ddeec6b2bd5a43cef1703bcc9a039c641",
+      "examples/nanogpt/test_muon_directed_product.py": "681ed76c96e1521bea019462b2d3f95af4960ce746e06204458a7a6f4ebf8694",
+      "examples/nanogpt/train.py": "bc43b09497dd396025f1335c40889698ba1e7f4d5ad7ca76809e6e8d388cda44",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "protocol": {
+    "callback": false,
+    "exact_config_mfu_minimum": 0.2,
+    "execution": "sequential direct foreground polling",
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "identical_lr_decay_iters": 238,
+    "identical_model_seed": 1337,
+    "identical_train_seed": 20260714,
+    "max_iters": 60,
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "question": "Is the six-stage online miss caused by the fixed 0.6589686 c_fc family radius understepping useful early Muon directions?",
+  "schema_version": "mai_124m_mlp_cfc_22x6_radius_step60_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
