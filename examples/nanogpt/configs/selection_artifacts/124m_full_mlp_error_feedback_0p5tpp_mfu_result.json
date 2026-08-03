@@ -1,0 +1,63 @@
+{
+  "artifact_kind": "124m_full_mlp_error_feedback_0p5tpp_exact_config_mfu_result",
+  "certificate": {
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_error_feedback_0p5tpp/performance_preflight.log",
+    "log_sha256": "2bc8d8cc8dfa9707ebcf034c0fb2c819153c04b926cf569088479c80564798f6",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_error_feedback_0p5tpp/performance_preflight.json",
+    "sha256": "4e710c9b5563c105632dae30367ac1c05b79fafeefe6ee9e6a1922a990590d4e"
+  },
+  "classification": "FULL_MLP_ERROR_FEEDBACK_0P5TPP_EXACT_CONFIG_MFU_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+    "sha256": "d361e03ef4607bbbd7d8982e11da52fdaa8fcb7666ea16fe3d4fd06ba8bd8712"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "one_full_238_update_run_authorized": true,
+    "reason": "The exact preregistered composed c_fc plus c_proj error-feedback path is finite, requires and validates the native extension, and exceeds the frozen 20 percent MFU floor."
+  },
+  "execution": {
+    "callback": false,
+    "direct_foreground_polling": true,
+    "git_commit": "0979e4df732858edef79e0826c7a26475eb56278",
+    "gpu": 0,
+    "host": "PRO6",
+    "native_extension_required": true,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "average_iter_ms": 1747.1775,
+    "empirical_bf16_peak_tflops": 414.8846077846673,
+    "mfu_fraction": 0.27009277832726064,
+    "minimum_required_mfu_fraction": 0.2,
+    "model_tflops": 112.05733640177662,
+    "peak_mib": 31858.53,
+    "timing_breakdown_ms": {
+      "data_ms": 0.55625,
+      "eval_ms": 0.0,
+      "flush_ms": 4.18875,
+      "fwbw_ms": 1188.4975,
+      "grad_ms": 1.57125,
+      "opt_ms": 547.895,
+      "other_ms": 0.7275,
+      "prepare_ms": 3.74
+    },
+    "tokens_per_second": 150038.86
+  },
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_error_feedback_0p5tpp_plan.json",
+    "sha256": "2bd4d198b9a339f9c88c634018b71e4001f7ca78bb1ad389e8975e975c404c03"
+  },
+  "recorded_at": "2026-08-03",
+  "schema_version": "mai_124m_full_mlp_error_feedback_0p5tpp_exact_config_mfu_result_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13
+  }
+}
