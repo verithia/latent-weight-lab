@@ -13,6 +13,7 @@ PLAN = (
 )
 PLAN_V1 = REPO / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan.json"
 FAILURE = REPO / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_attempt1_failure.json"
+RESULT = REPO / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_result.json"
 
 
 def sha256(path: Path) -> str:
@@ -56,3 +57,23 @@ def test_joint_prospective_plan_uses_fresh_fixed_windows_and_no_watcher() -> Non
     assert plan["execution"]["checkpoint_parameter_updates"] == 0
     assert "no watchdog" in plan["execution"]["monitoring"]
     assert "does not authorize" in plan["authorization"]
+
+
+def test_joint_prospective_result_is_exact_mixed_and_nonarchitectural() -> None:
+    result = json.loads(RESULT.read_text())
+    assert result["schema_version"] == "mlp_joint_prospective_step_result_v1"
+    assert result["decision"] == "MIXED_CFC_CPROJ_UPDATE_INTERACTION"
+    assert result["joint_helpful_on_all_windows"] is True
+    assert result["inputs"]["plan_sha256"] == sha256(PLAN)
+    assert result["prospective_step"]["joint_singleton_update_max_abs_error"] == {
+        "c_fc": 0.0,
+        "c_proj": 0.0,
+    }
+    signs = [
+        row["finite_interaction"]
+        for row in result["finite_ce_by_window"].values()
+    ]
+    assert min(signs) < 0.0 < max(signs)
+    assert "does not justify HyperConnection" in (
+        result["interpretation"]["not_established"]
+    )

@@ -1,0 +1,74 @@
+{
+  "artifact_kind": "124m_mlp_joint_prospective_step_result",
+  "schema_version": "mlp_joint_prospective_step_result_v1",
+  "created_at": "2026-08-03",
+  "decision": "MIXED_CFC_CPROJ_UPDATE_INTERACTION",
+  "next_action": "LOCALIZE_INTERACTION_BY_DEPTH_BEFORE_ARCHITECTURE_CHANGE",
+  "joint_helpful_on_all_windows": true,
+  "inputs": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan_v2.json",
+    "plan_sha256": "b3a05421b0ae49cc676da2d22e09a7888e945bcc5be5797a819d858531620d17",
+    "checkpoint_sha256": "9309dc737795f60b44c230f776cc257c36a31b6060f732c50b9f382c1dea079e",
+    "config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "finite_ce_by_window": {
+    "validation_1": {
+      "cfc_loss_change": -0.00011275708675384521,
+      "cproj_loss_change": -0.00006793439388275146,
+      "joint_loss_change": -0.0004050731658935547,
+      "finite_additive_prediction": -0.00018069148063659668,
+      "finite_interaction": -0.000224381685256958,
+      "normalized_interaction": -1.2417944911759855
+    },
+    "validation_2": {
+      "cfc_loss_change": -0.00024133920669555664,
+      "cproj_loss_change": -0.0002830922603607178,
+      "joint_loss_change": -0.0003348886966705322,
+      "finite_additive_prediction": -0.0005244314670562744,
+      "finite_interaction": 0.0001895427703857422,
+      "normalized_interaction": 0.36142524293913736
+    }
+  },
+  "prospective_step": {
+    "mean_training_ce": 5.671781897544861,
+    "global_gradient_norm": 0.9974708557128906,
+    "clip_threshold": 1.0,
+    "cfc_gradient_norm": 0.17592912912368774,
+    "cproj_gradient_norm": 0.961419939994812,
+    "cfc_update_fro": 0.03533870370427214,
+    "cproj_update_fro": 0.0142078989323644,
+    "custom_optimizer_learning_rate": 0.00024,
+    "joint_singleton_update_max_abs_error": {"c_fc": 0.0, "c_proj": 0.0}
+  },
+  "output_interaction_summary": {
+    "probe_layers": [0, 3, 7, 11],
+    "cfc_cproj_delta_cosine_range": [0.2950648110596458, 0.5115974509900645],
+    "joint_additive_cosine_range": [0.6480305455312569, 0.7561988679824025],
+    "interaction_to_additive_norm_range": [0.6543420834179767, 0.761614507774972],
+    "joint_to_base_norm_range": [0.003775516830681655, 0.010412411605061012],
+    "interpretation": "The nonlinear c_fc/c_proj cross-term is large and depth-consistent in output space, but its finite-CE sign is not stable across untouched windows at the terminal minimum LR."
+  },
+  "raw_outputs": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_joint_prospective_step_20260803_attempt2",
+    "summary_sha256": "59b9fb86ee6222d953cca5b16c7499c09c54bc7f1a2bcb743c0e43761f31dc80",
+    "finite_ce_sha256": "28571cb6223bad200424a747bbd65685523db1a52330bf025d6c587127c561aa",
+    "output_interaction_sha256": "458187bbcc7377c1e37e42b70998c159a87450d43ae7418c759bc2a46f41efb7",
+    "prospective_step_metadata_sha256": "fb0884926ceb7a839a4b1152c7b571041490ee2e40653a84619b98790a369614",
+    "log_sha256": "bf8434db00eab955c3af95d96074f86ce80a27c882c64dbd152ff2b7f2a5985b"
+  },
+  "execution": {
+    "git_commit": "fbe61f7fc36b3f29cc367a4cdc78eb407bb46257",
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 10.402805,
+    "checkpoint_parameter_updates": 0,
+    "disposable_optimizer_steps": 3,
+    "direct_foreground_polling": true
+  },
+  "interpretation": {
+    "established": "At the terminal checkpoint, both production singleton steps and their exact joint application descend on both windows. Joint nonlinearity is real in MLP/block output space, but its task-loss interaction changes sign across windows.",
+    "not_established": "The result does not establish systematic destructive optimizer interference, does not justify a joint chart yet, and does not justify HyperConnection or another residual topology.",
+    "limitation": "The terminal custom-optimizer LR is 0.00024, so CE effects are only 0.00007-0.00041 and require depth/trajectory localization rather than architectural inference."
+  }
+}
