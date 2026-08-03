@@ -1,0 +1,140 @@
+{
+  "artifact_kind": "350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_training_result",
+  "schema_version": "mai_350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_result_v1",
+  "classification": "PASS_FULL_MLP_CFC_ON_BOUNDED_CPROJ_350M_CLOSES_ATTENTION_GAP",
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 805306368,
+    "additional_trainable_parameters": 0,
+    "cfc": {
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "family_radius_ratio": 1.0,
+      "schedule": [30, 30, 29, 29, 29, 29],
+      "terminal_compression_residual": {
+        "finite": true,
+        "frobenius_norm_max": 0.014487847685813904,
+        "frobenius_norm_mean": 0.013918974320404232,
+        "frobenius_norm_min": 0.012966345995664597,
+        "layer_count": 24,
+        "max_abs": 0.00004160730168223381,
+        "rms_max": 0.0000070748324105807114,
+        "rms_mean": 0.000006797035230950617,
+        "rms_min": 0.0000063318884713226,
+        "shape_per_layer": [4096, 1024]
+      }
+    },
+    "cproj": {
+      "error_feedback": true,
+      "error_feedback_decay": 0.5,
+      "matching_neighbors": 64,
+      "parent_stages": 64,
+      "residual_stages": 24,
+      "terminal_compression_residual": {
+        "finite": true,
+        "frobenius_norm_max": 0.010376903228461742,
+        "frobenius_norm_mean": 0.010045060965542993,
+        "frobenius_norm_min": 0.00951369572430849,
+        "layer_count": 24,
+        "max_abs": 0.00002936604869319126,
+        "rms_max": 0.000005067319762019906,
+        "rms_mean": 0.000004905277383689584,
+        "rms_min": 0.000004645835360861383,
+        "shape_per_layer": [1024, 4096]
+      }
+    }
+  },
+  "checkpoint": {
+    "best_validation_ce": 4.425156116485596,
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_consistent": true,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_cfcdecay1_cprojdecay0p5_0p5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "49483e764d19ce795957e7716ed0f726c653fa040c47d4317d0edde132c0c44f",
+    "next_iter": 677,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_cfcdecay1_cprojdecay0p5_0p5tpp/scientific/ckpt.pt",
+    "readable": true,
+    "resolved_config_sha256": "d0227e3c302cadf61a045a5a76fab4f628f121e2e09fe0d94d9b6cfcd9c6a6e0",
+    "sha256": "eca5016b8fcb467d9af5462b984ca0b8be1228bebdbef43fdb7747e009c52d6a",
+    "size_bytes": 3215798064
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+    "sha256": "a316a887a84c8ebe7b2037f3d0fe3b9d3ac1cbad1695b305b550f0e6fe9db250"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_run_authorized": false,
+    "next_action": "Register the 690M, 0.5TPP full-MLP transfer of this exact c_fc decay-1 plus c_proj decay-0.5 recipe, bind its matched attention-only control and dataset identity, and require a fresh exact-config 20 percent MFU gate before one scientific run.",
+    "next_model_rung_registration_authorized": true,
+    "selected_for_full_mlp_scaling": true
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 11.0780, "validation_ce": 11.0774},
+    {"step": 170, "train_ce": 5.4618, "validation_ce": 5.4637},
+    {"step": 340, "train_ce": 4.8557, "validation_ce": 4.8523},
+    {"step": 510, "train_ce": 4.5453, "validation_ce": 4.5407},
+    {"step": 677, "train_ce": 4.4309, "validation_ce": 4.4252}
+  ],
+  "measurement": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_gap_ce_exact": 0.062256116485595925,
+    "bounded_cproj_parent_validation_ce_exact": 4.424571514129639,
+    "candidate_minus_bounded_cproj_parent_ce_exact": 0.0005846023559570312,
+    "candidate_minus_failed_full_mlp_ce_exact": -0.26224388351440453,
+    "failed_full_mlp_validation_ce": 4.6874,
+    "step_170_candidate_minus_bounded_cproj_parent_ce": 0.0037,
+    "step_340_candidate_minus_bounded_cproj_parent_ce": 0.0002,
+    "step_510_candidate_minus_bounded_cproj_parent_ce": 0.0005,
+    "success_ceiling": 4.4629,
+    "success_ceiling_margin_exact": 0.03774388351440461,
+    "terminal_step": 677,
+    "terminal_train_ce": 4.4309,
+    "terminal_validation_ce_exact": 4.425156116485596,
+    "terminal_validation_ce_log": 4.4252
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.2941649868231919,
+    "peak_mib_preflight": 53317.05,
+    "tokens_per_second_preflight": 57548.16875,
+    "update_seconds_preflight": 4.55522625
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_plan.json",
+    "sha256": "93115f6466fdac39f68a1944d5c32d0a939525fa6b885a4d5ecbaad0f9bd987a"
+  },
+  "provenance": {
+    "git_commit": "01a4ab9a4e3b86c2e999148ca2c6bc34fe76b56b",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T144155Z_3322755.log",
+    "log_sha256": "36fa56879e4c028d9bec806faebc0e886566eb50ca65a3923f45d98a867d408c",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_mfu_result.json",
+    "mfu_result_sha256": "717abcf6f696527f58a3d4989a0756d1d936a032ede4482e3e331489a8471dbc",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T144155Z_3322755.json",
+    "sha256": "af08cd5e54473fb444d1789177582146f62fa559e485a4bbb254c2aba7b98a42",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T144155Z_3322755.json",
+    "status_sha256": "6b3279a670c73e3eb9ee046176ba261877a4fb3b4c4129d657bb59958d1762cf"
+  },
+  "residual_diagnosis": {
+    "cfc_mean_frobenius_ratio_vs_failed_full_mlp": 1.0164732148629436,
+    "cfc_residual_remains_small": true,
+    "cproj_mean_frobenius_ratio_vs_bounded_cproj_parent": 0.9967671320434407,
+    "cproj_residual_remains_bounded": true,
+    "direction_problem_resolved_at_350m": true,
+    "interpretation": "The accepted c_proj decay-0.5 residual remains at the parent scale while the c_fc residual remains at the prior small scale. The full-MLP trajectory tracks c_proj-only within 0.0006 terminal CE and avoids the old 0.2622 CE failure, directly localizing and repairing the former late directional-accumulation problem."
+  },
+  "run": {
+    "finished_at": "2026-08-03T23:36:53+08:00",
+    "host": "PRO6",
+    "run_id": "pro6_mai_v3_350m_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp_20260803T144155Z_3322755",
+    "status": "clean",
+    "train_exit_code": 0
+  },
+  "watchdog": {
+    "callback_milestones_sent": [20, 50, 100],
+    "duplicate_terminal_callbacks": 0,
+    "keep_alive": false,
+    "terminal_signature": ["finished", 0, "2026-08-03T23:36:53+08:00"]
+  }
+}

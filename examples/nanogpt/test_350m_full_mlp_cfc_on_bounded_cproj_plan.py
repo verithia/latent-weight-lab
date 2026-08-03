@@ -15,6 +15,10 @@ MFU_RESULT_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_mfu_result.json"
 )
+RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -131,3 +135,30 @@ def test_exact_mfu_result_authorizes_one_scientific_run() -> None:
     assert result["decision"]["one_full_677_update_run_authorized"] is True
     assert result["decision"]["automatic_rerun_authorized"] is False
     assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_terminal_result_selects_full_mlp_recipe_for_next_rung() -> None:
+    result = load(RESULT_PATH)
+    assert result["classification"] == (
+        "PASS_FULL_MLP_CFC_ON_BOUNDED_CPROJ_350M_CLOSES_ATTENTION_GAP"
+    )
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert sha256(REPO / result["provenance"]["mfu_result_path"]) == (
+        result["provenance"]["mfu_result_sha256"]
+    )
+    assert result["run"]["status"] == "clean"
+    assert result["run"]["train_exit_code"] == 0
+    assert result["checkpoint"]["exact_resume_schema"] == "nanogpt_exact_resume_v2"
+    assert result["checkpoint"]["next_iter"] == 677
+    assert result["measurement"]["terminal_validation_ce_exact"] <= 4.4629
+    assert abs(result["measurement"]["candidate_minus_bounded_cproj_parent_ce_exact"]) <= 0.01
+    assert result["residual_diagnosis"]["cfc_residual_remains_small"] is True
+    assert result["residual_diagnosis"]["cproj_residual_remains_bounded"] is True
+    assert result["residual_diagnosis"]["direction_problem_resolved_at_350m"] is True
+    assert result["decision"]["selected_for_full_mlp_scaling"] is True
+    assert result["decision"]["next_model_rung_registration_authorized"] is True
+    assert result["decision"]["larger_model_or_token_rung_run_authorized"] is False
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["watchdog"]["callback_milestones_sent"] == [20, 50, 100]
+    assert result["watchdog"]["duplicate_terminal_callbacks"] == 0
