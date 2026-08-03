@@ -1,0 +1,119 @@
+{
+  "authorization": {
+    "additional_structure_authorized": false,
+    "automatic_rerun_authorized": false,
+    "full_238_update_run_authorized": false,
+    "larger_rung_authorized": false,
+    "scientific_step60_run_authorized_after_exact_mfu_pass": true
+  },
+  "candidate": {
+    "coordinate_multiplier_vs_22x6_control": 1.3333333333333333,
+    "coordinate_multiplier_vs_original": 2.0,
+    "coordinates_per_layer": 540672,
+    "family_radius_ratio": 1.0,
+    "offline_minimum_positive_line_recovery": 0.7503036425412035,
+    "schedule": [
+      30,
+      30,
+      29,
+      29,
+      29,
+      29
+    ]
+  },
+  "control": {
+    "coordinates_per_layer": 405504,
+    "dense_cfc_step60_validation_ce": 6.3141,
+    "remaining_gap": 0.03364398803710955,
+    "schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "step60_validation_ce": 6.347743988037109
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "reject additional same-family coordinate expansion as the main repair and move to a qualitatively different direction family",
+    "minimum_remaining_gap_fraction_to_recover": 0.5,
+    "pass": "register exactly one full 238-update 2x-coordinate config and measure its exact-config MFU before training",
+    "pass_validation_ce_maximum": 6.330921994018555,
+    "primary_metric": "fixed-window step-60 validation cross entropy",
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "callback": false,
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "lr_decay_iters": 238,
+    "max_iters": 60,
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_2x_radius1p00_step60/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct2x_radius1p00_step60.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_2x_radius1p00_step60/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_2x_radius1p00_step60/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_2x_radius1p00_step60/performance_preflight.log",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct2x_radius1p00_step60.json"
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "identity": {
+    "base_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_step60.json",
+    "base_config_sha256": "9337216260b6d6b8bf42895f5dd1b179714fa396f215da0681194f822e3f1619",
+    "capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_capacity_result.json",
+    "capacity_result_sha256": "62836f9c95ae28e129cbbe5b6c9a8450d31f2636f1570c2382cb5c84fb64a59b",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct2x_radius1p00_step60.json",
+    "config_sha256": "613be54c9ab03f4df05d3c90e88930972f65c9569598cfcc91bb170cf2d9a892",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "full_radius_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp_result.json",
+    "full_radius_result_sha256": "e9da5f7e34a6e8224b98cb707c4f6c544bccebcf65e131c06551f4c9c67c774f",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "07602c5045077a848ab1e0a176431dde6b15c07be08b271a56276e91ad13ceae",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b2973183268673859272837c80a13a8ddeec6b2bd5a43cef1703bcc9a039c641",
+      "examples/nanogpt/test_muon_directed_product.py": "681ed76c96e1521bea019462b2d3f95af4960ce746e06204458a7a6f4ebf8694",
+      "examples/nanogpt/train.py": "bc43b09497dd396025f1335c40889698ba1e7f4d5ad7ca76809e6e8d388cda44",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "question": "Does the offline-qualified 2x-coordinate six-stage chart close at least half of the remaining online step-60 directional gap?",
+  "schema_version": "mai_124m_mlp_cfc_2x_radius1_step60_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
