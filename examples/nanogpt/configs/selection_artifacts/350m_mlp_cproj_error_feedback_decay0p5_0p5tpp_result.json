@@ -1,0 +1,118 @@
+{
+  "artifact_kind": "350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_training_result",
+  "schema_version": "mai_350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_result_v1",
+  "classification": "PASS_BOUNDED_CPROJ_ERROR_FEEDBACK_350M_CLOSES_ATTENTION_GAP",
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 402653184,
+    "additional_trainable_parameters": 0,
+    "error_feedback": true,
+    "error_feedback_decay": 0.5,
+    "matching_neighbors": 64,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "terminal_compression_residual": {
+      "finite": true,
+      "frobenius_norm_max": 0.010407855734229088,
+      "frobenius_norm_mean": 0.01007764064706862,
+      "frobenius_norm_min": 0.009551708586513996,
+      "layer_count": 24,
+      "max_abs": 0.00003292023757239804,
+      "rms_max": 0.000005082421921542846,
+      "rms_mean": 0.0000049211877429418864,
+      "rms_min": 0.0000046644072426715866,
+      "shape_per_layer": [1024, 4096]
+    }
+  },
+  "checkpoint": {
+    "best_validation_ce": 4.424571514129639,
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_consistent": true,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_cproj_error_feedback_decay0p5_0p5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "3a57b201bb838dd5e0b6dafaa19f4893145a0eef5df5a8c8299debfd98356833",
+    "next_iter": 677,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_cproj_error_feedback_decay0p5_0p5tpp/scientific/ckpt.pt",
+    "readable": true,
+    "sha256": "c5e5f72f0a94580766d38d507842b0d2705cad788208e2cea07ebabd2b13b6f1",
+    "size_bytes": 2813128736
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_decay0p5_0p5tpp.json",
+    "sha256": "06039b7505c25cf17a3d5187cebc4cfacf30fb1478ce0950dbfa5f1180a298da"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "next_action": "Freeze decay-0.5 c_proj error feedback as the accepted 350M c_proj path. Register one same-rung full-MLP causal recombination that adds only the already selected c_fc mechanism on top of this accepted c_proj parent, with a fresh exact-config MFU gate and unchanged terminal endpoint.",
+    "same_rung_full_mlp_causal_recombination_registration_authorized": true,
+    "selected_for_cproj_scaling": true
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 11.0780, "validation_ce": 11.0774},
+    {"step": 170, "train_ce": 5.4580, "validation_ce": 5.4600},
+    {"step": 340, "train_ce": 4.8554, "validation_ce": 4.8521},
+    {"step": 510, "train_ce": 4.5446, "validation_ce": 4.5402},
+    {"step": 677, "train_ce": 4.4301, "validation_ce": 4.4246}
+  ],
+  "measurement": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_gap_ce_exact": 0.06167151412963867,
+    "candidate_minus_decay1_ce_exact": -0.05612848587036079,
+    "candidate_minus_memoryless_cproj_ce_exact": -0.031128485870361322,
+    "decay1_validation_ce": 4.4807,
+    "fraction_of_memoryless_cproj_to_attention_gap_closed": 0.3354362701547564,
+    "memoryless_cproj_validation_ce": 4.4557,
+    "step_170_candidate_minus_decay1_ce": 0.0412,
+    "step_340_candidate_minus_decay1_ce": 0.0535,
+    "step_510_candidate_minus_decay1_ce": -0.0196,
+    "success_ceiling": 4.4629,
+    "success_ceiling_margin_exact": 0.03832848587036075,
+    "terminal_step": 677,
+    "terminal_train_ce": 4.4301,
+    "terminal_validation_ce_exact": 4.424571514129639,
+    "terminal_validation_ce_log": 4.4246
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.36638255124303803,
+    "peak_mib_preflight": 52931.29,
+    "tokens_per_second_preflight": 71693.14375,
+    "update_seconds_preflight": 3.65649625
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_plan.json",
+    "sha256": "089550690167ffc0518bde5f188c928af8e5fb91246789b32e11cba26cf88798"
+  },
+  "provenance": {
+    "git_commit": "be6fc29e7e8b417870e0c38ff865ed63f49d42a2",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_cproj_errorfeedback_decay0p5_0p5tpp_20260803T133848Z_3291318.log",
+    "log_sha256": "c8e295505fc87393a36ff3abde403dd56451acd1d8ea54411f473e28697b92c2",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_cproj_errorfeedback_decay0p5_0p5tpp_20260803T133848Z_3291318.json",
+    "sha256": "b3eab7b7e6901bcc63d1fe2badc9b0a905ee9bd16e0e2a1367bdcdcec986f23c",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_cproj_errorfeedback_decay0p5_0p5tpp_20260803T133848Z_3291318.json",
+    "status_sha256": "4179d6ebbe727ba7bb01ac97635de1a805ce5d136620643da42609720fb419f8"
+  },
+  "residual_diagnosis": {
+    "decay1_to_decay0p5_frobenius_reduction_factor": 466.81679263065735,
+    "late_reversal_avoided": true,
+    "terminal_residual_mean_frobenius_ratio_vs_decay1": 0.002142168010633658,
+    "terminal_residual_mean_frobenius_ratio_vs_failed_full_mlp_decay1_cproj": 0.0017391854714794166,
+    "terminal_residual_mean_frobenius_ratio_vs_124m_decay1": 0.007823317012406576,
+    "interpretation": "Decay 0.5 trades away part of decay 1's early benefit but prevents unresolved c_proj motion from accumulating. It overtakes decay 1 by step 510, beats both decay 1 and memoryless c_proj at terminal, and closes the accepted attention gap without adding trainable or inference parameters."
+  },
+  "run": {
+    "finished_at": "2026-08-03T22:23:39+08:00",
+    "host": "PRO6",
+    "run_id": "pro6_mai_v3_350m_cproj_errorfeedback_decay0p5_0p5tpp_20260803T133848Z_3291318",
+    "status": "clean",
+    "train_exit_code": 0
+  },
+  "watchdog": {
+    "callback_milestones_sent": [20, 50, 100],
+    "duplicate_terminal_callbacks": 0,
+    "keep_alive": false,
+    "terminal_signature": ["finished", 0, "2026-08-03T22:23:39+08:00"]
+  }
+}

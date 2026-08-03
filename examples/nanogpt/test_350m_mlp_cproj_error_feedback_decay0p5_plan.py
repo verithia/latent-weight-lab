@@ -15,6 +15,10 @@ MFU_RESULT_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_mfu_result.json"
 )
+RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -126,3 +130,35 @@ def test_exact_mfu_result_authorizes_one_scientific_run() -> None:
     assert result["decision"]["one_full_677_update_run_authorized"] is True
     assert result["decision"]["automatic_rerun_authorized"] is False
     assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_terminal_result_passes_frozen_cproj_endpoint() -> None:
+    result = load(RESULT_PATH)
+    assert result["classification"] == (
+        "PASS_BOUNDED_CPROJ_ERROR_FEEDBACK_350M_CLOSES_ATTENTION_GAP"
+    )
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert result["run"]["train_exit_code"] == 0
+    measurement = result["measurement"]
+    assert measurement["terminal_validation_ce_exact"] <= measurement["success_ceiling"]
+    assert measurement["candidate_minus_memoryless_cproj_ce_exact"] < 0
+    assert measurement["candidate_minus_decay1_ce_exact"] < 0
+    assert measurement["attention_gap_ce_exact"] <= 0.1
+    assert result["decision"]["selected_for_cproj_scaling"] is True
+    assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_terminal_result_binds_exact_resume_and_bounded_residual() -> None:
+    result = load(RESULT_PATH)
+    checkpoint = result["checkpoint"]
+    assert checkpoint["exact_resume_schema"] == "nanogpt_exact_resume_v2"
+    assert checkpoint["metadata_consistent"] is True
+    assert checkpoint["next_iter"] == 677
+    residual = result["candidate"]["terminal_compression_residual"]
+    assert residual["finite"] is True
+    assert residual["layer_count"] == 24
+    assert residual["frobenius_norm_mean"] < 0.011
+    diagnosis = result["residual_diagnosis"]
+    assert diagnosis["decay1_to_decay0p5_frobenius_reduction_factor"] > 400
+    assert diagnosis["late_reversal_avoided"] is True
