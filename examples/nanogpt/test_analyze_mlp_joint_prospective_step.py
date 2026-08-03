@@ -1,8 +1,23 @@
 from __future__ import annotations
 
+import torch
+
 from examples.nanogpt.analyze_mlp_joint_prospective_step import (
+    historical_double_decay_update,
     interaction_decision,
 )
+
+
+def test_historical_double_decay_applies_the_second_decay_to_endpoint() -> None:
+    weight = torch.tensor([[2.0]])
+    canonical = torch.tensor([[-0.5]])
+    update = historical_double_decay_update(
+        weight,
+        canonical,
+        learning_rate=0.1,
+        weight_decay=0.2,
+    )
+    assert torch.equal(update, torch.tensor([[-0.53]]))
 
 
 def rows(cfc: float, cproj: float, joint: float):

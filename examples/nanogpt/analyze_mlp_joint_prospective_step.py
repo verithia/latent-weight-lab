@@ -28,6 +28,7 @@ from typing import Any, Iterator
 import torch
 
 from examples.nanogpt.analyze_mlp_cfc_exact_current_matcher import (
+    exact_muon_update,
     file_sha256,
     fixed_batches,
     git_commit,
@@ -98,6 +99,22 @@ def _diagnostics(optimizer: MultiOptimizer) -> dict[str, Any]:
     return result
 
 
+def historical_double_decay_update(
+    weight: torch.Tensor,
+    canonical_update: torch.Tensor,
+    *,
+    learning_rate: float,
+    weight_decay: float,
+) -> torch.Tensor:
+    """Return the exact dense endpoint under the historical chart semantics."""
+    weight_f = weight.float()
+    return (
+        (weight_f + canonical_update.float())
+        * (1.0 - float(learning_rate) * float(weight_decay))
+        - weight_f
+    )
+
+
 def extract_production_updates(
     checkpoint: Path,
     config: dict[str, Any],
@@ -105,10 +122,8 @@ def extract_production_updates(
     *,
     device: str,
     dtype: torch.dtype,
-) -> tuple[
-    dict[str, dict[str, dict[int, torch.Tensor]]],
-    dict[str, Any],
-]:
+    return_dense_oracle: bool = False,
+) -> Any:
     """Replay three optimizer masks from one identical gradient/context."""
     model, optimizer, checkpoint_payload = load_model_and_optimizer(
         checkpoint, config, device
@@ -196,6 +211,63 @@ def extract_production_updates(
         "c_fc": copy.deepcopy(cfc_owner.state_dict()),
         "c_proj": copy.deepcopy(cproj_owner.state_dict()),
     }
+    dense_oracle: dict[str, dict[str, dict[int, torch.Tensor]]] = {
+        "canonical_single_decay": {"c_fc": {}, "c_proj": {}},
+        "historical_double_decay": {"c_fc": {}, "c_proj": {}},
+    }
+    dense_oracle_metadata: dict[str, dict[str, dict[int, Any]]] = {
+        "canonical_single_decay": {"c_fc": {}, "c_proj": {}},
+        "historical_double_decay": {"c_fc": {}, "c_proj": {}},
+    }
+    if return_dense_oracle:
+        for family, owner in (
+            ("c_fc", cfc_owner),
+            ("c_proj", cproj_owner),
+        ):
+            if len(owner.param_groups) != 1:
+                raise ValueError(f"{family} owner must have one parameter group")
+            group = owner.param_groups[0]
+            learning_rate = float(group["lr"])
+            weight_decay = float(group["weight_decay"])
+            for layer, weight in weights[family].items():
+                buffer = owner.state[weight].get("momentum_buffer")
+                if buffer is None:
+                    raise RuntimeError(
+                        f"missing {family} momentum buffer for layer {layer}"
+                    )
+                canonical, _descent, diagnostics = exact_muon_update(
+                    weight.detach(),
+                    gradients[family][layer].to(
+                        device=weight.device, dtype=weight.dtype
+                    ),
+                    buffer,
+                    learning_rate=learning_rate,
+                    momentum=float(group["momentum"]),
+                    weight_decay=weight_decay,
+                    ns_steps=int(group["ns_steps"]),
+                )
+                historical = historical_double_decay_update(
+                    weight.detach(),
+                    canonical,
+                    learning_rate=learning_rate,
+                    weight_decay=weight_decay,
+                )
+                dense_oracle["canonical_single_decay"][family][layer] = (
+                    canonical.detach().float().cpu()
+                )
+                dense_oracle["historical_double_decay"][family][layer] = (
+                    historical.detach().float().cpu()
+                )
+                dense_oracle_metadata["canonical_single_decay"][family][
+                    layer
+                ] = diagnostics
+                dense_oracle_metadata["historical_double_decay"][family][
+                    layer
+                ] = {
+                    "update_fro": float(historical.norm()),
+                    "extra_decay_factor": 1.0
+                    - learning_rate * weight_decay,
+                }
 
     def restore(families: set[str]) -> float:
         for family, by_layer in modules.items():
@@ -288,9 +360,13 @@ def extract_production_updates(
         "gradient_replay": "one_backward_pass_three_exact_state_restores",
         "variants": variant_metadata,
     }
+    if return_dense_oracle:
+        metadata["dense_oracle"] = dense_oracle_metadata
     del model, optimizer
     if device.startswith("cuda"):
         torch.cuda.empty_cache()
+    if return_dense_oracle:
+        return variants, dense_oracle, metadata
     return variants, metadata
 
 
