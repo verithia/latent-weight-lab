@@ -1,0 +1,102 @@
+{
+  "authorization": {
+    "additional_structure_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "scope": "exactly one 124M/0.5TPP six-stage full-radius run",
+    "training_requires_exact_config_mfu_pass": true
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_0p5tpp.json",
+    "config_sha256": "806926e1241834b17f7d6a82f3acc6b19a2de004e7639bfc671e460427e3969c",
+    "coordinates_per_layer": 405504,
+    "incoming_schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "max_iters": 238,
+    "planned_tpp": 0.5,
+    "radius": 1.0,
+    "radius_screen_result_commit": "d2d7dbd09086074d78ad9e36665b9aa73c37a923"
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "directional_only": "terminal validation CE > 5.5918 and < 5.649507999420166",
+    "reject": "terminal validation CE >= 5.649507999420166, nonfinite path, incomplete evaluation, or identity mismatch",
+    "success": "finite complete terminal validation CE <= 5.5918",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "base_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_0p5tpp.json",
+    "base_config_sha256": "0405340d2ea327331f983662c2da3db48c803271cec4861779948884abc1d21f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "07602c5045077a848ab1e0a176431dde6b15c07be08b271a56276e91ad13ceae",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b2973183268673859272837c80a13a8ddeec6b2bd5a43cef1703bcc9a039c641",
+      "examples/nanogpt/test_muon_directed_product.py": "681ed76c96e1521bea019462b2d3f95af4960ce746e06204458a7a6f4ebf8694",
+      "examples/nanogpt/train.py": "bc43b09497dd396025f1335c40889698ba1e7f4d5ad7ca76809e6e8d388cda44",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    },
+    "radius_screen_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_radius_step60_result.json",
+    "radius_screen_result_sha256": "2a04dc097413d427dd806943fc86299f7f4dcd0f54bfdd3a4e69a025cbe7892c"
+  },
+  "protocol": {
+    "callback": false,
+    "exact_config_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/performance_preflight.json",
+    "exact_config_preflight_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "exact_config_preflight_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/performance_preflight.log",
+    "execution": "direct foreground polling through terminal exit",
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "prelaunch_run_metadata": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/prelaunch_run_metadata.json",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "run_directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_22x6_radius1p00_0p5tpp",
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_0p5tpp.json"
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "question": "Does correcting the six-stage c_fc family understep close full MLP replacement to within +0.10 CE of attention-only?",
+  "schema_version": "mai_124m_mlp_cfc_22x6_radius1p00_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
