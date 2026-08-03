@@ -48,6 +48,7 @@ from examples.nanogpt.analyze_mlp_joint_step_response_surface import (
     paired_comparison,
 )
 from examples.nanogpt.model import MultiOptimizer
+from examples.nanogpt.muon import zeropower_via_newtonschulz5
 from examples.nanogpt.muon_matched_givens import (
     MuonFunctionalShear,
     MuonMatchedGivens,
@@ -190,6 +191,36 @@ def _owner_and_group(
     return owner, owner.param_groups[0]
 
 
+@torch.no_grad()
+def production_muon_request(
+    weight: torch.Tensor,
+    gradient: torch.Tensor,
+    momentum_buffer: torch.Tensor,
+    *,
+    learning_rate: float,
+    momentum: float,
+    weight_decay: float,
+    ns_steps: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Emulate the custom optimizer's native-dtype Muon request exactly."""
+    buffer = momentum_buffer.detach().clone()
+    gradient_native = gradient.detach().clone()
+    buffer.mul_(float(momentum)).add_(gradient_native)
+    combined = gradient_native.add(buffer, alpha=float(momentum))
+    polar = zeropower_via_newtonschulz5(
+        combined, steps=int(ns_steps)
+    ).float()
+    scale = max(
+        1.0,
+        polar.shape[0] / max(1, polar.numel() / polar.shape[0]),
+    ) ** 0.5
+    direction = -scale * polar
+    requested = float(learning_rate) * (
+        direction - float(weight_decay) * weight.float()
+    )
+    return requested, direction
+
+
 def extract_reconstructed_capacity_updates(
     checkpoint: Path,
     config: dict[str, Any],
@@ -257,7 +288,7 @@ def extract_reconstructed_capacity_updates(
             momentum = owner.state[weight].get("momentum_buffer")
             if momentum is None:
                 raise RuntimeError(f"missing {family} momentum for layer {layer}")
-            canonical, descent, _dense_row = exact_muon_update(
+            canonical, _descent, _dense_row = exact_muon_update(
                 weight,
                 weight.grad,
                 momentum,
@@ -266,7 +297,15 @@ def extract_reconstructed_capacity_updates(
                 weight_decay=weight_decay,
                 ns_steps=int(group["ns_steps"]),
             )
-            direction = descent + weight_decay * weight.float()
+            requested, direction = production_muon_request(
+                weight,
+                weight.grad,
+                momentum,
+                learning_rate=learning_rate,
+                momentum=float(group["momentum"]),
+                weight_decay=weight_decay,
+                ns_steps=int(group["ns_steps"]),
+            )
             dense_historical[family][layer] = historical_double_decay_update(
                 weight,
                 canonical,
@@ -283,7 +322,7 @@ def extract_reconstructed_capacity_updates(
                 for stages in residual_stages:
                     raw, row = functional_coordinate_mix_update(
                         weight,
-                        canonical,
+                        requested,
                         direction,
                         inputs,
                         pre_gelu,
@@ -305,7 +344,7 @@ def extract_reconstructed_capacity_updates(
                 for stages in residual_stages:
                     raw, row = reconstruct_cproj_update(
                         weight,
-                        canonical,
+                        requested,
                         direction,
                         parent_stages=int(module.stages),
                         residual_stages=int(stages),

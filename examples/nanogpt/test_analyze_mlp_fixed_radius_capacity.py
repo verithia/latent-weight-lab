@@ -6,6 +6,7 @@ from examples.nanogpt.analyze_mlp_fixed_radius_capacity import (
     candidate_names,
     classify_capacity,
     normalize_family_to_radius,
+    production_muon_request,
     quantized_update,
 )
 
@@ -27,6 +28,24 @@ def test_family_normalization_matches_requested_radius() -> None:
     normalized, row = normalize_family_to_radius(bases, raw, 0.05)
     assert set(normalized) == {0, 1}
     assert row["relative_radius_error"] < 0.02
+
+
+def test_production_request_preserves_native_buffer_rounding() -> None:
+    weight = torch.randn(8, 8).to(torch.bfloat16)
+    gradient = torch.randn(8, 8).to(torch.bfloat16) * 0.01
+    buffer = torch.randn(8, 8).to(torch.bfloat16) * 0.02
+    requested, direction = production_muon_request(
+        weight,
+        gradient,
+        buffer,
+        learning_rate=0.002,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    assert requested.dtype == torch.float32
+    assert direction.dtype == torch.float32
+    assert torch.isfinite(requested).all()
 
 
 def _rows() -> list[dict[str, object]]:
