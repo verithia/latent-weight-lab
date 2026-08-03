@@ -1,0 +1,130 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "checkpoint_mutation_authorized": false,
+    "larger_rung_authorized": false,
+    "pass_authorizes": "production implementation and a separately preregistered real-training MFU gate only",
+    "training_authorized": false
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "maximum_coordinates_per_layer": 540672,
+    "maximum_radius_error": 1e-07,
+    "minimum_improvement_over_current": 0.12,
+    "minimum_layer_positive_line_recovery": 0.62,
+    "minimum_positive_line_recovery": 0.65,
+    "primary_metric": "minimum family positive-line recovery across all three fresh terminal gradient windows",
+    "reject": "if none passes, reject additional depth/capacity in this directed sparse product topology",
+    "selection": "among candidates passing every threshold on every gradient, select the fewest coordinates, then the highest worst-window recovery",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_0p5tpp/ckpt.pt",
+    "checkpoint_next_iter": 238,
+    "checkpoint_sha256": "aaf00e4b36489fb4eb0d720cc821e401579c3d00c917489ea86a4eb61b278f1a",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
+    "config_sha256": "80c3cd31d1494799c19c1083504231819caefda33f917d6e48fa96c73257ed7b",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_directed_product_terminal_capacity.py",
+    "entrypoint_sha256": "2287ab327fccbfeafce1264ade592a770918419265063c1d6553abdf07a445fc",
+    "implementation_commit": "a87440582d9a26a90ea13d419b0a46e34b36019f",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_result.json",
+    "parent_result_sha256": "3edbae656215de35a62846c7dfc67d5be12901764ff0177ac9969cecde183748"
+  },
+  "protocol": {
+    "callback": false,
+    "candidate_schedules": {
+      "current_depth3_total88": [
+        30,
+        29,
+        29
+      ],
+      "depth4_total132": [
+        33,
+        33,
+        33,
+        33
+      ],
+      "depth4_total176": [
+        44,
+        44,
+        44,
+        44
+      ],
+      "depth4_total88": [
+        22,
+        22,
+        22,
+        22
+      ],
+      "depth6_total132": [
+        22,
+        22,
+        22,
+        22,
+        22,
+        22
+      ],
+      "depth6_total176": [
+        30,
+        30,
+        29,
+        29,
+        29,
+        29
+      ],
+      "depth6_total88": [
+        15,
+        15,
+        15,
+        15,
+        14,
+        14
+      ]
+    },
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/analyze_mlp_cfc_directed_product_terminal_capacity.py",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_0p5tpp/ckpt.pt",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_capacity_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_capacity",
+      "--device",
+      "cuda"
+    ],
+    "current_candidate": "current_depth3_total88",
+    "execution": "direct foreground polling through process exit",
+    "gpu": 0,
+    "gradient_accumulation_steps": 8,
+    "gradient_batch_size": 4,
+    "gradient_seeds": [
+      2026080401,
+      2026080407,
+      2026080413
+    ],
+    "gradient_split": "train",
+    "heartbeat": false,
+    "host": "PRO6",
+    "output_directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_capacity",
+    "parameter_updates_to_checkpoint": 0,
+    "queue_worker": false,
+    "registered_radius_ratio": 0.6589686140591383,
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "question": "Can additional directed-product depth or at most 2x coordinates materially raise c_fc dense-direction recovery across multiple fresh terminal gradients?",
+  "schema_version": "mai_124m_mlp_cfc_terminal_capacity_plan_v1",
+  "status": "registered_before_terminal_capacity_measurement"
+}
