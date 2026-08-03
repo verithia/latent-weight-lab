@@ -15,6 +15,7 @@ individually harmful directions and from approximately additive updates.
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import math
 import sys
@@ -78,6 +79,8 @@ def family_weights(model: GPT) -> dict[str, dict[int, torch.Tensor]]:
 
 
 def _gradient_norm(parameters: list[torch.Tensor]) -> float:
+    if not parameters:
+        return 0.0
     squares = torch.zeros((), device=parameters[0].device)
     for parameter in parameters:
         if parameter.grad is not None:
@@ -99,24 +102,19 @@ def extract_production_updates(
     checkpoint: Path,
     config: dict[str, Any],
     train_batches: list[torch.Tensor],
-    families: set[str],
     *,
     device: str,
     dtype: torch.dtype,
-) -> tuple[dict[str, dict[int, torch.Tensor]], dict[str, Any]]:
-    """Run one disposable production step and return materialized deltas."""
+) -> tuple[
+    dict[str, dict[str, dict[int, torch.Tensor]]],
+    dict[str, Any],
+]:
+    """Replay three optimizer masks from one identical gradient/context."""
     model, optimizer, checkpoint_payload = load_model_and_optimizer(
         checkpoint, config, device
     )
     model.train()
     weights = family_weights(model)
-    before = {
-        family: {
-            layer: weight.detach().float().cpu().clone()
-            for layer, weight in by_layer.items()
-        }
-        for family, by_layer in weights.items()
-    }
     optimizer.zero_grad(set_to_none=True)
     model.prepare_block_fht_cache(dtype=dtype)
     losses: list[float] = []
@@ -141,53 +139,147 @@ def extract_production_updates(
         model.product_fht_clip_parameters(), clip_threshold
     )
     gradient_norm_after_clip = _gradient_norm(all_parameters)
-    allowed = {
-        id(weight)
-        for family in families
-        for weight in weights[family].values()
-    }
-    for parameter in all_parameters:
-        if id(parameter) not in allowed:
-            parameter.grad = None
-    selected_gradient_norm = _gradient_norm(
-        [parameter for parameter in all_parameters if id(parameter) in allowed]
-    )
-    optimizer.step()
-
-    updates = {
+    gradients = {
         family: {
-            layer: weight.detach().float().cpu() - before[family][layer]
-            for layer, weight in weights[family].items()
+            layer: weight.grad.detach().cpu().clone()
+            for layer, weight in by_layer.items()
         }
-        for family in families
+        for family, by_layer in weights.items()
     }
+    before = {
+        family: {
+            layer: weight.detach().float().cpu().clone()
+            for layer, weight in by_layer.items()
+        }
+        for family, by_layer in weights.items()
+    }
+    modules = {
+        "c_fc": {
+            layer: model.transformer.h[layer].mlp.c_fc
+            for layer in weights["c_fc"]
+        },
+        "c_proj": {
+            layer: model.transformer.h[layer].mlp.c_proj
+            for layer in weights["c_proj"]
+        },
+    }
+    module_states = {
+        family: {
+            layer: {
+                name: tensor.detach().cpu().clone()
+                for name, tensor in module.state_dict().items()
+            }
+            for layer, module in by_layer.items()
+        }
+        for family, by_layer in modules.items()
+    }
+    contexts = {
+        layer: (
+            module._functional_inputs,
+            module._functional_pre_gelu,
+        )
+        for layer, module in modules["c_fc"].items()
+    }
+    if any(inputs is None or pre is None for inputs, pre in contexts.values()):
+        raise RuntimeError("functional c_fc context was not recorded")
+    cfc_owner = next(
+        child
+        for child in optimizer.optimizers
+        if isinstance(child, MuonFunctionalShear)
+    )
+    cproj_owner = next(
+        child
+        for child in optimizer.optimizers
+        if isinstance(child, MuonMatchedGivens)
+    )
+    owner_states = {
+        "c_fc": copy.deepcopy(cfc_owner.state_dict()),
+        "c_proj": copy.deepcopy(cproj_owner.state_dict()),
+    }
+
+    def restore(families: set[str]) -> float:
+        for family, by_layer in modules.items():
+            for layer, module in by_layer.items():
+                module.load_state_dict(module_states[family][layer])
+        cfc_owner.load_state_dict(copy.deepcopy(owner_states["c_fc"]))
+        cproj_owner.load_state_dict(copy.deepcopy(owner_states["c_proj"]))
+        cfc_owner.last_step_diagnostics = []
+        cproj_owner.last_step_diagnostics = []
+        for parameter in all_parameters:
+            parameter.grad = None
+        for family in families:
+            for layer, weight in weights[family].items():
+                weight.grad = gradients[family][layer].to(
+                    device=weight.device, dtype=weight.dtype
+                )
+        for layer, module in modules["c_fc"].items():
+            module.clear_functional_context()
+            if "c_fc" in families:
+                inputs, pre = contexts[layer]
+                module._functional_inputs = inputs
+                module._functional_pre_gelu = pre
+        return _gradient_norm(
+            [
+                weight
+                for family in families
+                for weight in weights[family].values()
+            ]
+        )
+
+    variants: dict[str, dict[str, dict[int, torch.Tensor]]] = {}
+    variant_metadata: dict[str, Any] = {}
+    for variant, families in (
+        ("cfc_only", {"c_fc"}),
+        ("cproj_only", {"c_proj"}),
+        ("joint", {"c_fc", "c_proj"}),
+    ):
+        selected_gradient_norm = restore(families)
+        if "c_fc" in families:
+            cfc_owner.step()
+        if "c_proj" in families:
+            cproj_owner.step()
+        variants[variant] = {
+            family: {
+                layer: weight.detach().float().cpu() - before[family][layer]
+                for layer, weight in weights[family].items()
+            }
+            for family in families
+        }
+        variant_metadata[variant] = {
+            "families": sorted(families),
+            "selected_gradient_norm_after_clip": selected_gradient_norm,
+            "update_fro": {
+                family: math.sqrt(
+                    sum(
+                        float(update.double().square().sum())
+                        for update in by_layer.values()
+                    )
+                )
+                for family, by_layer in variants[variant].items()
+            },
+            "optimizer_diagnostics": _diagnostics(optimizer),
+        }
+    restore(set())
     group_lrs = {
         type(child).__name__: [float(group["lr"]) for group in child.param_groups]
         for child in optimizer.optimizers
     }
     metadata = {
-        "families": sorted(families),
         "next_iter": int(checkpoint_payload["next_iter"]),
         "mean_training_ce": sum(losses) / len(losses),
         "gradient_accumulation_steps": len(train_batches),
         "gradient_norm_before_clip": gradient_norm_before_clip,
         "clip_norm_reported": float(reported_norm),
         "gradient_norm_after_clip": gradient_norm_after_clip,
-        "selected_gradient_norm_after_clip": selected_gradient_norm,
         "clip_threshold": clip_threshold,
         "optimizer_group_lrs": group_lrs,
-        "update_fro": {
-            family: math.sqrt(
-                sum(float(update.double().square().sum()) for update in by_layer.values())
-            )
-            for family, by_layer in updates.items()
-        },
-        "optimizer_diagnostics": _diagnostics(optimizer),
+        "gradient_replay": "one_backward_pass_three_exact_state_restores",
+        "variants": variant_metadata,
     }
     del model, optimizer
     if device.startswith("cuda"):
         torch.cuda.empty_cache()
-    return updates, metadata
+    return variants, metadata
 
 
 def assert_joint_matches_singletons(
@@ -518,36 +610,21 @@ def main() -> None:
         batches=int(protocol["gradient_accumulation_steps"]),
         seed=int(protocol["train_seed"]),
     )
-    extracted: dict[str, Any] = {}
-    cfc_payload, extracted["cfc_only"] = extract_production_updates(
+    extracted_updates, extracted = extract_production_updates(
         args.checkpoint,
         config,
         train_batches,
-        {"c_fc"},
-        device=args.device,
-        dtype=dtype,
-    )
-    cproj_payload, extracted["cproj_only"] = extract_production_updates(
-        args.checkpoint,
-        config,
-        train_batches,
-        {"c_proj"},
-        device=args.device,
-        dtype=dtype,
-    )
-    joint_payload, extracted["joint"] = extract_production_updates(
-        args.checkpoint,
-        config,
-        train_batches,
-        {"c_fc", "c_proj"},
         device=args.device,
         dtype=dtype,
     )
     exactness = assert_joint_matches_singletons(
-        cfc_payload["c_fc"], cproj_payload["c_proj"], joint_payload
+        extracted_updates["cfc_only"]["c_fc"],
+        extracted_updates["cproj_only"]["c_proj"],
+        extracted_updates["joint"],
     )
     variants = update_variants(
-        cfc_payload["c_fc"], cproj_payload["c_proj"]
+        extracted_updates["cfc_only"]["c_fc"],
+        extracted_updates["cproj_only"]["c_proj"],
     )
     batches_by_window = {
         f"validation_{index + 1}": fixed_batches(
