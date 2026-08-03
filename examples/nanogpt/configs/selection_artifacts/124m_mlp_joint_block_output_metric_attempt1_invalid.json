@@ -1,0 +1,20 @@
+{
+  "artifact_kind": "124m_mlp_joint_block_output_metric_invalid_attempt",
+  "schema_version": "mlp_joint_block_output_metric_invalid_attempt_v1",
+  "created_at": "2026-08-03",
+  "classification": "INVALID_IMPLEMENTATION_FAILURE_NO_SCIENTIFIC_RESULT",
+  "reason": "The block-output Gram accumulator was allocated on CPU while finite block-output deltas were CUDA tensors, causing a device-mismatch RuntimeError on the first metric contribution.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "85e10a74c01582cc5274d265da07411b2a130ccb",
+    "plan_sha256": "62daf664e617f0b9fe0dcef677a045911554e66341a549c3cad326def3063b53",
+    "entrypoint_sha256": "f90f5c9a7d0bdaff3c1160cf0d64df66ec1afc3d0d5ea7e3c11b9ead2ebbf260",
+    "exception": "RuntimeError: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!",
+    "output_directory_created": false,
+    "parameter_updates_to_checkpoint": 0
+  },
+  "burned_seeds": [20260858, 20260859, 20260860, 20260861, 20260862],
+  "scientific_values_observed": false,
+  "next_action": "Fix accumulator device placement, add regression coverage, freeze a v2 plan with entirely new seeds, and rerun once by direct foreground polling."
+}

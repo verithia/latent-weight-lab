@@ -71,7 +71,7 @@ def estimate_block_output_metric(
     model.prepare_block_fht_cache(dtype=dtype)
     try:
         for window, batches in batches_by_window.items():
-            gram = torch.zeros((2, 2), dtype=torch.float64)
+            gram = torch.zeros((2, 2), dtype=torch.float64, device=device)
             contributions = 0
             for tokens in batches:
                 _base_loss, base_values = forward_capture(

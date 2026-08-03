@@ -2,11 +2,24 @@ from __future__ import annotations
 
 import math
 
+import torch
+
 from examples.nanogpt.analyze_mlp_joint_block_output_metric import (
+    _accumulate_gram,
     decide_metric,
     normalize_coefficients,
     solve_metric_coefficients,
 )
+
+
+def test_gram_accumulator_accepts_outputs_on_accumulator_device() -> None:
+    gram = torch.zeros((2, 2), dtype=torch.float64)
+    base = torch.ones((2, 3), dtype=torch.float32)
+    _accumulate_gram(gram, base, base + 1.0, base + 2.0)
+    assert torch.allclose(
+        gram,
+        torch.tensor([[1.0, 2.0], [2.0, 4.0]], dtype=torch.float64),
+    )
 
 
 def test_metric_coefficients_preserve_materialized_update_budget() -> None:
