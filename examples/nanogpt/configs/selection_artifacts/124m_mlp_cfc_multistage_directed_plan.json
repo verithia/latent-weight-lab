@@ -1,0 +1,89 @@
+{
+  "artifact_kind": "124m_mlp_cfc_multistage_directed_plan",
+  "schema_version": "mlp_cfc_multistage_directed_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "At exactly matched total sparse coordinates, does a third task-selected directed residual-mixer stage close the remaining c_fc oracle gap left by the reliable two-stage product?",
+  "authorization": "One zero-persistent-update three-stage directed-product bracket only. No training, learned basis, LoRA, HyperConnection, residual-topology change, larger rung, watchdog, callback, queue worker, or heartbeat is authorized.",
+  "identity": {
+    "analysis_git_commit": "cdc3c5ade396a955bf8a3da3af76cc48b4d2f2cd",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "ee9bebeb970835ecf35ea01c3658cd06849c4055671a88a898726398b6e0c921",
+    "product_directed_result_sha256": "665c4d0b614699a99b22113161648b56939cdb5d2ae0155c0dc4ea6c1c2e0223"
+  },
+  "source_hashes_at_analysis_commit": {
+    "examples/nanogpt/analyze_mlp_cfc_multistage_directed.py": "ee9bebeb970835ecf35ea01c3658cd06849c4055671a88a898726398b6e0c921",
+    "examples/nanogpt/analyze_mlp_cfc_product_directed.py": "4ccf379d30dee3ccbac8792eaada4db92b13b41234e4f197516bc8078d92ccc3",
+    "examples/nanogpt/analyze_mlp_cfc_directed_sparse.py": "bbfda441f798a2e659d16325444e3a05e415f076f7b897ebaf1203178c02edd7",
+    "examples/nanogpt/analyze_mlp_fixed_radius_capacity.py": "8c906488b7112fac56f55f7da6dfe0fac9450a1a55153d125e064ec7edbfa01b",
+    "examples/nanogpt/analyze_mlp_dense_oracle_gap.py": "642b4967954aebc9adb8c010b4d25c2648da7fbd7b7e35ebdb55139eab7c130d",
+    "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 120,
+    "train_seed": 20261001,
+    "gradient_accumulation_steps": 8,
+    "validation_seeds": [20261004, 20261005],
+    "evaluation_batch_size": 2,
+    "evaluation_block_size": 512,
+    "validation_batches_per_window": 128,
+    "production_residual_stages": 24,
+    "three_stage_schedules": {
+      "44": [15, 15, 14],
+      "88": [30, 29, 29]
+    },
+    "coordinates_per_layer": {
+      "44_total": 135168,
+      "88_total": 270336
+    },
+    "ridge_ratio": 0.000001,
+    "solver_chunk_size": 32,
+    "control_max_abs_tolerance": 0.0,
+    "maximum_relative_radius_error": 0.00001,
+    "fit": "Greedy three-stage residual product. Every stage fits the remaining exact historical dense-Muon c_fc update from columns transformed by all preceding stages, yielding explicit higher-order product terms while holding total sparse coordinates fixed.",
+    "matched_controls": "Recompute directed44/directed88 and product22x2/product44x2 on the identical replay and held-out windows. The 44-total and 88-total three-stage schedules use exactly the same coordinate counts as their one- and two-stage controls.",
+    "fixed_radius": "Globally normalize only each final BF16 c_fc endpoint to the deployed production c_fc family Frobenius norm.",
+    "candidate_order": [
+      "baseline", "production_cfc", "production_cproj", "production_joint",
+      "dense_norm_cfc", "hybrid_norm_cfc",
+      "directed44_cfc", "hybrid_directed44_cfc",
+      "directed88_cfc", "hybrid_directed88_cfc",
+      "product22x2_cfc", "hybrid_product22x2_cfc",
+      "product44x2_cfc", "hybrid_product44x2_cfc",
+      "product44totalx3_cfc", "hybrid_product44totalx3_cfc",
+      "product88totalx3_cfc", "hybrid_product88totalx3_cfc"
+    ],
+    "exact_restore": "Restore every BF16 materialized MLP tensor around every candidate and persist zero model or optimizer updates to the checkpoint."
+  },
+  "decision_rule": {
+    "confidence_z": 2.576,
+    "reliable_improvement": "Candidate-minus-production 99% CI upper bound below zero and negative mean on every held-out window.",
+    "minimum_oracle_gap_fraction": 0.25,
+    "mean_oracle_gap_fraction": 0.4,
+    "oracle_gate": "Equal-radius dense c_fc must reliably beat production both alone and beside production c_proj on the new windows.",
+    "three_stage_pass": "A three-stage level must reliably beat production both alone and beside production c_proj, recover at least 25% of the same-window dense c_fc oracle gap in the worse attribution, and at least 40% on average.",
+    "selection": "Select 44-total if it passes; otherwise select 88-total only if it passes. Matched-depth controls are retained as mechanistic evidence but do not replace the production and oracle gates.",
+    "pass_classification": "THREE_STAGE_DIRECTED_CFC_PASSES",
+    "reject_classification": "THREE_STAGE_DIRECTED_CFC_REJECTED",
+    "architecture_gate": "A pass authorizes production implementation and an MFU preflight only; it does not directly authorize training or a larger rung."
+  },
+  "test_evidence": {
+    "focused_tests": "16 passed",
+    "scientific_validation_windows_inspected": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "worktree": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_midpoint_replay/pro6_mai_v3_124m_functionmix50_step120/ckpt.pt",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_functionmix50_midpoint_step120_replay.json",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_mlp_cfc_multistage_directed_20260803",
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0
+  }
+}

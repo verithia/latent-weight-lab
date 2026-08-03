@@ -1,0 +1,36 @@
+{
+  "artifact_kind": "124m_mlp_cfc_multistage_directed_cuda_smoke",
+  "schema_version": "mlp_cfc_multistage_directed_smoke_v1",
+  "created_at": "2026-08-03",
+  "authorization": "Disposable CUDA validity smoke only; no scientific-window inspection and no persistent checkpoint update.",
+  "identity": {
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "ee9bebeb970835ecf35ea01c3658cd06849c4055671a88a898726398b6e0c921"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 120,
+    "train_seed": 20260901,
+    "gradient_accumulation_steps": 8,
+    "validation_seeds": [20260902],
+    "evaluation_batch_size": 1,
+    "evaluation_block_size": 512,
+    "validation_batches_per_window": 1,
+    "production_residual_stages": 24,
+    "three_stage_schedules": {
+      "44": [15, 15, 14],
+      "88": [30, 29, 29]
+    },
+    "ridge_ratio": 0.000001,
+    "solver_chunk_size": 32,
+    "control_max_abs_tolerance": 0.0,
+    "maximum_relative_radius_error": 0.00001
+  },
+  "decision_rule": {
+    "confidence_z": 2.576,
+    "minimum_oracle_gap_fraction": 0.25,
+    "mean_oracle_gap_fraction": 0.4
+  },
+  "execution": {"host": "PRO6", "gpu": 0, "monitoring": "direct foreground polling only"}
+}
