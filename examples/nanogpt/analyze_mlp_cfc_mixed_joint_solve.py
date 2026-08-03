@@ -336,7 +336,8 @@ def classify(
         comparisons[name]["candidate_reliably_better"]
         for name in ("mixed_single", "mixed_hybrid")
     )
-    fraction_pass = (
+    finite_fractions = all(math.isfinite(value) for value in fractions.values())
+    fraction_pass = finite_fractions and (
         min(fractions.values()) >= float(minimum_fraction)
         and sum(fractions.values()) / len(fractions) >= float(mean_fraction)
     )
@@ -357,7 +358,10 @@ def classify(
         "next_action": next_action,
         "candidate_means": means,
         "comparisons": comparisons,
-        "oracle_gap_fraction_recovered": fractions,
+        "oracle_gap_fraction_recovered": {
+            name: value if math.isfinite(value) else None
+            for name, value in fractions.items()
+        },
         "gates": {
             "dense_cfc_oracle_valid": oracle_valid,
             "mixed_candidate_reliable_singleton_and_hybrid": mixed_reliable,
