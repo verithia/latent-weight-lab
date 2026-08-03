@@ -1,0 +1,83 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_mfu_retry1_result",
+  "schema_version": "mai_124m_mlp_cfc_directed_product_mfu_retry1_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "DIRECTED_PRODUCT_CFC_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_mfu_retry1_plan.json",
+    "sha256": "edd55fbf40249352b4445084f58ec061377b803ee4e5762da274a938ff57e2a9"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_mfu_retry1.json",
+    "sha256": "cbdb67234128a8f99b8735ea0964d15159e821fc27f3c82ff44bda4355aae6f2"
+  },
+  "implementation_commit": "29d5e90ff419cde1b13fc5541aff79b12ec49f27",
+  "execution_commit": "7f11044288a79f507955641b57ce42f84a3469b2",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "native_extension_required": true,
+    "native_extension_loaded": true
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_mfu_retry1/performance_preflight.json",
+    "sha256": "a14389834573bb5195ace071018886ee642146143e568541c57b9f1d45a04432",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_mfu_retry1/preflight.log",
+    "preflight_log_sha256": "ffce4c25bc9f73717a82abe5beb3e863a6bb6afbaa6a46d0c5713a21fe357989"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 415.2170362558925,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 160717.115,
+    "average_iter_ms": 1631.10125,
+    "model_tflops": 120.03244906738175,
+    "mfu_fraction": 0.2890836323811324,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31640.09,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "timing_breakdown_ms": {
+      "prepare": 3.77375,
+      "forward_backward": 1188.33875,
+      "flush": 4.285,
+      "gradient": 1.6,
+      "optimizer": 431.07375,
+      "data": 0.97125,
+      "other": 1.05625
+    }
+  },
+  "stability": {
+    "train_exit_code": 0,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "config_identity_matched": true,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "failed_runtime_control": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_mfu_result.json",
+    "result_sha256": "f914c41b4450ef8599fdc7167e32ca99d419d22131a35c8ecdb24a79f6bbc611",
+    "mfu_fraction": 0.008357316546691727,
+    "prepare_plus_flush_ms": 54880.41625,
+    "root_cause": "wrong Python environment lacked Ninja, so BlockFHT silently used the eager fallback",
+    "scientific_structure_changed_in_retry": false
+  },
+  "comparison": {
+    "same_host_prior_cproj_only_mfu_fraction": 0.31593993493562816,
+    "absolute_mfu_fraction_change": -0.02685630255449577,
+    "relative_mfu_change": -0.08499970407408087,
+    "caveat": "The prior cproj-only certificate is a same-host engineering reference, not a preregistered paired runtime comparison."
+  },
+  "decision": {
+    "mfu_gate_passed": true,
+    "smallest_rung_scientific_training_plan_authorized": true,
+    "scientific_training_started_by_this_artifact": false,
+    "larger_rung_authorized": false,
+    "additional_structure_authorized": false
+  }
+}
