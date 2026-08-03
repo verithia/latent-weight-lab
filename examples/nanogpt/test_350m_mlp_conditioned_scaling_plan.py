@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import subprocess
 from pathlib import Path
 
 
@@ -15,10 +16,22 @@ VALIDATOR_CONTRACT_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_mlp_functional_shear_stability_validator_contract.json"
 )
+V2_REQUALIFICATION_COMMIT = "13cc24e644614b33c6796c631997552b1e735fc4"
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def sha256_at_commit(commit: str, relative_path: str) -> str:
+    """Hash an immutable historical blob instead of today's mutable worktree file."""
+    blob = subprocess.run(
+        ["git", "show", f"{commit}:{relative_path}"],
+        cwd=REPO,
+        check=True,
+        stdout=subprocess.PIPE,
+    ).stdout
+    return hashlib.sha256(blob).hexdigest()
 
 
 def load(path: Path) -> dict:
@@ -122,8 +135,9 @@ def test_350m_conditioned_scaling_plan_binds_every_input() -> None:
     assert parent["preregistered_decision_rule"]["success"].find("4.4629") >= 0
     assert candidate["preregistered_decision_rule"]["attention_only_absolute_ce_ceiling"] == 4.5629
 
+    causal_repair_commit = plan["implementation"]["causal_repair_commit"]
     for relative, expected in plan["implementation"]["source_hashes"].items():
-        assert sha256(REPO / relative) == expected
+        assert sha256_at_commit(causal_repair_commit, relative) == expected
     assert (
         parent["data_manifest_sha256"]
         == candidate["data_manifest_sha256"]
@@ -234,7 +248,10 @@ def test_v2_requalification_is_distinct_and_prior_anchored() -> None:
     assert sha256(REPO / plan["candidate"]["config"]) == plan["candidate"]["config_sha256"]
     assert sha256(REPO / plan["parent"]["result"]) == plan["parent"]["result_sha256"]
     assert sha256(REPO / plan["v1_rejection"]["result"]) == plan["v1_rejection"]["result_sha256"]
-    assert sha256(REPO / plan["validator"]["path"]) == plan["validator"]["sha256"]
+    assert (
+        sha256_at_commit(V2_REQUALIFICATION_COMMIT, plan["validator"]["path"])
+        == plan["validator"]["sha256"]
+    )
     basis = plan["historical_basis"]
     assert sha256(REPO / basis["preexisting_124m_plan"]) == basis["preexisting_124m_plan_sha256"]
     assert plan["rules"]["minimum_internal_limiter_active_rows"] == 1
@@ -257,7 +274,11 @@ def test_v2_preflight_result_authorizes_only_the_registered_candidate() -> None:
     assert sha256(REPO / result["requalification_plan"]["path"]) == (
         result["requalification_plan"]["sha256"]
     )
-    assert sha256(REPO / result["validator"]["path"]) == result["validator"]["sha256"]
+    assert result["execution"]["git_commit"] == V2_REQUALIFICATION_COMMIT
+    assert (
+        sha256_at_commit(result["execution"]["git_commit"], result["validator"]["path"])
+        == result["validator"]["sha256"]
+    )
     assert result["performance"]["mfu_fraction"] >= result["performance"]["minimum_mfu_fraction"]
     stability = result["stability"]
     assert stability["observed_rows"] == stability["expected_rows"] == 600
