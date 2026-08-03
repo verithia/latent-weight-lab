@@ -38,8 +38,6 @@ from examples.nanogpt.analyze_mlp_dense_oracle_gap import (
 from examples.nanogpt.analyze_mlp_joint_prospective_step import (
     _autocast,
     _gradient_norm,
-    assert_joint_matches_singletons,
-    extract_production_updates,
     family_weights,
     historical_double_decay_update,
     optimizer_parameters,
@@ -363,10 +361,30 @@ def extract_reconstructed_capacity_updates(
         "gradient_norm_after_clip": gradient_norm_after_clip,
         "diagnostics": diagnostics,
     }
+    # Take the actual custom-optimizer steps only after every alternative has
+    # been constructed.  This keeps the production control, gradients,
+    # momentum, functional context, and CUDA execution in one replay state.
+    cfc_owner.step()
+    cproj_owner.step()
+    production = {
+        family: {
+            layer: weight.detach().float().cpu() - bases[family][layer].float()
+            for layer, weight in by_layer.items()
+        }
+        for family, by_layer in weights.items()
+    }
+    metadata["production_optimizer_diagnostics"] = {
+        "c_fc": list(cfc_owner.last_step_diagnostics),
+        "c_proj": list(cproj_owner.last_step_diagnostics),
+    }
     del model, optimizer
     if device.startswith("cuda"):
         torch.cuda.empty_cache()
-    return bases, dense_historical, {"raw": raw_by_level, "metadata": metadata}
+    return bases, dense_historical, {
+        "raw": raw_by_level,
+        "production": production,
+        "metadata": metadata,
+    }
 
 
 def candidate_names(levels: list[int]) -> list[str]:
@@ -537,19 +555,6 @@ def main() -> None:
         batches=int(protocol["gradient_accumulation_steps"]),
         seed=int(protocol["train_seed"]),
     )
-    production, _dense, extracted = extract_production_updates(
-        args.checkpoint,
-        config,
-        train_batches,
-        device=args.device,
-        dtype=dtype,
-        return_dense_oracle=True,
-    )
-    exactness = assert_joint_matches_singletons(
-        production["cfc_only"]["c_fc"],
-        production["cproj_only"]["c_proj"],
-        production["joint"],
-    )
     levels = [int(value) for value in protocol["expanded_residual_stages"]]
     control_level = int(protocol["control_residual_stages"])
     all_levels = [control_level, *levels]
@@ -564,8 +569,8 @@ def main() -> None:
         )
     )
     raw = reconstructed["raw"]
-    prod_cfc = production["cfc_only"]["c_fc"]
-    prod_cproj = production["cproj_only"]["c_proj"]
+    prod_cfc = reconstructed["production"]["c_fc"]
+    prod_cproj = reconstructed["production"]["c_proj"]
     reconstructed_control = {
         "c_fc": {
             layer: quantized_update(bases["c_fc"][layer], update)
@@ -699,17 +704,16 @@ def main() -> None:
         + "\n"
     )
     paths["prospective"].write_text(
-        json.dumps(extracted, indent=2, sort_keys=True) + "\n"
+        json.dumps(reconstructed["metadata"], indent=2, sort_keys=True) + "\n"
     )
     summary = {
         "schema_version": SCHEMA_VERSION,
         "decision": decision,
         "production_reconstruction_max_abs_error": reconstruction_max_abs,
-        "joint_singleton_update_max_abs_error": exactness,
         "normalization": normalization,
         "direction_recovery_against_norm_dense": direction_recovery,
         "parameter_updates_to_checkpoint": 0,
-        "disposable_optimizer_steps": 3,
+        "disposable_optimizer_steps": 2,
         "checkpoint_next_iter": int(checkpoint_payload["next_iter"]),
         "identity": {
             "checkpoint_sha256": file_sha256(args.checkpoint),
