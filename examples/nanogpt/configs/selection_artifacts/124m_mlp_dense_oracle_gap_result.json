@@ -1,0 +1,83 @@
+{
+  "artifact_kind": "124m_mlp_dense_oracle_gap_result",
+  "schema_version": "mlp_dense_oracle_gap_result_v1",
+  "created_at": "2026-08-03",
+  "classification": "LOCAL_DENSE_ORACLE_NOT_BETTER_THAN_PRODUCTION",
+  "secondary_interpretation": "NATIVE_DENSE_OVERSHOOTS_BUT_BOTH_FAMILIES_HAVE_SAME_RADIUS_DIRECTION_CAPACITY_GAP",
+  "interpretation": "The preregistered primary classifier is preserved: the native historical and canonical dense joint Muon steps are both reliably worse than the deployed joint step. Their family norms are about 1.5x the deployed norms, however, and every registered same-radius attribution passes: norm-matched dense c_fc and c_proj each beat their deployed singleton, both hybrid substitutions beat the deployed joint step, and the norm-matched dense joint beats the deployed joint step. The native dense step therefore overshoots, while both deployed charts discard useful direction at the current safe radius. This does not authorize a larger step, learned basis, LoRA, HyperConnection, or residual-topology change.",
+  "identity": {
+    "git_commit": "39c675476a50af5f8db3af482cefce1023d32c70",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "d3e13e7b98e94a6e5ac101712a3cb27c3826737a4b913cfd5ef318ba4712a2d6",
+    "entrypoint_sha256": "642b4967954aebc9adb8c010b4d25c2648da7fbd7b7e35ebdb55139eab7c130d"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 45.978517055511475,
+    "direct_foreground_polling": true,
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 3,
+    "checkpoint_next_iter": 120,
+    "checkpoint_hash_after_run": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "joint_singleton_update_max_abs_error": {"c_fc": 0.0, "c_proj": 0.0}
+  },
+  "norm_match": {
+    "c_fc_scale": 0.663447935845893,
+    "c_proj_scale": 0.6402985719136708,
+    "production_c_fc_fro": 0.1690545208303097,
+    "native_dense_c_fc_fro": 0.25481203828717314,
+    "production_c_proj_fro": 0.0824642853991701,
+    "native_dense_c_proj_fro": 0.12879036283449413
+  },
+  "heldout_mean_ce": {
+    "baseline": 5.908613558858633,
+    "production_cfc": 5.907399792224169,
+    "production_cproj": 5.906141106039286,
+    "production_joint": 5.9056239407509565,
+    "dense_historical_cfc": 5.905803173780441,
+    "dense_historical_cproj": 5.905345417559147,
+    "dense_historical_joint": 5.9071122743189335,
+    "dense_norm_cfc": 5.906563755124807,
+    "dense_norm_cproj": 5.905189009383321,
+    "dense_norm_joint": 5.905128836631775,
+    "hybrid_norm_cfc": 5.9052314050495625,
+    "hybrid_norm_cproj": 5.9051063396036625,
+    "dense_canonical_joint": 5.907114595174789
+  },
+  "registered_comparisons": {
+    "native_dense_joint_vs_production": {"mean_ce": 0.0014883335679769516, "ci99": [0.000751603799005098, 0.002225063336948805], "window_means": [0.0015394315123558044, 0.0014372356235980988], "reliably_better": false},
+    "canonical_dense_joint_vs_production": {"mean_ce": 0.0014906544238328934, "ci99": [0.00075538059607575, 0.002225928251590037], "window_means": [0.0015654116868972778, 0.001415897160768509], "reliably_better": false},
+    "canonical_vs_historical_dense_joint": {"mean_ce": 0.0000023208558559417725, "ci99": [-0.00006888036059359706, 0.0000735220723054806], "window_means": [0.00002598017454147339, -0.000021338462829589844], "reliably_better": false},
+    "dense_norm_joint_vs_production": {"mean_ce": -0.000495104119181633, "ci99": [-0.0008401412693078469, -0.00015006696905541905], "window_means": [-0.0005104728043079376, -0.00047973543405532837], "reliably_better": true},
+    "dense_norm_cfc_vs_production_cfc": {"mean_ce": -0.0008360370993614197, "ci99": [-0.0009787549176387858, -0.0006933192810840537], "window_means": [-0.0007781349122524261, -0.0008939392864704132], "reliably_better": true},
+    "dense_norm_cproj_vs_production_cproj": {"mean_ce": -0.0009520966559648514, "ci99": [-0.0012119058761524597, -0.000692287435777243], "window_means": [-0.0009702220559120178, -0.0009339712560176849], "reliably_better": true},
+    "hybrid_norm_cfc_vs_production_joint": {"mean_ce": -0.0003925357013940811, "ci99": [-0.0005259655503478314, -0.0002591058524403308], "window_means": [-0.0004194006323814392, -0.000365670770406723], "reliably_better": true},
+    "hybrid_norm_cproj_vs_production_joint": {"mean_ce": -0.0005176011472940445, "ci99": [-0.0007817558298364613, -0.0002534464647516276], "window_means": [-0.0005266889929771423, -0.0005085133016109467], "reliably_better": true}
+  },
+  "weight_space_recovery_against_native_dense": {
+    "production_c_fc": {"cosine": 0.5055516711254113, "fixed_scale_recovery": 0.23065126176501582, "positive_line_recovery": 0.2555824921776961},
+    "production_c_proj": {"cosine": 0.539172099592884, "fixed_scale_recovery": 0.2804799895753519, "positive_line_recovery": 0.29070655297939885},
+    "norm_dense_c_fc": {"fixed_scale_recovery": 0.8867326951017171},
+    "norm_dense_c_proj": {"fixed_scale_recovery": 0.8706148635360254}
+  },
+  "output_effect_recovery_against_native_dense_joint": {
+    "production_block_fixed_scale_mean": 0.5876409585684016,
+    "production_block_fixed_scale_range": [0.5721362460915718, 0.5964448545299402],
+    "production_mlp_fixed_scale_mean": 0.5784478433152152,
+    "production_mlp_fixed_scale_range": [0.5578964738582319, 0.5921021318771384],
+    "norm_dense_block_fixed_scale_mean": 0.8616565565694495,
+    "norm_dense_block_fixed_scale_range": [0.8506228751706997, 0.8692095403126688],
+    "norm_dense_mlp_fixed_scale_mean": 0.8532486885992481,
+    "norm_dense_mlp_fixed_scale_range": [0.8375282676524074, 0.8643753762884765]
+  },
+  "raw_outputs": {
+    "summary_sha256": "172f8b68959672569ff470b5da28b5fca9f56d25149f61191fa20aedb7d71bc0",
+    "heldout_ce_sha256": "bbfb0fd366e1092a4b62df5c7c50ffdfcd0bdaadba1ace645d8cb4d49ac73a78",
+    "output_effect_recovery_sha256": "704d7d999de4989c5ce81754b3867c415193b08008b95158ee820f3cf1096d56",
+    "prospective_step_metadata_sha256": "92326f314334cdd6060478f7323c192d313cefa22b6b00bc8be581e2f40bdff9"
+  },
+  "next_action": "At exactly the deployed per-family Frobenius norms, increase only the task-matched chart coordinate capacity and test c_fc and c_proj separately and jointly. The exact 64+24 production reconstruction must first match the deployed update. Do not increase step radius and do not train until a held-out zero-update capacity bracket passes."
+}
