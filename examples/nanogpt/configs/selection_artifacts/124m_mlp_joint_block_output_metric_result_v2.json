@@ -1,0 +1,76 @@
+{
+  "artifact_kind": "124m_mlp_joint_block_output_metric_result",
+  "schema_version": "mlp_joint_block_output_metric_result_v2",
+  "created_at": "2026-08-03",
+  "classification": "BLOCK_OUTPUT_METRIC_REJECTED",
+  "interpretation": "The full output metric recovers the harmful diagonal misallocation but is statistically indistinguishable from the production step. The remaining all-depth interaction is therefore not a static two-family step-coordination defect; return to generator representational capacity and nonlinear functional structure.",
+  "identity": {
+    "git_commit": "f5d9e6e1a98350e4af51d1c0622f872a67e2a57d",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "49130f88db0ac5449af2f8a6643a23a05e112ac44f59adc6f0657d1a1a9fc6bb",
+    "entrypoint_sha256": "0cf7f599a43d18f2d50d7f3e7138a570348fdcfbccdef13551b7814cd3d0b7f2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 10.602227449417114,
+    "direct_foreground_polling": true,
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 3,
+    "checkpoint_next_iter": 120,
+    "checkpoint_hash_after_run": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "joint_singleton_update_max_abs_error": {"c_fc": 0.0, "c_proj": 0.0}
+  },
+  "production_update": {
+    "c_fc_fro": 0.16899389871151152,
+    "c_proj_fro": 0.08248659892760866,
+    "gradient_update_dot": [-0.001825178734575053, -0.004538883103373869]
+  },
+  "block_output_metric": {
+    "mean_gram": [
+      [0.00006715412274372836, 0.00009813370469313302],
+      [0.00009813370469313302, 0.0003118135759919074]
+    ],
+    "mean_correlation": 0.6781633951136966,
+    "regularized_condition": 10.604627973164707,
+    "damping": 0.0
+  },
+  "constant_budget_coefficients": {
+    "production": [1.0, 1.0],
+    "full_metric": [0.996886356584787, 1.0129646658703853],
+    "diagonal_metric": [1.0765863891650267, 0.5765940319197267]
+  },
+  "heldout_256_pair_comparisons": {
+    "full_vs_production": {
+      "mean_ce": -0.00001944415271282196,
+      "sem": 0.000024941843443485062,
+      "ci99": [-0.00008369434142323948, 0.00004480603599759556],
+      "window_means": [-0.00002156570553779602, -0.0000173225998878479],
+      "reliably_better": false
+    },
+    "diagonal_vs_production": {
+      "mean_ce": 0.0003057848662137985,
+      "sem": 0.00006997097556938208,
+      "ci99": [0.0001255396331470703, 0.00048603009928052676],
+      "window_means": [0.0003594793379306793, 0.0002520903944969177],
+      "reliably_better": false
+    },
+    "full_vs_diagonal": {
+      "mean_ce": -0.0003252290189266205,
+      "sem": 0.00007185118440306268,
+      "ci99": [-0.00051031766994891, -0.000140140367904331],
+      "window_means": [-0.00038104504346847534, -0.0002694129943847656],
+      "reliably_better": true
+    }
+  },
+  "raw_outputs": {
+    "summary_sha256": "2705002ca159d9e857252f72124d16a4972c7e895dca4c531ddd4ea68e8727da",
+    "metric_sha256": "78031f261f13e4b7a04ec7818b59b373842285417ed2198915677d46e2183dfc",
+    "solve_sha256": "c5470ae506cad7d36054a9ad8aaedddf0db679e74cf9cbd2a12185b839d2e3b8",
+    "validation_sha256": "6e0426cf9096867124db469674e7c6dc9d39fd7ace50af0c334a4d0cede42541",
+    "prospective_step_metadata_sha256": "c78420bd08cbdb91d2553c921e844f6d468cdc8014518646d9b5675a4f005baa"
+  },
+  "next_action": "Measure whether the fixed BlockFHT generator can represent the dense MLP's useful input-output action within the current residual/activation distribution. Prioritize function-space representability and structured dominant directions; do not spend more runs on scalar family LR or a 2x2 output metric, and do not add HyperConnection."
+}
