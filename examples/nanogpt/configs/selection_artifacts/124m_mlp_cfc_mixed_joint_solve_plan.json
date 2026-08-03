@@ -1,0 +1,87 @@
+{
+  "artifact_kind": "124m_mlp_cfc_mixed_joint_solve_plan",
+  "schema_version": "mlp_cfc_mixed_joint_solve_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "At the exact functionmix midpoint and deployed c_fc update radius, does solving the existing 64-stage skew parent plus 24-stage symmetric-shear residual coordinates jointly remove the coordinate-interference gap seen in the sequential chart?",
+  "authorization": "One zero-persistent-update mixed-coordinate diagnostic only. No training, learned basis, LoRA, HyperConnection, residual-topology change, larger rung, watchdog, callback, queue worker, or heartbeat is authorized.",
+  "identity": {
+    "analysis_git_commit": "8497dd8fa32a8f79b6d272598379d41f76ad754f",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "874c70ec45ad2c757b484a54d73e9a419bae406bca8e2b96febd0512ec702dc5",
+    "fixed_radius_result_sha256": "6d4bd1a71b5f0a311c0c09b4dfef3102690b6c780588d38add900294e241a1f8"
+  },
+  "source_hashes_at_analysis_commit": {
+    "examples/nanogpt/analyze_mlp_cfc_mixed_joint_solve.py": "874c70ec45ad2c757b484a54d73e9a419bae406bca8e2b96febd0512ec702dc5",
+    "examples/nanogpt/analyze_mlp_fixed_radius_capacity.py": "8c906488b7112fac56f55f7da6dfe0fac9450a1a55153d125e064ec7edbfa01b",
+    "examples/nanogpt/analyze_mlp_dense_oracle_gap.py": "642b4967954aebc9adb8c010b4d25c2648da7fbd7b7e35ebdb55139eab7c130d",
+    "examples/nanogpt/analyze_mlp_joint_prospective_step.py": "a0644f5f58ead88d2bdcf8f47296e7d536067b6d96b25cdcb773d58563325de3",
+    "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "examples/nanogpt/muon_matched_givens.py": "0e900ed9519f9d350e7fe4eecfdb36b180da4c5ad3fd0f5f8d5037ee0d4a437a",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 120,
+    "train_seed": 20260891,
+    "gradient_accumulation_steps": 8,
+    "validation_seeds": [20260894, 20260895],
+    "evaluation_batch_size": 2,
+    "evaluation_block_size": 512,
+    "validation_batches_per_window": 128,
+    "parent_stages": 64,
+    "shear_stages": 24,
+    "neighbors": 64,
+    "coordinates_per_layer": 135168,
+    "cg_iterations": 8,
+    "cg_damping": 0.0001,
+    "cproj_control_residual_stages": 64,
+    "control_max_abs_tolerance": 0.0,
+    "maximum_relative_radius_error": 0.00001,
+    "topology": "Select the exact deployed task-matched 64-stage skew parent. Apply its diagonal production fit only to select the exact deployed 24-stage symmetric-shear residual pairings. Flatten those fixed pairings into 135,168 coordinates and solve their linear tangents simultaneously with diagonal-preconditioned CG.",
+    "fixed_radius": "Materialize the joint tangent plus accepted historical outer decay, then globally normalize its BF16 endpoint across all c_fc layers to the actual deployed production c_fc Frobenius norm. The c_proj residual-64 calibration arm is independently normalized to the deployed c_proj norm.",
+    "same_replay_state": "Construct the production reconstruction, dense c_fc oracle, mixed solve, and c_proj-64 calibration from one gradient, clipped state, persisted momentum, functional context, and base model. Take the actual production optimizer steps only after all alternatives are built.",
+    "candidate_order": [
+      "baseline",
+      "production_cfc",
+      "production_cproj",
+      "production_joint",
+      "dense_norm_cfc",
+      "hybrid_norm_cfc",
+      "mixed_joint_cfc",
+      "hybrid_mixed_joint_cfc",
+      "cproj64_only",
+      "hybrid_cproj64"
+    ],
+    "exact_restore": "Restore every BF16 materialized MLP tensor around every candidate and persist zero model or optimizer updates to the checkpoint."
+  },
+  "decision_rule": {
+    "confidence_z": 2.576,
+    "reliable_improvement": "Candidate-minus-production 99% CI upper bound below zero and negative mean on every held-out window.",
+    "minimum_oracle_gap_fraction": 0.25,
+    "mean_oracle_gap_fraction": 0.4,
+    "oracle_gate": "Equal-radius dense c_fc must reliably beat production both alone and when substituted beside production c_proj on these new held-out windows.",
+    "mixed_pass": "The mixed joint c_fc solve must reliably beat production both alone and beside production c_proj, recover at least 25% of the same-window dense c_fc oracle gap in the worse attribution, and at least 40% on average.",
+    "cproj64_role": "Residual-64 c_proj is a calibration control only. Its result cannot rescue or authorize the mixed c_fc candidate.",
+    "pass_classification": "MIXED_JOINT_CFC_SOLVE_PASSES",
+    "reject_classification": "MIXED_JOINT_CFC_SOLVE_REJECTED",
+    "architecture_gate": "A pass authorizes implementation and a performance preflight only; it does not directly authorize training or a larger rung."
+  },
+  "test_evidence": {
+    "focused_tests": "12 passed",
+    "scientific_validation_windows_inspected": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "worktree": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_midpoint_replay/pro6_mai_v3_124m_functionmix50_step120/ckpt.pt",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_functionmix50_midpoint_step120_replay.json",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_mlp_cfc_mixed_joint_solve_20260803",
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0
+  }
+}
