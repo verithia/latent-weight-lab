@@ -1,0 +1,89 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "pass_authorizes": "a separately preregistered 124M/0.5TPP scientific run only",
+    "scientific_training_authorized": false,
+    "scope": "exactly one directly polled six-stage MFU preflight"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_mfu.json",
+    "config_sha256": "dd4b75ac4238925d810bdd521ecc221d9c7062f264dd30cff363d27ad39ceaf6",
+    "coordinate_multiplier_over_30_29_29": 1.5,
+    "coordinates_per_layer": 405504,
+    "incoming_schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "production_implementation_commit": "29d5e90ff419cde1b13fc5541aff79b12ec49f27",
+    "selection_result_commit": "2fb83ef164a404a905298111476e17ee279e7c1e"
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "pass": "native extension guard passes, exit zero, all losses and timings are finite, all eight timed updates complete, and MFU is at least 0.20",
+    "reject": "MFU below 0.20, native extension failure, nonfinite path, incomplete timing, identity mismatch, or nonzero exit",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "07602c5045077a848ab1e0a176431dde6b15c07be08b271a56276e91ad13ceae",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b2973183268673859272837c80a13a8ddeec6b2bd5a43cef1703bcc9a039c641",
+      "examples/nanogpt/test_muon_directed_product.py": "681ed76c96e1521bea019462b2d3f95af4960ce746e06204458a7a6f4ebf8694",
+      "examples/nanogpt/train.py": "bc43b09497dd396025f1335c40889698ba1e7f4d5ad7ca76809e6e8d388cda44",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    },
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_mfu_retry1.json",
+    "parent_config_sha256": "cbdb67234128a8f99b8735ea0964d15159e821fc27f3c82ff44bda4355aae6f2",
+    "selection_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_capacity_result.json",
+    "selection_result_sha256": "62836f9c95ae28e129cbbe5b6c9a8450d31f2636f1570c2382cb5c84fb64a59b"
+  },
+  "protocol": {
+    "callback": false,
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_mfu/performance_preflight.json",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_mfu.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_mfu/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_mfu/preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "denominator": "same-host empirical BF16 8192-square tensor-core GEMM peak",
+    "execution": "direct foreground polling through terminal exit",
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_mfu/preflight.log",
+    "minimum_mfu_fraction": 0.2,
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "question": "Does the selected six-stage 22x6 directed-product c_fc chart sustain at least 20 percent measured MFU on the exact production training path?",
+  "schema_version": "mai_124m_mlp_cfc_22x6_mfu_plan_v1",
+  "status": "registered_after_terminal_capacity_pass_before_mfu"
+}
