@@ -327,6 +327,7 @@ def decide_response_surface(
     validation_rows: list[dict[str, Any]],
     *,
     confidence_z: float,
+    registered_maximum_scale: float,
 ) -> dict[str, Any]:
     production = str(controls["production"]["point_id"])
     comparisons = {
@@ -359,16 +360,13 @@ def decide_response_surface(
     else:
         classification = "NO_SCALAR_STEP_COORDINATION_FIX"
         next_action = "TEST_A_TRUE_2X2_BLOCK_OUTPUT_METRIC_CHART"
-    maximum_scale = max(
-        float(point["total_scale"]) for point in controls.values()
-    )
     return {
         "classification": classification,
         "next_action": next_action,
         "controls": controls,
         "comparisons_to_production": comparisons,
         "surface_selected_at_maximum_scale": math.isclose(
-            float(surface["total_scale"]), maximum_scale
+            float(surface["total_scale"]), registered_maximum_scale
         ),
     }
 
@@ -497,6 +495,9 @@ def main() -> None:
         controls,
         validation_rows,
         confidence_z=float(plan["decision_rule"]["confidence_z"]),
+        registered_maximum_scale=max(
+            float(value) for value in protocol["total_scales"]
+        ),
     )
     quadratic = fit_quadratic_surface(calibration_rows)
     args.output.mkdir(parents=True, exist_ok=False)

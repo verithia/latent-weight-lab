@@ -66,6 +66,7 @@ def test_heldout_decision_prefers_reliable_fixed_budget_ratio() -> None:
             }
         ),
         confidence_z=2.576,
+        registered_maximum_scale=1.5,
     )
     assert decision["classification"] == "RELATIVE_FAMILY_SCALING_SUPPORTED"
     assert decision["next_action"] == "IMPLEMENT_CONSTANT_COST_CFC_CPROJ_LR_RATIO"
