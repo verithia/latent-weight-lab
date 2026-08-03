@@ -1,0 +1,125 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "exact_config_mfu_run_authorized": true,
+    "full_238_update_scientific_run_authorized_after_exact_mfu_pass": true,
+    "larger_rung_authorized": false
+  },
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 226492416,
+    "additional_trainable_parameters": 0,
+    "cfc": {
+      "coordinates_per_layer": 405504,
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "family_radius_ratio": 1.0,
+      "schedule": [
+        22,
+        22,
+        22,
+        22,
+        22,
+        22
+      ],
+      "structure": "six-stage directed-product Muon chart"
+    },
+    "cproj": {
+      "error_feedback": true,
+      "error_feedback_decay": 1.0,
+      "parent_stages": 64,
+      "residual_stages": 24,
+      "structure": "fresh two-pass Givens Muon chart"
+    },
+    "forward_structure_changed": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "transformer_residual_topology_changed": false
+  },
+  "controls": {
+    "accepted_attention_gap": 0.1,
+    "attention_only_terminal_validation_ce": 5.4918,
+    "cfc_error_feedback_with_memoryless_cproj_terminal_validation_ce": 5.594735145568848,
+    "cproj_error_feedback_with_dense_cfc_terminal_validation_ce": 5.527365207672119,
+    "global_success_ceiling": 5.5918,
+    "nonbinding_additive_forecast_validation_ce": 5.5300421714782715
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "if terminal validation CE exceeds 5.5918, reject smallest-rung full-MLP closure and diagnose c_fc/c_proj interaction before any larger rung or new structural family",
+    "pass": "if stable terminal validation CE is at most 5.5918, record accepted-gap full attention plus full MLP replacement at 124M/0.5 TPP; a separate scaling decision is still required before 350M",
+    "pass_validation_ce_maximum": 5.5918,
+    "primary_metric": "fixed-window terminal step-238 validation cross entropy",
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "callback": false,
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "lr_decay_iters": 238,
+    "max_iters": 238,
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_error_feedback_0p5tpp/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_error_feedback_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_error_feedback_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "training_launcher_command": [
+      "env",
+      "PYTHON_BIN=/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_full_mlp_errorfeedback_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "identity": {
+    "cfc_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_error_feedback_0p5tpp_result.json",
+    "cfc_parent_result_sha256": "9b3770e89638700c297de9a0ca9ff04b70ed3cafb772ce6030609e2c10d037e6",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+    "config_sha256": "d361e03ef4607bbbd7d8982e11da52fdaa8fcb7666ea16fe3d4fd06ba8bd8712",
+    "cproj_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_0p5tpp_result.json",
+    "cproj_parent_result_sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "25b1f807f3db05f272320242212e269d443f098d",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "9d32e2263d8672ae5fe1ea51fe02e1332ffcfe12bc8564b74c4291b6da18b33b",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "9a8928fd28225b7d174f0ccb9576c910922e4c98171fa54a3711e42f9e453446",
+      "examples/nanogpt/test_muon_directed_product.py": "17a0310c1c46147f65ef21968d7bc29397d14b86371235fde64ebd2674258885",
+      "examples/nanogpt/test_muon_matched_givens.py": "ca199a421f38aead8a56fbb953875e79928b364027f4749baa10b2707849eb98",
+      "examples/nanogpt/train.py": "8682b3831450f30dd0b0dd2b31fb1cb47011d1a985129a97f07b01b172a98e6d",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "question": "Do the separately causal c_fc and c_proj temporal-error repairs compose into an accepted-gap full MLP replacement at the smallest MAI rung?",
+  "schema_version": "mai_124m_full_mlp_error_feedback_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
