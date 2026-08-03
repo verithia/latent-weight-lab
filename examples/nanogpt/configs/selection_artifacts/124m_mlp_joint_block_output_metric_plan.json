@@ -1,0 +1,63 @@
+{
+  "artifact_kind": "124m_mlp_joint_block_output_metric_plan",
+  "schema_version": "mlp_joint_block_output_metric_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "Does a data-derived full 2x2 block-output metric coordinate the individually descending c_fc and c_proj production directions better than both the production step and a diagonal output-metric control at constant materialized-update norm?",
+  "authorization": "One zero-persistent-update metric-estimation and held-out-validation analysis only. No training run, optimizer change, HyperConnection, residual-topology change, or larger-rung experiment is authorized by this plan.",
+  "identity": {
+    "analysis_git_commit": "7b90751d0a8c6bcb3f69823d96362ee7d8e868ba",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "f90f5c9a7d0bdaff3c1160cf0d64df66ec1afc3d0d5ea7e3c11b9ead2ebbf260",
+    "depth_result_sha256": "6d30f4975330e8445ddc6f8ba242a6d984688289bbf2d1b8abbbca6058a1214b",
+    "scalar_response_result_sha256": "227f199f4a886700f80af4da129b4d6e04123c938d7de930eb31460f6f852793"
+  },
+  "source_hashes_at_analysis_commit": {
+    "examples/nanogpt/analyze_mlp_joint_block_output_metric.py": "f90f5c9a7d0bdaff3c1160cf0d64df66ec1afc3d0d5ea7e3c11b9ead2ebbf260",
+    "examples/nanogpt/analyze_mlp_joint_prospective_step.py": "9afe69be7cbd07a2c637c08ea7dcc0205b0d16ac5e040aef1b306191460cac90",
+    "examples/nanogpt/analyze_mlp_joint_step_response_surface.py": "eb508374047406648320bacb43240c5123d3a68c5ba1885dd457230b6a698577",
+    "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "examples/nanogpt/muon_matched_givens.py": "0e900ed9519f9d350e7fe4eecfdb36b180da4c5ad3fd0f5f8d5037ee0d4a437a",
+    "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 120,
+    "train_seed": 20260858,
+    "gradient_accumulation_steps": 8,
+    "metric_seeds": [20260859, 20260860],
+    "validation_seeds": [20260861, 20260862],
+    "evaluation_batch_size": 2,
+    "evaluation_block_size": 512,
+    "metric_batches_per_window": 8,
+    "validation_batches_per_window": 128,
+    "probe_layers": [3, 7, 11],
+    "condition_target": 100.0,
+    "production_direction": "Extract the exact historical optimizer update for c_fc and c_proj once from train_seed. Require each task-gradient dot update to be negative and exact singleton/joint tensor composition to have zero error.",
+    "metric_estimator": "On disjoint metric windows, form each family's finite block-output delta at production scale. Average the 2x2 Gram of normalized output-delta inner products over batches and probe layers. Do not use calibration CE to choose coefficients.",
+    "solve": "Solve (G + lambda I)a = -g_dot for the full metric and divide by diag(G + lambda I) for the diagonal control. Choose deterministic minimal damping for condition number at most 100, then normalize both coefficient vectors to the production total materialized Frobenius-update budget.",
+    "heldout_validation": "Evaluate only production [1,1], frozen full-metric coefficients, and frozen diagonal-metric coefficients on untouched validation windows with paired batch statistics.",
+    "power_design": "Use 256 held-out pairs, matching the powered scalar-response diagnostic, with a conservative two-sided 99% interval and an every-window sign requirement.",
+    "exact_restore": "Keep device-resident base weights and updates; restore every BF16 tensor by exact copy before and after each temporary point. Persist zero parameter updates to the checkpoint."
+  },
+  "decision_rule": {
+    "confidence_z": 2.576,
+    "full_metric_supported": "Full metric candidate-minus-production and full-minus-diagonal 99% CI upper bounds are both below zero, and both comparisons have negative mean in every held-out window.",
+    "diagonal_only_supported": "Full metric does not pass both gates, but diagonal-minus-production passes the same 99% and every-window gate.",
+    "metric_rejected": "Neither registered metric candidate passes its required held-out gate; return to generator representational capacity rather than adding residual topology.",
+    "architecture_gate": "No outcome directly authorizes HyperConnection or a residual-topology change."
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "worktree": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_midpoint_replay/pro6_mai_v3_124m_functionmix50_step120/ckpt.pt",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_functionmix50_midpoint_step120_replay.json",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_joint_block_output_metric_20260803",
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0
+  }
+}
