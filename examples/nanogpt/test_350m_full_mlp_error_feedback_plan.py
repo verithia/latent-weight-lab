@@ -11,6 +11,10 @@ PLAN_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_plan.json"
 )
+V2_PLAN_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v2_plan.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -121,3 +125,62 @@ def test_loss_and_token_endpoints_are_frozen() -> None:
     assert config["n_embd"] == 1024
     assert config["n_head"] == 16
     assert config["optimizer"] == "muon"
+
+
+def test_v1_invalid_stage_allocation_is_preserved_as_a_rejection() -> None:
+    result_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v1_preflight_reject_result.json"
+    )
+    result = load(result_path)
+    assert result["decision"] == "REJECT_INVALID_NATIVE_STAGE_ALLOCATION"
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert result["execution"]["train_exit_code"] == 1
+    assert result["execution"]["warmup_updates_completed"] == 0
+    assert result["execution"]["timed_updates_completed"] == 0
+    assert result["failure"]["scientific_training_started"] is False
+    assert result["repair_constraint"]["required_split"] == [64, 53]
+    assert result["repair_constraint"]["capacity_change"] is False
+    assert result["repair_constraint"]["loss_threshold_change"] is False
+
+
+def test_v2_redistributes_identical_capacity_into_native_legal_passes() -> None:
+    v1_plan = load(PLAN_PATH)
+    v2_plan = load(V2_PLAN_PATH)
+    assert v2_plan["schema_version"] == "mai_350m_full_mlp_error_feedback_0p5tpp_plan_v2"
+    integrity = v2_plan["registration_integrity"]
+    assert sha256(REPO / integrity["v1_plan"]) == integrity["v1_plan_sha256"]
+    assert sha256(REPO / integrity["v1_preflight_rejection"]) == (
+        integrity["v1_preflight_rejection_sha256"]
+    )
+    assert integrity["capacity_changed_from_v1"] is False
+    assert integrity["cfc_changed_from_v1"] is False
+    assert integrity["forward_or_optimizer_family_changed_from_v1"] is False
+    assert integrity["loss_thresholds_changed_from_v1"] is False
+
+    v1_config = load(REPO / v1_plan["identity"]["config"])
+    v2_config = load(REPO / v2_plan["identity"]["config"])
+    assert sha256(REPO / v2_plan["identity"]["config"]) == v2_plan["identity"]["config_sha256"]
+    assert v2_config["block_fht_mlp_cproj_muon_matched_givens_stages"] == 64
+    assert v2_config["block_fht_mlp_cproj_muon_matched_givens_residual_stages"] == 53
+    assert v2_config["block_fht_mlp_cproj_muon_matched_givens_neighbors"] == 64
+    assert 64 + 53 == 85 + 32 == v2_plan["candidate"]["cproj_total_stages"]
+    assert v2_config["block_fht_mlp_cfc_directed_product_schedule"] == (
+        v1_config["block_fht_mlp_cfc_directed_product_schedule"]
+    )
+    assert v2_config["preregistered_decision_rule"] == v1_config["preregistered_decision_rule"]
+    assert v2_plan["decision_rule"]["pass_validation_ce_maximum"] == 4.4629
+
+
+def test_v2_exact_gate_and_long_run_monitoring_remain_separate() -> None:
+    plan = load(V2_PLAN_PATH)
+    command = plan["execution"]["mfu_command"]
+    assert command[command.index("--warmup-updates") + 1] == "1"
+    assert command[command.index("--timed-updates") + 1] == "8"
+    assert command[command.index("--min-fraction") + 1] == "0.2"
+    assert plan["execution"]["mfu_polling"].startswith("foreground")
+    assert plan["execution"]["callback_milestones"] == [20, 50, 100]
+    assert plan["execution"]["callback_mention"] == "@Codex"
+    assert plan["execution"]["heartbeat_minutes"] == 90
+    assert plan["authorization"]["automatic_rerun_authorized"] is False

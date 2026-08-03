@@ -1,0 +1,114 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "exact_config_mfu_run_authorized": true,
+    "full_677_update_scientific_run_authorized_after_exact_mfu_pass": true,
+    "larger_model_or_token_rung_authorized": false
+  },
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 805306368,
+    "additional_trainable_parameters": 0,
+    "cfc_schedule": [
+      30,
+      30,
+      29,
+      29,
+      29,
+      29
+    ],
+    "cproj_matching_neighbors": 64,
+    "cproj_parent_stages": 64,
+    "cproj_residual_stages": 53,
+    "cproj_total_stages": 117,
+    "forward_structure_changed": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "transformer_residual_topology_changed": false
+  },
+  "controls": {
+    "accepted_attention_gap": 0.1,
+    "attention_only_terminal_validation_ce": 4.3629,
+    "global_success_ceiling": 4.4629,
+    "memoryless_cproj_terminal_validation_ce": 4.4557,
+    "smallest_rung_full_mlp_terminal_validation_ce": 5.529316425323486
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "failure": "if terminal validation CE exceeds 4.4629, reject 350M accepted-gap full-MLP closure and analyze size-transfer error before any larger model or token rung",
+    "pass": "if stable terminal validation CE is at most 4.4629, record accepted-gap full attention plus full MLP replacement at 350M/0.5 TPP",
+    "pass_validation_ce_maximum": 4.4629,
+    "primary_metric": "fixed-window terminal step-677 validation cross entropy",
+    "threshold_changes_from_v1": false
+  },
+  "execution": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "callback_milestones": [
+      20,
+      50,
+      100
+    ],
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "heartbeat_minutes": 90,
+    "host": "PRO6",
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp_v2/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp_v2.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp_v2/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp_v2/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_polling": "foreground operator polling only; no watchdog or callback",
+    "queue_worker": false,
+    "training_launcher_command": [
+      "env",
+      "PYTHON_BIN=/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp_v2.json",
+      "0",
+      "pro6_mai_v3_350m_full_mlp_errorfeedback_0p5tpp_v2",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "watchdog": "one local aggregate examples.nanogpt.watch_y400_dense_aggregate process, started only after launch identity is known; progress callbacks reset the 90-minute heartbeat clock and terminal ownership is persisted before exit",
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp_v2.json",
+    "config_sha256": "e51f0bad45546d74e79c6257619c8c6369fa37fc3b2b738e79f541546db88306",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "25b1f807f3db05f272320242212e269d443f098d"
+  },
+  "registration_integrity": {
+    "capacity_changed_from_v1": false,
+    "cfc_changed_from_v1": false,
+    "forward_or_optimizer_family_changed_from_v1": false,
+    "loss_thresholds_changed_from_v1": false,
+    "repair": "redistribute the same 117 total c_proj stages from invalid 85+32 to native-legal 64+53",
+    "v1_plan": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_plan.json",
+    "v1_plan_sha256": "20b84c630f1b257b942fa4f95392e62602d4fbe6e67dae20490444c48313ab15",
+    "v1_preflight_rejection": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v1_preflight_reject_result.json",
+    "v1_preflight_rejection_sha256": "7ba513d7c460fd0adb14f748e5a3b8a8f19cea94b18660c35f41fb55f41681dc"
+  },
+  "schema_version": "mai_350m_full_mlp_error_feedback_0p5tpp_plan_v2",
+  "status": "registered_before_exact_config_mfu_and_training"
+}

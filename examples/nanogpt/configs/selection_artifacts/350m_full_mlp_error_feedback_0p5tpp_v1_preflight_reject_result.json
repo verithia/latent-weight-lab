@@ -1,0 +1,48 @@
+{
+  "artifact_kind": "350m_full_mlp_error_feedback_preflight_rejection",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_errorfeedback_0p5tpp.json",
+    "sha256": "3262168fcc3fae6d0ef0ffca0ebbcf1a5447856453b46657b6dbc125ba646a3f"
+  },
+  "decision": "REJECT_INVALID_NATIVE_STAGE_ALLOCATION",
+  "execution": {
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "finished_at_unix": 1785755992.2618523,
+    "gpu": 0,
+    "host": "PRO6",
+    "preflight_certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp/performance_preflight.json",
+    "preflight_certificate_sha256": "984a41db4b58708041115b54001ad21b85f4514a6606a057373e2b37775ef65b",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_error_feedback_0p5tpp/performance_preflight.log",
+    "preflight_log_sha256": "e6102a82a35334ee8eb77d76e08f158c32aebbef24f9d236efb9db022a3ecf8e",
+    "timed_updates_completed": 0,
+    "train_exit_code": 1,
+    "warmup_updates_completed": 0
+  },
+  "failure": {
+    "exception": "ValueError",
+    "message": "require 0 < stages <= 64 and neighbors >= stages",
+    "offending_fields": {
+      "block_fht_mlp_cproj_muon_matched_givens_neighbors": 85,
+      "block_fht_mlp_cproj_muon_matched_givens_stages": 85
+    },
+    "scientific_training_started": false,
+    "summary": "the width-scaled first c_proj pass exceeded the native matcher per-pass stage cap; the failure occurred on optimizer step 1 before any MFU timing or scientific update"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_plan.json",
+    "registration_commit": "1c05c45751171c90e033b5a76c54b2d9146852d5",
+    "sha256": "20b84c630f1b257b942fa4f95392e62602d4fbe6e67dae20490444c48313ab15"
+  },
+  "repair_constraint": {
+    "allowed_change": "redistribute the same 117 total c_proj stages across two native-legal passes",
+    "capacity_change": false,
+    "loss_threshold_change": false,
+    "optimizer_or_forward_family_change": false,
+    "required_split": [
+      64,
+      53
+    ]
+  },
+  "schema_version": "mai_350m_full_mlp_error_feedback_preflight_reject_v1",
+  "status": "terminal_preflight_rejection"
+}
