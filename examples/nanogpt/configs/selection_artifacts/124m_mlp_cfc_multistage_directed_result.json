@@ -1,0 +1,79 @@
+{
+  "artifact_kind": "124m_mlp_cfc_multistage_directed_result",
+  "schema_version": "mlp_cfc_multistage_directed_result_v1",
+  "created_at": "2026-08-03",
+  "classification": "THREE_STAGE_DIRECTED_CFC_PASSES",
+  "interpretation": "At exactly 270,336 coordinates per layer, a three-stage 30+29+29 directed residual product clears the preregistered c_fc gate. It is reliably better than production both alone and beside production c_proj, and recovers 41.66% and 53.18% of the same-window equal-radius dense c_fc oracle gaps. The equal-budget one- and two-stage controls are weaker, establishing compositional depth as causal rather than coordinate count alone.",
+  "identity": {
+    "git_commit": "f092304222911fc987be5abcfd4f3d7d8e34a76f",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "b5698dd72eb924188862812d23bf90c85068ff7e26d93dc07b4b57c63ea0d5db",
+    "entrypoint_sha256": "ee9bebeb970835ecf35ea01c3658cd06849c4055671a88a898726398b6e0c921"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 134.28112244606018,
+    "monitoring": "direct foreground polling; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 2
+  },
+  "validity": {
+    "production_cfc_reconstruction_max_abs_error": 0.0,
+    "maximum_relative_radius_error": 4.838421656188248e-08,
+    "dense_cfc_oracle_valid_singleton_and_hybrid": true,
+    "selected_negative_on_every_window_singleton_and_hybrid": true,
+    "selected_per_layer_target_recovery_range": [
+      0.5087390542030334,
+      0.5190615653991699
+    ]
+  },
+  "direction_recovery_against_equal_radius_dense_cfc": {
+    "directed88_cosine": 0.6728523452814505,
+    "product44x2_cosine": 0.7038714290774786,
+    "product30_29_29x3_cosine": 0.7165478803249952,
+    "product30_29_29x3_fixed_scale_recovery": 0.4330957658329563,
+    "product30_29_29x3_positive_line_recovery": 0.5134408647982436
+  },
+  "heldout_ce": {
+    "production_cfc": 5.896785009652376,
+    "directed88_cfc": 5.896565660834312,
+    "product44x2_cfc": 5.89653336070478,
+    "product30_29_29x3_cfc": 5.896470997482538,
+    "dense_norm_cfc": 5.896031284704804,
+    "production_joint": 5.895085293799639,
+    "hybrid_directed88_cfc": 5.894980983808637,
+    "hybrid_product44x2_cfc": 5.894990602508187,
+    "hybrid_product30_29_29x3_cfc": 5.89494115114212,
+    "hybrid_norm_cfc": 5.894814256578684
+  },
+  "registered_comparisons": {
+    "selected_single_minus_production": {
+      "mean": -0.00031401216983795166,
+      "ci99": [-0.00040139567463823295, -0.00022662866503767037],
+      "window_means": [-0.00030094385147094727, -0.00032708048820495605],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.41661374066175216
+    },
+    "selected_hybrid_minus_production_joint": {
+      "mean": -0.00014414265751838684,
+      "ci99": [-0.00023044967969256734, -0.00005783563534420633],
+      "window_means": [-0.00013665109872817993, -0.00015163421630859375],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.5318186816207598
+    },
+    "same_budget_two_stage_single_minus_production": -0.00025164894759655,
+    "same_budget_two_stage_hybrid_minus_production_joint": -0.00009469129145145416,
+    "dense_single_minus_production": -0.0007537249475717545,
+    "dense_hybrid_minus_production_joint": -0.000271037220954895
+  },
+  "raw_outputs": {
+    "summary_sha256": "921db88d3b6ad0399f4fb1442f8580a0e0a7b374b232665ac887a5a22c6b5082",
+    "heldout_ce_sha256": "8149dc18e7adf82f9ce6fdea36ca24d7f54d394a658c1d3324561f350ad3479f",
+    "multistage_directed_fits_sha256": "43e57e6fdc9c25e8f8cd7cf2c01feddfd40a909bf3d9461c4409a33a0085c6ab",
+    "prospective_step_metadata_sha256": "820a4a50089380257a6eb56683976f55c70c692659ee7002af10c029deaed437"
+  },
+  "next_action": "Implement only the selected 30+29+29 three-stage directed c_fc product in the production training path, preserving the qualified production c_proj path. Add correctness, exact-resume, finite-gradient, coordinate-count, and no-dense-basis tests. Then preregister and directly foreground-poll a real-training-path PRO6 MFU preflight requiring measured MFU >=20%. This pass does not itself authorize a scientific training run or larger rung."
+}
