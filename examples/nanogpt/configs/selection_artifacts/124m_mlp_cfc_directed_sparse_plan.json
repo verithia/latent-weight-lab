@@ -1,0 +1,86 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_sparse_plan",
+  "schema_version": "mlp_cfc_directed_sparse_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "Does the exact-current dense c_fc direction concentrate in a task-selected directed sparse output action when reciprocal skew/shear tying and degree-regular perfect matchings are removed?",
+  "authorization": "One zero-persistent-update directed-sparse bracket only. No training, learned basis, LoRA, HyperConnection, residual-topology change, larger rung, watchdog, callback, queue worker, or heartbeat is authorized.",
+  "identity": {
+    "analysis_git_commit": "680f8d04d52c52617558582d41f5d8d5fbcfba24",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "bbfda441f798a2e659d16325444e3a05e415f076f7b897ebaf1203178c02edd7",
+    "mixed_joint_result_sha256": "6e1eee01496627a0bd7d2c599b8b4f4129271819d2d4bd383f9b5d0f1a3b9ce1"
+  },
+  "source_hashes_at_analysis_commit": {
+    "examples/nanogpt/analyze_mlp_cfc_directed_sparse.py": "bbfda441f798a2e659d16325444e3a05e415f076f7b897ebaf1203178c02edd7",
+    "examples/nanogpt/analyze_mlp_fixed_radius_capacity.py": "8c906488b7112fac56f55f7da6dfe0fac9450a1a55153d125e064ec7edbfa01b",
+    "examples/nanogpt/analyze_mlp_dense_oracle_gap.py": "642b4967954aebc9adb8c010b4d25c2648da7fbd7b7e35ebdb55139eab7c130d",
+    "examples/nanogpt/analyze_mlp_joint_prospective_step.py": "a0644f5f58ead88d2bdcf8f47296e7d536067b6d96b25cdcb773d58563325de3",
+    "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "examples/nanogpt/muon_matched_givens.py": "0e900ed9519f9d350e7fe4eecfdb36b180da4c5ad3fd0f5f8d5037ee0d4a437a",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 120,
+    "train_seed": 20260911,
+    "gradient_accumulation_steps": 8,
+    "validation_seeds": [20260914, 20260915],
+    "evaluation_batch_size": 2,
+    "evaluation_block_size": 512,
+    "validation_batches_per_window": 128,
+    "production_residual_stages": 24,
+    "incoming_per_target": [44, 88],
+    "coordinates_per_layer": {"44": 135168, "88": 270336},
+    "ridge_ratio": 0.000001,
+    "solver_chunk_size": 32,
+    "control_max_abs_tolerance": 0.0,
+    "maximum_relative_radius_error": 0.00001,
+    "selection": "Compute the ridge-stabilized minimum-norm full output action B satisfying c_fc.T @ B approximately equal to the exact historical dense-Muon c_fc update. For each target expansion channel, select the largest 44 or 88 directed coefficients independently, then jointly refit only that target channel on the selected current weight columns.",
+    "structural_difference": "Directed coefficients B[i,j] and B[j,i] are independent; source-channel degree is unconstrained. This removes both reciprocal skew/shear tying and perfect-matching degree regularity while using no learned basis or additive dense residual.",
+    "fixed_radius": "Globally normalize every directed BF16 c_fc endpoint to the actual deployed production c_fc family Frobenius norm.",
+    "same_replay_state": "Extract the dense historical c_fc oracle, exact production c_fc/c_proj updates, and production reconstruction from one gradient, clipped state, persisted momentum, functional context, and base model before fitting directed supports.",
+    "candidate_order": [
+      "baseline",
+      "production_cfc",
+      "production_cproj",
+      "production_joint",
+      "dense_norm_cfc",
+      "hybrid_norm_cfc",
+      "directed44_cfc",
+      "hybrid_directed44_cfc",
+      "directed88_cfc",
+      "hybrid_directed88_cfc"
+    ],
+    "exact_restore": "Restore every BF16 materialized MLP tensor around every candidate and persist zero model or optimizer updates to the checkpoint."
+  },
+  "decision_rule": {
+    "confidence_z": 2.576,
+    "reliable_improvement": "Candidate-minus-production 99% CI upper bound below zero and negative mean on every held-out window.",
+    "minimum_oracle_gap_fraction": 0.25,
+    "mean_oracle_gap_fraction": 0.4,
+    "oracle_gate": "Equal-radius dense c_fc must reliably beat production both alone and beside production c_proj on the new windows.",
+    "directed_pass": "A directed level must reliably beat production both alone and beside production c_proj, recover at least 25% of the same-window dense c_fc oracle gap in the worse attribution, and at least 40% on average.",
+    "selection": "Select 44 if it passes; otherwise select 88 only if it passes. A 44 failure and 88 pass identifies capacity within the new generator family. Neither pass authorizes training directly.",
+    "pass_classification": "DIRECTED_SPARSE_CFC_PASSES",
+    "reject_classification": "DIRECTED_SPARSE_CFC_REJECTED",
+    "architecture_gate": "A pass authorizes production implementation and an MFU preflight only; it does not directly authorize training or a larger rung."
+  },
+  "test_evidence": {
+    "focused_tests": "12 passed",
+    "scientific_validation_windows_inspected": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "worktree": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_midpoint_replay/pro6_mai_v3_124m_functionmix50_step120/ckpt.pt",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_functionmix50_midpoint_step120_replay.json",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_mlp_cfc_directed_sparse_20260803",
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0
+  }
+}
