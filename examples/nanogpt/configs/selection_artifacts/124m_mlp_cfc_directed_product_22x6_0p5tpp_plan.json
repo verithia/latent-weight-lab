@@ -1,0 +1,110 @@
+{
+  "authorization": {
+    "additional_structure_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "scope": "exactly one 124M/0.5TPP six-stage scientific run",
+    "training_requires_exact_config_mfu_pass": true
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_0p5tpp.json",
+    "config_sha256": "0405340d2ea327331f983662c2da3db48c803271cec4861779948884abc1d21f",
+    "coordinates_per_layer": 405504,
+    "family_radius_ratio": 0.6589686140591383,
+    "incoming_schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "max_iters": 238,
+    "mfu_result_commit": "7751ea42297e31acf61d42a943fec94a3ed089ce",
+    "planned_tpp": 0.5,
+    "production_implementation_commit": "29d5e90ff419cde1b13fc5541aff79b12ec49f27",
+    "selection_result_commit": "2fb83ef164a404a905298111476e17ee279e7c1e"
+  },
+  "controls": {
+    "attention_only_validation_ce": 5.4918,
+    "qualified_cproj_only_validation_ce": 5.592058181762695,
+    "rejected_three_stage_validation_ce": 5.658790111541748
+  },
+  "created_at": "2026-08-03",
+  "decision_rule": {
+    "directional_only": "terminal validation CE > 5.5918 and < 5.658790111541748",
+    "reject": "terminal validation CE >= 5.658790111541748, nonfinite path, incomplete evaluation, or identity mismatch",
+    "success": "finite complete run with terminal validation CE <= 5.5918",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_capacity_result.json",
+    "capacity_result_sha256": "62836f9c95ae28e129cbbe5b6c9a8450d31f2636f1570c2382cb5c84fb64a59b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "engineering_mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_mfu_result.json",
+    "engineering_mfu_result_sha256": "5fcb814f841754c7c4a8a1111353d23c9a262062d6b0f52f6b205075ff2919fd",
+    "fixed_eval_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "07602c5045077a848ab1e0a176431dde6b15c07be08b271a56276e91ad13ceae",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b2973183268673859272837c80a13a8ddeec6b2bd5a43cef1703bcc9a039c641",
+      "examples/nanogpt/test_muon_directed_product.py": "681ed76c96e1521bea019462b2d3f95af4960ce746e06204458a7a6f4ebf8694",
+      "examples/nanogpt/train.py": "bc43b09497dd396025f1335c40889698ba1e7f4d5ad7ca76809e6e8d388cda44",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "protocol": {
+    "callback": false,
+    "exact_config_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/performance_preflight.json",
+    "exact_config_preflight_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "exact_config_preflight_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/performance_preflight.log",
+    "execution": "direct foreground polling through terminal exit",
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/train.log",
+    "prelaunch_run_metadata": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/prelaunch_run_metadata.json",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "run_directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_22x6_0p5tpp",
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_0p5tpp.json"
+    ],
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
+  },
+  "question": "Does the terminal-selected six-stage c_fc chart close full MLP replacement to within +0.10 CE of attention-only at 124M/0.5TPP?",
+  "schema_version": "mai_124m_mlp_cfc_22x6_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
