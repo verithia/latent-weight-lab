@@ -1,0 +1,95 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_terminal_discriminator_result",
+  "schema_version": "mai_124m_mlp_cfc_terminal_discriminator_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "TERMINAL_LOCAL_STEP_NOT_DISCRIMINATING",
+  "plans": {
+    "v1": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_plan.json",
+      "sha256": "aa2e64ac2e310e61709f84bcf131b241f43a6467ca7ec5306350519c50ee3ae9",
+      "technical_result": "failed before candidate evaluation because the weight applier accepted only functional-shear c_fc modules; zero checkpoint updates and zero candidate CE measurements occurred"
+    },
+    "v2": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_plan_v2.json",
+      "sha256": "a7e194766da25ff72bb3d44f9e922cf326a13140972d6bf5d69ad7b3eb25dec9"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "432d479231c3c5d16d9d3af7486fb29a39fe66ee",
+    "implementation_commit": "5b25516e6c2e418a3086c8f821229bd0e4f6cc81",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_directed_product_terminal.py",
+    "entrypoint_sha256": "38d79db3b5aedb4484811abe10b3983a9d0255c3b78da99c73764b52225b4e15",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "exit_code": 0,
+    "wall_seconds": 6.022348165512085
+  },
+  "identity": {
+    "checkpoint_sha256": "aaf00e4b36489fb4eb0d720cc821e401579c3d00c917489ea86a4eb61b278f1a",
+    "checkpoint_next_iter": 238,
+    "checkpoint_unchanged_after_diagnostic": true,
+    "config_sha256": "80c3cd31d1494799c19c1083504231819caefda33f9176e48fa96c73257ed7b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "summary_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_diag_v2/summary.json",
+    "summary_sha256": "47e299f18caacf1be4b7bacb0f3c908cf03aef34befe5c9a9863af6cd2f726b8",
+    "heldout_ce_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_diag_v2/heldout_ce.json",
+    "heldout_ce_sha256": "682e502554c00e3533ef93df1f767944c325b72460579568d1b8490862b69f77"
+  },
+  "protocol": {
+    "parameter_updates_to_checkpoint": 0,
+    "gradient_seed": 2026080301,
+    "gradient_batch_size": 4,
+    "gradient_accumulation_steps": 8,
+    "validation_seeds": [2026080311, 2026080329],
+    "validation_batches_per_window": 8,
+    "evaluation_batch_size": 4,
+    "confidence": 0.99,
+    "registered_radius_ratio": 0.6589686140591383,
+    "tested_radius_ratios": [0.5, 0.6589686140591383, 0.75, 1.0],
+    "tested_dense_residual_fractions": [0.25, 0.5, 1.0]
+  },
+  "geometry": {
+    "dense_update_family_fro": 0.044440443089110056,
+    "registered_product_family_fro": 0.02928485723839004,
+    "registered_product_cosine_to_dense": 0.7133423104239808,
+    "registered_product_fixed_scale_recovery": 0.505900753101579,
+    "registered_product_positive_line_recovery": 0.508857251841023,
+    "registered_product_least_squares_scale": 1.082513330742602,
+    "stage_target_cosine_mean_approx": [0.4755, 0.6202, 0.7133],
+    "coordinates_per_cfc_layer": 270336
+  },
+  "heldout_ce": {
+    "baseline": 5.611036777496338,
+    "registered_product": 5.611042261123657,
+    "product_radius_0p50": 5.611034393310547,
+    "product_radius_0p75": 5.61099049448967,
+    "product_radius_1p00": 5.610993951559067,
+    "dense_same_registered_radius": 5.610948085784912,
+    "dense_full_radius": 5.610922992229462,
+    "product_plus_residual_0p25": 5.611007988452911,
+    "product_plus_residual_0p50": 5.610946923494339,
+    "product_plus_residual_1p00": 5.610922992229462
+  },
+  "paired_decision": {
+    "dense_same_radius_minus_registered_product_mean": -0.00009417533874511719,
+    "dense_same_radius_minus_registered_product_ci99": [-0.00022849790420389178, 0.0000401472267136574],
+    "alternative_radius_reliably_better": false,
+    "dense_same_radius_reliably_better": false,
+    "best_mean_product_radius_ratio": 0.75
+  },
+  "interpretation": [
+    "The finite-CE next-step response is too small relative to two-window sampling variation to separate radius from residual direction at terminal learning rate.",
+    "No radius in the preregistered 0.50-to-1.00 bracket reliably improves the registered product, so a scalar radius or learning-rate sweep is not supported.",
+    "The terminal product still captures only about 50.9 percent of the dense direction with cosine 0.7133, essentially the same reachability regime observed at the historical midpoint.",
+    "The training rejection is therefore consistent with a persistent moving-chart capacity limit, but this diagnostic alone does not prove that the unrecovered dense residual would improve terminal CE."
+  ],
+  "decision": {
+    "larger_rung_authorized": false,
+    "additional_training_authorized": false,
+    "radius_sweep_authorized": false,
+    "next_action": "Preregister a zero-update compositional-depth/capacity bracket at the exact terminal gradient; require materially higher dense-direction recovery before any new smallest-rung training run."
+  }
+}
