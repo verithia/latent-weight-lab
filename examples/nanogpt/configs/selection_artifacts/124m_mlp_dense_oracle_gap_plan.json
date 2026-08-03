@@ -1,0 +1,80 @@
+{
+  "artifact_kind": "124m_mlp_dense_oracle_gap_plan",
+  "schema_version": "mlp_dense_oracle_gap_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "At the exact functionmix midpoint and one common gradient/momentum state, is the deployed joint MLP step limited by local chart direction/capacity, only by update magnitude, by one matrix family, by both, or not at all relative to an uncompressed dense-Muon oracle?",
+  "authorization": "One zero-persistent-update dense-oracle attribution only. No training run, coordinate increase, topology change, HyperConnection, residual change, learned basis, LoRA, MFU preflight, or larger rung is authorized by this plan.",
+  "identity": {
+    "analysis_git_commit": "8240b08db8bcfd8b21f58ddad2170af068825936",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "642b4967954aebc9adb8c010b4d25c2648da7fbd7b7e35ebdb55139eab7c130d",
+    "block_output_metric_result_sha256": "33a699d6f40c49c3f94f1fdabc85a83c5b56e2bb9d79c7f9c0b454f036e36b7b"
+  },
+  "source_hashes_at_analysis_commit": {
+    "examples/nanogpt/analyze_mlp_dense_oracle_gap.py": "642b4967954aebc9adb8c010b4d25c2648da7fbd7b7e35ebdb55139eab7c130d",
+    "examples/nanogpt/analyze_mlp_joint_prospective_step.py": "a0644f5f58ead88d2bdcf8f47296e7d536067b6d96b25cdcb773d58563325de3",
+    "examples/nanogpt/analyze_mlp_joint_step_response_surface.py": "eb508374047406648320bacb43240c5123d3a68c5ba1885dd457230b6a698577",
+    "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+    "examples/nanogpt/muon_matched_givens.py": "0e900ed9519f9d350e7fe4eecfdb36b180da4c5ad3fd0f5f8d5037ee0d4a437a",
+    "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 120,
+    "train_seed": 20260868,
+    "gradient_accumulation_steps": 8,
+    "output_seeds": [20260869, 20260870],
+    "validation_seeds": [20260871, 20260872],
+    "evaluation_batch_size": 2,
+    "evaluation_block_size": 512,
+    "output_batches_per_window": 8,
+    "validation_batches_per_window": 128,
+    "probe_layers": [3, 7, 11],
+    "exact_common_state": "Use one backward pass and the exact persisted c_fc/c_proj Muon momentum states. Extract deployed singleton/joint steps by exact state restoration and compute uncompressed dense Muon targets before any disposable custom-optimizer step.",
+    "historical_oracle": "Because this accepted trajectory used historical double-decay chart semantics, the primary dense oracle exactly applies the second endpoint decay after the canonical dense Muon update. Canonical single-decay dense Muon is a registered secondary control.",
+    "norm_controls": "Scale each historical dense family globally to the deployed family Frobenius norm. Use these per-family norm-matched directions for the primary direction/capacity and family-attribution decisions.",
+    "candidate_set": [
+      "baseline",
+      "production_cfc",
+      "production_cproj",
+      "production_joint",
+      "dense_historical_cfc",
+      "dense_historical_cproj",
+      "dense_historical_joint",
+      "dense_norm_cfc",
+      "dense_norm_cproj",
+      "dense_norm_joint",
+      "hybrid_norm_cfc",
+      "hybrid_norm_cproj",
+      "dense_canonical_joint"
+    ],
+    "heldout_validation": "Score the frozen candidate set on 256 untouched paired validation batches. Estimate MLP/block-output recovery against the historical dense joint oracle on separate output windows.",
+    "exact_restore": "Restore all BF16 materialized MLP tensors by exact copy around every candidate. Persist zero parameter or optimizer updates to the checkpoint."
+  },
+  "decision_rule": {
+    "confidence_z": 2.576,
+    "reliable_improvement": "Candidate-minus-reference 99% CI upper bound below zero and negative mean on every held-out window.",
+    "no_local_dense_gain": "Historical dense joint does not reliably beat deployed joint; attribute the remaining loss to accumulated representation/path rather than the local step.",
+    "magnitude_only": "Historical dense joint reliably beats deployed joint, but its per-family norm-matched version does not.",
+    "cfc_capacity": "Norm-matched dense joint passes and norm-matched dense c_fc beats deployed c_fc both alone and when substituted into the deployed joint step.",
+    "cproj_capacity": "Norm-matched dense joint passes and norm-matched dense c_proj beats deployed c_proj both alone and when substituted into the deployed joint step.",
+    "both_capacity": "Both family-specific capacity rules pass.",
+    "joint_only_capacity": "Norm-matched dense joint passes but neither family passes its singleton-plus-hybrid attribution rule.",
+    "canonical_decay_control": "Report canonical dense comparisons but do not override the primary historical-oracle classification.",
+    "architecture_gate": "No result directly authorizes training, HyperConnection, residual-topology changes, or a learned dense basis."
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "worktree": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_midpoint_replay/pro6_mai_v3_124m_functionmix50_step120/ckpt.pt",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_functionmix50_midpoint_step120_replay.json",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_mlp_dense_oracle_gap_20260803",
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0
+  }
+}
