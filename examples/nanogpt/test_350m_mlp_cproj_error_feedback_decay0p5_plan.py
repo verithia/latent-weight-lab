@@ -11,6 +11,10 @@ PLAN_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_plan.json"
 )
+MFU_RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_mfu_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -103,3 +107,22 @@ def test_mfu_is_directly_polled_before_long_run_watchdog() -> None:
     assert plan["execution"]["heartbeat_minutes"] == 90
     assert plan["authorization"]["automatic_rerun_authorized"] is False
     assert plan["authorization"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_exact_mfu_result_authorizes_one_scientific_run() -> None:
+    result = load(MFU_RESULT_PATH)
+    assert result["passed"] is True
+    assert result["classification"] == (
+        "CPROJ_ERROR_FEEDBACK_DECAY0P5_350M_0P5TPP_EXACT_CONFIG_MFU_PASSED"
+    )
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert result["measurement"]["mfu_fraction"] >= 0.2
+    assert result["measurement"]["peak_mib"] < 97887
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["stability"]["native_matching_validated"] is True
+    assert result["execution"]["direct_foreground_polling"] is True
+    assert result["execution"]["watchdog"] is False
+    assert result["decision"]["one_full_677_update_run_authorized"] is True
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["larger_model_or_token_rung_authorized"] is False
