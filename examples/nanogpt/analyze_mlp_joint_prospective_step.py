@@ -248,6 +248,18 @@ def extract_production_updates(
         variant_metadata[variant] = {
             "families": sorted(families),
             "selected_gradient_norm_after_clip": selected_gradient_norm,
+            "gradient_update_dot": {
+                family: sum(
+                    float(
+                        (
+                            gradients[family][layer].double()
+                            * update.double()
+                        ).sum()
+                    )
+                    for layer, update in by_layer.items()
+                )
+                for family, by_layer in variants[variant].items()
+            },
             "update_fro": {
                 family: math.sqrt(
                     sum(
