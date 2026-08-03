@@ -1,0 +1,110 @@
+{
+  "artifact_kind": "124m_mlp_cproj_error_feedback_step60_training_result",
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 113246208,
+    "additional_trainable_parameters": 0,
+    "error_feedback": true,
+    "error_feedback_decay": 1.0,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "terminal_compression_residual": {
+      "frobenius_norm_max": 0.7787846922874451,
+      "frobenius_norm_mean": 0.6785412579774857,
+      "frobenius_norm_min": 0.5950320363044739,
+      "layer_count": 12,
+      "rms_max": 0.0005070431507192552,
+      "rms_mean": 0.00044177572514551383,
+      "rms_min": 0.00038740693707950413,
+      "shape_per_layer": [
+        768,
+        3072
+      ]
+    }
+  },
+  "classification": "STABLE_CPROJ_TEMPORAL_ERROR_FEEDBACK_SCREEN_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_step60.json",
+    "sha256": "59070611ab16bfc39709ae5f5e3e0a0b4f01da3af71393901018782631ce7ce2"
+  },
+  "decision": {
+    "accumulated_cproj_compression_residual_is_causal_at_step60": true,
+    "automatic_rerun_authorized": false,
+    "cfc_error_feedback_combination_authorized": false,
+    "full_238_update_config_registration_authorized": true,
+    "full_238_update_run_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Register one exact 238-update c_proj error-feedback configuration and independently qualify its real training path at at least 20 percent MFU. Do not combine it with c_fc error feedback until that isolated full run completes."
+  },
+  "exact_config_mfu_result": {
+    "average_iter_ms": 1492.42,
+    "mfu_fraction": 0.3160255678790404,
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_step60_mfu_result.json",
+    "peak_mib": 31748.09,
+    "sha256": "d1eb40044d62be863157d02a7eb6886b322e248ec4b4c283c7b3e54f3346dac5",
+    "tokens_per_second": 175654.39125
+  },
+  "execution": {
+    "callback": false,
+    "direct_foreground_polling": true,
+    "exit_code": 0,
+    "finished_at": "2026-08-03T18:22:39+08:00",
+    "git_commit": "8e7031efad6b5d256a0cb628086e8375afaf5507",
+    "gpu": 0,
+    "host": "PRO6",
+    "observed_peak_mib": 38120,
+    "ordinary_iter_mean_ms": 1483.366,
+    "ordinary_logged_updates": 5,
+    "started_at": "2026-08-03T18:20:28+08:00",
+    "wall_seconds": 131,
+    "watchdog": false
+  },
+  "identity": {
+    "archived_config_sha256": "59070611ab16bfc39709ae5f5e3e0a0b4f01da3af71393901018782631ce7ce2",
+    "archived_mfu_sha256": "06ba71980c2e5f0ea46ea370af6bc3e310331edad7e687c2c666ce441f570512",
+    "checkpoint_best_validation_ce": 6.262904644012451,
+    "checkpoint_meta_sha256": "df6a18b9b2c5d6b61c21757ebfbb556ce311ddf157843aa6abb91f04f73b1db8",
+    "checkpoint_next_iter": 60,
+    "checkpoint_sha256": "12e7ea4a028bd68fbc80690588d0bf634c38a45dd16a1032a8e5957569585a45",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "log_sha256": "5a05f2cc238603324d100a7cd0980aca34fe4c772e4af5a22b8491ac48ab13b6",
+    "provenance_sha256": "ecd3e0192df27fc4c604e0c8d754a4e49dab473c6b724870098c8df144b1c2be",
+    "run_id": "pro6_mai_v3_124m_cproj_twopassfresh88_errorfeedback_step60_20260803T102028Z_3190228",
+    "status_sha256": "77222265cae4924cc9e58ece74ff307eaed1255100c021a72beb474f6f12debe"
+  },
+  "interpretation": [
+    "The run is finite, complete, source-clean, and computationally qualified, so the pass is not a stability, identity, or throughput artifact.",
+    "Error feedback changes only optimizer dynamics: it adds no trainable parameter, learned basis, LoRA adapter, forward transform, inference parameter, or transformer residual-path change.",
+    "The unchanged c_proj chart recovers 53.50 percent of its matched step-60 gap to attention-only, which passes the immutable half-gap criterion by 0.00335 CE.",
+    "The terminal residual is substantial in all 12 layers, supporting persistent discarded c_proj motion rather than a numerical remainder.",
+    "A full isolated 238-update run is required before combining this mechanism with c_fc error feedback or scaling it."
+  ],
+  "loss": {
+    "attention_only_control_validation": 6.2184,
+    "candidate_minus_attention_only": 0.04450464401245102,
+    "candidate_minus_pass_threshold": -0.003345355987548926,
+    "control_minus_candidate": 0.051195355987549096,
+    "cproj_control_validation": 6.3141,
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train": 10.9672,
+        "validation": 10.9669
+      },
+      {
+        "step": 60,
+        "train": 6.2533,
+        "validation": 6.262904644012451
+      }
+    ],
+    "frozen_pass_validation_ce_maximum": 6.26625,
+    "remaining_control_gap": 0.09570000000000078,
+    "remaining_gap_fraction_recovered": 0.5349566989294522
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_step60_plan.json",
+    "sha256": "a87d1463f0666853bf6c43bf3b9be09d9b70a9545d1348a6901081007360f6cd"
+  },
+  "recorded_at": "2026-08-03",
+  "schema_version": "mai_124m_mlp_cproj_error_feedback_step60_result_v1"
+}
