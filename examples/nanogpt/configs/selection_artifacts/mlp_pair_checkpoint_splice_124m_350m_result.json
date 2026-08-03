@@ -1,0 +1,111 @@
+{
+  "artifact_kind": "mlp_pair_checkpoint_splice_cross_scale_result",
+  "schema_version": "mlp_pair_checkpoint_splice_result_v1",
+  "created_at": "2026-08-03",
+  "decision": "WIDER_RESIDUAL_BLOCK_CONTEXT_DOMINATES",
+  "causal_scope": "Static terminal endpoint transplantation across separately co-adapted runs does not localize the remaining gap to c_fc, c_proj, their paired MLP branch, or ln_2. This is evidence for wider block/residual-frame co-adaptation, not evidence that identity residual connections are intrinsically defective or that a HyperConnection is required.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repository_commit": "97e1ff8d8aa114d9a41cbe38ddf2ae07ccfb2052",
+    "elapsed_seconds": 36.49934434890747,
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "inputs": {
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/mlp_pair_checkpoint_splice_124m_350m_plan.json",
+    "plan_sha256": "3960c23732030a02282ff84f83cd31559180135862f4a26d585b6358e94b34e2",
+    "source_sha256": "e332e1997736d4ddae36278f9a34352071649a1763cf94cc2ab906e50cb9dc18",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_124m_checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+    "candidate_124m_checkpoint_sha256": "9309dc737795f60b44c230f776cc257c36a31b6060f732c50b9f382c1dea079e",
+    "parent_350m_checkpoint_sha256": "e94e46283941f0c81287cf3d4c7d4b1fb8bdfb74cb741ae5b2fddcc770602d16",
+    "candidate_350m_checkpoint_sha256": "9405949fa0ed34c63e3476c093fd4343e9457dd3171ee14cef2c2116c2f21a0b"
+  },
+  "classification_by_scale": {
+    "124m": "WIDER_RESIDUAL_BLOCK_CONTEXT_DOMINATES",
+    "350m": "WIDER_RESIDUAL_BLOCK_CONTEXT_DOMINATES"
+  },
+  "recovery_by_scale_and_window": {
+    "124m": {
+      "seed20260833": {
+        "c_fc": -0.18762592300200245,
+        "c_proj": -0.5188421545479811,
+        "mlp_pair": 0.040728321020862025,
+        "mlp_pair_plus_ln2": 0.041472905019701814,
+        "pair_synergy_over_best_single": 0.22835424402286447,
+        "ln2_increment_over_pair": 0.0007445839988397887
+      },
+      "seed20260834": {
+        "c_fc": -0.1959612593367699,
+        "c_proj": -0.5451669005379844,
+        "mlp_pair": 0.026376023287475268,
+        "mlp_pair_plus_ln2": 0.02756989216201576,
+        "pair_synergy_over_best_single": 0.22233728262424515,
+        "ln2_increment_over_pair": 0.0011938688745404928
+      }
+    },
+    "350m": {
+      "seed20260833": {
+        "c_fc": -2.9561003906905854,
+        "c_proj": -5.0264777040855995,
+        "mlp_pair": -3.342119449263849,
+        "mlp_pair_plus_ln2": -3.334120168104907,
+        "pair_synergy_over_best_single": -0.3860190585732637,
+        "ln2_increment_over_pair": 0.007999281158942217
+      },
+      "seed20260834": {
+        "c_fc": -2.922013016322538,
+        "c_proj": -5.022436302644182,
+        "mlp_pair": -3.418601212167675,
+        "mlp_pair_plus_ln2": -3.411891837652502,
+        "pair_synergy_over_best_single": -0.496588195845137,
+        "ln2_increment_over_pair": 0.006709374515173394
+      }
+    }
+  },
+  "depth_band_pair_recovery": {
+    "124m": {
+      "early": [-0.179743270672847, -0.21865079556432104],
+      "middle": [-0.09806360010793194, -0.11147243292072324],
+      "late": [-0.09268953716959084, -0.08268054303151878]
+    },
+    "350m": {
+      "early": [-4.073221354680421, -4.078277286388812],
+      "middle": [-0.9301377228241262, -0.9323750589118742],
+      "late": [-0.49637432484504984, -0.47104179169230187]
+    }
+  },
+  "mean_activation_residual_metrics": {
+    "124m": {
+      "parent": {"pre_rms": 0.5483708788990633, "post_rms": 0.32520132019177944, "update_to_residual_rms": 0.8527134532651822, "residual_update_cosine": 0.08213508753160674},
+      "candidate": {"pre_rms": 0.5360098171243541, "post_rms": 0.3164376760310977, "update_to_residual_rms": 0.8338910710680326, "residual_update_cosine": 0.05117775759351697},
+      "candidate_parent_mlp_pair": {"pre_rms": 0.5491357926789306, "post_rms": 0.32661254397789363, "update_to_residual_rms": 0.8667157791408929, "residual_update_cosine": 0.0909060962979341},
+      "candidate_parent_mlp_pair_ln2": {"pre_rms": 0.5492259901650741, "post_rms": 0.3266588397951924, "update_to_residual_rms": 0.8660312004782337, "residual_update_cosine": 0.09077962317345427}
+    },
+    "350m": {
+      "parent": {"pre_rms": 0.6258728061770957, "post_rms": 0.36807060588799084, "update_to_residual_rms": 0.6239324518460999, "residual_update_cosine": 0.10090805114831944},
+      "candidate": {"pre_rms": 0.585091740024689, "post_rms": 0.3494279210034421, "update_to_residual_rms": 0.5877317700586299, "residual_update_cosine": 0.02991088075880435},
+      "candidate_parent_mlp_pair": {"pre_rms": 0.6250528060482687, "post_rms": 0.3705539218451597, "update_to_residual_rms": 0.6122971040345323, "residual_update_cosine": 0.07750805454244819},
+      "candidate_parent_mlp_pair_ln2": {"pre_rms": 0.6256791023413225, "post_rms": 0.3708967989093882, "update_to_residual_rms": 0.6117203596974438, "residual_update_cosine": 0.07747716183998347}
+    }
+  },
+  "raw_artifacts": {
+    "summary_sha256": "e27c47cbc96167e146bd38a1c92fe355202c75e329ce10ac40702f4dc8667bef",
+    "evaluation_csv_sha256": "81c9425f114e9d11fc72de7aec7aa8702557d915e580b8e492df3f029e3165fe",
+    "activation_residual_csv_sha256": "86fa29efa577fd739d7bc10269f887669562120e6e8142f6933e4a5299d823ec"
+  },
+  "next_action": {
+    "authorized": "design and preregister a zero-update within-trajectory block-output compatibility diagnostic",
+    "not_authorized": [
+      "HyperConnection or learned residual topology",
+      "production MLP structure",
+      "MFU preflight",
+      "scientific training run",
+      "larger ladder rung"
+    ],
+    "reason": "Endpoint swaps between separately trained solutions confound useful local direction with the co-adapted attention/residual frame. The next test must evaluate candidate MLP updates in the current model's own block-output and residual coordinates."
+  }
+}

@@ -12,6 +12,10 @@ PLAN = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/mlp_pair_checkpoint_splice_124m_350m_plan.json"
 )
+RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/mlp_pair_checkpoint_splice_124m_350m_result.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -43,3 +47,21 @@ def test_cross_scale_pair_splice_is_zero_update_and_fresh_windowed() -> None:
     assert plan["protocol"]["validation_seeds"] == [20260833, 20260834]
     assert plan["protocol"]["batches_per_window"] == 32
     assert "No production structure" in plan["authorization"]
+
+
+def test_cross_scale_pair_splice_result_is_fail_closed_and_nonarchitectural() -> None:
+    result = json.loads(RESULT.read_text())
+    assert result["schema_version"] == "mlp_pair_checkpoint_splice_result_v1"
+    assert result["decision"] == "WIDER_RESIDUAL_BLOCK_CONTEXT_DOMINATES"
+    assert sha256(PLAN) == result["inputs"]["plan_sha256"]
+    assert result["execution"]["parameter_updates"] == 0
+    assert result["execution"]["direct_foreground_polling"] is True
+    assert set(result["classification_by_scale"].values()) == {
+        "WIDER_RESIDUAL_BLOCK_CONTEXT_DOMINATES"
+    }
+    for scale in ("124m", "350m"):
+        for metrics in result["recovery_by_scale_and_window"][scale].values():
+            assert metrics["mlp_pair_plus_ln2"] <= 0.25
+    assert "HyperConnection or learned residual topology" in (
+        result["next_action"]["not_authorized"]
+    )
