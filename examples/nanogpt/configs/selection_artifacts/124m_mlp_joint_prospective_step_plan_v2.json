@@ -1,0 +1,70 @@
+{
+  "artifact_kind": "124m_mlp_joint_prospective_step_plan",
+  "schema_version": "mlp_joint_prospective_step_plan_v2",
+  "created_at": "2026-08-03",
+  "question": "Within the accepted 124M candidate's own checkpoint and residual frame, do the next production c_fc and c_proj optimizer moves destructively interfere, cooperate, or produce approximately additive finite-CE effects?",
+  "implementation_commit": "b9e97b381eb50409123e4e642d393672bc59df57",
+  "predecessor": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan.json",
+    "plan_sha256": "9f76d12c3b905fda6529393c2fb5380570efd84d79126e296f26c44ff8a58253",
+    "failure": "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_attempt1_failure.json",
+    "failure_sha256": "3f0416324927c314b27004112c9a4a2eb9e3ef46b4ced9a7dc48365e78afee14",
+    "repair_scope": "Only gradient/context replay identity changed. All data seeds, finite-CE windows, thresholds, and structural authorization remain frozen."
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/pro6_mai_v3_124m_functionmix50_internalcondition1p01_0p5tpp/ckpt.pt",
+    "checkpoint_sha256": "9309dc737795f60b44c230f776cc257c36a31b6060f732c50b9f382c1dea079e",
+    "checkpoint_next_iter": 238,
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_training_result.json",
+    "parent_result_sha256": "c0a3605bf2c38bf3a03da0a5a81b9f80a067dfe27d6bd0a0dfedcabdfd7cb605",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_joint_prospective_step.py",
+    "entrypoint_sha256": "b845f6d0b8c5afef37e4236a2bcccc4a586676a250a979458a7a46c473624bbe"
+  },
+  "source_hashes": {
+    "examples/nanogpt/analyze_mlp_joint_prospective_step.py": "b845f6d0b8c5afef37e4236a2bcccc4a586676a250a979458a7a46c473624bbe",
+    "examples/nanogpt/analyze_mlp_cfc_exact_current_matcher.py": "a10f8dbf0f42d890613a11e5a981c39635223c20f26e8aae8d712da89add809e",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "examples/nanogpt/muon_matched_givens.py": "191d4a17c22fb8d19cc2e666dfc87a53f0183ded90244ea7127ffeae02d6604c"
+  },
+  "protocol": {
+    "train_seed": 20260840,
+    "gradient_accumulation_steps": 8,
+    "training_batch_size": 32,
+    "training_block_size": 1024,
+    "validation_seeds": [20260841, 20260842],
+    "evaluation_batch_size": 2,
+    "evaluation_block_size": 512,
+    "evaluation_batches_per_window": 32,
+    "probe_layers": [0, 3, 7, 11],
+    "output_metric_batches_per_window": 4,
+    "dtype": "bfloat16",
+    "gradient_clipping": "Apply the production global clip over model.product_fht_clip_parameters before masking non-target gradients.",
+    "update_extraction": "Compute one production backward pass, snapshot the clipped c_fc/c_proj gradients and functional contexts, restore the exact custom module and optimizer states before each c_fc-only, c_proj-only, and joint replay, and require joint deltas to match singleton deltas at absolute tolerance 1e-7.",
+    "scoring": "Apply extracted materialized deltas to the untouched checkpoint and restore after every fixed-window forward."
+  },
+  "decision_rule": {
+    "finite_interaction": "joint_loss_change - (cfc_loss_change + cproj_loss_change)",
+    "normalizer": "abs(cfc_loss_change) + abs(cproj_loss_change)",
+    "additive_tolerance": 0.1,
+    "destructive_threshold": 0.25,
+    "cooperative_threshold": 0.1,
+    "destructive": "The normalized finite interaction is at least +0.25 on both validation windows.",
+    "cooperative": "The normalized finite interaction is at most -0.10 on both validation windows.",
+    "additive": "The absolute normalized finite interaction is at most 0.10 on both validation windows.",
+    "mixed": "All other finite outcomes.",
+    "structural_action": "A destructive result authorizes a joint block-output metric chart. An additive but non-helpful joint step instead directs work to the individual prospective directions. No result directly authorizes HyperConnection or a learned residual topology."
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "checkpoint_parameter_updates": 0,
+    "disposable_optimizer_steps": 3,
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_joint_prospective_step_20260803_attempt2",
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.analyze_mlp_joint_prospective_step --checkpoint /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/pro6_mai_v3_124m_functionmix50_internalcondition1p01_0p5tpp/ckpt.pt --config examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json --data-dir /home/pro6000-9980x/MappingNetworks/data/finewebedu_20b --plan examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan_v2.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_joint_prospective_step_20260803_attempt2 --device cuda"
+  },
+  "authorization": "This plan authorizes only the zero-persistent-update diagnostic. It does not authorize a training run, a larger rung, HyperConnection, or any residual-topology change."
+}

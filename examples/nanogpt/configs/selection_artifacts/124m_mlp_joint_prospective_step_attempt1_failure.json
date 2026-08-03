@@ -1,0 +1,34 @@
+{
+  "artifact_kind": "124m_mlp_joint_prospective_step_failure",
+  "schema_version": "mlp_joint_prospective_step_failure_v1",
+  "created_at": "2026-08-03",
+  "decision": "FAIL_CLOSED_INDEPENDENT_BACKWARD_REPLAYS_NOT_IDENTICAL",
+  "inputs": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan.json",
+    "plan_sha256": "9f76d12c3b905fda6529393c2fb5380570efd84d79126e296f26c44ff8a58253",
+    "implementation_commit": "2d88d877befe86541cf44d253e98e16827a24b52",
+    "entrypoint_sha256": "6796008d75910b70712b8b97c1057e3c8d21d794f3cfa6795a26f46b9d6d7c7c"
+  },
+  "failure": {
+    "stage": "joint_singleton_update_identity_check",
+    "maximum_absolute_update_difference": 0.000025247223675251007,
+    "frozen_absolute_tolerance": 1e-7,
+    "mismatched_elements": 2273281,
+    "total_elements": 2359296,
+    "cause": "The three variants independently recomputed BF16/FlashAttention backward passes. Small numerical gradient differences were amplified by the discrete functional-chart selector, so they did not represent one identical prospective gradient.",
+    "persistent_checkpoint_updates": 0,
+    "finite_ce_evaluation_reached": false,
+    "output_directory_created": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_joint_prospective_step_20260803.log",
+    "log_sha256": "f6d7b362184bd2b0884f8d19af783f085ff3bd1b0877ad68b20805784233b24c"
+  },
+  "repair": {
+    "implementation_commit": "b9e97b381eb50409123e4e642d393672bc59df57",
+    "method": "Compute one backward pass once, snapshot its clipped gradients, functional contexts, materialized modules, and optimizer state, then replay all three masks from exact restores without relaxing the 1e-7 identity tolerance."
+  }
+}

@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 
 REPO = Path(__file__).resolve().parents[2]
 PLAN = (
     REPO
-    / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan.json"
+    / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan_v2.json"
 )
+PLAN_V1 = REPO / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_plan.json"
+FAILURE = REPO / "examples/nanogpt/configs/selection_artifacts/124m_mlp_joint_prospective_step_attempt1_failure.json"
 
 
 def sha256(path: Path) -> str:
@@ -18,7 +21,7 @@ def sha256(path: Path) -> str:
 
 def test_joint_prospective_plan_binds_repository_inputs() -> None:
     plan = json.loads(PLAN.read_text())
-    assert plan["schema_version"] == "mlp_joint_prospective_step_plan_v1"
+    assert plan["schema_version"] == "mlp_joint_prospective_step_plan_v2"
     for path, digest in plan["source_hashes"].items():
         assert sha256(REPO / path) == digest
     identity = plan["identity"]
@@ -29,6 +32,18 @@ def test_joint_prospective_plan_binds_repository_inputs() -> None:
     assert sha256(REPO / identity["entrypoint"]) == (
         identity["entrypoint_sha256"]
     )
+    assert sha256(PLAN_V1) == plan["predecessor"]["plan_sha256"]
+    assert sha256(FAILURE) == plan["predecessor"]["failure_sha256"]
+
+
+def test_attempt1_source_identity_is_historical_not_live() -> None:
+    plan = json.loads(PLAN_V1.read_text())
+    commit = plan["implementation_commit"]
+    for path, digest in plan["source_hashes"].items():
+        content = subprocess.check_output(
+            ["git", "-C", str(REPO), "show", f"{commit}:{path}"]
+        )
+        assert hashlib.sha256(content).hexdigest() == digest
 
 
 def test_joint_prospective_plan_uses_fresh_fixed_windows_and_no_watcher() -> None:
