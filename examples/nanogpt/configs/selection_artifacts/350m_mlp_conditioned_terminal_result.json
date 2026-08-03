@@ -1,0 +1,106 @@
+{
+  "artifact_kind": "350m_conditioned_full_mlp_terminal_result",
+  "callback": {
+    "delivery_anomaly": "The 20% and terminal events were durably owned, but the 50% event was not. A failed 50% delivery advanced last_iter beyond the threshold, exposing a watcher retry bug that is repaired with this result.",
+    "last_callback_at_unix": 1785686312.101536,
+    "sent_milestones": [
+      20
+    ],
+    "state_key": "pro6_350m_full_mlp_conditioned_20260802a_v1",
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-02T23:56:09+08:00"
+    ]
+  },
+  "checkpoint": {
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/run/ckpt.meta.json",
+    "metadata_sha256": "afa0dd17e6cae6c8571c67175a73e272e9f016955cc0ed31fffcc4b02e4b6f2a",
+    "next_iter": 677,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/run/ckpt.pt",
+    "sha256": "9405949fa0ed34c63e3476c093fd4343e9457dd3171ee14cef2c2116c2f21a0b",
+    "size_bytes": 2410474080
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+    "sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": "REJECT_TERMINAL_CE_GATE",
+  "host": "PRO6",
+  "measurement": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_gap_ce": 0.2205,
+    "attention_only_absolute_ceiling": 4.5629,
+    "attention_only_ceiling_excess": 0.0205,
+    "effective_ceiling": 4.5557,
+    "effective_ceiling_excess": 0.0277,
+    "matched_parent_gap_ce": 0.1277,
+    "matched_parent_plus_0p1_ceiling": 4.5557,
+    "matched_parent_validation_ce": 4.4557,
+    "terminal_step": 677,
+    "terminal_train_ce": 4.587,
+    "terminal_validation_ce": 4.5834
+  },
+  "performance_gate": {
+    "authorization_path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_preflight_v2_pass_result.json",
+    "authorization_sha256": "f842dbf86b2583d08eff387c990ecdf3cce04876c86c3a9526a5f750e83f647d",
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned_v2/performance_and_stability_preflight.json",
+    "certificate_sha256": "f50c3ee600a9430c3ed2b2eb3bc0a671ecd8fb9e17756ccbe2fb34defd9e3653",
+    "mfu_fraction": 0.257630788971985,
+    "minimum_mfu_fraction": 0.2
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_scaling_plan.json",
+    "sha256": "406cae6fc38d2ef9b64ed56f612e4d00614a8934cf555ba2342926527cba0615"
+  },
+  "provenance": {
+    "git_commit": "bb4f372582d1d3498cce0ca9fe88a5eed8f84255",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_full_mlp_conditioned_0p5tpp_20260802a_20260802T145416Z_2644829.log",
+    "log_sha256": "148dba28b3513a32a22deba292a9e5f08c48f358a6a1363a62fdf0630d253173",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_full_mlp_conditioned_0p5tpp_20260802a_20260802T145416Z_2644829.json",
+    "sha256": "db458cb671d39bdbb7c1645b1964b3b3af7660d6a4aeda9ea693d97887da8270",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_full_mlp_conditioned_0p5tpp_20260802a_20260802T145416Z_2644829.json",
+    "status_sha256": "a5e668b80fb09cd13496021f110ebd9a1b3fe4c80186b9877ccad6c371bbea5e"
+  },
+  "runtime_evaluation": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "protocol": "mai_ladder_fixed_eval_indices_v2",
+    "trajectory": [
+      {
+        "matched_parent_validation_ce": 5.4779,
+        "step": 170,
+        "validation_ce": 5.5604,
+        "validation_gap_ce": 0.0825
+      },
+      {
+        "matched_parent_validation_ce": 4.8763,
+        "step": 340,
+        "validation_ce": 4.9838,
+        "validation_gap_ce": 0.1075
+      },
+      {
+        "matched_parent_validation_ce": 4.5694,
+        "step": 510,
+        "validation_ce": 4.6914,
+        "validation_gap_ce": 0.122
+      },
+      {
+        "matched_parent_validation_ce": 4.4557,
+        "step": 677,
+        "validation_ce": 4.5834,
+        "validation_gap_ce": 0.1277
+      }
+    ]
+  },
+  "schema_version": "350m_conditioned_full_mlp_terminal_result_v1",
+  "workspace_after_run": {
+    "available_bytes": 1788717072384,
+    "cap_bytes": 274877906944,
+    "used_bytes": 120814282614
+  }
+}
