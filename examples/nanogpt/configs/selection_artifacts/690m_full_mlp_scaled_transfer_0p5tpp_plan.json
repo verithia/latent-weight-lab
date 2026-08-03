@@ -1,14 +1,17 @@
 {
   "schema_version": "mai_690m_full_mlp_scaled_transfer_0p5tpp_plan_v1",
   "created_at": "2026-08-03",
-  "revision": 2,
+  "revision": 3,
   "supersedes_invalid_config_commit": "66e18dedcaac838719abff57f7f45e10856eeb61",
   "v1_preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_result.json",
   "v1_preflight_reject_result_sha256": "77edd0be175f72a960bae922df908bbf5f7fbf7edc4cd10174000a724b40fa42",
+  "v2_native64_preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v2_native64_preflight_reject_result.json",
+  "v2_native64_preflight_reject_result_sha256": "e9ebe44fd5f36a3eee670452c585c3c57ca22dd20625c67f850dac38703fea15",
+  "native_stage_fix_commit": "d0b3cde5bb1b0661012eacd6373adad64202069a",
   "question": "Does the selected full-MLP replacement transfer from 350M to 690M at fixed 0.5TPP when both structured chart capacities are scaled in direct proportion to model width?",
   "identity": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_plus_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp.json",
-    "config_sha256": "a3061cc4d5f1935105662ed0e7b24ef815910f8bc186f2679647a5353fe25d33",
+    "config_sha256": "5403a0bf2905b43f2bfbf8179dd55f2d4d2db1c1c318096260471947a24d4e8d",
     "attention_control_config": "examples/nanogpt/configs/y400_mai_v2_690m_fullattn_blockfht_0p5tpp_mult1p00.json",
     "attention_control_config_sha256": "55ffa3633068998ad9d82b79dcd05d55c676d3992e5ba243e9ffc6e89b34f483",
     "attention_control_ranking": "examples/nanogpt/configs/selection_artifacts/690m_fullattn_0p5tpp_provisional_ranking.json",
@@ -17,15 +20,18 @@
     "selected_350m_result_sha256": "40cf563a9cdc7395b37957c70956613b4b148d0188ba3bcbd5ae5ac6d506a182",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
-    "implementation_commit": "d8e502b71ef3bf19dddd4bf61fd4ca076c208084",
+    "implementation_commit": "d0b3cde5bb1b0661012eacd6373adad64202069a",
     "implementation_source_hashes": {
+      "examples/nanogpt/csrc/task_edge_coloring.cpp": "988e1ae64f13061a5ae02eb1227523cea6a5e84b084121ba8f877b391dd8a53f",
+      "examples/nanogpt/fast_task_matching.py": "ec922fd31e136cf7a5c0ddff87f2f20db0da141ea9411a71ff7a25ba6b25c7c2",
       "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
       "examples/nanogpt/model.py": "9d32e2263d8672ae5fe1ea51fe02e1332ffcfe12bc8564b74c4291b6da18b33b",
       "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
-      "examples/nanogpt/muon_matched_givens.py": "9a8928fd28225b7d174f0ccb9576c910922e4c98171fa54a3711e42f9e453446",
+      "examples/nanogpt/muon_matched_givens.py": "9532eabdf3538eca2c0774ab6f7e35cd05fd28a59c451cf9c41b64d0376cf0fc",
+      "examples/nanogpt/test_fast_task_matching.py": "f163b6c972e59dd271f1e7f83c46cf7fc51e796b7b5c92ccd1b88809b3313d32",
       "examples/nanogpt/test_muon_directed_product.py": "17a0310c1c46147f65ef21968d7bc29397d14b86371235fde64ebd2674258885",
       "examples/nanogpt/test_muon_matched_givens.py": "ca199a421f38aead8a56fbb953875e79928b364027f4749baa10b2707849eb98",
-      "examples/nanogpt/train.py": "8682b3831450f30dd0b0dd2b31fb1cb47011d1a985129a97f07b01b172a98e6d",
+      "examples/nanogpt/train.py": "3f42cad2ddd24c9140b942ceceda87d88f3142eef7a3a6355a6c3a514c1a2a40",
       "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
     }
   },
@@ -46,6 +52,7 @@
     "cproj_error_feedback_decay": 0.5,
     "total_additional_trainable_parameters": 0,
     "total_additional_dense_optimizer_state_bytes": 1677721600,
+    "native_stage_occupancy": "dynamic uint64 bitset validated at 80 stages; no scientific chart-capacity change",
     "inference_parameter_or_flop_change_vs_materialized_attention_parent": 0,
     "scaling_rule": "multiply the selected 350M chart stage totals and c_proj matching-neighborhood width by 1280/1024 and distribute c_fc's integer total as evenly as possible over the unchanged six-stage topology"
   },
@@ -113,5 +120,14 @@
     "automatic_rerun_authorized": false,
     "larger_model_or_token_rung_authorized": false
   },
-  "status": "revision_2_registered_after_v1_preflight_invariant_rejection_before_exact_config_mfu_and_training"
+  "validation": {
+    "host": "PRO6",
+    "focused_tests": "33 passed in 2.55s",
+    "test_scope": [
+      "examples/nanogpt/test_fast_task_matching.py",
+      "examples/nanogpt/test_muon_matched_givens.py",
+      "examples/nanogpt/test_690m_full_mlp_scaled_transfer_plan.py"
+    ]
+  },
+  "status": "revision_3_registered_after_dynamic_stage_bitset_validation_before_exact_config_mfu_and_training"
 }
