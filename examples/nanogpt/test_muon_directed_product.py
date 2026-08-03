@@ -4,10 +4,13 @@ import copy
 
 import torch
 
+import pytest
+
 from examples.nanogpt.analyze_mlp_cfc_multistage_directed import (
     fit_multistage_directed_sparse_mixer,
 )
 from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.train import require_block_fht_native_extension
 from examples.nanogpt.muon_matched_givens import (
     MuonDirectedProduct,
     MuonDirectedProductLinear,
@@ -207,3 +210,19 @@ def test_directed_cfc_preserves_dense_paired_seed_initialization() -> None:
             dense_block.mlp.c_fc.weight,
             directed_block.mlp.c_fc.weight,
         )
+
+
+def test_native_extension_guard_fails_closed(monkeypatch) -> None:
+    from latent_weight_lab import block_fht as block_fht_module
+
+    assert require_block_fht_native_extension(False) is False
+    monkeypatch.setattr(block_fht_module, "_load_block_fht_ext", lambda: object())
+    assert require_block_fht_native_extension(True) is True
+    monkeypatch.setattr(block_fht_module, "_load_block_fht_ext", lambda: None)
+    monkeypatch.setattr(
+        block_fht_module,
+        "_BLOCK_FHT_EXT_ERROR",
+        RuntimeError("missing native test backend"),
+    )
+    with pytest.raises(RuntimeError, match="missing native test backend"):
+        require_block_fht_native_extension(True)

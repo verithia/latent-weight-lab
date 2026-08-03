@@ -1,0 +1,62 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_mfu_result",
+  "schema_version": "mai_124m_mlp_cfc_directed_product_mfu_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "MFU_RUNTIME_REJECTED_NATIVE_EXTENSION_UNAVAILABLE",
+  "passed": false,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_mfu_plan.json",
+    "sha256": "785071d13ea8380d60bdd8598a53f58e3bcbfdbaf6a6eb24ad25c80713e5d6c1"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_mfu.json",
+    "sha256": "bd9b1d044ad7d1dfb6104261bdaed980e2717bb61cb816b756f8263edf9458e4"
+  },
+  "implementation_commit": "6804c654919518b9e0c0cd63ee8eb3061d614368",
+  "execution_commit": "eadab7622279b49e49245cfc1348ed33fb6335e8",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv-pro6-diagnostics/bin/python",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_mfu/performance_preflight.json",
+    "sha256": "6b9a3ceb107c87fe88a03ce8eb76af38c7dd0310ff079470bd2a3bbb3223cd25",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_mfu/preflight.log",
+    "preflight_log_sha256": "da8712bbda4eb80b51246401585446bd887d0c39b1fda0e4e1963c324384ffe7"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 415.1121609497231,
+    "tokens_per_second": 4645.1075,
+    "average_iter_ms": 56435.0975,
+    "model_tflops": 3.4692237314380803,
+    "mfu_fraction": 0.008357316546691727,
+    "peak_mib": 33223.72,
+    "timing_breakdown_ms": {
+      "prepare": 14809.5125,
+      "forward_backward": 1175.795,
+      "flush": 40070.90375,
+      "gradient_postprocess": 1.7525,
+      "optimizer": 372.8275,
+      "data": 0.74,
+      "other": 3.56625
+    }
+  },
+  "diagnosis": {
+    "new_directed_product_optimizer_is_primary_bottleneck": false,
+    "directed_product_optimizer_ms_including_muon_and_qualified_cproj": 372.8275,
+    "dominant_failure": "BlockFHT cache prepare and flush used the eager fallback",
+    "native_extension_loaded": false,
+    "native_extension_error": "Ninja is required to load C++ extensions (pip install ninja to get it)",
+    "runtime_repair": "Use the project .venv with torch 2.7.0+cu128 and ninja present, then require explicit extension_loaded=true before retry."
+  },
+  "authorization": {
+    "scientific_training_authorized": false,
+    "larger_rung_authorized": false,
+    "retry_authorized_scope": "One newly preregistered MFU retry with the native extension explicitly verified before launch."
+  }
+}

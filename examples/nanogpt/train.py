@@ -40,6 +40,22 @@ CHECKPOINT_FILENAME = "ckpt.pt"
 CHECKPOINT_METADATA_FILENAME = "ckpt.meta.json"
 
 
+def require_block_fht_native_extension(required: bool) -> bool:
+    """Fail closed when a performance-gated run loses the CUDA backend."""
+    if not required:
+        return False
+    from latent_weight_lab import block_fht as block_fht_module
+
+    extension = block_fht_module._load_block_fht_ext()
+    if extension is None:
+        error = block_fht_module._BLOCK_FHT_EXT_ERROR
+        raise RuntimeError(
+            "BlockFHT native extension is required but unavailable: "
+            f"{error}"
+        )
+    return True
+
+
 def canonical_json_bytes(value: Any) -> bytes:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), allow_nan=False).encode("utf-8")
 
@@ -1341,6 +1357,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--block-fht-seed", type=int, default=1000)
     parser.add_argument("--block-fht-cache-weights", action="store_true")
+    parser.add_argument(
+        "--block-fht-native-extension-required",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--freeze-non-block-fht", action="store_true")
     parser.add_argument("--train-embeddings-when-frozen", action="store_true")
     parser.add_argument("--tie-word-embeddings", action=argparse.BooleanOptionalAction, default=True)
@@ -1696,6 +1717,10 @@ def conditioned_output_gate_config_kwargs(
 
 def main() -> None:
     args = parse_args()
+    if require_block_fht_native_extension(
+        bool(args.block_fht_native_extension_required)
+    ):
+        print("block_fht_native_extension loaded=true", flush=True)
     data_dir = Path(args.data_dir)
     out_dir = Path(args.out_dir)
     model_seed = 1337 if args.model_seed is None else int(args.model_seed)
