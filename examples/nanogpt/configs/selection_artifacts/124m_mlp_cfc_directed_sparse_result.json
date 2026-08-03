@@ -1,0 +1,99 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_sparse_result",
+  "schema_version": "mlp_cfc_directed_sparse_result_v1",
+  "created_at": "2026-08-03",
+  "classification": "DIRECTED_SPARSE_CFC_GAIN_TOO_SMALL",
+  "interpretation": "Removing reciprocal skew/shear tying and degree-regular matchings produces a real c_fc improvement, but the one-stage directed sparse output action remains below the preregistered oracle-gap threshold. At 88 incoming coefficients per expansion channel it is reliable both alone and beside production c_proj, yet recovers only 29.49% and 33.36% of the same-window equal-radius dense c_fc CE gaps. This is evidence for useful directed channel mixing, but not enough evidence to train the family.",
+  "identity": {
+    "git_commit": "e273111b5a2cc04aefb3c4978208d09a053b79cb",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "ca69517362e3dc69152db553bef71aad7abb5eb124841e86a76d39f04339f55e",
+    "entrypoint_sha256": "bbfda441f798a2e659d16325444e3a05e415f076f7b897ebaf1203178c02edd7"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 105.23435235023499,
+    "monitoring": "direct foreground polling; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 2
+  },
+  "validity": {
+    "production_cfc_reconstruction_max_abs_error": 0.0,
+    "directed44_relative_radius_error": 3.347893465716709e-08,
+    "directed88_relative_radius_error": 2.37500677475815e-08,
+    "dense_cfc_oracle_valid_singleton_and_hybrid": true,
+    "directed88_negative_on_every_window_singleton_and_hybrid": true
+  },
+  "direction_recovery_against_equal_radius_dense_cfc": {
+    "directed44": {
+      "cosine": 0.5460744064739824,
+      "fixed_scale_recovery": 0.09214874833955788,
+      "positive_line_recovery": 0.2981972574059122,
+      "per_layer_target_recovery_range": [
+        0.2958223223686218,
+        0.31008458137512207
+      ]
+    },
+    "directed88": {
+      "cosine": 0.6727601968686344,
+      "fixed_scale_recovery": 0.3455203535277238,
+      "positive_line_recovery": 0.45260628249072377,
+      "per_layer_target_recovery_range": [
+        0.4505104422569275,
+        0.4606679081916809
+      ]
+    }
+  },
+  "heldout_ce": {
+    "production_cfc": 5.899138797074556,
+    "directed44_cfc": 5.899070104584098,
+    "directed88_cfc": 5.8989066276699305,
+    "dense_norm_cfc": 5.898351514711976,
+    "production_joint": 5.896992214024067,
+    "hybrid_directed44_cfc": 5.896967329084873,
+    "hybrid_directed88_cfc": 5.896845450624824,
+    "hybrid_norm_cfc": 5.896552307531238
+  },
+  "registered_comparisons": {
+    "directed44_single_minus_production": {
+      "mean": -0.00006869249045848846,
+      "ci99": [-0.00014525101961642564, 0.000007866038699448711],
+      "window_means": [-0.00004212185740470886, -0.00009526312351226807],
+      "reliable": false,
+      "dense_oracle_gap_fraction": 0.0872526728953389
+    },
+    "directed44_hybrid_minus_production_joint": {
+      "mean": -0.000024884939193725586,
+      "ci99": [-0.00010068069492277916, 0.000050910816535327985],
+      "window_means": [-0.000024378299713134766, -0.000025391578674316406],
+      "reliable": false,
+      "dense_oracle_gap_fraction": 0.056568701756763054
+    },
+    "directed88_single_minus_production": {
+      "mean": -0.00023216940462589264,
+      "ci99": [-0.00031393301063537525, -0.00015040579861641003],
+      "window_means": [-0.00022184103727340698, -0.0002424977719783783],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.2948997915626649
+    },
+    "directed88_hybrid_minus_production_joint": {
+      "mean": -0.0001467633992433548,
+      "ci99": [-0.00022939949555993882, -0.00006412730292677079],
+      "window_means": [-0.00015702471137046814, -0.00013650208711624146],
+      "reliable": true,
+      "dense_oracle_gap_fraction": 0.33362408065274185
+    },
+    "dense_single_minus_production": -0.0007872823625802994,
+    "dense_hybrid_minus_production_joint": -0.0004399064928293228
+  },
+  "raw_outputs": {
+    "summary_sha256": "910e0f1c4a57dfd14742e4ae95c32ec2194490273fcf55ff607e26b21b6544e9",
+    "heldout_ce_sha256": "ccf803ee46bd6ce2bcb5874b375ac27590cb0b75a91f9a02bb14c1e670a148b7",
+    "directed_sparse_fits_sha256": "b7a87afc57c49cd7b668b719268f033454517d1a34a946eba431109e5c89d9a7",
+    "prospective_step_metadata_sha256": "58e4fc1aa45b2efa2c1eb9087d6938ad7f776140c4c4d771cedc32e466ed7e50"
+  },
+  "next_action": "Do not train either one-stage directed sparse family. The monotone 44-to-88 gain and uniform per-layer recovery show that directed channel mixing is useful, while the remaining gap is representational. Test a nonlinear two-stage product of task-selected directed sparse mixers: 22 incoming coefficients per stage and target channel at the same 135,168-coordinate budget, plus 44 per stage as a 2x-capacity discriminator. Fit the second stage on the first-stage-transformed source, normalize the final BF16 c_fc endpoint to the deployed radius, and retain the singleton plus production-cproj hybrid gates. This directly tests whether two-hop channel paths close the reachability gap without a learned basis, LoRA, HyperConnection, or residual-topology change."
+}
