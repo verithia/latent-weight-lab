@@ -1,0 +1,63 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_error_feedback_0p5tpp_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cfc_error_feedback_0p5tpp_exact_config_mfu_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "ERROR_FEEDBACK_0P5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_error_feedback_0p5tpp_plan.json",
+    "sha256": "17a950125fc995e41186624f7cf20a0d3276a92caba50315eb50ef9fdaae3134"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_errorfeedback_0p5tpp.json",
+    "sha256": "4995abe9709715c3dc6d076e6c5b0a367744123787a7a98e4d794654d3ebe93f"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "499689f8614b084480324e333b9fa059eec9be2b",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "native_extension_required": true,
+    "train_exit_code": 0
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_error_feedback_0p5tpp/performance_preflight.json",
+    "sha256": "228ac4931e4213f4e6ee2ba61258a74f55bf1df18694fee68bdee0c5819fb1e2",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_error_feedback_0p5tpp/performance_preflight.log",
+    "log_sha256": "ab71b2d89848eecc0bdb9a435961f0692863e4ba9edd2e96b7c8987a426e41a5"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 414.8211948545034,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 150259.07125,
+    "average_iter_ms": 1744.6225,
+    "model_tflops": 112.22180236826497,
+    "mfu_fraction": 0.2705305412555553,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31749.22,
+    "timing_breakdown_ms": {
+      "data_ms": 0.75625,
+      "eval_ms": 0.0,
+      "flush_ms": 4.37875,
+      "fwbw_ms": 1188.5925,
+      "grad_ms": 1.60625,
+      "opt_ms": 544.5525,
+      "other_ms": 0.95875,
+      "prepare_ms": 3.77875
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "finite_loss_values": 13
+  },
+  "decision": {
+    "one_full_238_update_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The exact preregistered full error-feedback configuration exceeds the frozen 20 percent MFU floor with finite losses, native execution, and clean exit."
+  }
+}
