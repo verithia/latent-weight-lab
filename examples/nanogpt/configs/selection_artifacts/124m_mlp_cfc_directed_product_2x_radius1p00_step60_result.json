@@ -1,0 +1,103 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_2x_radius1p00_step60_training_result",
+  "schema_version": "mai_124m_mlp_cfc_2x_radius1p00_step60_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "STABLE_SAME_FAMILY_COORDINATE_SCREEN_REJECTED",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_2x_radius1p00_step60_plan.json",
+    "sha256": "eeb6001cb5a3238c703ec59f7663d749c90c57224f64e09a050c94a21c14bb91"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct2x_radius1p00_step60.json",
+    "sha256": "613be54c9ab03f4df05d3c90e88930972f65c9569598cfcc91bb170cf2d9a892"
+  },
+  "exact_config_mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_2x_radius1p00_step60_mfu_result.json",
+    "sha256": "c9b982104974393b68ddb1f954b49265bbd5bffbc79a6ae74f0089bbcb5c01fd",
+    "mfu_fraction": 0.2661355348635522,
+    "tokens_per_second": 147767.08875,
+    "average_iter_ms": 1774.04125,
+    "peak_mib": 31640.09
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "e997eab418c0864c1682e4194d1d76ff4ecc1aa6",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-03T17:07:20+08:00",
+    "finished_at": "2026-08-03T17:09:48+08:00",
+    "wall_seconds": 148,
+    "exit_code": 0,
+    "ordinary_logged_updates": 5,
+    "ordinary_iter_mean_ms": 1765.312,
+    "observed_peak_mib": 44410
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_id": "pro6_mai_v3_124m_cfc_directed_product_2x_radius1p00_step60_20260803T090720Z_3151629",
+    "provenance_sha256": "8e63c22f042137c2cd91c2a7ad433759b7c8b96c64e4837700c541595dd2bcd0",
+    "archived_config_sha256": "613be54c9ab03f4df05d3c90e88930972f65c9569598cfcc91bb170cf2d9a892",
+    "archived_mfu_sha256": "51ea189bbed9794dda4cdfcc4c2009dc7d4c8bc7a504755324000ad5d7fd5f3d",
+    "log_sha256": "c12df307a48165ab81184365d187e759e77a718434a456256829d1d40aed82db",
+    "status_sha256": "666d09988f7394eadc9569602997c3505a7eac18532215db7c0456bf55c802ad",
+    "checkpoint_sha256": "73aea97ae27a99400a87ed1d2b1bbd407aff5bb6eacb4d5f31c3c18b838b47a6",
+    "checkpoint_meta_sha256": "ffa4fb884459c10936837b7d1189cabbde91f6df6274bdc14eb61329ca9b936f",
+    "checkpoint_next_iter": 60,
+    "checkpoint_best_validation_ce": 6.338449478149414
+  },
+  "candidate": {
+    "schedule": [
+      30,
+      30,
+      29,
+      29,
+      29,
+      29
+    ],
+    "coordinates_per_layer": 540672,
+    "coordinate_multiplier_vs_original": 2.0,
+    "coordinate_multiplier_vs_22x6_control": 1.3333333333333333,
+    "family_radius_ratio": 1.0,
+    "offline_terminal_minimum_positive_line_recovery": 0.7503036425412035
+  },
+  "loss": {
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train": 10.9672,
+        "validation": 10.9669
+      },
+      {
+        "step": 60,
+        "train": 6.3290,
+        "validation": 6.338449478149414
+      }
+    ],
+    "full_radius_22x6_control_validation": 6.347743988037109,
+    "dense_cfc_control_validation": 6.3141,
+    "frozen_pass_validation_ce_maximum": 6.330921994018555,
+    "gain_over_full_radius_22x6_control": 0.009294509887695312,
+    "remaining_control_gap": 0.03364398803710955,
+    "remaining_gap_fraction_recovered": 0.27626064655127697,
+    "candidate_minus_dense_cfc": 0.02434947814941424,
+    "candidate_minus_pass_threshold": 0.007527484130859463
+  },
+  "decision": {
+    "passed": false,
+    "full_238_update_run_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "same_family_coordinate_expansion_is_main_repair": false,
+    "next_action": "Reject further directed-product coordinate expansion as the main MLP repair. Diagnose and preregister a qualitatively different c_fc direction family while keeping the full-radius result as the causal control."
+  },
+  "interpretation": [
+    "The 2x chart is numerically stable and computationally qualified, so rejection is not caused by NaN, incomplete execution, or the 20 percent MFU gate.",
+    "The offline terminal tangent recovery increase from roughly 0.659 to 0.750 translates to only 0.00929 CE at step 60 and recovers 27.63 percent of the remaining online gap.",
+    "More coordinates inside the same incoming-channel directed-product family have diminishing online value; the residual error is a direction-family mismatch rather than a scalar radius or simple coordinate-count problem.",
+    "The result provides no evidence for changing residual topology, adding HyperConnection, or introducing a learned basis or LoRA adapter."
+  ]
+}
