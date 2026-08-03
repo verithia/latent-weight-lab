@@ -1,0 +1,109 @@
+{
+  "schema_version": "mai_350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "After fixing c_proj temporal accumulation with decay 0.5, does the selected c_fc directed-product error-feedback mechanism transfer at 350M without reopening the accepted attention gap?",
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+    "config_sha256": "a316a887a84c8ebe7b2037f3d0fe3b9d3ac1cbad1695b305b550f0e6fe9db250",
+    "bounded_cproj_parent_config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_decay0p5_0p5tpp.json",
+    "bounded_cproj_parent_config_sha256": "06039b7505c25cf17a3d5187cebc4cfacf30fb1478ce0950dbfa5f1180a298da",
+    "bounded_cproj_parent_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_result.json",
+    "bounded_cproj_parent_result_sha256": "66973c9b437211bbf796f2d3bc1dc888b0c63126034d2c4958b2fa45185becdb",
+    "failed_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v2_result.json",
+    "failed_full_mlp_result_sha256": "40053ca30fcb2f088fde98f6f8eb5f5f856cb5cda0db03fdab92be8ab8de1e7b",
+    "smallest_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_error_feedback_0p5tpp_result.json",
+    "smallest_full_mlp_result_sha256": "bec53473035d0128df566be4c20bde563167a6fd4296adf9b58618e3698d6b83",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "d8e502b71ef3bf19dddd4bf61fd4ca076c208084",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "b9454210c6f6aec59aa39da7a9f1b36f111eba5f13127c39fcf47758a94179a3",
+      "examples/nanogpt/model.py": "9d32e2263d8672ae5fe1ea51fe02e1332ffcfe12bc8564b74c4291b6da18b33b",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "9a8928fd28225b7d174f0ccb9576c910922e4c98171fa54a3711e42f9e453446",
+      "examples/nanogpt/test_muon_directed_product.py": "17a0310c1c46147f65ef21968d7bc29397d14b86371235fde64ebd2674258885",
+      "examples/nanogpt/test_muon_matched_givens.py": "ca199a421f38aead8a56fbb953875e79928b364027f4749baa10b2707849eb98",
+      "examples/nanogpt/train.py": "8682b3831450f30dd0b0dd2b31fb1cb47011d1a985129a97f07b01b172a98e6d",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "candidate": {
+    "only_change_from_bounded_cproj_parent": "add selected c_fc directed-product update chart and its decay-1 compression-error feedback; c_proj remains the accepted 64+24 decay-0.5 path",
+    "cfc_schedule": [30, 30, 29, 29, 29, 29],
+    "cfc_error_feedback_decay": 1.0,
+    "cfc_family_radius_ratio": 1.0,
+    "cfc_additional_dense_optimizer_state_bytes": 402653184,
+    "cproj_parent_stages": 64,
+    "cproj_residual_stages": 24,
+    "cproj_error_feedback_decay": 0.5,
+    "total_additional_trainable_parameters": 0,
+    "total_additional_dense_optimizer_state_bytes": 805306368,
+    "inference_parameter_or_flop_change_vs_materialized_parent": 0
+  },
+  "controls": {
+    "attention_only_terminal_validation_ce": 4.3629,
+    "bounded_cproj_parent_terminal_validation_ce_exact": 4.424571514129639,
+    "failed_decay1_full_mlp_terminal_validation_ce": 4.6874,
+    "accepted_attention_gap": 0.1,
+    "global_success_ceiling": 4.4629
+  },
+  "decision_rule": {
+    "primary_metric": "fixed-window terminal step-677 validation cross entropy",
+    "pass_validation_ce_maximum": 4.4629,
+    "pass": "stable terminal validation CE at or below 4.4629 establishes accepted-gap full attention and full MLP replacement at 350M/0.5 TPP",
+    "failure": "instability or terminal validation CE above 4.4629 rejects c_fc transfer on the repaired c_proj parent",
+    "nonbinding_near_neutral_cfc_increment_ce_maximum": 0.01,
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay",
+    "mfu_polling": "foreground operator polling only; no watchdog or callback",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "training_launcher_command": [
+      "env",
+      "PYTHON_BIN=/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_350m_fullmlp_cfcdecay1_cprojdecay0p5_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "callback_milestones": [20, 50, 100],
+    "heartbeat_minutes": 90,
+    "watchdog": "one aggregate idempotent watchdog only after MFU authorization; KeepAlive=false; progress resets heartbeat; terminal ownership persists before exit"
+  },
+  "authorization": {
+    "exact_config_mfu_run_authorized": true,
+    "full_677_update_scientific_run_authorized_after_exact_mfu_pass": true,
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false
+  },
+  "status": "registered_before_exact_config_mfu_and_training"
+}
