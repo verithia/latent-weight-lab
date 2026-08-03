@@ -1,13 +1,15 @@
 {
   "schema_version": "mai_690m_full_mlp_scaled_transfer_0p5tpp_plan_v1",
   "created_at": "2026-08-03",
-  "revision": 3,
+  "revision": 4,
   "supersedes_invalid_config_commit": "66e18dedcaac838719abff57f7f45e10856eeb61",
   "v1_preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_result.json",
   "v1_preflight_reject_result_sha256": "77edd0be175f72a960bae922df908bbf5f7fbf7edc4cd10174000a724b40fa42",
   "v2_native64_preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v2_native64_preflight_reject_result.json",
   "v2_native64_preflight_reject_result_sha256": "e9ebe44fd5f36a3eee670452c585c3c57ca22dd20625c67f850dac38703fea15",
   "native_stage_fix_commit": "d0b3cde5bb1b0661012eacd6373adad64202069a",
+  "mfu_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_mfu_result.json",
+  "mfu_result_sha256": "54bd56074744b6d52cdcdb5947264a056c62e51d2b2376532ef46072cab89c91",
   "question": "Does the selected full-MLP replacement transfer from 350M to 690M at fixed 0.5TPP when both structured chart capacities are scaled in direct proportion to model width?",
   "identity": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_plus_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp.json",
@@ -129,5 +131,17 @@
       "examples/nanogpt/test_690m_full_mlp_scaled_transfer_plan.py"
     ]
   },
-  "status": "revision_3_registered_after_dynamic_stage_bitset_validation_before_exact_config_mfu_and_training"
+  "mfu_admission": {
+    "passed": true,
+    "minimum_fraction": 0.2,
+    "measured_fraction": 0.2847733101603887,
+    "iter_ms": 9203.605,
+    "tokens_per_second": 28482.8725,
+    "peak_mib": 43692.55,
+    "native_parent_stages": 80,
+    "native_residual_stages": 30,
+    "projected_update_only_hours": 3.389527175,
+    "long_run_authorized": true
+  },
+  "status": "revision_4_exact_config_mfu_passed_and_one_scientific_run_admitted"
 }

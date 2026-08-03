@@ -19,6 +19,14 @@ V1_REJECT_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v1_preflight_reject_result.json"
 )
+V2_REJECT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_v2_native64_preflight_reject_result.json"
+)
+MFU_RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_mfu_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -51,6 +59,10 @@ def test_plan_binds_config_control_parent_and_implementation() -> None:
     assert sha256(REPO / plan["v1_preflight_reject_result"]) == (
         plan["v1_preflight_reject_result_sha256"]
     )
+    assert sha256(REPO / plan["v2_native64_preflight_reject_result"]) == (
+        plan["v2_native64_preflight_reject_result_sha256"]
+    )
+    assert sha256(REPO / plan["mfu_result"]) == plan["mfu_result_sha256"]
 
 
 def test_width_scaling_preserves_selected_coordinate_fraction() -> None:
@@ -151,3 +163,19 @@ def test_v1_preflight_rejection_is_preserved_and_non_scientific() -> None:
     assert result["measurement"]["mfu_measured"] is False
     assert result["decision"]["scientific_run_authorized"] is False
     assert result["runtime"]["callback_or_watchdog_attached"] is False
+
+
+def test_native_cap_rejection_and_exact_mfu_admission_are_preserved() -> None:
+    reject = load(V2_REJECT_PATH)
+    assert reject["rejection"]["scientific_result"] is False
+    assert reject["preflight"]["timed_updates_completed"] == 0
+    assert reject["resolution"]["scientific_config_change"] is False
+
+    result = load(MFU_RESULT_PATH)
+    plan = load(PLAN_PATH)
+    assert result["passed"] is True
+    assert result["measurement"]["mfu_fraction"] >= 0.2
+    assert result["implementation"]["parent_stages"] == 80
+    assert result["implementation"]["dynamic_stage_bitset_validated"] is True
+    assert result["decision"]["one_full_1326_update_run_authorized"] is True
+    assert plan["mfu_admission"]["long_run_authorized"] is True
