@@ -1676,9 +1676,18 @@ class MuonMatchedGivens(torch.optim.Optimizer):
         momentum: float,
         weight_decay: float,
         ns_steps: int,
+        error_feedback: bool = False,
+        error_feedback_decay: float = 1.0,
     ) -> None:
         if not modules:
             raise ValueError("MuonMatchedGivens requires at least one module")
+        if (
+            not math.isfinite(error_feedback_decay)
+            or not 0.0 <= error_feedback_decay <= 1.0
+        ):
+            raise ValueError(
+                "MuonMatchedGivens error-feedback decay must be in [0, 1]"
+            )
         for module in modules:
             module.weight.requires_grad_(True)
         self.modules_by_id = {id(module.weight): module for module in modules}
@@ -1688,6 +1697,8 @@ class MuonMatchedGivens(torch.optim.Optimizer):
             "momentum": float(momentum),
             "weight_decay": float(weight_decay),
             "ns_steps": int(ns_steps),
+            "error_feedback": bool(error_feedback),
+            "error_feedback_decay": float(error_feedback_decay),
         }
         super().__init__(
             [{"params": [module.weight for module in modules]}],
@@ -1706,6 +1717,10 @@ class MuonMatchedGivens(torch.optim.Optimizer):
             momentum = float(group["momentum"])
             weight_decay = float(group["weight_decay"])
             ns_steps = int(group["ns_steps"])
+            error_feedback = bool(group.get("error_feedback", False))
+            error_feedback_decay = float(
+                group.get("error_feedback_decay", 1.0)
+            )
             for weight in group["params"]:
                 gradient = weight.grad
                 if gradient is None:
@@ -1726,6 +1741,29 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     / max(1, polar.numel() / polar.shape[0]),
                 ) ** 0.5
                 direction = -scale * polar
+                requested_update = lr * (
+                    direction - weight_decay * weight.float()
+                )
+                if error_feedback:
+                    if "compression_residual" not in state:
+                        state["compression_residual"] = torch.zeros_like(
+                            weight, dtype=torch.float32
+                        )
+                    feedback_input = state["compression_residual"].float()
+                    corrected_update = requested_update + (
+                        error_feedback_decay * feedback_input
+                    )
+                    matching_direction = direction
+                    if lr != 0.0:
+                        matching_direction = matching_direction + (
+                            error_feedback_decay * feedback_input / lr
+                        )
+                else:
+                    feedback_input = torch.zeros_like(
+                        requested_update, dtype=torch.float32
+                    )
+                    corrected_update = requested_update
+                    matching_direction = direction
                 step_index = int(module.optimizer_step)
                 refresh = (
                     module.fast_fresh_matching
@@ -1739,7 +1777,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         permutations, matching_diagnostics = (
                             fast_muon_matched_permutations(
                                 weight,
-                                direction,
+                                matching_direction,
                                 stages=module.stages,
                                 neighbors=module.neighbors,
                                 seed=module.matching_seed + step_index,
@@ -1788,7 +1826,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         permutations, matching_diagnostics = (
                             muon_matched_permutations(
                                 weight,
-                                direction,
+                                matching_direction,
                                 stages=module.stages,
                                 neighbors=module.neighbors,
                                 seed=module.matching_seed,
@@ -1828,12 +1866,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     module.matching_valid.fill_(True)
                     module.last_refresh_step.fill_(step_index)
                     module.refresh_count.add_(1)
-                requested_update = lr * (
-                    direction - weight_decay * weight.float()
-                )
                 parent_angles = diagonal_metric_angles(
                     weight,
-                    requested_update,
+                    corrected_update,
                     module.selected_permutations,
                 )
                 after_parent = apply_givens_flow(
@@ -1844,7 +1879,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 )
                 parent_update = after_parent.float() - weight.float()
                 residual_update = (
-                    requested_update.float() - parent_update
+                    corrected_update.float() - parent_update
                 )
                 residual_angles = None
                 rotated = after_parent
@@ -1928,10 +1963,18 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     rotated.mul_(1.0 - lr * weight_decay)
                 update = rotated - weight
                 requested_energy = requested_update.float().square().sum()
-                residual_energy = (
-                    requested_update.float() - update.float()
-                ).square().sum()
+                corrected_energy = corrected_update.float().square().sum()
+                requested_residual = requested_update.float() - update.float()
+                compression_residual = (
+                    corrected_update.float() - update.float()
+                )
+                requested_residual_energy = requested_residual.square().sum()
+                corrected_residual_energy = compression_residual.square().sum()
                 weight.copy_(rotated)
+                if error_feedback:
+                    state["compression_residual"] = (
+                        compression_residual.contiguous()
+                    )
                 module.last_angles.copy_(
                     parent_angles.to(dtype=module.last_angles.dtype)
                 )
@@ -1964,6 +2007,8 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         ),
                         "refresh_count": int(module.refresh_count),
                         "coordinates": module.coordinate_count,
+                        "error_feedback": error_feedback,
+                        "error_feedback_decay": error_feedback_decay,
                         "angle_rms": float(
                             all_angles.square().mean().sqrt()
                         ),
@@ -1974,8 +2019,19 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "residual_stages": module.residual_stages,
                         "requested_update_recovery": float(
                             1.0
-                            - residual_energy
+                            - requested_residual_energy
                             / requested_energy.clamp_min(1e-30)
+                        ),
+                        "corrected_target_recovery": float(
+                            1.0
+                            - corrected_residual_energy
+                            / corrected_energy.clamp_min(1e-30)
+                        ),
+                        "feedback_input_fro": float(
+                            feedback_input.norm()
+                        ),
+                        "feedback_output_fro": float(
+                            compression_residual.norm()
                         ),
                         "matching": matching_summary,
                         "residual_matching": (

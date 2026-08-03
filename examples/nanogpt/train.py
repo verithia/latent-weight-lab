@@ -1109,6 +1109,16 @@ def parse_args() -> argparse.Namespace:
         default=161803,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-decay",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cfc-functional-shear",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -1502,6 +1512,20 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "fast fresh Muon-matched Givens c_proj requires "
                 "refresh interval 1"
+            )
+        if (
+            not math.isfinite(
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
+            )
+            or not 0.0
+            <= namespace
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
+            <= 1.0
+        ):
+            raise ValueError(
+                "Muon-matched Givens c_proj error-feedback decay must be "
+                "in [0, 1]"
             )
     if (
         namespace.block_fht_mlp_cfc_functional_shear
@@ -1908,6 +1932,14 @@ def main() -> None:
         ),
         block_fht_mlp_cproj_muon_matched_givens_seed=(
             args.block_fht_mlp_cproj_muon_matched_givens_seed
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_error_feedback=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
         ),
         block_fht_mlp_cfc_functional_shear=(
             args.block_fht_mlp_cfc_functional_shear

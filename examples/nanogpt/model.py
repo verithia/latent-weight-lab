@@ -158,6 +158,8 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_refresh_interval: int = 60
     block_fht_mlp_cproj_muon_matched_givens_fast_fresh: bool = False
     block_fht_mlp_cproj_muon_matched_givens_seed: int = 161803
+    block_fht_mlp_cproj_muon_matched_givens_error_feedback: bool = False
+    block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay: float = 1.0
     block_fht_mlp_cfc_functional_shear: bool = False
     block_fht_mlp_cfc_functional_shear_parent_stages: int = 64
     block_fht_mlp_cfc_functional_shear_stages: int = 24
@@ -3832,6 +3834,14 @@ class GPT(nn.Module):
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
                         ns_steps=muon_ns_steps,
+                        error_feedback=(
+                            self.config
+                            .block_fht_mlp_cproj_muon_matched_givens_error_feedback
+                        ),
+                        error_feedback_decay=(
+                            self.config
+                            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
+                        ),
                     )
                 )
                 for group in optimizers[-1].param_groups:

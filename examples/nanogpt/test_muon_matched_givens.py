@@ -161,6 +161,89 @@ def test_optimizer_refreshes_folds_and_round_trips_exact_state() -> None:
     assert torch.equal(original_momentum, restored_momentum)
 
 
+def test_cproj_error_feedback_preserves_first_step_and_resumes_exactly(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens.zeropower_via_newtonschulz5",
+        lambda matrix, steps: matrix,
+    )
+    control = make_module(layer_id=3)
+    candidate = make_module(layer_id=3)
+    candidate.load_state_dict(copy.deepcopy(control.state_dict()))
+    control_optimizer = MuonMatchedGivens(
+        [control],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    candidate_optimizer = MuonMatchedGivens(
+        [candidate],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+        error_feedback=True,
+        error_feedback_decay=1.0,
+    )
+    original = control.weight.detach().clone()
+    torch.manual_seed(41)
+    gradient = torch.randn_like(control.weight)
+    control.weight.grad = gradient.clone()
+    candidate.weight.grad = gradient.clone()
+    control_optimizer.step()
+    candidate_optimizer.step()
+    assert torch.equal(control.weight, candidate.weight)
+
+    combined = gradient + 0.95 * gradient
+    requested = 0.001 * (-combined - 0.1 * original.float())
+    applied = candidate.weight.float() - original.float()
+    expected_residual = requested - applied
+    residual = candidate_optimizer.state[candidate.weight][
+        "compression_residual"
+    ]
+    torch.testing.assert_close(residual, expected_residual)
+    diagnostics = candidate_optimizer.consume_diagnostics()
+    assert diagnostics[0]["error_feedback"] is True
+    assert diagnostics[0]["feedback_input_fro"] == 0.0
+    assert math.isclose(
+        diagnostics[0]["feedback_output_fro"],
+        float(expected_residual.detach().norm()),
+        rel_tol=1e-6,
+    )
+
+    module_state = copy.deepcopy(candidate.state_dict())
+    optimizer_state = copy.deepcopy(candidate_optimizer.state_dict())
+    restored = make_module(layer_id=3)
+    restored.load_state_dict(module_state)
+    restored_optimizer = MuonMatchedGivens(
+        [restored],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+        error_feedback=True,
+        error_feedback_decay=1.0,
+    )
+    restored_optimizer.load_state_dict(optimizer_state)
+    torch.manual_seed(43)
+    next_gradient = torch.randn_like(candidate.weight)
+    candidate.weight.grad = next_gradient.clone()
+    restored.weight.grad = next_gradient.clone()
+    candidate_optimizer.step()
+    restored_optimizer.step()
+    assert torch.equal(candidate.weight, restored.weight)
+    assert torch.equal(
+        candidate_optimizer.state[candidate.weight]["momentum_buffer"],
+        restored_optimizer.state[restored.weight]["momentum_buffer"],
+    )
+    assert torch.equal(
+        candidate_optimizer.state[candidate.weight]["compression_residual"],
+        restored_optimizer.state[restored.weight]["compression_residual"],
+    )
+
+
 def test_fast_fresh_optimizer_reselects_every_step(
     monkeypatch,
 ) -> None:
