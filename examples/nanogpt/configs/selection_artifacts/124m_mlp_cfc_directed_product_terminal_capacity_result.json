@@ -1,0 +1,116 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_terminal_capacity_result",
+  "schema_version": "mai_124m_mlp_cfc_terminal_capacity_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "TERMINAL_COMPOSITIONAL_CAPACITY_PASSES",
+  "selected_candidate": "depth6_total132",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_capacity_plan.json",
+    "sha256": "715fd70f82839c4532e58f8765240773648d7707e15bb289d34955695e89cf92"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "e85c5b892304f17014b119224d2e67b3aa509a2f",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cfc_directed_product_terminal_capacity.py",
+    "entrypoint_sha256": "2287ab327fccbfeafce1264ade592a770918419265063c1d6553abdf07a445fc",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "exit_code": 0,
+    "wall_seconds": 12.54540205001831
+  },
+  "identity": {
+    "checkpoint_sha256": "aaf00e4b36489fb4eb0d720cc821e401579c3d00c917489ea86a4eb61b278f1a",
+    "checkpoint_next_iter": 238,
+    "checkpoint_unchanged_after_diagnostic": true,
+    "config_sha256": "80c3cd31d1494799c19c1083504231819caefda33f917d6e48fa96c73257ed7b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "summary_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_capacity/summary.json",
+    "summary_sha256": "1aa2fe9eb16f934cdaa70e54f0e1792b6b8f409c9738ad121c2b0939e1379678",
+    "direction_rows_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_terminal_capacity/direction_rows.json",
+    "direction_rows_sha256": "a5f7d127d179f08beac88745552e33981c12ffe4aa796d30852cd8c408d4a911"
+  },
+  "protocol": {
+    "parameter_updates_to_checkpoint": 0,
+    "gradient_seeds": [2026080401, 2026080407, 2026080413],
+    "gradient_batch_size": 4,
+    "gradient_accumulation_steps": 8,
+    "registered_radius_ratio": 0.6589686140591383,
+    "maximum_coordinate_multiplier": 2.0,
+    "minimum_positive_line_recovery": 0.65,
+    "minimum_layer_positive_line_recovery": 0.62,
+    "minimum_improvement_over_current": 0.12
+  },
+  "candidate_summaries": {
+    "current_depth3_total88": {
+      "schedule": [30, 29, 29],
+      "coordinates_per_layer": 270336,
+      "mean_positive_line_recovery": 0.5088727444580861,
+      "minimum_positive_line_recovery": 0.5087334902290669,
+      "minimum_layer_positive_line_recovery": 0.5076043613280787,
+      "passes": false
+    },
+    "depth4_total88": {
+      "schedule": [22, 22, 22, 22],
+      "coordinates_per_layer": 270336,
+      "mean_positive_line_recovery": 0.5183569128533074,
+      "minimum_positive_line_recovery": 0.5182796927278676,
+      "minimum_improvement_over_current": 0.009364467387862008,
+      "passes": false
+    },
+    "depth6_total88": {
+      "schedule": [15, 15, 15, 15, 14, 14],
+      "coordinates_per_layer": 270336,
+      "mean_positive_line_recovery": 0.5288452701612827,
+      "minimum_positive_line_recovery": 0.528830711219697,
+      "minimum_improvement_over_current": 0.019877891606056353,
+      "passes": false
+    },
+    "depth4_total132": {
+      "schedule": [33, 33, 33, 33],
+      "coordinates_per_layer": 405504,
+      "mean_positive_line_recovery": 0.6454364119501536,
+      "minimum_positive_line_recovery": 0.6453892598757923,
+      "minimum_layer_positive_line_recovery": 0.6445502881136995,
+      "minimum_improvement_over_current": 0.13651589011856968,
+      "passes": false
+    },
+    "depth6_total132": {
+      "schedule": [22, 22, 22, 22, 22, 22],
+      "coordinates_per_layer": 405504,
+      "mean_positive_line_recovery": 0.6593762774150445,
+      "minimum_positive_line_recovery": 0.6593661794769589,
+      "minimum_layer_positive_line_recovery": 0.6585922403742861,
+      "minimum_improvement_over_current": 0.15039301759829682,
+      "passes": true
+    },
+    "depth4_total176": {
+      "schedule": [44, 44, 44, 44],
+      "coordinates_per_layer": 540672,
+      "minimum_positive_line_recovery": 0.7344628959680345,
+      "minimum_improvement_over_current": 0.22548973408937245,
+      "passes": true
+    },
+    "depth6_total176": {
+      "schedule": [30, 30, 29, 29, 29, 29],
+      "coordinates_per_layer": 540672,
+      "minimum_positive_line_recovery": 0.7503036425412035,
+      "minimum_improvement_over_current": 0.24136216914597008,
+      "passes": true
+    }
+  },
+  "interpretation": [
+    "Depth alone at the same 88 coefficients per output channel yields only modest recovery gains, so the current coordinate count is a real capacity bottleneck.",
+    "At 132 coefficients per channel, six stages outperform four stages on all fresh gradients and clear every preregistered family and per-layer threshold.",
+    "The 176-coordinate candidates recover more direction, but the registered efficiency rule selects the smallest passing family, six stages of 22 incoming coefficients.",
+    "The selected chart adds no learned basis or dense residual; it changes only the number and allocation of task-conditioned directed product stages."
+  ],
+  "decision": {
+    "production_implementation_authorized": true,
+    "mfu_preflight_authorized": true,
+    "scientific_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Instantiate exactly [22,22,22,22,22,22] in the production optimizer and directly poll a real-training-path MFU preflight with a hard 20 percent floor."
+  }
+}
