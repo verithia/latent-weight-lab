@@ -8,7 +8,7 @@ PLAN = (
     Path(__file__).parent
     / "configs"
     / "selection_artifacts"
-    / "124m_mlp_joint_block_output_metric_plan.json"
+    / "124m_mlp_joint_block_output_metric_plan_v2.json"
 )
 
 
@@ -21,7 +21,7 @@ def test_metric_plan_has_disjoint_new_seeds_and_zero_update_authorization() -> N
         *protocol["validation_seeds"],
     ]
     assert len(seeds) == len(set(seeds))
-    assert min(seeds) > 20260857
+    assert min(seeds) > 20260862
     assert protocol["validation_batches_per_window"] == 128
     assert plan["decision_rule"]["confidence_z"] == 2.576
     assert plan["execution"]["parameter_updates_to_checkpoint"] == 0
