@@ -72,14 +72,16 @@ OUTPUT_ROOT = (
 RUN_DIR = f"{OUTPUT_ROOT}/pro6_mai_v3_124m_cfc_directed_product_0p5tpp"
 LOG = f"{OUTPUT_ROOT}/train.log"
 RUN_METADATA = f"{OUTPUT_ROOT}/prelaunch_run_metadata.json"
-CERTIFICATE = (
+ENGINEERING_CERTIFICATE = (
     "/home/pro6000-9980x/MappingNetworks/outputs/"
     "pro6_mai_v3_mlp_cfc_directed_product_mfu_retry1/"
     "performance_preflight.json"
 )
-CERTIFICATE_SHA256 = (
+ENGINEERING_CERTIFICATE_SHA256 = (
     "a14389834573bb5195ace071018886ee642146143e568541c57b9f1d45a04432"
 )
+CERTIFICATE = f"{OUTPUT_ROOT}/performance_preflight.json"
+PREFLIGHT_LOG = f"{OUTPUT_ROOT}/performance_preflight.log"
 
 
 def sha256_file(path: Path) -> str:
@@ -129,8 +131,11 @@ def make_config() -> dict[str, Any]:
                 "or incomplete exact-resume state"
             ),
             "ladder_role": "mlp_full_replacement_directed_product_smallest_rung",
+            "engineering_mfu_preflight_certificate": ENGINEERING_CERTIFICATE,
+            "engineering_mfu_preflight_certificate_sha256": (
+                ENGINEERING_CERTIFICATE_SHA256
+            ),
             "mfu_preflight_certificate": CERTIFICATE,
-            "mfu_preflight_certificate_sha256": CERTIFICATE_SHA256,
             "mfu_preflight_result": str(MFU_RESULT.relative_to(ROOT)),
             "mfu_preflight_result_sha256": MFU_RESULT_SHA256,
             "monitoring_policy": (
@@ -240,9 +245,12 @@ def make_plan(config_sha256: str) -> dict[str, Any]:
         "qualification": {
             "mfu_result": str(MFU_RESULT.relative_to(ROOT)),
             "mfu_result_sha256": MFU_RESULT_SHA256,
-            "certificate": CERTIFICATE,
-            "certificate_sha256": CERTIFICATE_SHA256,
-            "mfu_fraction": 0.2890836323811324,
+            "engineering_certificate": ENGINEERING_CERTIFICATE,
+            "engineering_certificate_sha256": ENGINEERING_CERTIFICATE_SHA256,
+            "engineering_mfu_fraction": 0.2890836323811324,
+            "exact_config_certificate": CERTIFICATE,
+            "exact_config_preflight_log": PREFLIGHT_LOG,
+            "exact_config_status_at_registration": "pending",
             "minimum_mfu_fraction": 0.2,
         },
         "identity": {
@@ -284,6 +292,28 @@ def make_plan(config_sha256: str) -> dict[str, Any]:
             "log": LOG,
             "run_directory": RUN_DIR,
             "prelaunch_run_metadata": RUN_METADATA,
+            "exact_config_preflight_command": [
+                "env",
+                "CUDA_VISIBLE_DEVICES=0",
+                "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+                "PYTHONPATH=.",
+                PYTHON,
+                "-u",
+                "-m",
+                "examples.nanogpt.mfu_preflight",
+                "--config",
+                remote_config,
+                "--output",
+                CERTIFICATE,
+                "--log-output",
+                PREFLIGHT_LOG,
+                "--min-fraction",
+                "0.2",
+                "--warmup-updates",
+                "1",
+                "--timed-updates",
+                "8",
+            ],
             "execution": "direct foreground polling through terminal exit",
             "watchdog": False,
             "callback": False,

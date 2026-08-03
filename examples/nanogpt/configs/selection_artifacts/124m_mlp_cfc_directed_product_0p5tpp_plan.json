@@ -7,7 +7,7 @@
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
-    "config_sha256": "ebd4939ee7157ccc857e50e9c242d2e8df7ff03ab9f7cf8517e7f42840b46597",
+    "config_sha256": "80c3cd31d1494799c19c1083504231819caefda33f917d6e48fa96c73257ed7b",
     "coordinates_per_cfc_layer": 270336,
     "family_radius_ratio": 0.6589686140591383,
     "implementation_commit": "29d5e90ff419cde1b13fc5541aff79b12ec49f27",
@@ -60,6 +60,28 @@
       "--config",
       "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json"
     ],
+    "exact_config_preflight_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct30_29_29_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
     "execution": "direct foreground polling through terminal exit",
     "gpu": 0,
     "heartbeat": false,
@@ -73,9 +95,12 @@
     "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab-cfc-midpoint-replay"
   },
   "qualification": {
-    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_mfu_retry1/performance_preflight.json",
-    "certificate_sha256": "a14389834573bb5195ace071018886ee642146143e568541c57b9f1d45a04432",
-    "mfu_fraction": 0.2890836323811324,
+    "engineering_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_mfu_retry1/performance_preflight.json",
+    "engineering_certificate_sha256": "a14389834573bb5195ace071018886ee642146143e568541c57b9f1d45a04432",
+    "engineering_mfu_fraction": 0.2890836323811324,
+    "exact_config_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/performance_preflight.json",
+    "exact_config_preflight_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_0p5tpp/performance_preflight.log",
+    "exact_config_status_at_registration": "pending",
     "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_mfu_retry1_result.json",
     "mfu_result_sha256": "0da2c69612eb61852b58c951a2c6e2755da5166de0ddbc3e9ee998eb5f4a70c4",
     "minimum_mfu_fraction": 0.2
