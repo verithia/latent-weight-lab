@@ -1,0 +1,73 @@
+{
+  "artifact_kind": "124m_mlp_cfc_mixed_joint_solve_result",
+  "schema_version": "mlp_cfc_mixed_joint_solve_result_v1",
+  "created_at": "2026-08-03",
+  "classification": "MIXED_JOINT_CFC_SOLVE_REJECTED",
+  "interpretation": "Solving the deployed task-selected 64-stage skew plus 24-stage symmetric-shear coordinates jointly is numerically converged and improves equal-radius dense-direction cosine, but it does not recover held-out CE. The remaining c_fc defect is the sparse reciprocal generator family itself, not sequential-coordinate interference or insufficient CG convergence.",
+  "identity": {
+    "git_commit": "f5829a387e8b18b4e2f9b00a6e3f5cee52134279",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "7263000d89b4d0f94d9490a1f9568cc5356a7fd148186f89a6f58210d1605f3f",
+    "entrypoint_sha256": "fa56f82ddde1c31afbc8bb9714eb1ca54590d6a934b17a07c80875dc244fcaf3"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 104.43441915512085,
+    "monitoring": "direct foreground polling; no watchdog, callback, queue worker, or heartbeat",
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 2
+  },
+  "validity": {
+    "production_cfc_reconstruction_max_abs_error": 0.0,
+    "mixed_relative_radius_error": 4.1964359124745755e-08,
+    "cproj64_relative_radius_error": 1.2925104547494765e-08,
+    "cg_relative_normal_residual_range": [9.282107384933624e-06, 9.890422916214447e-06],
+    "per_layer_weight_target_recovery_range": [0.3191680312156677, 0.32230573892593384]
+  },
+  "direction_recovery_against_equal_radius_dense_cfc": {
+    "cosine": 0.572548793143145,
+    "fixed_scale_recovery": 0.14509751350297284,
+    "positive_line_recovery": 0.32781212052967185
+  },
+  "heldout_ce": {
+    "production_cfc": 5.903988853096962,
+    "mixed_joint_cfc": 5.903977440670133,
+    "dense_norm_cfc": 5.903115749359131,
+    "production_joint": 5.901917073875666,
+    "hybrid_mixed_joint_cfc": 5.901843547821045,
+    "hybrid_norm_cfc": 5.9013982359319925,
+    "production_cproj": 5.90260361507535,
+    "cproj64_only": 5.902390660718083,
+    "hybrid_cproj64": 5.901732178404927
+  },
+  "registered_comparisons": {
+    "mixed_single_minus_production": {
+      "mean": -0.000011412426829338074,
+      "ci99": [-0.00009314741033583745, 0.0000703225566771613],
+      "window_means": [-0.00006197020411491394, 0.00003914535045623779],
+      "reliable": false,
+      "dense_oracle_gap_fraction": 0.01307110064342157
+    },
+    "mixed_hybrid_minus_production_joint": {
+      "mean": -0.0000735260546207428,
+      "ci99": [-0.00014834898485063084, 0.0000012968756091452443],
+      "window_means": [-0.00008587166666984558, -0.00006118044257164001],
+      "reliable": false,
+      "dense_oracle_gap_fraction": 0.14171294817069888
+    },
+    "dense_single_minus_production": -0.0008731037378311157,
+    "dense_hybrid_minus_production_joint": -0.0005188379436731339,
+    "cproj64_single_minus_production": -0.00021295435726642609,
+    "cproj64_hybrid_minus_production_joint": -0.00018489547073841095
+  },
+  "raw_outputs": {
+    "summary_sha256": "39e86082557780a059b454ac38afc04ca076ddb7614ab7c03c93ffd7fdfc08d",
+    "heldout_ce_sha256": "5dbde9718aa7388dd8d90f56a53aaac7bcdce099b7bfb6a0731f5ecd4084bf17",
+    "solver_sha256": "d5f5c4794d957241438a6c409a28606903e3bf1d684fc1e918aaf7ffd7fdfc1e",
+    "prospective_step_metadata_sha256": "6445b6390e524fe87d451db0340b60da0ff37a71c80cba5558cbee3bd535e624"
+  },
+  "next_action": "Do not train the joint mixed solve. Test a new c_fc generator family: a task-selected directed sparse output mixer with independently fitted source-to-target channel coefficients, rather than reciprocal skew/shear pairs or degree-regular perfect matchings. At fixed radius, bracket 44 incoming coordinates per output channel (the same 135,168-coordinate budget) and 88 as a capacity discriminator. Require singleton and production-c_proj hybrid held-out gains against the same-window dense c_fc oracle. Keep cproj64 as a separately replicated positive control but do not integrate it until c_fc passes."
+}
