@@ -1,0 +1,78 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_22x6_mfu_result",
+  "schema_version": "mai_124m_mlp_cfc_22x6_mfu_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "DIRECTED_PRODUCT_22X6_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_mfu_plan.json",
+    "sha256": "ffd0612ad0633c88c0b3040671f3f98fdff5a6671a49bdd292ef9c9b7603e6d5"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_mfu.json",
+    "sha256": "dd4b75ac4238925d810bdd521ecc221d9c7062f264dd30cff363d27ad39ceaf6"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "edc457b831840c38f3a07ab86821c20f35a69d01",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "native_extension_required": true,
+    "native_extension_loaded": true,
+    "train_exit_code": 0
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_mfu/performance_preflight.json",
+    "sha256": "267f7c4dd7009ba6958c7f84f8d5028f375fa15bdca06149c3f3591b5090ee17",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_mfu/preflight.log",
+    "preflight_log_sha256": "48fbeee4f494ae7f4af56d18cf338c75a0bedf98a9ee1e72896b94b79aa97d81"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 415.6488248485233,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 150497.73625000002,
+    "average_iter_ms": 1741.84875,
+    "model_tflops": 112.40005061803394,
+    "mfu_fraction": 0.27042071070210866,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31640.09,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "timing_breakdown_ms": {
+      "prepare": 3.985,
+      "forward_backward": 1188.34375,
+      "flush": 4.2,
+      "gradient": 1.5425,
+      "optimizer": 542.3175,
+      "data": 0.68125,
+      "other": 0.78125
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "config_identity_matched": true,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "comparison_to_30_29_29": {
+    "prior_mfu_fraction": 0.2890836323811324,
+    "absolute_mfu_fraction_change": -0.01866292167902372,
+    "relative_mfu_change": -0.0645589061778077,
+    "prior_average_iter_ms": 1631.10125,
+    "average_iter_ms_change": 110.7475,
+    "prior_optimizer_ms": 431.07375,
+    "optimizer_ms_change": 111.24375,
+    "interpretation": "The 1.5x coordinate chart costs about 6.46 percent relative MFU and 6.79 percent wall time per update while remaining above the hard performance floor."
+  },
+  "decision": {
+    "mfu_gate_passed": true,
+    "exact_scientific_config_registration_authorized": true,
+    "scientific_training_started_by_this_artifact": false,
+    "larger_rung_authorized": false,
+    "additional_structure_authorized": false
+  }
+}
