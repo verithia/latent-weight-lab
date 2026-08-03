@@ -165,10 +165,20 @@ def all_terminal_delivered(samples: list[dict], state: dict) -> bool:
 
 
 def milestone_crossings(previous: int | None, current: int | None, maximum: int | None, sent: set[int]) -> list[int]:
-    """Return only milestones newly crossed since the previous aggregate probe."""
-    if previous is None or current is None or maximum is None or current <= previous:
+    """Return every reached milestone that still lacks durable ownership.
+
+    The first aggregate sample is handled separately as a baseline.  After
+    initialization, a failed callback must remain pending even though the
+    sampled iteration has advanced beyond the threshold; otherwise a transient
+    bridge failure permanently loses that milestone.
+    """
+    if previous is None or current is None or maximum is None or current < previous:
         return []
-    return [percent for percent in (20, 50) if percent not in sent and previous * 100 < percent * maximum <= current * 100]
+    return [
+        percent
+        for percent in (20, 50)
+        if percent not in sent and current * 100 >= percent * maximum
+    ]
 
 
 def event_text(

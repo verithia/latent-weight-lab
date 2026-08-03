@@ -280,3 +280,38 @@ def test_detached_launcher_can_bind_a_fresh_certificate_without_mutating_config(
         'MEASURED_MFU_CERTIFICATE="${MFU_PREFLIGHT_CERTIFICATE_OVERRIDE:-${MFU_CONFIG[1]}}"'
         in launcher
     )
+
+
+def test_conditioned_candidate_terminal_result_rejects_frozen_gate() -> None:
+    result_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_terminal_result.json"
+    )
+    result = load(result_path)
+    assert result["schema_version"] == "350m_conditioned_full_mlp_terminal_result_v1"
+    assert result["decision"] == "REJECT_TERMINAL_CE_GATE"
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert sha256(REPO / result["performance_gate"]["authorization_path"]) == (
+        result["performance_gate"]["authorization_sha256"]
+    )
+    measurement = result["measurement"]
+    assert measurement["effective_ceiling"] == min(
+        measurement["matched_parent_plus_0p1_ceiling"],
+        measurement["attention_only_absolute_ceiling"],
+    )
+    assert measurement["terminal_validation_ce"] > measurement["effective_ceiling"]
+    assert math.isclose(
+        measurement["matched_parent_gap_ce"],
+        measurement["terminal_validation_ce"] - measurement["matched_parent_validation_ce"],
+        abs_tol=1e-12,
+    )
+    assert math.isclose(
+        measurement["effective_ceiling_excess"],
+        measurement["terminal_validation_ce"] - measurement["effective_ceiling"],
+        abs_tol=1e-12,
+    )
+    assert result["checkpoint"]["next_iter"] == 677
+    assert result["checkpoint"]["exact_resume_schema"] == "nanogpt_exact_resume_v2"
+    assert result["callback"]["sent_milestones"] == [20]
+    assert "50% event was not" in result["callback"]["delivery_anomaly"]
