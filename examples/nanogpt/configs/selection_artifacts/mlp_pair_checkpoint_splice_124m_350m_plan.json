@@ -1,0 +1,108 @@
+{
+  "artifact_kind": "mlp_pair_checkpoint_splice_cross_scale_plan",
+  "schema_version": "mlp_pair_checkpoint_splice_plan_v1",
+  "created_at": "2026-08-03",
+  "question": "Does the failed c_fc-only endpoint transplant localize to intra-MLP c_fc/c_proj co-adaptation, pre-MLP normalization, or the wider residual-block context, and is the answer consistent at 124M and 350M?",
+  "implementation_commit": "2dc37fab264e5fc3853d3267f69e805bb9655eb4",
+  "source_hashes": {
+    "examples/nanogpt/analyze_mlp_pair_checkpoint_splice.py": "e332e1997736d4ddae36278f9a34352071649a1763cf94cc2ab906e50cb9dc18",
+    "examples/nanogpt/analyze_mlp_cfc_checkpoint_splice.py": "ce5677b3efa12651af6ece86f198f7b7e7566d58c60b2000c0cd172cceddc4d8",
+    "examples/nanogpt/analyze_residual_compatibility.py": "b09914d673267a7ee3ff6eb7db11957060364ccc526e78e4b40081cc2f106088",
+    "examples/nanogpt/model.py": "82bf501cbee8af4bbf62ccbcd34ce25bdb717cc34e42553331ecf65b4f0513c5",
+    "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+  },
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "experiments": [
+    {
+      "scale": "124m",
+      "n_layer": 12,
+      "next_iter": 238,
+      "activation_layers": [0, 3, 7, 11],
+      "parent_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_hidden88_replay/pro6_mai_v3_124m_twopassfresh88_replay1/ckpt.pt",
+      "parent_checkpoint_sha256": "0586c08fae79854d35ba765b822ae56c25efdd534df25b52797be0e8517fb075",
+      "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp_replay1.json",
+      "parent_config_sha256": "55340bb5c035300fba9fb23b11ddf345b6bd879e3f6996c6e4e993952e01cf59",
+      "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_two_pass_fresh_hidden88_pro6_replay_result.json",
+      "parent_result_sha256": "cc0c50e4876a5aa60d9c87a3465495dc56caa6d9a7225094e0e383bc7dd46439",
+      "parent_terminal_validation_ce": 5.5923542976379395,
+      "candidate_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_functionmix50_internal_condition/pro6_mai_v3_124m_functionmix50_internalcondition1p01_0p5tpp/ckpt.pt",
+      "candidate_checkpoint_sha256": "9309dc737795f60b44c230f776cc257c36a31b6060f732c50b9f382c1dea079e",
+      "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+      "candidate_config_sha256": "b5cb590d371161b03bf4591844b9520415d14bfb33643dd9fef0a0d84f37a511",
+      "candidate_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_functionmix50_internal_condition_training_result.json",
+      "candidate_result_sha256": "c0a3605bf2c38bf3a03da0a5a81b9f80a067dfe27d6bd0a0dfedcabdfd7cb605",
+      "candidate_terminal_validation_ce": 5.6761274337768555
+    },
+    {
+      "scale": "350m",
+      "n_layer": 24,
+      "next_iter": 677,
+      "activation_layers": [0, 7, 15, 23],
+      "parent_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/cproj_hidden88/run/ckpt.pt",
+      "parent_checkpoint_sha256": "e94e46283941f0c81287cf3d4c7d4b1fb8bdfb74cb741ae5b2fddcc770602d16",
+      "parent_config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_0p5tpp.json",
+      "parent_config_sha256": "f59803d0cca73bc87a7ca3f9170aa2d09c92a4fd6498f3eca36394bfb1d45321",
+      "parent_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_hidden88_terminal_result.json",
+      "parent_result_sha256": "c785605d9c167407d9c45f7324fdf784a43c348ca4f165753046a7f8349eedb7",
+      "parent_terminal_validation_ce": 4.4557,
+      "candidate_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_mlp_scaling/full_mlp_conditioned/run/ckpt.pt",
+      "candidate_checkpoint_sha256": "9405949fa0ed34c63e3476c093fd4343e9457dd3171ee14cef2c2116c2f21a0b",
+      "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_functionmix50_internalcondition1p01_0p5tpp.json",
+      "candidate_config_sha256": "7acef222ce18fe32b7459d90749a2a2f79d7e24929ed6ccff08a94ab15114594",
+      "candidate_result": "examples/nanogpt/configs/selection_artifacts/350m_mlp_conditioned_terminal_result.json",
+      "candidate_result_sha256": "3524d7dce204eba941cc8a6f98310e966e96b304751aeaeb65043cb06d84b454",
+      "candidate_terminal_validation_ce": 4.5834
+    }
+  ],
+  "protocol": {
+    "batch_size": 2,
+    "block_size": 512,
+    "batches_per_window": 32,
+    "validation_seeds": [20260833, 20260834],
+    "dtype": "bfloat16",
+    "evaluation_repeats": 1
+  },
+  "variants_by_layer_count": {
+    "12": [
+      {"name": "parent", "base": "parent", "source": null, "components": [], "layers": []},
+      {"name": "candidate", "base": "candidate", "source": null, "components": [], "layers": []},
+      {"name": "candidate_parent_cfc_all", "base": "candidate", "source": "parent", "components": ["c_fc"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11]},
+      {"name": "candidate_parent_cproj_all", "base": "candidate", "source": "parent", "components": ["c_proj"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11]},
+      {"name": "candidate_parent_mlp_pair_all", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11]},
+      {"name": "candidate_parent_mlp_pair_early", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [0,1,2,3]},
+      {"name": "candidate_parent_mlp_pair_middle", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [4,5,6,7]},
+      {"name": "candidate_parent_mlp_pair_late", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [8,9,10,11]},
+      {"name": "candidate_parent_ln2_all", "base": "candidate", "source": "parent", "components": ["ln_2"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11]},
+      {"name": "candidate_parent_mlp_pair_ln2_all", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj","ln_2"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11]},
+      {"name": "parent_candidate_mlp_pair_all", "base": "parent", "source": "candidate", "components": ["c_fc","c_proj"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11]}
+    ],
+    "24": [
+      {"name": "parent", "base": "parent", "source": null, "components": [], "layers": []},
+      {"name": "candidate", "base": "candidate", "source": null, "components": [], "layers": []},
+      {"name": "candidate_parent_cfc_all", "base": "candidate", "source": "parent", "components": ["c_fc"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},
+      {"name": "candidate_parent_cproj_all", "base": "candidate", "source": "parent", "components": ["c_proj"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},
+      {"name": "candidate_parent_mlp_pair_all", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},
+      {"name": "candidate_parent_mlp_pair_early", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [0,1,2,3,4,5,6,7]},
+      {"name": "candidate_parent_mlp_pair_middle", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [8,9,10,11,12,13,14,15]},
+      {"name": "candidate_parent_mlp_pair_late", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj"], "layers": [16,17,18,19,20,21,22,23]},
+      {"name": "candidate_parent_ln2_all", "base": "candidate", "source": "parent", "components": ["ln_2"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},
+      {"name": "candidate_parent_mlp_pair_ln2_all", "base": "candidate", "source": "parent", "components": ["c_fc","c_proj","ln_2"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]},
+      {"name": "parent_candidate_mlp_pair_all", "base": "parent", "source": "candidate", "components": ["c_fc","c_proj"], "layers": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]}
+    ]
+  },
+  "decision_rule": {
+    "intra_mlp_pair": "At each scale and on both windows, the paired c_fc+c_proj transplant recovers at least 50% of the parent/candidate CE gap and exceeds the better singleton transplant by at least 25 percentage points.",
+    "pre_mlp_normalization": "At each scale and on both windows, pair+ln_2 recovers at least 50% and exceeds the pair-only recovery by at least 25 percentage points.",
+    "wider_residual_block": "At each scale, pair+ln_2 recovers at most 25% on both windows.",
+    "mixed": "All other finite positive-gap outcomes.",
+    "cross_scale": "A single overall mechanism is reported only when the 124M and 350M classifications agree; otherwise the decision is scale-dependent."
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "parameter_updates": 0,
+    "monitoring": "direct foreground polling only; no watchdog, callback, queue worker, or heartbeat",
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.analyze_mlp_pair_checkpoint_splice --plan examples/nanogpt/configs/selection_artifacts/mlp_pair_checkpoint_splice_124m_350m_plan.json --data-dir /home/pro6000-9980x/MappingNetworks/data/finewebedu_20b --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_pair_splice_124m_350m_20260803 --device cuda"
+  },
+  "authorization": "This plan authorizes only the zero-update diagnostic. No production structure, MFU preflight, training run, or larger rung is authorized until the result is frozen."
+}
