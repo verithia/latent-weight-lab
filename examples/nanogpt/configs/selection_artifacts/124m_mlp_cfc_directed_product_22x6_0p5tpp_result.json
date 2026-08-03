@@ -1,0 +1,110 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_22x6_0p5tpp_training_result",
+  "schema_version": "mai_124m_mlp_cfc_directed_product_22x6_0p5tpp_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "STABLE_DIRECTIONAL_ONLY_TERMINAL_CE",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_0p5tpp_plan.json",
+    "sha256": "76158f7302df3fff9b37ccb5999d5cc53f4f5409ec488b0b30813469d81870a5"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_0p5tpp.json",
+    "sha256": "0405340d2ea327331f983662c2da3db48c803271cec4861779948884abc1d21f",
+    "resolved_runtime_sha256": "73d79b7420cf5940db0e34d1a47d84adcd7013a94a9135c5bc978b22aef054f4"
+  },
+  "selection_evidence": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_terminal_capacity_result.json",
+    "sha256": "62836f9c95ae28e129cbbe5b6c9a8450d31f2636f1570c2382cb5c84fb64a59b",
+    "selected_schedule": [22, 22, 22, 22, 22, 22],
+    "coordinates_per_layer": 405504,
+    "worst_window_positive_line_recovery": 0.6593662,
+    "worst_layer_positive_line_recovery": 0.6585922
+  },
+  "exact_config_mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_0p5tpp_mfu_result.json",
+    "sha256": "f6679cf5f29e160974435eb22b7772a537fb068e156b89dd649625beccc9e9f4",
+    "certificate_sha256": "c5d8fe40494c2a451e123dbb949048689a4e6b8ce3ec1e51290a06578e28194a",
+    "mfu_fraction": 0.2710115841306499
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "14b75c919d450cac2dbddbec0e4d25fdbc180351",
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-03T16:00:27+08:00",
+    "finished_at": "2026-08-03T16:09:02+08:00",
+    "wall_seconds": 515,
+    "exit_code": 0,
+    "ordinary_logged_updates": 20,
+    "ordinary_iter_mean_ms": 1740.352,
+    "observed_peak_mib": 44410
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_id": "pro6_mai_v3_124m_cfc_directed_product_22x6_0p5tpp_20260803T080027Z_3116358",
+    "provenance_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_cfc_directed_product_22x6_0p5tpp_20260803T080027Z_3116358.json",
+    "provenance_sha256": "123992b169c6ca65755a1709115f92f37567ebaebd40ecc013c7ec5b36ad3db3",
+    "archived_config_sha256": "0405340d2ea327331f983662c2da3db48c803271cec4861779948884abc1d21f",
+    "archived_mfu_certificate_sha256": "c5d8fe40494c2a451e123dbb949048689a4e6b8ce3ec1e51290a06578e28194a",
+    "log_sha256": "2175291d1f0b2639bc1130b71ebd8bfa938ed3fe7f2f279c1445eb695118eb23",
+    "status_sha256": "fa6af09e79c0eff79152c1367d3eecc16f0dda22d46c12fa9fde96a5301a847d"
+  },
+  "loss": {
+    "fixed_evaluations": [
+      {"step": 0, "train": 10.9672, "validation": 10.9669},
+      {"step": 60, "train": 6.3730, "validation": 6.3829},
+      {"step": 120, "train": 5.8912, "validation": 5.8960},
+      {"step": 180, "train": 5.7157, "validation": 5.7191},
+      {"step": 238, "train": 5.6461, "validation": 5.649507999420166}
+    ],
+    "attention_only_control_validation": 5.4918,
+    "accepted_attention_gap": 0.1,
+    "success_threshold": 5.5918,
+    "qualified_cproj_only_dense_cfc_validation": 5.592058181762695,
+    "rejected_three_stage_validation": 5.658790111541748,
+    "candidate_minus_attention_only": 0.15770799942016622,
+    "candidate_minus_success_threshold": 0.057707999420166134,
+    "candidate_minus_cproj_only_dense_cfc": 0.0574498176574707,
+    "candidate_minus_rejected_three_stage": -0.009282112121582031,
+    "registered_success_gate_passed": false,
+    "registered_directional_only_gate_passed": true
+  },
+  "trajectory_comparison": [
+    {"step": 60, "candidate": 6.3829, "cproj_only_control": 6.3141, "delta_to_cproj_only": 0.0688, "three_stage": 6.4037, "delta_to_three_stage": -0.0208},
+    {"step": 120, "candidate": 5.8960, "cproj_only_control": 5.8533, "delta_to_cproj_only": 0.0427, "three_stage": 5.9043, "delta_to_three_stage": -0.0083},
+    {"step": 180, "candidate": 5.7191, "cproj_only_control": 5.6733, "delta_to_cproj_only": 0.0458, "three_stage": 5.7270, "delta_to_three_stage": -0.0079},
+    {"step": 238, "candidate": 5.649507999420166, "cproj_only_control": 5.592058181762695, "delta_to_cproj_only": 0.0574498176574707, "three_stage": 5.658790111541748, "delta_to_three_stage": -0.009282112121582031}
+  ],
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_0p5tpp/pro6_mai_v3_124m_cfc_directed_product_22x6_0p5tpp/ckpt.pt",
+    "sha256": "2f2503052ac9f200fa84889fd50bb3302a3df5296031c86fccd3418cb26c6552",
+    "metadata_sha256": "5862cf6135cfa103c597225141a4eb20e4fbe0311431330eb34f6c180f339802",
+    "next_iter": 238,
+    "reason": "evaluation",
+    "best_val_loss": 5.649507999420166,
+    "optimizer_state_present": true,
+    "rng_and_train_generator_state_present": true
+  },
+  "interpretation": [
+    "The six-stage chart is numerically stable and measurably better than the rejected three-stage chart, but the terminal gain is only 0.00928 CE.",
+    "Its offline terminal direction-recovery gain of at least 0.15039 did not translate proportionally into online optimization: the held-out gap to dense c_fc is already 0.0688 CE at step 60 and remains 0.05745 at the terminal evaluation.",
+    "This falsifies insufficient compositional depth at the registered 1.5x coordinate budget as the principal remaining explanation. Static tangent coverage alone is not a sufficient selector for a useful 238-step chart.",
+    "The current optimizer refits supports to the exact dense Muon request every update and then enforces one globally calibrated family radius. The next causal question is whether the fixed radius understeps useful early and mid-training directions, or whether repeated sparse projection changes the trajectory despite adequate one-step recovery."
+  ],
+  "decision": {
+    "larger_rung_authorized": false,
+    "automatic_rerun_authorized": false,
+    "repeat_of_same_schedule_authorized": false,
+    "next_action": "Run a preregistered 124M step-60 radius bracket from identical initialization and data order at the current 0.6589686 control, positive-line-calibrated 0.82, and full-radius 1.00. Reuse the completed control, require exact-config MFU >=20 percent for each new arm, and directly poll both short arms. Only a reliable early held-out improvement may authorize a full 238-update radius candidate."
+  }
+}
