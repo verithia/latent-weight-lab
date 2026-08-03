@@ -1,0 +1,115 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_2x_error_feedback_step60_training_result",
+  "schema_version": "mai_124m_mlp_cfc_2x_error_feedback_step60_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "STABLE_TWO_X_ERROR_FEEDBACK_SCREEN_REJECTED",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_2x_error_feedback_step60_plan.json",
+    "sha256": "9fdf7e24c99d0bc9d5e1dca8dfac9ffe0548063e2715d4125a1ff1e93014eec5"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct2x_radius1p00_errorfeedback_step60.json",
+    "sha256": "b310c9792c00f14cb61aa9fb54a148d5be6a58f8ef59dffe0bdcec9d0181de0a"
+  },
+  "exact_config_mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_2x_error_feedback_step60_mfu_result.json",
+    "sha256": "f28fa20ca4f8bb2c0becaf32a6cb3e4e3147008db38a68df8768aa873e36f8cb",
+    "mfu_fraction": 0.26515329873337085,
+    "tokens_per_second": 147275.0625,
+    "average_iter_ms": 1779.96625,
+    "peak_mib": 31749.22
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "bdb13f4695db493968441dbb56f0952bc517f844",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-03T18:00:40+08:00",
+    "finished_at": "2026-08-03T18:03:09+08:00",
+    "wall_seconds": 149,
+    "exit_code": 0,
+    "ordinary_logged_updates": 5,
+    "ordinary_iter_mean_ms": 1777.004,
+    "observed_peak_mib": 44410
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_id": "pro6_mai_v3_124m_cfc_directed_product_2x_radius1p00_errorfeedback_step60_20260803T100040Z_3180480",
+    "provenance_sha256": "2c22316bb6705d603ed8e66c46d06b81f74a777580271ca97b4cb38c41afa59c",
+    "archived_config_sha256": "b310c9792c00f14cb61aa9fb54a148d5be6a58f8ef59dffe0bdcec9d0181de0a",
+    "archived_mfu_sha256": "2b4787446b58659edbc8230f872f8bdb5c803c7eeafa294598c1bed5540c19f0",
+    "log_sha256": "0ebf27e1af8650f5b98d05549355277143bd88bbae9743a88c7ea49dec9d2b02",
+    "status_sha256": "52706fa861870680539914be97f15a68edfb2bca9903a82e70ee9c550c350691",
+    "checkpoint_sha256": "8bf9e585c53c0932eccd9db50444e2a757e688ed0f5eff0b0bfdd06bc2c32fd5",
+    "checkpoint_meta_sha256": "7aea004b9c2d975f1f3d02e2afdc3d9bb552e8c35e950d1b6befe9ce671d1059",
+    "checkpoint_next_iter": 60,
+    "checkpoint_best_validation_ce": 6.318756580352783
+  },
+  "candidate": {
+    "schedule": [
+      30,
+      30,
+      29,
+      29,
+      29,
+      29
+    ],
+    "coordinates_per_layer": 540672,
+    "coordinate_multiplier_vs_22x6": 1.3333333333333333,
+    "family_radius_ratio": 1.0,
+    "error_feedback": true,
+    "error_feedback_decay": 1.0,
+    "additional_trainable_parameters": 0,
+    "additional_dense_optimizer_state_bytes": 113246208,
+    "terminal_compression_residual": {
+      "layer_count": 12,
+      "frobenius_norm_mean": 0.07903081427017848,
+      "frobenius_norm_min": 0.07382223010063171,
+      "frobenius_norm_max": 0.08338448405265808,
+      "rms_mean": 0.00005145446842410214,
+      "max_abs": 0.0003245257248636335,
+      "norm_reduction_vs_22x6_error_feedback": 0.2491234919678864
+    }
+  },
+  "loss": {
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train": 10.9672,
+        "validation": 10.9669
+      },
+      {
+        "step": 60,
+        "train": 6.3090,
+        "validation": 6.318756580352783
+      }
+    ],
+    "error_feedback_22x6_control_validation": 6.319543838500977,
+    "dense_cfc_control_validation": 6.3141,
+    "frozen_pass_validation_ce_maximum": 6.316821919250488,
+    "gain_over_error_feedback_22x6_control": 0.0007872581481933594,
+    "remaining_control_gap": 0.005443838500976739,
+    "remaining_gap_fraction_recovered": 0.14461453036347585,
+    "candidate_minus_dense_cfc": 0.004656580352783379,
+    "candidate_minus_pass_threshold": 0.00193466110229501
+  },
+  "decision": {
+    "passed": false,
+    "full_238_update_run_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "more_cfc_coordinates_are_remaining_repair": false,
+    "next_action": "Preserve the 22x6 c_fc error-feedback result and audit optimizer-side temporal compression in the qualified c_proj update. The c_proj-only/dense-c_fc terminal control is 5.59205818, already the effective floor at the 5.5918 closure threshold, so further c_fc-only capacity cannot reliably close the global target."
+  },
+  "interpretation": [
+    "The run is finite, complete, source-clean, and above the MFU floor; rejection is not caused by instability or runtime confounding.",
+    "Increasing chart coordinates reduces the terminal c_fc compression-residual norm by about 24.91 percent but improves validation CE by only 0.000787, recovering 14.46 percent of the remaining midpoint gap.",
+    "Once temporal error feedback is present, more coordinates inside the same c_fc action family have negligible online value. Do not run the full 2x-plus-error-feedback configuration.",
+    "The full 22x6 error-feedback result is only 0.002677 behind the c_proj-only/dense-c_fc control, while that control itself is 0.000258 above the strict global threshold. The remaining global closure problem is therefore no longer primarily c_fc capacity.",
+    "The next causal target is temporal projection error in the existing c_proj Muon-matched Givens optimizer. This remains an optimizer-side hypothesis and does not motivate HyperConnection, LoRA, a learned basis, or a forward residual."
+  ]
+}
