@@ -1,6 +1,7 @@
 import torch
 
 from examples.nanogpt.analyze_mlp_cfc_directed_product_terminal import (
+    DirectedProductCfcApplier,
     build_candidates,
     classify,
     interpolate,
@@ -64,3 +65,15 @@ def test_classify_direction_limited_with_nondefault_registered_ratio() -> None:
     )
     assert decision["classification"] == "RESIDUAL_DIRECTION_LIMITED"
     assert list(decision["radius_vs_registered"]) == ["0.750000"]
+
+
+def test_directed_product_applier_restores_materialized_weight() -> None:
+    module = torch.nn.Linear(2, 2, bias=False)
+    with torch.no_grad():
+        module.weight.copy_(torch.tensor([[1.0, 2.0], [3.0, 4.0]]))
+    base = module.weight.detach().clone()
+    applier = DirectedProductCfcApplier([module])
+    update = torch.tensor([[0.5, -0.5], [1.0, -1.0]])
+    with applier.apply({"c_fc": {0: update}}):
+        assert torch.allclose(module.weight, base + update)
+    assert torch.equal(module.weight, base)

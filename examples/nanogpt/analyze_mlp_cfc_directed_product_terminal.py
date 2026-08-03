@@ -8,9 +8,9 @@ import json
 import math
 import sys
 import time
-from contextlib import nullcontext
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterator
 
 import torch
 
@@ -21,7 +21,6 @@ from examples.nanogpt.analyze_mlp_cfc_exact_current_matcher import (
     load_model_and_optimizer,
 )
 from examples.nanogpt.analyze_mlp_dense_oracle_gap import (
-    ExactVariantApplier,
     aggregate_direction_metrics,
     evaluate_candidates,
     family_fro,
@@ -68,6 +67,43 @@ def cfc_modules(model) -> list[MuonDirectedProductLinear]:
     if len(modules) != len(model.transformer.h):
         raise ValueError("not every c_fc is a directed-product module")
     return modules
+
+
+class DirectedProductCfcApplier:
+    """Apply materialized c_fc updates while exactly restoring the buffer."""
+
+    def __init__(self, modules: list[MuonDirectedProductLinear]) -> None:
+        self.weights = {
+            layer: module.weight for layer, module in enumerate(modules)
+        }
+        self.base = {
+            layer: weight.detach().clone()
+            for layer, weight in self.weights.items()
+        }
+
+    @torch.no_grad()
+    def restore(self) -> None:
+        for layer, weight in self.weights.items():
+            weight.copy_(self.base[layer])
+
+    @contextmanager
+    def apply(
+        self, updates: dict[str, dict[int, torch.Tensor]]
+    ) -> Iterator[None]:
+        if set(updates) - {"c_fc"}:
+            raise ValueError("terminal discriminator only accepts c_fc updates")
+        self.restore()
+        try:
+            with torch.no_grad():
+                for layer, update in updates.get("c_fc", {}).items():
+                    weight = self.weights[layer]
+                    value = self.base[layer].float() + update.to(
+                        device=weight.device, dtype=torch.float32
+                    )
+                    weight.copy_(value.to(dtype=weight.dtype))
+            yield
+        finally:
+            self.restore()
 
 
 def collect_cfc_gradients(
@@ -342,7 +378,7 @@ def main() -> None:
     }
     rows = evaluate_candidates(
         model,
-        ExactVariantApplier(model),
+        DirectedProductCfcApplier(modules),
         windows,
         candidates,
         device=args.device,
