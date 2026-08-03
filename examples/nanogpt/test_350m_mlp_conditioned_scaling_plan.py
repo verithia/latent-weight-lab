@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import subprocess
 from pathlib import Path
 
 
@@ -19,6 +20,14 @@ VALIDATOR_CONTRACT_PATH = (
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def git_blob_sha256(commit: str, path: str) -> str:
+    payload = subprocess.check_output(
+        ["git", "show", f"{commit}:{path}"],
+        cwd=REPO,
+    )
+    return hashlib.sha256(payload).hexdigest()
 
 
 def load(path: Path) -> dict:
@@ -122,8 +131,9 @@ def test_350m_conditioned_scaling_plan_binds_every_input() -> None:
     assert parent["preregistered_decision_rule"]["success"].find("4.4629") >= 0
     assert candidate["preregistered_decision_rule"]["attention_only_absolute_ce_ceiling"] == 4.5629
 
+    source_commit = plan["implementation"]["causal_repair_commit"]
     for relative, expected in plan["implementation"]["source_hashes"].items():
-        assert sha256(REPO / relative) == expected
+        assert git_blob_sha256(source_commit, relative) == expected
     assert (
         parent["data_manifest_sha256"]
         == candidate["data_manifest_sha256"]
