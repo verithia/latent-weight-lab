@@ -1,0 +1,66 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_22x6_radius1p00_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cfc_22x6_radius1p00_exact_config_mfu_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "FULL_RADIUS_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp_plan.json",
+    "sha256": "c266d8263b87df3df8dd87a4fd4c8b86da283997b259488d393f6c7b5369ed07"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_0p5tpp.json",
+    "sha256": "806926e1241834b17f7d6a82f3acc6b19a2de004e7639bfc671e460427e3969c"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "67b9121b1ae1e52310b43113950b7ac0f3b697ca",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "native_extension_required": true,
+    "native_extension_loaded": true,
+    "train_exit_code": 0
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius1p00_0p5tpp/performance_preflight.json",
+    "sha256": "878e33651ce9a85cde6213b2b0700747b2e60afb8525c61a83464dcf55b39202",
+    "log_sha256": "5f3a5db544f5684af004442f1090eadded561026f9aa8bc5828c07714c52a89e"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 415.2018037605748,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 149605.21,
+    "average_iter_ms": 1752.25,
+    "model_tflops": 111.73346254715904,
+    "mfu_fraction": 0.2691063996715917,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31640.09,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "timing_breakdown_ms": {
+      "prepare": 3.86625,
+      "forward_backward": 1188.86375,
+      "flush": 4.46875,
+      "gradient": 1.61625,
+      "optimizer": 551.89375,
+      "data": 0.645,
+      "other": 0.8975
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "config_identity_matched": true,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "one_scientific_training_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "additional_structure_authorized": false
+  }
+}
