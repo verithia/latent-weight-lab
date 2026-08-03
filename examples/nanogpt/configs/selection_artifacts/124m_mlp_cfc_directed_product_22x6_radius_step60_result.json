@@ -1,0 +1,87 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_22x6_radius_step60_result",
+  "schema_version": "mai_124m_mlp_cfc_22x6_radius_step60_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "FULL_RADIUS_PASSES_EARLY_CAUSAL_GATE",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_radius_step60_plan.json",
+    "sha256": "52f924fd04cc76e58a7fc4ce85da93d55e293c536c6a400469965700e94cdaf8"
+  },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_radius_step60_mfu_result.json",
+    "sha256": "3a65d9289d4682beb5c6ab4fb9c8b3727c09d96735ec38392a0a7987751ae3bf"
+  },
+  "control": {
+    "radius": 0.6589686140591383,
+    "step60_train_ce": 6.3730,
+    "step60_validation_ce": 6.3829,
+    "dense_cfc_step60_validation_ce": 6.3141,
+    "gap_to_dense_cfc": 0.0688
+  },
+  "arms": {
+    "radius0p82": {
+      "radius": 0.82,
+      "config_sha256": "6a2bdc55c7adb55ad3b69ede01b33b2f542e0dfe6bcf621a69152b4239dcf580",
+      "execution_commit": "ced34bc9c51904867740e1ee79bf7ed2a8d21dfe",
+      "started_at": "2026-08-03T16:27:51+08:00",
+      "finished_at": "2026-08-03T16:30:18+08:00",
+      "exit_code": 0,
+      "step0_validation_ce": 10.9669,
+      "step60_train_ce": 6.3530,
+      "step60_validation_ce": 6.3629865646362305,
+      "improvement_vs_control": 0.01991343536376977,
+      "dense_gap_fraction_recovered": 0.2894394674966519,
+      "passes_ce_maximum_6p3485": false,
+      "provenance_sha256": "f10c61d7833ea329f6a43e17c01bcb1f70ad29628299e1e5b92d2f3b7792f6d3",
+      "log_sha256": "6c8203cdbdc342bea08b4c97249ec7ac585e7874f3f8448379ab119d96a4fdc7",
+      "status_sha256": "9f15404f95ea66b8d7fd5921ce0865b33016e00ceeb2a5ea0df753aa748c49e1",
+      "checkpoint_sha256": "707ca0eb70a55b3c720bc73068274e5427bae877ef5d8cb2a0ea40dce6288188",
+      "checkpoint_metadata_sha256": "9f5483e4109faf78c015b0fa5e008b3fd327ba87415500d501fe2617d8bf0871",
+      "checkpoint_next_iter": 60
+    },
+    "radius1p00": {
+      "radius": 1.0,
+      "config_sha256": "9337216260b6d6b8bf42895f5dd1b179714fa396f215da0681194f822e3f1619",
+      "execution_commit": "ced34bc9c51904867740e1ee79bf7ed2a8d21dfe",
+      "started_at": "2026-08-03T16:32:26+08:00",
+      "finished_at": "2026-08-03T16:34:52+08:00",
+      "exit_code": 0,
+      "step0_validation_ce": 10.9669,
+      "step60_train_ce": 6.3382,
+      "step60_validation_ce": 6.347743988037109,
+      "improvement_vs_control": 0.035156011962890865,
+      "dense_gap_fraction_recovered": 0.5109885459722479,
+      "remaining_gap_to_dense_cfc": 0.03364398803710955,
+      "margin_below_pass_ce_maximum": 0.0007560119628915456,
+      "improvement_vs_radius0p82": 0.015242576599121094,
+      "passes_ce_maximum_6p3485": true,
+      "provenance_sha256": "94dcef2f73329e12b8529db2a270e7229ac34313da0a39ca63c157b2c7ccaeff",
+      "log_sha256": "c244a1772a4faa26cb52dc958cdca09a44622f1db74ca7775878af2160c16be4",
+      "status_sha256": "b24cfa3d10f660ff5d778271345abe10e072bd2155d7d85b2085aa1f3e80d37b",
+      "checkpoint_sha256": "419111158786cf89987874024618d498f4a6a8e15da02f9395926f681f1f66ce",
+      "checkpoint_metadata_sha256": "3556badea3235db5e9111afd6de896ea803015c8febcac6abc1a0f0b7e473e31",
+      "checkpoint_next_iter": 60
+    }
+  },
+  "selection": {
+    "selected_arm": "radius1p00",
+    "selected_radius": 1.0,
+    "reason": "only arm at or below the preregistered 6.3485 CE ceiling and more than 0.005 CE better than radius 0.82",
+    "threshold_changed_after_measurement": false
+  },
+  "interpretation": [
+    "The identical step-0 losses and fixed evaluation identity establish a paired causal radius comparison.",
+    "Increasing the family radius monotonically improves early training: 0.82 recovers 28.9 percent and 1.00 recovers 51.1 percent of the step-60 gap to dense c_fc.",
+    "The fixed 0.6589686 family radius was a real online understep, even though the terminal one-step CE discriminator was too insensitive to identify it.",
+    "Full radius still leaves 0.03364 CE at step 60, so scalar radius is only a partial repair; the full 238-update trajectory must be measured before claiming MLP closure."
+  ],
+  "decision": {
+    "selected_full_config_registration_authorized": true,
+    "selected_full_config_exact_mfu_required": true,
+    "direct_full_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "additional_structure_authorized": false,
+    "next_action": "Register the exact 238-update radius-1.00 config with the original LR schedule and success ceiling 5.5918, pass an exact-config >=20 percent MFU gate, then run it once under direct foreground polling."
+  }
+}
