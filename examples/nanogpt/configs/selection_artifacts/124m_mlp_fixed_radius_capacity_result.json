@@ -1,0 +1,88 @@
+{
+  "artifact_kind": "124m_mlp_fixed_radius_capacity_result",
+  "schema_version": "mlp_fixed_radius_capacity_result_v1",
+  "created_at": "2026-08-03",
+  "classification": "SAME_TOPOLOGY_CAPACITY_REJECTED",
+  "interpretation": "Increasing residual stages at the deployed per-family Frobenius radius does not repair the joint MLP step. c_proj residual-64 is a reliable singleton improvement and c_fc residual-64 is a narrowly reliable hybrid improvement, but c_fc singleton and both joint candidates fail 99% confidence. On the new windows the equal-radius dense c_fc and c_proj singleton directions remain useful, while dense c_proj substituted into the joint and the dense joint itself are harmful; useful family directions therefore have data-dependent cross-family interaction. More stages in the same sequential topology are not the structural fix.",
+  "identity": {
+    "git_commit": "1965dc4754cce0b8d0c9ba6602c590d2e1eadfb9",
+    "checkpoint_sha256": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "config_sha256": "3cfc96f0d7cf987575f94e27a350793ba18d0e591c6c1d40182e8fad261ec277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "70d940f0cf8eb3b1da7596ae097d56e7c7790d98228cac10a426754f7e92c3c2",
+    "entrypoint_sha256": "8c906488b7112fac56f55f7da6dfe0fac9450a1a55153d125e064ec7edbfa01b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 69.35487079620361,
+    "direct_foreground_polling": true,
+    "parameter_updates_to_checkpoint": 0,
+    "disposable_optimizer_steps": 2,
+    "checkpoint_next_iter": 120,
+    "checkpoint_hash_after_run": "c4efea459c28c5ee031aa3090cdf1ef6b2b3b4a2a7d626749bc68a05394b1de1",
+    "production_reconstruction_max_abs_error": {"c_fc": 0.0, "c_proj": 0.0}
+  },
+  "fixed_radius": {
+    "production_c_fc_fro": 0.16790572036049578,
+    "production_c_proj_fro": 0.08250746078551252,
+    "maximum_relative_radius_error": 4.7135594921269875e-08,
+    "control_coordinates_per_layer_per_family": 135168,
+    "residual40_coordinates_per_layer_per_family": 159744,
+    "residual64_coordinates_per_layer_per_family": 196608
+  },
+  "heldout_mean_ce": {
+    "baseline": 5.881976513192058,
+    "production_cfc": 5.880778692662716,
+    "production_cproj": 5.879551051184535,
+    "production_joint": 5.8792055658996105,
+    "dense_norm_cfc": 5.880012260749936,
+    "dense_norm_cproj": 5.879207091405988,
+    "dense_norm_joint": 5.879544897004962,
+    "hybrid_norm_cfc": 5.878940116614103,
+    "hybrid_norm_cproj": 5.879302157089114,
+    "cfc40_only": 5.88073606044054,
+    "cfc64_only": 5.880737867206335,
+    "cproj40_only": 5.879461094737053,
+    "cproj64_only": 5.879366055130959,
+    "hybrid_cfc40": 5.879135232418776,
+    "hybrid_cfc64": 5.879134511575103,
+    "hybrid_cproj40": 5.879145793616772,
+    "hybrid_cproj64": 5.8791462276130915,
+    "joint40": 5.879150971770287,
+    "joint64": 5.879120917990804
+  },
+  "registered_comparisons": {
+    "cfc40_single_vs_production": {"mean_ce": -0.000042632222175598145, "ci99": [-0.00011271062781006408, 0.00002744618345886779], "reliably_better": false},
+    "cfc64_single_vs_production": {"mean_ce": -0.000040825456380844116, "ci99": [-0.00010758316493186552, 0.000025932252170177285], "reliably_better": false},
+    "cproj40_single_vs_production": {"mean_ce": -0.00008995644748210907, "ci99": [-0.00017007382177682305, -0.00000983907318739508], "reliably_better": true},
+    "cproj64_single_vs_production": {"mean_ce": -0.00018499605357646942, "ci99": [-0.0002769569710988315, -0.00009303513605410732], "reliably_better": true},
+    "cfc40_hybrid_vs_production_joint": {"mean_ce": -0.00007033348083496094, "ci99": [-0.00014281828377836112, 0.0000021513221084392325], "reliably_better": false},
+    "cfc64_hybrid_vs_production_joint": {"mean_ce": -0.00007105432450771332, "ci99": [-0.00014050614656041887, -0.0000016025024550077652], "reliably_better": true},
+    "cproj40_hybrid_vs_production_joint": {"mean_ce": -0.00005977228283882141, "ci99": [-0.00013494838046136225, 0.00001540381478371943], "reliably_better": false},
+    "cproj64_hybrid_vs_production_joint": {"mean_ce": -0.0000593382865190506, "ci99": [-0.0001497552399638657, 0.00003107866692576451], "reliably_better": false},
+    "joint40_vs_production": {"mean_ce": -0.00005459412932395935, "ci99": [-0.00013019978470123274, 0.000021011526053314034], "reliably_better": false},
+    "joint64_vs_production": {"mean_ce": -0.00008464790880680084, "ci99": [-0.00018148331039913714, 0.000012187492785535451], "reliably_better": false}
+  },
+  "same_window_dense_direction_check": {
+    "dense_norm_cfc_minus_production_cfc": -0.000766431912779808,
+    "dense_norm_cproj_minus_production_cproj": -0.000343959778547287,
+    "hybrid_norm_cfc_minus_production_joint": -0.00026544928550720215,
+    "hybrid_norm_cproj_minus_production_joint": 0.00009659118950366974,
+    "dense_norm_joint_minus_production_joint": 0.00033933110535144806,
+    "interpretation": "Both dense family directions improve as singletons, but the c_proj dense direction conflicts with production c_fc on these new windows. This contrasts with the preceding windows and shows that the family interaction is distribution-sensitive rather than a stable separable oracle."
+  },
+  "direction_recovery_against_norm_dense": {
+    "c_fc_residual40": {"cosine": 0.5313786902830119, "fixed_scale_recovery": 0.06275734800663979},
+    "c_fc_residual64": {"cosine": 0.5441557200316361, "fixed_scale_recovery": 0.08831138443815689},
+    "c_proj_residual40": {"cosine": 0.5677967354870398, "fixed_scale_recovery": 0.13559342640470473},
+    "c_proj_residual64": {"cosine": 0.5968598469205768, "fixed_scale_recovery": 0.19371967199179985}
+  },
+  "raw_outputs": {
+    "summary_sha256": "48ecc27c1342a7997d57626d4a7a2e5ab738b3d49ab2b434994402033cd784d3",
+    "heldout_ce_sha256": "b57d89df599e23f092b142123238904a40ef38702d03f454bcf02e58239d2d3c",
+    "reconstruction_and_capacity_sha256": "b911ed13b11c4317ac675b74a9f2c8ffbf7a1c4b8aae0be0fb7430de2a44dac4",
+    "prospective_step_metadata_sha256": "52f9bc360c10ff32234fcfc694c072bb52b633b48d51cec6ac502aebbc94f32f"
+  },
+  "next_action": "Do not add more stages. Test one fixed-radius, zero-update c_fc mixed-generator solve that jointly fits the existing task-selected skew and symmetric-shear coordinates instead of the current sequential parent/residual fit. This directly addresses coordinate interference left open by the earlier activation-weighted shear rejection and differs from the rejected skew-only output/input joint tangent. Keep c_proj residual-64 only as a registered singleton positive control; do not train or combine it unless the c_fc joint mixed-generator gate passes."
+}
