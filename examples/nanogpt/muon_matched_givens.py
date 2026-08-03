@@ -1256,6 +1256,362 @@ class MuonFunctionalShear(torch.optim.Optimizer):
         return diagnostics
 
 
+@torch.no_grad()
+def batched_multistage_directed_sparse_update(
+    source: torch.Tensor,
+    target: torch.Tensor,
+    *,
+    incoming_schedule: tuple[int, ...] | list[int],
+    ridge_ratio: float,
+    chunk_size: int,
+) -> tuple[torch.Tensor, list[dict[str, Any]]]:
+    """Fit a batched product of directed sparse output mixers.
+
+    ``source`` and ``target`` are ``[layers, rows, output_channels]``.
+    Each stage sparsifies the exact minimum-norm output action, jointly
+    refits the selected incoming columns per target channel, and fits the
+    next stage against the residual from the already transformed source.
+    This is the production-batched form of the preregistered 30+29+29
+    midpoint discriminator; no learned or persistent dense basis is used.
+    """
+    if source.ndim != 3 or source.shape != target.shape:
+        raise ValueError("source and target must be same-shaped rank-3 tensors")
+    batch, rows, width = source.shape
+    schedule = tuple(int(value) for value in incoming_schedule)
+    if (
+        batch <= 0
+        or rows <= 0
+        or width <= 0
+        or len(schedule) < 2
+        or any(value <= 0 or value > min(rows, width) for value in schedule)
+    ):
+        raise ValueError("invalid directed-product dimensions or schedule")
+    if not 0.0 < float(ridge_ratio) < 1.0 or int(chunk_size) <= 0:
+        raise ValueError("invalid directed-product solver settings")
+
+    source_f = source.float()
+    target_f = target.float()
+    transformed = source_f.clone()
+    prediction = torch.zeros_like(target_f)
+    stage_rows: list[dict[str, Any]] = []
+    for stage_index, incoming in enumerate(schedule):
+        remaining = target_f - prediction
+        row_gram = transformed @ transformed.transpose(1, 2)
+        row_scale = row_gram.diagonal(dim1=1, dim2=2).mean(dim=1)
+        row_gram.diagonal(dim1=1, dim2=2).add_(
+            float(ridge_ratio) * row_scale[:, None]
+        )
+        minimum_norm_action = transformed.transpose(1, 2) @ torch.linalg.solve(
+            row_gram, remaining
+        )
+        indices = torch.topk(
+            minimum_norm_action.abs(), k=incoming, dim=1
+        ).indices
+        del row_gram, minimum_norm_action
+
+        stage_update = torch.empty_like(remaining)
+        eye = torch.eye(
+            incoming, device=source.device, dtype=torch.float32
+        )[None, None]
+        for start in range(0, width, int(chunk_size)):
+            stop = min(start + int(chunk_size), width)
+            columns = stop - start
+            selected = indices[:, :, start:stop]
+            dictionary = torch.gather(
+                transformed.unsqueeze(3).expand(-1, -1, -1, columns),
+                2,
+                selected[:, None].expand(-1, rows, -1, -1),
+            ).permute(0, 3, 1, 2).contiguous()
+            targets = (
+                remaining[:, :, start:stop]
+                .permute(0, 2, 1)
+                .contiguous()
+                .unsqueeze(-1)
+            )
+            gram = dictionary.transpose(-1, -2) @ dictionary
+            rhs = dictionary.transpose(-1, -2) @ targets
+            diagonal_mean = gram.diagonal(
+                dim1=-2, dim2=-1
+            ).mean(dim=-1)
+            gram.add_(
+                eye
+                * (float(ridge_ratio) * diagonal_mean)[..., None, None]
+            )
+            coefficients = torch.linalg.solve(gram, rhs)
+            stage_update[:, :, start:stop] = (
+                (dictionary @ coefficients)
+                .squeeze(-1)
+                .permute(0, 2, 1)
+            )
+
+        transformed.add_(stage_update)
+        prediction.add_(stage_update)
+        remaining_after = target_f - prediction
+        target_energy = target_f.square().sum(dim=(1, 2)).clamp_min(1e-30)
+        prediction_norm = prediction.square().sum(dim=(1, 2)).sqrt()
+        target_norm = target_energy.sqrt()
+        stage_rows.append(
+            {
+                "stage_index": int(stage_index),
+                "incoming_per_target": int(incoming),
+                "coordinates_per_member": int(incoming * width),
+                "member_target_recovery": (
+                    1.0
+                    - remaining_after.square().sum(dim=(1, 2))
+                    / target_energy
+                ).cpu().tolist(),
+                "member_target_cosine": (
+                    (prediction * target_f).sum(dim=(1, 2))
+                    / (prediction_norm * target_norm).clamp_min(1e-30)
+                ).cpu().tolist(),
+            }
+        )
+    return prediction, stage_rows
+
+
+class MuonDirectedProductLinear(nn.Module):
+    """Materialized c_fc updated through a task-selected sparse product."""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        bias: bool,
+        incoming_schedule: tuple[int, ...] | list[int],
+        ridge_ratio: float,
+        chunk_size: int,
+        family_radius_ratio: float,
+        weight_std: float,
+        layer_id: int,
+    ) -> None:
+        super().__init__()
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.incoming_schedule = tuple(
+            int(value) for value in incoming_schedule
+        )
+        self.ridge_ratio = float(ridge_ratio)
+        self.chunk_size = int(chunk_size)
+        self.family_radius_ratio = float(family_radius_ratio)
+        self.weight_std = float(weight_std)
+        self.layer_id = int(layer_id)
+        if (
+            self.in_features <= 0
+            or self.out_features <= 0
+            or len(self.incoming_schedule) < 2
+            or any(
+                value <= 0
+                or value > min(self.in_features, self.out_features)
+                for value in self.incoming_schedule
+            )
+            or not 0.0 < self.ridge_ratio < 1.0
+            or self.chunk_size <= 0
+            or not math.isfinite(self.family_radius_ratio)
+            or self.family_radius_ratio <= 0.0
+            or not math.isfinite(self.weight_std)
+            or self.weight_std <= 0.0
+        ):
+            raise ValueError("invalid directed-product c_fc configuration")
+        weight = torch.empty(self.out_features, self.in_features)
+        nn.init.kaiming_uniform_(weight, a=math.sqrt(5.0))
+        self.register_buffer("weight", weight, persistent=True)
+        if bias:
+            bound = 1.0 / math.sqrt(self.in_features)
+            self.bias = nn.Parameter(
+                torch.empty(self.out_features).uniform_(-bound, bound)
+            )
+        else:
+            self.bias = None
+        self.register_buffer(
+            "optimizer_step",
+            torch.zeros((), dtype=torch.int64),
+            persistent=True,
+        )
+
+    @property
+    def coordinate_count(self) -> int:
+        return sum(self.incoming_schedule) * self.out_features
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        return F.linear(values, self.weight, self.bias)
+
+
+class MuonDirectedProduct(torch.optim.Optimizer):
+    """Exact Muon momentum followed by the selected batched sparse product."""
+
+    def __init__(
+        self,
+        modules: list[MuonDirectedProductLinear],
+        *,
+        lr: float,
+        momentum: float,
+        weight_decay: float,
+        ns_steps: int,
+    ) -> None:
+        if not modules:
+            raise ValueError("MuonDirectedProduct requires at least one module")
+        reference = modules[0]
+        if any(
+            module.in_features != reference.in_features
+            or module.out_features != reference.out_features
+            or module.incoming_schedule != reference.incoming_schedule
+            or module.ridge_ratio != reference.ridge_ratio
+            or module.chunk_size != reference.chunk_size
+            or module.family_radius_ratio != reference.family_radius_ratio
+            for module in modules
+        ):
+            raise ValueError("directed-product modules must share one geometry")
+        for module in modules:
+            module.weight.requires_grad_(True)
+        self.modules_by_id = {id(module.weight): module for module in modules}
+        self.last_step_diagnostics: list[dict[str, Any]] = []
+        defaults = {
+            "lr": float(lr),
+            "momentum": float(momentum),
+            "weight_decay": float(weight_decay),
+            "ns_steps": int(ns_steps),
+        }
+        super().__init__(
+            [{"params": [module.weight for module in modules]}], defaults
+        )
+
+    @torch.no_grad()
+    def step(self, closure=None):
+        loss = None
+        if closure is not None:
+            with torch.enable_grad():
+                loss = closure()
+        diagnostics: list[dict[str, Any]] = []
+        for group in self.param_groups:
+            lr = float(group["lr"])
+            momentum = float(group["momentum"])
+            weight_decay = float(group["weight_decay"])
+            ns_steps = int(group["ns_steps"])
+            active_weights = [
+                weight
+                for weight in group["params"]
+                if weight.grad is not None
+            ]
+            if not active_weights:
+                continue
+            requested: list[torch.Tensor] = []
+            modules: list[MuonDirectedProductLinear] = []
+            for weight in active_weights:
+                module = self.modules_by_id[id(weight)]
+                modules.append(module)
+                state = self.state[weight]
+                if "momentum_buffer" not in state:
+                    state["momentum_buffer"] = torch.zeros_like(weight)
+                buffer = state["momentum_buffer"]
+                gradient = weight.grad
+                assert gradient is not None
+                buffer.mul_(momentum).add_(gradient)
+                combined = gradient.add(buffer, alpha=momentum)
+                polar = zeropower_via_newtonschulz5(
+                    combined, steps=ns_steps
+                ).float()
+                scale = max(
+                    1.0,
+                    polar.shape[0]
+                    / max(1, polar.numel() / polar.shape[0]),
+                ) ** 0.5
+                direction = -scale * polar
+                requested.append(
+                    lr * (direction - weight_decay * weight.float())
+                )
+
+            source = torch.stack(
+                [weight.float().T for weight in active_weights], dim=0
+            ).contiguous()
+            target = torch.stack(
+                [update.T for update in requested], dim=0
+            ).contiguous()
+            reference = modules[0]
+            raw_prediction, stage_rows = (
+                batched_multistage_directed_sparse_update(
+                    source,
+                    target,
+                    incoming_schedule=reference.incoming_schedule,
+                    ridge_ratio=reference.ridge_ratio,
+                    chunk_size=reference.chunk_size,
+                )
+            )
+            raw_family_norm = raw_prediction.square().sum().sqrt()
+            dense_family_norm = target.square().sum().sqrt()
+            target_family_norm = (
+                reference.family_radius_ratio * dense_family_norm
+            )
+            family_scale = target_family_norm / raw_family_norm.clamp_min(
+                1e-30
+            )
+            prediction = raw_prediction * family_scale
+            residual = target - prediction
+            for index, (weight, module) in enumerate(
+                zip(active_weights, modules, strict=True)
+            ):
+                update = prediction[index].T.contiguous()
+                weight.add_(update.to(dtype=weight.dtype))
+                target_energy = target[index].square().sum().clamp_min(1e-30)
+                diagnostics.append(
+                    {
+                        "optimizer": "muon_directed_product",
+                        "step": int(module.optimizer_step),
+                        "layer": module.layer_id,
+                        "incoming_schedule": list(
+                            module.incoming_schedule
+                        ),
+                        "coordinates": module.coordinate_count,
+                        "ridge_ratio": module.ridge_ratio,
+                        "solver_chunk_size": module.chunk_size,
+                        "family_radius_ratio": module.family_radius_ratio,
+                        "family_scale": float(family_scale),
+                        "dense_family_fro": float(dense_family_norm),
+                        "raw_prediction_family_fro": float(
+                            raw_family_norm
+                        ),
+                        "target_family_fro": float(target_family_norm),
+                        "update_fro": float(update.float().norm()),
+                        "requested_update_recovery": float(
+                            1.0
+                            - residual[index].square().sum()
+                            / target_energy
+                        ),
+                        "requested_update_cosine": float(
+                            (prediction[index] * target[index]).sum()
+                            / (
+                                prediction[index].norm()
+                                * target[index].norm()
+                            ).clamp_min(1e-30)
+                        ),
+                        "stage_rows": [
+                            {
+                                **{
+                                    key: value
+                                    for key, value in row.items()
+                                    if not key.startswith("member_")
+                                },
+                                "target_recovery": row[
+                                    "member_target_recovery"
+                                ][index],
+                                "target_cosine": row[
+                                    "member_target_cosine"
+                                ][index],
+                            }
+                            for row in stage_rows
+                        ],
+                    }
+                )
+                module.optimizer_step.add_(1)
+        self.last_step_diagnostics = diagnostics
+        return loss
+
+    def consume_diagnostics(self) -> list[dict[str, Any]]:
+        diagnostics = self.last_step_diagnostics
+        self.last_step_diagnostics = []
+        return diagnostics
+
+
 class MuonMatchedGivens(torch.optim.Optimizer):
     """Muon state with a folded sparse-Givens materialized-weight step."""
 

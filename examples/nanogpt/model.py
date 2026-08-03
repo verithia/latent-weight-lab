@@ -10,6 +10,8 @@ from torch.nn import functional as F
 
 from examples.nanogpt.muon import Muon
 from examples.nanogpt.muon_matched_givens import (
+    MuonDirectedProduct,
+    MuonDirectedProductLinear,
     MuonFunctionalShear,
     MuonFunctionalShearLinear,
     MuonMatchedGivens,
@@ -165,6 +167,11 @@ class GPTConfig:
     block_fht_mlp_cfc_functional_shear_max_condition_number: float = 0.0
     block_fht_mlp_cfc_functional_shear_sample_cap: int = 2048
     block_fht_mlp_cfc_functional_shear_seed: int = 20260820
+    block_fht_mlp_cfc_directed_product: bool = False
+    block_fht_mlp_cfc_directed_product_schedule: tuple[int, ...] = (30, 29, 29)
+    block_fht_mlp_cfc_directed_product_ridge_ratio: float = 1e-6
+    block_fht_mlp_cfc_directed_product_chunk_size: int = 256
+    block_fht_mlp_cfc_directed_product_family_radius_ratio: float = 0.6589686140591383
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
@@ -1527,6 +1534,13 @@ class MLP(nn.Module):
         functional_shear_cfc = bool(
             config.block_fht_mlp_cfc_functional_shear
         )
+        directed_product_cfc = bool(
+            config.block_fht_mlp_cfc_directed_product
+        )
+        if functional_shear_cfc and directed_product_cfc:
+            raise ValueError(
+                "functional-shear and directed-product c_fc are mutually exclusive"
+            )
         if functional_shear_cfc and (
             grouped_targets or "mlp.c_fc" in config.block_fht_targets
         ):
@@ -1534,7 +1548,28 @@ class MLP(nn.Module):
                 "functional-shear c_fc requires the materialized plain "
                 "c_fc path"
             )
-        if functional_shear_cfc:
+        if directed_product_cfc:
+            self.c_fc = MuonDirectedProductLinear(
+                config.n_embd,
+                4 * config.n_embd,
+                bias=config.bias,
+                incoming_schedule=tuple(
+                    int(value)
+                    for value in config.block_fht_mlp_cfc_directed_product_schedule
+                ),
+                ridge_ratio=float(
+                    config.block_fht_mlp_cfc_directed_product_ridge_ratio
+                ),
+                chunk_size=int(
+                    config.block_fht_mlp_cfc_directed_product_chunk_size
+                ),
+                family_radius_ratio=float(
+                    config.block_fht_mlp_cfc_directed_product_family_radius_ratio
+                ),
+                weight_std=0.02,
+                layer_id=layer_id,
+            )
+        elif functional_shear_cfc:
             self.c_fc = MuonFunctionalShearLinear(
                 config.n_embd,
                 4 * config.n_embd,
@@ -3556,7 +3591,9 @@ class GPT(nn.Module):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
             if module.bias is not None:
                 nn.init.zeros_(module.bias)
-        elif isinstance(module, MuonFunctionalShearLinear):
+        elif isinstance(
+            module, (MuonFunctionalShearLinear, MuonDirectedProductLinear)
+        ):
             nn.init.normal_(
                 module.weight, mean=0.0, std=module.weight_std
             )
@@ -3628,8 +3665,15 @@ class GPT(nn.Module):
             for block in self.transformer.h
             if isinstance(block.mlp.c_fc, MuonFunctionalShearLinear)
         ]
+        directed_product_modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, MuonDirectedProductLinear)
+        ]
         if (
-            muon_matched_givens_modules or functional_shear_pairs
+            muon_matched_givens_modules
+            or functional_shear_pairs
+            or directed_product_modules
         ) and optimizer != "muon":
             raise ValueError(
                 "Muon chart optimizers require optimizer='muon'"
@@ -3759,6 +3803,18 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
+            if directed_product_modules:
+                optimizers.append(
+                    MuonDirectedProduct(
+                        directed_product_modules,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
             if muon_matched_givens_modules:
                 optimizers.append(
                     MuonMatchedGivens(
@@ -3879,6 +3935,10 @@ class GPT(nn.Module):
                 modules += 1
                 generated += module.in_features * module.out_features
                 latent += module.coordinate_count
+            elif isinstance(module, MuonDirectedProductLinear):
+                modules += 1
+                generated += module.in_features * module.out_features
+                latent += module.coordinate_count
         return {"modules": modules, "generated": generated, "latent": latent}
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
@@ -3923,7 +3983,11 @@ class GPT(nn.Module):
             for module in self.modules()
             if isinstance(
                 module,
-                (MuonMatchedGivensLinear, MuonFunctionalShearLinear),
+                (
+                    MuonMatchedGivensLinear,
+                    MuonFunctionalShearLinear,
+                    MuonDirectedProductLinear,
+                ),
             )
         )
         return parameters

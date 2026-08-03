@@ -1137,6 +1137,31 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=20260820,
     )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product-schedule",
+        type=json.loads,
+        default=[30, 29, 29],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product-ridge-ratio",
+        type=float,
+        default=1e-6,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product-chunk-size",
+        type=int,
+        default=256,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cfc-directed-product-family-radius-ratio",
+        type=float,
+        default=0.6589686140591383,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -1446,6 +1471,67 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "fast fresh Muon-matched Givens c_proj requires "
                 "refresh interval 1"
+            )
+    if (
+        namespace.block_fht_mlp_cfc_functional_shear
+        and namespace.block_fht_mlp_cfc_directed_product
+    ):
+        raise ValueError(
+            "functional-shear and directed-product c_fc are mutually exclusive"
+        )
+    if namespace.block_fht_mlp_cfc_directed_product:
+        if namespace.method != "block_fht" or namespace.optimizer != "muon":
+            raise ValueError(
+                "directed-product c_fc requires method=block_fht and optimizer=muon"
+            )
+        if "mlp.c_fc" in namespace.block_fht_targets:
+            raise ValueError(
+                "directed-product c_fc replaces the mlp.c_fc BlockFHT target"
+            )
+        if not namespace.block_fht_mlp_cproj_muon_matched_givens:
+            raise ValueError(
+                "directed-product c_fc requires the qualified materialized c_proj"
+            )
+        schedule = namespace.block_fht_mlp_cfc_directed_product_schedule
+        if (
+            not isinstance(schedule, list)
+            or len(schedule) < 2
+            or any(
+                not isinstance(value, int)
+                or isinstance(value, bool)
+                or value <= 0
+                or value > namespace.n_embd
+                for value in schedule
+            )
+        ):
+            raise ValueError(
+                "directed-product schedule must be a JSON list of positive integers <= n_embd"
+            )
+        ridge = float(
+            namespace.block_fht_mlp_cfc_directed_product_ridge_ratio
+        )
+        radius = float(
+            namespace.block_fht_mlp_cfc_directed_product_family_radius_ratio
+        )
+        if not 0.0 < ridge < 1.0:
+            raise ValueError("directed-product ridge ratio must be in (0, 1)")
+        if namespace.block_fht_mlp_cfc_directed_product_chunk_size <= 0:
+            raise ValueError("directed-product chunk size must be positive")
+        if not math.isfinite(radius) or radius <= 0.0:
+            raise ValueError("directed-product family radius ratio must be positive")
+        incompatible_cfc_addon = any(
+            (
+                namespace.block_fht_ffn_lowrank_rank > 0,
+                namespace.block_fht_ffn_pregelu_gain,
+                namespace.block_fht_ffn_pregelu_bias,
+                namespace.block_fht_mlp_shared_hidden_gain,
+                namespace.block_fht_mlp_activation_chart,
+                namespace.block_fht_mlp_pregelu_block_rotation_stages > 0,
+            )
+        )
+        if incompatible_cfc_addon:
+            raise ValueError(
+                "directed-product c_fc requires the unmodified pre-GELU path"
             )
     if namespace.block_fht_mlp_cfc_functional_shear:
         if namespace.method != "block_fht" or namespace.optimizer != "muon":
@@ -1808,6 +1894,22 @@ def main() -> None:
         ),
         block_fht_mlp_cfc_functional_shear_seed=(
             args.block_fht_mlp_cfc_functional_shear_seed
+        ),
+        block_fht_mlp_cfc_directed_product=(
+            args.block_fht_mlp_cfc_directed_product
+        ),
+        block_fht_mlp_cfc_directed_product_schedule=tuple(
+            int(value)
+            for value in args.block_fht_mlp_cfc_directed_product_schedule
+        ),
+        block_fht_mlp_cfc_directed_product_ridge_ratio=(
+            args.block_fht_mlp_cfc_directed_product_ridge_ratio
+        ),
+        block_fht_mlp_cfc_directed_product_chunk_size=(
+            args.block_fht_mlp_cfc_directed_product_chunk_size
+        ),
+        block_fht_mlp_cfc_directed_product_family_radius_ratio=(
+            args.block_fht_mlp_cfc_directed_product_family_radius_ratio
         ),
         block_fht_ffn_postgelu_std_target=args.block_fht_ffn_postgelu_std_target,
         block_fht_mlp_shared_hidden_gain=args.block_fht_mlp_shared_hidden_gain,
