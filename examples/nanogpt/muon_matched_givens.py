@@ -907,14 +907,13 @@ class MuonMatchedGivensLinear(nn.Module):
         if (
             self.stages <= 0
             or self.residual_stages < 0
-            or self.residual_stages > 64
             or self.neighbors < max(
                 self.stages, self.residual_stages
             )
             or self.neighbors >= self.in_features
         ):
             raise ValueError(
-                "require 0 < stages, 0 <= residual_stages <= 64, "
+                "require 0 < stages, 0 <= residual_stages, "
                 "and max(stages, residual_stages) <= neighbors "
                 "< in_features"
             )
@@ -1055,8 +1054,6 @@ class MuonFunctionalShearLinear(nn.Module):
             or self.out_features % 2
             or self.parent_stages <= 0
             or self.shear_stages <= 0
-            or self.parent_stages > 64
-            or self.shear_stages > 64
             or self.neighbors < max(self.parent_stages, self.shear_stages)
             or self.neighbors >= self.out_features
             or not 0.0 <= self.coordinate_mix_beta <= 1.0

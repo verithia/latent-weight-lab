@@ -1,0 +1,39 @@
+{
+  "schema_version": "mai_690m_full_mlp_scaled_transfer_preflight_reject_v1",
+  "created_at": "2026-08-03",
+  "candidate_revision": 2,
+  "implementation_commit": "6921b23928319ab6ff729403b987c5520efdc4af",
+  "config": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_plus_fullmlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp.json",
+  "config_sha256": "a3061cc4d5f1935105662ed0e7b24ef815910f8bc186f2679647a5353fe25d33",
+  "host": "PRO6",
+  "gpu": 0,
+  "preflight": {
+    "output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.json",
+    "output_sha256": "70f5df6301ef465db18e5ba83e7bee805be4d835af9cdbfc2e6b5c0fab4eac02",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_scaled_cfcdecay1_cprojdecay0p5_0p5tpp/performance_preflight.log",
+    "log_sha256": "430039de6e275efe7d243eee62bb7ac14fd5441f96cc76f3db57a99a21dc45d8",
+    "elapsed_seconds": 12.609754085540771,
+    "empirical_bf16_gemm_peak_tflops": 416.74245695462236,
+    "native_extension_loaded": true,
+    "step_zero_train_ce": 11.1662,
+    "step_zero_validation_ce": 11.1904,
+    "warmup_updates_completed": 0,
+    "timed_updates_completed": 0,
+    "passed": false
+  },
+  "rejection": {
+    "class": "implementation_capacity_invariant",
+    "reason": "The production fast task matcher encoded stage occupancy in one uint64 and rejected the registered 80-stage c_proj parent chart before optimizer update 1.",
+    "exception": "ValueError: require 0 < stages <= 64 and neighbors >= stages",
+    "scientific_result": false,
+    "weights_updated": false,
+    "checkpoint_created": false,
+    "watchdog_started": false,
+    "callback_sent": false
+  },
+  "resolution": {
+    "policy": "Do not shrink the width-scaled 80-stage chart to fit the implementation.",
+    "required_change": "Replace the native single-word occupancy mask with a dynamic stage bitset, validate more-than-64-stage perfect matchings, then rerun the same exact-config foreground MFU gate.",
+    "scientific_config_change": false
+  }
+}

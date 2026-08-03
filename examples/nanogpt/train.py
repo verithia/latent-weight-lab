@@ -1464,9 +1464,6 @@ def parse_args() -> argparse.Namespace:
             .block_fht_mlp_cproj_muon_matched_givens_residual_stages
             < 0
             or namespace
-            .block_fht_mlp_cproj_muon_matched_givens_residual_stages
-            > 64
-            or namespace
             .block_fht_mlp_cproj_muon_matched_givens_neighbors
             < max(
                 namespace
@@ -1480,7 +1477,7 @@ def parse_args() -> argparse.Namespace:
         ):
             raise ValueError(
                 "Muon-matched Givens c_proj requires "
-                "0 < stages, 0 <= residual stages <= 64, and "
+                "0 < stages, 0 <= residual stages, and "
                 "max(stages, residual stages) <= neighbors < 4*n_embd"
             )
         if (
@@ -1623,14 +1620,12 @@ def parse_args() -> argparse.Namespace:
         )
         if (
             parent_stages <= 0
-            or parent_stages > 64
             or shear_stages <= 0
-            or shear_stages > 64
             or neighbors < max(parent_stages, shear_stages)
             or neighbors >= 4 * namespace.n_embd
         ):
             raise ValueError(
-                "functional-shear c_fc requires 0 < stages <= 64 and "
+                "functional-shear c_fc requires positive stages and "
                 "max(stages) <= neighbors < 4*n_embd"
             )
         if not 0.0 <= float(

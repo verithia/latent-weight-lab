@@ -105,9 +105,43 @@ def test_empty_candidates_force_valid_completion(
     assert diagnostics["candidate_edge_fraction"] == 0.0
 
 
+def test_dynamic_stage_bitset_supports_more_than_64_matchings(
+    tmp_path: Path,
+) -> None:
+    permutations, diagnostics = color_sorted_edges(
+        torch.empty(0, 2, dtype=torch.int32),
+        width=128,
+        stages=80,
+        seed=37,
+        cache_dir=tmp_path,
+    )
+    assert_unique_perfect_matchings(permutations)
+    assert permutations.shape == (80, 128)
+    assert diagnostics["candidate_edge_fraction"] == 0.0
+
+
+def test_fast_muon_matching_accepts_more_than_64_stages(
+    tmp_path: Path,
+) -> None:
+    generator = torch.Generator().manual_seed(41)
+    weight = torch.randn(4, 128, generator=generator)
+    direction = torch.randn(4, 128, generator=generator)
+    permutations, diagnostics = fast_muon_matched_permutations(
+        weight,
+        direction,
+        stages=80,
+        neighbors=80,
+        seed=43,
+        cache_dir=tmp_path,
+    )
+    assert_unique_perfect_matchings(permutations)
+    assert permutations.shape == (80, 128)
+    assert diagnostics["candidate_edges"] == 128 * 80
+
+
 @pytest.mark.parametrize(
     "width,stages",
-    [(7, 2), (8, 0), (8, 65)],
+    [(7, 2), (8, 0), (8, 8)],
 )
 def test_color_sorted_edges_rejects_invalid_shapes(
     tmp_path: Path,

@@ -93,8 +93,8 @@ def color_sorted_edges(
         or sorted_edges.device.type != "cpu"
     ):
         raise ValueError("sorted_edges must be a CPU tensor shaped [E,2]")
-    if width <= 0 or width % 2 or stages <= 0 or stages > 64:
-        raise ValueError("require even width and 0 < stages <= 64")
+    if width <= 0 or width % 2 or stages <= 0 or stages >= width:
+        raise ValueError("require even width and 0 < stages < width")
     edges = np.ascontiguousarray(
         sorted_edges.to(dtype=torch.int32).numpy()
     )
@@ -155,10 +155,8 @@ def fast_muon_matched_permutations(
             "weight and direction must be same-shaped matrices with even width"
         )
     width = int(weight.shape[1])
-    if stages <= 0 or stages > 64 or neighbors < stages:
-        raise ValueError(
-            "require 0 < stages <= 64 and neighbors >= stages"
-        )
+    if stages <= 0 or neighbors < stages:
+        raise ValueError("require 0 < stages and neighbors >= stages")
     if neighbors >= width:
         raise ValueError("neighbors must be smaller than width")
 

@@ -15,9 +15,10 @@ std::uint64_t splitmix64(std::uint64_t& state) {
 
 }  // namespace
 
-// Greedily edge-color one globally score-sorted candidate list into up to
-// 64 edge-disjoint perfect matchings. Unlike the legacy Python routine, this
-// scans the candidate list once rather than once per stage.
+// Greedily edge-color one globally score-sorted candidate list into
+// edge-disjoint perfect matchings. Unlike the legacy Python routine, this
+// scans the candidate list once rather than once per stage. Stage occupancy
+// uses a compact dynamic bitset so width-scaled charts are not capped at 64.
 extern "C" int task_edge_color(
     const std::int32_t* sorted_edges,
     std::size_t edge_count,
@@ -28,17 +29,22 @@ extern "C" int task_edge_color(
     std::int32_t* candidate_pair_counts) {
     if (sorted_edges == nullptr || permutations == nullptr ||
         candidate_pair_counts == nullptr || width <= 0 ||
-        (width % 2) != 0 || stages <= 0 || stages > 64) {
+        (width % 2) != 0 || stages <= 0 || stages >= width) {
         return 1;
     }
 
-    const std::uint64_t full_mask =
-        stages == 64 ? ~std::uint64_t{0}
-                     : ((std::uint64_t{1} << stages) - 1);
+    const std::size_t stage_words =
+        (static_cast<std::size_t>(stages) + 63) / 64;
+    const std::int32_t final_word_bits = stages & 63;
+    const std::uint64_t final_word_mask =
+        final_word_bits == 0
+            ? ~std::uint64_t{0}
+            : ((std::uint64_t{1} << final_word_bits) - 1);
     const std::int32_t pairs_per_stage = width / 2;
     const std::int64_t target_pairs =
         static_cast<std::int64_t>(stages) * pairs_per_stage;
-    std::vector<std::uint64_t> occupied(width, 0);
+    std::vector<std::uint64_t> occupied(
+        static_cast<std::size_t>(width) * stage_words, 0);
     std::vector<std::int32_t> counts(stages, 0);
     std::vector<std::uint8_t> is_candidate(
         static_cast<std::size_t>(target_pairs), 0);
@@ -93,14 +99,30 @@ extern "C" int task_edge_color(
         if (edge_is_used(left, right)) {
             continue;
         }
-        std::uint64_t available =
-            full_mask & ~(occupied[left] | occupied[right]);
-        if (available == 0) {
+        std::int32_t selected_stage = -1;
+        for (std::size_t word = 0; word < stage_words; ++word) {
+            const std::uint64_t allowed =
+                word + 1 == stage_words
+                    ? final_word_mask
+                    : ~std::uint64_t{0};
+            const std::uint64_t available =
+                allowed &
+                ~(occupied[static_cast<std::size_t>(left) *
+                               stage_words +
+                           word] |
+                  occupied[static_cast<std::size_t>(right) *
+                               stage_words +
+                           word]);
+            if (available != 0) {
+                selected_stage = static_cast<std::int32_t>(
+                    64 * word + __builtin_ctzll(available));
+                break;
+            }
+        }
+        if (selected_stage < 0) {
             continue;
         }
 
-        const std::int32_t selected_stage =
-            static_cast<std::int32_t>(__builtin_ctzll(available));
         if (counts[selected_stage] >= pairs_per_stage) {
             continue;
         }
@@ -111,8 +133,14 @@ extern "C" int task_edge_color(
             2 * pair_index;
         permutations[output_offset] = left;
         permutations[output_offset + 1] = right;
-        occupied[left] |= std::uint64_t{1} << selected_stage;
-        occupied[right] |= std::uint64_t{1} << selected_stage;
+        const std::size_t selected_word =
+            static_cast<std::size_t>(selected_stage) >> 6;
+        const std::uint64_t selected_bit =
+            std::uint64_t{1} << (selected_stage & 63);
+        occupied[static_cast<std::size_t>(left) * stage_words +
+                 selected_word] |= selected_bit;
+        occupied[static_cast<std::size_t>(right) * stage_words +
+                 selected_word] |= selected_bit;
         set_edge_used(left, right);
         is_candidate[
             static_cast<std::size_t>(selected_stage) *
@@ -128,9 +156,15 @@ extern "C" int task_edge_color(
     for (std::int32_t stage = 0; stage < stages; ++stage) {
         std::vector<std::int32_t> remaining;
         remaining.reserve(width);
-        const std::uint64_t stage_bit = std::uint64_t{1} << stage;
+        const std::size_t stage_word =
+            static_cast<std::size_t>(stage) >> 6;
+        const std::uint64_t stage_bit =
+            std::uint64_t{1} << (stage & 63);
         for (std::int32_t vertex = 0; vertex < width; ++vertex) {
-            if ((occupied[vertex] & stage_bit) == 0) {
+            if ((occupied[static_cast<std::size_t>(vertex) *
+                              stage_words +
+                          stage_word] &
+                 stage_bit) == 0) {
                 remaining.push_back(vertex);
             }
         }
@@ -167,8 +201,12 @@ extern "C" int task_edge_color(
                     2 * pair_index;
                 permutations[output_offset] = left;
                 permutations[output_offset + 1] = right;
-                occupied[left] |= stage_bit;
-                occupied[right] |= stage_bit;
+                occupied[static_cast<std::size_t>(left) *
+                             stage_words +
+                         stage_word] |= stage_bit;
+                occupied[static_cast<std::size_t>(right) *
+                             stage_words +
+                         stage_word] |= stage_bit;
                 set_edge_used(left, right);
                 ++assigned_pairs;
                 continue;
@@ -236,8 +274,12 @@ extern "C" int task_edge_color(
                         }
                         remaining.erase(
                             remaining.begin() + remaining_index);
-                        occupied[left] |= stage_bit;
-                        occupied[right] |= stage_bit;
+                        occupied[static_cast<std::size_t>(left) *
+                                     stage_words +
+                                 stage_word] |= stage_bit;
+                        occupied[static_cast<std::size_t>(right) *
+                                     stage_words +
+                                 stage_word] |= stage_bit;
                         ++assigned_pairs;
                         repaired = true;
                     }
