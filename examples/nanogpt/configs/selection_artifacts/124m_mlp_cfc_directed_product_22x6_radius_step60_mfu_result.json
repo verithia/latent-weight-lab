@@ -1,0 +1,66 @@
+{
+  "artifact_kind": "124m_mlp_cfc_directed_product_22x6_radius_step60_mfu_result",
+  "schema_version": "mai_124m_mlp_cfc_22x6_radius_step60_mfu_result_v1",
+  "recorded_at": "2026-08-03",
+  "classification": "BOTH_EXACT_RADIUS_ARMS_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_directed_product_22x6_radius_step60_plan.json",
+    "sha256": "52f924fd04cc76e58a7fc4ce85da93d55e293c536c6a400469965700e94cdaf8"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "1a9be4d0829cf91c4ca5c4fc1bacea3e7a4684a1",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "native_extension_required": true,
+    "native_extension_loaded": true
+  },
+  "arms": {
+    "radius0p82": {
+      "radius": 0.82,
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius0p82_step60.json",
+      "config_sha256": "6a2bdc55c7adb55ad3b69ede01b33b2f542e0dfe6bcf621a69152b4239dcf580",
+      "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius0p82/performance_preflight.json",
+      "certificate_sha256": "91dee27697b6dd0c147b5cfdd50455f3b11009d4ed3641cd78b235b8643f5c96",
+      "log_sha256": "2e71830499ffd8712a855d03cf840fa171af9bea624885eef5ce5472237a8356",
+      "mfu_fraction": 0.26871089201836873,
+      "tokens_per_second": 149544.03375,
+      "average_iter_ms": 1752.9825,
+      "optimizer_ms": 552.2725,
+      "peak_mib": 31640.09,
+      "finite_loss_values": 13,
+      "passed": true
+    },
+    "radius1p00": {
+      "radius": 1.0,
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cfc_directedproduct22x6_radius1p00_step60.json",
+      "config_sha256": "9337216260b6d6b8bf42895f5dd1b179714fa396f215da0681194f822e3f1619",
+      "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cfc_directed_product_22x6_radius_step60/radius1p00/performance_preflight.json",
+      "certificate_sha256": "0565f54178d48490be064583559c23e074d359dd8218cb41a6f3275c60e0e511",
+      "log_sha256": "3c062794f7d594705bd9abb39ff07317a1ebcfd336fbeed098cfceff2c5c5581",
+      "mfu_fraction": 0.2711008104435629,
+      "tokens_per_second": 150412.45125,
+      "average_iter_ms": 1742.84625,
+      "optimizer_ms": 541.715,
+      "peak_mib": 31640.09,
+      "finite_loss_values": 13,
+      "passed": true
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "config_identities_matched": true,
+    "source_identities_matched": true
+  },
+  "decision": {
+    "radius0p82_step60_training_authorized": true,
+    "radius1p00_step60_training_authorized": true,
+    "full_238_update_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
