@@ -184,3 +184,25 @@ def test_v2_exact_gate_and_long_run_monitoring_remain_separate() -> None:
     assert plan["execution"]["callback_mention"] == "@Codex"
     assert plan["execution"]["heartbeat_minutes"] == 90
     assert plan["authorization"]["automatic_rerun_authorized"] is False
+
+
+def test_v2_mfu_result_authorizes_exactly_one_scientific_run() -> None:
+    result_path = (
+        REPO
+        / "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_error_feedback_0p5tpp_v2_mfu_result.json"
+    )
+    result = load(result_path)
+    assert result["passed"] is True
+    assert result["classification"] == (
+        "FULL_MLP_ERROR_FEEDBACK_350M_0P5TPP_V2_EXACT_CONFIG_MFU_PASSED"
+    )
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert result["measurement"]["mfu_fraction"] >= 0.2
+    assert result["measurement"]["peak_mib"] < 97887
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["execution"]["direct_foreground_polling"] is True
+    assert result["execution"]["watchdog"] is False
+    assert result["decision"]["one_full_677_update_run_authorized"] is True
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["larger_model_or_token_rung_authorized"] is False
