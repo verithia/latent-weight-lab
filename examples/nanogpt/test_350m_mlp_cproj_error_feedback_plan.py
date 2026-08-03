@@ -15,6 +15,10 @@ MFU_RESULT_PATH = (
     REPO
     / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_0p5tpp_mfu_result.json"
 )
+RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_0p5tpp_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -129,3 +133,32 @@ def test_exact_mfu_result_authorizes_one_scientific_run() -> None:
     assert result["decision"]["one_full_677_update_run_authorized"] is True
     assert result["decision"]["automatic_rerun_authorized"] is False
     assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_terminal_result_rejects_decay_one_late_regression() -> None:
+    result = load(RESULT_PATH)
+    assert result["classification"] == (
+        "REJECT_DECAY1_CPROJ_ERROR_FEEDBACK_350M_LATE_REGRESSION"
+    )
+    assert sha256(REPO / result["config"]["path"]) == result["config"]["sha256"]
+    assert sha256(REPO / result["plan"]["path"]) == result["plan"]["sha256"]
+    assert result["run"]["train_exit_code"] == 0
+    assert result["measurement"]["terminal_validation_ce"] == 4.4807
+    assert result["measurement"]["terminal_validation_ce"] > result["measurement"]["success_ceiling"]
+    assert result["measurement"]["step_340_gain_vs_memoryless_parent_ce"] > 0.07
+    assert result["measurement"]["candidate_minus_memoryless_cproj_ce"] > 0
+    assert result["decision"]["selected_for_scaling"] is False
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_terminal_residual_audit_selects_bounded_memory_next() -> None:
+    result = load(RESULT_PATH)
+    residual = result["candidate"]["terminal_compression_residual"]
+    assert residual["finite"] is True
+    assert residual["layer_count"] == 24
+    assert residual["frobenius_norm_mean"] > 4.7
+    diagnosis = result["residual_diagnosis"]
+    assert diagnosis["frobenius_ratio_vs_124m_cproj_error_feedback"] > 3.5
+    assert diagnosis["late_regression_after_step_340"] is True
+    assert "decay-0.5" in result["decision"]["next_action"]

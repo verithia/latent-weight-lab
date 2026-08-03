@@ -1,0 +1,112 @@
+{
+  "artifact_kind": "350m_mlp_cproj_error_feedback_0p5tpp_training_result",
+  "schema_version": "mai_350m_mlp_cproj_error_feedback_0p5tpp_result_v1",
+  "classification": "REJECT_DECAY1_CPROJ_ERROR_FEEDBACK_350M_LATE_REGRESSION",
+  "candidate": {
+    "additional_dense_optimizer_state_bytes": 402653184,
+    "additional_trainable_parameters": 0,
+    "error_feedback": true,
+    "error_feedback_decay": 1.0,
+    "matching_neighbors": 64,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "terminal_compression_residual": {
+      "finite": true,
+      "frobenius_norm_max": 5.047182559967041,
+      "frobenius_norm_mean": 4.704411884148915,
+      "frobenius_norm_min": 2.9865849018096924,
+      "layer_count": 24,
+      "max_abs": 0.016481876373291016,
+      "rms_max": 0.0024646844249218702,
+      "rms_mean": 0.00229730236363442,
+      "rms_min": 0.0014584376476705074,
+      "shape_per_layer": [1024, 4096]
+    }
+  },
+  "checkpoint": {
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_cproj_error_feedback_0p5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "16b0f318abfadefadf0b4eecb0c51daeac7c0a239c992ff075966f4e7ee07bf3",
+    "next_iter": 677,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_cproj_error_feedback_0p5tpp/scientific/ckpt.pt",
+    "sha256": "2e19869cadd8c332f73a57cdd5bb740ea623c3021347a6bb521fd5ad8e5ed330",
+    "size_bytes": 2813128736
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+    "sha256": "4aa9e0a2b6d5dbf76b7c25bea27c8835ebfaca9d710d19ecfb2494710ecbdb7b"
+  },
+  "dataset": {
+    "manifest_path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "next_action": "Register one 350M decay-0.5 c_proj error-feedback run with the same dense c_fc and accepted 64+24 chart. The lower decay directly tests whether bounded residual memory retains the early gain while eliminating the late regression.",
+    "selected_for_scaling": false
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 11.0780, "validation_ce": 11.0774},
+    {"step": 170, "train_ce": 5.4173, "validation_ce": 5.4188},
+    {"step": 340, "train_ce": 4.8026, "validation_ce": 4.7986},
+    {"step": 510, "train_ce": 4.5641, "validation_ce": 4.5598},
+    {"step": 677, "train_ce": 4.4858, "validation_ce": 4.4807}
+  ],
+  "measurement": {
+    "attention_control_validation_ce": 4.3629,
+    "attention_gap_ce": 0.1178,
+    "candidate_minus_failed_composed_full_mlp_ce": -0.2067,
+    "candidate_minus_memoryless_cproj_ce": 0.0250,
+    "memoryless_cproj_validation_ce": 4.4557,
+    "step_170_gain_vs_memoryless_parent_ce": 0.0591,
+    "step_340_gain_vs_memoryless_parent_ce": 0.0777,
+    "step_510_gain_vs_memoryless_parent_ce": 0.0096,
+    "success_ceiling": 4.4629,
+    "success_ceiling_miss_ce": 0.0178,
+    "terminal_step": 677,
+    "terminal_train_ce": 4.4858,
+    "terminal_validation_ce": 4.4807
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.367020155512474,
+    "ordinary_logged_update_ms_mean": 3660.180625,
+    "ordinary_logged_update_samples": 64,
+    "tokens_per_second_preflight": 71850.80500000001
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_0p5tpp_plan.json",
+    "sha256": "d3701ab474c8a07b176202f0957dc862a9b6f4a858d7433e5b6b7d861ae035f8"
+  },
+  "provenance": {
+    "git_commit": "2879d100ee4415c73538c47cec21e7d55039f50f",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_cproj_errorfeedback_0p5tpp_20260803T124156Z_3263081.log",
+    "log_sha256": "d7d70ea08d449f648271f9ca74975a67268b57ba75fed98b2f2138b1d41c5b9b",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_cproj_errorfeedback_0p5tpp_20260803T124156Z_3263081.json",
+    "sha256": "2fd28915de1aaccf7d2c961a04dd116121bb815c37960493d19b2c5de65b3989",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_cproj_errorfeedback_0p5tpp_20260803T124156Z_3263081.json",
+    "status_sha256": "c50a5f19de686ad842917c11574318f5e6a41d68239c7a7479f5d1a45d00e04f"
+  },
+  "residual_diagnosis": {
+    "frobenius_ratio_vs_124m_cproj_error_feedback": 3.652055755464494,
+    "frobenius_ratio_vs_failed_350m_full_mlp": 0.8118809835858588,
+    "late_regression_after_step_340": true,
+    "rms_ratio_vs_124m_cproj_error_feedback": 2.739203180020693,
+    "rms_ratio_vs_failed_350m_full_mlp": 0.8119598504361174,
+    "interpretation": "Decay 1.0 produces a useful early correction but retains unresolved c_proj direction strongly enough that the advantage collapses after step 340 and reverses by terminal. Reduce temporal memory before changing chart capacity."
+  },
+  "run": {
+    "finished_at": "2026-08-03T21:27:01+08:00",
+    "host": "PRO6",
+    "run_id": "pro6_mai_v3_350m_cproj_errorfeedback_0p5tpp_20260803T124156Z_3263081",
+    "status": "clean",
+    "train_exit_code": 0
+  },
+  "watchdog": {
+    "callback_milestones_sent": [20, 50, 100],
+    "duplicate_terminal_callbacks": 0,
+    "keep_alive": false,
+    "service_removed_after_terminal_audit": true,
+    "terminal_signature": ["finished", 0, "2026-08-03T21:27:01+08:00"]
+  }
+}
