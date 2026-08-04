@@ -1,0 +1,87 @@
+{
+  "artifact_kind": "124m_mlp_cproj_fht_block_cayley_output_result",
+  "schema_version": "mai_124m_mlp_cproj_fht_block_cayley_output_result_v1",
+  "created_at": "2026-08-04",
+  "decision": "REJECT_FHT_BLOCK_CAYLEY_OUTPUT",
+  "passed": false,
+  "interpretation": "The fixed signed/permuted FHT-conjugated block-Cayley chart is stable and stays inside the shared trust radius, but it is less aligned with useful c_proj output transport than the existing Frobenius output32 control. It increases held-out activation-output residual energy by 4.08%, reduces held-out first-order CE descent, and loses every finite-step CE cell. Since no coordinate was trust-clipped, the failure is fixed-basis alignment rather than excessive angular scale. Do not train this family or relax its gate.",
+  "identity": {
+    "git_commit": "b948cab06ba759466228ef57a2cf930ebea6fa9c",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_fht_block_cayley_output.py",
+    "entrypoint_sha256": "a524f5e8246d055c35a5880200944179a04f4c39b33d6dd45ceb41e8af8b4545",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_fht_block_cayley_output_plan.json",
+    "plan_sha256": "9cf5556f3c63e9da4610189cd5d0148a49461b1a765483c91bff5a0a8aa55b25",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "source_config_sha256": "d399f817080de51cd378cf5952935a15f9915b99e2a5128f92e2daed66ef2720",
+    "resolved_config_sha256": "dfcf7bfc89a7fbe4c9125bef74aa546870e9a1cb6e31688244cbef0d4186a49c",
+    "provenance_sha256": "f822a5acfdf5631b28e27e3d5b568896f2dc1596e68b194c5079069a64fe3c86",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 31.698867559432983,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python examples/nanogpt/analyze_mlp_cproj_fht_block_cayley_output.py --plan examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_fht_block_cayley_output_plan.json --acquisition-result examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json --snapshot-dir <registered-scientific-snapshots> --probe-dir <registered-scientific-probes> --data-dir /home/pro6000-9980x/MappingNetworks/data/finewebedu_20b --output <registered-fht-block-cayley-output-dir> --device cuda"
+  },
+  "control": {
+    "name": "frobenius_output32",
+    "coordinates_per_layer": 147456,
+    "heldout_activation_output_residual_energy": 8.900497689306775,
+    "heldout_task_gradient_predicted_ce_decrease": 0.003565022037137948,
+    "update_energy": 0.009803250867829752,
+    "mean_finite_step_ce": 7.181512460112572
+  },
+  "candidate": {
+    "name": "fht_block32_cayley1",
+    "coordinates_per_layer": 147072,
+    "heldout_activation_output_residual_energy": 9.26353587494173,
+    "heldout_residual_ratio_to_control": 1.0407885264743248,
+    "heldout_task_gradient_predicted_ce_decrease": 0.003397713692127204,
+    "update_energy": 0.009638189557008355,
+    "update_energy_ratio_to_control": 0.9831625944243597,
+    "mean_finite_step_ce": 7.181550517678261,
+    "finite_step_wins": 0,
+    "finite_step_total": 8,
+    "holdout_wins": 0,
+    "holdout_total": 4,
+    "minimum_trust_scale": 1.0,
+    "maximum_raw_coordinate": 0.00021233249572105706,
+    "maximum_bounded_coordinate": 0.00021233249572105706,
+    "trust_radius_obeyed": true
+  },
+  "finite_step_candidate_minus_control_ce": {
+    "step0_fit": 0.00005245208740234375,
+    "step0_holdout": 0.000060558319091796875,
+    "step60_fit": 0.00004506111145019531,
+    "step60_holdout": 0.000049948692321777344,
+    "step120_fit": 0.000043511390686035156,
+    "step120_holdout": 0.000017642974853515625,
+    "step180_fit": 0.000010728836059570312,
+    "step180_holdout": 0.000024557113647460938
+  },
+  "gate": {
+    "all_coordinates_obey_trust_radius": true,
+    "coordinate_budget_no_larger_than_control": true,
+    "candidate_update_energy_at_most_1p10_control": true,
+    "heldout_activation_residual_at_most_0p95_control": false,
+    "heldout_task_descent_above_control_and_prior_best": false,
+    "all_4_holdout_ce_wins": false,
+    "at_least_7_of_8_ce_wins": false,
+    "mean_ce_no_worse_than_prior_best": false
+  },
+  "raw_outputs": {
+    "remote_result_sha256": "697e23becaf0e2dfda442736effb6e948a01bc275efece708f8cc31cda49b268",
+    "cells_sha256": "cf22fb6a14311cc1e68d7cad7d3f23339257a5b6544c79ef99f7f1a0dba49a26",
+    "chart_sha256": "cdf3c245a82c41093fc36b479d14f04bf5c0c401fc48d618fcbc37505a296873",
+    "finite_ce_sha256": "e9411c2fb4a75f50ff33fecc2ad51de86528eb84e973cdfbf90b58763601bf64",
+    "final_log_sha256": "d98587b38d4d02d93498176680799bb81d1ab6ef7f8b91c8188c81bf54ea9bcf",
+    "result_embedded_pre_final_log_sha256": "c839d92ac8523a77e87b6cf073e2e197ec9cd1eb8d8bdb1afa243171e05c508d"
+  },
+  "next_action": "Close the fixed-basis orthogonal output family. Preregister a genuinely non-orthogonal c_proj output chart only after checking it against the already-rejected 2x2 block-output metric and same-topology capacity branches. No training is authorized by this result."
+}
