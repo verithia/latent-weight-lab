@@ -1,0 +1,82 @@
+{
+  "artifact_kind": "124m_mlp_cproj_error_feedback_half_switch_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cproj_half_switch_mfu_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "CPROJ_HALF_SWITCH_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_halfswitch_0p5tpp.json",
+    "sha256": "9c112ab9816a6300f5798c933c8ba59aa456925f5fdd345e87697533f1e8f1c1"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_half_switch_0p5tpp_mfu_plan.json",
+    "sha256": "2228fece7de02707323062726b42f2bc818e19198cf83742ad2003942a4d23cd"
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_halfswitch_0p5tpp/performance_preflight.json",
+    "sha256": "1fdd1be025081ada4497dadddd950695bb050ff50f966a686a57689dd5632eaa",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_halfswitch_0p5tpp/performance_preflight.log",
+    "log_sha256": "83dfd167e1d23c4207523dcfe9de553882a90b378a58984ecc6659b7f59b87d3"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "7d017214681ad7bd0f105a9493ba8616017c7e33",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "train_exit_code": 0,
+    "parameter_updates_persisted": 0
+  },
+  "measurement": {
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "average_iter_ms": 1491.67625,
+    "tokens_per_second": 175739.01625,
+    "active_params_6n_estimate": 124475904,
+    "model_tflops": 131.25163749473663,
+    "empirical_bf16_peak_tflops": 414.5446051354527,
+    "mfu_fraction": 0.3166164409541648,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31748.09,
+    "timing_breakdown_ms": {
+      "prepare_ms": 3.83875,
+      "fwbw_ms": 1188.37875,
+      "flush_ms": 4.36125,
+      "grad_ms": 1.67875,
+      "opt_ms": 291.865,
+      "data_ms": 0.6275,
+      "other_ms": 0.92375,
+      "eval_ms": 0.0
+    }
+  },
+  "stability": {
+    "logged_loss_values": 13,
+    "finite_loss_values": 13,
+    "all_logged_losses_finite": true,
+    "native_matcher_output_validated": true
+  },
+  "schedule_execution_evidence": {
+    "scientific_switch_fraction": 0.5042016806722689,
+    "scratch_max_iters": 9,
+    "deterministic_scratch_switch_iter": 5,
+    "early_decay_updates": 5,
+    "late_decay_updates": 4,
+    "exact_boundary_and_optimizer_group_tests": "55 passed, 40 subtests passed on PRO6 before measurement",
+    "diagnostic_log_limitation": "Detailed Givens refresh diagnostics are emitted only for the initial reported refresh, so the late 0.5 phase is certified by the pinned deterministic schedule, production-group wiring test, and exact scratch horizon rather than a second diagnostic line."
+  },
+  "comparison": {
+    "constant_decay1_mfu_fraction": 0.316928745502483,
+    "relative_mfu_change": -0.0009854093475272219,
+    "interpretation": "The normalized carry switch adds no measurable throughput penalty; MFU differs by about -0.10 percent relative from the matched constant-carry preflight."
+  },
+  "decision": {
+    "one_124m_0p5tpp_scientific_training_plan_registration_authorized": true,
+    "scientific_training_authorized_without_separate_plan": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The exact registered path is finite, source-bound, native-validated, exercises both normalized schedule phases, and clears the 20 percent MFU floor by 11.66 percentage points."
+  }
+}

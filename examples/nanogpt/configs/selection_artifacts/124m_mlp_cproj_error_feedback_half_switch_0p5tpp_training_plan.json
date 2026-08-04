@@ -1,0 +1,111 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_half_switch_training_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_after_exact_mfu_pass_before_scientific_training",
+  "scientific_question": "Does the replay-selected halfway-bounded carry reduce the isolated c_proj loss increment from +0.035565 CE to at most +0.020 CE over the matched attention-only model at 124M/0.5TPP?",
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_halfswitch_0p5tpp.json",
+    "config_sha256": "9c112ab9816a6300f5798c933c8ba59aa456925f5fdd345e87697533f1e8f1c1",
+    "implementation_commit": "f11c020e669175906a56beba9a159f869259a627",
+    "decay_before": 1.0,
+    "decay_after": 0.5,
+    "switch_iter": 120,
+    "max_iters": 238,
+    "switch_fraction": 0.5042016806722689,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "cfc_structure": "dense control for causal isolation",
+    "forward_structure_changed": false,
+    "additional_trainable_parameters": 0,
+    "additional_dense_optimizer_state_bytes": 113246208
+  },
+  "controls": {
+    "attention_only_terminal_validation_ce": 5.4918,
+    "constant_decay1_cproj_terminal_validation_ce": 5.527365207672119,
+    "constant_decay1_cproj_minus_attention": 0.03556520767211957,
+    "strict_target_increment": 0.02,
+    "strict_target_validation_ce": 5.511799999999999
+  },
+  "parent_evidence": {
+    "trajectory_selection": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_carry_schedule_result.json",
+    "trajectory_selection_sha256": "51beef439a8bc9fb765357d617883ae017dbba55369c3441bd0e89b605cb2152",
+    "exact_mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_half_switch_0p5tpp_mfu_result.json",
+    "exact_mfu_result_sha256": "1a5b22780074a4fee90043c5dc6a871bc97e047fb05ff7264f650f04c68d6b52",
+    "mfu_fraction": 0.3166164409541648,
+    "minimum_mfu_fraction": 0.2
+  },
+  "identity": {
+    "source_hashes": {
+      "examples/nanogpt/model.py": "4f93fd50141c00858b9ff92e2149e29da04b40e52150111b9a77a29e20357e51",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "9532eabdf3538eca2c0774ab6f7e35cd05fd28a59c451cf9c41b64d0376cf0fc",
+      "examples/nanogpt/train.py": "1f81dc03a37b49fad8ef8348bbafffcde81a9af919420ba22b52b158d51764a5",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "fixed_evaluation_steps": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "training_sampling_protocol": "dedicated_cpu_generator_train_data_seed_v1",
+    "resume_protocol": "atomic_latest_checkpoint_v2 with full RNG, folded weights, Muon momentum, compression residual, and deterministic schedule phase"
+  },
+  "decision_rule": {
+    "primary_metric": "terminal fixed-window validation cross entropy at update 238",
+    "strict_close": "finite complete terminal validation CE <= 5.5118",
+    "partial_improvement": "5.5118 < terminal validation CE < 5.527365207672119",
+    "reject": "terminal validation CE >= 5.527365207672119, nonfinite path, incomplete terminal evaluation, or identity mismatch",
+    "threshold_changes_after_measurement": false,
+    "on_strict_close": "keep the half-switch as the selected c_proj temporal rule and separately register full-MLP composition; do not automatically scale",
+    "on_partial_improvement": "retain as evidence but do not claim the +0.02 c_proj margin is closed; inspect phasewise losses and terminal residual before another registered schedule",
+    "on_reject": "retain constant decay 1.0 as the 124M c_proj control and reject the half-switch for production"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "workspace_root": "/home/pro6000-9980x/MappingNetworks",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "run_name": "pro6_mai_v3_124m_cproj_errorfeedback_halfswitch_0p5tpp",
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "MAPPING_NETWORKS_NATIVE_CACHE=/mnt/ssd-data/orj/MappingNetworks/outputs/native_cache",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_halfswitch_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_cproj_errorfeedback_halfswitch_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "polling": "direct foreground process plus caller-side log/status polls through terminal exit",
+    "watchdog": false,
+    "callback": false,
+    "heartbeat": false,
+    "queue_worker": false,
+    "expected_wall_minutes_from_preflight": 8
+  },
+  "required_run_metadata": {
+    "git_commit": true,
+    "entrypoint": true,
+    "literal_command": true,
+    "config_archive_and_sha256": true,
+    "dataset_manifest_and_sha256": true,
+    "mfu_certificate_and_sha256": true,
+    "status_and_log": true,
+    "terminal_checkpoint_and_sidecar": true
+  },
+  "authorization": {
+    "exactly_one_124m_scientific_run": true,
+    "automatic_rerun": false,
+    "full_mlp_composition": false,
+    "larger_model_or_token_rung": false,
+    "additional_structure": false
+  }
+}
