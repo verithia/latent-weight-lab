@@ -47,6 +47,29 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertEqual(probe["optimizer_probe_steps"], [0, 15, 30])
         self.assertEqual(probe["perf_warmup_iters"], 0)
 
+    def test_attention_atlas_is_compacted_and_final_stage_is_timed(self) -> None:
+        source = {
+            "registered_resume_determinism_required": True,
+            "save_checkpoint": True,
+            "checkpoint_history": False,
+            "lr_decay_iters": 2373,
+            "block_fht_attn_cayley_atlas_start_steps": [
+                0,
+                594,
+                1188,
+                1782,
+            ],
+        }
+        probe = make_preflight_config(source, Path("/tmp/probe"), 2, 3)
+        self.assertEqual(probe["block_fht_attn_cayley_atlas_start_steps"], [0, 1, 2, 3])
+        self.assertEqual(probe["perf_warmup_iters"], 4)
+        self.assertEqual(probe["max_iters"], 7)
+        self.assertEqual(probe["eval_interval"], 107)
+        self.assertEqual(
+            source["block_fht_attn_cayley_atlas_start_steps"],
+            [0, 594, 1188, 1782],
+        )
+
     def test_snapshot_elapsed_parser(self) -> None:
         text = "\n".join(
             [

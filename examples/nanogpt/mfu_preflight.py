@@ -130,6 +130,16 @@ def make_preflight_config(
     include_diagnostic_io: bool = False,
 ) -> dict[str, Any]:
     config = dict(source)
+    atlas_start_steps = tuple(
+        int(step)
+        for step in source.get(
+            "block_fht_attn_cayley_atlas_start_steps", ()
+        )
+    )
+    # The scientific boundaries are far outside a short scratch horizon. Use
+    # one compact warmup step per registered chart, then time only the final
+    # (worst-cost) cumulative atlas. The scientific config itself is immutable.
+    effective_warmups = max(warmups, len(atlas_start_steps))
     # A preflight is never a scientific result.  Keep the real train path but
     # avoid checkpoint/evaluation overhead and any deterministic-run policy
     # intended for registered results.
@@ -141,14 +151,21 @@ def make_preflight_config(
     config["registered_resume_determinism_required"] = False
     config["out_dir"] = str(temporary_out)
     config["init_from"] = "scratch"
-    config["max_iters"] = warmups + timed
-    config["lr_decay_iters"] = max(warmups + timed, int(config.get("lr_decay_iters", 1)))
-    config["eval_interval"] = warmups + timed + 100
+    config["max_iters"] = effective_warmups + timed
+    config["lr_decay_iters"] = max(
+        effective_warmups + timed,
+        int(config.get("lr_decay_iters", 1)),
+    )
+    config["eval_interval"] = effective_warmups + timed + 100
     config["eval_iters"] = 1
     config["fixed_eval_indices"] = False
     config["eval_seed"] = None
     config["save_checkpoint"] = False
     config["checkpoint_history"] = False
+    if atlas_start_steps:
+        config["block_fht_attn_cayley_atlas_start_steps"] = list(
+            range(len(atlas_start_steps))
+        )
     if not include_diagnostic_io:
         # Parameter-trajectory I/O is normally a scientific sampling side
         # effect, not part of the steady-state compute gate.  A diagnostic can
@@ -165,7 +182,9 @@ def make_preflight_config(
     # Strict diagnostic-I/O accounting needs every update row, including the
     # update-0 optimizer probe. Evaluation time is emitted separately and
     # subtracted by the certificate calculation below.
-    config["perf_warmup_iters"] = 0 if include_diagnostic_io else warmups
+    config["perf_warmup_iters"] = (
+        0 if include_diagnostic_io else effective_warmups
+    )
     config["perf_log_interval"] = 1
     config["log_interval"] = 1
     return config
@@ -223,6 +242,16 @@ def main() -> None:
         raise RuntimeError("MFU preflight requires CUDA")
 
     config_sha256 = hashlib.sha256(config_path.read_bytes()).hexdigest()
+    atlas_start_steps = tuple(
+        int(step)
+        for step in source.get(
+            "block_fht_attn_cayley_atlas_start_steps", ()
+        )
+    )
+    effective_warmup_updates = max(
+        args.warmup_updates,
+        len(atlas_start_steps),
+    )
     device_name = torch.cuda.get_device_name(0)
     temporary_root = Path(tempfile.mkdtemp(prefix="mfu-preflight-"))
     output = args.output.resolve()
@@ -239,9 +268,15 @@ def main() -> None:
         },
         "hardware": {"cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"), "device": device_name},
         "preflight": {
-            "warmup_updates": args.warmup_updates,
+            "requested_warmup_updates": args.warmup_updates,
+            "warmup_updates": effective_warmup_updates,
             "timed_updates": args.timed_updates,
             "include_diagnostic_io": args.include_diagnostic_io,
+            "scientific_atlas_start_steps": list(atlas_start_steps),
+            "scratch_atlas_start_steps": list(range(len(atlas_start_steps))),
+            "timed_atlas_stage": (
+                len(atlas_start_steps) - 1 if atlas_start_steps else None
+            ),
         },
         "passed": False,
     }
@@ -296,7 +331,7 @@ def main() -> None:
         base_iter_ms = sum(row["iter_ms"] for row in steady) / len(steady)
         snapshot_seconds = parse_snapshot_elapsed_seconds(process.stdout)
         if args.include_diagnostic_io:
-            expected_rows = args.warmup_updates + args.timed_updates
+            expected_rows = effective_warmup_updates + args.timed_updates
             if len(rows) < expected_rows:
                 raise RuntimeError(
                     "I/O-inclusive preflight emitted only "
