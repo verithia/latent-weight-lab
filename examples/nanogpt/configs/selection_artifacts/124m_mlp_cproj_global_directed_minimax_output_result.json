@@ -1,0 +1,69 @@
+{
+  "artifact_kind": "124m_mlp_cproj_global_directed_minimax_output_result",
+  "schema_version": "mai_124m_mlp_cproj_global_directed_minimax_output_result_v1",
+  "created_at": "2026-08-04",
+  "decision": "REJECT_GLOBAL_DIRECTED16_MINIMAX",
+  "passed": false,
+  "interpretation": "Per-edge minimax task agreement slightly improves mean CE over averaged consensus and preserves all eight wins versus output32, but it does not generalize better than averaged consensus on the four holdout cells and remains above the immutable prior-best mean. Only 44.87% of directed edges predict descent under both gradients, yet the selected supports still overlap the averaged arm by 73.51%; the remaining mean loss is not fixed by another consensus scoring rule. Close the global directed16 selector branch without training.",
+  "identity": {
+    "git_commit": "0d93aa608863c7c10a74ea938a1d2ae1fd4901f4",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_global_directed_minimax_output.py",
+    "entrypoint_sha256": "562971ff5d6a833e9e5ba8ce88d6bdc6c1469bc52e4c9b7050da76136ec8230f",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_global_directed_minimax_output_plan.json",
+    "plan_sha256": "00385d62a3b540030ae8c6b214b111ef82f02ebf9cbe0af1e8ecad2b9e3e85e8",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 26.002837419509888,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0
+  },
+  "control": {
+    "name": "frobenius_output32",
+    "coordinates_per_layer": 147456,
+    "heldout_activation_output_residual_energy": 8.900497689306775,
+    "heldout_task_gradient_predicted_ce_decrease": 0.003565022037137948,
+    "mean_finite_step_ce": 7.181512475013733
+  },
+  "average_consensus": {
+    "heldout_activation_output_residual_energy": 6.927151486359466,
+    "heldout_task_gradient_predicted_ce_decrease": 0.0046210601318823165,
+    "mean_finite_step_ce": 7.180932566523552
+  },
+  "minimax_consensus": {
+    "coordinates_per_layer": 147456,
+    "heldout_activation_output_residual_energy": 6.99321102483981,
+    "heldout_residual_ratio_to_control": 0.7857101107100545,
+    "heldout_task_gradient_predicted_ce_decrease": 0.004576168019168053,
+    "heldout_task_ratio_to_control": 1.2836296582452174,
+    "finite_step_wins_vs_control": 8,
+    "holdout_wins_vs_control": 4,
+    "holdout_wins_vs_average": 1,
+    "mean_finite_step_ce": 7.180864229798317,
+    "mean_ce_improvement_vs_control": 0.0006482452154159546,
+    "mean_ce_improvement_vs_average": 0.00006833672523498535,
+    "miss_to_prior_best_mean_ce": 0.0002072155475616455,
+    "minimum_trust_scale": 0.15148540570642913,
+    "minimum_singular_value_i_plus_b": 0.9958707981968539
+  },
+  "selector_diagnostics": {
+    "mean_positive_task_agreement_fraction": 0.44874912053346633,
+    "mean_support_overlap_with_average": 0.7351114908854167,
+    "mean_train_fit_gradient_cosine": 0.3496369382830765
+  },
+  "raw_outputs": {
+    "remote_result_sha256": "07ef990e0d3a22a8685527deb6793009fe6bd4b4ddf1ff04c880f27459d79f52",
+    "cells_sha256": "715853d3f961aa2cf9320b5f2162b001651eb787765c47941fec7e4db92cc4a4",
+    "chart_sha256": "a866341b8dd91f31efec31f69a2b44f256bcebfbdee874c375f4433930be6dbe",
+    "finite_ce_sha256": "80f04f2ea5bda1a95f61a7bdf9b5741410a789fcc532ef247095f1ea2988e140",
+    "final_log_sha256": "333cf37faf2e75b4cccfed02df357ace65332e0dd8aa37a2a357d5eef6c1ae85"
+  },
+  "next_action": "Close global directed16 support selection. If continuing c_proj output work, test a fixed-coordinate hybrid that composes the best orthogonal task-selected transport with the non-orthogonal global directed action; do not add another task-score or support-size variant."
+}
