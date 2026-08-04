@@ -1,0 +1,142 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_global_directed_affine_output_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "Can an equal-budget, globally connected, directed non-orthogonal c_proj output map preserve the activation-affine gain across held-out task windows, and does train/fit task-gradient consensus improve support transfer?",
+  "identity": {
+    "block_affine_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_fht_block_affine_output_result.json",
+    "block_affine_result_sha256": "2281fd7c6bbcc98b95f30e9cdc080aadd32772b435000b6c3fa085461d679c4e",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementation"
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/global_directed_affine_output",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "shared_hidden_chart": {
+      "parent_stages": 64,
+      "residual_stages": 24,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinates_per_layer": 135168,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in every arm"
+    },
+    "control": {
+      "name": "frobenius_output32",
+      "output_stages": 32,
+      "output_coordinates_per_layer": 12288,
+      "total_coordinates_per_layer": 147456
+    },
+    "directed_map": {
+      "basis": "current post-hidden c_proj output rows; no FHT, learned basis, or persistent axes",
+      "source_channels": 768,
+      "target_channels": 768,
+      "incoming_coordinates_per_target": 16,
+      "output_coordinates_per_layer": 12288,
+      "total_coordinates_per_layer": 147456,
+      "diagonal_edges_allowed": true,
+      "fit_design": "A=H_fit W_after_hidden^T",
+      "fit_target": "T=H_fit remaining_update^T",
+      "single_edge_coefficient": "beta_ij=(A_i^T T_j)/(A_i^T A_i + 1e-6 mean_i(A_i^T A_i))",
+      "activation_residual_score": "2 beta_ij A_i^T T_j - beta_ij^2 A_i^T A_i",
+      "joint_refit": "For each target j, jointly ridge-solve its selected 16 A columns against T_j in float64 using ridge 1e-6 times mean selected diagonal Gram.",
+      "application": "Build sparse B with selected directed coefficients and apply X_new=X+X B exactly."
+    },
+    "candidates": {
+      "global_directed16_activation": {
+        "support_score": "activation_residual_score",
+        "role": "structure-only candidate"
+      },
+      "global_directed16_activation_task_consensus": {
+        "recorded_train_gradient": "exact probe gradient_after_clip",
+        "fit_validation_gradient": "gradient on the fixed fit window",
+        "consensus": "normalize each full c_proj gradient independently to unit Frobenius norm, then average with equal weight",
+        "single_edge_task_score": "negative consensus-gradient inner product with the single-edge weight update using beta_ij",
+        "support_score": "activation_residual_score and consensus task score are each divided by their global RMS over all directed edges, then added with unit weight",
+        "holdout_use": "none"
+      }
+    },
+    "trust_constraint": {
+      "definition": "For each layer-phase cell, multiply all sparse B coefficients by min(1, sqrt(output32_control_output_delta_energy/raw_candidate_output_delta_energy)).",
+      "invertibility_check": "minimum singular value of exact full I+B must be at least 0.95",
+      "post_hoc_tuning": false
+    },
+    "diagnostics": [
+      "fit/holdout residual-stream energy and task-gradient predicted CE descent",
+      "finite-step CE for every phase/window",
+      "train-versus-fit gradient cosine",
+      "support overlap between activation-only and consensus arms",
+      "skew, symmetric-off-diagonal, and diagonal coefficient energy",
+      "trust scale and minimum singular value of I+B"
+    ],
+    "prior_comparators": {
+      "best_prior_mean_finite_step_ce": 7.180657014250755,
+      "best_prior_heldout_predicted_ce_decrease": 0.004353292856055148
+    },
+    "prohibited": [
+      "fit or selection on holdout tokens",
+      "learned or persisted basis",
+      "LoRA adapter",
+      "dense residual or dense optimizer update",
+      "more than 16 incoming coordinates per target",
+      "post-hoc score weights, ridge, trust, seed, or support-size tuning"
+    ]
+  },
+  "decision_rule": {
+    "primary_control": "frobenius_output32",
+    "candidate_common_pass_all": [
+      "all outputs, support scores, ridge solves, exact maps, and metrics are finite",
+      "candidate uses exactly 147456 total coordinates per selected layer, equal to control",
+      "candidate exact output-delta energy is no greater than control in every layer-phase cell",
+      "minimum singular value of every exact I+B is at least 0.95",
+      "aggregate held-out residual-stream energy is no more than 0.95 times control",
+      "aggregate held-out predicted CE descent is positive, at least 1.15 times control, and at least 0.004353292856055148",
+      "candidate beats control on all four held-out finite-step CE comparisons and at least seven of all eight comparisons",
+      "mean candidate finite-step CE is at least 0.0005 lower than control and no greater than 7.180657014250755"
+    ],
+    "consensus_candidate_extra_pass_all": [
+      "consensus candidate beats activation-only on at least three of four held-out finite-step CE comparisons",
+      "consensus candidate mean finite-step CE is lower than activation-only"
+    ],
+    "selection_order": [
+      "select global_directed16_activation if it passes all common gates",
+      "otherwise select global_directed16_activation_task_consensus only if it passes all common and consensus-extra gates",
+      "otherwise reject this global directed16 family"
+    ],
+    "pass_action": "preregister only the selected production map, add exact-resume/correctness tests, and require a directly polled at-least-20-percent MFU gate before one 124M causal run",
+    "fail_action": "reject global directed16 without causal training; use support overlap, non-orthogonal energy, and phase transfer to decide whether to test a low-dimensional state-conditioned output metric or close sparse output maps"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "production_implementation": false,
+    "performance_preflight": false,
+    "language_model_training": false
+  }
+}
