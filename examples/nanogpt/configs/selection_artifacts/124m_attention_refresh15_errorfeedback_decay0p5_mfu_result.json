@@ -1,0 +1,49 @@
+{
+  "classification": "PASS_EXACT_CONFIG_MFU_WITH_ERROR_FEEDBACK_AND_REFRESH15_ACTIVE",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp_lr24e4.json",
+    "sha256": "6b50a00bc77201eabb47e534a82317a5e29fdb87f6bd1fffd5346c8e9ba91b5d"
+  },
+  "decision": {
+    "minimum_mfu_fraction": 0.2,
+    "passed": true,
+    "scientific_run_authorized_count": 1,
+    "watchdog_or_callback_authorized": false
+  },
+  "execution": {
+    "git_commit": "8e838d94ed67a57419dc2728a247fb45c33bc799",
+    "host": "PRO6",
+    "preflight_certificate_sha256": "4edc88dccf3731227cb463772d8c8bcf068a966ecc906639f60a5ee244b61324",
+    "preflight_log_sha256": "4b4bb2c29baa2722799d1e5f3804a2e03f2177766c61c617f47d629bc4ee5654"
+  },
+  "feedback_validation": {
+    "all_rows_error_feedback_enabled": true,
+    "decay_maximum": 0.5,
+    "decay_minimum": 0.5,
+    "feedback_input_fro_maximum": 0.09188715368509293,
+    "feedback_input_fro_minimum": 0.0,
+    "feedback_output_nominal_steps_maximum": 1.3915280103683472,
+    "feedback_output_nominal_steps_minimum": 0.21234413981437683,
+    "refresh_rows_at_step_0": 36,
+    "refresh_rows_at_step_15": 36,
+    "total_rows": 72
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "base_timed_iter_ms": 1631.03375,
+    "empirical_bf16_gemm_peak_tflops": 416.950212374785,
+    "mfu_fraction": 0.28803957077815373,
+    "model_tflops": 120.09816020829312,
+    "peak_mib": 31996.27,
+    "timed_updates": 16,
+    "tokens_per_second": 160805.09875,
+    "warmup_updates": 1
+  },
+  "recorded_at": "2026-08-05",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 21,
+    "logged_loss_values": 21
+  },
+  "schema_version": "mai_124m_attention_refresh15_errorfeedback_mfu_result_v1"
+}
