@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_attention_capacity_radial_closure_plan_v1",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Can the selected targeted-bilateral full-Cayley-LR attention chart close practical parity by adding the two independently diagnosed missing freedoms: terminal QK orbit capacity and radial/singular-value freedom?",
+  "parent": {
+    "validation_ce": 3.6278,
+    "dense_validation_ce": 3.5401,
+    "dense_token_equivalent_penalty": 1.416,
+    "qk_pair_rank": 32,
+    "v_pair_rank": 16,
+    "cproj_pair_rank": 8,
+    "targeted_bilateral_targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v"
+    ],
+    "cayley_effective_learning_rate": 0.0024
+  },
+  "diagnosis": {
+    "qk_capacity": "The terminal dense oracle reports pair rank 32 at 88.8% of the selected full QK orbit and identifies pair rank 64 as the first allocation above 90%.",
+    "radial_capacity": "Cayley coordinates are exactly orthogonal and cannot change singular values; per-output-channel gain is the smallest already-tested non-LoRA radial freedom.",
+    "held_fixed": "V pair rank 16 and c_proj pair rank 8 already recover approximately 90% of their selected full orbits; their ranks are not swept."
+  },
+  "factorial": [
+    {
+      "slot": "qk64",
+      "qk_pair_rank": 64,
+      "output_gain": false
+    },
+    {
+      "slot": "outputgain",
+      "qk_pair_rank": 32,
+      "output_gain": true
+    },
+    {
+      "slot": "qk64_outputgain",
+      "qk_pair_rank": 64,
+      "output_gain": true
+    }
+  ],
+  "execution": {
+    "host": "Y400",
+    "rung": "124M/5TPP",
+    "direct_poll": true,
+    "watchdog": false,
+    "exact_config_mfu_min_fraction": 0.2,
+    "fixed_eval_steps": [594, 1188, 1782, 2373],
+    "fixed_eval_iters": 400,
+    "max_parallel_runs": 3
+  },
+  "selection": {
+    "primary": "lowest common-loss horizontal dense-compute ratio over the four matched fixed evaluations",
+    "secondary": "terminal held-out validation CE",
+    "development_gate_ce": 0.02,
+    "candidate_parity_ce": 0.01,
+    "candidate_parity_max_dense_compute_penalty": 1.1,
+    "instability": "reject NaN, Inf, divergence, failed terminal evaluation, or MFU below 20%"
+  },
+  "prohibitions": [
+    "no learned dense basis",
+    "no additive residual or LoRA-like branch",
+    "no global-FHT rerun",
+    "no blind learning-rate sweep",
+    "no MLP replacement in this factorial"
+  ]
+}
