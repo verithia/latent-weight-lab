@@ -136,6 +136,9 @@ def make_preflight_config(
             "block_fht_attn_cayley_atlas_start_steps", ()
         )
     )
+    task_frame_start_iter = int(
+        source.get("block_fht_mlp_task_frame_start_iter", 0)
+    )
     # The scientific boundaries are far outside a short scratch horizon. Use
     # one compact warmup step per registered chart, then time only the final
     # (worst-cost) cumulative atlas. The scientific config itself is immutable.
@@ -166,6 +169,11 @@ def make_preflight_config(
         config["block_fht_attn_cayley_atlas_start_steps"] = list(
             range(len(atlas_start_steps))
         )
+    if task_frame_start_iter > 0:
+        # Time the active scientific path, not the cheaper held-identity
+        # prefix. Update 0 remains the warmup; every timed update executes all
+        # three frame VJPs and AdamW coordinate updates.
+        config["block_fht_mlp_task_frame_start_iter"] = effective_warmups
     if not include_diagnostic_io:
         # Parameter-trajectory I/O is normally a scientific sampling side
         # effect, not part of the steady-state compute gate.  A diagnostic can
@@ -277,6 +285,13 @@ def main() -> None:
             "timed_atlas_stage": (
                 len(atlas_start_steps) - 1 if atlas_start_steps else None
             ),
+            "scientific_task_frame_start_iter": task_frame_start_iter,
+            "scratch_task_frame_start_iter": (
+                effective_warmup_updates
+                if task_frame_start_iter > 0
+                else 0
+            ),
+            "timed_task_frame_active": bool(task_frame_start_iter > 0),
         },
         "passed": False,
     }

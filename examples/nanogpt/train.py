@@ -904,6 +904,41 @@ def schedule_mlp_cproj_chart_gradients(
     return held_chart, frozen_base
 
 
+def is_mlp_task_frame_parameter(name: str) -> bool:
+    """Identify the three fixed-basis MLP task-frame coordinate groups."""
+    return any(
+        token in name
+        for token in (
+            "pregelu_block_rotation.coordinates",
+            "hidden_block_rotation.coordinates",
+            "output_block_rotation.coordinates",
+        )
+    )
+
+
+def schedule_mlp_task_frame_gradients(
+    model: GPT,
+    *,
+    iter_num: int,
+    start_iter: int,
+) -> int:
+    """Hold every MLP task frame at identity before ``start_iter``.
+
+    Clearing gradients, rather than changing ``requires_grad`` or optimizer
+    membership, preserves the registered optimizer/checkpoint identity. AdamW
+    skips parameters with ``None`` gradients, so zero coordinates acquire no
+    optimizer state and remain bitwise unchanged until the boundary.
+    """
+    if iter_num >= start_iter:
+        return 0
+    held = 0
+    for name, parameter in model.named_parameters():
+        if is_mlp_task_frame_parameter(name):
+            parameter.grad = None
+            held += 1
+    return held
+
+
 def latent_rms_hinge_loss(model: GPT, target: float) -> torch.Tensor:
     losses = []
     for latent in block_fht_latents(model):
@@ -1366,6 +1401,15 @@ def parse_args() -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--block-fht-mlp-task-frame-start-iter",
+        type=int,
+        default=0,
+        help=(
+            "hold pre-GELU, hidden-side, and residual-output fixed-basis "
+            "frame gradients until this iteration"
+        ),
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-chart-start-iter",
         type=int,
         default=0,
@@ -1571,6 +1615,15 @@ def parse_args() -> argparse.Namespace:
     if namespace.block_fht_mlp_cproj_chart_start_iter < 0:
         raise ValueError(
             "--block-fht-mlp-cproj-chart-start-iter must be >= 0"
+        )
+    if (
+        namespace.block_fht_mlp_task_frame_start_iter < 0
+        or namespace.block_fht_mlp_task_frame_start_iter
+        >= namespace.max_iters
+    ):
+        raise ValueError(
+            "--block-fht-mlp-task-frame-start-iter must be >= 0 and "
+            "less than max_iters"
         )
     if namespace.mlp_cproj_teacher_lambda < 0.0:
         raise ValueError("--mlp-cproj-teacher-lambda must be >= 0")
@@ -2677,6 +2730,11 @@ def main() -> None:
                 ),
             )
         )
+        held_task_frame_parameters = schedule_mlp_task_frame_gradients(
+            raw_model,
+            iter_num=iter_num,
+            start_iter=args.block_fht_mlp_task_frame_start_iter,
+        )
         if (
             frozen_hidden_chart_parameters
             and iter_num == args.block_fht_mlp_hidden_chart_stop_iter
@@ -2695,6 +2753,21 @@ def main() -> None:
                 f"iter={iter_num} held_chart_parameters="
                 f"{held_cproj_chart_parameters} frozen_base_parameters="
                 f"{frozen_cproj_base_parameters}",
+                flush=True,
+            )
+        if (
+            args.block_fht_mlp_task_frame_start_iter > 0
+            and iter_num == args.block_fht_mlp_task_frame_start_iter
+        ):
+            active_task_frame_parameters = sum(
+                is_mlp_task_frame_parameter(name)
+                for name, _parameter in raw_model.named_parameters()
+            )
+            print(
+                "started delayed MLP task frame at "
+                f"iter={iter_num} held_parameters="
+                f"{held_task_frame_parameters} active_parameters="
+                f"{active_task_frame_parameters}",
                 flush=True,
             )
         section_start = perf_now() if args.perf_profile else 0.0

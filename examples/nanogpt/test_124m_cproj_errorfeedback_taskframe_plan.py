@@ -3,13 +3,16 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import tempfile
 from pathlib import Path
 from typing import Any
 
 import torch
 
 from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.mfu_preflight import make_preflight_config
 from examples.nanogpt.muon_matched_givens import MuonMatchedGivensLinear
+from examples.nanogpt.train import schedule_mlp_task_frame_gradients
 
 
 REPO = Path(__file__).resolve().parents[2]
@@ -131,13 +134,22 @@ def train_step(
     batch: tuple[torch.Tensor, torch.Tensor],
     *,
     verify_routes: bool = False,
-) -> None:
+    iter_num: int | None = None,
+    task_frame_start_iter: int = 0,
+) -> int:
     optimizer.zero_grad(set_to_none=True)
     model.prepare_block_fht_cache(dtype=torch.float32)
     _, loss = model(*batch)
     assert loss is not None and torch.isfinite(loss)
     loss.backward()
     model.flush_block_fht_cache()
+    held = 0
+    if iter_num is not None:
+        held = schedule_mlp_task_frame_gradients(
+            model,
+            iter_num=iter_num,
+            start_iter=task_frame_start_iter,
+        )
     mlp = model.transformer.h[0].mlp
     assert isinstance(mlp.c_proj, MuonMatchedGivensLinear)
     if verify_routes:
@@ -148,7 +160,11 @@ def train_step(
         assert mlp.c_proj.weight.grad is not None
         assert torch.isfinite(mlp.c_proj.weight.grad).all()
         assert torch.count_nonzero(mlp.c_proj.weight.grad) > 0
+        assert mlp.c_fc.weight.grad is not None
+        assert torch.isfinite(mlp.c_fc.weight.grad).all()
+        assert torch.count_nonzero(mlp.c_fc.weight.grad) > 0
     optimizer.step()
+    return held
 
 
 def assert_nested_equal(left: Any, right: Any) -> None:
@@ -317,3 +333,89 @@ def test_terminal_result_rejects_directionally_misaligned_transfer() -> None:
         "residual_output_global_cosine",
     ):
         assert abs(result["direction_diagnosis"][field]) < 0.05
+
+
+def test_delayed_boundary_holds_all_frames_then_resumes_exactly() -> None:
+    torch.manual_seed(20260892)
+    template = make_tiny_model()
+    initial_model_state = copy.deepcopy(template.state_dict())
+
+    uninterrupted = make_tiny_model()
+    uninterrupted.load_state_dict(copy.deepcopy(initial_model_state))
+    uninterrupted_optimizer = make_optimizer(uninterrupted)
+    uninterrupted_generator = torch.Generator().manual_seed(20260893)
+    held = train_step(
+        uninterrupted,
+        uninterrupted_optimizer,
+        random_batch(uninterrupted_generator),
+        iter_num=119,
+        task_frame_start_iter=120,
+    )
+    assert held == 3
+    assert all(
+        torch.count_nonzero(parameter) == 0
+        for parameter in frame_coordinates(uninterrupted)
+    )
+    assert all(
+        parameter not in suboptimizer.state
+        for suboptimizer in uninterrupted_optimizer.optimizers
+        for parameter in frame_coordinates(uninterrupted)
+    )
+    checkpoint_model = copy.deepcopy(uninterrupted.state_dict())
+    checkpoint_optimizer = copy.deepcopy(uninterrupted_optimizer.state_dict())
+    checkpoint_data_rng = uninterrupted_generator.get_state().clone()
+    checkpoint_torch_rng = torch.get_rng_state().clone()
+
+    train_step(
+        uninterrupted,
+        uninterrupted_optimizer,
+        random_batch(uninterrupted_generator),
+        verify_routes=True,
+        iter_num=120,
+        task_frame_start_iter=120,
+    )
+    assert all(
+        torch.count_nonzero(parameter) > 0
+        for parameter in frame_coordinates(uninterrupted)
+    )
+
+    resumed = make_tiny_model()
+    resumed.load_state_dict(checkpoint_model)
+    resumed_optimizer = make_optimizer(resumed)
+    resumed_optimizer.load_state_dict(checkpoint_optimizer)
+    resumed_generator = torch.Generator()
+    resumed_generator.set_state(checkpoint_data_rng)
+    torch.set_rng_state(checkpoint_torch_rng)
+    train_step(
+        resumed,
+        resumed_optimizer,
+        random_batch(resumed_generator),
+        verify_routes=True,
+        iter_num=120,
+        task_frame_start_iter=120,
+    )
+
+    assert_nested_equal(uninterrupted.state_dict(), resumed.state_dict())
+    assert_nested_equal(
+        uninterrupted_optimizer.state_dict(),
+        resumed_optimizer.state_dict(),
+    )
+    assert torch.equal(
+        uninterrupted_generator.get_state(),
+        resumed_generator.get_state(),
+    )
+
+
+def test_mfu_preflight_moves_delayed_boundary_before_timed_updates() -> None:
+    source = load(CONFIG_PATH)
+    source["block_fht_mlp_task_frame_start_iter"] = 120
+    with tempfile.TemporaryDirectory() as raw:
+        preflight = make_preflight_config(
+            source,
+            Path(raw),
+            warmups=1,
+            timed=8,
+        )
+    assert preflight["block_fht_mlp_task_frame_start_iter"] == 1
+    assert preflight["perf_warmup_iters"] == 1
+    assert preflight["max_iters"] == 9
