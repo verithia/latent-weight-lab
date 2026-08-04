@@ -1,0 +1,64 @@
+{
+  "decision": {
+    "classification": "REJECT_FHT_BLOCK_SKEW_ORBIT",
+    "selected_stages": null
+  },
+  "execution": {
+    "device": "PRO6 GPU0",
+    "elapsed_seconds": 13.528486013412476,
+    "mode": "direct foreground zero-update oracle; no watchdog or callbacks",
+    "source_commit": "87ebbee13384a0e337ca2e68423b0a7e3b62f239"
+  },
+  "identity": {
+    "cells_sha256": "cafaadbfd02ed89013969523107c8371791aa3fad5ab723d80797123b147fc89",
+    "plan_sha256": "c7f38484beb95526cb2a27a985ecdd7d2f96d1168a44e8e09e8eb25f2aa7ff38",
+    "raw_result_sha256": "05eb2ce94e93458e05a763872fb01689983cc7d4bb576332b9b6d7830da02ae7",
+    "replay_run_identity_sha256": "dcd0517abee1788a554aee27d1cc02ded292ffe3e824deccad0bc77e56aae871",
+    "source_sha256": "52cf3a5fed44616fd9c4c8b0717ea80888ed47a545f6908f770019d57d762883"
+  },
+  "interpretation": [
+    "Two stages recover 6.7576 percent of dense-Muon direction energy with 6.6399 percent nominal coordinates: 1.0177x enrichment.",
+    "Four stages recover 13.4686 percent with 13.2798 percent nominal coordinates: 1.0142x enrichment.",
+    "Phase-chord enrichment is below random share at 0.9723x and 0.9713x.",
+    "Projection orthogonality and normal residuals pass, so the null result is not a solver failure.",
+    "Fixed FHT connectivity plus learned block-skew rotations buys only proportional ambient coverage and does not repair attention direction alignment. No training run is authorized."
+  ],
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_attention_fht_block_skew_gate_result_v1",
+  "stage_results": {
+    "2": {
+      "dense_muon_direction": {
+        "coordinate_fraction": 0.0663988003976798,
+        "energy_recovery": 0.06757641209803715,
+        "normalized_enrichment": 1.017735436
+      },
+      "phase_chord": {
+        "coordinate_fraction": 0.0674437459537732,
+        "energy_recovery": 0.0655761393546491,
+        "normalized_enrichment": 0.972308676
+      },
+      "target_recovery": {
+        "cproj": 0.04295541772447559,
+        "qk": 0.059960904,
+        "v": 0.082274002
+      }
+    },
+    "4": {
+      "dense_muon_direction": {
+        "coordinate_fraction": 0.1327976007953596,
+        "energy_recovery": 0.13468629509819038,
+        "normalized_enrichment": 1.014222353
+      },
+      "phase_chord": {
+        "coordinate_fraction": 0.1348874919075464,
+        "energy_recovery": 0.13102253463070557,
+        "normalized_enrichment": 0.971346807
+      },
+      "target_recovery": {
+        "cproj": 0.08533718355332014,
+        "qk": 0.119792516,
+        "v": 0.16394164
+      }
+    }
+  }
+}

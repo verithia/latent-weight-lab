@@ -1,0 +1,59 @@
+{
+  "authorization": {
+    "callbacks": false,
+    "candidate_training": "at most one 124M/0.5-TPP run after the oracle and exact-config MFU gates pass",
+    "watchdog": false,
+    "zero_update_oracle": true
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "promote_at_most_one": true,
+    "selection": "among passing candidates, maximize applied-direction recovery minus nominal coordinate fraction; ties prefer fewer stages",
+    "thresholds": {
+      "aggregate_chord_recovery_minimum": 0.05,
+      "aggregate_dense_recovery_minimum": 0.12,
+      "chord_over_random_minimum": 2.0,
+      "dense_enrichment_minimum": 2.0,
+      "dense_over_random_minimum": 2.0,
+      "maximum_normal_residual": 0.0001,
+      "maximum_projection_error": 0.0001,
+      "per_target_dense_recovery_minimum": 0.06
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "replay_run_identity_sha256": "dcd0517abee1788a554aee27d1cc02ded292ffe3e824deccad0bc77e56aae871"
+  },
+  "oracle": {
+    "candidate_family": "sparse Givens orthogonal orbit with integer connectivity selected only from the step-0 exact dense-Muon direction and frozen thereafter",
+    "cg_iterations": 160,
+    "cg_tolerance": 1e-5,
+    "evaluation_steps": [60, 120, 180],
+    "layers": [0, 3, 6, 9, 11],
+    "learned_additive_adapter": false,
+    "learned_dense_basis": false,
+    "matching_seed": 161803,
+    "neighbors": 128,
+    "parameter_updates": 0,
+    "phase_boundaries": [0, 60, 120, 180, 238],
+    "random_seed": 271828,
+    "ridge": 0.0,
+    "selection_step": 0,
+    "stage_counts": [32, 64],
+    "target_sides": {
+      "cproj": ["output"],
+      "qk": ["input", "output"],
+      "v": ["input", "output"]
+    }
+  },
+  "prior_evidence": {
+    "best_attention_5tpp_validation_ce": 3.6151,
+    "dense_5tpp_validation_ce": 3.5401,
+    "fixed_fht_block_skew_four_stage_enrichment": 1.014222353,
+    "remaining_gap_ce": 0.075
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_attention_persistent_givens_gate_plan_v1",
+  "scientific_question": "Does the earliest dense attention direction reveal sparse rotation edges that remain useful through later unseen training phases?"
+}
