@@ -185,3 +185,94 @@ def test_attention_targets_build_the_registered_bilateral_geometry() -> None:
     tokens = torch.randint(0, 32, (2, 8))
     _logits, loss = model(tokens, tokens)
     assert loss is not None and torch.isfinite(loss)
+
+
+def test_attention_error_feedback_has_separate_optimizer_ownership() -> None:
+    targets = ("attn.c_attn.qk", "attn.c_attn.v", "attn.c_proj")
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=targets,
+            block_fht_attn_muon_matched_givens_targets=targets,
+            block_fht_attn_muon_matched_givens_stages=1,
+            block_fht_attn_muon_matched_givens_neighbors=2,
+            block_fht_attn_muon_matched_givens_error_feedback=True,
+            block_fht_attn_muon_matched_givens_error_feedback_decay=0.5,
+        )
+    )
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=1e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+    )
+    matched = [
+        item
+        for item in optimizer.optimizers
+        if isinstance(item, MuonMatchedGivens)
+    ]
+    assert len(matched) == 1
+    group = matched[0].param_groups[0]
+    assert group["error_feedback"] is True
+    assert group["error_feedback_decay"] == 0.5
+    assert group["attention_error_feedback"] is True
+    assert "cproj_error_feedback_decay_schedule" not in group
+
+
+def test_attention_and_mlp_matched_charts_use_distinct_feedback_groups() -> None:
+    attention_targets = (
+        "attn.c_attn.qk",
+        "attn.c_attn.v",
+        "attn.c_proj",
+    )
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=attention_targets + ("mlp.c_proj",),
+            block_fht_attn_muon_matched_givens_targets=attention_targets,
+            block_fht_attn_muon_matched_givens_stages=1,
+            block_fht_attn_muon_matched_givens_neighbors=2,
+            block_fht_attn_muon_matched_givens_error_feedback=True,
+            block_fht_attn_muon_matched_givens_error_feedback_decay=0.5,
+            block_fht_mlp_cproj_muon_matched_givens=True,
+            block_fht_mlp_cproj_muon_matched_givens_stages=1,
+            block_fht_mlp_cproj_muon_matched_givens_neighbors=2,
+            block_fht_mlp_cproj_muon_matched_givens_error_feedback=True,
+            block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay=1.0,
+        )
+    )
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=1e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+    )
+    matched = [
+        item
+        for item in optimizer.optimizers
+        if isinstance(item, MuonMatchedGivens)
+    ]
+    assert len(matched) == 2
+    groups = [item.param_groups[0] for item in matched]
+    attention = next(group for group in groups if group.get("attention_error_feedback"))
+    mlp = next(
+        group
+        for group in groups
+        if group.get("cproj_error_feedback_decay_schedule")
+    )
+    assert attention["error_feedback_decay"] == 0.5
+    assert mlp["error_feedback_decay"] == 1.0

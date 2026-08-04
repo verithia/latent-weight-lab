@@ -1,0 +1,111 @@
+{
+  "classification": "REJECT_MEMORYLESS_REFRESH15_ACCUMULATES_DISCARDED_NORMAL_UPDATE",
+  "comparison": {
+    "exact_dense_curve": {
+      "60": 6.2353,
+      "120": 5.7489,
+      "180": 5.5616,
+      "238": 5.4889
+    },
+    "exact_dense_delta": {
+      "60": 0.0718,
+      "120": 0.076,
+      "180": 0.0879,
+      "238": 0.0995
+    },
+    "parent_curve": {
+      "60": 6.2893,
+      "120": 5.7759,
+      "180": 5.5048,
+      "238": 5.4024
+    },
+    "parent_delta": {
+      "60": 0.0184,
+      "120": 0.0485,
+      "180": 0.1447,
+      "238": 0.186
+    },
+    "primary_comparator_caveat": "The QK32 parent is schedule-matched. The exact dense replay uses the same data/evaluation identity but warmup 10 rather than the candidate's inherited warmup 23."
+  },
+  "decision": {
+    "automatic_larger_rung_authorized": false,
+    "next_authorized_change": "attention-specific error feedback with fixed decay 0.5, subject to a fresh exact-config MFU gate",
+    "no_posthoc_refresh_stage_or_decay_sweep": true,
+    "passed": false,
+    "promotion_threshold": 5.3924,
+    "terminal_excess_over_threshold": 0.196
+  },
+  "diagnostics": {
+    "aggregate": {
+      "angle_max_abs": 0.001412194687873125,
+      "angle_rms_mean": 0.00015580345777582098,
+      "count": 576,
+      "recovery_first": 0.23810982373025683,
+      "recovery_last": 0.22825442420111763,
+      "recovery_mean": 0.23294601030647755,
+      "residual_nominal_first": 0.35323380140794647,
+      "residual_nominal_last": 0.6201298948791292,
+      "residual_nominal_mean": 0.5309667871074958
+    },
+    "by_target": {
+      "cproj": {
+        "angle_rms_mean": 0.0003197282755,
+        "count": 192,
+        "recovery_first": 0.1563609143,
+        "recovery_last": 0.1537920038,
+        "recovery_mean": 0.1557050177,
+        "residual_nominal_last": 0.6211930563,
+        "residual_nominal_mean": 0.4993249536
+      },
+      "qk": {
+        "angle_rms_mean": 0.000086536008,
+        "count": 192,
+        "recovery_first": 0.2552695324,
+        "recovery_last": 0.2522554398,
+        "recovery_mean": 0.2533704101,
+        "residual_nominal_last": 0.6772034466,
+        "residual_nominal_mean": 0.6353378372
+      },
+      "v": {
+        "angle_rms_mean": 0.0000611460898,
+        "count": 192,
+        "recovery_first": 0.3026990245,
+        "recovery_last": 0.2787158291,
+        "recovery_mean": 0.2897626031,
+        "residual_nominal_last": 0.5619931817,
+        "residual_nominal_mean": 0.4582375705
+      }
+    },
+    "interpretation": "Connectivity remains directionally aligned throughout the run, while the one-step discarded normal update grows. The failure is accumulated compression bias, not refresh staleness."
+  },
+  "execution": {
+    "checkpoint_metadata_sha256": "319fdeea8c6c5843629b499814f421d62e40d3885efa334c73a7329f02ce1813",
+    "checkpoint_sha256": "22c85a957a476a6bc8195d4844c8cb54bcba359f5b17f253089ed67d60a160df",
+    "config_sha256": "d1c3bf1c7927083dedd5089f2f97bbddebf024b5ca9cac3cc37490f77b800faa",
+    "duration_seconds": 491,
+    "exit_code": 0,
+    "git_commit": "411a89012e23effe5c9604c12ef2074b0958e08a",
+    "host": "PRO6",
+    "log_sha256": "a113a2be2f87e83daba5cb3a837081dc939a5fd3c49c1e813b6e0b671211765f",
+    "mfu_certificate_sha256": "5a185c02b31507ace477f95b8325f3106769bd1678751b7549fdfb3364cd5e82",
+    "provenance_sha256": "a0e79ed3cc78371c3ae88c93dfeff303990a3fe351e33f30db51b341cf5917c4",
+    "run_id": "pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_20260804T221542Z_36589",
+    "status_sha256": "3ca2d19ab59b621ed698abeda3356d27659f991f5ea8c13e5a751a36e01087c8"
+  },
+  "fixed_evaluation": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "train_validation_curve": {
+      "0": [10.9737, 10.9738],
+      "60": [6.2977, 6.3071],
+      "120": [5.8201, 5.8249],
+      "180": [5.6461, 5.6495],
+      "238": [5.5849, 5.5884]
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "plan_sha256": "41d2b02af0fa48fd0cb30c0bef46d22c304aa46878e93ec2db5c8d364fed85d9"
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_attention_refresh15_muon_matched_givens_result_v1"
+}

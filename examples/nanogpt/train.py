@@ -1176,6 +1176,21 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=8192,
     )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-error-feedback-decay",
+        type=float,
+        default=0.5,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-error-feedback-max-nominal-steps",
+        type=float,
+        default=None,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -1735,6 +1750,40 @@ def parse_args() -> argparse.Namespace:
     attention_muon_targets = set(
         namespace.block_fht_attn_muon_matched_givens_targets
     )
+    attention_feedback = (
+        namespace.block_fht_attn_muon_matched_givens_error_feedback
+    )
+    attention_feedback_cap = (
+        namespace
+        .block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps
+    )
+    if attention_feedback and not attention_muon_targets:
+        raise ValueError(
+            "attention error feedback requires attention Muon-matched "
+            "Givens targets"
+        )
+    if attention_feedback_cap is not None and not attention_feedback:
+        raise ValueError(
+            "attention feedback nominal-step cap requires error feedback"
+        )
+    attention_feedback_decay = float(
+        namespace.block_fht_attn_muon_matched_givens_error_feedback_decay
+    )
+    if (
+        not math.isfinite(attention_feedback_decay)
+        or not 0.0 <= attention_feedback_decay <= 1.0
+    ):
+        raise ValueError(
+            "attention Muon-matched Givens error-feedback decay must be "
+            "in [0, 1]"
+        )
+    if attention_feedback_cap is not None and (
+        not math.isfinite(attention_feedback_cap)
+        or attention_feedback_cap <= 0.0
+    ):
+        raise ValueError(
+            "attention feedback nominal-step cap must be finite and positive"
+        )
     if attention_muon_targets:
         supported_attention_muon_targets = {
             "attn.c_attn.qk",
@@ -2269,6 +2318,16 @@ def main() -> None:
         ),
         block_fht_attn_muon_matched_givens_seed_step_stride=(
             args.block_fht_attn_muon_matched_givens_seed_step_stride
+        ),
+        block_fht_attn_muon_matched_givens_error_feedback=(
+            args.block_fht_attn_muon_matched_givens_error_feedback
+        ),
+        block_fht_attn_muon_matched_givens_error_feedback_decay=(
+            args.block_fht_attn_muon_matched_givens_error_feedback_decay
+        ),
+        block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps=(
+            args
+            .block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps
         ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,

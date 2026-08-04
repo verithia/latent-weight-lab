@@ -1,0 +1,82 @@
+{
+  "decision_rule": {
+    "automatic_larger_rung_authorized": false,
+    "memoryless_refresh15_terminal_validation_ce": 5.5884,
+    "mfu_must_pass_before_training": true,
+    "no_posthoc_decay_stage_or_refresh_sweep": true,
+    "parent_terminal_validation_ce": 5.4024,
+    "terminal_validation_ce_maximum": 5.3924
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp_lr24e4.json",
+    "candidate_config_sha256": "6b50a00bc77201eabb47e534a82317a5e29fdb87f6bd1fffd5346c8e9ba91b5d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
+    "source_config_sha256": "d1c3bf1c7927083dedd5089f2f97bbddebf024b5ca9cac3cc37490f77b800faa",
+    "source_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_refresh15_muon_matched_givens_result.json",
+    "source_result_sha256": "2e82f111d2fb747ac17b39708cc45fc41ff08fa0d7e9250a5c6abde1e4d7ad2f"
+  },
+  "isolated_change": {
+    "error_feedback": true,
+    "error_feedback_decay": 0.5,
+    "error_feedback_max_nominal_steps": null,
+    "feedback_state_bytes": 113246208,
+    "learned_additive_adapter": false,
+    "learned_dense_basis": false
+  },
+  "performance_gate": {
+    "callbacks": false,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh15_errorfeedback/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh15_errorfeedback/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "16"
+    ],
+    "direct_foreground_polling": true,
+    "minimum_mfu_fraction": 0.2,
+    "reason": "the timed window activates error feedback and includes the connectivity refresh at optimizer update 15",
+    "timed_updates": 16,
+    "warmup_updates": 1,
+    "watchdog": false
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_attention_refresh15_errorfeedback_plan_v1",
+  "scientific_question": "Does decay-0.5 temporal error feedback prevent discarded sparse attention updates from accumulating into the observed late-run loss regression?",
+  "scientific_run": {
+    "authorized_count": 1,
+    "callbacks": false,
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "MFU_PREFLIGHT_CERTIFICATE_OVERRIDE=/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh15_errorfeedback/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp/performance_preflight.json",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp_lr24e4.json",
+      "0",
+      "pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "max_iters": 238,
+    "watchdog": false
+  },
+  "status": "registered_before_preflight_and_training"
+}

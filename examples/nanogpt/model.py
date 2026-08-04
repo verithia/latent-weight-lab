@@ -160,6 +160,9 @@ class GPTConfig:
     block_fht_attn_muon_matched_givens_fast_matching: bool = True
     block_fht_attn_muon_matched_givens_seed: int = 161803
     block_fht_attn_muon_matched_givens_seed_step_stride: int = 8192
+    block_fht_attn_muon_matched_givens_error_feedback: bool = False
+    block_fht_attn_muon_matched_givens_error_feedback_decay: float = 0.5
+    block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps: float | None = None
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
     block_fht_mlp_cproj_muon_matched_givens_residual_stages: int = 0
@@ -4030,10 +4033,23 @@ class GPT(nn.Module):
         params = {name: param for name, param in self.named_parameters() if param.requires_grad}
         decay = [param for _, param in params.items() if param.dim() >= 2]
         nodecay = [param for _, param in params.items() if param.dim() < 2]
-        muon_matched_givens_modules = [
-            module
-            for module in self.modules()
+        muon_matched_givens_named_modules = [
+            (name, module)
+            for name, module in self.named_modules()
             if isinstance(module, MuonMatchedGivensLinear)
+        ]
+        attention_muon_matched_givens_modules = [
+            module
+            for name, module in muon_matched_givens_named_modules
+            if ".attn." in name
+        ]
+        mlp_muon_matched_givens_modules = [
+            module
+            for name, module in muon_matched_givens_named_modules
+            if ".attn." not in name
+        ]
+        muon_matched_givens_modules = [
+            module for _name, module in muon_matched_givens_named_modules
         ]
         functional_shear_pairs = [
             (block.mlp.c_fc, block.mlp.c_proj)
@@ -4255,10 +4271,35 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
-            if muon_matched_givens_modules:
+            if attention_muon_matched_givens_modules:
                 optimizers.append(
                     MuonMatchedGivens(
-                        muon_matched_givens_modules,
+                        attention_muon_matched_givens_modules,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                        error_feedback=(
+                            self.config
+                            .block_fht_attn_muon_matched_givens_error_feedback
+                        ),
+                        error_feedback_decay=(
+                            self.config
+                            .block_fht_attn_muon_matched_givens_error_feedback_decay
+                        ),
+                        error_feedback_max_nominal_steps=(
+                            self.config
+                            .block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps
+                        ),
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
+                    group["attention_error_feedback"] = True
+            if mlp_muon_matched_givens_modules:
+                optimizers.append(
+                    MuonMatchedGivens(
+                        mlp_muon_matched_givens_modules,
                         lr=learning_rate,
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
@@ -4360,6 +4401,10 @@ class GPT(nn.Module):
                 f"product_fht_factor_tensors={len(product_factors)} "
                 "muon_matched_givens_tensors="
                 f"{len(muon_matched_givens_modules)} "
+                "attention_muon_matched_givens_tensors="
+                f"{len(attention_muon_matched_givens_modules)} "
+                "mlp_muon_matched_givens_tensors="
+                f"{len(mlp_muon_matched_givens_modules)} "
                 "muon_functional_shear_tensors="
                 f"{len(functional_shear_pairs)} "
                 f"mlp_chart_tensors={len(chart_other)} "
