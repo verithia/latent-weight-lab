@@ -7,7 +7,7 @@
   "source_commit_before_implementation": "13d199c5c233c53fdd2c9f21cdb6e5778cfcac91",
   "inputs": {
     "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
-    "trajectory_run_identity_sha256": "see every snapshot metadata; execution must reject disagreement",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
     "snapshot_steps": "0 through 238 inclusive",
     "snapshot_layers": [0, 3, 6, 9, 11],
     "phase_boundaries": [0, 60, 120, 180, 238],
