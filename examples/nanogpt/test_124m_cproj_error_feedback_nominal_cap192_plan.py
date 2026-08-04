@@ -17,6 +17,11 @@ RESOLUTION = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cproj_error_feedback_nominal_cap192_resolution.json"
 )
+MFU_RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_error_feedback_nominal_cap192_mfu_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -114,3 +119,24 @@ def test_gates_and_direct_polling_are_frozen() -> None:
     assert resolution["authorization"]["cap_sweep_authorized"] is False
     assert resolution["execution"]["direct_foreground_polling"] is True
     assert resolution["execution"]["watchdog"] is False
+
+
+def test_active_path_mfu_result_authorizes_exactly_one_short_run() -> None:
+    result = load(MFU_RESULT)
+    assert result["passed"] is True
+    assert result["classification"] == (
+        "CPROJ_NOMINAL_CAP192_ACTIVE_PATH_MFU_PASSED"
+    )
+    for key in ("config", "plan", "resolution"):
+        assert sha256(REPO / result[key]["path"]) == result[key]["sha256"]
+    assert result["measurement"]["mfu_fraction"] >= 0.20
+    assert result["stability"]["all_logged_losses_finite"] is True
+    active = result["active_path_evidence"]
+    assert active["scientific_cap_nominal_steps"] == 192.0
+    assert active["scratch_cap_nominal_steps"] == 0.5
+    assert active["timed_event_count"] == 8
+    assert active["active_layer_updates"] >= 1
+    assert result["invalid_prior_attempt"]["scientific_information_used"] is False
+    assert result["decision"]["one_238_update_scientific_run_authorized"] is True
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["cap_sweep_authorized"] is False

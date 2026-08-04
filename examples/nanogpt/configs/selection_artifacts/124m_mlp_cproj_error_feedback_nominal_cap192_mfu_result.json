@@ -1,0 +1,89 @@
+{
+  "artifact_kind": "124m_mlp_cproj_error_feedback_nominal_cap192_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cproj_nominal_cap192_mfu_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "CPROJ_NOMINAL_CAP192_ACTIVE_PATH_MFU_PASSED",
+  "passed": true,
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_cap192_0p5tpp.json",
+    "sha256": "e40618e7f7f0a5a98df6ae26c0cfab13ed8d9217677556c5c02cb8d830af3ba4"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_nominal_cap192_plan.json",
+    "sha256": "b1c9fbd15c1483d99d8677300a372c31c8414efbfba83ba7a5fd1c7ab0973511"
+  },
+  "resolution": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_nominal_cap192_resolution.json",
+    "sha256": "3b0d0526aabc6bd90c7cebfb9b5a00c851f7a71fa26106dd734807ddeccf76d4"
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/performance_preflight.json",
+    "sha256": "eb85794827d461cfe4f00f92e3db7bd563e957d109ef47a64dc9d80021a838e5",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/performance_preflight.log",
+    "log_sha256": "7b16e40a37220eeda0cc2f2c844417f2eb952ca4d5ee0dc2f6538e14f51f0af6"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "fd30617f60cd80d70d3721b83a5b27d0baffc229",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "train_exit_code": 0,
+    "parameter_updates_persisted": 0
+  },
+  "measurement": {
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "average_iter_ms": 1493.66875,
+    "tokens_per_second": 175505.05875,
+    "active_params_6n_estimate": 124475904,
+    "model_tflops": 131.07690506687615,
+    "empirical_bf16_peak_tflops": 416.7456933520902,
+    "mfu_fraction": 0.3145249180922789,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 31749.4,
+    "timing_breakdown_ms": {
+      "data_ms": 0.90375,
+      "eval_ms": 0.0,
+      "flush_ms": 4.3875,
+      "fwbw_ms": 1187.63375,
+      "grad_ms": 1.67875,
+      "opt_ms": 294.08375,
+      "other_ms": 1.235,
+      "prepare_ms": 3.75
+    }
+  },
+  "stability": {
+    "logged_loss_values": 13,
+    "finite_loss_values": 13,
+    "all_logged_losses_finite": true,
+    "native_matcher_output_validated": true
+  },
+  "active_path_evidence": {
+    "scientific_cap_nominal_steps": 192.0,
+    "scratch_cap_nominal_steps": 0.5,
+    "scratch_event_count": 9,
+    "timed_event_count": 8,
+    "active_layer_updates": 94,
+    "maximum_pre_cap_nominal_steps": 0.9708901047706604,
+    "maximum_post_cap_nominal_steps": 0.5000000596046448,
+    "interpretation": "Every timed update executed the active norm/branch/rescale kernel. The scratch scalar is performance-only; the bound scientific config remains 192.0."
+  },
+  "invalid_prior_attempt": {
+    "certificate_sha256": "ec5b5f3b1d35ec4da334140be4136c18207e67e31dfd5ec4655051cc8269d67d",
+    "mfu_fraction": 0.3147798136578227,
+    "active_cap_events": 0,
+    "classification": "NOT_A_GATE_CAP_PATH_INACTIVE",
+    "scientific_information_used": false
+  },
+  "decision": {
+    "one_238_update_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "cap_sweep_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "reason": "The source-bound real path is finite, native-validated, executes the active cap on all eight timed updates, and clears the 20 percent MFU floor by 11.45 percentage points."
+  }
+}
