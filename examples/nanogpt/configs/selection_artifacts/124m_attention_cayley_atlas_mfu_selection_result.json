@@ -1,0 +1,47 @@
+{
+  "schema_version": "mai_124m_attention_cayley_atlas_mfu_selection_result_v1",
+  "recorded_at": "2026-08-04",
+  "repository_commit": "6004a0fa12f18b840c42b173e49e432f53aba332",
+  "host": "PRO6",
+  "gpu": 0,
+  "policy": "Measure the cumulative final atlas phase for phase4, phase3, then phase2; select and train the first exact config with measured MFU >=0.20. Never use validation CE to select stage count.",
+  "denominator": "empirical_bf16_tensorcore_gemm_peak",
+  "results": [
+    {
+      "slot": "phase4",
+      "scientific_start_steps": [0, 594, 1188, 1782],
+      "scratch_start_steps": [0, 1, 2, 3],
+      "config_sha256": "c9dc6ae2c2d3ec7cb8bf6bdb801a928fac10021893f5b56d835e8f118b5a60a6",
+      "certificate_sha256": "ac139f5fd2a52908ebbce826d6c86f95b13642c27a53a69d1da74bc582e54ea6",
+      "preflight_log_sha256": "a77e35204a9d12649f32d61f15d64ff1339c414efaa2773a6228abe348331d0f",
+      "mfu_fraction": 0.17893094588056924,
+      "iter_ms": 2641.736666666666,
+      "tokens_per_second": 99231.77,
+      "peak_mib": 35527.33,
+      "finite_losses": true,
+      "passed": false
+    },
+    {
+      "slot": "phase3",
+      "scientific_start_steps": [0, 594, 1188],
+      "scratch_start_steps": [0, 1, 2],
+      "config_sha256": "3ad08275ea0353a38be2285367220bb5c382fc6eb10f11fc992b99ffd81eadee",
+      "certificate_sha256": "1cf63ebd14b10dbc055449d48f8db5b736437d9e38824aab5f8f9ef3727f1e5d",
+      "preflight_log_sha256": "17b313602332e5c0714b951f805c05f6faf8c391574cb0ea197f280b414e943f",
+      "mfu_fraction": 0.20416742858115297,
+      "iter_ms": 2321.24,
+      "tokens_per_second": 112932.72,
+      "peak_mib": 35499.45,
+      "finite_losses": true,
+      "passed": true
+    },
+    {
+      "slot": "phase2",
+      "status": "not_measured_after_first_ordered_pass"
+    }
+  ],
+  "selected_slot": "phase3",
+  "selected_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_cayley_atlas_phase3_5tpp_lr24e4.json",
+  "selected_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_attention_cayley_atlas/preflight_phase3_v1.json",
+  "decision": "Phase4 is rejected at 17.89% MFU. Phase3 is the first ordered passing configuration at 20.42% MFU and must be trained. Phase2 remains unmeasured to avoid post-hoc stage-count selection."
+}
