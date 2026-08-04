@@ -17,6 +17,8 @@ OUTPUT_ROOT = (
     "/root/userdata/MappingNetworks/outputs/"
     "y400_mai_v3_attention_capacity_closure"
 )
+STAGED_DATA_DIR = "/dev/shm/MappingNetworks/finewebedu_20b"
+SOURCE_DATA_DIR = "/root/userdata/MappingNetworks/data/finewebedu_20b"
 VARIANTS: dict[str, dict[str, Any]] = {
     "qk64": {
         "ranks": {
@@ -79,6 +81,13 @@ def make_config(slot: str, specification: dict[str, Any]) -> dict[str, Any]:
     stem = Path(destination_name(slot)).stem
     config.update(
         {
+            "data_dir": STAGED_DATA_DIR,
+            "data_staging_source": SOURCE_DATA_DIR,
+            "data_staging_policy": (
+                "byte-identical rsync copy into Y400 tmpfs; verify train.bin "
+                "and val.bin against the immutable manifest before every "
+                "scientific launch; tmpfs is performance staging only"
+            ),
             "block_fht_attn_cayley_ranks": specification["ranks"],
             "block_fht_output_gain_targets": gains,
             "out_dir": f"{OUTPUT_ROOT}/{stem}",

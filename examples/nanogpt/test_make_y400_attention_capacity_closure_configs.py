@@ -5,6 +5,8 @@ import json
 from examples.nanogpt.make_y400_attention_capacity_closure_configs import (
     BASE_NAME,
     CONFIG_DIR,
+    SOURCE_DATA_DIR,
+    STAGED_DATA_DIR,
     VARIANTS,
     destination_name,
     make_config,
@@ -21,6 +23,9 @@ def test_capacity_factorial_changes_only_registered_fields() -> None:
         "confirmation_slot",
         "confirmation_source",
         "dense_fixed_validation_curve",
+        "data_dir",
+        "data_staging_policy",
+        "data_staging_source",
         "execution_host",
         "hpo_stage",
         "ladder_role",
@@ -61,6 +66,11 @@ def test_capacity_factorial_changes_only_registered_fields() -> None:
         else:
             assert "block_fht_output_gain_targets" not in changed
         assert candidate["max_iters"] == 2373
+        assert candidate["data_dir"] == STAGED_DATA_DIR
+        assert candidate["data_staging_source"] == SOURCE_DATA_DIR
+        assert candidate["data_manifest_sha256"] == base[
+            "data_manifest_sha256"
+        ]
         assert candidate["fixed_eval_indices"] is True
         assert candidate["eval_iters"] == 400
         assert candidate["block_fht_attn_cayley_lr_scale"] == 10.0 / 3.0
