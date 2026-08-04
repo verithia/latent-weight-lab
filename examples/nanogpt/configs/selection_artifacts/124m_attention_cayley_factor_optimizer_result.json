@@ -1,0 +1,49 @@
+{
+  "schema_version": "mai_124m_attention_cayley_factor_optimizer_record_v1",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does Muon geometry on thin Cayley factors better recover the dense Muon-applied attention direction than current AdamW?",
+  "analysis": {
+    "source_commit": "00e9c19",
+    "entrypoint": "examples.nanogpt.analyze_attention_cayley_factor_optimizer",
+    "command": "CUDA_VISIBLE_DEVICES=0 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -m examples.nanogpt.analyze_attention_cayley_factor_optimizer --probe-dir /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/y400_mai_v3_124m_dense_attention_trajectory_5tpp_lr24e4/optimizer_probe --production-config examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_5tpp_lr24e4.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/analysis/attention_cayley_factor_optimizer_qk64_20260804 --device cuda",
+    "device": "Y400 GPU0, read-only offline analysis",
+    "elapsed_seconds": 7.3387675285339355,
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "raw_result_sha256": "3c4097b01c5b774bd31ee5736663c5359eb0a5d1f73ca6ed307df09d609cd246",
+    "cells_csv_sha256": "690f1fa58e9e546a5be9dea9f76b8aded88551d0170d4c1f4f92f1979a1be4d2",
+    "run_log_sha256": "e63fb4f6dba3418d3cdc4aaec4bbca4600cf6a58a9ad3265b3534f4d86f4a4e7"
+  },
+  "aggregate": {
+    "adamw_cosine": 0.035303757337516874,
+    "adamw_positive_line_recovery": 0.00154124447227116,
+    "muon_cosine": 0.059098970833419306,
+    "muon_positive_line_recovery": 0.004344890415427567,
+    "relative_recovery": 2.8190793177833666
+  },
+  "positive_line_recovery_by_target": {
+    "qk_shared": {
+      "adamw": 0.003143715128650278,
+      "muon": 0.008771805359696705
+    },
+    "v": {
+      "adamw": 0.0009342202896210557,
+      "muon": 0.0027938162785102636
+    },
+    "cproj": {
+      "adamw": 0.0002935119378434648,
+      "muon": 0.0006287687163753692
+    }
+  },
+  "decision": {
+    "minimum_relative_recovery": 1.25,
+    "no_target_regression": true,
+    "admitted": true,
+    "classification": "ADMIT_CAYLEY_FACTOR_MUON_124M_SCREEN",
+    "next_test": "Change only the static QK64 candidate's thin Cayley factor optimizer from full-LR AdamW to norm-matched matrix Muon. Preserve the decoder, bilateral sides, QK/V/c-proj ranks 64/16/8, model/data seed, schedule, and fixed evaluations. Require an exact-config >=20% MFU gate before a directly polled 124M run."
+  },
+  "limitations": [
+    "This is an identity-chart oracle on dense weights and gradients, not a trained generated model.",
+    "It isolates first-step optimizer geometry and omits accumulated optimizer momentum.",
+    "Absolute recovered direction remains below one percent; the 2.82x relative gain admits a screen but does not imply parity."
+  ]
+}
