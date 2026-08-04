@@ -17,7 +17,8 @@ def test_replace_selection_direction_is_nonmutating_and_uses_descent() -> None:
                 "applied_direction_per_lr": original_applied,
                 "gradient_after_clip": gradient,
             }
-        }
+        },
+        "hyperparameters": {"x": {"ns_steps": 5}},
     }
     selected = replace_selection_direction(probe)
     torch.testing.assert_close(
@@ -28,6 +29,25 @@ def test_replace_selection_direction_is_nonmutating_and_uses_descent() -> None:
         probe["parameters"]["x"]["applied_direction_per_lr"]
         is original_applied
     )
+
+
+def test_replace_selection_direction_supports_instantaneous_muon() -> None:
+    gradient = torch.randn(4, 4)
+    probe = {
+        "parameters": {
+            "x": {
+                "applied_direction_per_lr": torch.zeros_like(gradient),
+                "gradient_after_clip": gradient,
+            }
+        },
+        "hyperparameters": {"x": {"ns_steps": 5}},
+    }
+    selected = replace_selection_direction(
+        probe, mode="instantaneous_muon_polar"
+    )["parameters"]["x"]["applied_direction_per_lr"]
+    assert selected.shape == gradient.shape
+    assert torch.isfinite(selected).all()
+    assert float((selected * gradient).sum()) < 0.0
 
 
 def test_gate_passes_only_when_every_registered_check_passes() -> None:

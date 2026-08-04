@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_attention_gradient_selected_givens_gate_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_RAW_GRADIENT_SELECTED_GIVENS_BEFORE_IMPLEMENTATION",
+  "decision": {
+    "passed": false,
+    "implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "scientific_training_authorized": false,
+    "failed_checks": [
+      "task_gradient_recovery",
+      "task_gradient_enrichment",
+      "dense_muon_recovery",
+      "dense_muon_over_random",
+      "future_chord_recovery",
+      "future_chord_over_random",
+      "per_target_future_chord"
+    ],
+    "next_gate": "select sparse connectivity from the instantaneous Muon polar of the transient generated-weight gradient; do not retain dense momentum or inspect the dense-Muon scoring target"
+  },
+  "task_selected": {
+    "task_gradient_descent": {
+      "energy_recovery": 0.13003717501238368,
+      "coordinate_fraction": 0.04410572290070694,
+      "normalized_enrichment": 2.948306171177151
+    },
+    "dense_muon_direction": {
+      "energy_recovery": 0.07743729900147252,
+      "coordinate_fraction": 0.06852334394455944,
+      "normalized_enrichment": 1.13008639893764,
+      "over_random": 1.109501791338243
+    },
+    "future_15_update_chord": {
+      "energy_recovery": 0.07229878292214864,
+      "coordinate_fraction": 0.06925357481525508,
+      "normalized_enrichment": 1.0439718543774401,
+      "over_random": 1.045667439360303,
+      "by_target": {
+        "qk": 0.07004295577435184,
+        "v": 0.0844818421683992,
+        "cproj": 0.04424519559164762
+      }
+    }
+  },
+  "interpretation": "Task-gradient edge scores are not a sufficient proxy for dense Muon's matrix-polar geometry. They provide only marginal enrichment over equal-coordinate random connectivity for both the dense Muon direction and the unseen 15-update chord. The earlier causal sparse-orbit success depended on access to matrix-polar direction information.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "3c90f356457ecfaf9328563a73e423f776c2eb5f",
+    "source_sha256": "a1525b7dc684ed24ac45a2201dd3e92865a34f839123b108a1b4b87c9309bc06",
+    "plan_sha256": "b9e899567ce84ab55d0a0a8cbfbcb23909ff3704c0e398e914056d794bed1d10",
+    "run_identity_sha256": "2ce330849884afc80f6a6e4268052d79cabd3b593ca90aadf516d6dba1179cb1",
+    "raw_result_sha256": "d4fdf669089b8b5520145a2622f27d1ebb2877a9fa65a33a78db01e2e19b2cbb",
+    "cells_sha256": "56f7164c62ca43721728260cbb71a95c95eae4c526911743138706b6ca461aef",
+    "connectivity_sha256": "28d9d0c612b6413f2b771efe45a0b373f93ce779f616b74081d846bb7b515148",
+    "elapsed_seconds": 76.86956357955933,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true
+  }
+}

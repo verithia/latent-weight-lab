@@ -32,6 +32,7 @@ from examples.nanogpt.analyze_attention_persistent_givens_tangent import (
     select_connectivity,
 )
 from examples.nanogpt.analyze_parameter_trajectory import load_snapshots
+from examples.nanogpt.muon import zeropower_via_newtonschulz5
 from examples.nanogpt.parameter_trajectory import (
     OPTIMIZER_PROBE_SCHEMA_VERSION,
 )
@@ -46,8 +47,7 @@ def git_commit(root: Path) -> str:
 def replace_selection_direction(
     probe: dict[str, Any],
     *,
-    field: str = "gradient_after_clip",
-    descent: bool = True,
+    mode: str = "raw_task_gradient",
 ) -> dict[str, Any]:
     """Return a shallow probe view usable by the existing selector.
 
@@ -57,11 +57,25 @@ def replace_selection_direction(
     """
     parameters: dict[str, dict[str, Any]] = {}
     for name, record in probe["parameters"].items():
-        if field not in record:
-            raise ValueError(f"probe parameter {name} has no field {field}")
-        selected = record[field]
-        if descent:
-            selected = -selected
+        gradient = record.get("gradient_after_clip")
+        if gradient is None:
+            raise ValueError(
+                f"probe parameter {name} has no gradient_after_clip"
+            )
+        if mode == "raw_task_gradient":
+            selected = -gradient
+        elif mode == "instantaneous_muon_polar":
+            hyperparameters = probe["hyperparameters"][name]
+            polar = zeropower_via_newtonschulz5(
+                gradient.float(),
+                steps=int(hyperparameters["ns_steps"]),
+            )
+            rows = polar.shape[0]
+            columns = max(1, polar.numel() // rows)
+            scale = max(1.0, rows / columns) ** 0.5
+            selected = (-scale * polar).to(dtype=gradient.dtype)
+        else:
+            raise ValueError(f"unsupported selection mode: {mode}")
         parameters[name] = {
             **record,
             "applied_direction_per_lr": selected,
@@ -136,12 +150,16 @@ def main() -> None:
     args = parser.parse_args()
     started = time.time()
     plan = json.loads(args.plan.read_text())
-    if (
-        plan.get("schema_version")
-        != "mai_124m_attention_gradient_selected_givens_gate_plan_v1"
-    ):
+    accepted_schemas = {
+        "mai_124m_attention_gradient_selected_givens_gate_plan_v1",
+        "mai_124m_attention_instantaneous_muon_selected_givens_gate_plan_v1",
+    }
+    if plan.get("schema_version") not in accepted_schemas:
         raise ValueError("unexpected plan schema")
     oracle = plan["oracle"]
+    selection_mode = str(
+        oracle.get("selection_mode", "raw_task_gradient")
+    )
     layers = [int(value) for value in oracle["layers"]]
     phase_starts = [int(value) for value in oracle["phase_starts"]]
     horizon = int(oracle["horizon"])
@@ -186,7 +204,9 @@ def main() -> None:
     connectivity_by_phase: dict[int, dict[str, Any]] = {}
     for phase_start in phase_starts:
         probe = probes[phase_start]
-        selection_probe = replace_selection_direction(probe)
+        selection_probe = replace_selection_direction(
+            probe, mode=selection_mode
+        )
         connectivity, selected_rows = select_connectivity(
             probe=selection_probe,
             layers=layers,
@@ -238,7 +258,15 @@ def main() -> None:
                         stages=stage_count,
                     )
                     coordinate_fraction = chart.coordinate_count / weight.numel()
+                    selected_direction = select_target(
+                        selection_probe["parameters"][name][
+                            "applied_direction_per_lr"
+                        ],
+                        target,
+                        n_embd,
+                    ).to(args.device, dtype=torch.float32)
                     for kind, requested in (
+                        ("selection_direction", selected_direction),
                         ("task_gradient_descent", task_descent),
                         ("dense_muon_direction", dense_muon),
                         ("future_phase_chord", chord),
@@ -267,7 +295,8 @@ def main() -> None:
                                 **diagnostics,
                             }
                         )
-                    del chart, weight, task_descent, dense_muon, chord
+                    del chart, weight, selected_direction, task_descent
+                    del dense_muon, chord
                     if args.device.startswith("cuda"):
                         torch.cuda.empty_cache()
 
@@ -279,6 +308,7 @@ def main() -> None:
         summaries[connectivity_name] = {
             kind: weighted_summary(selected, kind)
             for kind in (
+                "selection_direction",
                 "task_gradient_descent",
                 "dense_muon_direction",
                 "future_phase_chord",
@@ -305,7 +335,7 @@ def main() -> None:
         for key, value in plan["decision_rule"]["thresholds"].items()
     }
     passed, failures = gate_passes(
-        task_gradient=task["task_gradient_descent"],
+        task_gradient=task["selection_direction"],
         dense_muon=task["dense_muon_direction"],
         dense_muon_over_random=dense_muon_over_random,
         future_chord=task["future_phase_chord"],
@@ -333,7 +363,12 @@ def main() -> None:
         "plan": {"path": str(args.plan), "sha256": file_sha256(args.plan)},
         "run_identity_sha256": snapshot_metadata["run_identity_sha256"],
         "selection": {
-            "field": "negative gradient_after_clip",
+            "mode": selection_mode,
+            "field": (
+                "negative gradient_after_clip"
+                if selection_mode == "raw_task_gradient"
+                else "negative scaled polar(gradient_after_clip)"
+            ),
             "uses_dense_muon_target": False,
             "phase_starts": phase_starts,
             "stage_count": stage_count,
