@@ -1,0 +1,93 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_task_gradient_sequential_trust_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "Does stage-by-stage residual refitting under the Frobenius control's angle trust radius turn the consistent but weak task-aware pair-selection gain into a cross-window stable output32 update?",
+  "identity": {
+    "task_gradient_selector_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_gradient_output_selector_result.json",
+    "task_gradient_selector_result_sha256": "c18b7d4535a34743fe908c77eb815633a399e170f89ee233ae8e7d17be0843e9",
+    "task_gradient_selector_plan_sha256": "c1582dea5b7fb816b8239f702cd318c48c4bbdc2b816eb77b7df080f40d6a07b",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementation"
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/task_gradient_sequential_trust",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {"split": "validation", "seed": 20260804, "batch_size": 2, "block_size": 256, "batches": 4, "rows_per_layer": 2048},
+    "holdout_window": {"split": "validation", "seed": 20260805, "batch_size": 2, "block_size": 256, "batches": 4, "rows_per_layer": 2048},
+    "shared_chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinate_count_per_layer": 147456,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in all arms"
+    },
+    "arms": {
+      "frobenius_simultaneous": "Existing output32 control: Frobenius-selected pairs and all diagonal angles fitted at the same pre-output source and residual.",
+      "frobenius_sequential_trust": "Reuse the Frobenius control's fixed 32 matchings, but before each stage refit that stage's Frobenius angle on current source and remaining residual, clamp by the per-cell trust radius, apply it, and subtract the realized update.",
+      "task_gradient_sequential_trust": "Reuse the preregistered RMS-normalized residual-plus-fit-task-gradient fixed 32 matchings, then use the identical sequential Frobenius refit and trust clamp."
+    },
+    "trust_radius": {
+      "definition": "For each layer-phase cell, max_abs(diagonal_metric_angles(S,R,frobenius_control_pairs)) from the existing simultaneous Frobenius output32 control.",
+      "application": "Clamp every sequentially refitted scalar angle in both sequential arms to [-radius,+radius].",
+      "minimum": 0.0,
+      "tunable": false,
+      "shared_between_sequential_arms": true
+    },
+    "sequential_refit": {
+      "connectivity_fixed_before_refit": true,
+      "stages": 32,
+      "stage_angle": "diagonal_metric_angles(current_source,current_remaining_residual,current_single_matching)",
+      "after_stage": "remaining_residual -= next_source-current_source; current_source = next_source",
+      "task_gradient_used_for_angles": false,
+      "holdout_used_for_selection_or_angles": false
+    },
+    "prohibited": [
+      "connectivity refresh during sequential refit",
+      "selection on holdout gradient or activations",
+      "task-metric or activation-metric angles",
+      "learned trust radius",
+      "learned basis",
+      "inverse metric solve",
+      "dense residual",
+      "extra chart coordinates"
+    ]
+  },
+  "decision_rule": {
+    "primary_comparator": "frobenius_sequential_trust",
+    "pass_all": [
+      "all outputs and metrics finite",
+      "all arms use exactly 147456 coordinates per selected layer",
+      "all sequential angles obey the shared per-cell trust radius",
+      "aggregate held-out predicted CE descent is positive and strictly greater than frobenius_sequential_trust",
+      "fit and holdout task-descent advantages over frobenius_sequential_trust are positive with holdout/fit retention >=0.10",
+      "aggregate held-out activation-output residual energy is no more than 1.10 times frobenius_sequential_trust",
+      "aggregate update energy is no more than 1.10 times frobenius_sequential_trust",
+      "task candidate beats frobenius_sequential_trust on all 4 held-out finite-step CE comparisons and at least 7 of all 8 comparisons",
+      "mean task-candidate finite-step CE is at least 0.0005 lower than frobenius_sequential_trust",
+      "mean task-candidate finite-step CE is no worse than the existing frobenius_simultaneous control"
+    ],
+    "pass_action": "preregister the exact production selector and sequential refit, add correctness tests, require an I/O-inclusive >=20% MFU preflight, then consider exactly one 124M causal run",
+    "fail_action": "reject current output32 task-gradient chart and return to a cross-batch consensus direction or different structured MLP parameterization; no causal training"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "production_implementation": false,
+    "performance_preflight": false,
+    "language_model_training": false
+  }
+}

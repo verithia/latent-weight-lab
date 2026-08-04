@@ -1,0 +1,78 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_task_gradient_output_selector_result_v1",
+  "recorded_at": "2026-08-04",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_gradient_output_selector_plan.json",
+    "sha256": "c1582dea5b7fb816b8239f702cd318c48c4bbdc2b816eb77b7df080f40d6a07b"
+  },
+  "acquisition": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "8151ed3af1f18802c7cab301d2d1c5556cfd0912",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_task_gradient_output_selector.py",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 8.139442443847656,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "remote_output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/task_gradient_output_selector",
+    "result_sha256": "0f91af85cf87a8f7f658ffe06b77da3aa4b4796e614175a7ea1b73cdfb29f15a",
+    "cells_sha256": "d6a1f2ade8a0c35c88d9f089fd54db865e5fc88d63edbb16e3d00dd410d343aa",
+    "finite_ce_sha256": "f7fd4510cb5465fd846ed7083ccb3ac568bea87766f1d8c17097f2d6a5f21c89",
+    "timing_sha256": "54a02d12e133c6d0d86ca7c4e8bcc4e5c43b0e7512b513fa580826b3ad6a797d",
+    "log_sha256": "de4c6f80a6a92b67b7edb367805502eaeeb6c7b84eb8f13e559c566b1787ae4a"
+  },
+  "aggregate": {
+    "task_gradient_predicted_ce_decrease": {
+      "fit": {"frobenius": 0.00528873384173681, "candidate": 0.011734781953343265},
+      "holdout": {"frobenius": 0.003565022037137948, "candidate": 0.004101882218905208}
+    },
+    "task_descent_advantage": {"fit": 0.006446048111606455, "holdout": 0.0005368601817672598},
+    "holdout_to_fit_task_advantage_retention": 0.08328516518525735,
+    "holdout_activation_residual_energy_ratio": 0.9983561802825388,
+    "candidate_to_control_update_energy_ratio": 0.9963707784039357,
+    "finite_step": {
+      "candidate_wins": 8,
+      "comparisons": 8,
+      "mean_frobenius_ce": 7.181512489914894,
+      "mean_candidate_ce": 7.1806570291519165,
+      "mean_candidate_advantage": 0.0008554607629776001,
+      "holdout_wins": 4,
+      "minimum_holdout_advantage": 0.000005841255187988281
+    },
+    "angle_diagnostics": {
+      "frobenius_max_abs": 0.0004420270852278918,
+      "frobenius_mean_abs": 0.00010384290885667724,
+      "candidate_max_abs": 0.0004420270852278918,
+      "candidate_mean_abs": 0.00009037458580678504
+    }
+  },
+  "gate": {
+    "all_outputs_and_metrics_finite": true,
+    "coordinate_budget_exact": true,
+    "holdout_task_descent_at_least_1p25_control_and_positive": false,
+    "fit_task_advantage_positive": true,
+    "holdout_task_advantage_positive": true,
+    "holdout_to_fit_task_advantage_retention_at_least_0p50": false,
+    "holdout_activation_residual_at_most_1p25_control": true,
+    "candidate_update_energy_at_most_1p25_control": true,
+    "finite_step_ce_wins_at_least_6_of_8": true,
+    "mean_finite_step_ce_not_worse": true
+  },
+  "decision": {
+    "classification": "REJECT_TASK_GRADIENT_OUTPUT_SELECTOR",
+    "production_preregistration_authorized": false,
+    "language_model_training_authorized": false,
+    "diagnosis": "Task-aware pair selection with Frobenius angles removes the activation selector's scale failure and improves finite CE in all eight comparisons, but its fit-gradient advantage transfers weakly to the held-out gradient and misses the frozen 1.25x held-out descent threshold.",
+    "next_action": "Test fixed connectivity with stage-by-stage Frobenius angle refitting under the simultaneous Frobenius control's per-cell maximum-angle trust radius."
+  }
+}
