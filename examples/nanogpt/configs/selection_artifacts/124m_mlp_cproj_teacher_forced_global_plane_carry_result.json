@@ -1,0 +1,104 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_global_plane_carry_result_v1",
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_global_plane_carry_result",
+  "recorded_at": "2026-08-04",
+  "classification": "CLOSE_PRACTICAL_RIGHT_ORTHOGONAL_CHART_BRANCH",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_global_plane_carry_plan.json",
+    "sha256": "a3b13a4b1e240f27042124b29f9d09d9563fe5ce5f540ca3a414d1fbba699bd4"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 0,
+    "git_commit": "badcd73cd859f662048491342bed27a8f517c512",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_global_plane_carry.py",
+    "entrypoint_sha256": "3cefdb6ecf182a25d172c6a2aca051aebf03a6a7800de3b267b205f3fb9685e5",
+    "started_at_unix": 1785843022.1208081,
+    "finished_at_unix": 1785843168.6799924,
+    "wall_seconds": 146.5591843,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "comparisons": {
+    "global4": {
+      "endpoint_recovery_ratios_by_step": {
+        "60": 1.0010712085561964,
+        "120": 1.0001518793702169,
+        "180": 1.0000209923650571,
+        "238": 1.000004210136563
+      },
+      "terminal_endpoint_error_energy_ratio": 0.9999768575365532,
+      "terminal_feedback_ratio": 0.9999802525956317,
+      "terminal_layers_won": 5,
+      "terminal_mean_plane_update_recovery": 0.0012545394797285063,
+      "passed": false
+    },
+    "global8": {
+      "endpoint_recovery_ratios_by_step": {
+        "60": 1.0019474535260549,
+        "120": 1.000291949230135,
+        "180": 1.0000394666472845,
+        "238": 1.0000087783286804
+      },
+      "terminal_endpoint_error_energy_ratio": 0.9999517468976182,
+      "terminal_feedback_ratio": 0.9999613515085936,
+      "terminal_layers_won": 5,
+      "terminal_mean_plane_update_recovery": 0.0023120449370696767,
+      "passed": false
+    }
+  },
+  "terminal_scores": {
+    "hidden88": {
+      "endpoint_recovery": 0.8460791090646863,
+      "row_gram_recovery": -0.10108335542246571,
+      "maximum_feedback_fro": 1.267708420753479,
+      "mean_requested_update_recovery": -3.738456263261683
+    },
+    "hidden88_plus_global4": {
+      "endpoint_recovery": 0.8460826711732785,
+      "row_gram_recovery": -0.10107616500155636,
+      "maximum_feedback_fro": 1.2676833868026733,
+      "mean_requested_update_recovery": -3.56252375786044
+    },
+    "hidden88_plus_global8": {
+      "endpoint_recovery": 0.8460865362251953,
+      "row_gram_recovery": -0.10106566818211271,
+      "maximum_feedback_fro": 1.2676594257354736,
+      "mean_requested_update_recovery": -3.4014223282076728
+    }
+  },
+  "remote_artifacts": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_global_plane_carry_v1",
+    "aggregate_sha256": "c2c0d7f546824ce027b3d1b051c72bdf1e7f0550474861f1bfc958c475980932",
+    "cells_sha256": "2872d0507a9f191bfb04d90dfca1dcbd94a22acc0e5467b10a4456a4066166d6",
+    "metadata_sha256": "42bb71717206bf9ddd1ce89606c4feeeb9f42210c08979ef3a35a862c880bebd",
+    "foreground_log_sha256": "6cf5e4bc244442ee7ed4bc32978d272af1f8ebbb572065e8503c6de6c62bd854",
+    "directory_manifest_sha256": "b66e77fcc5116dd1f1489b4ca00e611015705a25184f4dc63f6a62e46a4be44f"
+  },
+  "interpretation": [
+    "Task-conditioned dense planes consistently improve every sampled layer and requested-update recovery, validating the direction selector itself.",
+    "The advantage nevertheless decays from 0.195 percent endpoint recovery at step 60 to 0.00088 percent at terminal for eight planes; terminal error energy and feedback are unchanged to four significant figures.",
+    "Sparse depth, sparse connectivity, and a small dense global right-rotation residual all fail under full carry. The practical right-orthogonal family is therefore closed at this rung.",
+    "Right rotations preserve row Gram, while the control's terminal row-Gram recovery is negative. The next causal discriminator must add a bounded direction-conditioned non-orthogonal residual that can change row Gram without learning or persisting a basis."
+  ],
+  "decision": {
+    "selected_arm": "hidden88_full_carry",
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister an offline full-trajectory low-rank non-orthogonal residual replay after hidden64+24. Derive ephemeral task-conditioned singular directions from the current corrected residual, fold the bounded update into the dense buffer, and compare nested ranks before any production implementation."
+  }
+}
