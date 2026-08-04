@@ -1,0 +1,149 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_fht_block_affine_output_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "At an output-coordinate budget exactly matched to 64 sparse Givens stages, does a fixed-FHT block-local general linear map recover useful non-orthogonal c_proj output transport, and does fitting that map in activation-output space improve cross-window task direction?",
+  "identity": {
+    "block_cayley_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_fht_block_cayley_output_result.json",
+    "block_cayley_result_sha256": "1f321f2dead1f50570354ae69831507bb03fd5a9c73427307631f74c427dfa90",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementation"
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/fht_block_affine_output",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "shared_hidden_chart": {
+      "parent_stages": 64,
+      "residual_stages": 24,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinates_per_layer": 135168,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in every arm"
+    },
+    "controls": {
+      "frobenius_output32": {
+        "output_stages": 32,
+        "output_coordinates_per_layer": 12288,
+        "total_coordinates_per_layer": 147456
+      },
+      "frobenius_output64": {
+        "output_stages": 64,
+        "output_coordinates_per_layer": 24576,
+        "total_coordinates_per_layer": 159744,
+        "role": "primary equal-coordinate control"
+      }
+    },
+    "fixed_block_basis": {
+      "definition": "one exact fixed signed/permuted normalized block-FHT basis and its inverse",
+      "basis_block_size": 256,
+      "basis_seed": 20260804,
+      "affine_block_size": 32,
+      "blocks": 24,
+      "coordinates_per_block": 1024,
+      "output_coordinates_per_layer": 24576,
+      "total_coordinates_per_layer": 159744
+    },
+    "candidates": {
+      "fht_block32_affine_fro": {
+        "fit_source": "X = basis(W_after_hidden^T)",
+        "fit_target": "R = basis(remaining requested update^T)",
+        "per_block_solve": "B=(X^T X + ridge I)^-1 X^T R in float64",
+        "ridge": "1e-6 times mean diagonal of X^T X",
+        "application": "X_new=X+X B blockwise, then invert the fixed basis and transpose"
+      },
+      "fht_block32_affine_activation": {
+        "fit_source": "A = H_fit basis(W_after_hidden^T)",
+        "fit_target": "T = H_fit basis(remaining requested update^T)",
+        "per_block_solve": "B=(A^T A + ridge I)^-1 A^T T in float64",
+        "ridge": "1e-6 times mean diagonal of A^T A",
+        "application": "the same direct block-affine map as the Frobenius arm; H_holdout is scoring-only"
+      }
+    },
+    "trust_constraint": {
+      "definition": "For each layer-phase cell, multiply every candidate B block by min(1, sqrt(output64_control_output_delta_energy/raw_candidate_output_delta_energy)).",
+      "purpose": "prevent activation-metric scale amplification while never enlarging the raw affine solution",
+      "invertibility_check": "minimum singular value of every exact I+B block must be at least 0.95 after trust scaling",
+      "post_hoc_tuning": false
+    },
+    "diagnostic_decomposition": [
+      "Frobenius energy of skew, symmetric-off-diagonal, and diagonal parts of B",
+      "exact output-update energy and trust scale",
+      "block condition numbers and minimum singular value of I+B",
+      "fit and held-out activation-output residual energy",
+      "fit and held-out task-gradient predicted CE descent",
+      "finite-step CE on every phase and window"
+    ],
+    "prior_comparators": {
+      "best_prior_mean_finite_step_ce": 7.180657014250755,
+      "best_prior_heldout_predicted_ce_decrease": 0.004353292856055148
+    },
+    "prohibited": [
+      "data-dependent basis or permutation selection",
+      "fit or selection on holdout tokens",
+      "learned or persisted basis",
+      "LoRA adapter",
+      "dense residual or dense optimizer update",
+      "more than one affine stage",
+      "more than 24576 output coordinates per layer",
+      "post-hoc ridge, trust, seed, or block-size tuning"
+    ]
+  },
+  "decision_rule": {
+    "primary_control": "frobenius_output64",
+    "candidate_common_pass_all": [
+      "all outputs, linear solves, exact maps, and metrics are finite",
+      "candidate uses exactly 159744 total coordinates per selected layer, equal to frobenius_output64",
+      "candidate exact output-delta energy is no greater than frobenius_output64 in every layer-phase cell and in aggregate",
+      "minimum singular value of every exact I+B block is at least 0.95",
+      "aggregate held-out activation-output residual energy is no more than 0.95 times frobenius_output64",
+      "aggregate held-out predicted CE descent is positive, at least 1.10 times frobenius_output64, and at least 0.004353292856055148",
+      "candidate beats frobenius_output64 on all four held-out finite-step CE comparisons and at least seven of all eight comparisons",
+      "mean candidate finite-step CE is at least 0.0005 lower than frobenius_output64 and no greater than 7.180657014250755"
+    ],
+    "activation_candidate_extra_pass_all": [
+      "activation candidate beats the Frobenius affine candidate on at least three of four held-out finite-step CE comparisons",
+      "activation candidate mean finite-step CE is lower than the Frobenius affine candidate"
+    ],
+    "selection_order": [
+      "select fht_block32_affine_fro if it passes all common gates",
+      "otherwise select fht_block32_affine_activation only if it passes all common and activation-extra gates",
+      "otherwise reject the fixed-basis block-affine output family"
+    ],
+    "pass_action": "preregister only the selected production block-affine matcher, add exact-resume/correctness tests, then require an I/O-inclusive at-least-20-percent MFU gate before considering one 124M causal run",
+    "fail_action": "reject the fixed-basis block-affine family without causal training; use the symmetric/skew decomposition to decide whether to abandon fixed-basis output maps or design a state-conditioned sparse non-orthogonal chart"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "production_implementation": false,
+    "performance_preflight": false,
+    "language_model_training": false
+  }
+}
