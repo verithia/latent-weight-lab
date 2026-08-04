@@ -1,0 +1,126 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_bilateral_full_carry_result_v1",
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_bilateral_full_carry_result",
+  "recorded_at": "2026-08-04",
+  "classification": "GEOMETRY_PASS_BUT_REGISTERED_INSTANTANEOUS_GATE_FAIL",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_full_carry_plan.json",
+    "sha256": "3b32bcd5c836297d3e4043c1612b0a400e85ff0a2cd9af266021464c5059ca20"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 0,
+    "git_commit": "6fd83798478d6d9d74bfe1d4d57c3b9f2e53fa18",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_bilateral_full_carry.py",
+    "entrypoint_sha256": "4b00c5e02dc17840bc5f110933b71b0e99b56cfb5a448680bfd8785435909eb6",
+    "command": [
+      "examples/nanogpt/analyze_mlp_cproj_teacher_forced_bilateral_full_carry.py",
+      "--snapshot-dir",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+      "--plan",
+      "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_full_carry_plan.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_bilateral_full_carry_v1",
+      "--device",
+      "cuda:0"
+    ],
+    "started_at_unix": 1785844104.3338888,
+    "finished_at_unix": 1785844261.6214042,
+    "wall_seconds": 157.2875154,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608"
+  },
+  "terminal_scores": {
+    "hidden88_full_carry": {
+      "endpoint_recovery": 0.8460791090646863,
+      "endpoint_error_energy": 7.268211007118225,
+      "row_gram_recovery": -0.10108335542246571,
+      "row_gram_error_energy": 1.6474915444850922,
+      "maximum_feedback_fro": 1.267708420753479,
+      "mean_requested_update_recovery": -3.738456263261683
+    },
+    "hidden88_output32_full_carry": {
+      "endpoint_recovery": 0.935307753786933,
+      "endpoint_error_energy": 3.0547958314418793,
+      "row_gram_recovery": 0.5086685254601849,
+      "row_gram_error_energy": 0.7351527437567711,
+      "maximum_feedback_fro": 0.8474525809288025,
+      "mean_requested_update_recovery": -12.504714263437176
+    },
+    "hidden88_output64_full_carry": {
+      "endpoint_recovery": 0.9439743229681208,
+      "endpoint_error_energy": 2.645556688308716,
+      "row_gram_recovery": 0.5662552271969843,
+      "row_gram_error_energy": 0.6489888727664948,
+      "maximum_feedback_fro": 0.7947956323623657,
+      "mean_requested_update_recovery": -10.91890160336214
+    }
+  },
+  "comparisons": {
+    "hidden88_output32_full_carry": {
+      "endpoint_recovery_ratios_by_step": {
+        "60": 1.0639710902072639,
+        "120": 1.0831676327432447,
+        "180": 1.0965874903953519,
+        "238": 1.1054613496140877
+      },
+      "terminal_endpoint_error_energy_ratio": 0.420295424616886,
+      "terminal_row_gram_error_energy_ratio": 0.44622550338280254,
+      "terminal_feedback_ratio": 0.6684917186438724,
+      "terminal_layers_won": 5,
+      "terminal_requested_update_recovery_no_worse": false,
+      "registered_pass": false
+    },
+    "hidden88_output64_full_carry": {
+      "endpoint_recovery_ratios_by_step": {
+        "60": 1.0782386660408554,
+        "120": 1.0964562739911934,
+        "180": 1.1082728836790843,
+        "238": 1.1157045633849234
+      },
+      "terminal_endpoint_error_energy_ratio": 0.36399007757448876,
+      "terminal_row_gram_error_energy_ratio": 0.3939254650131331,
+      "terminal_feedback_ratio": 0.6269546051370145,
+      "terminal_layers_won": 5,
+      "terminal_requested_update_recovery_no_worse": false,
+      "registered_pass": false
+    }
+  },
+  "remote_artifacts": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_bilateral_full_carry_v1",
+    "aggregate_sha256": "40620583bfc4e35d67367fa51e334fcc76f6eb4d0a6c634205bf554ea4bf7e69",
+    "cells_sha256": "1bab02e9647604936b59f13a4641fbbca9858b08cc5fbec484e32cea2661013d",
+    "metadata_sha256": "009a1a1748088dd4db3664e3a9ccb17336625c2ea58f44ae69256807a5aca851",
+    "foreground_log_sha256": "674493ba59fe3bbf1d2ff68506a19f681504ae9339912ca19687ae026e2c1f5d",
+    "directory_manifest_sha256": "b66e77fcc5116dd1f1489b4ca00e611015705a25184f4dc63f6a62e46a4be44f"
+  },
+  "interpretation": [
+    "Adding output rotation changes the accumulated trajectory materially: both candidates improve endpoint recovery at every score point, win all five layers, and reduce endpoint, row-Gram, and feedback error by large margins.",
+    "The output64 arm recovers 94.40 percent of the dense endpoint chord and changes row-Gram recovery from -10.11 percent to +56.63 percent, confirming that the missing c_proj state is substantially a left/output orientation problem rather than singular-value capacity.",
+    "Both candidates fail the frozen instantaneous requested-update gate. The more expressive bilateral path spends more carried residual per step, so this diagnostic cannot determine whether its much better endpoint is task-helpful or merely trajectory-close.",
+    "The gate is not weakened after measurement. This result therefore authorizes only a separately preregistered zero-update endpoint CE oracle, not production implementation or training."
+  ],
+  "decision": {
+    "formal_registered_decision": "CLOSE_PRACTICAL_BILATERAL_ORTHOGONAL_BRANCH",
+    "scientific_followup": "RUN_FIXED_EVAL_ENDPOINT_TASK_RELEVANCE_ORACLE",
+    "selected_arm": "hidden88_full_carry",
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister and directly poll a deterministic replay that inserts the right-only, output32, and output64 terminal weights into the same dense endpoint checkpoint for the five recorded layers, then measures the exact fixed train/validation CE windows. Only a predeclared CE improvement over right-only can reopen a production bilateral implementation."
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_fixed_eval_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does the large endpoint and row-Gram improvement from full-carry bilateral c_proj transport reduce complete-model CE when the replayed terminal weights replace the same five c_proj matrices in their dense trajectory endpoint checkpoint?",
+  "parameter_updates": 0,
+  "source_commit_before_implementation": "6fd83798478d6d9d74bfe1d4d57c3b9f2e53fa18",
+  "causal_scope": {
+    "changed_variable": "terminal c_proj weights for recorded layers 0,3,6,9,11: exact dense, replayed hidden88 right-only, hidden88+output32, or hidden88+output64",
+    "fixed_variables": [
+      "same dense endpoint checkpoint for every non-c_proj parameter",
+      "same five replaced layers",
+      "same 238-step teacher-forced trajectory and learning-rate/weight-decay schedule",
+      "constant feedback carry 1.0",
+      "hidden/right 64+24 stages and neighbors 64",
+      "same fixed train and validation evaluation indices",
+      "same BF16 evaluation context and checkpoint model configuration"
+    ],
+    "language_model_parameter_updates": 0,
+    "teacher_forced": true,
+    "partial_layer_oracle": true,
+    "production_training": false
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "dense_endpoint_checkpoint": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4/ckpt.pt",
+    "dense_endpoint_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608",
+    "trajectory_snapshot_steps": "0 through 238 inclusive",
+    "trajectory_snapshot_layers": [0, 3, 6, 9, 11],
+    "bilateral_geometry_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_full_carry_result.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "variants": [
+    {
+      "name": "dense_endpoint",
+      "role": "exact task-loss reference",
+      "cproj_state": "unchanged checkpoint weights"
+    },
+    {
+      "name": "hidden88_full_carry",
+      "role": "right-only control",
+      "output_stages": 0
+    },
+    {
+      "name": "hidden88_output32_full_carry",
+      "role": "smallest bilateral candidate",
+      "output_stages": 32
+    },
+    {
+      "name": "hidden88_output64_full_carry",
+      "role": "larger bilateral discriminator",
+      "output_stages": 64
+    }
+  ],
+  "evaluation_protocol": {
+    "protocol": "mai_ladder_fixed_eval_indices_v2",
+    "data_dir": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "eval_seed": 20260715,
+    "eval_batch_size": 16,
+    "block_size": 1024,
+    "eval_iters_per_split": 400,
+    "tokens_per_split": 6553600,
+    "splits": ["train", "val"],
+    "dtype": "bfloat16",
+    "expected_fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "paired_batches": true,
+    "terminal_state_persistence": "save CPU float32 candidate c_proj states and their SHA-256 so task evaluation is auditable without a third replay"
+  },
+  "registered_decision_rule": {
+    "minimum_validation_ce_gain_vs_right_only": 0.002,
+    "minimum_train_ce_gain_vs_right_only": 0.0,
+    "candidate_pass": "All values and logits/losses must be finite; candidate validation CE must be at least 0.002 below hidden88_full_carry; candidate train CE must be no worse than hidden88_full_carry; and candidate validation distance from dense endpoint must be smaller than the right-only distance.",
+    "selection_order": [
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "selection": "Choose the first passing candidate to favor the smaller output coordinate budget.",
+    "threshold_changes_after_measurement": false,
+    "authorization_on_pass": "A pass reopens only implementation of the selected no-learned-basis bilateral optimizer path, exact update/resume tests, and a separately preregistered directly polled >=20 percent MFU preflight. It does not authorize language-model training.",
+    "authorization_on_failure": "Do not implement bilateral output rotation. Treat its geometry gain as task-irrelevant in this dense-endpoint context and move to a preregistered bounded non-orthogonal residual diagnostic."
+  },
+  "limitations": [
+    "Only the five layers recorded by the source trajectory can be replaced, so this measures task relevance of representative-layer endpoint geometry rather than a complete twelve-layer production model.",
+    "Directions are teacher-forced from a dense run; a positive result establishes useful capacity and direction, not causal learnability without a teacher.",
+    "The dense endpoint checkpoint was itself trained for only 0.5 TPP."
+  ],
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "minimum_training_mfu_not_applicable": "zero-update replay and evaluation",
+    "workspace_cap_gib": 300
+  }
+}
