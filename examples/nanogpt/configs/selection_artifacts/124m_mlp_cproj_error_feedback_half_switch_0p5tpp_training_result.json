@@ -1,0 +1,100 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_half_switch_training_result_v1",
+  "artifact_kind": "124m_mlp_cproj_error_feedback_half_switch_0p5tpp_training_result",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_FIXED_TIME_HALF_SWITCH",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_half_switch_0p5tpp_training_plan.json",
+    "sha256": "a3cd868aab7156b0dbadf23a342de94f9d89ba7c11ab7f0372bcb668a3effba3"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_halfswitch_0p5tpp.json",
+    "config_sha256": "9c112ab9816a6300f5798c933c8ba59aa456925f5fdd345e87697533f1e8f1c1",
+    "decay_before": 1.0,
+    "decay_after": 0.5,
+    "switch_iter": 120,
+    "max_iters": 238,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "forward_structure_changed": false,
+    "additional_trainable_parameters": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "056e78beb11990ce89932d6a42955f856b04aede",
+    "run_id": "pro6_mai_v3_124m_cproj_errorfeedback_halfswitch_0p5tpp_20260804T104324Z_3883392",
+    "started_at": "2026-08-04T18:43:24+08:00",
+    "finished_at": "2026-08-04T18:50:59+08:00",
+    "wall_seconds": 455,
+    "exit_code": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "loss": {
+    "attention_only_control_validation_ce": 5.4918,
+    "constant_decay1_control_validation_ce": 5.527365207672119,
+    "strict_target_validation_ce": 5.5118,
+    "candidate_validation_ce": 5.548335075378418,
+    "candidate_minus_attention_only": 0.0565350753784184,
+    "candidate_minus_constant_decay1": 0.020969867706298828,
+    "candidate_minus_strict_target": 0.03653507537841816,
+    "perplexity_inflation_vs_attention_only_fraction": 0.0581637,
+    "fixed_evaluations": [
+      {"step": 0, "train": 10.9672, "validation": 10.9669},
+      {"step": 60, "train": 6.2539, "validation": 6.2633},
+      {"step": 120, "train": 5.8130, "validation": 5.8174},
+      {"step": 180, "train": 5.6291, "validation": 5.6324},
+      {"step": 238, "train": 5.5453, "validation": 5.548335075378418, "validation_precision": "exact checkpoint"}
+    ]
+  },
+  "terminal_compression_residual": {
+    "layer_count": 12,
+    "shape_per_layer": [768, 3072],
+    "frobenius_norm_mean": 0.00867705,
+    "frobenius_norm_min": 0.008491,
+    "frobenius_norm_max": 0.00874544,
+    "rms_mean": 0.00000564936,
+    "maximum_absolute_value_max": 0.0000319039,
+    "frobenius_ratio_vs_constant_decay1": 0.006736,
+    "reduction_vs_constant_decay1": 148.46
+  },
+  "cross_scale_terminal_state_audit": {
+    "normalization": "feedback Frobenius norm divided by learning_rate times square_root(output_rows)",
+    "rows": [
+      {"rung": "124M", "decay": "constant_1.0", "validation_ce": 5.527365207672119, "mean_nominal_muon_steps": 193.676, "minimum_nominal_muon_steps": 181.338, "maximum_nominal_muon_steps": 199.075, "mean_feedback_to_weight_fro_ratio": 0.212033},
+      {"rung": "124M", "decay": "half_switch_to_0.5", "validation_ce": 5.548335075378418, "mean_nominal_muon_steps": 1.30461, "minimum_nominal_muon_steps": 1.2766, "maximum_nominal_muon_steps": 1.3149, "mean_feedback_to_weight_fro_ratio": 0.001428},
+      {"rung": "350M", "decay": "constant_1.0", "validation_ce": 4.480673, "mean_nominal_muon_steps": 612.554, "minimum_nominal_muon_steps": 388.878, "maximum_nominal_muon_steps": 657.185, "mean_feedback_to_weight_fro_ratio": 0.870240},
+      {"rung": "350M", "decay": "constant_0.5", "validation_ce": 4.424571514129639, "mean_nominal_muon_steps": 1.31219, "minimum_nominal_muon_steps": 1.2437, "maximum_nominal_muon_steps": 1.3552, "mean_feedback_to_weight_fro_ratio": 0.001864}
+    ],
+    "separating_cap_hypothesis_nominal_muon_steps": 256,
+    "interpretation": "Bounded decay erases nearly all temporal memory at both scales. Full carry is useful at 124M despite retaining about 194 nominal steps, but harmful at 350M after growing beyond 389 steps in every layer. A dimensionless norm cap is therefore better motivated than a fixed-time switch."
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_result_sha256": "1a5b22780074a4fee90043c5dc6a871bc97e047fb05ff7264f650f04c68d6b52",
+    "performance_preflight_sha256": "1fdd1be025081ada4497dadddd950695bb050ff50f966a686a57689dd5632eaa",
+    "log_sha256": "2527a615b4d992e97a1678a672a1612cfa652c421ca9e58ff29e51f36355b545",
+    "status_sha256": "254ff46ee9169ac43524bda259b93359815083f36bbe7e3aa1034b81c3689f4f",
+    "provenance_sha256": "130f8b24cf1c233095e3a1b2cbffabae932fe578a70283fad4b534f854a4b3e6",
+    "checkpoint_sha256": "0053242fc3e92727e8f6c0d6f14624ad269c5cdd0f859f4499f7a2c4169dffa4",
+    "checkpoint_meta_sha256": "6a338d286042416286794b557acffd02b1a007cf3cfdfb17e2fd8aee35fbf1dd",
+    "checkpoint_resolved_config_sha256": "a5c6983c7838290a6c2ff623dce623fd11ea22c788e9799bbf5f7657344d3f51",
+    "checkpoint_next_iter": 238
+  },
+  "interpretation": [
+    "The candidate is source-clean, complete, finite, and performance-qualified, so the rejection is scientific rather than operational.",
+    "The schedule matches constant full carry exactly through step 120, then is already 0.0117 CE worse at step 180 and 0.02097 CE worse at terminal.",
+    "Shrinking terminal feedback by 148.46x worsened task loss, falsifying the hypothesis that large terminal residual magnitude is intrinsically harmful at 124M.",
+    "The teacher-forced endpoint-reconstruction objective did not predict autoregressive training value for this schedule; do not promote another clock-based decay from replay alone."
+  ],
+  "decision": {
+    "fixed_time_half_switch_selected": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "retain_124m_control": "constant decay 1.0",
+    "next_action": "Preregister a zero-update full-trajectory comparison of hidden64+24 versus hidden64+48 under constant full carry. If extra hidden-direction capacity wins causally, qualify and run the smallest 124M production candidate. Preserve a 256-nominal-step norm cap as the later cross-scale temporal follow-up."
+  }
+}
