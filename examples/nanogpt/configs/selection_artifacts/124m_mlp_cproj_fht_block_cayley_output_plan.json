@@ -1,0 +1,117 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_fht_block_cayley_output_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "Can a fixed-FHT-conjugated block-Cayley output chart recover the task-useful c_proj output-frame motion without discrete pair selection or learned bases?",
+  "identity": {
+    "cross_batch_consensus_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_cross_batch_consensus_selector_result.json",
+    "cross_batch_consensus_result_sha256": "7f7bcd9f9e6e5089e3dee66d3e65627b98d1efe6aa650b03e26e5eed5f50e98a",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementation"
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/fht_block_cayley_output",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "shared_hidden_chart": {
+      "parent_stages": 64,
+      "residual_stages": 24,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinates_per_layer": 135168,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in both arms"
+    },
+    "control": {
+      "name": "frobenius_output32",
+      "output_stages": 32,
+      "output_coordinates_per_layer": 12288,
+      "total_coordinates_per_layer": 147456,
+      "definition": "Existing top-neighbor Frobenius pair selector with simultaneous Frobenius residual-fit angles."
+    },
+    "candidate": {
+      "name": "fht_block32_cayley1",
+      "basis": "one exact fixed signed/permuted normalized block-FHT basis and its inverse",
+      "basis_block_size": 256,
+      "basis_seed": 20260804,
+      "rotation_block_size": 32,
+      "stages": 1,
+      "rotation_blocks": 24,
+      "coordinates_per_block": 496,
+      "output_coordinates_per_layer": 11904,
+      "total_coordinates_per_layer": 147072,
+      "fit": {
+        "source": "X = basis(W_after_hidden^T)",
+        "residual": "R = basis(remaining requested update^T)",
+        "per_block_equation": "C B + B C = D - D^T, where C=X^T X and D=X^T R",
+        "solver": "symmetric eigendecomposition of C in float64; denominator lambda_i+lambda_j+1e-6*mean(diag(C))",
+        "cayley_coordinates": "A=B/2 because Cayley(A)=I+2A+O(A^2)",
+        "trust_radius": "multiply all A blocks in a layer-phase cell by min(1, max_abs(control_output32_angle)/max_abs(A))",
+        "application": "apply the exact block Cayley transform in the fixed basis, invert the basis, transpose, and use the same decoupled-weight-decay ordering as control"
+      }
+    },
+    "prior_comparators": {
+      "best_prior_mean_finite_step_ce": 7.180657014250755,
+      "best_prior_heldout_predicted_ce_decrease": 0.004353292856055148,
+      "source": "fit-task and cross-batch-consensus selector diagnostics"
+    },
+    "prohibited": [
+      "data-dependent basis or permutation selection",
+      "fit or selection on holdout tokens",
+      "learned dense basis",
+      "LoRA adapter",
+      "more than one block-Cayley stage",
+      "extra coordinates",
+      "dense residual",
+      "task-metric or activation-metric angle fitting",
+      "post-hoc trust radius or seed tuning"
+    ]
+  },
+  "decision_rule": {
+    "primary_control": "frobenius_output32",
+    "pass_all": [
+      "all outputs, eigensolves, Cayley solves, and metrics are finite",
+      "candidate uses exactly 147072 coordinates per selected layer and no more coordinates than the 147456-coordinate control",
+      "every candidate coordinate obeys the cell's frozen Frobenius-output32 maximum-angle trust radius",
+      "aggregate held-out activation-output residual energy is no more than 0.95 times control",
+      "aggregate update energy is no more than 1.10 times control",
+      "aggregate held-out predicted CE descent is positive, strictly greater than control, and at least 0.004353292856055148",
+      "candidate beats control on all four held-out finite-step CE comparisons and at least seven of all eight comparisons",
+      "mean candidate finite-step CE is at least 0.0005 lower than control and no greater than 7.180657014250755"
+    ],
+    "pass_action": "preregister a production fixed-basis block-Cayley output matcher, add exact-resume/correctness tests, and require an I/O-inclusive at-least-20-percent MFU gate before considering one 124M causal run",
+    "fail_action": "reject this fixed-basis block-Cayley output family without causal training; the next structural branch must be non-orthogonal or couple c_proj transport to block-output state rather than revisiting output pair selection"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "production_implementation": false,
+    "performance_preflight": false,
+    "language_model_training": false
+  }
+}
