@@ -1,0 +1,63 @@
+{
+  "schema_version": "mai_124m_attention_cayley_hybrid_left_muon_scale022_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_CAYLEY_OPTIMIZER_BRANCH_AFTER_GEOMETRY_CALIBRATION",
+  "run": {
+    "name": "pro6_mai_v3_124m_attn_qk32_hybrid_left_muon_scale022_0p5tpp_20260804a",
+    "run_id": "pro6_mai_v3_124m_attn_qk32_hybrid_left_muon_scale022_0p5tpp_20260804a_20260804T205605Z_4189858",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "d309c9dc",
+    "entrypoint": "examples.nanogpt.train",
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train --config /mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_qk32_hybrid_left_muon_scale022_0p5tpp_20260804a_20260804T205605Z_4189858.config.json",
+    "config_sha256": "61ae475f0e14fadc382b15b112a7fa82181973ed81a9d8fa9a1ccfe0a521ca4c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "2f676580c3a5aca5282edbcc39da762a8396f651b136cea02d04e5778628a383",
+    "status_sha256": "e1ffd4496f753b8a839f4c4dbcdf460b20871f0a6240062f2c6ccd021503ca65",
+    "log_sha256": "44277cfa722261763ae62622111ac7e1a87dad1c0d7967106c45a8006720bb37",
+    "checkpoint_sha256": "de1912d4a9386cbb30514e72ad714ed716e7e96394b007c330922b0c7999f71f",
+    "checkpoint_metadata_sha256": "10055df7857d5bda86d76c650c2deb9a5bb1e351ca0a0878551eabc83fd82045",
+    "mfu_certificate_sha256": "f4314e1918f566c47583c95cc3c971f3d7e0590a64a79c28a26a8d7e47bbfdf7",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "exit_code": 0
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.2790697662730836,
+    "iter_ms": 1684.338,
+    "tokens_per_second": 155636.431,
+    "peak_mib": 35417.83
+  },
+  "fixed_evaluations": [
+    {"step": 60, "train_loss": 6.2718, "validation_loss": 6.2816},
+    {"step": 120, "train_loss": 5.7710, "validation_loss": 5.7764},
+    {"step": 180, "train_loss": 5.5051, "validation_loss": 5.5082},
+    {"step": 238, "train_loss": 5.3996, "validation_loss": 5.4021}
+  ],
+  "comparison": {
+    "matched_adamw_validation_ce": [6.2887, 5.7764, 5.5048, 5.4024],
+    "delta_to_matched_adamw": [-0.0071, 0.0000, 0.0034, -0.0003],
+    "unit_scale_hybrid_validation_ce": [6.3232, 5.7936, 5.5306, 5.4225],
+    "delta_to_unit_scale_hybrid": [-0.0416, -0.0172, -0.0224, -0.0204],
+    "promotion_threshold_validation_ce": 5.3924,
+    "terminal_miss_to_promotion_threshold": 0.0097
+  },
+  "checkpoint_geometry": {
+    "entrypoint": "examples.nanogpt.analyze_attention_cayley_checkpoint_geometry",
+    "raw_result_sha256": "7a923f0264b630d19cb52b6e20f7bf225178dab24935bad8dddc4a7d24d62320",
+    "right_subspace_mean_angle_degrees": 23.585405849495668,
+    "right_subspace_projector_distance": 0.4178594285875778,
+    "fixed_right_generator_relative_error": 0.5328431233891744,
+    "generator_spectral": 1.8839732496468025,
+    "maximum_cayley_angle_degrees": 122.43983392590327,
+    "left_fro": 3.4285088568787385
+  },
+  "decision": {
+    "promoted": false,
+    "reason": "The preregistered 0.22 scale hit the intended angular regime (122.44 degrees versus the AdamW target 126.00) and removed the full-factor/unit-scale Muon regressions, but terminal CE improved over AdamW by only 0.0003 and missed the 5.3924 gate by 0.0097. Muon direction geometry provides no material benefit once basis drift and Cayley saturation are controlled.",
+    "closed_family": "Cayley factor optimizer ownership and scalar Muon LR calibration",
+    "next_test": "Keep AdamW for the selected QK64 plus output-gain parent. Test a fixed-connectivity, globally mixed block-skew butterfly orbit offline; it supplies broad nonlinear orientation motion without a learned dense basis and is distinct from the rejected ProductFHT diagonal residual."
+  }
+}
