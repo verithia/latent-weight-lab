@@ -1,0 +1,43 @@
+{
+  "schema_version": "mai_124m_attention_cayley_hybrid_left_muon_scale022_mfu_result_v1",
+  "artifact_kind": "exact_config_performance_gate",
+  "recorded_at": "2026-08-04",
+  "classification": "HYBRID_LEFT_MUON_SCALE022_MFU_PASS",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_hybrid_left_muon_scale0p22_0p5tpp_lr24e4.json",
+    "sha256": "61ae475f0e14fadc382b15b112a7fa82181973ed81a9d8fa9a1ccfe0a521ca4c"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "74daf981",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "warmup_updates": 2,
+    "timed_updates": 10,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "wall_time_seconds": 23.7759
+  },
+  "measurement": {
+    "passed": true,
+    "minimum_mfu_fraction": 0.20,
+    "mfu_fraction": 0.2790697662730836,
+    "iter_ms": 1684.338,
+    "tokens_per_second": 155636.431,
+    "model_tflops": 116.23791266435175,
+    "empirical_bf16_gemm_peak_tflops": 416.5191887916916,
+    "peak_mib": 35417.83,
+    "all_logged_losses_finite": true
+  },
+  "artifacts": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_hybrid_left_muon_scale022/performance_preflight.json",
+    "certificate_sha256": "f4314e1918f566c47583c95cc3c971f3d7e0590a64a79c28a26a8d7e47bbfdf7",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_hybrid_left_muon_scale022/performance_preflight.log",
+    "log_sha256": "b77fcb34ed3cf1f27cdd8d359b133716d1b31f2a9f9260bf07269253c5b23f57"
+  },
+  "decision": {
+    "admitted": true,
+    "next_action": "run the one preregistered 238-update scale-0.22 screen and poll it directly"
+  }
+}
