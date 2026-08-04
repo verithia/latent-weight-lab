@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_capacity_carry_result_v1",
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_capacity_carry_result",
+  "recorded_at": "2026-08-04",
+  "classification": "RETAIN_HIDDEN88_AND_CLOSE_EXTRA_STAGE_BRANCH",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_capacity_carry_plan.json",
+    "sha256": "be01882d2d237d233efd3f5cb61802be1637b3a2a87d1a7128f4d2c8e5c1774a"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 0,
+    "git_commit": "47d1dbcd51719e23d4eebe6850e9fea068462e22",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_capacity_carry.py",
+    "entrypoint_sha256": "ca5cb2369d139d338bff4c6a82f916fe6b50b11f6793bbdcc24bc0b9a1be954d",
+    "started_at_unix": 1785841445.4743092,
+    "finished_at_unix": 1785841532.6814125,
+    "wall_seconds": 87.2071033,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "comparison": {
+    "endpoint_recovery_ratios_hidden112_over_hidden88": {
+      "60": 1.0058290205541491,
+      "120": 1.00113754052317,
+      "180": 1.0001576914181582,
+      "238": 1.0000333737614855
+    },
+    "terminal_hidden88_endpoint_recovery": 0.8460791090646863,
+    "terminal_hidden112_endpoint_recovery": 0.84610734590707,
+    "terminal_feedback_ratio_hidden112_over_hidden88": 0.999872864329972,
+    "terminal_hidden88_maximum_feedback_fro": 1.267708420753479,
+    "terminal_hidden112_maximum_feedback_fro": 1.2675472497940063,
+    "terminal_hidden88_mean_requested_update_recovery": -3.738456263261683,
+    "terminal_hidden112_mean_requested_update_recovery": -2.816550323642603,
+    "terminal_hidden88_row_gram_recovery": -0.10108335542246571,
+    "terminal_hidden112_row_gram_recovery": -0.1010253341036047,
+    "terminal_layers_won": 5,
+    "required_terminal_endpoint_ratio": 1.05,
+    "required_maximum_feedback_ratio": 0.95,
+    "passed": false
+  },
+  "remote_artifacts": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_capacity_carry_v1",
+    "aggregate_sha256": "92407c98144bd329c30b62c77e29a74050ad42c7a806099ed223875fd2a8565d",
+    "cells_sha256": "2ba9c37b23a0cc218889fd7c9aae5799de147d50f2698f1b87ac3ec8345faa54",
+    "metadata_sha256": "ee458df669601fe492e994e6d0636aa3991e20e1bd9dfcb860bb4faf370bb27d",
+    "foreground_log_sha256": "8717e31abcf4fd844350e3aa771f9a1158dec37a5aaa4ce93fba4e66eddbba7f"
+  },
+  "interpretation": [
+    "Hidden112 is directionally consistent and wins all five terminal layers, but its aggregate endpoint advantage decays from 0.583 percent at step 60 to 0.0033 percent at step 238.",
+    "The additional 27.27 percent spatial coordinates improve mean requested-update recovery substantially, from -3.738 to -2.817, yet reduce terminal feedback by only 0.0127 percent and leave the endpoint unchanged.",
+    "Under constant full carry, the extra same-neighborhood stages are absorbed by temporal residual bookkeeping and do not provide a materially new trajectory direction.",
+    "The right-orthogonal chart preserves row Gram by construction. Extra depth in the same local candidate graph cannot address missing long-range hidden-channel transport."
+  ],
+  "decision": {
+    "hidden112_selected": false,
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "retain_control": "hidden64+24 with constant full carry at 124M",
+    "next_action": "Preregister a zero-update full-trajectory connectivity-radius comparison at fixed 64+24 coordinates: neighbors 64 versus 128 and 256. This tests access to long-range task-selected hidden-channel rotations without adding trainable coordinates. Keep the 256-nominal-step residual cap as the later scale-transfer safeguard."
+  }
+}
