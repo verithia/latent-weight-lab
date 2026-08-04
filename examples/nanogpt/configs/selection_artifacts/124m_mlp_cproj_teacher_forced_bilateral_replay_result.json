@@ -1,0 +1,90 @@
+{
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_bilateral_replay_result",
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_bilateral_replay_result_v1",
+  "classification": "REJECT_ADDITIVE_SPARSE_OUTPUT_TRANSPORT",
+  "analysis": {
+    "parameter_updates": 0,
+    "teacher_forced": true,
+    "cells_per_arm": 20,
+    "layers": [0, 3, 6, 9, 11],
+    "phase_boundaries": [0, 60, 120, 180, 238],
+    "limitations": [
+      "Dense trajectory directions are teacher-forced, so this is an optimistic representation and transport oracle rather than language-model training evidence.",
+      "Only one trajectory and five preregistered layers are tested."
+    ]
+  },
+  "controls": {
+    "hidden88_decay0p5": {
+      "aggregate_endpoint_recovery": 0.5648986145974112,
+      "aggregate_row_gram_recovery": -0.051012117587748707,
+      "maximum_terminal_feedback_fro": 0.07195340842008591
+    },
+    "hidden88_decay1p0": {
+      "aggregate_endpoint_recovery": 0.8410253750577421,
+      "aggregate_row_gram_recovery": -0.050906220925206025,
+      "maximum_terminal_feedback_fro": 0.78282630443573,
+      "mean_requested_update_recovery": -3.438395962530169
+    },
+    "hidden96_decay0p5": {
+      "aggregate_endpoint_recovery": 0.5866067120629386,
+      "aggregate_row_gram_recovery": -0.05103073105652056
+    },
+    "hidden104_decay0p5": {
+      "aggregate_endpoint_recovery": 0.6051852576439768,
+      "aggregate_row_gram_recovery": -0.05104996325555655
+    }
+  },
+  "comparisons": {
+    "hidden88_output32_decay0p5_vs_hidden96_decay0p5": {
+      "candidate_endpoint_recovery": 0.5834546989536542,
+      "endpoint_recovery_ratio": 0.9946267012557706,
+      "row_gram_error_reduction": 0.08014541894588478,
+      "improved_endpoint_cells": 2,
+      "required_improved_endpoint_cells": 16,
+      "passed": false
+    },
+    "hidden88_output64_decay0p5_vs_hidden104_decay0p5": {
+      "candidate_endpoint_recovery": 0.5913009793380946,
+      "endpoint_recovery_ratio": 0.9770578048118116,
+      "row_gram_error_reduction": 0.11778164551517978,
+      "improved_endpoint_cells": 0,
+      "required_improved_endpoint_cells": 16,
+      "passed": false
+    }
+  },
+  "decision": {
+    "output_side_production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "next_action": "Do not add sparse output/left transport. Preregister a full-trajectory temporal-carry schedule replay: constant 0.5 and 1.0 controls versus early-strong, late-bounded decay schedules."
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_replay_plan.json",
+    "sha256": "c5aa9a5d0aba73bb484744fb8e2b07a93692785a2ef8c2920f8b1e040622c781"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 0,
+    "git_commit": "f80f6633e941cb8891aa900eb962781725aa5ab3",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_bilateral_replay.py",
+    "entrypoint_sha256": "99c63f3bd4371d147e09656915c6a4c13cfabbd4b6e0d06cf3ebb394069612af",
+    "command": "CUDA_VISIBLE_DEVICES=0 MAPPING_NETWORKS_NATIVE_CACHE=/root/userdata/MappingNetworks/outputs/native_cache python -u -m examples.nanogpt.analyze_mlp_cproj_teacher_forced_bilateral_replay --snapshot-dir /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4/parameter_trajectory --plan examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_replay_plan.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_bilateral_replay_v1 --layers 0,3,6,9,11 --phase-boundaries 0,60,120,180,238 --device cuda",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "remote_outputs": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_bilateral_replay_v1",
+    "aggregate_sha256": "b0601cbebb4214025ba3903fef486a7a9ccb7a3a78d7c495a1906611d15ee685",
+    "cells_sha256": "fc68b6a922202dd347102845179b793bf8ec7af6531cbe39e6fabd57008b88a5",
+    "metadata_sha256": "d760ab710d30970943fd6a86c93a26dd3ef51a8147096e591675f068c5f33118",
+    "log_sha256": "d1ebc116a660208fe8c559597ae3c5541b2adbee2d09705e78d6e814249f6238"
+  }
+}
