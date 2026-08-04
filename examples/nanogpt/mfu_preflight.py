@@ -99,6 +99,19 @@ def parse_training_loss_values(text: str) -> list[float]:
     return values
 
 
+def parse_feedback_cap_events(text: str) -> list[dict[str, Any]]:
+    """Parse the once-per-update aggregate emitted when the cap is active."""
+    rows: list[dict[str, Any]] = []
+    prefix = "muon_matched_givens_feedback_cap "
+    for line in text.splitlines():
+        if line.startswith(prefix):
+            value = json.loads(line[len(prefix) :])
+            if not isinstance(value, dict):
+                raise ValueError("feedback-cap event must be a JSON object")
+            rows.append(value)
+    return rows
+
+
 def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> float:
     if not torch.cuda.is_available():
         raise RuntimeError("MFU preflight requires CUDA")
@@ -174,6 +187,17 @@ def make_preflight_config(
         # prefix. Update 0 remains the warmup; every timed update executes all
         # three frame VJPs and AdamW coordinate updates.
         config["block_fht_mlp_task_frame_start_iter"] = effective_warmups
+    scratch_feedback_cap = source.get(
+        "mfu_preflight_error_feedback_max_nominal_steps"
+    )
+    if scratch_feedback_cap is not None:
+        # The scientific scalar remains immutable in ``source``.  A compact
+        # performance-only horizon cannot naturally build hundreds of nominal
+        # steps of residual state, so use the registered scratch threshold to
+        # execute and time the same active norm/rescale kernel.
+        config[
+            "block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps"
+        ] = float(scratch_feedback_cap)
     if not include_diagnostic_io:
         # Parameter-trajectory I/O is normally a scientific sampling side
         # effect, not part of the steady-state compute gate.  A diagnostic can
@@ -212,6 +236,23 @@ def task_frame_preflight_metadata(
             effective_warmup_updates if task_frame_start_iter > 0 else 0
         ),
         "timed_task_frame_active": bool(task_frame_start_iter > 0),
+    }
+
+
+def feedback_cap_preflight_metadata(source: dict[str, Any]) -> dict[str, Any]:
+    scientific = source.get(
+        "block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps"
+    )
+    scratch = source.get(
+        "mfu_preflight_error_feedback_max_nominal_steps",
+        scientific,
+    )
+    return {
+        "scientific_feedback_cap_nominal_steps": scientific,
+        "scratch_feedback_cap_nominal_steps": scratch,
+        "feedback_cap_activity_required": bool(
+            source.get("mfu_preflight_require_feedback_cap_active", False)
+        ),
     }
 
 
@@ -306,6 +347,7 @@ def main() -> None:
                 source,
                 effective_warmup_updates,
             ),
+            **feedback_cap_preflight_metadata(source),
         },
         "passed": False,
     }
@@ -353,6 +395,36 @@ def main() -> None:
             raise RuntimeError("real-training preflight emitted no loss values")
         if finite_loss_values != len(loss_values):
             raise RuntimeError("real-training preflight emitted nonfinite loss")
+        feedback_cap_events = parse_feedback_cap_events(process.stdout)
+        active_cap_layer_updates = sum(
+            int(row.get("active_layers", 0)) for row in feedback_cap_events
+        )
+        timed_cap_events = [
+            row
+            for row in feedback_cap_events
+            if int(row.get("step", -1)) >= effective_warmup_updates
+        ]
+        certificate["feedback_cap"] = {
+            "event_count": len(feedback_cap_events),
+            "timed_event_count": len(timed_cap_events),
+            "active_layer_updates": active_cap_layer_updates,
+            "maximum_pre_cap_nominal_steps": max(
+                (
+                    float(row.get("max_pre_cap_nominal_steps", 0.0))
+                    for row in feedback_cap_events
+                ),
+                default=0.0,
+            ),
+        }
+        if source.get("mfu_preflight_require_feedback_cap_active", False):
+            if not feedback_cap_events or active_cap_layer_updates < 1:
+                raise RuntimeError(
+                    "registered preflight did not exercise an active feedback cap"
+                )
+            if not timed_cap_events:
+                raise RuntimeError(
+                    "registered preflight did not exercise the cap during timed updates"
+                )
         rows = parse_perf_rows(process.stdout)
         if len(rows) < args.timed_updates:
             raise RuntimeError(f"preflight emitted only {len(rows)} timed perf rows; expected {args.timed_updates}")

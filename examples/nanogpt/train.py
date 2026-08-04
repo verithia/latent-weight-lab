@@ -2878,7 +2878,8 @@ def main() -> None:
             None,
         )
         if consume_givens_diagnostics is not None:
-            for row in consume_givens_diagnostics():
+            givens_diagnostics = consume_givens_diagnostics()
+            for row in givens_diagnostics:
                 if row.get("report_refresh", row.get("refresh")):
                     print(
                         "muon_matched_givens_refresh "
@@ -2889,6 +2890,45 @@ def main() -> None:
                         ),
                         flush=True,
                     )
+            active_feedback_cap_rows = [
+                row
+                for row in givens_diagnostics
+                if row.get("feedback_cap_active", False)
+            ]
+            if active_feedback_cap_rows:
+                print(
+                    "muon_matched_givens_feedback_cap "
+                    + json.dumps(
+                        {
+                            "step": int(active_feedback_cap_rows[0]["step"]),
+                            "active_layers": len(active_feedback_cap_rows),
+                            "total_layers": len(givens_diagnostics),
+                            "max_pre_cap_nominal_steps": max(
+                                float(
+                                    row[
+                                        "feedback_output_nominal_steps_pre_cap"
+                                    ]
+                                )
+                                for row in active_feedback_cap_rows
+                            ),
+                            "max_post_cap_nominal_steps": max(
+                                float(
+                                    row[
+                                        "feedback_output_nominal_steps_post_cap"
+                                    ]
+                                )
+                                for row in active_feedback_cap_rows
+                            ),
+                            "min_cap_scale": min(
+                                float(row["feedback_cap_scale"])
+                                for row in active_feedback_cap_rows
+                            ),
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
         pullback_probe_rows = (
             raw_model.finalize_product_fht_pullback_probes()
         )

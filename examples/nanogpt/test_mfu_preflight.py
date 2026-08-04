@@ -5,7 +5,9 @@ import unittest
 from pathlib import Path
 
 from examples.nanogpt.mfu_preflight import (
+    feedback_cap_preflight_metadata,
     make_preflight_config,
+    parse_feedback_cap_events,
     parse_snapshot_elapsed_seconds,
     parse_training_loss_values,
     task_frame_preflight_metadata,
@@ -80,6 +82,60 @@ class MfuPreflightTest(unittest.TestCase):
                 "scratch_task_frame_start_iter": 1,
                 "timed_task_frame_active": True,
             },
+        )
+
+    def test_feedback_cap_is_compacted_only_in_scratch_copy(self) -> None:
+        source = {
+            "block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps": 192.0,
+            "mfu_preflight_error_feedback_max_nominal_steps": 0.5,
+            "mfu_preflight_require_feedback_cap_active": True,
+        }
+        probe = make_preflight_config(
+            source,
+            Path("/tmp/probe"),
+            warmups=1,
+            timed=8,
+        )
+        self.assertEqual(
+            probe[
+                "block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps"
+            ],
+            0.5,
+        )
+        self.assertEqual(
+            source[
+                "block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps"
+            ],
+            192.0,
+        )
+        self.assertEqual(
+            feedback_cap_preflight_metadata(source),
+            {
+                "scientific_feedback_cap_nominal_steps": 192.0,
+                "scratch_feedback_cap_nominal_steps": 0.5,
+                "feedback_cap_activity_required": True,
+            },
+        )
+
+    def test_feedback_cap_event_parser(self) -> None:
+        text = "\n".join(
+            [
+                "iter 0: loss 1.0",
+                (
+                    "muon_matched_givens_feedback_cap "
+                    '{"active_layers":3,"max_pre_cap_nominal_steps":0.7,"step":1}'
+                ),
+            ]
+        )
+        self.assertEqual(
+            parse_feedback_cap_events(text),
+            [
+                {
+                    "active_layers": 3,
+                    "max_pre_cap_nominal_steps": 0.7,
+                    "step": 1,
+                }
+            ],
         )
         self.assertEqual(
             task_frame_preflight_metadata({}, effective_warmup_updates=1),
