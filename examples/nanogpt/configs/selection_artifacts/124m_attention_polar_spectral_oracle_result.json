@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_124m_attention_polar_spectral_oracle_record_v1",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does the remaining attention direction require singular-value motion that orthogonal Cayley charts cannot represent?",
+  "analysis": {
+    "source_commit": "8fadc74",
+    "entrypoint": "examples.nanogpt.analyze_attention_polar_spectral_oracle",
+    "command": "CUDA_VISIBLE_DEVICES=0 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -m examples.nanogpt.analyze_attention_polar_spectral_oracle --probe-dir /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/y400_mai_v3_124m_dense_attention_trajectory_5tpp_lr24e4/optimizer_probe --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/analysis/attention_polar_spectral_20260804 --device cuda",
+    "device": "Y400 GPU0, read-only offline analysis",
+    "elapsed_seconds": 15.676793575286865,
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "42363bec8143315a37b1210d6b2fed395cf180baf54f6ab145a1c9082bdf0a69",
+      "step_000594.pt": "bbd88e2da2693ade96d24592e260491411ace875e0643bf69211bf16930ae990",
+      "step_001188.pt": "3015e7ffaad8a409f0b2bbdd69a7bf315e2651cb2f7ba799a88f703f2586ae81",
+      "step_001782.pt": "83e0bc5c54ed630296dd3175e4ccf82fbc4def46f2ce9927914dbfeb70c86fe5",
+      "step_002372.pt": "a10296b79be6f270d4f1ba8ce2631f30e850b9b1b2b357dd316e0153953ff434"
+    },
+    "raw_result_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/analysis/attention_polar_spectral_20260804/attention_polar_spectral_result.json",
+    "raw_result_sha256": "a4ab40406c704311b1a47f11915873b0ebc95626d429fefba1bc1f73a2d0a728",
+    "cells_csv_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/analysis/attention_polar_spectral_20260804/attention_polar_spectral_cells.csv",
+    "cells_csv_sha256": "56475957bd067a67be5a9dccbd7849252ef6042dff96a8e8fe470b9906bc9fe9",
+    "run_log_sha256": "6446f8ee1adae7f80490975c3daf0cab1ebdfa124527cd90d515b13f37c06e55"
+  },
+  "aggregate_direction_energy_fraction": {
+    "clipped_task_gradient_spectral": 0.0015555334622351332,
+    "muon_applied_spectral": 0.0029517059151582064
+  },
+  "muon_applied_spectral_fraction_by_target": {
+    "qk_shared": 0.0037096810982297176,
+    "v": 0.0027996241989754105,
+    "cproj": 0.00207270105283473
+  },
+  "muon_applied_spectral_fraction_by_step": {
+    "0": 0.01962016542010557,
+    "594": 0.003313100706029654,
+    "1188": 0.0018564652653689884,
+    "1782": 0.0019956641398828395,
+    "2372": 0.0021429691796635694
+  },
+  "decision": {
+    "material_spectral_threshold": 0.1,
+    "material_spectral_component": false,
+    "classification": "KEEP_FOCUS_ON_ORBIT_OPTIMIZATION",
+    "reason": "Only 0.156% of clipped-gradient energy and 0.295% of dense Muon-applied direction energy lie in singular-value-changing coordinates. More than 99.7% of the applied direction is orientation/orbit motion, so a current-SVD gain chart targets the wrong residual. The discrepancy between clipped-gradient and Muon-applied directions must remain explicit in the next optimizer test."
+  },
+  "limitations": [
+    "This is an oracle on one dense 124M/5-TPP Muon trajectory, not a trained generated model.",
+    "The polar split assumes a simple full-rank singular spectrum; per-cell adjacent-gap diagnostics are retained in the raw result.",
+    "The result rejects spectral modulation as the leading missing component but does not prove that the current finite-rank Cayley chart or AdamW coordinate optimizer can realize the full bilateral orbit efficiently."
+  ]
+}
