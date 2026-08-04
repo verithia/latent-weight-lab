@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_124m_attention_cayley_basis_drift_fixed_right_result_v1",
+  "recorded_at": "2026-08-04",
+  "checkpoint_geometry": {
+    "source_commit": "e53e92e2d0e888448df79fb24dae82d3d66e077f",
+    "entrypoint": "examples.nanogpt.analyze_attention_cayley_checkpoint_geometry",
+    "adamw_control": {
+      "checkpoint_sha256": "2a64053887177a292aad73725f1b97be191292249ecb48eb5880724d70f720e3",
+      "result_sha256": "669556ef01c5a487ab4c412127018749008201d2320902fbc93847e1f63bdc9c",
+      "right_subspace_mean_angle_degrees": 19.518165957405472,
+      "right_subspace_projector_distance": 0.36804512820931373,
+      "fixed_right_generator_relative_error": 0.6106635559071291,
+      "maximum_cayley_angle_degrees": 126.0037547778492
+    },
+    "factor_muon": {
+      "checkpoint_sha256": "9e054ca49c0d5628fae5d2538e7be9f71c41451ce2d343b6a6efce7f5ccdecf6",
+      "result_sha256": "c70555edfe6012ea8c9d14e482860ebecc8126a2991cf378627bf2db3133fdef",
+      "right_subspace_mean_angle_degrees": 66.79165250539857,
+      "right_subspace_projector_distance": 0.9099633552074317,
+      "fixed_right_generator_relative_error": 1.0742884321825585,
+      "maximum_cayley_angle_degrees": 166.85889473737768
+    }
+  },
+  "seeded_fixed_right_terminal_oracle": {
+    "source_commit": "86e395959a2d25a4f9473205edadfddf5f9d1e4c",
+    "source_sha256": "f9431e907d4b714901a8a28048b19be900e4c5e8d2b70e3443e229d8684ff1fd",
+    "entrypoint": "examples.nanogpt.analyze_attention_fixed_right_tangent",
+    "command": "CUDA_VISIBLE_DEVICES=0 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_attention_fixed_right_tangent --probe-dir /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/y400_mai_v3_124m_dense_attention_trajectory_5tpp_lr24e4/optimizer_probe --production-config examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/analysis/attention_fixed_right_qk32_terminal_20260804 --steps 2372 --device cuda",
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "raw_result_sha256": "e1e3d3cf9d38db5eb2ecdf049a7ec34d97bbceedba501705dccb66fd61f226f9",
+    "cells_csv_sha256": "ea752e484b044ab6293c3496e852abb801ba43915562135dbb960910ccebf2b7",
+    "run_log_sha256": "c41db98f5d7d9e82e96a24250aadb7f22ad4427a2a94476811b5da89802ba704",
+    "cells": 15,
+    "weighted_dense_muon_direction_recovery": 0.0441500855921548,
+    "by_target": {
+      "qk_shared": 0.06704826044049038,
+      "v": 0.042658973775003474,
+      "cproj": 0.011337439429552124
+    },
+    "maximum_cg_relative_normal_residual": 9.999968265667347e-08,
+    "maximum_projection_orthogonality_error": 2.4194793065610357e-13
+  },
+  "decision": {
+    "classification": "REJECT_BLIND_SEEDED_FIXED_RIGHT_TRAINING_SCREEN",
+    "reason": "The current AdamW repair relies on material right-subspace motion, while the same-size seeded fixed-right chart can represent only 4.42% of the terminal dense Muon direction (1.13% for c-proj). Freezing the existing random frame would restore the intended fixed mapping but remove most of the mechanism that produced the measured CE gain.",
+    "next_test": "Before any training, compare parameter-free state-derived right frames: exact current-weight singular frames as an upper diagnostic and fixed-seed randomized range frames as the implementable approximation. Admit a candidate only if direction recovery materially exceeds the seeded 4.42% ceiling without using the dense target direction to choose the basis."
+  }
+}

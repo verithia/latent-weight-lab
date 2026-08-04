@@ -213,6 +213,8 @@ def fixed_frames(
     base_seed: int,
     layer: int,
     target: str,
+    basis: str = "seeded",
+    power_iterations: int = 0,
 ) -> tuple[torch.Tensor | None, torch.Tensor | None]:
     input_chart, output_chart = make_charts(
         weight=weight,
@@ -221,6 +223,47 @@ def fixed_frames(
         layer=layer,
         target=target,
     )
+    if basis not in {"seeded", "weight_svd", "weight_random_range"}:
+        raise ValueError(f"unsupported right basis: {basis}")
+    if power_iterations < 0:
+        raise ValueError("power_iterations must be nonnegative")
+    if basis == "weight_svd":
+        output_vectors, _, input_vh = torch.linalg.svd(
+            weight, full_matrices=False
+        )
+        return (
+            input_vh[:rank].T.contiguous() if input_chart is not None else None,
+            output_vectors[:, :rank].contiguous()
+            if output_chart is not None
+            else None,
+        )
+    if basis == "weight_random_range":
+        metadata = TARGETS[target]
+
+        def random_matrix(rows: int, seed_offset: int) -> torch.Tensor:
+            generator = torch.Generator(device="cpu")
+            generator.manual_seed(base_seed + layer * 64 + seed_offset)
+            return torch.randn(rows, rank, generator=generator).to(
+                device=weight.device, dtype=weight.dtype
+            )
+
+        input_frame = None
+        if input_chart is not None:
+            sample = weight.T @ random_matrix(
+                weight.shape[0], int(metadata["input_seed_offset"])
+            )
+            for _ in range(power_iterations):
+                sample = weight.T @ (weight @ sample)
+            input_frame = torch.linalg.qr(sample, mode="reduced").Q
+        output_frame = None
+        if output_chart is not None:
+            sample = weight @ random_matrix(
+                weight.shape[1], int(metadata["output_seed_offset"])
+            )
+            for _ in range(power_iterations):
+                sample = weight @ (weight.T @ sample)
+            output_frame = torch.linalg.qr(sample, mode="reduced").Q
+        return input_frame, output_frame
     frames = []
     for chart in (input_chart, output_chart):
         frames.append(
@@ -269,6 +312,12 @@ def main() -> None:
     parser.add_argument("--cg-iterations", type=int, default=80)
     parser.add_argument("--cg-tolerance", type=float, default=1e-7)
     parser.add_argument("--ridge", type=float, default=1e-12)
+    parser.add_argument(
+        "--basis",
+        choices=("seeded", "weight_svd", "weight_random_range"),
+        default="seeded",
+    )
+    parser.add_argument("--power-iterations", type=int, default=0)
     args = parser.parse_args()
     started = time.time()
     layers = parse_int_list(args.layers)
@@ -329,6 +378,8 @@ def main() -> None:
                     base_seed=base_seed,
                     layer=layer,
                     target=target_name,
+                    basis=args.basis,
+                    power_iterations=args.power_iterations,
                 )
                 projected, diagnostics = project_fixed_right_tangent(
                     weight=weight,
@@ -368,7 +419,7 @@ def main() -> None:
     result = {
         "schema_version": "mai_124m_attention_fixed_right_tangent_v1",
         "scientific_question": (
-            "How much exact dense Muon direction can the seeded fixed-right "
+            "How much exact dense Muon direction can a non-learned-right "
             "QK32/V16/c-proj8 Cayley tangent represent?"
         ),
         "source_commit": git_commit(Path(__file__).resolve().parents[2]),
@@ -389,6 +440,11 @@ def main() -> None:
             "maximum_iterations": args.cg_iterations,
             "tolerance": args.cg_tolerance,
             "ridge": args.ridge,
+        },
+        "basis": {
+            "kind": args.basis,
+            "power_iterations": args.power_iterations,
+            "uses_dense_direction_to_choose_basis": False,
         },
         "aggregate": weighted_summary(rows),
         "by_target": by_target,
