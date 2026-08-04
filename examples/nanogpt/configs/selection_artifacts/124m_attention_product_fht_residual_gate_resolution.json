@@ -1,0 +1,59 @@
+{
+  "schema_version": "mai_124m_attention_product_fht_residual_gate_resolution_v1",
+  "artifact_kind": "pre_execution_oracle_implementation_binding",
+  "recorded_at": "2026-08-04",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_plan.json",
+    "sha256": "e4f96d76d133e9584639fb0b6ed015d83338b56b57e681cfed3206f6ae09415a"
+  },
+  "oracle_entrypoint": "examples.nanogpt.analyze_attention_product_fht_residual_tangent",
+  "implementation_source_sha256": "96a25909c10b390732f59c038ddf5d00778c4bec49772617acc4cf481b3f25b9",
+  "implementation_test_sha256": "4237a940c6aa68ce6afd4c39f975708ffae0e902c4caa4a2abb65135119ca77d",
+  "geometry_resolution": {
+    "base_seed": 1000,
+    "layer_seed_stride": 8,
+    "target_seed_offsets": {
+      "attn.c_attn": 0,
+      "attn.c_proj": 1
+    },
+    "factors": [6, 12],
+    "diagonal_scale": 1.0,
+    "residual_definition": "W(D) - W(0)",
+    "initial_diagonal_coordinates": 0.0,
+    "initial_residual": 0.0,
+    "learned_dense_basis": false
+  },
+  "solver": {
+    "method": "batched conjugate gradient on J^T J plus registered ridge",
+    "maximum_iterations": 100,
+    "relative_normal_residual_tolerance": 1e-6,
+    "ridge": 1e-8,
+    "projection_orthogonality_threshold": 1e-4
+  },
+  "inputs": {
+    "layers": [0, 3, 6, 9, 11],
+    "phase_boundaries": [0, 60, 120, 180, 238],
+    "optimizer_probe_steps": [0, 60, 120, 180],
+    "targets": ["attn.c_attn", "attn.c_proj"],
+    "primary_kind": "exact dense Muon applied direction per learning rate",
+    "secondary_kind": "dense phase chord"
+  },
+  "decision_rule": {
+    "aggregate_recovery_minimum": 0.10,
+    "normalized_enrichment_minimum": 2.0,
+    "per_target_recovery_minimum": 0.02,
+    "maximum_projection_orthogonality_error": 1e-4,
+    "promote_at_most_one": true,
+    "selection_order": [6, 12],
+    "no_posthoc_threshold_changes": true
+  },
+  "execution_policy": {
+    "parameter_updates": 0,
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "execution_commit_rule": "run only from the clean pushed commit containing this resolution and the bound source hashes"
+  }
+}
