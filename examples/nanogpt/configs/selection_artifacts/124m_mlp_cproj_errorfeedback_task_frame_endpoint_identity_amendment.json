@@ -1,0 +1,43 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_endpoint_identity_amendment_v1",
+  "registered_at": "2026-08-05",
+  "parent_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_endpoint_plan.json",
+    "sha256": "8dda3ef994f003ceceec1a7fd9952a952e545558f29adbff044a311aa73b7d62"
+  },
+  "trigger": "The first real-checkpoint loader invocation failed before model evaluation or any parameter update because the mathematically identity pre-GELU FHT basis/inverse round trip was not bitwise identical in FP32.",
+  "observed_without_loss_evaluation": {
+    "layers": 12,
+    "pregelu_weight_max_absolute_difference_range": [
+      1.6763806343078613e-08,
+      2.2351741790771484e-08
+    ],
+    "pregelu_weight_rms_difference_range": [
+      2.9530244916031734e-09,
+      3.0366600345388406e-09
+    ],
+    "pregelu_weight_relative_frobenius_difference_range": [
+      1.536127456347458e-07,
+      1.53835131300184e-07
+    ],
+    "postgelu_cproj_weight_max_absolute_difference": 0.0,
+    "postgelu_cproj_weight_relative_frobenius_difference": 0.0,
+    "losses_observed": 0,
+    "updates_applied": 0
+  },
+  "amendment": {
+    "pregelu_identity_max_absolute_tolerance": 3e-08,
+    "pregelu_identity_relative_frobenius_tolerance": 2e-07,
+    "postgelu_identity_remains_bitwise_exact": true,
+    "endpoint_identity_check": "Evaluate the all-zero frame and the same checkpoint with the frame disabled on the separate preflight safety tokens; require absolute CE difference at most 1e-6 before any update.",
+    "frozen_state_bitwise_requirement": "unchanged; every non-coordinate state tensor must remain bitwise identical across preflight updates",
+    "rationale": "The discrepancy is a deterministic normalized-FHT floating-point round trip at about 1.54e-7 relative Frobenius error, not a learned or validation-selected perturbation. Replacing it with a branch at zero would erase the required coordinate gradient, while residualizing the operator would change the preregistered chart away from zero. A strict roundoff bound plus a complete-model CE identity comparison preserves the intended test."
+  },
+  "unchanged": [
+    "all optimization tokens, seeds, updates, learning rate, and optimizer fields",
+    "all evaluation windows, ablations, thresholds, and decision rules",
+    "all structure dimensions and fixed bases",
+    "the 20 percent MFU and CE safety gates",
+    "no automatic causal training authorization"
+  ]
+}

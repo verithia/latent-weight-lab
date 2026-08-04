@@ -104,3 +104,14 @@ def test_identity_materialized_muon_chart_preserves_weight_bitwise() -> None:
     )
     charted = mlp._materialize_charted_cproj_weight(mlp.c_proj.weight)
     assert torch.equal(charted, mlp.c_proj.weight)
+
+
+def test_identity_pregelu_frame_is_bounded_to_fht_roundoff() -> None:
+    model = make_model()
+    mlp = model.transformer.h[0].mlp
+    base = mlp._cfc_base_weight()
+    delta = (
+        mlp._materialize_charted_cfc_weight(base) - base
+    ).detach().float()
+    assert float(delta.abs().max()) <= 3e-8
+    assert float(delta.norm() / base.float().norm()) <= 2e-7

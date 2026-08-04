@@ -56,6 +56,9 @@ from examples.nanogpt.train import TokenBatchSource
 
 
 PLAN_NAME = "124m_mlp_cproj_errorfeedback_task_frame_endpoint_plan.json"
+IDENTITY_AMENDMENT_NAME = (
+    "124m_mlp_cproj_errorfeedback_task_frame_endpoint_identity_amendment.json"
+)
 PARENT_RESULT_NAME = "124m_mlp_cproj_error_feedback_0p5tpp_result.json"
 INTERVENTION_RESULT_NAME = (
     "124m_mlp_cproj_hybrid_endpoint_interpolation_result.json"
@@ -202,11 +205,19 @@ def load_frame_model(checkpoint_path: Path, device: str) -> GPT:
         mlp = block.mlp
         cfc_base = mlp._cfc_base_weight()
         cproj_base = mlp._cproj_base_weight()
-        if not torch.equal(
-            mlp._materialize_charted_cfc_weight(cfc_base), cfc_base
+        cfc_identity_delta = (
+            mlp._materialize_charted_cfc_weight(cfc_base) - cfc_base
+        ).float()
+        cfc_relative = float(
+            cfc_identity_delta.norm() / cfc_base.float().norm()
+        )
+        if (
+            float(cfc_identity_delta.abs().max()) > 3e-8
+            or cfc_relative > 2e-7
         ):
             raise RuntimeError(
-                f"layer {layer} pre-GELU identity is not bitwise exact"
+                f"layer {layer} pre-GELU identity exceeds the registered "
+                "roundoff bound"
             )
         if not torch.equal(
             mlp._materialize_charted_cproj_weight(cproj_base), cproj_base
@@ -221,6 +232,7 @@ def input_paths(root: Path, args: argparse.Namespace) -> dict[str, Path]:
     artifact_root = root / "examples/nanogpt/configs/selection_artifacts"
     return {
         "checkpoint": args.checkpoint,
+        "identity_amendment": artifact_root / IDENTITY_AMENDMENT_NAME,
         "parent_result": artifact_root / PARENT_RESULT_NAME,
         "endpoint_intervention_result": artifact_root / INTERVENTION_RESULT_NAME,
         "dataset_manifest": args.data_dir / "manifest.json",
@@ -233,6 +245,7 @@ def validate_input_hashes(
     paths = input_paths(root, args)
     expected = {
         "checkpoint": args.checkpoint_sha256,
+        "identity_amendment": args.identity_amendment_sha256,
         "parent_result": args.parent_result_sha256,
         "endpoint_intervention_result": args.intervention_result_sha256,
         "dataset_manifest": args.manifest_sha256,
@@ -433,6 +446,32 @@ def validate_mfu_certificate(
         raise ValueError("MFU certificate is not marked passed")
 
 
+def evaluate_without_frames(
+    model: GPT, batches: list[torch.Tensor], device: str
+) -> float:
+    suspended: list[tuple[object, object, object, object]] = []
+    for block in model.transformer.h:
+        mlp = block.mlp
+        suspended.append(
+            (
+                mlp,
+                mlp.pregelu_block_rotation,
+                mlp.hidden_block_rotation,
+                mlp.output_block_rotation,
+            )
+        )
+        mlp.pregelu_block_rotation = None
+        mlp.hidden_block_rotation = None
+        mlp.output_block_rotation = None
+    try:
+        return evaluate_ce(model, batches, device)
+    finally:
+        for mlp, pregelu, hidden, output in suspended:
+            mlp.pregelu_block_rotation = pregelu
+            mlp.hidden_block_rotation = hidden
+            mlp.output_block_rotation = output
+
+
 def run_preflight(args: argparse.Namespace) -> None:
     output = args.output.resolve()
     if output.exists():
@@ -489,7 +528,16 @@ def run_preflight(args: argparse.Namespace) -> None:
     }
     error: Exception | None = None
     try:
+        parent_reference_ce = evaluate_without_frames(
+            model, safety_batches, args.device
+        )
         initial_ce = evaluate_ce(model, safety_batches, args.device)
+        identity_ce_difference = initial_ce - parent_reference_ce
+        if abs(identity_ce_difference) > 1e-6:
+            raise RuntimeError(
+                "zero-coordinate complete-model CE identity failed: "
+                f"{identity_ce_difference:+.9f}"
+            )
         peak_tflops = empirical_bf16_gemm_peak_tflops(
             args.gemm_size, args.gemm_warmups, args.gemm_trials
         )
@@ -552,6 +600,9 @@ def run_preflight(args: argparse.Namespace) -> None:
         certificate["stability"].update(
             {
                 "initial_ce": initial_ce,
+                "parent_reference_ce": parent_reference_ce,
+                "identity_ce_difference": identity_ce_difference,
+                "identity_ce_absolute_tolerance": 1e-6,
                 "final_ce": final_ce,
                 "ce_increase": ce_increase,
                 "finite": bool(finite),
@@ -892,6 +943,13 @@ def main() -> None:
         default=(
             "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9"
             "a17312071755063"
+        ),
+    )
+    parser.add_argument(
+        "--identity-amendment-sha256",
+        default=(
+            "67abd0ecdfdee12c149c8fb2c1c85ec05689eef248c90ad44"
+            "4e6726bf7bcffb6"
         ),
     )
     parser.add_argument(
