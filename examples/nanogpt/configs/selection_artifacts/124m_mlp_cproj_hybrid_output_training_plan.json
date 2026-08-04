@@ -1,0 +1,116 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_hybrid_output_training_plan_v1",
+  "recorded_at": "2026-08-05",
+  "status": "registered_before_production_implementation",
+  "scientific_question": "Does the preregistered task16-then-minimax8 output composition improve the accepted causal 124M c_proj error-feedback path when every selector input is restricted to online training state?",
+  "identity": {
+    "hybrid_zero_update_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_result.json",
+    "hybrid_zero_update_result_sha256": "0e8e5b3726c29e005f0bcd85c9515b32a71ef8b414dc0e928c7fecc6db106eae",
+    "causal_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+    "causal_parent_config_sha256": "fb7d8f5b4e5f8a98a30fa6216080146622f018403a5b7f8dddc1875803a81cd9",
+    "causal_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_0p5tpp_result.json",
+    "causal_parent_result_sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "commit and push this immutable plan before production code; later bind the exact config, code hashes, tests, and MFU certificate before training"
+  },
+  "candidate": {
+    "selected_order": "task16_then_minimax8",
+    "materialization": "persistent dense c_proj weight buffer owned by the Muon chart optimizer; no dense trainable parameter and no inference-time transform",
+    "hidden_parent_stages": 64,
+    "hidden_residual_stages": 24,
+    "output_task_givens_stages": 16,
+    "output_directed_incoming_per_target": 8,
+    "output_control_stages_for_trust_only": 32,
+    "matching_neighbors": 64,
+    "directed_ridge_ratio": 1e-6,
+    "functional_sample_cap": 2048,
+    "error_feedback": true,
+    "error_feedback_decay": 1.0,
+    "coordinates_per_layer": 147456,
+    "additional_trainable_parameters": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0
+  },
+  "causal_online_substitution": {
+    "activation_rows": "the first at most 2048 detached post-GELU c_proj input rows observed in the current optimizer step; no validation or future-token activation is available",
+    "task_givens_gradient": "the current globally clipped c_proj training gradient",
+    "directed_minimax_first_gradient": "the current globally clipped c_proj training gradient",
+    "directed_minimax_second_gradient": "the current Muon momentum-combined pre-polar matrix formed after updating the persisted momentum buffer",
+    "holdout_or_validation_use": false,
+    "sequence": [
+      "form the exact current dense Muon request including weight decay and add decay-1 compression feedback",
+      "apply fresh hidden64 and residual hidden24 charts",
+      "compute a fresh Frobenius output32 fit only to obtain the output-update energy cap",
+      "select task16 pairs with normalized residual plus current-gradient predicted-descent score and fit ordinary Frobenius angles",
+      "fit directed8 on the remaining residual using current post-GELU activations and per-edge minimax agreement of current-gradient and momentum-combined views",
+      "compose task16 then directed8 exactly, project the combined output delta to the output32 energy cap if required, apply weight decay in the accepted ordering, and store corrected target minus applied update as compression residual"
+    ]
+  },
+  "implementation_gates": {
+    "required": [
+      "focused numerical tests reproduce exact task and directed transforms and the combined trust projection",
+      "configuration validation fails closed for incompatible target, stage, neighbor, sample-cap, ridge, optimizer, and method settings",
+      "the module records at most one bounded activation sample per optimizer step and clears all transient context after step or zero_grad",
+      "checkpoint state includes materialized weight, chart selections, optimizer step, Muon momentum, and compression residual, but excludes transient activations",
+      "an interrupted two-step run resumed from an exact checkpoint is bitwise equal in model and optimizer tensors to uninterrupted execution",
+      "existing Muon-matched Givens behavior remains unchanged when the hybrid option is disabled"
+    ]
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "dtype": "bfloat16",
+    "minimum_mfu_fraction": 0.20,
+    "required": [
+      "all timed losses and diagnostics finite",
+      "native fresh-matching extension loaded and validated",
+      "candidate path active in all 12 c_proj layers",
+      "measured MFU at least 0.20",
+      "peak VRAM below physical GPU capacity",
+      "workspace remains below 256 GiB and real filesystem headroom remains positive"
+    ],
+    "failure": "optimize and repeat only the directly polled performance preflight; do not launch a watchdog or scientific training until every performance gate passes"
+  },
+  "scientific_run": {
+    "authorized_only_after_mfu_pass": true,
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_hybrid_output_errorfeedback_0p5tpp.json",
+    "host": "PRO6",
+    "gpu": 0,
+    "max_iters": 238,
+    "tokens_per_parameter": 0.5,
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "eval_seed": 20260715,
+    "fixed_eval_iters": 400,
+    "attention_structure": "unchanged accepted full-attention replacement",
+    "c_fc_structure": "dense causal isolation control",
+    "checkpoint_history": false,
+    "exact_resume_v2_required": true,
+    "short_run_monitoring": "direct foreground polling; no watchdog and no callback"
+  },
+  "decision_rule": {
+    "primary_metric": "fixed-window terminal step-238 validation cross entropy",
+    "causal_parent_validation_ce": 5.527365207672119,
+    "accepted_attention_only_validation_ce": 5.4918,
+    "global_stability_ceiling": 5.5918,
+    "minimum_meaningful_parent_improvement": 0.005,
+    "promotion_ceiling": 5.522365207672119,
+    "pass": "terminal validation CE is finite and at most 5.522365207672119, with a readable finite exact-resume checkpoint and no structural, identity, or performance-gate violation",
+    "failure": "do not scale or combine with c_fc; close this linear output-composition path if it does not improve the accepted parent by at least 0.005 CE",
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "production_implementation": true,
+    "correctness_and_resume_tests": true,
+    "performance_preflight_after_tests": true,
+    "scientific_training_before_mfu_pass": false,
+    "larger_rung": false,
+    "automatic_rerun": false
+  }
+}
