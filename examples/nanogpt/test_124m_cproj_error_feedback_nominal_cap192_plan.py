@@ -22,6 +22,11 @@ MFU_RESULT = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cproj_error_feedback_nominal_cap192_mfu_result.json"
 )
+EXECUTION_AMENDMENT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_error_feedback_nominal_cap192_execution_amendment.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -140,3 +145,23 @@ def test_active_path_mfu_result_authorizes_exactly_one_short_run() -> None:
     assert result["decision"]["one_238_update_scientific_run_authorized"] is True
     assert result["decision"]["automatic_rerun_authorized"] is False
     assert result["decision"]["cap_sweep_authorized"] is False
+
+
+def test_zero_update_execution_amendment_changes_only_launcher_envelope() -> None:
+    amendment = load(EXECUTION_AMENDMENT)
+    assert sha256(REPO / amendment["candidate_config"]["path"]) == amendment[
+        "candidate_config"
+    ]["sha256"]
+    assert sha256(REPO / amendment["mfu_result"]["path"]) == amendment[
+        "mfu_result"
+    ]["sha256"]
+    rejected = amendment["rejected_launch"]
+    assert rejected["parameter_updates"] == 0
+    assert rejected["scientific_evaluations"] == 0
+    assert rejected["checkpoint_created"] is False
+    assert rejected["scientific_information_used"] is False
+    correction = amendment["correction"]
+    assert correction["candidate_config_changed"] is False
+    assert correction["decision_rule_changed"] is False
+    assert correction["scientific_run_count_consumed"] == 0
+    assert amendment["authorization"]["one_valid_238_update_launch_remains_authorized"] is True

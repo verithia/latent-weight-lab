@@ -1,0 +1,40 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_nominal_cap192_execution_amendment_v1",
+  "recorded_at": "2026-08-05",
+  "status": "registered_after_zero_update_envelope_rejection_before_valid_launch",
+  "candidate_config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_cap192_0p5tpp.json",
+    "sha256": "e40618e7f7f0a5a98df6ae26c0cfab13ed8d9217677556c5c02cb8d830af3ba4"
+  },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_nominal_cap192_mfu_result.json",
+    "sha256": "e948496c2de0fc56ba1259603d67af8925c7d97ebacbb0ffe050456c03c73615"
+  },
+  "rejected_launch": {
+    "exit_code": 1,
+    "reason": "registered launch requires EXPERIMENT_PROVENANCE_PATH and EXPERIMENT_PROVENANCE_SHA256",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/scientific.log",
+    "log_lines": 14,
+    "model_constructed": false,
+    "optimizer_constructed": false,
+    "parameter_updates": 0,
+    "scientific_evaluations": 0,
+    "checkpoint_created": false,
+    "scientific_information_used": false
+  },
+  "correction": {
+    "only_change": "the launcher envelope exports the already-required immutable provenance path and SHA-256 before invoking the unchanged registered command",
+    "experiment_provenance_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/prelaunch_run_metadata.json",
+    "experiment_provenance_sha256_source": "SHA-256 of the completed prelaunch metadata file",
+    "candidate_config_changed": false,
+    "decision_rule_changed": false,
+    "random_seed_changed": false,
+    "scientific_run_count_consumed": 0
+  },
+  "authorization": {
+    "one_valid_238_update_launch_remains_authorized": true,
+    "automatic_rerun_after_any_parameter_update": false,
+    "cap_sweep_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
