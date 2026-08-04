@@ -1,0 +1,120 @@
+{
+  "authorization": {
+    "callbacks": false,
+    "candidate_training": "at most one 124M/0.5-TPP run only after the oracle passes",
+    "dense_replay": "one exact 238-update PRO6 replay after MFU pass",
+    "watchdog": false,
+    "zero_update_oracle": true
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "promote": "aggregate recovery >= 0.10, enrichment >= 2.0, every target recovery >= 0.02, exact projection residual checks pass, and a later real-training preflight reaches MFU >= 0.20",
+    "promote_at_most_one": true,
+    "reject": "no factor count meets every registered threshold; close this fixed-basis nonlinear residual family without a training run"
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_replay_lr24e4.json",
+    "candidate_config_sha256": "f5ffdc737b6358b0f9c5b85d01f2f78b45182b3295eabd8d70ee65bbeb726c6d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "use a clean pushed commit containing this immutable plan",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_attention_trajectory_lr24e4.json",
+    "source_config_sha256": "3c712e68108fec9a71064ed8b8a5fb836992d266f0d56b86fbe413c5ebd4a892"
+  },
+  "oracle": {
+    "candidate_family": "zero-preserving additive residual W(D)-W(0), where W is a product of fixed seeded global FHT/sign mixers and learned per-channel diagonals",
+    "factors": [
+      6,
+      12
+    ],
+    "learned_dense_basis": false,
+    "normalization": "compare recovery with coordinate_fraction and report recovery/coordinate_fraction enrichment",
+    "parameter_updates": 0,
+    "primary_metric": "dense-Muon applied-direction energy recovery",
+    "selection_data": "only the registered dense replay probes",
+    "targets": [
+      "attn.c_attn",
+      "attn.c_proj"
+    ]
+  },
+  "performance_gate": {
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_replay_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "direct_foreground_polling": true,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "prior_evidence": {
+    "best_attention_5tpp_validation_ce": 3.6151,
+    "dense_5tpp_validation_ce": 3.5401,
+    "deployed_blockfht_recovery": 0.01002095,
+    "fixed_right_best_recovery": 0.0536304,
+    "global_fht_locality_control_delta_ce": 0.0053,
+    "interpretation": "The residual is an orientation problem, not isolated repeated-BlockFHT locality or scalar radial capacity.",
+    "remaining_gap_ce": 0.075
+  },
+  "recorded_at": "2026-08-04",
+  "replay": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_replay_lr24e4.json",
+      "0",
+      "pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "optimizer_probe_steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/scientific",
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "snapshot_targets": [
+      "attn.c_attn",
+      "attn.c_proj"
+    ]
+  },
+  "schema_version": "mai_124m_attention_product_fht_residual_gate_plan_v1",
+  "scientific_question": "Can a zero-preserving product of fixed global FHT mixers and learned diagonals supply an attention residual tangent aligned with dense Muon without a learned dense/LoRA-like basis?",
+  "status": "registered_before_replay_preflight_or_oracle_implementation"
+}
