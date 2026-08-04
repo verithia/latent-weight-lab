@@ -162,6 +162,8 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_seed: int = 161803
     block_fht_mlp_cproj_muon_matched_givens_error_feedback: bool = False
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay: float = 1.0
+    block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after: float | None = None
+    block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction: float | None = None
     block_fht_mlp_cfc_functional_shear: bool = False
     block_fht_mlp_cfc_functional_shear_parent_stages: int = 64
     block_fht_mlp_cfc_functional_shear_stages: int = 24
@@ -4077,6 +4079,7 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
+                    group["cproj_error_feedback_decay_schedule"] = True
             if other:
                 fused_available = "fused" in inspect.signature(torch.optim.AdamW).parameters
                 use_fused = fused_available and device_type == "cuda"

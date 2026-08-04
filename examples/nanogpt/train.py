@@ -790,6 +790,57 @@ def apply_scheduled_lr(optimizer, lr: float) -> None:
         group["lr"] = lr * float(group.get("lr_scale", 1.0))
 
 
+def scheduled_cproj_error_feedback_decay(
+    *,
+    iter_num: int,
+    max_iters: int,
+    decay_before: float,
+    decay_after: float | None,
+    switch_fraction: float | None,
+) -> float:
+    """Resolve the c_proj carry decay for one deterministic update.
+
+    ``max_iters`` is the number of optimizer updates (updates are numbered
+    ``0 .. max_iters - 1``).  The registered fraction is converted with a
+    ceiling so the 120/238 replay boundary keeps updates 0..119 at the early
+    decay and switches update 120 onward.  Recomputing from ``iter_num`` makes
+    the schedule independent of checkpoint/resume boundaries.
+    """
+    if decay_after is None or switch_fraction is None:
+        return float(decay_before)
+    switch_iter = int(
+        math.ceil(float(max_iters) * float(switch_fraction) - 1e-12)
+    )
+    return (
+        float(decay_before)
+        if int(iter_num) < switch_iter
+        else float(decay_after)
+    )
+
+
+def apply_cproj_error_feedback_decay_schedule(
+    optimizer,
+    *,
+    iter_num: int,
+    max_iters: int,
+    decay_before: float,
+    decay_after: float | None,
+    switch_fraction: float | None,
+) -> float:
+    """Apply only to the tagged Muon-matched c_proj optimizer group."""
+    decay = scheduled_cproj_error_feedback_decay(
+        iter_num=iter_num,
+        max_iters=max_iters,
+        decay_before=decay_before,
+        decay_after=decay_after,
+        switch_fraction=switch_fraction,
+    )
+    for group in optimizer.param_groups:
+        if group.get("cproj_error_feedback_decay_schedule", False):
+            group["error_feedback_decay"] = decay
+    return decay
+
+
 def block_fht_latents(model: GPT) -> list[torch.Tensor]:
     return [module.generator.latent for module in model.modules() if isinstance(module, BlockFHTLinear)]
 
@@ -1154,6 +1205,16 @@ def parse_args() -> argparse.Namespace:
         "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-decay",
         type=float,
         default=1.0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-decay-after",
+        type=float,
+        default=None,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-switch-fraction",
+        type=float,
+        default=None,
     )
     parser.add_argument(
         "--block-fht-mlp-cfc-functional-shear",
@@ -1575,6 +1636,35 @@ def parse_args() -> argparse.Namespace:
                 "Muon-matched Givens c_proj error-feedback decay must be "
                 "in [0, 1]"
             )
+        decay_after = (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after
+        )
+        switch_fraction = (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction
+        )
+        if (decay_after is None) != (switch_fraction is None):
+            raise ValueError(
+                "Muon-matched Givens c_proj scheduled error feedback requires "
+                "both decay-after and switch-fraction"
+            )
+        if decay_after is not None:
+            if not namespace.block_fht_mlp_cproj_muon_matched_givens_error_feedback:
+                raise ValueError(
+                    "scheduled c_proj error-feedback decay requires error feedback"
+                )
+            if not math.isfinite(decay_after) or not 0.0 <= decay_after <= 1.0:
+                raise ValueError(
+                    "Muon-matched Givens c_proj decay-after must be in [0, 1]"
+                )
+            if (
+                not math.isfinite(switch_fraction)
+                or not 0.0 < switch_fraction < 1.0
+            ):
+                raise ValueError(
+                    "Muon-matched Givens c_proj switch-fraction must be in (0, 1)"
+                )
     if (
         namespace.block_fht_mlp_cfc_functional_shear
         and namespace.block_fht_mlp_cfc_directed_product
@@ -1993,6 +2083,14 @@ def main() -> None:
             args
             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
         ),
+        block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction
+        ),
         block_fht_mlp_cfc_functional_shear=(
             args.block_fht_mlp_cfc_functional_shear
         ),
@@ -2259,6 +2357,23 @@ def main() -> None:
         checkpoint_succeeded_this_iteration = False
         lr = cosine_lr(iter_num, args)
         apply_scheduled_lr(optimizer, lr)
+        apply_cproj_error_feedback_decay_schedule(
+            optimizer,
+            iter_num=iter_num,
+            max_iters=args.max_iters,
+            decay_before=(
+                args
+                .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
+            ),
+            decay_after=(
+                args
+                .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after
+            ),
+            switch_fraction=(
+                args
+                .block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction
+            ),
+        )
         raw_model.set_product_fht_factor_learning_rate(lr)
         # The final post-update iteration must be evaluated even when it falls
         # between periodic intervals; the OR avoids a duplicate at a boundary.

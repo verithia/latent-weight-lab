@@ -538,6 +538,16 @@ def test_gpt_wires_custom_cproj_into_muon_optimizer_and_stats() -> None:
         if isinstance(candidate, MuonMatchedGivens)
     ]
     assert len(custom) == 1
+    assert all(
+        group.get("cproj_error_feedback_decay_schedule") is True
+        for group in custom[0].param_groups
+    )
+    assert all(
+        not group.get("cproj_error_feedback_decay_schedule", False)
+        for candidate in optimizer.optimizers
+        if candidate is not custom[0]
+        for group in candidate.param_groups
+    )
     stats = model.block_fht_stats()
     assert stats["modules"] == 2
     assert stats["generated"] == 2 * 8 * 32
