@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_124m_attention_product_fht_residual_gate_mfu_result_v1",
+  "artifact_kind": "dense_attention_replay_performance_gate",
+  "recorded_at": "2026-08-04",
+  "classification": "DENSE_ATTENTION_REPLAY_MFU_PASS",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_plan.json",
+    "sha256": "e4f96d76d133e9584639fb0b6ed015d83338b56b57e681cfed3206f6ae09415a"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_replay_lr24e4.json",
+    "sha256": "f5ffdc737b6358b0f9c5b85d01f2f78b45182b3295eabd8d70ee65bbeb726c6d"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "4a93b8ea096352a82b822d2f0b8d917cbcd05561",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "include_diagnostic_io": true,
+    "warmup_updates": 1,
+    "timed_updates": 8
+  },
+  "measurement": {
+    "passed": true,
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.38656714872906056,
+    "iter_ms": 1214.6766666666667,
+    "tokens_per_second": 215813.8105339418,
+    "model_tflops": 161.18171497138277,
+    "empirical_bf16_gemm_peak_tflops": 416.95657662920746,
+    "peak_mib": 31243.45,
+    "diagnostic_snapshot_count": 2,
+    "diagnostic_snapshot_seconds": 0.11199999999999999
+  },
+  "artifacts": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/performance_preflight.json",
+    "certificate_sha256": "f57e795a6c3853c5b60f235aed9b67578781fcba6becdd3803e9ccf07103263d",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/performance_preflight.log",
+    "log_sha256": "85bcb1a82710869eff12dffe6f17d77de04f6a96ca54dff7f57f5d46c3035547"
+  },
+  "decision": {
+    "admitted": true,
+    "next_action": "run the exact registered 238-update dense replay with foreground polling and no watchdog"
+  }
+}
