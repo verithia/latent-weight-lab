@@ -1,0 +1,88 @@
+{
+  "authorization": {
+    "automatic_rerun": false,
+    "larger_rung": false,
+    "parameter_updates_persisted": 0,
+    "scientific_training": false,
+    "single_exact_mfu_preflight": true
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_halfswitch_0p5tpp.json",
+    "config_sha256": "9c112ab9816a6300f5798c933c8ba59aa456925f5fdd345e87697533f1e8f1c1",
+    "decay_after": 0.5,
+    "decay_before": 1.0,
+    "implementation_commit": "f11c020e669175906a56beba9a159f869259a627",
+    "max_iters": 238,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "switch_fraction": 0.5042016806722689,
+    "switch_iter": 120
+  },
+  "decision_rule": {
+    "pass": "exit zero, finite complete certificate bound to the exact config hash, all 8 timed updates present, both carry phases executed, native matcher validated, and MFU >= 0.20",
+    "reject": "MFU < 0.20, nonfinite path, incomplete timing, native validation failure, provenance mismatch, or nonzero exit",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "base_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+    "base_config_sha256": "fb7d8f5b4e5f8a98a30fa6216080146622f018403a5b7f8dddc1875803a81cd9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "selection_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_carry_schedule_result.json",
+    "selection_result_commit": "13d397f62ca939ce42d0ecb90d41d09a4e0800de",
+    "selection_result_sha256": "51beef439a8bc9fb765357d617883ae017dbba55369c3441bd0e89b605cb2152",
+    "source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "4a89b1b68d901072b39773ff2c461a1863765ccd4722ff7d6ddbb396d5a0e6aa",
+      "examples/nanogpt/model.py": "4f93fd50141c00858b9ff92e2149e29da04b40e52150111b9a77a29e20357e51",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "9532eabdf3538eca2c0774ab6f7e35cd05fd28a59c451cf9c41b64d0376cf0fc",
+      "examples/nanogpt/test_cproj_error_feedback_schedule.py": "8e87d6665b67f53a56397a263d57741b5a3b8f7cadaa0f32d974f67e63641ec5",
+      "examples/nanogpt/test_muon_matched_givens.py": "848c00e907ee9fb683ce5c4aea688af6542bf3d7b883a4775bd6837409e51775",
+      "examples/nanogpt/train.py": "1f81dc03a37b49fad8ef8348bbafffcde81a9af919420ba22b52b158d51764a5",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "protocol": {
+    "callback": false,
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_halfswitch_0p5tpp/performance_preflight.json",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "MAPPING_NETWORKS_NATIVE_CACHE=/mnt/ssd-data/orj/MappingNetworks/outputs/native_cache",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_halfswitch_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_halfswitch_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_halfswitch_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "denominator": "same-host empirical BF16 8192-square GEMM peak",
+    "execution": "direct foreground process polled through exit",
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_halfswitch_0p5tpp/performance_preflight.log",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "queue_worker": false,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "watchdog": false,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab"
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_mlp_cproj_half_switch_mfu_plan_v1",
+  "scientific_question": "Can the replay-selected halfway-bounded c_proj carry execute the exact real training path at >=20% MFU before loss validation?",
+  "status": "registered_before_exact_config_mfu_measurement"
+}
