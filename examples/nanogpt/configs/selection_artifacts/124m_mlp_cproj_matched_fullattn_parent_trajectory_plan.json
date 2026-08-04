@@ -1,0 +1,126 @@
+{
+  "authorization": {
+    "callbacks": false,
+    "endpoint_oracle": "one zero-update right/output32/output64 fixed-eval replay after trajectory acceptance",
+    "language_model_candidate_training": false,
+    "trajectory": "one exact 238-update matched-parent replay after MFU pass",
+    "watchdog": false
+  },
+  "confound": "The accepted output32 oracle replayed a fully dense-attention teacher, but the causal candidate used the original BlockFHT attention-only parent from initialization onward. The optimizer-selector correction did not remove this parent-model mismatch.",
+  "decision_rule": {
+    "candidate_passes_but_known_causal_run_fails": "classify true matched-parent closed-loop direction drift; then preregister an activation-weighted/current-task selector",
+    "neither_candidate_passes": "classify the old bilateral direction as dense-attention-specific; do not implement an activation metric around that direction",
+    "new_training_before_classification": false
+  },
+  "endpoint_oracle": {
+    "candidate_pass": "finite candidate validation CE at least 0.002 below right-only, candidate train CE no worse, and candidate validation distance from matched parent smaller than right-only",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/ckpt.pt",
+    "connectivity_target": "production_nondecay",
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/matched_parent_endpoint_oracle",
+    "selection_order": [
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "trajectory_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/parameter_trajectory",
+    "variants": [
+      "matched_parent_endpoint",
+      "hidden88_full_carry",
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ]
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp.json",
+    "candidate_config_sha256": "fb576d990db3aed24e0245fbef8a0b7eed72ee328612072d3b87c60fe4b5893a",
+    "causal_bilateral_result_sha256": "c2094f6098ca4ea3b2bb9a85f2e9493868cb9e288e9f73ce4fdc58aba339286d",
+    "corrected_dense_teacher_oracle_sha256": "f91f831734f6c171bd3ca62668a46f8052cd4b11b269945dc1f38d92645724b0",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "record the exact clean pushed commit containing this immutable plan",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "source_config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult1p00.json",
+    "source_config_sha256": "a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7"
+  },
+  "matched_parent": {
+    "block_fht_targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "method": "block_fht",
+    "mlp_c_fc": "dense",
+    "mlp_c_proj": "dense teacher trajectory",
+    "original_step60_validation_ce": 6.2184,
+    "original_terminal_validation_ce": 5.4918,
+    "snapshot_layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "snapshot_steps": "0 through 238 inclusive"
+  },
+  "performance_gate": {
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "direct_foreground_polling": true,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_mlp_cproj_matched_fullattn_parent_trajectory_plan_v1",
+  "scientific_question": "Does the bilateral c_proj endpoint gain survive when the teacher trajectory and evaluated checkpoint use the same original BlockFHT attention operator as the failed causal c_proj candidate?",
+  "status": "registered_before_performance_preflight_or_execution",
+  "trajectory_acceptance": {
+    "required": [
+      "MFU >= 0.20 with snapshot I/O charged",
+      "clean terminal step 238 and complete exact-resume checkpoint",
+      "239 snapshots for layers 0,3,6,9,11",
+      "dataset and fixed-evaluation digests match",
+      "all losses and floating optimizer/model state finite",
+      "absolute terminal validation CE delta from 5.4918 <= 0.03",
+      "absolute step-60 validation CE delta from 6.2184 <= 0.03"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "trajectory_execution": {
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp.json"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific"
+  }
+}
