@@ -114,6 +114,7 @@ class GPTConfig:
     block_fht_attn_cayley_ranks: dict[str, int] | None = None
     block_fht_attn_cayley_scale: float = 1.0
     block_fht_attn_cayley_seed: int = 618033
+    block_fht_attn_cayley_atlas_start_steps: tuple[int, ...] = ()
     block_fht_ffn_pregelu_gain: bool = False
     block_fht_ffn_pregelu_bias: bool = False
     block_fht_ffn_pregelu_bias_init: float = 0.0
@@ -1276,6 +1277,31 @@ class CausalSelfAttention(nn.Module):
                 "attention Cayley targets"
             )
         default_cayley_rank = int(config.block_fht_attn_cayley_rank)
+        atlas_start_steps = tuple(
+            int(step)
+            for step in config.block_fht_attn_cayley_atlas_start_steps
+        )
+        if atlas_start_steps:
+            if not cayley_targets:
+                raise ValueError(
+                    "attention Cayley atlas requires enabled Cayley targets"
+                )
+            if atlas_start_steps[0] != 0:
+                raise ValueError(
+                    "attention Cayley atlas must start with step 0"
+                )
+            if any(step < 0 for step in atlas_start_steps) or any(
+                later <= earlier
+                for earlier, later in zip(
+                    atlas_start_steps, atlas_start_steps[1:]
+                )
+            ):
+                raise ValueError(
+                    "attention Cayley atlas start steps must be strictly "
+                    "increasing nonnegative integers"
+                )
+        self.cayley_atlas_start_steps = atlas_start_steps
+        self.active_cayley_atlas_stage = max(len(atlas_start_steps) - 1, 0)
         cayley_rank_overrides = {
             str(target): int(rank)
             for target, rank in (
@@ -1340,13 +1366,15 @@ class CausalSelfAttention(nn.Module):
             features: int,
             seed_offset: int,
             target: str,
+            stage: int = 0,
         ) -> LearnedLowRankCayleyMix:
             return LearnedLowRankCayleyMix(
                 features,
                 cayley_ranks[target],
                 int(config.block_fht_attn_cayley_seed)
                 + layer_id * 64
-                + seed_offset,
+                + seed_offset
+                + stage * 104729,
                 coordinate_scale=float(config.block_fht_attn_cayley_scale),
             )
 
@@ -1416,6 +1444,63 @@ class CausalSelfAttention(nn.Module):
             )
             else None
         )
+
+        def cayley_atlas(
+            primary: LearnedLowRankCayleyMix | None,
+            features: int,
+            seed_offset: int,
+            target: str,
+        ) -> nn.ModuleList:
+            if primary is None or len(atlas_start_steps) <= 1:
+                return nn.ModuleList()
+            return nn.ModuleList(
+                [
+                    cayley_mix(
+                        features,
+                        seed_offset,
+                        target,
+                        stage=stage,
+                    )
+                    for stage in range(1, len(atlas_start_steps))
+                ]
+            )
+
+        self.qk_input_cayley_atlas = cayley_atlas(
+            self.qk_input_cayley,
+            config.n_embd,
+            0,
+            "attn.c_attn.qk_headwise",
+        )
+        self.qk_output_cayley_atlas = cayley_atlas(
+            self.qk_output_cayley,
+            2 * config.n_embd,
+            3,
+            "attn.c_attn.qk_headwise",
+        )
+        self.v_input_cayley_atlas = cayley_atlas(
+            self.v_input_cayley,
+            config.n_embd,
+            1,
+            "attn.c_attn.v",
+        )
+        self.v_output_cayley_atlas = cayley_atlas(
+            self.v_output_cayley,
+            config.n_embd,
+            4,
+            "attn.c_attn.v",
+        )
+        self.cproj_input_cayley_atlas = cayley_atlas(
+            self.cproj_input_cayley,
+            config.n_embd,
+            2,
+            "attn.c_proj",
+        )
+        self.cproj_output_cayley_atlas = cayley_atlas(
+            self.cproj_output_cayley,
+            config.n_embd,
+            5,
+            "attn.c_proj",
+        )
         self.attn_dropout = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
         self.n_head = config.n_head
@@ -1428,17 +1513,63 @@ class CausalSelfAttention(nn.Module):
                 torch.tril(torch.ones(config.block_size, config.block_size)).view(1, 1, config.block_size, config.block_size),
             )
 
+    @staticmethod
+    def _apply_cayley_atlas(
+        values: torch.Tensor,
+        primary: LearnedLowRankCayleyMix | None,
+        atlas: nn.ModuleList,
+        active_stage: int,
+    ) -> torch.Tensor:
+        result = primary(values) if primary is not None else values
+        for stage, chart in enumerate(atlas, start=1):
+            if stage > active_stage:
+                break
+            result = chart(result)
+        return result
+
+    def attention_cayley_stage_modules(
+        self,
+    ) -> tuple[tuple[LearnedLowRankCayleyMix, ...], ...]:
+        if not self.cayley_atlas_start_steps:
+            return ()
+        primary = tuple(
+            chart
+            for chart in (
+                self.qk_input_cayley,
+                self.qk_output_cayley,
+                self.v_input_cayley,
+                self.v_output_cayley,
+                self.cproj_input_cayley,
+                self.cproj_output_cayley,
+            )
+            if chart is not None
+        )
+        atlases = (
+            self.qk_input_cayley_atlas,
+            self.qk_output_cayley_atlas,
+            self.v_input_cayley_atlas,
+            self.v_output_cayley_atlas,
+            self.cproj_input_cayley_atlas,
+            self.cproj_output_cayley_atlas,
+        )
+        return (primary,) + tuple(
+            tuple(atlas[stage] for atlas in atlases if len(atlas) > stage)
+            for stage in range(len(self.cayley_atlas_start_steps) - 1)
+        )
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         bsz, seq_len, channels = x.size()
-        qk_input = (
-            self.qk_input_cayley(x)
-            if self.qk_input_cayley is not None
-            else x
+        qk_input = self._apply_cayley_atlas(
+            x,
+            self.qk_input_cayley,
+            self.qk_input_cayley_atlas,
+            self.active_cayley_atlas_stage,
         )
-        v_input = (
-            self.v_input_cayley(x)
-            if self.v_input_cayley is not None
-            else x
+        v_input = self._apply_cayley_atlas(
+            x,
+            self.v_input_cayley,
+            self.v_input_cayley_atlas,
+            self.active_cayley_atlas_stage,
         )
         if self.split_c_attn:
             assert self.c_attn_q is not None and self.c_attn_k is not None and self.c_attn_v is not None
@@ -1457,12 +1588,20 @@ class CausalSelfAttention(nn.Module):
         elif self.qk_headwise_c_attn:
             assert self.c_attn_qk_headwise is not None and self.c_attn_v is not None
             qk = self.c_attn_qk_headwise(qk_input)
-            if self.qk_output_cayley is not None:
-                qk = self.qk_output_cayley(qk)
+            qk = self._apply_cayley_atlas(
+                qk,
+                self.qk_output_cayley,
+                self.qk_output_cayley_atlas,
+                self.active_cayley_atlas_stage,
+            )
             q, k = qk.split(self.n_embd, dim=2)
             v = self.c_attn_v(v_input)
-            if self.v_output_cayley is not None:
-                v = self.v_output_cayley(v)
+            v = self._apply_cayley_atlas(
+                v,
+                self.v_output_cayley,
+                self.v_output_cayley_atlas,
+                self.active_cayley_atlas_stage,
+            )
         elif self.qk_tied_c_attn or self.qk_tied_sign_c_attn:
             assert self.c_attn_qk_tied is not None and self.c_attn_v is not None
             q = self.c_attn_qk_tied(x)
@@ -1519,11 +1658,19 @@ class CausalSelfAttention(nn.Module):
             att = self.attn_dropout(att)
             y = att @ v
         y = y.transpose(1, 2).contiguous().view(bsz, seq_len, channels)
-        if self.cproj_input_cayley is not None:
-            y = self.cproj_input_cayley(y)
+        y = self._apply_cayley_atlas(
+            y,
+            self.cproj_input_cayley,
+            self.cproj_input_cayley_atlas,
+            self.active_cayley_atlas_stage,
+        )
         y = self.c_proj(y)
-        if self.cproj_output_cayley is not None:
-            y = self.cproj_output_cayley(y)
+        y = self._apply_cayley_atlas(
+            y,
+            self.cproj_output_cayley,
+            self.cproj_output_cayley_atlas,
+            self.active_cayley_atlas_stage,
+        )
         return self.resid_dropout(y)
 
 
@@ -3639,6 +3786,42 @@ class GPT(nn.Module):
             return next(self.parameters()).new_zeros(())
         return torch.stack(losses).mean()
 
+    def schedule_attention_cayley_atlas_gradients(
+        self,
+        iter_num: int,
+    ) -> tuple[int | None, int, int]:
+        """Train one local attention chart per registered trajectory phase.
+
+        Every future chart is exactly identity initialized. At a phase
+        boundary the preceding chart is frozen and the next chart becomes
+        trainable, so the represented function is continuous while the local
+        tangent receives a fresh fixed basis.
+        """
+        starts = tuple(self.config.block_fht_attn_cayley_atlas_start_steps)
+        if not starts:
+            return None, 0, 0
+        active = max(
+            index for index, start in enumerate(starts) if start <= iter_num
+        )
+        held_future = 0
+        frozen_previous = 0
+        for block in self.transformer.h:
+            block.attn.active_cayley_atlas_stage = active
+            for stage, modules in enumerate(
+                block.attn.attention_cayley_stage_modules()
+            ):
+                for module in modules:
+                    for parameter in module.parameters():
+                        is_active = stage == active
+                        parameter.requires_grad_(is_active)
+                        if not is_active:
+                            parameter.grad = None
+                            if stage < active:
+                                frozen_previous += 1
+                            else:
+                                held_future += 1
+        return active, held_future, frozen_previous
+
     def mlp_cproj_teacher_alignment_loss(self) -> torch.Tensor:
         losses = []
         for block in self.transformer.h:
@@ -3759,6 +3942,7 @@ class GPT(nn.Module):
                 ".v_output_cayley.",
                 ".cproj_input_cayley.",
                 ".cproj_output_cayley.",
+                "_cayley_atlas.",
             )
             attention_cayley_other = [
                 param
@@ -4064,6 +4248,9 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
             module.product_output_log_gain.requires_grad_(True)
             if module.bias is not None:
                 module.bias.requires_grad_(True)
+        if isinstance(module, LearnedLowRankCayleyMix):
+            for parameter in module.parameters():
+                parameter.requires_grad_(True)
         if isinstance(module, MLP) and module.shared_hidden_log_gain is not None:
             module.shared_hidden_log_gain.requires_grad_(True)
         if isinstance(module, MLP):

@@ -1,0 +1,45 @@
+{
+  "schema_version": "mai_124m_attention_cayley_atlas_plan_v1",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does a causal sequence of phase-local fixed-basis Cayley charts close the remaining attention-only loss and compute-equivalent gap caused by horizon-dependent direction drift?",
+  "evidence": {
+    "dense_trajectory": "At 5 TPP attention c_attn/c_proj need mean 90%-energy dimensions 3.0/4.4, but have path/chord 3.65/5.39 and median turns 79.6/82.0 degrees.",
+    "fixed_tangent": "The deployed one-percent BlockFHT tangent remains at equal-rank random-subspace overlap throughout training.",
+    "capacity_radial": "QK pair rank 64 and per-output radial gain improve the selected parent only modestly and do not remove the late-horizon gap at the first three fixed evaluations.",
+    "locality_control": "A same-coordinate global FHT control was 0.0053 CE worse than repeated BlockFHT, so locality is not the isolated cause."
+  },
+  "mechanism": {
+    "function_continuity": "Every future chart is identity initialized; activating it cannot change the current function.",
+    "causality": "At a registered boundary, the preceding chart is frozen and exactly one fresh chart receives gradients.",
+    "parameterization": "Each chart is a product of the same fixed-basis low-rank Cayley orbits; no learned dense basis, additive residual, or LoRA branch is used.",
+    "resume_identity": "The full start-step schedule is in the resolved config and exact checkpoint identity."
+  },
+  "ordered_performance_fallback": [
+    {
+      "slot": "phase4",
+      "start_steps": [0, 594, 1188, 1782]
+    },
+    {
+      "slot": "phase3",
+      "start_steps": [0, 594, 1188]
+    },
+    {
+      "slot": "phase2",
+      "start_steps": [0, 594]
+    }
+  ],
+  "execution": {
+    "host": "PRO6",
+    "rung": "124M/5TPP",
+    "selection_rule": "Gate in listed order and train only the first exact configuration with measured MFU >= 0.20; validation loss cannot select stage count.",
+    "direct_poll": true,
+    "watchdog": false,
+    "fixed_eval_steps": [594, 1188, 1782, 2373]
+  },
+  "acceptance": {
+    "terminal_validation_ce_max": 3.5501,
+    "direct_dense_token_equivalent_penalty_max": 1.1,
+    "development_gap_ce_max": 0.02,
+    "instability": "reject NaN, Inf, divergence, failed terminal evaluation, or MFU below 20%"
+  }
+}

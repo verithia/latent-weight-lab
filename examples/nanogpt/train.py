@@ -1006,6 +1006,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-attn-cayley-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-attn-cayley-seed", type=int, default=618033)
     parser.add_argument(
+        "--block-fht-attn-cayley-atlas-start-steps",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
         "--block-fht-attn-cayley-lr-scale",
         type=float,
         default=1.0,
@@ -1417,6 +1423,20 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--perf-warmup-iters must be >= 0")
     if namespace.checkpoint_wall_clock_seconds <= 0:
         raise ValueError("--checkpoint-wall-clock-seconds must be > 0")
+    atlas_steps = tuple(namespace.block_fht_attn_cayley_atlas_start_steps)
+    if atlas_steps and (
+        atlas_steps[0] != 0
+        or any(step < 0 for step in atlas_steps)
+        or any(
+            later <= earlier
+            for earlier, later in zip(atlas_steps, atlas_steps[1:])
+        )
+        or atlas_steps[-1] >= namespace.max_iters
+    ):
+        raise ValueError(
+            "block_fht_attn_cayley_atlas_start_steps must begin at 0, "
+            "increase strictly, and end before max_iters"
+        )
     if namespace.block_fht_mlp_hidden_chart_stop_iter < -1:
         raise ValueError(
             "--block-fht-mlp-hidden-chart-stop-iter must be >= -1"
@@ -1857,6 +1877,9 @@ def main() -> None:
         block_fht_attn_cayley_ranks=args.block_fht_attn_cayley_ranks,
         block_fht_attn_cayley_scale=args.block_fht_attn_cayley_scale,
         block_fht_attn_cayley_seed=args.block_fht_attn_cayley_seed,
+        block_fht_attn_cayley_atlas_start_steps=tuple(
+            args.block_fht_attn_cayley_atlas_start_steps
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -2237,6 +2260,27 @@ def main() -> None:
         grad_postprocess_ms = 0.0
         optimizer_ms = 0.0
         data_ms = 0.0
+
+        (
+            active_attention_atlas_stage,
+            held_attention_atlas_parameters,
+            frozen_attention_atlas_parameters,
+        ) = raw_model.schedule_attention_cayley_atlas_gradients(iter_num)
+        if (
+            active_attention_atlas_stage is not None
+            and iter_num
+            == args.block_fht_attn_cayley_atlas_start_steps[
+                active_attention_atlas_stage
+            ]
+        ):
+            print(
+                "activated attention Cayley atlas stage "
+                f"stage={active_attention_atlas_stage} iter={iter_num} "
+                f"held_future_parameters={held_attention_atlas_parameters} "
+                f"frozen_previous_parameters="
+                f"{frozen_attention_atlas_parameters}",
+                flush=True,
+            )
 
         ce_accum = None
         stability_accum = 0.0

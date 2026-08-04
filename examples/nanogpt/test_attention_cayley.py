@@ -218,6 +218,93 @@ def test_attention_cayley_supports_targeted_bilateral_orbits() -> None:
     assert attention.cproj_output_cayley is not None
 
 
+def test_attention_cayley_atlas_is_identity_initialized_and_phase_local() -> None:
+    base = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+    )
+    atlas_config = replace(
+        base,
+        block_fht_attn_cayley_targets=base.block_fht_targets,
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_bilateral_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+        ),
+        block_fht_attn_cayley_rank=1,
+        block_fht_attn_cayley_atlas_start_steps=(0, 2, 4),
+    )
+    torch.manual_seed(20260804)
+    control = GPT(base).eval()
+    torch.manual_seed(20260804)
+    candidate = GPT(atlas_config).eval()
+    tokens = torch.randint(0, base.vocab_size, (2, base.block_size))
+    control_logits, _ = control(tokens)
+    candidate_logits, _ = candidate(tokens)
+    torch.testing.assert_close(candidate_logits, control_logits)
+
+    stages = candidate.transformer.h[0].attn.attention_cayley_stage_modules()
+    assert len(stages) == 3
+    assert all(len(stage) == 5 for stage in stages)
+    assert len({id(module) for stage in stages for module in stage}) == 15
+
+    active, held, frozen = candidate.schedule_attention_cayley_atlas_gradients(0)
+    assert (active, held, frozen) == (0, 20, 0)
+    assert candidate.transformer.h[0].attn.active_cayley_atlas_stage == 0
+    candidate_logits, _ = candidate(tokens)
+    candidate_logits.sum().backward()
+    assert any(parameter.grad is not None for module in stages[0] for parameter in module.parameters())
+    assert all(parameter.grad is None for stage in stages[1:] for module in stage for parameter in module.parameters())
+
+    candidate.zero_grad(set_to_none=True)
+    active, held, frozen = candidate.schedule_attention_cayley_atlas_gradients(2)
+    assert (active, held, frozen) == (1, 10, 10)
+    assert candidate.transformer.h[0].attn.active_cayley_atlas_stage == 1
+    candidate(tokens)[0].sum().backward()
+    assert all(parameter.grad is None for module in stages[0] for parameter in module.parameters())
+    assert any(parameter.grad is not None for module in stages[1] for parameter in module.parameters())
+    assert all(parameter.grad is None for module in stages[2] for parameter in module.parameters())
+
+
+def test_attention_cayley_atlas_rejects_invalid_schedule() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=("attn.c_attn.qk_headwise",),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+        block_fht_attn_cayley_targets=("attn.c_attn.qk_headwise",),
+        block_fht_attn_cayley_rank=1,
+        block_fht_attn_cayley_atlas_start_steps=(1, 2),
+    )
+    try:
+        GPT(config)
+    except ValueError as exc:
+        assert "must start with step 0" in str(exc)
+    else:
+        raise AssertionError("invalid attention atlas schedule was accepted")
+
+
 def test_attention_cayley_optimizer_has_independent_lr_scale() -> None:
     config = GPTConfig(
         block_size=8,

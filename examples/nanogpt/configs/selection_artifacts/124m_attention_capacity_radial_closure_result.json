@@ -1,0 +1,95 @@
+{
+  "schema_version": "mai_124m_attention_capacity_radial_closure_result_v1",
+  "recorded_at": "2026-08-04",
+  "repository_commit": "0b5f4c82e4f1e3e3d4b450091f541f56f416ebb8",
+  "entrypoint": [
+    "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train"
+  ],
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "dense_fixed_evaluations": [
+    {"step": 594, "validation_ce": 4.1739},
+    {"step": 1188, "validation_ce": 3.7622},
+    {"step": 1782, "validation_ce": 3.6038},
+    {"step": 2373, "validation_ce": 3.5401}
+  ],
+  "parent_fixed_evaluations": [
+    {"step": 594, "validation_ce": 4.2151},
+    {"step": 1188, "validation_ce": 3.8411},
+    {"step": 1782, "validation_ce": 3.6907},
+    {"step": 2373, "validation_ce": 3.6278}
+  ],
+  "runs": {
+    "qk64": {
+      "run_id": "pro6_mai_v3_124m_attn_closure_qk64_20260804T034323Z_3680943",
+      "command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python", "-u", "-m",
+        "examples.nanogpt.train", "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_closure_qk64_20260804T034323Z_3680943.config.json"
+      ],
+      "config_sha256": "c158f64c19ad5a4f41e6fb9375d4d70ad278f0ba76f9d9f0df8d740da54ffca4",
+      "provenance_sha256": "a115494c72bdb2d7fa99b0cedf7689f333a1e340c2e15cd1ea5a34e9d61ca464",
+      "status_sha256": "6abac76ffa64c7b22cc5633582c8528475d363e1998ae8efb7dd02daf2a76021",
+      "log_sha256": "0a6cac5199acbac52713a04f338f36977341d3eaee967092af47728ce17b9639",
+      "mfu_certificate_sha256": "5992a639b14dc13e335ae9bc561f12192c8c498070fab98cf995f711eb5011f3",
+      "mfu_fraction": 0.2799367356885072,
+      "fixed_validation_ce": [4.1914, 3.8326, 3.6808, 3.6170],
+      "terminal_dense_compute_penalty": 1.3774134,
+      "common_loss_median_compute_ratio": 1.1084093
+    },
+    "outputgain": {
+      "run_id": "pro6_mai_v3_124m_attn_closure_outputgain_20260804T050522Z_3717911",
+      "command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python", "-u", "-m",
+        "examples.nanogpt.train", "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_closure_outputgain_20260804T050522Z_3717911.config.json"
+      ],
+      "config_sha256": "d85b5736fdf2f45b423a863a1900a84f79d8a9f6fe617f76ef4f4fe3424eafad",
+      "provenance_sha256": "34d7e4f97f7acf7069c28955001aee3b1b5a9f99957b8101d3bf01a4f6987873",
+      "status_sha256": "c8193f1843ec1152f7ef5c0bb89b827406cd7a2a8143dc5158787050f2915dc3",
+      "log_sha256": "5cf383afbb1b8af4d87d11c1fb3cdddf383376cb00a89213cdf0ebc67e7777cd",
+      "mfu_certificate_sha256": "9b6c5621013a38c9e013498ce6282832dd91fd315fa9ead7777ca50980f9d201",
+      "mfu_fraction": 0.28030527509181336,
+      "fixed_validation_ce": [4.2034, 3.8377, 3.6861, 3.6241],
+      "terminal_dense_compute_penalty": 1.40267575,
+      "common_loss_median_compute_ratio": 1.12089959
+    },
+    "qk64_outputgain": {
+      "initial_run_id": "pro6_mai_v3_124m_attn_closure_qk64_outputgain_20260804T061549Z_3750729",
+      "resume_run_id": "pro6_mai_v3_124m_attn_closure_qk64_outputgain_resume1_20260804T071122Z_3781266",
+      "initial_command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python", "-u", "-m",
+        "examples.nanogpt.train", "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_closure_qk64_outputgain_20260804T061549Z_3750729.config.json"
+      ],
+      "resume_command": [
+        "/home/pro6000-9980x/MappingNetworks/.venv/bin/python", "-u", "-m",
+        "examples.nanogpt.train", "--config",
+        "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_closure_qk64_outputgain_resume1_20260804T071122Z_3781266.config.json",
+        "--init-from", "resume"
+      ],
+      "config_sha256": "1760f05850745465021bda6e9892427c34f97c776bd501d25708da28f1cf8e3b",
+      "initial_provenance_sha256": "948f14a1ba3ce6962b13a630c019aca41cffb68e88b24df20a183da4eed14d60",
+      "resume_provenance_sha256": "03534e64daf3fc029ad3094e9a5f6c88f7dc76feba95e011b2b4a7631db5ce91",
+      "initial_status_sha256": "d5267b1a5bd0005c67128a68a40dfec2a235dc5b0b25ede80e3e7f9a42742466",
+      "resume_status_sha256": "6458368ba340fb1d4e6c702a1b518727cc356829ab53f9ee61b7f895b0a82ec9",
+      "initial_log_sha256": "f2a967537c051625fa7283a92912841b3a683adfa108cd58cc21e8f1a83b4aa8",
+      "resume_log_sha256": "e9f6795fbf1b0e385d7151d4080be204fadad4d5effcbf5ccf4aa83378849d5b",
+      "mfu_certificate_sha256": "4f91ee7edfae41e1848dc44b8d3500b0d38d56d7df065f6e449fbb792ea335e8",
+      "mfu_fraction": 0.27955866853995015,
+      "resume_reason": "The initial process encountered a CUDA kernel launch timeout after the exact step-1782 checkpoint; the continuation reused the same commit, archived config, data manifest, MFU certificate, and exact-resume state.",
+      "fixed_validation_ce": [4.1885, 3.8302, 3.6788, 3.6151],
+      "terminal_dense_gap_ce": 0.0750,
+      "terminal_dense_compute_penalty": 1.3707305884234553,
+      "common_loss_median_compute_ratio": 1.1033510971045881,
+      "common_loss_compute_ratio_range": [1.0286469985324493, 1.370730588423455]
+    }
+  },
+  "factorial_interaction_ce": {
+    "definition": "L_both - L_qk64 - L_outputgain + L_parent; positive is antagonistic",
+    "values": [0.0088, 0.0010, 0.0026, 0.0018]
+  },
+  "decision": "QK64 plus output gain is the numerical winner, but the gain over QK64 alone is only 0.0019 CE and the radial factorial interaction is antagonistic. It fails both practical-equivalence gates (+0.0750 CE and 1.3707x terminal dense compute). Reject static radial gain as the missing mechanism and test the preregistered causal phase-local fixed-basis Cayley atlas for horizon-dependent direction drift."
+}
