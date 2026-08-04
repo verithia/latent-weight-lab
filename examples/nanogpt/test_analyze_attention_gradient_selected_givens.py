@@ -72,3 +72,12 @@ def test_gate_passes_only_when_every_registered_check_passes() -> None:
     )
     assert not passed
     assert failures == ["per_target_future_chord"]
+
+
+def test_python_result_booleans_are_json_serializable() -> None:
+    import json
+
+    payload = {"uses_dense_muon_target": False}
+    assert json.loads(json.dumps(payload)) == {
+        "uses_dense_muon_target": False
+    }

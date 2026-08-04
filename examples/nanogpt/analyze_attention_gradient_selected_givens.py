@@ -334,7 +334,7 @@ def main() -> None:
         "run_identity_sha256": snapshot_metadata["run_identity_sha256"],
         "selection": {
             "field": "negative gradient_after_clip",
-            "uses_dense_muon_target": false,
+            "uses_dense_muon_target": False,
             "phase_starts": phase_starts,
             "stage_count": stage_count,
             "horizon": horizon,
@@ -357,7 +357,7 @@ def main() -> None:
             "passed": passed,
             "failures": failures,
             "thresholds": thresholds,
-            "automatic_training_authorized": false,
+            "automatic_training_authorized": False,
         },
         "cells_csv": {
             "path": str(cells_path),
