@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
 import torch
 
 from examples.nanogpt.analyze_mlp_cproj_task_frame_terminal_direction_radius import (
@@ -8,6 +12,29 @@ from examples.nanogpt.analyze_mlp_cproj_task_frame_terminal_direction_radius imp
     select_decision,
     state_group_norm,
 )
+
+
+REPO = Path(__file__).resolve().parents[2]
+PLAN = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_task_frame_terminal_direction_radius_plan.json"
+)
+RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_task_frame_terminal_direction_radius_result.json"
+)
+
+
+def load(path: Path) -> dict:
+    value = json.loads(path.read_text())
+    assert isinstance(value, dict)
+    return value
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def synthetic_state(scales: tuple[float, float, float]) -> dict[str, torch.Tensor]:
@@ -110,3 +137,24 @@ def test_negative_confirmation_window_fails_sufficiency() -> None:
     )
     assert result["decision"] == "DIRECTION_DOMINATES"
     assert result["automatic_training_run_authorized"] is False
+
+
+def test_recorded_result_closes_nonportable_endpoint_route() -> None:
+    plan = load(PLAN)
+    result = load(RESULT)
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["execution"]["training_updates"] == 0
+    assert result["protocol"]["nonframe_state_bitwise_preserved"] is True
+    native = result["ce_by_variant"]["native_delayed"]
+    identity = result["ce_by_variant"]["identity"]
+    endpoint = result["ce_by_variant"]["endpoint_full_radius"]
+    for split in ("primary", "confirmation"):
+        assert identity[split] > native[split]
+        assert endpoint[split] > native[split]
+    effects = result["effects"]
+    assert effects["native_delayed_gain_over_identity"]["mean"] > 0.04
+    assert effects["endpoint_full_radius_gain_over_native"]["mean"] < -0.02
+    assert effects["native_direction_endpoint_radius_gain_over_native"]["mean"] < -0.15
+    assert result["decision"]["registered_decision"] == "ENDPOINT_NOT_PORTABLE"
+    assert result["decision"]["endpoint_frame_route_closed"] is True
+    assert plan["next_action_binding"]["automatic_training_run_authorized"] is False

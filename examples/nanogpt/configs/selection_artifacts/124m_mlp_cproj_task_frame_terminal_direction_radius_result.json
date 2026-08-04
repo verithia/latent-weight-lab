@@ -1,0 +1,133 @@
+{
+  "artifact_kind": "124m_mlp_cproj_task_frame_terminal_direction_radius_result",
+  "schema_version": "mai_124m_mlp_cproj_task_frame_terminal_direction_radius_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "ENDPOINT_NOT_PORTABLE_CLOSE_ENDPOINT_FRAME_ROUTE",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repository_commit": "5a611ca7d5a52c1e798ea918bfcecb406e697315",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_task_frame_terminal_direction_radius",
+    "source_sha256": "4eeb06f28fab3baadb84c364a338101dcca940819018890cc5ebe1798c55b9b8",
+    "training_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "exit_code": 0
+  },
+  "identity": {
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_frame_terminal_direction_radius_plan.json",
+    "plan_sha256": "aec8e529e2b08fb616449ff2fcc472b5638dd22ecdb1f8983cefbd07ccff21e6",
+    "delayed_checkpoint_sha256": "120d604b767160d504f968c08f13939d26b571b1f43accd7ef19c7dd72a76629",
+    "endpoint_frame_state_sha256": "a345068471731d64556c365d07c9dcdc3d877ec261871421c24245bd85106ae7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "summary_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_task_frame_terminal_direction_radius_20260805a/summary.json",
+    "summary_sha256": "c5083b3bd40d4ddf34797eef9fb88e0730d5d6be9365c9ef473cca4a128899c2",
+    "primary_token_sha256": "4028deaf1e043cea488afdc1ab2dbf5c5040173fd1ae3f7525bce3c18c6db796",
+    "confirmation_token_sha256": "c209a032f73fc5066374e6e56aa835141b888d4cb59455b7bdd9491d6eb5ff5d"
+  },
+  "protocol": {
+    "validation_seeds": {
+      "primary": 20260883,
+      "confirmation": 20260884
+    },
+    "batches_per_window": 32,
+    "batch_size": 16,
+    "block_size": 1024,
+    "cached_block_fht_modules": 168,
+    "peak_mib": 8632.9775390625,
+    "steady_variant_tokens_per_second_range": [
+      635905.0840224971,
+      639130.9707047305
+    ],
+    "nonframe_state_sha256_before": "c0df95623bb229072be098e8ad2dfbc82d1bf3ebd2ddba2cf2e86afb1495b724",
+    "nonframe_state_sha256_after": "c0df95623bb229072be098e8ad2dfbc82d1bf3ebd2ddba2cf2e86afb1495b724",
+    "nonframe_state_bitwise_preserved": true
+  },
+  "scale_factors": {
+    "endpoint_direction_to_native_radius": {
+      "pregelu_rotation": 0.3242388502226346,
+      "hidden_rotation": 0.33101685803870384,
+      "output_rotation": 0.3482650706762409
+    },
+    "native_direction_to_endpoint_radius": {
+      "pregelu_rotation": 3.084146145082128,
+      "hidden_rotation": 3.0209941751156246,
+      "output_rotation": 2.87137609883833
+    }
+  },
+  "ce_by_variant": {
+    "native_delayed": {
+      "primary": 5.5015712678432465,
+      "confirmation": 5.529752194881439
+    },
+    "identity": {
+      "primary": 5.54520246386528,
+      "confirmation": 5.57341456413269
+    },
+    "endpoint_full_radius": {
+      "primary": 5.526556625962257,
+      "confirmation": 5.5556767880916595
+    },
+    "endpoint_direction_native_radius": {
+      "primary": 5.536918863654137,
+      "confirmation": 5.565388262271881
+    },
+    "native_direction_endpoint_radius": {
+      "primary": 5.660854399204254,
+      "confirmation": 5.688247084617615
+    }
+  },
+  "effects": {
+    "native_delayed_gain_over_identity": {
+      "primary": 0.04363119602203369,
+      "confirmation": 0.04366236925125122,
+      "mean": 0.043646782636642456
+    },
+    "endpoint_full_radius_gain_over_identity": {
+      "primary": 0.018645837903022766,
+      "confirmation": 0.017737776041030884,
+      "mean": 0.018191806972026825
+    },
+    "endpoint_direction_native_radius_gain_over_identity": {
+      "primary": 0.008283600211143494,
+      "confirmation": 0.008026301860809326,
+      "mean": 0.00815495103597641
+    },
+    "native_direction_endpoint_radius_gain_over_identity": {
+      "primary": -0.115651935338974,
+      "confirmation": -0.11483252048492432,
+      "mean": -0.11524222791194916
+    },
+    "endpoint_full_radius_gain_over_native": {
+      "primary": -0.024985358119010925,
+      "confirmation": -0.025924593210220337,
+      "mean": -0.02545497566461563
+    },
+    "endpoint_direction_native_radius_gain_over_native": {
+      "primary": -0.0353475958108902,
+      "confirmation": -0.035636067390441895,
+      "mean": -0.035491831600666046
+    },
+    "native_direction_endpoint_radius_gain_over_native": {
+      "primary": -0.1592831313610077,
+      "confirmation": -0.15849488973617554,
+      "mean": -0.1588890105485916
+    }
+  },
+  "decision": {
+    "registered_decision": "ENDPOINT_NOT_PORTABLE",
+    "endpoint_frame_route_closed": true,
+    "automatic_training_run_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Return to c_proj generator and temporal transport. Test whether basepoint-aware parallel transport of the materialized endpoint action, rather than raw coordinate copying or radial scaling, restores portability before designing another causal optimizer."
+  },
+  "interpretation": [
+    "The native delayed frames contribute a repeatable 0.04365 CE within their co-adapted terminal context even though the whole delayed run is tied with the frame-free parent. Other parameters compensated around those frames; removing them is harmful.",
+    "Raw endpoint coordinates are still beneficial relative to identity by 0.01819 CE, but they are 0.02545 CE worse than the native co-adapted coordinates at the delayed terminal base. The frozen endpoint direction is not portable by the registered relative-to-native criterion.",
+    "Scaling the native delayed direction to the endpoint radius is strongly destructive. The failure is not insufficient radius and must not be answered by a scalar learning-rate or norm-target sweep.",
+    "Coordinate cosine is a basepoint-dependent chart statistic, not functional parallel transport. In multiplicative pre/post rotation charts, identical coordinates act through the current c_fc/c_proj bases, so comparison across basepoints requires transporting the induced materialized action.",
+    "The endpoint-frame route is closed as a direct causal recipe. The next diagnostic must operate on c_proj generator action or transport, with no learned dense basis, LoRA-like adapter, or residual HyperConnection."
+  ]
+}
