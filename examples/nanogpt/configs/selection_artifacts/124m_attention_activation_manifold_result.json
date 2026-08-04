@@ -1,0 +1,51 @@
+{
+  "schema_version": "mai_124m_attention_activation_manifold_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "ACTIVATION_SOFTMAX_METRIC_NOT_UNIFORMLY_SIMPLER",
+  "decision": {
+    "passed": false,
+    "score_softmax_materially_simpler": true,
+    "residual_head_contribution_materially_simpler": false,
+    "model_change_authorized": false,
+    "mfu_preflight_authorized": false,
+    "scientific_training_authorized": false,
+    "next_gate": "replay the matched 124M dense 5TPP endpoint on PRO6, then attribute best-candidate residual mismatch between attention probabilities, value states, output projection, and residual contribution on identical fixed validation inputs"
+  },
+  "aggregate": {
+    "score_kernel_path_length_over_chord": 1.7976781788896654,
+    "score_kernel_pc1_energy": 0.8436878482535591,
+    "centered_logits_path_length_over_chord": 1.491398274932796,
+    "centered_logits_pc1_energy": 0.9106986103682378,
+    "probabilities_path_length_over_chord": 1.36966244103578,
+    "probabilities_pc1_energy": 0.9274252489286545,
+    "value_output_kernel_path_length_over_chord": 1.9315000588942814,
+    "value_output_kernel_pc1_energy": 0.8260195520576007,
+    "head_contribution_path_length_over_chord": 2.0675741758007375,
+    "head_contribution_pc1_energy": 0.8070746562971267
+  },
+  "comparisons": {
+    "centered_logits_over_score_kernel_path": 0.8296247306366911,
+    "centered_logits_minus_score_kernel_pc1": 0.06701076211467871,
+    "probabilities_over_score_kernel_path": 0.7619063618393316,
+    "probabilities_minus_score_kernel_pc1": 0.08373740067509539,
+    "head_contribution_over_value_output_kernel_path": 1.0704499677749706,
+    "head_contribution_minus_value_output_kernel_pc1": -0.01894489576047398
+  },
+  "interpretation": "The data-dependent causal-softmax score path is materially simpler than the raw score-kernel path, but the value/output contribution to the residual stream is more curved and less PC1-concentrated than its kernel. The remaining attention gap should therefore be attributed and repaired in the V/O residual branch rather than with more QK rank, scalar radial gain, or gauge quotienting.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "59fc51c676eb6726b40b34397c3681b82c566d0f",
+    "analysis_entrypoint": "examples/nanogpt/analyze_attention_activation_manifold.py",
+    "analysis_source_sha256": "cd98e4ccd812d2fdad0cd7d9863ee1e05ebdfce4ccccb5f41b740bb8bccbd7c7",
+    "plan_sha256": "f405d1d8cdef1c76a8a1d80fcaffe8415bfea8e6fa1073e747c1c11c9603a09f",
+    "snapshot_run_identity_sha256": "2ce330849884afc80f6a6e4268052d79cabd3b593ca90aadf516d6dba1179cb1",
+    "terminal_checkpoint_sha256": "fea0ab189f1d403b980c3601aab1da9846c98d39193d520c883e638fc78d65d2",
+    "raw_result_sha256": "07707f18fb8945214042b69e7a8b9b72b0c634612edacc17b145ea8db5635e38",
+    "cells_csv_sha256": "f65578441b3c7b2e4b968135695ab25d500b936a227d92f3483acb0ddf18cb7d",
+    "elapsed_seconds": 3.4153456687927246,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true
+  }
+}

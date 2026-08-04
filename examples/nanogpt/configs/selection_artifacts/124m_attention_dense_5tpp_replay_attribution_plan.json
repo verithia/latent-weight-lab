@@ -1,0 +1,33 @@
+{
+  "schema_version": "mai_124m_attention_dense_5tpp_replay_attribution_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_performance_preflight",
+  "purpose": "recover the lost matched dense 5TPP endpoint and horizon trajectory on PRO6, then attribute the QK64-plus-output-gain residual mismatch before selecting a V/O repair",
+  "replay": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
+    "reference_terminal_validation_ce": 3.5401,
+    "maximum_absolute_terminal_replay_delta": 0.005,
+    "required_fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "required_dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "minimum_mfu_fraction": 0.2,
+    "host": "PRO6",
+    "gpu": 0,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true
+  },
+  "attribution": {
+    "candidate_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_recovery/pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_outputgain_5tpp_lr24e4/ckpt.pt",
+    "fixed_input_policy": "use identical terminal-dense ln_1 inputs from immutable validation windows",
+    "components": [
+      "causal attention probabilities",
+      "value states under shared dense or candidate probabilities",
+      "output projection under shared dense or candidate head states",
+      "full per-head residual contribution"
+    ],
+    "selection_rule": "select exactly one next structural gate from component-wise normalized endpoint error and CE intervention; do not infer from weight Frobenius distance alone",
+    "automatic_training_authorized": false,
+    "learned_dense_basis_forbidden": true,
+    "additive_lora_adapter_forbidden": true
+  }
+}
