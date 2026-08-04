@@ -1177,6 +1177,11 @@ def parse_args() -> argparse.Namespace:
         default=0,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-output-stages",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-muon-matched-givens-neighbors",
         type=int,
         default=64,
@@ -1576,30 +1581,47 @@ def parse_args() -> argparse.Namespace:
             .block_fht_mlp_cproj_muon_matched_givens_residual_stages
             < 0
             or namespace
+            .block_fht_mlp_cproj_muon_matched_givens_output_stages
+            < 0
+            or namespace
             .block_fht_mlp_cproj_muon_matched_givens_neighbors
             < max(
                 namespace
                 .block_fht_mlp_cproj_muon_matched_givens_stages,
                 namespace
                 .block_fht_mlp_cproj_muon_matched_givens_residual_stages,
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_output_stages,
             )
             or namespace
             .block_fht_mlp_cproj_muon_matched_givens_neighbors
             >= 4 * namespace.n_embd
+            or (
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_output_stages
+                and namespace
+                .block_fht_mlp_cproj_muon_matched_givens_neighbors
+                >= namespace.n_embd
+            )
         ):
             raise ValueError(
                 "Muon-matched Givens c_proj requires "
-                "0 < stages, 0 <= residual stages, and "
-                "max(stages, residual stages) <= neighbors < 4*n_embd"
+                "0 < stages, 0 <= residual/output stages, and "
+                "max(stages, residual stages, output stages) <= neighbors "
+                "< 4*n_embd (and < n_embd when output stages are enabled)"
             )
         if (
-            namespace
-            .block_fht_mlp_cproj_muon_matched_givens_residual_stages
+            (
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_residual_stages
+                or namespace
+                .block_fht_mlp_cproj_muon_matched_givens_output_stages
+            )
             and not namespace
             .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
         ):
             raise ValueError(
-                "residual Muon-matched Givens c_proj requires "
+                "residual/output Muon-matched Givens c_proj requires "
                 "fast fresh matching"
             )
         if (
@@ -2060,6 +2082,10 @@ def main() -> None:
         block_fht_mlp_cproj_muon_matched_givens_residual_stages=(
             args
             .block_fht_mlp_cproj_muon_matched_givens_residual_stages
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_output_stages=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_output_stages
         ),
         block_fht_mlp_cproj_muon_matched_givens_neighbors=(
             args.block_fht_mlp_cproj_muon_matched_givens_neighbors

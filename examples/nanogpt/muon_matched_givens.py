@@ -878,6 +878,7 @@ class MuonMatchedGivensLinear(nn.Module):
         bias: bool,
         stages: int,
         residual_stages: int,
+        output_stages: int = 0,
         neighbors: int,
         refresh_interval: int,
         fast_fresh_matching: bool,
@@ -890,6 +891,7 @@ class MuonMatchedGivensLinear(nn.Module):
         self.out_features = int(out_features)
         self.stages = int(stages)
         self.residual_stages = int(residual_stages)
+        self.output_stages = int(output_stages)
         self.neighbors = int(neighbors)
         self.refresh_interval = int(refresh_interval)
         self.fast_fresh_matching = bool(fast_fresh_matching)
@@ -899,23 +901,30 @@ class MuonMatchedGivensLinear(nn.Module):
             self.in_features <= 0
             or self.in_features % 2
             or self.out_features <= 0
+            or (self.output_stages and self.out_features % 2)
         ):
             raise ValueError(
                 "MuonMatchedGivensLinear requires positive dimensions "
-                "and an even input width"
+                "and even widths for every enabled rotation side"
             )
         if (
             self.stages <= 0
             or self.residual_stages < 0
+            or self.output_stages < 0
             or self.neighbors < max(
-                self.stages, self.residual_stages
+                self.stages, self.residual_stages, self.output_stages
             )
             or self.neighbors >= self.in_features
+            or (
+                self.output_stages
+                and self.neighbors >= self.out_features
+            )
         ):
             raise ValueError(
-                "require 0 < stages, 0 <= residual_stages, "
-                "and max(stages, residual_stages) <= neighbors "
-                "< in_features"
+                "require 0 < stages, 0 <= residual/output stages, "
+                "and max(stages, residual_stages, output_stages) <= "
+                "neighbors < in_features (and < out_features when "
+                "output stages are enabled)"
             )
         if self.refresh_interval <= 0:
             raise ValueError("refresh_interval must be positive")
@@ -923,9 +932,11 @@ class MuonMatchedGivensLinear(nn.Module):
             raise ValueError(
                 "fast fresh matching requires refresh_interval=1"
             )
-        if self.residual_stages and not self.fast_fresh_matching:
+        if (
+            self.residual_stages or self.output_stages
+        ) and not self.fast_fresh_matching:
             raise ValueError(
-                "residual matching requires fast fresh matching"
+                "residual/output matching requires fast fresh matching"
             )
         if not math.isfinite(weight_std) or weight_std <= 0.0:
             raise ValueError("weight_std must be positive and finite")
@@ -975,6 +986,27 @@ class MuonMatchedGivensLinear(nn.Module):
                 ),
                 persistent=True,
             )
+        if self.output_stages:
+            output_initial = torch.arange(self.out_features).repeat(
+                self.output_stages, 1
+            )
+            self.register_buffer(
+                "output_selected_permutations",
+                output_initial,
+                persistent=True,
+            )
+            self.register_buffer(
+                "output_selected_inverse_permutations",
+                torch.argsort(output_initial, dim=1),
+                persistent=True,
+            )
+            self.register_buffer(
+                "output_last_angles",
+                torch.zeros(
+                    self.output_stages, self.out_features // 2
+                ),
+                persistent=True,
+            )
         self.register_buffer(
             "optimizer_step",
             torch.zeros((), dtype=torch.int64),
@@ -999,8 +1031,10 @@ class MuonMatchedGivensLinear(nn.Module):
     @property
     def coordinate_count(self) -> int:
         return (
-            self.stages + self.residual_stages
-        ) * (self.in_features // 2)
+            (self.stages + self.residual_stages)
+            * (self.in_features // 2)
+            + self.output_stages * (self.out_features // 2)
+        )
 
     def forward(self, values: torch.Tensor) -> torch.Tensor:
         return F.linear(values, self.weight, self.bias)
@@ -1769,6 +1803,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 )
                 matching_summary = None
                 residual_matching_summary = None
+                output_matching_summary = None
                 if refresh:
                     if module.fast_fresh_matching:
                         permutations, matching_diagnostics = (
@@ -1956,6 +1991,85 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             residual_diagnostics["source_sha256"]
                         ),
                     }
+                output_angles = None
+                if module.output_stages:
+                    output_residual_update = (
+                        corrected_update.float()
+                        - (rotated.float() - weight.float())
+                    )
+                    output_source = rotated.transpose(0, 1).contiguous()
+                    output_direction = (
+                        output_residual_update.transpose(0, 1).contiguous()
+                    )
+                    output_permutations, output_diagnostics = (
+                        fast_muon_matched_permutations(
+                            output_source,
+                            output_direction,
+                            stages=module.output_stages,
+                            neighbors=module.neighbors,
+                            seed=(
+                                module.matching_seed
+                                + step_index
+                                + 2
+                            ),
+                        )
+                    )
+                    module.output_selected_permutations.copy_(
+                        output_permutations.to(
+                            device=weight.device,
+                            dtype=torch.long,
+                        )
+                    )
+                    module.output_selected_inverse_permutations.copy_(
+                        torch.argsort(
+                            module.output_selected_permutations,
+                            dim=1,
+                        )
+                    )
+                    output_angles = diagonal_metric_angles(
+                        output_source,
+                        output_direction,
+                        module.output_selected_permutations,
+                    )
+                    rotated = apply_givens_flow(
+                        output_source,
+                        output_angles,
+                        module.output_selected_permutations,
+                        module.output_selected_inverse_permutations,
+                    ).transpose(0, 1).contiguous()
+                    output_matching_summary = {
+                        "selector": "fast_fresh_output_pass",
+                        "candidate_edge_fraction": float(
+                            output_diagnostics[
+                                "candidate_edge_fraction"
+                            ]
+                        ),
+                        "minimum_stage_candidate_edge_fraction": float(
+                            output_diagnostics[
+                                "minimum_stage_candidate_edge_fraction"
+                            ]
+                        ),
+                        "prepared_seconds": float(
+                            output_diagnostics["prepared_seconds"]
+                        ),
+                        "native_seconds": float(
+                            output_diagnostics["native_seconds"]
+                        ),
+                        "total_seconds": float(
+                            output_diagnostics["total_seconds"]
+                        ),
+                        "native_output_validated": bool(
+                            output_diagnostics[
+                                "native_output_validated"
+                            ]
+                        ),
+                        "native_library_sha256": str(
+                            output_diagnostics["native_library_sha256"]
+                        ),
+                        "native_source_sha256": str(
+                            output_diagnostics["source_sha256"]
+                        ),
+                    }
                 if weight_decay != 0.0:
                     rotated.mul_(1.0 - lr * weight_decay)
                 update = rotated - weight
@@ -1981,12 +2095,19 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             dtype=module.residual_last_angles.dtype
                         )
                     )
+                if output_angles is not None:
+                    module.output_last_angles.copy_(
+                        output_angles.to(
+                            dtype=module.output_last_angles.dtype
+                        )
+                    )
                 module.optimizer_step.add_(1)
-                all_angles = (
-                    torch.cat((parent_angles, residual_angles), dim=0)
-                    if residual_angles is not None
-                    else parent_angles
-                )
+                angle_parts = [parent_angles.reshape(-1)]
+                if residual_angles is not None:
+                    angle_parts.append(residual_angles.reshape(-1))
+                if output_angles is not None:
+                    angle_parts.append(output_angles.reshape(-1))
+                all_angles = torch.cat(angle_parts)
                 diagnostics.append(
                     {
                         "step": step_index,
@@ -2014,6 +2135,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         ),
                         "parent_stages": module.stages,
                         "residual_stages": module.residual_stages,
+                        "output_stages": module.output_stages,
                         "requested_update_recovery": float(
                             1.0
                             - requested_residual_energy
@@ -2034,6 +2156,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "residual_matching": (
                             residual_matching_summary
                         ),
+                        "output_matching": output_matching_summary,
                     }
                 )
         self.last_step_diagnostics = diagnostics

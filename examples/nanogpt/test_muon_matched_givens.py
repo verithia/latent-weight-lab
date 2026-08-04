@@ -453,6 +453,153 @@ def test_fast_fresh_residual_pass_fits_after_parent_residual(
     )
 
 
+def test_fast_fresh_output_pass_fits_transposed_post_hidden_residual(
+    monkeypatch,
+) -> None:
+    calls: list[tuple[torch.Tensor, torch.Tensor, int, int]] = []
+
+    def fake_fast_matching(
+        weight: torch.Tensor,
+        direction: torch.Tensor,
+        *,
+        stages: int,
+        neighbors: int,
+        seed: int,
+    ):
+        del neighbors
+        calls.append(
+            (
+                weight.detach().clone(),
+                direction.detach().clone(),
+                stages,
+                seed,
+            )
+        )
+        return (
+            torch.arange(weight.shape[1]).repeat(stages, 1),
+            {
+                "candidate_edge_fraction": 1.0,
+                "minimum_stage_candidate_edge_fraction": 1.0,
+                "prepared_seconds": 0.001,
+                "native_seconds": 0.002,
+                "total_seconds": 0.003,
+                "native_output_validated": True,
+                "native_library_sha256": "library",
+                "source_sha256": "source",
+            },
+        )
+
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens."
+        "fast_muon_matched_permutations",
+        fake_fast_matching,
+    )
+    module = MuonMatchedGivensLinear(
+        8,
+        4,
+        bias=False,
+        stages=1,
+        residual_stages=1,
+        output_stages=1,
+        neighbors=2,
+        refresh_interval=1,
+        fast_fresh_matching=True,
+        matching_seed=23,
+        weight_std=0.02,
+        layer_id=3,
+    )
+    optimizer = MuonMatchedGivens(
+        [module],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()
+
+    assert len(calls) == 3
+    parent_source, parent_direction, _, _ = calls[0]
+    residual_source, residual_direction, _, _ = calls[1]
+    output_source, output_direction, output_stages, output_seed = calls[2]
+    requested = 0.001 * (
+        parent_direction - 0.1 * parent_source.float()
+    )
+    parent_angles = diagonal_metric_angles(
+        parent_source,
+        requested,
+        torch.arange(8).view(1, 8),
+    )
+    after_parent = apply_givens_flow(
+        parent_source,
+        parent_angles,
+        torch.arange(8).view(1, 8),
+    )
+    expected_residual = requested - (after_parent - parent_source)
+    residual_angles = diagonal_metric_angles(
+        residual_source,
+        residual_direction,
+        torch.arange(8).view(1, 8),
+    )
+    after_residual = apply_givens_flow(
+        residual_source,
+        residual_angles,
+        torch.arange(8).view(1, 8),
+    )
+    expected_output_residual = (
+        requested - (after_residual - parent_source)
+    )
+    torch.testing.assert_close(output_source, after_residual.T.contiguous())
+    torch.testing.assert_close(
+        output_direction,
+        expected_output_residual.T.contiguous(),
+    )
+    assert output_stages == 1
+    assert output_seed == 25
+    assert module.coordinate_count == 10
+    assert module.output_selected_permutations.shape == (1, 4)
+    assert module.output_selected_inverse_permutations.shape == (1, 4)
+    assert module.output_last_angles.shape == (1, 2)
+    assert torch.isfinite(module.output_last_angles).all()
+    assert diagnostics[0]["output_stages"] == 1
+    assert diagnostics[0]["output_matching"]["selector"] == (
+        "fast_fresh_output_pass"
+    )
+
+    module_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = MuonMatchedGivensLinear(
+        8,
+        4,
+        bias=False,
+        stages=1,
+        residual_stages=1,
+        output_stages=1,
+        neighbors=2,
+        refresh_interval=1,
+        fast_fresh_matching=True,
+        matching_seed=23,
+        weight_std=0.02,
+        layer_id=3,
+    )
+    restored.load_state_dict(module_state)
+    restored_optimizer = MuonMatchedGivens(
+        [restored],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    restored_optimizer.load_state_dict(optimizer_state)
+    for key, value in module_state.items():
+        assert torch.equal(value, restored.state_dict()[key])
+    assert torch.equal(
+        optimizer.state[module.weight]["momentum_buffer"],
+        restored_optimizer.state[restored.weight]["momentum_buffer"],
+    )
+
+
 def test_stage64_optimizer_state_round_trip() -> None:
     torch.manual_seed(31)
     module = MuonMatchedGivensLinear(
