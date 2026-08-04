@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_task_frame_terminal_direction_radius_plan_v1",
+  "registered_at": "2026-08-05",
+  "status": "registered_before_evaluator_implementation_or_result_observation",
+  "question": "At the delayed-start terminal base, is the missing causal CE gain primarily limited by frame radius, residual direction error, both, or loss of frozen-endpoint portability?",
+  "evidence": {
+    "delayed_result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_result.json",
+    "delayed_result_sha256": "058c72cc61eb2542c231aea51b26e08c0fa794a25db44bf99d45aad215fdf658",
+    "delayed_checkpoint_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/scientific/ckpt.pt",
+    "delayed_checkpoint_sha256": "120d604b767160d504f968c08f13939d26b571b1f43accd7ef19c7dd72a76629",
+    "endpoint_frame_state_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_task_frame_endpoint_20260805c/scientific/frame_state_step_0120.pt",
+    "endpoint_frame_state_sha256": "a345068471731d64556c365d07c9dcdc3d877ec261871421c24245bd85106ae7",
+    "terminal_fixed_validation_ce": 5.527349472045898,
+    "attention_only_validation_ce": 5.4918,
+    "coordinate_cosines_to_endpoint": {
+      "pregelu": 0.30916228890419006,
+      "postgelu_hidden": 0.27877047657966614,
+      "residual_output": 0.26650726795196533
+    },
+    "coordinate_rms_fraction_of_endpoint": {
+      "pregelu": 0.32423882420509825,
+      "postgelu_hidden": 0.3310168357421445,
+      "residual_output": 0.348265082431814
+    }
+  },
+  "protocol": {
+    "training_updates": 0,
+    "checkpoint_or_optimizer_mutation": false,
+    "model_base": "delayed-start terminal checkpoint with every non-frame tensor held bitwise fixed",
+    "variant_order": [
+      "native_delayed",
+      "identity",
+      "endpoint_full_radius",
+      "endpoint_direction_native_radius",
+      "native_direction_endpoint_radius"
+    ],
+    "variants": {
+      "native_delayed": "unchanged delayed-start terminal coordinates",
+      "identity": "all three coordinate groups zeroed",
+      "endpoint_full_radius": "step-120 frozen-endpoint coordinates transplanted without rescaling",
+      "endpoint_direction_native_radius": "each endpoint coordinate group rescaled by one global group scalar to the native delayed group Frobenius norm",
+      "native_direction_endpoint_radius": "each native delayed coordinate group rescaled by one global group scalar to the endpoint group Frobenius norm"
+    },
+    "rescaling_scope": "one scalar per frame family across all 12 layers; no per-layer fitting, interpolation search, optimization, or validation selection",
+    "validation_windows": {
+      "primary_seed": 20260883,
+      "confirmation_seed": 20260884,
+      "batches_per_window": 32,
+      "batch_size": 16,
+      "block_size": 1024,
+      "shared_tokens_across_variants": true,
+      "disjoint_from_endpoint_optimizer_windows": true
+    },
+    "precision": "BF16 autocast on PRO6 GPU0 with cached materialized bases",
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "callbacks": false
+  },
+  "metrics": {
+    "primary": "mean CE gain relative to native_delayed across the two frozen windows",
+    "secondary": [
+      "per-window CE gain",
+      "identity-minus-native realized causal contribution",
+      "gain fraction relative to endpoint_full_radius",
+      "finite execution",
+      "non-frame state bitwise preservation",
+      "variant throughput and peak memory"
+    ]
+  },
+  "decision_rule": {
+    "minimum_mean_gain": 0.005,
+    "both_windows_nonnegative_required": true,
+    "sufficiency_fraction_of_endpoint_full_gain": 0.5,
+    "endpoint_not_portable": "endpoint_full_radius mean gain below 0.005 or negative on either window",
+    "amplitude_dominates": "endpoint_full_radius is portable; native_direction_endpoint_radius clears the gain and fraction thresholds; endpoint_direction_native_radius does not",
+    "direction_dominates": "endpoint_full_radius is portable; endpoint_direction_native_radius clears the gain and fraction thresholds; native_direction_endpoint_radius does not",
+    "both_direction_and_radius_matter": "endpoint_full_radius is portable and neither controlled variant clears both thresholds",
+    "both_controlled_variants_sufficient": "endpoint_full_radius is portable and both controlled variants clear both thresholds",
+    "no_post_hoc_variant_or_scale_search": true
+  },
+  "next_action_binding": {
+    "amplitude_dominates": "design one causal coordinate-trust/radial-transport mechanism; do not sweep scalar learning rates",
+    "direction_dominates": "design one target-stabilized or transported-gradient learner; do not add radius",
+    "both_direction_and_radius_matter": "design one two-timescale transported frame learner that controls both target drift and trust radius",
+    "endpoint_not_portable": "close this endpoint-frame route and return to c_proj generator structure",
+    "automatic_training_run_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
