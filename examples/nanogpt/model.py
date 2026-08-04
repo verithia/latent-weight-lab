@@ -115,6 +115,7 @@ class GPTConfig:
     block_fht_attn_cayley_scale: float = 1.0
     block_fht_attn_cayley_seed: int = 618033
     block_fht_attn_cayley_atlas_start_steps: tuple[int, ...] = ()
+    block_fht_attn_cayley_factor_optimizer: str = "adamw"
     block_fht_ffn_pregelu_gain: bool = False
     block_fht_ffn_pregelu_bias: bool = False
     block_fht_ffn_pregelu_bias_init: float = 0.0
@@ -477,6 +478,7 @@ class LearnedLowRankCayleyMix(nn.Module):
         rank: int,
         seed: int,
         coordinate_scale: float = 1.0,
+        matrix_parameters: bool = False,
     ) -> None:
         super().__init__()
         self.features = int(features)
@@ -501,10 +503,13 @@ class LearnedLowRankCayleyMix(nn.Module):
             dtype=torch.float32,
         )
         right = F.normalize(right, dim=0)
-        # Keep chart coordinates one-dimensional so the Muon recipe assigns
-        # them to its AdamW fallback instead of orthogonalizing thin factors.
-        self.left = nn.Parameter(torch.zeros(self.features * self.rank))
-        self.right = nn.Parameter(right.reshape(-1))
+        parameter_shape = (
+            (self.features, self.rank)
+            if matrix_parameters
+            else (self.features * self.rank,)
+        )
+        self.left = nn.Parameter(torch.zeros(parameter_shape))
+        self.right = nn.Parameter(right.reshape(parameter_shape))
 
         identity = torch.eye(self.rank, dtype=torch.float32)
         zero = torch.zeros_like(identity)
@@ -1277,6 +1282,13 @@ class CausalSelfAttention(nn.Module):
                 "attention Cayley targets"
             )
         default_cayley_rank = int(config.block_fht_attn_cayley_rank)
+        cayley_factor_optimizer = str(
+            config.block_fht_attn_cayley_factor_optimizer
+        )
+        if cayley_factor_optimizer not in {"adamw", "muon"}:
+            raise ValueError(
+                "attention Cayley factor optimizer must be adamw or muon"
+            )
         atlas_start_steps = tuple(
             int(step)
             for step in config.block_fht_attn_cayley_atlas_start_steps
@@ -1376,6 +1388,7 @@ class CausalSelfAttention(nn.Module):
                 + seed_offset
                 + stage * 104729,
                 coordinate_scale=float(config.block_fht_attn_cayley_scale),
+                matrix_parameters=cayley_factor_optimizer == "muon",
             )
 
         self.qk_input_cayley = (
@@ -3843,6 +3856,7 @@ class GPT(nn.Module):
         muon_ns_steps: int = 5,
         muon_adamw_lr_scale: float = 1.0,
         block_fht_attn_cayley_lr_scale: float = 1.0,
+        block_fht_attn_cayley_muon_lr_scale: float = 1.0,
         block_fht_mlp_chart_lr_scale: float = 1.0,
         block_fht_mlp_pregelu_chart_lr_scale: float = 1.0,
     ):
@@ -3873,6 +3887,26 @@ class GPT(nn.Module):
                 "Muon chart optimizers require optimizer='muon'"
             )
         if optimizer == "muon":
+            attention_cayley_tokens = (
+                ".qk_input_cayley.",
+                ".qk_output_cayley.",
+                ".v_input_cayley.",
+                ".v_output_cayley.",
+                ".cproj_input_cayley.",
+                ".cproj_output_cayley.",
+                "_cayley_atlas.",
+            )
+            attention_cayley_matrix_named = [
+                (name, param)
+                for name, param in params.items()
+                if param.dim() >= 2
+                and any(
+                    token in name for token in attention_cayley_tokens
+                )
+            ]
+            attention_cayley_matrix_ids = {
+                id(param) for _, param in attention_cayley_matrix_named
+            }
             product_factor_tokens = (
                 "product_log_diagonals",
                 "product_output_log_gain",
@@ -3895,6 +3929,7 @@ class GPT(nn.Module):
                 and "wpe" not in name
                 and "lm_head" not in name
                 and id(param) not in product_factor_ids
+                and id(param) not in attention_cayley_matrix_ids
             ]
             other = [
                 param
@@ -3935,15 +3970,6 @@ class GPT(nn.Module):
             pregelu_chart_parameter_ids = {
                 id(param) for param in pregelu_chart_other
             }
-            attention_cayley_tokens = (
-                ".qk_input_cayley.",
-                ".qk_output_cayley.",
-                ".v_input_cayley.",
-                ".v_output_cayley.",
-                ".cproj_input_cayley.",
-                ".cproj_output_cayley.",
-                "_cayley_atlas.",
-            )
             attention_cayley_other = [
                 param
                 for name, param in params.items()
@@ -3973,6 +3999,27 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
+            if attention_cayley_matrix_named:
+                cayley_muon_groups = [
+                    {
+                        "params": [param],
+                        "weight_decay": 0.0,
+                        "lr_scale": (
+                            float(block_fht_attn_cayley_muon_lr_scale)
+                            * math.sqrt(float(param.shape[1]))
+                        ),
+                    }
+                    for _name, param in attention_cayley_matrix_named
+                ]
+                optimizers.append(
+                    Muon(
+                        cayley_muon_groups,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=0.0,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
             if product_factors:
                 optimizers.append(
                     torch.optim.SGD(
@@ -4106,6 +4153,10 @@ class GPT(nn.Module):
                 f"attn_cayley_tensors={len(attention_cayley_other)} "
                 f"attn_cayley_lr_scale="
                 f"{float(block_fht_attn_cayley_lr_scale)} "
+                "attn_cayley_muon_tensors="
+                f"{len(attention_cayley_matrix_named)} "
+                "attn_cayley_muon_lr_scale="
+                f"{float(block_fht_attn_cayley_muon_lr_scale)} "
                 f"adamw_lr={adamw_lr}"
             )
             return MultiOptimizer(optimizers)

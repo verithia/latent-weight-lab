@@ -362,3 +362,66 @@ def test_attention_cayley_optimizer_has_independent_lr_scale() -> None:
         for parameter in cayley_groups[0]["params"]
     } == cayley_ids
     assert cayley_groups[0]["lr_scale"] == 1.0
+
+
+def test_attention_cayley_factors_can_be_muon_owned() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+        block_fht_attn_cayley_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_bilateral_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+        ),
+        block_fht_attn_cayley_rank=2,
+        block_fht_attn_cayley_factor_optimizer="muon",
+    )
+    model = GPT(config)
+    cayley = {
+        id(parameter): parameter
+        for name, parameter in model.named_parameters()
+        if "_cayley." in name
+    }
+    assert cayley
+    assert all(parameter.dim() == 2 for parameter in cayley.values())
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_adamw_lr_scale=0.3,
+        block_fht_attn_cayley_lr_scale=10.0 / 3.0,
+        block_fht_attn_cayley_muon_lr_scale=1.0,
+    )
+    cayley_groups = [
+        group
+        for group in optimizer.param_groups
+        if any(id(parameter) in cayley for parameter in group["params"])
+    ]
+    assert len(cayley_groups) == len(cayley)
+    assert all(len(group["params"]) == 1 for group in cayley_groups)
+    assert all(group["weight_decay"] == 0.0 for group in cayley_groups)
+    assert all(
+        group["lr_scale"] == 2.0 ** 0.5 for group in cayley_groups
+    )

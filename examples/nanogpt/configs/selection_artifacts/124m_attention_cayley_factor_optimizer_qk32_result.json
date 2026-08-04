@@ -1,0 +1,56 @@
+{
+  "schema_version": "mai_124m_attention_cayley_factor_optimizer_record_v1",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does the optimizer-direction result remain positive on the QK32/V16/c-proj8 chart with an existing matched 0.5-TPP AdamW control?",
+  "analysis": {
+    "source_commit": "00e9c1968bc6884f87e05672e238e31a35685cf7",
+    "entrypoint": "examples.nanogpt.analyze_attention_cayley_factor_optimizer",
+    "command": "CUDA_VISIBLE_DEVICES=0 /root/userdata/MappingNetworks/.venv-gpt2/bin/python -m examples.nanogpt.analyze_attention_cayley_factor_optimizer --probe-dir /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/y400_mai_v3_124m_dense_attention_trajectory_5tpp_lr24e4/optimizer_probe --production-config examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_attention_manifold/analysis/attention_cayley_factor_optimizer_qk32_20260804 --device cuda",
+    "device": "Y400 GPU0, read-only offline analysis",
+    "elapsed_seconds": 7.245466709136963,
+    "optimizer_probe_run_identity_sha256": "884a170685656f94afb4303ef0b34d2e99a840e6a5dc38c2d0c55a8139c01663",
+    "raw_result_sha256": "bebf27ced3ac35b3c6fef2dab21d4ea4f4bc8bd478c115b7f404c7347923e046",
+    "cells_csv_sha256": "4100edcf057fd18b8b32657f3adb5ba674bbadea40eb2f0331621464975ffa9f",
+    "run_log_sha256": "786e1be69f818af361dc206ea99a722678bbcfa9d4558a99324ac05330456aa9"
+  },
+  "aggregate": {
+    "adamw_cosine": 0.030488834108280915,
+    "adamw_positive_line_recovery": 0.0010610284768097953,
+    "muon_cosine": 0.048697778411016746,
+    "muon_positive_line_recovery": 0.0027117230120413407,
+    "relative_recovery": 2.5557495122041445
+  },
+  "positive_line_recovery_by_target": {
+    "qk_shared": {
+      "adamw": 0.00171481041830579,
+      "muon": 0.003912240877181661
+    },
+    "v": {
+      "adamw": 0.0009342202896210557,
+      "muon": 0.0027938162785102636
+    },
+    "cproj": {
+      "adamw": 0.0002935119378434648,
+      "muon": 0.0006287687163753692
+    }
+  },
+  "matched_control": {
+    "name": "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4",
+    "terminal_validation_ce": 5.4024,
+    "result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_attention_targeted_bilateral_full_cayley_lr_0p5tpp_result.json"
+  },
+  "decision": {
+    "minimum_relative_recovery": 1.25,
+    "no_target_regression": true,
+    "admitted": true,
+    "classification": "ADMIT_MATCHED_QK32_FACTOR_MUON_0P5TPP_SCREEN",
+    "amendment_reason": "QK32 satisfies the same oracle gate and, unlike QK64 at 0.5 TPP, has an existing optimizer-matched control. This preserves the user's smallest-rung-first rule and an optimizer-only causal comparison.",
+    "promotion_threshold_validation_ce": 5.3924,
+    "next_test": "Change only QK32/V16/c-proj8 Cayley thin factors from full-main-LR AdamW to norm-matched matrix Muon; require exact-config MFU >=20% and poll the 238-update run directly."
+  },
+  "limitations": [
+    "This is an identity-chart oracle on dense weights and gradients, not a trained generated model.",
+    "It isolates first-step optimizer geometry and omits accumulated optimizer momentum.",
+    "Absolute recovered direction remains below one percent; promotion requires measured held-out CE."
+  ]
+}

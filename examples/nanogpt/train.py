@@ -699,6 +699,27 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
         raise ValueError(
             "block_fht_attn_cayley_lr_scale must be positive and finite"
         )
+    attn_cayley_factor_optimizer = str(
+        getattr(args, "block_fht_attn_cayley_factor_optimizer", "adamw")
+    )
+    if attn_cayley_factor_optimizer not in {"adamw", "muon"}:
+        raise ValueError(
+            "block_fht_attn_cayley_factor_optimizer must be adamw or muon"
+        )
+    if attn_cayley_factor_optimizer == "muon" and args.optimizer != "muon":
+        raise ValueError(
+            "Muon attention Cayley factors require optimizer=muon"
+        )
+    attn_cayley_muon_lr_scale = float(
+        getattr(args, "block_fht_attn_cayley_muon_lr_scale", 1.0)
+    )
+    if (
+        not math.isfinite(attn_cayley_muon_lr_scale)
+        or attn_cayley_muon_lr_scale <= 0.0
+    ):
+        raise ValueError(
+            "block_fht_attn_cayley_muon_lr_scale must be positive and finite"
+        )
     mlp_pregelu_chart_lr_scale = float(
         getattr(args, "block_fht_mlp_pregelu_chart_lr_scale", 1.0)
     )
@@ -1013,6 +1034,16 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--block-fht-attn-cayley-lr-scale",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--block-fht-attn-cayley-factor-optimizer",
+        choices=["adamw", "muon"],
+        default="adamw",
+    )
+    parser.add_argument(
+        "--block-fht-attn-cayley-muon-lr-scale",
         type=float,
         default=1.0,
     )
@@ -1880,6 +1911,9 @@ def main() -> None:
         block_fht_attn_cayley_atlas_start_steps=tuple(
             args.block_fht_attn_cayley_atlas_start_steps
         ),
+        block_fht_attn_cayley_factor_optimizer=(
+            args.block_fht_attn_cayley_factor_optimizer
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -2102,6 +2136,9 @@ def main() -> None:
         muon_ns_steps=args.muon_ns_steps,
         muon_adamw_lr_scale=args.muon_adamw_lr_scale,
         block_fht_attn_cayley_lr_scale=args.block_fht_attn_cayley_lr_scale,
+        block_fht_attn_cayley_muon_lr_scale=(
+            args.block_fht_attn_cayley_muon_lr_scale
+        ),
         block_fht_mlp_chart_lr_scale=args.block_fht_mlp_chart_lr_scale,
         block_fht_mlp_pregelu_chart_lr_scale=args.block_fht_mlp_pregelu_chart_lr_scale,
     )
