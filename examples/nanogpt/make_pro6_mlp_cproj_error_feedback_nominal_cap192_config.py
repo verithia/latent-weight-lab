@@ -30,21 +30,22 @@ RESOLUTION = (
 
 BASE_SHA256 = "fb7d8f5b4e5f8a98a30fa6216080146622f018403a5b7f8dddc1875803a81cd9"
 PLAN_SHA256 = "b1c9fbd15c1483d99d8677300a372c31c8414efbfba83ba7a5fd1c7ab0973511"
-IMPLEMENTATION_COMMIT = "5e19cf7d5a89d5360adeb2f13d41ffe009c7b0db"
+IMPLEMENTATION_COMMIT = "0402a5a8b1e31fa8dc93098ef1ed8bb4d61a8084"
 DATASET_MANIFEST_SHA256 = "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
 FIXED_EVAL_INDICES_SHA256 = "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
 SOURCE_HASHES = {
-    "examples/nanogpt/mfu_preflight.py": "eb2312801e4b532d10540224aa2027ab70d1e5c68845febced341412eea1e985",
+    "examples/nanogpt/mfu_preflight.py": "278da853e7fb1b12884426a354b18a8d7d753560261111f4f373c69c472944f6",
     "examples/nanogpt/model.py": "86bcae18fcf86e75af4e3929a239897ed18129e19e6fc79c92d4cf2eb7a54666",
     "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
     "examples/nanogpt/muon_matched_givens.py": "b73ed8ed213b17f2d63046b7a75451c3f17b3516a9b77c0809d3b0a031461cf7",
     "examples/nanogpt/test_cproj_error_feedback_schedule.py": "68af908631af05e18ba5c8655ce8f68700b7a588fad98143db76c3bdc0805b21",
     "examples/nanogpt/test_muon_matched_givens.py": "30db3afa48881f8a294c6958844a33214e5922943ac178e0fcb8aa115b849b55",
-    "examples/nanogpt/train.py": "56ee43523e124e785163fa3ae1a2a7c54a02c8c593042ee4367934d094df4000",
+    "examples/nanogpt/train.py": "43520b5c70ef0b23267c428d2224b7abf5f5bbd689b834927301137e38c36f2f",
     "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561",
 }
 
 CAP_NOMINAL_STEPS = 192.0
+PREFLIGHT_CAP_NOMINAL_STEPS = 0.5
 PARENT_CE = 5.527365207672119
 PASS_CE = 5.522365207672119
 NEAR_CLOSE_CE = 5.5118
@@ -123,9 +124,13 @@ def make_config() -> dict[str, Any]:
             "ladder_role": "mlp_cproj_nominal_cap192_smallest_rung_candidate",
             "mfu_measurement_protocol": (
                 "foreground real-training preflight with 1 warmup and 8 timed "
-                "updates; qualification additionally requires at least one "
-                "logged active cap event in the scratch horizon"
+                "updates; the performance-only scratch copy lowers the cap "
+                "from 192 to 0.5 nominal steps so the same active norm/rescale "
+                "kernel executes during timed updates; qualification requires "
+                "at least one logged timed cap event"
             ),
+            "mfu_preflight_error_feedback_max_nominal_steps": PREFLIGHT_CAP_NOMINAL_STEPS,
+            "mfu_preflight_require_feedback_cap_active": True,
             "mfu_preflight_certificate": CERTIFICATE,
             "monitoring_policy": (
                 "direct foreground polling; no watchdog, callback, queue "
@@ -224,6 +229,8 @@ def make_resolution(config_sha256: str) -> dict[str, Any]:
             "parent_config_sha256": BASE_SHA256,
             "decision_threshold_changed": False,
             "mlp_cfc_dense": True,
+            "performance_only_scratch_cap_nominal_steps": PREFLIGHT_CAP_NOMINAL_STEPS,
+            "scientific_cap_nominal_steps": CAP_NOMINAL_STEPS,
         },
         "execution": {
             "host": "PRO6",
@@ -245,6 +252,14 @@ def make_resolution(config_sha256: str) -> dict[str, Any]:
             "required_scratch_cap_events": 1,
             "scientific_promotion_ceiling": PASS_CE,
             "required_scientific_cap_events": 1,
+            "preflight_transform": {
+                "scientific_cap_nominal_steps": CAP_NOMINAL_STEPS,
+                "scratch_cap_nominal_steps": PREFLIGHT_CAP_NOMINAL_STEPS,
+                "reason": (
+                    "exercise and time the identical active cap kernel inside "
+                    "the compact scratch horizon"
+                ),
+            },
         },
         "authorization": {
             "single_mfu_preflight": True,

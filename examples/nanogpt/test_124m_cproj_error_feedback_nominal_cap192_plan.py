@@ -85,6 +85,8 @@ def test_cap_is_the_only_scientific_change_from_full_carry_parent() -> None:
     assert candidate[
         "block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps"
     ] == 192.0
+    assert candidate["mfu_preflight_error_feedback_max_nominal_steps"] == 0.5
+    assert candidate["mfu_preflight_require_feedback_cap_active"] is True
     assert "mlp.c_fc" not in candidate["block_fht_targets"]
 
 
@@ -98,6 +100,14 @@ def test_gates_and_direct_polling_are_frozen() -> None:
     assert command[command.index("--min-fraction") + 1] == "0.2"
     assert resolution["gates"]["required_scratch_cap_events"] == 1
     assert resolution["gates"]["required_scientific_cap_events"] == 1
+    assert resolution["gates"]["preflight_transform"] == {
+        "scientific_cap_nominal_steps": 192.0,
+        "scratch_cap_nominal_steps": 0.5,
+        "reason": (
+            "exercise and time the identical active cap kernel inside the "
+            "compact scratch horizon"
+        ),
+    }
     assert config["preregistered_decision_rule"]["pass_validation_ce_maximum"] == 5.522365207672119
     assert plan["decision_policy"]["automatic_rerun_authorized"] is False
     assert resolution["authorization"]["automatic_rerun_authorized"] is False
