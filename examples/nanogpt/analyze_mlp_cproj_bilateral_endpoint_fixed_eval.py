@@ -49,6 +49,7 @@ def select_variant(
     *,
     minimum_val_gain: float,
     minimum_train_gain: float,
+    authorize_production_implementation: bool = True,
 ) -> dict[str, Any]:
     by_name = {str(row["variant"]): row for row in rows}
     dense = by_name["dense_endpoint"]
@@ -90,15 +91,19 @@ def select_variant(
         (name for name in CANDIDATE_ORDER if comparisons[name]["passed"]),
         None,
     )
+    if selected is None:
+        decision = "REJECT_BILATERAL_ENDPOINT_AS_TASK_DIRECTION"
+    elif authorize_production_implementation:
+        decision = f"SELECT_{selected.upper()}_FOR_PRODUCTION_IMPLEMENTATION"
+    else:
+        decision = f"SELECT_{selected.upper()}_AS_DIAGNOSTIC_ENDPOINT_PASS"
     return {
         "comparisons": comparisons,
         "selected_variant": selected if selected is not None else CONTROL,
-        "decision": (
-            f"SELECT_{selected.upper()}_FOR_PRODUCTION_IMPLEMENTATION"
-            if selected is not None
-            else "REJECT_BILATERAL_ENDPOINT_AS_TASK_DIRECTION"
+        "decision": decision,
+        "production_implementation_authorized": bool(
+            selected is not None and authorize_production_implementation
         ),
-        "production_implementation_authorized": selected is not None,
         "language_model_training_authorized": False,
     }
 
@@ -294,11 +299,14 @@ def main() -> None:
     if schema_version not in {
         "mai_124m_mlp_cproj_bilateral_endpoint_fixed_eval_plan_v1",
         "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_plan_v1",
+        "mai_124m_mlp_cproj_bilateral_endpoint_matched_parent_plan_v1",
     }:
         raise ValueError("unexpected plan schema")
     if (
-        schema_version
-        == "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_plan_v1"
+        schema_version in {
+            "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_plan_v1",
+            "mai_124m_mlp_cproj_bilateral_endpoint_matched_parent_plan_v1",
+        }
         and args.connectivity_target != "production_nondecay"
     ):
         raise ValueError("production-selector plan requires production_nondecay")
@@ -384,6 +392,12 @@ def main() -> None:
         rows,
         minimum_val_gain=args.minimum_val_gain,
         minimum_train_gain=args.minimum_train_gain,
+        authorize_production_implementation=bool(
+            decision_rule.get(
+                "endpoint_pass_authorizes_production_implementation",
+                True,
+            )
+        ),
     )
     args.output.mkdir(parents=True, exist_ok=True)
     state_path = args.output / "cproj_bilateral_terminal_states.pt"

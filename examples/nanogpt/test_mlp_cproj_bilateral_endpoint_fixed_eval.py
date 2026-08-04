@@ -58,6 +58,19 @@ def test_no_candidate_defaults_to_right_only_without_training_authority() -> Non
     assert result["language_model_training_authorized"] is False
 
 
+def test_matched_parent_diagnostic_pass_does_not_reauthorize_production() -> None:
+    result = select_variant(
+        _rows(5.429, 5.437),
+        minimum_val_gain=0.002,
+        minimum_train_gain=0.0,
+        authorize_production_implementation=False,
+    )
+    assert result["selected_variant"] == "hidden88_output32_full_carry"
+    assert result["decision"].endswith("_AS_DIAGNOSTIC_ENDPOINT_PASS")
+    assert result["production_implementation_authorized"] is False
+    assert result["language_model_training_authorized"] is False
+
+
 def test_production_parent_selector_does_not_change_later_angle_targets(
     monkeypatch,
 ) -> None:
