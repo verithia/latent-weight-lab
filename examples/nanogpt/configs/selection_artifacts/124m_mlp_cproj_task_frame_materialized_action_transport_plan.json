@@ -1,0 +1,68 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_task_frame_materialized_action_transport_plan_v1",
+  "registered_at": "2026-08-05",
+  "status": "registered_before_evaluator_implementation_or_result_observation",
+  "question": "Does basepoint-aware additive transport of the useful parent endpoint's materialized c_fc/c_proj action improve the delayed terminal model, even though raw chart coordinates do not?",
+  "evidence": {
+    "terminal_direction_radius_result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_frame_terminal_direction_radius_result.json",
+    "terminal_direction_radius_result_sha256": "8961510f4732c1d8138d8815016a0953477d48635a1977f1e1bf8f133f1aec31",
+    "registered_prior_decision": "ENDPOINT_NOT_PORTABLE",
+    "parent_checkpoint_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/scientific/ckpt.pt",
+    "parent_checkpoint_sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+    "delayed_checkpoint_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/scientific/ckpt.pt",
+    "delayed_checkpoint_sha256": "120d604b767160d504f968c08f13939d26b571b1f43accd7ef19c7dd72a76629",
+    "endpoint_frame_state_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_task_frame_endpoint_20260805c/scientific/frame_state_step_0120.pt",
+    "endpoint_frame_state_sha256": "a345068471731d64556c365d07c9dcdc3d877ec261871421c24245bd85106ae7"
+  },
+  "transport": {
+    "parent_action_definition": "for each layer and tensor family, delta_W_parent = W_parent_with_endpoint_frame - W_parent_identity",
+    "target_definition": "W_delayed_identity + delta_W_parent",
+    "basepoint_awareness": "transport the induced additive materialized action, not the raw multiplicative chart coordinate",
+    "fitting_or_projection": false,
+    "language_model_updates": 0,
+    "checkpoint_or_optimizer_mutation": false,
+    "inference_only_override": "install exact cached c_fc/c_proj materialized weights for evaluation, then discard them"
+  },
+  "protocol": {
+    "variant_order": [
+      "native_delayed",
+      "identity",
+      "raw_endpoint_coordinates",
+      "additive_materialized_full",
+      "additive_materialized_cfc_only",
+      "additive_materialized_cproj_only"
+    ],
+    "validation_windows": {
+      "primary_seed": 20260885,
+      "confirmation_seed": 20260886,
+      "batches_per_window": 32,
+      "batch_size": 16,
+      "block_size": 1024,
+      "shared_tokens_across_variants": true,
+      "untouched_by_prior_frame_diagnostics": true
+    },
+    "precision": "BF16 autocast on PRO6 GPU0 with cached materialized bases",
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "callbacks": false,
+    "no_interpolation_or_action_scale_search": true
+  },
+  "decision_rule": {
+    "minimum_mean_gain_over_native": 0.005,
+    "both_windows_nonnegative_required": true,
+    "materialized_action_portable": "additive_materialized_full clears the mean gain threshold and is nonnegative on both windows",
+    "materialized_action_nonportable": "the full additive action fails either frozen requirement",
+    "component_support_fraction": 0.5,
+    "component_supported": "the one-sided component is nonnegative on both windows and recovers at least half the full-action mean gain",
+    "raw_coordinate_control": "raw_endpoint_coordinates must reproduce the prior nonportable sign; otherwise stop for evaluator identity drift",
+    "automatic_training_run_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "next_action_binding": {
+    "materialized_action_portable": "fit or parallel-transport the materialized action into a deployable fixed chart before any causal training run",
+    "materialized_action_nonportable": "close task-frame transport and concentrate on c_proj generator/error-state structure",
+    "learned_dense_basis_or_lora_authorized": false,
+    "residual_hyperconnection_authorized": false
+  }
+}
