@@ -75,7 +75,7 @@
   "grad_clip": 1.0,
   "gradient_accumulation_steps": 8,
   "hpo_stage": "cproj_errorfeedback_task_frame_delayed_direction_acquisition_start120_0p5tpp",
-  "implementation_commit": "69ca219c1fb4425f012be95729ed12a08f936174",
+  "implementation_commit": "f6f781bb6bd2922cfd071cf0e4663f15d88d81e6",
   "implementation_source_hashes": {
     "examples/nanogpt/mfu_preflight.py": "0baa7637ee10fe55496873afd933ca29cfcc5027c23e11996b74e850f2105370",
     "examples/nanogpt/model.py": "3751c1ec18b75f34940ce7cce48101b9853f6b9ed043c5ee9998d02610894331",

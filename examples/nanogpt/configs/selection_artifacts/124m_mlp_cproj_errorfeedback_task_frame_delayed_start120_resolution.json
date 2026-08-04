@@ -8,16 +8,17 @@
   },
   "config": {
     "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
-    "sha256": "3678e957273f491dffa29e6c3cf7cf7d727a782e0a3dec0c809af4dafee73896"
+    "sha256": "a712d155a15c8e64e5d3aa6c6551f384b1e4705ea1ee1b58d861187831c644fa"
   },
   "implementation": {
-    "commit": "69ca219c1fb4425f012be95729ed12a08f936174",
+    "commit": "f6f781bb6bd2922cfd071cf0e4663f15d88d81e6",
     "source_hashes": {
-      "examples/nanogpt/mfu_preflight.py": "0baa7637ee10fe55496873afd933ca29cfcc5027c23e11996b74e850f2105370",
+      "examples/nanogpt/mfu_preflight.py": "eb2312801e4b532d10540224aa2027ab70d1e5c68845febced341412eea1e985",
       "examples/nanogpt/model.py": "3751c1ec18b75f34940ce7cce48101b9853f6b9ed043c5ee9998d02610894331",
       "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
       "examples/nanogpt/muon_matched_givens.py": "b743b56b343bd692ad125df4d7daeb77274c8516b91868410992987373d6149b",
       "examples/nanogpt/test_124m_cproj_errorfeedback_taskframe_plan.py": "a0820515e88e6b78bb7366dc7bed2aa2d98264ae015eed74da19ece882ffc484",
+      "examples/nanogpt/test_mfu_preflight.py": "8755d44f711585dc0ae5860caadd278b1ad51d9730c8d4b5d8a3873db38dc9dd",
       "examples/nanogpt/train.py": "17802c372da8b5fd24993dae8f7393f7714e20cf42bb79044a2a7544cc3bce56",
       "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
     },
@@ -40,7 +41,7 @@
       "timed_updates": 8,
       "timed_active_path": true
     },
-    "local_test_result": "57 passed, 40 subtests passed"
+    "local_test_result": "66 passed, 40 subtests passed"
   },
   "scientific_invariants": {
     "max_iters": 238,
