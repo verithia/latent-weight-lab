@@ -1,0 +1,125 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_endpoint_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "COUPLED_ACTIVATION_FRAME_CAPACITY",
+  "scientific_scope": "frozen-endpoint task-conditioned capacity diagnostic using 31,457,280 extra optimization tokens; not a same-budget pretraining result",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_endpoint_plan.json",
+    "sha256": "8dda3ef994f003ceceec1a7fd9952a952e545558f29adbff044a311aa73b7d62"
+  },
+  "identity_amendments": [
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_endpoint_identity_amendment.json",
+      "sha256": "67abd0ecdfdee12c149c8fb2c1c85ec05689eef248c90ad444e6726bf7bcffb6"
+    },
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_endpoint_ce_identity_amendment.json",
+      "sha256": "a93a8dd32d698bbffda9fc864508fdb9f3145349f6c158d0db017ca9d96e1310"
+    }
+  ],
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repository_commit": "273e46138f134122caed885548e3a462715ad115",
+    "entrypoint": "examples/nanogpt/optimize_mlp_cproj_errorfeedback_task_frame_endpoint.py",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "parameter_updates": 120,
+    "tokens_per_update": 262144,
+    "diagnostic_optimization_tokens": 31457280,
+    "ordinary_update_mean_ms": 1446.9890181149822,
+    "ordinary_update_median_ms": 1434.0010070009157
+  },
+  "inputs": {
+    "accepted_parent_checkpoint_sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+    "accepted_parent_terminal_fixed_validation_ce": 5.527365207672119,
+    "accepted_parent_result_sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df",
+    "endpoint_intervention_result_sha256": "b3da66aa6c041d177a78613192b12eab3fe38a3b3d08b0d58ad9672ff526e628",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction": 0.3145782185939502,
+    "tokens_per_second": 175789.2978902677,
+    "mean_iter_ms": 1491.23981463102,
+    "peak_mib": 29569.10791015625,
+    "empirical_bf16_gemm_peak_tflops": 417.3499080683747,
+    "safety_ce_increase": 0.01991748809814453,
+    "maximum_safety_ce_increase": 0.05,
+    "frozen_state_bitwise_unchanged": true,
+    "certificate_sha256": "4176c80505b79e92ed1586cde1775f478af949c39cb3e0709d076ae80354aaef",
+    "log_sha256": "2b35c4355665741abc73de11e22eec367ea258a0fced7ae34b8b9d3a3bbcc7c2"
+  },
+  "protocol": {
+    "train_token_seed": 20260882,
+    "train_indices_sha256": "5506765a3ae3570795600b79a5a441c08943206942823a7dd8c26f35f3cc2ec2",
+    "validation_seeds": {
+      "primary": 20260880,
+      "confirmation": 20260881
+    },
+    "validation_token_sha256": {
+      "primary": "c502fdba7df81bcea582990e0b821b44365590e68e4338f7d52cc8479f384e7c",
+      "confirmation": "17301cfbf321024b7fbcc281ce40e4ee801a30c539eeb38179677993f908c340"
+    },
+    "evaluation_updates": [0, 30, 60, 120],
+    "frame_parameter_count": 2856960,
+    "frame_parameter_count_by_group": {
+      "pregelu_rotation": 1142784,
+      "hidden_rotation": 1142784,
+      "output_rotation": 571392
+    },
+    "scalar_gains": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false
+  },
+  "selected_update": 120,
+  "paired_validation_ce": {
+    "primary": {
+      "identity": 5.656493663787842,
+      "full_coupled": 5.639458656311035,
+      "post_only": 5.6458752155303955,
+      "pre_only": 5.649361312389374,
+      "full_coupled_gain": 0.01703500747680664,
+      "post_only_gain": 0.010618448257446289,
+      "pre_only_gain": 0.007132351398468018,
+      "pregelu_marginal_over_post_only": 0.0064165592193603516
+    },
+    "confirmation": {
+      "identity": 5.581315636634827,
+      "full_coupled": 5.5625593066215515,
+      "post_only": 5.569486916065216,
+      "pre_only": 5.574306428432465,
+      "full_coupled_gain": 0.018756330013275146,
+      "post_only_gain": 0.011828720569610596,
+      "pre_only_gain": 0.0070092082023620605,
+      "pregelu_marginal_over_post_only": 0.006927609443664551
+    }
+  },
+  "decision_thresholds": {
+    "minimum_full_gain_both_seeds": 0.0075,
+    "minimum_post_only_gain_both_seeds": 0.005,
+    "minimum_pregelu_marginal_both_seeds": 0.0025,
+    "all_passed": true
+  },
+  "interpretation": [
+    "The accepted error-feedback parent retains task-useful local capacity in both sides of GELU: neither an isolated post-c_proj rotation nor an isolated pre-GELU rotation explains the full gain.",
+    "The post-only and pre-only gains are individually reproducible across untouched windows, and their combined gain is nearly additive. This resolves the local direction problem more concretely than the rejected batch-local selector because full student CE selects one persistent coupled frame.",
+    "The mean full-coupled paired gain is 0.01790 CE, about half of the parent's 0.03557 fixed-window gap to attention-only if it transferred unchanged. That comparison is a capacity estimate only because the endpoint optimizer consumed an additional 31.46M tokens.",
+    "This evidence does not justify a residual hyperconnection: the registered pre/post-GELU frames act inside the MLP and improve CE without changing the identity residual path.",
+    "A same-budget causal run is required to test transfer. Prior from-scratch paired frames failed when the post-frame learning rate was ten times larger and the c_proj base lacked the accepted error-feedback geometry; the new causal control must use 7.2e-5 effective LR for all frame groups and the accepted error-feedback c_proj parent mechanism."
+  ],
+  "decision": {
+    "automatic_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister and performance-qualify exactly one 124M 0.5-TPP same-budget causal run combining the accepted c_proj error-feedback mechanism with these identity-initialized pre/post-GELU frames at effective frame LR 7.2e-5."
+  },
+  "raw_artifacts": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_task_frame_endpoint_20260805c",
+    "summary_sha256": "de8c46e350fea41005bce7c4152e539f16b36638af0d99833b7732fb407471fb",
+    "scientific_log_sha256": "9991aeaffd6d83744217e6502061799ddf40132a342a80fbcad106064b7821f8",
+    "optimization_csv_sha256": "6a77f78a311732085f51621c281d23e7bdf7169d76597d726aea6ce30676fd2b",
+    "validation_csv_sha256": "792caeac7a571760af0357ffe21eea19709c3567cb3c08cda55d8d240f08a806",
+    "selected_frame_state_sha256": "a345068471731d64556c365d07c9dcdc3d877ec261871421c24245bd85106ae7"
+  }
+}

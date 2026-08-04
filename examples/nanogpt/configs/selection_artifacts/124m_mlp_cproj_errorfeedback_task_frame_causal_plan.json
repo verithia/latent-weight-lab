@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_causal_plan_v1",
+  "registered_at": "2026-08-05",
+  "question": "Does the coupled pre/post-GELU frame capacity transfer when trained causally inside the original 124M 0.5-TPP budget together with the accepted c_proj Muon error-feedback mechanism?",
+  "scientific_scope": "one smallest-rung same-token-budget causal transfer test; not a learning-rate sweep and not a fitted scaling ladder",
+  "parent": {
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_0p5tpp_result.json",
+    "result_sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df",
+    "terminal_fixed_validation_ce": 5.527365207672119,
+    "attention_only_fixed_validation_ce": 5.4918,
+    "remaining_ce_gap": 0.03556520767211957
+  },
+  "capacity_evidence": {
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_endpoint_result.json",
+    "mean_full_coupled_endpoint_gain": 0.017895668745040894,
+    "primary_gain": 0.01703500747680664,
+    "confirmation_gain": 0.018756330013275146,
+    "limitation": "31,457,280 extra endpoint optimization tokens; cannot be counted as same-budget improvement"
+  },
+  "candidate": {
+    "base": "accepted full-attention replacement plus Muon-matched hidden64+24 c_proj with decay-1 compression error feedback; c_fc remains dense",
+    "pregelu_frame": "two-stage fixed-basis block32/basis256 rotation, coordinate scale 4, seed 161803",
+    "postgelu_hidden_frame": "two-stage fixed-basis block32/basis256 rotation, coordinate scale 4, seed 314159",
+    "residual_output_frame": "four-stage fixed-basis block32/basis256 rotation, coordinate scale 4, seed 271828",
+    "initialization": "exact zero coordinates; mathematical identity with registered bounded FHT roundoff",
+    "scalar_gains": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "residual_hyperconnection": false,
+    "additional_trainable_coordinates": 2856960,
+    "inference_cost_after_folding": "unchanged dense materialized c_fc/c_proj GEMMs"
+  },
+  "training": {
+    "updates": 238,
+    "tokens_per_update": 262144,
+    "scheduled_tokens": 62390272,
+    "token_budget_label": "0.5 TPP",
+    "main_optimizer": "Muon",
+    "main_learning_rate": 0.0024,
+    "muon_adamw_lr_scale": 0.3,
+    "postgelu_chart_lr_scale": 0.1,
+    "pregelu_chart_lr_scale": 0.1,
+    "effective_frame_learning_rate": 0.000072,
+    "frame_optimizer": "AdamW fallback, betas 0.9/0.95, zero chart weight decay",
+    "weight_decay": 0.1,
+    "warmup_updates": 10,
+    "cosine_decay_minimum_lr": 0.00024,
+    "gradient_clip": 1.0,
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "train_data_seed": 20260714,
+    "model_seed": 1337,
+    "endpoint_state_initialization": false,
+    "teacher_objective": false
+  },
+  "evaluation": {
+    "fixed_eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "eval_batch_size": 16,
+    "eval_iters": 400,
+    "eval_interval": 60,
+    "terminal_evaluation_required": true,
+    "primary_metric": "terminal update-238 fixed-window validation CE"
+  },
+  "decision_rule": {
+    "pass": "stable terminal validation CE at or below 5.522365207672119, improving the accepted causal parent by at least 0.005",
+    "near_close": "terminal validation CE at or below 5.5018, within 0.01 CE of attention-only",
+    "close": "terminal validation CE at or below 5.4968, within 0.005 CE of attention-only",
+    "reject": "instability, incomplete exact-resume state, MFU below 20 percent, or terminal validation CE above 5.522365207672119",
+    "no_post_hoc_lr_or_capacity_sweep": true,
+    "automatic_larger_rung_authorized": false
+  },
+  "performance_and_correctness_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "preflight": "one warmup plus eight timed exact training updates on PRO6 GPU0",
+    "required": [
+      "all local and remote focused chart/cache tests pass",
+      "exact training config and source/config/dataset identities are bound",
+      "all three frame groups receive finite nonzero gradients",
+      "MuonMatchedGivensLinear c_proj receives its projected dense gradient and applies error feedback",
+      "one interrupted two-step exact-resume test is bitwise identical for model, optimizer, RNG, and frame coordinates",
+      "measured exact-path MFU is at least 20 percent"
+    ],
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "callbacks": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "queue_entry": false,
+    "automatic_rerun": false,
+    "required_artifacts": [
+      "git commit, entrypoint, literal command, config and source hashes",
+      "dataset manifest and fixed-eval identities",
+      "MFU certificate and log hashes",
+      "run metadata and provenance envelope",
+      "terminal log, status, checkpoint, and exact custom optimizer state hashes"
+    ]
+  }
+}
