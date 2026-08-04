@@ -1,0 +1,114 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_activation_selector_phase_acquisition_result_v1",
+  "artifact_kind": "124m_mlp_cproj_activation_selector_phase_acquisition_result",
+  "recorded_at": "2026-08-04",
+  "classification": "ACCEPTED_MATCHED_PARENT_PHASE_STATE_ACQUISITION",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_plan.json",
+    "sha256": "e40b359abbbc912704ddad45a285f4f2a6300b58b3f611031f56b7ac481633fb"
+  },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_probe_mfu_result.json",
+    "sha256": "3298164fa6b078fdbc73b236999c49f0c379d99031dd8e6d15c8f2f3da1bad11"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "3fbf61e70f15e3863e5a677d2c37972a7d3eb3c8",
+    "run_id": "pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp_20260804T141555Z_3983537",
+    "entrypoint": "examples/nanogpt/train.py",
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp_20260804T141555Z_3983537.config.json"
+    ],
+    "started_at": "2026-08-04T22:15:55+08:00",
+    "finished_at": "2026-08-04T22:22:51+08:00",
+    "elapsed_seconds": 416,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "exit_code": 0
+  },
+  "identity": {
+    "source_config_sha256": "d399f817080de51cd378cf5952935a15f9915b99e2a5128f92e2daed66ef2720",
+    "resolved_config_sha256": "dfcf7bfc89a7fbe4c9125bef74aa546870e9a1cb6e31688244cbef0d4186a49c",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "f822a5acfdf5631b28e27e3d5b568896f2dc1596e68b194c5079069a64fe3c86",
+    "status_sha256": "f525801b191cb8b4e5cf98c2028a61639693524f97c0844130de707449345691",
+    "log_sha256": "c839d92ac8523a77e87b6cf073e2e197ec9cd1eb8d8bdb1afa243171e05c508d"
+  },
+  "loss": {
+    "step_0": {"train_ce": 10.9991, "validation_ce": 10.9991},
+    "step_60": {"train_ce": 6.2087, "validation_ce": 6.2182},
+    "step_120": {"train_ce": 5.7910, "validation_ce": 5.7957},
+    "step_180": {"train_ce": 5.5826, "validation_ce": 5.5856},
+    "step_238": {"train_ce": 5.4891, "validation_ce": 5.4919},
+    "step_60_absolute_delta_from_reference": 0.0002,
+    "terminal_absolute_delta_from_reference": 0.0001
+  },
+  "snapshots": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/scientific/parameter_trajectory",
+    "steps": [0, 60, 120, 180, 238],
+    "count": 5,
+    "all_parameters": true,
+    "parameter_tensors_per_snapshot": 219,
+    "dtype": "float32",
+    "total_bytes": 1927449965,
+    "sha256_by_step": {
+      "0": "4f88e9a52300b2e4ee437a0b2b91d5e257910237081b6a39c67b12d7b0e9462b",
+      "60": "bd4db23704004b58df1e8e15c811e60cb02fe06dcd38ae44352c2b0095e7109c",
+      "120": "b4f5b120a0f15daa4f4717382952b548eb58728a97ec1e0260e5e5dcaf70b89e",
+      "180": "81a8331b055302b0d702a4c3d6e70f5b585444f0682faa70a8b25b0cc1b569c0",
+      "238": "4346a0038a26df272b58bf5eba2fc47e54226789b75ff84070a263b8cbfceae8"
+    }
+  },
+  "optimizer_probes": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/scientific/optimizer_probe",
+    "registered_plan_path_correction": "The preregistered prose path used optimizer_probes; train.py's immutable writer uses optimizer_probe. Only this directory spelling is corrected downstream.",
+    "steps": [0, 60, 120, 180],
+    "layers": [0, 3, 6, 9, 11],
+    "parameters_per_probe": 5,
+    "tensors_per_probe": 30,
+    "dtype": "float32",
+    "total_bytes": 1132601380,
+    "weight_before_step_exactly_equals_snapshot": true,
+    "sha256_by_step": {
+      "0": "401bd8f5ee214573897e59cb08ce29b092ab3e5639186175003d0592072e4569",
+      "60": "905d745eca9bb1b081ce1e7d75b97360a6dd273763f230e0bd59a7bbd2c7225b",
+      "120": "87061bbaa9c3dfbcf814b0f93bebc7fc9aa716d668163c44191549b0624c60a1",
+      "180": "03682aabb1b475aafbcd2cd64182066d212ef71f198c58704f61ccea1c0324fe"
+    }
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/scientific/ckpt.pt",
+    "schema_version": "nanogpt_exact_resume_v2",
+    "reason": "evaluation",
+    "next_iter": 238,
+    "bytes": 929964545,
+    "floating_model_optimizer_tensors": 829,
+    "sha256": "716f98795841dcf49538b4521abb3ced4a4d6d70104c6ff2e21a2551ab2e591d",
+    "metadata_sha256": "8540293f8e7567581cad3a2b507b3c321f0a6a483f0429670bd84da658eb956f"
+  },
+  "verification": {
+    "all_snapshot_probe_checkpoint_identities_equal": true,
+    "all_floating_model_optimizer_snapshot_probe_tensors_finite": true,
+    "all_acquisition_acceptance_rules_passed": true,
+    "workspace_bytes_after_acquisition": 189953276704,
+    "workspace_gib_after_acquisition": 176.90777471661568,
+    "project_cap_headroom_gib": 79.09222528338432,
+    "real_filesystem_available_bytes": 1719572152320
+  },
+  "decision": {
+    "phase_acquisition_accepted": true,
+    "activation_weighted_selector_implementation_authorized": true,
+    "zero_update_selector_analysis_authorized": true,
+    "language_model_training_authorized": false
+  }
+}
