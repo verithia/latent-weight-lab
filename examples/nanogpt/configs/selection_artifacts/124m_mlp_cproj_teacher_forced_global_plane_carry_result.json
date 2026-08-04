@@ -2,7 +2,7 @@
   "schema_version": "mai_124m_mlp_cproj_teacher_forced_global_plane_carry_result_v1",
   "artifact_kind": "124m_mlp_cproj_teacher_forced_global_plane_carry_result",
   "recorded_at": "2026-08-04",
-  "classification": "CLOSE_PRACTICAL_RIGHT_ORTHOGONAL_CHART_BRANCH",
+  "classification": "CLOSE_PRACTICAL_RIGHT_ONLY_ORTHOGONAL_CHART_BRANCH",
   "parameter_updates": 0,
   "plan": {
     "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_global_plane_carry_plan.json",
@@ -90,8 +90,8 @@
   "interpretation": [
     "Task-conditioned dense planes consistently improve every sampled layer and requested-update recovery, validating the direction selector itself.",
     "The advantage nevertheless decays from 0.195 percent endpoint recovery at step 60 to 0.00088 percent at terminal for eight planes; terminal error energy and feedback are unchanged to four significant figures.",
-    "Sparse depth, sparse connectivity, and a small dense global right-rotation residual all fail under full carry. The practical right-orthogonal family is therefore closed at this rung.",
-    "Right rotations preserve row Gram, while the control's terminal row-Gram recovery is negative. The next causal discriminator must add a bounded direction-conditioned non-orthogonal residual that can change row Gram without learning or persisting a basis."
+    "Sparse depth, sparse connectivity, and a small dense global right-rotation residual all fail under full carry. The practical right-only orthogonal family is therefore closed at this rung.",
+    "Right rotations preserve row Gram, while the control's terminal row-Gram recovery is negative. The earlier exact SVD oracle recovered 85.72 percent with the right frame but 99.09 percent bilaterally, so the next causal discriminator must add task-conditioned left/output rotation under full carry before considering a non-orthogonal residual."
   ],
   "decision": {
     "selected_arm": "hidden88_full_carry",
@@ -99,6 +99,6 @@
     "mfu_preflight_authorized": false,
     "language_model_training_authorized": false,
     "larger_rung_authorized": false,
-    "next_action": "Preregister an offline full-trajectory low-rank non-orthogonal residual replay after hidden64+24. Derive ephemeral task-conditioned singular directions from the current corrected residual, fold the bounded update into the dense buffer, and compare nested ranks before any production implementation."
+    "next_action": "Preregister an offline full-trajectory bilateral replay after hidden64+24 at constant full carry. Fit task-conditioned output/left rotations to the post-right residual and compare output32/output64 before any production implementation. Only if this fails should a non-orthogonal row-Gram-changing residual be considered."
   }
 }
