@@ -27,6 +27,11 @@ EXECUTION_AMENDMENT = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cproj_error_feedback_nominal_cap192_execution_amendment.json"
 )
+RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_error_feedback_nominal_cap192_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -165,3 +170,26 @@ def test_zero_update_execution_amendment_changes_only_launcher_envelope() -> Non
     assert correction["decision_rule_changed"] is False
     assert correction["scientific_run_count_consumed"] == 0
     assert amendment["authorization"]["one_valid_238_update_launch_remains_authorized"] is True
+
+
+def test_terminal_result_rejects_scalar_cap_without_authorizing_sweep() -> None:
+    result = load(RESULT)
+    assert result["classification"] == "REJECT_CAP192_TOO_LATE_AND_TOO_MILD"
+    assert result["passed"] is False
+    for key in (
+        "config",
+        "plan",
+        "resolution",
+        "mfu_result",
+        "execution_amendment",
+    ):
+        assert sha256(REPO / result[key]["path"]) == result[key]["sha256"]
+    assert result["identity"]["checkpoint_next_iter"] == 238
+    assert result["loss"]["candidate_minus_parent_ce"] < 0.0
+    assert result["loss"]["candidate_minus_pass_threshold_ce"] > 0.0
+    assert result["cap_activity"]["active_update_count"] == 8
+    assert result["cap_activity"]["active_layer_updates"] == 54
+    assert result["decision"]["selected"] is False
+    assert result["decision"]["scalar_feedback_magnitude_control_closed"] is True
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["cap_sweep_authorized"] is False
