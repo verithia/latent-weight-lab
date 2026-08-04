@@ -1222,6 +1222,36 @@ def parse_args() -> argparse.Namespace:
         default=None,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-hybrid-output",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-hybrid-task-stages",
+        type=int,
+        default=16,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-hybrid-directed-incoming",
+        type=int,
+        default=8,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-hybrid-control-stages",
+        type=int,
+        default=32,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-hybrid-ridge-ratio",
+        type=float,
+        default=1e-6,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-hybrid-sample-cap",
+        type=int,
+        default=2048,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cfc-functional-shear",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -1559,6 +1589,48 @@ def parse_args() -> argparse.Namespace:
             "--block-fht-mlp-cproj-chart-freeze-base-at-start requires "
             "a positive chart start iteration"
         )
+    if namespace.block_fht_mlp_cproj_hybrid_output:
+        if not namespace.block_fht_mlp_cproj_muon_matched_givens:
+            raise ValueError(
+                "hybrid c_proj output requires Muon-matched Givens"
+            )
+        if (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_output_stages
+            != 0
+        ):
+            raise ValueError(
+                "hybrid c_proj output owns the output chart; legacy output "
+                "stages must be zero"
+            )
+        task_stages = namespace.block_fht_mlp_cproj_hybrid_task_stages
+        directed = namespace.block_fht_mlp_cproj_hybrid_directed_incoming
+        control_stages = (
+            namespace.block_fht_mlp_cproj_hybrid_control_stages
+        )
+        neighbors = (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_neighbors
+        )
+        if (
+            task_stages <= 0
+            or directed <= 0
+            or control_stages <= 0
+            or max(task_stages, control_stages) > neighbors
+            or neighbors >= namespace.n_embd
+            or directed > namespace.n_embd
+            or task_stages * namespace.n_embd // 2
+            + directed * namespace.n_embd
+            != control_stages * namespace.n_embd // 2
+            or namespace.block_fht_mlp_cproj_hybrid_sample_cap <= 0
+            or not math.isfinite(
+                namespace.block_fht_mlp_cproj_hybrid_ridge_ratio
+            )
+            or not 0.0
+            < namespace.block_fht_mlp_cproj_hybrid_ridge_ratio
+            < 1.0
+        ):
+            raise ValueError("invalid hybrid c_proj output configuration")
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2116,6 +2188,24 @@ def main() -> None:
         block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction=(
             args
             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction
+        ),
+        block_fht_mlp_cproj_hybrid_output=(
+            args.block_fht_mlp_cproj_hybrid_output
+        ),
+        block_fht_mlp_cproj_hybrid_task_stages=(
+            args.block_fht_mlp_cproj_hybrid_task_stages
+        ),
+        block_fht_mlp_cproj_hybrid_directed_incoming=(
+            args.block_fht_mlp_cproj_hybrid_directed_incoming
+        ),
+        block_fht_mlp_cproj_hybrid_control_stages=(
+            args.block_fht_mlp_cproj_hybrid_control_stages
+        ),
+        block_fht_mlp_cproj_hybrid_ridge_ratio=(
+            args.block_fht_mlp_cproj_hybrid_ridge_ratio
+        ),
+        block_fht_mlp_cproj_hybrid_sample_cap=(
+            args.block_fht_mlp_cproj_hybrid_sample_cap
         ),
         block_fht_mlp_cfc_functional_shear=(
             args.block_fht_mlp_cfc_functional_shear

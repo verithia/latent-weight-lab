@@ -165,6 +165,12 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay: float = 1.0
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after: float | None = None
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction: float | None = None
+    block_fht_mlp_cproj_hybrid_output: bool = False
+    block_fht_mlp_cproj_hybrid_task_stages: int = 16
+    block_fht_mlp_cproj_hybrid_directed_incoming: int = 8
+    block_fht_mlp_cproj_hybrid_control_stages: int = 32
+    block_fht_mlp_cproj_hybrid_ridge_ratio: float = 1e-6
+    block_fht_mlp_cproj_hybrid_sample_cap: int = 2048
     block_fht_mlp_cfc_functional_shear: bool = False
     block_fht_mlp_cfc_functional_shear_parent_stages: int = 64
     block_fht_mlp_cfc_functional_shear_stages: int = 24
@@ -1865,6 +1871,13 @@ class MLP(nn.Module):
         muon_matched_cproj = bool(
             config.block_fht_mlp_cproj_muon_matched_givens
         )
+        if (
+            config.block_fht_mlp_cproj_hybrid_output
+            and not muon_matched_cproj
+        ):
+            raise ValueError(
+                "hybrid c_proj output requires Muon-matched Givens"
+            )
         if muon_matched_cproj and structured_proj_count:
             raise ValueError(
                 "Muon-matched Givens c_proj requires the plain "
@@ -1892,7 +1905,9 @@ class MLP(nn.Module):
                     .block_fht_mlp_cproj_muon_matched_givens_residual_stages
                 ),
                 output_stages=int(
-                    config
+                    config.block_fht_mlp_cproj_hybrid_task_stages
+                    if config.block_fht_mlp_cproj_hybrid_output
+                    else config
                     .block_fht_mlp_cproj_muon_matched_givens_output_stages
                 ),
                 neighbors=int(
@@ -1918,6 +1933,21 @@ class MLP(nn.Module):
                     0.02 / math.sqrt(2 * config.n_layer)
                 ),
                 layer_id=layer_id,
+                hybrid_output=bool(
+                    config.block_fht_mlp_cproj_hybrid_output
+                ),
+                hybrid_directed_incoming=int(
+                    config.block_fht_mlp_cproj_hybrid_directed_incoming
+                ),
+                hybrid_control_output_stages=int(
+                    config.block_fht_mlp_cproj_hybrid_control_stages
+                ),
+                hybrid_ridge_ratio=float(
+                    config.block_fht_mlp_cproj_hybrid_ridge_ratio
+                ),
+                hybrid_functional_sample_cap=int(
+                    config.block_fht_mlp_cproj_hybrid_sample_cap
+                ),
             )
         elif grouped_proj_targets:
             target = grouped_proj_targets[0]
@@ -3328,6 +3358,11 @@ class MLP(nn.Module):
             self.last_postgelu = activated
         else:
             self.last_postgelu = None
+        record_hybrid_output_context = getattr(
+            self.c_proj, "record_hybrid_output_context", None
+        )
+        if record_hybrid_output_context is not None:
+            record_hybrid_output_context(activated)
         out = self._charted_cproj(activated)
         if out is None:
             out = self._fused_cached_cproj_lowrank(activated)

@@ -347,6 +347,286 @@ def apply_givens_flow(
     return result
 
 
+@torch.no_grad()
+def _score_selected_permutations(
+    scores: torch.Tensor,
+    *,
+    stages: int,
+    neighbors: int,
+    seed: int,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Compile deterministic matchings from a dense symmetric edge score."""
+    if (
+        scores.ndim != 2
+        or scores.shape[0] != scores.shape[1]
+        or scores.shape[0] % 2
+    ):
+        raise ValueError("scores must be an even square matrix")
+    width = int(scores.shape[0])
+    if not 0 < stages <= neighbors < width:
+        raise ValueError("require 0 < stages <= neighbors < width")
+    local = scores.float().clone()
+    local.fill_diagonal_(-torch.inf)
+    top_scores, top_indices = torch.topk(local, k=neighbors, dim=1)
+    order = torch.argsort(top_scores.reshape(-1), descending=True)
+    left = (
+        torch.arange(width, device=scores.device)
+        .repeat_interleave(neighbors)
+        .index_select(0, order)
+    )
+    right = top_indices.reshape(-1).index_select(0, order)
+    edges = torch.stack(
+        (torch.minimum(left, right), torch.maximum(left, right)), dim=1
+    ).to(device="cpu", dtype=torch.int32)
+    permutations, diagnostics = color_sorted_edges(
+        edges, width=width, stages=stages, seed=seed
+    )
+    diagnostics["candidate_edges"] = int(edges.shape[0])
+    return permutations, diagnostics
+
+
+@torch.no_grad()
+def task_gradient_output_pass(
+    source: torch.Tensor,
+    residual: torch.Tensor,
+    task_gradient: torch.Tensor,
+    *,
+    stages: int,
+    neighbors: int,
+    seed: int,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict[str, Any]]:
+    """Apply the preregistered residual-plus-task selected output rotation."""
+    if (
+        source.ndim != 2
+        or residual.shape != source.shape
+        or task_gradient.shape != source.shape
+    ):
+        raise ValueError("source, residual, and task gradient must agree")
+    source_f = source.float()
+    residual_f = residual.float()
+    gradient_f = task_gradient.float()
+    residual_cross = source_f.T @ residual_f
+    residual_inner = residual_cross - residual_cross.T
+    column_energy = source_f.square().sum(dim=0)
+    coordinate_norm = (
+        column_energy[:, None] + column_energy[None, :]
+    ).clamp_min(1e-30)
+    angle = residual_inner / coordinate_norm
+    residual_score = residual_inner.square() / coordinate_norm
+    gradient_cross = source_f.T @ gradient_f
+    task_inner = gradient_cross - gradient_cross.T
+    task_score = -angle * task_inner
+    mask = torch.triu(
+        torch.ones_like(residual_score, dtype=torch.bool), diagonal=1
+    )
+    residual_rms = residual_score[mask].square().mean().sqrt().clamp_min(1e-30)
+    task_rms = task_score[mask].square().mean().sqrt().clamp_min(1e-30)
+    scores = residual_score / residual_rms + task_score / task_rms
+    permutations, matching = _score_selected_permutations(
+        scores, stages=stages, neighbors=neighbors, seed=seed
+    )
+    permutations = permutations.to(source.device)
+    angles = diagonal_metric_angles(source_f, residual_f, permutations)
+    updated = apply_givens_flow(
+        source_f,
+        angles,
+        permutations,
+        torch.argsort(permutations, dim=1),
+    )
+    return updated, permutations, angles, {
+        **matching,
+        "coordinates": int(stages * source.shape[1] // 2),
+        "residual_score_rms": float(residual_rms),
+        "task_score_rms": float(task_rms),
+        "positive_task_edge_fraction": float(
+            (task_score[mask] > 0.0).float().mean()
+        ),
+        "maximum_abs_angle": float(angles.abs().max()),
+        "mean_abs_angle": float(angles.abs().mean()),
+    }
+
+
+@torch.no_grad()
+def minimax_directed_output_pass(
+    source: torch.Tensor,
+    residual: torch.Tensor,
+    activations: torch.Tensor,
+    first_gradient: torch.Tensor,
+    second_gradient: torch.Tensor,
+    *,
+    incoming: int,
+    ridge_ratio: float,
+    trust_output_energy: float,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Fit the preregistered global directed map from online-only state."""
+    if source.ndim != 2 or residual.shape != source.shape:
+        raise ValueError("source and residual must be same-shaped matrices")
+    if activations.ndim != 2 or activations.shape[1] != source.shape[0]:
+        raise ValueError("activation/source shapes disagree")
+    if first_gradient.shape != source.T.shape or second_gradient.shape != source.T.shape:
+        raise ValueError("task-gradient/source shapes disagree")
+    outputs = int(source.shape[1])
+    if not 0 < incoming <= outputs:
+        raise ValueError("incoming support size is invalid")
+    if not math.isfinite(ridge_ratio) or not 0.0 < ridge_ratio < 1.0:
+        raise ValueError("ridge ratio must be finite and in (0, 1)")
+    h = activations.to(source.device, dtype=torch.float32)
+    source_f = source.float()
+    residual_f = residual.float()
+    design = h @ source_f
+    target = h @ residual_f
+    energy = design.square().sum(dim=0)
+    ridge = float(ridge_ratio) * float(energy.mean().clamp_min(1e-30))
+    cross = design.T @ target
+    beta = cross / (energy[:, None] + ridge)
+    residual_score = 2.0 * beta * cross - beta.square() * energy[:, None]
+    first = first_gradient.float()
+    second = second_gradient.float()
+    first = first / first.norm().clamp_min(1e-30)
+    second = second / second.norm().clamp_min(1e-30)
+    first_task = -beta * (first @ source_f).T
+    second_task = -beta * (second @ source_f).T
+    residual_rms = residual_score.square().mean().sqrt().clamp_min(1e-30)
+    first_rms = first_task.square().mean().sqrt().clamp_min(1e-30)
+    second_rms = second_task.square().mean().sqrt().clamp_min(1e-30)
+    agreement = torch.minimum(first_task / first_rms, second_task / second_rms)
+    score = residual_score / residual_rms + agreement
+    supports = torch.topk(
+        score, k=incoming, dim=0, largest=True, sorted=True
+    ).indices
+    selected_design = design[:, supports.T].permute(1, 0, 2).contiguous()
+    target_by_output = target.T.unsqueeze(-1)
+    gram = selected_design.transpose(1, 2).double() @ selected_design.double()
+    rhs = selected_design.transpose(1, 2).double() @ target_by_output.double()
+    joint_ridge = (
+        float(ridge_ratio)
+        * torch.diagonal(gram, dim1=-2, dim2=-1)
+        .mean(dim=1)
+        .clamp_min(1e-30)
+    )
+    eye = torch.eye(
+        incoming, device=gram.device, dtype=gram.dtype
+    ).unsqueeze(0)
+    coefficients = torch.linalg.solve(
+        gram + joint_ridge[:, None, None] * eye, rhs
+    ).squeeze(-1).float()
+    mapping = torch.zeros(
+        outputs, outputs, device=source.device, dtype=torch.float32
+    )
+    targets = torch.arange(outputs, device=source.device).unsqueeze(1).expand(
+        -1, incoming
+    )
+    mapping[supports.T, targets] = coefficients
+    raw_delta = source_f @ mapping
+    raw_energy = float(raw_delta.double().square().sum())
+    trust_scale = min(
+        1.0,
+        math.sqrt(float(trust_output_energy) / max(raw_energy, 1e-30)),
+    )
+    delta = raw_delta * trust_scale
+    bounded_energy = float(delta.double().square().sum())
+    both_positive = (first_task > 0.0) & (second_task > 0.0)
+    return source_f + delta, {
+        "coordinates": int(outputs * incoming),
+        "incoming_per_target": int(incoming),
+        "single_edge_ridge": ridge,
+        "minimum_joint_ridge": float(joint_ridge.min()),
+        "maximum_joint_ridge": float(joint_ridge.max()),
+        "positive_task_agreement_fraction": float(
+            both_positive.float().mean()
+        ),
+        "raw_output_delta_energy": raw_energy,
+        "bounded_output_delta_energy": bounded_energy,
+        "trust_output_energy": float(trust_output_energy),
+        "trust_scale": trust_scale,
+        "trust_energy_obeyed": (
+            bounded_energy
+            <= trust_output_energy + max(1e-12, 1e-5 * trust_output_energy)
+        ),
+    }
+
+
+@torch.no_grad()
+def hybrid_task_directed_output_update(
+    source: torch.Tensor,
+    residual: torch.Tensor,
+    activations: torch.Tensor,
+    current_gradient: torch.Tensor,
+    momentum_combined_gradient: torch.Tensor,
+    *,
+    task_stages: int,
+    directed_incoming: int,
+    control_stages: int,
+    neighbors: int,
+    ridge_ratio: float,
+    seed: int,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, dict[str, Any]]:
+    """Apply task-Givens then directed-minimax under an output32 trust cap."""
+    control_permutations, control_matching = fast_muon_matched_permutations(
+        source,
+        residual,
+        stages=control_stages,
+        neighbors=neighbors,
+        seed=seed,
+    )
+    control_permutations = control_permutations.to(source.device)
+    control_angles = diagonal_metric_angles(
+        source, residual, control_permutations
+    )
+    control = apply_givens_flow(
+        source,
+        control_angles,
+        control_permutations,
+        torch.argsort(control_permutations, dim=1),
+    )
+    trust_energy = float((control - source).double().square().sum())
+    after_task, task_permutations, task_angles, task_diagnostics = (
+        task_gradient_output_pass(
+            source,
+            residual,
+            current_gradient.T.contiguous(),
+            stages=task_stages,
+            neighbors=neighbors,
+            seed=seed,
+        )
+    )
+    remaining = residual.float() - (after_task.float() - source.float())
+    after_directed, directed_diagnostics = minimax_directed_output_pass(
+        after_task,
+        remaining,
+        activations,
+        current_gradient,
+        momentum_combined_gradient,
+        incoming=directed_incoming,
+        ridge_ratio=ridge_ratio,
+        trust_output_energy=trust_energy,
+    )
+    raw_delta = after_directed.float() - source.float()
+    raw_energy = float(raw_delta.double().square().sum())
+    combined_scale = min(
+        1.0, math.sqrt(trust_energy / max(raw_energy, 1e-30))
+    )
+    bounded_delta = raw_delta * combined_scale
+    bounded_energy = float(bounded_delta.double().square().sum())
+    updated = source.float() + bounded_delta
+    return updated, task_permutations, task_angles, {
+        "coordinates": int(task_diagnostics["coordinates"])
+        + int(directed_diagnostics["coordinates"]),
+        "control_stages": int(control_stages),
+        "control_matching": control_matching,
+        "control_maximum_abs_angle": float(control_angles.abs().max()),
+        "task": task_diagnostics,
+        "directed": directed_diagnostics,
+        "raw_combined_output_delta_energy": raw_energy,
+        "bounded_combined_output_delta_energy": bounded_energy,
+        "combined_trust_output_energy": trust_energy,
+        "combined_trust_scale": combined_scale,
+        "combined_trust_energy_obeyed": (
+            bounded_energy <= trust_energy + max(1e-12, 1e-5 * trust_energy)
+        ),
+    }
+
+
 def _gelu_derivative(values: torch.Tensor) -> torch.Tensor:
     """Derivative of the exact erf GELU used by ``torch.nn.GELU``."""
     values = values.float()
@@ -885,6 +1165,11 @@ class MuonMatchedGivensLinear(nn.Module):
         matching_seed: int,
         weight_std: float,
         layer_id: int = -1,
+        hybrid_output: bool = False,
+        hybrid_directed_incoming: int = 0,
+        hybrid_control_output_stages: int = 32,
+        hybrid_ridge_ratio: float = 1e-6,
+        hybrid_functional_sample_cap: int = 2048,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -897,6 +1182,15 @@ class MuonMatchedGivensLinear(nn.Module):
         self.fast_fresh_matching = bool(fast_fresh_matching)
         self.matching_seed = int(matching_seed)
         self.layer_id = int(layer_id)
+        self.hybrid_output = bool(hybrid_output)
+        self.hybrid_directed_incoming = int(hybrid_directed_incoming)
+        self.hybrid_control_output_stages = int(
+            hybrid_control_output_stages
+        )
+        self.hybrid_ridge_ratio = float(hybrid_ridge_ratio)
+        self.hybrid_functional_sample_cap = int(
+            hybrid_functional_sample_cap
+        )
         if (
             self.in_features <= 0
             or self.in_features % 2
@@ -940,6 +1234,23 @@ class MuonMatchedGivensLinear(nn.Module):
             )
         if not math.isfinite(weight_std) or weight_std <= 0.0:
             raise ValueError("weight_std must be positive and finite")
+        if self.hybrid_output:
+            if (
+                not self.fast_fresh_matching
+                or self.output_stages <= 0
+                or self.hybrid_directed_incoming <= 0
+                or self.hybrid_directed_incoming > self.out_features
+                or self.hybrid_control_output_stages <= 0
+                or self.hybrid_control_output_stages > self.neighbors
+                or not math.isfinite(self.hybrid_ridge_ratio)
+                or not 0.0 < self.hybrid_ridge_ratio < 1.0
+                or self.hybrid_functional_sample_cap <= 0
+            ):
+                raise ValueError("invalid hybrid-output c_proj configuration")
+        elif self.hybrid_directed_incoming != 0:
+            raise ValueError(
+                "hybrid directed coordinates require hybrid output"
+            )
 
         weight = torch.empty(self.out_features, self.in_features)
         nn.init.normal_(weight, mean=0.0, std=float(weight_std))
@@ -1027,6 +1338,7 @@ class MuonMatchedGivensLinear(nn.Module):
             torch.zeros((), dtype=torch.bool),
             persistent=True,
         )
+        self._hybrid_output_inputs: torch.Tensor | None = None
 
     @property
     def coordinate_count(self) -> int:
@@ -1034,10 +1346,41 @@ class MuonMatchedGivensLinear(nn.Module):
             (self.stages + self.residual_stages)
             * (self.in_features // 2)
             + self.output_stages * (self.out_features // 2)
+            + (
+                self.hybrid_directed_incoming * self.out_features
+                if self.hybrid_output
+                else 0
+            )
         )
 
     def forward(self, values: torch.Tensor) -> torch.Tensor:
         return F.linear(values, self.weight, self.bias)
+
+    @torch.no_grad()
+    def record_hybrid_output_context(self, values: torch.Tensor) -> None:
+        if (
+            not self.hybrid_output
+            or not self.training
+            or self._hybrid_output_inputs is not None
+        ):
+            return
+        if values.shape[-1] != self.in_features:
+            raise ValueError("hybrid c_proj activation width mismatch")
+        flat = values.detach().reshape(-1, self.in_features)
+        count = min(self.hybrid_functional_sample_cap, flat.shape[0])
+        self._hybrid_output_inputs = flat[:count].contiguous()
+
+    def consume_hybrid_output_context(self) -> torch.Tensor:
+        values = self._hybrid_output_inputs
+        self._hybrid_output_inputs = None
+        if values is None:
+            raise RuntimeError(
+                f"missing hybrid c_proj context for layer {self.layer_id}"
+            )
+        return values
+
+    def clear_hybrid_output_context(self) -> None:
+        self._hybrid_output_inputs = None
 
 
 class MuonFunctionalShearLinear(nn.Module):
@@ -1992,7 +2335,55 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         ),
                     }
                 output_angles = None
-                if module.output_stages:
+                if module.hybrid_output:
+                    output_residual_update = (
+                        corrected_update.float()
+                        - (rotated.float() - weight.float())
+                    )
+                    output_source = rotated.transpose(0, 1).contiguous()
+                    output_direction = (
+                        output_residual_update.transpose(0, 1).contiguous()
+                    )
+                    activations = module.consume_hybrid_output_context()
+                    hybrid_output, output_permutations, output_angles, (
+                        hybrid_diagnostics
+                    ) = hybrid_task_directed_output_update(
+                        output_source,
+                        output_direction,
+                        activations,
+                        gradient.float(),
+                        combined.float(),
+                        task_stages=module.output_stages,
+                        directed_incoming=(
+                            module.hybrid_directed_incoming
+                        ),
+                        control_stages=(
+                            module.hybrid_control_output_stages
+                        ),
+                        neighbors=module.neighbors,
+                        ridge_ratio=module.hybrid_ridge_ratio,
+                        seed=(
+                            module.matching_seed + step_index + 2
+                        ),
+                    )
+                    module.output_selected_permutations.copy_(
+                        output_permutations.to(
+                            device=weight.device, dtype=torch.long
+                        )
+                    )
+                    module.output_selected_inverse_permutations.copy_(
+                        torch.argsort(
+                            module.output_selected_permutations, dim=1
+                        )
+                    )
+                    rotated = hybrid_output.transpose(
+                        0, 1
+                    ).contiguous()
+                    output_matching_summary = {
+                        "selector": "causal_task16_then_minimax8",
+                        **hybrid_diagnostics,
+                    }
+                if module.output_stages and not module.hybrid_output:
                     output_residual_update = (
                         corrected_update.float()
                         - (rotated.float() - weight.float())
@@ -2136,6 +2527,10 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "parent_stages": module.stages,
                         "residual_stages": module.residual_stages,
                         "output_stages": module.output_stages,
+                        "hybrid_output": module.hybrid_output,
+                        "hybrid_directed_incoming": (
+                            module.hybrid_directed_incoming
+                        ),
                         "requested_update_recovery": float(
                             1.0
                             - requested_residual_energy
@@ -2161,6 +2556,11 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 )
         self.last_step_diagnostics = diagnostics
         return loss
+
+    def zero_grad(self, set_to_none: bool = True) -> None:
+        super().zero_grad(set_to_none=set_to_none)
+        for module in self.modules_by_id.values():
+            module.clear_hybrid_output_context()
 
     def consume_diagnostics(self) -> list[dict[str, Any]]:
         diagnostics = self.last_step_diagnostics
