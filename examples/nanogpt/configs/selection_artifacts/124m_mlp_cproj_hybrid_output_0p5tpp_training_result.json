@@ -1,0 +1,115 @@
+{
+  "artifact_kind": "124m_mlp_cproj_hybrid_output_0p5tpp_training_result",
+  "candidate": {
+    "additional_inference_flops": 0,
+    "additional_inference_parameters": 0,
+    "additional_trainable_parameters": 0,
+    "coordinates_per_layer": 147456,
+    "error_feedback_decay": 1.0,
+    "hidden_parent_stages": 64,
+    "hidden_residual_stages": 24,
+    "output_control_stages_for_trust_only": 32,
+    "output_directed_incoming_per_target": 8,
+    "output_task_givens_stages": 16,
+    "selected_order": "task16_then_minimax8"
+  },
+  "classification": "REJECT_CPROJ_HYBRID_OUTPUT_CAUSAL_TRANSFER",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_hybrid_output_errorfeedback_0p5tpp.json",
+    "sha256": "b85e1bd1ed239056a2ad3c093d1ac01b196a7add6795a77772de66f3e9a57a93"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "linear_output_composition_closed": true,
+    "next_action": "Do not tune task/directed widths, score weights, or the promotion ceiling. Use zero-update endpoint and within-step causal diagnostics to distinguish destructive c_proj endpoint direction from wider block co-adaptation before registering a nonlinear or transported connection.",
+    "promotion_passed": false,
+    "stability_ceiling_passed": false
+  },
+  "exact_config_mfu_result": {
+    "mfu_fraction": 0.2841709507351441,
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_0p5tpp_mfu_result.json",
+    "sha256": "aa922b22897e0f115701539b27dfe6fc06d4a5f6acba7ffbadb0ccdbc833e060"
+  },
+  "execution": {
+    "callback": false,
+    "direct_foreground_polling": true,
+    "exit_code": 0,
+    "finished_at": "2026-08-05T01:04:14+08:00",
+    "git_commit": "78b7dad95310debe7868dd06a6bcfeb6ad26064c",
+    "gpu": 0,
+    "host": "PRO6",
+    "ordinary_iter_ms_range": [1636.46, 1660.32],
+    "prelaunch_failed_before_updates": {
+      "reason": "direct invocation omitted the required immutable provenance envelope",
+      "scientific_attempt_consumed": false
+    },
+    "run_id": "pro6_mai_v3_124m_cproj_hybrid_output_errorfeedback_0p5tpp_20260804T165600Z_4065378",
+    "started_at": "2026-08-05T00:56:00+08:00",
+    "watchdog": false
+  },
+  "identity": {
+    "archived_config_sha256": "b85e1bd1ed239056a2ad3c093d1ac01b196a7add6795a77772de66f3e9a57a93",
+    "archived_mfu_sha256": "cba9b9adde7b60e77970fdb6b1aceed6cca15434f84a3f1184b8a4fc2e635f83",
+    "checkpoint_best_validation_ce": 5.607751369476318,
+    "checkpoint_meta_sha256": "e2d5600414443e37ce1c0b7e102342b8e10346f5c02748f4444f0894820fc7c6",
+    "checkpoint_resolved_config_sha256": "d1c99e81f3188dc307de9b5fa9ae32a30a2aa8ca263470f2097ce426a89c5087",
+    "checkpoint_sha256": "c2590a8a00f2b824f83df6e7f6c0ce26b8ac320e8a307a5e6f2bfe1b0e15503a",
+    "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "log_sha256": "bec3178d27d05a94b806cab87b4d279f4cfd3ddf467188e817ec8684efde8b87",
+    "provenance_sha256": "758a19f92db82bf07984c9597d27a7278f43ab08a06584053843578921b1ed09",
+    "status_sha256": "2a9bf6c1cafff8c2bfbf6a381c4b4ee3ec683dfbef7d3bcb50a2cfcbe3385a53"
+  },
+  "interpretation": [
+    "The candidate is source-clean, finite, computationally qualified, and exactly resumable, so its rejection is scientific rather than an identity, throughput, or crash artifact.",
+    "The zero-update hybrid advantage did not transfer to a causal trajectory. The validation deficit versus the causal parent is already +0.0397 at step 60 and widens monotonically to +0.080386 at step 238.",
+    "The online substitution does not reproduce the diagnostic's independent-gradient generalization signal: task selection uses one accumulated current gradient, directed agreement uses that gradient plus correlated Muon momentum, and the activation solve sees a bounded current-step sample. Repeated local fits therefore change the trajectory in a direction the static finite-step CE screen did not validate.",
+    "The result closes fixed-budget linear task-Givens plus directed-affine output composition under the current causal statistics. Another width, order, score-weight, ridge, or threshold sweep is not justified.",
+    "The smaller terminal compression residual than the causal parent does not imply better task geometry. More faithfully fitting the corrected Muon request can be worse when the fitted output direction is batch-local or the residual/block frame co-adapts around a different trajectory."
+  ],
+  "loss": {
+    "accepted_attention_only_validation_ce": 5.4918,
+    "candidate_minus_attention_only": 0.11595136947631879,
+    "candidate_minus_causal_parent": 0.08038616180419922,
+    "candidate_minus_global_stability_ceiling": 0.01595136947631892,
+    "candidate_minus_promotion_ceiling": 0.08538616180419934,
+    "causal_parent_validation_ce": 5.527365207672119,
+    "fixed_evaluations": [
+      {"step": 0, "train": 10.9672, "validation": 10.9669},
+      {"step": 60, "train": 6.2930, "validation": 6.3030, "validation_minus_parent": 0.0397},
+      {"step": 120, "train": 5.8556, "validation": 5.8605, "validation_minus_parent": 0.0431},
+      {"step": 180, "train": 5.6813, "validation": 5.6848, "validation_minus_parent": 0.0641},
+      {"step": 238, "train": 5.6043, "validation": 5.607751369476318, "validation_minus_parent": 0.08038616180419922}
+    ],
+    "global_stability_ceiling": 5.5918,
+    "promotion_ceiling": 5.522365207672119
+  },
+  "optimizer_state": {
+    "all_custom_state_tensors_finite": true,
+    "compression_residual_frobenius_max": 0.5815441012382507,
+    "compression_residual_frobenius_mean": 0.508995088438193,
+    "compression_residual_frobenius_min": 0.35503146052360535,
+    "compression_residual_rms_max": 0.0003786246234085411,
+    "compression_residual_rms_mean": 0.00033139016644175473,
+    "compression_residual_rms_min": 0.00023114829673431814,
+    "custom_layer_count": 12,
+    "state_shape_per_layer": [768, 3072]
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_training_plan.json",
+    "sha256": "04cc84668ccf4b790dae7988b0693084f418fde42bedc7b5d3f0870dc7cbf5b1"
+  },
+  "recorded_at": "2026-08-05",
+  "resume_envelope": {
+    "bytes": 1104316209,
+    "cache_state": "flushed_not_serialized",
+    "metadata_consistent": true,
+    "model_all_finite": true,
+    "model_tensor_bytes": 600962220,
+    "next_iter": 238,
+    "readable": true,
+    "schema_version": "nanogpt_exact_resume_v2"
+  },
+  "schema_version": "mai_124m_mlp_cproj_hybrid_output_0p5tpp_training_result_v1"
+}
