@@ -114,4 +114,4 @@ def test_identity_pregelu_frame_is_bounded_to_fht_roundoff() -> None:
         mlp._materialize_charted_cfc_weight(base) - base
     ).detach().float()
     assert float(delta.abs().max()) <= 3e-8
-    assert float(delta.norm() / base.float().norm()) <= 2e-7
+    assert float(delta.norm() / base.detach().float().norm()) <= 2e-7

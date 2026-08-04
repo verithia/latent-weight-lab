@@ -40,6 +40,7 @@ from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_matched_givens import MuonMatchedGivensLinear
 from examples.nanogpt.optimize_mlp_bilateral_endpoint_ce import (
     ALL_LAYERS,
+    autocast_context,
     clear_frozen_base_cache,
     evaluate_ce,
     git_head,
@@ -464,7 +465,18 @@ def evaluate_without_frames(
         mlp.hidden_block_rotation = None
         mlp.output_block_rotation = None
     try:
-        return evaluate_ce(model, batches, device)
+        losses: list[float] = []
+        with torch.no_grad():
+            for tokens in batches:
+                tokens = tokens.to(device)
+                inputs = tokens[:, :-1].contiguous()
+                targets = tokens[:, 1:].contiguous()
+                with autocast_context(device):
+                    _, loss = model(inputs, targets)
+                if loss is None:
+                    raise RuntimeError("model returned no CE loss")
+                losses.append(float(loss))
+        return float(np.mean(losses))
     finally:
         for mlp, pregelu, hidden, output in suspended:
             mlp.pregelu_block_rotation = pregelu

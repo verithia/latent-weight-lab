@@ -4,6 +4,7 @@ import torch
 
 from examples.nanogpt.optimize_mlp_cproj_errorfeedback_task_frame_endpoint import (
     capture_frame_state,
+    evaluate_without_frames,
     frame_parameters,
     restore_frame_state,
     select_decision,
@@ -69,3 +70,21 @@ def test_variant_state_round_trip_is_exact() -> None:
         torch.equal(parameter.detach().cpu(), state[key])
         for key, parameter in parameters.items()
     )
+
+
+def test_frame_disabled_evaluation_restores_every_module() -> None:
+    model = make_model().eval()
+    mlp = model.transformer.h[0].mlp
+    before = (
+        mlp.pregelu_block_rotation,
+        mlp.hidden_block_rotation,
+        mlp.output_block_rotation,
+    )
+    tokens = torch.randint(0, 32, (2, 9))
+    ce = evaluate_without_frames(model, [tokens], "cpu")
+    assert torch.isfinite(torch.tensor(ce))
+    assert (
+        mlp.pregelu_block_rotation,
+        mlp.hidden_block_rotation,
+        mlp.output_block_rotation,
+    ) == before
