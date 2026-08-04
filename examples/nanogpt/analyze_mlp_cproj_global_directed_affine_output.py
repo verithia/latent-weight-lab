@@ -154,7 +154,10 @@ def fit_global_directed_map(
     incoming: int,
     trust_output_energy: float,
     relative_ridge: float = 1e-6,
-) -> tuple[torch.Tensor, torch.Tensor, dict[str, Any]]:
+    return_mapping: bool = False,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, Any]] | tuple[
+    torch.Tensor, torch.Tensor, dict[str, Any], torch.Tensor
+]:
     """Select global directed supports, jointly refit, and apply sparse ``B``."""
     outputs = int(source.shape[1])
     if score.shape != (outputs, outputs):
@@ -200,7 +203,10 @@ def fit_global_directed_map(
     }
     if not all_finite(diagnostics) or not torch.isfinite(updated).all():
         raise ValueError("global-directed map produced a nonfinite result")
-    return updated, supports.detach().cpu(), diagnostics
+    result = (updated, supports.detach().cpu(), diagnostics)
+    if return_mapping:
+        return (*result, bounded)
+    return result
 
 
 def support_overlap(first: torch.Tensor, second: torch.Tensor) -> float:
