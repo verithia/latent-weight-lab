@@ -1,0 +1,89 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_connectivity_carry_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "At fixed hidden64+24 coordinates and constant full carry, is the remaining c_proj trajectory error caused by restricting task-selected Givens pairs to a 64-neighbor candidate graph rather than allowing longer-range hidden-channel transport?",
+  "parameter_updates": 0,
+  "source_commit_before_implementation": "c4b3c50879074a7a0497d71c3573143c52154801",
+  "causal_scope": {
+    "changed_variable": "candidate connectivity radius only",
+    "fixed_variables": [
+      "64 first-pass stages",
+      "24 second-pass stages",
+      "135168 coordinates per layer",
+      "constant error-feedback decay 1.0",
+      "dense teacher-forced update sequence",
+      "seed family",
+      "weight decay and learning-rate schedule",
+      "layers and score steps"
+    ],
+    "learned_basis": false,
+    "lora_adapter": false,
+    "language_model_training": false,
+    "loss_evaluation": false
+  },
+  "evidence_before_registration": {
+    "capacity_carry_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_capacity_carry_result.json",
+    "capacity_carry_result_sha256": "94ad670a05f5d8f9e856535b46902b506deb6c908f5908aa714fcbe78c325522",
+    "hidden112_terminal_endpoint_ratio": 1.0000333737614855,
+    "hidden112_terminal_feedback_ratio": 0.999872864329972,
+    "hidden112_requested_update_recovery_improved": true,
+    "singular_frame_evidence": {
+      "cproj_singular_value_motion_fraction": 0.006754200813875223,
+      "cproj_in_frame_mixing_fraction": 0.2581817722003717,
+      "cproj_expansion_subspace_rotation_fraction": 0.7350640269859143,
+      "source": "examples/nanogpt/configs/selection_artifacts/124m_mlp_singular_frame_motion_result.json"
+    },
+    "interpretation": "Dense c_proj motion is 99.32 percent orientation rather than radial motion. More stages inside the same radius improve instantaneous fitting but not the carried endpoint, so access to long-range task-selected channel pairs is the next isolated variable."
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608"
+  },
+  "teacher_forcing_protocol": {
+    "trajectory_reset": "Each arm/layer starts once from exact dense step-0 c_proj and follows all 238 updates without phase reset.",
+    "per_step_target": "Use recorded dense W[t+1]-W[t], remove dense decoupled weight decay, add the arm's prior compression residual with decay 1.0, fit 64+24 right-rotation stages, then apply weight decay once.",
+    "matching": "The same deterministic task-conditioned fast matcher selects 64 and 24 disjoint stage matchings from radius-specific candidate graphs. Radius changes candidates, not selected coordinate count.",
+    "interpretation": "This is an optimistic transport-capacity oracle; no LM loss is evaluated."
+  },
+  "arms": [
+    {"name": "neighbors64_full_carry", "role": "production control", "neighbors": 64, "first_pass_stages": 64, "second_pass_stages": 24, "coordinates_per_layer": 135168},
+    {"name": "neighbors128_full_carry", "role": "smallest wider candidate", "neighbors": 128, "first_pass_stages": 64, "second_pass_stages": 24, "coordinates_per_layer": 135168},
+    {"name": "neighbors256_full_carry", "role": "larger-radius discriminator", "neighbors": 256, "first_pass_stages": 64, "second_pass_stages": 24, "coordinates_per_layer": 135168}
+  ],
+  "metrics": {
+    "per_layer_score_step": [
+      "dense-chord endpoint energy recovery",
+      "endpoint cosine",
+      "row-Gram recovery",
+      "compression-residual Frobenius norm",
+      "mean requested-update recovery"
+    ],
+    "aggregate": "Energy-weight endpoint recovery across five layers, residual error-energy ratio, maximum feedback ratio, requested-update recovery, and per-layer wins."
+  },
+  "registered_decision_rule": {
+    "candidate_pass": "All metrics must be finite. Candidate endpoint recovery must be no worse than neighbors64 at every score step; terminal unrecovered endpoint energy must be at most 0.85x control; terminal maximum feedback norm must be at most 0.95x control; terminal mean requested-update recovery must be no worse than control; and candidate must win at least 4/5 terminal layers.",
+    "selection_order": ["neighbors128_full_carry", "neighbors256_full_carry"],
+    "selection": "Choose the first passing radius. If neither passes, retain neighbors64 and close the radius-only branch.",
+    "threshold_changes_after_measurement": false,
+    "authorization_on_pass": "Implement only the selected radius at unchanged 64+24 stages, add tests, then separately preregister and directly poll an exact 124M >=20% MFU preflight. No language-model training is authorized by this plan.",
+    "authorization_on_failure": "Do not implement or train a wider radius. Move to a qualitatively different task-conditioned right-orbit factorization rather than more stages or a learned basis."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "minimum_training_mfu_not_applicable": "zero-update diagnostic",
+    "workspace_cap_gib": 300
+  }
+}
