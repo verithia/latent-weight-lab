@@ -11,6 +11,15 @@ from typing import Any
 CONFIG_DIR = Path(__file__).resolve().parent / "configs"
 PRO6_ROOT = Path("/home/pro6000-9980x/MappingNetworks")
 SOURCES = {
+    "y400_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_5tpp_lr24e4.json": (
+        "pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_5tpp_lr24e4.json"
+    ),
+    "y400_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_outputgain_5tpp_lr24e4.json": (
+        "pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_outputgain_5tpp_lr24e4.json"
+    ),
+    "y400_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_outputgain_5tpp_lr24e4.json": (
+        "pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_outputgain_5tpp_lr24e4.json"
+    ),
     "y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json": (
         "pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json"
     ),
