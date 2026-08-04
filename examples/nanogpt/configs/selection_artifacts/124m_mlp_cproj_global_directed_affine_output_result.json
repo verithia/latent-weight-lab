@@ -1,0 +1,77 @@
+{
+  "artifact_kind": "124m_mlp_cproj_global_directed_affine_output_result",
+  "schema_version": "mai_124m_mlp_cproj_global_directed_affine_output_result_v1",
+  "created_at": "2026-08-04",
+  "decision": "REJECT_GLOBAL_DIRECTED16_OUTPUT",
+  "passed": false,
+  "interpretation": "Global directed support repairs the fixed-block alignment problem. The task-consensus arm clears every common gate except the immutable absolute prior-best mean-CE gate: it wins all eight finite-step cells, lowers mean CE by 0.000580 versus output32, cuts held-out residual-stream error by 22.17%, and raises held-out predicted descent by 29.62%, but mean CE 7.180933 remains 0.000276 above the frozen prior best 7.180657. The chart is a real near-pass but is not authorized for training. Its 53.7% support overlap and 0.350 train/fit gradient cosine motivate one final agreement-constrained support test, not a relaxed threshold.",
+  "identity": {
+    "git_commit": "50de505be0f007bbb39b79e13b2f5a6d621ace63",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_global_directed_affine_output.py",
+    "entrypoint_sha256": "fc461ee5f0b4ca3665e23a817c3db791665fad5a3f2ea4f15f9b0b3c44e7e54e",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_global_directed_affine_output_plan.json",
+    "plan_sha256": "d84da142e4652084f085dc4da018e6fb2dc1603d317b9c8c58bf92f535e23f29",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 25.931566953659058,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0
+  },
+  "control": {
+    "name": "frobenius_output32",
+    "coordinates_per_layer": 147456,
+    "heldout_activation_output_residual_energy": 8.900497689306775,
+    "heldout_task_gradient_predicted_ce_decrease": 0.003565022037137948,
+    "mean_finite_step_ce": 7.181512460112572
+  },
+  "activation_only": {
+    "coordinates_per_layer": 147456,
+    "heldout_residual_ratio_to_control": 0.7598250828233262,
+    "heldout_task_gradient_predicted_ce_decrease": 0.0045130690656736295,
+    "heldout_task_ratio_to_control": 1.2659302014572644,
+    "finite_step_wins": 7,
+    "holdout_wins": 3,
+    "mean_finite_step_ce": 7.181266963481903,
+    "passed": false
+  },
+  "task_consensus": {
+    "coordinates_per_layer": 147456,
+    "heldout_residual_ratio_to_control": 0.7782881056956934,
+    "heldout_task_gradient_predicted_ce_decrease": 0.0046210601318823165,
+    "heldout_task_ratio_to_control": 1.2962220383894658,
+    "finite_step_wins": 8,
+    "holdout_wins": 4,
+    "mean_finite_step_ce": 7.180932596325874,
+    "mean_ce_improvement_vs_control": 0.0005798637866973877,
+    "miss_to_prior_best_mean_ce": 0.00027558207511901855,
+    "minimum_trust_scale": 0.15087852573868443,
+    "minimum_singular_value_i_plus_b": 0.9955363769530462,
+    "coordinate_energy": {
+      "total": 0.008609404734601839,
+      "skew": 0.004245879172253401,
+      "symmetric_offdiagonal": 0.004275751000162302,
+      "diagonal": 0.00008777456213392578
+    },
+    "passed_all_except_absolute_prior_best_mean": true
+  },
+  "selector_diagnostics": {
+    "mean_support_overlap": 0.5369873046875,
+    "mean_train_fit_gradient_cosine": 0.3496369382830765
+  },
+  "raw_outputs": {
+    "remote_result_sha256": "f0e23a126d256bcaf777014cbfae29e934d1fd6897ef746bce031171d15b80ce",
+    "cells_sha256": "6f1ee766b58c8ca898080e00d902182c923ce0c99943f6eb9f512432a0565385",
+    "chart_sha256": "6f04cf0e1dac78761f3951c3c02fd149fe5722c9e454157cfca42b46134602ca",
+    "finite_ce_sha256": "9bc86673f51ed227f63cf5d2bd3432d5b7cd61110f63454e7890226b0cf6026f",
+    "final_log_sha256": "da3aba0bee97d75040fbc94a2fd38b69e7d3ac888f6db2ade5bc2b4353d4402c"
+  },
+  "next_action": "Run one final zero-update directed16 selector with a per-edge minimax task-agreement score: an edge receives positive task support only to the extent that both independently normalized recorded-train and fit-validation gradients predict descent. Keep all coordinates, ridge, energy trust, windows, and gates unchanged. Failure closes sparse directed output selection without training."
+}
