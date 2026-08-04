@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_attention_functional_manifold_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_analysis",
+  "scientific_question": "Does quotienting exact Q/K and V/O factor gauges reveal a materially straighter, lower-dimensional attention-operator trajectory than the corresponding raw factor weights?",
+  "method_relation": "Apply the Mapping Networks paper's layerwise trajectory-PCA motivation to gauge-invariant per-head operators, while explicitly treating temporal PCA as descriptive rather than a global manifold-dimension estimator.",
+  "protocol": {
+    "snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/parameter_trajectory",
+    "snapshot_run_identity_sha256": "2ce330849884afc80f6a6e4268052d79cabd3b593ca90aadf516d6dba1179cb1",
+    "layers": [0, 3, 6, 9, 11],
+    "steps": [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 238],
+    "heads_per_layer": 12,
+    "functional_cells": 120,
+    "score_operator": "Q_h.T @ K_h",
+    "value_output_operator": "V_h.T @ O_h.T",
+    "raw_comparator": "joint flattened factor pair for the same layer/head/family",
+    "metrics": [
+      "temporal PCA energy and dimensions",
+      "path length over terminal chord",
+      "terminal-ray recovery and residual",
+      "increment turning angle",
+      "exact low-rank singular spectrum of operator increments and terminal displacement"
+    ]
+  },
+  "interpretation_rule": {
+    "maximum_path_length_ratio": 0.9,
+    "minimum_pc1_energy_gain": 0.03,
+    "maximum_terminal_delta_rank95_mean": 32,
+    "classification_if_all_pass": "FUNCTIONAL_QUOTIENT_SIMPLER_AND_LOW_RANK",
+    "classification_otherwise": "FUNCTIONAL_QUOTIENT_NOT_SUFFICIENTLY_SIMPLER",
+    "no_posthoc_threshold_changes": true,
+    "automatic_training_authorized": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_functional_manifold",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_attention_functional_manifold_plan.json",
+      "--snapshot-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/parameter_trajectory",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_functional_manifold/analysis",
+      "--device",
+      "cuda"
+    ]
+  },
+  "scope_guard": "No learned basis, model implementation, MFU preflight, or training run is authorized by this diagnostic."
+}

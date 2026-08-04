@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_attention_instantaneous_muon_selected_givens_gate_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_INSTANTANEOUS_MUON_SELECTED_GIVENS_BEFORE_IMPLEMENTATION",
+  "decision": {
+    "passed": false,
+    "implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "scientific_training_authorized": false,
+    "failed_checks": [
+      "dense_muon_recovery",
+      "dense_muon_over_random",
+      "future_chord_recovery",
+      "future_chord_over_random"
+    ],
+    "next_gate": "analyze the gauge-invariant QK and value-output functional manifolds before designing another attention parameterization"
+  },
+  "task_selected": {
+    "instantaneous_muon_selection_direction": {
+      "energy_recovery": 0.24962675188589206,
+      "coordinate_fraction": 0.06867500635702861,
+      "normalized_enrichment": 3.634899581779853
+    },
+    "dense_momentum_muon_direction": {
+      "energy_recovery": 0.1146528150651505,
+      "coordinate_fraction": 0.06852334394455944,
+      "normalized_enrichment": 1.6731935201223291,
+      "over_random": 1.6427161760166484
+    },
+    "future_15_update_chord": {
+      "energy_recovery": 0.08233424749472017,
+      "coordinate_fraction": 0.06925357481525508,
+      "normalized_enrichment": 1.188880829825173,
+      "over_random": 1.1908117712322737,
+      "by_target": {
+        "qk": 0.08214262478802602,
+        "v": 0.09493985704431063,
+        "cproj": 0.05080995037476441
+      }
+    }
+  },
+  "interpretation": "Instantaneous matrix-polar geometry is self-selectable from a transient generated-weight gradient, but it does not reproduce the persistent direction supplied by dense Muon momentum. The selected graph captures its own polar target strongly yet loses most enrichment against the actual momentum-bearing update and future chord. Sparse-orbit self-selection is therefore closed without model implementation.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "110cfee953c2c8643ae7c710fa47d193578670df",
+    "source_sha256": "2c6437fdc70166009ec8f7246394e294b85be01341521c383d1d60f1e6804f11",
+    "plan_sha256": "0e084def7bc14a59258c4e7c15516108e9b667a2d44ea9e5057dddcb86fac6e1",
+    "run_identity_sha256": "2ce330849884afc80f6a6e4268052d79cabd3b593ca90aadf516d6dba1179cb1",
+    "raw_result_sha256": "d13f99eeb5354fd88af153646440fe61006aca4e39ddc55c0e8bda0215474371",
+    "cells_sha256": "43efa4fb6d9129503195be954686fa0a0377f43faa7cac2d17d2341e0a68b510",
+    "connectivity_sha256": "840b45c5cfdff5b9631914cfc6e2a9d529c78bdc1b51facc3bff0b15ebca3774",
+    "elapsed_seconds": 74.6828601360321,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true
+  }
+}
