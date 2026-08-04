@@ -15,6 +15,11 @@ PLAN = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cproj_bilateral_output32_mfu_plan.json"
 )
+TRAINING_PLAN = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_bilateral_output32_training_plan.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -91,3 +96,29 @@ def test_mfu_gate_and_post_pass_authority_are_frozen() -> None:
     assert plan["authorization"]["automatic_retry_authorized"] is False
     assert plan["authorization"]["larger_rung_authorized"] is False
     assert plan["decision_rule"]["threshold_changes_after_measurement"] is False
+
+
+def test_training_plan_binds_the_passed_mfu_gate_and_loss_thresholds() -> None:
+    plan = load(TRAINING_PLAN)
+    assert sha256(ROOT / plan["candidate"]["config"]) == (
+        plan["candidate"]["config_sha256"]
+    )
+    for field, hash_field in (
+        ("endpoint_selection_result", "endpoint_selection_result_sha256"),
+        ("mfu_result", "mfu_result_sha256"),
+        ("right_only_control_result", "right_only_control_result_sha256"),
+    ):
+        assert sha256(ROOT / plan["identity"][field]) == (
+            plan["identity"][hash_field]
+        )
+    assert plan["identity"]["mfu_certificate_sha256"] == (
+        "ccb91a200451e566904369a65e36772909648e66255c6a3aef5627c67277169a"
+    )
+    assert plan["decision_rule"]["strict_close_validation_ce_maximum"] == 5.5118
+    assert plan["decision_rule"]["minimum_directional_gain_ce"] == 0.002
+    assert plan["decision_rule"]["directional_ce_maximum"] == 5.525365207672119
+    assert plan["execution"]["foreground_direct_polling"] is True
+    assert plan["execution"]["watchdog"] is False
+    assert plan["authorization"]["one_238_update_scientific_run_authorized"] is True
+    assert plan["authorization"]["automatic_retry_authorized"] is False
+    assert plan["authorization"]["larger_rung_authorized"] is False

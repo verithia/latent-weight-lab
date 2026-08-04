@@ -1,0 +1,94 @@
+{
+  "authorization": {
+    "automatic_retry_authorized": false,
+    "larger_rung_authorized": false,
+    "one_238_update_scientific_run_authorized": true,
+    "scope": "one exact 124M 0.5-TPP run; attention replacement fixed, c_fc dense, and only the c_proj output32 pass differs from the paired right-only full-carry control"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_bilateral_output32_errorfeedback_0p5tpp.json",
+    "config_sha256": "21bd970f968a3a729dd6cf6632596e8d6fa0b253ba5faf9c170b69515dec26f7",
+    "coordinate_fraction_per_cproj": 0.0625,
+    "coordinates_per_layer": 147456,
+    "dense_residual": false,
+    "error_feedback_decay": 1.0,
+    "learned_basis": false,
+    "neighbors": 64,
+    "output_stages": 32,
+    "parent_stages": 64,
+    "residual_stages": 24
+  },
+  "decision_rule": {
+    "directional_ce_maximum": 5.525365207672119,
+    "directional_only": "stable terminal validation CE is greater than 5.5118 and at most 5.525365207672119, improving by at least 0.002 CE over right-only full carry",
+    "minimum_directional_gain_ce": 0.002,
+    "primary_metric": "fixed-window terminal validation cross entropy at update 238",
+    "reject": "terminal validation CE exceeds 5.525365207672119, any value is nonfinite, terminal evaluation or exact-resume state is incomplete, or identity/provenance differs",
+    "strict_close": "stable terminal validation CE is at most 5.5118, leaving at most +0.0200 CE over attention-only",
+    "strict_close_validation_ce_maximum": 5.5118,
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "MAPPING_NETWORKS_NATIVE_CACHE=/mnt/ssd-data/orj/MappingNetworks/outputs/native_cache",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/home/pro6000-9980x/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_bilateral_output32_errorfeedback_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_cproj_bilateral_output32_errorfeedback_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "expected_update_time_ms_from_preflight": 1560.9175,
+    "foreground_direct_polling": true,
+    "gpu": 0,
+    "heartbeat": false,
+    "host": "PRO6",
+    "queue_worker": false,
+    "watchdog": false,
+    "working_directory": "/home/pro6000-9980x/MappingNetworks/latent-weight-lab"
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "endpoint_selection_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_fixed_eval_pro6_replay_result.json",
+    "endpoint_selection_result_sha256": "c7a181dd41405da424e215806ebe92d75b939700bf93d7d964b850736aa11a35",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "6cb178d7ddc55c4157bb4ba9ec6c54f628fad6f0",
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_bilateral_output32_0p5tpp/performance_preflight.json",
+    "mfu_certificate_sha256": "ccb91a200451e566904369a65e36772909648e66255c6a3aef5627c67277169a",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_output32_mfu_result.json",
+    "mfu_result_sha256": "d622a63d3196aad8bddb45d863b07be5928800ea61cec75ee4abfce173d850ae",
+    "right_only_control_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_0p5tpp_result.json",
+    "right_only_control_result_sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df"
+  },
+  "prelaunch_requirements": {
+    "config_and_all_registered_hashes_match": true,
+    "exact_run_metadata": [
+      "repository commit",
+      "training entrypoint and source hashes",
+      "literal command",
+      "config and plan hashes",
+      "dataset manifest",
+      "fixed evaluation digest",
+      "MFU certificate",
+      "host GPU identity"
+    ],
+    "gpu0_exclusive": true,
+    "output_directory_absent": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_bilateral_output32_0p5tpp/scientific",
+    "project_cap_gib": 256,
+    "real_filesystem_headroom_required": true
+  },
+  "recorded_at": "2026-08-04",
+  "references": {
+    "attention_only_terminal_validation_ce": 5.4918,
+    "dense_124m_terminal_validation_ce": 5.5401,
+    "right_only_full_carry_terminal_validation_ce": 5.527365207672119
+  },
+  "schema_version": "mai_124m_mlp_cproj_bilateral_output32_training_plan_v1",
+  "scientific_question": "Does causal bilateral output transport reproduce the teacher-forced endpoint benefit and close the remaining c_proj loss gap without a learned basis?",
+  "status": "registered_after_exact_path_mfu_pass_before_scientific_training"
+}
