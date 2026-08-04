@@ -1,0 +1,126 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_hybrid_endpoint_interpolation_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "WIDER_BLOCK_COADAPTATION_DOMINATES",
+  "secondary_interpretation": "HYBRID_CPROJ_IS_FORWARD_SUFFICIENT_FOR_THE_BAD_ENDPOINT_BUT_PARENT_CPROJ_IS_NOT_REVERSE_SUFFICIENT_FOR_RECOVERY",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_endpoint_interpolation_plan.json",
+    "sha256": "b65d0a688cf4cca4c96810d380b632e0de2e5aeac13df51765891f651abc2fc9"
+  },
+  "identity_amendment": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_endpoint_interpolation_identity_amendment.json",
+    "sha256": "232b6b7e4aceeeae3b2be483ffb481def1c5bbf45d52f1f1396334faa8ad4d42",
+    "reason": "The first fail-closed invocation evaluated zero batches and exposed only 36 forward-inert hybrid selector-history buffers. The amendment was committed before any loss observation."
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "7835d8d70b61f61ac6118b0193bebfc7f062eb16",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_hybrid_endpoint_interpolation.py",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 31.889771938323975,
+    "eval_seeds": [20260878, 20260879],
+    "eval_batches_per_seed": 32,
+    "batch_size": 16,
+    "block_size": 1024,
+    "dtype": "bfloat16"
+  },
+  "identity": {
+    "parent_checkpoint_sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+    "hybrid_checkpoint_sha256": "c2590a8a00f2b824f83df6e7f6c0ce26b8ac320e8a307a5e6f2bfe1b0e15503a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256_by_seed": {
+      "20260878": "412b776bf815bec8bea8b889fa63c1e1fdbaeecbc061190551c701c063957747",
+      "20260879": "2e9611521930aba2206ae9839521c0ebaad335c68676deec5a49b79943ff654d"
+    },
+    "source_sha256": "4ae8e8e3b927a1917f38a424ef58b97ab703b51a23c9401300b60a545e6234d3"
+  },
+  "mean_validation_ce_across_windows": {
+    "parent_native": 5.524624153971672,
+    "hybrid_native": 5.606457628309727,
+    "native_hybrid_minus_parent_gap": 0.08183347433805466,
+    "hybrid_context_parent_cproj_alpha0p25": 5.60670056194067,
+    "hybrid_context_parent_cproj_alpha0p50": 5.612277187407017,
+    "hybrid_context_parent_cproj_alpha0p75": 5.624779254198074,
+    "hybrid_context_parent_cproj_alpha1p00": 5.646817520260811,
+    "parent_context_hybrid_cproj_alpha0p25": 5.53740257024765,
+    "parent_context_hybrid_cproj_alpha0p50": 5.558237098157406,
+    "parent_context_hybrid_cproj_alpha0p75": 5.582337237894535,
+    "parent_context_hybrid_cproj_alpha1p00": 5.607697367668152,
+    "hybrid_context_parent_cproj_early_layers_0_3": 5.628114253282547,
+    "hybrid_context_parent_cproj_middle_layers_4_7": 5.615680932998657,
+    "hybrid_context_parent_cproj_late_layers_8_11": 5.619740262627602,
+    "hybrid_context_parent_all_cproj_plus_all_cfc": 5.631342440843582,
+    "hybrid_context_parent_all_cproj_plus_all_cfc_plus_all_ln2": 5.631242826581001
+  },
+  "causal_attribution": {
+    "parent_cproj_transplant_into_hybrid_recovery_fraction_by_window": [-0.4892359620716098, -0.4971205412990743],
+    "mean_parent_cproj_transplant_into_hybrid_recovery_fraction": -0.49317825168534205,
+    "hybrid_cproj_damage_in_parent_context": 0.0830732136964798,
+    "hybrid_cproj_damage_as_fraction_of_native_gap": 1.0151507569045578,
+    "interpretation": [
+      "Replacing hybrid c_proj by the accepted parent c_proj does not repair the hybrid checkpoint; it worsens CE by 0.04036 on average. The hybrid's wider context has co-adapted around its own c_proj endpoint.",
+      "The reverse intervention is almost perfectly forward-sufficient: inserting the hybrid c_proj into the parent context worsens CE by 0.08307, or 1.015x the native 0.08183 gap, and lands within 0.00124 CE of the native hybrid endpoint.",
+      "Therefore the hybrid c_proj endpoint carries the harmful function, while non-c_proj co-adaptation partially compensates for it. The frozen recovery rule names the result wider-block co-adaptation because reverse repair fails; the symmetric intervention prevents misreading that label as evidence that c_proj direction is harmless."
+    ]
+  },
+  "functional_interpolation": {
+    "classification": "NO_LARGE_INTERIOR_FUNCTIONAL_BARRIER",
+    "hybrid_context_ce_change_from_native_by_alpha": {
+      "0.25": 0.00024293363094329834,
+      "0.50": 0.005819559097290039,
+      "0.75": 0.018321625888347626,
+      "1.00": 0.04035989195108414
+    },
+    "parent_context_ce_change_from_native_by_alpha": {
+      "0.25": 0.012778416275978088,
+      "0.50": 0.033612944185733795,
+      "0.75": 0.05771308392286301,
+      "1.00": 0.0830732136964798
+    },
+    "interior_excess_over_linear_endpoint_interpolation_range": [-0.014446854591369629, -0.004493184387683868],
+    "interpretation": "Both affine segments are smooth and have favorable negative curvature relative to endpoint-linear CE, but every movement toward the other endpoint is monotone harmful in both windows. The issue is endpoint/context compatibility, not an interior affine barrier."
+  },
+  "depth_and_wider_controls": {
+    "ce_change_from_hybrid_native": {
+      "parent_cproj_early_layers_0_3": 0.021656624972820282,
+      "parent_cproj_middle_layers_4_7": 0.009223304688930511,
+      "parent_cproj_late_layers_8_11": 0.013282634317874908,
+      "parent_all_cproj_plus_all_cfc": 0.024884812533855438,
+      "parent_all_cproj_plus_all_cfc_plus_all_ln2": 0.024785198271274567
+    },
+    "interpretation": "Every depth-band repair is harmful, strongest in layers 0-3. Adding parent c_fc recovers part of the incompatibility relative to parent c_proj alone but remains worse than native hybrid; adding ln_2 is negligible. A simple tensor-family transplant is not a valid coupled repair."
+  },
+  "endpoint_parameter_geometry_mean_across_layers": {
+    "flattened_weight_cosine": 0.9737712244192759,
+    "distance_normalized_by_parent_frobenius_norm": 0.259636327624321,
+    "hybrid_to_parent_frobenius_norm_ratio": 1.0990798870722454,
+    "delta_stable_rank": 174.33012262980142,
+    "delta_top1_singular_energy": 0.005772671545855701,
+    "normalized_row_gram_difference": 0.37689278026421863,
+    "normalized_column_gram_difference": 0.4242137297987938,
+    "interpretation": "The terminal endpoint delta is distributed and high-rank rather than a single dominant correction: high cosine coexists with a 26% relative Frobenius displacement, about 10% norm inflation, stable rank 174, and substantial row/column Gram drift. This is endpoint evidence, not an intrinsic-dimension estimate for the full trajectory."
+  },
+  "decision": {
+    "frozen_primary_rule": "WIDER_BLOCK_COADAPTATION_DOMINATES",
+    "isolated_cproj_optimizer_variant_authorized": false,
+    "automatic_training_authorized": false,
+    "next_action": "Do not tune the rejected task/directed selector and do not treat a parent c_proj transplant as a repair. Register a zero-update coupled functional-frame diagnostic that preserves the MLP input-output connection or residual-frame action before any new causal structure."
+  },
+  "raw_artifacts": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_hybrid_endpoint_interpolation_20260805b",
+    "result_sha256": "d7f84a0e597b5709b3182822e5f521cf6ae23d3ee5ca2ab3a77d13b3fd5defb9",
+    "metadata_sha256": "6701204c8a2a1823a6635d2f0007a4c0439f8ce3ee588ac49d5f98bdb42a80f0",
+    "variant_validation_ce_csv_sha256": "1497edaa68d24cc12313c2fed1b289a99094d74bf650aa2822a69dde6c509e6f",
+    "cproj_endpoint_geometry_csv_sha256": "fb10cdb5ab6f7ec4777d54f1d8d7aa510776d5d2421d79ad9d72fc08d70fa9ba",
+    "diagnostic_log_sha256": "d7f0e15a7d711482bfbb99bd5850c9e3cf024bebd7ec1924962a71bf8cbc3ac4"
+  },
+  "limitations": [
+    "This diagnostic made no parameter updates and cannot establish the dimension or curvature of the complete training trajectory.",
+    "Per-variant standard errors are about 0.014 CE across 32 batch means, but all intervention comparisons are paired on identical windows and reproduce in both independent seeds.",
+    "The wider controls are endpoint transplants, not jointly refitted functional connections."
+  ]
+}
