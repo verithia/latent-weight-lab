@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_connectivity_carry_result_v1",
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_connectivity_carry_result",
+  "recorded_at": "2026-08-04",
+  "classification": "RETAIN_NEIGHBORS64_AND_CLOSE_RADIUS_BRANCH",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_connectivity_carry_plan.json",
+    "sha256": "6e49ff6f69f85447fd41515a18f9b149470847712e64a21546cba9ef25980f78"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 0,
+    "git_commit": "067816c0d2fd848d6748dd349b7c0b7450999ca9",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_connectivity_carry.py",
+    "entrypoint_sha256": "2324d3e1ad0a979f59eec347ce1e2cbdec902b1e31cd439ed0f38fc5a5ac6200",
+    "started_at_unix": 1785842042.2482061,
+    "finished_at_unix": 1785842174.034923,
+    "wall_seconds": 131.7867169,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "comparisons": {
+    "neighbors128": {
+      "endpoint_recovery_ratios_by_step": {"60": 1.0009308983930632, "120": 1.000150237052423, "180": 1.000022030878721, "238": 1.0000042369907294},
+      "terminal_endpoint_error_energy_ratio": 0.9999767099233916,
+      "terminal_feedback_ratio": 0.9999829796181398,
+      "terminal_layers_won": 5,
+      "passed": false
+    },
+    "neighbors256": {
+      "endpoint_recovery_ratios_by_step": {"60": 1.001148150560699, "120": 1.0001789795596934, "180": 1.0000265477875487, "238": 1.0000051679351716},
+      "terminal_endpoint_error_energy_ratio": 0.9999715926671227,
+      "terminal_feedback_ratio": 0.9999782778551949,
+      "terminal_layers_won": 5,
+      "passed": false
+    }
+  },
+  "terminal_scores": {
+    "neighbors64": {"endpoint_recovery": 0.8460791090646863, "maximum_feedback_fro": 1.267708420753479, "mean_requested_update_recovery": -3.738456263261683},
+    "neighbors128": {"endpoint_recovery": 0.8460826938940278, "maximum_feedback_fro": 1.2676868438720703, "mean_requested_update_recovery": -3.6583641544610517},
+    "neighbors256": {"endpoint_recovery": 0.8460834815466719, "maximum_feedback_fro": 1.2676808834075928, "mean_requested_update_recovery": -3.638437412616585}
+  },
+  "remote_artifacts": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_connectivity_carry_v1",
+    "aggregate_sha256": "eaf8e691548362a47e6925eeaac0ae096811b46b3267acaa9411754770566b2a",
+    "cells_sha256": "973bd086591fb6a5085da1a4f362566150050126c93cd1a3e7920fe8024a1b02",
+    "metadata_sha256": "4cda8b200a56c52b1b710cbf120c1cce92607900e811f353e4b03f8d9bb64939",
+    "foreground_log_sha256": "6e9884636defd60adc51728b9bbf13938caccd4c4e56382ad793210225607ad3"
+  },
+  "interpretation": [
+    "Wider candidate graphs consistently improve all five layers and requested-update recovery, but the endpoint benefit decays from 0.115 percent at step 60 to 0.00052 percent at terminal even for neighbors256.",
+    "At fixed 64+24 coordinates, long-range sparse pair selection reduces terminal endpoint-error energy by only 0.00284 percent and maximum feedback by only 0.00217 percent.",
+    "Together with the hidden112 rejection, this closes extra depth and candidate-radius changes inside the sparse task-selected Givens family under full carry.",
+    "The remaining chart must change the factorization itself, using dense global task-conditioned rotation planes rather than more or wider coordinate-axis pairs."
+  ],
+  "decision": {
+    "selected_neighbors": 64,
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister an offline full-trajectory global-plane chart. Derive ephemeral dense right-rotation planes from the current corrected Muon direction using an implicit skew operator and block power iteration; compare rank4/rank8 against hidden64+24 full carry. Do not learn or persist plane bases."
+  }
+}
