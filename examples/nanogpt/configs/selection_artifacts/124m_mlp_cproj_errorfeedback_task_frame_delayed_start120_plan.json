@@ -1,0 +1,112 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_plan_v1",
+  "registered_at": "2026-08-05",
+  "status": "registered_before_scheduler_implementation_config_resolution_mfu_and_training",
+  "question": "Does holding all three identity-initialized task frames inactive until update 120 prevent early coadaptation from selecting directions nearly orthogonal to the useful frozen-endpoint directions?",
+  "evidence": {
+    "failed_causal_result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_0p5tpp_result.json",
+    "failed_causal_result_sha256": "5ef0c39cb0ef362ccab3017fabb5f60b7cc8eea7d68ddcb2398138feeb28cc61",
+    "accepted_parent_terminal_validation_ce": 5.527365207672119,
+    "attention_only_terminal_validation_ce": 5.4918,
+    "all_from_start_terminal_validation_ce": 5.552272319793701,
+    "all_from_start_coordinate_cosines_to_endpoint": {
+      "pregelu": 0.042266979813575745,
+      "postgelu_hidden": 0.022707968950271606,
+      "residual_output": 0.036211371421813965
+    },
+    "interpretation": "The frames are sufficiently large and gradient-connected but select the wrong local directions while the dense bases are changing fastest."
+  },
+  "candidate": {
+    "base": "byte-identical accepted full-attention plus Muon-matched hidden64+24 c_proj decay-1 error-feedback recipe and byte-identical three-frame capacity",
+    "only_scientific_change": "set all pre-GELU, post-GELU hidden, and residual-output frame gradients to None for updates 0 through 119; activate all at update 120",
+    "task_frame_start_iter": 120,
+    "active_frame_updates": 118,
+    "freeze_cfc_base_at_start": false,
+    "freeze_cproj_base_at_start": false,
+    "frame_optimizer_state_before_start": "absent because AdamW receives None gradients; exact identity coordinates are retained",
+    "pregelu_frame": "two-stage fixed-basis block32/basis256 rotation, coordinate scale 4, seed 161803",
+    "postgelu_hidden_frame": "two-stage fixed-basis block32/basis256 rotation, coordinate scale 4, seed 314159",
+    "residual_output_frame": "four-stage fixed-basis block32/basis256 rotation, coordinate scale 4, seed 271828",
+    "postgelu_chart_lr_scale": 0.1,
+    "pregelu_chart_lr_scale": 0.1,
+    "effective_frame_learning_rate_at_peak": 0.000072,
+    "scalar_gains": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "residual_hyperconnection": false,
+    "teacher_or_endpoint_initialization": false,
+    "additional_trainable_coordinates": 2856960,
+    "inference_cost_after_folding": "unchanged dense materialized c_fc/c_proj GEMMs"
+  },
+  "training": {
+    "updates": 238,
+    "tokens_per_update": 262144,
+    "scheduled_tokens": 62390272,
+    "token_budget_label": "0.5 TPP",
+    "main_learning_rate": 0.0024,
+    "muon_adamw_lr_scale": 0.3,
+    "weight_decay": 0.1,
+    "warmup_updates": 10,
+    "cosine_decay_minimum_lr": 0.00024,
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "train_data_seed": 20260714,
+    "model_seed": 1337
+  },
+  "evaluation": {
+    "fixed_eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "eval_batch_size": 16,
+    "eval_iters": 400,
+    "eval_interval": 60,
+    "terminal_evaluation_required": true,
+    "primary_metric": "terminal update-238 fixed-window validation CE"
+  },
+  "decision_rule": {
+    "pass": "stable terminal validation CE at or below 5.522365207672119, improving the accepted causal parent by at least 0.005",
+    "near_close": "terminal validation CE at or below 5.5018, within 0.01 CE of attention-only",
+    "close": "terminal validation CE at or below 5.4968, within 0.005 CE of attention-only",
+    "reject": "instability, incomplete exact-resume state, MFU below 20 percent, scheduler identity failure, or terminal validation CE above 5.522365207672119",
+    "secondary_direction_support": "at least two of three global coordinate cosines to the useful endpoint state exceed 0.10 and improve over the all-from-start control",
+    "no_post_hoc_start_time_or_lr_sweep": true,
+    "automatic_rerun_authorized": false,
+    "automatic_larger_rung_authorized": false
+  },
+  "implementation_gate": {
+    "new_train_argument": "block_fht_mlp_task_frame_start_iter",
+    "default": 0,
+    "scope": "pre-GELU, post-GELU hidden, and residual-output frame coordinates only; no base parameter is frozen",
+    "required_tests": [
+      "updates before 120 preserve all three coordinate groups bitwise at zero and create no AdamW state for them",
+      "update 120 supplies finite nonzero gradients to all three coordinate groups without freezing c_fc or c_proj base gradients",
+      "interruption at update 119 followed by update 120 is bitwise identical for model, optimizer, training RNG, and frame coordinates",
+      "MFU preflight explicitly moves the delayed boundary into its scratch warmup so all active-frame overhead is timed"
+    ]
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "preflight": "one warmup plus eight timed updates with the active-frame path executing on every timed update",
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "callbacks": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "queue_entry": false,
+    "automatic_rerun": false,
+    "larger_model_or_token_rung_authorized": false,
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+    "config_sha256": null,
+    "implementation_commit": null,
+    "required_artifacts": [
+      "implementation/config resolution artifact",
+      "git commit, entrypoint, literal command, config/source/dataset/fixed-eval hashes",
+      "active-path MFU certificate and log hashes",
+      "prelaunch provenance envelope",
+      "terminal log, status, checkpoint, frame coordinates, and exact custom optimizer state hashes"
+    ]
+  }
+}
