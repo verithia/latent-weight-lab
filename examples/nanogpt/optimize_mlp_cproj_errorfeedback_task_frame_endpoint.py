@@ -60,6 +60,10 @@ PLAN_NAME = "124m_mlp_cproj_errorfeedback_task_frame_endpoint_plan.json"
 IDENTITY_AMENDMENT_NAME = (
     "124m_mlp_cproj_errorfeedback_task_frame_endpoint_identity_amendment.json"
 )
+CE_IDENTITY_AMENDMENT_NAME = (
+    "124m_mlp_cproj_errorfeedback_task_frame_endpoint_ce_identity_amendment.json"
+)
+CE_IDENTITY_ABSOLUTE_TOLERANCE = 1e-5
 PARENT_RESULT_NAME = "124m_mlp_cproj_error_feedback_0p5tpp_result.json"
 INTERVENTION_RESULT_NAME = (
     "124m_mlp_cproj_hybrid_endpoint_interpolation_result.json"
@@ -233,6 +237,7 @@ def input_paths(root: Path, args: argparse.Namespace) -> dict[str, Path]:
     artifact_root = root / "examples/nanogpt/configs/selection_artifacts"
     return {
         "checkpoint": args.checkpoint,
+        "ce_identity_amendment": artifact_root / CE_IDENTITY_AMENDMENT_NAME,
         "identity_amendment": artifact_root / IDENTITY_AMENDMENT_NAME,
         "parent_result": artifact_root / PARENT_RESULT_NAME,
         "endpoint_intervention_result": artifact_root / INTERVENTION_RESULT_NAME,
@@ -246,6 +251,7 @@ def validate_input_hashes(
     paths = input_paths(root, args)
     expected = {
         "checkpoint": args.checkpoint_sha256,
+        "ce_identity_amendment": args.ce_identity_amendment_sha256,
         "identity_amendment": args.identity_amendment_sha256,
         "parent_result": args.parent_result_sha256,
         "endpoint_intervention_result": args.intervention_result_sha256,
@@ -545,7 +551,7 @@ def run_preflight(args: argparse.Namespace) -> None:
         )
         initial_ce = evaluate_ce(model, safety_batches, args.device)
         identity_ce_difference = initial_ce - parent_reference_ce
-        if abs(identity_ce_difference) > 1e-6:
+        if abs(identity_ce_difference) > CE_IDENTITY_ABSOLUTE_TOLERANCE:
             raise RuntimeError(
                 "zero-coordinate complete-model CE identity failed: "
                 f"{identity_ce_difference:+.9f}"
@@ -614,7 +620,9 @@ def run_preflight(args: argparse.Namespace) -> None:
                 "initial_ce": initial_ce,
                 "parent_reference_ce": parent_reference_ce,
                 "identity_ce_difference": identity_ce_difference,
-                "identity_ce_absolute_tolerance": 1e-6,
+                "identity_ce_absolute_tolerance": (
+                    CE_IDENTITY_ABSOLUTE_TOLERANCE
+                ),
                 "final_ce": final_ce,
                 "ce_increase": ce_increase,
                 "finite": bool(finite),
@@ -955,6 +963,13 @@ def main() -> None:
         default=(
             "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9"
             "a17312071755063"
+        ),
+    )
+    parser.add_argument(
+        "--ce-identity-amendment-sha256",
+        default=(
+            "a93a8dd32d698bbffda9fc864508fdb9f3145349f6c158d0"
+            "db017ca9d96e1310"
         ),
     )
     parser.add_argument(

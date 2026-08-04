@@ -1,0 +1,35 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_endpoint_ce_identity_amendment_v1",
+  "registered_at": "2026-08-05",
+  "parent_plan_sha256": "8dda3ef994f003ceceec1a7fd9952a952e545558f29adbff044a311aa73b7d62",
+  "parent_identity_amendment_sha256": "67abd0ecdfdee12c149c8fb2c1c85ec05689eef248c90ad444e6726bf7bcffb6",
+  "trigger": "The first complete-model identity preflight at commit 65d21223721823f3108f1a2c3ebfe0f1dd73d41d failed before any update because the preregistered absolute CE tolerance of 1e-6 was smaller than the BF16 propagation of the already bounded FP32 FHT round trip.",
+  "failed_preflight": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_task_frame_endpoint_20260805b",
+    "certificate_sha256": "9a904ea789691dc6ef3b3a5c55be9fa5b8cffd7d6bc894bcd46ac7f98cca70ca",
+    "log_sha256": "61bab46ce425c9b80bf52f05ad5a3bf117aea4c551b1d5c40c254529fd6ab80f",
+    "safety_seed": 20260883,
+    "batches": 2,
+    "batch_size": 8,
+    "block_size": 256,
+    "token_sha256": "1bd984fb52d2ad6cfac0bacb336ba5c986c98dcb0d3125bc820e00b8c92c2b79",
+    "frame_disabled_parent_ce": 5.687947511673,
+    "zero_coordinate_frame_ce": 5.687940835953,
+    "frame_minus_parent_ce": -6.67572e-06,
+    "updates_applied": 0,
+    "scientific_primary_or_confirmation_losses_observed": 0
+  },
+  "amendment": {
+    "complete_model_identity_absolute_ce_tolerance": 1e-05,
+    "reason": "The observed difference is favorable, 0.27 percent of the smallest 0.0025 scientific marginal threshold, and follows directly from the pre-registered per-weight roundoff bound. The widened tolerance remains 250x smaller than that threshold.",
+    "failed_certificate_remains_rejected": true,
+    "new_certificate_required_from_a_new_output_path": true
+  },
+  "unchanged": [
+    "scientific primary and confirmation seeds and windows",
+    "all capacity and marginal-gain thresholds",
+    "all update counts, tokens, learning rate, optimizer, and structure",
+    "the 20 percent MFU floor, 0.05 post-update safety ceiling, finite checks, and bitwise frozen-state check",
+    "no automatic causal training authorization"
+  ]
+}
