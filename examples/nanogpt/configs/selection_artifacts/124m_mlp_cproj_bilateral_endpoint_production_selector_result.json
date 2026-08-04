@@ -1,0 +1,61 @@
+{
+  "artifacts": {
+    "metadata": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_production_selector_v1/cproj_bilateral_endpoint_fixed_eval_metadata.json",
+    "metadata_sha256": "853f182f8f1d6b3ca07907eae89736e26e6286201d64d09fc352a1564eae0032",
+    "result": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_production_selector_v1/cproj_bilateral_endpoint_fixed_eval_result.json",
+    "result_sha256": "63fe5ab30972f04dff3a97c6670e12dfbad9d6ed3fd090bbe5ad2fd162f44d87",
+    "terminal_states": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_production_selector_v1/cproj_bilateral_terminal_states.pt",
+    "terminal_states_sha256": "abc1a9d5cde8835dfdae1a5f8f1baadd867300f5f6f8d17989691a46422b4c4f"
+  },
+  "classification": "PRODUCTION_SELECTOR_BILATERAL_ENDPOINT_PASS_BUT_CAUSAL_FAIL",
+  "decision": {
+    "language_model_training_authorized": false,
+    "next_action": "Do not retrain the same bilateral chart. Diagnose and preregister a task-functional c_proj projection metric, based on post-GELU activation covariance or an equivalent dense-direction surrogate, because Frobenius update recovery does not prevent closed-loop trajectory drift.",
+    "same_structure_retry_authorized": false,
+    "selected_endpoint_variant": "hidden88_output32_full_carry"
+  },
+  "execution": {
+    "command_recorded_in_metadata": true,
+    "direct_foreground_polling": true,
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_bilateral_endpoint_fixed_eval.py",
+    "entrypoint_sha256": "a15e33981e1ae9af83e3dc7c8440c15783739aa94d6bfaa4169c18a36e692406",
+    "exit_code": 0,
+    "git_commit": "dd13e05b3855a9e00c9fbfd405aea4c33b895fa2",
+    "gpu": 0,
+    "host": "PRO6",
+    "parameter_updates": 0,
+    "watchdog": false
+  },
+  "identity": {
+    "causal_training_result_sha256": "c2094f6098ca4ea3b2bb9a85f2e9493868cb9e288e9f73ce4fdc58aba339286d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_endpoint_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "plan_sha256": "186e95af397a944680f77442885f1e23c1ed7341885a37e9c62007a269534ba8",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7"
+  },
+  "interpretation": [
+    "Making the parent selector production-faithful changes output32 validation CE by only +0.00000763 and right-only by -0.00002289 relative to the previous endpoint oracle, so the prior bilateral endpoint gain was not a weight-decay-selection artifact.",
+    "Output32 still improves paired validation CE by 0.02459812 and train CE by 0.02424622 over right-only, leaving only 0.00655937 validation CE to the dense endpoint. Output64 reaches a 0.02640104 validation gain and 0.00475645 dense gap.",
+    "The causal output32 run nevertheless worsened validation CE by 0.00110149 versus its causal right-only control. The contradiction localizes the failure to closed-loop trajectory conditioning: bilateral output capacity fits useful dense-teacher directions, but the compressed model does not generate those directions by itself.",
+    "The next fix must change the projection metric or supply a task-functional direction surrogate; adding more Frobenius-matched output stages or rerunning the same optimizer is not supported."
+  ],
+  "loss": {
+    "dense_endpoint": {"train_ce": 5.485774517059326, "validation_ce": 5.488473415374756},
+    "hidden88_full_carry": {"train_ce": 5.516457557678223, "validation_ce": 5.5196309089660645},
+    "hidden88_output32_full_carry": {
+      "train_ce": 5.49221134185791,
+      "validation_ce": 5.495032787322998,
+      "validation_gain_vs_right_only": 0.024598121643066406,
+      "validation_gap_vs_dense": 0.0065593719482421875
+    },
+    "hidden88_output64_full_carry": {
+      "train_ce": 5.490461349487305,
+      "validation_ce": 5.493229866027832,
+      "validation_gain_vs_right_only": 0.026401042938232422,
+      "validation_gap_vs_dense": 0.004756450653076172
+    }
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_result_v1"
+}
