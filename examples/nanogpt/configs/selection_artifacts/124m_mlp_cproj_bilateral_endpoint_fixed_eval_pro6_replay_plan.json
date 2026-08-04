@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_fixed_eval_plan_v1",
+  "status": "registered_before_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "On the accepted PRO6 reproduction, does bilateral full-carry c_proj endpoint transport reduce exact fixed-window complete-model CE relative to the right-only endpoint?",
+  "parameter_updates": 0,
+  "source_commit_before_execution": "cd2d22bfee126a3be69cf380c2135fcee0ae5ca7",
+  "derivation": {
+    "frozen_parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_fixed_eval_plan.json",
+    "frozen_parent_plan_sha256": "740fb1bb689b1faf27026f58cd5ffd7fd51703af62e956974d8cdc1ba83ce920",
+    "trajectory_replay_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_stepwise_trajectory_pro6_replay_result.json",
+    "change_from_parent": "Only the internally paired checkpoint/snapshot identity and host paths change from Y400 to its accepted PRO6 replay. Variants, exact evaluation protocol, thresholds, and selection order are unchanged."
+  },
+  "inputs": {
+    "trajectory_run": "pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "dense_endpoint_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+    "dense_endpoint_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "trajectory_snapshot_steps": "0 through 238 inclusive",
+    "trajectory_snapshot_layers": [0, 3, 6, 9, 11],
+    "bilateral_geometry_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_full_carry_result.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "variants": [
+    "dense_endpoint",
+    "hidden88_full_carry",
+    "hidden88_output32_full_carry",
+    "hidden88_output64_full_carry"
+  ],
+  "evaluation_protocol": {
+    "protocol": "mai_ladder_fixed_eval_indices_v2",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "eval_seed": 20260715,
+    "eval_batch_size": 16,
+    "block_size": 1024,
+    "eval_iters_per_split": 400,
+    "tokens_per_split": 6553600,
+    "splits": ["train", "val"],
+    "dtype": "bfloat16",
+    "expected_fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "paired_batches": true
+  },
+  "registered_decision_rule": {
+    "minimum_validation_ce_gain_vs_right_only": 0.002,
+    "minimum_train_ce_gain_vs_right_only": 0.0,
+    "candidate_pass": "All values must be finite; candidate validation CE must be at least 0.002 below hidden88_full_carry; candidate train CE must be no worse; and candidate validation distance from dense endpoint must be smaller than right-only.",
+    "selection_order": [
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "threshold_changes_after_measurement": false,
+    "authorization_on_pass": "A pass authorizes only production implementation of the smallest passing no-learned-basis bilateral optimizer path, exact update/resume tests, and a separately preregistered directly polled >=20 percent MFU preflight. It does not authorize language-model training.",
+    "authorization_on_failure": "Do not implement bilateral output rotation; move to a preregistered bounded non-orthogonal residual diagnostic."
+  },
+  "limitations": [
+    "Only the five recorded layers are replaced.",
+    "Directions are teacher-forced from the paired dense replay.",
+    "This is a 0.5 TPP endpoint capacity/task-direction oracle, not causal candidate training."
+  ],
+  "execution_constraints": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "minimum_training_mfu_not_applicable": "zero-update replay and evaluation",
+    "workspace_cap_gib": 256
+  }
+}

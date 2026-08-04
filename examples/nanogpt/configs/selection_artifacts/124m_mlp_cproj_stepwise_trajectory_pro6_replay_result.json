@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_stepwise_trajectory_pro6_replay_result_v1",
+  "artifact_kind": "124m_mlp_cproj_stepwise_trajectory_pro6_replay_result",
+  "recorded_at": "2026-08-04",
+  "classification": "ACCEPTED_CROSS_HOST_TRAJECTORY_REPLAY",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_stepwise_trajectory_pro6_replay_plan.json",
+    "sha256": "58a359f9d3bcc5cf51245f824ae2c60ea9bbe7ee2706bba1c2e1cc3b7e6842c9"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "hardware": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "git_commit": "cd2d22bfee126a3be69cf380c2135fcee0ae5ca7",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_cproj_stepwise_trajectory_replay_lr24e4.json"
+    ],
+    "config_sha256": "c87913b238368e0bcc8f11d194b9ce1f7b4f7f079199d1cb971b378f258bcc49",
+    "run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "prelaunch_provenance_sha256": "72a9326ac469a18d2df9d2de4c7b5f65567729510f2c3888943d23d111d38754",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "first_rejected_launch": "The first invocation exited before model allocation because EXPERIMENT_PROVENANCE_PATH/SHA-256 were absent. No checkpoint or trajectory state from it was reused."
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction": 0.38140863619066623,
+    "minimum_fraction": 0.2,
+    "tokens_per_second": 213174.50105896217,
+    "iter_ms_with_diagnostic_io": 1229.7155555555555,
+    "peak_mib": 31243.45,
+    "empirical_bf16_gemm_peak_tflops": 417.4277068408862,
+    "snapshot_count": 10,
+    "snapshot_seconds": 0.526,
+    "all_logged_losses_finite": true,
+    "certificate_sha256": "36fbd428e3dce253c15afb423186544d60e361172211b4834a6ff5a979b9166a"
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "optimizer": "muon",
+    "learning_rate": 0.0024,
+    "max_iters": 238,
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "snapshot_count": 239
+  },
+  "terminal": {
+    "next_iter": 238,
+    "checkpoint_reason": "evaluation",
+    "train_ce": 5.4858,
+    "validation_ce": 5.488473415374756,
+    "original_y400_validation_ce": 5.48837423324585,
+    "absolute_validation_difference_vs_y400": 0.00009918212890625,
+    "all_losses_finite": true,
+    "clean_exit": true
+  },
+  "remote_artifacts": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4",
+    "checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "checkpoint_metadata_sha256": "eecb2ee545936e2708643dab8bf825b81f159a509c5c6f1272785c2831e3158d",
+    "first_snapshot_sha256": "7156be842b00929184ba4769447ec3441892da880be6da5df66cd5323bf6eee3",
+    "last_snapshot_sha256": "89bb1963b3b0efe8229c8759cd96cd380b33d279b1e6a6a5fb227e1b67fa60c1",
+    "foreground_log_sha256": "7f5bc0c09b6c4638cb9b642e5647dfab2fe973bbc169a047497125aa1127f9b1",
+    "preflight_sha256": "36fbd428e3dce253c15afb423186544d60e361172211b4834a6ff5a979b9166a",
+    "prelaunch_metadata_sha256": "72a9326ac469a18d2df9d2de4c7b5f65567729510f2c3888943d23d111d38754",
+    "workspace_bytes_human": "12G"
+  },
+  "interpretation": [
+    "The exact registered dataset and fixed-evaluation digests match the Y400 trajectory, and all optimizer, schedule, seed, snapshot, and model semantics are preserved.",
+    "PRO6 terminal validation differs from Y400 by only 0.000099 CE, far below the predeclared 0.002 bilateral selection margin. Cross-host numerical drift is therefore not large enough to determine the paired endpoint decision.",
+    "The endpoint oracle must compare variants only within this PRO6 replay; it must not mix a PRO6 candidate endpoint with the Y400 dense reference."
+  ],
+  "decision": {
+    "trajectory_accepted": true,
+    "endpoint_oracle_authorized": true,
+    "production_bilateral_implementation_authorized": false,
+    "language_model_training_authorized": false,
+    "next_action": "Run the already frozen fixed-eval endpoint task-relevance rule on this replay's checkpoint and snapshots."
+  }
+}
