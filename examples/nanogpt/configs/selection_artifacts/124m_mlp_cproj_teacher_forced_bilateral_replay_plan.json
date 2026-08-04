@@ -1,0 +1,55 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_bilateral_replay_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does a small additive task-selected output-side pass prevent the long-horizon row-Gram and endpoint drift left by the accepted hidden88 plus bounded-error-feedback c_proj path, despite losing to hidden-only stages in the prior one-step equal-budget screen?",
+  "parameter_updates": 0,
+  "source_commit_before_implementation": "13d199c5c233c53fdd2c9f21cdb6e5778cfcac91",
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "see every snapshot metadata; execution must reject disagreement",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "phase_boundaries": [0, 60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608"
+  },
+  "teacher_forcing_protocol": {
+    "phase_reset": "Each layer/phase candidate starts at the exact dense phase-start c_proj weight.",
+    "per_step_target": "Use only the already-recorded dense W[t+1]-W[t]. Remove the registered decoupled weight-decay radial term before chart fitting and apply weight decay exactly once to the candidate after the structured update.",
+    "causality": "At step t, connectivity and coordinates may use only the candidate W[t], the dense update observed at t, and the candidate compression residual through t-1. No later dense weight is used until scoring.",
+    "error_feedback": "E[t+1] = requested_corrected_update - actual_structured_update; corrected target adds decay*E[t].",
+    "interpretation": "This is an optimistic representation/transport oracle because directions are teacher-forced from the dense run. Passing can authorize a real training-path implementation gate; failure rejects the structure. It is not language-model training evidence."
+  },
+  "candidate_arms": [
+    {"name": "hidden88_decay0p5", "right_parent_stages": 64, "right_residual_stages": 24, "right_extra_stages": 0, "output_residual_stages": 0, "error_feedback_decay": 0.5, "role": "accepted scaled control"},
+    {"name": "hidden88_decay1p0", "right_parent_stages": 64, "right_residual_stages": 24, "right_extra_stages": 0, "output_residual_stages": 0, "error_feedback_decay": 1.0, "role": "smallest-rung temporal control"},
+    {"name": "hidden96_decay0p5", "right_parent_stages": 64, "right_residual_stages": 24, "right_extra_stages": 8, "output_residual_stages": 0, "error_feedback_decay": 0.5, "role": "equal-coordinate control for output32"},
+    {"name": "hidden104_decay0p5", "right_parent_stages": 64, "right_residual_stages": 24, "right_extra_stages": 16, "output_residual_stages": 0, "error_feedback_decay": 0.5, "role": "equal-coordinate control for output64"},
+    {"name": "hidden88_output32_decay0p5", "right_parent_stages": 64, "right_residual_stages": 24, "right_extra_stages": 0, "output_residual_stages": 32, "error_feedback_decay": 0.5, "role": "additive bilateral candidate"},
+    {"name": "hidden88_output64_decay0p5", "right_parent_stages": 64, "right_residual_stages": 24, "right_extra_stages": 0, "output_residual_stages": 64, "error_feedback_decay": 0.5, "role": "additive bilateral depth candidate"}
+  ],
+  "metrics": {
+    "per_layer_phase": ["dense-chord endpoint energy recovery", "endpoint cosine", "row-Gram drift recovery", "mean requested-update recovery", "terminal compression-residual Frobenius norm"],
+    "aggregate": "energy-weight every metric and report the minimum cell; no aggregate can hide a nonfinite cell",
+    "coordinate_matching": "output32 adds 32*(768/2)=12,288 coordinates, equal to 8*(3072/2) extra hidden coordinates; output64 matches 16 extra hidden stages"
+  },
+  "registered_decision_rule": {
+    "candidate_pass": "An output arm must beat its equal-coordinate hidden-only control by at least 1.10x in aggregate endpoint recovery, reduce aggregate row-Gram error by at least 25%, improve endpoint recovery in at least 16/20 cells, and remain finite in all cells.",
+    "selection": "Select output32 if it passes. Output64 is eligible only if output32 fails and output64 passes. If neither passes, reject additive sparse output transport.",
+    "authorization_on_pass": "Implement only the selected production optimizer arm, exact-resume tests, and a separately registered exact-config >=20% MFU preflight. No scientific training or larger rung is authorized by this plan.",
+    "authorization_on_failure": "No output-side production implementation, MFU run, language-model training, or larger rung."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": "one idle GPU",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "minimum_training_mfu_not_applicable": "zero-update diagnostic",
+    "workspace_cap_gib": 300
+  }
+}

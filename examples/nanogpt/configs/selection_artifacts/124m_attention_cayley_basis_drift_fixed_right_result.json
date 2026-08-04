@@ -40,9 +40,78 @@
     "maximum_cg_relative_normal_residual": 9.999968265667347e-08,
     "maximum_projection_orthogonality_error": 2.4194793065610357e-13
   },
+  "state_derived_fixed_right_terminal_oracles": {
+    "source_commit": "13d199c5c233c53fdd2c9f21cdb6e5778cfcac91",
+    "entrypoint": "examples.nanogpt.analyze_attention_fixed_right_tangent",
+    "selection_constraint": "The right frames use only the current generated weight and fixed randomness; the dense target direction is never used to select a frame.",
+    "weight_svd": {
+      "weighted_dense_muon_direction_recovery": 0.0536304,
+      "by_target": {
+        "qk_shared": 0.0888154,
+        "v": 0.0472035,
+        "cproj": 0.0118690
+      },
+      "raw_result_sha256": "70d82d8476c80bb23bedde16d4e67c3fb389384b2e2deebb3612ec02ec980d9b",
+      "cells_csv_sha256": "74e1e0454f809ec092737504c012ec78c44888e41f74cf8cea7fb92193879685",
+      "run_log_sha256": "13eb4b598470c2530502dc648a60a0fbc01b9f80ec94af8f62dd745fdc60e377"
+    },
+    "weight_random_range_power0": {
+      "weighted_dense_muon_direction_recovery": 0.0477946,
+      "by_target": {
+        "qk_shared": 0.0753758,
+        "v": 0.0444163,
+        "cproj": 0.0115836
+      },
+      "raw_result_sha256": "a4088e1f33143ab41491fe37de8290d6ea02fe2c21cbffd72a012b8e3020eb73",
+      "cells_csv_sha256": "053ab0bb7c2ce9ae3ff10e24b3df79a28455d4aaef7ab0ace0ab50299050cff1",
+      "run_log_sha256": "ebb99ba5ecfa73e1afe18b1227f09d7a76caef2a15a1471b501c339a64d31a06"
+    },
+    "weight_random_range_power1": {
+      "weighted_dense_muon_direction_recovery": 0.0506551,
+      "by_target": {
+        "qk_shared": 0.0819571,
+        "v": 0.0457645,
+        "cproj": 0.0117711
+      },
+      "raw_result_sha256": "6e4639a2082acae3a5328d935db555f1c3c514b0cba9ce389650396dda1b13ae",
+      "cells_csv_sha256": "c714dc2925d611ff1aca30a8f88d536cb8390a1cba41dadb3ce7d158eab0078f",
+      "run_log_sha256": "32a64da6d849ceb178c521c3fa7427d82a21c2dad8bad552e372d6ecda4978be"
+    }
+  },
+  "best_qk64_gain_5tpp_checkpoint_geometry": {
+    "checkpoint_sha256": "7a38c4bd60ec454c5daaaf6aa8ea7636603a4f0b168e8b00c356d3d83134698c",
+    "next_iter": 2373,
+    "optimizer": "AdamW",
+    "chart_modules": 60,
+    "right_subspace_mean_angle_degrees": 45.3677,
+    "right_subspace_projector_distance": 0.705311,
+    "fixed_right_generator_relative_error": 0.813466,
+    "maximum_cayley_angle_degrees": 145.385,
+    "right_factor_norm_mean": 1.687,
+    "generator_frobenius_norm_mean": 11.664,
+    "by_target": {
+      "cproj": {
+        "right_subspace_mean_angle_degrees": 47.996,
+        "fixed_right_generator_relative_error": 0.8410,
+        "maximum_cayley_angle_degrees": 129.639
+      },
+      "qk_shared": {
+        "right_subspace_mean_angle_degrees": 46.854,
+        "fixed_right_generator_relative_error": 0.84063,
+        "maximum_cayley_angle_degrees": 158.647
+      },
+      "v": {
+        "right_subspace_mean_angle_degrees": 42.567,
+        "fixed_right_generator_relative_error": 0.77252,
+        "maximum_cayley_angle_degrees": 139.995
+      }
+    },
+    "result_sha256": "3f9b9456d6122ab051932424e654c25c1307bbc14b9e4f098779a38ed91e8eef",
+    "run_log_sha256": "3f9b9456d6122ab051932424e654c25c1307bbc14b9e4f098779a38ed91e8eef"
+  },
   "decision": {
-    "classification": "REJECT_BLIND_SEEDED_FIXED_RIGHT_TRAINING_SCREEN",
-    "reason": "The current AdamW repair relies on material right-subspace motion, while the same-size seeded fixed-right chart can represent only 4.42% of the terminal dense Muon direction (1.13% for c-proj). Freezing the existing random frame would restore the intended fixed mapping but remove most of the mechanism that produced the measured CE gain.",
-    "next_test": "Before any training, compare parameter-free state-derived right frames: exact current-weight singular frames as an upper diagnostic and fixed-seed randomized range frames as the implementable approximation. Admit a candidate only if direction recovery materially exceeds the seeded 4.42% ceiling without using the dense target direction to choose the basis."
+    "classification": "REJECT_NONLEARNED_FIXED_RIGHT_BASIS_FAMILY",
+    "reason": "Seeded fixed-right recovery is only 4.42%. Exact current-weight SVD raises it to 5.36%, and implementable randomized range frames reach only 4.78-5.07%; c-proj remains near 1.2%. The best 5TPP AdamW checkpoint itself rotates its right subspaces by 45.4 degrees on average, so its gain depends on material basis motion. A direction-adaptive learned frame would be LoRA-like and is outside the fixed-projection claim being tested.",
+    "next_test": "Do not train fixed-right or state-derived-right attention variants. Keep the best QK64 plus output-gain attention result as the current parent and concentrate closure work on the independently isolated c-proj temporal/directional residual."
   }
 }
