@@ -1,0 +1,95 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_matched_fullattn_parent_result_v1",
+  "artifact_kind": "124m_mlp_cproj_bilateral_endpoint_matched_fullattn_parent_result",
+  "recorded_at": "2026-08-04",
+  "classification": "MATCHED_PARENT_BILATERAL_TASK_DIRECTION_PASS_CAUSAL_DRIFT_CONFIRMED",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_matched_fullattn_parent_plan.json",
+    "sha256": "db33fd599691c7b34f0dbef1545011d127188cf1e61c5b84ab80b6b71f7279f7"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "31eee1beb738b590c786286eaa7bb635ab29e87a",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_bilateral_endpoint_fixed_eval.py",
+    "entrypoint_sha256": "f66c8416658abe4e650066fb4f2f6592cb78678f3de6e93130f2162d41c7b7ba",
+    "direct_foreground_polling": true,
+    "parameter_updates": 0,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "exit_code": 0
+  },
+  "identity": {
+    "trajectory_result_sha256": "f261dc43f44ae73bbc01ae32cdae317897370b4382564f0994d0178711f724c0",
+    "trajectory_run_identity_sha256": "792a87c43fbd4f5105c7e2e8f2ed228e2ff6dcb06731925e132ab8a10758090c",
+    "checkpoint_sha256": "7302fe2e880c1cadbb1584ef9367f3f8a9f95746733c41e58d68771a462c5154",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "parent_method": "block_fht",
+    "parent_block_fht_targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "teacher_mlp_cproj": "dense"
+  },
+  "loss": {
+    "dense_endpoint": {
+      "label_note": "matched BlockFHT-attention endpoint with dense MLP c_proj",
+      "train_ce": 5.489073276519775,
+      "validation_ce": 5.4918928146362305
+    },
+    "hidden88_full_carry": {
+      "train_ce": 5.519721508026123,
+      "validation_ce": 5.5228729248046875,
+      "validation_gap_vs_parent": 0.03098011016845703
+    },
+    "hidden88_output32_full_carry": {
+      "train_ce": 5.497262954711914,
+      "validation_ce": 5.500156402587891,
+      "validation_gain_vs_right_only": 0.022716522216796875,
+      "train_gain_vs_right_only": 0.022458553314208984,
+      "validation_gap_vs_parent": 0.008263587951660156,
+      "retained_fraction_of_dense_attention_oracle_gain": 0.9235063776993758
+    },
+    "hidden88_output64_full_carry": {
+      "train_ce": 5.495400428771973,
+      "validation_ce": 5.498264312744141,
+      "validation_gain_vs_right_only": 0.024608612060546875,
+      "train_gain_vs_right_only": 0.02432107925415039,
+      "validation_gap_vs_parent": 0.006371498107910156,
+      "retained_fraction_of_dense_attention_oracle_gain": 0.932107573103112
+    },
+    "known_causal_output32": {
+      "validation_ce": 5.528466701507568,
+      "validation_delta_vs_causal_right_only": 0.0011014938354492188,
+      "directional_gate_passed": false
+    }
+  },
+  "selection": {
+    "selected_diagnostic_variant": "hidden88_output32_full_carry",
+    "decision": "SELECT_HIDDEN88_OUTPUT32_FULL_CARRY_AS_DIAGNOSTIC_ENDPOINT_PASS",
+    "production_implementation_authorized": false,
+    "language_model_training_authorized": false
+  },
+  "remote_artifacts": {
+    "result_sha256": "94291cfa685667b6f6e2ed089d295ac7795bff81dffde6c21d3c5b909d09ec67",
+    "metadata_sha256": "f17519a87f7db3dee848df0cef1d1fcd9be1a0c0abd087e00351a903bc0e6167",
+    "terminal_states_sha256": "294c7f015186bb0586a2c90a18057a88062224e3aaf6f61eebe0de6ec23edc9c",
+    "foreground_log_sha256": "cea92fba9987ee6df237fff41141f8c4f632ca350194f2b2f806826ef7936490"
+  },
+  "interpretation": [
+    "Output32 retains 92.35% of its validation gain from the fully dense-attention teacher oracle, and output64 retains 93.21%. The useful output-side direction is therefore not an artifact of the attention parent.",
+    "The causal output32 structure nevertheless failed against causal right-only, so capacity, parent identity, and the production selector mechanics are no longer sufficient explanations. The remaining failure is closed-loop direction generation/selection under the compressed model.",
+    "The next discriminator must fit the output pass in the actual residual-stream metric induced by current post-GELU activations, rather than using Frobenius weight geometry or an inverse natural-gradient pullback."
+  ],
+  "decision": {
+    "matched_parent_direction_passed": true,
+    "closed_loop_direction_drift_confirmed": true,
+    "activation_weighted_selector_diagnostic_authorized": true,
+    "new_language_model_training_authorized": false,
+    "same_structure_retry_authorized": false,
+    "next_action": "Capture exact matched-parent full-model states plus c_proj Muon directions at phase boundaries, then compare Frobenius and empirical post-GELU output-space output selectors on disjoint activation windows before any causal training."
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "acquisition": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "optimizer_probe_layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "optimizer_probe_scope": "weight, clipped gradient, old momentum, combined momentum, polar update, and exact applied direction per LR for mlp.c_proj",
+    "optimizer_probe_steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/scientific",
+    "phase_boundaries": [
+      0,
+      60,
+      120,
+      180,
+      238
+    ],
+    "probe_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/scientific/optimizer_probes",
+    "snapshot_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/scientific/parameter_trajectory",
+    "snapshot_scope": "all named model parameters in float32"
+  },
+  "acquisition_acceptance": {
+    "required": [
+      "MFU >= 0.20 with all-parameter snapshot and optimizer-probe I/O charged",
+      "clean terminal step 238 and complete exact-resume checkpoint",
+      "all-parameter snapshots exactly at 0,60,120,180,238",
+      "c_proj optimizer probes exactly at 0,60,120,180 for layers 0,3,6,9,11",
+      "one common run identity across snapshots, probes, and checkpoint",
+      "dataset and fixed-evaluation digests match",
+      "all losses and floating model/optimizer/probe tensors finite",
+      "absolute terminal validation CE delta from 5.4918 <= 0.03",
+      "absolute step-60 validation CE delta from 6.2184 <= 0.03"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "acquisition": "one exact 238-update matched-parent replay after MFU pass",
+    "callbacks": false,
+    "language_model_candidate_training": false,
+    "selector_implementation_before_acquisition_acceptance": false,
+    "watchdog": false,
+    "zero_update_selector_analysis": true
+  },
+  "causal_diagnosis": "The matched BlockFHT-attention endpoint oracle retained 92.35% of the dense-attention output32 gain, while the causal output32 run worsened its right-only parent. Parent identity, output capacity, and the earlier weight-decay selector mismatch are therefore ruled out; closed-loop task-direction selection remains the live cause.",
+  "decision_rule": {
+    "advantage_formula": "advantage(window)=1-E_activation(window)/E_frobenius(window); retention=advantage(holdout)/advantage(fit)",
+    "fail_action": "reject activation-weighted pair selection without training and move to a directly task-gradient-aware output selector",
+    "language_model_training_authorized_by_this_plan": false,
+    "pass_action": "preregister a production activation-weighted output32 path, add focused correctness tests, and require a separate >=20% MFU preflight before considering exactly one 124M causal run",
+    "pass_all": [
+      "all outputs and metrics finite",
+      "aggregate holdout activation-output residual energy <= 0.95 times Frobenius control",
+      "fit activation residual-energy advantage = 1-candidate/control is positive",
+      "holdout-to-fit activation residual-energy advantage ratio >= 0.80",
+      "aggregate holdout task-gradient predicted CE descent >= Frobenius control",
+      "activation selector finite-step CE beats Frobenius in at least 6 of 8 phase-window comparisons",
+      "mean finite-step CE across all 8 comparisons <= Frobenius control"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp.json",
+    "candidate_config_sha256": "d399f817080de51cd378cf5952935a15f9915b99e2a5128f92e2daed66ef2720",
+    "causal_output32_result_sha256": "c2094f6098ca4ea3b2bb9a85f2e9493868cb9e288e9f73ce4fdc58aba339286d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "matched_parent_endpoint_result_sha256": "7041249de559c82df785ec439308e5849f6c38b9d52eb885afdea9b0bf2b3760",
+    "matched_parent_trajectory_result_sha256": "f261dc43f44ae73bbc01ae32cdae317897370b4382564f0994d0178711f724c0",
+    "source_config": "examples/nanogpt/configs/y400_mai_v2_124m_fullattn_blockfht_0p5tpp_mult1p00.json",
+    "source_config_sha256": "a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7"
+  },
+  "performance_gate": {
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "direct_foreground_polling": true,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_mlp_cproj_activation_weighted_output_selector_plan_v1",
+  "scientific_question": "At identical output32 chart size, does selecting c_proj output pairs and angles in the empirical post-GELU residual-stream metric beat the current Frobenius weight-space selector on unseen tokens and CE?",
+  "selector_analysis": {
+    "candidate": "Activation output32: on fit tokens form H@output_source and H@output_residual, choose the same number of output-channel pairs and fit angles there, then apply those discrete pairs and angles to the unprojected output_source",
+    "control": "Frobenius output32: choose output pairs and closed-form angles from output_source=W_after_hidden^T and output residual^T",
+    "fit_window": {
+      "batch_size": 2,
+      "batches": 4,
+      "block_size": 256,
+      "rows_per_layer": 2048,
+      "seed": 20260804,
+      "split": "validation"
+    },
+    "holdout_window": {
+      "batch_size": 2,
+      "batches": 4,
+      "block_size": 256,
+      "rows_per_layer": 2048,
+      "seed": 20260805,
+      "split": "validation"
+    },
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "measurements": [
+      "fit and holdout ||H(DeltaW_target-DeltaW_chart)^T||_F^2",
+      "fit and holdout fixed-scale and positive-line output recovery",
+      "recorded-train and fit/holdout task-gradient predicted CE descent",
+      "simultaneous five-layer finite-step CE on fit and holdout batches",
+      "weight-space recovery and chart timing as secondary diagnostics"
+    ],
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/activation_weighted_output_selector",
+    "parameter_updates": 0,
+    "phases": [
+      [
+        0,
+        60
+      ],
+      [
+        60,
+        120
+      ],
+      [
+        120,
+        180
+      ],
+      [
+        180,
+        238
+      ]
+    ],
+    "prohibited": [
+      "learned basis",
+      "inverse JtJ or conjugate-gradient pullback",
+      "dense residual",
+      "extra chart coordinates",
+      "selection on holdout activations"
+    ],
+    "shared_chart": {
+      "coordinate_count_per_layer": 147456,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "matching_seed": 20260804,
+      "neighbors": 64,
+      "output_stages": 32,
+      "weight_decay_application": "identical production ordering in both arms"
+    }
+  },
+  "status": "registered_before_acquisition_preflight_or_selector_implementation"
+}
