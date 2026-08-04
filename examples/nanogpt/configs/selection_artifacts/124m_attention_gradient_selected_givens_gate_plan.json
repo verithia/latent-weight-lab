@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_attention_gradient_selected_givens_gate_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_offline_gate",
+  "scientific_question": "Can a sparse orbit whose integer connectivity is chosen only from the currently available clipped task gradient retain useful dense-Muon and unseen 15-update chord directions?",
+  "identity": {
+    "analysis_entrypoint": "examples/nanogpt/analyze_attention_gradient_selected_givens.py",
+    "snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/parameter_trajectory",
+    "optimizer_probe_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/optimizer_probe",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "oracle": {
+    "selection_field": "negative gradient_after_clip",
+    "selection_uses_dense_muon_target": false,
+    "scoring_targets": [
+      "negative gradient_after_clip",
+      "applied_direction_per_lr",
+      "unseen 15-update dense weight chord"
+    ],
+    "layers": [0, 3, 6, 9, 11],
+    "phase_starts": [0, 60, 120, 180],
+    "horizon": 15,
+    "stage_count": 64,
+    "neighbors": 128,
+    "matching_seed": 161803,
+    "random_seed": 271828,
+    "phase_seed_stride": 8192,
+    "cg_iterations": 160,
+    "cg_tolerance": 1e-05,
+    "ridge": 0.0,
+    "random_control": "equal-coordinate unique random matchings",
+    "learned_dense_basis": false,
+    "learned_additive_adapter": false,
+    "parameter_updates": 0
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "task_gradient_recovery_minimum": 0.2,
+      "task_gradient_enrichment_minimum": 3.0,
+      "dense_muon_recovery_minimum": 0.15,
+      "dense_muon_over_random_minimum": 2.0,
+      "future_chord_recovery_minimum": 0.1,
+      "future_chord_over_random_minimum": 1.75,
+      "per_target_chord_recovery_minimum": 0.05,
+      "maximum_projection_error": 0.0001,
+      "maximum_normal_residual": 0.0001
+    },
+    "pass_action": "authorize implementation audit of a differentiable task-selected sparse orbit composed with actual BlockFHT-generated weights; implementation must separately pass tests and exact-config MFU >=20%",
+    "fail_action": "reject this self-contained selector without implementation or training",
+    "automatic_training_authorized": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_gradient_selected_givens",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_attention_gradient_selected_givens_gate_plan.json",
+      "--snapshot-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/parameter_trajectory",
+      "--probe-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/optimizer_probe",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_gradient_selected_givens_gate/analysis",
+      "--device",
+      "cuda"
+    ]
+  },
+  "scope_guard": "This is stricter than the earlier oracle because selection cannot inspect dense Muon. It does not authorize dense folded weights, dense optimizer state, learned dense bases, additive adapters, or a training run."
+}
