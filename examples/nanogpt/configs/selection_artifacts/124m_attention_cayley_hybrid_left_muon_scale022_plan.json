@@ -1,0 +1,40 @@
+{
+  "schema_version": "mai_124m_attention_cayley_hybrid_left_muon_scale022_plan_v1",
+  "artifact_kind": "pre_execution_geometry_calibrated_screen_plan",
+  "recorded_at": "2026-08-04",
+  "hypothesis": "The unit-scale hybrid repaired destructive right-basis rotation but remained worse than AdamW because its Muon-owned left amplitude saturated the Cayley map near a half-turn. A precomputed 0.22 left scale should retain Muon's direction geometry while matching AdamW's terminal angular regime.",
+  "calibration": {
+    "unit_scale_hybrid_generator_spectral": 9.060312300263536,
+    "unit_scale_hybrid_maximum_cayley_angle_degrees": 166.94914942165119,
+    "matched_adamw_maximum_cayley_angle_degrees": 126.0037547778492,
+    "target_generator_spectral": 1.96275,
+    "exact_scale_ratio": 0.21663,
+    "registered_scale": 0.22,
+    "selection_timing": "fixed before MFU or scientific execution",
+    "scale_sweep": false
+  },
+  "causal_isolation": {
+    "changed": "block_fht_attn_cayley_muon_lr_scale: 1.0 -> 0.22",
+    "fixed": "all parameters, chart ranks/sides/seeds, decoder, right-factor AdamW, data, schedule, and other optimizer groups",
+    "learned_dense_basis": false,
+    "additive_adapter": false,
+    "lora_branch": false
+  },
+  "admission": {
+    "host": "PRO6",
+    "gpu": 0,
+    "exact_config_mfu_minimum": 0.20,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "scientific_updates": 238
+  },
+  "decision_rule": {
+    "finite_losses_required": true,
+    "terminal_validation_ce_maximum": 5.3924,
+    "minimum_improvement_over_adamw_control_ce": 0.0100,
+    "promote_if_passed": "transfer scale-0.22 hybrid ownership to QK64 plus output gain at 5 TPP",
+    "reject_if_failed": "close the Cayley optimizer branch; do not run a posthoc left-scale sweep",
+    "no_posthoc_threshold_changes": true
+  }
+}

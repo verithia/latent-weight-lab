@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_attention_cayley_hybrid_left_muon_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_HYBRID_LEFT_MUON_AT_UNIT_SCALE",
+  "run": {
+    "name": "pro6_mai_v3_124m_attn_qk32_hybrid_left_muon_0p5tpp_20260804a",
+    "run_id": "pro6_mai_v3_124m_attn_qk32_hybrid_left_muon_0p5tpp_20260804a_20260804T204144Z_4182118",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "5ff39db84a0ce00aac5dbc809fd07588eccff109",
+    "entrypoint": "examples.nanogpt.train",
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train --config /mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_qk32_hybrid_left_muon_0p5tpp_20260804a_20260804T204144Z_4182118.config.json",
+    "config_sha256": "4ea0ade4068ee9e9c1c00ac2c8a5c2a3d8da2b71a56f1917ef067cb5bf2ee23e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "c6ec284e673f45232c1d9ee0fb2187ae8af8ae62bf7a783bc11b2b8e9ba0d9d9",
+    "status_sha256": "7e6e326b43ebb03a5b7164ee35da791235162b810aab47b84248e1df9db783f7",
+    "log_sha256": "1ed477ec07231c8e93eb744a56fa3ffba7a449063b307f72eeee79063e5f1057",
+    "checkpoint_sha256": "52a103cf956ce9dc97e8ab392e5412cf42734d2ea1904cdc1481af41c3544615",
+    "checkpoint_metadata_sha256": "59cad73fba6e3eab8350f7f5ec01ae76cacdc88785db04b66004c144ba421f3b",
+    "mfu_certificate_sha256": "0210b92fb65b04f2b76b66ac0517a29db4be9d65524536a367aeee7a4d30e582",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "exit_code": 0
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.27855700024754904,
+    "iter_ms": 1683.6796666666667,
+    "tokens_per_second": 155697.384,
+    "peak_mib": 35417.83
+  },
+  "fixed_evaluations": [
+    {"step": 60, "train_loss": 6.3123, "validation_loss": 6.3232},
+    {"step": 120, "train_loss": 5.7882, "validation_loss": 5.7936},
+    {"step": 180, "train_loss": 5.5275, "validation_loss": 5.5306},
+    {"step": 238, "train_loss": 5.4202, "validation_loss": 5.4225}
+  ],
+  "comparison": {
+    "matched_adamw_validation_ce": [6.2887, 5.7764, 5.5048, 5.4024],
+    "delta_to_matched_adamw": [0.0345, 0.0172, 0.0258, 0.0201],
+    "full_factor_muon_validation_ce": [6.3603, 5.8100, 5.5500, 5.4389],
+    "delta_to_full_factor_muon": [-0.0371, -0.0164, -0.0194, -0.0164],
+    "promotion_threshold_validation_ce": 5.3924,
+    "terminal_miss_to_promotion_threshold": 0.0301
+  },
+  "checkpoint_geometry": {
+    "entrypoint": "examples.nanogpt.analyze_attention_cayley_checkpoint_geometry",
+    "raw_result_sha256": "2bf7ad36577908d602f20d9d80a6cbd72dd26974045c08deb4ed2f3558b9bf34",
+    "right_subspace_mean_angle_degrees": 21.50265591603012,
+    "right_subspace_projector_distance": 0.38249334805617935,
+    "fixed_right_generator_relative_error": 0.46099316847465005,
+    "generator_spectral": 9.060312300263536,
+    "maximum_cayley_angle_degrees": 166.94914942165119,
+    "left_fro": 17.287222715327058
+  },
+  "decision": {
+    "promoted": false,
+    "reason": "Splitting optimizer ownership controls the right basis and recovers about half of full-factor Muon's CE damage, proving that over-rotation was real. It still loses to AdamW because the Muon-owned left amplitude saturates the Cayley transform near a half-turn: 166.95 degrees versus 126.00 degrees for AdamW.",
+    "next_test": "Run one geometry-calibrated left-Muon scale of 0.22, derived before launch from tan(126/2)/9.0603 = 0.2167 and rounded to two significant figures; keep the right factor and every other setting fixed."
+  }
+}
