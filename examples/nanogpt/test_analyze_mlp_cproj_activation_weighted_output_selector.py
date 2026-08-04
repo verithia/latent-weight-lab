@@ -152,3 +152,11 @@ def test_aggregate_passes_only_when_every_registered_rule_passes() -> None:
     failed = aggregate_results(failed_rows, failed_finite)
     assert failed["passed"] is False
     assert failed["decision"] == "REJECT_ACTIVATION_WEIGHTED_OUTPUT_SELECTOR"
+
+
+def test_negative_advantages_remain_finite_but_fail_positive_gate() -> None:
+    rows, finite = synthetic_rows(candidate_ratio=2.0)
+    result = aggregate_results(rows, finite)
+    assert result["gate"]["all_outputs_and_metrics_finite"] is True
+    assert result["gate"]["fit_advantage_positive"] is False
+    assert result["passed"] is False

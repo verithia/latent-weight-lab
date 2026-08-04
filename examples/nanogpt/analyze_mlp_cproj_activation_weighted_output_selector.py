@@ -324,8 +324,8 @@ def aggregate_results(
     }
     retention = (
         advantages["holdout"] / advantages["fit"]
-        if advantages["fit"] > 0.0
-        else float("-inf")
+        if abs(advantages["fit"]) > 1e-30
+        else float("nan")
     )
 
     comparisons: list[dict[str, Any]] = []
