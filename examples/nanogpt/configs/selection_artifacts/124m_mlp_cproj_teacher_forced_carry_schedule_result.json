@@ -1,0 +1,85 @@
+{
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_carry_schedule_result",
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_carry_schedule_result_v1",
+  "classification": "SELECT_HALF_SWITCH_FOR_PRODUCTION_PREFLIGHT",
+  "selected_arm": {
+    "name": "half_switch",
+    "formula": "d(t)=1.0 for the first half of updates, then d(t)=0.5",
+    "normalized_for_production": true,
+    "midpoint_recovery_ratio_vs_decay1": 1.0,
+    "terminal_endpoint_recovery": 0.8115073658043876,
+    "terminal_recovery_ratio_vs_decay0p5": 1.3873877162619037,
+    "terminal_feedback_ratio_vs_decay1": 0.006813526712219854,
+    "terminal_layers_beating_decay0p5": 5,
+    "required_winning_layers": 4,
+    "passed": true
+  },
+  "controls": {
+    "constant_decay0p5": {
+      "midpoint_endpoint_recovery": 0.5777005989268379,
+      "terminal_endpoint_recovery": 0.5849175081287772,
+      "terminal_maximum_feedback_fro": 0.008609553799033165
+    },
+    "constant_decay1p0": {
+      "midpoint_endpoint_recovery": 0.8492365012754448,
+      "terminal_endpoint_recovery": 0.8460791090646863,
+      "terminal_maximum_feedback_fro": 1.267708420753479,
+      "terminal_mean_requested_update_recovery": -3.738456263261683
+    }
+  },
+  "other_candidates": {
+    "late_linear": {
+      "passed": true,
+      "terminal_recovery_ratio_vs_decay0p5": 1.429330295174534,
+      "terminal_feedback_ratio_vs_decay1": 0.006888710105658957,
+      "not_selected_reason": "The preregistered smallest-pass ordering selects the simpler half-switch first."
+    },
+    "full_cosine": {
+      "passed": false,
+      "midpoint_recovery_ratio_vs_decay1": 0.9398482271858523,
+      "terminal_recovery_ratio_vs_decay0p5": 1.314109068486397,
+      "failure": "Misses the frozen 0.99 midpoint-retention gate."
+    }
+  },
+  "decision": {
+    "production_schedule_implementation_authorized": true,
+    "exact_resume_and_config_tests_authorized": true,
+    "one_exact_124m_mfu_preflight_authorized_after_implementation": true,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Implement the selected normalized halfway switch for c_proj error-feedback decay, validate exact resume/config behavior, then preregister and directly poll an exact 124M performance preflight."
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_carry_schedule_plan.json",
+    "sha256": "0f36dc1a7630afeac9c3bd41cf303ba6f48e21b5147df8b40367b5c15802dbf0"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 0,
+    "git_commit": "7587a7e6d341498148673450f56ed7d56a5feea0",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_carry_schedule.py",
+    "entrypoint_sha256": "d8bfff4d19e2fae6adb7cb5869e568defbbe2dc2998bb6af1e9970bdb8c8aed7",
+    "command": "CUDA_VISIBLE_DEVICES=0 MAPPING_NETWORKS_NATIVE_CACHE=/root/userdata/MappingNetworks/outputs/native_cache /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.analyze_mlp_cproj_teacher_forced_carry_schedule --snapshot-dir /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4/parameter_trajectory --plan examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_carry_schedule_plan.json --output /root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_carry_schedule_v1 --layers 0,3,6,9,11 --score-steps 60,120,180,238 --device cuda",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "remote_outputs": {
+    "directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/cproj_teacher_forced_carry_schedule_v1",
+    "aggregate_sha256": "a78a4b49996fa05c0c7044eb7b8a2bf54e821b0029855f026534a4ac5b37be67",
+    "cells_sha256": "10a23ca5089daf7df698c69200920a57d63a19c75292df74d1ba154d72213e95",
+    "metadata_sha256": "adea52355dda23ce51e72beacdf1cefde3a4dcc09f400693bd7dc0829af6830a",
+    "log_sha256": "66b08398d38cb7d92aa02a847235c673779d2dc652534667a179c6416e9d223c"
+  },
+  "limitations": [
+    "This is a teacher-forced zero-update replay, not language-model training.",
+    "The schedule is selected on one dense trajectory and five layers; real loss and scale transfer remain unverified."
+  ]
+}
