@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_cross_batch_consensus_selector_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "Can pair selection from a normalized consensus of the exact recorded training gradient and an independent fit-validation gradient preserve task direction across unseen validation tokens while retaining stable Frobenius angles?",
+  "identity": {
+    "sequential_trust_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_gradient_sequential_trust_result.json",
+    "sequential_trust_result_sha256": "3beab2e14c41ab8fee3a4f8d4b6f91c2f3abb876087772e483f8ac13f124ed55",
+    "task_gradient_selector_result_sha256": "c18b7d4535a34743fe908c77eb815633a399e170f89ee233ae8e7d17be0843e9",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementation"
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/cross_batch_consensus_selector",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {"split": "validation", "seed": 20260804, "batch_size": 2, "block_size": 256, "batches": 4, "rows_per_layer": 2048},
+    "holdout_window": {"split": "validation", "seed": 20260805, "batch_size": 2, "block_size": 256, "batches": 4, "rows_per_layer": 2048},
+    "shared_chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinate_count_per_layer": 147456,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in all arms"
+    },
+    "gradient_sources": {
+      "recorded_train": "optimizer probe gradient_after_clip from the exact dense Muon pre-step training batch",
+      "fit_validation": "average c_proj task gradient on fixed validation seed 20260804",
+      "holdout_validation": "average c_proj task gradient on fixed validation seed 20260805; scoring-only"
+    },
+    "consensus": {
+      "formula": "G_consensus = 0.5 * (G_recorded_train/max(||G_recorded_train||_F,1e-30) + G_fit_validation/max(||G_fit_validation||_F,1e-30))",
+      "weights": [0.5, 0.5],
+      "tunable": false,
+      "holdout_used": false
+    },
+    "arms": {
+      "frobenius_output32": "Existing Frobenius pair selector and simultaneous Frobenius residual-fit angles.",
+      "fit_task_output32": "Previously tested RMS-normalized residual-plus-fit-validation-gradient pair score with simultaneous Frobenius angles.",
+      "consensus_task_output32": "The same pair-score formula using G_consensus instead of fit gradient, followed by simultaneous Frobenius angles."
+    },
+    "pair_score": {
+      "residual_term": "u_ij = r_ij^2/max(q_ij,1e-30)",
+      "task_term": "v_ij = -(r_ij/max(q_ij,1e-30))*g_ij using the arm's task gradient",
+      "normalization": "divide u and v independently by strict-upper-triangle RMS, then add with unit weights",
+      "candidate_graph": "top 64 score neighbors per output vertex and deterministic compiled 32-stage edge coloring",
+      "angles": "ordinary simultaneous diagonal_metric_angles(S,R,pairs); task and activation metrics do not fit angles"
+    },
+    "prohibited": [
+      "selection on holdout gradient or activations",
+      "post-hoc consensus weights",
+      "sequential refit",
+      "task-metric or activation-metric angles",
+      "learned basis",
+      "inverse metric solve",
+      "dense residual",
+      "extra chart coordinates"
+    ]
+  },
+  "decision_rule": {
+    "primary_control": "frobenius_output32",
+    "descriptive_comparator": "fit_task_output32",
+    "pass_all": [
+      "all outputs and metrics finite",
+      "all arms use exactly 147456 coordinates per selected layer",
+      "aggregate held-out predicted CE descent is positive and strictly greater than frobenius_output32",
+      "fit and holdout task-descent advantages over frobenius_output32 are positive with holdout/fit retention >=0.10",
+      "aggregate held-out predicted CE descent is at least fit_task_output32",
+      "aggregate held-out activation-output residual energy is no more than 1.10 times frobenius_output32",
+      "aggregate update energy is no more than 1.10 times frobenius_output32",
+      "consensus beats frobenius_output32 on all 4 held-out finite-step CE comparisons and at least 7 of all 8 comparisons",
+      "consensus beats fit_task_output32 on at least 3 of 4 held-out finite-step CE comparisons",
+      "mean consensus finite-step CE is at least 0.0005 lower than frobenius_output32 and no worse than fit_task_output32"
+    ],
+    "pass_action": "preregister exact production consensus selector, add correctness tests, require an I/O-inclusive >=20% MFU preflight, then consider exactly one 124M causal run",
+    "fail_action": "stop iterating output32 task selectors and return to a different structured MLP parameterization; no causal training"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "production_implementation": false,
+    "performance_preflight": false,
+    "language_model_training": false
+  }
+}

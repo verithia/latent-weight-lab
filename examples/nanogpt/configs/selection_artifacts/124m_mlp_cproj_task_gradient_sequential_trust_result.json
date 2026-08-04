@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_task_gradient_sequential_trust_result_v1",
+  "recorded_at": "2026-08-04",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_gradient_sequential_trust_plan.json",
+    "sha256": "edab766c850d26a84ac06646e6e49b09398e81b10dbcc4093b338318b3c88d14"
+  },
+  "acquisition": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "a18305cc5ea15e2994c239649db125e297ca2c43",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_task_gradient_sequential_trust.py",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 9.844860553741455,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "remote_output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/task_gradient_sequential_trust",
+    "result_sha256": "d7c1a3d355154f7194752d7d0b7f679382b6232c582f9ec504ce173fdac00a22",
+    "cells_sha256": "2d179b03a8ce3f48b4bab49ec104a2582e3e71eee3e61ec65c732d9516da66f7",
+    "finite_ce_sha256": "17264a7c29d55309e2c6db84e9c92f29163416fa32fd53f5b7392d2fe7591827",
+    "angles_sha256": "35797588072904768556430815ee6b4c49296f406bd480b12323e7b3ceb1f5c2",
+    "log_sha256": "bf7214faf2f96d9479c9620010f3f54a0cd70f3ec277c8d4c4b96f97300b8bec"
+  },
+  "aggregate": {
+    "task_gradient_predicted_ce_decrease": {
+      "fit": {"sequential_frobenius": 0.005285399217708766, "candidate": 0.01160786294182705},
+      "holdout": {"sequential_frobenius": 0.003562273186753551, "candidate": 0.0040893783957687}
+    },
+    "task_descent_advantage": {"fit": 0.006322463724118285, "holdout": 0.0005271052090151493},
+    "holdout_to_fit_task_advantage_retention": 0.08337022275104601,
+    "holdout_activation_residual_energy_ratio": 0.9982077138415348,
+    "candidate_to_control_update_energy_ratio": 0.9964154459701845,
+    "finite_step": {
+      "candidate_wins": 8,
+      "holdout_wins": 4,
+      "comparisons": 8,
+      "mean_frobenius_simultaneous_ce": 7.1815124452114105,
+      "mean_frobenius_sequential_ce": 7.181513339281082,
+      "mean_candidate_ce": 7.180673971772194,
+      "mean_candidate_advantage_vs_sequential": 0.0008393675088882446
+    },
+    "trust": {
+      "all_angles_obeyed": true,
+      "task_coordinates_clipped": 4,
+      "frobenius_coordinates_clipped": 0,
+      "maximum_radius": 0.0004420270852278918
+    }
+  },
+  "gate": {
+    "all_outputs_and_metrics_finite": true,
+    "coordinate_budget_exact": true,
+    "all_sequential_angles_obey_shared_trust_radius": true,
+    "holdout_task_descent_positive_and_above_control": true,
+    "fit_task_advantage_positive": true,
+    "holdout_to_fit_task_advantage_retention_at_least_0p10": false,
+    "holdout_activation_residual_at_most_1p10_control": true,
+    "candidate_update_energy_at_most_1p10_control": true,
+    "all_4_holdout_finite_ce_wins": true,
+    "finite_step_ce_wins_at_least_7_of_8": true,
+    "mean_ce_at_least_0p0005_better_than_sequential_control": true,
+    "mean_ce_no_worse_than_simultaneous_control": true
+  },
+  "decision": {
+    "classification": "REJECT_TASK_GRADIENT_SEQUENTIAL_TRUST",
+    "production_preregistration_authorized": false,
+    "language_model_training_authorized": false,
+    "diagnosis": "Sequential refitting is numerically stable and preserves all eight finite CE wins, but does not improve cross-window gradient transfer: retention remains 0.08337 versus the preregistered 0.10 threshold.",
+    "next_action": "Use a normalized consensus of the exact recorded training gradient and the independent fit-window validation gradient for pair selection, retain simultaneous Frobenius angles, and test zero-update transfer before training."
+  }
+}
