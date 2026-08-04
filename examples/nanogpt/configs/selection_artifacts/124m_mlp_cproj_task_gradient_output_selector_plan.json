@@ -1,0 +1,117 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_task_gradient_output_selector_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "At identical output32 chart size and stable Frobenius residual-fit angles, does using current fit-window task gradient to select c_proj output pairs improve held-out task descent and finite-step CE without recreating the activation selector's scale failure?",
+  "identity": {
+    "activation_selector_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_result.json",
+    "activation_selector_result_sha256": "1dbbec0196683e0aa2506a8af4701ce44e4c38139b801997eb16934b78f394a5",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementing the analyzer"
+  },
+  "diagnosis": {
+    "activation_selector_holdout_task_descent_ratio_vs_frobenius": 9.077663472529895,
+    "activation_selector_holdout_residual_error_ratio_vs_frobenius": 33.13790525202592,
+    "activation_selector_finite_ce_wins": 4,
+    "activation_selector_finite_ce_comparisons": 8,
+    "interpretation": "Current activation geometry exposes useful task direction, but fitting 32 diagonal angles in that correlated metric amplifies the update. Keep task information in discrete pair selection only and restore bounded Frobenius residual-fit angles."
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/task_gradient_output_selector",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "shared_chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinate_count_per_layer": 147456,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in both arms"
+    },
+    "control": "Use existing Frobenius output32 pair scores and Frobenius residual-fit angles.",
+    "candidate": {
+      "name": "task_gradient_hybrid_output32",
+      "source": "S = W_after_hidden^T",
+      "residual": "R = remaining requested update^T after shared hidden64+24",
+      "fit_task_gradient": "G = current fit-window validation gradient^T; holdout gradient is scoring-only",
+      "per_edge_residual_inner": "r_ij = dot(S_i,R_j)-dot(S_j,R_i)",
+      "per_edge_coordinate_norm": "q_ij = ||S_i||^2+||S_j||^2",
+      "per_edge_angle": "a_ij = r_ij/max(q_ij,1e-30)",
+      "per_edge_residual_score": "u_ij = r_ij^2/max(q_ij,1e-30)",
+      "per_edge_task_inner": "g_ij = dot(S_i,G_j)-dot(S_j,G_i)",
+      "per_edge_task_score": "v_ij = -a_ij*g_ij",
+      "normalization": "divide u and v independently by their RMS over finite strict-upper-triangle edges, each clamped at 1e-30",
+      "combined_score": "score_ij = normalized(u_ij)+normalized(v_ij)",
+      "candidate_graph": "top 64 combined-score neighbors per output vertex, then the existing deterministic compiled edge coloring",
+      "angle_fit": "After selecting 32 matchings, recompute ordinary Frobenius diagonal_metric_angles(S,R,pairs); do not fit angles in activation or task metric.",
+      "application": "Apply selected pairs and Frobenius angles to unprojected S, transpose, then use the same production weight-decay ordering as control."
+    },
+    "measurements": [
+      "fit and holdout task-gradient predicted CE descent",
+      "fit and holdout activation-output residual energy and recovery",
+      "weight-space residual and update energy",
+      "candidate/control angle and coordinate-budget diagnostics",
+      "simultaneous five-layer finite-step CE on fit and holdout batches"
+    ],
+    "prohibited": [
+      "selection on holdout gradient or activations",
+      "task-metric angle fit",
+      "activation-metric angle fit",
+      "learned basis",
+      "inverse JtJ or conjugate-gradient pullback",
+      "dense residual",
+      "extra chart coordinates",
+      "post-hoc score mixing coefficient"
+    ]
+  },
+  "decision_rule": {
+    "task_advantage_formula": "advantage(window)=candidate predicted CE descent-control predicted CE descent; retention=advantage(holdout)/advantage(fit)",
+    "pass_all": [
+      "all outputs and metrics finite",
+      "candidate and control each use exactly 147456 coordinates per selected layer",
+      "aggregate held-out predicted CE descent is at least 1.25 times the Frobenius control and strictly positive",
+      "fit task-descent advantage is positive",
+      "holdout task-descent advantage is positive and at least 0.50 times fit advantage",
+      "aggregate held-out activation-output residual energy is no more than 1.25 times the Frobenius control",
+      "aggregate candidate update energy is no more than 1.25 times the Frobenius control",
+      "candidate finite-step CE beats Frobenius in at least 6 of 8 phase-window comparisons",
+      "mean candidate finite-step CE across all 8 comparisons is no worse than Frobenius"
+    ],
+    "pass_action": "preregister the exact production selector, add correctness tests, require an I/O-inclusive >=20% MFU preflight, then consider exactly one 124M causal run",
+    "fail_action": "reject pair selection alone and test a sequentially refit, trust-region task-aware output chart in zero-update analysis before any language-model training"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "production_implementation": false,
+    "performance_preflight": false,
+    "language_model_training": false
+  }
+}

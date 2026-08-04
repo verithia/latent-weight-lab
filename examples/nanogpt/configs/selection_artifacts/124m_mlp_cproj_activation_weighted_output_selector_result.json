@@ -1,0 +1,92 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_activation_weighted_output_selector_result_v1",
+  "recorded_at": "2026-08-04",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_plan.json",
+    "sha256": "e40b359abbbc912704ddad45a285f4f2a6300b58b3f611031f56b7ac481633fb"
+  },
+  "acquisition": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "1c9fca49d8b76e54e2ff1e8a143e0b481eeb8e06",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_activation_weighted_output_selector.py",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 9.387924194335938,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "remote_output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/activation_weighted_output_selector",
+    "result_sha256": "57708a4568f4b69f5dca383a9c621e6247d93dd7fcad70c67eba779bf4986bff",
+    "cells_sha256": "22b0727e93525083a3317898fa2b3b262c93ebe929b16e8def15fd06063e1a33",
+    "finite_ce_sha256": "c89ea110e66551c1ef8b9cb94f1bcae4f20f8393e58696c4aed1fe01cebdab76",
+    "timing_sha256": "f4dbd3480233413bb2e956b5294e519d80e3d89db4f270ec52e62559cbf7656d",
+    "log_sha256": "b1dfbd751bc6eb434687c12ccbb36dc9befa2d257e838e63f728ce3e6ae5ee5a"
+  },
+  "reporting_correction": {
+    "first_source_commit": "151bbb080d138d57b68a79aa551dd7af069e45eb",
+    "first_result_sha256": "89471da4fd99b251ae48925b5b26b7a4838ceac8d68b63f95c51b878e18e5e32",
+    "issue": "The first aggregate encoded retention as negative infinity whenever fit advantage was non-positive, which incorrectly made the all-finite reporting gate false. Raw cells and finite-step CE were correct.",
+    "correction": "Evaluate the preregistered retention formula for any nonzero fit advantage. The corrected retention is finite at 0.9822174487528121; the separate positive-fit-advantage rule still fails.",
+    "raw_cells_bit_identical_after_correction": true,
+    "finite_ce_bit_identical_after_correction": true,
+    "scientific_decision_changed": false
+  },
+  "aggregate": {
+    "fit_activation_output_residual_energy": {
+      "frobenius": 8.877743191078991,
+      "activation": 299.3552437577762,
+      "candidate_advantage": -32.71974580866343
+    },
+    "holdout_activation_output_residual_energy": {
+      "frobenius": 8.900497689306775,
+      "activation": 294.9438491241235,
+      "candidate_advantage": -32.13790525202592
+    },
+    "holdout_to_fit_advantage_retention": 0.9822174487528121,
+    "holdout_task_gradient_predicted_ce_decrease": {
+      "frobenius": 0.003565022037137948,
+      "activation": 0.032362002848664174
+    },
+    "weight_error_energy": {
+      "frobenius": 0.01688756595386066,
+      "activation": 0.11614955138271084
+    },
+    "finite_step": {
+      "activation_wins": 4,
+      "comparisons": 8,
+      "mean_frobenius_ce": 7.181512489914894,
+      "mean_activation_ce": 7.1798359751701355
+    },
+    "angle_diagnostics": {
+      "frobenius_output32_max_abs": 0.0004420270852278918,
+      "frobenius_output32_mean_abs": 0.00010384290885667724,
+      "activation_output32_max_abs": 0.013332575559616089,
+      "activation_output32_mean_abs": 0.0013677290844498202
+    }
+  },
+  "gate": {
+    "all_outputs_and_metrics_finite": true,
+    "holdout_activation_residual_at_most_0p95_control": false,
+    "fit_advantage_positive": false,
+    "holdout_to_fit_advantage_retention_at_least_0p80": true,
+    "holdout_predicted_ce_descent_not_worse": true,
+    "finite_step_ce_wins_at_least_6_of_8": false,
+    "mean_finite_step_ce_not_worse": true
+  },
+  "decision": {
+    "classification": "REJECT_ACTIVATION_WEIGHTED_OUTPUT_SELECTOR",
+    "production_preregistration_authorized": false,
+    "language_model_training_authorized": false,
+    "diagnosis": "The activation metric exposes useful task direction but its independently fitted diagonal multi-stage angles amplify correlated output coordinates. The candidate has much better first-order task descent yet roughly 33 times the held-out residual-stream error and inconsistent finite-step CE.",
+    "next_action": "Preregister a directly task-gradient-aware pair selector while retaining Frobenius residual-fit angles and the identical output32 coordinate budget."
+  }
+}
