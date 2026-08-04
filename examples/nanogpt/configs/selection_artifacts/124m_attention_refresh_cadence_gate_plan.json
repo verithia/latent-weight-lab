@@ -1,0 +1,122 @@
+{
+  "authorization": {
+    "callbacks": false,
+    "candidate_training": "none until one refresh horizon passes and a compact implementation separately clears exact-config MFU >= 0.20",
+    "dense_replay": "one exact 238-update PRO6 replay after MFU pass",
+    "watchdog": false,
+    "zero_update_oracle": true
+  },
+  "decision_rule": {
+    "choose": "the longest registered horizon passing every threshold",
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "current_dense_enrichment_minimum": 3.0,
+      "current_dense_recovery_minimum": 0.2,
+      "future_chord_over_random_minimum": 2.0,
+      "future_chord_recovery_minimum": 0.05,
+      "maximum_normal_residual": 0.0001,
+      "maximum_projection_error": 0.0001,
+      "per_target_chord_recovery_minimum": 0.025
+    }
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_cadence15_lr24e4.json",
+    "candidate_config_sha256": "4353a95d7d9169393e504116f523af525b67e333b195c5fae02d8aa4c575d4fb",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_replay_lr24e4.json",
+    "source_config_sha256": "f5ffdc737b6358b0f9c5b85d01f2f78b45182b3295eabd8d70ee65bbeb726c6d"
+  },
+  "oracle": {
+    "cg_iterations": 160,
+    "cg_tolerance": 1e-05,
+    "horizons": [
+      15,
+      30,
+      60
+    ],
+    "learned_additive_adapter": false,
+    "learned_dense_basis": false,
+    "matching_seed": 161803,
+    "neighbors": 128,
+    "parameter_updates": 0,
+    "phase_seed_stride": 8192,
+    "phase_starts": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "random_control": "equal-coordinate unique random matchings",
+    "random_seed": 271828,
+    "ridge": 0.0,
+    "selection_policy": "select integer Givens pairs only from the exact current dense-Muon direction; future weights are scoring-only",
+    "stage_count": 64
+  },
+  "performance_gate": {
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_cadence15_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "16",
+      "--include-diagnostic-io"
+    ],
+    "direct_foreground_polling": true,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "reason": "the timed window crosses update 15 and therefore includes the new periodic snapshot cost",
+    "timed_updates": 16,
+    "warmup_updates": 1
+  },
+  "recorded_at": "2026-08-04",
+  "replay": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_muon_0p5tpp_attention_trajectory_cadence15_lr24e4.json",
+      "0",
+      "pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "layers": [
+      0,
+      3,
+      6,
+      9,
+      11
+    ],
+    "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific",
+    "probe_steps": [
+      0,
+      60,
+      120,
+      180
+    ],
+    "snapshot_interval": 15,
+    "targets": [
+      "attn.c_attn",
+      "attn.c_proj"
+    ]
+  },
+  "schema_version": "mai_124m_attention_refresh_cadence_gate_plan_v1",
+  "scientific_question": "At what 15/30/60-update horizon does causally selected sparse attention connectivity cease to retain at least 2x random future-chord recovery?",
+  "status": "registered_before_preflight_and_replay"
+}

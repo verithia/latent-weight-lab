@@ -1,0 +1,49 @@
+{
+  "decision": {
+    "classification": "REJECT_CAUSAL_GIVENS_AT_60_UPDATE_HORIZON",
+    "selected_stages": null
+  },
+  "execution": {
+    "device": "PRO6 GPU0",
+    "elapsed_seconds": 60.565,
+    "mode": "direct foreground zero-update oracle; no watchdog or callbacks",
+    "source_commit": "a371351b2007a829bd57dc9a0e7e52ae946eeca8"
+  },
+  "identity": {
+    "cells_sha256": "8e9e51c41ab5fc093bf63fb973c111e0598936c57aeccc981e0fbe70f17c167e",
+    "connectivity_sha256": "efcd8d254d589c06442a9d283a36efbf2ae248bfb2d5945ef857b9ae99e6978a",
+    "plan_sha256": "55c417d4ad995f8614a955758a8e77ba72cbb710b83c9e9c8686589be3363977",
+    "raw_result_sha256": "ad9b5774d1b2409d3809f768c1d9ebcf99c05189c3557c4ea79cb334d743cd58",
+    "replay_run_identity_sha256": "dcd0517abee1788a554aee27d1cc02ded292ffe3e824deccad0bc77e56aae871",
+    "source_sha256": "fdee2fe63e04703e5b3155f04d24efe3f6292986d581267d048cf8948b76dc40"
+  },
+  "interpretation": [
+    "Causal pair selection resolves current-direction alignment: the 64-stage chart captures 24.3000 percent of the current dense-Muon direction, 3.5453x coordinate share and 3.4824x random.",
+    "The same connectivity captures 9.9622 percent of the subsequent 60-update chord, but only 1.4739x random, below the preregistered 2x persistence floor.",
+    "The mechanism has sufficient instantaneous capacity but becomes stale across 60 updates. It is not promoted to training at that cadence.",
+    "A high-cadence replay at 15/30/60-update horizons is justified to locate the longest viable refresh interval before implementation."
+  ],
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_attention_causal_givens_gate_result_v1",
+  "stage_results": {
+    "32": {
+      "current_dense_energy_recovery": 0.165896792,
+      "current_dense_enrichment": 4.84082592,
+      "current_dense_over_random": 4.739573093,
+      "future_chord_energy_recovery": 0.057879541,
+      "future_chord_over_random": 1.712341418
+    },
+    "64": {
+      "current_dense_energy_recovery": 0.24300047,
+      "current_dense_enrichment": 3.545345758,
+      "current_dense_over_random": 3.482351152,
+      "future_chord_energy_recovery": 0.099622329,
+      "future_chord_over_random": 1.47386555,
+      "future_chord_target_recovery": {
+        "cproj": 0.06417179,
+        "qk": 0.102406606,
+        "v": 0.111529254
+      }
+    }
+  }
+}
