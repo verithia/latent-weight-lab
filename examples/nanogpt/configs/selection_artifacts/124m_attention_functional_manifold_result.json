@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_attention_functional_manifold_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "FUNCTIONAL_QUOTIENT_NOT_SUFFICIENTLY_SIMPLER",
+  "decision": {
+    "passed": false,
+    "direct_operator_chart_authorized": false,
+    "mfu_preflight_authorized": false,
+    "scientific_training_authorized": false,
+    "failed_checks": [
+      "functional_over_factor_path_length_ratio",
+      "functional_minus_factor_pc1_energy",
+      "terminal_delta_rank95_mean"
+    ],
+    "next_gate": "measure the trajectory in the activation-weighted softmax/output metric on fixed terminal dense layer inputs before designing another attention parameterization"
+  },
+  "comparison": {
+    "cells": 120,
+    "functional_over_factor_path_length_ratio": 1.0041347613963572,
+    "functional_minus_factor_pc1_energy": -0.0011410187234351943,
+    "functional_path_length_over_chord": 1.8548886770544224,
+    "factor_path_length_over_chord": 1.8472507360217274,
+    "functional_pc1_energy": 0.8361344345139047,
+    "factor_pc1_energy": 0.8372754532373399,
+    "functional_dimension_95pct": 2.823304141874689,
+    "factor_dimension_95pct": 2.898010973199026,
+    "functional_terminal_ray_recovery": 0.7187103674200843,
+    "factor_terminal_ray_recovery": 0.7177949235717682,
+    "terminal_delta_rank95_mean": 69.58333333333333,
+    "increment_rank95_mean": 69.31666666666666
+  },
+  "by_family": {
+    "score_qk": {
+      "functional_over_factor_path_length_ratio": 0.9822262514245094,
+      "functional_minus_factor_pc1_energy": 0.0039426923659032
+    },
+    "value_output": {
+      "functional_over_factor_path_length_ratio": 1.032848410736284,
+      "functional_minus_factor_pc1_energy": -0.0079486876639717
+    }
+  },
+  "interpretation": "Exact Q/K and V/O gauge quotienting does not reveal a materially simpler trajectory. Functional and raw-factor temporal geometry are nearly identical, and the exact per-head operator displacement remains broad rank. Gauge redundancy is therefore not the source of the remaining attention replacement gap; the next diagnostic must use the data-dependent softmax and residual-stream metric.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "20c766c47def45f886a5927b87dbf2740837c89d",
+    "analysis_entrypoint": "examples/nanogpt/analyze_attention_functional_manifold.py",
+    "analysis_source_sha256": "8cbc606e167f94a3051b8dd8341c1b75fabeaea6fc98296b895b53430f1e9aee",
+    "plan_sha256": "b41749744f7d1a306c76e67f75eedb7cccbb3209d6f9eb230b5e218c0a6b6167",
+    "snapshot_run_identity_sha256": "2ce330849884afc80f6a6e4268052d79cabd3b593ca90aadf516d6dba1179cb1",
+    "raw_result_sha256": "a9e7716b75cef96be737a507b5f8f9c3a1bc7ed74e7712ecd23ff86425a3d15a",
+    "cells_csv_sha256": "4b22d0cf319cb767c9f34be4eaafced59ed8efe604e5f45eb5fcec7324d2cff8",
+    "elapsed_seconds": 7.891287088394165,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true
+  }
+}

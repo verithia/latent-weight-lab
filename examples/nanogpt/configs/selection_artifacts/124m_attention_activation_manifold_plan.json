@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_124m_attention_activation_manifold_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_analysis",
+  "scientific_question": "Does the dense attention trajectory become materially straighter in the activation-weighted causal-softmax and residual-output metric?",
+  "protocol": {
+    "snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/parameter_trajectory",
+    "snapshot_run_identity_sha256": "2ce330849884afc80f6a6e4268052d79cabd3b593ca90aadf516d6dba1179cb1",
+    "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh_cadence/pro6_mai_v3_124m_dense_attention_refresh_cadence15_0p5tpp/scientific/ckpt.pt",
+    "data_dir": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+    "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 3, 6, 9, 11],
+    "steps": [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 238],
+    "batch_size": 2,
+    "block_size": 256,
+    "batches": 2,
+    "sample_seed": 20260804,
+    "input_policy": "freeze terminal dense ln_1 outputs for every snapshot",
+    "representations": [
+      "score_kernel",
+      "value_output_kernel",
+      "row-centered causal score logits",
+      "causal softmax probabilities",
+      "per-head projected residual contribution"
+    ]
+  },
+  "interpretation_rule": {
+    "maximum_path_length_ratio": 0.9,
+    "minimum_pc1_energy_gain": 0.03,
+    "classification_if_both_pass": "ACTIVATION_SOFTMAX_METRIC_MATERIALLY_SIMPLER",
+    "classification_otherwise": "ACTIVATION_SOFTMAX_METRIC_NOT_UNIFORMLY_SIMPLER",
+    "no_posthoc_threshold_changes": true,
+    "automatic_training_authorized": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true,
+    "output": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_activation_manifold/analysis"
+  },
+  "scope_guard": "No learned activation basis, model change, MFU preflight, or training run is authorized by this diagnostic."
+}
