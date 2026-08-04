@@ -198,6 +198,23 @@ def make_preflight_config(
     return config
 
 
+def task_frame_preflight_metadata(
+    source: dict[str, Any],
+    effective_warmup_updates: int,
+) -> dict[str, Any]:
+    """Describe the immutable scientific and transformed scratch boundaries."""
+    task_frame_start_iter = int(
+        source.get("block_fht_mlp_task_frame_start_iter", 0)
+    )
+    return {
+        "scientific_task_frame_start_iter": task_frame_start_iter,
+        "scratch_task_frame_start_iter": (
+            effective_warmup_updates if task_frame_start_iter > 0 else 0
+        ),
+        "timed_task_frame_active": bool(task_frame_start_iter > 0),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", required=True, type=Path)
@@ -285,13 +302,10 @@ def main() -> None:
             "timed_atlas_stage": (
                 len(atlas_start_steps) - 1 if atlas_start_steps else None
             ),
-            "scientific_task_frame_start_iter": task_frame_start_iter,
-            "scratch_task_frame_start_iter": (
-                effective_warmup_updates
-                if task_frame_start_iter > 0
-                else 0
+            **task_frame_preflight_metadata(
+                source,
+                effective_warmup_updates,
             ),
-            "timed_task_frame_active": bool(task_frame_start_iter > 0),
         },
         "passed": False,
     }

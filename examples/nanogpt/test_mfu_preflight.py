@@ -8,6 +8,7 @@ from examples.nanogpt.mfu_preflight import (
     make_preflight_config,
     parse_snapshot_elapsed_seconds,
     parse_training_loss_values,
+    task_frame_preflight_metadata,
 )
 
 
@@ -68,6 +69,25 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertEqual(
             source["block_fht_attn_cayley_atlas_start_steps"],
             [0, 594, 1188, 1782],
+        )
+
+    def test_delayed_task_frame_certificate_reports_active_timed_path(self) -> None:
+        source = {"block_fht_mlp_task_frame_start_iter": 120}
+        self.assertEqual(
+            task_frame_preflight_metadata(source, effective_warmup_updates=1),
+            {
+                "scientific_task_frame_start_iter": 120,
+                "scratch_task_frame_start_iter": 1,
+                "timed_task_frame_active": True,
+            },
+        )
+        self.assertEqual(
+            task_frame_preflight_metadata({}, effective_warmup_updates=1),
+            {
+                "scientific_task_frame_start_iter": 0,
+                "scratch_task_frame_start_iter": 0,
+                "timed_task_frame_active": False,
+            },
         )
 
     def test_snapshot_elapsed_parser(self) -> None:
