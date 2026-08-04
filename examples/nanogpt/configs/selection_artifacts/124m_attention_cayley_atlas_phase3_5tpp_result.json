@@ -1,0 +1,74 @@
+{
+  "schema_version": "mai_124m_attention_cayley_atlas_phase3_5tpp_result_v1",
+  "recorded_at": "2026-08-04",
+  "run": {
+    "name": "pro6_mai_v3_124m_attn_cayley_atlas_phase3_5tpp_20260804a",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "0003f83fcb90d220c3c55abe25ab4f279f9521ee",
+    "entrypoint": "examples.nanogpt.train",
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train --config /home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_cayley_atlas_phase3_5tpp_20260804a_20260804T074400Z_3797892.config.json",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_cayley_atlas_phase3_5tpp_lr24e4.json",
+    "config_sha256": "3ad08275ea0353a38be2285367220bb5c382fc6eb10f11fc992b99ffd81eadee",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "5ab966fd24085711e13a14ee504f7f23f0857873717d2e03e73d854646c3579d",
+    "status_sha256": "3fd827f63af73fbbff4a6e2e214f9f7f23bd5bb762d635d75f7642644de6ec71",
+    "log_sha256": "d0899cf8c14962e08f0989e2fd6edf88cdc177ce2edea57146cd310db8659437",
+    "checkpoint_metadata_sha256": "2e47fd54afb8d198f27a4ad4eedbb7c791b297390fba02c13c2e2a2babda758f",
+    "mfu_certificate_sha256": "1cf63ebd14b10dbc055449d48f8db5b736437d9e38824aab5f8f9ef3727f1e5d",
+    "max_iters": 2373,
+    "scheduled_tokens": 622067712
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.20416742858115297,
+    "iter_ms_final_stage": 2321.24,
+    "tokens_per_second_final_stage": 112932.72,
+    "peak_mib": 35499.45
+  },
+  "fixed_evaluations": [
+    {
+      "step": 594,
+      "train_loss": 4.2177,
+      "validation_loss": 4.2070
+    },
+    {
+      "step": 1188,
+      "train_loss": 3.8526,
+      "validation_loss": 3.8380
+    },
+    {
+      "step": 1782,
+      "train_loss": 3.7082,
+      "validation_loss": 3.6920
+    },
+    {
+      "step": 2373,
+      "train_loss": 3.6476,
+      "validation_loss": 3.6305
+    }
+  ],
+  "comparison": {
+    "dense_terminal_validation_ce": 3.5401,
+    "selected_parent_terminal_validation_ce": 3.6278,
+    "static_qk64_terminal_validation_ce": 3.6170,
+    "qk64_plus_output_gain_terminal_validation_ce": 3.6151,
+    "terminal_delta_to_dense": 0.0904,
+    "terminal_delta_to_selected_parent": 0.0027,
+    "terminal_delta_to_static_qk64": 0.0135,
+    "terminal_delta_to_qk64_plus_output_gain": 0.0154,
+    "terminal_candidate_over_dense_compute": 1.4258442476274487,
+    "median_common_loss_candidate_over_dense_compute": 1.1219976833444527,
+    "common_loss_ratio_range": [
+      1.0641502751710308,
+      1.4258442476274484
+    ],
+    "compute_equivalence_method": "interpolation in (ln compute, validation CE) per notes/active/fixed-model-compute-equivalence-sop-20260804.md"
+  },
+  "decision": {
+    "classification": "REJECT_PHASE_LOCAL_CAYLEY_ATLAS",
+    "reason": "The three-phase atlas is stable but worse than the single static parent and QK64 chart at terminal CE, and its 1.426x terminal dense-compute penalty fails the <=1.10x parity gate.",
+    "next_test": "Do not optimize or enlarge the atlas. Test the separately admitted optimizer-direction repair on a static chart."
+  }
+}

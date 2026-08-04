@@ -1,0 +1,74 @@
+{
+  "schema_version": "mai_124m_attention_cayley_factor_muon_0p5tpp_result_v1",
+  "recorded_at": "2026-08-04",
+  "run": {
+    "name": "pro6_mai_v3_124m_attn_qk32_factor_muon_0p5tpp_20260804a",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "eb4df360d91b109e49ec9c8905553e2873877c3e",
+    "entrypoint": "examples.nanogpt.train",
+    "command": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train --config /mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_attn_qk32_factor_muon_0p5tpp_20260804a_20260804T091340Z_3841745.config.json",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_factor_muon_0p5tpp_lr24e4.json",
+    "config_sha256": "85ffd0e4c80b580dd862a497d9fcd85283c6e71ac2a10ba1ed2393b64d87294e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "9131c6f46b4ba8fc30dc94ec9fcb252eb0002510848efeeb88fb6feb137bf286",
+    "status_sha256": "8db4f3c34a10191b45966607d430357489d98badbfc6164926dfeff6aa09de4c",
+    "log_sha256": "c5cceb6a5ea7b92bf0e750a1f42e052e73d4adb300ea353636346b575142eb24",
+    "checkpoint_sha256": "9e054ca49c0d5628fae5d2538e7be9f71c41451ce2d343b6a6efce7f5ccdecf6",
+    "checkpoint_metadata_sha256": "72018e031bd3d37eadc74a332464a0546fef98a1ec5cd6c26194afeedb4fd994",
+    "mfu_certificate_sha256": "6282da4eae99094fc5e3a1dc5f6c193e4242b2a443389769bbf49e586a041c8c",
+    "max_iters": 238,
+    "scheduled_tokens": 62390272
+  },
+  "admission": {
+    "passed": true,
+    "mfu_fraction": 0.27953590244377025,
+    "iter_ms": 1697.6733333333334,
+    "tokens_per_second": 154413.54,
+    "peak_mib": 35409.9
+  },
+  "fixed_evaluations": [
+    {
+      "step": 60,
+      "train_loss": 6.3488,
+      "validation_loss": 6.3603
+    },
+    {
+      "step": 120,
+      "train_loss": 5.8047,
+      "validation_loss": 5.8100
+    },
+    {
+      "step": 180,
+      "train_loss": 5.5466,
+      "validation_loss": 5.5500
+    },
+    {
+      "step": 238,
+      "train_loss": 5.4361,
+      "validation_loss": 5.4389
+    }
+  ],
+  "matched_adamw_control_validation_ce": [
+    6.2887,
+    5.7764,
+    5.5048,
+    5.4024
+  ],
+  "comparison": {
+    "validation_delta_to_adamw_control": [
+      0.0716,
+      0.0336,
+      0.0452,
+      0.0365
+    ],
+    "terminal_promotion_threshold_validation_ce": 5.3924,
+    "terminal_miss_to_promotion_threshold": 0.0465
+  },
+  "decision": {
+    "classification": "REJECT_CAYLEY_FACTOR_MUON",
+    "reason": "The candidate is finite and performance-qualified but is worse than the optimizer-matched AdamW control at every fixed evaluation. The identity-chart oracle's 2.556x relative direction recovery did not survive training, and its absolute recovery was still only 0.271%.",
+    "next_test": "Stop the factor-Muon branch. Measure terminal right-frame/subspace drift against the exact seeded chart in both checkpoints before deciding whether to freeze the right basis or redesign the fixed orbit."
+  }
+}
