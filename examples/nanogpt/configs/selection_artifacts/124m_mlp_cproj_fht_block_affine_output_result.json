@@ -1,0 +1,81 @@
+{
+  "artifact_kind": "124m_mlp_cproj_fht_block_affine_output_result",
+  "schema_version": "mai_124m_mlp_cproj_fht_block_affine_output_result_v1",
+  "created_at": "2026-08-04",
+  "decision": "REJECT_FHT_BLOCK_AFFINE_OUTPUT",
+  "passed": false,
+  "interpretation": "Allowing general linear motion inside fixed-FHT output blocks establishes that non-orthogonal coordinates matter, but it does not pass the task gate. The activation-fit arm cuts held-out residual-stream error by 16.24% and raises predicted descent by 16.21% versus the equal-coordinate output64 control, yet wins only two of four holdout CE cells and improves mean CE by 0.000167 rather than the required 0.0005. The Frobenius-fit affine arm loses every cell. Heavy energy trust scaling and the split holdout result indicate that unrestricted activation regression inside a fixed block partition still fits batch-specific directions. Do not train either arm.",
+  "identity": {
+    "git_commit": "cc209270625335edc4ec307738d089f467743f20",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_fht_block_affine_output.py",
+    "entrypoint_sha256": "9a7665421125dd60233abea1a320b47553095b4a01391318692a92553291f5e8",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_fht_block_affine_output_plan.json",
+    "plan_sha256": "e88a287883dd6bca3cd4b844f2a9b13c8bab30ef2ae5e5ca145b31854ce61179",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "elapsed_seconds": 12.978461503982544,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0
+  },
+  "equal_coordinate_control": {
+    "name": "frobenius_output64",
+    "coordinates_per_layer": 159744,
+    "heldout_activation_output_residual_energy": 8.647445475426156,
+    "heldout_task_gradient_predicted_ce_decrease": 0.003653082998694852,
+    "mean_finite_step_ce": 7.18149508535862
+  },
+  "frobenius_affine": {
+    "coordinates_per_layer": 159744,
+    "heldout_activation_output_residual_energy": 9.037294903721852,
+    "heldout_residual_ratio_to_control": 1.045082611900075,
+    "heldout_task_gradient_predicted_ce_decrease": 0.0034602083499961035,
+    "heldout_task_ratio_to_control": 0.9472022265117828,
+    "finite_step_wins": 0,
+    "holdout_wins": 0,
+    "mean_finite_step_ce": 7.181531727313995,
+    "minimum_trust_scale": 1.0,
+    "minimum_singular_value_i_plus_b": 0.9987945553593666,
+    "coordinate_energy": {
+      "total": 0.006344033821209919,
+      "skew": 0.001431428807670005,
+      "symmetric_offdiagonal": 0.0025423412193096915,
+      "diagonal": 0.002370263795311646
+    }
+  },
+  "activation_affine": {
+    "coordinates_per_layer": 159744,
+    "heldout_activation_output_residual_energy": 7.243021775428787,
+    "heldout_residual_ratio_to_control": 0.8375909158388584,
+    "heldout_task_gradient_predicted_ce_decrease": 0.004245109272723075,
+    "heldout_task_ratio_to_control": 1.1620620922765068,
+    "finite_step_wins": 6,
+    "holdout_wins": 2,
+    "mean_finite_step_ce": 7.181328132748604,
+    "mean_ce_improvement_vs_control": 0.00016695261001520323,
+    "minimum_trust_scale": 0.1413300509663228,
+    "minimum_singular_value_i_plus_b": 0.9961546648084686,
+    "coordinate_energy": {
+      "total": 0.014148320575191784,
+      "skew": 0.00629536212026363,
+      "symmetric_offdiagonal": 0.0067753879437747,
+      "diagonal": 0.0010775705120204145,
+      "nonorthogonal_fraction": 0.5550782540083722
+    }
+  },
+  "raw_outputs": {
+    "remote_result_sha256": "7eb4b02d860a44bdadeab9b1228fda73482035667037a0b08649e13484f17adc",
+    "cells_sha256": "1a15dc1af4414476cd9662f49006be64baab846b959aa9809e65a77c66a91314",
+    "chart_sha256": "c7eef1ed24ff1b815283a34e7114e8eff92e62822c59bc6f6342ad9ae10d88d7",
+    "finite_ce_sha256": "c4e362364de98628229684a38462346631cff87630fcff36251bbbcc5a8215f8",
+    "final_log_sha256": "7c2b6cbd5e3073319a13a05dcc578138e08b049a6e0fd26f7bbde9f405e6f147"
+  },
+  "next_action": "Reject the fixed block partition. Preregister an equal-budget directed sparse non-orthogonal output map with global source-channel support, activation regression, and cross-batch task-gradient consensus. No causal training is authorized."
+}
