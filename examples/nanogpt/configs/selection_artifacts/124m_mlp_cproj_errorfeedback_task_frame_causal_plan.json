@@ -1,6 +1,13 @@
 {
   "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_causal_plan_v1",
   "registered_at": "2026-08-05",
+  "identity": {
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json",
+    "config_sha256": "8c246202bf07b337f9c30085a03ed10f53c6bd0f661ea85f10b18c188e8f5793",
+    "implementation_commit": "273e46138f134122caed885548e3a462715ad115",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
   "question": "Does the coupled pre/post-GELU frame capacity transfer when trained causally inside the original 124M 0.5-TPP budget together with the accepted c_proj Muon error-feedback mechanism?",
   "scientific_scope": "one smallest-rung same-token-budget causal transfer test; not a learning-rate sweep and not a fitted scaling ladder",
   "parent": {
@@ -90,6 +97,42 @@
   "execution_policy": {
     "host": "PRO6",
     "gpu": 0,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json"
+    ],
     "queue_entry": false,
     "automatic_rerun": false,
     "required_artifacts": [
