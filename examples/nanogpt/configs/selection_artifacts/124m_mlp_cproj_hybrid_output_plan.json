@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_hybrid_output_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_implementation",
+  "scientific_question": "At the same output-coordinate budget, does sequential composition of the best task-aligned orthogonal c_proj chart and the more transferable global directed non-orthogonal chart beat either full-budget component alone?",
+  "identity": {
+    "task_gradient_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_gradient_output_selector_result.json",
+    "task_gradient_result_sha256": "c18b7d4535a34743fe908c77eb815633a399e170f89ee233ae8e7d17be0843e9",
+    "minimax_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_global_directed_minimax_output_result.json",
+    "minimax_result_sha256": "e1ca3a452f4946139ec5b8ff9e9743b841b8f45c1604a910a22e10f69f0f9ba9",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_commit_rule": "record a clean pushed commit containing this immutable plan before implementation"
+  },
+  "analysis": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/hybrid_output",
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048
+    },
+    "shared_hidden_chart": {
+      "parent_stages": 64,
+      "residual_stages": 24,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinates_per_layer": 135168,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in every arm"
+    },
+    "output_budget": {
+      "source_channels": 768,
+      "coordinates_per_layer": 12288,
+      "total_coordinates_per_layer": 147456,
+      "control_output_stages": 32,
+      "full_task_givens_stages": 32,
+      "full_minimax_incoming_per_target": 16,
+      "hybrid_task_givens_stages": 16,
+      "hybrid_minimax_incoming_per_target": 8,
+      "task_givens_coordinates": 6144,
+      "directed_coordinates": 6144
+    },
+    "components": {
+      "task_givens": "Select pairs by the preregistered normalized Frobenius-residual plus fit-validation task-gradient score; fit ordinary Frobenius Givens angles after selection.",
+      "directed_minimax": "Select each target's global incoming sources by normalized activation-residual score plus the elementwise minimum of separately RMS-normalized recorded-training and fit-validation predicted-descent scores; jointly ridge-refit coefficients in activation space.",
+      "sequential_refit": "The first component fits the requested residual. The second component fits the remaining requested residual after applying the first component, using the first component's output as its source.",
+      "combined_trust": "After exact composition, uniformly scale the full output delta toward identity only if needed so its Frobenius energy is at most the recomputed output32 control energy. Require the exact combined 768x768 transformation to have minimum singular value at least 0.95."
+    },
+    "arms": [
+      "frobenius_output32",
+      "task_gradient_output32",
+      "global_directed_minimax16",
+      "task16_then_minimax8",
+      "minimax8_then_task16"
+    ],
+    "selection_order": [
+      "task16_then_minimax8",
+      "minimax8_then_task16"
+    ]
+  },
+  "decision_rule": {
+    "per_candidate_required": [
+      "all outputs, scores, solves, transformations, and metrics are finite",
+      "exactly 147456 total coordinates per selected layer in every arm",
+      "combined output delta obeys the exact output32 energy cap in every cell",
+      "minimum singular value of the exact combined output transformation is at least 0.95 in every cell",
+      "heldout activation-output residual energy is at most 0.95 times output32",
+      "heldout predicted CE descent is positive, at least 1.15 times output32, and at least 0.004353292856055148",
+      "candidate beats output32 finite-step CE in all 4 holdout cells and at least 7 of 8 total cells",
+      "mean finite-step CE is at least 0.0005 below output32 and at most the frozen prior best 7.180657014250755",
+      "candidate mean finite-step CE is lower than both recomputed full-budget task-gradient output32 and global-directed minimax16"
+    ],
+    "selection": "Evaluate both frozen composition orders. Select task16_then_minimax8 if it passes; otherwise select minimax8_then_task16 if it passes; otherwise reject the hybrid output chart.",
+    "on_pass": "preregister a production 124M causal replay, add correctness and exact-resume tests, and require measured MFU at least 20 percent before training",
+    "on_fail": "do not train; close the local output-chart composition branch and reconsider whether the remaining c_proj gap requires a nonlinear activation-conditioned generator rather than a linear output reparameterization"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "language_model_training": false
+  }
+}
