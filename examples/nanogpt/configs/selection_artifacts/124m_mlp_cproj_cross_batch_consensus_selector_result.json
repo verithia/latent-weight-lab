@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_cross_batch_consensus_selector_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_CROSS_BATCH_CONSENSUS_SELECTOR",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_cross_batch_consensus_selector_plan.json",
+    "sha256": "6f8049151d5b9afc9b2b722f5d544e9d3632b78514f6fa38732b9e4d9eaf3e9e"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "ba38ff7e692e277c717c58a5ebb6e528d533a4ad",
+    "source_path": "examples/nanogpt/analyze_mlp_cproj_cross_batch_consensus_selector.py",
+    "source_sha256": "52740c10360b4abc13c0a328ab33c1c9655dd9cfc70b586561f510cb36569ecb",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates": 0,
+    "elapsed_seconds": 9.640597581863403
+  },
+  "identity": {
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "remote_result_sha256": "122ae2f038dd5b5b1866c97d9b3423496c82e97c548b5814fe9eab714a985d2b",
+    "cells_sha256": "c3fe9c5c98dc26f0d41856223ac8df4e0ddc3789e613f57c70823c5cdb203ca6",
+    "finite_ce_sha256": "a141da4c23b6a38b3752d9bff0068642dea5fc14b653a9c500a670370f9d62ba",
+    "gradients_sha256": "f9de10a3d00c2168d0facdf74e39dc25030e9fa1ffee6bf6234975d05f234cb2",
+    "log_sha256": "1df06392940bcf9b496e59acc6d557c5dcf9c06675da1873dc118d53e5c73f71"
+  },
+  "candidate": {
+    "coordinates_per_layer": 147456,
+    "hidden_stages": 88,
+    "output_stages": 32,
+    "consensus_formula": "0.5 * unit(recorded_train_gradient) + 0.5 * unit(fit_validation_gradient)",
+    "mean_recorded_fit_gradient_cosine": 0.34963693656027317,
+    "minimum_recorded_fit_gradient_cosine": 0.05849592760205269
+  },
+  "aggregate": {
+    "frobenius_output32": {
+      "activation_output_residual_energy_fit": 8.877743191078991,
+      "activation_output_residual_energy_holdout": 8.900497689306775,
+      "predicted_ce_decrease_fit": 0.00528873384173681,
+      "predicted_ce_decrease_holdout": 0.003565022037137948,
+      "update_energy": 0.009803250867829752,
+      "mean_finite_step_ce": 7.1815125197172165
+    },
+    "fit_task_output32": {
+      "activation_output_residual_energy_fit": 8.843876090149111,
+      "activation_output_residual_energy_holdout": 8.885866875709874,
+      "predicted_ce_decrease_fit": 0.011734781953343265,
+      "predicted_ce_decrease_holdout": 0.004101882218905208,
+      "update_energy": 0.009767672698068589,
+      "mean_finite_step_ce": 7.180657014250755
+    },
+    "consensus_task_output32": {
+      "activation_output_residual_energy_fit": 8.288121894581192,
+      "activation_output_residual_energy_holdout": 8.316573619847276,
+      "predicted_ce_decrease_fit": 0.010287863061261443,
+      "predicted_ce_decrease_holdout": 0.004353292856055148,
+      "update_energy": 0.009804252152467456,
+      "mean_finite_step_ce": 7.180834695696831
+    },
+    "candidate_to_control_update_energy_ratio": 1.000102138020459,
+    "holdout_activation_residual_energy_ratio": 0.9343942226780153,
+    "fit_task_descent_advantage_over_frobenius": 0.0049991292195246334,
+    "holdout_task_descent_advantage_over_frobenius": 0.0007882708189171999,
+    "holdout_to_fit_task_advantage_retention": 0.1576816249995147,
+    "finite_ce_wins_vs_frobenius": 8,
+    "holdout_ce_wins_vs_frobenius": 4,
+    "holdout_ce_wins_vs_fit_task": 3
+  },
+  "gate": {
+    "passed": false,
+    "all_outputs_and_metrics_finite": true,
+    "coordinate_budget_exact": true,
+    "heldout_descent_above_frobenius": true,
+    "task_advantage_retention_at_least_0p10": true,
+    "heldout_descent_at_least_fit_task": true,
+    "heldout_activation_residual_at_most_1p10_control": true,
+    "update_energy_at_most_1p10_control": true,
+    "all_holdout_ce_wins_vs_frobenius": true,
+    "at_least_7_of_8_ce_wins_vs_frobenius": true,
+    "at_least_3_of_4_holdout_ce_wins_vs_fit_task": true,
+    "mean_ce_at_least_0p0005_better_than_frobenius": true,
+    "mean_ce_no_worse_than_fit_task": false,
+    "mean_ce_excess_over_fit_task": 0.00017768144607543945
+  },
+  "decision": {
+    "production_preregistration_authorized": false,
+    "language_model_training_authorized": false,
+    "output32_selector_line_closed": true,
+    "automatic_rerun_authorized": false,
+    "next_action": "Return to a different structured MLP parameterization and target the cross-scale c_fc/full-MLP transfer failure; do not relax the registered mean-CE gate or run another output32 selector."
+  },
+  "interpretation": [
+    "Cross-batch consensus materially improves held-out functional residual energy and first-order held-out descent over Frobenius selection while preserving the coordinate and update-energy budgets.",
+    "The recorded training and fit-validation gradients are only moderately aligned, with mean cosine 0.34964 and minimum 0.05850, confirming that selector direction is batch-sensitive.",
+    "Consensus wins every finite-step CE cell against Frobenius and three of four held-out cells against fit-only selection, but its mean CE is 0.00017768 worse than fit-only selection and therefore fails the immutable all-gates rule.",
+    "The output32 selector line is exhausted without causal training. The next work must change the structured MLP parameterization rather than add another selector heuristic."
+  ]
+}
