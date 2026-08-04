@@ -1,0 +1,76 @@
+{
+  "artifact_kind": "124m_mlp_cproj_errorfeedback_task_frame_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_mfu_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "CPROJ_ERRORFEEDBACK_TASK_FRAME_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_causal_plan.json",
+    "sha256": "98314d14dcc395a7277777acde8b6e623b24cc95c9b3b6f876b61ab8891d05ed"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json",
+    "sha256": "8c246202bf07b337f9c30085a03ed10f53c6bd0f661ea85f10b18c188e8f5793"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "200e19bf61693f3a8578756e450df5a3f8b7d42e",
+    "implementation_commit": "273e46138f134122caed885548e3a462715ad115",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0
+  },
+  "correctness": {
+    "local_focused_tests": "53 passed, 40 subtests passed",
+    "remote_focused_tests": "53 passed, 40 subtests passed",
+    "three_frame_gradients_finite_and_nonzero": true,
+    "materialized_cproj_projected_gradient_finite_and_nonzero": true,
+    "interrupted_resume_model_bitwise_equal": true,
+    "interrupted_resume_optimizer_bitwise_equal": true,
+    "interrupted_resume_training_rng_bitwise_equal": true,
+    "interrupted_resume_frame_coordinates_bitwise_equal": true
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_0p5tpp/performance_preflight.json",
+    "sha256": "e4441e515288797d49bed206a507f7356171a394cbb9971422edb91f60eb026d",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_0p5tpp/performance_preflight.log",
+    "preflight_log_sha256": "8b49114cf19bbfbf646d780d4e3c382eb3ce70a4b72590a2c13b9bc64bbf75dc"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 417.2703823397916,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 141423.205,
+    "average_iter_ms": 1853.63625,
+    "model_tflops": 105.6226877337139,
+    "mfu_fraction": 0.2531276893927814,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 32002.66,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "timing_breakdown_ms": {
+      "prepare": 75.5875,
+      "forward_backward": 1187.1775,
+      "flush": 287.54,
+      "gradient": 1.85625,
+      "optimizer": 299.635,
+      "data": 0.69375,
+      "other": 1.145
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "config_identity_matched": true,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "one_238_update_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "additional_structure_authorized": false
+  }
+}

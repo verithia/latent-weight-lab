@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_prelaunch_run_metadata_v1",
+  "created_at": "2026-08-05",
+  "status": "ready_for_one_preregistered_scientific_run",
+  "repository": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "branch": "experiment/cfc-midpoint-replay-20260803",
+    "git_commit": "200e19bf61693f3a8578756e450df5a3f8b7d42e",
+    "worktree_clean": true
+  },
+  "entrypoint": "examples.nanogpt.train",
+  "command": [
+    "env",
+    "CUDA_VISIBLE_DEVICES=0",
+    "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+    "PYTHONPATH=.",
+    "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json"
+  ],
+  "config": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json",
+    "sha256": "8c246202bf07b337f9c30085a03ed10f53c6bd0f661ea85f10b18c188e8f5793"
+  },
+  "dataset_manifest": {
+    "path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "launch_attempts": [
+    {
+      "attempt": 0,
+      "outcome": "failed_closed_before_model_construction_or_parameter_update",
+      "reason": "missing EXPERIMENT_PROVENANCE_PATH and EXPERIMENT_PROVENANCE_SHA256",
+      "scientific_updates_persisted": 0
+    }
+  ],
+  "run": {
+    "name": "pro6_mai_v3_124m_cproj_errorfeedback_taskframe_0p5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "git_commit": "200e19bf61693f3a8578756e450df5a3f8b7d42e",
+    "entrypoint": "examples.nanogpt.train",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json"
+    ],
+    "out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_0p5tpp/scientific",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "automatic_rerun": false
+  },
+  "identity": {
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_0p5tpp.json",
+    "config_sha256": "8c246202bf07b337f9c30085a03ed10f53c6bd0f661ea85f10b18c188e8f5793",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_causal_plan.json",
+    "plan_sha256": "98314d14dcc395a7277777acde8b6e623b24cc95c9b3b6f876b61ab8891d05ed",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_0p5tpp_mfu_result.json",
+    "mfu_result_sha256": "f68f040c515f151c5ec19f8d81a87282e54362f9a07467bdc7768c09eb46845c",
+    "implementation_commit": "273e46138f134122caed885548e3a462715ad115",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_certificate_sha256": "e4441e515288797d49bed206a507f7356171a394cbb9971422edb91f60eb026d",
+    "mfu_preflight_log_sha256": "8b49114cf19bbfbf646d780d4e3c382eb3ce70a4b72590a2c13b9bc64bbf75dc"
+  },
+  "protocol": {
+    "max_iters": 238,
+    "tokens_per_iter": 262144,
+    "scheduled_tokens": 62390272,
+    "terminal_fixed_validation_ce_pass_maximum": 5.522365207672119,
+    "terminal_fixed_validation_ce_near_close_maximum": 5.5018,
+    "terminal_fixed_validation_ce_close_maximum": 5.4968,
+    "minimum_mfu_fraction": 0.2,
+    "measured_mfu_fraction": 0.2531276893927814,
+    "terminal_evaluation_required": true,
+    "exact_resume_required": true,
+    "larger_rung_authorized": false
+  }
+}

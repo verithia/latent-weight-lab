@@ -24,6 +24,21 @@ PLAN_PATH = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cproj_errorfeedback_task_frame_causal_plan.json"
 )
+MFU_RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_errorfeedback_task_frame_0p5tpp_mfu_result.json"
+)
+PRELAUNCH_METADATA_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_errorfeedback_task_frame_prelaunch_run_metadata.json"
+)
+RESULT_PATH = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_errorfeedback_task_frame_0p5tpp_result.json"
+)
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -196,6 +211,28 @@ def test_candidate_preserves_parent_and_adds_only_registered_frames() -> None:
     assert config["block_fht_mlp_shared_hidden_gain"] is False
 
 
+def test_mfu_gate_and_prelaunch_metadata_bind_the_run() -> None:
+    result = load(MFU_RESULT_PATH)
+    metadata = load(PRELAUNCH_METADATA_PATH)
+    assert result["passed"] is True
+    assert result["measurement"]["mfu_fraction"] >= 0.2
+    assert result["measurement"]["timed_updates"] == 8
+    assert result["correctness"]["interrupted_resume_optimizer_bitwise_equal"] is True
+    assert sha256(CONFIG_PATH) == result["config"]["sha256"]
+    assert sha256(PLAN_PATH) == result["plan"]["sha256"]
+    assert sha256(MFU_RESULT_PATH) == metadata["identity"]["mfu_result_sha256"]
+    assert metadata["run"]["entrypoint"] == "examples.nanogpt.train"
+    assert metadata["entrypoint"] == "examples.nanogpt.train"
+    assert metadata["repository"]["git_commit"] == result["execution"]["git_commit"]
+    assert metadata["config"]["sha256"] == result["config"]["sha256"]
+    assert metadata["dataset_manifest"]["sha256"] == result["stability"]["dataset_manifest_sha256"]
+    assert metadata["launch_attempts"][0]["scientific_updates_persisted"] == 0
+    assert metadata["run"]["git_commit"] == result["execution"]["git_commit"]
+    assert metadata["run"]["direct_foreground_polling"] is True
+    assert metadata["run"]["watchdog"] is False
+    assert metadata["protocol"]["larger_rung_authorized"] is False
+
+
 def test_three_frame_gradient_routes_and_interrupted_resume_are_exact() -> None:
     torch.manual_seed(20260890)
     template = make_tiny_model()
@@ -260,3 +297,23 @@ def test_three_frame_gradient_routes_and_interrupted_resume_are_exact() -> None:
         strict=True,
     ):
         assert torch.equal(left, right)
+
+
+def test_terminal_result_rejects_directionally_misaligned_transfer() -> None:
+    result = load(RESULT_PATH)
+    assert result["classification"] == "REJECT_CAUSAL_TASK_FRAME_DIRECTION_MISALIGNED"
+    assert sha256(CONFIG_PATH) == result["config"]["sha256"]
+    assert sha256(PLAN_PATH) == result["plan"]["sha256"]
+    assert sha256(MFU_RESULT_PATH) == result["mfu_result"]["sha256"]
+    assert result["identity"]["checkpoint_schema"] == "nanogpt_exact_resume_v2"
+    assert result["identity"]["checkpoint_next_iter"] == 238
+    assert result["loss"]["candidate_minus_parent_ce"] > 0.0
+    assert result["loss"]["candidate_minus_pass_threshold_ce"] > 0.0
+    assert result["decision"]["passed"] is False
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    for field in (
+        "pregelu_global_cosine",
+        "postgelu_hidden_global_cosine",
+        "residual_output_global_cosine",
+    ):
+        assert abs(result["direction_diagnosis"][field]) < 0.05
