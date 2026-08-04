@@ -1,0 +1,110 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_resolution_v1",
+  "recorded_at": "2026-08-05",
+  "status": "implementation_and_config_resolved_pending_remote_tests_and_active_path_mfu",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_plan.json",
+    "sha256": "ee236c512aa8f3b631cc929dc38324c85ce755e66472b869f11739b7c10cf473"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+    "sha256": "3678e957273f491dffa29e6c3cf7cf7d727a782e0a3dec0c809af4dafee73896"
+  },
+  "implementation": {
+    "commit": "69ca219c1fb4425f012be95729ed12a08f936174",
+    "source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "0baa7637ee10fe55496873afd933ca29cfcc5027c23e11996b74e850f2105370",
+      "examples/nanogpt/model.py": "3751c1ec18b75f34940ce7cce48101b9853f6b9ed043c5ee9998d02610894331",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b743b56b343bd692ad125df4d7daeb77274c8516b91868410992987373d6149b",
+      "examples/nanogpt/test_124m_cproj_errorfeedback_taskframe_plan.py": "a0820515e88e6b78bb7366dc7bed2aa2d98264ae015eed74da19ece882ffc484",
+      "examples/nanogpt/train.py": "17802c372da8b5fd24993dae8f7393f7714e20cf42bb79044a2a7544cc3bce56",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    },
+    "scheduler": {
+      "argument": "block_fht_mlp_task_frame_start_iter",
+      "default": 0,
+      "selected_value": 120,
+      "held_parameter_groups": [
+        "pregelu_block_rotation.coordinates",
+        "hidden_block_rotation.coordinates",
+        "output_block_rotation.coordinates"
+      ],
+      "base_gradients_frozen": false,
+      "mechanism": "clear only frame gradients before the boundary; preserve requires_grad and optimizer membership for checkpoint identity"
+    },
+    "preflight_transform": {
+      "scientific_start": 120,
+      "scratch_start": 1,
+      "warmup_updates": 1,
+      "timed_updates": 8,
+      "timed_active_path": true
+    },
+    "local_test_result": "57 passed, 40 subtests passed"
+  },
+  "scientific_invariants": {
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "task_frame_start_iter": 120,
+    "active_frame_updates": 118,
+    "frame_capacity_changed": false,
+    "frame_learning_rates_changed": false,
+    "cfc_or_cproj_base_frozen": false,
+    "teacher_or_endpoint_state_used": false,
+    "decision_threshold_changed": false,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "output_root": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json"
+    ],
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_entry": false
+  },
+  "authorization": {
+    "remote_focused_tests_required": true,
+    "active_path_mfu_minimum": 0.2,
+    "one_scientific_run_authorized_after_both_gates": true,
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false
+  }
+}
