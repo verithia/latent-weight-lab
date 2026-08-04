@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_124m_attention_blockfht_projected_muon_gate_plan_v1",
+  "recorded_at": "2026-08-04",
+  "status": "registered_before_offline_gate",
+  "scientific_question": "Can compact latent momentum decoded through the actual fixed BlockFHT Jacobian preserve dense Muon's matrix direction after polarization and exact tangent pullback?",
+  "candidate": {
+    "formula": "P * polar(P * combined_momentum_update)",
+    "momentum_state": "compact latent coordinates only",
+    "forward_weight": "actual BlockFHT-generated attention matrix",
+    "learned_dense_basis": false,
+    "persistent_dense_weight": false,
+    "persistent_dense_gradient": false,
+    "persistent_dense_momentum": false,
+    "targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ]
+  },
+  "identity": {
+    "analysis_entrypoint": "examples/nanogpt/analyze_attention_blockfht_projected_muon.py",
+    "production_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json",
+    "optimizer_probe_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/scientific/optimizer_probe",
+    "optimizer_probe_steps": [0, 60, 120, 180],
+    "optimizer_probe_layers": [0, 3, 6, 9, 11]
+  },
+  "primary_measurement": {
+    "target": "dense optimizer-probe polar_update",
+    "weight_decay": "excluded because the proposed linear generated chart applies its own decoupled coordinate decay separately",
+    "candidate": "positive-step line recovery of P * polar(P * combined_momentum_update)",
+    "oracle": "positive-step line recovery of P * dense_polar_update",
+    "raw_control": "positive-step line recovery of P * combined_momentum_update",
+    "aggregation": "dense-polar Frobenius-energy weighted across 4 steps x 5 layers x 2 targets"
+  },
+  "decision_rule": {
+    "minimum_aggregate_fraction_of_tangent_oracle": 0.5,
+    "minimum_aggregate_multiplier_over_raw_projected_momentum": 1.25,
+    "minimum_each_target_fraction_of_tangent_oracle": 0.35,
+    "each_target_aggregate_cosine_must_be_positive": true,
+    "pass_action": "authorize optimizer implementation and exact-config MFU preflight only",
+    "fail_action": "reject projected weight-space Muon without training",
+    "automatic_scientific_training_authorized": false,
+    "threshold_changes_after_observation": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_blockfht_projected_muon",
+      "--probe-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/scientific/optimizer_probe",
+      "--production-config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_projected_muon_gate/analysis",
+      "--device",
+      "cuda"
+    ]
+  },
+  "scope_guard": "This gate evaluates actual fixed BlockFHT generation. It does not authorize the prior refresh-15 dense folded-weight optimizer, a learned basis, LoRA, radial/spectral repeats, or a larger rung."
+}
