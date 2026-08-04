@@ -1,0 +1,100 @@
+{
+  "schema_version": "mai_124m_attention_blockfht_projected_muon_gate_result_v1",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_PROJECTED_WEIGHT_SPACE_MUON_BEFORE_TRAINING",
+  "decision": {
+    "passed": false,
+    "implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "scientific_training_authorized": false,
+    "failures": [
+      "aggregate_oracle_fraction",
+      "aggregate_raw_multiplier",
+      "attn.c_attn_oracle_fraction",
+      "attn.c_proj_oracle_fraction"
+    ],
+    "next_gate": "audit and implement a differentiable task-selected sparse orbit composed with the actual BlockFHT-generated attention weight; it may use the transient generated-weight gradient for causal connectivity selection but must not retain a dense weight, dense gradient, dense momentum, learned dense basis, or additive adapter"
+  },
+  "method": {
+    "candidate_formula": "P * polar(P * combined_momentum_update)",
+    "oracle_formula": "P * dense_polar_update",
+    "raw_control_formula": "P * combined_momentum_update",
+    "primary_target": "dense optimizer-probe polar_update; decoupled weight decay excluded",
+    "aggregation": "dense-polar Frobenius-energy weighted across 4 steps x 5 layers x 2 targets"
+  },
+  "thresholds": {
+    "minimum_aggregate_fraction_of_tangent_oracle": 0.5,
+    "minimum_aggregate_multiplier_over_raw_projected_momentum": 1.25,
+    "minimum_each_target_fraction_of_tangent_oracle": 0.35,
+    "each_target_aggregate_cosine_must_be_positive": true
+  },
+  "aggregate": {
+    "cells": 40,
+    "oracle_recovery": 0.01003334244258893,
+    "oracle_cosine": 0.10016416194917928,
+    "proposed_recovery": 0.000871127045064792,
+    "proposed_cosine": 0.028670309504234368,
+    "proposed_over_oracle": 0.08682321470132269,
+    "raw_projected_momentum_recovery": 0.0008228354738904316,
+    "raw_projected_momentum_cosine": 0.027744754286177047,
+    "proposed_over_raw": 1.0586892188131292
+  },
+  "by_target": {
+    "attn.c_attn": {
+      "cells": 20,
+      "oracle_recovery": 0.010053165131411893,
+      "proposed_recovery": 0.0009194332192301865,
+      "proposed_over_oracle": 0.09145708910692675,
+      "proposed_over_raw": 1.1056931745459428,
+      "proposed_cosine": 0.029545447249586455
+    },
+    "attn.c_proj": {
+      "cells": 20,
+      "oracle_recovery": 0.010009531363390287,
+      "proposed_recovery": 0.0008131015093209589,
+      "proposed_over_oracle": 0.08123272506991343,
+      "proposed_over_raw": 1.000895523196616,
+      "proposed_cosine": 0.027619091157903758
+    }
+  },
+  "by_step": {
+    "0": {
+      "oracle_recovery": 0.010017791733367592,
+      "proposed_recovery": 0.00017782464787696734,
+      "proposed_over_oracle": 0.017750882890154637
+    },
+    "60": {
+      "oracle_recovery": 0.010059722247417267,
+      "proposed_recovery": 0.0005263298152640334,
+      "proposed_over_oracle": 0.052320511672095456
+    },
+    "120": {
+      "oracle_recovery": 0.010027332962007446,
+      "proposed_recovery": 0.0008724704382837078,
+      "proposed_over_oracle": 0.08700922185285064
+    },
+    "180": {
+      "oracle_recovery": 0.010027827363383285,
+      "proposed_recovery": 0.0011754046495490403,
+      "proposed_over_oracle": 0.11721428849493785
+    }
+  },
+  "interpretation": "The fixed one-percent tangent itself has the expected one-percent oracle ceiling, but polarizing momentum after projection destroys most of even that available alignment. The nonlinear Muon map and orthogonal projection do not commute. The candidate retains only 8.68% of the tangent oracle and is nearly identical to raw projected momentum, so it cannot repair the optimizer-direction mismatch.",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "e6eecd16a89aaba34523774e6a9b94ee5eec0e84",
+    "analysis_entrypoint": "examples/nanogpt/analyze_attention_blockfht_projected_muon.py",
+    "analysis_source_sha256": "99fda610035161e36dbef8522bb4eb704aa174e5e9c6d36da9bae9e9f4ce09e7",
+    "plan_sha256": "86aed3eefb75f9fec5e431c90b23f0e811f4ae1165a71aad48003afc9a182bbb",
+    "production_config_sha256": "0c1bf038cbcf2f3d81570987912a5d1fe9a338b1b2ce4cb0e5ed2c54926660de",
+    "optimizer_probe_run_identity_sha256": "dcd0517abee1788a554aee27d1cc02ded292ffe3e824deccad0bc77e56aae871",
+    "raw_result_sha256": "a901058adc462d5f278cea7dfa37105af5af1664c33b977ef21f85286075f2e6",
+    "cells_csv_sha256": "32a6ca64122587908b0ec17b5bdbda6a746443db4935e59d0617c77e01e14136",
+    "elapsed_seconds": 1.7097289562225342,
+    "watchdog": false,
+    "callbacks": false,
+    "direct_foreground_polling": true,
+    "command": "CUDA_VISIBLE_DEVICES=0 /home/pro6000-9980x/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.analyze_attention_blockfht_projected_muon --probe-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/scientific/optimizer_probe --production-config /mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_projected_muon_gate/analysis --device cuda"
+  }
+}
