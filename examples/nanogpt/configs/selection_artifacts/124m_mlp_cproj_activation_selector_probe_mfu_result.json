@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_activation_selector_probe_mfu_result_v1",
+  "artifact_kind": "124m_mlp_cproj_activation_selector_probe_mfu_result",
+  "recorded_at": "2026-08-04",
+  "classification": "ACTIVATION_SELECTOR_PHASE_ACQUISITION_MFU_PASS",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_plan.json",
+    "sha256": "e40b359abbbc912704ddad45a285f4f2a6300b58b3f611031f56b7ac481633fb"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp.json",
+    "sha256": "d399f817080de51cd378cf5952935a15f9915b99e2a5128f92e2daed66ef2720"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9315081a59a170ccc9261764f6c8c38be83ce784",
+    "entrypoint": "examples/nanogpt/mfu_preflight.py",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "exit_code": 0
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.36642053354305554,
+    "tokens_per_second": 204522.50982391078,
+    "effective_iter_ms": 1281.7366666666667,
+    "base_iter_ms": 1208.06,
+    "model_tflops": 152.74874579208105,
+    "empirical_bf16_gemm_peak_tflops": 416.86731994819445,
+    "peak_mib": 31586.69,
+    "diagnostic_io_included": true,
+    "snapshot_count": 2,
+    "snapshot_seconds": 0.758,
+    "optimizer_probe_io_included_in_iter_ms": true,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "passed": true
+  },
+  "storage_admission": {
+    "project_cap_gib": 256,
+    "workspace_bytes_after_preflight": 185963071814,
+    "workspace_gib_after_preflight": 173.19346947036684,
+    "project_cap_headroom_gib": 82.80653052963316,
+    "estimated_scientific_diagnostic_payload_bytes": 3619937280,
+    "real_filesystem_available_bytes": 1723562504192,
+    "admitted": true
+  },
+  "artifacts": {
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/performance_preflight.json",
+    "certificate_sha256": "02291cebee26f65b8152bb02822172864c282f158a370b947f32a6de7a17b0e0",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/performance_preflight.log",
+    "log_sha256": "66241680e5d03841f9d6e6f39b41ec47d1e8a5d31f4a5dcd0be09bcd5b89d57a"
+  },
+  "decision": {
+    "phase_acquisition_authorized": true,
+    "selector_analysis_authorized_before_acquisition_acceptance": false,
+    "language_model_training_authorized": false
+  }
+}
