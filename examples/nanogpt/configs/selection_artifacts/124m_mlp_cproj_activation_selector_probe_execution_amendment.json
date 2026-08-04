@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_activation_selector_probe_execution_amendment_v1",
+  "artifact_kind": "execution_only_amendment",
+  "recorded_at": "2026-08-04",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_plan.json",
+    "sha256": "e40b359abbbc912704ddad45a285f4f2a6300b58b3f611031f56b7ac481633fb"
+  },
+  "null_attempt": {
+    "run_id": "pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp_20260804T141342Z_3982211",
+    "git_commit": "09371f93fff09a6389b51ede75c8eae10452c94f",
+    "classification": "EXECUTION_ENVIRONMENT_FAILURE_BEFORE_MODEL_CONSTRUCTION",
+    "cause": "launcher default PYTHON_BIN=python3 resolved to an interpreter without NumPy; the certified preflight used /home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "scientific_attempt": false,
+    "model_constructed": false,
+    "optimizer_updates": 0,
+    "evaluations": 0,
+    "snapshots": 0,
+    "optimizer_probes": 0,
+    "checkpoint_created": false,
+    "config_archive_sha256": "d399f817080de51cd378cf5952935a15f9915b99e2a5128f92e2daed66ef2720",
+    "provenance_sha256": "a2d7a476770eccc15a18e56f95e1da6f78c962c9e2dabc071218266f2b620db6",
+    "status_sha256": "17e6cba7fae7f75cf44d6167ee1492f34649187a3c03d38688f245a93d6d9cc8",
+    "log_sha256": "51067a26af11f42699e12d9314b3e09e6f7b69e2b6a79f21a683428d6716ce49"
+  },
+  "amendment": {
+    "scientific_config_changed": false,
+    "config_sha256": "d399f817080de51cd378cf5952935a15f9915b99e2a5128f92e2daed66ef2720",
+    "mfu_certificate_sha256": "02291cebee26f65b8152bb02822172864c282f158a370b947f32a6de7a17b0e0",
+    "launcher_changed": false,
+    "only_change": "set launcher environment PYTHON_BIN to the exact project interpreter used by the passing MFU certificate",
+    "python_bin": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ]
+  },
+  "authorization": {
+    "one_corrected_foreground_acquisition": true,
+    "automatic_retry_after_any_model_or_update_activity": false,
+    "selector_implementation": false,
+    "language_model_training": false
+  }
+}
