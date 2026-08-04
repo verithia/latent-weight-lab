@@ -1,0 +1,93 @@
+{
+  "classification": "REJECT_DECAY0P5_TEMPORAL_FEEDBACK_NO_MATERIAL_GAIN",
+  "comparison": {
+    "exact_dense_delta": {
+      "60": 0.0718,
+      "120": 0.0738,
+      "180": 0.0873,
+      "238": 0.099
+    },
+    "memoryless_delta": {
+      "60": 0.0,
+      "120": -0.0022,
+      "180": -0.0006,
+      "238": -0.0005
+    },
+    "parent_delta": {
+      "60": 0.0178,
+      "120": 0.0468,
+      "180": 0.1441,
+      "238": 0.1855
+    }
+  },
+  "decision": {
+    "automatic_larger_rung_authorized": false,
+    "next_gate": "audit a self-contained task-selected sparse-orbit update for the generated-attention model; do not repeat radial/spectral or static rank expansion, which prior 5-TPP gates already rejected",
+    "no_posthoc_decay_stage_or_refresh_sweep": true,
+    "passed": false,
+    "promotion_threshold": 5.3924,
+    "terminal_excess_over_threshold": 0.1955
+  },
+  "diagnostics": {
+    "aggregate": {
+      "corrected_target_recovery_mean": 0.21388965110398,
+      "feedback_input_fro_maximum": 0.1540425717830658,
+      "feedback_input_fro_mean": 0.041472658327418484,
+      "feedback_output_fro_maximum": 0.13892751932144165,
+      "feedback_output_fro_mean": 0.03741808711674821,
+      "feedback_output_nominal_steps_maximum": 1.5135740041732788,
+      "feedback_output_nominal_steps_mean": 0.9330610879179504,
+      "requested_update_recovery_mean": -0.0009436712910731634,
+      "rows": 576
+    },
+    "by_target_signature": {
+      "cproj_output64": {
+        "corrected_target_recovery_mean": 0.14291300748785338,
+        "feedback_output_nominal_steps_mean": 0.8970739281115433,
+        "requested_update_recovery_mean": -0.048721102687219776
+      },
+      "qk_bilateral64": {
+        "corrected_target_recovery_mean": 0.23697071770826975,
+        "feedback_output_nominal_steps_mean": 1.096792471439888,
+        "requested_update_recovery_mean": -0.01131864699224631
+      },
+      "v_bilateral64": {
+        "corrected_target_recovery_mean": 0.2617852281158169,
+        "feedback_output_nominal_steps_mean": 0.8053168642024199,
+        "requested_update_recovery_mean": 0.0572087358062466
+      }
+    },
+    "interpretation": "Decay 0.5 bounds the carry, but the sparse orthogonal chart chases old components outside its current sparse tangent. It remains aligned to the corrected carry-inclusive target while becoming neutral or anti-aligned to the current Muon request. The missing orientation-coordinate capacity is not fixed by temporal feedback; prior polar analysis already limits singular-value-changing motion to 0.295% of dense Muon's applied-direction energy."
+  },
+  "execution": {
+    "checkpoint_metadata_sha256": "fea7abc521350cbf97f19621f49a2a359d3122c3ad61438a3d3ee76ad8dbc6f0",
+    "checkpoint_sha256": "6ee218dd7e11ccc172a994138a16c14913b5524a67464c59660f5d006e21a5d5",
+    "config_sha256": "6b50a00bc77201eabb47e534a82317a5e29fdb87f6bd1fffd5346c8e9ba91b5d",
+    "duration_seconds": 491,
+    "exit_code": 0,
+    "git_commit": "1f64ba67a2f9ef59ffa6a68874f76542986fe25f",
+    "host": "PRO6",
+    "log_sha256": "405edc6b6265f5ab54bf5694ef2fcea284622c6c3cdeece0c7acfbd6e9169a8b",
+    "mfu_certificate_sha256": "4edc88dccf3731227cb463772d8c8bcf068a966ecc906639f60a5ee244b61324",
+    "provenance_sha256": "f545daf89cbfdc6eb8b9ce770835adaff78cbc5e8b6e2ae0b88d5bdc075c37ed",
+    "run_id": "pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_errorfeedback_decay0p5_0p5tpp_20260804T224012Z_49479",
+    "status_sha256": "9c3d0890e16f8e12bc91dd742faeab697a15c36de96bf33401d836006b8ba1f9"
+  },
+  "fixed_evaluation": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "train_validation_curve": {
+      "0": [10.9737, 10.9738],
+      "60": [6.2976, 6.3071],
+      "120": [5.818, 5.8227],
+      "180": [5.6455, 5.6489],
+      "238": [5.5843, 5.5879]
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_result_sha256": "b2c39f2d472626fa304ed0e09b60d47d2d07de6aefded67fc5a440909a582fbf",
+    "plan_sha256": "f9d4335426de0e075727576c4a4cc0c6123983df89dbfc376d53e55cc68cb6ec"
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_attention_refresh15_errorfeedback_result_v1"
+}
