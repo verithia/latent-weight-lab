@@ -1,0 +1,27 @@
+{
+  "classification": "FAILED_BEFORE_MODEL_SETUP_PRO6_DATA_PATH_PERMISSION",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
+    "sha256": "311d654aa1ea97cb735523be531ec636f6fe2164a68041f0788642e935dd3970"
+  },
+  "decision": {
+    "candidate_performance_measured": false,
+    "scientific_updates_completed": 0,
+    "scientific_run_authorized": false,
+    "repair": "replace the inherited Y400-only data_dir with the byte-identical PRO6 dataset path, regenerate and commit the config, then rerun the full exact-config MFU gate"
+  },
+  "execution": {
+    "git_commit": "561914cc08a58bf625f1e77a33ec91f041acd365",
+    "host": "PRO6",
+    "preflight_certificate_sha256": "528905ffd96a450df664382e9e046cf59ceb46c8a14202400496771cdcf47876",
+    "preflight_log_sha256": "bdb995d057b57cd229164109ce4a62886f9a8e5fe2a56a4758a6354d39f18f12",
+    "train_exit_code": 1
+  },
+  "failure": {
+    "phase": "run identity construction before model setup",
+    "reason": "PermissionError reading /root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json on PRO6",
+    "runtime_seconds": 0.9835672378540039
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_attention_refresh15_failed_preflight_v1"
+}

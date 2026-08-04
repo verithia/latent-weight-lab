@@ -36,7 +36,7 @@
   },
   "identity": {
     "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
-    "candidate_config_sha256": "311d654aa1ea97cb735523be531ec636f6fe2164a68041f0788642e935dd3970",
+    "candidate_config_sha256": "d1c3bf1c7927083dedd5089f2f97bbddebf024b5ca9cac3cc37490f77b800faa",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
     "refresh_oracle_cells_sha256": "b51635ae932f6a1fe8c3ee3c44f04cc8ca7198003218765e0cb6ea4051601f6b",

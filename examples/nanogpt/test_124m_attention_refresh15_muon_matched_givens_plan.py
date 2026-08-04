@@ -54,6 +54,9 @@ def test_candidate_preserves_parent_schedule_and_registered_geometry() -> None:
     assert config["max_iters"] == config["lr_decay_iters"] == 238
     assert config["warmup_iters"] == 23
     assert config["learning_rate"] == 0.0024
+    assert config["data_dir"] == (
+        "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b"
+    )
     assert config["block_fht_targets"] == [
         "attn.c_attn.qk",
         "attn.c_attn.v",

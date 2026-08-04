@@ -105,6 +105,9 @@ def make_config(source: dict[str, Any]) -> dict[str, Any]:
             "block_fht_input_gain_targets": [],
             "block_fht_cache_weights": False,
             "block_fht_native_extension_required": False,
+            "data_dir": str(
+                WORKSPACE / "data/finewebedu_20b"
+            ),
             "out_dir": str(SCIENTIFIC_OUT),
             "mfu_preflight_certificate": str(CERTIFICATE),
             "execution_host": "PRO6",
@@ -114,7 +117,8 @@ def make_config(source: dict[str, Any]) -> dict[str, Any]:
             "host_transfer_policy": (
                 "preserve the parent's 124M/0.5-TPP data, model, Muon, "
                 "learning-rate, warmup, decay, and fixed-evaluation settings; "
-                "replace only the attention generator/chart and PRO6 paths"
+                "replace only the attention generator/chart and the literal "
+                "PRO6 data/output paths"
             ),
             "hpo_stage": (
                 "attention_causal_refresh15_muon_matched_givens_124m_0p5tpp"
