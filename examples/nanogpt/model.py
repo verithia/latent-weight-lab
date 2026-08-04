@@ -2196,10 +2196,11 @@ class MLP(nn.Module):
                 "mutually exclusive"
             )
         if block_rotation_stages and not isinstance(
-            self.c_proj, (nn.Linear, BlockFHTLinear)
+            self.c_proj,
+            (nn.Linear, BlockFHTLinear, MuonMatchedGivensLinear),
         ):
             raise ValueError(
-                "block-orthogonal output rotation requires a plain "
+                "block-orthogonal output rotation requires a materialized "
                 "mlp.c_proj linear"
             )
         incompatible_cproj_addon = any(
@@ -2221,10 +2222,11 @@ class MLP(nn.Module):
                 "non-negative"
             )
         if hidden_block_rotation_stages and not isinstance(
-            self.c_proj, (nn.Linear, BlockFHTLinear)
+            self.c_proj,
+            (nn.Linear, BlockFHTLinear, MuonMatchedGivensLinear),
         ):
             raise ValueError(
-                "block-orthogonal hidden rotation requires a plain "
+                "block-orthogonal hidden rotation requires a materialized "
                 "mlp.c_proj linear"
             )
         if hidden_block_rotation_stages and incompatible_cproj_addon:
@@ -3143,6 +3145,24 @@ class MLP(nn.Module):
             parameters.append(self.residual_output_log_gain)
         return parameters
 
+    def _cproj_base_weight(self) -> torch.Tensor:
+        """Return the materialized c_proj weight used by an exact chart.
+
+        BlockFHTLinear exposes its per-step materialization through
+        ``_cached_weight``.  MuonMatchedGivensLinear instead owns a persistent
+        folded ``weight`` buffer.  Treating both as materialized bases lets
+        frozen-endpoint diagnostics reuse the exact cached chart VJP without
+        changing the normal BlockFHT training path.
+        """
+        weight = getattr(self.c_proj, "_cached_weight", None)
+        if weight is not None:
+            return weight
+        if not hasattr(self.c_proj, "weight"):
+            raise RuntimeError(
+                "charted c_proj requires a materialized base weight"
+            )
+        return self.c_proj.weight
+
     def prepare_charted_cproj_cache(self) -> None:
         """Materialize the complete generated c_proj chart once per step.
 
@@ -3156,7 +3176,10 @@ class MLP(nn.Module):
             return
         if self._cached_charted_cproj_weight is not None:
             return
-        base_weight = getattr(self.c_proj, "_cached_weight", None)
+        try:
+            base_weight = self._cproj_base_weight()
+        except RuntimeError:
+            base_weight = None
         # Biases also need output-chart VJPs.  Current scientific GPT configs
         # are bias-free; retain the live path for a biased c_proj.
         if base_weight is None or getattr(self.c_proj, "bias", None) is not None:
@@ -3194,11 +3217,7 @@ class MLP(nn.Module):
         self._cached_charted_cproj_weight = None
         if cached.grad is None:
             return
-        base_weight = getattr(self.c_proj, "_cached_weight", None)
-        if base_weight is None:
-            raise RuntimeError(
-                "charted c_proj cache cannot flush without its base cache"
-            )
+        base_weight = self._cproj_base_weight()
         chart_parameters = self._cproj_chart_parameters(
             require_grad_only=True
         )
@@ -3263,9 +3282,7 @@ class MLP(nn.Module):
                 self._cached_charted_cproj_weight,
                 None,
             )
-        weight = getattr(self.c_proj, "_cached_weight", None)
-        if weight is None:
-            weight = self.c_proj.weight
+        weight = self._cproj_base_weight()
         bias = getattr(self.c_proj, "bias", None)
         charted_weight = self._materialize_charted_cproj_weight(weight)
         if bias is not None:
