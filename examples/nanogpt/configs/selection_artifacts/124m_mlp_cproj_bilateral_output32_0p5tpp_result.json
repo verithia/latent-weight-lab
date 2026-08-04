@@ -50,7 +50,7 @@
     "The exact run is stable, complete, source-clean, computationally qualified, and has finite model and optimizer state; the rejection is scientific rather than operational.",
     "Output32 improves mean step-zero requested-update recovery from 0.26939623 to 0.28742441 and reduces terminal compression-residual RMS from 0.00083868 to 0.00055667, but terminal validation CE worsens by 0.00110149 versus right-only.",
     "The teacher-forced endpoint gain therefore does not transfer causally: reducing Frobenius residual energy is not sufficient to preserve task-useful update direction.",
-    "Post-result source audit found that the teacher-forced replay selected connectivity from the full requested update including decoupled weight decay, whereas production selects from the non-decay Muon direction plus feedback divided by learning rate. The prior endpoint oracle was not an exact production-path oracle and must be corrected before another structural decision.",
+    "Post-result source audit found that the teacher-forced replay selected the parent-pass connectivity from the full requested update including decoupled weight decay, whereas production selects that parent connectivity from the non-decay Muon direction plus feedback divided by learning rate. Residual and output selectors in both paths already use the full remaining corrected residual. The prior endpoint oracle was not an exact production-path oracle and must be corrected before another structural decision.",
     "No retry, hyperparameter adjustment, or larger rung is authorized from this result."
   ],
   "loss": {

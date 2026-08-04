@@ -46,7 +46,7 @@
   },
   "inputs": {
     "causal_training_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_output32_0p5tpp_result.json",
-    "causal_training_result_sha256": "5a4ed63d7cc17a23819a4802b3aca4699edf004ac025ffa8466a1016c89abba2",
+    "causal_training_result_sha256": "c2094f6098ca4ea3b2bb9a85f2e9493868cb9e288e9f73ce4fdc58aba339286d",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "dense_endpoint_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
     "dense_endpoint_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
@@ -59,7 +59,8 @@
   },
   "registered_change": {
     "angle_target": "unchanged: full corrected update including candidate-specific decoupled weight decay and full compression-error carry",
-    "connectivity_target": "dense teacher non-decay Muon direction plus compression error divided by learning rate; excludes decoupled weight decay exactly as production does",
+    "parent_connectivity_target": "dense teacher non-decay Muon direction plus compression error divided by learning rate; excludes decoupled weight decay exactly as production does",
+    "residual_and_output_connectivity_target": "unchanged: the full remaining corrected update after the preceding fitted passes",
     "variants": [
       "dense_endpoint",
       "hidden88_full_carry",
