@@ -1938,6 +1938,8 @@ class MLP(nn.Module):
                 ),
                 hybrid_directed_incoming=int(
                     config.block_fht_mlp_cproj_hybrid_directed_incoming
+                    if config.block_fht_mlp_cproj_hybrid_output
+                    else 0
                 ),
                 hybrid_control_output_stages=int(
                     config.block_fht_mlp_cproj_hybrid_control_stages
