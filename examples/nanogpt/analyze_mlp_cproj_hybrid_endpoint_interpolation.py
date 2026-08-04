@@ -38,8 +38,27 @@ from examples.nanogpt.train import (
 
 
 SCHEMA_VERSION = "mai_124m_mlp_cproj_hybrid_endpoint_interpolation_plan_v1"
+IDENTITY_AMENDMENT_SCHEMA_VERSION = (
+    "mai_124m_mlp_cproj_hybrid_endpoint_interpolation_identity_amendment_v1"
+)
+IDENTITY_AMENDMENT_SHA256 = (
+    "232b6b7e4aceeeae3b2be483ffb481def1c5bbf45d52f1f1396334faa8ad4d42"
+)
 CONTEXTS = ("hybrid", "parent")
 INTERIOR_ALPHAS = (0.25, 0.50, 0.75)
+HYBRID_CONFIG_FIELDS = {
+    "block_fht_mlp_cproj_hybrid_output",
+    "block_fht_mlp_cproj_hybrid_task_stages",
+    "block_fht_mlp_cproj_hybrid_directed_incoming",
+    "block_fht_mlp_cproj_hybrid_control_stages",
+    "block_fht_mlp_cproj_hybrid_ridge_ratio",
+    "block_fht_mlp_cproj_hybrid_sample_cap",
+}
+HYBRID_ONLY_BUFFER_SUFFIXES = (
+    "mlp.c_proj.output_last_angles",
+    "mlp.c_proj.output_selected_inverse_permutations",
+    "mlp.c_proj.output_selected_permutations",
+)
 
 
 def file_sha256(path: Path) -> str:
@@ -172,22 +191,76 @@ def install_variant(
         raise ValueError(f"unknown variant kind: {kind}")
 
 
+def validate_model_configs(
+    parent: dict[str, Any], hybrid: dict[str, Any]
+) -> dict[str, list[Any]]:
+    parent_canonical = vars(GPTConfig(**parent))
+    hybrid_canonical = vars(GPTConfig(**hybrid))
+
+    def normalized(value: Any) -> Any:
+        if isinstance(value, (tuple, list)):
+            return [normalized(item) for item in value]
+        return value
+
+    differences = {
+        name: [parent_canonical[name], hybrid_canonical[name]]
+        for name in sorted(parent_canonical)
+        if normalized(parent_canonical[name]) != normalized(hybrid_canonical[name])
+    }
+    unsafe = sorted(set(differences) - HYBRID_CONFIG_FIELDS)
+    if unsafe:
+        raise ValueError(f"forward-relevant model configuration differs: {unsafe}")
+    if differences.get("block_fht_mlp_cproj_hybrid_output") != [False, True]:
+        raise ValueError(
+            "expected parent/hybrid c_proj hybrid-output flags to be false/true"
+        )
+    return differences
+
+
+def expected_hybrid_only_buffers(layers: list[int]) -> set[str]:
+    return {
+        f"transformer.h.{layer}.{suffix}"
+        for layer in layers
+        for suffix in HYBRID_ONLY_BUFFER_SUFFIXES
+    }
+
+
 def validate_state_topology(
     parent: dict[str, torch.Tensor], hybrid: dict[str, torch.Tensor]
-) -> None:
-    if parent.keys() != hybrid.keys():
-        missing_parent = sorted(hybrid.keys() - parent.keys())
-        missing_hybrid = sorted(parent.keys() - hybrid.keys())
+) -> set[str]:
+    layers = list(range(12))
+    only_parent = set(parent) - set(hybrid)
+    only_hybrid = set(hybrid) - set(parent)
+    expected_only_hybrid = expected_hybrid_only_buffers(layers)
+    if only_parent or only_hybrid != expected_only_hybrid:
         raise ValueError(
-            f"model state topology differs: parent_missing={missing_parent[:3]} "
-            f"hybrid_missing={missing_hybrid[:3]}"
+            f"model state topology differs: only_parent={sorted(only_parent)[:3]} "
+            f"only_hybrid_unexpected={sorted(only_hybrid - expected_only_hybrid)[:3]} "
+            f"hybrid_buffers_missing={sorted(expected_only_hybrid - only_hybrid)[:3]}"
         )
-    for name in parent:
+    for name in set(parent) & set(hybrid):
         if parent[name].shape != hybrid[name].shape:
             raise ValueError(
                 f"model tensor shape differs for {name}: "
                 f"{tuple(parent[name].shape)} != {tuple(hybrid[name].shape)}"
             )
+    return expected_only_hybrid
+
+
+def load_endpoint_context(
+    model: GPT,
+    state: dict[str, torch.Tensor],
+    *,
+    allowed_missing: set[str],
+) -> None:
+    incompatible = model.load_state_dict(state, strict=False)
+    missing = set(incompatible.missing_keys)
+    unexpected = set(incompatible.unexpected_keys)
+    if unexpected or not missing.issubset(allowed_missing):
+        raise ValueError(
+            f"unsafe endpoint load: missing={sorted(missing)} "
+            f"unexpected={sorted(unexpected)}"
+        )
 
 
 def resolve_metadata_sidecar(checkpoint: Path, expected_sha256: str) -> Path:
@@ -213,6 +286,7 @@ def verify_identity(
     *,
     plan: dict[str, Any],
     plan_path: Path,
+    identity_amendment_path: Path,
     parent_checkpoint: Path,
     hybrid_checkpoint: Path,
     data_dir: Path,
@@ -222,10 +296,20 @@ def verify_identity(
     inputs = plan["inputs"]
     observed = {
         "plan_sha256": file_sha256(plan_path),
+        "identity_amendment_sha256": file_sha256(identity_amendment_path),
         "parent_checkpoint_sha256": file_sha256(parent_checkpoint),
         "hybrid_checkpoint_sha256": file_sha256(hybrid_checkpoint),
         "dataset_manifest_sha256": file_sha256(data_dir / "manifest.json"),
     }
+    amendment = json.loads(identity_amendment_path.read_text(encoding="utf-8"))
+    if amendment.get("schema_version") != IDENTITY_AMENDMENT_SCHEMA_VERSION:
+        raise ValueError("unexpected identity amendment schema")
+    if observed["identity_amendment_sha256"] != IDENTITY_AMENDMENT_SHA256:
+        raise ValueError("identity amendment hash mismatch")
+    if amendment["original_plan"]["sha256"] != observed["plan_sha256"]:
+        raise ValueError("identity amendment does not bind the supplied plan")
+    if amendment.get("loss_observed_before_amendment") is not False:
+        raise ValueError("identity amendment was not registered pre-loss")
     expected = {
         "parent_checkpoint_sha256": inputs["parent_checkpoint_sha256"],
         "hybrid_checkpoint_sha256": inputs["hybrid_checkpoint_sha256"],
@@ -527,6 +611,7 @@ def main() -> None:
     parser.add_argument("--hybrid-checkpoint", required=True, type=Path)
     parser.add_argument("--data-dir", required=True, type=Path)
     parser.add_argument("--plan", required=True, type=Path)
+    parser.add_argument("--identity-amendment", required=True, type=Path)
     parser.add_argument("--output-dir", required=True, type=Path)
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
@@ -536,6 +621,7 @@ def main() -> None:
     identity = verify_identity(
         plan=plan,
         plan_path=args.plan,
+        identity_amendment_path=args.identity_amendment,
         parent_checkpoint=args.parent_checkpoint,
         hybrid_checkpoint=args.hybrid_checkpoint,
         data_dir=args.data_dir,
@@ -548,11 +634,14 @@ def main() -> None:
     hybrid_checkpoint = torch.load(
         args.hybrid_checkpoint, map_location="cpu", weights_only=False
     )
-    if parent_checkpoint["model_config"] != hybrid_checkpoint["model_config"]:
-        raise ValueError("endpoint model configurations differ")
+    model_config_differences = validate_model_configs(
+        parent_checkpoint["model_config"], hybrid_checkpoint["model_config"]
+    )
     parent_state = parent_checkpoint["model"]
     hybrid_state = hybrid_checkpoint["model"]
-    validate_state_topology(parent_state, hybrid_state)
+    allowed_missing = validate_state_topology(parent_state, hybrid_state)
+    identity["canonical_model_config_differences"] = model_config_differences
+    identity["hybrid_only_forward_inert_buffers"] = sorted(allowed_missing)
     layers = [int(layer) for layer in plan["interpolation"]["layers"]]
 
     print(json.dumps({"phase": "parameter_geometry"}), flush=True)
@@ -575,8 +664,8 @@ def main() -> None:
         fixed_indices[seed] = indices
         fixed_digests[str(seed)] = fixed_eval_indices_digest(indices)
 
-    model = GPT(GPTConfig(**parent_checkpoint["model_config"]))
-    model.load_state_dict(hybrid_state, strict=True)
+    model = GPT(GPTConfig(**hybrid_checkpoint["model_config"]))
+    load_endpoint_context(model, hybrid_state, allowed_missing=allowed_missing)
     model.to(args.device)
     model.eval()
     source = TokenBatchSource(args.data_dir)
@@ -585,7 +674,7 @@ def main() -> None:
     for context_name in CONTEXTS:
         base_state = hybrid_state if context_name == "hybrid" else parent_state
         other_state = parent_state if context_name == "hybrid" else hybrid_state
-        model.load_state_dict(base_state, strict=True)
+        load_endpoint_context(model, base_state, allowed_missing=allowed_missing)
         context_specs = [spec for spec in specs if spec["context"] == context_name]
         for spec in context_specs:
             install_variant(
@@ -652,6 +741,10 @@ def main() -> None:
             "path": str(args.plan),
             "sha256": identity["plan_sha256"],
         },
+        "identity_amendment": {
+            "path": str(args.identity_amendment),
+            "sha256": identity["identity_amendment_sha256"],
+        },
         "identity": identity,
         "fixed_eval_indices_sha256_by_seed": fixed_digests,
         "parameter_geometry_mean_across_layers": mean_geometry(geometry_rows),
@@ -684,6 +777,7 @@ def main() -> None:
         "cproj_endpoint_geometry_csv_sha256": file_sha256(geometry_path),
         "source_sha256": file_sha256(Path(__file__)),
         "plan_sha256": identity["plan_sha256"],
+        "identity_amendment_sha256": identity["identity_amendment_sha256"],
         "dataset_manifest_sha256": identity["dataset_manifest_sha256"],
         "git_commit": git_commit(),
         "entrypoint": "examples/nanogpt/analyze_mlp_cproj_hybrid_endpoint_interpolation.py",

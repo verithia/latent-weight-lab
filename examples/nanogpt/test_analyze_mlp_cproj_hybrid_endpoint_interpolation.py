@@ -11,8 +11,11 @@ from examples.nanogpt.analyze_mlp_cproj_hybrid_endpoint_interpolation import (
     family_tensor_names,
     install_variant,
     interpolation_variant,
+    validate_model_configs,
     validate_state_topology,
 )
+from examples.nanogpt.model import GPTConfig
+from examples.nanogpt.muon_matched_givens import MuonMatchedGivensLinear
 
 
 def plan() -> dict:
@@ -200,11 +203,63 @@ def test_wider_ln2_variant_transplants_all_registered_families() -> None:
 
 def test_state_topology_fails_closed() -> None:
     parent = {"x": torch.zeros(2, 2)}
-    validate_state_topology(parent, copy.deepcopy(parent))
+    hybrid = copy.deepcopy(parent)
+    for layer in range(12):
+        prefix = f"transformer.h.{layer}.mlp.c_proj."
+        hybrid[prefix + "output_last_angles"] = torch.zeros(1)
+        hybrid[prefix + "output_selected_permutations"] = torch.zeros(1)
+        hybrid[prefix + "output_selected_inverse_permutations"] = torch.zeros(1)
+    assert len(validate_state_topology(parent, hybrid)) == 36
     with pytest.raises(ValueError, match="topology differs"):
         validate_state_topology(parent, {"y": torch.zeros(2, 2)})
     with pytest.raises(ValueError, match="shape differs"):
-        validate_state_topology(parent, {"x": torch.zeros(3, 2)})
+        malformed = copy.deepcopy(hybrid)
+        malformed["x"] = torch.zeros(3, 2)
+        validate_state_topology(parent, malformed)
+
+
+def test_only_hybrid_optimizer_config_difference_is_allowed() -> None:
+    parent = vars(GPTConfig()).copy()
+    hybrid = parent.copy()
+    hybrid["block_fht_mlp_cproj_hybrid_output"] = True
+    differences = validate_model_configs(parent, hybrid)
+    assert differences == {"block_fht_mlp_cproj_hybrid_output": [False, True]}
+    malformed = hybrid.copy()
+    malformed["n_embd"] = parent["n_embd"] * 2
+    with pytest.raises(ValueError, match="forward-relevant"):
+        validate_model_configs(parent, malformed)
+
+
+def test_selector_history_does_not_change_eval_forward() -> None:
+    common = {
+        "in_features": 6,
+        "out_features": 4,
+        "bias": False,
+        "stages": 2,
+        "residual_stages": 0,
+        "neighbors": 2,
+        "refresh_interval": 1,
+        "fast_fresh_matching": True,
+        "matching_seed": 17,
+        "weight_std": 0.02,
+    }
+    parent = MuonMatchedGivensLinear(**common, output_stages=0)
+    hybrid = MuonMatchedGivensLinear(
+        **common,
+        output_stages=2,
+        hybrid_output=True,
+        hybrid_directed_incoming=1,
+        hybrid_control_output_stages=2,
+    )
+    hybrid.weight.copy_(parent.weight)
+    hybrid.output_last_angles.fill_(0.7)
+    hybrid.output_selected_permutations.copy_(
+        torch.flip(hybrid.output_selected_permutations, dims=(1,))
+    )
+    parent.eval()
+    hybrid.eval()
+    values = torch.randn(3, 6)
+    assert torch.equal(parent(values), hybrid(values))
 
 
 @pytest.mark.parametrize("alpha", INTERIOR_ALPHAS)
