@@ -153,6 +153,13 @@ class GPTConfig:
     block_fht_cproj_product_fht_pullback_probe: bool = False
     block_fht_cproj_product_fht_muon_momentum: float = 0.95
     block_fht_cproj_product_fht_muon_ns_steps: int = 5
+    block_fht_attn_muon_matched_givens_targets: tuple[str, ...] = ()
+    block_fht_attn_muon_matched_givens_stages: int = 64
+    block_fht_attn_muon_matched_givens_neighbors: int = 128
+    block_fht_attn_muon_matched_givens_refresh_interval: int = 15
+    block_fht_attn_muon_matched_givens_fast_matching: bool = True
+    block_fht_attn_muon_matched_givens_seed: int = 161803
+    block_fht_attn_muon_matched_givens_seed_step_stride: int = 8192
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
     block_fht_mlp_cproj_muon_matched_givens_residual_stages: int = 0
@@ -1043,13 +1050,106 @@ class CausalSelfAttention(nn.Module):
             raise ValueError("attn.c_attn.q can only be used with split-QKV")
         if structured and "attn.c_attn.k" in config.block_fht_targets and not self.split_c_attn:
             raise ValueError("attn.c_attn.k can only be used with split-QKV")
+        attention_muon_targets = set(
+            config.block_fht_attn_muon_matched_givens_targets
+        )
+        supported_attention_muon_targets = {
+            "attn.c_attn.qk",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        }
+        unknown_attention_muon_targets = (
+            attention_muon_targets - supported_attention_muon_targets
+        )
+        if unknown_attention_muon_targets:
+            raise ValueError(
+                "unsupported attention Muon-matched Givens targets: "
+                + ", ".join(sorted(unknown_attention_muon_targets))
+            )
+        if not attention_muon_targets.issubset(
+            set(config.block_fht_targets)
+        ):
+            raise ValueError(
+                "attention Muon-matched Givens targets must also be "
+                "BlockFHT targets"
+            )
+        if (
+            attention_muon_targets
+            and not config.block_fht_attn_muon_matched_givens_fast_matching
+        ):
+            raise ValueError(
+                "bilateral attention Muon-matched Givens requires the "
+                "native fast matcher"
+            )
+
+        def attention_linear(
+            in_features: int,
+            out_features: int,
+            bias: bool,
+            target_name: str,
+            seed_offset: int,
+        ) -> nn.Module:
+            if target_name not in attention_muon_targets:
+                return make_linear(
+                    in_features,
+                    out_features,
+                    bias,
+                    config,
+                    target_name,
+                    seed_offset,
+                )
+            stages = int(
+                config.block_fht_attn_muon_matched_givens_stages
+            )
+            target_seed_offset = {
+                "attn.c_attn.qk": 0,
+                "attn.c_attn.v": 256,
+                # The c-proj oracle has output as side index zero.  The
+                # module adds the shared output-side offset below.
+                "attn.c_proj": 384,
+            }[target_name]
+            return MuonMatchedGivensLinear(
+                in_features,
+                out_features,
+                bias=bias,
+                stages=(0 if target_name == "attn.c_proj" else stages),
+                residual_stages=0,
+                output_stages=stages,
+                neighbors=int(
+                    config.block_fht_attn_muon_matched_givens_neighbors
+                ),
+                refresh_interval=int(
+                    config
+                    .block_fht_attn_muon_matched_givens_refresh_interval
+                ),
+                fast_fresh_matching=bool(
+                    config
+                    .block_fht_attn_muon_matched_givens_fast_matching
+                ),
+                matching_seed=(
+                    int(config.block_fht_attn_muon_matched_givens_seed)
+                    + layer_id * 4096
+                    + target_seed_offset
+                ),
+                matching_seed_step_stride=int(
+                    config
+                    .block_fht_attn_muon_matched_givens_seed_step_stride
+                ),
+                output_matching_seed_offset=128,
+                weight_std=(
+                    0.02 / math.sqrt(2 * config.n_layer)
+                    if target_name == "attn.c_proj"
+                    else 0.02
+                ),
+                layer_id=layer_id,
+            )
         if self.split_c_attn:
             if "attn.c_attn" in config.block_fht_targets:
                 raise ValueError("Use either monolithic attn.c_attn or split attn.c_attn.{q,k,v}, not both")
             self.c_attn = None
             self.c_attn_q = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.q", layer_id * 8)
             self.c_attn_k = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.k", layer_id * 8 + 1)
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             self.c_attn_qk = None
             self.c_attn_k_headwise = None
             self.c_attn_qk_headwise = None
@@ -1066,10 +1166,10 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             if "attn.c_attn.v" not in config.block_fht_targets:
                 self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
-            self.c_attn_qk = make_linear(config.n_embd, 2 * config.n_embd, config.bias, config, "attn.c_attn.qk", layer_id * 8)
+            self.c_attn_qk = attention_linear(config.n_embd, 2 * config.n_embd, config.bias, "attn.c_attn.qk", layer_id * 8)
             self.c_attn_k_headwise = None
             self.c_attn_qk_headwise = None
             self.c_attn_qk_tied = None
@@ -1258,7 +1358,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn_k_sameseed_headwise = None
             self.qk_mix_alpha = 0.0
             self.qk_tied_sign = None
-        self.c_proj = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_proj", layer_id * 4 + 1)
+        self.c_proj = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_proj", layer_id * 4 + 1)
         cayley_targets = set(config.block_fht_attn_cayley_targets)
         cayley_output_targets = set(
             config.block_fht_attn_cayley_output_targets

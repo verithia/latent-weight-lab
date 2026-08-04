@@ -1,0 +1,104 @@
+{
+  "candidate": {
+    "input_stages": {
+      "attn.c_attn.qk": 64,
+      "attn.c_attn.v": 64,
+      "attn.c_proj": 0
+    },
+    "learned_additive_adapter": false,
+    "learned_dense_basis": false,
+    "matching_seed": 161803,
+    "materialized_attention_weight_elements": 28311552,
+    "neighbors": 128,
+    "output_stages": {
+      "attn.c_attn.qk": 64,
+      "attn.c_attn.v": 64,
+      "attn.c_proj": 64
+    },
+    "persistent_dense_weight_and_muon_state": true,
+    "refresh_interval": 15,
+    "seed_step_stride": 8192,
+    "sparse_coordinate_fraction": 0.0625,
+    "sparse_update_coordinates": 1769472,
+    "targets": [
+      "attn.c_attn.qk",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ]
+  },
+  "decision_rule": {
+    "automatic_larger_rung_authorized": false,
+    "historical_dense_terminal_validation_ce": 5.489,
+    "mfu_must_pass_before_training": true,
+    "no_posthoc_stage_or_refresh_sweep": true,
+    "parent_terminal_validation_ce": 5.4024,
+    "terminal_validation_ce_maximum": 5.3924
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
+    "candidate_config_sha256": "311d654aa1ea97cb735523be531ec636f6fe2164a68041f0788642e935dd3970",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "refresh_oracle_cells_sha256": "b51635ae932f6a1fe8c3ee3c44f04cc8ca7198003218765e0cb6ea4051601f6b",
+    "refresh_oracle_connectivity_sha256": "7b84f242932c19bfedbec404eae06f21453939b51230e34f2f1bc0b9aa145ffc",
+    "refresh_oracle_raw_result_sha256": "a7cff8d14b8445c7b8c34a4e6c4f0e059441bdf7d2987bbe36618b66624d2d0e",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_0p5tpp_lr24e4.json",
+    "source_config_sha256": "0c1bf038cbcf2f3d81570987912a5d1fe9a338b1b2ce4cb0e5ed2c54926660de",
+    "source_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_targeted_bilateral_full_cayley_lr_0p5tpp_result.json",
+    "source_result_sha256": "e7c3705ae5ea05042ad216f9bc559ca098c576406a4269197adbad2091375bce"
+  },
+  "performance_gate": {
+    "callbacks": false,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh15_candidate/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh15_candidate/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "16"
+    ],
+    "direct_foreground_polling": true,
+    "minimum_mfu_fraction": 0.2,
+    "reason": "the timed window includes the expensive connectivity refresh at optimizer update 15",
+    "timed_updates": 16,
+    "warmup_updates": 1,
+    "watchdog": false
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_attention_refresh15_muon_matched_givens_plan_v1",
+  "scientific_question": "Does causally refreshing task-selected sparse attention connectivity every 15 updates turn the oracle's local direction recovery into a terminal CE improvement over the QK32 parent?",
+  "scientific_run": {
+    "authorized_count": 1,
+    "callbacks": false,
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "MFU_PREFLIGHT_CERTIFICATE_OVERRIDE=/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_refresh15_candidate/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp/performance_preflight.json",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
+      "0",
+      "pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "max_iters": 238,
+    "watchdog": false
+  },
+  "status": "registered_before_preflight_and_training"
+}

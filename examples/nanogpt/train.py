@@ -1141,6 +1141,41 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=1.0,
     )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-targets",
+        nargs="+",
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-stages",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-neighbors",
+        type=int,
+        default=128,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-refresh-interval",
+        type=int,
+        default=15,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-fast-matching",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-seed",
+        type=int,
+        default=161803,
+    )
+    parser.add_argument(
+        "--block-fht-attn-muon-matched-givens-seed-step-stride",
+        type=int,
+        default=8192,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -1697,6 +1732,54 @@ def parse_args() -> argparse.Namespace:
             < 1.0
         ):
             raise ValueError("invalid hybrid c_proj output configuration")
+    attention_muon_targets = set(
+        namespace.block_fht_attn_muon_matched_givens_targets
+    )
+    if attention_muon_targets:
+        supported_attention_muon_targets = {
+            "attn.c_attn.qk",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        }
+        if namespace.method != "block_fht":
+            raise ValueError(
+                "attention Muon-matched Givens requires method=block_fht"
+            )
+        if namespace.optimizer != "muon":
+            raise ValueError(
+                "attention Muon-matched Givens requires optimizer=muon"
+            )
+        if not attention_muon_targets.issubset(
+            supported_attention_muon_targets
+        ):
+            raise ValueError(
+                "unsupported attention Muon-matched Givens target"
+            )
+        if not attention_muon_targets.issubset(
+            set(namespace.block_fht_targets)
+        ):
+            raise ValueError(
+                "attention Muon-matched Givens targets must also be "
+                "BlockFHT targets"
+            )
+        if (
+            namespace.block_fht_attn_muon_matched_givens_stages <= 0
+            or namespace.block_fht_attn_muon_matched_givens_neighbors
+            < namespace.block_fht_attn_muon_matched_givens_stages
+            or namespace.block_fht_attn_muon_matched_givens_neighbors
+            >= namespace.n_embd
+            or namespace
+            .block_fht_attn_muon_matched_givens_refresh_interval
+            <= 0
+            or namespace
+            .block_fht_attn_muon_matched_givens_seed_step_stride
+            <= 0
+            or not namespace
+            .block_fht_attn_muon_matched_givens_fast_matching
+        ):
+            raise ValueError(
+                "invalid attention Muon-matched Givens geometry"
+            )
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -1770,17 +1853,6 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "Muon-matched Givens c_proj refresh interval must be "
                 "positive"
-            )
-        if (
-            namespace
-            .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
-            and namespace
-            .block_fht_mlp_cproj_muon_matched_givens_refresh_interval
-            != 1
-        ):
-            raise ValueError(
-                "fast fresh Muon-matched Givens c_proj requires "
-                "refresh interval 1"
             )
         if (
             not math.isfinite(
@@ -2176,6 +2248,27 @@ def main() -> None:
         ),
         block_fht_attn_cayley_factor_optimizer=(
             args.block_fht_attn_cayley_factor_optimizer
+        ),
+        block_fht_attn_muon_matched_givens_targets=tuple(
+            args.block_fht_attn_muon_matched_givens_targets
+        ),
+        block_fht_attn_muon_matched_givens_stages=(
+            args.block_fht_attn_muon_matched_givens_stages
+        ),
+        block_fht_attn_muon_matched_givens_neighbors=(
+            args.block_fht_attn_muon_matched_givens_neighbors
+        ),
+        block_fht_attn_muon_matched_givens_refresh_interval=(
+            args.block_fht_attn_muon_matched_givens_refresh_interval
+        ),
+        block_fht_attn_muon_matched_givens_fast_matching=(
+            args.block_fht_attn_muon_matched_givens_fast_matching
+        ),
+        block_fht_attn_muon_matched_givens_seed=(
+            args.block_fht_attn_muon_matched_givens_seed
+        ),
+        block_fht_attn_muon_matched_givens_seed_step_stride=(
+            args.block_fht_attn_muon_matched_givens_seed_step_stride
         ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,

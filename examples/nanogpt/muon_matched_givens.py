@@ -1164,6 +1164,8 @@ class MuonMatchedGivensLinear(nn.Module):
         fast_fresh_matching: bool,
         matching_seed: int,
         weight_std: float,
+        matching_seed_step_stride: int = 1,
+        output_matching_seed_offset: int = 2,
         layer_id: int = -1,
         hybrid_output: bool = False,
         hybrid_directed_incoming: int = 0,
@@ -1181,6 +1183,12 @@ class MuonMatchedGivensLinear(nn.Module):
         self.refresh_interval = int(refresh_interval)
         self.fast_fresh_matching = bool(fast_fresh_matching)
         self.matching_seed = int(matching_seed)
+        self.matching_seed_step_stride = int(
+            matching_seed_step_stride
+        )
+        self.output_matching_seed_offset = int(
+            output_matching_seed_offset
+        )
         self.layer_id = int(layer_id)
         self.hybrid_output = bool(hybrid_output)
         self.hybrid_directed_incoming = int(hybrid_directed_incoming)
@@ -1202,7 +1210,8 @@ class MuonMatchedGivensLinear(nn.Module):
                 "and even widths for every enabled rotation side"
             )
         if (
-            self.stages <= 0
+            self.stages < 0
+            or (self.stages == 0 and self.output_stages == 0)
             or self.residual_stages < 0
             or self.output_stages < 0
             or self.neighbors < max(
@@ -1215,17 +1224,16 @@ class MuonMatchedGivensLinear(nn.Module):
             )
         ):
             raise ValueError(
-                "require 0 < stages, 0 <= residual/output stages, "
+                "require at least one input/output stage, nonnegative "
+                "residual stages, "
                 "and max(stages, residual_stages, output_stages) <= "
                 "neighbors < in_features (and < out_features when "
                 "output stages are enabled)"
             )
         if self.refresh_interval <= 0:
             raise ValueError("refresh_interval must be positive")
-        if self.fast_fresh_matching and self.refresh_interval != 1:
-            raise ValueError(
-                "fast fresh matching requires refresh_interval=1"
-            )
+        if self.matching_seed_step_stride <= 0:
+            raise ValueError("matching seed step stride must be positive")
         if (
             self.residual_stages or self.output_stages
         ) and not self.fast_fresh_matching:
@@ -2160,22 +2168,30 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     matching_direction = direction
                 step_index = int(module.optimizer_step)
                 refresh = (
-                    module.fast_fresh_matching
-                    or not bool(module.matching_valid)
+                    not bool(module.matching_valid)
                     or step_index % module.refresh_interval == 0
                 )
                 matching_summary = None
                 residual_matching_summary = None
                 output_matching_summary = None
                 if refresh:
-                    if module.fast_fresh_matching:
+                    if module.stages == 0:
+                        matching_summary = {
+                            "selector": "disabled_input_side",
+                            "coordinates": 0,
+                        }
+                    elif module.fast_fresh_matching:
                         permutations, matching_diagnostics = (
                             fast_muon_matched_permutations(
                                 weight,
                                 matching_direction,
                                 stages=module.stages,
                                 neighbors=module.neighbors,
-                                seed=module.matching_seed + step_index,
+                                seed=(
+                                    module.matching_seed
+                                    + step_index
+                                    * module.matching_seed_step_stride
+                                ),
                             )
                         )
                         matching_summary = {
@@ -2246,18 +2262,19 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             )
                             / len(matching_diagnostics),
                         }
-                    module.selected_permutations.copy_(
-                        permutations.to(
-                            device=weight.device,
-                            dtype=torch.long,
+                    if module.stages:
+                        module.selected_permutations.copy_(
+                            permutations.to(
+                                device=weight.device,
+                                dtype=torch.long,
+                            )
                         )
-                    )
-                    module.selected_inverse_permutations.copy_(
-                        torch.argsort(
-                            module.selected_permutations,
-                            dim=1,
+                        module.selected_inverse_permutations.copy_(
+                            torch.argsort(
+                                module.selected_permutations,
+                                dim=1,
+                            )
                         )
-                    )
                     module.matching_valid.fill_(True)
                     module.last_refresh_step.fill_(step_index)
                     module.refresh_count.add_(1)
@@ -2288,6 +2305,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             seed=(
                                 module.matching_seed
                                 + step_index
+                                * module.matching_seed_step_stride
                                 + 1
                             ),
                         )
@@ -2383,7 +2401,10 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         neighbors=module.neighbors,
                         ridge_ratio=module.hybrid_ridge_ratio,
                         seed=(
-                            module.matching_seed + step_index + 2
+                            module.matching_seed
+                            + step_index
+                            * module.matching_seed_step_stride
+                            + module.output_matching_seed_offset
                         ),
                     )
                     module.output_selected_permutations.copy_(
@@ -2412,31 +2433,68 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     output_direction = (
                         output_residual_update.transpose(0, 1).contiguous()
                     )
-                    output_permutations, output_diagnostics = (
-                        fast_muon_matched_permutations(
-                            output_source,
-                            output_direction,
-                            stages=module.output_stages,
-                            neighbors=module.neighbors,
-                            seed=(
-                                module.matching_seed
-                                + step_index
-                                + 2
+                    if refresh:
+                        output_permutations, output_diagnostics = (
+                            fast_muon_matched_permutations(
+                                output_source,
+                                output_direction,
+                                stages=module.output_stages,
+                                neighbors=module.neighbors,
+                                seed=(
+                                    module.matching_seed
+                                    + step_index
+                                    * module.matching_seed_step_stride
+                                    + module.output_matching_seed_offset
+                                ),
+                            )
+                        )
+                        module.output_selected_permutations.copy_(
+                            output_permutations.to(
+                                device=weight.device,
+                                dtype=torch.long,
+                            )
+                        )
+                        module.output_selected_inverse_permutations.copy_(
+                            torch.argsort(
+                                module.output_selected_permutations,
+                                dim=1,
+                            )
+                        )
+                        output_matching_summary = {
+                            "selector": "fast_fresh_output_pass",
+                            "candidate_edge_fraction": float(
+                                output_diagnostics[
+                                    "candidate_edge_fraction"
+                                ]
                             ),
-                        )
-                    )
-                    module.output_selected_permutations.copy_(
-                        output_permutations.to(
-                            device=weight.device,
-                            dtype=torch.long,
-                        )
-                    )
-                    module.output_selected_inverse_permutations.copy_(
-                        torch.argsort(
-                            module.output_selected_permutations,
-                            dim=1,
-                        )
-                    )
+                            "minimum_stage_candidate_edge_fraction": float(
+                                output_diagnostics[
+                                    "minimum_stage_candidate_edge_fraction"
+                                ]
+                            ),
+                            "prepared_seconds": float(
+                                output_diagnostics["prepared_seconds"]
+                            ),
+                            "native_seconds": float(
+                                output_diagnostics["native_seconds"]
+                            ),
+                            "total_seconds": float(
+                                output_diagnostics["total_seconds"]
+                            ),
+                            "native_output_validated": bool(
+                                output_diagnostics[
+                                    "native_output_validated"
+                                ]
+                            ),
+                            "native_library_sha256": str(
+                                output_diagnostics[
+                                    "native_library_sha256"
+                                ]
+                            ),
+                            "native_source_sha256": str(
+                                output_diagnostics["source_sha256"]
+                            ),
+                        }
                     output_angles = diagonal_metric_angles(
                         output_source,
                         output_direction,
@@ -2448,39 +2506,6 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         module.output_selected_permutations,
                         module.output_selected_inverse_permutations,
                     ).transpose(0, 1).contiguous()
-                    output_matching_summary = {
-                        "selector": "fast_fresh_output_pass",
-                        "candidate_edge_fraction": float(
-                            output_diagnostics[
-                                "candidate_edge_fraction"
-                            ]
-                        ),
-                        "minimum_stage_candidate_edge_fraction": float(
-                            output_diagnostics[
-                                "minimum_stage_candidate_edge_fraction"
-                            ]
-                        ),
-                        "prepared_seconds": float(
-                            output_diagnostics["prepared_seconds"]
-                        ),
-                        "native_seconds": float(
-                            output_diagnostics["native_seconds"]
-                        ),
-                        "total_seconds": float(
-                            output_diagnostics["total_seconds"]
-                        ),
-                        "native_output_validated": bool(
-                            output_diagnostics[
-                                "native_output_validated"
-                            ]
-                        ),
-                        "native_library_sha256": str(
-                            output_diagnostics["native_library_sha256"]
-                        ),
-                        "native_source_sha256": str(
-                            output_diagnostics["source_sha256"]
-                        ),
-                    }
                 if weight_decay != 0.0:
                     rotated.mul_(1.0 - lr * weight_decay)
                 update = rotated - weight
@@ -2552,6 +2577,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             refresh
                             and (
                                 not module.fast_fresh_matching
+                                or module.refresh_interval > 1
                                 or step_index == 0
                             )
                         ),
