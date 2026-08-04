@@ -115,6 +115,10 @@ def test_schedule_requires_error_feedback() -> None:
         "train.py",
         "--method",
         "block_fht",
+        "--data-dir",
+        "/tmp/data",
+        "--out-dir",
+        "/tmp/out",
         "--optimizer",
         "muon",
         "--block-fht-targets",
@@ -127,3 +131,65 @@ def test_schedule_requires_error_feedback() -> None:
     ]
     with patch.object(sys, "argv", argv), pytest.raises(ValueError):
         train.parse_args()
+
+
+@pytest.mark.parametrize("value", ("0", "-1", "nan", "inf"))
+def test_feedback_nominal_step_cap_rejects_invalid_values(value: str) -> None:
+    argv = [
+        "train.py",
+        "--method",
+        "block_fht",
+        "--optimizer",
+        "muon",
+        "--block-fht-targets",
+        "mlp.c_proj",
+        "--block-fht-mlp-cproj-muon-matched-givens",
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback",
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-max-nominal-steps",
+        value,
+    ]
+    with patch.object(sys, "argv", argv), pytest.raises(ValueError):
+        train.parse_args()
+
+
+def test_feedback_nominal_step_cap_requires_error_feedback() -> None:
+    argv = [
+        "train.py",
+        "--method",
+        "block_fht",
+        "--optimizer",
+        "muon",
+        "--block-fht-targets",
+        "mlp.c_proj",
+        "--block-fht-mlp-cproj-muon-matched-givens",
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-max-nominal-steps",
+        "192",
+    ]
+    with patch.object(sys, "argv", argv), pytest.raises(ValueError):
+        train.parse_args()
+
+
+def test_feedback_nominal_step_cap_parses_when_enabled() -> None:
+    argv = [
+        "train.py",
+        "--method",
+        "block_fht",
+        "--data-dir",
+        "/tmp/data",
+        "--out-dir",
+        "/tmp/out",
+        "--optimizer",
+        "muon",
+        "--block-fht-targets",
+        "mlp.c_proj",
+        "--block-fht-mlp-cproj-muon-matched-givens",
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback",
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-max-nominal-steps",
+        "192",
+    ]
+    with patch.object(sys, "argv", argv):
+        args = train.parse_args()
+    assert (
+        args.block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps
+        == 192.0
+    )

@@ -1247,6 +1247,11 @@ def parse_args() -> argparse.Namespace:
         default=1.0,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-max-nominal-steps",
+        type=float,
+        default=None,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-muon-matched-givens-error-feedback-decay-after",
         type=float,
         default=None,
@@ -1783,6 +1788,19 @@ def parse_args() -> argparse.Namespace:
                 "Muon-matched Givens c_proj error-feedback decay must be "
                 "in [0, 1]"
             )
+        max_nominal_steps = (
+            namespace
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps
+        )
+        if max_nominal_steps is not None:
+            if not namespace.block_fht_mlp_cproj_muon_matched_givens_error_feedback:
+                raise ValueError(
+                    "c_proj feedback nominal-step cap requires error feedback"
+                )
+            if not math.isfinite(max_nominal_steps) or max_nominal_steps <= 0.0:
+                raise ValueError(
+                    "c_proj feedback nominal-step cap must be finite and positive"
+                )
         decay_after = (
             namespace
             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after
@@ -2233,6 +2251,10 @@ def main() -> None:
         block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay=(
             args
             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps=(
+            args
+            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps
         ),
         block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after=(
             args

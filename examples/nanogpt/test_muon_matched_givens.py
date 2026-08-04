@@ -244,6 +244,117 @@ def test_cproj_error_feedback_preserves_first_step_and_resumes_exactly(
     )
 
 
+def test_cproj_feedback_nominal_step_cap_preserves_direction_and_resumes(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens.zeropower_via_newtonschulz5",
+        lambda matrix, steps: matrix,
+    )
+    uncapped = make_module(layer_id=3)
+    capped = make_module(layer_id=3)
+    capped.load_state_dict(copy.deepcopy(uncapped.state_dict()))
+    kwargs = {
+        "lr": 0.001,
+        "momentum": 0.95,
+        "weight_decay": 0.1,
+        "ns_steps": 2,
+        "error_feedback": True,
+        "error_feedback_decay": 1.0,
+    }
+    uncapped_optimizer = MuonMatchedGivens([uncapped], **kwargs)
+    capped_optimizer = MuonMatchedGivens(
+        [capped],
+        **kwargs,
+        error_feedback_max_nominal_steps=0.25,
+    )
+    torch.manual_seed(47)
+    gradient = torch.randn_like(uncapped.weight)
+    uncapped.weight.grad = gradient.clone()
+    capped.weight.grad = gradient.clone()
+    uncapped_optimizer.step()
+    capped_optimizer.step()
+
+    # The cap changes only next-step state, not the update that produced it.
+    assert torch.equal(uncapped.weight, capped.weight)
+    raw = uncapped_optimizer.state[uncapped.weight]["compression_residual"]
+    bounded = capped_optimizer.state[capped.weight]["compression_residual"]
+    maximum = 0.25 * 0.001 * math.sqrt(capped.weight.shape[0])
+    assert math.isclose(float(bounded.norm()), maximum, rel_tol=1e-6)
+    cosine = torch.nn.functional.cosine_similarity(
+        raw.flatten(), bounded.flatten(), dim=0
+    )
+    assert float(cosine) > 0.999999
+    diagnostics = capped_optimizer.consume_diagnostics()[0]
+    assert diagnostics["feedback_cap_active"] is True
+    assert diagnostics["feedback_output_nominal_steps_post_cap"] <= (
+        0.25 + 1e-6
+    )
+    assert diagnostics["feedback_cap_scale"] < 1.0
+    assert diagnostics["feedback_output_fro_pre_cap"] > maximum
+
+    module_state = copy.deepcopy(capped.state_dict())
+    optimizer_state = copy.deepcopy(capped_optimizer.state_dict())
+    restored = make_module(layer_id=3)
+    restored.load_state_dict(module_state)
+    restored_optimizer = MuonMatchedGivens(
+        [restored],
+        **kwargs,
+        error_feedback_max_nominal_steps=0.25,
+    )
+    restored_optimizer.load_state_dict(optimizer_state)
+    torch.manual_seed(53)
+    next_gradient = torch.randn_like(capped.weight)
+    capped.weight.grad = next_gradient.clone()
+    restored.weight.grad = next_gradient.clone()
+    capped_optimizer.step()
+    restored_optimizer.step()
+    assert torch.equal(capped.weight, restored.weight)
+    assert torch.equal(
+        capped_optimizer.state[capped.weight]["compression_residual"],
+        restored_optimizer.state[restored.weight]["compression_residual"],
+    )
+
+
+def test_inactive_cproj_feedback_cap_is_bitwise_identical(monkeypatch) -> None:
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens.zeropower_via_newtonschulz5",
+        lambda matrix, steps: matrix,
+    )
+    control = make_module(layer_id=3)
+    candidate = make_module(layer_id=3)
+    candidate.load_state_dict(copy.deepcopy(control.state_dict()))
+    kwargs = {
+        "lr": 0.001,
+        "momentum": 0.95,
+        "weight_decay": 0.1,
+        "ns_steps": 2,
+        "error_feedback": True,
+        "error_feedback_decay": 1.0,
+    }
+    control_optimizer = MuonMatchedGivens([control], **kwargs)
+    candidate_optimizer = MuonMatchedGivens(
+        [candidate],
+        **kwargs,
+        error_feedback_max_nominal_steps=1e9,
+    )
+    for seed in (59, 61):
+        torch.manual_seed(seed)
+        gradient = torch.randn_like(control.weight)
+        control.weight.grad = gradient.clone()
+        candidate.weight.grad = gradient.clone()
+        control_optimizer.step()
+        candidate_optimizer.step()
+        assert torch.equal(control.weight, candidate.weight)
+        assert torch.equal(
+            control_optimizer.state[control.weight]["compression_residual"],
+            candidate_optimizer.state[candidate.weight]["compression_residual"],
+        )
+        diagnostics = candidate_optimizer.consume_diagnostics()[0]
+        assert diagnostics["feedback_cap_active"] is False
+        assert diagnostics["feedback_cap_scale"] == 1.0
+
+
 def test_fast_fresh_optimizer_reselects_every_step(
     monkeypatch,
 ) -> None:

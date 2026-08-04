@@ -163,6 +163,7 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_seed: int = 161803
     block_fht_mlp_cproj_muon_matched_givens_error_feedback: bool = False
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay: float = 1.0
+    block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps: float | None = None
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after: float | None = None
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction: float | None = None
     block_fht_mlp_cproj_hybrid_output: bool = False
@@ -4133,6 +4134,10 @@ class GPT(nn.Module):
                         error_feedback_decay=(
                             self.config
                             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay
+                        ),
+                        error_feedback_max_nominal_steps=(
+                            self.config
+                            .block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps
                         ),
                     )
                 )

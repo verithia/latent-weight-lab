@@ -2052,6 +2052,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
         ns_steps: int,
         error_feedback: bool = False,
         error_feedback_decay: float = 1.0,
+        error_feedback_max_nominal_steps: float | None = None,
     ) -> None:
         if not modules:
             raise ValueError("MuonMatchedGivens requires at least one module")
@@ -2061,6 +2062,13 @@ class MuonMatchedGivens(torch.optim.Optimizer):
         ):
             raise ValueError(
                 "MuonMatchedGivens error-feedback decay must be in [0, 1]"
+            )
+        if error_feedback_max_nominal_steps is not None and (
+            not math.isfinite(error_feedback_max_nominal_steps)
+            or error_feedback_max_nominal_steps <= 0.0
+        ):
+            raise ValueError(
+                "MuonMatchedGivens feedback nominal-step cap must be finite and positive"
             )
         for module in modules:
             module.weight.requires_grad_(True)
@@ -2073,6 +2081,11 @@ class MuonMatchedGivens(torch.optim.Optimizer):
             "ns_steps": int(ns_steps),
             "error_feedback": bool(error_feedback),
             "error_feedback_decay": float(error_feedback_decay),
+            "error_feedback_max_nominal_steps": (
+                None
+                if error_feedback_max_nominal_steps is None
+                else float(error_feedback_max_nominal_steps)
+            ),
         }
         super().__init__(
             [{"params": [module.weight for module in modules]}],
@@ -2095,6 +2108,13 @@ class MuonMatchedGivens(torch.optim.Optimizer):
             error_feedback_decay = float(
                 group.get("error_feedback_decay", 1.0)
             )
+            error_feedback_max_nominal_steps = group.get(
+                "error_feedback_max_nominal_steps"
+            )
+            if error_feedback_max_nominal_steps is not None:
+                error_feedback_max_nominal_steps = float(
+                    error_feedback_max_nominal_steps
+                )
             for weight in group["params"]:
                 gradient = weight.grad
                 if gradient is None:
@@ -2470,8 +2490,32 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 compression_residual = (
                     corrected_update.float() - update.float()
                 )
-                requested_residual_energy = requested_residual.square().sum()
                 corrected_residual_energy = compression_residual.square().sum()
+                feedback_output_fro_pre_cap = compression_residual.norm()
+                nominal_step_fro = abs(lr) * math.sqrt(weight.shape[0])
+                feedback_output_nominal_steps_pre_cap = (
+                    feedback_output_fro_pre_cap
+                    / max(nominal_step_fro, 1e-30)
+                )
+                feedback_cap_scale = 1.0
+                feedback_cap_active = False
+                if error_feedback_max_nominal_steps is not None:
+                    if nominal_step_fro <= 0.0:
+                        raise RuntimeError(
+                            "c_proj feedback nominal-step cap requires nonzero learning rate"
+                        )
+                    maximum_feedback_fro = (
+                        error_feedback_max_nominal_steps * nominal_step_fro
+                    )
+                    if float(feedback_output_fro_pre_cap) > maximum_feedback_fro:
+                        feedback_cap_scale = maximum_feedback_fro / float(
+                            feedback_output_fro_pre_cap
+                        )
+                        compression_residual = (
+                            compression_residual * feedback_cap_scale
+                        )
+                        feedback_cap_active = True
+                requested_residual_energy = requested_residual.square().sum()
                 weight.copy_(rotated)
                 if error_feedback:
                     state["compression_residual"] = (
@@ -2518,6 +2562,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "coordinates": module.coordinate_count,
                         "error_feedback": error_feedback,
                         "error_feedback_decay": error_feedback_decay,
+                        "error_feedback_max_nominal_steps": (
+                            error_feedback_max_nominal_steps
+                        ),
                         "angle_rms": float(
                             all_angles.square().mean().sqrt()
                         ),
@@ -2547,6 +2594,18 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "feedback_output_fro": float(
                             compression_residual.norm()
                         ),
+                        "feedback_output_fro_pre_cap": float(
+                            feedback_output_fro_pre_cap
+                        ),
+                        "feedback_output_nominal_steps_pre_cap": float(
+                            feedback_output_nominal_steps_pre_cap
+                        ),
+                        "feedback_output_nominal_steps_post_cap": float(
+                            compression_residual.norm()
+                            / max(nominal_step_fro, 1e-30)
+                        ),
+                        "feedback_cap_scale": float(feedback_cap_scale),
+                        "feedback_cap_active": feedback_cap_active,
                         "matching": matching_summary,
                         "residual_matching": (
                             residual_matching_summary
