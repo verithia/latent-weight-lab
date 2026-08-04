@@ -1,0 +1,101 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_capacity_carry_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Under the 124M constant-full-carry mechanism that is useful in real training, does the previously validated hidden64+48 c_proj spatial chart track the complete dense trajectory materially better than the production hidden64+24 chart?",
+  "parameter_updates": 0,
+  "source_commit_before_implementation": "f5bcfc39838cb0e41e119eb75e38073b6bf75af4",
+  "causal_scope": {
+    "changed_variable": "second-pass hidden/right chart stages only",
+    "fixed_variables": [
+      "dense teacher-forced update sequence",
+      "constant error-feedback decay 1.0",
+      "first-pass 64 stages",
+      "neighbors 64",
+      "seed family",
+      "weight decay and learning-rate schedule",
+      "layers and score steps"
+    ],
+    "language_model_training": false,
+    "loss_evaluation": false
+  },
+  "evidence_before_registration": {
+    "production_hidden88_constant_carry_validation_ce": 5.527365207672119,
+    "production_hidden88_minus_attention_only": 0.03556520767211957,
+    "half_switch_validation_ce": 5.548335075378418,
+    "half_switch_rejection_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_half_switch_0p5tpp_training_result.json",
+    "half_switch_rejection_result_sha256": "a09548b4790a4dc25b26d1b54a6562d56fd1c00e7de840c6450eebdb14fd5c41",
+    "prior_hidden_capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_fast_fresh_hidden_capacity_holdout_result.json",
+    "prior_hidden_capacity_result_sha256": "cab549170a3cbfb1a0228e374bca056834f0d64e6a242632783e511520b437b3",
+    "prior_hidden112_vs_hidden64_current_output_recovery_ratio": 1.2627859986521903,
+    "prior_hidden112_vs_hidden64_fit_validation_descent_ratio": 1.3372193891781088,
+    "prior_hidden112_vs_hidden64_holdout_validation_descent_ratio": 1.362243170454431,
+    "prior_hidden112_positive_future_cells": "20/20",
+    "prior_hidden112_finite_ce_wins": "8/8",
+    "interpretation": "The prior held-out one-step screen supports extra hidden/right directions, but the temporal error-feedback mechanism changes the effective requested update. A full-trajectory causal replay is required before production promotion."
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608"
+  },
+  "teacher_forcing_protocol": {
+    "trajectory_reset": "Each arm/layer starts once from the exact dense step-0 c_proj weight and follows all 238 updates without phase reset.",
+    "per_step_target": "Use recorded dense W[t+1]-W[t], remove dense decoupled weight decay before matching, add the arm's prior compression residual with decay 1.0, then apply registered weight decay once.",
+    "causality": "At step t an arm sees only its current weight, current recorded dense update, and its own prior compression residual.",
+    "fit": "First fit 64 deterministic hidden/right stages. Fit the second pass to the remaining current corrected-update residual using either 24 or 48 deterministic stages with the same seed family.",
+    "interpretation": "This optimistic zero-update replay tests spatial transport capacity under full carry; it does not measure language-model loss."
+  },
+  "arms": [
+    {
+      "name": "hidden88_full_carry",
+      "role": "production spatial control",
+      "first_pass_stages": 64,
+      "second_pass_stages": 24,
+      "coordinates_per_layer": 135168,
+      "error_feedback_decay": 1.0
+    },
+    {
+      "name": "hidden112_full_carry",
+      "role": "candidate",
+      "first_pass_stages": 64,
+      "second_pass_stages": 48,
+      "coordinates_per_layer": 172032,
+      "coordinate_increase_fraction": 0.2727272727272727,
+      "error_feedback_decay": 1.0
+    }
+  ],
+  "metrics": {
+    "per_layer_score_step": [
+      "dense-chord endpoint energy recovery",
+      "endpoint cosine",
+      "row-Gram recovery",
+      "compression-residual Frobenius norm",
+      "mean requested-update recovery"
+    ],
+    "aggregate": "Energy-weight endpoint and row-Gram recovery across five layers; report minimum layer recovery, maximum feedback norm, and per-layer wins."
+  },
+  "registered_decision_rule": {
+    "candidate_pass": "All metrics must be finite. Hidden112 endpoint recovery must be no worse than hidden88 at every score step, at least 1.05x hidden88 at step 238, and better in at least 4/5 terminal layers. Its terminal maximum feedback norm must be at most 0.95x hidden88, and its terminal aggregate row-Gram recovery and mean requested-update recovery must each be no worse than hidden88.",
+    "selection": "Select hidden112 only if every rule passes; otherwise retain hidden88 and close this extra-stage branch.",
+    "threshold_changes_after_measurement": false,
+    "authorization_on_pass": "Implement only hidden64+48 for c_proj constant-full-carry, add production/config tests, then separately preregister and directly poll an exact 124M >=20% MFU gate. No language-model training is authorized by this plan.",
+    "authorization_on_failure": "Do not implement or train hidden112. Move to the preregistered-by-evidence dimensionless residual-norm-cap family rather than another time schedule."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "minimum_training_mfu_not_applicable": "zero-update diagnostic",
+    "workspace_cap_gib": 300
+  }
+}
