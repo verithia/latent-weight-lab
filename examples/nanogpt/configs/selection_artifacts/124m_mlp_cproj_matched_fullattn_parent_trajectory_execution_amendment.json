@@ -1,0 +1,60 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_matched_fullattn_parent_trajectory_execution_amendment_v1",
+  "status": "registered_after_prelaunch_failure_and_before_corrected_execution",
+  "recorded_at": "2026-08-04",
+  "original_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_matched_fullattn_parent_trajectory_plan.json",
+    "sha256": "30b9940f07a6b89fa679f66af903557657663b3c07816c54d215256b7d7f49a9",
+    "registration_commit": "890de2cf1fecf4ee1dd9af304375f336b6fc68b8"
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction": 0.412225422844472,
+    "tokens_per_second": 230352.98459591743,
+    "iter_ms": 1138.01,
+    "peak_mib": 31587.25,
+    "diagnostic_io_included": true,
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/performance_preflight.json",
+    "certificate_config_sha256": "fb576d990db3aed24e0245fbef8a0b7eed72ee328612072d3b87c60fe4b5893a"
+  },
+  "failed_prelaunch": {
+    "exit_code": 1,
+    "failure_stage": "run identity construction before model construction, step-0 evaluation, snapshot, or optimizer update",
+    "reason": "The raw train.py command omitted EXPERIMENT_PROVENANCE_PATH and EXPERIMENT_PROVENANCE_SHA256 required by the registered source config.",
+    "scientific_attempt_consumed": false,
+    "checkpoint_created": false,
+    "trajectory_snapshot_created": false,
+    "retry_semantics": "Correct the launch envelope only; the immutable config, MFU certificate, scientific thresholds, and one-run authorization remain unchanged."
+  },
+  "corrected_execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "launcher_role": "create immutable config archive, dataset/MFU/source provenance, status, and log; execute synchronously in foreground",
+    "command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/home/pro6000-9980x/MappingNetworks/.cuda-12.8",
+      "bash",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "training_out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific",
+    "launcher_artifact_root": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs"
+  },
+  "unchanged": [
+    "candidate config SHA-256 fb576d990db3aed24e0245fbef8a0b7eed72ee328612072d3b87c60fe4b5893a",
+    "source config SHA-256 a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7",
+    "dataset manifest and fixed evaluation identities",
+    "model, optimizer, data, schedule, and snapshot settings",
+    "trajectory and endpoint acceptance thresholds",
+    "no candidate language-model training authorization"
+  ]
+}
