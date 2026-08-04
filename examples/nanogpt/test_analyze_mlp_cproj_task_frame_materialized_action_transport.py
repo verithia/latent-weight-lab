@@ -1,8 +1,35 @@
 from __future__ import annotations
 
+import hashlib
+import json
+from pathlib import Path
+
 from examples.nanogpt.analyze_mlp_cproj_task_frame_materialized_action_transport import (
     select_decision,
 )
+
+
+REPO = Path(__file__).resolve().parents[2]
+PLAN = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_task_frame_materialized_action_transport_plan.json"
+)
+RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_task_frame_materialized_action_transport_result.json"
+)
+
+
+def load(path: Path) -> dict:
+    value = json.loads(path.read_text())
+    assert isinstance(value, dict)
+    return value
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def table(
@@ -65,3 +92,25 @@ def test_raw_control_sign_drift_fails_closed() -> None:
     )
     assert result["raw_coordinate_control_passed"] is False
     assert result["decision"] == "MATERIALIZED_ACTION_NONPORTABLE"
+
+
+def test_recorded_result_closes_materialized_transport() -> None:
+    plan = load(PLAN)
+    result = load(RESULT)
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["execution"]["training_updates"] == 0
+    assert result["protocol"]["nonframe_state_bitwise_preserved"] is True
+    gains = result["mean_gain_over_native"]
+    assert gains["raw_endpoint_coordinates"] < -0.02
+    assert gains["additive_materialized_full"] < -0.02
+    assert gains["additive_materialized_cfc_only"] < gains[
+        "additive_materialized_full"
+    ]
+    assert gains["additive_materialized_cproj_only"] < gains[
+        "additive_materialized_full"
+    ]
+    assert result["decision"]["registered_decision"] == (
+        "MATERIALIZED_ACTION_NONPORTABLE"
+    )
+    assert result["decision"]["task_frame_transport_closed"] is True
+    assert plan["decision_rule"]["automatic_training_run_authorized"] is False

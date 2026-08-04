@@ -1,0 +1,126 @@
+{
+  "artifact_kind": "124m_mlp_cproj_task_frame_materialized_action_transport_result",
+  "schema_version": "mai_124m_mlp_cproj_task_frame_materialized_action_transport_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "MATERIALIZED_ACTION_NONPORTABLE_CLOSE_TASK_FRAME_TRANSPORT",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repository_commit": "3857157397f6dae8c192862e71ad6a45f04bcadd",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_task_frame_materialized_action_transport",
+    "source_sha256": "7c0b68dd4fd72edc10c8c39928f62ab2699c82c946378ee371085286a6fd80a9",
+    "training_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "exit_code": 0
+  },
+  "identity": {
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_frame_materialized_action_transport_plan.json",
+    "plan_sha256": "994d68f50582f73b07d1287cf38747954b90293824741ee49ee09f6d92cd4f67",
+    "parent_checkpoint_sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+    "delayed_checkpoint_sha256": "120d604b767160d504f968c08f13939d26b571b1f43accd7ef19c7dd72a76629",
+    "endpoint_frame_state_sha256": "a345068471731d64556c365d07c9dcdc3d877ec261871421c24245bd85106ae7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "summary_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_task_frame_materialized_action_transport_20260805a/summary.json",
+    "summary_sha256": "4053ae696cae545904d34baa2097ff5865d2e856c274dfbb8accadbffd79c3d8",
+    "primary_token_sha256": "24e277ca35c6f98141d9a9102ac9771ae81010f80c63f9f04b4cf5b93186b505",
+    "confirmation_token_sha256": "8e6c70a56b6e586a87cd8ed0213fa64a3cd39915ea5a9ea50f7aa731f959ac68"
+  },
+  "protocol": {
+    "validation_seeds": {
+      "primary": 20260885,
+      "confirmation": 20260886
+    },
+    "batches_per_window": 32,
+    "batch_size": 16,
+    "block_size": 1024,
+    "parent_cached_block_fht_modules": 168,
+    "delayed_cached_block_fht_modules": 168,
+    "peak_mib": 9341.4453125,
+    "coordinate_variant_tokens_per_second_range": [
+      635426.8527122209,
+      636936.9413606202
+    ],
+    "materialized_override_tokens_per_second_range": [
+      699848.2957903628,
+      704601.038272067
+    ],
+    "delayed_nonframe_state_sha256": "c0df95623bb229072be098e8ad2dfbc82d1bf3ebd2ddba2cf2e86afb1495b724",
+    "parent_nonframe_state_sha256": "0a272227e931a0f1f2f1a8643c96e8c4be1cc45c7dca1afb6ad28389ae02359a",
+    "nonframe_state_bitwise_preserved": true
+  },
+  "parent_materialized_action": {
+    "cfc_delta_frobenius_mean": 1.16827854514122,
+    "cfc_delta_frobenius_range": [
+      1.0179076194763184,
+      1.2942452430725098
+    ],
+    "cfc_delta_relative_mean": 0.03877830815811952,
+    "cfc_delta_relative_range": [
+      0.033834829926490784,
+      0.04270504042506218
+    ],
+    "cproj_delta_frobenius_mean": 0.35611842572689056,
+    "cproj_delta_frobenius_range": [
+      0.32604119181632996,
+      0.3934934139251709
+    ],
+    "cproj_delta_relative_mean": 0.05861658168335756,
+    "cproj_delta_relative_range": [
+      0.053659163415431976,
+      0.06480973213911057
+    ]
+  },
+  "ce_by_variant": {
+    "native_delayed": {
+      "primary": 5.516459286212921,
+      "confirmation": 5.517977803945541
+    },
+    "identity": {
+      "primary": 5.559737294912338,
+      "confirmation": 5.560848385095596
+    },
+    "raw_endpoint_coordinates": {
+      "primary": 5.541197225451469,
+      "confirmation": 5.542884275317192
+    },
+    "additive_materialized_full": {
+      "primary": 5.541408598423004,
+      "confirmation": 5.543069303035736
+    },
+    "additive_materialized_cfc_only": {
+      "primary": 5.553211033344269,
+      "confirmation": 5.554498717188835
+    },
+    "additive_materialized_cproj_only": {
+      "primary": 5.5466979295015335,
+      "confirmation": 5.548173099756241
+    }
+  },
+  "mean_gain_over_native": {
+    "identity": -0.04307429492473602,
+    "raw_endpoint_coordinates": -0.024822205305099487,
+    "additive_materialized_full": -0.025020405650138855,
+    "additive_materialized_cfc_only": -0.03663633018732071,
+    "additive_materialized_cproj_only": -0.030216969549655914
+  },
+  "decision": {
+    "registered_decision": "MATERIALIZED_ACTION_NONPORTABLE",
+    "raw_coordinate_control_passed": true,
+    "cfc_component_supported": false,
+    "cproj_component_supported": false,
+    "task_frame_transport_closed": true,
+    "automatic_training_run_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Concentrate on c_proj generator and compression-error temporal state. Do not fit, scale, or transport the rejected task frame."
+  },
+  "interpretation": [
+    "Additive transport of the exact parent endpoint materialized action is 0.02502 CE worse than the native delayed frame on two new windows, nearly identical to the 0.02482 CE deficit from raw coordinate copying.",
+    "The endpoint materialized action is therefore context-specific, not merely expressed in the wrong coordinate gauge or at the wrong radius.",
+    "The c_fc-only and c_proj-only transported actions are individually more harmful than the coupled action; their partial cancellation does not yield portability.",
+    "The native delayed frame remains 0.04307 CE better than identity in its own context, confirming strong coadaptation rather than a disconnected or unused frame.",
+    "Close task-frame transport as a causal repair. The remaining MLP gap should be attacked at the c_proj generator and its temporal error-feedback state, where deployable direction capacity is actually defined."
+  ]
+}
