@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_matched_parent_plan_v1",
+  "status": "registered_before_analysis_entrypoint_change_or_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Does bilateral output-frame capacity still recover task-useful c_proj directions when the teacher trajectory and endpoint checkpoint use the same original BlockFHT-attention parent as the failed causal candidate?",
+  "authorization": {
+    "scope": "one zero-update direct-foreground replay of the accepted matched-parent trajectory",
+    "parameter_updates": 0,
+    "language_model_training_authorized": false,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false
+  },
+  "inputs": {
+    "trajectory_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_matched_fullattn_parent_trajectory_result.json",
+    "trajectory_result_sha256": "f261dc43f44ae73bbc01ae32cdae317897370b4382564f0994d0178711f724c0",
+    "causal_training_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_output32_0p5tpp_result.json",
+    "causal_training_result_sha256": "c2094f6098ca4ea3b2bb9a85f2e9493868cb9e288e9f73ce4fdc58aba339286d",
+    "dense_teacher_oracle_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_production_selector_result.json",
+    "dense_teacher_oracle_result_sha256": "f91f831734f6c171bd3ca62668a46f8052cd4b11b269945dc1f38d92645724b0",
+    "dense_endpoint_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/ckpt.pt",
+    "dense_endpoint_checkpoint_sha256": "7302fe2e880c1cadbb1584ef9367f3f8a9f95746733c41e58d68771a462c5154",
+    "trajectory_snapshot_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/parameter_trajectory",
+    "trajectory_run_identity_sha256": "792a87c43fbd4f5105c7e2e8f2ed228e2ff6dcb06731925e132ab8a10758090c",
+    "trajectory_snapshot_steps": "0 through 238 inclusive",
+    "trajectory_snapshot_layers": [0, 3, 6, 9, 11],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "parent_identity": {
+    "method": "block_fht",
+    "block_fht_targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "mlp_cproj_teacher": "dense",
+    "matched_parent_terminal_validation_ce": 5.4918928146362305,
+    "labeling_note": "The analysis entrypoint's historical dense_endpoint label means this matched BlockFHT-attention endpoint with dense MLP c_proj, not a fully dense-attention model."
+  },
+  "registered_change": {
+    "analysis_only": true,
+    "connectivity_target": "production_nondecay",
+    "variants": [
+      "dense_endpoint",
+      "hidden88_full_carry",
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "entrypoint_change_before_execution": [
+      "accept this matched-parent plan schema",
+      "read endpoint_pass_authorizes_production_implementation from the frozen decision rule",
+      "when false, an endpoint pass may select a diagnostic variant but must not emit production or language-model training authority"
+    ],
+    "language_model_parameters_updated": false
+  },
+  "decision_rule": {
+    "minimum_validation_ce_gain_vs_right_only": 0.002,
+    "minimum_train_ce_gain_vs_right_only": 0.0,
+    "candidate_pass": "All values finite; validation CE at least 0.002 below matched-parent right-only; train CE no worse; validation distance from matched parent smaller than right-only.",
+    "selection_order": [
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "endpoint_pass_authorizes_production_implementation": false,
+    "on_no_candidate_pass": "Classify the previously useful bilateral direction as dense-attention-specific. Abandon that output direction and do not build an activation metric around it.",
+    "on_candidate_pass": "Classify true matched-parent closed-loop direction drift because the already completed causal output32 run failed. This authorizes preregistration of an activation-weighted/current-task selector diagnostic, but no language-model training.",
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "output_directory_must_be_absent": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_matched_fullattn_parent_v1",
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cproj_bilateral_endpoint_fixed_eval",
+      "--snapshot-dir",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/parameter_trajectory",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/ckpt.pt",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_matched_fullattn_parent_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_matched_fullattn_parent_v1",
+      "--connectivity-target",
+      "production_nondecay",
+      "--device",
+      "cuda:0"
+    ]
+  },
+  "limitations": [
+    "Only c_proj in layers 0,3,6,9,11 is replaced.",
+    "Directions remain teacher-forced from the matched BlockFHT-attention parent trajectory.",
+    "This is an endpoint capacity/task-direction oracle, not causal training.",
+    "The endpoint checkpoint's attention and untouched MLP weights co-adapted with dense c_proj; a pass can diagnose capacity but cannot override the measured causal failure."
+  ]
+}

@@ -1,0 +1,124 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_matched_fullattn_parent_trajectory_result_v1",
+  "artifact_kind": "124m_mlp_cproj_matched_fullattn_parent_trajectory_result",
+  "recorded_at": "2026-08-04",
+  "classification": "ACCEPTED_MATCHED_BLOCKFHT_ATTENTION_PARENT_TRAJECTORY",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_matched_fullattn_parent_trajectory_plan.json",
+    "sha256": "30b9940f07a6b89fa679f66af903557657663b3c07816c54d215256b7d7f49a9",
+    "registration_commit": "890de2cf1fecf4ee1dd9af304375f336b6fc68b8"
+  },
+  "execution_amendment": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_matched_fullattn_parent_trajectory_execution_amendment.json",
+    "sha256": "a478d512fd874aafc83e936b0523f123362192f8dc598764b55f07f98f1299dd",
+    "execution_commit": "e54a3091a8026bde7aed6231da44ba9a0ba1df68",
+    "failed_raw_invocation_created_training_state": false
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "hardware": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "exit_code": 0,
+    "run_id": "pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp_20260804T133909Z_3965370",
+    "started_at": "2026-08-04T21:39:09+08:00",
+    "finished_at": "2026-08-04T21:45:48+08:00",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp_20260804T133909Z_3965370.config.json"
+    ]
+  },
+  "performance_gate": {
+    "passed": true,
+    "minimum_fraction": 0.2,
+    "mfu_fraction": 0.412225422844472,
+    "tokens_per_second": 230352.98459591743,
+    "iter_ms_with_diagnostic_io": 1138.01,
+    "peak_mib": 31587.25,
+    "empirical_bf16_gemm_peak_tflops": 417.34538057580755,
+    "snapshot_count": 10,
+    "snapshot_seconds": 0.551,
+    "all_logged_losses_finite": true,
+    "certificate_sha256": "2e4cd83694487696a4b5bac5d07c4dfc6bdfdedd181a0e079ab675beb87304b6"
+  },
+  "identity": {
+    "source_config_sha256": "a34024398271ca0d40e41b3b136ed0e471bce22ce796b402e46608624793fac7",
+    "candidate_config_sha256": "fb576d990db3aed24e0245fbef8a0b7eed72ee328612072d3b87c60fe4b5893a",
+    "resolved_config_sha256": "ebea2786e460a262b3c6f57c0a1644ac9d8361269fc1f2d50a0bca44392f6840",
+    "trajectory_run_identity_sha256": "792a87c43fbd4f5105c7e2e8f2ed228e2ff6dcb06731925e132ab8a10758090c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "method": "block_fht",
+    "block_fht_targets": [
+      "attn.c_attn.qk_headwise",
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "mlp_cproj_teacher": "dense",
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "optimizer": "muon",
+    "learning_rate": 0.0024,
+    "max_iters": 238,
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "snapshot_count": 239
+  },
+  "terminal": {
+    "next_iter": 238,
+    "checkpoint_reason": "evaluation",
+    "train_ce_log_precision": 5.4891,
+    "validation_ce": 5.4918928146362305,
+    "original_y400_validation_ce": 5.4918,
+    "absolute_validation_difference_vs_original": 0.00009281463623052089,
+    "step60_validation_ce": 6.2183,
+    "original_step60_validation_ce": 6.2184,
+    "absolute_step60_validation_difference": 0.00009999999999976694,
+    "all_model_and_optimizer_floating_tensors_finite": true,
+    "floating_tensor_count_checked": 829,
+    "clean_exit": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9991, "validation_ce": 10.9991},
+    {"step": 60, "train_ce": 6.2089, "validation_ce": 6.2183},
+    {"step": 120, "train_ce": 5.7910, "validation_ce": 5.7958},
+    {"step": 180, "train_ce": 5.5826, "validation_ce": 5.5857},
+    {"step": 238, "train_ce": 5.4891, "validation_ce": 5.4918928146362305}
+  ],
+  "remote_artifacts": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp",
+    "checkpoint_sha256": "7302fe2e880c1cadbb1584ef9367f3f8a9f95746733c41e58d68771a462c5154",
+    "checkpoint_metadata_sha256": "a5d25ad42fea0507d8e943129e25515762dd9d058d1207bc470232a1ba1c7bc7",
+    "first_snapshot_sha256": "7a06f939746cd0403c30a786a168809c43277e41e905937ef7cc2b8cfff5332c",
+    "last_snapshot_sha256": "5e30624a111f8ec5c5a424dadc1f7cd6431fddf3cdbc4daa7809745680e19ddc",
+    "provenance_sha256": "d3ae794b627801cc57948f1416d5de9bec38716bd53212754a1c40efabd5f29b",
+    "status_sha256": "0f46704d0cb3c5bf6ef6cb17ad519d49da0005ef2e889a7fefb68a0f5fde2c46",
+    "log_sha256": "c4bcd054de076b93d4221cd2d8a38d70e717509d3237ddad3a93893cceadcef8",
+    "workspace_bytes_human": "12G"
+  },
+  "decision": {
+    "trajectory_accepted": true,
+    "endpoint_oracle_authorized": true,
+    "production_bilateral_implementation_authorized": false,
+    "language_model_training_authorized": false,
+    "next_action": "Replay the frozen right-only/output32/output64 production-selector endpoints using this matched BlockFHT-attention checkpoint and trajectory."
+  },
+  "interpretation": [
+    "The matched BlockFHT-attention parent reproduces the original control to 0.0001 CE at both step 60 and the terminal endpoint, so host and current-code drift are negligible for the planned paired comparison.",
+    "All 239 snapshots and the terminal checkpoint share trajectory identity 792a87c4...090c; endpoint arms must be compared only inside this checkpoint.",
+    "This result removes the dense-attention/BlockFHT-attention parent mismatch from the next zero-update oracle but does not itself validate a compressed c_proj chart."
+  ]
+}
