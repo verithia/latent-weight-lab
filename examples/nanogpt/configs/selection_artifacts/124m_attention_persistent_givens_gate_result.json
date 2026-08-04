@@ -1,0 +1,51 @@
+{
+  "decision": {
+    "classification": "REJECT_PERSISTENT_GIVENS",
+    "selected_stages": null
+  },
+  "execution": {
+    "device": "PRO6 GPU0",
+    "elapsed_seconds": 30.939,
+    "mode": "direct foreground zero-update oracle; no watchdog or callbacks",
+    "source_commit": "1f4ab0efc5f0885a84adb33bfb2e5a654e9a13e8"
+  },
+  "identity": {
+    "cells_sha256": "eea5bb42531f533475c759f5a1012b9daa3b27b7db7b5a892f5030c9ebd707e8",
+    "connectivity_sha256": "119124e561cfa77b9b3a67c2fdffe04f0e7b31f486ed5bc16b788d0183241e5f",
+    "plan_sha256": "3e3ec5ac8f271969c674b317627016552e73a5001cd52d9c29f4b9a8229c09c3",
+    "raw_result_sha256": "67e4708ed6a572181b47683e0dbcba53ec8b958fec1b517259e437d11de6b708",
+    "replay_run_identity_sha256": "dcd0517abee1788a554aee27d1cc02ded292ffe3e824deccad0bc77e56aae871",
+    "source_sha256": "d1588907b924ab93a7734f227132e953d9314985bb615782507d287885237732"
+  },
+  "interpretation": [
+    "Sparse integer pairings selected from the exact step-0 dense-Muon direction do not retain enrichment at later steps.",
+    "At 64 stages, later dense-direction recovery is 6.9977 percent for 6.8309 percent coordinates, only 1.0244x nominal share and 1.0019x the random-connectivity control.",
+    "Later chord recovery is 6.8438 percent, 0.9938x nominal share and 1.0037x random.",
+    "The attention direction graph is therefore not a static early-training object. No training run with frozen step-0 connectivity is authorized."
+  ],
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_attention_persistent_givens_gate_result_v1",
+  "stage_results": {
+    "32": {
+      "chord_energy_recovery": 0.034303235,
+      "chord_over_random": 1.006115664,
+      "dense_coordinate_fraction": 0.034154297,
+      "dense_energy_recovery": 0.03509633,
+      "dense_normalized_enrichment": 1.027581683,
+      "dense_over_random": 1.003135897
+    },
+    "64": {
+      "chord_energy_recovery": 0.068437877,
+      "chord_over_random": 1.003655954,
+      "dense_coordinate_fraction": 0.068308593,
+      "dense_energy_recovery": 0.069976971,
+      "dense_normalized_enrichment": 1.024424134,
+      "dense_over_random": 1.001918674,
+      "target_dense_recovery": {
+        "cproj": 0.04450466,
+        "qk": 0.062348849,
+        "v": 0.085535242
+      }
+    }
+  }
+}
