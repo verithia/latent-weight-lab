@@ -1,0 +1,82 @@
+{
+  "artifacts": {
+    "foreground_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_pro6_v1.foreground.log",
+    "foreground_log_sha256": "15590da253b6a71e785002bcc298825c84a40862610f175c80701a88b70f8bdb",
+    "metadata": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_pro6_v1/cproj_bilateral_endpoint_fixed_eval_metadata.json",
+    "metadata_sha256": "07a1e91aa24ae74a6eaf52d8164bb111be3c9b3d09bc7f599df358c6dceec55c",
+    "result": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_pro6_v1/cproj_bilateral_endpoint_fixed_eval_result.json",
+    "result_sha256": "39253fed4e3e061c3f62f802a0eb74ac0e376a1af59f700b97b61ad54b9926d7",
+    "terminal_states": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_pro6_v1/cproj_bilateral_terminal_states.pt",
+    "terminal_states_sha256": "6ae7cdced9a601c2a6b829dfab374711c594d6c08c8285a4b885b9229cc3a8eb"
+  },
+  "decision": {
+    "classification": "BILATERAL_ENDPOINT_TASK_LOSS_PASS",
+    "language_model_training_authorized": false,
+    "production_implementation_authorized": true,
+    "selected_variant": "hidden88_output32_full_carry",
+    "selection_reason": "Both bilateral arms pass; the frozen selection order chooses the smaller output32 chart. It improves validation CE over right-only by 0.02462864, more than twelve times the registered 0.002 effect-size floor, improves train CE by 0.02426910, and reduces validation distance from dense to 0.00655174."
+  },
+  "execution": {
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cproj_bilateral_endpoint_fixed_eval",
+      "--snapshot-dir",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/parameter_trajectory",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_fixed_eval_pro6_replay_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_pro6_v1",
+      "--device",
+      "cuda:0"
+    ],
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_bilateral_endpoint_fixed_eval.py",
+    "entrypoint_sha256": "083ea62728a293012b0733552577d4f54419b63e7dba4aad93f9c0132ed332d3",
+    "gpu": 0,
+    "host": "PRO6",
+    "mode": "direct foreground polling; zero parameter updates; no watchdog, callback, heartbeat, or queue worker",
+    "repository_commit": "b197fa291585d2a3a9a4934a426cd388c83184de"
+  },
+  "identity": {
+    "checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_fixed_eval_pro6_replay_plan.json",
+    "plan_sha256": "a450d0c5bd8547f66a5138f44209e47f74e874ce9df03c6eb90c7e3d964e7147",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7"
+  },
+  "limitations": [
+    "Only c_proj layers 0, 3, 6, 9, and 11 were replaced in the dense endpoint checkpoint.",
+    "The directions are teacher-forced from a paired dense trajectory; this proves useful endpoint capacity, not causal trainability.",
+    "A separate exact-update/resume implementation and at least 20 percent MFU preflight are required before scientific training can be preregistered."
+  ],
+  "loss": {
+    "dense_endpoint": {
+      "train_ce": 5.485774517059326,
+      "validation_ce": 5.488473415374756
+    },
+    "hidden88_full_carry": {
+      "train_ce": 5.516478061676025,
+      "validation_ce": 5.519653797149658
+    },
+    "hidden88_output32_full_carry": {
+      "train_ce": 5.492208957672119,
+      "validation_ce": 5.495025157928467,
+      "validation_gain_vs_right_only": 0.024628639221191406,
+      "validation_gap_vs_dense": 0.0065517425537109375
+    },
+    "hidden88_output64_full_carry": {
+      "train_ce": 5.490428924560547,
+      "validation_ce": 5.4932050704956055,
+      "validation_gain_vs_right_only": 0.026448726654052734,
+      "validation_gap_vs_dense": 0.004731655120849609
+    }
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_fixed_eval_pro6_replay_result_v1"
+}
