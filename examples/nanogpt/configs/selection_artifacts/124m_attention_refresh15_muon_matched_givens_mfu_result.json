@@ -1,0 +1,40 @@
+{
+  "classification": "PASS_EXACT_CONFIG_MFU_WITH_REFRESH15_ACTIVE",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_refresh15_muon_matched_givens_0p5tpp_lr24e4.json",
+    "sha256": "d1c3bf1c7927083dedd5089f2f97bbddebf024b5ca9cac3cc37490f77b800faa"
+  },
+  "decision": {
+    "minimum_mfu_fraction": 0.2,
+    "passed": true,
+    "scientific_run_authorized_count": 1,
+    "watchdog_or_callback_authorized": false
+  },
+  "execution": {
+    "git_commit": "3534bc5734240e677ff7ff96737ca0f552a01aa0",
+    "host": "PRO6",
+    "preflight_certificate_sha256": "5a185c02b31507ace477f95b8325f3106769bd1678751b7549fdfb3364cd5e82",
+    "preflight_log_sha256": "c3c34642471914e23400171f01625dc250fa069d5b7729941acba17aee3f0ee3"
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "base_timed_iter_ms": 1631.384375,
+    "empirical_bf16_gemm_peak_tflops": 417.69576297646125,
+    "mfu_fraction": 0.2874184982456013,
+    "model_tflops": 120.05348891824512,
+    "peak_mib": 31887.71,
+    "timed_updates": 16,
+    "tokens_per_second": 160745.28625,
+    "warmup_updates": 1
+  },
+  "recorded_at": "2026-08-05",
+  "refresh_validation": {
+    "all_logged_losses_finite": true,
+    "native_library_sha256": "189cd6f308957364d584c91c21364bc2697d8425ab6d9820c4ace19190f52b13",
+    "native_source_sha256": "988e1ae64f13061a5ae02eb1227523cea6a5e84b084121ba8f877b391dd8a53f",
+    "refresh_rows_at_step_0": 36,
+    "refresh_rows_at_step_15": 36,
+    "total_refresh_rows": 72
+  },
+  "schema_version": "mai_124m_attention_refresh15_mfu_result_v1"
+}
