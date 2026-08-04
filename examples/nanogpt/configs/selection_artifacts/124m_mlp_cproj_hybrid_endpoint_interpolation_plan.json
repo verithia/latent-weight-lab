@@ -1,0 +1,108 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_hybrid_endpoint_interpolation_plan_v1",
+  "recorded_at": "2026-08-05",
+  "status": "registered_before_analyzer_implementation",
+  "scientific_question": "Is the rejected causal hybrid's terminal loss caused primarily by a destructive c_proj endpoint direction, or does c_proj only become useful through wider MLP and block-frame co-adaptation?",
+  "scope": {
+    "parameter_updates": 0,
+    "training_authorized": false,
+    "larger_rung_authorized": false,
+    "purpose": "terminal endpoint and near-affine functional interpolation diagnosis; this does not establish the geometry of the complete training trajectory"
+  },
+  "inputs": {
+    "parent_name": "accepted causal c_proj hidden64+24 error-feedback decay1",
+    "parent_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/scientific/ckpt.pt",
+    "parent_checkpoint_sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+    "parent_checkpoint_meta_sha256": "37b69079f6274639d7351abb15d8d0976d192d9fa5f56296a437a1283be2c790",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_0p5tpp_result.json",
+    "parent_result_sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df",
+    "parent_terminal_validation_ce": 5.527365207672119,
+    "hybrid_name": "rejected causal task16-then-directed8 c_proj hybrid",
+    "hybrid_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_hybrid_output_errorfeedback_0p5tpp/scientific/ckpt.pt",
+    "hybrid_checkpoint_sha256": "c2590a8a00f2b824f83df6e7f6c0ce26b8ac320e8a307a5e6f2bfe1b0e15503a",
+    "hybrid_checkpoint_meta_sha256": "e2d5600414443e37ce1c0b7e102342b8e10346f5c02748f4444f0894820fc7c6",
+    "hybrid_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_0p5tpp_training_result.json",
+    "hybrid_result_sha256": "28e203a6baaf0464b391d6670dd4604a25bdea73ca2b682afb297a462cbeec87",
+    "hybrid_terminal_validation_ce": 5.607751369476318,
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "evaluation": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "cuda",
+    "dtype": "bfloat16",
+    "split": "val",
+    "independent_window_seeds": [20260878, 20260879],
+    "eval_batches_per_window": 32,
+    "batch_size": 16,
+    "block_size": 1024,
+    "tokens_per_variant_per_window": 524288,
+    "fixed_index_algorithm": "examples.nanogpt.train.make_fixed_eval_indices and fixed_eval_indices_digest; both split streams are hashed although only val is evaluated",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "requirements": [
+      "verify both checkpoint, checkpoint-metadata, result-artifact, and dataset-manifest hashes before loading CUDA",
+      "verify identical model configuration and model state key/shape topology",
+      "evaluate every variant on exactly the same ordered validation indices within each window",
+      "require finite cross entropy for every batch and variant",
+      "record per-window means and standard errors rather than pooling away window identity"
+    ]
+  },
+  "interpolation": {
+    "formula": "W(alpha) = (1-alpha) * W_context + alpha * W_other for the selected tensor family, copied into the context model with all nonselected tensors unchanged",
+    "alphas": [0.0, 0.25, 0.5, 0.75, 1.0],
+    "primary_variants": [
+      "hybrid_context_all_cproj_alpha0p00",
+      "hybrid_context_all_cproj_alpha0p25",
+      "hybrid_context_all_cproj_alpha0p50",
+      "hybrid_context_all_cproj_alpha0p75",
+      "hybrid_context_all_cproj_alpha1p00",
+      "parent_context_all_cproj_alpha0p00",
+      "parent_context_all_cproj_alpha0p25",
+      "parent_context_all_cproj_alpha0p50",
+      "parent_context_all_cproj_alpha0p75",
+      "parent_context_all_cproj_alpha1p00"
+    ],
+    "depth_band_variants_in_hybrid_context": {
+      "parent_cproj_early": [0, 1, 2, 3],
+      "parent_cproj_middle": [4, 5, 6, 7],
+      "parent_cproj_late": [8, 9, 10, 11]
+    },
+    "secondary_wider_context_variants_in_hybrid_context": [
+      "parent_all_cproj_plus_all_cfc",
+      "parent_all_cproj_plus_all_cfc_plus_all_ln2"
+    ],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+  },
+  "parameter_geometry": {
+    "per_layer_metrics": [
+      "flattened_weight_cosine",
+      "hybrid_minus_parent_frobenius_norm",
+      "distance_normalized_by_parent_frobenius_norm",
+      "hybrid_to_parent_frobenius_norm_ratio",
+      "delta_stable_rank",
+      "delta_top1_singular_energy",
+      "normalized_row_gram_difference",
+      "normalized_column_gram_difference"
+    ],
+    "interpretation_limit": "Two terminal checkpoints and the affine segment between them can expose endpoint direction, scale, depth localization, and functional barriers, but cannot prove a low-dimensional or near-affine training-trajectory manifold."
+  },
+  "registered_decision_rule": {
+    "native_gap_definition": "for each window, CE(hybrid native) - CE(parent native)",
+    "hybrid_context_cproj_recovery_fraction": "(CE(hybrid native) - CE(hybrid context with all parent c_proj)) / native_gap",
+    "direction_dominates": "HYBRID_CPROJ_ENDPOINT_DIRECTION_DOMINATES iff the all-parent-c_proj transplant recovers at least 0.50 of the native gap in both windows and at least one alpha in {0.25,0.50,0.75,1.00} lowers hybrid-context CE in both windows",
+    "wider_coadaptation_dominates": "WIDER_BLOCK_COADAPTATION_DOMINATES iff the all-parent-c_proj transplant recovers at most 0.25 of the native gap in both windows and none of alpha {0.25,0.50,0.75} improves hybrid-context CE by at least 0.01 in both windows",
+    "otherwise": "MIXED_ENDPOINT_DIRECTION_AND_COADAPTATION",
+    "interior_barrier": "INTERIOR_FUNCTIONAL_BARRIER iff at one common interior alpha, observed CE exceeds the linear interpolation of the two same-context endpoint CEs by at least 0.01 in both windows; otherwise NO_LARGE_INTERIOR_FUNCTIONAL_BARRIER",
+    "secondary_controls_affect_primary_classification": false,
+    "threshold_changes_after_measurement": false
+  },
+  "next_action_constraints": {
+    "if_direction_dominates": "Do not add capacity first; diagnose why the causal selector accumulates the wrong endpoint and test a transported/frozen-reference direction only after a separate preregistration.",
+    "if_wider_coadaptation_dominates": "Stop treating c_proj as an isolated manifold. Study a coupled nonlinear MLP or residual-frame connection before another optimizer-coordinate variant.",
+    "if_mixed": "Use depth and wider-context controls to register the smallest causal coupled structure; do not sweep the rejected task/directed widths.",
+    "automatic_training_after_diagnostic": false
+  }
+}
