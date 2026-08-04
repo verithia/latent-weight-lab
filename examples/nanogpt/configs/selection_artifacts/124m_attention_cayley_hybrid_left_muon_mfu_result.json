@@ -1,0 +1,47 @@
+{
+  "schema_version": "mai_124m_attention_cayley_hybrid_left_muon_mfu_result_v1",
+  "artifact_kind": "exact_config_performance_gate",
+  "recorded_at": "2026-08-04",
+  "classification": "HYBRID_LEFT_MUON_MFU_PASS",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cayley_hybrid_left_muon_plan.json",
+    "sha256": "21f5a012ff986d76467ed65dc19fdbf79975ebe11cdd9c50d9b892a0f26fa1f6"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_hybrid_left_muon_0p5tpp_lr24e4.json",
+    "sha256": "4ea0ade4068ee9e9c1c00ac2c8a5c2a3d8da2b71a56f1917ef067cb5bf2ee23e"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "a92eae3f",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "warmup_updates": 2,
+    "timed_updates": 30,
+    "wall_time_seconds": 57.4727
+  },
+  "measurement": {
+    "passed": true,
+    "minimum_mfu_fraction": 0.20,
+    "mfu_fraction": 0.27855700024754904,
+    "iter_ms": 1683.6796666666667,
+    "tokens_per_second": 155697.384,
+    "model_tflops": 116.28343574301081,
+    "empirical_bf16_gemm_peak_tflops": 417.4493394158884,
+    "peak_mib": 35417.83,
+    "all_logged_losses_finite": true
+  },
+  "artifacts": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_hybrid_left_muon/performance_preflight.json",
+    "certificate_sha256": "0210b92fb65b04f2b76b66ac0517a29db4be9d65524536a367aeee7a4d30e582",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_hybrid_left_muon/performance_preflight.log",
+    "log_sha256": "7f42d5bfcf1188486b3f8ff0aed68abfb210db2c8828e18f60af144a679a1c29"
+  },
+  "decision": {
+    "admitted": true,
+    "next_action": "run exactly one registered 238-update hybrid screen, poll it directly, and promote only if terminal validation CE is at most 5.3924"
+  }
+}
