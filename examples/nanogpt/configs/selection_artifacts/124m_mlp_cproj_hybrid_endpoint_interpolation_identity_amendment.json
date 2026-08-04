@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_hybrid_endpoint_interpolation_identity_amendment_v1",
+  "recorded_at": "2026-08-05",
+  "status": "registered_after_identity_failure_and_before_any_loss_evaluation",
+  "original_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_endpoint_interpolation_plan.json",
+    "sha256": "b65d0a688cf4cca4c96810d380b632e0de2e5aeac13df51765891f651abc2fc9"
+  },
+  "failed_pre_execution_check": {
+    "git_commit": "c5befe4f62def958acedc3e52b5151d50cc30514",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_hybrid_endpoint_interpolation_20260805a/diagnostic.log",
+    "log_sha256": "7825299cb5c73b705d348ef6fa7294ac8402cafbc670380229df5a4f59f898ff",
+    "log_bytes": 1535,
+    "checkpoint_hashes_verified": true,
+    "model_constructed": false,
+    "cuda_model_allocated": false,
+    "validation_batches_evaluated": 0,
+    "scientific_attempt_consumed": false,
+    "failure": "serialized model_config dictionaries were not byte-identical"
+  },
+  "observed_config_difference": {
+    "omitted_default_equivalences": {
+      "block_fht_attn_cayley_atlas_start_steps": [null, []],
+      "block_fht_attn_cayley_factor_optimizer": [null, "adamw"],
+      "block_fht_mlp_cproj_muon_matched_givens_output_stages": [null, 0]
+    },
+    "hybrid_optimizer_fields": {
+      "block_fht_mlp_cproj_hybrid_output": [null, true],
+      "block_fht_mlp_cproj_hybrid_task_stages": [null, 16],
+      "block_fht_mlp_cproj_hybrid_directed_incoming": [null, 8],
+      "block_fht_mlp_cproj_hybrid_control_stages": [null, 32],
+      "block_fht_mlp_cproj_hybrid_ridge_ratio": [null, 1e-6],
+      "block_fht_mlp_cproj_hybrid_sample_cap": [null, 2048]
+    }
+  },
+  "observed_state_topology": {
+    "parent_tensor_count": 340,
+    "hybrid_tensor_count": 376,
+    "parent_only_tensors": 0,
+    "common_shape_differences": 0,
+    "hybrid_only_tensor_count": 36,
+    "hybrid_only_exact_pattern": "for every layer 0 through 11: mlp.c_proj.output_last_angles, output_selected_permutations, and output_selected_inverse_permutations",
+    "hybrid_only_role": "persistent optimizer selector history; not read by evaluation forward"
+  },
+  "source_evidence": {
+    "muon_matched_givens_path": "examples/nanogpt/muon_matched_givens.py",
+    "muon_matched_givens_sha256": "b743b56b343bd692ad125df4d7daeb77274c8516b91868410992987373d6149b",
+    "forward_contract": "MuonMatchedGivensLinear.forward returns F.linear(values, self.weight, self.bias); output selector-history buffers are not read",
+    "activation_context_contract": "record_hybrid_output_context returns without recording when self.training is false",
+    "model_path": "examples/nanogpt/model.py",
+    "model_sha256": "3ddac7403ab8fe3b26f6ed8ba019d6b38119419a0b49df28b40a1ca3f3a2d90e"
+  },
+  "amended_identity_gate": {
+    "unchanged": [
+      "checkpoint, metadata, result, plan, and dataset hashes",
+      "all common state tensor names and shapes",
+      "all preregistered evaluation windows, variants, and decision thresholds"
+    ],
+    "replace": "byte-identical serialized model_config and exact state-key equality",
+    "with": [
+      "canonical GPTConfig values must differ only in the six allow-listed hybrid optimizer fields",
+      "parent state must be an exact subset of hybrid state with identical common shapes",
+      "the hybrid-only state must be exactly the three allow-listed output selector-history buffers in each of layers 0 through 11",
+      "both contexts use the hybrid-configured evaluation module; parent loading may omit only the allow-listed selector-history buffers",
+      "a focused test must prove bitwise-equal eval forward for parent-style and hybrid-style MuonMatchedGivensLinear modules with equal weight and bias despite different selector buffers"
+    ]
+  },
+  "scientific_rules_unchanged": true,
+  "loss_observed_before_amendment": false,
+  "training_authorized": false
+}
