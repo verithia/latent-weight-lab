@@ -1,0 +1,154 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_endpoint_plan_v1",
+  "registered_at": "2026-08-05",
+  "question": "At the accepted error-feedback c_proj endpoint, can a coupled identity-initialized pre-GELU/post-GELU orthogonal frame lower full student next-token CE when every learned checkpoint tensor is frozen?",
+  "scientific_scope": "task-conditioned frozen-endpoint capacity diagnostic only; its extra optimization tokens are not a same-compute architecture result and cannot close the 0.5-TPP training gap",
+  "evidence_chain": {
+    "accepted_parent": "The causal hidden64+24 c_proj error-feedback run finished at validation CE 5.52736521, only 0.03556521 above the attention-only control.",
+    "rejected_selector": "A task16-plus-directed8 causal output selector finished at 5.60775137 and was rejected.",
+    "endpoint_intervention": "The rejected c_proj inserted into the parent context reproduced 1.015x of the native endpoint penalty, while the parent c_proj could not repair the co-adapted rejected context. The harmful c_proj direction and compensating wider-block context must therefore be addressed jointly.",
+    "prior_chart_evidence": "At the older plain-c_proj endpoint, post-GELU hidden/output rotations gained about 0.0097 CE across two seeds and a separate pre-GELU frame added about 0.008-0.010 CE, but the paired from-scratch structure did not transfer. Re-test capacity at the substantially better accepted error-feedback endpoint before any new causal run."
+  },
+  "inputs": {
+    "accepted_parent_checkpoint": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/scientific/ckpt.pt",
+      "sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+      "metadata_sha256": "37b69079f6274639d7351abb15d8d0976d192d9fa5f56296a437a1283be2c790",
+      "terminal_fixed_validation_ce": 5.527365207672119
+    },
+    "accepted_parent_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_0p5tpp_result.json",
+      "sha256": "272f8709ddc805175542b2f163398d9823141aca0e1f6026f699a51bc5af87df"
+    },
+    "endpoint_intervention_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_endpoint_interpolation_result.json",
+      "sha256": "b3da66aa6c041d177a78613192b12eab3fe38a3b3d08b0d58ad9672ff526e628"
+    },
+    "prior_bilateral_endpoint_result_sha256": "c3146795b7491021a9a7a6ec9b0f31a41673aac3823ffd79f342abe17adaff9a",
+    "prior_bilateral_attribution_result_sha256": "e50a0beb0236639b02e11449a9402b09f77e239ba7bfbafcfa66e18be1dd249e",
+    "prior_pregelu_endpoint_result_sha256": "53e6161da799c6aac7f27e99eb8cce4305c0ff9ccd5ba83d7296098d2678305b",
+    "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "structure": {
+    "layers": "all 12 transformer MLPs",
+    "pregelu_frame": {
+      "location": "folded into dense c_fc output before GELU",
+      "stages": 2,
+      "rotation_block_size": 32,
+      "basis_block_size": 256,
+      "coordinate_scale": 4.0,
+      "basis_seed": 161803
+    },
+    "postgelu_hidden_frame": {
+      "location": "folded into the input side of the materialized MuonMatchedGivensLinear c_proj weight",
+      "stages": 2,
+      "rotation_block_size": 32,
+      "basis_block_size": 256,
+      "coordinate_scale": 4.0,
+      "basis_seed": 314159
+    },
+    "residual_output_frame": {
+      "location": "folded into the output side of c_proj before the identity residual addition",
+      "stages": 4,
+      "rotation_block_size": 32,
+      "basis_block_size": 256,
+      "coordinate_scale": 4.0,
+      "basis_seed": 271828
+    },
+    "initialization": "exact identity for every coordinate group",
+    "scalar_gains": false,
+    "learned_dense_basis": false,
+    "lora_adapter": false,
+    "residual_hyperconnection": false,
+    "inference_cost_after_folding": "none beyond the unchanged dense materialized c_fc and c_proj GEMMs"
+  },
+  "optimization_protocol": {
+    "updated_parameters": "only the three registered fixed-basis rotation-coordinate groups in every layer; all checkpoint tensors, Muon materialized weights, embeddings, norms, attention, and LM head are frozen",
+    "objective": "next-token cross entropy on deterministic fresh train.bin windows",
+    "updates": 120,
+    "evaluation_updates": [0, 30, 60, 120],
+    "micro_batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "tokens_per_update": 262144,
+    "diagnostic_optimization_tokens": 31457280,
+    "optimizer": "fused AdamW",
+    "learning_rate": 0.000072,
+    "betas": [0.9, 0.95],
+    "weight_decay": 0.0,
+    "learning_rate_schedule": "constant",
+    "gradient_clipping": null,
+    "train_token_seed": 20260882,
+    "teacher_objective": false,
+    "no_learning_rate_or_capacity_sweep": true
+  },
+  "evaluation_protocol": {
+    "data_split": "val.bin only; no validation window participates in optimization",
+    "batch_size": 8,
+    "block_size": 256,
+    "batches_per_seed": 8,
+    "primary_seed": 20260880,
+    "confirmation_seed": 20260881,
+    "selection": "choose the registered update with lowest full-coupled primary CE, then report full-coupled, post-only, pre-only, and identity CE on both seeds at that same update",
+    "ablations": {
+      "full_coupled": "pre-GELU plus post-GELU hidden and residual-output rotations",
+      "post_only": "post-GELU hidden plus residual-output rotations with pre-GELU coordinates set to zero",
+      "pre_only": "pre-GELU rotation with both post-GELU coordinate groups set to zero",
+      "identity": "all three coordinate groups set to zero"
+    }
+  },
+  "decision_rule": {
+    "coupled_activation_frame_capacity": "at the primary-selected nonzero update, full-coupled improves both seeds by at least 0.0075 CE versus identity, post-only improves both by at least 0.005 CE, and full-coupled improves both by at least 0.0025 CE versus post-only",
+    "post_cproj_frame_only_capacity": "the coupled rule fails but post-only improves both seeds by at least 0.005 CE versus identity",
+    "local_frame_capacity_insufficient": "neither registered cross-seed rule passes",
+    "automatic_training_authorized": false,
+    "interpretation_limit": "even a pass demonstrates local task-conditioned capacity only; it does not establish same-budget causal transfer"
+  },
+  "performance_gate": {
+    "required_before_scientific_updates": true,
+    "minimum_mfu_fraction": 0.2,
+    "measurement": "the exact coupled cached path, optimizer, batch shape, accumulation, checkpoint, code commit, dataset, and GPU used by the diagnostic",
+    "numerator": "conventional active-model 6N FLOPs times measured tokens per second",
+    "denominator": "same-GPU empirical BF16 tensor-core GEMM peak",
+    "preflight_updates": {"warmup": 2, "timed": 3},
+    "stability_control": {
+      "seed": 20260883,
+      "batches": 2,
+      "batch_size": 8,
+      "block_size": 256,
+      "maximum_ce_increase_after_five_updates": 0.05
+    },
+    "policy": "direct foreground polling; no scientific updates unless exact-path MFU is at least 20 percent, all losses and gradients are finite, all frozen tensors are unchanged, and the separate safety-window CE increase is at most 0.05"
+  },
+  "implementation_gate": {
+    "materialized_muon_cproj_cache": "the production c_proj chart cache must accept the frozen MuonMatchedGivensLinear weight buffer without changing normal BlockFHT training semantics",
+    "required_tests": [
+      "cached and uncached charted c_proj forwards are exact for a materialized MuonMatchedGivensLinear base",
+      "cache flush projects gradients only to chart coordinates when project_base_gradient is false",
+      "the frozen c_proj base remains bitwise unchanged",
+      "identity coordinates preserve the parent endpoint",
+      "saved ablation states restore exactly"
+    ]
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "polling": "direct foreground polling only",
+    "watchdog": false,
+    "callbacks": false,
+    "queue_entry": false,
+    "required_artifacts": [
+      "source commit and source SHA-256",
+      "literal commands",
+      "checkpoint, result, plan, and dataset-manifest SHA-256",
+      "preflight MFU/safety certificate and SHA-256",
+      "fixed train and validation index digests",
+      "optimization and all-ablation validation CSVs",
+      "coordinate states at all registered evaluation updates",
+      "summary JSON and hashes"
+    ]
+  },
+  "next_if_capacity_passes": "Preregister one same-budget 238-update causal 124M run with separate low-LR frame coordinates active during training; endpoint gains cannot be counted as training-gap closure.",
+  "next_if_capacity_fails": "Close this fixed-basis local frame family and investigate a nonlinear transported MLP connection or residual mixer without adding a learned dense basis."
+}
