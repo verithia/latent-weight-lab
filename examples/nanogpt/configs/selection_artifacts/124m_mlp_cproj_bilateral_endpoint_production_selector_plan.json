@@ -1,0 +1,76 @@
+{
+  "authorization": {
+    "language_model_training_authorized": false,
+    "parameter_updates": 0,
+    "scope": "one direct foreground replay and fixed-window evaluation of the existing 239-snapshot PRO6 trajectory",
+    "watchdog": false
+  },
+  "decision_rule": {
+    "candidate_pass": "All values must be finite; candidate validation CE must be at least 0.002 below the production-selector right-only arm; candidate train CE must be no worse; and candidate validation distance from dense endpoint must be smaller than right-only.",
+    "minimum_train_ce_gain_vs_right_only": 0.0,
+    "minimum_validation_ce_gain_vs_right_only": 0.002,
+    "on_failure": "Treat the previous bilateral endpoint pass as a connectivity-target artifact and abandon output rotation as the next causal fix.",
+    "on_pass": "Conclude that output-frame capacity remains real under the production selector but is trajectory-conditioned; do not retrain the same structure. Design a task-metric or dense-direction surrogate before another training run.",
+    "selection_order": [
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "execution": {
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_mlp_cproj_bilateral_endpoint_fixed_eval",
+      "--snapshot-dir",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/parameter_trajectory",
+      "--checkpoint",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+      "--data-dir",
+      "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
+      "--plan",
+      "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_production_selector_plan.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_production_selector_v1",
+      "--connectivity-target",
+      "production_nondecay",
+      "--device",
+      "cuda:0"
+    ],
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "output_directory_must_be_absent": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_bilateral_endpoint_fixed_eval_production_selector_v1",
+    "workspace_cap_gib": 256
+  },
+  "inputs": {
+    "causal_training_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_output32_0p5tpp_result.json",
+    "causal_training_result_sha256": "5a4ed63d7cc17a23819a4802b3aca4699edf004ac025ffa8466a1016c89abba2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_endpoint_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+    "dense_endpoint_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "prior_endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_fixed_eval_pro6_replay_result.json",
+    "prior_endpoint_result_sha256": "c7a181dd41405da424e215806ebe92d75b939700bf93d7d964b850736aa11a35",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "trajectory_snapshot_layers": [0, 3, 6, 9, 11],
+    "trajectory_snapshot_steps": "0 through 238 inclusive"
+  },
+  "registered_change": {
+    "angle_target": "unchanged: full corrected update including candidate-specific decoupled weight decay and full compression-error carry",
+    "connectivity_target": "dense teacher non-decay Muon direction plus compression error divided by learning rate; excludes decoupled weight decay exactly as production does",
+    "variants": [
+      "dense_endpoint",
+      "hidden88_full_carry",
+      "hidden88_output32_full_carry",
+      "hidden88_output64_full_carry"
+    ],
+    "weight_decay_application": "unchanged: multiply the post-rotation candidate by 1 - learning_rate * weight_decay"
+  },
+  "recorded_at": "2026-08-04",
+  "schema_version": "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_plan_v1",
+  "scientific_question": "Does the bilateral endpoint CE gain survive when teacher-forced connectivity selection is made production-faithful by excluding decoupled weight decay?",
+  "source_commit_before_implementation": "83d1b32",
+  "status": "registered_before_implementation_and_execution"
+}
