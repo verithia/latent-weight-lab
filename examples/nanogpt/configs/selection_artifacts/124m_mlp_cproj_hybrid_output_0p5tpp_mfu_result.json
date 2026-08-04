@@ -1,0 +1,83 @@
+{
+  "artifact_kind": "124m_mlp_cproj_hybrid_output_0p5tpp_exact_config_mfu_result",
+  "certificate": {
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_hybrid_output_errorfeedback_0p5tpp/performance_preflight.log",
+    "log_sha256": "3c8a991f6e2742646d0db1d0b6ed62ee509011e14b5f7bcc494943822806f462",
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_hybrid_output_errorfeedback_0p5tpp/performance_preflight.json",
+    "sha256": "cba9b9adde7b60e77970fdb6b1aceed6cca15434f84a3f1184b8a4fc2e635f83"
+  },
+  "classification": "CPROJ_HYBRID_OUTPUT_0P5TPP_EXACT_CONFIG_MFU_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_hybrid_output_errorfeedback_0p5tpp.json",
+    "sha256": "b85e1bd1ed239056a2ad3c093d1ac01b196a7add6795a77772de66f3e9a57a93"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "one_full_238_update_run_authorized": true,
+    "reason": "The exact preregistered causal hybrid output path is finite in all 12 c_proj layers, uses the validated native matching extension, obeys every combined trust bound, and exceeds the frozen 20 percent MFU floor."
+  },
+  "execution": {
+    "callback": false,
+    "config_commit": "c5184ddbb918e5a2cfd901e9120a8c2680fe112a",
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "implementation_commit": "2fc7db460e44e10bc81414e155f93d549ac49646",
+    "native_extension_required": true,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "average_iter_ms": 1651.51,
+    "empirical_bf16_peak_tflops": 417.1781028281352,
+    "mfu_fraction": 0.2841709507351441,
+    "minimum_required_mfu_fraction": 0.2,
+    "model_tflops": 118.54989810655488,
+    "peak_mib": 34054.06,
+    "timing_breakdown_ms": {
+      "data_ms": 0.7375,
+      "eval_ms": 0.0,
+      "flush_ms": 4.33375,
+      "fwbw_ms": 1187.38375,
+      "grad_ms": 1.6875,
+      "opt_ms": 452.28625,
+      "other_ms": 1.13,
+      "prepare_ms": 3.9525
+    },
+    "tokens_per_second": 158732.0575
+  },
+  "path_validation": {
+    "all_combined_trust_bounds_obeyed": true,
+    "all_parent_native_outputs_validated": true,
+    "all_residual_native_outputs_validated": true,
+    "coordinate_count_per_layer": 147456,
+    "hybrid_layer_count": 12,
+    "hybrid_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "output_selector": "causal_task16_then_minimax8"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_training_plan.json",
+    "sha256": "04cc84668ccf4b790dae7988b0693084f418fde42bedc7b5d3f0870dc7cbf5b1"
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_mlp_cproj_hybrid_output_0p5tpp_exact_config_mfu_result_v1",
+  "speed_comparison_to_causal_parent": {
+    "candidate_iter_ms": 1651.51,
+    "candidate_mfu_fraction": 0.2841709507351441,
+    "candidate_optimizer_ms": 452.28625,
+    "parent_iter_ms": 1488.49,
+    "parent_mfu_fraction": 0.316928745502483,
+    "parent_optimizer_ms": 289.0675,
+    "relative_iter_time_increase": 0.10952038643188196,
+    "relative_mfu_decrease": 0.10336170669129015,
+    "interpretation": "The causal hybrid selector adds about 163 ms per update, concentrated in optimizer work. This is a measurable roughly 11 percent throughput cost but remains above the scientific 20 percent MFU floor."
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13
+  }
+}
