@@ -111,6 +111,7 @@ def replay_terminal_states(
     seed: int,
     device: str,
     expected_identity: str,
+    connectivity_target: str,
 ) -> tuple[dict[tuple[str, int], torch.Tensor], dict[str, Any]]:
     paths = [snapshot_dir / f"step_{step:06d}.pt" for step in range(239)]
     missing = [str(path) for path in paths if not path.is_file()]
@@ -154,10 +155,16 @@ def replay_terminal_states(
                 key = (arm.name, layer)
                 candidate = states[key]
                 requested = dense_nondecay - lr * weight_decay * candidate
+                parent_connectivity_update = None
+                if connectivity_target == "production_nondecay":
+                    parent_connectivity_update = (
+                        dense_nondecay + feedback[key]
+                    )
                 states[key], feedback[key], _ = structured_step(
                     candidate,
                     requested,
                     feedback[key],
+                    parent_connectivity_update=parent_connectivity_update,
                     output_stages=arm.output_stages,
                     learning_rate=lr,
                     weight_decay=weight_decay,
@@ -174,7 +181,11 @@ def replay_terminal_states(
         "last_sha256": file_sha256(paths[-1]),
         "total_bytes": sum(path.stat().st_size for path in paths),
     }
-    return states, {"config": config, "snapshot_inventory": inventory}
+    return states, {
+        "config": config,
+        "connectivity_target": connectivity_target,
+        "snapshot_inventory": inventory,
+    }
 
 
 def install_variant(
@@ -269,20 +280,40 @@ def main() -> None:
     parser.add_argument("--dtype", choices=("bfloat16", "float16", "float32"), default="bfloat16")
     parser.add_argument("--minimum-val-gain", type=float, default=0.002)
     parser.add_argument("--minimum-train-gain", type=float, default=0.0)
+    parser.add_argument(
+        "--connectivity-target",
+        choices=("legacy_full_requested", "production_nondecay"),
+        default="legacy_full_requested",
+    )
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
     started = time.time()
     layers = [int(value) for value in args.layers.split(",")]
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
-    if plan.get("schema_version") != "mai_124m_mlp_cproj_bilateral_endpoint_fixed_eval_plan_v1":
+    schema_version = plan.get("schema_version")
+    if schema_version not in {
+        "mai_124m_mlp_cproj_bilateral_endpoint_fixed_eval_plan_v1",
+        "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_plan_v1",
+    }:
         raise ValueError("unexpected plan schema")
+    if (
+        schema_version
+        == "mai_124m_mlp_cproj_bilateral_endpoint_production_selector_plan_v1"
+        and args.connectivity_target != "production_nondecay"
+    ):
+        raise ValueError("production-selector plan requires production_nondecay")
+    decision_rule = plan.get(
+        "registered_decision_rule", plan.get("decision_rule")
+    )
+    if not isinstance(decision_rule, dict):
+        raise ValueError("plan does not contain a decision rule")
     if file_sha256(args.checkpoint) != plan["inputs"]["dense_endpoint_checkpoint_sha256"]:
         raise ValueError("dense endpoint checkpoint hash mismatch")
     if file_sha256(args.data_dir / "manifest.json") != plan["inputs"]["dataset_manifest_sha256"]:
         raise ValueError("dataset manifest hash mismatch")
-    if args.minimum_val_gain != plan["registered_decision_rule"]["minimum_validation_ce_gain_vs_right_only"]:
+    if args.minimum_val_gain != decision_rule["minimum_validation_ce_gain_vs_right_only"]:
         raise ValueError("minimum validation gain differs from plan")
-    if args.minimum_train_gain != plan["registered_decision_rule"]["minimum_train_ce_gain_vs_right_only"]:
+    if args.minimum_train_gain != decision_rule["minimum_train_ce_gain_vs_right_only"]:
         raise ValueError("minimum train gain differs from plan")
 
     print("replaying terminal states", flush=True)
@@ -293,6 +324,7 @@ def main() -> None:
         seed=args.seed,
         device=args.device,
         expected_identity=plan["inputs"]["trajectory_run_identity_sha256"],
+        connectivity_target=args.connectivity_target,
     )
     checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
     dense_weights = {
@@ -398,7 +430,14 @@ def main() -> None:
             "result_sha256": file_sha256(result_path),
             "terminal_states_sha256": file_sha256(state_path),
         },
-        "limitations": plan["limitations"],
+        "limitations": plan.get(
+            "limitations",
+            [
+                "Only the five recorded c_proj layers are replaced.",
+                "Directions remain teacher-forced from the paired dense replay.",
+                "This is an endpoint capacity/task-direction oracle, not causal training.",
+            ],
+        ),
     }
     metadata_path = args.output / "cproj_bilateral_endpoint_fixed_eval_metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2, sort_keys=True) + "\n")

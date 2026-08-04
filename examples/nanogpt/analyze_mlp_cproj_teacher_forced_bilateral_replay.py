@@ -82,6 +82,7 @@ def fit_right_pass(
     weight: torch.Tensor,
     target_update: torch.Tensor,
     *,
+    matching_target_update: torch.Tensor | None = None,
     stages: int,
     neighbors: int,
     seed: int,
@@ -90,7 +91,11 @@ def fit_right_pass(
         return weight
     permutations, _ = fast_muon_matched_permutations(
         weight,
-        target_update,
+        (
+            target_update
+            if matching_target_update is None
+            else matching_target_update
+        ),
         stages=stages,
         neighbors=neighbors,
         seed=seed,

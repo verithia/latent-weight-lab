@@ -70,6 +70,7 @@ def structured_step(
     requested_update: torch.Tensor,
     feedback: torch.Tensor,
     *,
+    parent_connectivity_update: torch.Tensor | None = None,
     output_stages: int,
     learning_rate: float,
     weight_decay: float,
@@ -83,6 +84,9 @@ def structured_step(
         updated = fit_right_pass(
             current,
             residual,
+            matching_target_update=(
+                parent_connectivity_update if pass_index == 0 else None
+            ),
             stages=stages,
             neighbors=neighbors,
             seed=seed + pass_index,
