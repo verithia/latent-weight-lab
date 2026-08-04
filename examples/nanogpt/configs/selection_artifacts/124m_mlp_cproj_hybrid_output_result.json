@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_hybrid_output_result_v1",
+  "recorded_at": "2026-08-05",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_plan.json",
+    "sha256": "ff16d5bf5d497f17fede724af6df6406c746be6d6a0d8729efd9ddaa9ddd2330"
+  },
+  "acquisition": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "c1c62ac7ec74c9b25529a080a81f2808e35ac596",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_hybrid_output.py",
+    "source_sha256": "a79a00a9feb148fbd9121d391126f3a7ee6596bc38476ae7627040c0aed97a81",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 53.55256199836731,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "remote_output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_activation_selector_probe_0p5tpp/hybrid_output",
+    "result_sha256": "66d00523bc9959dd819b095edd78320332ada5af9404f1f0755066f4843c2491",
+    "cells_sha256": "65d817a25044b3a73395005471a1c9f419b27bbe7ad283a1949ddecb28afaf4b",
+    "finite_ce_sha256": "c8577bf14f3e92f2264030f22213187fbe3802799d8736a65cae4dc326728596",
+    "chart_sha256": "821b2a7263c78fd624f2c79c0b945e23eab4ba24ae583ea88f328874c162a809",
+    "log_sha256": "8d645b2d0684086f2a327d4262de9cb11d37be6a21b74e155264976e44db4993"
+  },
+  "aggregate": {
+    "mean_finite_step_ce": {
+      "frobenius_output32": 7.1815125197172165,
+      "task_gradient_output32": 7.1806570291519165,
+      "global_directed_minimax16": 7.180864259600639,
+      "task16_then_minimax8": 7.18056857585907,
+      "minimax8_then_task16": 7.180481672286987
+    },
+    "task16_then_minimax8": {
+      "heldout_residual_ratio_to_control": 0.8109642762646929,
+      "heldout_task_descent": 0.0046997415207022785,
+      "heldout_task_ratio_to_control": 1.3182924177588815,
+      "wins_vs_control": 8,
+      "holdout_wins_vs_control": 4,
+      "minimum_trust_scale": 0.8003006304915182,
+      "minimum_singular_value": 0.9965604815650907,
+      "passed": true
+    },
+    "minimax8_then_task16": {
+      "heldout_residual_ratio_to_control": 0.8275667856629927,
+      "heldout_task_descent": 0.004775507115346738,
+      "heldout_task_ratio_to_control": 1.3395449076047188,
+      "wins_vs_control": 8,
+      "holdout_wins_vs_control": 4,
+      "minimum_trust_scale": 0.8699136850043993,
+      "minimum_singular_value": 0.996321243526515,
+      "passed": true
+    },
+    "all_frozen_gates_passed": true,
+    "selected_by_preregistered_priority": "task16_then_minimax8",
+    "numerically_best_mean_ce": "minimax8_then_task16"
+  },
+  "decision": {
+    "classification": "HYBRID_OUTPUT_PASS",
+    "production_preregistration_authorized": true,
+    "language_model_training_authorized": false,
+    "selected_structure": "task16_then_minimax8",
+    "diagnosis": "The orthogonal task-selected and non-orthogonal directed charts are complementary at fixed capacity: both frozen composition orders improve residual coverage, task descent, and finite-step CE beyond either full-budget component. The reverse order is numerically lower in mean CE by 0.00008690, but the immutable selection rule gives the passing task-first order priority.",
+    "next_action": "Preregister a causal 124M production replay for task16_then_minimax8, implement online-only statistics with correctness and exact-resume tests, then require measured MFU at least 20 percent before any training run."
+  }
+}
