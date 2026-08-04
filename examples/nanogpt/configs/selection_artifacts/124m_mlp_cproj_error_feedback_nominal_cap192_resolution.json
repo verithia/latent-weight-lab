@@ -1,0 +1,94 @@
+{
+  "authorization": {
+    "automatic_rerun_authorized": false,
+    "cap_sweep_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "one_scientific_run_only_after_full_gate": true,
+    "single_mfu_preflight": true
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_cap192_0p5tpp.json",
+    "sha256": "4c8fc998a0fdf059a060c351e490b5543f8fd8b436fff2e067f1ba96c9123ad3"
+  },
+  "execution": {
+    "callback": false,
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/performance_preflight.json",
+    "direct_foreground_polling": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "MAPPING_NETWORKS_NATIVE_CACHE=/mnt/ssd-data/orj/MappingNetworks/outputs/native_cache",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_cap192_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "preflight_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/performance_preflight.log",
+    "prelaunch_metadata": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_cap192_0p5tpp/prelaunch_run_metadata.json",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "scientific_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "MAPPING_NETWORKS_NATIVE_CACHE=/mnt/ssd-data/orj/MappingNetworks/outputs/native_cache",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_cap192_0p5tpp.json"
+    ],
+    "watchdog": false,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab"
+  },
+  "gates": {
+    "minimum_mfu_fraction": 0.2,
+    "required_scientific_cap_events": 1,
+    "required_scratch_cap_events": 1,
+    "required_timed_updates": 8,
+    "scientific_promotion_ceiling": 5.522365207672119
+  },
+  "implementation": {
+    "commit": "5e19cf7d5a89d5360adeb2f13d41ffe009c7b0db",
+    "source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "eb2312801e4b532d10540224aa2027ab70d1e5c68845febced341412eea1e985",
+      "examples/nanogpt/model.py": "86bcae18fcf86e75af4e3929a239897ed18129e19e6fc79c92d4cf2eb7a54666",
+      "examples/nanogpt/muon.py": "532e172d91306d12284507c96aa3176792b33eb657f568512ce278bb5a9874ff",
+      "examples/nanogpt/muon_matched_givens.py": "b73ed8ed213b17f2d63046b7a75451c3f17b3516a9b77c0809d3b0a031461cf7",
+      "examples/nanogpt/test_cproj_error_feedback_schedule.py": "68af908631af05e18ba5c8655ce8f68700b7a588fad98143db76c3bdc0805b21",
+      "examples/nanogpt/test_muon_matched_givens.py": "30db3afa48881f8a294c6958844a33214e5922943ac178e0fcb8aa115b849b55",
+      "examples/nanogpt/train.py": "56ee43523e124e785163fa3ae1a2a7c54a02c8c593042ee4367934d094df4000",
+      "latent_weight_lab/block_fht.py": "864ba9a79664cba2f830c06b11214538b7817685e1ba990f6e103feefb49b561"
+    }
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_nominal_cap192_plan.json",
+    "sha256": "b1c9fbd15c1483d99d8677300a372c31c8414efbfba83ba7a5fd1c7ab0973511"
+  },
+  "recorded_at": "2026-08-05",
+  "schema_version": "mai_124m_mlp_cproj_nominal_cap192_resolution_v1",
+  "scientific_invariants": {
+    "decision_threshold_changed": false,
+    "mlp_cfc_dense": true,
+    "only_scientific_change_from_parent": "error_feedback_max_nominal_steps: null -> 192.0",
+    "parent_config_sha256": "fb7d8f5b4e5f8a98a30fa6216080146622f018403a5b7f8dddc1875803a81cd9"
+  },
+  "status": "bound_before_performance_or_scientific_execution"
+}
