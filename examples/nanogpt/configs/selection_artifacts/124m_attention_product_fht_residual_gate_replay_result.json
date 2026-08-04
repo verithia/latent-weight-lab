@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_attention_product_fht_residual_gate_replay_result_v1",
+  "artifact_kind": "dense_attention_replay_result",
+  "recorded_at": "2026-08-04",
+  "classification": "ACCEPT_DENSE_ATTENTION_REPLAY",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_plan.json",
+    "sha256": "e4f96d76d133e9584639fb0b6ed015d83338b56b57e681cfed3206f6ae09415a"
+  },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_mfu_result.json",
+    "mfu_fraction": 0.38656714872906056
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp_20260804T201751Z_4170174",
+    "git_commit": "5f38bf2f6ca351ef7d15c71373006523f59fd0a6",
+    "entrypoint": "examples.nanogpt.train",
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp_20260804T201751Z_4170174.config.json"
+    ],
+    "started_at": "2026-08-05T04:17:51+08:00",
+    "finished_at": "2026-08-05T04:24:13+08:00",
+    "exit_code": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false
+  },
+  "identity": {
+    "config_sha256": "f5ffdc737b6358b0f9c5b85d01f2f78b45182b3295eabd8d70ee65bbeb726c6d",
+    "resolved_config_sha256": "9134d706d70b5f972de21b3492428af9dcbd0e1f78af80bc9324d8bf2f144b70",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "dcd0517abee1788a554aee27d1cc02ded292ffe3e824deccad0bc77e56aae871",
+    "provenance_sha256": "2ce9ad2b032552b0787eeeb35879be8110018b1705b6ed7ef1ba6093d2e532e9"
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 11.0027, "validation_ce": 11.0020},
+    {"step": 60, "train_ce": 6.2259, "validation_ce": 6.2353},
+    {"step": 120, "train_ce": 5.7440, "validation_ce": 5.7489},
+    {"step": 180, "train_ce": 5.5583, "validation_ce": 5.5616},
+    {"step": 238, "train_ce": 5.4861, "validation_ce": 5.4889}
+  ],
+  "reproducibility_check": {
+    "historical_terminal_validation_ce": 5.4890,
+    "replay_terminal_validation_ce": 5.4889,
+    "absolute_delta_ce": 0.0001,
+    "passed": true
+  },
+  "diagnostic_inventory": {
+    "trajectory_steps": [0, 60, 120, 180, 238],
+    "trajectory_files": 5,
+    "optimizer_probe_steps": [0, 60, 120, 180],
+    "optimizer_probe_files": 4,
+    "parameters_per_file": 10,
+    "layers": [0, 3, 6, 9, 11],
+    "targets": ["attn.c_attn", "attn.c_proj"]
+  },
+  "artifacts": {
+    "log_sha256": "63741f2118573157d2ddb7848862ab478ff1fbfa9b4b411037f1c11f979c2c54",
+    "status_sha256": "6d8146b272fedec080ea97aaf49ea69dfdcf224c7e5ae984b28f88571f48ac57",
+    "checkpoint_sha256": "475d2f0ee4181106719861e9f16fa0a1f2851349413acc19e1ab4c642d063ca0",
+    "checkpoint_metadata_sha256": "c575be6ba125cb8a620b9094bb806af0fdf3f0924ab8f521e77c4058c8d15ad4"
+  },
+  "decision": {
+    "accepted": true,
+    "reason": "clean exact 238-update replay, matching identities and complete diagnostic inventory, with terminal validation CE within 0.0001 of the historical dense control",
+    "next_action": "run the committed zero-update ProductFHT residual tangent oracle; do not train a candidate unless every registered recovery threshold passes"
+  }
+}
