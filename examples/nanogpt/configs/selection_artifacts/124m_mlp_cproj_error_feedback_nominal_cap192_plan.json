@@ -1,0 +1,108 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_error_feedback_nominal_cap192_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-05",
+  "scientific_question": "Can a direction-preserving dimensionless norm cap remove c_proj error-feedback overdrive without destroying the useful temporal direction retained by constant full carry?",
+  "source_commit_before_implementation": "13809d3998fc82fab57aaf68d506a35dd130148d",
+  "evidence_before_registration": {
+    "accepted_124m_constant_decay1_validation_ce": 5.527365207672119,
+    "accepted_124m_constant_decay1_mean_terminal_feedback_nominal_steps": 193.676,
+    "accepted_124m_constant_decay1_layer_range_terminal_feedback_nominal_steps": [
+      181.338,
+      199.075
+    ],
+    "rejected_124m_half_switch_validation_ce": 5.548335075378418,
+    "rejected_124m_half_switch_mean_terminal_feedback_nominal_steps": 1.3046,
+    "accepted_350m_decay0p5_validation_ce": 4.424571514129639,
+    "rejected_350m_decay1_validation_ce": 4.480673,
+    "rejected_350m_decay1_layer_range_terminal_feedback_nominal_steps": [
+      388.878,
+      657.185
+    ],
+    "interpretation": "A scalar late decay destroys useful 124M directional memory, while unconstrained carry overdrives at 350M. A norm cap preserves the residual direction and intervenes only on magnitude. Cap 192 is the smallest single preregistered intervention centered on the useful 124M terminal scale; no cap sweep is authorized."
+  },
+  "parent": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_twopassfresh88_errorfeedback_0p5tpp.json",
+    "config_sha256": "fb7d8f5b4e5f8a98a30fa6216080146622f018403a5b7f8dddc1875803a81cd9",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_error_feedback_0p5tpp/scientific/ckpt.pt",
+    "checkpoint_sha256": "7e614ddfdb6fd53d95c8cb790a70deb334f055aab42f6c8c9a17312071755063",
+    "validation_ce": 5.527365207672119,
+    "error_feedback_decay": 1.0,
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "matching_neighbors": 64
+  },
+  "candidate": {
+    "only_scientific_change": "after each c_proj compression residual is formed, rescale it only when required so its per-layer Frobenius norm is at most max_nominal_steps * abs(current_lr) * sqrt(output_rows)",
+    "max_nominal_steps": 192.0,
+    "cap_application": "post-compression, before persistence as the next-step feedback state",
+    "direction_preserved_when_capped": true,
+    "error_feedback_decay": 1.0,
+    "forward_graph_changed": false,
+    "additional_trainable_parameters": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0,
+    "dense_optimizer_state_retained_for_this_causal_test": true,
+    "not_authorized": [
+      "cap sweep",
+      "clock-based decay schedule",
+      "learned basis",
+      "LoRA adapter",
+      "residual hyperconnection",
+      "larger model or token rung"
+    ]
+  },
+  "identity": {
+    "model": "MAI-v3 124M full-attention replacement plus c_proj-only Muon-matched hidden64+24 replacement",
+    "token_budget": "0.5 TPP",
+    "max_iters": 238,
+    "learning_rate": 0.0024,
+    "min_lr": 0.00024,
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "block_size": 1024,
+    "tokens_per_update": 262144,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "fixed_eval_seed": 20260715,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "correctness_gate": {
+    "required": [
+      "default-off and uncapped full-carry behavior remains bitwise identical",
+      "synthetic residual cap preserves direction and enforces the exact Frobenius bound",
+      "all production c_proj groups receive the registered cap and no other optimizer group does",
+      "cap diagnostics report finite pre-cap norm, post-cap norm, nominal steps, scale, and active flag",
+      "interrupted two-step exact resume is bitwise identical for model, optimizer, RNG, and capped feedback state"
+    ]
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "protocol": "direct foreground polling; exact candidate config; one warmup plus eight timed BF16 training updates; no watchdog or callback",
+    "minimum_mfu_fraction": 0.20,
+    "all_losses_finite": true,
+    "native_matching_required": true,
+    "cap_path_must_be_exercised_in_scratch_horizon": true
+  },
+  "scientific_gate": {
+    "execution": "exactly one directly polled 238-update run after correctness and performance gates pass",
+    "primary_parent_validation_ce": 5.527365207672119,
+    "minimum_improvement_ce": 0.005,
+    "promotion_ceiling": 5.522365207672119,
+    "near_close_ceiling_attention_plus_0p02": 5.5118,
+    "accepted_attention_only_validation_ce": 5.4918,
+    "required": [
+      "finite terminal fixed-window validation CE",
+      "at least one capped c_proj layer-update in the scientific run",
+      "terminal validation CE no greater than 5.522365207672119"
+    ]
+  },
+  "decision_policy": {
+    "pass": "authorize one separately preregistered 350M cap transfer diagnostic; do not launch it automatically",
+    "fail": "close scalar direction-preserving feedback magnitude control at 124M; do not sweep the cap",
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
