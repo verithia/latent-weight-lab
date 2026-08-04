@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_carry_schedule_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-04",
+  "scientific_question": "Can an early-strong, late-bounded error-feedback schedule retain the endpoint advantage of decay 1 while avoiding its large accumulated compression residual, using the accepted hidden64+24 c_proj chart and no new spatial coordinates?",
+  "parameter_updates": 0,
+  "source_commit_before_implementation": "1e4624423c7b025d5c0c7321668a9e66408259c0",
+  "evidence_before_registration": {
+    "teacher_forced_phase_reset_decay0p5_endpoint_recovery": 0.5648986145974112,
+    "teacher_forced_phase_reset_decay1_endpoint_recovery": 0.8410253750577421,
+    "teacher_forced_decay1_to_decay0p5_max_feedback_ratio": 10.879624847353497,
+    "real_350m_decay1_validation_ce_by_step": {"170": 5.4188, "340": 4.7986, "510": 4.5598, "677": 4.4807},
+    "real_350m_decay0p5_validation_ce_by_step": {"170": 5.46, "340": 4.8521, "510": 4.5402, "677": 4.424571514129639},
+    "interpretation": "Decay 1 wins early and reverses late in real training; decay 0.5 wins terminally. The full-carry replay has much better endpoint tracking but much larger feedback, motivating a schedule rather than another basis."
+  },
+  "inputs": {
+    "trajectory_run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "snapshot_steps": "0 through 238 inclusive",
+    "snapshot_layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608"
+  },
+  "teacher_forcing_protocol": {
+    "trajectory_reset": "Each layer/arm starts once from the exact dense step-0 c_proj weight and follows all 238 updates without phase reset.",
+    "per_step_target": "Use only recorded dense W[t+1]-W[t], remove dense decoupled weight decay before fitting, and apply registered weight decay once to the candidate.",
+    "chart": {"right_parent_stages": 64, "right_residual_stages": 24, "neighbors": 64},
+    "causality": "At step t the arm may use only its current weight, the recorded current dense update, its prior compression residual, and the preregistered deterministic decay schedule.",
+    "interpretation": "This optimistic zero-update replay gates implementation only; language-model loss is not measured."
+  },
+  "arms": [
+    {"name": "constant_decay0p5", "role": "bounded selected 350M control", "formula": "d(t)=0.5"},
+    {"name": "constant_decay1p0", "role": "strong selected 124M control", "formula": "d(t)=1.0"},
+    {"name": "half_switch", "role": "smallest schedule", "formula": "d(t)=1.0 for t<120, otherwise 0.5"},
+    {"name": "late_linear", "role": "smooth late schedule", "formula": "d(t)=1.0 for t<120, otherwise 1.0-0.5*(t-120)/(238-120)"},
+    {"name": "full_cosine", "role": "smooth full-run schedule", "formula": "d(t)=0.75+0.25*cos(pi*t/(238-1))"}
+  ],
+  "metrics": {
+    "per_layer_score_step": ["dense-chord endpoint energy recovery", "endpoint cosine", "row-Gram recovery", "compression-residual Frobenius norm", "mean requested-update recovery"],
+    "aggregate": "Energy-weight endpoint and row-Gram metrics across the five layers; report minimum layer endpoint recovery and maximum feedback norm."
+  },
+  "registered_decision_rule": {
+    "candidate_pass": "At step 120, aggregate endpoint recovery must be at least 0.99x constant decay 1. At step 238, aggregate endpoint recovery must be at least 1.10x constant decay 0.5, maximum layer feedback norm must be at most 0.50x constant decay 1, endpoint recovery must beat constant decay 0.5 in at least 4/5 layers, and every metric must be finite.",
+    "selection_order": ["half_switch", "late_linear", "full_cosine"],
+    "selection": "Choose the first passing arm in the registered order; if none passes, reject scheduled carry.",
+    "authorization_on_pass": "Implement only the selected schedule in the c_proj optimizer, exact-resume/config tests, and a separately registered exact 124M >=20% MFU preflight. This plan does not authorize language-model training or a larger rung.",
+    "authorization_on_failure": "Do not implement a schedule or launch an MFU/training run."
+  },
+  "execution_constraints": {
+    "host": "Y400",
+    "gpu": "one idle GPU",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "queue_worker": false,
+    "heartbeat": false,
+    "minimum_training_mfu_not_applicable": "zero-update diagnostic",
+    "workspace_cap_gib": 300
+  }
+}
