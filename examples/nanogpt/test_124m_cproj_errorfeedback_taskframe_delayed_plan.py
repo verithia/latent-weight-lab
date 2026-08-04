@@ -28,6 +28,22 @@ FAILED_RESULT = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_mlp_cproj_errorfeedback_task_frame_0p5tpp_result.json"
 )
+MFU_RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_mfu_result.json"
+)
+PRELAUNCH_METADATA = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_"
+    "prelaunch_run_metadata.json"
+)
+RESULT = (
+    REPO
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -100,3 +116,42 @@ def test_gates_time_active_path_and_forbid_automatic_promotion() -> None:
     assert plan["decision_rule"]["no_post_hoc_start_time_or_lr_sweep"] is True
     assert resolution["authorization"]["automatic_rerun_authorized"] is False
     assert resolution["authorization"]["larger_model_or_token_rung_authorized"] is False
+
+
+def test_completed_result_preserves_registered_primary_and_secondary_rules() -> None:
+    plan = load(PLAN)
+    resolution = load(RESOLUTION)
+    config = load(CONFIG)
+    mfu = load(MFU_RESULT)
+    metadata = load(PRELAUNCH_METADATA)
+    result = load(RESULT)
+    assert resolution["status"] == (
+        "completed_rejected_primary_gain_secondary_direction_support_passed"
+    )
+    assert result["config"]["sha256"] == sha256(CONFIG)
+    assert result["plan"]["sha256"] == sha256(PLAN)
+    assert result["mfu_result"]["sha256"] == sha256(MFU_RESULT)
+    assert result["execution"]["prelaunch_provenance_sha256"] == sha256(
+        PRELAUNCH_METADATA
+    )
+    assert metadata["repository"]["git_commit"] == result["execution"]["git_commit"]
+    assert metadata["config"]["sha256"] == sha256(CONFIG)
+    assert mfu["measurement"]["timed_task_frame_active"] is True
+    assert mfu["measurement"]["mfu_fraction"] >= 0.20
+    assert result["loss"]["fixed_evaluations"][-1]["step"] == config["max_iters"]
+    assert result["loss"]["candidate_minus_parent_ce"] < 0.0
+    assert result["loss"]["candidate_minus_pass_threshold_ce"] > 0.0
+    assert result["decision"]["passed"] is False
+    assert result["decision"]["secondary_direction_support_passed"] is True
+    all_start = plan["evidence"]["all_from_start_coordinate_cosines_to_endpoint"]
+    diagnosis = result["direction_diagnosis"]
+    for group, result_key in (
+        ("pregelu", "pregelu_global_cosine"),
+        ("postgelu_hidden", "postgelu_hidden_global_cosine"),
+        ("residual_output", "residual_output_global_cosine"),
+    ):
+        assert diagnosis[result_key] > 0.10
+        assert diagnosis[result_key] > all_start[group]
+        assert diagnosis["coordinate_rms_fraction_of_endpoint"][group] < 0.36
+    assert result["decision"]["automatic_rerun_authorized"] is False
+    assert result["decision"]["larger_model_or_token_rung_authorized"] is False

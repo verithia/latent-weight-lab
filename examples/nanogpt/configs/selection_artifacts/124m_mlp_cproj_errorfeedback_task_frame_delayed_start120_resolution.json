@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_resolution_v1",
   "recorded_at": "2026-08-05",
-  "status": "implementation_and_config_resolved_pending_remote_tests_and_active_path_mfu",
+  "status": "completed_rejected_primary_gain_secondary_direction_support_passed",
   "plan": {
     "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_plan.json",
     "sha256": "ee236c512aa8f3b631cc929dc38324c85ce755e66472b869f11739b7c10cf473"

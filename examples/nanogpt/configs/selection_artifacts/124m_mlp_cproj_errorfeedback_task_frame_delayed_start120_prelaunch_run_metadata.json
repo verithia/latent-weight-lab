@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_prelaunch_run_metadata_v1",
+  "created_at": "2026-08-05",
+  "status": "ready_for_one_preregistered_scientific_run",
+  "repository": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "branch": "experiment/cfc-midpoint-replay-20260803",
+    "git_commit": "9030adc37787e00f44dae1afec86c6182fa4f226",
+    "worktree_clean": true
+  },
+  "entrypoint": "examples.nanogpt.train",
+  "command": [
+    "env",
+    "CUDA_VISIBLE_DEVICES=0",
+    "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+    "PYTHONPATH=.",
+    "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json"
+  ],
+  "config": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+    "sha256": "a712d155a15c8e64e5d3aa6c6551f384b1e4705ea1ee1b58d861187831c644fa"
+  },
+  "dataset_manifest": {
+    "path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "launch_attempts": [],
+  "run": {
+    "name": "pro6_mai_v3_124m_cproj_errorfeedback_taskframe_start120_0p5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "git_commit": "9030adc37787e00f44dae1afec86c6182fa4f226",
+    "entrypoint": "examples.nanogpt.train",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json"
+    ],
+    "out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/scientific",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "automatic_rerun": false
+  },
+  "identity": {
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+    "config_sha256": "a712d155a15c8e64e5d3aa6c6551f384b1e4705ea1ee1b58d861187831c644fa",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_plan.json",
+    "plan_sha256": "ee236c512aa8f3b631cc929dc38324c85ce755e66472b869f11739b7c10cf473",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_mfu_result.json",
+    "mfu_result_sha256": "e6eb798bb86046aa0f14113e3adf73117339201f0f5888eeecfa28afb29540a2",
+    "implementation_commit": "f6f781bb6bd2922cfd071cf0e4663f15d88d81e6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_certificate_sha256": "63659a5e77ac6f010428dc64fc3fdddb894c62c0a6f6b0b320ad727f28913561",
+    "mfu_preflight_log_sha256": "f207bfb3ee47774cf69db43c7b94584c09da475432729eee849880956bb1539b"
+  },
+  "protocol": {
+    "max_iters": 238,
+    "tokens_per_iter": 262144,
+    "scheduled_tokens": 62390272,
+    "task_frame_start_iter": 120,
+    "active_frame_updates": 118,
+    "terminal_fixed_validation_ce_pass_maximum": 5.522365207672119,
+    "terminal_fixed_validation_ce_near_close_maximum": 5.5018,
+    "terminal_fixed_validation_ce_close_maximum": 5.4968,
+    "minimum_mfu_fraction": 0.2,
+    "measured_active_path_mfu_fraction": 0.25167466316548726,
+    "terminal_evaluation_required": true,
+    "exact_resume_required": true,
+    "larger_rung_authorized": false,
+    "automatic_rerun_authorized": false
+  }
+}

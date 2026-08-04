@@ -1,0 +1,80 @@
+{
+  "artifact_kind": "124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_exact_config_mfu_result",
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_mfu_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "DELAYED_START120_ACTIVE_TASK_FRAME_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_plan.json",
+    "sha256": "ee236c512aa8f3b631cc929dc38324c85ce755e66472b869f11739b7c10cf473"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+    "sha256": "a712d155a15c8e64e5d3aa6c6551f384b1e4705ea1ee1b58d861187831c644fa"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9030adc37787e00f44dae1afec86c6182fa4f226",
+    "implementation_commit": "f6f781bb6bd2922cfd071cf0e4663f15d88d81e6",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0
+  },
+  "correctness": {
+    "local_focused_tests": "66 passed, 40 subtests passed",
+    "remote_focused_tests": "66 passed, 40 subtests passed",
+    "update_119_to_120_exact_resume_boundary_tested": true,
+    "frame_coordinates_zero_and_without_adam_state_before_boundary": true,
+    "three_frame_gradients_finite_and_nonzero_at_boundary": true,
+    "dense_cfc_and_cproj_base_gradients_active_before_boundary": true,
+    "interrupted_resume_model_bitwise_equal": true,
+    "interrupted_resume_optimizer_bitwise_equal": true,
+    "interrupted_resume_training_rng_bitwise_equal": true
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/performance_preflight.json",
+    "sha256": "63659a5e77ac6f010428dc64fc3fdddb894c62c0a6f6b0b320ad727f28913561",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp/performance_preflight.log",
+    "preflight_log_sha256": "f207bfb3ee47774cf69db43c7b94584c09da475432729eee849880956bb1539b"
+  },
+  "measurement": {
+    "empirical_bf16_peak_tflops": 417.33949313820193,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 140634.68375,
+    "average_iter_ms": 1864.02375,
+    "model_tflops": 105.03377636121216,
+    "mfu_fraction": 0.25167466316548726,
+    "minimum_required_mfu_fraction": 0.2,
+    "peak_mib": 32002.66,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "scientific_task_frame_start_iter": 120,
+    "scratch_task_frame_start_iter": 1,
+    "timed_task_frame_active": true,
+    "timing_breakdown_ms": {
+      "prepare": 77.11,
+      "forward_backward": 1187.26125,
+      "flush": 294.2875,
+      "gradient": 1.8525,
+      "optimizer": 301.8975,
+      "data": 0.5587500000000001,
+      "other": 1.05625
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "config_identity_matched": true,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "exact_config_active_path_mfu_gate_passed": true,
+    "one_238_update_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "start_time_or_learning_rate_sweep_authorized": false
+  }
+}

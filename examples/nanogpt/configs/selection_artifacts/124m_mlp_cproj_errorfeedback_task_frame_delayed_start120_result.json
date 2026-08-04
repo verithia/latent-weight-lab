@@ -1,0 +1,170 @@
+{
+  "artifact_kind": "124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_training_result",
+  "schema_version": "mai_124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "REJECT_PRIMARY_GAIN_WITH_DIRECTION_RECOVERY_BUT_LIMITED_CAUSAL_TRAVEL",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_plus_mlp_cproj_errorfeedback_taskframe_start120_0p5tpp.json",
+    "sha256": "a712d155a15c8e64e5d3aa6c6551f384b1e4705ea1ee1b58d861187831c644fa"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_plan.json",
+    "sha256": "ee236c512aa8f3b631cc929dc38324c85ce755e66472b869f11739b7c10cf473"
+  },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_errorfeedback_task_frame_delayed_start120_mfu_result.json",
+    "sha256": "e6eb798bb86046aa0f14113e3adf73117339201f0f5888eeecfa28afb29540a2",
+    "mfu_fraction": 0.25167466316548726,
+    "tokens_per_second": 140634.68375,
+    "average_iter_ms": 1864.02375,
+    "peak_mib": 32002.66,
+    "active_path_timed": true
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9030adc37787e00f44dae1afec86c6182fa4f226",
+    "implementation_commit": "f6f781bb6bd2922cfd071cf0e4663f15d88d81e6",
+    "entrypoint": "examples.nanogpt.train",
+    "exit_code": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "automatic_rerun": false,
+    "ordinary_logged_updates": 20,
+    "ordinary_iter_mean_ms": 1854.85,
+    "ordinary_iter_median_ms": 1854.55,
+    "observed_peak_mib": 38560,
+    "prelaunch_provenance_sha256": "5ce29ecc4ec515305327b26ac204a810f54167d17d96b18ed33177a27c9d5e02"
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "checkpoint_schema": "nanogpt_exact_resume_v2",
+    "checkpoint_next_iter": 238,
+    "checkpoint_reason": "evaluation",
+    "checkpoint_sha256": "120d604b767160d504f968c08f13939d26b571b1f43accd7ef19c7dd72a76629",
+    "checkpoint_meta_sha256": "874f4b452dbda48f66c788abc2ff73ad8ce9b9cf04d216ee6ab0320e99e463b8",
+    "train_log_sha256": "42b325cf8274a35edcdfa56ae531454dee1b23f2803e34a43bbdf1072a91875d"
+  },
+  "loss": {
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train": 10.9672,
+        "validation": 10.9669,
+        "precision": "four-decimal log"
+      },
+      {
+        "step": 60,
+        "train": 6.2533,
+        "validation": 6.2627,
+        "precision": "four-decimal log"
+      },
+      {
+        "step": 120,
+        "train": 5.8128,
+        "validation": 5.8172,
+        "precision": "four-decimal log"
+      },
+      {
+        "step": 180,
+        "train": 5.6199,
+        "validation": 5.6231,
+        "precision": "four-decimal log"
+      },
+      {
+        "step": 238,
+        "train": 5.5245,
+        "validation": 5.527349472045898,
+        "precision": "validation exact from checkpoint; train four-decimal log"
+      }
+    ],
+    "accepted_cproj_parent_validation_ce": 5.527365207672119,
+    "attention_only_validation_ce": 5.4918,
+    "all_from_start_validation_ce": 5.552272319793701,
+    "pass_validation_ce_maximum": 5.522365207672119,
+    "candidate_minus_parent_ce": -0.000015735626220703125,
+    "candidate_minus_attention_only_ce": 0.03554947204589887,
+    "candidate_minus_pass_threshold_ce": 0.00498426437377919,
+    "perplexity_ratio_vs_parent": 0.9999842644975836,
+    "perplexity_ratio_vs_attention_only": 1.0361889092453362
+  },
+  "terminal_state": {
+    "frame_coordinates": {
+      "pregelu": {
+        "count": 1142784,
+        "rms": 0.00019565031107049435,
+        "max_abs": 0.0011618800926953554
+      },
+      "postgelu_hidden": {
+        "count": 1142784,
+        "rms": 0.0001835882430896163,
+        "max_abs": 0.001281284843571484
+      },
+      "residual_output": {
+        "count": 571392,
+        "rms": 0.00016652009799145162,
+        "max_abs": 0.0008737370371818542
+      }
+    },
+    "cproj_compression_residual": {
+      "layer_count": 12,
+      "frobenius_norm_min": 1.2082728147506714,
+      "frobenius_norm_mean": 1.2904372016588848,
+      "frobenius_norm_max": 1.3260670900344849,
+      "rms_min": 0.0007866710657253861,
+      "rms_mean": 0.0008401620822648207,
+      "rms_max": 0.0008633577381260693
+    }
+  },
+  "direction_diagnosis": {
+    "comparison": "terminal delayed-start coordinates versus the step-120 frozen-endpoint coordinates in identical zero-centered fixed bases",
+    "pregelu_global_cosine": 0.30916228890419006,
+    "postgelu_hidden_global_cosine": 0.27877047657966614,
+    "residual_output_global_cosine": 0.26650726795196533,
+    "pregelu_layer_cosine_range": [
+      0.28689044713974,
+      0.35827815532684326
+    ],
+    "postgelu_hidden_layer_cosine_range": [
+      0.23116083443164825,
+      0.372672975063324
+    ],
+    "residual_output_layer_cosine_range": [
+      0.20482857525348663,
+      0.37718465924263
+    ],
+    "cosine_gain_over_all_from_start": {
+      "pregelu": 7.314511002863046,
+      "postgelu_hidden": 12.276328067479227,
+      "residual_output": 7.3597673186003565
+    },
+    "coordinate_rms_fraction_of_endpoint": {
+      "pregelu": 0.32423882420509825,
+      "postgelu_hidden": 0.3310168357421445,
+      "residual_output": 0.348265082431814
+    },
+    "global_lr_mass_from_updates_120_through_237_fraction_of_full_run": 0.24859692692968066,
+    "secondary_direction_support_passed": true,
+    "interpretation": "Maturing the dense bases before frame activation changes the learned direction materially: every frame cosine rises from 0.023-0.042 to 0.267-0.309. However, the terminal coordinates travel only 32-35 percent of the useful endpoint RMS and yield no preregistered CE gain. Direction acquisition improved, but a moving-base, late-schedule causal optimizer does not accumulate the frozen-endpoint correction."
+  },
+  "decision": {
+    "passed": false,
+    "near_close": false,
+    "closed": false,
+    "secondary_direction_support_passed": true,
+    "same_budget_task_frame_selected": false,
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "start_time_or_learning_rate_sweep_authorized": false,
+    "next_action": "Register one different causal two-timescale direction learner that stabilizes the local frame target while the dense bases continue training; do not sweep the delayed start or simply inflate the frame learning rate."
+  },
+  "interpretation": [
+    "The candidate is statistically indistinguishable from the accepted parent at the exact checkpoint precision: -0.0000157 CE, while the required improvement was 0.005 CE.",
+    "Delayed activation eliminates nearly all of the +0.02491 CE regression from all-from-start training, so early frame/base coadaptation was a real failure mode.",
+    "All three endpoint cosines improve by 7.3x to 12.3x and clear the registered secondary threshold, demonstrating that mature bases expose a much better local direction.",
+    "The remaining 0.03555 CE gap to attention-only is not closed; the recovered direction is too weakly accumulated or too nonstationary under simultaneous base updates.",
+    "This result does not support replacing the identity residual with a hyperconnection: local frame capacity exists without changing residual topology, and the failure is in causal acquisition of that capacity."
+  ]
+}
