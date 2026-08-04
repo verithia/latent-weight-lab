@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_attention_product_fht_residual_gate_result_v1",
+  "artifact_kind": "zero_update_product_fht_residual_tangent_oracle",
+  "recorded_at": "2026-08-04",
+  "classification": "REJECT_PRODUCT_FHT_RESIDUAL_TANGENT",
+  "inputs": {
+    "dense_replay_result_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_replay_result.json",
+    "dense_replay_result_sha256": "d1fcacd56e69eb42619df5b3f167bf8390b664e3b19db9b97eb65e5e01bbfbd",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_plan.json",
+    "plan_sha256": "e4f96d76d133e9584639fb0b6ed015d83338b56b57e681cfed3206f6ae09415a",
+    "resolution_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_resolution.json",
+    "resolution_sha256": "f2224f3337400942ace68a62ee7aaa318134ed6811dd4eaf71836f7ae6a1a413"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "dc518220e3e46bc8acfd78c2a901cd9790fef363",
+    "entrypoint": "examples.nanogpt.analyze_attention_product_fht_residual_tangent",
+    "parameter_updates": 0,
+    "wall_time_seconds": 99.07,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_source_sha256": "96a25909c10b390732f59c038ddf5d00778c4bec49772617acc4cf481b3f25b9"
+  },
+  "results": {
+    "6_factors": {
+      "coordinate_fraction": 0.0144414,
+      "dense_muon_direction_recovery": 0.01284536,
+      "normalized_enrichment": 0.88948,
+      "by_target": {
+        "attn.c_attn": {"recovery": 0.01326445, "normalized_enrichment": 0.87318},
+        "attn.c_proj": {"recovery": 0.01132302, "normalized_enrichment": 0.96623}
+      },
+      "dense_phase_chord_recovery": 0.01285378,
+      "dense_phase_chord_normalized_enrichment": 0.88726,
+      "maximum_projection_orthogonality_error": 1.09e-8,
+      "maximum_relative_normal_residual": 9.96e-7,
+      "passed": false
+    },
+    "12_factors": {
+      "coordinate_fraction": 0.02758077,
+      "dense_muon_direction_recovery": 0.02591812,
+      "normalized_enrichment": 0.93972,
+      "by_target": {
+        "attn.c_attn": {"recovery": 0.02708650, "normalized_enrichment": 0.93145},
+        "attn.c_proj": {"recovery": 0.02167408, "normalized_enrichment": 0.97916}
+      },
+      "dense_phase_chord_recovery": 0.02608460,
+      "dense_phase_chord_normalized_enrichment": 0.94263,
+      "maximum_projection_orthogonality_error": 1.62e-8,
+      "maximum_relative_normal_residual": 7.04e-7,
+      "passed": false
+    }
+  },
+  "artifacts": {
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_product_fht_gate/pro6_mai_v3_124m_dense_attention_productfht_gate_0p5tpp/product_fht_residual_oracle/attention_product_fht_residual_result.json",
+    "raw_result_sha256": "858a21b6f56d8fe0b0d89c6425a7554072594d519380fba6a5b88fee50ab6423",
+    "cells_csv_sha256": "459626534ca250e0efc2e44af3eab108e04fc0b924d06d690b9dac6b569ed67a"
+  },
+  "decision": {
+    "training_authorized": false,
+    "reason": "Both factor counts recover no more than their coordinate-fraction random expectation. Exact projection residuals are converged, and dense optimizer directions and phase chords agree, so increasing fixed FHT-diagonal coordinates only buys proportional random coverage rather than useful orientation.",
+    "closed_family": "fixed global FHT/sign mixers with learned channel diagonals and zero-preserving ProductFHT residuals",
+    "interpretation": "The failure is not specific evidence against fast Hadamard multiplication; it is evidence that this non-data-adaptive fixed basis does not align with the attention trajectory. Nonlinearity and state dependence alone do not solve the direction problem.",
+    "next_test": "Keep the existing moving Cayley family and isolate its optimizer geometry: apply Muon only to the zero-initialized left tangent-amplitude factor while retaining AdamW for the learned right basis, then admit at most one directly polled 124M/0.5-TPP screen after an exact-config MFU gate."
+  }
+}

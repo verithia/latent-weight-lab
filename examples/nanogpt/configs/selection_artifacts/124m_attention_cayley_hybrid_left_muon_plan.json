@@ -1,0 +1,47 @@
+{
+  "schema_version": "mai_124m_attention_cayley_hybrid_left_muon_plan_v1",
+  "artifact_kind": "pre_execution_causal_screen_plan",
+  "recorded_at": "2026-08-04",
+  "hypothesis": "Muon helps the zero-initialized Cayley left factor align its first-order tangent, but applying Muon to the right factor destroys the learned basis through excessive subspace rotation. Left-Muon/right-AdamW should retain the direction benefit while matching the stable basis motion of the AdamW control.",
+  "causal_isolation": {
+    "changed": "optimizer ownership of existing Cayley factors only",
+    "left_factor": "Muon, one zero-weight-decay group per thin matrix, sqrt(rank) LR norm matching",
+    "right_factor": "the exact existing zero-weight-decay AdamW fallback and full-Cayley LR scale",
+    "fixed": [
+      "QK/V/c-proj ranks 32/16/8",
+      "Cayley sides and seeds",
+      "BlockFHT decoder and latent coordinates",
+      "model/data seeds and fixed-evaluation indices",
+      "training schedule and all non-Cayley optimizer groups",
+      "MLP matrices"
+    ],
+    "learned_dense_basis": false,
+    "additive_adapter": false,
+    "lora_branch": false
+  },
+  "evidence": {
+    "adamw_control_terminal_validation_ce": 5.4024,
+    "factor_muon_terminal_validation_ce": 5.4389,
+    "adamw_right_subspace_mean_angle_degrees": 19.5182,
+    "factor_muon_right_subspace_mean_angle_degrees": 66.7917,
+    "identity_oracle_factor_muon_over_adamw_recovery_ratio": 2.5557
+  },
+  "admission": {
+    "host": "PRO6",
+    "gpu": 0,
+    "exact_config_mfu_minimum": 0.20,
+    "preflight_updates": 32,
+    "scientific_updates": 238,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false
+  },
+  "decision_rule": {
+    "finite_losses_required": true,
+    "terminal_validation_ce_maximum": 5.3924,
+    "minimum_improvement_over_adamw_control_ce": 0.0100,
+    "promote_if_passed": "transfer the split optimizer to QK64 plus output gain at 5 TPP",
+    "reject_if_failed": "close split Cayley-factor optimization and retain QK64 plus output gain as the attention parent",
+    "no_posthoc_threshold_changes": true
+  }
+}

@@ -9,6 +9,7 @@ from examples.nanogpt.model import (
     GPTConfig,
     LearnedLowRankCayleyMix,
 )
+from examples.nanogpt.muon import Muon
 
 
 def test_low_rank_cayley_is_identity_initialized_with_live_gradient() -> None:
@@ -425,3 +426,95 @@ def test_attention_cayley_factors_can_be_muon_owned() -> None:
     assert all(
         group["lr_scale"] == 2.0 ** 0.5 for group in cayley_groups
     )
+
+
+def test_attention_cayley_hybrid_routes_left_to_muon_right_to_adamw() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+        block_fht_attn_cayley_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_bilateral_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+        ),
+        block_fht_attn_cayley_rank=2,
+        block_fht_attn_cayley_factor_optimizer="hybrid_left_muon",
+    )
+    model = GPT(config)
+    left = {
+        id(parameter)
+        for name, parameter in model.named_parameters()
+        if "_cayley." in name and name.endswith(".left")
+    }
+    right = {
+        id(parameter)
+        for name, parameter in model.named_parameters()
+        if "_cayley." in name and name.endswith(".right")
+    }
+    assert left and right and len(left) == len(right)
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=2.4e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_adamw_lr_scale=0.3,
+        block_fht_attn_cayley_lr_scale=10.0 / 3.0,
+        block_fht_attn_cayley_muon_lr_scale=1.0,
+    )
+    left_groups = [
+        group
+        for group in optimizer.param_groups
+        if any(id(parameter) in left for parameter in group["params"])
+    ]
+    right_groups = [
+        group
+        for group in optimizer.param_groups
+        if any(id(parameter) in right for parameter in group["params"])
+    ]
+    assert len(left_groups) == len(left)
+    assert all(len(group["params"]) == 1 for group in left_groups)
+    assert all(group["lr_scale"] == 2.0 ** 0.5 for group in left_groups)
+    assert len(right_groups) == 1
+    assert {id(parameter) for parameter in right_groups[0]["params"]} == right
+    assert right_groups[0]["weight_decay"] == 0.0
+    assert right_groups[0]["lr_scale"] == 1.0
+    assert not left & right
+    muon_ids = {
+        id(parameter)
+        for child in optimizer.optimizers
+        if isinstance(child, Muon)
+        for group in child.param_groups
+        for parameter in group["params"]
+    }
+    adamw_ids = {
+        id(parameter)
+        for child in optimizer.optimizers
+        if isinstance(child, torch.optim.AdamW)
+        for group in child.param_groups
+        for parameter in group["params"]
+    }
+    assert left <= muon_ids
+    assert not left & adamw_ids
+    assert right <= adamw_ids
+    assert not right & muon_ids

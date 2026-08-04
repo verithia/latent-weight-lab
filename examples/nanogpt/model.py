@@ -1295,9 +1295,14 @@ class CausalSelfAttention(nn.Module):
         cayley_factor_optimizer = str(
             config.block_fht_attn_cayley_factor_optimizer
         )
-        if cayley_factor_optimizer not in {"adamw", "muon"}:
+        if cayley_factor_optimizer not in {
+            "adamw",
+            "muon",
+            "hybrid_left_muon",
+        }:
             raise ValueError(
-                "attention Cayley factor optimizer must be adamw or muon"
+                "attention Cayley factor optimizer must be adamw, muon, "
+                "or hybrid_left_muon"
             )
         atlas_start_steps = tuple(
             int(step)
@@ -1398,7 +1403,7 @@ class CausalSelfAttention(nn.Module):
                 + seed_offset
                 + stage * 104729,
                 coordinate_scale=float(config.block_fht_attn_cayley_scale),
-                matrix_parameters=cayley_factor_optimizer == "muon",
+                matrix_parameters=cayley_factor_optimizer != "adamw",
             )
 
         self.qk_input_cayley = (
@@ -3969,6 +3974,37 @@ class GPT(nn.Module):
             attention_cayley_matrix_ids = {
                 id(param) for _, param in attention_cayley_matrix_named
             }
+            cayley_factor_optimizer = str(
+                self.config.block_fht_attn_cayley_factor_optimizer
+            )
+            if cayley_factor_optimizer == "hybrid_left_muon":
+                attention_cayley_muon_matrix_named = [
+                    (name, param)
+                    for name, param in attention_cayley_matrix_named
+                    if name.endswith(".left")
+                ]
+                attention_cayley_adamw_matrix_named = [
+                    (name, param)
+                    for name, param in attention_cayley_matrix_named
+                    if name.endswith(".right")
+                ]
+                routed_ids = {
+                    id(param)
+                    for _, param in (
+                        attention_cayley_muon_matrix_named
+                        + attention_cayley_adamw_matrix_named
+                    )
+                }
+                if routed_ids != attention_cayley_matrix_ids:
+                    raise ValueError(
+                        "hybrid attention Cayley routing requires every "
+                        "matrix factor to end in .left or .right"
+                    )
+            else:
+                attention_cayley_muon_matrix_named = (
+                    attention_cayley_matrix_named
+                )
+                attention_cayley_adamw_matrix_named = []
             product_factor_tokens = (
                 "product_log_diagonals",
                 "product_output_log_gain",
@@ -4061,7 +4097,7 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
-            if attention_cayley_matrix_named:
+            if attention_cayley_muon_matrix_named:
                 cayley_muon_groups = [
                     {
                         "params": [param],
@@ -4071,7 +4107,7 @@ class GPT(nn.Module):
                             * math.sqrt(float(param.shape[1]))
                         ),
                     }
-                    for _name, param in attention_cayley_matrix_named
+                    for _name, param in attention_cayley_muon_matrix_named
                 ]
                 optimizers.append(
                     Muon(
@@ -4144,7 +4180,7 @@ class GPT(nn.Module):
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
                     group["cproj_error_feedback_decay_schedule"] = True
-            if other:
+            if other or attention_cayley_adamw_matrix_named:
                 fused_available = "fused" in inspect.signature(torch.optim.AdamW).parameters
                 use_fused = fused_available and device_type == "cuda"
                 extra_args = {"fused": True} if use_fused else {}
@@ -4193,6 +4229,22 @@ class GPT(nn.Module):
                             ),
                         }
                     )
+                if attention_cayley_adamw_matrix_named:
+                    fallback_groups.append(
+                        {
+                            "params": [
+                                param
+                                for _, param in (
+                                    attention_cayley_adamw_matrix_named
+                                )
+                            ],
+                            "weight_decay": 0.0,
+                            "lr_scale": (
+                                float(muon_adamw_lr_scale)
+                                * float(block_fht_attn_cayley_lr_scale)
+                            ),
+                        }
+                    )
                 optimizers.append(
                     torch.optim.AdamW(
                         fallback_groups,
@@ -4221,7 +4273,9 @@ class GPT(nn.Module):
                 f"attn_cayley_lr_scale="
                 f"{float(block_fht_attn_cayley_lr_scale)} "
                 "attn_cayley_muon_tensors="
-                f"{len(attention_cayley_matrix_named)} "
+                f"{len(attention_cayley_muon_matrix_named)} "
+                "attn_cayley_adamw_matrix_tensors="
+                f"{len(attention_cayley_adamw_matrix_named)} "
                 "attn_cayley_muon_lr_scale="
                 f"{float(block_fht_attn_cayley_muon_lr_scale)} "
                 f"adamw_lr={adamw_lr}"

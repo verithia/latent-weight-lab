@@ -702,11 +702,19 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
     attn_cayley_factor_optimizer = str(
         getattr(args, "block_fht_attn_cayley_factor_optimizer", "adamw")
     )
-    if attn_cayley_factor_optimizer not in {"adamw", "muon"}:
+    if attn_cayley_factor_optimizer not in {
+        "adamw",
+        "muon",
+        "hybrid_left_muon",
+    }:
         raise ValueError(
-            "block_fht_attn_cayley_factor_optimizer must be adamw or muon"
+            "block_fht_attn_cayley_factor_optimizer must be adamw, muon, "
+            "or hybrid_left_muon"
         )
-    if attn_cayley_factor_optimizer == "muon" and args.optimizer != "muon":
+    if (
+        attn_cayley_factor_optimizer in {"muon", "hybrid_left_muon"}
+        and args.optimizer != "muon"
+    ):
         raise ValueError(
             "Muon attention Cayley factors require optimizer=muon"
         )
@@ -1125,7 +1133,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--block-fht-attn-cayley-factor-optimizer",
-        choices=["adamw", "muon"],
+        choices=["adamw", "muon", "hybrid_left_muon"],
         default="adamw",
     )
     parser.add_argument(
