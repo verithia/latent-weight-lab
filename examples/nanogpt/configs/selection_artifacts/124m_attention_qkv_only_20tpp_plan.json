@@ -49,7 +49,16 @@
         "recorded_at": "2026-08-05",
         "scope": "124M/20TPP generated QK+V with dense c_proj"
       },
-      "resolved_from_template": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_5tpp_lr24e4.json"
+      "resolved_from_template": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_5tpp_lr24e4.json",
+      "dense_fixed_validation_curve": [
+        {"step": 9489, "validation_ce": 3.1547}
+      ],
+      "parent_fixed_validation_curve": [
+        {"step": 9489, "validation_ce": 3.3191}
+      ],
+      "parent_dense_token_equivalent_penalty": null,
+      "recipe_resolution_dependency": "clean 124M/5TPP QK+V result plus certified c_proj and V/O offline rejections",
+      "recipe_resolution_stage": "attention_qkv_only_confirmation_124m_20tpp"
     },
     "invariants": [
       "learning_rate=0.0024 and min_lr=0.00024",
