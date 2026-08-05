@@ -1,0 +1,194 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_only_5tpp_result_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_only_5tpp_component_attribution_result",
+  "classification": "LOCALIZE_REMAINING_MLP_GAP_PRIMARILY_TO_CPROJ",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799",
+    "name": "pro6_mai_v3_124m_repairedattn_cprojonly_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-06T02:34:56+08:00",
+    "finished_at": "2026-08-06T03:54:47+08:00",
+    "wall_seconds": 4791,
+    "exit_code": 0,
+    "status": "clean"
+  },
+  "identity": {
+    "execution_git_commit": "e5c9912b389e9149ee86b7b5c982c6670f93d519",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json",
+    "config_sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20",
+    "resolved_config_sha256": "c7b80b456698e289cc01253ab59f828addb59b0710853497a44880d4a6b4f039",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "926faccae7975fd06bfb837138546303d126cdab0d3a0951be4a8b4d8ce99416",
+    "mfu_certificate_sha256": "140ec74bbbe30fdc517dd722b6d0418cb4b32a1b0ae7990ae078d207e14c41de"
+  },
+  "fixed_evaluation": {
+    "steps": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "candidate_validation_ce": [
+      4.2704,
+      3.877,
+      3.7206,
+      3.6562013626098633
+    ],
+    "joint_full_mlp_validation_ce": [
+      4.2666,
+      3.8819,
+      3.7252,
+      3.660243034362793
+    ],
+    "repaired_attention_validation_ce": [
+      4.2151,
+      3.8411,
+      3.6907,
+      3.6278
+    ],
+    "dense_validation_ce": [
+      4.1739,
+      3.7622,
+      3.6038,
+      3.5401
+    ],
+    "candidate_minus_joint_full_mlp": [
+      0.0038,
+      -0.0049,
+      -0.0046,
+      -0.0040416717529296875
+    ],
+    "candidate_minus_repaired_attention": [
+      0.0553,
+      0.0359,
+      0.0299,
+      0.028401362609863146
+    ],
+    "candidate_minus_dense": [
+      0.0965,
+      0.1148,
+      0.1168,
+      0.11610136260986348
+    ],
+    "terminal_validation_ce_exact": 3.6562013626098633
+  },
+  "decision_rule": {
+    "cproj_only_pass_validation_ce_maximum": 3.6478,
+    "joint_full_mlp_validation_ce_exact": 3.660243034362793,
+    "joint_near_match_absolute_ce_maximum": 0.01,
+    "cproj_only_passed": false,
+    "terminal_gate_miss_ce_exact": 0.008401362609863128,
+    "absolute_difference_from_joint_ce_exact": 0.0040416717529296875,
+    "joint_near_match_passed": true,
+    "incremental_gap_vs_attention_ce_exact": 0.028401362609863146,
+    "total_gap_vs_dense_ce_exact": 0.11610136260986348,
+    "threshold_changed_after_measurement": false,
+    "registered_classification_applied": "c_proj fails the attention-relative gate and matches the rejected joint result within 0.0100 CE; localize the remaining incremental MLP deficit primarily to c_proj"
+  },
+  "compute_equivalence": {
+    "method": "piecewise linear inversion in validation CE versus log fixed-model compute; at most one adjacent interval extrapolation",
+    "tool_path": "examples/nanogpt/fixed_model_compute_equivalence.py",
+    "tool_sha256": "239e1099bce11ad0e289fbf7e6ed95668db8b1784f450c483d33e8af107ecad1",
+    "dense_match_steps": 1558.30969793039,
+    "candidate_over_dense_token_compute": 1.522803845186621,
+    "common_loss_candidate_over_dense": {
+      "loss_low": 3.6562013626098633,
+      "loss_high": 4.1739,
+      "samples": 101,
+      "minimum": 1.1853370994148134,
+      "median": 1.209612130613068,
+      "maximum": 1.5228038451866208
+    },
+    "attention_match_steps": 2085.12288917843,
+    "candidate_over_attention_token_compute": 1.1380624193977353,
+    "common_loss_candidate_over_attention": {
+      "loss_low": 3.6562013626098633,
+      "loss_high": 4.2151,
+      "samples": 101,
+      "minimum": 1.069067785486994,
+      "median": 1.0892703692607781,
+      "maximum": 1.1421137041863516
+    },
+    "common_loss_candidate_over_joint_full_mlp": {
+      "loss_low": 3.660243034362793,
+      "loss_high": 4.2666,
+      "samples": 101,
+      "minimum": 0.9801379912437072,
+      "median": 0.9946293003585684,
+      "maximum": 1.006717835960173
+    },
+    "perplexity_ratio_vs_attention": 1.02880852684151,
+    "perplexity_ratio_vs_dense": 1.1231097076949574,
+    "perplexity_ratio_vs_joint_full_mlp": 0.9959664848099329
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.23958994349643856,
+    "tokens_per_second_preflight": 133812.12375,
+    "update_ms_preflight": 1959.05,
+    "peak_mib_preflight": 35591.23,
+    "additional_dense_optimizer_state_bytes": 113246208,
+    "additional_trainable_parameters": 0,
+    "additional_materialized_inference_parameters": 0,
+    "additional_materialized_inference_flops": 0
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp/scientific/ckpt.pt",
+    "sha256": "02db49da292d660a2ad77a3477e0ed963294a0900350153667dbe8d91bf3645c",
+    "bytes": 1131879604,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "f11881b3d067874fcb036a9e3250d862dcfbc1c529807289b5b4d502edb2eadd",
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "readable": true,
+    "metadata_consistent": true,
+    "model_tensor_count": 460,
+    "model_tensor_bytes": 608335020,
+    "compression_residual_count": 12,
+    "all_compression_residuals_finite": true,
+    "compression_residual_frobenius_range": [
+      0.00766079593449831,
+      0.008442697115242481
+    ]
+  },
+  "artifacts": {
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.log",
+      "sha256": "f243ec85c530104aee4124c3120f3f1a9b76476e2ffb571583e09ea884793681"
+    },
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.json",
+      "sha256": "5b3fc16db05dd1a33b9246c963c12279a9247105c8eac6cb3af36f5b8b988ca1"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.json",
+      "sha256": "926faccae7975fd06bfb837138546303d126cdab0d3a0951be4a8b4d8ce99416"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.config.json",
+      "sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20"
+    }
+  },
+  "watchdog": {
+    "progress_milestones_sent": [
+      20,
+      50
+    ],
+    "terminal_100_percent_callback_sent_once": true,
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-06T03:54:47+08:00"
+    ],
+    "duplicate_terminal_callbacks": 0,
+    "service_removed_after_verification": true
+  },
+  "decision": {
+    "c_proj_is_primary_residual_mlp_bottleneck": true,
+    "c_fc_is_primary_residual_mlp_bottleneck": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Keep repaired attention, dense c_fc, c_proj hidden64+24 capacity, and decay-0.5 temporal feedback fixed. Register one activation-metric c_proj projection that fits the same Givens coordinates under an online EMA of post-GELU channel energy rather than unweighted Frobenius geometry. It adds no learned basis or inference transform and must pass focused correctness/exact-resume tests plus a fresh exact-config MFU gate before one 124M/5TPP run."
+  }
+}
