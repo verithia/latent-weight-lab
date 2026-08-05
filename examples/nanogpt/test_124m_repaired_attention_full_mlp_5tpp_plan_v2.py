@@ -7,6 +7,7 @@ V1 = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_ful
 V2 = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json"
 PLAN = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_plan_v2.json"
 FAILURE = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_pretraining_failure.json"
+MFU_V2 = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_mfu_result_v2.json"
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -44,3 +45,11 @@ def test_thresholds_and_performance_policy_are_unchanged() -> None:
     assert v2["mfu_preflight_required"] is True
     assert v2["mfu_min_fraction"] >= 0.20
     assert plan["authorization"]["automatic_rerun"] is False
+
+def test_fresh_v2_mfu_gate_passes_for_exact_config() -> None:
+    result = json.loads(MFU_V2.read_text())
+    assert result["identity"]["config_sha256"] == sha256(V2)
+    assert result["measurement"]["mfu_fraction"] >= 0.20
+    assert result["measurement"]["native_block_fht_extension"]["loaded"] is True
+    assert result["decision"]["scientific_attempt2_authorized"] is True
+    assert result["execution"]["watchdog_used"] is False

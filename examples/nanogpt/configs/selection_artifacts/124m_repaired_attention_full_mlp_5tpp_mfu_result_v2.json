@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_exact_config_mfu_result_v2",
+  "artifact_kind": "124m_repaired_attention_full_mlp_5tpp_v2_exact_config_mfu_result",
+  "recorded_at": "2026-08-06",
+  "identity": {
+    "implementation_commit": "63874b828aeb298fe6871872a6cfb97d5341cfde",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json",
+    "config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_plan_v2.json",
+    "plan_sha256": "6bc4aaab036b0e2dbce501817bc083b4d524d7df8fe541fb26215943c5e3be81",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/performance_preflight.json",
+    "certificate_sha256": "e6825514f8896b6cc7b3d207937582ae423d7b3fe9a57f190b1fa4b0f3e7f578",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/performance_preflight.log",
+    "log_sha256": "4c6d7ae40d6806fde43259f6697efc221ac5060f7365cb54897b58501033bce2",
+    "elapsed_seconds": 23.46671414375305,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "foreground_polled": true,
+    "watchdog_used": false
+  },
+  "measurement": {
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "empirical_bf16_peak_tflops": 411.9825610959949,
+    "model_tflops": 88.40408437090944,
+    "mfu_fraction": 0.21458210302816835,
+    "tokens_per_second": 118368.40375,
+    "iter_ms": 2214.65625,
+    "peak_mib": 35696.49,
+    "timing_breakdown_ms": {
+      "prepare": 3.56625,
+      "fwbw": 1654.05,
+      "optimizer": 548.5175,
+      "gradient": 1.965,
+      "flush": 4.4375,
+      "data": 0.6225,
+      "other": 1.49875
+    },
+    "native_block_fht_extension": {
+      "loaded": true,
+      "required": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    },
+    "all_logged_losses_finite": true,
+    "train_exit_code": 0
+  },
+  "comparison_to_v1": {
+    "v1_mfu_fraction": 0.21201994485515552,
+    "absolute_mfu_change": 0.00256215817301283,
+    "v1_iter_ms": 2215.72375,
+    "iter_ms_change": -1.0675,
+    "interpretation": "checkpoint contract repair leaves performance path unchanged within measurement noise"
+  },
+  "decision": {
+    "minimum_mfu_fraction": 0.2,
+    "passed": true,
+    "scientific_attempt2_authorized": true,
+    "requires_long_run_watchdog": true,
+    "automatic_rerun_authorized": false
+  }
+}
