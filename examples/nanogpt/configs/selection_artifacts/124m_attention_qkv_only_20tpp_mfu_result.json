@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_124m_attention_qkv_only_20tpp_mfu_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "QKV_ONLY_124M_20TPP_EXACT_CONFIG_MFU_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4.json",
+    "sha256": "64f615031048d1158c861b7bbbd19b5f09d8011bc1c65e436f0e9cfd3c99ccc1"
+  },
+  "source_commit": "a2f6f300419cc44037b4eefeaf5038e8fba0d11e",
+  "host": "PRO6",
+  "gpu": 0,
+  "execution_environment": {
+    "cuda_home": "/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "native_extension_loaded": true,
+    "science_config_changed": false
+  },
+  "failed_fallback_preflight": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/mfu_preflight/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4.json",
+    "mfu_fraction": 0.0077494162080652485,
+    "cause": "CUDA toolkit was not discoverable from the ext4 execution clone, so BlockFHT silently used the eager fallback.",
+    "scientific_updates": 0
+  },
+  "passing_preflight": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/mfu_preflight/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4_native_retry1.json",
+    "certificate_sha256": "fcf2e8add811dbb5e78299964794103b3b54cda179996f138d130eb0f2dbde45",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/mfu_preflight/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4_native_retry1.log",
+    "log_sha256": "fac6fc2db3f73237be34ac2222de0bef7f26652eae3758f8efa73a0319efae6c",
+    "mfu_fraction": 0.2869262886683139,
+    "minimum_fraction": 0.2,
+    "empirical_bf16_gemm_peak_tflops": 414.84273576553306,
+    "model_tflops": 119.02928655421441,
+    "tokens_per_second": 159373.93333333335,
+    "iter_ms": 1644.8333333333333,
+    "peak_mib": 35120.77,
+    "prepare_ms": 3.8733333333333335,
+    "flush_ms": 9.193333333333333,
+    "all_logged_losses_finite": true,
+    "train_exit_code": 0
+  },
+  "decision": {
+    "launch_authorized": true,
+    "scope": "exactly one from-scratch 124M/20TPP generated-QK+V/dense-c_proj confirmation",
+    "watchdog_required": true,
+    "callbacks": [20, 50, 100],
+    "heartbeat_minutes": 90
+  }
+}
