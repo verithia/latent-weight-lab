@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 import copy
+import json
+import sys
+from pathlib import Path
+from unittest.mock import patch
 
 import torch
 
@@ -10,7 +14,7 @@ from examples.nanogpt.analyze_mlp_cfc_multistage_directed import (
     fit_multistage_directed_sparse_mixer,
 )
 from examples.nanogpt.model import GPT, GPTConfig
-from examples.nanogpt.train import require_block_fht_native_extension
+from examples.nanogpt.train import parse_args, require_block_fht_native_extension
 from examples.nanogpt.muon_matched_givens import (
     MuonDirectedProduct,
     MuonDirectedProductLinear,
@@ -329,6 +333,52 @@ def test_directed_cfc_preserves_dense_paired_seed_initialization() -> None:
             dense_block.mlp.c_fc.weight,
             directed_block.mlp.c_fc.weight,
         )
+
+
+def test_directed_cfc_accepts_dense_cproj_control_and_rejects_unqualified_generated_cproj(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    joint = json.loads(
+        (
+            root
+            / "examples/nanogpt/configs/"
+            "pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_"
+            "cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json"
+        ).read_text()
+    )
+    dense_control = {
+        key: value
+        for key, value in joint.items()
+        if not key.startswith("block_fht_mlp_cproj_")
+    }
+    dense_control["block_fht_targets"] = [
+        target
+        for target in dense_control["block_fht_targets"]
+        if target != "mlp.c_proj"
+    ]
+    dense_path = tmp_path / "dense_cproj_control.json"
+    dense_path.write_text(json.dumps(dense_control))
+    with patch.object(
+        sys, "argv", ["train.py", "--config", str(dense_path)]
+    ):
+        parsed = parse_args()
+    assert parsed.block_fht_mlp_cfc_directed_product is True
+    assert "mlp.c_proj" not in parsed.block_fht_targets
+    assert parsed.block_fht_mlp_cproj_muon_matched_givens is False
+
+    generated_unqualified = dict(dense_control)
+    generated_unqualified["block_fht_targets"] = [
+        *dense_control["block_fht_targets"],
+        "mlp.c_proj",
+    ]
+    generated_path = tmp_path / "generated_unqualified_cproj.json"
+    generated_path.write_text(json.dumps(generated_unqualified))
+    with patch.object(
+        sys, "argv", ["train.py", "--config", str(generated_path)]
+    ):
+        with pytest.raises(ValueError, match="either dense c_proj"):
+            parse_args()
 
 
 def test_native_extension_guard_fails_closed(monkeypatch) -> None:

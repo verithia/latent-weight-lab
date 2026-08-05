@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from pathlib import Path
 
 
@@ -19,6 +20,13 @@ def load(path: Path) -> dict:
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def git_blob_sha256(commit: str, path: str) -> str:
+    payload = subprocess.check_output(
+        ["git", "-C", str(REPO), "show", f"{commit}:{path}"]
+    )
+    return hashlib.sha256(payload).hexdigest()
 
 
 def test_causal_inputs_are_hash_pinned() -> None:
@@ -107,5 +115,6 @@ def test_production_config_is_the_registered_single_factor_candidate() -> None:
     for key in frozen:
         assert candidate[key] == control[key], key
     assert candidate["implementation_commit"] == "edc11023f7428ee3d3214cb3afb6a4f656e62475"
+    launch_commit = candidate["implementation_commit"]
     for path, digest in candidate["implementation_source_hashes"].items():
-        assert sha256(REPO / path) == digest
+        assert git_blob_sha256(launch_commit, path) == digest

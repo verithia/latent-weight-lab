@@ -1,0 +1,137 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_only_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_only_5tpp_preregistration",
+  "recorded_at": "2026-08-06",
+  "status": "immutable_preconfig",
+  "scientific_question": "Is the accepted c_fc directed-product decay-1 error-feedback replacement near-neutral at 5TPP when c_proj is restored to dense Muon, or was its apparently small contribution masked by the localized c_proj bottleneck in the joint run?",
+  "causal_evidence": {
+    "joint_full_mlp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+      "sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2",
+      "terminal_validation_ce": 3.660243034362793
+    },
+    "cproj_only": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_result.json",
+      "sha256": "091fd6a9475539cfe06b5aba51ec2693b53638e55565d658afbe462ec01d21ef",
+      "terminal_validation_ce": 3.6562013626098633,
+      "fact": "c_proj-only stays within 0.005 CE of joint full MLP at every fixed checkpoint, so c_fc is not the primary joint bottleneck, but the missing c_fc-only factorial arm is needed to rule out masking or interaction."
+    },
+    "rejected_activation_metric": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_activation_energy_metric_5tpp_result.json",
+      "sha256": "fcab81c9c15518a74910501a0802a89018174f6b2e9ef39abfe9a2bc3748dfb3",
+      "terminal_validation_ce": 3.686002254486084,
+      "fact": "Raw post-GELU activation-energy weighting worsens the unweighted c_proj control at all checkpoints; the metric family is closed."
+    },
+    "repaired_attention_parent": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json",
+      "config_sha256": "d605621e54f81e9336439012ebaea470812bfd0b52de05a140ee732262ad3fd7",
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pro6_recovery_result.json",
+      "result_sha256": "bcbd5dc8dbc4007a8204d8479c56b2fe79074cfd928bb2e7f11c6c2d2a0d5c5c",
+      "terminal_validation_ce": 3.6278
+    },
+    "joint_config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json",
+      "sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363"
+    }
+  },
+  "single_factor_ablation": {
+    "parent": "the exact rejected joint repaired-attention full-MLP v2 configuration",
+    "remove": "all c_proj Muon-matched Givens flags and mlp.c_proj from block_fht_targets, restoring every c_proj matrix to ordinary dense Muon",
+    "retain": [
+      "repaired attention Cayley structure and optimizer",
+      "c_fc six-cell directed-product schedule 22/22/22/22/22/22",
+      "c_fc family radius 1.0 and ridge ratio 1e-6",
+      "c_fc temporal error feedback with decay 1.0",
+      "main learning rate, warmup, cosine schedule, data order, evaluation windows, and seeds",
+      "zero additional materialized inference parameters or FLOPs relative to the attention parent"
+    ],
+    "not_reopened": [
+      "c_proj activation metric",
+      "c_proj output selector or bilateral chart",
+      "c_proj capacity, gain, fixed-basis, or low-rank sweep",
+      "c_fc schedule, radius, optimizer, or learning-rate sweep"
+    ]
+  },
+  "implementation_guard": {
+    "required_change": "The launch validator previously admitted directed-product c_fc only when the generated Muon-matched-Givens c_proj flag was enabled. Permit the scientifically stronger dense-c_proj control when mlp.c_proj is absent from block_fht_targets, while continuing to reject every unqualified generated c_proj.",
+    "scope": "validation-only control admission; no model, optimizer, update, initialization, schedule, or loss math changes",
+    "test_requirements": [
+      "the exact c_fc-only config parses with dense c_proj",
+      "directed-product c_fc with an unqualified generated c_proj remains rejected",
+      "candidate c_fc initialization and optimizer wiring remain covered by the existing directed-product tests"
+    ]
+  },
+  "decision_rule": {
+    "primary_terminal_validation_ce_maximum": 3.6478,
+    "nonbinding_near_parent_validation_ce_maximum": 3.6378,
+    "attention_parent_validation_ce": 3.6278,
+    "dense_validation_ce": 3.5401,
+    "pass_action": "If terminal CE is at most 3.6478 and the full fixed curve has no material regression, accept c_fc-only as the partial MLP replacement and quantify the retained trainable-parameter reduction and empirical compute penalty.",
+    "fail_action": "If terminal CE exceeds 3.6478, reject the c_fc chart at 5TPP; do not tune or scale it. Use the factorial curve to classify c_fc/c_proj interaction before selecting a new full-MLP representation.",
+    "threshold_changed_after_measurement": false
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "protocol": "Foreground exact-scientific-config run with one warmup plus eight timed real training updates; poll directly and use no watchdog.",
+    "minimum_mfu_fraction": 0.2,
+    "require_native_blockfht_extension": true,
+    "require_all_losses_finite": true,
+    "require_cfc_directed_product_active": true,
+    "require_dense_cproj": true
+  },
+  "scientific_run": {
+    "model": "124M",
+    "token_budget_tpp": 5.0,
+    "updates": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "monitoring": {
+      "watchdog_required": true,
+      "milestones": [20, 50, 100],
+      "heartbeat_minutes": 90,
+      "progress_resets_heartbeat": true,
+      "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+      "callback_mention": "@Codex",
+      "terminal_delivery_once": true,
+      "callback_action_prompt": "verify the live or terminal state against the active project note, inspect fixed loss and GPU health, update durable state, and continue the causal MLP plan autonomously"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repo": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-cfc-only-5tpp",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "exact_mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_polling": "foreground direct polling without watchdog; expected below five minutes"
+  },
+  "authorization": {
+    "config_generation_and_tests": true,
+    "one_exact_config_mfu_gate": true,
+    "one_scientific_5tpp_run_only_after_gate": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false,
+    "post_hoc_hyperparameter_sweep": false
+  }
+}

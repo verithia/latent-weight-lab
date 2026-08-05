@@ -2046,9 +2046,16 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "directed-product c_fc replaces the mlp.c_fc BlockFHT target"
             )
-        if not namespace.block_fht_mlp_cproj_muon_matched_givens:
+        cproj_is_dense_control = (
+            "mlp.c_proj" not in namespace.block_fht_targets
+        )
+        if (
+            not namespace.block_fht_mlp_cproj_muon_matched_givens
+            and not cproj_is_dense_control
+        ):
             raise ValueError(
-                "directed-product c_fc requires the qualified materialized c_proj"
+                "directed-product c_fc requires either dense c_proj or the "
+                "qualified materialized c_proj"
             )
         schedule = namespace.block_fht_mlp_cfc_directed_product_schedule
         if (
