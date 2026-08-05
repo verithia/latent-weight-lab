@@ -40,7 +40,12 @@
     "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/scientific/ckpt.pt"
   },
   "scientific_contract": {
-    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "fixed_evaluation_steps": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
     "primary_terminal_validation_ce_maximum": 3.6478,
     "nonbinding_near_parent_validation_ce_maximum": 3.6378,
     "repaired_attention_parent_validation_ce": 3.6278,
@@ -74,18 +79,79 @@
     "filesystem_available_bytes": 1685382283264,
     "intervention": "none"
   },
+  "preobserved_factorial_reference": {
+    "purpose": "nonbinding no-interaction diagnostic; not a promotion threshold",
+    "fixed_evaluation_steps": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "cfc_marginal_ce_in_mapped_cproj_context": [
+      -0.0038,
+      0.0049,
+      0.0046,
+      0.004041671752929688
+    ],
+    "no_interaction_expected_cfc_only_validation_ce": [
+      4.2113,
+      3.846,
+      3.6953,
+      3.6318416717529298
+    ],
+    "interaction_definition": "joint_full_mlp_ce - cproj_only_ce - observed_cfc_only_ce + repaired_attention_ce",
+    "interpretation": "zero means additive c_fc and c_proj effects; terminal decisions remain governed only by the frozen 3.6478 gate"
+  },
+  "latest_verification": {
+    "verified_at": "2026-08-06T06:36:54+08:00",
+    "trigger": "20_percent_callback",
+    "callback_iter": 500,
+    "verified_iter": 520,
+    "max_iters": 2373,
+    "progress_fraction": 0.2191319,
+    "recent_train_loss": 4.2837,
+    "recent_update_ms": 1934.37,
+    "process_alive": true,
+    "status_running": true,
+    "errors": [],
+    "fixed_evaluation_steps_observed": [],
+    "next_fixed_evaluation_step": 594,
+    "scientific_decision_available": false,
+    "gpu_memory_mib": 48276,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 95,
+    "gpu_power_w": 493.02,
+    "gpu_power_limit_w": 600.0,
+    "gpu_temperature_c": 51,
+    "workspace_bytes": 224734108672,
+    "workspace_gib": 209.3,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1684986462208,
+    "filesystem_available_gib": 1569.266,
+    "update_only_eta_minutes": 59.7,
+    "identity_hashes_unchanged": true,
+    "remote_worktree_clean": true,
+    "intervention": "none",
+    "decision": "NO_INTERVENTION_AT_20_PERCENT"
+  },
   "watchdog": {
     "service": "com.mappingnetworks.pro6.repairedattncfconly5tpp",
     "script": "/Users/verithia/research/latent-weight-lab-midpoint/examples/nanogpt/watch_y400_dense_aggregate.py",
     "state_path": "/Users/verithia/research/latent-weight-lab-midpoint/outputs/monitor_state/pro6_124m_repairedattn_cfconly_5tpp.json",
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
     "callback_mention": "@Codex",
-    "milestones": [20, 50, 100],
+    "milestones": [
+      20,
+      50,
+      100
+    ],
     "heartbeat_minutes": 90,
     "progress_resets_heartbeat": true,
     "terminal_delivery_once": true,
     "interval_seconds": 60,
     "alive": true,
-    "sent_milestones": []
+    "sent_milestones": [
+      20
+    ]
   }
 }
