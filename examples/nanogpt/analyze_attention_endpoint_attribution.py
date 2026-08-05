@@ -27,8 +27,8 @@ import torch.nn.functional as F
 
 from examples.nanogpt.analyze_residual_compatibility import (
     fixed_validation_batches,
-    load_model,
 )
+from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.optimize_mlp_bilateral_endpoint_ce import (
     autocast_context,
     clear_frozen_base_cache,
@@ -37,6 +37,18 @@ from examples.nanogpt.optimize_mlp_bilateral_endpoint_ce import (
 
 
 COMPONENTS = ("score", "value", "projection")
+
+
+def load_endpoint_model(checkpoint_path: Path, device: str) -> GPT:
+    """Load on CPU so deterministic CPU generators remain device-compatible."""
+    checkpoint = torch.load(
+        checkpoint_path, map_location="cpu", weights_only=False
+    )
+    model = GPT(GPTConfig(**checkpoint["model_config"]))
+    model.load_state_dict(checkpoint["model"])
+    model.to(device)
+    model.eval()
+    return model
 
 
 def sha256(path: Path) -> str:
@@ -365,8 +377,8 @@ def main() -> None:
     if candidate_sha256 != protocol["required_candidate_checkpoint_sha256"]:
         raise ValueError("candidate checkpoint SHA-256 mismatch")
     root = Path(__file__).resolve().parents[2]
-    dense = load_model(args.dense_checkpoint, args.device)
-    candidate = load_model(args.candidate_checkpoint, args.device)
+    dense = load_endpoint_model(args.dense_checkpoint, args.device)
+    candidate = load_endpoint_model(args.candidate_checkpoint, args.device)
     cached = prepare_frozen_base_cache(candidate, torch.bfloat16)
     windows = {
         name: fixed_validation_batches(
