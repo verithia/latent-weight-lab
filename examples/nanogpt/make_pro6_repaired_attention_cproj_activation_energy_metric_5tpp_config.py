@@ -105,7 +105,6 @@ def main() -> None:
         "examples/nanogpt/mfu_preflight.py",
         "latent_weight_lab/block_fht.py",
         "examples/nanogpt/test_muon_matched_givens.py",
-        "examples/nanogpt/test_124m_repaired_attention_cproj_activation_energy_metric_5tpp_plan.py",
     )
     config["implementation_source_hashes"] = {
         path: sha256(REPO / path) for path in source_paths
