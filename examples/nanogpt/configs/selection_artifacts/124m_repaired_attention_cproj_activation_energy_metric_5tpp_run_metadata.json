@@ -72,6 +72,43 @@
       "activation_energy_metric_condition_maximum": 16.0
     }
   },
+  "latest_verification": {
+    "verified_at": "2026-08-06T04:48:51+08:00",
+    "trigger": "20_percent_callback",
+    "callback_iter": 490,
+    "verified_iter": 520,
+    "progress_fraction": 0.219132,
+    "last_train_loss": 4.3934,
+    "observed_update_ms": 1989.16,
+    "process_alive": true,
+    "status_running": true,
+    "fixed_steps_observed": [],
+    "next_fixed_evaluation_step": 594,
+    "scientific_decision_available": false,
+    "gpu_memory_mib": 48470,
+    "gpu_utilization_percent": 100,
+    "gpu_power_w": 517.57,
+    "gpu_power_limit_w": 600,
+    "gpu_temperature_c": 54,
+    "workspace_bytes": 223427438435,
+    "workspace_gib": 208.083,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1686078615552,
+    "filesystem_available_tib": 1.5335,
+    "estimated_remaining_update_minutes": 61.43,
+    "activation_metric_diagnostics": {
+      "rows": 12,
+      "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+      "all_active": true,
+      "all_finite": true,
+      "maximum_condition_number": 16.0,
+      "minimum_samples_per_layer": 262144
+    },
+    "watchdog_milestones_sent": [20],
+    "watchdog_errors": [],
+    "intervention": "none",
+    "decision": "NO_INTERVENTION_AT_20_PERCENT"
+  },
   "watchdog": {
     "service": "com.mappingnetworks.pro6.repairedattncprojactivationenergy5tpp",
     "state_key": "pro6_124m_repairedattn_cproj_activationenergymetric_5tpp",
@@ -87,7 +124,7 @@
     "terminal_delivery_once": true,
     "interval_seconds": 60,
     "alive": true,
-    "sent_milestones": [],
+    "sent_milestones": [20],
     "recorded_errors": []
   },
   "preflight_performance": {
