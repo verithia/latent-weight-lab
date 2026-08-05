@@ -26,6 +26,10 @@ PLAN = REPO / (
     "examples/nanogpt/configs/selection_artifacts/"
     "124m_repaired_attention_cfc_only_5tpp_plan.json"
 )
+MFU_RESULT = REPO / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "124m_repaired_attention_cfc_only_5tpp_mfu_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -144,3 +148,20 @@ def test_gate_monitoring_and_authorization_are_frozen() -> None:
     assert authorization["parallel_arm"] is False
     assert authorization["larger_rung"] is False
 
+
+def test_exact_config_mfu_gate_authorizes_one_scientific_run() -> None:
+    result = load(MFU_RESULT)
+    assert result["classification"] == "CFC_ONLY_124M_5TPP_EXACT_CONFIG_MFU_PASSED"
+    assert result["passed"] is True
+    assert sha256(REPO / result["identity"]["config"]) == result["identity"]["config_sha256"]
+    assert sha256(REPO / result["identity"]["plan"]) == result["identity"]["plan_sha256"]
+    assert result["measurement"]["mfu_fraction"] >= 0.20
+    assert result["measurement"]["native_block_fht_extension"]["loaded"] is True
+    assert result["structural_verification"]["cfc_directed_product_active"] is True
+    assert result["structural_verification"]["cproj_dense_muon_active"] is True
+    assert result["structural_verification"]["cproj_generated_target_absent"] is True
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["execution"]["direct_foreground_polling"] is True
+    assert result["execution"]["watchdog_used"] is False
+    assert result["decision"]["one_scientific_2373_update_run_authorized"] is True
+    assert result["decision"]["automatic_rerun_authorized"] is False

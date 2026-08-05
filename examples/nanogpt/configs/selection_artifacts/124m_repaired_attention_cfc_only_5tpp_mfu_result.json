@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_only_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_only_5tpp_exact_config_mfu_result",
+  "classification": "CFC_ONLY_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "recorded_at": "2026-08-06T06:14:55+08:00",
+  "passed": true,
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+    "config_sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_plan.json",
+    "plan_sha256": "ecf5ef1a68d1d64d6e56c4df6009eb9d72e8e0702eebb6009262895d235da62e",
+    "implementation_commit": "c47a961104d3b5c89f999d9ba2c2e7e3eeea7f15",
+    "execution_git_commit": "cc5b3197fa993900e543e79b10c702c025ea9acc",
+    "remote_repo": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-cfc-only-5tpp"
+  },
+  "artifacts": {
+    "certificate": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/performance_preflight.json",
+      "sha256": "8a7663a6f31d1957e6400abc3b8fc83ec90c5139c1284b86c0faf50cba13ac50"
+    },
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/performance_preflight.log",
+      "sha256": "65ad361946fb367975e100aaeaebe094746c7fadfa14a5c24ee5293fca1c92ca"
+    }
+  },
+  "measurement": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 43.25900912284851,
+    "iter_ms": 1933.11375,
+    "tokens_per_second": 135607.41625,
+    "model_tflops": 101.27913436093824,
+    "empirical_bf16_gemm_peak_tflops": 416.85880575355526,
+    "mfu_fraction": 0.24295788637079657,
+    "minimum_mfu_fraction": 0.2,
+    "peak_mib": 35535.27,
+    "native_block_fht_extension": {
+      "loaded": true,
+      "required": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    }
+  },
+  "structural_verification": {
+    "cfc_directed_product_active": true,
+    "cfc_schedule": [22, 22, 22, 22, 22, 22],
+    "cfc_error_feedback": true,
+    "cfc_error_feedback_decay": 1,
+    "cfc_procedural_coordinates_per_update": 4866048,
+    "cproj_dense_muon_active": true,
+    "cproj_generated_target_absent": true,
+    "cproj_muon_matched_givens_active": false,
+    "dense_cproj_parameters": 28311552,
+    "model_registered_parameters": 70540512,
+    "model_reported_trainable_parameters": 70540512,
+    "block_fht_generated_parameters": 56623104,
+    "block_fht_reported_latent_or_coordinate_count": 5149152,
+    "optimizer_dense_muon_matrix_tensors": 12,
+    "attention_cayley_tensors": 120
+  },
+  "stability": {
+    "train_exit_code": 0,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "finite_loss_values": 13,
+    "first_logged_validation_ce": 10.9895,
+    "last_logged_validation_ce": 9.1684
+  },
+  "execution": {
+    "direct_foreground_polling": true,
+    "watchdog_used": false,
+    "scientific_run_duration_estimate_minutes_from_update_rate": 76.45,
+    "workspace_bytes_after_gate": 224338340864,
+    "workspace_gib_after_gate": 208.9313,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes_after_gate": 1685382283264
+  },
+  "decision": {
+    "one_scientific_2373_update_run_authorized": true,
+    "watchdog_required": true,
+    "watchdog_milestones": [20, 50, 100],
+    "watchdog_heartbeat_minutes": 90,
+    "automatic_rerun_authorized": false,
+    "parallel_arm_authorized": false,
+    "larger_rung_authorized": false,
+    "terminal_validation_ce_maximum": 3.6478
+  }
+}
