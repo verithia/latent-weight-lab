@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_pretraining_failure_v1",
+  "artifact_kind": "pretraining_launch_validation_failure",
+  "recorded_at": "2026-08-06",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_20260805T164115Z_578272",
+    "name": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 578463,
+    "started_at": "2026-08-06T00:41:17+08:00",
+    "finished_at": "2026-08-06T00:41:18+08:00",
+    "exit_code": 1,
+    "state": "failed",
+    "last_iter": null,
+    "training_updates_executed": 0
+  },
+  "identity": {
+    "implementation_commit": "b8c587988ced4fd66d177ccfe6ea44c9a75b7968",
+    "config_sha256": "d9a7eabe958784e832d70b73242a7d24841817a801075f47bfe257b47474e1b5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_certificate_sha256": "4679cb176c34bd9d062d1df7e595439035e8ef5e377b6fc442e4604210b203ba"
+  },
+  "artifacts": {
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_20260805T164115Z_578272.log",
+      "sha256": "92add68d67aae4bae47b8568e3b5f1a7547dcf5c2119c01e171199282a753f98"
+    },
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_20260805T164115Z_578272.json",
+      "sha256": "f61ad93d1e41300a8aef531ed2352eda886fae1f39ebd5cca9c4e26299b532f4"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_20260805T164115Z_578272.json",
+      "sha256": "a7dbe98549049418ebd00e58af1ff8e4a1b90cfcbe1a2302c177e2b12022a0b4"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_20260805T164115Z_578272.config.json",
+      "sha256": "d9a7eabe958784e832d70b73242a7d24841817a801075f47bfe257b47474e1b5"
+    },
+    "archived_mfu": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_20260805T164115Z_578272.mfu.json",
+      "sha256": "4679cb176c34bd9d062d1df7e595439035e8ef5e377b6fc442e4604210b203ba"
+    }
+  },
+  "diagnosis": {
+    "exception": "ValueError: registered deterministic runs require checkpoint_wall_clock_seconds=7200",
+    "classification": "PRETRAINING_CONFIG_CONTRACT_REJECTION",
+    "scientific_result_valid": false,
+    "loss_or_threshold_observed": false
+  },
+  "repair_policy": {
+    "only_config_change_authorized": "checkpoint_wall_clock_seconds 3600 -> 7200 plus identity/output metadata",
+    "fresh_exact_config_mfu_required": true,
+    "new_preregistered_plan_required": true,
+    "automatic_scientific_rerun": false
+  }
+}
