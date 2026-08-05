@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_only_5tpp_run_metadata_v1",
+  "recorded_at": "2026-08-06",
+  "state": "running",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799",
+    "name": "pro6_mai_v3_124m_repairedattn_cprojonly_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 645985,
+    "started_at": "2026-08-06T02:34:56+08:00",
+    "max_iters": 2373,
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.log",
+    "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.json",
+    "provenance": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cprojonly_5tpp_20260805T183455Z_645799.json",
+    "provenance_sha256": "926faccae7975fd06bfb837138546303d126cdab0d3a0951be4a8b4d8ce99416"
+  },
+  "identity": {
+    "implementation_commit": "a9f68e06189989ed5016290006b2a3cb3e6e469f",
+    "launch_artifact_commit": "e5c9912b389e9149ee86b7b5c982c6670f93d519",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json",
+    "config_sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20",
+    "archived_config_sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_mfu_result.json",
+    "archived_mfu_sha256": "140ec74bbbe30fdc517dd722b6d0418cb4b32a1b0ae7990ae078d207e14c41de"
+  },
+  "launch_validation": {
+    "process_alive": true,
+    "status_running": true,
+    "native_extension_loaded": true,
+    "last_iter": 10,
+    "last_train_loss": 8.9797,
+    "step_zero_validation_ce": 10.9669,
+    "observed_update_ms": 1953,
+    "gpu_memory_mib": 48314,
+    "gpu_utilization_percent": 100,
+    "gpu_power_w": 464.88,
+    "gpu_power_limit_w": 600,
+    "gpu_temperature_c": 46,
+    "workspace_gib": 208,
+    "workspace_cap_gib": 256,
+    "filesystem_free_tib": 1.6,
+    "optimizer_confirmation": {
+      "matrix_tensors": 12,
+      "muon_matched_givens_tensors": 12,
+      "c_fc_directed_product": false,
+      "c_proj_directed_product": true
+    }
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.repairedattncprojonly5tpp",
+    "state_key": "pro6_124m_repairedattn_cprojonly_5tpp",
+    "process_id": 88015,
+    "state_file": "/Users/verithia/research/.watchdog-state/pro6_124m_repairedattn_cprojonly_5tpp.json",
+    "host": "PRO6",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "chat_id": "oc_fa5c2ec0190c9444cce960125eafff50",
+    "mention": "@Codex",
+    "milestones": [
+      20,
+      50,
+      100
+    ],
+    "heartbeat_minutes": 90,
+    "progress_resets_heartbeat": true,
+    "terminal_delivery_once": true,
+    "interval_seconds": 60,
+    "alive": true,
+    "sent_milestones": [],
+    "recorded_errors": []
+  },
+  "preflight_performance": {
+    "mfu": 0.23958994349643856,
+    "tokens_per_second": 133812.12375,
+    "milliseconds_per_update": 1959.05,
+    "peak_memory_mib": 35591.23,
+    "forward_backward_ms": 1653.87125,
+    "optimizer_ms": 293.60625,
+    "empirical_bf16_peak_tflops": 417.1223,
+    "gate_minimum_mfu": 0.2,
+    "gate_passed": true,
+    "all_losses_finite": true,
+    "native_blockfht_loaded": true,
+    "certificate_sha256": "140ec74bbbe30fdc517dd722b6d0418cb4b32a1b0ae7990ae078d207e14c41de",
+    "log_sha256": "27562e34e2bba73d11035749bfcceb4d849ee100aff3c95a68550fba20325b71"
+  },
+  "frozen_decision_rule": {
+    "terminal_validation_ce_maximum": 3.6478,
+    "joint_full_mlp_validation_ce_exact": 3.660243034362793,
+    "joint_near_match_absolute_ce_maximum": 0.01,
+    "if_passes": "localize the rejected joint miss to c_fc or the c_fc/c_proj interaction",
+    "if_fails_and_matches_joint": "localize the remaining incremental MLP gap primarily to c_proj",
+    "otherwise": "classify a mixed c_fc and c_proj contribution",
+    "threshold_changed_after_measurement": false
+  },
+  "authorization": {
+    "one_scientific_run": true,
+    "automatic_rerun": false,
+    "larger_rung": false,
+    "parallel_gpu_experiment": false
+  }
+}
