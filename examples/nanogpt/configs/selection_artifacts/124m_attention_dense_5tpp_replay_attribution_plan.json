@@ -17,6 +17,8 @@
     "direct_foreground_polling": true
   },
   "attribution": {
+    "dense_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "required_dense_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
     "candidate_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_recovery/pro6_mai_v3_124m_fullattn_targeted_bilateral_fullcayleylr_qk64_outputgain_5tpp_lr24e4/ckpt.pt",
     "required_candidate_checkpoint_sha256": "7a38c4bd60ec454c5daaaf6aa8ea7636603a4f0b168e8b00c356d3d83134698c",
     "fixed_input_policy": "use identical terminal-dense ln_1 inputs from immutable validation windows",

@@ -358,6 +358,9 @@ def main() -> None:
     if manifest_sha256 != required_manifest:
         raise ValueError("dataset manifest SHA-256 mismatch")
     protocol = plan["attribution"]
+    dense_sha256 = sha256(args.dense_checkpoint)
+    if dense_sha256 != protocol["required_dense_checkpoint_sha256"]:
+        raise ValueError("dense checkpoint SHA-256 mismatch")
     candidate_sha256 = sha256(args.candidate_checkpoint)
     if candidate_sha256 != protocol["required_candidate_checkpoint_sha256"]:
         raise ValueError("candidate checkpoint SHA-256 mismatch")
@@ -424,7 +427,7 @@ def main() -> None:
             "plan": str(args.plan),
             "plan_sha256": sha256(args.plan),
             "dense_checkpoint": str(args.dense_checkpoint),
-            "dense_checkpoint_sha256": sha256(args.dense_checkpoint),
+            "dense_checkpoint_sha256": dense_sha256,
             "candidate_checkpoint": str(args.candidate_checkpoint),
             "candidate_checkpoint_sha256": candidate_sha256,
             "dataset_manifest_sha256": manifest_sha256,
