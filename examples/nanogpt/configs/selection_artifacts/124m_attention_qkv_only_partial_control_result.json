@@ -1,0 +1,131 @@
+{
+  "schema_version": "mai_124m_attention_qkv_only_partial_control_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "name": "pro6_mai_v3_124m_qkv_only_qk64_outputgain_5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "f01e4813143930db2eab3e7b1a902b71db71b48c",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_5tpp_lr24e4.json",
+    "config_sha256": "aa0a2e0301e9cba90e9fe108dbd5444d3a165b4d4c0877ef484ccf2df5e403e0",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_fraction": 0.28635185298266536,
+    "mfu_certificate_sha256": "98660a96e1bc9c3af3a4cf2d95b9efaa756abdc68805e430ac11bc2127596d13",
+    "mfu_preflight_log_sha256": "5606eedb0836936565cea72424572220337563296a3bf98f1a44608d6609c33c",
+    "provenance_sha256": "2c67a8f6fa405085728d1895070327cafe6ab8c9dec42aa242652429ad69f8c6",
+    "status_sha256": "8078727fd4960949cb3c0d2f12c32a5958ba0f1a2a6ddd4d6f5688b9a57ece65",
+    "log_sha256": "9f95691394c0127e82d04d0b7ad43062a4e630eb12cd95e460506543277ea65e",
+    "checkpoint_sha256": "320ed61c73f870a408c0c84e2bbfb24a2a83f9f972069420d0f87aafbd5df05f",
+    "exit_code": 0,
+    "classification": "clean",
+    "fixed_evaluations": [
+      {
+        "step": 594,
+        "train_ce": 4.0668,
+        "validation_ce": 4.0553
+      },
+      {
+        "step": 1188,
+        "train_ce": 3.7391,
+        "validation_ce": 3.724
+      },
+      {
+        "step": 1782,
+        "train_ce": 3.5941,
+        "validation_ce": 3.5769
+      },
+      {
+        "step": 2373,
+        "train_ce": 3.5325,
+        "validation_ce": 3.5148
+      }
+    ]
+  },
+  "comparisons": {
+    "qk_only_validation_ce_by_step": [
+      4.0173,
+      3.6941,
+      3.5477,
+      3.4858
+    ],
+    "full_attention_validation_ce_by_step": [
+      4.1885,
+      3.8302,
+      3.6788,
+      3.6151
+    ],
+    "blockwise_dense_validation_ce_by_step": [
+      4.1372,
+      3.7301,
+      3.5736,
+      3.511
+    ],
+    "ordinary_dense_validation_ce_by_step": [
+      4.1742,
+      3.7631,
+      3.6039,
+      3.5402
+    ],
+    "validation_delta_to_qk_only_by_step": [
+      0.038,
+      0.0299,
+      0.0292,
+      0.029
+    ],
+    "full_attention_delta_to_qkv_only_by_step": [
+      0.1332,
+      0.1062,
+      0.1019,
+      0.1003
+    ],
+    "validation_delta_to_blockwise_dense_by_step": [
+      -0.0819,
+      -0.0061,
+      0.0033,
+      0.0038
+    ],
+    "validation_delta_to_ordinary_dense_by_step": [
+      -0.1189,
+      -0.0391,
+      -0.027,
+      -0.0254
+    ],
+    "v_share_of_qk_only_to_full_penalty_by_step": [
+      0.222,
+      0.2197,
+      0.2227,
+      0.2243
+    ],
+    "cproj_plus_interaction_share_by_step": [
+      0.778,
+      0.7803,
+      0.7773,
+      0.7757
+    ]
+  },
+  "watchdog": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "agent_mention": "@Codex",
+    "state_key": "pro6_qkv_only_qk64_5tpp",
+    "terminal_callback_owned": true,
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-05T13:01:58+08:00"
+    ],
+    "monitoring_correction": "The run was initially foreground-polled longer than the new five-minute cutoff. A terminal aggregate watcher was then verified, delivered one 100% callback, persisted ownership, and exited. Future runs over five minutes must start with a watchdog."
+  },
+  "interpretation": {
+    "supported": "Generated V introduces a stable approximately 0.029 CE terminal penalty relative to QK-only, but QK+V with dense c_proj remains essentially tied with the fair blockwise-dense control and better than ordinary dense.",
+    "terminal_attribution": "Along the registered QK-only -> QK+V -> full path, V generation accounts for 0.0290 of the 0.1293 terminal penalty (22.43%); generated c_proj plus interaction accounts for 0.1003 (77.57%).",
+    "scope": "The path attribution includes V-by-c_proj interaction in the c_proj-added leg. The complementary QK+c_proj/dense-V control is required to estimate the other addition order."
+  },
+  "decision": "Generated attention c_proj is the primary remaining full-attention bottleneck. Run the preregistered QK+c_proj/dense-V control with a watchdog to quantify c_proj main effect and interaction before selecting the c_proj repair."
+}
