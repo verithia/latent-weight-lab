@@ -66,11 +66,13 @@
     "replicated_signal_minimum_mean_ce_gain": 0.001,
     "distributed_signal": "directed16_all improves both fresh windows by at least 0.001 CE, at least four of five single-layer substitutions improve both windows, and the top two layers account for at most 75 percent of summed positive single-layer gain",
     "layer_local_signal": "directed16_all improves both fresh windows by at least 0.001 CE and the top two layers account for more than 75 percent of summed positive single-layer gain",
+    "mixed_signal": "directed16_all improves both fresh windows by at least 0.001 CE, the top-two concentration is at most 75 percent, but fewer than four single-layer substitutions improve both windows",
     "functional_null": "the all-layer gain is below 0.001 CE on either fresh window or changes sign",
     "nonadditive_context": "reported descriptively when the sum of mean single-layer gains differs from the mean all-layer gain by more than 50 percent of the larger magnitude",
     "binding_next_actions": {
       "DISTRIBUTED_DIRECTED_FUNCTIONAL_SIGNAL": "preregister a different high-mixing c_proj generator family; do not reuse directed-product supports or tune their capacity",
       "LAYER_LOCAL_DIRECTED_FUNCTIONAL_SIGNAL": "preregister one zero-update layer-targeting capacity test in the identified layers using a different generator family; no training",
+      "MIXED_DIRECTED_FUNCTIONAL_SIGNAL": "stop layer-targeted inference and measure coupled c_fc/c_proj or residual-frame action before selecting another tensor-local generator",
       "DIRECTED_ENDPOINT_FUNCTIONALLY_NULL": "stop endpoint geometry fitting and return to the accepted temporal-error c_proj parent plus the c_fc/full-MLP cross-scale branch",
       "NONADDITIVE_CPROJ_CONTEXT": "measure coupled c_fc/c_proj or residual-frame action before selecting another tensor-local generator"
     },
