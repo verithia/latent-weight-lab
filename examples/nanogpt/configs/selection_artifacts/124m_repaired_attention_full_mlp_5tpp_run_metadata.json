@@ -1,7 +1,15 @@
 {
   "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_run_metadata_v1",
   "recorded_at": "2026-08-06",
-  "state": "running",
+  "state": "finished",
+  "terminal": {
+    "classification": "REJECT_FULL_MLP_124M_5TPP_INCREMENTAL_GATE",
+    "finished_at": "2026-08-06T02:19:41+08:00",
+    "exit_code": 0,
+    "terminal_validation_ce_exact": 3.660243034362793,
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+    "result_sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2"
+  },
   "run": {
     "id": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527",
     "name": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2",
@@ -45,7 +53,17 @@
     "heartbeat_minutes": 90,
     "progress_resets_heartbeat": true,
     "terminal_delivery_once": true,
-    "interval_seconds": 60
+    "interval_seconds": 60,
+    "callback_events_delivered": [
+      20,
+      50,
+      100
+    ],
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-06T02:19:41+08:00"
+    ]
   },
   "preflight_performance": {
     "candidate": {

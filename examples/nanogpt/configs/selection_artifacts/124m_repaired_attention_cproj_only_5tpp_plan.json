@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_only_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_only_5tpp_component_attribution_plan",
+  "created_at": "2026-08-06",
+  "status": "registered_before_exact_config_mfu",
+  "causal_question": "Did the rejected joint 124M/5TPP full-MLP gap come from c_proj, from c_fc, or from their interaction?",
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json",
+    "config_sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20",
+    "attention_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json",
+    "attention_parent_config_sha256": "d605621e54f81e9336439012ebaea470812bfd0b52de05a140ee732262ad3fd7",
+    "attention_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pro6_recovery_result.json",
+    "attention_parent_result_sha256": "bcbd5dc8dbc4007a8204d8479c56b2fe79074cfd928bb2e7f11c6c2d2a0d5c5c",
+    "joint_full_mlp_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json",
+    "joint_full_mlp_config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "joint_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+    "joint_full_mlp_result_sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "implementation_commit": "a9f68e06189989ed5016290006b2a3cb3e6e469f"
+  },
+  "single_factor_change": {
+    "restored_to_dense_muon": "mlp.c_fc",
+    "removed_keys": [
+      "block_fht_mlp_cfc_directed_product",
+      "block_fht_mlp_cfc_directed_product_chunk_size",
+      "block_fht_mlp_cfc_directed_product_error_feedback",
+      "block_fht_mlp_cfc_directed_product_error_feedback_decay",
+      "block_fht_mlp_cfc_directed_product_family_radius_ratio",
+      "block_fht_mlp_cfc_directed_product_ridge_ratio",
+      "block_fht_mlp_cfc_directed_product_schedule",
+      "block_fht_mlp_cfc_functional_shear"
+    ],
+    "preserved": "repaired attention Cayley parent; c_proj hidden64+24 fast-fresh matched-Givens projection; c_proj error-feedback decay 0.5; optimizer, data, seeds, schedule, fixed evaluation, checkpoint protocol, and all model dimensions",
+    "additional_dense_optimizer_state_bytes": 113246208,
+    "additional_trainable_parameters": 0,
+    "additional_materialized_inference_parameters": 0,
+    "additional_materialized_inference_flops": 0
+  },
+  "decision_rule": {
+    "primary_metric": "fixed-window terminal step-2373 validation cross entropy",
+    "attention_parent_validation_ce": 3.6278,
+    "dense_control_validation_ce": 3.5401,
+    "joint_full_mlp_validation_ce_exact": 3.660243034362793,
+    "cproj_only_pass_validation_ce_maximum": 3.6478,
+    "joint_near_match_absolute_ce_maximum": 0.01,
+    "if_cproj_passes": "localize the rejected joint miss to c_fc or c_fc/c_proj interaction",
+    "if_cproj_fails_and_matches_joint": "localize the remaining incremental MLP gap primarily to c_proj",
+    "otherwise": "classify a mixed c_fc and c_proj contribution from the signed terminal and fixed-curve differences",
+    "threshold_changed_after_measurement": false,
+    "required_reporting": [
+      "fixed curve against joint full MLP, repaired attention, and dense",
+      "terminal component attribution",
+      "dense token-compute equivalence and common-loss horizontal ratio",
+      "MFU, wall time, peak memory, optimizer state, and materialized inference cost"
+    ]
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repo": "/tmp/latent-weight-lab-qkv20-gate-test",
+    "workspace": "/mnt/ssd-data/orj/MappingNetworks",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "exact_mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_polling": "foreground direct polling without watchdog; expected below five minutes",
+    "scientific_monitoring": {
+      "watchdog": "one idempotent aggregate watcher",
+      "milestones": [20, 50, 100],
+      "heartbeat_minutes": 90,
+      "progress_resets_heartbeat": true,
+      "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+      "callback_mention": "@Codex",
+      "terminal_delivery_once": true,
+      "callback_action_prompt": "verify state and artifacts against the active project note, inspect loss and GPU health, update durable state, choose the next causal action, and continue autonomously"
+    }
+  },
+  "authorization": {
+    "exact_config_mfu_preflight": true,
+    "scientific_run_only_after_mfu_at_least_0p20": true,
+    "one_scientific_run": true,
+    "automatic_rerun": false,
+    "larger_rung": false,
+    "parallel_gpu_experiment": false
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_result_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_5tpp_training_result",
+  "classification": "REJECT_FULL_MLP_124M_5TPP_INCREMENTAL_GATE",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527",
+    "name": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2",
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-06T00:49:37+08:00",
+    "finished_at": "2026-08-06T02:19:41+08:00",
+    "wall_seconds": 5404,
+    "exit_code": 0,
+    "status": "clean"
+  },
+  "identity": {
+    "git_commit": "a9f68e06189989ed5016290006b2a3cb3e6e469f",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json",
+    "config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "2a5fefc9136c960211072e00ce19b26cb11431e54f9e5e711984be66fdf79861",
+    "mfu_certificate_sha256": "e6825514f8896b6cc7b3d207937582ae423d7b3fe9a57f190b1fa4b0f3e7f578"
+  },
+  "fixed_evaluation": {
+    "steps": [594, 1188, 1782, 2373],
+    "candidate_validation_ce": [4.2666, 3.8819, 3.7252, 3.6602],
+    "repaired_attention_validation_ce": [4.2151, 3.8411, 3.6907, 3.6278],
+    "dense_validation_ce": [4.1739, 3.7622, 3.6038, 3.5401],
+    "candidate_minus_attention": [0.0515, 0.0408, 0.0345, 0.0324],
+    "candidate_minus_dense": [0.0927, 0.1197, 0.1214, 0.1201],
+    "terminal_validation_ce_exact": 3.660243034362793
+  },
+  "decision_rule": {
+    "primary_terminal_ce_maximum": 3.6478,
+    "nonbinding_parity_terminal_ce_maximum": 3.6378,
+    "primary_gate_passed": false,
+    "parity_diagnostic_passed": false,
+    "primary_gate_miss_ce_exact": 0.012443034362792815,
+    "parity_diagnostic_miss_ce_exact": 0.022443034362793046,
+    "incremental_gap_vs_attention_ce_exact": 0.03244303436279283,
+    "total_gap_vs_dense_ce_exact": 0.12014303436279317,
+    "threshold_changed_after_measurement": false
+  },
+  "compute_equivalence": {
+    "method": "piecewise linear inversion in validation CE versus log fixed-model compute; at most one adjacent interval extrapolation",
+    "tool_path": "examples/nanogpt/fixed_model_compute_equivalence.py",
+    "tool_sha256": "239e1099bce11ad0e289fbf7e6ed95668db8b1784f450c483d33e8af107ecad1",
+    "dense_match_steps": 1542.2710216416172,
+    "candidate_over_dense_token_compute": 1.5386400747348168,
+    "common_loss_candidate_over_dense": {
+      "loss_low": 3.660243034362793,
+      "loss_high": 4.1739,
+      "samples": 101,
+      "minimum": 1.1817845042215744,
+      "median": 1.2181989989910698,
+      "maximum": 1.5386400747348166
+    },
+    "common_loss_candidate_over_attention": {
+      "loss_low": 3.660243034362793,
+      "loss_high": 4.2151,
+      "samples": 101,
+      "minimum": 1.078564283555336,
+      "median": 1.093161254828138,
+      "maximum": 1.1638477683429551
+    },
+    "perplexity_ratio_vs_attention": 1.0329750473861021,
+    "perplexity_ratio_vs_dense": 1.127658133907275
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.21458210302816835,
+    "tokens_per_second_preflight": 118368.40375,
+    "update_ms_preflight": 2214.65625,
+    "peak_mib_preflight": 35696.49,
+    "relative_to_attention_parent": {
+      "mfu_relative_degradation": 0.235024721889193,
+      "update_time_ratio": 1.3209893449500352,
+      "throughput_ratio": 0.7570131060047739,
+      "optimizer_fraction_of_slowdown": 0.9946629728936629
+    },
+    "additional_dense_optimizer_state_bytes": 226492416,
+    "additional_trainable_parameters": 0,
+    "additional_materialized_inference_parameters": 0,
+    "additional_materialized_inference_flops": 0
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/scientific/ckpt.pt",
+    "sha256": "6b3c9cadc169b9dd234e111428dc22b4390be79561f98d178e8f105747612a24",
+    "bytes": 1245132956,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/scientific/ckpt.meta.json",
+    "metadata_sha256": "e262dd3ad15535fffbef70ab47437bd91fcdd0720a7fa19b73e78d3efde6a741",
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "readable": true,
+    "metadata_consistent": true,
+    "model_tensor_bytes": 608335116,
+    "all_24_compression_residuals_finite": true,
+    "cfc_residual_frobenius_range": [0.011454442515969276, 0.013732566498219967],
+    "cproj_residual_frobenius_range": [0.007650540675967932, 0.008444616571068764]
+  },
+  "artifacts": {
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.log",
+      "sha256": "8499d9d062c174ef6a51ea0523ce6cf6635c0a5a90d31d9580dac6c7e85d941d"
+    },
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.json",
+      "sha256": "d9d4eef09bd44f0f3869fab8ad7ae4d16d4b647784fd40c930554ed61c5900ab"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.json",
+      "sha256": "2a5fefc9136c960211072e00ce19b26cb11431e54f9e5e711984be66fdf79861"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.config.json",
+      "sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363"
+    }
+  },
+  "watchdog": {
+    "progress_milestones_sent": [20, 50],
+    "terminal_100_percent_callback_sent_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-06T02:19:41+08:00"],
+    "duplicate_terminal_callbacks": 0
+  },
+  "decision": {
+    "selected_for_full_mlp_scaling": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "optimize_rejected_chart_runtime": false,
+    "next_action": "Run one matched 124M/5TPP repaired-attention plus c_proj-only decay-0.5 component attribution. If c_proj-only passes 3.6478, localize the joint miss to c_fc or interaction; if it remains above 3.6478 and near the joint curve, localize the residual gap to c_proj. Require a fresh exact-config MFU gate before launch."
+  }
+}
