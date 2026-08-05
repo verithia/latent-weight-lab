@@ -28,6 +28,46 @@ def zeropower_via_newtonschulz5(grad: torch.Tensor, steps: int = 5, eps: float =
     return x.reshape(original_shape).to(dtype=grad.dtype)
 
 
+def muon_update(
+    update: torch.Tensor,
+    *,
+    steps: int,
+    row_splits: tuple[int, ...] | None = None,
+) -> torch.Tensor:
+    """Return Muon's scaled polar update, optionally per contiguous row block.
+
+    Packed QKV normally receives one polar map over its full ``3d x d``
+    matrix.  A partial-QK model instead gives the dense value matrix its own
+    ``d x d`` Muon update.  ``row_splits=(2d, d)`` is the exact packed-weight
+    control for that optimizer geometry: momentum remains attached to the
+    original parameter, while QK and V are orthogonalized and scaled as two
+    independent matrices.
+    """
+
+    if row_splits is None:
+        orthogonal = zeropower_via_newtonschulz5(update, steps=steps)
+        columns = max(1, orthogonal.numel() / orthogonal.shape[0])
+        scale = max(1.0, orthogonal.shape[0] / columns) ** 0.5
+        return orthogonal.mul(scale)
+    if not row_splits or any(
+        isinstance(rows, bool) or not isinstance(rows, int) or rows <= 0
+        for rows in row_splits
+    ):
+        raise ValueError("Muon row splits must be positive integers")
+    if sum(row_splits) != update.shape[0]:
+        raise ValueError("Muon row splits must exactly cover the first dimension")
+    blocks = []
+    start = 0
+    for rows in row_splits:
+        block = update.narrow(0, start, rows)
+        orthogonal = zeropower_via_newtonschulz5(block, steps=steps)
+        columns = max(1, orthogonal.numel() / orthogonal.shape[0])
+        scale = max(1.0, orthogonal.shape[0] / columns) ** 0.5
+        blocks.append(orthogonal.mul(scale))
+        start += rows
+    return torch.cat(blocks, dim=0)
+
+
 class Muon(torch.optim.Optimizer):
     def __init__(
         self,
@@ -63,7 +103,10 @@ class Muon(torch.optim.Optimizer):
                 buf = state["momentum_buffer"]
                 buf.mul_(momentum).add_(grad)
                 update = grad.add(buf, alpha=momentum)
-                update = zeropower_via_newtonschulz5(update, steps=ns_steps)
-                scale = max(1.0, update.shape[0] / max(1, update.numel() / update.shape[0])) ** 0.5
-                param.add_(update, alpha=-lr * scale)
+                update = muon_update(
+                    update,
+                    steps=ns_steps,
+                    row_splits=getattr(param, "_muon_row_splits", None),
+                )
+                param.add_(update, alpha=-lr)
         return loss

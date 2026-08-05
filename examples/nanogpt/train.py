@@ -1070,6 +1070,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--muon-momentum", type=float, default=0.95)
     parser.add_argument("--muon-ns-steps", type=int, default=5)
     parser.add_argument("--muon-adamw-lr-scale", type=float, default=1.0)
+    parser.add_argument(
+        "--muon-split-attention-qkv-rows",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--block-fht-mlp-chart-lr-scale", type=float, default=1.0)
     parser.add_argument(
         "--block-fht-mlp-pregelu-chart-lr-scale",
@@ -2584,6 +2589,7 @@ def main() -> None:
         muon_momentum=args.muon_momentum,
         muon_ns_steps=args.muon_ns_steps,
         muon_adamw_lr_scale=args.muon_adamw_lr_scale,
+        muon_split_attention_qkv_rows=args.muon_split_attention_qkv_rows,
         block_fht_attn_cayley_lr_scale=args.block_fht_attn_cayley_lr_scale,
         block_fht_attn_cayley_muon_lr_scale=(
             args.block_fht_attn_cayley_muon_lr_scale

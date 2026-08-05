@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_124m_attention_qk_only_partial_control_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "91ae829a4216d91cdfeb73769a25586f72b4cd09",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4.json",
+    "config_sha256": "a66a8415f72404d4bf8925de50ff4aeef412cb3426fa40d20f45968247f3c7f9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_fraction": 0.31765039042557547,
+    "mfu_certificate_sha256": "7d441963ad81d0c271bad4246ab82888c8287076b9963a81d935c46525577e77",
+    "provenance_sha256": "bedef8de0f2b215a82806b4933c670dd5ea5a6561a8326c56397028916f71fef",
+    "status_sha256": "6325c4e73a3eb54303aa434530f1d8f5984b1187a4cf2c660c9ec7aba8dc5fe5",
+    "log_sha256": "1a3eba9404208cb348f2d608c0348ef9e8d1289a0d0a503fe295aa3045fcf477",
+    "checkpoint_sha256": "13b1dd1ad120f23578a7dce376a2b259e34cd5590982aa2c2ba85a68c033a5a3",
+    "exit_code": 0,
+    "classification": "clean",
+    "fixed_evaluations": [
+      {"step": 594, "train_ce": 4.0287, "validation_ce": 4.0173},
+      {"step": 1188, "train_ce": 3.7089, "validation_ce": 3.6941},
+      {"step": 1782, "train_ce": 3.5649, "validation_ce": 3.5477},
+      {"step": 2373, "train_ce": 3.5039, "validation_ce": 3.4858}
+    ]
+  },
+  "comparisons": {
+    "dense_terminal_validation_ce": 3.5402,
+    "full_attention_terminal_validation_ce": 3.6151,
+    "terminal_delta_to_dense_ce": -0.0544,
+    "terminal_delta_to_full_attention_ce": -0.1293,
+    "validation_delta_to_dense_by_step": [-0.1569, -0.0690, -0.0562, -0.0544],
+    "validation_delta_to_full_attention_by_step": [-0.1712, -0.1361, -0.1311, -0.1293]
+  },
+  "interpretation": {
+    "supported": "The mapped Q/K score path is not the source of the full-attention loss gap; retaining dense V and c_proj closes the gap at every fixed evaluation and beats the reproduced dense terminal CE.",
+    "unresolved_confound": "The QK-only architecture gives dense V an independent square Muon polar update instead of the packed dense baseline's single 3d-by-d QKV polar update. A packed-weight blockwise-QK/V Muon control is required before attributing the gain to mapped Q/K.",
+    "full_replacement_status": "not closed: V and c_proj remain dense in this partial-compression control"
+  },
+  "decision": "Retain QK-only as the partial-attention anchor. Run the exact dense packed-QKV blockwise-Muon control before selecting QK+V versus QK+c_proj; do not report the -0.0544 CE result as an unconfounded mapping advantage."
+}

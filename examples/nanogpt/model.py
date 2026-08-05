@@ -4025,12 +4025,36 @@ class GPT(nn.Module):
         muon_momentum: float = 0.95,
         muon_ns_steps: int = 5,
         muon_adamw_lr_scale: float = 1.0,
+        muon_split_attention_qkv_rows: bool = False,
         block_fht_attn_cayley_lr_scale: float = 1.0,
         block_fht_attn_cayley_muon_lr_scale: float = 1.0,
         block_fht_mlp_chart_lr_scale: float = 1.0,
         block_fht_mlp_pregelu_chart_lr_scale: float = 1.0,
     ):
         params = {name: param for name, param in self.named_parameters() if param.requires_grad}
+        split_qkv_named: list[tuple[str, nn.Parameter]] = []
+        if muon_split_attention_qkv_rows:
+            if optimizer != "muon":
+                raise ValueError("split-QKV row updates require optimizer='muon'")
+            expected_shape = (3 * self.config.n_embd, self.config.n_embd)
+            split_qkv_named = [
+                (name, param)
+                for name, param in params.items()
+                if name.endswith(".attn.c_attn.weight")
+            ]
+            if len(split_qkv_named) != self.config.n_layer or any(
+                tuple(param.shape) != expected_shape
+                for _name, param in split_qkv_named
+            ):
+                raise ValueError(
+                    "split-QKV row updates require one dense packed c_attn "
+                    "weight with shape (3*n_embd, n_embd) per layer"
+                )
+            for _name, param in split_qkv_named:
+                param._muon_row_splits = (
+                    2 * self.config.n_embd,
+                    self.config.n_embd,
+                )
         decay = [param for _, param in params.items() if param.dim() >= 2]
         nodecay = [param for _, param in params.items() if param.dim() < 2]
         muon_matched_givens_named_modules = [
@@ -4398,6 +4422,7 @@ class GPT(nn.Module):
                 adamw_lr = learning_rate * float(muon_adamw_lr_scale)
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
+                f"muon_split_qkv_tensors={len(split_qkv_named)} "
                 f"product_fht_factor_tensors={len(product_factors)} "
                 "muon_matched_givens_tensors="
                 f"{len(muon_matched_givens_modules)} "
