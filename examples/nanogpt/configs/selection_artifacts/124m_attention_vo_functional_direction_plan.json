@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_attention_vo_functional_direction_plan_v1",
+  "recorded_at": "2026-08-05",
+  "status": "registered_before_analysis",
+  "scientific_question": "At the successful generated-QK/dense-V/dense-O endpoint, is the held-out task direction of the joint per-head value/output operator K_h = O_h V_h materially more stable and useful than the K_h direction induced by the actual separate dense-Muon V and O factor updates?",
+  "causal_basis": {
+    "qk_only_endpoint": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+      "result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4.json",
+      "config_sha256": "a66a8415f72404d4bf8925de50ff4aeef412cb3426fa40d20f45968247f3c7f9",
+      "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4/ckpt.pt",
+      "checkpoint_sha256": "13b1dd1ad120f23578a7dce376a2b259e34cd5590982aa2c2ba85a68c033a5a3",
+      "terminal_validation_ce": 3.4858
+    },
+    "qk_plus_v_endpoint": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_partial_control_result.json",
+      "result_sha256": "bef499f835be994f39fdabe5396c82a7deb6b3878e607e495ecfa56b8b92ebc9",
+      "terminal_validation_ce": 3.5148,
+      "fact": "Generated V costs only 0.0290 CE relative to QK-only and remains within +0.0038 CE of the fair blockwise-dense control."
+    },
+    "trajectory_manifold": {
+      "functional_result_sha256": "aca56b7c988e80523f7f2c02bb24991381d5bad703f0327be7d4cb61585a8f11",
+      "activation_result_sha256": "9404751379b1fd27fcfaa58f2b8ad8ed69c42fa11cd075bb8c55a37aa46e921d",
+      "fact": "The V/O quotient trajectory was not globally simpler than its factors, and residual head contribution was not simpler than the value/output kernel. A task-direction gate is therefore required before proposing a joint operator chart."
+    },
+    "cproj_rejection": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_activation_metric_result.json",
+      "result_sha256": "2ab3ea43ba63013d73cb12da0bb9418b15d8c7083ae93598ebaf83781ca39b6c",
+      "fact": "Tenfold fixed-chart capacity and activation-metric preconditioning failed; the trained c_proj chart was indistinguishable from an equal-coordinate random chart."
+    }
+  },
+  "identity": {
+    "required_dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "required_qk_only_config_sha256": "a66a8415f72404d4bf8925de50ff4aeef412cb3426fa40d20f45968247f3c7f9",
+    "required_qk_only_checkpoint_sha256": "13b1dd1ad120f23578a7dce376a2b259e34cd5590982aa2c2ba85a68c033a5a3",
+    "required_qk_only_result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585"
+  },
+  "protocol": {
+    "runtime_policy": "zero-update diagnostic expected under five minutes; foreground-poll directly and do not attach a watchdog",
+    "layers": [0, 3, 6, 9, 11],
+    "heads_per_layer": 12,
+    "expected_cells": 60,
+    "block_size": 256,
+    "muon_newton_schulz_steps": 5,
+    "fit_window": {
+      "seed": 20260805,
+      "batches": 8,
+      "batch_size": 4
+    },
+    "holdout_window": {
+      "seed": 20260806,
+      "batches": 8,
+      "batch_size": 4
+    },
+    "operator_convention": "PyTorch F.linear weights: V_h is [head_dim,d], O_h is [d,head_dim], K_h=O_h@V_h is [d,d], and the residual contribution is S_h@K_h.T where S_h=A_h@X_value.",
+    "direct_direction": "For each layer/head/window accumulate G_K=R.T@S_h and form the per-head Muon polar direction U_K.",
+    "factor_direction": "Accumulate the actual full dense V and O gradients, apply the existing full-matrix Muon transform separately, then linearize K_h: U_factor=U_O[:,h]@V_h + O_h@U_V[h,:].",
+    "primary_metrics": [
+      "fit direct-direction cosine with the disjoint holdout raw task gradient",
+      "fit factor-induced-direction cosine with the disjoint holdout raw task gradient",
+      "direct-minus-factor held-out task cosine",
+      "fit/holdout direct Muon-direction cosine",
+      "fit/holdout factor-induced-direction cosine",
+      "factor-induced line recovery of the direct functional direction"
+    ],
+    "guards": {
+      "parameter_updates": 0,
+      "dense_optimizer_state_retained": false,
+      "require_no_V_or_cproj_Cayley_or_adapter": true,
+      "all_metrics_finite": true,
+      "minimum_valid_cells": 60,
+      "fit_holdout_token_windows_must_be_disjoint": true
+    }
+  },
+  "preregistered_gate": {
+    "minimum_aggregate_direct_heldout_task_cosine": 0.20,
+    "minimum_aggregate_direct_minus_factor_heldout_task_cosine": 0.05,
+    "minimum_direct_over_positive_factor_heldout_alignment_multiplier": 1.25,
+    "minimum_aggregate_direct_fit_holdout_direction_cosine": 0.15,
+    "maximum_aggregate_factor_line_recovery_of_direct": 0.81,
+    "minimum_layers_with_positive_direct_advantage": 4,
+    "minimum_cells_with_positive_direct_heldout_alignment": 36,
+    "no_posthoc_threshold_changes": true,
+    "pass_classification": "AUTHORIZE_NONLEARNED_JOINT_VO_STRUCTURE_DESIGN",
+    "fail_classification": "REJECT_JOINT_VO_DIRECTION_ADVANTAGE",
+    "pass_action": "Design one nonlearned joint V/O functional generator with explicit materialization and trainable-parameter accounting. Preregister its exact architecture and require a fresh exact-config >=20% MFU gate before any training.",
+    "fail_action": "Retain generated QK+V with dense c_proj as the honest attention-compression endpoint; do not train a direct V/O operator chart from this evidence."
+  },
+  "exclusions": [
+    "learned dense basis",
+    "LoRA-like additive residual",
+    "parameter updates during this diagnostic",
+    "retained dense gradients or optimizer state after scoring",
+    "post-hoc threshold changes",
+    "automatic architecture construction, MFU preflight, or training"
+  ]
+}
