@@ -148,3 +148,28 @@ def test_evaluate_ce_accepts_sliced_next_token_targets() -> None:
     tokens = torch.randint(0, config.vocab_size, (2, config.block_size + 1))
     value = evaluate_ce(model, [tokens], "cpu")
     assert math.isfinite(value)
+
+
+def test_harmful_pair_is_not_selected_from_positive_interaction_only() -> None:
+    protocol = {
+        "minimum_stable_component_ce": 0.005,
+        "minimum_value_projection_interaction_ce": 0.003,
+    }
+    window = {
+        "shapley_ce_improvement": {
+            "score": -1.0,
+            "value": -0.6,
+            "projection": -1.8,
+        },
+        "hybrid_ce": {
+            "000": 3.6,
+            "010": 6.8,
+            "001": 8.0,
+            "011": 7.1,
+        },
+    }
+    decision = select_structural_gate(
+        {"primary": window, "confirmation": window}, protocol
+    )
+    assert decision["classification"] == "NO_STABLE_ENDPOINT_COMPONENT"
+    assert decision["selected_component"] is None

@@ -267,17 +267,21 @@ def select_structural_gate(
         and confirmation_shapley[confirmation_top] >= minimum
     )
     joint: dict[str, float] = {}
+    joint_improvement: dict[str, float] = {}
     for name, result in results.items():
         ce = result["hybrid_ce"]
         value = ce["000"] - ce["010"]
         projection = ce["000"] - ce["001"]
         value_projection = ce["000"] - ce["011"]
+        joint_improvement[name] = value_projection
         joint[name] = value_projection - value - projection
     interaction_minimum = float(
         protocol["minimum_value_projection_interaction_ce"]
     )
     coupled = (
         not stable
+        and joint_improvement["primary"] >= minimum
+        and joint_improvement["confirmation"] >= minimum
         and joint["primary"] >= interaction_minimum
         and joint["confirmation"] >= interaction_minimum
     )
@@ -297,6 +301,7 @@ def select_structural_gate(
         "confirmation_top_component": confirmation_top,
         "minimum_stable_component_ce": minimum,
         "value_projection_interaction_ce": joint,
+        "value_projection_absolute_improvement_ce": joint_improvement,
         "minimum_value_projection_interaction_ce": interaction_minimum,
         "rule": (
             "same top Shapley component with minimum CE improvement in both "

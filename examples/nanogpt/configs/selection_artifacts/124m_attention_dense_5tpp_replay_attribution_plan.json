@@ -47,7 +47,7 @@
     "minimum_value_projection_interaction_ce": 0.003,
     "output_error_window": "confirmation",
     "output_error_batches": 2,
-    "selection_rule": "select a single component only when it is the top Shapley CE contributor and improves at least 0.005 CE in both primary and confirmation windows; otherwise select a joint value/projection coupling gate only if its super-additive interaction is at least 0.003 CE in both windows; otherwise admit no structural training gate; use normalized output error only as corroboration and never infer from weight Frobenius distance alone",
+    "selection_rule": "select a single component only when it is the top Shapley CE contributor and improves at least 0.005 CE in both primary and confirmation windows; otherwise select a joint value/projection coupling gate only if the pair has positive absolute improvement of at least 0.005 CE and a super-additive interaction of at least 0.003 CE in both windows; otherwise admit no structural training gate; use normalized output error only as corroboration and never infer from weight Frobenius distance alone",
     "automatic_training_authorized": false,
     "learned_dense_basis_forbidden": true,
     "additive_lora_adapter_forbidden": true
