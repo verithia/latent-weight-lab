@@ -1,0 +1,112 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_run_metadata_v1",
+  "recorded_at": "2026-08-06",
+  "state": "running",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527",
+    "name": "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 584630,
+    "started_at": "2026-08-06T00:49:37+08:00",
+    "max_iters": 2373,
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.log",
+    "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.json",
+    "provenance": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_5tpp_v2_20260805T164936Z_584527.json",
+    "provenance_sha256": "2a5fefc9136c960211072e00ce19b26cb11431e54f9e5e711984be66fdf79861"
+  },
+  "identity": {
+    "implementation_commit": "a9f68e06189989ed5016290006b2a3cb3e6e469f",
+    "config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "archived_config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "archived_mfu_sha256": "e6825514f8896b6cc7b3d207937582ae423d7b3fe9a57f190b1fa4b0f3e7f578"
+  },
+  "launch_validation": {
+    "process_alive": true,
+    "status_running": true,
+    "native_extension_loaded": true,
+    "gpu_memory_mib": 11706,
+    "gpu_utilization_percent": 97,
+    "gpu_temperature_c": 42
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.repairedattnfullmlp5tppv2",
+    "state_key": "pro6_124m_repairedattn_fullmlp_5tpp_v2",
+    "host": "PRO6",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "chat_id": "oc_fa5c2ec0190c9444cce960125eafff50",
+    "mention": "@Codex",
+    "milestones": [
+      20,
+      50,
+      100
+    ],
+    "heartbeat_minutes": 90,
+    "progress_resets_heartbeat": true,
+    "terminal_delivery_once": true,
+    "interval_seconds": 60
+  },
+  "preflight_performance": {
+    "candidate": {
+      "mfu": 0.21458210302816835,
+      "iter": 2214.65625,
+      "tps": 118368.40375,
+      "peak": 35696.49
+    },
+    "attention_parent": {
+      "mfu": 0.280508546051453,
+      "iter": 1676.5133333333333,
+      "tps": 156362.42333333334,
+      "peak": 35419.52
+    },
+    "relative": {
+      "mfu_ratio": 0.764975278110807,
+      "mfu_relative_degradation": 0.235024721889193,
+      "iter_time_ratio": 1.3209893449500352,
+      "throughput_ratio": 0.7570131060047739,
+      "peak_mib_delta": 276.97000000000116
+    },
+    "estimated_update_only_minutes": 87.5896546875
+  },
+  "frozen_analysis": {
+    "fixed_steps": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "dense_validation_ce": [
+      4.1739,
+      3.7622,
+      3.6038,
+      3.5401
+    ],
+    "repaired_attention_validation_ce": [
+      4.2151,
+      3.8411,
+      3.6907,
+      3.6278
+    ],
+    "development_ce_max": 3.6478,
+    "parity_diagnostic_ce_max": 3.6378,
+    "dense_terminal_ce": 3.5401,
+    "dense_curve_source": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_capacity_radial_closure_result.json",
+      "sha256": "d1f7a86da7d09c449d9d02cfbea2f8d8d0a9204de21cc02c9cae771ee5183076"
+    },
+    "compute_equivalence_tool": {
+      "path": "examples/nanogpt/fixed_model_compute_equivalence.py",
+      "sha256": "239e1099bce11ad0e289fbf7e6ed95668db8b1784f450c483d33e8af107ecad1"
+    },
+    "required_postprocessing": [
+      "parse the four candidate fixed checkpoints from the terminal log",
+      "fit dense local L versus ln compute slopes over terminal 2/3/4 points",
+      "invert dense curve in ln-compute space for candidate terminal CE with at most one adjacent interval extrapolation",
+      "report common-loss horizontal compute ratios where curves overlap",
+      "report CE gaps, perplexity multiplier exp(delta CE), MFU/wall/VRAM/state and inference cost",
+      "hash log/status/provenance/checkpoint metadata and fixed-eval digest before decision"
+    ],
+    "prohibition": "do not substitute a literature-generic alpha or relative-loss heuristic for measured fixed-curve inversion"
+  }
+}

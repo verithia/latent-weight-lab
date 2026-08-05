@@ -8,6 +8,7 @@ V2 = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_ful
 PLAN = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_plan_v2.json"
 FAILURE = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_pretraining_failure.json"
 MFU_V2 = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_mfu_result_v2.json"
+RUN_METADATA = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_run_metadata.json"
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -53,3 +54,14 @@ def test_fresh_v2_mfu_gate_passes_for_exact_config() -> None:
     assert result["measurement"]["native_block_fht_extension"]["loaded"] is True
     assert result["decision"]["scientific_attempt2_authorized"] is True
     assert result["execution"]["watchdog_used"] is False
+
+def test_running_identity_watchdog_and_analysis_are_sealed() -> None:
+    metadata = json.loads(RUN_METADATA.read_text())
+    assert metadata["identity"]["config_sha256"] == sha256(V2)
+    assert metadata["watchdog"]["milestones"] == [20, 50, 100]
+    assert metadata["watchdog"]["heartbeat_minutes"] == 90
+    assert metadata["watchdog"]["progress_resets_heartbeat"] is True
+    assert metadata["watchdog"]["terminal_delivery_once"] is True
+    assert metadata["preflight_performance"]["relative"]["iter_time_ratio"] > 1.0
+    assert metadata["frozen_analysis"]["development_ce_max"] == 3.6478
+    assert "literature-generic alpha" in metadata["frozen_analysis"]["prohibition"]
