@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_124m_attention_cproj_activation_metric_result_v1",
+  "recorded_at": "2026-08-05",
+  "diagnostic": {
+    "source_commit": "e0486e550821568003f75d7d228d56a0b9059088",
+    "source_sha256": "d0922d5d410d606cd680999e7d68be71a52256cc4b346c0d07d79fdc126ca945",
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_activation_metric_certified_20260805",
+    "raw_result_sha256": "234f5a2f0db399eb986214742c585eed612291d607b6a9931b9976de3002e5e3",
+    "cells_csv_sha256": "7d3ea0fee5ba729bb33cb05b1ff855ffe4f81aac5aa5264af6f15d8773eac42a",
+    "elapsed_seconds": 8.817786931991577,
+    "parameter_updates": 0,
+    "dense_optimizer_state_retained": false
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_activation_metric_fallback_plan.json",
+    "plan_sha256": "11e49d67923504358749c359d599919ce3d504b4996c8de9bb850aede34829d3",
+    "capacity_decision": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_ratio10_promotion_result.json",
+    "capacity_decision_sha256": "e39f8e29bc1894bb24def855160508f2c12311a09008162a99fd6a5b33a04873",
+    "run_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_cproj_only_cprojratio10_5tpp_result.json",
+    "run_result_sha256": "034c00e96161b3c2f463e864221163d7906267e7ce2eabfd21894c4655b88d84",
+    "production_config_sha256": "f370636fa973c0d351cbb75230945889299df34c9a5529e06e5ea4cca2898394",
+    "checkpoint_sha256": "38acebf577ba498ba80b71883a29dcd2e3f577681e3d54a38246cce282d4bf2e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "protocol": {
+    "layers": [0, 3, 6, 9, 11],
+    "batches": 4,
+    "batch_size": 2,
+    "block_size": 256,
+    "sample_seed": 20260805,
+    "random_control_seed_offset": 15485863,
+    "muon_newton_schulz_steps": 5,
+    "cg_iterations": 512,
+    "cg_fp64_retry_iterations": 512,
+    "cg_tolerance": 1e-6
+  },
+  "summary": {
+    "ratio01_activation_output_recovery": 0.5938794986353247,
+    "ratio01_euclidean_output_recovery": 0.004133719833167432,
+    "ratio10_activation_output_recovery": 0.907478226785782,
+    "ratio10_euclidean_output_recovery": 0.04649896364909229,
+    "ratio10_random_activation_output_recovery": 0.9075402968928379,
+    "activation_over_euclidean_multiplier": 19.516095748587656,
+    "activation_over_equal_coordinate_random_multiplier": 0.9999316062247943,
+    "minimum_candidate_activation_output_cosine": 0.8965816212941172,
+    "all_five_sampled_layers_positive": true,
+    "maximum_candidate_relative_normal_residual": 0.0002496292869434836,
+    "maximum_random_relative_normal_residual": 0.0002893484760554806
+  },
+  "rejection_certificate": {
+    "random_feasible_explained_fraction_lower_bound": 0.907539779227749,
+    "candidate_universal_explained_fraction_upper_bound": 1.0,
+    "maximum_possible_candidate_over_random_multiplier": 1.1018800749989472,
+    "registered_candidate_over_random_multiplier": 1.5,
+    "registered_gate_mathematically_impossible": true
+  },
+  "interpretation": {
+    "supported": "The activation-output metric changes the local c_proj fit dramatically, but an equal-coordinate independent random BlockFHT chart obtains the same recovery. The high recovery is caused by the low-rank sampled activation metric rather than trained-chart orientation.",
+    "excluded": "Neither tenfold fixed-chart capacity nor activation-metric preconditioning makes the trained fixed random c_proj chart structurally preferable to an equal-size random chart.",
+    "numerical_scope": "The layer-0 near-null normal equations exceeded the preregistered residual tolerance, but the feasible random lower bound and universal candidate upper bound prove that the 1.5x random-control gate cannot pass even with an exact candidate solve."
+  },
+  "decision": {
+    "classification": "REJECT_FIXED_RANDOM_CPROJ_CHART_CERTIFIED",
+    "language_model_training_authorized": false,
+    "next_action": "Close fixed-random c_proj capacity and Euclidean/activation-metric optimizer variants. Retain QK+V with dense c_proj as the honest compressed-attention fallback and test a jointly generated V/O functional representation only through a preregistered zero-update gate."
+  }
+}
