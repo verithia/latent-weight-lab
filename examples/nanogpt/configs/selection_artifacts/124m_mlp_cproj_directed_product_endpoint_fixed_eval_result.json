@@ -1,0 +1,89 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_directed_product_endpoint_fixed_eval_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "REJECT_DIRECTED16_ENDPOINT_TASK_DIRECTION",
+  "identity": {
+    "host": "PRO6",
+    "execution_commit": "868b63d0c15b7d6faf4ff232f1399095aa519c3f",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_directed_product_endpoint_fixed_eval.py",
+    "entrypoint_sha256": "07753ec4a80c5bf72c3c0fb7496f59789cc4e5af968bdac22bf2fa26ec6fc588",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_directed_product_endpoint_fixed_eval_plan.json",
+    "plan_sha256": "910f9855d479b7b5863d468b28726bdd6746d62dd1986820f0e6a3a26257992b",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "trajectory_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "layers": [0, 3, 6, 9, 11],
+    "trajectory_steps_replayed": 238,
+    "splits": ["train", "val"],
+    "eval_iters_per_split": 400,
+    "eval_batch_size": 16,
+    "block_size": 1024,
+    "dtype": "bfloat16",
+    "duration_seconds": 184.21173334121704,
+    "watchdog": false,
+    "callback": false,
+    "execution_mode": "direct foreground polling"
+  },
+  "fixed_checkpoint_rows": [
+    {
+      "variant": "dense_endpoint",
+      "train_ce": 5.485774517059326,
+      "val_ce": 5.488473415374756
+    },
+    {
+      "variant": "hidden88_full_carry",
+      "train_ce": 5.516456127166748,
+      "val_ce": 5.519629001617432
+    },
+    {
+      "variant": "hidden88_output32_full_carry",
+      "train_ce": 5.49217414855957,
+      "val_ce": 5.494988441467285
+    },
+    {
+      "variant": "hidden88_directed16_full_carry",
+      "train_ce": 5.490397930145264,
+      "val_ce": 5.493183612823486
+    }
+  ],
+  "decision": {
+    "geometry_gate_classification": "DIRECTED_OUTPUT_PRODUCT_PASS",
+    "geometry_selected_terminal_endpoint_recovery": 0.9684774759111727,
+    "geometry_selected_terminal_row_gram_recovery": 0.7950603391941055,
+    "output32_terminal_endpoint_recovery": 0.9354832910258393,
+    "output32_terminal_row_gram_recovery": 0.5095202352469639,
+    "train_ce_improvement_over_output32": 0.0017762184143066406,
+    "validation_ce_improvement_over_output32": 0.0018048286437988281,
+    "validation_ce_improvement_required": 0.002,
+    "validation_ce_gap_to_dense": 0.004710197448730469,
+    "validation_ce_gap_to_dense_maximum": 0.0046,
+    "all_finite": true,
+    "train_ce_no_worse_than_output32": true,
+    "validation_ce_no_worse_than_output32": true,
+    "passed": false,
+    "diagnosis": "The equal-budget directed16 action substantially improves Euclidean endpoint and row-Gram trajectory reconstruction, and moves both fixed train and validation CE in the right direction, but the functional gain is smaller than the frozen minimum and leaves a slightly excessive gap to the paired dense endpoint. Better parameter-manifold fit is therefore not sufficient task alignment.",
+    "directed_output_product_family_closed": true,
+    "production_implementation_authorized": false,
+    "exact_config_mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Run one preregistered zero-update fresh-window layer-local functional attribution using the saved output32 and directed16 terminal states. Do not implement or train directed16."
+  },
+  "artifacts": {
+    "remote_result_sha256": "b6245ed0c00f0387d35ac5fe5ac16490e81aba8648d2a17e65d2c81cf0cd0497",
+    "remote_metadata_sha256": "69b7dc1187268a440446c022d0c83bb50263ce20298ddeb7c2439b7bb13d1a70",
+    "remote_terminal_states_sha256": "394931dfda0a2b3bc00f56112f4083a00599fef124e9dbd58cc4266e7c03f096",
+    "remote_terminal_states_bytes": 141564289,
+    "foreground_log_sha256": "3bdeff043937b425b0b6b75d76e0d25d8e6e31c5ef4dd166dabd3fcbe34ad0de"
+  },
+  "verification": {
+    "focused_tests": "10 passed",
+    "final_gpu": "GPU0 282/97887 MiB, 0% utilization, 35 C",
+    "snapshot_first_sha256": "7156be842b00929184ba4769447ec3441892da880be6da5df66cd5323bf6eee3",
+    "snapshot_last_sha256": "89bb1963b3b0efe8229c8759cd96cd380b33d279b1e6a6a5fb227e1b67fa60c1"
+  }
+}

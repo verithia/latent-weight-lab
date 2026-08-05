@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_directed_endpoint_layer_attribution_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-05",
+  "scientific_question": "On untouched validation windows, is the small directed16 endpoint CE advantage over output32 distributed across the five replayed c_proj layers, concentrated in one or two layers, or functionally null despite the large trajectory and row-Gram recovery gain?",
+  "source_commit_before_implementation": "868b63d0c15b7d6faf4ff232f1399095aa519c3f",
+  "promotion_basis": {
+    "endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_directed_product_endpoint_fixed_eval_result.json",
+    "endpoint_result_sha256": "158c53e35e88eaeb44c5a2863d798d85da67e3239816f2f616e8c7a613298dc1",
+    "classification": "REJECT_DIRECTED16_ENDPOINT_TASK_DIRECTION",
+    "directed_output_product_family_closed": true,
+    "saved_terminal_states_sha256": "394931dfda0a2b3bc00f56112f4083a00599fef124e9dbd58cc4266e7c03f096"
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+    "checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "terminal_states": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_directed_product_endpoint_fixed_eval_v1/cproj_directed_product_endpoint_states.pt",
+    "terminal_states_sha256": "394931dfda0a2b3bc00f56112f4083a00599fef124e9dbd58cc4266e7c03f096",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers_in_fixed_depth_order": [0, 3, 6, 9, 11],
+    "base_variant": "hidden88_output32_full_carry",
+    "candidate_variant": "hidden88_directed16_full_carry",
+    "evaluation_variants": [
+      "dense_endpoint",
+      "output32_all",
+      "directed16_all",
+      "directed16_layer_0",
+      "directed16_layer_3",
+      "directed16_layer_6",
+      "directed16_layer_9",
+      "directed16_layer_11",
+      "directed16_cumulative_0",
+      "directed16_cumulative_0_3",
+      "directed16_cumulative_0_3_6",
+      "directed16_cumulative_0_3_6_9"
+    ],
+    "evaluation_protocol": {
+      "split": "val",
+      "eval_seeds": [20260901, 20260902],
+      "eval_iters_per_seed": 32,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "dtype": "bfloat16",
+      "fresh_windows": true,
+      "paired_checkpoint": true
+    },
+    "not_tested": [
+      "causal training",
+      "new directed width, product, trust, or selector",
+      "production implementation",
+      "learned basis or LoRA adapter",
+      "larger rung"
+    ]
+  },
+  "classification_rule": {
+    "all_common_requirements": [
+      "checkpoint, terminal-state, endpoint-result, and dataset identities match exactly",
+      "all losses and derived gains are finite",
+      "only the five registered c_proj tensors differ between variants",
+      "each one-layer and cumulative variant uses the exact saved output32 or directed16 terminal tensor without fitting or interpolation"
+    ],
+    "replicated_signal_minimum_mean_ce_gain": 0.001,
+    "distributed_signal": "directed16_all improves both fresh windows by at least 0.001 CE, at least four of five single-layer substitutions improve both windows, and the top two layers account for at most 75 percent of summed positive single-layer gain",
+    "layer_local_signal": "directed16_all improves both fresh windows by at least 0.001 CE and the top two layers account for more than 75 percent of summed positive single-layer gain",
+    "functional_null": "the all-layer gain is below 0.001 CE on either fresh window or changes sign",
+    "nonadditive_context": "reported descriptively when the sum of mean single-layer gains differs from the mean all-layer gain by more than 50 percent of the larger magnitude",
+    "binding_next_actions": {
+      "DISTRIBUTED_DIRECTED_FUNCTIONAL_SIGNAL": "preregister a different high-mixing c_proj generator family; do not reuse directed-product supports or tune their capacity",
+      "LAYER_LOCAL_DIRECTED_FUNCTIONAL_SIGNAL": "preregister one zero-update layer-targeting capacity test in the identified layers using a different generator family; no training",
+      "DIRECTED_ENDPOINT_FUNCTIONALLY_NULL": "stop endpoint geometry fitting and return to the accepted temporal-error c_proj parent plus the c_fc/full-MLP cross-scale branch",
+      "NONADDITIVE_CPROJ_CONTEXT": "measure coupled c_fc/c_proj or residual-frame action before selecting another tensor-local generator"
+    },
+    "automatic_rerun_authorized": false,
+    "production_implementation_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update fixed-checkpoint attribution",
+    "implementation_and_focused_tests_required_before_execution": true,
+    "output_directory_must_be_absent": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_directed_endpoint_layer_attribution_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_attribution": true,
+    "run_performance_preflight": false,
+    "run_language_model_training": false
+  }
+}
