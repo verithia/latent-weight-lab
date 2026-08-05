@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_repaired_attention_cfc_only_5tpp_run_metadata_v1",
-  "recorded_at": "2026-08-06T06:20:00+08:00",
-  "state": "running",
+  "recorded_at": "2026-08-06T07:45:00+08:00",
+  "state": "finished",
   "run": {
     "id": "pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198",
     "name": "pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp",
@@ -103,16 +103,18 @@
     "interpretation": "zero means additive c_fc and c_proj effects; terminal decisions remain governed only by the frozen 3.6478 gate"
   },
   "latest_verification": {
-    "verified_at": "2026-08-06T06:59:56+08:00",
-    "trigger": "50_percent_callback",
-    "callback_iter": 1190,
-    "verified_iter": 1230,
+    "verified_at": "2026-08-06T07:45:00+08:00",
+    "trigger": "100_percent_callback",
+    "callback_iter": 2373,
+    "verified_iter": 2373,
     "max_iters": 2373,
-    "progress_fraction": 0.51833123,
-    "recent_train_loss": 3.8061,
-    "recent_update_ms": 1934.17,
-    "process_alive": true,
-    "status_running": true,
+    "progress_fraction": 1.0,
+    "recent_train_loss": 3.6429,
+    "recent_update_ms": 1935.32,
+    "process_alive": false,
+    "status_running": false,
+    "status_finished": true,
+    "exit_code": 0,
     "errors": [],
     "fixed_evaluations": [
       {
@@ -124,50 +126,75 @@
         "step": 1188,
         "train_loss": 3.8537,
         "validation_loss": 3.8395
+      },
+      {
+        "step": 1782,
+        "train_loss": 3.7048,
+        "validation_loss": 3.6888
+      },
+      {
+        "step": 2373,
+        "train_loss": 3.6429,
+        "validation_loss": 3.625838041305542
       }
     ],
     "candidate_minus_repaired_attention_ce": [
       -0.0123,
-      -0.0016
+      -0.0016,
+      -0.0019,
+      -0.001961958694458
     ],
     "candidate_minus_dense_ce": [
       0.0289,
-      0.0773
+      0.0773,
+      0.085,
+      0.085738041305542
     ],
     "candidate_minus_joint_full_mlp_ce": [
       -0.0638,
-      -0.0424
+      -0.0424,
+      -0.0364,
+      -0.034404993057251
     ],
     "candidate_minus_cproj_only_ce": [
       -0.0676,
-      -0.0375
+      -0.0375,
+      -0.0318,
+      -0.030363321304321
     ],
     "candidate_minus_no_interaction_expectation_ce": [
       -0.0085,
-      -0.0065
+      -0.0065,
+      -0.0065,
+      -0.006003630447388
     ],
     "cfc_cproj_interaction_ce": [
       0.0085,
-      0.0065
+      0.0065,
+      0.0065,
+      0.006003630447388
     ],
-    "next_fixed_evaluation_step": 1782,
-    "scientific_decision_available": "provisional_only_terminal_rule_remains_binding",
-    "gpu_memory_mib": 48276,
+    "next_fixed_evaluation_step": null,
+    "scientific_decision_available": "terminal_pass",
+    "terminal_validation_ce_exact": 3.625838041305542,
+    "primary_gate_passed": true,
+    "nonbinding_diagnostic_passed": true,
+    "gpu_memory_mib": 282,
     "gpu_total_memory_mib": 97887,
-    "gpu_utilization_percent": 99,
-    "gpu_power_w": 471.36,
+    "gpu_utilization_percent": 0,
+    "gpu_power_w": 21.92,
     "gpu_power_limit_w": 600.0,
-    "gpu_temperature_c": 54,
-    "workspace_bytes": 225190580112,
-    "workspace_gib": 209.725071,
+    "gpu_temperature_c": 27,
+    "workspace_bytes": 225190584631,
+    "workspace_gib": 209.725075,
     "workspace_cap_gib": 256,
-    "filesystem_available_bytes": 1684308627456,
-    "filesystem_available_gib": 1568.634647,
-    "update_only_eta_minutes": 36.8459,
+    "filesystem_available_bytes": 1684308672512,
+    "filesystem_available_gib": 1568.634689,
+    "update_only_eta_minutes": 0,
     "identity_hashes_unchanged": true,
     "remote_worktree_clean": true,
-    "intervention": "none",
-    "decision": "NO_INTERVENTION_AT_50_PERCENT_PROVISIONALLY_CFC_NEUTRAL_OR_BENEFICIAL"
+    "intervention": "seal_result_and_remove_terminal_watcher",
+    "decision": "PASS_CFC_ONLY_NEUTRAL_OR_BENEFICIAL_LOCALIZE_REMAINING_MLP_GAP_TO_CPROJ"
   },
   "watchdog": {
     "service": "com.mappingnetworks.pro6.repairedattncfconly5tpp",
@@ -184,10 +211,13 @@
     "progress_resets_heartbeat": true,
     "terminal_delivery_once": true,
     "interval_seconds": 60,
-    "alive": true,
+    "alive": false,
     "sent_milestones": [
       20,
       50
-    ]
+    ],
+    "terminal_callback_sent_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-06T07:37:36+08:00"],
+    "service_removed_after_verification": true
   }
 }
