@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_directed_endpoint_layer_attribution_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "LAYER_LOCAL_DIRECTED_FUNCTIONAL_SIGNAL",
+  "identity": {
+    "host": "PRO6",
+    "execution_commit": "ccedcb932315b0ef2659e176e8c72404d09a54f6",
+    "entrypoint_sha256": "60b8e32d423aa6d1b55134d944508cf9244d17b6610756d9d8aea2ab1f9dcfd5",
+    "plan_sha256": "a0bba324d7dc19e01a15982ecf93b7e23db49e391e95dc064dbcc3254a7dbf79",
+    "checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "terminal_states_sha256": "394931dfda0a2b3bc00f56112f4083a00599fef124e9dbd58cc4266e7c03f096",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "layers": [0, 3, 6, 9, 11],
+    "validation_seeds": [20260901, 20260902],
+    "eval_iters_per_seed": 32,
+    "eval_batch_size": 16,
+    "block_size": 1024,
+    "duration_seconds": 20.17498016357422,
+    "execution_mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false
+  },
+  "decision": {
+    "all_layer_ce_gain_by_seed": {
+      "20260901": 0.0014815330505371094,
+      "20260902": 0.0018243789672851562
+    },
+    "mean_all_layer_ce_gain": 0.0016529560089111328,
+    "mean_single_layer_ce_gain": {
+      "0": 0.0013728141784667969,
+      "3": 0.00015425682067871094,
+      "6": 0.00005888938903808594,
+      "9": -0.000001430511474609375,
+      "11": -0.0001964569091796875
+    },
+    "consistent_improving_layers": [0, 3],
+    "top_two_positive_gain_fraction": 0.9628683102826218,
+    "nonadditivity_ratio": 0.1602480888504255,
+    "nonadditive_context": false,
+    "diagnosis": "The directed16 endpoint gain replicates on both untouched windows but is overwhelmingly layer-local. Layer 0 supplies 83.5 percent of the summed positive singleton gain by itself, layers 0 and 3 supply 96.29 percent, and layer 11 is consistently harmful. The five-layer effect is close enough to additive that wider c_fc/c_proj context is not the primary explanation.",
+    "all_layer_directed_product_closed": true,
+    "directed_product_implementation_authorized": false,
+    "performance_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "next_action": "Run one zero-update layer-0 capacity test of a different generator family: an ephemeral full general output action fitted from the output32 endpoint toward the paired dense endpoint and folded into c_proj."
+  },
+  "artifacts": {
+    "remote_result_sha256": "ea21cf046332a2b532bc9850560a23d17eae030c30860ae364989314e8604573",
+    "remote_metadata_sha256": "c1747dd353ff5366a24121e8c2e84fcca830cddcd6dd36e4cb788ae73e6a7995",
+    "foreground_log_sha256": "7e101c859c569f558a33d16788cad01c9af141a90946eee2582b6253186f4b85",
+    "fixed_eval_indices_sha256": {
+      "20260901": "e296cde93286ceee5a56b908b5c7d8e50e8c988c86fbe7f5da2e5a560fb28cc3",
+      "20260902": "6c652f1fa413fbd4cd845f9dc82398738dd660cfae36ee43bf7edf3722a08e23"
+    }
+  },
+  "verification": {
+    "focused_tests": "11 passed",
+    "all_values_finite": true,
+    "final_gpu": "GPU0 282/97887 MiB, 0% utilization, 28 C"
+  }
+}

@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_layer0_general_output_capacity_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-05",
+  "scientific_question": "Can a layer-0-only full general output action recover task-useful c_proj endpoint motion that the closed sparse directed16 product represents inefficiently, and is skew, symmetric shear, or their combination required?",
+  "source_commit_before_implementation": "ccedcb932315b0ef2659e176e8c72404d09a54f6",
+  "promotion_basis": {
+    "layer_attribution_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_directed_endpoint_layer_attribution_result.json",
+    "layer_attribution_result_sha256": "5bb0e1e4e054f19a5d8e88334ad2a800d1d4d34ca2360029b87783c55b59e880",
+    "classification": "LAYER_LOCAL_DIRECTED_FUNCTIONAL_SIGNAL",
+    "selected_layer": 0,
+    "selected_layer_mean_directed16_gain": 0.0013728141784667969,
+    "top_two_positive_gain_fraction": 0.9628683102826218
+  },
+  "identity": {
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+    "checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "terminal_states": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_directed_product_endpoint_fixed_eval_v1/cproj_directed_product_endpoint_states.pt",
+    "terminal_states_sha256": "394931dfda0a2b3bc00f56112f4083a00599fef124e9dbd58cc4266e7c03f096",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "selected_layer": 0,
+    "base_endpoint": "hidden88_output32_full_carry",
+    "target_endpoint": "dense_endpoint",
+    "general_action": {
+      "formula": "A = R W^T (W W^T + ridge I)^-1; W_candidate = W + component(A) W",
+      "residual": "R = W_dense_layer0 - W_output32_layer0",
+      "relative_ridge": 1e-6,
+      "components_in_smallest_pass_order": ["skew", "symmetric", "full"],
+      "independent_coordinate_counts": {
+        "skew": 294528,
+        "symmetric": 295296,
+        "full": 589824
+      },
+      "persistent_coordinates": 0,
+      "minimum_singular_value_i_plus_action": 0.95,
+      "trust_policy": "If raw I+component(A) violates 0.95, use deterministic bisection for the largest uniform scale in [0,1] satisfying 0.95; do not refit or tune."
+    },
+    "evaluation_variants": [
+      "output32_all",
+      "directed16_layer0",
+      "dense_layer0",
+      "general_skew_layer0",
+      "general_symmetric_layer0",
+      "general_full_layer0"
+    ],
+    "evaluation_protocol": {
+      "split": "val",
+      "eval_seeds": [20260903, 20260904],
+      "eval_iters_per_seed": 32,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "dtype": "bfloat16",
+      "fresh_windows": true,
+      "paired_checkpoint": true
+    },
+    "not_tested": [
+      "causal optimizer integration",
+      "per-update task alignment",
+      "performance or MFU",
+      "persistent learned dense basis",
+      "language-model training",
+      "larger rung"
+    ]
+  },
+  "decision_rule": {
+    "common_requirements": [
+      "all identities, matrices, singular values, and losses are finite",
+      "only layer-0 c_proj differs from output32_all",
+      "each component obeys its frozen formula, coordinate count, ridge, and minimum-singular-value trust rule",
+      "the full-action endpoint residual energy does not exceed the exact dense-layer0 residual energy"
+    ],
+    "candidate_requirements": {
+      "validation_ce_gain_over_output32_each_seed_minimum": 0.0012,
+      "validation_ce_gain_strictly_greater_than_directed16_layer0_each_seed": true,
+      "dense_layer0_ce_gain_recovery_each_seed_minimum": 0.75
+    },
+    "smallest_pass_order": ["general_skew_layer0", "general_symmetric_layer0", "general_full_layer0"],
+    "pass": "authorize production implementation and focused tests for exactly the selected ephemeral layer-0 output action, followed by a separately recorded exact-config >=20% MFU preflight; do not authorize training",
+    "fail": "close layer-0 one-sided general output actions and return to the accepted temporal-error c_proj parent plus c_fc/full-MLP cross-scale work",
+    "automatic_rerun_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update endpoint capacity oracle; a pass authorizes implementation plus a separate exact-config training-path MFU gate",
+    "implementation_and_focused_tests_required_before_execution": true,
+    "output_directory_must_be_absent": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_layer0_general_output_capacity_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_capacity_oracle": true,
+    "implement_production_action_after_pass": true,
+    "run_mfu_preflight_after_pass": true,
+    "run_language_model_training": false
+  }
+}
