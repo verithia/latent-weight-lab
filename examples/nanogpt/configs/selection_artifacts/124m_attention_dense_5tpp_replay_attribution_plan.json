@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_attention_dense_5tpp_replay_attribution_plan_v1",
   "recorded_at": "2026-08-04",
-  "status": "registered_before_performance_preflight",
+  "status": "dense_replay_running_at_mfu_38p349_endpoint_attribution_ready",
   "purpose": "recover the lost matched dense 5TPP endpoint and horizon trajectory on PRO6, then attribute the QK64-plus-output-gain residual mismatch before selecting a V/O repair",
   "replay": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
@@ -25,6 +25,23 @@
       "output projection under shared dense or candidate head states",
       "full per-head residual contribution"
     ],
+    "validation_windows": {
+      "primary": {
+        "batch_size": 4,
+        "block_size": 1024,
+        "batches": 6,
+        "seed": 239017
+      },
+      "confirmation": {
+        "batch_size": 4,
+        "block_size": 1024,
+        "batches": 6,
+        "seed": 271828
+      }
+    },
+    "maximum_native_manual_ce_delta": 0.003,
+    "output_error_window": "confirmation",
+    "output_error_batches": 2,
     "selection_rule": "select exactly one next structural gate from component-wise normalized endpoint error and CE intervention; do not infer from weight Frobenius distance alone",
     "automatic_training_authorized": false,
     "learned_dense_basis_forbidden": true,
