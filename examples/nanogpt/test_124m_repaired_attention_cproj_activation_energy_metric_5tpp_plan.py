@@ -7,6 +7,8 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
 PLAN = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_activation_energy_metric_5tpp_plan.json"
+CONFIG = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_activationenergymetric_5tpp_lr24e4.json"
+CONTROL = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json"
 
 
 def load(path: Path) -> dict:
@@ -67,3 +69,43 @@ def test_only_one_run_is_authorized() -> None:
     assert authorization["parallel_arm"] is False
     assert authorization["larger_rung"] is False
     assert authorization["post_hoc_metric_sweep"] is False
+
+
+def test_production_config_is_the_registered_single_factor_candidate() -> None:
+    plan = load(PLAN)
+    candidate = load(CONFIG)
+    control = load(CONTROL)
+    assert candidate["registered_plan"] == str(PLAN.relative_to(REPO))
+    assert candidate["registered_plan_sha256"] == sha256(PLAN)
+    assert candidate["cproj_control_result_sha256"] == (
+        plan["causal_evidence"]["cproj_only_terminal_result"]["sha256"]
+    )
+    metric = plan["metric_definition"]
+    assert candidate["block_fht_mlp_cproj_activation_energy_metric"] is True
+    assert candidate["block_fht_mlp_cproj_activation_energy_metric_decay"] == metric["ema_decay"]
+    assert candidate["block_fht_mlp_cproj_activation_energy_metric_minimum"] == metric["minimum_weight"]
+    assert candidate["block_fht_mlp_cproj_activation_energy_metric_maximum"] == metric["maximum_weight"]
+    assert candidate["block_fht_mlp_cproj_activation_energy_metric_epsilon"] == metric["epsilon"]
+    frozen = (
+        "n_layer", "n_head", "n_embd", "block_size", "batch_size",
+        "gradient_accumulation_steps", "max_iters", "warmup_iters",
+        "eval_interval", "eval_iters", "learning_rate", "min_lr",
+        "optimizer", "weight_decay", "model_seed", "train_data_seed",
+        "data_manifest_sha256", "eval_seed", "fixed_eval_index_spec_sha256",
+        "block_fht_targets", "block_fht_attn_cayley_targets",
+        "block_fht_attn_cayley_ranks", "block_fht_attn_cayley_scale",
+        "block_fht_attn_cayley_lr_scale",
+        "block_fht_mlp_cproj_muon_matched_givens_stages",
+        "block_fht_mlp_cproj_muon_matched_givens_residual_stages",
+        "block_fht_mlp_cproj_muon_matched_givens_neighbors",
+        "block_fht_mlp_cproj_muon_matched_givens_refresh_interval",
+        "block_fht_mlp_cproj_muon_matched_givens_fast_fresh",
+        "block_fht_mlp_cproj_muon_matched_givens_error_feedback",
+        "block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay",
+        "checkpoint_wall_clock_seconds",
+    )
+    for key in frozen:
+        assert candidate[key] == control[key], key
+    assert candidate["implementation_commit"] == "edc11023f7428ee3d3214cb3afb6a4f656e62475"
+    for path, digest in candidate["implementation_source_hashes"].items():
+        assert sha256(REPO / path) == digest
