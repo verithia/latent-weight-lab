@@ -1,0 +1,31 @@
+{
+  "schema_version": "mai_124m_attention_layerwise_local_intervention_plan_v1",
+  "recorded_at": "2026-08-05",
+  "purpose": "avoid invalid compounded endpoint swaps by measuring small dense-component directions at one candidate layer at a time",
+  "protocol": {
+    "required_dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "required_dense_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "required_candidate_checkpoint_sha256": "7a38c4bd60ec454c5daaaf6aa8ea7636603a4f0b168e8b00c356d3d83134698c",
+    "source_endpoint_result_sha256": "07052cb9b56fc4169a182e13fb314ac976344410fe9a3d5f76a3fc6457e0cf15",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "ratios": [0.01, 0.03, 0.1],
+    "selection_ratio": 0.03,
+    "minimum_replicated_sum_improvement_ce": 0.005,
+    "minimum_improving_layer_fraction": 0.5,
+    "validation_windows": {
+      "primary": {"batch_size": 4, "block_size": 1024, "batches": 6, "seed": 239017},
+      "confirmation": {"batch_size": 4, "block_size": 1024, "batches": 6, "seed": 271828}
+    },
+    "components": {
+      "score": "100",
+      "value": "010",
+      "projection": "001",
+      "value_projection": "011",
+      "all": "111"
+    },
+    "intervention": "candidate_output + ratio * (hybrid_output - candidate_output) at exactly one layer",
+    "automatic_training_authorized": false,
+    "learned_dense_basis_forbidden": true,
+    "additive_lora_adapter_forbidden": true
+  }
+}
