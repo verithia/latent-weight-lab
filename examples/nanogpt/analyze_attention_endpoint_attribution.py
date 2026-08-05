@@ -17,6 +17,7 @@ import itertools
 import json
 import math
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any
@@ -415,6 +416,8 @@ def main() -> None:
         "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "identity": {
             "git_commit": git_commit(root),
+            "entrypoint": "examples.nanogpt.analyze_attention_endpoint_attribution",
+            "command": sys.argv,
             "plan": str(args.plan),
             "plan_sha256": sha256(args.plan),
             "dense_checkpoint": str(args.dense_checkpoint),
@@ -423,6 +426,12 @@ def main() -> None:
             "candidate_checkpoint_sha256": sha256(args.candidate_checkpoint),
             "dataset_manifest_sha256": manifest_sha256,
             "cached_block_fht_modules": cached,
+            "device": args.device,
+            "device_name": (
+                torch.cuda.get_device_name(0)
+                if args.device.startswith("cuda")
+                else "cpu"
+            ),
         },
         "protocol": protocol,
         "results": results,
