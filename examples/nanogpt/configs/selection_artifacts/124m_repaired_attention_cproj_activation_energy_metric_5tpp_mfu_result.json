@@ -1,0 +1,116 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_activation_energy_metric_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_activation_energy_metric_5tpp_exact_config_mfu_result",
+  "recorded_at": "2026-08-06",
+  "classification": "ACTIVATION_ENERGY_METRIC_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_activationenergymetric_5tpp_lr24e4.json",
+    "config_sha256": "06ad111ce4710a5d9b224779717ff57a3880a5fd06e96dd5659366ae8c3cf875",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_activation_energy_metric_5tpp_plan.json",
+    "plan_sha256": "70f5ba31bd44664fb5c76a392eba3f9003266c0525765dc0a6d31754772d5a3f",
+    "cproj_control_result_sha256": "091fd6a9475539cfe06b5aba51ec2693b53638e55565d658afbe462ec01d21ef",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "preregistration_commit": "41afc42",
+    "implementation_commit": "edc11023f7428ee3d3214cb3afb6a4f656e62475",
+    "config_artifact_commit": "176e4b89e82d6c76d767a3da96aabf2ca36a7bd9"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "direct_foreground_polling": true,
+    "watchdog_used": false,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 43.914790391922
+  },
+  "measurement": {
+    "mfu_fraction": 0.2358335551866907,
+    "minimum_fraction": 0.2,
+    "headroom_percentage_points": 3.58335551866907,
+    "empirical_bf16_gemm_peak_tflops": 416.9717540662977,
+    "model_tflops": 98.33593117388544,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 131666.6225,
+    "iter_ms": 1990.96875,
+    "peak_mib": 35586.64,
+    "timing_breakdown_ms": {
+      "prepare": 3.53375,
+      "forward_backward": 1662.50625,
+      "flush": 4.46125,
+      "gradient": 1.9024999999999999,
+      "optimizer": 316.82,
+      "data": 0.57125,
+      "other": 1.1775
+    },
+    "native_block_fht_extension": {
+      "required": true,
+      "loaded": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    }
+  },
+  "activation_metric": {
+    "diagnostic_rows": 12,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "active_on_all_layers": true,
+    "all_reported_values_finite": true,
+    "minimum_weight_observed": 0.25,
+    "maximum_weight_observed": 4.0,
+    "maximum_condition_number_observed": 16.0,
+    "mean_weight_range": [0.9583820104598999, 0.9999904632568359],
+    "minimum_samples_per_layer": 262144,
+    "activation_weighted_corrected_recovery_range": [
+      0.24424099922180176,
+      0.26740801334381104
+    ],
+    "unweighted_corrected_recovery_range": [
+      0.086789071559906,
+      0.23419511318206787
+    ]
+  },
+  "stability": {
+    "train_exit_code": 0,
+    "logged_loss_values": 13,
+    "finite_loss_values": 13,
+    "all_logged_losses_finite": true,
+    "native_matching_validated": true,
+    "metric_bounded_and_finite": true
+  },
+  "matched_cproj_control_performance": {
+    "control_mfu_fraction": 0.23958994349643856,
+    "control_tokens_per_second": 133812.12375,
+    "control_iter_ms": 1959.05,
+    "control_optimizer_ms": 293.60625,
+    "candidate_relative_iter_time_change": 0.01629297363518023,
+    "candidate_relative_tokens_per_second_change": -0.016033683569722124,
+    "candidate_relative_mfu_change": -0.01567840559135869,
+    "interpretation": "The online activation metric costs 1.63% per update relative to the exact c_proj-only control and remains 3.58 MFU percentage points above the admission floor."
+  },
+  "storage_and_gpu_after_gate": {
+    "gpu_memory_mib": 282,
+    "gpu_utilization_percent": 0,
+    "gpu_power_w": 21.74,
+    "gpu_temperature_c": 28,
+    "workspace_bytes": 222973080715,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1686533025792
+  },
+  "artifacts": {
+    "certificate": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp/performance_preflight.json",
+      "sha256": "99025298fd40a3eaa99823a1917139d0134af508fd8955b841e401094c65095c"
+    },
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp/performance_preflight.log",
+      "sha256": "a641032921dbb1bc2618ca67140997a0d36061020645461ac965e4500b1f5c1c"
+    }
+  },
+  "decision": {
+    "one_scientific_2373_update_run_authorized": true,
+    "watchdog_required": true,
+    "automatic_rerun_authorized": false,
+    "parallel_experiment_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
