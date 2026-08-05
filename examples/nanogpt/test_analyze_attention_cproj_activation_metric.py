@@ -106,9 +106,12 @@ def test_aggregate_requires_every_registered_gate() -> None:
     passed = aggregate(_rows(), _plan())
     assert passed["passed"] is True
     assert passed["language_model_training_authorized"] is False
-    failed = aggregate(_rows(candidate=0.15), _plan())
+    failed = aggregate(_rows(candidate=0.15, random=0.80), _plan())
     assert failed["passed"] is False
-    assert failed["decision"] == "REJECT_FIXED_RANDOM_CPROJ_CHART"
+    assert failed["decision"] == "REJECT_FIXED_RANDOM_CPROJ_CHART_CERTIFIED"
+    assert failed["rejection_certificate"][
+        "random_multiplier_gate_mathematically_impossible"
+    ] is True
 
 
 def test_endpoint_validation_is_fail_closed() -> None:

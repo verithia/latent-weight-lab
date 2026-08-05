@@ -389,6 +389,21 @@ def aggregate(rows: list[dict[str, Any]], plan: dict[str, Any]) -> dict[str, Any
             "cells": len(selected),
             "activation_output_recovery": projected_energy
             / max(target_energy, 1e-30),
+            # For any feasible prediction p and target y, the explained
+            # fraction is (2<y,p>-||p||^2)/||y||^2.  We retain a conservative
+            # lower bound using the recorded projection-identity residual.
+            # This remains valid even if a near-null normal solve stalls.
+            "feasible_explained_fraction_lower_bound": sum(
+                max(
+                    0.0,
+                    float(row["projected_output_energy"])
+                    - 2.0
+                    * float(row["activation_projection_identity_residual"])
+                    * float(row["target_output_energy"]),
+                )
+                for row in selected
+            )
+            / max(target_energy, 1e-30),
             "minimum_activation_output_cosine": min(
                 float(row["activation_output_cosine"]) for row in selected
             ),
@@ -444,6 +459,18 @@ def aggregate(rows: list[dict[str, Any]], plan: dict[str, Any]) -> dict[str, Any
             / max(float(random["activation_output_recovery"]), 1e-30)
         ),
     }
+    random_explained_lower_bound = float(
+        random["feasible_explained_fraction_lower_bound"]
+    )
+    maximum_possible_multiplier_over_random = 1.0 / max(
+        random_explained_lower_bound, 1e-30
+    )
+    random_gate_threshold = float(
+        gate_spec["minimum_multiplier_over_equal_coordinate_random_control"]
+    )
+    random_gate_impossible = (
+        maximum_possible_multiplier_over_random < random_gate_threshold
+    )
     gate = {
         "all_metrics_finite": all_finite(rows) and all_finite(arms),
         "minimum_valid_cells": valid_cells
@@ -473,18 +500,35 @@ def aggregate(rows: list[dict[str, Any]], plan: dict[str, Any]) -> dict[str, Any
         ),
     }
     passed = all(gate.values())
+    if passed:
+        classification = (
+            "AUTHORIZE_ACTIVATION_METRIC_TRUST_REGION_IMPLEMENTATION"
+        )
+    elif random_gate_impossible:
+        classification = "REJECT_FIXED_RANDOM_CPROJ_CHART_CERTIFIED"
+    else:
+        classification = "INCONCLUSIVE_ACTIVATION_METRIC_NUMERICS"
     return {
         "valid_cells": valid_cells,
         "arms": arms,
         "multipliers": multipliers,
+        "rejection_certificate": {
+            "random_feasible_explained_fraction_lower_bound": (
+                random_explained_lower_bound
+            ),
+            "candidate_universal_explained_fraction_upper_bound": 1.0,
+            "maximum_possible_multiplier_over_random": (
+                maximum_possible_multiplier_over_random
+            ),
+            "registered_random_multiplier_threshold": random_gate_threshold,
+            "random_multiplier_gate_mathematically_impossible": (
+                random_gate_impossible
+            ),
+        },
         "by_layer": by_layer,
         "gate": gate,
         "passed": passed,
-        "decision": (
-            "AUTHORIZE_ACTIVATION_METRIC_TRUST_REGION_IMPLEMENTATION"
-            if passed
-            else "REJECT_FIXED_RANDOM_CPROJ_CHART"
-        ),
+        "decision": classification,
         "next_action": (
             gate_spec["pass_action"] if passed else gate_spec["fail_action"]
         ),
