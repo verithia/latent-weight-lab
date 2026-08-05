@@ -48,6 +48,28 @@
       "c_proj_directed_product": true
     }
   },
+  "latest_verification": {
+    "verified_at": "2026-08-06T02:52:56+08:00",
+    "trigger": "20_percent_callback",
+    "callback_iter": 490,
+    "verified_iter": 530,
+    "progress_fraction": 0.223346,
+    "last_train_loss": 4.362,
+    "last_update_ms": 1951.89,
+    "process_alive": true,
+    "status_running": true,
+    "gpu_memory_mib": 48314,
+    "gpu_utilization_percent": 99,
+    "gpu_power_w": 516.79,
+    "gpu_power_limit_w": 600,
+    "gpu_temperature_c": 53,
+    "workspace_bytes": 222282777504,
+    "filesystem_available_bytes": 1687230099456,
+    "estimated_remaining_update_minutes": 59.9,
+    "first_fixed_validation_step": 594,
+    "scientific_decision_available": false,
+    "intervention": "none"
+  },
   "watchdog": {
     "service": "com.mappingnetworks.pro6.repairedattncprojonly5tpp",
     "state_key": "pro6_124m_repairedattn_cprojonly_5tpp",
@@ -67,7 +89,9 @@
     "terminal_delivery_once": true,
     "interval_seconds": 60,
     "alive": true,
-    "sent_milestones": [],
+    "sent_milestones": [
+      20
+    ],
     "recorded_errors": []
   },
   "preflight_performance": {
