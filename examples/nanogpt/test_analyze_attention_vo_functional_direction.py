@@ -12,17 +12,17 @@ from examples.nanogpt.analyze_attention_vo_functional_direction import (
 
 def test_factor_induced_direction_matches_finite_difference() -> None:
     generator = torch.Generator().manual_seed(7)
-    value = torch.randn(3, 5, generator=generator)
-    output = torch.randn(5, 3, generator=generator)
-    d_value = torch.randn(3, 5, generator=generator)
-    d_output = torch.randn(5, 3, generator=generator)
-    epsilon = 1e-4
+    value = torch.randn(3, 5, generator=generator, dtype=torch.float64)
+    output = torch.randn(5, 3, generator=generator, dtype=torch.float64)
+    d_value = torch.randn(3, 5, generator=generator, dtype=torch.float64)
+    d_output = torch.randn(5, 3, generator=generator, dtype=torch.float64)
+    epsilon = 1e-6
     measured = (
         (output + epsilon * d_output) @ (value + epsilon * d_value)
         - output @ value
     ) / epsilon
     expected = factor_induced_direction(value, output, d_value, d_output)
-    assert torch.allclose(measured, expected, atol=2e-3, rtol=2e-3)
+    assert torch.allclose(measured, expected, atol=1e-5, rtol=1e-5)
 
 
 def _plan() -> dict:
