@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_124m_attention_endpoint_attribution_result_v1",
+  "recorded_at": "2026-08-05",
+  "source_commit": "cfffd847",
+  "raw_result_sha256": "07052cb9b56fc4169a182e13fb314ac976344410fe9a3d5f76a3fc6457e0cf15",
+  "raw_log_sha256": "af4afeb37ec5ced984f7ec2d112bd8e5d39d4c88a9b0d2d824926bc904951c5e",
+  "failed_attempts_retained": [
+    "initial CUDA-device/CPU-generator construction mismatch",
+    "retry1 non-contiguous next-token target"
+  ],
+  "validation": {
+    "primary_native_candidate_ce": 3.5592023531595864,
+    "primary_manual_candidate_ce": 3.559382756551107,
+    "confirmation_native_candidate_ce": 3.6213165521621704,
+    "confirmation_manual_candidate_ce": 3.621176600456238,
+    "maximum_native_manual_absolute_delta": 0.0001804033915205
+  },
+  "full_swap": {
+    "primary_all_dense_attention_ce": 7.077851057052612,
+    "confirmation_all_dense_attention_ce": 7.184638420740764,
+    "primary_shapley_ce_improvement": {
+      "score": -1.0455289814207287,
+      "value": -0.6276550028059218,
+      "projection": -1.8452843162748547
+    },
+    "confirmation_shapley_ce_improvement": {
+      "score": -1.0572356515460546,
+      "value": -0.6324444744322039,
+      "projection": -1.8737816943062673
+    }
+  },
+  "normalized_attention_output_error": {
+    "candidate": 1.4229102388679113,
+    "dense_value_only": 1.2809696735805056,
+    "dense_projection_only": 2.036293326290879,
+    "dense_value_and_projection": 0.49869860149800466,
+    "dense_all": 0.0
+  },
+  "decision": {
+    "classification": "NO_STABLE_ENDPOINT_COMPONENT",
+    "selected_component": null,
+    "interpretation": "Independent endpoints are strongly co-adapted. Full component swaps are task-harmful even where paired V/projection substitution reduces fixed-input output error, so endpoint transplantation does not identify a trainable structural repair."
+  }
+}

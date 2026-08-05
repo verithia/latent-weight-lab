@@ -1,0 +1,30 @@
+{
+  "schema_version": "mai_124m_attention_dense_5tpp_replay_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_attention_5tpp_replay_20260804",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "d733b73c3177060172d2d74bfd0f0a50fc108986",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
+    "provenance_sha256": "4b0b642869131d87a596dfd20aae1ade44a38f5fb538af6be18933ea32c7dc8d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "exit_code": 0,
+    "classification": "clean",
+    "mfu_fraction": 0.38349,
+    "fixed_evaluations": [
+      {"step": 594, "train_ce": 4.1843, "validation_ce": 4.1742},
+      {"step": 1188, "train_ce": 3.7777, "validation_ce": 3.7631},
+      {"step": 1782, "train_ce": 3.6208, "validation_ce": 3.6039},
+      {"step": 2373, "train_ce": 3.5581, "validation_ce": 3.5402}
+    ]
+  },
+  "gate": {
+    "reference_terminal_validation_ce": 3.5401,
+    "maximum_absolute_delta": 0.005,
+    "actual_delta": 0.0001,
+    "passed": true
+  },
+  "decision": "The lost dense 5TPP endpoint and its full attention trajectory are reproduced on PRO6 closely enough for matched downstream diagnostics."
+}

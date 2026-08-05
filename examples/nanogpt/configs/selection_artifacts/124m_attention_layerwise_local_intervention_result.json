@@ -1,0 +1,31 @@
+{
+  "schema_version": "mai_124m_attention_layerwise_local_intervention_result_v1",
+  "recorded_at": "2026-08-05",
+  "source_commit": "357f55a4",
+  "raw_result_sha256": "76c5458aa116f59696321ad3ec45fe968415ddbcf39bd307cc9150553ee28acb",
+  "raw_log_sha256": "27766ee833c3d22d8f81fda050550a1b3287174b60f8ae6fbb80f68127857829",
+  "selection_ratio": 0.03,
+  "primary_sum_single_layer_ce_delta": {
+    "score": 0.0038403,
+    "value": 0.0040270,
+    "projection": 0.0090743,
+    "value_projection": 0.0053800,
+    "all": 0.0065080
+  },
+  "confirmation_sum_single_layer_ce_delta": {
+    "score": 0.0014339,
+    "value": 0.0029237,
+    "projection": 0.0067617,
+    "value_projection": 0.0038908,
+    "all": 0.0044109
+  },
+  "improving_layer_fraction": {
+    "primary_best_score": 0.08333333333333333,
+    "confirmation_best_score": 0.16666666666666666
+  },
+  "decision": {
+    "classification": "NO_REPLICATED_LOCAL_DENSE_DIRECTION",
+    "selected_component": null,
+    "interpretation": "At a 3% one-layer blend every component has a harmful summed CE delta in both windows. Dense endpoint component directions are not locally portable to the generated backbone, closing teacher-direction transplantation as an attention repair."
+  }
+}
