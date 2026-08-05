@@ -23,8 +23,24 @@ def test_send_allows_slow_bridge_ack_and_mentions_agent(monkeypatch) -> None:
     assert observed["timeout"] == 300
     assert observed["body"] == {
         "chat_id": "chat",
-        "text": "@Codex PROGRESS: run 20%",
+        "text": (
+            "@Codex PROGRESS: run 20%\n\n"
+            f"{watcher.PROGRESS_ACTION_PROMPT}"
+        ),
     }
+
+
+def test_callback_prompt_requires_terminal_result_sealing_and_continuation() -> None:
+    text = "PROGRESS: run 100% (238/238) finished exit=0"
+    assert watcher.callback_action_prompt(text) == watcher.TERMINAL_ACTION_PROMPT
+    assert "seal the result" in watcher.callback_action_prompt(text)
+    assert "next causally justified experiment" in watcher.callback_action_prompt(text)
+
+
+def test_callback_prompt_routes_failures_and_stalls_to_recovery() -> None:
+    assert watcher.callback_action_prompt("PROGRESS: run FAILED (90/238)") == watcher.RECOVERY_ACTION_PROMPT
+    assert watcher.callback_action_prompt("run STALL: no progress") == watcher.RECOVERY_ACTION_PROMPT
+    assert watcher.callback_action_prompt("run ERROR: process missing") == watcher.RECOVERY_ACTION_PROMPT
 
 
 def test_failed_milestone_delivery_remains_pending_after_threshold() -> None:

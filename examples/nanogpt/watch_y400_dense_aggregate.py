@@ -22,6 +22,25 @@ from pathlib import Path
 CALLBACK_URL = "http://127.0.0.1:8766/send-opencode-test"
 AGENT_MENTION = "@Codex"
 CALLBACK_TIMEOUT_SECONDS = 300
+PROGRESS_ACTION_PROMPT = (
+    "Action required: verify the live state against the active project note, "
+    "inspect progress, loss, and GPU health for any needed intervention, update "
+    "durable state if it changed, and continue the current research plan "
+    "autonomously. Do not merely acknowledge this callback."
+)
+TERMINAL_ACTION_PROMPT = (
+    "Action required: verify the terminal state and exact artifacts against the "
+    "active project note; seal the result with hashes and fixed-checkpoint "
+    "comparisons, update durable notes, choose and launch the next causally "
+    "justified experiment after its exact-config MFU gate, and continue "
+    "autonomously. Do not merely acknowledge this callback."
+)
+RECOVERY_ACTION_PROMPT = (
+    "Action required: inspect the remote status, log, GPU, and active project "
+    "note; diagnose and safely recover or requeue the run, record the blocker "
+    "and remediation, and continue the research plan. Do not merely acknowledge "
+    "this callback."
+)
 
 REMOTE_PROBE = r'''python3 - "$1" <<'PY'
 import json, pathlib, re, subprocess, sys
@@ -92,12 +111,32 @@ def parse_run(value: str) -> dict[str, object]:
     }
 
 
+def callback_action_prompt(text: str) -> str:
+    """Return the concrete continuation instruction for a callback event."""
+    normalized = text.upper()
+    if any(
+        marker in normalized
+        for marker in (" FAILED ", " ERROR:", " STALL:", "MONITOR_DEGRADED:")
+    ):
+        return RECOVERY_ACTION_PROMPT
+    if " 100% " in normalized and any(
+        marker in normalized for marker in (" FINISHED", " COMPLETED", " CLEAN")
+    ):
+        return TERMINAL_ACTION_PROMPT
+    return PROGRESS_ACTION_PROMPT
+
+
 def send(chat_id: str, text: str) -> bool:
+    action_prompt = callback_action_prompt(text)
     request = urllib.request.Request(
         CALLBACK_URL,
         # The bridge invocation endpoint wakes the active coding agent.  The
-        # explicit visible mention makes ownership unambiguous in the group.
-        data=json.dumps({"chat_id": chat_id, "text": f"{AGENT_MENTION} {text}"}).encode(),
+        # explicit visible mention makes ownership unambiguous in the group,
+        # while the event-specific prompt requires continued research rather
+        # than a notification-only acknowledgement.
+        data=json.dumps(
+            {"chat_id": chat_id, "text": f"{AGENT_MENTION} {text}\n\n{action_prompt}"}
+        ).encode(),
         headers={"Content-Type": "application/json"},
         method="POST",
     )
