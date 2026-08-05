@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_124m_attention_vo_factorial_cproj_capacity_plan_v1",
+  "recorded_at": "2026-08-05",
+  "objective": "Complete the from-scratch 2x2 V/c_proj factorial on the selected QK-only attention replacement, then admit at most one c_proj fixed-chart capacity intervention without a learned dense basis or additive adapter.",
+  "fixed_curves": {
+    "qk_only_L00": [4.0173, 3.6941, 3.5477, 3.4858],
+    "qk_plus_v_L10": [4.0553, 3.724, 3.5769, 3.5148],
+    "qk_plus_cproj_L01": "active preregistered QK+c_proj/dense-V run",
+    "qk_plus_v_plus_cproj_L11": [4.1885, 3.8302, 3.6788, 3.6151],
+    "steps": [594, 1188, 1782, 2373]
+  },
+  "factorial_metrics": {
+    "v_shapley": "0.5 * ((L10 - L00) + (L11 - L01))",
+    "cproj_shapley": "0.5 * ((L01 - L00) + (L11 - L10))",
+    "interaction": "L11 - L10 - L01 + L00",
+    "identity_check": "v_shapley + cproj_shapley == L11 - L00 at every fixed evaluation"
+  },
+  "capacity_derivation": {
+    "current_cproj_latent_ratio": 0.01,
+    "candidate_cproj_latent_ratio": 0.1,
+    "qk_latent_ratio_held_fixed": 0.01,
+    "evidence": "The deployed BlockFHT c_proj tangent is an exact tight frame and captures approximately its one-percent random coordinate share, with no enrichment over equal-rank Haar. A single ten-percent ratio tests a tenfold fixed-chart capacity increase directly; no intermediate or post-hoc ratio sweep is authorized.",
+    "excluded": [
+      "learned dense basis",
+      "LoRA-like additive residual",
+      "post-hoc ratio sweep",
+      "learning-rate sweep",
+      "simultaneous V change"
+    ]
+  },
+  "decision": {
+    "authorize_cproj_ratio10_if": "At terminal, cproj_shapley is positive and at least 0.05 CE, or positive V-by-c_proj interaction is at least 0.03 CE. The same sign must hold at at least three of four fixed evaluations.",
+    "otherwise": "Reject c_proj capacity as the immediate branch. If V dominates, isolate V structure; if neither main effect dominates but interaction is negative or small, retain the QK+V/dense-c_proj partial architecture as the evidence-backed fallback and do not launch a capacity run.",
+    "training_gate": "After authorization only: generate the immutable config, run an exact-config synchronous MFU preflight, require MFU >= 20% and finite losses, then launch with one verified persistent aggregate watchdog. Runs longer than five minutes are never foreground-polled.",
+    "promotion": "Relative to the exact QK+c_proj/dense-V parent, require at least 0.02 CE improvement at terminal without worsening more than one earlier fixed evaluation by over 0.01 CE before transferring c_proj ratio 0.10 into the full QK+V+c_proj model."
+  },
+  "parameter_accounting": {
+    "dense_attention_trainable": 28311552,
+    "qk_plus_v_dense_cproj_trainable": 11446632,
+    "qk_plus_v_dense_cproj_attention_reduction_fraction": 0.5957,
+    "full_attention_current_trainable": 4596192,
+    "full_attention_current_attention_reduction_fraction": 0.8377,
+    "materialized_model_parameters_unchanged": 124373760,
+    "note": "Counts instantiate GPTConfig with block_fht=true. They include Cayley coordinates and all trainable attention tensors. The QK+V/dense-c_proj fallback reduces trainable attention parameters by about 59.6%, not the paper's whole-model 200-500x claim."
+  },
+  "identity": {
+    "active_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_5tpp_lr24e4.json",
+    "active_parent_config_sha256": "1837ec1529374096d634db9bce958f6a990c26070bac5686b2122b4a32d74a38",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "candidate_builder": "examples.nanogpt.make_pro6_attention_cproj_capacity"
+  }
+}
