@@ -1,0 +1,122 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_activation_energy_metric_5tpp_run_metadata_v1",
+  "recorded_at": "2026-08-06",
+  "state": "running",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp_20260805T203039Z_704550",
+    "name": "pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 704750,
+    "started_at": "2026-08-06T04:30:40+08:00",
+    "max_iters": 2373,
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp_20260805T203039Z_704550.log",
+    "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp_20260805T203039Z_704550.json",
+    "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp_20260805T203039Z_704550.json",
+    "provenance_sha256": "6f711f2e9e7e521dddb14932e1646435c2080ad3461f1fc10765a71c52d5ac62"
+  },
+  "identity": {
+    "implementation_commit": "edc11023f7428ee3d3214cb3afb6a4f656e62475",
+    "config_artifact_commit": "176e4b89e82d6c76d767a3da96aabf2ca36a7bd9",
+    "launch_artifact_commit": "fd888828e364e50f170f3d1c025a52fa56a9f3b4",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_activationenergymetric_5tpp_lr24e4.json",
+    "config_sha256": "06ad111ce4710a5d9b224779717ff57a3880a5fd06e96dd5659366ae8c3cf875",
+    "archived_config_sha256": "06ad111ce4710a5d9b224779717ff57a3880a5fd06e96dd5659366ae8c3cf875",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_activation_energy_metric_5tpp_mfu_result.json",
+    "mfu_result_sha256": "bee09c7a9f6a967acba43a4e640895594da88fa57e7437df08b0d4a651ad2975",
+    "archived_mfu_certificate_sha256": "99025298fd40a3eaa99823a1917139d0134af508fd8955b841e401094c65095c"
+  },
+  "execution": {
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cproj_activationenergymetric_5tpp_20260805T203039Z_704550.config.json"
+    ],
+    "repository_root": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-cproj-activation-metric",
+    "repository_origin": "git@github.com:verithia/latent-weight-lab.git",
+    "worktree_dirty_at_launch": false
+  },
+  "launch_validation": {
+    "process_alive": true,
+    "status_running": true,
+    "native_extension_loaded": true,
+    "last_iter": 10,
+    "last_train_loss": 8.9819,
+    "step_zero_validation_ce": 10.9669,
+    "observed_update_ms": 1986.6,
+    "gpu_memory_mib": 48470,
+    "gpu_utilization_percent": 100,
+    "gpu_power_w": 508.98,
+    "gpu_power_limit_w": 600,
+    "gpu_temperature_c": 46,
+    "workspace_bytes": 223427436505,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1686078615552,
+    "optimizer_confirmation": {
+      "matrix_tensors": 12,
+      "muon_matched_givens_tensors": 12,
+      "c_fc_replacement": false,
+      "c_proj_replacement": true,
+      "activation_energy_metric": true,
+      "activation_energy_metric_layers": 12,
+      "activation_energy_metric_condition_maximum": 16.0
+    }
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.repairedattncprojactivationenergy5tpp",
+    "state_key": "pro6_124m_repairedattn_cproj_activationenergymetric_5tpp",
+    "process_id": 27873,
+    "state_file": "/Users/verithia/research/.watchdog-state/pro6_124m_repairedattn_cproj_activationenergymetric_5tpp.json",
+    "host": "PRO6",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "chat_id": "oc_fa5c2ec0190c9444cce960125eafff50",
+    "mention": "@Codex",
+    "milestones": [20, 50, 100],
+    "heartbeat_minutes": 90,
+    "progress_resets_heartbeat": true,
+    "terminal_delivery_once": true,
+    "interval_seconds": 60,
+    "alive": true,
+    "sent_milestones": [],
+    "recorded_errors": []
+  },
+  "preflight_performance": {
+    "mfu": 0.2358335551866907,
+    "tokens_per_second": 131666.6225,
+    "milliseconds_per_update": 1990.96875,
+    "peak_memory_mib": 35586.64,
+    "gate_minimum_mfu": 0.2,
+    "gate_passed": true,
+    "all_losses_finite": true,
+    "native_blockfht_loaded": true,
+    "metric_active_and_finite": true,
+    "certificate_sha256": "99025298fd40a3eaa99823a1917139d0134af508fd8955b841e401094c65095c",
+    "log_sha256": "a641032921dbb1bc2618ca67140997a0d36061020645461ac965e4500b1f5c1c"
+  },
+  "frozen_decision_rule": {
+    "terminal_validation_ce_maximum": 3.6478,
+    "nonbinding_near_parent_validation_ce_maximum": 3.6378,
+    "repaired_attention_terminal_validation_ce": 3.6278,
+    "cproj_control_terminal_validation_ce_exact": 3.6562013626098633,
+    "if_passes": "promote the activation-energy metric as a c_proj structural repair",
+    "if_fails": "reject this bounded diagonal metric without an automatic rerun or hyperparameter sweep",
+    "threshold_changed_after_measurement": false
+  },
+  "authorization": {
+    "one_scientific_run": true,
+    "automatic_rerun": false,
+    "larger_rung": false,
+    "parallel_gpu_experiment": false,
+    "post_hoc_metric_sweep": false
+  }
+}
