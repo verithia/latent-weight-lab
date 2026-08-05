@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_directed_product_carry_pro6_replay_result_v1",
+  "artifact_kind": "124m_mlp_cproj_teacher_forced_directed_product_carry_pro6_replay_result",
+  "recorded_at": "2026-08-05",
+  "classification": "DIRECTED_OUTPUT_PRODUCT_PASS",
+  "parameter_updates": 0,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_directed_product_carry_pro6_replay_plan.json",
+    "sha256": "5014534ee606024d7957373d614bf05de60acbcded1513ff58e8e84e2923fd9f"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "79ab2307870cf305ae7107c881a7bbb3e697bd51",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_teacher_forced_directed_product_carry.py",
+    "entrypoint_sha256": "16c6e20a17bf4988035988c9e48c69de5b7e509537550c20f02167d6cdd104f0",
+    "mode": "direct foreground polling; zero language-model parameter updates; no watchdog, callback, heartbeat, or queue worker",
+    "started_at_unix": 1785940867.6734986,
+    "finished_at_unix": 1785941030.6416209,
+    "wall_seconds": 162.96812224388123,
+    "focused_tests": "4/4 passed on PRO6 before execution"
+  },
+  "identity": {
+    "trajectory_run": "pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "trajectory_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "snapshot_count": 239,
+    "first_snapshot_sha256": "7156be842b00929184ba4769447ec3441892da880be6da5df66cd5323bf6eee3",
+    "last_snapshot_sha256": "89bb1963b3b0efe8229c8759cd96cd380b33d279b1e6a6a5fb227e1b67fa60c1",
+    "snapshot_bytes": 11282687383
+  },
+  "terminal_scores": {
+    "hidden88_full_carry": {
+      "endpoint_recovery": 0.8462878182428796,
+      "row_gram_recovery": -0.10085752585085528,
+      "maximum_feedback_fro": 1.2650598287582397,
+      "mean_requested_update_recovery": -3.7387927143513657
+    },
+    "hidden88_output32_full_carry": {
+      "endpoint_recovery": 0.9354832910258393,
+      "row_gram_recovery": 0.5095202352469639,
+      "maximum_feedback_fro": 0.8451806902885437,
+      "mean_requested_update_recovery": -12.495338716276553
+    },
+    "hidden88_directed16_full_carry": {
+      "endpoint_recovery": 0.9684774759111727,
+      "row_gram_recovery": 0.7950603391941055,
+      "maximum_feedback_fro": 0.5721838474273682,
+      "mean_requested_update_recovery": -4.547491483778513
+    },
+    "hidden88_directed8x2_full_carry": {
+      "endpoint_recovery": 0.9685795405074452,
+      "row_gram_recovery": 0.7954264188923491,
+      "maximum_feedback_fro": 0.5712134838104248,
+      "mean_requested_update_recovery": -4.571490932562772
+    }
+  },
+  "comparisons": {
+    "hidden88_directed16_full_carry": {
+      "passed": true,
+      "all_registered_gates_passed": true,
+      "endpoint_no_worse_than_output32_at_every_score": true,
+      "equal_output_coordinate_budget": 12288,
+      "terminal_feedback_ratio_to_output32": 0.6769958826579737,
+      "terminal_layers_beating_output32": 5,
+      "minimum_singular_value_lower_bound": 0.95,
+      "minimum_trust_scale": 0.055409220940806324
+    },
+    "hidden88_directed8x2_full_carry": {
+      "passed": true,
+      "all_registered_gates_passed": true,
+      "endpoint_no_worse_than_output32_at_every_score": true,
+      "equal_output_coordinate_budget": 12288,
+      "terminal_feedback_ratio_to_output32": 0.6758477688545075,
+      "terminal_layers_beating_output32": 5,
+      "minimum_singular_value_lower_bound": 0.95,
+      "minimum_trust_scale": 0.05414560809265865
+    }
+  },
+  "decision": {
+    "selected_arm": "hidden88_directed16_full_carry",
+    "selection_reason": "Both directed products pass every frozen gate; the registered smallest-pass order chooses the one-stage directed16 arm.",
+    "fixed_eval_endpoint_oracle_authorized": true,
+    "production_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Preregister and directly poll a paired fixed-evaluation endpoint oracle comparing dense, hidden88, output32, and directed16 states."
+  },
+  "remote_artifacts": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_teacher_forced_directed_product_carry_pro6_replay_v1",
+    "aggregate_sha256": "12bbc6dc61b6550dde52698f44f33a7986fb16a79838da90bc9f7e594c26a6f8",
+    "cells_sha256": "df37f0e4a89936e1b61eb5ac49ec436113ecd5459ab2592e5ea5795d1c5f25d8",
+    "chart_sha256": "d2b54581cbc5752d9d26bb68064b9d03f3e4500f1fe42c594a9b1026e6ed8fcb",
+    "metadata_sha256": "5cde5ca6c67ea5f3c3e6e3b79102e3d64ea7e86bf891c34d7cf98e1fe7fe9cbd",
+    "foreground_log_sha256": "2744eabeeba3abf11995e0b6cde2a3489bd949044cdf01a88e40668ce1643e1a"
+  },
+  "limitations": [
+    "Teacher-forced dense updates make this an optimistic representation oracle.",
+    "No language-model update or task-loss evaluation was performed.",
+    "The pass authorizes only a separately preregistered endpoint-loss oracle."
+  ]
+}

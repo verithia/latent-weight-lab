@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_directed_product_endpoint_fixed_eval_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-05",
+  "scientific_question": "Does the selected equal-budget one-stage directed16 output action improve fixed-window task loss beyond the accepted orthogonal output32 teacher-forced endpoint, or does its much better Frobenius/row-Gram trajectory fit remain task-irrelevant?",
+  "source_commit_before_implementation": "79ab2307870cf305ae7107c881a7bbb3e697bd51",
+  "promotion_basis": {
+    "geometry_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_directed_product_carry_pro6_replay_result.json",
+    "geometry_result_sha256": "f1daf32d3485baad13852ca0584f72be6fe955e779131a5710530a73dbb68d69",
+    "classification": "DIRECTED_OUTPUT_PRODUCT_PASS",
+    "selected_arm": "hidden88_directed16_full_carry",
+    "selected_terminal_endpoint_recovery": 0.9684774759111727,
+    "selected_terminal_row_gram_recovery": 0.7950603391941055,
+    "output32_terminal_endpoint_recovery": 0.9354832910258393,
+    "output32_terminal_row_gram_recovery": 0.5095202352469639,
+    "selected_feedback_ratio_to_output32": 0.6769958826579737
+  },
+  "identity": {
+    "trajectory_run": "pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "1acc9d6bda7dd787646c5aae112b5b372724c4a8d509523d5151c2c2ce0513d7",
+    "trajectory_checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4/scientific/ckpt.pt",
+    "trajectory_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "first_snapshot_sha256": "7156be842b00929184ba4769447ec3441892da880be6da5df66cd5323bf6eee3",
+    "last_snapshot_sha256": "89bb1963b3b0efe8229c8759cd96cd380b33d279b1e6a6a5fb227e1b67fa60c1"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "teacher_forced_dense_updates": true,
+    "layers": [0, 3, 6, 9, 11],
+    "trajectory_steps": 238,
+    "feedback_decay": 1.0,
+    "hidden_parent_stages": [64, 24],
+    "output32_control_stages": [32],
+    "selected_directed_incoming_by_stage": [16],
+    "selected_output_coordinate_budget_per_layer": 12288,
+    "models_in_evaluation_order": [
+      "dense_endpoint",
+      "hidden88_full_carry",
+      "hidden88_output32_full_carry",
+      "hidden88_directed16_full_carry"
+    ],
+    "evaluation_protocol": {
+      "splits": ["train", "val"],
+      "eval_iters": 400,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "fixed_eval_indices": true,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "dtype": "float32_loss_accumulation_with_model_bfloat16",
+      "paired_checkpoint": true
+    },
+    "not_tested": [
+      "causal language-model training",
+      "learned persistent support or basis",
+      "LoRA adapter",
+      "residual HyperConnection",
+      "larger model or token rung"
+    ]
+  },
+  "decision_rule": {
+    "common_requirements": [
+      "all identities, reconstructed weights, logits, and losses are finite",
+      "all four models use the same paired dense checkpoint and exact fixed train/validation windows",
+      "only c_proj layers 0,3,6,9,11 differ between endpoint variants",
+      "directed16 uses exactly 12288 ephemeral output coordinates per layer and the frozen geometry algorithm"
+    ],
+    "selected_candidate_requirements": {
+      "validation_ce_improvement_over_output32_minimum": 0.002,
+      "train_ce_no_worse_than_output32": true,
+      "validation_ce_no_worse_than_output32": true,
+      "validation_ce_gap_to_dense_maximum": 0.0046
+    },
+    "pass": "authorize implementation and focused tests for the one-stage directed16 production c_proj chart, followed by a separately recorded exact-config >=20% MFU preflight; do not authorize language-model training yet",
+    "fail": "close corrected-residual-fitted equal-budget directed output products and return to a different c_proj generator family",
+    "automatic_rerun_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update fixed-evaluation oracle; a passing oracle authorizes only implementation plus a separate exact-config training MFU gate",
+    "implementation_and_focused_tests_required_before_execution": true,
+    "output_directory_must_be_absent": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_directed_product_endpoint_fixed_eval_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_endpoint_oracle": true,
+    "implement_production_chart_after_pass": true,
+    "run_mfu_preflight_after_pass": true,
+    "run_language_model_training": false
+  }
+}
