@@ -1,0 +1,155 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_preregistration",
+  "recorded_at": "2026-08-06",
+  "status": "registered_before_implementation_or_execution",
+  "source_commit_before_implementation": "4cfd38f863167f1cf2bd4b4e499e65f5a8cb6cbf",
+  "scientific_question": "Can an equal-coordinate non-orthogonal symmetric output shear recover c_proj singular-value-changing motion that the accepted hidden-only Givens plus bounded temporal-error chart misses, without a learned basis, persistent adapter, or inference transform?",
+  "causal_evidence": {
+    "accepted_cfc_only_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+      "sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+      "terminal_validation_ce": 3.625838041305542,
+      "fact": "c_fc-only is slightly better than repaired attention at every fixed checkpoint, so c_fc is frozen and c_proj is the only unresolved MLP component."
+    },
+    "rejected_joint_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+      "sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2",
+      "terminal_validation_ce": 3.660243034362793
+    },
+    "cproj_only_attribution": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_result.json",
+      "sha256": "091fd6a9475539cfe06b5aba51ec2693b53638e55565d658afbe462ec01d21ef",
+      "terminal_validation_ce": 3.6562013626098633,
+      "fact": "c_proj-only matches the rejected joint result within 0.0041 CE at terminal."
+    },
+    "symmetric_capacity_oracle": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_layer0_general_output_capacity_result.json",
+      "sha256": "5b25a0424e0c1e7d3c75e136767678530048f67ff2a37fe1b4f42c26cccef457",
+      "fact": "The useful layer-0 general output action was almost entirely symmetric; skew-only action was null. The one-sided layer-0 endpoint family itself remains closed because it recovered only 62-63% of dense layer-0 task gain."
+    },
+    "bounded_temporal_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_mlp_cproj_error_feedback_decay0p5_0p5tpp_result.json",
+      "sha256": "66973c9b437211bbf796f2d3bc1dc888b0c63126034d2c4958b2fa45185becdb",
+      "fact": "Decay-0.5 temporal feedback prevents the late accumulation failure of decay 1.0 at 350M and is retained unchanged."
+    },
+    "cross_scale_transfer": {
+      "path": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_result.json",
+      "sha256": "d94df6b805a3a45dbd40b91038fe047225c8ceadf8c0d8ad2b4c3a111c2115b3",
+      "fact": "The bounded temporal chart transfers across width but still leaves a measurable attention-relative gap, motivating a structural direction change rather than another decay or capacity sweep."
+    }
+  },
+  "single_factor_change": {
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json",
+    "parent_config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "retain": [
+      "repaired full-attention Cayley parent",
+      "accepted c_fc directed-product schedule [22]*6, radius 1, and decay-1 error feedback",
+      "c_proj main hidden64 fresh Muon-matched Givens pass",
+      "c_proj decay-0.5 temporal error feedback",
+      "learning rate, Muon settings, warmup, cosine schedule, data order, evaluation windows, seeds, and token budget"
+    ],
+    "replace": "Replace eight of the c_proj residual hidden Givens stages: hidden residual24 becomes hidden residual16 plus output symmetric-shear32. The total c_proj procedural coordinate count remains exactly 135,168 per layer.",
+    "not_reopened": [
+      "activation-energy or task-gradient selectors",
+      "learned gain, learned basis, LoRA, HyperConnection, or persistent adapter",
+      "rejected layer-0 endpoint action or its trust-radius tuning",
+      "c_fc schedule, radius, optimizer, or horizon",
+      "learning-rate or capacity sweep"
+    ]
+  },
+  "operator": {
+    "stage_order": [
+      "dense Muon requested c_proj update plus decay-0.5 temporal residual",
+      "64 fresh hidden-side Givens stages",
+      "16 fresh residual hidden-side Givens stages",
+      "32 fresh output-side symmetric shear stages",
+      "ordinary folded materialized-weight update and refreshed compression residual"
+    ],
+    "symmetric_selector": "For output-side source columns x_i,x_j and remaining residual columns r_i,r_j, rank undirected edges by (<x_i,r_j>+<x_j,r_i>)^2/(||x_i||^2+||x_j||^2), then compile 32 edge-disjoint perfect matchings from the top 64 neighbors with the existing deterministic native edge-coloring path.",
+    "coordinate_fit": "For every selected pair use s=(<x_j,r_i>+<x_i,r_j>)/(||x_i||^2+||x_j||^2), recursively refitting the remaining residual after each stage.",
+    "fold": "Apply exp([[0,s],[s,0]]) to each disjoint pair and fold the result directly into the materialized c_proj weight.",
+    "condition_bound": {
+      "maximum_per_update_condition_number": 1.1,
+      "method": "project stage coordinates against the sufficient bound exp(2*sum_stage max_pair_abs_s)<=1.1 while fitting",
+      "minimum_guaranteed_singular_value_lower_bound": 0.9534625892455924
+    },
+    "connectivity": "deterministic, optimizer-step-local, task-selected, and ephemeral; no basis or coordinate tensor is learned or used in the forward path",
+    "additional_persistent_trainable_coordinates": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0
+  },
+  "coordinate_accounting": {
+    "cproj_materialized_elements_per_layer": 2359296,
+    "parent_hidden64_plus_residual24_coordinates_per_layer": 135168,
+    "candidate_hidden64_plus_residual16_coordinates_per_layer": 122880,
+    "candidate_symmetric_output32_coordinates_per_layer": 12288,
+    "candidate_total_cproj_coordinates_per_layer": 135168,
+    "candidate_total_cproj_coordinates_all_12_layers": 1622016,
+    "materialized_elements_over_coordinates_per_cproj": 17.454545454545453,
+    "cproj_update_coordinate_reduction_fraction": 0.9427083333333334,
+    "accepted_cfc_coordinates_all_12_layers": 4866048,
+    "candidate_full_mlp_coordinates_all_12_layers": 6488064,
+    "realized_pytorch_trainable_parameter_reduction_expected": 0,
+    "accounting_scope": "procedural optimizer-update coordinates only; materialized tensors remain present"
+  },
+  "implementation_gate": {
+    "required_tests": [
+      "selector determinism, unique perfect matchings, and symmetric rather than skew score",
+      "pure selected symmetric-shear direction recovery and skew-direction rejection",
+      "per-update condition bound and all-finite behavior",
+      "module/config coordinate accounting and invalid-combination rejection",
+      "one-step optimizer state plus compression-residual correctness",
+      "bitwise exact two-step resume including shear matchings, coordinates, optimizer step, momentum, and temporal residual",
+      "exact scientific config parsing and c_fc/c_proj/attention structural binding"
+    ],
+    "all_existing_focused_tests_must_remain_green": true
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "protocol": "Foreground exact-scientific-config run with one warmup plus eight timed real training updates; direct polling and no watchdog because the gate must finish within five minutes.",
+    "minimum_mfu_fraction": 0.2,
+    "require_native_blockfht_extension": true,
+    "require_native_edge_coloring": true,
+    "require_all_losses_and_shear_coordinates_finite": true,
+    "require_condition_bound_each_layer": true,
+    "fail_action": "If MFU is below 20%, do not launch. Optimize the exact same operator without changing stages, thresholds, data, or schedule, then repeat the foreground gate."
+  },
+  "scientific_run": {
+    "model": "124M",
+    "token_budget_tpp": 5.0,
+    "updates": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "primary_terminal_validation_ce_maximum": 3.635838041305542,
+    "secondary_old_closure_validation_ce_maximum": 3.6478,
+    "accepted_cfc_only_parent_validation_ce": 3.625838041305542,
+    "rejected_joint_validation_ce": 3.660243034362793,
+    "dense_validation_ce": 3.5401,
+    "curve_requirement": "No fixed checkpoint may be worse than the rejected joint full-MLP control by more than 0.005 CE; report every exact difference regardless of pass/fail.",
+    "pass_action": "If terminal CE is <=3.635838041305542, the full curve satisfies the requirement, and all condition/finite gates hold, accept the symmetric c_proj chart as a near-parent full-MLP replacement and quantify fixed-model token-compute plus execution overhead.",
+    "secondary_only_action": "If primary fails but terminal CE is <=3.6478, classify as partial direction recovery only; do not promote or tune until fixed-curve diagnostics identify the miss.",
+    "fail_action": "If terminal CE exceeds 3.6478 or the curve/stability gate fails, reject the sparse symmetric output chart and do not tune its stage count, neighbors, or condition bound.",
+    "threshold_changed_after_measurement": false,
+    "monitoring": {
+      "watchdog_required": true,
+      "milestones": [20, 50, 100],
+      "heartbeat_minutes": 90,
+      "progress_resets_heartbeat": true,
+      "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+      "callback_mention": "@Codex",
+      "terminal_delivery_once": true,
+      "callback_action_prompt": "verify live or terminal state and exact artifacts against the active project note; inspect fixed loss, symmetric-shear condition diagnostics, GPU health, and provenance; update durable state; then continue the causal c_proj plan autonomously"
+    }
+  },
+  "authorization": {
+    "implement_exact_registered_operator": true,
+    "run_focused_tests": true,
+    "run_one_exact_config_mfu_gate": true,
+    "run_one_scientific_5tpp_candidate_only_after_gate": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false,
+    "post_hoc_hyperparameter_sweep": false
+  }
+}
