@@ -6,6 +6,7 @@ REPO = Path(__file__).resolve().parents[2]
 CONFIG = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4.json"
 PARENT = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json"
 PLAN = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_plan.json"
+MFU_RESULT = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_mfu_result.json"
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -67,3 +68,11 @@ def test_long_run_monitoring_is_registered() -> None:
     assert monitoring["terminal_callback_once"] is True
     assert monitoring["callback_endpoint"].endswith("/send-opencode-test")
     assert monitoring["callback_mention"] == "@Codex"
+
+def test_exact_config_mfu_pass_is_bound_to_candidate() -> None:
+    result = json.loads(MFU_RESULT.read_text())
+    assert result["identity"]["config_sha256"] == sha256(CONFIG)
+    assert result["decision"]["passed"] is True
+    assert result["measurement"]["mfu_fraction"] >= 0.20
+    assert result["measurement"]["native_block_fht_extension"]["loaded"] is True
+    assert result["execution"]["watchdog_used"] is False

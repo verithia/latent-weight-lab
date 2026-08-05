@@ -1,0 +1,60 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_exact_config_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_5tpp_exact_config_mfu_result",
+  "recorded_at": "2026-08-05",
+  "identity": {
+    "implementation_commit": "0574aca015f5cb1440f750be080c4ca9c2bb4d2b",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4.json",
+    "config_sha256": "d9a7eabe958784e832d70b73242a7d24841817a801075f47bfe257b47474e1b5",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_plan.json",
+    "plan_sha256": "43fd47d35fbd54f2b37871cf0f11d12f0eb3cfc60f65bf66aa236329083431ba",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp/performance_preflight.json",
+    "certificate_sha256": "4679cb176c34bd9d062d1df7e595439035e8ef5e377b6fc442e4604210b203ba",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp/performance_preflight.log",
+    "log_sha256": "6963bed677e5078f0006ddea7c8fd16314fb140c3e5dcbf8c7a02a29a196d897",
+    "elapsed_seconds": 24.03415608406067,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "foreground_polled": true,
+    "watchdog_used": false
+  },
+  "measurement": {
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "empirical_bf16_peak_tflops": 416.7595957220234,
+    "model_tflops": 88.3613465028403,
+    "mfu_fraction": 0.21201994485515552,
+    "tokens_per_second": 118311.18,
+    "iter_ms": 2215.72375,
+    "peak_mib": 35696.49,
+    "timing_breakdown_ms": {
+      "prepare": 3.58375,
+      "fwbw": 1654.29,
+      "optimizer": 549.75125,
+      "gradient": 1.9225,
+      "flush": 4.4075,
+      "data": 0.60875,
+      "other": 1.16375
+    },
+    "native_block_fht_extension": {
+      "loaded": true,
+      "required": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    },
+    "all_logged_losses_finite": true,
+    "train_exit_code": 0
+  },
+  "decision": {
+    "minimum_mfu_fraction": 0.2,
+    "passed": true,
+    "scientific_run_authorized": true,
+    "estimated_update_time_minutes": 87.63,
+    "requires_long_run_watchdog": true,
+    "automatic_rerun_authorized": false
+  }
+}
