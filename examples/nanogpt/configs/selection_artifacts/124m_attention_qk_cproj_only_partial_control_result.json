@@ -1,0 +1,146 @@
+{
+  "schema_version": "mai_124m_attention_qk_cproj_only_partial_control_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "3f7f0ba74cf8920a977c5718075b639f473e83da",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_5tpp_lr24e4_20260805T050926Z_235532.config.json"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_5tpp_lr24e4.json",
+    "config_sha256": "1837ec1529374096d634db9bce958f6a990c26070bac5686b2122b4a32d74a38",
+    "resolved_config_sha256": "e13e68d13b753b28bfeef19f261769d53db5d948ef7f6ed1d91db9445e3b77aa",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_fraction": 0.3094498327314562,
+    "mfu_certificate_sha256": "c312b9e851851e309d62831fb12760e138f636228a0e1a700a2d258e5f28f1aa",
+    "provenance_sha256": "6ed442b7ed458d94ac5b744f774035ef7c0ac989b9f2ea85d4953dafb26817db",
+    "status_sha256": "f6ed7fa2ad64462c57f76409f090c53fd376c080b0cfa23910e5364c77a07af8",
+    "log_sha256": "33a15f82e6065426530ada5618e8eb3809d829b6f3d7377f325bd4077cd4c014",
+    "checkpoint_sha256": "60949d457cec23fb8791a83aafb2df37aa6675a44bf524399e4082a585397af0",
+    "checkpoint_metadata_sha256": "a4ee5b9414e1240359c91c7f85946b480e33090b0e57fcc2026a44dc8c12ccbb",
+    "checkpoint_bytes": 1030576032,
+    "exit_code": 0,
+    "classification": "clean",
+    "started_at": "2026-08-05T13:09:26+08:00",
+    "finished_at": "2026-08-05T14:12:30+08:00",
+    "fixed_evaluations": [
+      {
+        "step": 594,
+        "train_ce": 4.1186,
+        "validation_ce": 4.1074
+      },
+      {
+        "step": 1188,
+        "train_ce": 3.7774,
+        "validation_ce": 3.7633
+      },
+      {
+        "step": 1782,
+        "train_ce": 3.6305,
+        "validation_ce": 3.6141
+      },
+      {
+        "step": 2373,
+        "train_ce": 3.5693,
+        "validation_ce": 3.5518
+      }
+    ]
+  },
+  "comparisons": {
+    "qk_only_validation_ce_by_step": [
+      4.0173,
+      3.6941,
+      3.5477,
+      3.4858
+    ],
+    "qk_plus_v_validation_ce_by_step": [
+      4.0553,
+      3.724,
+      3.5769,
+      3.5148
+    ],
+    "full_attention_validation_ce_by_step": [
+      4.1885,
+      3.8302,
+      3.6788,
+      3.6151
+    ],
+    "blockwise_dense_validation_ce_by_step": [
+      4.1372,
+      3.7301,
+      3.5736,
+      3.511
+    ],
+    "ordinary_dense_validation_ce_by_step": [
+      4.1742,
+      3.7631,
+      3.6039,
+      3.5402
+    ],
+    "validation_delta_to_qk_only_by_step": [
+      0.0901,
+      0.0692,
+      0.0664,
+      0.066
+    ],
+    "validation_delta_to_qk_plus_v_by_step": [
+      0.0521,
+      0.0393,
+      0.0372,
+      0.037
+    ],
+    "validation_delta_to_full_attention_by_step": [
+      -0.0811,
+      -0.0669,
+      -0.0647,
+      -0.0633
+    ],
+    "validation_delta_to_blockwise_dense_by_step": [
+      -0.0298,
+      0.0332,
+      0.0405,
+      0.0408
+    ],
+    "validation_delta_to_ordinary_dense_by_step": [
+      -0.0668,
+      0.0002,
+      0.0102,
+      0.0116
+    ]
+  },
+  "watchdog": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "agent_mention": "@Codex",
+    "state_key": "pro6_qk_cproj_only_qk64_5tpp",
+    "progress_milestones_owned": [
+      20,
+      50
+    ],
+    "terminal_callback_owned": true,
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-05T14:12:30+08:00"
+    ],
+    "action_prompt_verified": true
+  },
+  "interpretation": {
+    "supported": "Generated c_proj introduces a stable 0.0660 CE terminal penalty relative to QK-only when V remains dense. The complementary QK+V arm introduced 0.0290 CE, while full replacement introduced 0.1293 CE.",
+    "scope": "The four-arm factorial, not either single addition order, determines V and c-proj Shapley effects and interaction."
+  },
+  "decision": "Run the preregistered factorial analyzer. Do not authorize a repair from this arm alone."
+}

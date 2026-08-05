@@ -1,0 +1,82 @@
+{
+  "curves": {
+    "L00": [
+      4.0173,
+      3.6941,
+      3.5477,
+      3.4858
+    ],
+    "L01": [
+      4.1074,
+      3.7633,
+      3.6141,
+      3.5518
+    ],
+    "L10": [
+      4.0553,
+      3.724,
+      3.5769,
+      3.5148
+    ],
+    "L11": [
+      4.1885,
+      3.8302,
+      3.6788,
+      3.6151
+    ]
+  },
+  "decision": {
+    "authorize_cproj_ratio10": true,
+    "reason": "Preregistered c-proj capacity gate passed.",
+    "selected_branch": "qk_cproj_only_cprojratio10"
+  },
+  "decision_evidence": {
+    "cproj_gate": true,
+    "interaction_gate": true,
+    "positive_cproj_shapley_evaluations": 4,
+    "positive_interaction_evaluations": 4,
+    "terminal_cproj_shapley_ce": 0.08315000000000006,
+    "terminal_interaction_ce": 0.03429999999999955
+  },
+  "effects": {
+    "cproj_shapley_ce": [
+      0.11165000000000047,
+      0.08769999999999989,
+      0.08414999999999995,
+      0.08315000000000006
+    ],
+    "identity_residual": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "v_by_cproj_interaction_ce": [
+      0.043099999999999916,
+      0.03699999999999992,
+      0.03549999999999942,
+      0.03429999999999955
+    ],
+    "v_shapley_ce": [
+      0.059550000000000214,
+      0.0484,
+      0.04695000000000005,
+      0.046150000000000135
+    ]
+  },
+  "identity": {
+    "active_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_5tpp_lr24e4.json",
+    "active_parent_config_sha256": "1837ec1529374096d634db9bce958f6a990c26070bac5686b2122b4a32d74a38",
+    "candidate_builder": "examples.nanogpt.make_pro6_attention_cproj_capacity",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "schema_version": "mai_124m_attention_vo_factorial_result_v1",
+  "source_plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_factorial_cproj_capacity_plan.json",
+  "steps": [
+    594,
+    1188,
+    1782,
+    2373
+  ]
+}
