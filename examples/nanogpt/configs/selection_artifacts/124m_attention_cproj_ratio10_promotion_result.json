@@ -1,0 +1,78 @@
+{
+  "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_lr24e4.json",
+  "candidate_config_sha256": "f370636fa973c0d351cbb75230945889299df34c9a5529e06e5ea4cca2898394",
+  "comparisons": {
+    "delta_to_qk_only_ce": [
+      0.09710000000000019,
+      0.06849999999999978,
+      0.06420000000000003,
+      0.06330000000000036
+    ],
+    "improvement_over_ratio01_ce": [
+      -0.006999999999999673,
+      0.000700000000000145,
+      0.002200000000000202,
+      0.0026999999999999247
+    ],
+    "recovery_fraction_of_parent_qk_only_gap": [
+      -0.07769145394006252,
+      0.01011560693641829,
+      0.03313253012048485,
+      0.0409090909090896
+    ]
+  },
+  "curves": {
+    "qk_cproj_ratio01_parent": [
+      4.1074,
+      3.7633,
+      3.6141,
+      3.5518
+    ],
+    "qk_cproj_ratio10_candidate": [
+      4.1144,
+      3.7626,
+      3.6119,
+      3.5491
+    ],
+    "qk_only": [
+      4.0173,
+      3.6941,
+      3.5477,
+      3.4858
+    ]
+  },
+  "decision": {
+    "classification": "REJECT_CPROJ_RATIO10_TRANSFER",
+    "next_action": "Do not sweep c-proj ratios; reject fixed-chart capacity as sufficient and return to a directional c-proj representation test.",
+    "promote_cproj_ratio10_to_full_attention": false
+  },
+  "decision_evidence": {
+    "early_gate": true,
+    "early_worsened_steps": [],
+    "terminal_gate": false,
+    "terminal_improvement_ce": 0.0026999999999999247
+  },
+  "identity": {
+    "active_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_5tpp_lr24e4.json",
+    "active_parent_config_sha256": "1837ec1529374096d634db9bce958f6a990c26070bac5686b2122b4a32d74a38",
+    "candidate_builder": "examples.nanogpt.make_pro6_attention_cproj_capacity",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_cproj_only_partial_control_result.json",
+  "parent_result_sha256": "d328fee61e58eaf380bf17a962021904a4ef77a7a7f441922f8a1b20d5246216",
+  "registered_gate": {
+    "early_maximum_worsened_evaluations": 1,
+    "early_maximum_worsening_ce": 0.01,
+    "terminal_minimum_improvement_ce": 0.02
+  },
+  "schema_version": "mai_124m_attention_cproj_ratio10_promotion_result_v1",
+  "source_plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_factorial_cproj_capacity_plan.json",
+  "source_plan_sha256": "b8f622ce94eff757bb9563d6d6e8521839021445f5b6cdf48fb3ffaa3fd6a14e",
+  "steps": [
+    594,
+    1188,
+    1782,
+    2373
+  ]
+}

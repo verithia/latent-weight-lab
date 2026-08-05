@@ -1,0 +1,159 @@
+{
+  "schema_version": "mai_124m_attention_qk_cproj_only_cprojratio10_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "e620401e146cf61e0eac20e94d213013146a8fa9",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_lr24e4_20260805T062607Z_273203.config.json"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_lr24e4.json",
+    "config_sha256": "f370636fa973c0d351cbb75230945889299df34c9a5529e06e5ea4cca2898394",
+    "resolved_config_sha256": "38b08e93278d9c567fc93a6184d8cdcd105e90370a823cecd7c9a5ce8c96a4f7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_fraction": 0.30879153565939454,
+    "mfu_certificate_sha256": "ca92499f2b3b7c815a7441d21a360600e93d618583cb0dbe489188a72d2b15a4",
+    "provenance_sha256": "a524c04a38bc006b0aeeb8bf1ab3fbaec7e9cc2975278450b3b27ea99c8ac418",
+    "status_sha256": "8a6ecfcfa47c1e1f3fdd50c6b6a8ad6aa55223373c30c67e2842f56400715ba7",
+    "log_sha256": "c253f91158bf6f6889fcdc78f617870134443635f61405442b600dd19426a61f",
+    "checkpoint_sha256": "38acebf577ba498ba80b71883a29dcd2e3f577681e3d54a38246cce282d4bf2e",
+    "checkpoint_metadata_sha256": "c20064bb11d28d355d979ffd4062c6505cf995348690d40a8cece3da90d8ada1",
+    "checkpoint_bytes": 1038221152,
+    "exit_code": 0,
+    "classification": "clean",
+    "started_at": "2026-08-05T14:26:07+08:00",
+    "finished_at": "2026-08-05T15:29:16+08:00",
+    "fixed_evaluations": [
+      {
+        "step": 594,
+        "train_ce": 4.1252,
+        "validation_ce": 4.1144
+      },
+      {
+        "step": 1188,
+        "train_ce": 3.7770,
+        "validation_ce": 3.7626
+      },
+      {
+        "step": 1782,
+        "train_ce": 3.6287,
+        "validation_ce": 3.6119
+      },
+      {
+        "step": 2373,
+        "train_ce": 3.5667,
+        "validation_ce": 3.5491
+      }
+    ]
+  },
+  "comparisons": {
+    "qk_cproj_ratio01_parent_validation_ce_by_step": [
+      4.1074,
+      3.7633,
+      3.6141,
+      3.5518
+    ],
+    "qk_only_validation_ce_by_step": [
+      4.0173,
+      3.6941,
+      3.5477,
+      3.4858
+    ],
+    "qk_plus_v_validation_ce_by_step": [
+      4.0553,
+      3.7240,
+      3.5769,
+      3.5148
+    ],
+    "full_attention_validation_ce_by_step": [
+      4.1885,
+      3.8302,
+      3.6788,
+      3.6151
+    ],
+    "blockwise_dense_validation_ce_by_step": [
+      4.1372,
+      3.7301,
+      3.5736,
+      3.5110
+    ],
+    "ordinary_dense_validation_ce_by_step": [
+      4.1742,
+      3.7631,
+      3.6039,
+      3.5402
+    ],
+    "improvement_over_ratio01_parent_by_step": [
+      -0.0070,
+      0.0007,
+      0.0022,
+      0.0027
+    ],
+    "validation_delta_to_qk_only_by_step": [
+      0.0971,
+      0.0685,
+      0.0642,
+      0.0633
+    ],
+    "validation_delta_to_qk_plus_v_by_step": [
+      0.0591,
+      0.0386,
+      0.0350,
+      0.0343
+    ],
+    "validation_delta_to_full_attention_by_step": [
+      -0.0741,
+      -0.0676,
+      -0.0669,
+      -0.0660
+    ],
+    "validation_delta_to_blockwise_dense_by_step": [
+      -0.0228,
+      0.0325,
+      0.0383,
+      0.0381
+    ],
+    "validation_delta_to_ordinary_dense_by_step": [
+      -0.0598,
+      -0.0005,
+      0.0080,
+      0.0089
+    ]
+  },
+  "watchdog": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "agent_mention": "@Codex",
+    "state_key": "pro6_qk_cproj_cprojratio10_5tpp",
+    "progress_milestones_owned": [
+      20,
+      50
+    ],
+    "terminal_callback_owned": true,
+    "terminal_signature": [
+      "finished",
+      0,
+      "2026-08-05T15:29:16+08:00"
+    ],
+    "action_prompt_verified": true
+  },
+  "interpretation": {
+    "supported": "Increasing only attention c_proj BlockFHT latent ratio from 0.01 to 0.10 recovered just 0.0027 CE at terminal, or 4.09 percent of the parent-to-QK-only gap.",
+    "excluded": "The stable c_proj penalty is not primarily an insufficient-coordinate-capacity problem within the fixed random BlockFHT chart.",
+    "scope": "This rejects a ratio sweep; it does not show that the useful c_proj direction is absent under the activation-weighted residual-stream metric."
+  },
+  "decision": "Apply the immutable capacity analyzer and, on rejection, activate the preregistered zero-update activation-metric tangent diagnostic."
+}
