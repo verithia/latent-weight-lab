@@ -1,0 +1,49 @@
+{
+  "schema_version": "mai_124m_attention_dense_blockwise_qkv_muon_control_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_blockwise_qkv_muon_5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "bd476029866d880268fb740caaf2f25fe00e2b0e",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_blockwise_qkv_muon_5tpp_lr24e4.json",
+    "config_sha256": "78839305c562304e7d799879b216fcb3b22a23f7dcfa327c785df851a80c859c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_fraction": 0.3986757009138856,
+    "mfu_certificate_sha256": "9018700ec6b6d3821673e19ff0e311896dbcd86645125926e37df1fa8d793915",
+    "mfu_preflight_log_sha256": "8c483739af67e4a638322f012f5f428e7f1659cd63473fcca8a9fdf45cd2fb69",
+    "provenance_sha256": "07e01d988100876e0fc6f3c23f33e211943333598ef4217a855e8198cf5e4910",
+    "status_sha256": "17abbf0c44e9e7de4b4d4e8ef363a6ca33242404e5b2c76446f5aa117a7d5a98",
+    "log_sha256": "25889a8be37283b96dd7fda4a8ae78927d14b73e68c8ea755c03a1c91b6adfec",
+    "checkpoint_sha256": "ce7aadffd104c893e368181ffaf09d12ebe7b12df05a8ea45f2640bf3d55ecb7",
+    "exit_code": 0,
+    "classification": "clean",
+    "fixed_evaluations": [
+      {"step": 594, "train_ce": 4.1477, "validation_ce": 4.1372},
+      {"step": 1188, "train_ce": 3.7449, "validation_ce": 3.7301},
+      {"step": 1782, "train_ce": 3.5903, "validation_ce": 3.5736},
+      {"step": 2373, "train_ce": 3.5282, "validation_ce": 3.5110}
+    ]
+  },
+  "comparisons": {
+    "ordinary_dense_validation_ce_by_step": [4.1742, 3.7631, 3.6039, 3.5402],
+    "qk_only_validation_ce_by_step": [4.0173, 3.6941, 3.5477, 3.4858],
+    "validation_delta_to_ordinary_dense_by_step": [-0.0370, -0.0330, -0.0303, -0.0292],
+    "validation_delta_to_qk_only_by_step": [0.1199, 0.0360, 0.0259, 0.0252],
+    "qk_only_gain_explained_by_muon_grouping_fraction_by_step": [0.2358, 0.4783, 0.5391, 0.5368],
+    "qk_only_gain_remaining_with_mapped_qk_fraction_by_step": [0.7642, 0.5217, 0.4609, 0.4632]
+  },
+  "interpretation": {
+    "supported": "Applying Muon's polar map separately to packed QK and V improves the exact dense reference at every fixed evaluation, but mapped Q/K with the same effective QK-versus-V grouping remains better at every fixed evaluation.",
+    "terminal_attribution": "At terminal CE, Muon grouping accounts for 0.0292 of the 0.0544 QK-only improvement over ordinary dense (53.68%); mapped Q/K retains a separate 0.0252 CE advantage (46.32%).",
+    "scope": "This closes the optimizer-geometry confound for the QK-only partial replacement. It does not identify whether generated V or generated attention c_proj causes the full-replacement deficit."
+  },
+  "decision": "Keep mapped Q/K as the attention anchor. Next run QK+V with dense c_proj; if it remains near QK-only, generated c_proj is the primary remaining bottleneck. Run the complementary dense-V/QK+c-proj control if needed."
+}
