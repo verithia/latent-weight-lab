@@ -158,9 +158,9 @@ def analyze(
             ),
         },
         "scope": {
-            "partial_attention_only": true,
-            "dense_c_proj": true,
-            "materialized_inference_parameters_unchanged": true
+            "partial_attention_only": True,
+            "dense_c_proj": True,
+            "materialized_inference_parameters_unchanged": True,
         }
     }
 
