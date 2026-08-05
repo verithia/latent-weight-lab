@@ -34,8 +34,8 @@ import torch
 
 from examples.nanogpt.analyze_residual_compatibility import (
     fixed_validation_batches,
-    load_model,
 )
+from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon import zeropower_via_newtonschulz5
 from latent_weight_lab.block_fht import (
     BlockFHTLinear,
@@ -116,6 +116,18 @@ def validate_activation(
         raise ValueError("dataset manifest SHA-256 mismatch")
     if checkpoint_sha256 != run.get("checkpoint_sha256"):
         raise ValueError("checkpoint SHA-256 mismatch")
+
+
+def load_endpoint_model(checkpoint_path: Path, device: str) -> GPT:
+    """Construct fixed CPU-seeded buffers before moving the endpoint to CUDA."""
+    checkpoint = torch.load(
+        checkpoint_path, map_location="cpu", weights_only=False
+    )
+    model = GPT(GPTConfig(**checkpoint["model_config"]))
+    model.load_state_dict(checkpoint["model"], strict=True)
+    model.to(device)
+    model.eval()
+    return model
 
 
 @dataclass(frozen=True)
@@ -544,7 +556,7 @@ def main() -> None:
         int(args.batches),
         int(args.sample_seed),
     )
-    model = load_model(args.checkpoint, args.device)
+    model = load_endpoint_model(args.checkpoint, args.device)
     model.prepare_block_fht_cache(dtype=torch.float32)
     for parameter in model.parameters():
         parameter.requires_grad_(False)
