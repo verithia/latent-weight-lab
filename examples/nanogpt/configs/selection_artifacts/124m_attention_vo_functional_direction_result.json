@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_attention_vo_functional_direction_result_v1",
+  "recorded_at": "2026-08-05",
+  "diagnostic": {
+    "source_commit": "3b6c3bff01497dbaf3e4fc8da518c9f0d1bd3fea",
+    "source_sha256": "59ddda522a168c71ec686d930ad893829178f330130da5572cae07ae00bc778d",
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_functional_direction_20260805",
+    "raw_result_sha256": "2bfb6f0907744725ab310743578aab5cd195d425df18dcd50d980697ad77533d",
+    "cells_csv_sha256": "8260a5207b6a6bfce16fe47e5f050ae6b8c61481b447b284dd42fbede359835f",
+    "elapsed_seconds": 17.585355520248413,
+    "parameter_updates": 0,
+    "dense_optimizer_state_retained": false
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_functional_direction_plan.json",
+    "plan_sha256": "22a29739d2fbf0e1523af60f374dac52c6de84d24befebb2ba8ddb2777429766",
+    "qk_only_result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "qk_only_config_sha256": "a66a8415f72404d4bf8925de50ff4aeef412cb3426fa40d20f45968247f3c7f9",
+    "qk_only_checkpoint_sha256": "13b1dd1ad120f23578a7dce376a2b259e34cd5590982aa2c2ba85a68c033a5a3",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "protocol": {
+    "layers": [0, 3, 6, 9, 11],
+    "heads_per_layer": 12,
+    "valid_cells": 60,
+    "fit_seed": 20260805,
+    "holdout_seed": 20260806,
+    "batches_per_window": 8,
+    "batch_size": 4,
+    "block_size": 256,
+    "sequence_start_overlap": 0,
+    "fit_token_sha256": "a5d40dd6990485a79721cc5092c2a73748f47649eb2362e3d3fbe270a5124f08",
+    "holdout_token_sha256": "3aa7e6c675fa8d452e080e47e65779c0cd55cd4525e51d9576f3aaa761d8e981"
+  },
+  "summary": {
+    "direct_heldout_task_cosine": -0.00249646226127527,
+    "factor_heldout_task_cosine": -0.0004775745991813487,
+    "direct_minus_factor_heldout_task_cosine": -0.0020188876620939214,
+    "direct_fit_holdout_direction_cosine": 0.004354591549260387,
+    "factor_fit_holdout_direction_cosine": 0.0025675036789614076,
+    "factor_fit_direct_fit_cosine": 0.24014619619042055,
+    "factor_line_recovery_of_direct": 0.05767019554472796,
+    "positive_direct_heldout_cells": 30,
+    "layers_with_positive_direct_advantage": 1,
+    "maximum_relative_autograd_v_gradient_discrepancy": 9.694129452561729e-7,
+    "maximum_relative_autograd_o_gradient_discrepancy": 1.0528548120377284e-6
+  },
+  "interpretation": {
+    "supported": "On disjoint validation windows, neither the direct per-head K_h=O_hV_h Muon direction nor the direction induced by separate factor Muon is stable or predictive. The direct direction has effectively zero and slightly negative held-out task alignment.",
+    "factorization_check": "The analytically reconstructed V and O gradients match autograd to about 1e-6 relative error, so the rejection is not caused by an incorrect product differential.",
+    "scope": "This rejects a direct joint V/O operator chart at this terminal endpoint and measurement scale. It does not claim that all possible time-dependent functional parameterizations are impossible."
+  },
+  "decision": {
+    "classification": "REJECT_JOINT_VO_DIRECTION_ADVANTAGE",
+    "language_model_training_authorized": false,
+    "next_action": "Retain generated QK+V with dense c_proj as the honest attention-compression endpoint and validate that endpoint on the next ladder rung; do not train another direct V/O or fixed-random c_proj chart from this evidence."
+  }
+}
