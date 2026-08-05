@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_full_mlp_5tpp_dense_compute_bounds_v1",
+  "recorded_at": "2026-08-06",
+  "inputs": {
+    "fixed_steps": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "dense_validation_ce": [
+      4.1739,
+      3.7622,
+      3.6038,
+      3.5401
+    ],
+    "dense_curve_source": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_capacity_radial_closure_result.json",
+      "sha256": "d1f7a86da7d09c449d9d02cfbea2f8d8d0a9204de21cc02c9cae771ee5183076"
+    },
+    "method": {
+      "path": "examples/nanogpt/fixed_model_compute_equivalence.py",
+      "sha256": "239e1099bce11ad0e289fbf7e6ed95668db8b1784f450c483d33e8af107ecad1",
+      "fit": "ordinary least squares L = intercept - s ln(C) on terminal windows",
+      "inversion": "piecewise linear interpolation in (ln compute, validation CE)",
+      "extrapolation": "at most one adjacent interval"
+    }
+  },
+  "dense_local_fits": [
+    {
+      "window": 2,
+      "loss_slope_per_log_compute": 0.22240171984166893,
+      "alpha_eff_total_loss": 0.06282356991092594
+    },
+    {
+      "window": 3,
+      "loss_slope_per_log_compute": 0.32564427020068965,
+      "alpha_eff_total_loss": 0.09198730832481841
+    },
+    {
+      "window": 4,
+      "loss_slope_per_log_compute": 0.46772723622871676,
+      "alpha_eff_total_loss": 0.1321226056407211
+    }
+  ],
+  "fixed_terminal_bounds": {
+    "repaired_attention_parent": {
+      "validation_ce": 3.6278,
+      "delta_ce_vs_dense": 0.0877,
+      "perplexity_ratio_vs_dense": 1.0916605747261412,
+      "dense_match_steps": 1675.8193699509022,
+      "candidate_over_dense_token_compute": 1.4160237329572838
+    },
+    "full_mlp_parity_diagnostic": {
+      "validation_ce": 3.6378,
+      "delta_ce_vs_dense": 0.0977,
+      "perplexity_ratio_vs_dense": 1.1026319459013376,
+      "dense_match_steps": 1633.4668811178794,
+      "candidate_over_dense_token_compute": 1.4527383612308158
+    },
+    "full_mlp_development_ceiling": {
+      "validation_ce": 3.6478,
+      "delta_ce_vs_dense": 0.1077,
+      "perplexity_ratio_vs_dense": 1.1137135811899876,
+      "dense_match_steps": 1592.1847542477935,
+      "candidate_over_dense_token_compute": 1.4904049254768126
+    }
+  },
+  "interpretation": [
+    "the effective alpha is phase/window dependent (0.0628 to 0.1321 here), so a generic literature alpha is not used",
+    "perplexity ratios understate the measured horizontal token-compute penalty",
+    "passing the incremental +0.02 MLP gate does not establish end-to-end practical parity because the repaired attention parent already carries a 1.416x token penalty",
+    "wall-clock and hardware-FLOP penalties remain separate and require measured dense/candidate throughput"
+  ]
+}
