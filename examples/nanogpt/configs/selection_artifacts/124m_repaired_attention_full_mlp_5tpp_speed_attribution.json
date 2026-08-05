@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_full_mlp_5tpp_speed_attribution_v1",
+  "recorded_at": "2026-08-06",
+  "sources": {
+    "attention_parent": {
+      "run_id": "pro6_mai_v3_124m_targeted_bilateral_fullcayleylr_5tpp_recovery2_20260731T080629Z_1561520",
+      "certificate_sha256": "96c5616bccd43215c2e7bca364fed2757dbcf5b370e0bd3ee556dcfd536db3fb",
+      "mfu_fraction": 0.280508546051453,
+      "tokens_per_second": 156362.42333333334,
+      "peak_mib": 35419.52
+    },
+    "full_mlp_candidate": {
+      "config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+      "certificate_sha256": "e6825514f8896b6cc7b3d207937582ae423d7b3fe9a57f190b1fa4b0f3e7f578",
+      "mfu_fraction": 0.21458210302816835,
+      "tokens_per_second": 118368.40375,
+      "peak_mib": 35696.49
+    }
+  },
+  "timing_ms": {
+    "attention_parent": {
+      "iter": 1676.5133333333333,
+      "prepare": 3.2733333333333334,
+      "fwbw": 1652.21,
+      "flush": 4.133333333333333,
+      "grad": 1.7966666666666669,
+      "opt": 13.246666666666668,
+      "data": 0.73,
+      "other": 1.1266666666666667
+    },
+    "full_mlp_candidate": {
+      "iter": 2214.65625,
+      "prepare": 3.56625,
+      "fwbw": 1654.05,
+      "flush": 4.4375,
+      "grad": 1.965,
+      "opt": 548.5175,
+      "data": 0.6225,
+      "other": 1.49875
+    },
+    "delta": {
+      "iter": 538.1429166666667,
+      "prepare": 0.2929166666666667,
+      "fwbw": 1.8399999999999181,
+      "flush": 0.30416666666666714,
+      "grad": 0.16833333333333322,
+      "opt": 535.2708333333334,
+      "data": -0.10749999999999993,
+      "other": 0.3720833333333333
+    }
+  },
+  "attribution": {
+    "optimizer_fraction_of_total_slowdown": 0.9946629728936629,
+    "fwbw_fraction_of_total_slowdown": 0.0034191660672542867,
+    "optimizer_time_ratio": 41.40796426774031,
+    "fwbw_time_ratio": 1.0011136598858499,
+    "peak_mib_delta": 276.97000000000116
+  },
+  "diagnosis": "The full-MLP training slowdown is optimizer-side per-step chart selection/refit/error-feedback work, not forward/backward BlockFHT generation or materialized inference.",
+  "conditional_next_action": {
+    "if_loss_gate_passes": "profile and mechanically optimize the exact accepted chart algorithm by batching layer work, caching invariant setup, and fusing selector/refit operations; require bitwise/tolerance update equivalence and a fresh >=20% exact MFU gate",
+    "if_loss_gate_fails": "do not optimize this rejected mechanism; use the fixed loss/trajectory evidence to select a different structural family",
+    "no_change_during_current_run": true
+  }
+}
