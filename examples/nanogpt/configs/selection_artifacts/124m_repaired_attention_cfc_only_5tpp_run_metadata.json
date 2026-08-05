@@ -103,36 +103,71 @@
     "interpretation": "zero means additive c_fc and c_proj effects; terminal decisions remain governed only by the frozen 3.6478 gate"
   },
   "latest_verification": {
-    "verified_at": "2026-08-06T06:36:54+08:00",
-    "trigger": "20_percent_callback",
-    "callback_iter": 500,
-    "verified_iter": 520,
+    "verified_at": "2026-08-06T06:59:56+08:00",
+    "trigger": "50_percent_callback",
+    "callback_iter": 1190,
+    "verified_iter": 1230,
     "max_iters": 2373,
-    "progress_fraction": 0.2191319,
-    "recent_train_loss": 4.2837,
-    "recent_update_ms": 1934.37,
+    "progress_fraction": 0.51833123,
+    "recent_train_loss": 3.8061,
+    "recent_update_ms": 1934.17,
     "process_alive": true,
     "status_running": true,
     "errors": [],
-    "fixed_evaluation_steps_observed": [],
-    "next_fixed_evaluation_step": 594,
-    "scientific_decision_available": false,
+    "fixed_evaluations": [
+      {
+        "step": 594,
+        "train_loss": 4.2132,
+        "validation_loss": 4.2028
+      },
+      {
+        "step": 1188,
+        "train_loss": 3.8537,
+        "validation_loss": 3.8395
+      }
+    ],
+    "candidate_minus_repaired_attention_ce": [
+      -0.0123,
+      -0.0016
+    ],
+    "candidate_minus_dense_ce": [
+      0.0289,
+      0.0773
+    ],
+    "candidate_minus_joint_full_mlp_ce": [
+      -0.0638,
+      -0.0424
+    ],
+    "candidate_minus_cproj_only_ce": [
+      -0.0676,
+      -0.0375
+    ],
+    "candidate_minus_no_interaction_expectation_ce": [
+      -0.0085,
+      -0.0065
+    ],
+    "cfc_cproj_interaction_ce": [
+      0.0085,
+      0.0065
+    ],
+    "next_fixed_evaluation_step": 1782,
+    "scientific_decision_available": "provisional_only_terminal_rule_remains_binding",
     "gpu_memory_mib": 48276,
     "gpu_total_memory_mib": 97887,
-    "gpu_utilization_percent": 95,
-    "gpu_power_w": 493.02,
+    "gpu_utilization_percent": 99,
+    "gpu_power_w": 471.36,
     "gpu_power_limit_w": 600.0,
-    "gpu_temperature_c": 51,
-    "workspace_bytes": 224734108672,
-    "workspace_gib": 209.3,
+    "gpu_temperature_c": 54,
+    "workspace_bytes": 225190580112,
+    "workspace_gib": 209.725071,
     "workspace_cap_gib": 256,
-    "filesystem_available_bytes": 1684986462208,
-    "filesystem_available_gib": 1569.266,
-    "update_only_eta_minutes": 59.7,
+    "filesystem_available_bytes": 1684308627456,
+    "filesystem_available_gib": 1568.634647,
+    "update_only_eta_minutes": 36.8459,
     "identity_hashes_unchanged": true,
     "remote_worktree_clean": true,
     "intervention": "none",
-    "decision": "NO_INTERVENTION_AT_20_PERCENT"
+    "decision": "NO_INTERVENTION_AT_50_PERCENT_PROVISIONALLY_CFC_NEUTRAL_OR_BENEFICIAL"
   },
   "watchdog": {
     "service": "com.mappingnetworks.pro6.repairedattncfconly5tpp",
@@ -151,7 +186,8 @@
     "interval_seconds": 60,
     "alive": true,
     "sent_milestones": [
-      20
+      20,
+      50
     ]
   }
 }
