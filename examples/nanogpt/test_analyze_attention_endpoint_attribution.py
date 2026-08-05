@@ -5,6 +5,7 @@ import torch
 from examples.nanogpt.analyze_attention_endpoint_attribution import (
     project_attention,
     qkv,
+    select_structural_gate,
     shapley_improvements,
 )
 from examples.nanogpt.model import CausalSelfAttention, GPTConfig
@@ -92,3 +93,41 @@ def test_shapley_telescopes_and_recovers_additive_contributions() -> None:
     assert math.isclose(
         sum(attribution.values()), losses[(0, 0, 0)] - losses[(1, 1, 1)]
     )
+
+
+def test_selection_requires_replication_or_stable_joint_interaction() -> None:
+    protocol = {
+        "minimum_stable_component_ce": 0.005,
+        "minimum_value_projection_interaction_ce": 0.003,
+    }
+    result = {
+        "primary": {
+            "shapley_ce_improvement": {
+                "score": 0.001,
+                "value": 0.010,
+                "projection": 0.002,
+            },
+            "hybrid_ce": {
+                "000": 4.0,
+                "010": 3.995,
+                "001": 3.998,
+                "011": 3.985,
+            },
+        },
+        "confirmation": {
+            "shapley_ce_improvement": {
+                "score": 0.001,
+                "value": 0.009,
+                "projection": 0.002,
+            },
+            "hybrid_ce": {
+                "000": 4.0,
+                "010": 3.995,
+                "001": 3.998,
+                "011": 3.986,
+            },
+        },
+    }
+    decision = select_structural_gate(result, protocol)
+    assert decision["classification"] == "STABLE_SINGLE_COMPONENT"
+    assert decision["selected_component"] == "value"

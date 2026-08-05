@@ -234,6 +234,65 @@ def shapley_improvements(
     return result
 
 
+def select_structural_gate(
+    results: dict[str, Any], protocol: dict[str, Any]
+) -> dict[str, Any]:
+    primary = results["primary"]
+    confirmation = results["confirmation"]
+    primary_shapley = primary["shapley_ce_improvement"]
+    confirmation_shapley = confirmation["shapley_ce_improvement"]
+    primary_top = max(COMPONENTS, key=lambda key: primary_shapley[key])
+    confirmation_top = max(
+        COMPONENTS, key=lambda key: confirmation_shapley[key]
+    )
+    minimum = float(protocol["minimum_stable_component_ce"])
+    stable = (
+        primary_top == confirmation_top
+        and primary_shapley[primary_top] >= minimum
+        and confirmation_shapley[confirmation_top] >= minimum
+    )
+    joint: dict[str, float] = {}
+    for name, result in results.items():
+        ce = result["hybrid_ce"]
+        value = ce["000"] - ce["010"]
+        projection = ce["000"] - ce["001"]
+        value_projection = ce["000"] - ce["011"]
+        joint[name] = value_projection - value - projection
+    interaction_minimum = float(
+        protocol["minimum_value_projection_interaction_ce"]
+    )
+    coupled = (
+        not stable
+        and joint["primary"] >= interaction_minimum
+        and joint["confirmation"] >= interaction_minimum
+    )
+    if stable:
+        classification = "STABLE_SINGLE_COMPONENT"
+        selected = primary_top
+    elif coupled:
+        classification = "STABLE_VALUE_PROJECTION_INTERACTION"
+        selected = "value_projection_coupling"
+    else:
+        classification = "NO_STABLE_ENDPOINT_COMPONENT"
+        selected = None
+    return {
+        "classification": classification,
+        "selected_component": selected,
+        "primary_top_component": primary_top,
+        "confirmation_top_component": confirmation_top,
+        "minimum_stable_component_ce": minimum,
+        "value_projection_interaction_ce": joint,
+        "minimum_value_projection_interaction_ce": interaction_minimum,
+        "rule": (
+            "same top Shapley component with minimum CE improvement in both "
+            "windows; otherwise admit a joint V/projection gate only when "
+            "its super-additive interaction clears the fixed threshold in "
+            "both windows"
+        ),
+        "automatic_training_authorized": False,
+    }
+
+
 @torch.no_grad()
 def normalized_output_errors(
     dense: torch.nn.Module,
@@ -350,8 +409,7 @@ def main() -> None:
         )
     finally:
         clear_frozen_base_cache(candidate)
-    confirmation = results["confirmation"]["shapley_ce_improvement"]
-    selected = max(COMPONENTS, key=lambda component: confirmation[component])
+    decision = select_structural_gate(results, protocol)
     output = {
         "schema_version": "mai_124m_attention_endpoint_attribution_v1",
         "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -369,11 +427,7 @@ def main() -> None:
         "protocol": protocol,
         "results": results,
         "normalized_attention_output_error": errors,
-        "decision": {
-            "selected_component": selected,
-            "rule": "largest positive confirmation-window Shapley CE improvement",
-            "automatic_training_authorized": False,
-        },
+        "decision": decision,
         "elapsed_seconds": time.time() - started,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
