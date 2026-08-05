@@ -520,6 +520,7 @@ def main() -> None:
     parser.add_argument("--sample-seed", type=int, default=20260805)
     parser.add_argument("--cg-tolerance", type=float, default=1e-6)
     parser.add_argument("--cg-max-iterations", type=int, default=96)
+    parser.add_argument("--cg-double-retry-iterations", type=int, default=512)
     parser.add_argument("--muon-ns-steps", type=int, default=5)
     args = parser.parse_args()
 
@@ -635,6 +636,26 @@ def main() -> None:
                         tolerance=float(args.cg_tolerance),
                         max_iterations=int(args.cg_max_iterations),
                     )
+                    diagnostics["solver_dtype"] = "float32"
+                    if (
+                        not bool(diagnostics["converged"])
+                        and metric_activations is not None
+                    ):
+                        # Near-null activation directions can reach the FP32
+                        # residual floor before satisfying the preregistered
+                        # normal-equation guard.  Retry only those solves in
+                        # FP64 through the same exact Jacobian/adjoint; this
+                        # changes numerical precision, not the objective.
+                        projected, diagnostics = solve_projection(
+                            chart,
+                            target.double(),
+                            metric_activations.double(),
+                            tolerance=float(args.cg_tolerance),
+                            max_iterations=int(
+                                args.cg_double_retry_iterations
+                            ),
+                        )
+                        diagnostics["solver_dtype"] = "float64_retry"
                     metrics = output_metrics(
                         activations,
                         dense_gradient,
@@ -706,6 +727,9 @@ def main() -> None:
             "sample_seed": int(args.sample_seed),
             "cg_tolerance": float(args.cg_tolerance),
             "cg_max_iterations": int(args.cg_max_iterations),
+            "cg_double_retry_iterations": int(
+                args.cg_double_retry_iterations
+            ),
             "muon_ns_steps": int(args.muon_ns_steps),
             "random_control_seed_offset": RANDOM_SEED_OFFSET,
             "parameter_updates": 0,
