@@ -73,29 +73,67 @@
     }
   },
   "latest_verification": {
-    "verified_at": "2026-08-06T04:48:51+08:00",
-    "trigger": "20_percent_callback",
-    "callback_iter": 490,
-    "verified_iter": 520,
-    "progress_fraction": 0.219132,
-    "last_train_loss": 4.3934,
-    "observed_update_ms": 1989.16,
+    "verified_at": "2026-08-06T05:13:41+08:00",
+    "trigger": "50_percent_callback",
+    "callback_iter": 1188,
+    "verified_iter": 1220,
+    "progress_fraction": 0.51411715,
+    "last_train_loss": 3.8995,
+    "observed_update_ms": 2001.05,
     "process_alive": true,
     "status_running": true,
-    "fixed_steps_observed": [],
-    "next_fixed_evaluation_step": 594,
+    "fixed_steps_observed": [594, 1188],
+    "candidate_validation_ce": {
+      "594": 4.2963,
+      "1188": 3.9007
+    },
+    "fixed_checkpoint_comparison": {
+      "cproj_control_validation_ce": {
+        "594": 4.2704,
+        "1188": 3.8770
+      },
+      "candidate_minus_cproj_control": {
+        "594": 0.0259,
+        "1188": 0.0237
+      },
+      "joint_full_mlp_validation_ce": {
+        "594": 4.2666,
+        "1188": 3.8819
+      },
+      "candidate_minus_joint_full_mlp": {
+        "594": 0.0297,
+        "1188": 0.0188
+      },
+      "repaired_attention_validation_ce": {
+        "594": 4.2151,
+        "1188": 3.8411
+      },
+      "candidate_minus_repaired_attention": {
+        "594": 0.0812,
+        "1188": 0.0596
+      },
+      "dense_validation_ce": {
+        "594": 4.1739,
+        "1188": 3.7622
+      },
+      "candidate_minus_dense": {
+        "594": 0.1224,
+        "1188": 0.1385
+      }
+    },
+    "next_fixed_evaluation_step": 1782,
     "scientific_decision_available": false,
     "gpu_memory_mib": 48470,
-    "gpu_utilization_percent": 100,
-    "gpu_power_w": 517.57,
+    "gpu_utilization_percent": 99,
+    "gpu_power_w": 516.47,
     "gpu_power_limit_w": 600,
-    "gpu_temperature_c": 54,
-    "workspace_bytes": 223427438435,
-    "workspace_gib": 208.083,
+    "gpu_temperature_c": 55,
+    "workspace_bytes": 224105278949,
+    "workspace_gib": 208.714,
     "workspace_cap_gib": 256,
-    "filesystem_available_bytes": 1686078615552,
-    "filesystem_available_tib": 1.5335,
-    "estimated_remaining_update_minutes": 61.43,
+    "filesystem_available_bytes": 1685400780800,
+    "filesystem_available_tib": 1.5329,
+    "estimated_remaining_update_minutes": 38.26,
     "activation_metric_diagnostics": {
       "rows": 12,
       "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
@@ -104,10 +142,10 @@
       "maximum_condition_number": 16.0,
       "minimum_samples_per_layer": 262144
     },
-    "watchdog_milestones_sent": [20],
+    "watchdog_milestones_sent": [20, 50],
     "watchdog_errors": [],
     "intervention": "none",
-    "decision": "NO_INTERVENTION_AT_20_PERCENT"
+    "decision": "NO_INTERVENTION_AT_50_PERCENT; PROVISIONALLY_WORSE_THAN_UNWEIGHTED_CPROJ"
   },
   "watchdog": {
     "service": "com.mappingnetworks.pro6.repairedattncprojactivationenergy5tpp",
@@ -124,7 +162,7 @@
     "terminal_delivery_once": true,
     "interval_seconds": 60,
     "alive": true,
-    "sent_milestones": [20],
+    "sent_milestones": [20, 50],
     "recorded_errors": []
   },
   "preflight_performance": {
