@@ -32,6 +32,49 @@ def test_dense_decomposition_matches_native_attention() -> None:
     torch.testing.assert_close(decomposed, native, rtol=1e-5, atol=1e-6)
 
 
+def test_structured_decomposition_matches_native_attention() -> None:
+    torch.manual_seed(11)
+    targets = (
+        "attn.c_attn.qk_headwise",
+        "attn.c_attn.v",
+        "attn.c_proj",
+    )
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        dropout=0.0,
+        bias=False,
+        block_fht=True,
+        block_fht_targets=targets,
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+        block_fht_output_gain_targets=targets,
+        block_fht_attn_cayley_targets=targets,
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_proj",
+        ),
+        block_fht_attn_cayley_bilateral_targets=(
+            "attn.c_attn.qk_headwise",
+            "attn.c_attn.v",
+        ),
+        block_fht_attn_cayley_rank=1,
+    )
+    attention = CausalSelfAttention(config, layer_id=0).eval()
+    values = torch.randn(2, 6, 8)
+    q, k, value = qkv(attention, values)
+    scores = q @ k.transpose(-2, -1) / math.sqrt(k.shape[-1])
+    mask = torch.ones((6, 6), dtype=torch.bool).tril()
+    probabilities = torch.softmax(scores.masked_fill(~mask, -torch.inf), dim=-1)
+    decomposed = project_attention(attention, probabilities @ value)
+    native = attention(values)
+    torch.testing.assert_close(decomposed, native, rtol=1e-5, atol=1e-6)
+
+
 def test_shapley_telescopes_and_recovers_additive_contributions() -> None:
     effects = (0.2, -0.1, 0.05)
     losses = {}
