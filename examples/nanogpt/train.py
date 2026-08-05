@@ -1325,6 +1325,31 @@ def parse_args() -> argparse.Namespace:
         default=None,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-activation-energy-metric",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-activation-energy-metric-decay",
+        type=float,
+        default=0.95,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-activation-energy-metric-minimum",
+        type=float,
+        default=0.25,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-activation-energy-metric-maximum",
+        type=float,
+        default=4.0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-activation-energy-metric-epsilon",
+        type=float,
+        default=1e-6,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-hybrid-output",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -1964,6 +1989,47 @@ def parse_args() -> argparse.Namespace:
                 raise ValueError(
                     "Muon-matched Givens c_proj switch-fraction must be in (0, 1)"
                 )
+    if namespace.block_fht_mlp_cproj_activation_energy_metric:
+        if not namespace.block_fht_mlp_cproj_muon_matched_givens:
+            raise ValueError(
+                "c_proj activation-energy metric requires Muon-matched Givens"
+            )
+        if (
+            namespace.block_fht_mlp_cproj_hybrid_output
+            or namespace
+            .block_fht_mlp_cproj_muon_matched_givens_output_stages
+            != 0
+        ):
+            raise ValueError(
+                "c_proj activation-energy metric supports hidden-side Givens only"
+            )
+        metric_decay = float(
+            namespace.block_fht_mlp_cproj_activation_energy_metric_decay
+        )
+        metric_minimum = float(
+            namespace.block_fht_mlp_cproj_activation_energy_metric_minimum
+        )
+        metric_maximum = float(
+            namespace.block_fht_mlp_cproj_activation_energy_metric_maximum
+        )
+        metric_epsilon = float(
+            namespace.block_fht_mlp_cproj_activation_energy_metric_epsilon
+        )
+        if (
+            not math.isfinite(metric_decay)
+            or not 0.0 <= metric_decay < 1.0
+            or not math.isfinite(metric_minimum)
+            or not math.isfinite(metric_maximum)
+            or metric_minimum <= 0.0
+            or metric_minimum > 1.0
+            or metric_maximum < 1.0
+            or metric_maximum < metric_minimum
+            or not math.isfinite(metric_epsilon)
+            or metric_epsilon <= 0.0
+        ):
+            raise ValueError(
+                "invalid c_proj activation-energy metric configuration"
+            )
     if (
         namespace.block_fht_mlp_cfc_functional_shear
         and namespace.block_fht_mlp_cfc_directed_product
@@ -2428,6 +2494,21 @@ def main() -> None:
         block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction=(
             args
             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction
+        ),
+        block_fht_mlp_cproj_activation_energy_metric=(
+            args.block_fht_mlp_cproj_activation_energy_metric
+        ),
+        block_fht_mlp_cproj_activation_energy_metric_decay=(
+            args.block_fht_mlp_cproj_activation_energy_metric_decay
+        ),
+        block_fht_mlp_cproj_activation_energy_metric_minimum=(
+            args.block_fht_mlp_cproj_activation_energy_metric_minimum
+        ),
+        block_fht_mlp_cproj_activation_energy_metric_maximum=(
+            args.block_fht_mlp_cproj_activation_energy_metric_maximum
+        ),
+        block_fht_mlp_cproj_activation_energy_metric_epsilon=(
+            args.block_fht_mlp_cproj_activation_energy_metric_epsilon
         ),
         block_fht_mlp_cproj_hybrid_output=(
             args.block_fht_mlp_cproj_hybrid_output

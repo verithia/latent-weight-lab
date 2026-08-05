@@ -302,6 +302,68 @@ def diagonal_metric_angles(
     return angles
 
 
+def diagonal_input_metric_angles(
+    weight: torch.Tensor,
+    requested_update: torch.Tensor,
+    permutations: torch.Tensor,
+    input_metric: torch.Tensor,
+) -> torch.Tensor:
+    """Fit right-Givens coordinates in a diagonal input-space metric.
+
+    For a pair of source columns ``a,b``, requested columns ``u,v``, and
+    positive input-channel weights ``q_a,q_b``, the first-order least-squares
+    coordinate is
+
+    ``(q_b <a,v> - q_a <b,u>) / (q_a ||b||^2 + q_b ||a||^2)``.
+
+    The rotations are still applied to the ordinary materialized weight; the
+    metric changes only selector/fitting geometry and adds no forward path.
+    """
+    if weight.ndim != 2 or weight.shape != requested_update.shape:
+        raise ValueError(
+            "weight and requested_update must be same-shaped matrices"
+        )
+    if (
+        permutations.ndim != 2
+        or permutations.shape[1] != weight.shape[1]
+    ):
+        raise ValueError("permutations have an incompatible shape")
+    if input_metric.ndim != 1 or input_metric.shape[0] != weight.shape[1]:
+        raise ValueError("input metric has an incompatible shape")
+    metric = input_metric.to(device=weight.device, dtype=torch.float32)
+    if not bool(torch.isfinite(metric).all()) or bool((metric <= 0).any()):
+        raise ValueError("input metric must be positive and finite")
+    stages = int(permutations.shape[0])
+    angles = torch.empty(
+        stages,
+        weight.shape[1] // 2,
+        device=weight.device,
+        dtype=torch.float32,
+    )
+    source = weight.float()
+    update = requested_update.float()
+    for stage in range(stages):
+        pairs = permutations[stage].view(-1, 2)
+        left = pairs[:, 0]
+        right = pairs[:, 1]
+        weight_left = source.index_select(-1, left)
+        weight_right = source.index_select(-1, right)
+        update_left = update.index_select(-1, left)
+        update_right = update.index_select(-1, right)
+        metric_left = metric.index_select(0, left)
+        metric_right = metric.index_select(0, right)
+        coordinate_inner = (
+            metric_right * (weight_left * update_right).sum(dim=0)
+            - metric_left * (weight_right * update_left).sum(dim=0)
+        )
+        coordinate_norm = (
+            metric_left * weight_right.square().sum(dim=0)
+            + metric_right * weight_left.square().sum(dim=0)
+        ).clamp_min(1e-30)
+        angles[stage] = coordinate_inner / coordinate_norm
+    return angles
+
+
 def apply_givens_flow(
     values: torch.Tensor,
     angles: torch.Tensor,
@@ -1172,6 +1234,11 @@ class MuonMatchedGivensLinear(nn.Module):
         hybrid_control_output_stages: int = 32,
         hybrid_ridge_ratio: float = 1e-6,
         hybrid_functional_sample_cap: int = 2048,
+        activation_energy_metric: bool = False,
+        activation_energy_metric_decay: float = 0.95,
+        activation_energy_metric_minimum: float = 0.25,
+        activation_energy_metric_maximum: float = 4.0,
+        activation_energy_metric_epsilon: float = 1e-6,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -1198,6 +1265,19 @@ class MuonMatchedGivensLinear(nn.Module):
         self.hybrid_ridge_ratio = float(hybrid_ridge_ratio)
         self.hybrid_functional_sample_cap = int(
             hybrid_functional_sample_cap
+        )
+        self.activation_energy_metric = bool(activation_energy_metric)
+        self.activation_energy_metric_decay = float(
+            activation_energy_metric_decay
+        )
+        self.activation_energy_metric_minimum = float(
+            activation_energy_metric_minimum
+        )
+        self.activation_energy_metric_maximum = float(
+            activation_energy_metric_maximum
+        )
+        self.activation_energy_metric_epsilon = float(
+            activation_energy_metric_epsilon
         )
         if (
             self.in_features <= 0
@@ -1259,6 +1339,25 @@ class MuonMatchedGivensLinear(nn.Module):
             raise ValueError(
                 "hybrid directed coordinates require hybrid output"
             )
+        if self.activation_energy_metric:
+            if self.output_stages or self.hybrid_output:
+                raise ValueError(
+                    "activation-energy metric supports hidden-side Givens only"
+                )
+            if (
+                not math.isfinite(self.activation_energy_metric_decay)
+                or not 0.0 <= self.activation_energy_metric_decay < 1.0
+                or not math.isfinite(self.activation_energy_metric_minimum)
+                or not math.isfinite(self.activation_energy_metric_maximum)
+                or self.activation_energy_metric_minimum <= 0.0
+                or self.activation_energy_metric_minimum > 1.0
+                or self.activation_energy_metric_maximum < 1.0
+                or self.activation_energy_metric_maximum
+                < self.activation_energy_metric_minimum
+                or not math.isfinite(self.activation_energy_metric_epsilon)
+                or self.activation_energy_metric_epsilon <= 0.0
+            ):
+                raise ValueError("invalid activation-energy metric configuration")
 
         weight = torch.empty(self.out_features, self.in_features)
         nn.init.normal_(weight, mean=0.0, std=float(weight_std))
@@ -1346,7 +1445,20 @@ class MuonMatchedGivensLinear(nn.Module):
             torch.zeros((), dtype=torch.bool),
             persistent=True,
         )
+        if self.activation_energy_metric:
+            self.register_buffer(
+                "activation_energy_ema",
+                torch.ones(self.in_features, dtype=torch.float32),
+                persistent=True,
+            )
+            self.register_buffer(
+                "activation_energy_updates",
+                torch.zeros((), dtype=torch.int64),
+                persistent=True,
+            )
         self._hybrid_output_inputs: torch.Tensor | None = None
+        self._activation_energy_sum: torch.Tensor | None = None
+        self._activation_energy_count = 0
 
     @property
     def coordinate_count(self) -> int:
@@ -1389,6 +1501,66 @@ class MuonMatchedGivensLinear(nn.Module):
 
     def clear_hybrid_output_context(self) -> None:
         self._hybrid_output_inputs = None
+
+    @torch.no_grad()
+    def record_activation_energy_context(self, values: torch.Tensor) -> None:
+        """Accumulate training-only post-GELU channel energy for one step."""
+        if not self.activation_energy_metric or not self.training:
+            return
+        if values.shape[-1] != self.in_features:
+            raise ValueError("activation-energy c_proj input width mismatch")
+        flat = values.detach().reshape(-1, self.in_features)
+        energy = torch.linalg.vector_norm(
+            flat,
+            ord=2,
+            dim=0,
+            dtype=torch.float32,
+        ).square()
+        if self._activation_energy_sum is None:
+            self._activation_energy_sum = energy
+        else:
+            self._activation_energy_sum.add_(energy)
+        self._activation_energy_count += int(flat.shape[0])
+
+    @torch.no_grad()
+    def consume_activation_energy_metric(
+        self,
+    ) -> tuple[torch.Tensor | None, int]:
+        """Update the persistent EMA and return its bounded mean-one metric."""
+        if not self.activation_energy_metric:
+            return None, 0
+        energy_sum = self._activation_energy_sum
+        count = int(self._activation_energy_count)
+        self._activation_energy_sum = None
+        self._activation_energy_count = 0
+        if energy_sum is None or count <= 0:
+            raise RuntimeError(
+                f"missing activation-energy context for layer {self.layer_id}"
+            )
+        observed = energy_sum.float() / float(count)
+        if not bool(torch.isfinite(observed).all()):
+            raise RuntimeError("non-finite activation-energy observation")
+        if int(self.activation_energy_updates) == 0:
+            self.activation_energy_ema.copy_(observed)
+        else:
+            self.activation_energy_ema.mul_(
+                self.activation_energy_metric_decay
+            ).add_(
+                observed,
+                alpha=1.0 - self.activation_energy_metric_decay,
+            )
+        self.activation_energy_updates.add_(1)
+        normalized = self.activation_energy_ema / (
+            self.activation_energy_ema.mean()
+            + self.activation_energy_metric_epsilon
+        )
+        metric = normalized.clamp(
+            min=self.activation_energy_metric_minimum,
+            max=self.activation_energy_metric_maximum,
+        )
+        if not bool(torch.isfinite(metric).all()):
+            raise RuntimeError("non-finite activation-energy metric")
+        return metric, count
 
 
 class MuonFunctionalShearLinear(nn.Module):
@@ -2166,6 +2338,15 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     )
                     corrected_update = requested_update
                     matching_direction = direction
+                input_metric, activation_metric_sample_count = (
+                    module.consume_activation_energy_metric()
+                )
+                metric_matching_direction = matching_direction
+                if input_metric is not None:
+                    metric_matching_direction = (
+                        matching_direction.float()
+                        * input_metric.unsqueeze(0)
+                    )
                 step_index = int(module.optimizer_step)
                 refresh = (
                     not bool(module.matching_valid)
@@ -2184,7 +2365,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         permutations, matching_diagnostics = (
                             fast_muon_matched_permutations(
                                 weight,
-                                matching_direction,
+                                metric_matching_direction,
                                 stages=module.stages,
                                 neighbors=module.neighbors,
                                 seed=(
@@ -2237,7 +2418,7 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         permutations, matching_diagnostics = (
                             muon_matched_permutations(
                                 weight,
-                                matching_direction,
+                                metric_matching_direction,
                                 stages=module.stages,
                                 neighbors=module.neighbors,
                                 seed=module.matching_seed,
@@ -2278,11 +2459,19 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     module.matching_valid.fill_(True)
                     module.last_refresh_step.fill_(step_index)
                     module.refresh_count.add_(1)
-                parent_angles = diagonal_metric_angles(
-                    weight,
-                    corrected_update,
-                    module.selected_permutations,
-                )
+                if input_metric is None:
+                    parent_angles = diagonal_metric_angles(
+                        weight,
+                        corrected_update,
+                        module.selected_permutations,
+                    )
+                else:
+                    parent_angles = diagonal_input_metric_angles(
+                        weight,
+                        corrected_update,
+                        module.selected_permutations,
+                        input_metric,
+                    )
                 after_parent = apply_givens_flow(
                     weight,
                     parent_angles,
@@ -2299,7 +2488,12 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     residual_permutations, residual_diagnostics = (
                         fast_muon_matched_permutations(
                             after_parent,
-                            residual_update,
+                            (
+                                residual_update
+                                if input_metric is None
+                                else residual_update
+                                * input_metric.unsqueeze(0)
+                            ),
                             stages=module.residual_stages,
                             neighbors=module.neighbors,
                             seed=(
@@ -2322,11 +2516,19 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             dim=1,
                         )
                     )
-                    residual_angles = diagonal_metric_angles(
-                        after_parent,
-                        residual_update,
-                        module.residual_selected_permutations,
-                    )
+                    if input_metric is None:
+                        residual_angles = diagonal_metric_angles(
+                            after_parent,
+                            residual_update,
+                            module.residual_selected_permutations,
+                        )
+                    else:
+                        residual_angles = diagonal_input_metric_angles(
+                            after_parent,
+                            residual_update,
+                            module.residual_selected_permutations,
+                            input_metric,
+                        )
                     rotated = apply_givens_flow(
                         after_parent,
                         residual_angles,
@@ -2516,6 +2718,30 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     corrected_update.float() - update.float()
                 )
                 corrected_residual_energy = compression_residual.square().sum()
+                activation_weighted_requested_recovery = None
+                activation_weighted_corrected_recovery = None
+                if input_metric is not None:
+                    metric_row = input_metric.unsqueeze(0)
+                    weighted_requested_energy = (
+                        requested_update.float().square() * metric_row
+                    ).sum().clamp_min(1e-30)
+                    weighted_corrected_energy = (
+                        corrected_update.float().square() * metric_row
+                    ).sum().clamp_min(1e-30)
+                    activation_weighted_requested_recovery = float(
+                        1.0
+                        - (
+                            requested_residual.square() * metric_row
+                        ).sum()
+                        / weighted_requested_energy
+                    )
+                    activation_weighted_corrected_recovery = float(
+                        1.0
+                        - (
+                            compression_residual.square() * metric_row
+                        ).sum()
+                        / weighted_corrected_energy
+                    )
                 feedback_output_fro_pre_cap = compression_residual.norm()
                 nominal_step_fro = abs(lr) * math.sqrt(weight.shape[0])
                 feedback_output_nominal_steps_pre_cap = (
@@ -2603,6 +2829,46 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "hybrid_output": module.hybrid_output,
                         "hybrid_directed_incoming": (
                             module.hybrid_directed_incoming
+                        ),
+                        "activation_energy_metric": (
+                            input_metric is not None
+                        ),
+                        "activation_energy_metric_samples": (
+                            activation_metric_sample_count
+                        ),
+                        "activation_energy_metric_updates": (
+                            0
+                            if input_metric is None
+                            else int(module.activation_energy_updates)
+                        ),
+                        "activation_energy_metric_min": (
+                            None
+                            if input_metric is None
+                            else float(input_metric.min())
+                        ),
+                        "activation_energy_metric_max": (
+                            None
+                            if input_metric is None
+                            else float(input_metric.max())
+                        ),
+                        "activation_energy_metric_mean": (
+                            None
+                            if input_metric is None
+                            else float(input_metric.mean())
+                        ),
+                        "activation_energy_metric_condition": (
+                            None
+                            if input_metric is None
+                            else float(
+                                input_metric.max()
+                                / input_metric.min().clamp_min(1e-30)
+                            )
+                        ),
+                        "activation_weighted_requested_update_recovery": (
+                            activation_weighted_requested_recovery
+                        ),
+                        "activation_weighted_corrected_target_recovery": (
+                            activation_weighted_corrected_recovery
                         ),
                         "requested_update_recovery": float(
                             1.0

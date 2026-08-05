@@ -176,6 +176,11 @@ class GPTConfig:
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps: float | None = None
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay_after: float | None = None
     block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction: float | None = None
+    block_fht_mlp_cproj_activation_energy_metric: bool = False
+    block_fht_mlp_cproj_activation_energy_metric_decay: float = 0.95
+    block_fht_mlp_cproj_activation_energy_metric_minimum: float = 0.25
+    block_fht_mlp_cproj_activation_energy_metric_maximum: float = 4.0
+    block_fht_mlp_cproj_activation_energy_metric_epsilon: float = 1e-6
     block_fht_mlp_cproj_hybrid_output: bool = False
     block_fht_mlp_cproj_hybrid_task_stages: int = 16
     block_fht_mlp_cproj_hybrid_directed_incoming: int = 8
@@ -2059,6 +2064,25 @@ class MLP(nn.Module):
                 hybrid_functional_sample_cap=int(
                     config.block_fht_mlp_cproj_hybrid_sample_cap
                 ),
+                activation_energy_metric=bool(
+                    config.block_fht_mlp_cproj_activation_energy_metric
+                ),
+                activation_energy_metric_decay=float(
+                    config
+                    .block_fht_mlp_cproj_activation_energy_metric_decay
+                ),
+                activation_energy_metric_minimum=float(
+                    config
+                    .block_fht_mlp_cproj_activation_energy_metric_minimum
+                ),
+                activation_energy_metric_maximum=float(
+                    config
+                    .block_fht_mlp_cproj_activation_energy_metric_maximum
+                ),
+                activation_energy_metric_epsilon=float(
+                    config
+                    .block_fht_mlp_cproj_activation_energy_metric_epsilon
+                ),
             )
         elif grouped_proj_targets:
             target = grouped_proj_targets[0]
@@ -3491,6 +3515,11 @@ class MLP(nn.Module):
         )
         if record_hybrid_output_context is not None:
             record_hybrid_output_context(activated)
+        record_activation_energy_context = getattr(
+            self.c_proj, "record_activation_energy_context", None
+        )
+        if record_activation_energy_context is not None:
+            record_activation_energy_context(activated)
         out = self._charted_cproj(activated)
         if out is None:
             out = self._fused_cached_cproj_lowrank(activated)

@@ -15,6 +15,7 @@ from examples.nanogpt.muon_matched_givens import (
     _fit_functional_shear_recipe,
     _fit_weight_shear_recipe,
     apply_givens_flow,
+    diagonal_input_metric_angles,
     diagonal_metric_angles,
     mix_shear_recipes,
     random_unique_matchings,
@@ -42,6 +43,30 @@ def make_module(*, layer_id: int = 0) -> MuonMatchedGivensLinear:
         matching_seed=23,
         weight_std=0.02,
         layer_id=layer_id,
+    )
+
+
+def make_activation_metric_module(
+    *, layer_id: int = 0
+) -> MuonMatchedGivensLinear:
+    torch.manual_seed(17)
+    return MuonMatchedGivensLinear(
+        8,
+        4,
+        bias=False,
+        stages=1,
+        residual_stages=0,
+        neighbors=2,
+        refresh_interval=3,
+        fast_fresh_matching=False,
+        matching_seed=23,
+        weight_std=0.02,
+        layer_id=layer_id,
+        activation_energy_metric=True,
+        activation_energy_metric_decay=0.95,
+        activation_energy_metric_minimum=0.25,
+        activation_energy_metric_maximum=4.0,
+        activation_energy_metric_epsilon=1e-6,
     )
 
 
@@ -85,6 +110,130 @@ def test_diagonal_metric_function_recovers_small_in_chart_update() -> None:
     ).square().sum() / requested.square().sum()
     assert float(cosine) > 0.999999
     assert float(recovery) > 0.99999
+
+
+def test_diagonal_input_metric_recovers_small_in_chart_update() -> None:
+    torch.manual_seed(131)
+    source = torch.randn(5, 8)
+    permutations = torch.arange(8).view(1, 8)
+    requested = torch.zeros_like(source)
+    angle = 0.001
+    requested[:, 0] = -angle * source[:, 1]
+    requested[:, 1] = angle * source[:, 0]
+    metric = torch.tensor([0.25, 4.0, 0.5, 2.0, 1.0, 3.0, 0.75, 1.5])
+    angles = diagonal_input_metric_angles(
+        source, requested, permutations, metric
+    )
+    assert torch.allclose(angles[0, 0], torch.tensor(angle), atol=1e-7)
+    predicted = apply_givens_flow(source, angles, permutations) - source
+    weighted_target = requested.square() * metric
+    weighted_error = (requested - predicted).square() * metric
+    recovery = 1.0 - weighted_error.sum() / weighted_target.sum()
+    assert float(recovery) > 0.99999
+
+
+def test_activation_energy_metric_aggregates_training_microbatches() -> None:
+    module = make_activation_metric_module()
+    first = torch.tensor(
+        [[[1.0, 2.0, 1.0, 2.0, 1.0, 2.0, 1.0, 2.0]]]
+    )
+    second = torch.tensor(
+        [[[3.0, 1.0, 3.0, 1.0, 3.0, 1.0, 3.0, 1.0]]]
+    )
+    module.record_activation_energy_context(first)
+    module.record_activation_energy_context(second)
+    metric, count = module.consume_activation_energy_metric()
+    assert count == 2
+    assert metric is not None
+    observed = (first.square().sum((0, 1)) + second.square().sum((0, 1))) / 2
+    expected = (observed / (observed.mean() + 1e-6)).clamp(0.25, 4.0)
+    assert torch.allclose(module.activation_energy_ema, observed)
+    assert torch.allclose(metric, expected)
+    assert int(module.activation_energy_updates) == 1
+    assert module._activation_energy_sum is None
+    assert module._activation_energy_count == 0
+
+    module.eval()
+    module.record_activation_energy_context(torch.full((2, 8), 100.0))
+    assert module._activation_energy_sum is None
+    assert module._activation_energy_count == 0
+
+
+def test_activation_metric_state_and_optimizer_round_trip_exactly() -> None:
+    module = make_activation_metric_module(layer_id=3)
+    optimizer = MuonMatchedGivens(
+        [module],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    module.record_activation_energy_context(torch.randn(2, 3, 8))
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()
+    assert diagnostics[0]["activation_energy_metric"] is True
+    assert diagnostics[0]["activation_energy_metric_samples"] == 6
+    assert 0.25 <= diagnostics[0]["activation_energy_metric_min"]
+    assert diagnostics[0]["activation_energy_metric_max"] <= 4.0
+    assert diagnostics[0]["activation_energy_metric_condition"] <= 16.0
+    assert math.isfinite(
+        diagnostics[0]["activation_weighted_corrected_target_recovery"]
+    )
+
+    module_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = make_activation_metric_module(layer_id=3)
+    restored.load_state_dict(module_state)
+    restored_optimizer = MuonMatchedGivens(
+        [restored],
+        lr=0.001,
+        momentum=0.95,
+        weight_decay=0.1,
+        ns_steps=2,
+    )
+    restored_optimizer.load_state_dict(optimizer_state)
+    for key, value in module.state_dict().items():
+        assert torch.equal(value, restored.state_dict()[key])
+    assert torch.equal(
+        optimizer.state[module.weight]["momentum_buffer"],
+        restored_optimizer.state[restored.weight]["momentum_buffer"],
+    )
+
+
+def test_activation_metric_default_off_preserves_state_and_update() -> None:
+    control = make_module()
+    torch.manual_seed(17)
+    explicit = MuonMatchedGivensLinear(
+        8,
+        4,
+        bias=False,
+        stages=1,
+        residual_stages=0,
+        neighbors=2,
+        refresh_interval=3,
+        fast_fresh_matching=False,
+        matching_seed=23,
+        weight_std=0.02,
+        activation_energy_metric=False,
+    )
+    assert set(control.state_dict()) == set(explicit.state_dict())
+    gradient = torch.randn_like(control.weight)
+    optimizers = [
+        MuonMatchedGivens(
+            [module],
+            lr=0.001,
+            momentum=0.95,
+            weight_decay=0.1,
+            ns_steps=2,
+        )
+        for module in (control, explicit)
+    ]
+    control.weight.grad = gradient.clone()
+    explicit.weight.grad = gradient.clone()
+    optimizers[0].step()
+    optimizers[1].step()
+    assert torch.equal(control.weight, explicit.weight)
 
 
 def test_random_unique_matchings_are_deterministic_and_edge_disjoint() -> None:
@@ -832,6 +981,39 @@ def test_gpt_wires_residual_stages_into_coordinate_stats() -> None:
     assert all(module.coordinate_count == 32 for module in modules)
     stats = model.block_fht_stats()
     assert stats["latent"] == 64
+
+
+def test_gpt_wires_activation_energy_metric_and_records_postgelu() -> None:
+    torch.manual_seed(409)
+    config = make_gpt_config()
+    config.block_fht_mlp_cproj_activation_energy_metric = True
+    model = GPT(config)
+    modules = [
+        module
+        for module in model.modules()
+        if isinstance(module, MuonMatchedGivensLinear)
+    ]
+    assert len(modules) == 2
+    assert all(module.activation_energy_metric for module in modules)
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+    )
+    tokens = torch.randint(0, config.vocab_size, (2, config.block_size))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None
+    loss.backward()
+    assert all(module._activation_energy_count > 0 for module in modules)
+    optimizer.step()
+    assert all(int(module.activation_energy_updates) == 1 for module in modules)
+    assert all(module._activation_energy_sum is None for module in modules)
+    assert all(
+        torch.isfinite(module.activation_energy_ema).all()
+        for module in modules
+    )
 
 
 def test_gpt_backward_step_and_full_checkpoint_round_trip() -> None:
