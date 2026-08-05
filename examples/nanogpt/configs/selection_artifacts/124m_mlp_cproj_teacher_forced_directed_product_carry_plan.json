@@ -1,0 +1,129 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_teacher_forced_directed_product_carry_plan_v1",
+  "status": "registered_before_implementation_or_execution",
+  "recorded_at": "2026-08-05",
+  "scientific_question": "After the accepted hidden64+24 right-side c_proj matcher and constant full compression-error carry, can an equal-budget task-conditioned non-orthogonal output product represent the missing row-Gram-changing trajectory more faithfully than the rejected orthogonal output32 pass?",
+  "source_commit_before_implementation": "49fb48b41e10050a904a5006e25036e0ec1b8a89",
+  "evidence_before_registration": {
+    "right_only_terminal_endpoint_recovery": 0.8460791090646863,
+    "right_only_terminal_row_gram_recovery": -0.10108335542246571,
+    "orthogonal_output32_terminal_endpoint_recovery": 0.935307753786933,
+    "orthogonal_output32_terminal_row_gram_recovery": 0.5086685254601849,
+    "orthogonal_output32_terminal_feedback_fro": 0.8474525809288025,
+    "orthogonal_output32_fixed_eval_gain_over_right_only_ce": 0.02462864,
+    "orthogonal_output32_remaining_fixed_eval_gap_to_dense_ce": 0.00655174,
+    "causal_output32_minus_causal_right_only_ce": 0.00110149,
+    "causal_hybrid_output_minus_accepted_parent_ce": 0.08038616,
+    "nominal_cap192_improvement_over_full_carry_ce": 0.0005364418029785156,
+    "interpretation": "The carried residual contains useful output-side motion that a right-orthogonal chart cannot express. Orthogonal output transport is teacher-forced useful but causally drifts, scalar carry control is exhausted, and a static linear hybrid is not portable. The remaining smallest distinct factorization is a moving non-orthogonal output action fitted directly to the current corrected Muon residual, with no learned persistent basis."
+  },
+  "identity": {
+    "trajectory_run": "pro6_mai_v3_124m_dense_cproj_stepwise_trajectory_replay_0p5tpp_lr24e4",
+    "trajectory_run_identity_sha256": "42f020d3014cb5c0943afb59c8129e4904f400c96b208a170da5cbce1d8d14a5",
+    "trajectory_checkpoint_sha256": "4b3462d248fbee947f511b0d52bd7b8142ba40dfd7206cdcd094c28f83a3a608",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "bilateral_full_carry_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_teacher_forced_bilateral_full_carry_result.json",
+    "bilateral_full_carry_result_sha256": "6682e36cf11b9de40dec673e8ad29e19b1a26f52c700c4ef7760a7d14e930051",
+    "bilateral_fixed_eval_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_fixed_eval_pro6_replay_result.json",
+    "bilateral_fixed_eval_result_sha256": "c7a181dd41405da424e215806ebe92d75b939700bf93d7d964b850736aa11a35",
+    "hybrid_causal_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_hybrid_output_0p5tpp_training_result.json",
+    "hybrid_causal_result_sha256": "28e203a6baaf0464b391d6670dd4604a25bdea73ca2b682afb297a462cbeec87",
+    "nominal_cap_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_nominal_cap192_result.json",
+    "nominal_cap_result_sha256": "69d73fa8188b5e16ae4a0bac487c9791fe56e1925dc422aeb03c56c04290d6aa"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "teacher_forced_dense_updates": true,
+    "layers": [0, 3, 6, 9, 11],
+    "phase_boundaries": [0, 60, 120, 180, 238],
+    "feedback_decay": 1.0,
+    "hidden_parent": {
+      "stages": [64, 24],
+      "neighbors": 64,
+      "coordinates_per_layer": 135168
+    },
+    "output_coordinate_budget_per_layer": 12288,
+    "arms_in_smallest_pass_order": [
+      {
+        "name": "hidden88_full_carry",
+        "kind": "right_only_control",
+        "output_coordinates_per_layer": 0
+      },
+      {
+        "name": "hidden88_output32_full_carry",
+        "kind": "orthogonal_output_control",
+        "stages": [32],
+        "output_coordinates_per_layer": 12288
+      },
+      {
+        "name": "hidden88_directed16_full_carry",
+        "kind": "one_stage_general_output_action",
+        "incoming_per_target_by_stage": [16],
+        "output_coordinates_per_layer": 12288
+      },
+      {
+        "name": "hidden88_directed8x2_full_carry",
+        "kind": "two_stage_general_output_product",
+        "incoming_per_target_by_stage": [8, 8],
+        "output_coordinates_per_layer": 12288
+      }
+    ],
+    "directed_fit": {
+      "support_score": "single-edge Frobenius residual reduction from the exact current corrected Muon residual after hidden64+24",
+      "coefficient_fit": "per-target joint ridge least squares on selected current output rows",
+      "relative_ridge": 1e-6,
+      "diagonal_edges_allowed": true,
+      "persistent_basis": false,
+      "persistent_support": false,
+      "validation_or_task_gradient_used_for_selection": false,
+      "composition": "each stage is fit to the residual left by the preceding stage; the complete output action is uniformly scaled to the orthogonal-output32 update energy",
+      "minimum_effective_transform_singular_value": 0.95
+    },
+    "not_tested": [
+      "learned dense basis",
+      "LoRA adapter",
+      "residual HyperConnection",
+      "scalar feedback tuning",
+      "more right-side stages",
+      "wider right-side neighborhoods",
+      "language-model training"
+    ]
+  },
+  "decision_rule": {
+    "common_requirements": [
+      "all snapshots, identities, solves, updates, and metrics are finite",
+      "both directed candidates use exactly 12288 ephemeral output coordinates per layer",
+      "the complete candidate output update never exceeds the orthogonal-output32 update energy",
+      "the effective per-step output transform has minimum singular value at least 0.95"
+    ],
+    "candidate_pass_requirements": {
+      "terminal_endpoint_recovery_minimum": 0.940307753786933,
+      "terminal_row_gram_recovery_minimum": 0.5586685254601849,
+      "terminal_feedback_ratio_to_output32_maximum": 0.95,
+      "terminal_layers_beating_output32_minimum": 4,
+      "mean_requested_update_recovery_no_worse_than_output32": true,
+      "endpoint_recovery_no_worse_than_output32_at_every_score_step": true
+    },
+    "selection": "select the first passing arm in arms_in_smallest_pass_order",
+    "pass": "authorize a separately preregistered fixed-eval endpoint relevance oracle; do not authorize production training",
+    "fail": "close equal-budget general output products fitted only to the corrected Muon residual and return to a different c_proj generator family",
+    "automatic_rerun_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "implementation_and_focused_tests_required_before_execution": true
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "run_fixed_eval_endpoint_oracle_after_a_pass": false,
+    "run_language_model_training": false
+  }
+}
