@@ -57,6 +57,7 @@
         {"step": 9489, "validation_ce": 3.3191}
       ],
       "parent_dense_token_equivalent_penalty": null,
+      "practical_equivalence_nll": 0.02,
       "recipe_resolution_dependency": "clean 124M/5TPP QK+V result plus certified c_proj and V/O offline rejections",
       "recipe_resolution_stage": "attention_qkv_only_confirmation_124m_20tpp"
     },
