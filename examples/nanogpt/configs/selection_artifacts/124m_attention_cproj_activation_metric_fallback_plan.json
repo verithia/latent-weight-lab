@@ -1,0 +1,81 @@
+{
+  "schema_version": "mai_124m_attention_cproj_activation_metric_fallback_plan_v1",
+  "recorded_at": "2026-08-05",
+  "status": "conditional_and_launch_blocked",
+  "activation_condition": "Run only if the immutable ratio-0.10 capacity analyzer returns REJECT_CPROJ_RATIO10_TRANSFER.",
+  "scientific_question": "If tenfold fixed-chart capacity does not improve c_proj, can the unchanged BlockFHT tangent express the useful c_proj update in the activation-weighted residual-stream metric even though it is unaligned in Euclidean weight space?",
+  "causal_basis": {
+    "capacity_plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_factorial_cproj_capacity_plan.json",
+      "sha256": "b8f622ce94eff757bb9563d6d6e8521839021445f5b6cdf48fb3ffaa3fd6a14e"
+    },
+    "activation_manifold_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_activation_manifold_result.json",
+      "sha256": "9404751379b1fd27fcfaa58f2b8ad8ed69c42fa11cd075bb8c55a37aa46e921d",
+      "fact": "The V/O residual contribution is more curved and less PC1-concentrated than the value-output kernel, so the next metric must be data dependent."
+    },
+    "endpoint_attribution_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_endpoint_attribution_result.json",
+      "sha256": "b542ad8fb14bdebdd6b7fb64cc5939d0cbed56196ea5b203469879eb9136330c",
+      "fact": "Independent dense/generated endpoint swaps are strongly co-adapted and cannot select a trainable component."
+    },
+    "projected_muon_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_blockfht_projected_muon_gate_result.json",
+      "sha256": "06510034f58df5fd4ab1e32488464bf292084c265a7b35623d317ab46350ad1a",
+      "fact": "Polarizing after Euclidean tangent projection retains only 8.68 percent of the tangent oracle; projection and Muon do not commute."
+    },
+    "fixed_right_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cayley_basis_drift_fixed_right_result.json",
+      "sha256": "455ecd1fabace11119685580a529903759fc9a5a7ef06fce938fb917b7069e9d",
+      "fact": "A nonlearned fixed-right family recovers only about 1.2 percent for c_proj; a learned dense basis is excluded as LoRA-like."
+    }
+  },
+  "source_state": {
+    "checkpoint": "terminal checkpoint of pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_lr24e4",
+    "required_config_sha256": "f370636fa973c0d351cbb75230945889299df34c9a5529e06e5ea4cca2898394",
+    "required_dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "required_fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "layers": [0, 3, 6, 9, 11],
+    "fixed_validation_inputs": true
+  },
+  "offline_diagnostic": {
+    "runtime_policy": "zero-update diagnostic expected under five minutes; foreground-poll directly and do not attach a watchdog",
+    "per_cell_measurement": [
+      "capture c_proj input activations H and output gradients R on fixed validation batches",
+      "form the transient dense current-gradient target G = H^T R without retaining a dense optimizer state",
+      "form the dense current-gradient Muon polar target U",
+      "solve the exact Euclidean BlockFHT tangent projection for the registered ratio-0.01 and ratio-0.10 charts",
+      "solve the activation-weighted projection minimizing ||H (J delta - U)||_F with converged matrix-free CG",
+      "compare with equal-coordinate seeded Haar/tight-frame controls"
+    ],
+    "primary_metrics": [
+      "activation-output target energy recovery ||H J delta||_F^2 / ||H U||_F^2",
+      "activation-output cosine with H U",
+      "first-order task-gradient descent alignment",
+      "activation-weighted over Euclidean-projection recovery multiplier",
+      "activation-weighted over equal-coordinate random-control multiplier"
+    ],
+    "numerical_guards": {
+      "maximum_relative_normal_residual": 1e-06,
+      "all_metrics_finite": true,
+      "minimum_valid_cells": 20,
+      "require_positive_alignment_in_each_sampled_layer": true
+    }
+  },
+  "preregistered_gate": {
+    "minimum_ratio10_activation_output_recovery": 0.20,
+    "minimum_multiplier_over_ratio10_euclidean_projection": 1.25,
+    "minimum_multiplier_over_equal_coordinate_random_control": 1.50,
+    "minimum_layer_support": "all five sampled layers have positive activation-output cosine",
+    "pass_action": "Implement one activation-metric latent trust-region/preconditioned update on the unchanged fixed BlockFHT c_proj chart; require a fresh exact-config MFU gate before any training.",
+    "fail_action": "Close fixed random c_proj chart expansion and Euclidean optimizer variants. Retain QK+V with dense c_proj as the honest compressed-attention fallback and study a jointly generated V/O functional map only through another preregistered offline gate."
+  },
+  "exclusions": [
+    "learned dense basis",
+    "LoRA-like additive residual",
+    "retained dense c_proj gradient or momentum",
+    "post-hoc latent-ratio sweep",
+    "another static radial-gain, Cayley-rank, atlas, ProductFHT, or sparse-Givens training run",
+    "training before the offline gate passes"
+  ]
+}
