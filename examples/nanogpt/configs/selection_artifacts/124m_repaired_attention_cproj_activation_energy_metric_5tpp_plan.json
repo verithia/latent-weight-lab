@@ -1,0 +1,122 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_activation_energy_metric_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_activation_energy_metric_5tpp_preregistration",
+  "recorded_at": "2026-08-06",
+  "status": "immutable_preimplementation",
+  "scientific_question": "Can the existing hidden64+24 c_proj Givens budget close its residual loss gap when projection is measured in a bounded diagonal approximation to the post-GELU functional metric rather than unweighted Frobenius geometry?",
+  "causal_evidence": {
+    "cproj_only_terminal_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_result.json",
+      "sha256": "091fd6a9475539cfe06b5aba51ec2693b53638e55565d658afbe462ec01d21ef",
+      "fact": "c_proj-only terminal CE 3.6562013626 is within 0.00404167 of joint full-MLP CE but 0.02840136 behind repaired attention; c_fc is not the primary incremental bottleneck."
+    },
+    "repaired_attention_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_pro6_recovery_result.json",
+      "sha256": "bcbd5dc8dbc4007a8204d8479c56b2fe79074cfd928bb2e7f11c6c2d2a0d5c5c",
+      "terminal_validation_ce": 3.6278
+    },
+    "frozen_control_config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json",
+      "sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20"
+    },
+    "excluded_prior_output_metric": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_result.json",
+      "sha256": "1dbbec0196683e0aa2506a8af4701ce44e4c38139b801997eb16934b78f394a5",
+      "fact": "The full correlated activation metric on output-side coordinates amplified angles and produced roughly 33x held-out residual-stream error; it must not be repeated."
+    }
+  },
+  "single_factor_change": {
+    "enabled_flag": "block_fht_mlp_cproj_activation_energy_metric",
+    "unchanged": [
+      "repaired attention structure and optimizer",
+      "dense Muon c_fc",
+      "c_proj materialized weight and hidden-side 64 parent plus 24 residual stages",
+      "fresh matching every update with 64 neighbors",
+      "c_proj error feedback decay 0.5",
+      "main learning rate, schedule, data order, evaluation windows, and seeds",
+      "zero additional trainable parameters and zero inference-time transforms"
+    ],
+    "changed": "Only c_proj hidden-side pair selection and angle fitting use the registered bounded diagonal post-GELU activation-energy metric."
+  },
+  "metric_definition": {
+    "observation": "For each layer and optimizer update, accumulate the per-channel sum of squared post-GELU c_proj inputs over all training microbatches; evaluation activations are excluded.",
+    "ema_decay": 0.95,
+    "initialization": "The first optimizer update initializes the persistent EMA exactly to that update's aggregate second moment; later updates use decay 0.95.",
+    "normalization": "Divide the EMA by its channel mean, clamp to [0.25,4.0], and add no learned scale.",
+    "minimum_weight": 0.25,
+    "maximum_weight": 4.0,
+    "epsilon": 1e-06,
+    "weighted_pair_formula": "For source columns a,b, requested columns u,v, and metric weights q_a,q_b, theta=(q_b<a,v>-q_a<b,u>)/(q_a||b||^2+q_b||a||^2).",
+    "weighted_selector_formula": "Pair scores use abs(q_b<a,v>-q_a<b,u>) before the unchanged deterministic top-neighbor edge coloring.",
+    "passes": "Use one fixed metric vector for both parent and fresh residual passes of an optimizer update; apply the fitted rotations to the unscaled materialized weight.",
+    "state": "EMA, initialization flag, and update count are persistent exact-resume buffers; transient microbatch sums are consumed and cleared at optimizer.step()."
+  },
+  "safety_against_prior_failure": {
+    "not_output_side": true,
+    "not_full_activation_covariance": true,
+    "bounded_metric_condition_number": 16.0,
+    "no_independent_dense_activation_fit": true,
+    "required_diagnostics": [
+      "metric minimum, maximum, mean, and condition number",
+      "activation-weighted requested-update recovery",
+      "activation-weighted corrected-target recovery",
+      "angle RMS and maximum",
+      "native matching path and source hash"
+    ]
+  },
+  "implementation_gate": {
+    "requirements": [
+      "closed-form weighted-angle recovery test",
+      "weighted selector score test",
+      "default-off state and update bitwise equivalence",
+      "training-only microbatch accumulation test",
+      "EMA/clamp test",
+      "state_dict and optimizer exact-resume round trip",
+      "config validation and model wiring tests"
+    ],
+    "production_config_must_be_hash_pinned": true,
+    "source_hashes_must_be_recorded": true
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "protocol": "Foreground exact-scientific-config run with one warmup plus eight timed real training updates; poll directly and use no watchdog.",
+    "minimum_mfu_fraction": 0.2,
+    "require_native_block_fht_extension": true,
+    "require_all_losses_finite": true,
+    "require_activation_metric_active_and_finite": true
+  },
+  "scientific_run": {
+    "model": "124M",
+    "token_budget_tpp": 5.0,
+    "updates": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "monitoring": {
+      "watchdog_required": true,
+      "milestones": [20, 50, 100],
+      "heartbeat_minutes": 90,
+      "progress_resets_heartbeat": true,
+      "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+      "callback_mention": "@Codex",
+      "terminal_delivery_once": true
+    }
+  },
+  "decision_rule": {
+    "promote_terminal_validation_ce_maximum": 3.6478,
+    "nonbinding_near_parent_validation_ce_maximum": 3.6378,
+    "control_terminal_validation_ce_exact": 3.6562013626098633,
+    "repaired_attention_terminal_validation_ce": 3.6278,
+    "promote_action": "If terminal CE is at most 3.6478 with finite metric diagnostics and no material performance regression, classify the functional metric as a causal c_proj improvement and preregister a smallest-rung confirmation or next closure step.",
+    "insufficient_action": "If terminal CE is above 3.6478, do not tune metric decay or bounds post hoc and do not launch another language-model arm from this family; seal the result and return to a structurally different c_proj representation.",
+    "threshold_changed_after_measurement": false
+  },
+  "authorization": {
+    "implementation_and_tests": true,
+    "one_exact_config_mfu_gate": true,
+    "one_scientific_5tpp_run_after_gate": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false,
+    "post_hoc_metric_sweep": false
+  }
+}
