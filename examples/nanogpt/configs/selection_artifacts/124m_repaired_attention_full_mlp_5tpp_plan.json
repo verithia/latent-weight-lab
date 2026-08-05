@@ -1,0 +1,156 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_5tpp_plan_v1",
+  "created_at": "2026-08-05",
+  "question": "Does the accepted temporal-error full-MLP mechanism remain within +0.02 CE of the repaired 124M full-attention parent when extended from 0.5TPP to 5TPP?",
+  "rationale": {
+    "causal_change": "Preserve the repaired full-attention parent and all train/eval invariants; add c_fc directed-product error feedback decay 1.0 and c_proj fresh hidden64+24 matched-Givens error feedback decay 0.5.",
+    "why_now": "At 350M, c_proj decay0.5 beat memoryless and decay1 and adding c_fc was nearly neutral; the composition transferred to 690M. Token horizon on the smallest model is unresolved.",
+    "excluded": [
+      "closed directed-support/layer0 general-action family",
+      "closed diagonal/gain and fixed-basis families",
+      "learned basis or LoRA-like adapter",
+      "activation or residual-link modification",
+      "persistent added coordinates"
+    ]
+  },
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4.json",
+    "config_sha256": "d9a7eabe958784e832d70b73242a7d24841817a801075f47bfe257b47474e1b5",
+    "attention_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json",
+    "attention_parent_config_sha256": "d605621e54f81e9336439012ebaea470812bfd0b52de05a140ee732262ad3fd7",
+    "attention_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pro6_recovery_result.json",
+    "attention_parent_result_sha256": "bcbd5dc8dbc4007a8204d8479c56b2fe79074cfd928bb2e7f11c6c2d2a0d5c5c",
+    "smallest_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_error_feedback_0p5tpp_result.json",
+    "smallest_full_mlp_result_sha256": "bec53473035d0128df566be4c20bde563167a6fd4296adf9b58618e3698d6b83",
+    "full_mlp_350m_result": "examples/nanogpt/configs/selection_artifacts/350m_full_mlp_cfc_on_bounded_cproj_0p5tpp_result.json",
+    "full_mlp_350m_result_sha256": "40cf563a9cdc7395b37957c70956613b4b148d0188ba3bcbd5ae5ac6d506a182",
+    "full_mlp_690m_result": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_scaled_transfer_0p5tpp_result.json",
+    "full_mlp_690m_result_sha256": "d94df6b805a3a45dbd40b91038fe047225c8ceadf8c0d8ad2b4c3a111c2115b3",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "implementation_commit": "27402f6665d5bebef2d1975d848a0c15cd40c966"
+  },
+  "frozen_controls": {
+    "repaired_attention_terminal_validation_ce": 3.6278,
+    "dense_terminal_validation_ce": 3.5401,
+    "repaired_attention_dense_gap_ce": 0.0877,
+    "fixed_checkpoints": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "repaired_attention_fixed_validation_ce": [
+      4.2151,
+      3.8411,
+      3.6907,
+      3.6278
+    ],
+    "dense_fixed_validation_ce": [
+      4.1739,
+      3.7622,
+      3.6038,
+      3.5401
+    ],
+    "prior_124m_0p5tpp_full_mlp_validation_ce": 5.529316425323486,
+    "prior_124m_0p5tpp_attention_validation_ce": 5.4918,
+    "full_mlp_350m_attention_increment_ce": 0.062256115722656,
+    "full_mlp_690m_attention_increment_ce": 0.0585775157928465
+  },
+  "candidate": {
+    "cfc_schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "cfc_error_feedback_decay": 1,
+    "cproj_stages": 64,
+    "cproj_residual_stages": 24,
+    "cproj_error_feedback_decay": 0.5,
+    "additional_trainable_parameters": 0,
+    "additional_dense_optimizer_state_bytes": 226492416,
+    "additional_materialized_inference_parameters": 0,
+    "additional_materialized_inference_flops": 0
+  },
+  "decision_rule": {
+    "primary_metric": "fixed-window terminal step-2373 validation cross entropy",
+    "pass_validation_ce_maximum": 3.6478,
+    "pass_definition": "stable terminal CE at most +0.0200 over repaired attention",
+    "nonbinding_parity_diagnostic_validation_ce_maximum": 3.6378,
+    "nonbinding_parity_definition": "at most +0.0100 over repaired attention",
+    "required_reporting": [
+      "four fixed-checkpoint train/validation losses",
+      "incremental attention gap",
+      "total dense gap",
+      "empirical dense token/compute equivalence",
+      "MFU, wall time, peak memory, optimizer state and materialized inference cost"
+    ],
+    "threshold_changes_after_measurement": false,
+    "no_automatic_rerun": true,
+    "no_larger_rung_without_new_preregistration": true
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repo": "/tmp/latent-weight-lab-qkv20-gate-test",
+    "workspace": "/mnt/ssd-data/orj/MappingNetworks",
+    "python": "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "exact_mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "training_launcher_command": [
+      "env",
+      "PYTHON_BIN=/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4.json",
+      "0",
+      "pro6_mai_v3_124m_repairedattn_fullmlp_5tpp",
+      "/mnt/ssd-data/orj/MappingNetworks"
+    ],
+    "monitoring": {
+      "mfu": "foreground polling without watchdog",
+      "scientific_run": "one idempotent aggregate watchdog",
+      "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+      "callback_mention": "@Codex",
+      "milestones": [
+        20,
+        50,
+        100
+      ],
+      "heartbeat_minutes": 90,
+      "progress_resets_heartbeat": true,
+      "terminal_callback_once": true,
+      "callback_action_prompt": "verify state and artifacts against the active note, inspect loss/GPU health, update durable state, and continue autonomously"
+    }
+  },
+  "authorization": {
+    "exact_config_mfu_preflight": true,
+    "scientific_run_only_after_mfu_at_least_0p20": true,
+    "automatic_rerun": false,
+    "larger_rung": false
+  },
+  "status": "registered_before_exact_config_mfu_and_training"
+}

@@ -1,0 +1,143 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_layer0_general_output_capacity_result_v1",
+  "recorded_at": "2026-08-05",
+  "classification": "REJECT_LAYER0_GENERAL_OUTPUT_ACTION",
+  "identity": {
+    "host": "PRO6",
+    "execution_commit": "27402f6665d5bebef2d1975d848a0c15cd40c966",
+    "entrypoint": "examples/nanogpt/analyze_mlp_cproj_layer0_general_output_capacity.py",
+    "entrypoint_sha256": "e2f512bb3728656bcda1face03e7f27290b9a720aa856ee27392864d46f21a30",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_layer0_general_output_capacity_plan.json",
+    "plan_sha256": "d4bc20f5d5fd6889b9865a5b38b7fc25c3786e1e1d49a28ade863bd452847f9d",
+    "checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "terminal_states_sha256": "394931dfda0a2b3bc00f56112f4083a00599fef124e9dbd58cc4266e7c03f096",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "selected_layer": 0,
+    "validation_seeds": [20260903, 20260904],
+    "eval_iters_per_seed": 32,
+    "eval_batch_size": 16,
+    "block_size": 1024,
+    "duration_seconds": 13.258799076080322,
+    "execution_mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false
+  },
+  "fixed_checkpoint_rows": [
+    {
+      "variant": "output32_all",
+      "validation_ce_by_seed": {
+        "20260903": 5.478326797485352,
+        "20260904": 5.485652446746826
+      }
+    },
+    {
+      "variant": "directed16_layer0",
+      "validation_ce_by_seed": {
+        "20260903": 5.476876735687256,
+        "20260904": 5.484158992767334
+      }
+    },
+    {
+      "variant": "dense_layer0",
+      "validation_ce_by_seed": {
+        "20260903": 5.474132537841797,
+        "20260904": 5.4814910888671875
+      }
+    },
+    {
+      "variant": "general_skew_layer0",
+      "validation_ce_by_seed": {
+        "20260903": 5.478318214416504,
+        "20260904": 5.485666275024414
+      }
+    },
+    {
+      "variant": "general_symmetric_layer0",
+      "validation_ce_by_seed": {
+        "20260903": 5.475715160369873,
+        "20260904": 5.483027935028076
+      }
+    },
+    {
+      "variant": "general_full_layer0",
+      "validation_ce_by_seed": {
+        "20260903": 5.475718021392822,
+        "20260904": 5.4830145835876465
+      }
+    }
+  ],
+  "action_diagnostics": {
+    "skew": {
+      "action_fro": 0.14611225047524048,
+      "delta_energy": 0.0009100621519324961,
+      "endpoint_recovery": -0.003111778217609107,
+      "minimum_singular_value_i_plus_action": 1.00014328956604,
+      "trust_scale": 1.0
+    },
+    "symmetric": {
+      "action_fro": 0.9890890624833948,
+      "delta_energy": 0.03764604582100134,
+      "endpoint_recovery": 0.5122638167654108,
+      "minimum_singular_value_i_plus_action": 0.9500056505203247,
+      "trust_scale": 0.30282844603061676
+    },
+    "full": {
+      "action_fro": 0.9897706541739383,
+      "delta_energy": 0.03750556620782365,
+      "endpoint_recovery": 0.5121473187386052,
+      "minimum_singular_value_i_plus_action": 0.950006902217865,
+      "trust_scale": 0.30273435986600816
+    },
+    "ridge": 4.8050247132778164e-08,
+    "target_residual_energy": 0.4105722619610268
+  },
+  "decision": {
+    "general_symmetric_validation_ce_gain_by_seed": {
+      "20260903": 0.0026116371154785156,
+      "20260904": 0.00262451171875
+    },
+    "general_full_validation_ce_gain_by_seed": {
+      "20260903": 0.002608776092529297,
+      "20260904": 0.0026378631591796875
+    },
+    "directed16_validation_ce_gain_by_seed": {
+      "20260903": 0.0014500617980957031,
+      "20260904": 0.0014934539794921875
+    },
+    "general_symmetric_dense_layer0_gain_recovery_by_seed": {
+      "20260903": 0.622669395179627,
+      "20260904": 0.6306863756159047
+    },
+    "general_full_dense_layer0_gain_recovery_by_seed": {
+      "20260903": 0.621987266939518,
+      "20260904": 0.6338948092127878
+    },
+    "required_dense_layer0_gain_recovery_each_seed": 0.75,
+    "passed": false,
+    "diagnosis": "A non-orthogonal output action is useful, but its task value is almost entirely symmetric shear: symmetric and full actions are indistinguishable while the skew action is null. Under the frozen minimum-singular-value trust rule, both useful arms recover only about 62-63 percent of the exact dense-layer0 CE gain, below the required 75 percent. Better one-sided endpoint fit therefore does not authorize a causal optimizer path.",
+    "layer0_one_sided_general_output_family_closed": true,
+    "production_implementation_authorized": false,
+    "exact_config_mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Return to the accepted temporal-error c_proj parent, keep c_fc frozen at its selected decay-1 path, and use the 124M/350M/690M cross-scale evidence to preregister the next distinct causal structure. Do not tune the rejected layer-0 action or its trust radius."
+  },
+  "artifacts": {
+    "remote_result_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_layer0_general_output_capacity_v1/cproj_layer0_general_output_capacity_result.json",
+    "remote_result_sha256": "c215516038d0ba70ccf2d664116c8d1e351957036b0eb04330a485df063dfb39",
+    "remote_metadata_sha256": "bb6f80cd1b8ef6ea2ba87a6177dbc63d86fcac4a91eb9cdff6d3c10b736571d6",
+    "foreground_log_sha256": "66af50389d7473bda75723680f217185206d24ad88521456de1f8ba4cce19aca",
+    "fixed_eval_indices_sha256": {
+      "20260903": "3aae196b97b11b544fdb5ca25fbcac603c2036cf0870d5f0861e1aa3e88e0e1b",
+      "20260904": "e4be1393635527210a8a849238d8ad599d692ed5e682bdaaf154ca659ddffe7b"
+    }
+  },
+  "verification": {
+    "focused_tests": "9 passed",
+    "all_values_finite": true,
+    "final_gpu": "GPU0 282/97887 MiB, 0% utilization, 26 C"
+  }
+}
