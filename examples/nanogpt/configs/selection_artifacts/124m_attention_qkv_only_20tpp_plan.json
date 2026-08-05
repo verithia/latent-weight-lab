@@ -40,7 +40,16 @@
       "ladder_slot": "qkv_only_qk64_outputgain_20tpp",
       "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4",
       "confirmation_slot": "qkv_only_qk64_outputgain_20tpp",
-      "candidate_scope": "From-scratch 124M/20TPP confirmation of generated QK+V with dense Muon-trained c_proj; all model, optimizer, data, seed, and learning-rate settings remain fixed from the accepted 5TPP endpoint."
+      "candidate_scope": "From-scratch 124M/20TPP confirmation of generated QK+V with dense Muon-trained c_proj; all model, optimizer, data, seed, and learning-rate settings remain fixed from the accepted 5TPP endpoint.",
+      "confirmation_source": "The 124M/5TPP QK+V endpoint reached validation CE 3.5148, only +0.0038 versus the fair blockwise-dense control; fixed-random c_proj and direct joint V/O alternatives were rejected by preregistered offline gates.",
+      "practical_equivalence_policy": "At terminal require validation CE no more than +0.02 behind dense 124M/20TPP and at least 0.10 better than full-attention 124M/20TPP; compare all available fixed evaluations without post-hoc threshold changes.",
+      "operator_override": {
+        "accepted_as_formal_dense_fit_conditioned_result": false,
+        "reason": "Causal partial-attention confirmation after full c_proj replacement and joint V/O direction gates failed.",
+        "recorded_at": "2026-08-05",
+        "scope": "124M/20TPP generated QK+V with dense c_proj"
+      },
+      "resolved_from_template": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_5tpp_lr24e4.json"
     },
     "invariants": [
       "learning_rate=0.0024 and min_lr=0.00024",
