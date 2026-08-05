@@ -3,12 +3,13 @@ import math
 import torch
 
 from examples.nanogpt.analyze_attention_endpoint_attribution import (
+    evaluate_ce,
     project_attention,
     qkv,
     select_structural_gate,
     shapley_improvements,
 )
-from examples.nanogpt.model import CausalSelfAttention, GPTConfig
+from examples.nanogpt.model import CausalSelfAttention, GPT, GPTConfig
 
 
 def test_dense_decomposition_matches_native_attention() -> None:
@@ -131,3 +132,19 @@ def test_selection_requires_replication_or_stable_joint_interaction() -> None:
     decision = select_structural_gate(result, protocol)
     assert decision["classification"] == "STABLE_SINGLE_COMPONENT"
     assert decision["selected_component"] == "value"
+
+
+def test_evaluate_ce_accepts_sliced_next_token_targets() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        dropout=0.0,
+        bias=False,
+    )
+    model = GPT(config).eval()
+    tokens = torch.randint(0, config.vocab_size, (2, config.block_size + 1))
+    value = evaluate_ce(model, [tokens], "cpu")
+    assert math.isfinite(value)

@@ -201,8 +201,10 @@ def evaluate_ce(
     losses = []
     for tokens in batches:
         tokens = tokens.to(device)
+        inputs = tokens[:, :-1].contiguous()
+        targets = tokens[:, 1:].contiguous()
         with autocast_context(device):
-            _, loss = model(tokens[:, :-1], tokens[:, 1:])
+            _, loss = model(inputs, targets)
         if loss is None or not torch.isfinite(loss):
             raise RuntimeError("non-finite or missing CE")
         losses.append(float(loss))
@@ -326,7 +328,7 @@ def normalized_output_errors(
             captured.clear()
             tokens = tokens.to(device)
             with autocast_context(device):
-                candidate(tokens[:, :-1], None)
+                candidate(tokens[:, :-1].contiguous(), None)
                 for layer, (dense_block, candidate_block) in enumerate(zip(
                     dense.transformer.h, candidate.transformer.h, strict=True
                 )):
