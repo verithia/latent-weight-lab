@@ -10,6 +10,7 @@ CONFIG = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus
 PLAN = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_plan.json"
 JOINT_CONFIG = REPO / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json"
 JOINT_RESULT = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json"
+MFU_RESULT = REPO / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_mfu_result.json"
 
 
 def load(path: Path) -> dict:
@@ -99,3 +100,20 @@ def test_no_rerun_or_scale_is_pre_authorized() -> None:
     assert authorization["automatic_rerun"] is False
     assert authorization["larger_rung"] is False
     assert authorization["parallel_gpu_experiment"] is False
+
+
+def test_exact_config_mfu_gate_authorizes_one_scientific_run() -> None:
+    result = load(MFU_RESULT)
+    assert result["classification"] == "CPROJ_ONLY_124M_5TPP_EXACT_CONFIG_MFU_PASSED"
+    assert result["passed"] is True
+    assert sha256(REPO / result["identity"]["config"]) == result["identity"]["config_sha256"]
+    assert sha256(REPO / result["identity"]["plan"]) == result["identity"]["plan_sha256"]
+    assert result["measurement"]["mfu_fraction"] >= 0.20
+    assert result["measurement"]["native_block_fht_extension"]["loaded"] is True
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["execution"]["direct_foreground_polling"] is True
+    assert result["execution"]["watchdog_used"] is False
+    decision = result["decision"]
+    assert decision["one_scientific_2373_update_run_authorized"] is True
+    assert decision["watchdog_required"] is True
+    assert decision["automatic_rerun_authorized"] is False

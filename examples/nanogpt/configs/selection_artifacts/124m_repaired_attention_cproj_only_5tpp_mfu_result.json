@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_only_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_only_5tpp_exact_config_mfu_result",
+  "classification": "CPROJ_ONLY_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp_lr24e4.json",
+    "config_sha256": "02b6b758cb18f3303ee36204947addac8412a0bab5357099fe6f594025521d20",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_only_5tpp_plan.json",
+    "plan_sha256": "46c8f42300163f3e5101e14abd07e6af3d5d410c8dea5b116c22b6e910c7fc2d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "registration_commit": "5520555e236073e1f5acc40f81515334ec4254de"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog_used": false,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 21.208521842956543
+  },
+  "measurement": {
+    "mfu_fraction": 0.23958994349643856,
+    "minimum_fraction": 0.2,
+    "empirical_bf16_gemm_peak_tflops": 417.12230889662646,
+    "model_tflops": 99.93831041964673,
+    "active_params_6n_estimate": 124475904,
+    "tokens_per_second": 133812.12375,
+    "iter_ms": 1959.05,
+    "peak_mib": 35591.23,
+    "timing_breakdown_ms": {
+      "prepare": 3.44875,
+      "fwbw": 1653.87125,
+      "flush": 4.375,
+      "grad": 1.93875,
+      "optimizer": 293.60625,
+      "data": 0.60125,
+      "other": 1.20375
+    },
+    "native_block_fht_extension": {
+      "required": true,
+      "loaded": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    }
+  },
+  "stability": {
+    "train_exit_code": 0,
+    "logged_loss_values": 13,
+    "all_logged_losses_finite": true,
+    "native_matching_validated": true,
+    "feedback_cap_required": false
+  },
+  "artifacts": {
+    "certificate": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp/performance_preflight.json",
+      "sha256": "140ec74bbbe30fdc517dd722b6d0418cb4b32a1b0ae7990ae078d207e14c41de"
+    },
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cprojdecay0p5_5tpp/performance_preflight.log",
+      "sha256": "27562e34e2bba73d11035749bfcceb4d849ee100aff3c95a68550fba20325b71"
+    }
+  },
+  "decision": {
+    "one_scientific_2373_update_run_authorized": true,
+    "watchdog_required": true,
+    "automatic_rerun_authorized": false,
+    "parallel_experiment_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
