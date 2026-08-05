@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import math
+import types
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from examples.nanogpt.mfu_preflight import (
     parse_snapshot_elapsed_seconds,
     parse_training_loss_values,
     task_frame_preflight_metadata,
+    verify_native_block_fht_extension,
 )
 
 
@@ -169,6 +171,31 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertEqual(len(values), 6)
         self.assertTrue(math.isfinite(values[0]))
         self.assertFalse(math.isfinite(values[-1]))
+
+    def test_native_extension_is_required_for_cuda_block_fht(self) -> None:
+        extension = types.SimpleNamespace(__name__="native_test_ext")
+        result = verify_native_block_fht_extension(
+            {"method": "block_fht", "device": "cuda"},
+            loader=lambda: extension,
+        )
+        self.assertTrue(result["required"])
+        self.assertTrue(result["loaded"])
+        self.assertEqual(result["module"], "native_test_ext")
+
+        with self.assertRaisesRegex(RuntimeError, "refusing the MFU gate"):
+            verify_native_block_fht_extension(
+                {"method": "block_fht", "device": "cuda"},
+                loader=lambda: None,
+            )
+
+    def test_dense_or_cpu_preflight_does_not_require_extension(self) -> None:
+        self.assertEqual(
+            verify_native_block_fht_extension(
+                {"method": "baseline", "device": "cuda"},
+                loader=lambda: None,
+            ),
+            {"required": False, "loaded": None, "module": None},
+        )
 
 
 if __name__ == "__main__":

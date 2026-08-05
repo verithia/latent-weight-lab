@@ -134,6 +134,34 @@ def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> flo
     return (2.0 * size * size * size * trials) / elapsed / 1e12
 
 
+def verify_native_block_fht_extension(
+    config: dict[str, Any],
+    loader: Any | None = None,
+) -> dict[str, Any]:
+    """Fail before timing if a registered CUDA BlockFHT run would fall back."""
+    required = (
+        config.get("method") == "block_fht"
+        and config.get("device", "cuda") == "cuda"
+    )
+    if not required:
+        return {"required": False, "loaded": None, "module": None}
+    if loader is None:
+        from latent_weight_lab.block_fht import _load_block_fht_ext
+
+        loader = _load_block_fht_ext
+    extension = loader()
+    if extension is None:
+        raise RuntimeError(
+            "native BlockFHT CUDA extension did not load; refusing the MFU "
+            "gate instead of measuring the eager fallback"
+        )
+    return {
+        "required": True,
+        "loaded": True,
+        "module": getattr(extension, "__name__", type(extension).__name__),
+    }
+
+
 def make_preflight_config(
     source: dict[str, Any],
     temporary_out: Path,
@@ -352,6 +380,9 @@ def main() -> None:
         "passed": False,
     }
     try:
+        certificate["native_block_fht_extension"] = (
+            verify_native_block_fht_extension(source)
+        )
         gemm_peak = empirical_bf16_gemm_peak_tflops(args.gemm_size, args.gemm_warmups, args.gemm_trials)
         certificate["calibration"] = {
             "bf16_gemm_size": args.gemm_size,

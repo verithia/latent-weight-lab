@@ -301,6 +301,20 @@ print(config.get("mfu_preflight_certificate") or "")
 PY
 )
 MFU_MIN_FRACTION="${MFU_CONFIG[0]}"
+# A passing certificate is not enough if this launch environment can no
+# longer load the native kernel. Refuse before provenance publication or
+# trainer creation instead of silently starting the eager BlockFHT fallback.
+CUDA_VISIBLE_DEVICES="$GPU" "$PYTHON_BIN" - "$CONFIG" <<'PY'
+import json, sys
+config = json.load(open(sys.argv[1]))
+if config.get("method") == "block_fht" and config.get("device", "cuda") == "cuda":
+    import latent_weight_lab.block_fht as block_fht
+    if block_fht._load_block_fht_ext() is None:
+        raise SystemExit(
+            "refusing launch: native BlockFHT CUDA extension did not load: "
+            + repr(block_fht._BLOCK_FHT_EXT_ERROR)
+        )
+PY
 # A registered rerun may need to preserve an immutable scientific config while
 # binding provenance to a fresher certificate for that exact config.  Keep the
 # config value as the default, but permit an explicit launcher-only override.

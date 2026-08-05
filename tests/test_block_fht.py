@@ -73,6 +73,24 @@ def test_cuda_home_discovery_finds_project_sibling_toolkit(
     assert _discover_cuda_home(checkout) == str(toolkit.resolve())
 
 
+def test_cuda_home_discovery_follows_explicit_native_cache_anchor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    checkout = tmp_path / "ext4" / "latent-weight-lab"
+    checkout.mkdir(parents=True)
+    workspace = tmp_path / "workspace"
+    native_cache = workspace / "outputs" / "native_cache"
+    native_cache.mkdir(parents=True)
+    toolkit = workspace / ".cuda-12.8"
+    (toolkit / "bin").mkdir(parents=True)
+    (toolkit / "bin" / "nvcc").touch()
+    monkeypatch.delenv("CUDA_HOME", raising=False)
+    monkeypatch.setenv("MAPPING_NETWORKS_NATIVE_CACHE", str(native_cache))
+    monkeypatch.setattr("shutil.which", lambda _name: None)
+
+    assert _discover_cuda_home(checkout) == str(toolkit.resolve())
+
+
 def test_slice_matches_full_forward_cpu():
     bfht = BlockFHT(7, size=31, layers=2, seed=123)
     sliced = bfht.slice(3, 17)

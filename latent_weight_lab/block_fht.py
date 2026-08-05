@@ -134,6 +134,22 @@ def _discover_cuda_home(root: Path) -> str | None:
     candidates = [Path("/usr/local/cuda"), Path("/opt/cuda")]
     for parent in (root, root.parent):
         candidates.extend(sorted(parent.glob(".cuda-*"), reverse=True))
+    # A safe execution clone can deliberately live on a different filesystem
+    # from the project workspace. In that case the native-extension cache is
+    # still anchored inside the workspace next to its bundled CUDA toolkit.
+    # Follow only explicit execution/cache anchors; do not scan arbitrary
+    # home-directory trees or bake a host-specific absolute path into code.
+    for variable in (
+        "MAPPING_NETWORKS_WORKSPACE",
+        "MAPPING_NETWORKS_NATIVE_CACHE",
+        "TORCH_EXTENSIONS_DIR",
+    ):
+        value = os.environ.get(variable)
+        if not value:
+            continue
+        anchor = Path(value).expanduser().resolve()
+        for parent in (anchor, *list(anchor.parents)[:4]):
+            candidates.extend(sorted(parent.glob(".cuda-*"), reverse=True))
     for candidate in candidates:
         if (candidate / "bin" / "nvcc").is_file():
             return str(candidate.resolve())
