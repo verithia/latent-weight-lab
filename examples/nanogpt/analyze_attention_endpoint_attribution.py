@@ -358,6 +358,9 @@ def main() -> None:
     if manifest_sha256 != required_manifest:
         raise ValueError("dataset manifest SHA-256 mismatch")
     protocol = plan["attribution"]
+    candidate_sha256 = sha256(args.candidate_checkpoint)
+    if candidate_sha256 != protocol["required_candidate_checkpoint_sha256"]:
+        raise ValueError("candidate checkpoint SHA-256 mismatch")
     root = Path(__file__).resolve().parents[2]
     dense = load_model(args.dense_checkpoint, args.device)
     candidate = load_model(args.candidate_checkpoint, args.device)
@@ -423,7 +426,7 @@ def main() -> None:
             "dense_checkpoint": str(args.dense_checkpoint),
             "dense_checkpoint_sha256": sha256(args.dense_checkpoint),
             "candidate_checkpoint": str(args.candidate_checkpoint),
-            "candidate_checkpoint_sha256": sha256(args.candidate_checkpoint),
+            "candidate_checkpoint_sha256": candidate_sha256,
             "dataset_manifest_sha256": manifest_sha256,
             "cached_block_fht_modules": cached,
             "device": args.device,
