@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_124m_attention_qkv_only_20tpp_run_result_v1",
+  "recorded_at": "2026-08-05",
+  "run": {
+    "run_name": "pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "launch_commit": "5fe787bebab21e63c13339d690db8faf485fd7bf",
+    "config_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4_20260805T100510Z_374964.config.json",
+    "config_sha256": "64f615031048d1158c861b7bbbd19b5f09d8011bc1c65e436f0e9cfd3c99ccc1",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_certificate_sha256": "fcf2e8add811dbb5e78299964794103b3b54cda179996f138d130eb0f2dbde45",
+    "provenance_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4_20260805T100510Z_374964.json",
+    "provenance_sha256": "2022c84cc2cb4d3ad18dac03aca0ddb2313c42b03f32f80a9c359f004968cc3d",
+    "status_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4_20260805T100510Z_374964.json",
+    "status_sha256": "250a70f9f853f570a0abed592bf99e5980ed3b5c6a3b8d12628240e9f9b33a69",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4_20260805T100510Z_374964.log",
+    "log_sha256": "0fbb1b5c23fd146788cc0fe639278181aa222ddc568118b92f75819e53431ea2",
+    "checkpoint_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4/ckpt.pt",
+    "checkpoint_sha256": "cf4df0c3f6ce6d4b9b43ecdb61432ef54415e259b7d862bfea33568e39a45e9f",
+    "checkpoint_size_bytes": 1035913216,
+    "checkpoint_metadata_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4/ckpt.meta.json",
+    "checkpoint_metadata_sha256": "5c1af13cfd32c8684da13b25f0c69f9691e75209bfa5d5d16cb22b136725fbe7",
+    "started_at": "2026-08-05T18:05:10+08:00",
+    "finished_at": "2026-08-05T22:29:01+08:00",
+    "exit_code": 0,
+    "classification": "clean",
+    "fixed_evaluations": [
+      {
+        "step": 2373,
+        "train_ce": 3.5566,
+        "validation_ce": 3.5397
+      },
+      {
+        "step": 4746,
+        "train_ce": 3.3735,
+        "validation_ce": 3.3533
+      },
+      {
+        "step": 7119,
+        "train_ce": 3.2638,
+        "validation_ce": 3.2413
+      },
+      {
+        "step": 9489,
+        "train_ce": 3.2082,
+        "validation_ce": 3.1853
+      }
+    ]
+  }
+}

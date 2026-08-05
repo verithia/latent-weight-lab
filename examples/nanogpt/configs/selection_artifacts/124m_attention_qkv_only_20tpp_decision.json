@@ -1,0 +1,52 @@
+{
+  "candidate_validation_ce": [
+    3.5397,
+    3.3533,
+    3.2413,
+    3.1853
+  ],
+  "comparisons": {
+    "terminal_candidate_validation_ce": 3.1853,
+    "terminal_delta_to_dense_ce": 0.03059999999999974,
+    "terminal_dense_validation_ce": 3.1547,
+    "terminal_full_attention_validation_ce": 3.3191,
+    "terminal_improvement_over_full_attention_ce": 0.13380000000000036
+  },
+  "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_20tpp_lr24e4.json",
+  "config_sha256": "64f615031048d1158c861b7bbbd19b5f09d8011bc1c65e436f0e9cfd3c99ccc1",
+  "decision": {
+    "classification": "QKV_ONLY_PARTIAL_ATTENTION_NOT_CONFIRMED_20TPP",
+    "confirmed": false,
+    "next_action": "Stop scaling the partial endpoint and retain the 124M/5TPP result as a local control only."
+  },
+  "decision_evidence": {
+    "dense_gate": false,
+    "full_attention_gate": true
+  },
+  "fixed_steps": [
+    2373,
+    4746,
+    7119,
+    9489
+  ],
+  "identity": {
+    "config_sha256": "64f615031048d1158c861b7bbbd19b5f09d8011bc1c65e436f0e9cfd3c99ccc1",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_certificate_sha256": "fcf2e8add811dbb5e78299964794103b3b54cda179996f138d130eb0f2dbde45"
+  },
+  "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_20tpp_mfu_result.json",
+  "mfu_result_sha256": "d7a689c83060d66a179d61be6cdca1aa1275360e4a618800d44e947f205bf29c",
+  "registered_gate": {
+    "maximum_validation_ce_delta_to_dense": 0.02,
+    "minimum_validation_ce_improvement_over_full_attention": 0.1
+  },
+  "schema_version": "mai_124m_attention_qkv_only_20tpp_decision_v1",
+  "scope": {
+    "dense_c_proj": true,
+    "materialized_inference_parameters_unchanged": true,
+    "partial_attention_only": true
+  },
+  "source_plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_20tpp_plan.json",
+  "source_plan_sha256": "ec7ac08aff2f711e834e636aa8748b1cbb82709e92a7bf2f13ba15debb65a94f"
+}
