@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_only_5tpp_run_metadata_v1",
+  "recorded_at": "2026-08-06T06:20:00+08:00",
+  "state": "running",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198",
+    "name": "pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 757403,
+    "pgid": 757403,
+    "started_at": "2026-08-06T06:18:25+08:00",
+    "max_iters": 2373,
+    "tokens_per_iter": 262144,
+    "scheduled_tokens": 622067712,
+    "planned_tpp": 5.0
+  },
+  "identity": {
+    "execution_git_commit": "a06caff86779a2c239f5f781b4f70f6f10139b49",
+    "implementation_commit": "c47a961104d3b5c89f999d9ba2c2e7e3eeea7f15",
+    "remote_repo": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-cfc-only-5tpp",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+    "config_sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_plan.json",
+    "plan_sha256": "ecf5ef1a68d1d64d6e56c4df6009eb9d72e8e0702eebb6009262895d235da62e",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_mfu_result.json",
+    "mfu_result_sha256": "0b7d73df04f5bf7de372e375f1bd64c09d7d7334b6ca52eb8992f9e97bce53af",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "remote_artifacts": {
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198.log",
+    "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198.json",
+    "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198.json",
+    "provenance_sha256": "8f471469c150c7b1378e29b03b78dbf07e1d44937c6e423dd6b408805e2ce6d1",
+    "archived_config": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198.config.json",
+    "archived_config_sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857",
+    "archived_mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp_20260805T221802Z_757198.mfu.json",
+    "archived_mfu_certificate_sha256": "8a7663a6f31d1957e6400abc3b8fc83ec90c5139c1284b86c0faf50cba13ac50",
+    "checkpoint": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/scientific/ckpt.pt"
+  },
+  "scientific_contract": {
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "primary_terminal_validation_ce_maximum": 3.6478,
+    "nonbinding_near_parent_validation_ce_maximum": 3.6378,
+    "repaired_attention_parent_validation_ce": 3.6278,
+    "joint_full_mlp_validation_ce": 3.660243034362793,
+    "cproj_only_validation_ce": 3.6562013626098633,
+    "dense_validation_ce": 3.5401,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.24295788637079657,
+    "tokens_per_second_preflight": 135607.41625,
+    "update_ms_preflight": 1933.11375,
+    "peak_mib_preflight": 35535.27,
+    "update_only_eta_minutes_at_launch": 76.45
+  },
+  "initial_verification": {
+    "verified_at": "2026-08-06T06:20:00+08:00",
+    "iter": 30,
+    "process_alive": true,
+    "status_running": true,
+    "errors": [],
+    "gpu_memory_mib": 48276,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 96,
+    "gpu_temperature_c": 48,
+    "workspace_bytes": 224338340864,
+    "workspace_gib": 208.9313,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1685382283264,
+    "intervention": "none"
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.repairedattncfconly5tpp",
+    "script": "/Users/verithia/research/latent-weight-lab-midpoint/examples/nanogpt/watch_y400_dense_aggregate.py",
+    "state_path": "/Users/verithia/research/latent-weight-lab-midpoint/outputs/monitor_state/pro6_124m_repairedattn_cfconly_5tpp.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "milestones": [20, 50, 100],
+    "heartbeat_minutes": 90,
+    "progress_resets_heartbeat": true,
+    "terminal_delivery_once": true,
+    "interval_seconds": 60,
+    "alive": true,
+    "sent_milestones": []
+  }
+}
