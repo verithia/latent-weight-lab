@@ -1,0 +1,66 @@
+{
+  "artifact_kind": "124m_attention_qk_cproj_only_cprojratio10_5tpp_exact_config_mfu_result",
+  "schema_version": "mai_124m_attention_cproj_capacity_exact_config_mfu_result_v1",
+  "classification": "ATTENTION_CPROJ_RATIO10_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "implementation_commit": "a26eaa7e87c06596749e18a71377d2bcaed1a30e",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_lr24e4.json",
+    "sha256": "f370636fa973c0d351cbb75230945889299df34c9a5529e06e5ea4cca2898394"
+  },
+  "authorization": {
+    "classification": "AUTHORIZE_QK_CPROJ_CPROJRATIO10",
+    "decision_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_factorial_result.json",
+    "decision_sha256": "15903243d7a8f058aef45b9d2cad8a9d7f6078df4711510d34d4eb36c59e6308",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_factorial_cproj_capacity_plan.json",
+    "plan_sha256": "b8f622ce94eff757bb9563d6d6e8521839021445f5b6cdf48fb3ffaa3fd6a14e"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "train_exit_code": 0,
+    "elapsed_seconds": 17.49075698852539
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_gemm_peak_tflops": 414.88630726280286,
+    "iter_ms": 1528.205,
+    "mfu_fraction": 0.30879153565939454,
+    "model_tflops": 128.1133799437363,
+    "peak_mib": 34471.14,
+    "tokens_per_second": 171537.055,
+    "headroom_over_gate_percentage_points": 10.879153565939454,
+    "timing_breakdown_ms": {
+      "data": 0.5175000000000001,
+      "flush": 9.3025,
+      "forward_backward": 1493.4475,
+      "gradient_postprocess": 2.1174999999999997,
+      "optimizer": 17.4175,
+      "other": 0.9924999999999999,
+      "prepare": 4.4175
+    }
+  },
+  "preflight": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_capacity/qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_preflight.json",
+    "certificate_sha256": "ca92499f2b3b7c815a7441d21a360600e93d618583cb0dbe489188a72d2b15a4",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_capacity/qk_cproj_only_qk64_outputgain_cprojratio10_5tpp_preflight.log",
+    "log_sha256": "d1e82196f575ab885a9a532d543b6d46d1c4cda0802e74aa6c7a9b8733e5dad2",
+    "minimum_mfu_fraction": 0.2,
+    "warmup_updates": 5,
+    "timed_updates": 4,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak"
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13
+  },
+  "decision": {
+    "one_124m_5tpp_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "larger_model_or_token_rung_authorized": false,
+    "required_monitor": "persistent aggregate watchdog with 20/50/100 callbacks and 90-minute heartbeat"
+  }
+}
