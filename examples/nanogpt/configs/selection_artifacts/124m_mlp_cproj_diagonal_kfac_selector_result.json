@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_diagonal_kfac_selector_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_diagonal_kfac_zero_update_selector_result",
+  "recorded_at": "2026-08-06",
+  "classification": "REJECT_DIAGONAL_KFAC_SELECTOR",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_diagonal_kfac_selector_plan.json",
+    "sha256": "db5483def65056188ac29613ab1bff57616fcc2ab5da8a4c023c3f398c698f21",
+    "registration_commit": "ef8f560"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "56af892b616c8e8916a56a76d259cbbfdc11f2d0",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_diagonal_kfac_selector",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-06T04:38:30.396477+00:00",
+    "wall_seconds": 9.086885690689087,
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_diagonal_kfac_selector_v1"
+  },
+  "identity": {
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd"
+  },
+  "protocol": {
+    "layers": [0, 3, 6, 9, 11],
+    "phase_starts": [0, 60, 120, 180],
+    "fit_seed": 20260804,
+    "holdout_seed": 20260805,
+    "coordinates_per_layer": 147456,
+    "common_angle_fit": "raw Frobenius",
+    "candidate_difference": "output-pair selector only",
+    "output_error_scale_bounds": [0.25, 4.0]
+  },
+  "control": {
+    "name": "frobenius_output32",
+    "fit_predicted_ce_decrease": 0.00528873384173681,
+    "holdout_predicted_ce_decrease": 0.003565022037137948,
+    "fit_activation_residual_energy": 8.877743191078991,
+    "holdout_activation_residual_energy": 8.900497689306775,
+    "update_energy": 0.009803250867829752
+  },
+  "candidates": {
+    "activation_selector_output32": {
+      "mean_finite_step_ce_gain": 0.00002537667751312256,
+      "finite_step_wins": "5/8",
+      "holdout_wins": "2/4",
+      "minimum_holdout_gain": -0.00001919269561767578,
+      "fit_task_advantage": 0.00016468128669782593,
+      "holdout_task_advantage": 0.00008554770417078684,
+      "holdout_to_fit_task_advantage_retention": 0.5194743488236069,
+      "holdout_activation_residual_energy_ratio": 0.992880271303671,
+      "candidate_to_control_update_energy_ratio": 0.9847036125745919,
+      "passed": false
+    },
+    "error_selector_output32": {
+      "mean_finite_step_ce_gain": -0.0000034123659133911133,
+      "finite_step_wins": "1/8",
+      "fit_task_advantage": -0.000022867690904205575,
+      "holdout_task_advantage": -0.000005101990256002175,
+      "holdout_to_fit_task_advantage_retention": null,
+      "candidate_to_control_update_energy_ratio": 0.9995476826542639,
+      "passed": false
+    },
+    "diagonal_kfac_selector_output32": {
+      "mean_finite_step_ce_gain": 0.000022724270820617676,
+      "finite_step_wins": "5/8",
+      "holdout_wins": "2/4",
+      "minimum_holdout_gain": -0.000022172927856445312,
+      "fit_task_advantage": 0.00015387926018950882,
+      "holdout_task_advantage": 0.0000722737439325322,
+      "holdout_to_fit_task_advantage_retention": 0.46967826491707865,
+      "holdout_activation_residual_energy_ratio": 0.9944827471167001,
+      "candidate_to_control_update_energy_ratio": 0.9846550215862119,
+      "passed": false
+    }
+  },
+  "decision": {
+    "passed": false,
+    "selected_variant": null,
+    "production_implementation_authorized": false,
+    "exact_config_mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "interpretation": [
+      "Activation-only and diagonal-KFAC selectors each win five of eight finite-step cells but only two of four held-out cells; both regress on the late held-out windows.",
+      "Their mean CE gains are about 22 times below the preregistered 0.0005 threshold, so the positive first-order signal is too small and unstable to justify implementation.",
+      "Output-error-only selection is actively worse. Diagonal activation-error scaling does not resolve the c_proj direction problem."
+    ],
+    "next_action": "Do not tune this metric or launch a causal run. Test a qualitatively different temporal generator/transport hypothesis against the saved dense trajectory."
+  },
+  "artifacts": {
+    "cells_sha256": "cc01aca68f96f054ac7c6445938c6b543e6ab76094fdf323f092a09fa5d324ae",
+    "finite_ce_sha256": "a6200c41c8d992a608c7cddce3a263f5236dc5ae6186e5ddc31829b196123589",
+    "raw_result_sha256": "fdf5069fd9a9adc113cb8c4b95ea13d1dda9e9481657cf7c87a8f9d06ee891bb",
+    "scales_sha256": "42c2508915578b15eefaea145073750a8857e3e2b75659e7a11299aa88807a7e",
+    "foreground_log_sha256": "c4a307ec30bd3cb0aa2e5d28d857e09b739f246eefacf654ec814fb1bbc311d7"
+  },
+  "reporting_correction": {
+    "source_commit": "9c1bc04ff8b9baf24cf40c74605de834c2198fa0",
+    "change": "A negative fit advantage now serializes undefined retention as JSON null rather than nonstandard -Infinity.",
+    "scientific_decision_changed": false
+  }
+}

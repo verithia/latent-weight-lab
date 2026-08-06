@@ -186,3 +186,15 @@ def test_aggregate_rejects_subthreshold_gain() -> None:
     result = aggregate_results(rows, finite, scales, decision_rule())
     assert result["passed"] is False
     assert result["classification"] == "REJECT_DIAGONAL_KFAC_SELECTOR"
+
+
+def test_nonpositive_fit_advantage_uses_json_null_retention() -> None:
+    rows, finite, scales = synthetic_inputs()
+    for row in rows:
+        if row["variant"] == "error_selector_output32":
+            row["task_predicted_ce_decrease"] = 0.9
+    result = aggregate_results(rows, finite, scales, decision_rule())
+    candidate = result["candidates"]["error_selector_output32"]
+    assert candidate["holdout_to_fit_task_advantage_retention"] is None
+    assert candidate["gate"]["task_advantage_retention"] is False
+    assert candidate["passed"] is False
