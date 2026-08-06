@@ -9,8 +9,10 @@ from pathlib import Path
 import torch
 
 from examples.nanogpt.parameter_trajectory import (
+    FULL_STATE_SCHEMA_VERSION,
     OPTIMIZER_PROBE_SCHEMA_VERSION,
     SCHEMA_VERSION,
+    collect_persistent_buffers,
     collect_parameters,
     optimizer_probe_path,
     prepare_optimizer_probe,
@@ -41,6 +43,11 @@ class TinyModel(torch.nn.Module):
         self.transformer = torch.nn.Module()
         self.transformer.h = torch.nn.ModuleList([Block(), Block()])
         self.unrelated = torch.nn.Linear(3, 3, bias=False)
+        self.register_buffer("persistent_float", torch.tensor([1.25]))
+        self.register_buffer("persistent_step", torch.tensor(7, dtype=torch.int64))
+        self.register_buffer(
+            "transient_cache", torch.tensor([9.0]), persistent=False
+        )
 
 
 def config_as_dataclass() -> object:
@@ -100,6 +107,86 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 layers=[0],
                 all_parameters=True,
             )
+
+    def test_collects_only_persistent_buffers_and_preserves_integer_dtype(self) -> None:
+        selected = collect_persistent_buffers(TinyModel(), dtype="float16")
+        self.assertEqual(
+            set(selected), {"persistent_float", "persistent_step"}
+        )
+        self.assertEqual(selected["persistent_float"].dtype, torch.float16)
+        self.assertEqual(selected["persistent_step"].dtype, torch.int64)
+
+    def test_full_state_snapshot_is_versioned_and_buffer_complete(self) -> None:
+        model = TinyModel()
+        identity = {
+            "config_sha256": "a" * 64,
+            "data_manifest": {"sha256": "b" * 64},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            path = write_parameter_snapshot(
+                model=model,
+                out_dir=Path(raw),
+                step=0,
+                targets=[],
+                dtype="float32",
+                layers=None,
+                all_parameters=True,
+                all_buffers=True,
+                model_config=config_as_dataclass(),
+                run_identity=identity,
+                execution_provenance={"git_commit": "c" * 40},
+            )
+            payload = torch.load(path, map_location="cpu", weights_only=False)
+        self.assertEqual(payload["schema_version"], FULL_STATE_SCHEMA_VERSION)
+        self.assertTrue(payload["all_parameters"])
+        self.assertTrue(payload["all_buffers"])
+        self.assertEqual(
+            set(payload["buffers"]), {"persistent_float", "persistent_step"}
+        )
+        self.assertNotIn("transient_cache", payload["buffers"])
+        self.assertEqual(payload["buffers"]["persistent_step"].dtype, torch.int64)
+
+    def _assert_full_state_snapshot_does_not_mutate_model(
+        self, device: str
+    ) -> None:
+        model = TinyModel().to(device)
+        before_parameters = {
+            name: value.detach().clone()
+            for name, value in model.named_parameters()
+        }
+        before_buffers = {
+            name: value.detach().clone()
+            for name, value in model.named_buffers()
+        }
+        identity = {
+            "config_sha256": "a" * 64,
+            "data_manifest": {"sha256": "b" * 64},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            write_parameter_snapshot(
+                model=model,
+                out_dir=Path(raw),
+                step=0,
+                targets=[],
+                dtype="float32",
+                layers=None,
+                all_parameters=True,
+                all_buffers=True,
+                model_config=config_as_dataclass(),
+                run_identity=identity,
+                execution_provenance=None,
+            )
+        for name, value in model.named_parameters():
+            self.assertTrue(torch.equal(value, before_parameters[name]))
+        for name, value in model.named_buffers():
+            self.assertTrue(torch.equal(value, before_buffers[name]))
+
+    def test_full_state_snapshot_does_not_mutate_cpu_model(self) -> None:
+        self._assert_full_state_snapshot_does_not_mutate_model("cpu")
+
+    @unittest.skipUnless(torch.cuda.is_available(), "CUDA is required")
+    def test_full_state_snapshot_does_not_mutate_cuda_model(self) -> None:
+        self._assert_full_state_snapshot_does_not_mutate_model("cuda")
 
     def test_snapshot_is_atomic_identity_bound_and_idempotent(self) -> None:
         model = TinyModel()
@@ -176,6 +263,16 @@ class ParameterTrajectoryTest(unittest.TestCase):
                     trajectory_snapshot_targets=[],
                     trajectory_snapshot_layers=[0],
                     trajectory_snapshot_all_parameters=True,
+                )
+            )
+        with self.assertRaisesRegex(ValueError, "requires"):
+            validate_arguments(
+                argparse.Namespace(
+                    trajectory_snapshot_interval=60,
+                    trajectory_snapshot_targets=["mlp.c_proj"],
+                    trajectory_snapshot_layers=None,
+                    trajectory_snapshot_all_parameters=False,
+                    trajectory_snapshot_all_buffers=True,
                 )
             )
 

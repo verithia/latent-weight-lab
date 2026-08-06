@@ -35,7 +35,11 @@ from examples.nanogpt.analyze_residual_compatibility import (
     fixed_validation_batches,
 )
 from examples.nanogpt.model import GPT, GPTConfig
-from examples.nanogpt.parameter_trajectory import SCHEMA_VERSION
+from examples.nanogpt.parameter_trajectory import (
+    FULL_STATE_SCHEMA_VERSION,
+    SUPPORTED_SCHEMA_VERSIONS,
+    persistent_buffer_names,
+)
 
 
 def file_sha256(path: Path) -> str:
@@ -195,7 +199,7 @@ def load_snapshot(path: Path) -> dict[str, Any]:
     payload = torch.load(path, map_location="cpu", weights_only=False)
     if (
         not isinstance(payload, dict)
-        or payload.get("schema_version") != SCHEMA_VERSION
+        or payload.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS
         or payload.get("all_parameters") is not True
     ):
         raise ValueError(f"not an all-parameter trajectory snapshot: {path}")
@@ -221,6 +225,26 @@ def model_from_snapshot(payload: dict[str, Any], device: str) -> GPT:
     with torch.no_grad():
         for name, parameter in destination.items():
             parameter.copy_(source[name].to(device=device, dtype=parameter.dtype))
+        if payload.get("schema_version") == FULL_STATE_SCHEMA_VERSION:
+            if payload.get("all_buffers") is not True:
+                raise ValueError("full-state snapshot does not declare all buffers")
+            source_buffers = payload.get("buffers")
+            if not isinstance(source_buffers, dict):
+                raise ValueError("full-state snapshot has no buffer mapping")
+            destination_buffers = dict(model.named_buffers())
+            expected_buffers = persistent_buffer_names(model)
+            if set(source_buffers) != expected_buffers:
+                missing = sorted(expected_buffers - set(source_buffers))
+                unexpected = sorted(set(source_buffers) - expected_buffers)
+                raise ValueError(
+                    "snapshot persistent-buffer inventory mismatch: "
+                    f"missing={missing} unexpected={unexpected}"
+                )
+            for name in sorted(expected_buffers):
+                buffer = destination_buffers[name]
+                buffer.copy_(
+                    source_buffers[name].to(device=device, dtype=buffer.dtype)
+                )
     model.eval()
     return model
 

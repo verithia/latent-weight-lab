@@ -10,9 +10,11 @@ from examples.nanogpt.analyze_mlp_cproj_diagonal_kfac_selector import (
     apply_plan_authorization,
     fit_metric_selected_raw_angle_pass,
     normalized_output_error_scale,
+    require_full_state_snapshot,
     validate_plan,
 )
 from examples.nanogpt.muon_matched_givens import diagonal_metric_angles
+from examples.nanogpt.parameter_trajectory import FULL_STATE_SCHEMA_VERSION
 
 
 def valid_plan() -> dict:
@@ -70,6 +72,24 @@ def test_plan_validation_fails_closed() -> None:
     changed["analysis"]["output_error_scale"]["bounds"] = [0.1, 10.0]
     with pytest.raises(ValueError):
         validate_plan(changed)
+
+
+def test_functional_calibration_requires_full_state_snapshot() -> None:
+    with pytest.raises(ValueError, match="full-state v2"):
+        require_full_state_snapshot(
+            {
+                "schema_version": "nanogpt_parameter_trajectory_v1",
+                "all_parameters": True,
+            }
+        )
+    require_full_state_snapshot(
+        {
+            "schema_version": FULL_STATE_SCHEMA_VERSION,
+            "all_parameters": True,
+            "all_buffers": True,
+            "buffers": {"transformer.h.0.mlp.c_fc.weight": torch.ones(1)},
+        }
+    )
 
 
 def test_5tpp_calibration_plan_is_fail_closed_and_never_authorizes_training() -> None:

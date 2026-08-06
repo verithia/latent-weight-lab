@@ -2918,6 +2918,7 @@ def main() -> None:
             dtype=args.trajectory_snapshot_dtype,
             layers=args.trajectory_snapshot_layers,
             all_parameters=args.trajectory_snapshot_all_parameters,
+            all_buffers=args.trajectory_snapshot_all_buffers,
             model_config=gpt_config,
             run_identity=run_identity,
             execution_provenance=trajectory_execution_provenance,

@@ -16,6 +16,10 @@ import torch
 
 
 SCHEMA_VERSION = "nanogpt_parameter_trajectory_v1"
+FULL_STATE_SCHEMA_VERSION = "nanogpt_parameter_trajectory_v2"
+SUPPORTED_SCHEMA_VERSIONS = frozenset(
+    {SCHEMA_VERSION, FULL_STATE_SCHEMA_VERSION}
+)
 OPTIMIZER_PROBE_SCHEMA_VERSION = "nanogpt_optimizer_probe_v2"
 DTYPES = {
     "float32": torch.float32,
@@ -91,6 +95,35 @@ def collect_parameters(
     return selected
 
 
+def persistent_buffer_names(model: torch.nn.Module) -> set[str]:
+    """Return unique named buffers that participate in ``state_dict``."""
+
+    return set(dict(model.named_buffers())).intersection(model.state_dict())
+
+
+def collect_persistent_buffers(
+    model: torch.nn.Module,
+    *,
+    dtype: str,
+) -> dict[str, torch.Tensor]:
+    """Copy forward-critical persistent buffers without duplicating parameters."""
+
+    if dtype not in DTYPES:
+        raise ValueError(f"unsupported trajectory snapshot dtype: {dtype}")
+    names = persistent_buffer_names(model)
+    selected: dict[str, torch.Tensor] = {}
+    for name, value in model.named_buffers():
+        if name not in names:
+            continue
+        detached = value.detach()
+        if detached.is_floating_point():
+            detached = detached.to(device="cpu", dtype=DTYPES[dtype])
+        else:
+            detached = detached.to(device="cpu")
+        selected[name] = detached.contiguous()
+    return selected
+
+
 def snapshot_path(out_dir: Path, step: int) -> Path:
     if step < 0:
         raise ValueError("trajectory snapshot step must be non-negative")
@@ -151,17 +184,25 @@ def write_parameter_snapshot(
     dtype: str,
     layers: list[int] | None,
     all_parameters: bool = False,
+    all_buffers: bool = False,
     model_config: Any,
     run_identity: dict[str, Any],
     execution_provenance: dict[str, Any] | None,
 ) -> Path:
+    if all_buffers and not all_parameters:
+        raise ValueError(
+            "all-buffer trajectory snapshots require all parameters"
+        )
     destination = snapshot_path(out_dir, step)
     run_identity_sha256 = canonical_digest(run_identity)
+    expected_schema_version = (
+        FULL_STATE_SCHEMA_VERSION if all_buffers else SCHEMA_VERSION
+    )
     if destination.exists():
         observed = torch.load(destination, map_location="cpu", weights_only=False)
         if (
             not isinstance(observed, dict)
-            or observed.get("schema_version") != SCHEMA_VERSION
+            or observed.get("schema_version") != expected_schema_version
             or observed.get("step") != step
             or observed.get("run_identity_sha256") != run_identity_sha256
         ):
@@ -184,12 +225,25 @@ def write_parameter_snapshot(
         }
         for name, value in sorted(parameters.items())
     }
+    buffers = (
+        collect_persistent_buffers(model, dtype=dtype) if all_buffers else {}
+    )
+    buffer_inventory = {
+        name: {
+            "shape": list(value.shape),
+            "dtype": str(value.dtype),
+            "numel": value.numel(),
+            "bytes": value.numel() * value.element_size(),
+        }
+        for name, value in sorted(buffers.items())
+    }
     payload = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": expected_schema_version,
         "step": step,
         "targets": list(targets),
         "layers": None if layers is None else list(layers),
         "all_parameters": bool(all_parameters),
+        "all_buffers": bool(all_buffers),
         "storage_dtype": dtype,
         "model_config": asdict(model_config),
         "run_identity": run_identity,
@@ -197,6 +251,8 @@ def write_parameter_snapshot(
         "execution_provenance": execution_provenance,
         "tensor_inventory": inventory,
         "parameters": parameters,
+        "buffer_inventory": buffer_inventory,
+        "buffers": buffers,
         "created_at_unix": time.time(),
     }
     _atomic_torch_save(destination, payload)
@@ -422,6 +478,16 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         ),
     )
     parser.add_argument(
+        "--trajectory-snapshot-all-buffers",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help=(
+            "with --trajectory-snapshot-all-parameters, also store every "
+            "unique persistent named model buffer needed for exact forward "
+            "reconstruction"
+        ),
+    )
+    parser.add_argument(
         "--optimizer-probe-steps",
         nargs="+",
         type=int,
@@ -454,6 +520,14 @@ def validate_arguments(args: argparse.Namespace) -> None:
         all_parameters = bool(
             getattr(args, "trajectory_snapshot_all_parameters", False)
         )
+        all_buffers = bool(
+            getattr(args, "trajectory_snapshot_all_buffers", False)
+        )
+        if all_buffers and not all_parameters:
+            raise ValueError(
+                "--trajectory-snapshot-all-buffers requires "
+                "--trajectory-snapshot-all-parameters"
+            )
         if not all_parameters and (not isinstance(targets, list) or not targets):
             raise ValueError("--trajectory-snapshot-targets must be non-empty")
         if not all_parameters and any(

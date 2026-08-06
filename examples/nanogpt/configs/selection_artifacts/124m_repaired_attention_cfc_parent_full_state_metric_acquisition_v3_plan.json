@@ -1,0 +1,161 @@
+{
+  "acquisition": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "expected_duration_minutes": [
+      80,
+      90
+    ],
+    "gpu": 0,
+    "host": "PRO6",
+    "optimizer_probe_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "optimizer_probe_steps": [
+      0,
+      594,
+      1188,
+      1782
+    ],
+    "out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp/scientific",
+    "phase_boundaries": [
+      0,
+      594,
+      1188,
+      1782,
+      2373
+    ]
+  },
+  "acquisition_acceptance": {
+    "accepted_parent_validation_ce": [
+      4.2028,
+      3.8395,
+      3.6888,
+      3.625838041305542
+    ],
+    "functional_replay_absolute_tolerance_ce": 0.005,
+    "parent_equivalence_absolute_tolerance_ce": 0.005,
+    "required": [
+      "exact-config MFU >=0.20 with diagnostic I/O charged and native BlockFHT loaded",
+      "clean terminal 2373/2373 and complete exact-resume checkpoint",
+      "all five full-state snapshots and all four v2 optimizer probes exist, are finite, and share one run identity",
+      "exactly 327 named parameters and 24 required persistent buffers occur at every phase",
+      "each reconstructed snapshot fixed validation CE differs from the run's same-step fixed validation CE by <=0.005",
+      "absolute validation CE difference from the accepted parent is <=0.005 at every nonzero fixed checkpoint",
+      "terminal full-state snapshot equals the checkpoint model state modulo the tied lm_head alias"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "blind_rerun": false,
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "one_full_state_acquisition_after_all_gates_pass": true,
+    "zero_update_metric_calibration_after_both_acceptance_gates_pass": true
+  },
+  "causal_basis": [
+    "The accepted v2 run is parent-equivalent and its c_proj optimizer probes are internally exact.",
+    "Its v1 trajectory snapshots omitted 24 persistent c_fc buffers, so reconstructed mature-phase CE was approximately 10-11 instead of 3.69-4.21.",
+    "The invalid calibration is preserved only as an audit and provides no metric evidence.",
+    "The minimal repair is observational: capture persistent named buffers in addition to the unchanged all-parameter and optimizer-probe payloads."
+  ],
+  "full_state_contract": {
+    "floating_buffer_storage_dtype": "float32",
+    "named_parameter_count_expected": 327,
+    "nonfloating_buffer_dtype_policy": "preserve exact source dtype",
+    "nonpersistent_caches": "excluded",
+    "persistent_buffer_count_expected": 24,
+    "phase_boundaries": [
+      0,
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "required_buffer_patterns": [
+      "transformer.h.{0..11}.mlp.c_fc.weight",
+      "transformer.h.{0..11}.mlp.c_fc.optimizer_step"
+    ],
+    "tied_parameter_aliases": "not duplicated",
+    "trajectory_schema_version": "nanogpt_parameter_trajectory_v2"
+  },
+  "identity": {
+    "accepted_v2_config_sha256": "d9395addcac32933c3c62a7d10aad7e26caa356b4957901482373be1150498fe",
+    "accepted_v2_plan_sha256": "e01cd9bbc56787846c95c9a6948eeafc278365d9398fb47d2f3817896946d4e1",
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp.json",
+    "candidate_config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "use one clean pushed commit containing the implementation, tests, invalid audit, immutable plan, and config",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "invalid_calibration_audit": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_functional_metric_calibration_invalid_result.json",
+    "invalid_calibration_audit_sha256": "b1c3b584233671e8f6e6b799fd2de4cb3a704159edbd66bf3d5750957d00c613",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+    "source_config_sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857",
+    "source_parent_result_sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f"
+  },
+  "monitoring": {
+    "callback_action": "verify terminal artifacts, exact buffer inventory, parent equivalence, and same-step functional replay before any next step",
+    "callbacks": [
+      "100% clean completion",
+      "error or actionable stall"
+    ],
+    "heartbeats": false,
+    "milestones": false,
+    "scientific_run_policy": "one idempotent terminal-only watchdog"
+  },
+  "nonintervention_gate": {
+    "required": [
+      "full-state snapshotting leaves all CPU model parameters and buffers bitwise unchanged",
+      "full-state snapshotting leaves all CUDA model parameters and buffers bitwise unchanged",
+      "v2 optimizer-probe CPU and CUDA trajectory-identity tests remain bitwise exact",
+      "all focused tests pass on PRO6 before preflight"
+    ]
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "direct_foreground_polling": true,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "native_extension_required": true,
+    "watchdog": false
+  },
+  "recorded_at": "2026-08-06",
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_plan_v1",
+  "scientific_question": "Can a nonintervening full-state replay preserve the accepted 5TPP parent trajectory and exactly reconstruct its procedural c_fc forward function at every phase?",
+  "status": "registered_before_preflight_or_execution"
+}

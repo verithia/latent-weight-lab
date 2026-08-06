@@ -18,7 +18,7 @@ from typing import Any
 
 import torch
 
-from examples.nanogpt.parameter_trajectory import SCHEMA_VERSION
+from examples.nanogpt.parameter_trajectory import SUPPORTED_SCHEMA_VERSIONS
 
 
 PARAMETER_PATTERN = re.compile(
@@ -244,7 +244,10 @@ def load_snapshots(
     expected_names: set[str] | None = None
     for path in paths:
         payload = torch.load(path, map_location="cpu", weights_only=False)
-        if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
+        if (
+            not isinstance(payload, dict)
+            or payload.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS
+        ):
             raise ValueError(f"unsupported trajectory snapshot: {path}")
         if metadata is None:
             metadata = {

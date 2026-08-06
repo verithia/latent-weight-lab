@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_invalid_result_v1",
+  "artifact_kind": "invalid_functional_replay_audit",
+  "recorded_at": "2026-08-06T19:08:55+08:00",
+  "classification": "INVALID_FUNCTIONAL_REPLAY_MISSING_PERSISTENT_CFC_STATE",
+  "scientific_result": null,
+  "invalidated_claim": "The zero-update metric ranking and rejection classification produced by this execution are not scientific evidence because the reconstructed parent was not the acquired parent function.",
+  "identity": {
+    "execution_git_commit": "1e81c42b84bf6cb021499c0288e55f40101f9b0a",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_result.json",
+    "acquisition_result_sha256": "105f814e994b9f7f39935c4170cef51353d1683099db4db5aec370cd4c2f6d6a",
+    "calibration_plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_functional_metric_calibration_plan.json",
+    "calibration_plan_sha256": "c761aa698da54174b5880c72e7be075e7526dd6478ad34307f05911178ac2d8f",
+    "remote_output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_functional_metric_calibration_v1"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "wall_seconds": 14.23,
+    "exit_code": 0,
+    "parameter_updates": 0
+  },
+  "observed_replay_failure": {
+    "expected_same_step_validation_ce_approximately": {
+      "0": 10.9991,
+      "594": 4.2077,
+      "1188": 3.8390,
+      "1782": 3.6901
+    },
+    "reconstructed_baseline_validation_ce_approximately": {
+      "0": 10.98,
+      "594": 10.35,
+      "1188": 11.0,
+      "1782": 10.08
+    },
+    "conclusion": "The phase-594/1188/1782 reconstructed functions are grossly inconsistent with their acquired same-step parent losses, so every derived finite-CE arm comparison is invalid."
+  },
+  "root_cause": {
+    "trajectory_schema": "nanogpt_parameter_trajectory_v1",
+    "captured_named_parameters_per_snapshot": 327,
+    "captured_named_parameters_numel": 70540512,
+    "missing_checkpoint_state_keys_count": 25,
+    "forward_critical_persistent_buffers_missing_count": 24,
+    "missing_forward_state_pattern": [
+      "transformer.h.{0..11}.mlp.c_fc.weight",
+      "transformer.h.{0..11}.mlp.c_fc.optimizer_step"
+    ],
+    "additional_tied_alias_not_independently_required": "lm_head.weight",
+    "mechanism": "MuonDirectedProductLinear registers the materialized c_fc weight and optimizer_step as persistent buffers, not parameters. The v1 all-parameter recorder serialized model.named_parameters() only. Reconstruction therefore retained freshly initialized random c_fc buffers even though the dense parameters were restored exactly.",
+    "terminal_snapshot_checkpoint_statement_correction": "The v2 acquisition result's terminal-snapshot equality covered the named-parameter inventory only; it did not establish complete model-state or functional equality."
+  },
+  "invalid_raw_artifacts": {
+    "cells_csv_sha256": "d069a5bcbf7a9159768454852bddb97b9e7933a3d12ec6894504e806886bbcb8",
+    "finite_step_csv_sha256": "08625f70419d5cf3abe2503c1cc426b6bdb425a37f5f288414639b81419243b7",
+    "result_json_sha256": "c72499b28d0ecb601453bd55fc7564f4c3cf6f4c4bca311c9849a8f7f0790c1f",
+    "output_error_scales_csv_sha256": "60629153f4209f53ad6f76f68a88b625b6b9460d1c63c8d6cbd090982ab92c01",
+    "foreground_log_sha256": "2b1c11ac953c03279341a0c22dc01449817bb53ff9383b6e73d58dd961806018"
+  },
+  "supersession": {
+    "v2_acquisition_parent_equivalence": "retained for the live training trajectory and named-parameter/probe identity only",
+    "v2_acquisition_zero_update_calibration_authorization": false,
+    "registered_calibration_plan_execution_authorization": false,
+    "reason": "The prerequisite exact functional-state replay was not satisfied.",
+    "replacement": "Acquire a distinct v3 trajectory with all unique named parameters and all persistent named buffers, then require reconstructed fixed-evaluation CE agreement at every phase before recalibration."
+  },
+  "authorization": {
+    "interpret_metric_ranking": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false,
+    "blind_rerun": false,
+    "full_state_v3_acquisition_after_tests_and_mfu_gate": true
+  }
+}

@@ -56,6 +56,7 @@ from examples.nanogpt.muon_matched_givens import (
     apply_givens_flow,
     diagonal_metric_angles,
 )
+from examples.nanogpt.parameter_trajectory import FULL_STATE_SCHEMA_VERSION
 
 
 SCHEMA_VERSION = "mai_124m_mlp_cproj_diagonal_kfac_selector_result_v1"
@@ -73,6 +74,18 @@ VARIANTS = (
     "diagonal_kfac_selector_output32",
 )
 SMALLEST_PASS_ORDER = VARIANTS[1:]
+
+
+def require_full_state_snapshot(snapshot: dict[str, Any]) -> None:
+    if (
+        snapshot.get("schema_version") != FULL_STATE_SCHEMA_VERSION
+        or snapshot.get("all_buffers") is not True
+        or not isinstance(snapshot.get("buffers"), dict)
+    ):
+        raise ValueError(
+            "functional metric calibration requires a full-state v2 "
+            "snapshot with persistent buffers"
+        )
 WINDOWS = ("fit", "holdout")
 
 
@@ -631,6 +644,7 @@ def main() -> None:
     for phase_index, (phase_start, phase_end) in enumerate(phases):
         phase_started = time.perf_counter()
         snapshot = load_snapshot(snapshot_paths[phase_start])
+        require_full_state_snapshot(snapshot)
         if snapshot.get("run_identity_sha256") != run_identity:
             raise ValueError("snapshot run identity mismatch")
         model = model_from_snapshot(snapshot, args.device)
