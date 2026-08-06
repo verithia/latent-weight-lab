@@ -160,14 +160,14 @@
   "host_transfer_policy": "scientific settings are unchanged; only data_dir, out_dir, and explicit host-transfer metadata differ",
   "host_transfer_source_config": "examples/nanogpt/configs/y400_mai_v3_124m_fullattn_cayley_horizon_capacity_qk32_v16_cproj8_targeted_bilateral_fullcayleylr_5tpp_lr24e4.json",
   "hpo_stage": "repaired_attention_cfc_late_cproj_lwt_124m_5tpp",
-  "implementation_commit": "880892eae3587e081cc36459d8f00f115da935fa",
+  "implementation_commit": "cf21de414f60330959e263fd51d45c5d363bea36",
   "implementation_source_hashes": {
     "examples/nanogpt/mfu_preflight.py": "02ffc6f2356a0fc0da4493739e1a454a453bc0045b167e1c18c5bfb7e62f74db",
     "examples/nanogpt/model.py": "85b5a69f6fd3042bf3b4c5d40a67c380f75f4cb1a88467b8e9dbdbd20fcb93cb",
     "examples/nanogpt/muon.py": "265544e19f1ea1c923bbd0d8cb43655042b494c6aa99bc1ebd00947359dc418e",
     "examples/nanogpt/muon_matched_givens.py": "33810ce922e1d1436ffc2981b04c13870831dd8810ef9d1f79c8266b1801f05e",
     "examples/nanogpt/test_mlp_cproj_layer_allocation.py": "fd38b7735cfff65fce5a087839f9b53d0f2baaad9f21edcfcfe694d430010e0a",
-    "examples/nanogpt/train.py": "14eaf95c92f2e2b98b63434f1637a3e9bd8bdd6594a5f9b0476b7fcbe04b7258",
+    "examples/nanogpt/train.py": "abc8e564767b69b6a1f22b717c11044209ea42992229e7fb5fae468aa5ab892a",
     "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
   },
   "inherit_dense_fallback_scale_from": "y400_mai_v2_124m_muon_20tpp_selected",
