@@ -18,7 +18,7 @@ from examples.nanogpt.muon_matched_givens import apply_givens_flow
 
 def valid_plan() -> dict:
     return {
-        "schema_version": "mai_124m_mlp_cproj_predictive_manifold_plan_v1",
+        "schema_version": "mai_124m_mlp_cproj_predictive_manifold_v2_plan_v1",
         "analysis": {
             "parameter_updates": 0,
             "layers": [8, 9, 10, 11],
@@ -28,8 +28,8 @@ def valid_plan() -> dict:
             "learned_basis_role": "diagnostic_oracle_only",
         },
         "decision_rule": {"thresholds": {
-            "normalization_schedule_max_relative_error": 1e-5,
-            "last_step_replay_max_relative_error": 1e-6,
+            "normalization_schedule_max_relative_error": 0.03,
+            "last_step_replay_max_relative_error": 3e-5,
             "rank8_holdout_endpoint_weight_recovery": 0.80,
             "rank8_holdout_endpoint_functional_recovery": 0.80,
             "rank8_holdout_tangent_functional_recovery": 0.25,

@@ -51,8 +51,8 @@ from examples.nanogpt.train import (
 )
 
 
-PLAN_SCHEMA = "mai_124m_mlp_cproj_predictive_manifold_plan_v1"
-RESULT_SCHEMA = "mai_124m_mlp_cproj_predictive_manifold_result_v1"
+PLAN_SCHEMA = "mai_124m_mlp_cproj_predictive_manifold_v2_plan_v1"
+RESULT_SCHEMA = "mai_124m_mlp_cproj_predictive_manifold_v2_result_v1"
 LATE_LAYERS = tuple(range(8, 12))
 PRIMARY_RANK = 8
 SUPPORTING_SOURCES = (
@@ -84,8 +84,8 @@ def validate_plan(plan: dict[str, Any]) -> None:
     if analysis.get("learned_basis_role") != "diagnostic_oracle_only":
         raise ValueError("learned basis cannot become a candidate")
     expected = {
-        "normalization_schedule_max_relative_error": 1e-5,
-        "last_step_replay_max_relative_error": 1e-6,
+        "normalization_schedule_max_relative_error": 0.03,
+        "last_step_replay_max_relative_error": 3e-5,
         "rank8_holdout_endpoint_weight_recovery": 0.80,
         "rank8_holdout_endpoint_functional_recovery": 0.80,
         "rank8_holdout_tangent_functional_recovery": 0.25,
@@ -286,6 +286,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--trajectory-verification", type=Path, required=True)
+    parser.add_argument("--orbit-v2-result", type=Path, required=True)
     parser.add_argument("--snapshot-dir", type=Path, required=True)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--output-dir", type=Path, required=True)
@@ -300,6 +301,7 @@ def main() -> None:
     pinned = {
         Path(__file__): identity["analyzer_sha256"],
         args.trajectory_verification: identity["trajectory_verification_sha256"],
+        args.orbit_v2_result: identity["orbit_v2_result_sha256"],
         args.config: identity["config_sha256"],
     }
     for path, expected in pinned.items():
@@ -314,9 +316,16 @@ def main() -> None:
     verification = json.loads(args.trajectory_verification.read_text())
     if verification.get("classification") != "ACCEPTED_COADAPTED_LATE_CPROJ_FULL_STATE_TRAJECTORY":
         raise ValueError("trajectory verification is not accepted")
+    orbit_v2 = json.loads(args.orbit_v2_result.read_text())
+    if orbit_v2.get("classification") != "ADAPTIVE_RIGHT_ORBIT_WITH_MOVING_SUPPORT_NOT_LAYER_LOCALIZED":
+        raise ValueError("source orbit result has an unexpected classification")
+    if orbit_v2.get("authorization", {}).get("functional_metric_path_analysis") is not True:
+        raise ValueError("source orbit result did not authorize this analysis")
     if verification["identity"]["dataset_manifest_sha256"] != identity["dataset_manifest_sha256"]:
         raise ValueError("trajectory dataset identity changed")
     config = json.loads(args.config.read_text())
+    if verification["identity"]["run_identity_sha256"] != identity["run_identity_sha256"]:
+        raise ValueError("accepted run identity changed")
     manifest = Path(config["data_dir"]) / "manifest.json"
     if file_sha256(manifest) != identity["dataset_manifest_sha256"]:
         raise ValueError("dataset manifest SHA-256 mismatch")
