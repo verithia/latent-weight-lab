@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_late_cproj_lwt_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_late_cproj_lwt_5tpp_exact_config_mfu_result",
+  "recorded_at": "2026-08-06",
+  "classification": "LATE_CPROJ_LWT_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_plan.json",
+    "sha256": "b0c4fea15a310f339bdad4634e3657616918a896d9143c26d63bb21b62bfc296"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json",
+    "sha256": "684f24b4aa6482aef98ee776d9e71f101ff9a56d9f72f6a783f9997ea91d717c"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "b8acd30fd1b16b251367b1e0a8940420463731a8",
+    "implementation_commit": "10b64e939e23e3e05d1590b4c379d78ac2caa08c",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 MAPPING_NETWORKS_NATIVE_CACHE=/mnt/ssd-data/orj/MappingNetworks/outputs/native_cache /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp/performance_preflight.json --min-fraction 0.20 --warmup-updates 1 --timed-updates 8",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0
+  },
+  "correctness": {
+    "remote_focused_tests": "21 passed",
+    "dense_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "procedural_cproj_layers": [8, 9, 10, 11],
+    "checkpoint_wall_clock_seconds": 7200,
+    "registered_deterministic_resume_required": true,
+    "native_extension_required": true,
+    "native_extension_loaded": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp/performance_preflight.json",
+    "sha256": "a92b0e956360d9838cee279c7f6ae2540fb04e249b98a40f304da6308287762b",
+    "preflight_log_sha256": "c9316c34d71f4b561fa04014c745816b53a8e3bb1d313b96e8caa5436d598aea"
+  },
+  "failed_preflight_attempt": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp/performance_preflight_attempt1_failed_validation.json",
+    "sha256": "9812aebec81a33f9a5aee5f6215a3297767553df5b0174c25d47e531ba34601e",
+    "classification": "PREMODEL_ARGUMENT_VALIDATION_FAILURE",
+    "parameter_updates_persisted": 0,
+    "scientific_data_produced": false,
+    "repair_commit": "cf21de414f60330959e263fd51d45c5d363bea36"
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_peak_tflops": 414.32389868357154,
+    "iter_ms": 2034.75875,
+    "tokens_per_second": 128833.9875,
+    "model_tflops": 96.2203623599232,
+    "mfu_fraction": 0.23223464218608555,
+    "minimum_required_mfu_fraction": 0.2,
+    "headroom_percentage_points": 3.223464218608554,
+    "peak_mib": 35592.34,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "estimated_raw_training_minutes": 80.4687079375,
+    "timing_breakdown_ms": {
+      "prepare": 3.6425,
+      "forward_backward": 1654.31,
+      "flush": 4.5625,
+      "gradient": 1.9825,
+      "optimizer": 367.74625,
+      "data": 0.89,
+      "other": 1.625
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "one_2373_update_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "parallel_experiment_authorized": false,
+    "larger_rung_authorized": false,
+    "required_monitoring": "one idempotent terminal-only watchdog; callback only on clean completion or actionable error"
+  }
+}
