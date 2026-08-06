@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_run_metadata_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_parent_nonintervening_metric_acquisition_running_record",
+  "recorded_at": "2026-08-06T17:31:00+08:00",
+  "classification": "RUNNING_NONINTERVENING_SAME_GAUGE_5TPP_METRIC_ACQUISITION",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442",
+    "name": "pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1186544,
+    "pgid": 1186544,
+    "started_at": "2026-08-06T17:27:08+08:00",
+    "state": "running",
+    "initial_train_ce": 10.9991,
+    "initial_validation_ce": 10.9991,
+    "first_verified_iteration": 20,
+    "max_iters": 2373,
+    "estimated_raw_training_minutes": 79.84903305555555,
+    "expected_wall_minutes": [82, 90]
+  },
+  "launch": {
+    "execution_git_commit": "9a9af46",
+    "repository": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "launcher": "examples/nanogpt/launch_y400_ladder_detached.sh",
+    "command": [
+      "env",
+      "PYTHON_BIN=/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "examples/nanogpt/launch_y400_ladder_detached.sh",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "pre_run_failed_attempt": {
+      "scientific_process_started": false,
+      "artifacts_created": false,
+      "reason": "launcher defaulted to system python3 without torch during pre-launch validation",
+      "repair": "set PYTHON_BIN to the pinned project virtualenv",
+      "config_or_code_changed": false
+    }
+  },
+  "identity": {
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_plan.json",
+    "plan_sha256": "e01cd9bbc56787846c95c9a6948eeafc278365d9398fb47d2f3817896946d4e1",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp.json",
+    "config_sha256": "d9395addcac32933c3c62a7d10aad7e26caa356b4957901482373be1150498fe",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_mfu_result.json",
+    "mfu_result_sha256": "ba02722fbe6e271e27f462fbba51e845b602675cdd8b9377fdea758ca34a03ba",
+    "provenance_sha256": "ef63973238468d2565cee317734e8173ac9a4e283524eea3470969654063d8e4",
+    "archived_config_sha256": "d9395addcac32933c3c62a7d10aad7e26caa356b4957901482373be1150498fe",
+    "archived_mfu_certificate_sha256": "a40a59cd068e6e71f8fe595a27a38a2c22e9d59cd344826e44c953382a9bc4fc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "paths": {
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442.log",
+    "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442.json",
+    "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442.json",
+    "scientific_output": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp/scientific"
+  },
+  "performance": {
+    "mfu_fraction_with_diagnostic_io": 0.23393890312469937,
+    "tokens_per_second": 129842.46400061637,
+    "diagnostic_io_adjusted_iter_ms": 2018.9388888888889,
+    "peak_mib_preflight": 35535.27,
+    "live_gpu_memory_mib": 48276,
+    "gpu_total_memory_mib": 97887,
+    "live_gpu_utilization_percent": 99,
+    "live_gpu_power_w": 484.56,
+    "live_gpu_temperature_c": 52,
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "monitoring": {
+    "launch_agent": "com.mappingnetworks.pro6.cprojmetricacqv25tpp",
+    "state_key": "pro6_124m_cproj_metric_acquisition_v2_5tpp",
+    "terminal_only": true,
+    "milestone_callbacks": false,
+    "heartbeats": false,
+    "stall_minutes": 20,
+    "poll_interval_seconds": 60,
+    "sent_callbacks_at_record_time": 0,
+    "service_running": true,
+    "terminal_action": "verify all artifacts and the unchanged 0.005 CE parent-equivalence gate; only full acceptance unlocks zero-update analysis"
+  },
+  "decision": {
+    "corrected_acquisition_active": true,
+    "parallel_or_automatic_rerun_authorized": false,
+    "zero_update_metric_calibration_before_acceptance_authorized": false,
+    "candidate_structure_implementation_authorized": false,
+    "candidate_language_model_training_authorized": false
+  }
+}
