@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_bounded_integrated_trajectory_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_bounded_integrated_trajectory_plan",
+  "registered_at": "2026-08-07T03:20:00+08:00",
+  "status": "registered_before_execution",
+  "scientific_question": "Does the independently supported decay-0.5 residual memory stabilize the accepted bilateral c_proj chart on mature integrated paths, or is the remaining c_proj gap a chart-family failure?",
+  "theory": {
+    "fixed_chart": "Keep hidden64+24 and output32 bilateral passes, the exact same-gauge full-state snapshots, and the observed best eight-substep straight-chord cadence fixed. No basis, allocation, connectivity, or task-selected direction is added.",
+    "candidate": "At substep t use corrected request u_t + 0.5 e_t and set e_(t+1) to corrected request minus the realized chart update. This is the same bounded residual-memory coefficient that won terminally at 350M and transferred to 690M.",
+    "control": "A zero-feedback arm uses the identical chart and requests but discards compression residual. It determines whether residual memory itself is useful rather than merely bounded.",
+    "transport": "A non-reset decay-0.5 arm starts at step zero and follows all four dense phase chords without resetting its weight or feedback to a dense endpoint. This is the causal coarse-transport discriminator.",
+    "closure": "If decay 0.5 cannot pass exact phase-local and non-reset fixed-CE gates, close the bilateral mature-path family. Do not sweep cadence or invent another basis from this trajectory."
+  },
+  "evidence_before_registration": {
+    "full_carry_straight8_aggregate_recovery": 0.651554,
+    "full_carry_straight8_terminal_validation_ce_gap": 0.005738496780395508,
+    "full_carry_straight8_maximum_feedback_fro": 5.2305989265441895,
+    "full_carry_straight32_terminal_validation_ce_gap": 0.02448272705078125,
+    "full_carry_sequential32_terminal_validation_ce_gap": 2.2314748764038086,
+    "earlier_decay0p5_endpoint_recovery": 0.5648986145974112,
+    "earlier_decay1_endpoint_recovery": 0.8410253750577421,
+    "interpretation": "The chart has nontrivial integrated capacity, but full carry dominates shrinking requests and drifts. Decay 0.5 is the only already-supported scalar intervention; zero carry is its minimal ablation."
+  },
+  "identity": {
+    "integrated_trajectory_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_integrated_trajectory_capacity_result.json",
+    "integrated_trajectory_result_sha256": "402e04c553e3d632f0ae41889d497ec4ba9725c726b55150803ee26892f4db4d",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp.json",
+    "config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "straight_chord_substeps": 8,
+    "variants": {
+      "phase_zero_feedback": {"feedback_decay": 0.0},
+      "phase_decay0p5": {"feedback_decay": 0.5},
+      "sequential_decay0p5": {"feedback_decay": 0.5}
+    },
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260807,
+      "weight_decay": 0.0,
+      "learning_rate": 1.0
+    },
+    "fixed_validation": {
+      "split": "validation",
+      "eval_iters": 400,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "eval_seed": 20260715,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+    },
+    "measurements": [
+      "phase-local endpoint recovery for zero and decay-0.5 carry at every phase and layer",
+      "exact fixed-window decay-0.5 validation CE at all four phase endpoints",
+      "terminal exact CE for zero-feedback and non-reset sequential decay-0.5 controls",
+      "terminal feedback norms and minimum layer-phase recovery"
+    ]
+  },
+  "decision_rule": {
+    "thresholds": {
+      "phase_decay0p5_geometric_recovery_minimum": 0.55,
+      "phase_decay0p5_minimum_layer_phase_recovery": 0.0,
+      "phase_decay0p5_maximum_validation_ce_gap": 0.01,
+      "phase_decay0p5_terminal_validation_ce_gap": 0.005,
+      "sequential_decay0p5_terminal_validation_ce_gap": 0.02,
+      "phase_decay0p5_maximum_feedback_fro": 2.6153
+    },
+    "threshold_basis": "Recovery 0.55 is the previously supported bounded-carry level. The feedback cap is one half of the observed full-carry straight8 maximum. Functional thresholds retain the preregistered 0.005 terminal, 0.01 phase, and 0.02 transport tolerances.",
+    "interpretation": {
+      "joint_pass": "authorize only a bounded chart-transport theory; implementation and training remain separately gated",
+      "phase_pass_transport_fail": "the chart has target-selected phase capacity but lacks causal transport; do not implement or train",
+      "phase_fail": "close the bilateral mature-path family and do not run another cadence or basis sweep"
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_bounded_integrated_trajectory_v1"
+  },
+  "authorization": {
+    "run_zero_update_bounded_feedback_analysis": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
