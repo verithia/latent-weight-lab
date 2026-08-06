@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_repaired_attention_whole_mlp_functional_layer_allocation_sealed_result_v1",
+  "artifact_kind": "124m_repaired_attention_whole_mlp_functional_layer_allocation_zero_update_result",
+  "recorded_at": "2026-08-06",
+  "classification": "REJECT_WHOLE_MLP_FUNCTIONAL_LAYER_ALLOCATION",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_whole_mlp_functional_layer_allocation_plan.json",
+    "sha256": "c5a51f2e6d2fd9495ac0bb70143312e39fc590ab69c2cbec6a6c68383f1c5b61",
+    "registration_commit": "894b573f5c89614d99b33834a65af42ce70480e8"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "dc6d64043f4f8861d74a820972aedd62f7c15fe1",
+    "entrypoint": "examples.nanogpt.analyze_whole_mlp_functional_layer_allocation",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-06T05:30:37.760598+00:00",
+    "elapsed_seconds": 192.22554469108582,
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/whole_mlp_functional_layer_allocation_v1"
+  },
+  "identity": {
+    "joint_checkpoint_sha256": "6b3c9cadc169b9dd234e111428dc22b4390be79561f98d178e8f105747612a24",
+    "donor_checkpoint_sha256": "3d4b893cd59d384a404daf439742e03614dc6d7d0992353e0099429261a53a02",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_checkpoint_ce": {
+    "joint_control": {
+      "primary": 3.664406716823578,
+      "confirmation": 3.652073420584202
+    },
+    "unchanged_donor_control": {
+      "primary": 3.631481371819973,
+      "confirmation": 3.6172274500131607,
+      "gain_vs_joint_primary": 0.03292534500360489,
+      "gain_vs_joint_confirmation": 0.03484597057104111
+    },
+    "all12_whole_mlp_patch": {
+      "primary": 11.66495767235756,
+      "confirmation": 11.673934131860733,
+      "gain_vs_joint_primary": -8.000550955533981,
+      "gain_vs_joint_confirmation": -8.021860711276531
+    },
+    "least_harmful_single_layer": {
+      "layer": 11,
+      "primary": 4.894210144877434,
+      "confirmation": 4.8867955803871155,
+      "gain_vs_joint_primary": -1.229803428053856,
+      "gain_vs_joint_confirmation": -1.2347221598029137
+    }
+  },
+  "primary_single_layer": {
+    "ranking_least_to_most_harmful": [11, 10, 9, 8, 7, 6, 5, 4, 3, 1, 2, 0],
+    "gain_vs_joint": {
+      "0": -5.130730926990509,
+      "1": -4.670469790697098,
+      "2": -4.756740212440491,
+      "3": -4.596037209033966,
+      "4": -4.162507027387619,
+      "5": -3.6554801762104034,
+      "6": -3.1523454934358597,
+      "7": -2.4486779123544693,
+      "8": -2.0977969020605087,
+      "9": -1.8522333353757858,
+      "10": -1.3967194557189941,
+      "11": -1.229803428053856
+    }
+  },
+  "integrity": {
+    "joint_module_and_parameter_identity_unchanged": true,
+    "donor_module_and_parameter_identity_unchanged": true,
+    "joint_mlp_state_fingerprint_before": "79183dbe7f0f15ff9381b6f255bff807ac1986d34047cc1fc202e14b196fcd83",
+    "joint_mlp_state_fingerprint_after": "79183dbe7f0f15ff9381b6f255bff807ac1986d34047cc1fc202e14b196fcd83",
+    "donor_mlp_state_fingerprint_before": "259d78675a6b1001090382fb6ba2b073bf73d8f5d6036a6abc2bc5724b6df759",
+    "donor_mlp_state_fingerprint_after": "259d78675a6b1001090382fb6ba2b073bf73d8f5d6036a6abc2bc5724b6df759"
+  },
+  "decision": {
+    "passed": false,
+    "selected_k": null,
+    "mixed_layer_training_implementation_authorized": false,
+    "exact_config_mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "interpretation": [
+      "The untouched donor checkpoint improves both fresh validation windows by about 0.034 CE, so its advantage and the evaluation are real.",
+      "Preserving the complete donor MLP internal function does not make any layer portable into the independently trained joint checkpoint. Every single-layer arm is harmful and the damage grows across cumulative arms.",
+      "The c_fc-only donor advantage is globally co-adapted with attention, normalization, residual-stream states, later layers, and the head; it cannot identify post-hoc dense MLP exceptions.",
+      "Close cross-run component transplantation. A new c_proj structure must remain in the same model gauge from initialization, such as a fixed exact dense base plus a zero-initialized procedural local update, rather than importing a component learned in another run."
+    ],
+    "next_action": "Audit whether the code already contains a true fixed-exact-dense-base plus zero-initialized procedural c_proj delta. If absent, preregister a minimal same-gauge structural discriminator before implementation; do not infer layer subsets from these transplant losses."
+  },
+  "artifacts": {
+    "raw_result_sha256": "c8b75858570a6c5e095b6f7dd34d152c7f7e7750919e8791249a837b61afd0c3",
+    "rows_sha256": "8b1f7d60aa631c42b2b2329e4667412f10894179d4091f634f81710f867ca9ba",
+    "successful_foreground_log_sha256": "a831587b341d2bc4528df274b3d99655079078c693ab5e3b5395d9700badf1ac"
+  },
+  "terminal_health": {
+    "gpu_memory_mib": 282,
+    "gpu_utilization_percent": 0,
+    "gpu_temperature_c": 44,
+    "workspace_bytes": 227696745894,
+    "filesystem_available_bytes": 1681795305472
+  }
+}
