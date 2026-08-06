@@ -1,0 +1,149 @@
+{
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "zero_update_coadapted_manifold_analysis": true
+  },
+  "classification": "ACCEPTED_COADAPTED_LATE_CPROJ_FULL_STATE_TRAJECTORY",
+  "curve_reproduction": {
+    "passed": true,
+    "rows": [
+      {
+        "absolute_delta_ce": 0.0043999999999999595,
+        "accepted_validation_ce": 3.851,
+        "delta_ce": 0.0043999999999999595,
+        "observed_validation_ce": 3.8554,
+        "step": 1188,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.0047999999999999154,
+        "accepted_validation_ce": 3.6998,
+        "delta_ce": 0.0047999999999999154,
+        "observed_validation_ce": 3.7046,
+        "step": 1782,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.0042957603454589766,
+        "accepted_validation_ce": 3.636904239654541,
+        "delta_ce": 0.0042957603454589766,
+        "observed_validation_ce": 3.6412,
+        "step": 2373,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.0016999999999995907,
+        "accepted_validation_ce": 4.2239,
+        "delta_ce": 0.0016999999999995907,
+        "observed_validation_ce": 4.2256,
+        "step": 594,
+        "within_tolerance": true
+      }
+    ],
+    "tolerance_ce": 0.005
+  },
+  "execution": {
+    "device": "cuda",
+    "elapsed_seconds": 91.67973613739014,
+    "entrypoint": "examples.nanogpt.verify_late_cproj_full_state_trajectory",
+    "git_commit": "61f379d55654255b3e8bf99b0be865ed97947467",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "functional_replay": {
+    "passed": true,
+    "rows": [
+      {
+        "absolute_delta_ce": 0.00003477478027313907,
+        "delta_ce": -0.00003477478027313907,
+        "logged_validation_ce": 10.9765,
+        "replayed_validation_ce": 10.976465225219727,
+        "step": 0,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.00004505691528322586,
+        "delta_ce": -0.00004505691528322586,
+        "logged_validation_ce": 4.2256,
+        "replayed_validation_ce": 4.225554943084717,
+        "step": 594,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.000021372222900328808,
+        "delta_ce": -0.000021372222900328808,
+        "logged_validation_ce": 3.8554,
+        "replayed_validation_ce": 3.8553786277770996,
+        "step": 1188,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.000031852340698357295,
+        "delta_ce": -0.000031852340698357295,
+        "logged_validation_ce": 3.7046,
+        "replayed_validation_ce": 3.7045681476593018,
+        "step": 1782,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.00001781578063964062,
+        "delta_ce": -0.00001781578063964062,
+        "logged_validation_ce": 3.6412,
+        "replayed_validation_ce": 3.6411821842193604,
+        "step": 2373,
+        "within_tolerance": true
+      }
+    ],
+    "tolerance_ce": 0.005
+  },
+  "identity": {
+    "accepted_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "checkpoint_sha256": "1c37154c864282c1ac7c11d6e09140dbc73b23c737294829be1012700ea0e6a8",
+    "config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "plan_sha256": "87f478bacd125a5a65d96954c4532a3ba3a25aa714bb5fca578c7c9ed37e56cc",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "training_log_sha256": "4e25001af011c8a28616275fb9f88b08e507d24cef4212c0013efa412fc76d0c"
+  },
+  "inventory": {
+    "buffer_count": 68,
+    "compared_buffers": 68,
+    "compared_parameters": 323,
+    "parameter_count": 323,
+    "snapshot_count": 25,
+    "snapshot_sha256_by_step": {
+      "0": "e2e15982fd826cb18ff2edbcacd0f89a09bf13641136071c15c8da70e3f815d2",
+      "99": "fe3959812a59753a19333c99b42923bde5296088e58ece0d8a080bd6ecfd5768",
+      "198": "75d826c632848510becfb19d73c2aa75aa2f997903a65c320aa64fbc71586c74",
+      "297": "024d4c9cf97e35ad4871dc23f7233c5e9237ffaf92b13b14578aaa42c89b3a7d",
+      "396": "973fa8bf2863e11cee839af239966de66a02a3609bbce36117127fb2166b5246",
+      "495": "00627de79133be7c165d0f72a1a9ea1970a9e4600a624a99d9d8d93b1623a5a0",
+      "594": "dbb237169441159cbd7f1cf661996c7beaa40be1c4307d754119998e824b08eb",
+      "693": "be8ae60259a08b2039a73702f13b6780ecd99c1ff57523e5a329a8451ffee690",
+      "792": "2f240fb032ab1f3677855d4160ae41f95349f3e1fa3d6b134236ebdd9aa2f249",
+      "891": "660bc6bd817e921c01bdb9c77684fbbdcda2419a7b0715799f26ca1e08e1f515",
+      "990": "94855b745b8f4ddd057fd2b3192154ce045ce5e93eabc792c10af0edfdc5385f",
+      "1089": "21535023452ae00fd915a03baed4d2e58ac6be4db1fff952fa0a96eece27b561",
+      "1188": "9045f7a7aa97285dbbcc5d864351e92da7942ffc26469eb63ebd933b1059ca9f",
+      "1287": "2cff5b865604bc9982c2c61c6442791e5491a5f1ebc6f33ccb4c705e2f65a53a",
+      "1386": "0631bdd8ff799e8459362dfd2606c7d1de490f8c6cb3fe9a0bf243fab905788e",
+      "1485": "adb6b3591b3dfcf9ae5455cc77718f1a8a8fff088c1b0db3e2d594dd21b22b09",
+      "1584": "018f2216383922173ecbfebd67f5cbf606e73f4d14e4866a52746f3b03e62722",
+      "1683": "428d6beae0029fc773b56de645a5e7e12397aea119be754b52169557bdc2b6dc",
+      "1782": "0f7471b0db92e3d7cd6e29a191fdd8d0c937bff1ec02d1a73feb70c58266c015",
+      "1881": "e60e728fe21333aa87d8b5db1cd894d0076d82cfa48288aafbd725aec16b76fd",
+      "1980": "e5d238396436aa9eaa5ad29b4cad7f47ec857bd53176fc0dc982aab351647c86",
+      "2079": "0721949d12106e0c24c5198eae35862d96e71f8a71040e7a0df729d2f055c045",
+      "2178": "2655cfab4a80b0b74e71be2587d95a100ee4ccfb9c64ff98cfd1213b36bf4cd5",
+      "2277": "d1820fda386a6e7adecac9995158dc6dff0a3ce6ff1e7ac0f537e2b07ca3675a",
+      "2373": "7bdd6b1f61a3025276b152d3a4ce5ab8cc1273e7c2e9e2a21abebff3a300a542"
+    }
+  },
+  "passed": true,
+  "recorded_at": "2026-08-06T20:07:37.943187+00:00",
+  "schema_version": "mai_124m_late_cproj_full_state_trajectory_verification_v1"
+}
+
