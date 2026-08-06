@@ -1,0 +1,182 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_result_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_terminal_result",
+  "recorded_at": "2026-08-06",
+  "classification": "REJECT_SYMMETRIC_CPROJ_LATE_TRACE_FREE_SPECTRAL_COLLAPSE",
+  "identity": {
+    "run_name": "pro6_mai_v3_124m_repairedattn_fullmlp_symmetriccproj_5tpp",
+    "run_id": "pro6_mai_v3_124m_repairedattn_fullmlp_symmetriccproj_5tpp_20260806T002057Z_816692",
+    "execution_git_commit": "5a7897e18603b2f90e1d358f8764940a78a42901",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_symmetriccproj_5tpp_lr24e4.json",
+    "config_sha256": "30a7080470e4d4c2578666ac32c54d000bda8a6fcc230a6daf24b2b8958333b6",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_plan.json",
+    "plan_sha256": "6be04cc086f596954ce1f97d18f6cc33ae61b268b80924e27f5ba3ad427bf578",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_mfu_result.json",
+    "mfu_result_sha256": "fc2f753bb5feca449bd92cb0019532cf4a584213576e703abbbbfab2fdbad64c",
+    "running_metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_run_metadata.json",
+    "running_metadata_sha256": "7217be54e0677f9b4cbb1db2e684ed1a01a145c23c0e61a6cb71977d12280b6e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "1e689a9e5bad77f498ba5a8cbfc3f4747dd457fca0a4db04d57d7ec23255a2ba"
+  },
+  "fixed_evaluation": {
+    "steps": [594, 1188, 1782, 2373],
+    "candidate_train_ce": [4.2622, 3.8828, 3.7471, 3.6902],
+    "candidate_validation_ce": [4.2528, 3.8694, 3.7317, 3.674018621444702],
+    "candidate_terminal_validation_ce_exact": 3.674018621444702,
+    "accepted_cfc_only_validation_ce": [4.2028, 3.8395, 3.6888, 3.625838041305542],
+    "repaired_attention_validation_ce": [4.2151, 3.8411, 3.6907, 3.6278],
+    "rejected_joint_validation_ce": [4.2666, 3.8819, 3.7252, 3.660243034362793],
+    "cproj_only_validation_ce": [4.2704, 3.877, 3.7206, 3.6562013626098633],
+    "dense_validation_ce": [4.1739, 3.7622, 3.6038, 3.5401],
+    "candidate_minus_accepted_cfc_only_ce": [0.05, 0.0299, 0.0429, 0.048180580139160156],
+    "candidate_minus_repaired_attention_ce": [0.0377, 0.0283, 0.041, 0.04621862144470201],
+    "candidate_minus_rejected_joint_ce": [-0.0138, -0.0125, 0.0065, 0.01377558708190918],
+    "candidate_minus_cproj_only_ce": [-0.0176, -0.0076, 0.0111, 0.017817258834838867],
+    "candidate_minus_dense_ce": [0.0789, 0.1072, 0.1279, 0.13391862144470235]
+  },
+  "decision_rule": {
+    "primary_terminal_validation_ce_maximum": 3.635838041305542,
+    "secondary_terminal_validation_ce_maximum": 3.6478,
+    "maximum_fixed_checkpoint_regression_vs_rejected_joint_ce": 0.005,
+    "primary_passed": false,
+    "secondary_passed": false,
+    "curve_gate_passed": false,
+    "primary_margin_ce": 0.038180580139160156,
+    "secondary_margin_ce": 0.026218621444702218,
+    "curve_violations": {
+      "1782": 0.0015,
+      "2373": 0.00877558708190918
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "compute_equivalence": {
+    "method": "piecewise linear inversion in validation CE versus log fixed-model compute; at most one adjacent interval extrapolation",
+    "tool_path": "examples/nanogpt/fixed_model_compute_equivalence.py",
+    "dense_match_steps": 1488.8349463511072,
+    "candidate_over_dense_terminal_token_compute": 1.5938637159316,
+    "common_loss_candidate_over_dense": {
+      "loss_low": 3.674018621444702,
+      "loss_high": 4.1739,
+      "samples": 101,
+      "minimum": 1.1533179525664228,
+      "median": 1.1897033574739,
+      "maximum": 1.5938637159315996
+    },
+    "candidate_over_repaired_attention_terminal_token_compute": 1.234244526363954,
+    "common_loss_candidate_over_repaired_attention": {
+      "minimum": 1.0540799814648119,
+      "median": 1.0665932900808162,
+      "maximum": 1.2342445263639539
+    },
+    "candidate_over_cfc_only_terminal_token_compute": 1.2450516989942535,
+    "candidate_over_rejected_joint_terminal_token_compute": 1.0626242149432445,
+    "candidate_over_cproj_only_terminal_token_compute": 1.0824682368666203
+  },
+  "terminal_mechanism_audit": {
+    "interpretation": "The determinant-one symmetric shear cannot change the geometric-mean singular value. It improves early c_proj task loss by redistributing singular energy, then over-concentrates the spectrum and amplifies middle-layer compression residuals while leaving the dominant dense volume gap unchanged.",
+    "mean_across_12_cproj_layers": {
+      "candidate_frobenius_norm": 5.14181113243103,
+      "rejected_joint_frobenius_norm": 4.581921100616455,
+      "dense_cproj_parent_frobenius_norm": 10.695483684539795,
+      "candidate_stable_rank": 155.6045742034912,
+      "rejected_joint_stable_rank": 344.3185272216797,
+      "dense_cproj_parent_stable_rank": 179.2941697438558,
+      "candidate_condition_number": 6.740136583646138,
+      "rejected_joint_condition_number": 2.96811713774999,
+      "dense_cproj_parent_condition_number": 6.211998820304871,
+      "candidate_log_singular_std": 0.4412926882505417,
+      "rejected_joint_log_singular_std": 0.271519993742307,
+      "dense_cproj_parent_log_singular_std": 0.32713665316502255,
+      "candidate_top16_energy_fraction": 0.07996294337014358,
+      "rejected_joint_top16_energy_fraction": 0.04462873314817747,
+      "dense_cproj_parent_top16_energy_fraction": 0.06245066784322262
+    },
+    "dense_parent_singular_gap_from_rejected_joint": {
+      "mean_log_singular_shift": 0.8115279227495193,
+      "centered_log_singular_rmse": 0.06000332875798146,
+      "frobenius_norm_ratio": 2.3343253334363303,
+      "interpretation": "The missing dense spectrum is dominated by a positive trace/volume shift rather than centered shape change."
+    },
+    "dense_parent_singular_gap_from_candidate": {
+      "mean_log_singular_shift": 0.8129906555016836,
+      "centered_log_singular_rmse": 0.12459357765813668,
+      "frobenius_norm_ratio": 2.077565689881643,
+      "interpretation": "The trace-free shear leaves the mean log-singular gap unchanged and approximately doubles centered spectral-shape error."
+    },
+    "terminal_symmetric_shear_coordinate_max_abs": 0.0011514838552102447,
+    "preflight_symmetric_shear_coordinate_max_abs": 0.00002291924967824053,
+    "candidate_cproj_compression_residual_fro_min": 0.007794026751071215,
+    "candidate_cproj_compression_residual_fro_max": 0.11084187775850296,
+    "rejected_joint_cproj_compression_residual_fro_min": 0.007650540675967932,
+    "rejected_joint_cproj_compression_residual_fro_max": 0.008444616571068764,
+    "candidate_middle_layer_residual_inflation_observed": true
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.20130144672285552,
+    "iter_ms": 2330.895,
+    "tokens_per_second": 112466.7875,
+    "peak_mib": 35697.99,
+    "candidate_over_rejected_joint_update_time_ratio": 1.052486255201711,
+    "candidate_over_accepted_cfc_only_update_time_ratio": 1.205772293534201,
+    "wall_time_seconds": 5705,
+    "algorithmic_generator_flops_instrumented": false
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_symmetriccproj_5tpp/scientific/ckpt.pt",
+    "sha256": "b4d093eb9ca63c6630c728837f17c6195c189339dd58a9dfad4c19068350837b",
+    "bytes": 1242782468,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_symmetriccproj_5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "20d330577dd50e5fe8420e2a161aea4ab1f0da167deaf485204e2a97327e02fc",
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "checkpoint_reason": "evaluation",
+    "best_validation_ce_exact": 3.674018621444702,
+    "model_floating_tensor_count": 376,
+    "optimizer_floating_tensor_count": 993,
+    "model_and_optimizer_all_finite": true,
+    "full_rng_state_present": true
+  },
+  "terminal_artifacts": {
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_fullmlp_symmetriccproj_5tpp_20260806T002057Z_816692.log",
+      "sha256": "c58c9903b7fcd48b84167ea8dc5e32dcb939364eaf1f37a9575e637b1fd8f5fb"
+    },
+    "status": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_fullmlp_symmetriccproj_5tpp_20260806T002057Z_816692.json",
+      "sha256": "5aa570aaeb3510f6d20e957fbb812a21665d3da1e5454898d0791e93d45fcf6b",
+      "classification": "clean",
+      "exit_code": 0,
+      "finished_at": "2026-08-06T09:56:04+08:00"
+    },
+    "archived_config_sha256": "30a7080470e4d4c2578666ac32c54d000bda8a6fcc230a6daf24b2b8958333b6",
+    "archived_mfu_certificate_sha256": "4a97235dd2f1f7071d990c693b3e222d9a7412ef497c99f53d11951ff7c6c14a"
+  },
+  "resource_release": {
+    "gpu_memory_mib": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 0,
+    "gpu_power_watts": 22.86,
+    "gpu_temperature_celsius": 35,
+    "workspace_bytes": 226448832231,
+    "workspace_gib": 210.89695043023676,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1683043573760
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.symmetriccproj5tpp",
+    "terminal_delivered_once": true,
+    "progress_callbacks_delivered_once": [20, 50],
+    "terminal_100_percent_delivered_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-06T09:56:04+08:00"],
+    "stopped_cleanly": true,
+    "stderr_empty": true
+  },
+  "decision": {
+    "selected_for_full_mlp_scaling": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "tune_symmetric_shear_stage_neighbor_condition_or_lr": false,
+    "next_action": "Close the trace-free sparse symmetric-shear family. Preregister one distinct trace/volume discriminator: retain repaired attention, accepted c_fc, hidden64+24 c_proj Givens, and decay-0.5 feedback, then fit one ephemeral positive global radial scale per c_proj layer from the remaining corrected Muon target and fold it into the materialized weight. This directly tests the dominant mean-log-singular gap without a learned gain, basis, adapter, or inference transform. Require focused exact-resume/default-off tests and a fresh exact-config >=20% MFU foreground gate before one matched 124M/5TPP run."
+  }
+}
