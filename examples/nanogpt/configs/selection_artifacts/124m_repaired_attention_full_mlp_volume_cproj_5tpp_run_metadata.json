@@ -1,0 +1,137 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_volume_cproj_5tpp_run_metadata_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_volume_cproj_5tpp_running_record",
+  "recorded_at": "2026-08-06T10:40:57+08:00",
+  "classification": "RUNNING_AFTER_EXACT_CONFIG_MFU_AND_STRUCTURAL_GATE",
+  "scientific_identity": {
+    "run_name": "pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp",
+    "run_id": "pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 907067,
+    "pgid": 907067,
+    "started_at": "2026-08-06T10:39:41+08:00",
+    "updates": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "execution_git_commit": "c2c611cd450d6ef139c0b79f1b518975e01a328c",
+    "implementation_commit": "c2a3d01f9f948322e92a1cd7d9911b949a93d8d1",
+    "configuration_provenance_commit": "c35ca33d728aba9ad7032b3c615c744c9c81a925",
+    "mfu_result_commit": "c2c611cd450d6ef139c0b79f1b518975e01a328c",
+    "remote_repository": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "remote_worktree_clean_at_launch": true
+  },
+  "code_and_command": {
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973.config.json"
+    ],
+    "launcher": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "cuda_visible_devices": "0"
+  },
+  "immutable_inputs": {
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_volume_cproj_5tpp_plan.json",
+      "sha256": "d5446e543e4d4752771d997a38c4587fc58fb41326db68edc5f202454f850a5b"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_volumecproj_5tpp_lr24e4.json",
+      "archived_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973.config.json",
+      "sha256": "55f353fca4a61fb83b317ffe03c4bf7101c8833fa24ef757df08f31c6f1823dd"
+    },
+    "dataset_manifest": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_evaluation_runtime_digest": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "performance_preflight": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973.mfu.json",
+      "sha256": "77d6425b257586ab57eb5510c698ea6724ad45cf7423ac254c84bc64343a9775"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_volume_cproj_5tpp_mfu_result.json",
+      "sha256": "b16c7aaf3b5411ad9e43fdf72e7055c1d08a8750d6f4ec28e56fa984a87f822c"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973.json",
+      "sha256": "73b55a36d6d55670bebafe1d7656df33187a302f22b079c86b82f64da242156a"
+    }
+  },
+  "gates": {
+    "focused_optimizer_and_watcher_tests_local": 67,
+    "exact_operator_and_config_tests_local": 44,
+    "exact_operator_and_config_tests_remote": 44,
+    "all_tests_passed": true,
+    "mfu_fraction": 0.2126547187773473,
+    "minimum_mfu_fraction": 0.2,
+    "iter_ms": 2222.4700000000003,
+    "tokens_per_second": 117951.79125,
+    "model_tflops": 88.09293506557823,
+    "peak_vram_mib": 35699.37,
+    "native_block_fht_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "maximum_abs_global_log_volume_coordinate": 0.000011486261428217404,
+    "all_losses_and_coordinates_finite": true,
+    "any_coordinate_nonzero": true,
+    "coordinate_clamp_active": false,
+    "condition_number_ratio_by_construction": 1
+  },
+  "decision_thresholds": {
+    "primary_terminal_validation_ce_maximum": 3.635838041305542,
+    "secondary_terminal_validation_ce_maximum": 3.6478,
+    "maximum_fixed_checkpoint_regression_vs_rejected_joint_ce": 0.005,
+    "automatic_rerun_authorized": false,
+    "parallel_arm_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "mutable_artifacts": {
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973.log",
+    "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_fullmlp_volumecproj_5tpp_20260806T023940Z_906973.json",
+    "note": "Log and status hashes are deferred until terminal sealing because both remain mutable."
+  },
+  "initial_live_verification": {
+    "verified_at": "2026-08-06T10:40:57+08:00",
+    "process_alive": true,
+    "status": "running",
+    "last_iter": 0,
+    "initial_train_loss": 10.9662,
+    "initial_validation_loss": 10.9669,
+    "gpu_memory_mib": 48314,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 422.76,
+    "gpu_temperature_celsius": 50,
+    "workspace_bytes": 226904198825,
+    "workspace_gib": 211.32100264076144,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1682588061696,
+    "finite_and_error_free_log": true,
+    "estimated_duration_minutes_from_exact_gate": 87.8986885
+  },
+  "monitoring": {
+    "service": "com.mappingnetworks.pro6.volumecproj5tpp",
+    "state_key": "pro6_124m_volume_cproj_5tpp",
+    "state": "running",
+    "terminal_only": true,
+    "healthy_progress_callbacks": false,
+    "healthy_heartbeat_callbacks": false,
+    "callback_on_clean_completion": true,
+    "callback_on_actionable_error": true,
+    "stall_error_minutes": 20,
+    "missing_process_grace_minutes": 2,
+    "terminal_delivery_once": true,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "sent_callbacks": [],
+    "stderr_empty": true
+  }
+}
