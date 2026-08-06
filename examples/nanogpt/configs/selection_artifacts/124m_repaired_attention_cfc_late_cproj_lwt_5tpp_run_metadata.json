@@ -1,0 +1,146 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_late_cproj_lwt_5tpp_run_metadata_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_late_cproj_lwt_5tpp_running_record",
+  "recorded_at": "2026-08-06T14:01:45+08:00",
+  "classification": "RUNNING_AFTER_EXACT_CONFIG_MFU_AND_SAME_GAUGE_LAYER_ALLOCATION_GATE",
+  "scientific_identity": {
+    "run_name": "pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp",
+    "run_id": "pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1034338,
+    "pgid": 1034338,
+    "started_at": "2026-08-06T14:00:25+08:00",
+    "updates": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "execution_git_commit": "7b6cc4986581c37fca05d712f1c7b067f26a44f7",
+    "implementation_commit": "10b64e939e23e3e05d1590b4c379d78ac2caa08c",
+    "configuration_provenance_commit": "b8acd30fd1b16b251367b1e0a8940420463731a8",
+    "mfu_result_commit": "7b6cc4986581c37fca05d712f1c7b067f26a44f7",
+    "remote_repository": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "remote_worktree_clean_at_launch": true
+  },
+  "code_and_command": {
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.config.json"
+    ],
+    "launcher": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "cuda_visible_devices": "0"
+  },
+  "architecture": {
+    "repaired_attention_layers": 12,
+    "procedural_cfc_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "dense_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "procedural_cproj_layers": [8, 9, 10, 11],
+    "procedural_cproj_error_feedback_decay": 0.5,
+    "joint_training_from_initialization": true,
+    "cross_run_transplants": false,
+    "total_parameters": 61103328,
+    "trainable_parameters": 61103328,
+    "generated_weight_elements": 66060288,
+    "latent_elements": 5689824
+  },
+  "immutable_inputs": {
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_plan.json",
+      "sha256": "b0c4fea15a310f339bdad4634e3657616918a896d9143c26d63bb21b62bfc296"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json",
+      "archived_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.config.json",
+      "sha256": "684f24b4aa6482aef98ee776d9e71f101ff9a56d9f72f6a783f9997ea91d717c"
+    },
+    "dataset_manifest": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_evaluation_runtime_digest": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "performance_preflight": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.mfu.json",
+      "sha256": "a92b0e956360d9838cee279c7f6ae2540fb04e249b98a40f304da6308287762b"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_mfu_result.json",
+      "sha256": "98a5c0f5451450d316e56760b83a34e3cad7d260edc2d5230cce649b1fae1b62"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.json",
+      "sha256": "b4b23f7a2e3eeedf7c47a94261bd767a00ca0311d61f96a5f92e81398421dc50"
+    }
+  },
+  "gates": {
+    "focused_tests_remote": 21,
+    "all_tests_passed": true,
+    "mfu_fraction": 0.23223464218608555,
+    "minimum_mfu_fraction": 0.2,
+    "iter_ms": 2034.75875,
+    "tokens_per_second": 128833.9875,
+    "model_tflops": 96.2203623599232,
+    "peak_vram_mib": 35592.34,
+    "native_block_fht_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "all_losses_finite": true
+  },
+  "decision_thresholds": {
+    "terminal_validation_ce_maximum": 3.6478,
+    "all_layer_procedural_terminal_validation_ce": 3.660243,
+    "accepted_cfc_only_terminal_validation_ce": 3.625838041305542,
+    "maximum_fixed_checkpoint_regression_vs_all_layer_procedural_ce": 0.005,
+    "automatic_rerun_authorized": false,
+    "parallel_arm_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "mutable_artifacts": {
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.log",
+    "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.json",
+    "note": "Log and status remain mutable and are hashed only at terminal sealing."
+  },
+  "initial_live_verification": {
+    "verified_at": "2026-08-06T14:01:45+08:00",
+    "process_alive": true,
+    "status": "running",
+    "last_iter": 20,
+    "initial_train_loss": 10.9755,
+    "initial_validation_loss": 10.9765,
+    "gpu_memory_mib": 48284,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 99,
+    "gpu_power_watts": 502.39,
+    "gpu_temperature_celsius": 54,
+    "workspace_bytes": 228112525060,
+    "workspace_gib": 212.44634414091706,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1681379344384,
+    "finite_and_error_free_log": true,
+    "estimated_raw_training_minutes": 80.4687079375,
+    "estimated_wall_time_minutes_including_evaluation_and_checkpointing": 85
+  },
+  "monitoring": {
+    "service": "com.mappingnetworks.pro6.latecprojlwt5tpp",
+    "state_key": "pro6_124m_late_cproj_lwt_5tpp",
+    "state": "running",
+    "terminal_only": true,
+    "healthy_progress_callbacks": false,
+    "healthy_heartbeat_callbacks": false,
+    "callback_on_clean_completion": true,
+    "callback_on_actionable_error": true,
+    "stall_error_minutes": 20,
+    "missing_process_grace_minutes": 2,
+    "terminal_delivery_once": true,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "sent_callbacks": [],
+    "stderr_empty": true
+  }
+}
