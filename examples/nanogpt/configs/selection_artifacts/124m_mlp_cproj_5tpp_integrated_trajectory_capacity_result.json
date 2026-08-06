@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_integrated_trajectory_capacity_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_integrated_trajectory_capacity_sealed_result",
+  "sealed_at": "2026-08-07T02:55:00+08:00",
+  "classification": "REJECT_MATURE_PHASE_BILATERAL_CAPACITY_AT_TESTED_CADENCE",
+  "passed": false,
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "git_commit": "7624cbd4ff40aa37f86945d5b339eb0dfcb80ede",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_integrated_trajectory_capacity",
+    "parameter_updates": 0,
+    "elapsed_seconds": 186.66591453552246,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan_sha256": "9fb64490b8dc8af03cc38c508e88c3df747bb7924bf943f496ef26d40b1fa5bb",
+    "analysis_source_sha256": "259339f2ef03357a2674a47ad6922e8b9c0456ce1459eb18d6915e2672cdbbea",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "raw_result_sha256": "207197fc650656c74a4c0f705c54f6176b6e64ddb8a0b1a51b8fe753a9e78e35",
+    "cells_sha256": "811405a1122f7ad8229d5334848213593f1c1f1f333af727eff4052f8cf0841d",
+    "fixed_ce_sha256": "9f50ac6fe4a040b94c4feff7a45bdce9765f50dc9721fae41f6741202668e7ae",
+    "cell_rows": 128,
+    "fixed_ce_rows": 7,
+    "all_metrics_finite": true
+  },
+  "metrics": {
+    "phase_straight1_aggregate_geometric_recovery": 0.2773781956792569,
+    "phase_straight8_aggregate_geometric_recovery": 0.651554,
+    "phase_straight32_aggregate_geometric_recovery": 0.785761022380572,
+    "phase_straight32_minimum_layer_phase_recovery": -2.771405455585792,
+    "phase_straight32_maximum_validation_ce_gap": 0.7706542015075684,
+    "phase_straight32_terminal_validation_ce_gap": 0.02448272705078125,
+    "sequential_straight32_terminal_validation_ce_gap": 2.2314748764038086,
+    "straight32_terminal_ce_improvement_over_direct": -0.013361692428588867,
+    "straight32_terminal_ce_improvement_over_straight8": -0.018744230270385742
+  },
+  "fixed_validation": {
+    "phase_straight32_gap_by_step": {
+      "594": 0.7706542015075684,
+      "1188": 0.09814929962158203,
+      "1782": 0.014941692352294922,
+      "2373": 0.02448272705078125
+    },
+    "terminal_gap_by_variant": {
+      "phase_straight1": 0.011121034622192383,
+      "phase_straight8": 0.005738496780395508,
+      "phase_straight32": 0.02448272705078125,
+      "sequential_straight32": 2.2314748764038086
+    }
+  },
+  "decision": {
+    "capacity_passed": false,
+    "transport_passed": false,
+    "all_frozen_capacity_gates_passed": false,
+    "higher_cadence_acquisition_authorized": false,
+    "candidate_structure_theory_authorized": false
+  },
+  "interpretation": [
+    "The mature integrated trajectory is more chart-compressible than an instantaneous Muon action, but the preregistered full-carry straight32 oracle is not functionally adequate.",
+    "More refreshes are not monotonically better: terminal straight8 is +0.00574 CE while straight32 is +0.02448 and the non-reset sequential arm is +2.23147.",
+    "The terminal straight32 geometric collapse and sequential drift occur with feedback norms larger than the late-phase chord scale, matching the independently observed failure of unbounded error carry.",
+    "This result rejects full residual carry at the tested cadences. It does not reject the independently supported bounded decay-0.5 carry, which is the only remaining feedback discriminator justified without inventing a new structure."
+  ],
+  "authorization": {
+    "run_zero_update_bounded_feedback_discriminator": true,
+    "acquire_higher_cadence_trajectory": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
