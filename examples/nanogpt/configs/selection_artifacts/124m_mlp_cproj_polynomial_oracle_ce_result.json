@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_polynomial_oracle_ce_sealed_result_v1",
+  "classification": "TASK_ADAPTIVE_RESIDUAL_FUNCTIONALLY_NECESSARY",
+  "identity": {
+    "execution_commit": "56fac12f278a80cc0f7daf6bc83e8bffbdafcd0b",
+    "plan_sha256": "0729d5e759bdb0e90257663b199448a616fd73d5b1f3830054838a47ed3f4f17",
+    "analyzer_sha256": "659e45ffaff483ac96cdc3f42d21b3b65107fd5de9e044c5abdc3a0eb24cdfdf",
+    "raw_result_sha256": "971fcaec85387470999243f9febe7abd9ef96791003482d76f31c982a05831aa",
+    "raw_rows_sha256": "0f5123b25a76ecdfea0d1bc624eaf458fac8c01b0c610afb58c5e19caaf39934",
+    "multiscale_result_sha256": "622b24054c8733b4e14a9761db941ea4645a8fb5e29784da4f7ae22fe30cb5e0",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9"
+  },
+  "execution": {
+    "parameter_updates": 0,
+    "runtime_seconds": 99.07330513000488,
+    "device": "cuda",
+    "exact_replay_ce": 3.6411821842193604,
+    "exact_replay_absolute_error_ce": 0.0
+  },
+  "rank_results": {
+    "1": {
+      "validation_ce": 3.6901485919952393,
+      "validation_ce_gap": 0.048966407775878906,
+      "passes_plus_0p005_gate": false
+    },
+    "2": {
+      "validation_ce": 3.699192523956299,
+      "validation_ce_gap": 0.05801033973693848,
+      "passes_plus_0p005_gate": false
+    },
+    "4": {
+      "validation_ce": 3.6849701404571533,
+      "validation_ce_gap": 0.04378795623779297,
+      "passes_plus_0p005_gate": false
+    },
+    "8": {
+      "validation_ce": 3.6849863529205322,
+      "validation_ce_gap": 0.043804168701171875,
+      "passes_plus_0p005_gate": false
+    },
+    "16": {
+      "validation_ce": 3.6849920749664307,
+      "validation_ce_gap": 0.04380989074707031,
+      "passes_plus_0p005_gate": false
+    }
+  },
+  "decision": {
+    "best_rank_by_validation_ce": 4,
+    "best_validation_ce_gap": 0.04378795623779297,
+    "frozen_maximum_gap": 0.005,
+    "smooth_scheduled_envelope_functionally_sufficient": false,
+    "task_conditioned_state_dependent_mapping_jacobian_required": true,
+    "learned_pca_basis_authorized": false,
+    "training_time_as_candidate_latent_authorized": false,
+    "language_model_training_authorized": false,
+    "next_authorized_action": "Zero-update decomposition of the function-critical terminal residual against literal paper modulation and nonlearned structured state-conditioned tangent families."
+  }
+}
