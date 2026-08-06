@@ -1,0 +1,157 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result_v1",
+  "artifact_kind": "terminal_experiment_result",
+  "sealed_at": "2026-08-07T00:57:00+08:00",
+  "classification": "ACCEPTED_PARENT_EQUIVALENT_EXACT_FUNCTIONAL_REPLAY",
+  "passed": true,
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp_20260806T112509Z_1265714",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1265808,
+    "pgid": 1265808,
+    "started_at": "2026-08-06T19:25:11+08:00",
+    "finished_at": "2026-08-06T20:44:41+08:00",
+    "wall_seconds": 4770,
+    "terminal_iter": 2373,
+    "max_iters": 2373,
+    "exit_code": 0,
+    "process_group_absent_after_completion": true
+  },
+  "identity": {
+    "execution_git_commit": "cdb06f17439ae6571ddd04120d15600708e0bccc",
+    "config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "plan_sha256": "121c03e91dad080e93e995e677859e21688336823b6961d5d4ab629245f7e11a",
+    "run_metadata_sha256": "29af963863a79a158c970fd4b6ddac4d7beaf2543a08d86bbeb318b85557d49d",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "003b0da8ea00fa81c04f2b4b2cbb5a5956c7c359912dc077710d313b534e4a84"
+  },
+  "performance_gate": {
+    "passed": true,
+    "minimum_mfu_fraction": 0.2,
+    "measured_mfu_fraction": 0.22977803164192337,
+    "tokens_per_second": 127327,
+    "model_tflops": 95.095,
+    "diagnostic_adjusted_iteration_ms": 2058.819,
+    "peak_vram_mib": 35535.27,
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "certificate_sha256": "7c5b540664d74e2114ff958d1b766f14a68b28c2d9329f9ac2fc1183a10ae2db",
+    "preflight_log_sha256": "0d0b9dc1d0216a70f26ab7861d151c73d05cd830fd98dce3eadbd4e4edd19a2e",
+    "sealed_mfu_result_sha256": "b56f33e7292195871367444c220e38bc5e0e99ca103d830654ab36522cd230c0"
+  },
+  "parent_equivalence": {
+    "absolute_tolerance_ce": 0.005,
+    "threshold_changed_after_measurement": false,
+    "rows": [
+      {
+        "step": 594,
+        "candidate_validation_ce": 4.2058,
+        "accepted_parent_validation_ce": 4.2028,
+        "candidate_minus_parent_ce": 0.003,
+        "within_tolerance": true
+      },
+      {
+        "step": 1188,
+        "candidate_validation_ce": 3.8408,
+        "accepted_parent_validation_ce": 3.8395,
+        "candidate_minus_parent_ce": 0.0013,
+        "within_tolerance": true
+      },
+      {
+        "step": 1782,
+        "candidate_validation_ce": 3.6896,
+        "accepted_parent_validation_ce": 3.6888,
+        "candidate_minus_parent_ce": 0.0008,
+        "within_tolerance": true
+      },
+      {
+        "step": 2373,
+        "candidate_validation_ce": 3.6267,
+        "accepted_parent_validation_ce": 3.625838041305542,
+        "candidate_minus_parent_ce": 0.0008619586944580415,
+        "within_tolerance": true
+      }
+    ],
+    "passed": true
+  },
+  "functional_replay": {
+    "schema_version": "nanogpt_full_state_functional_replay_result_v1",
+    "classification": "ACCEPTED_EXACT_FUNCTIONAL_REPLAY",
+    "absolute_tolerance_ce": 0.005,
+    "maximum_absolute_delta_ce": 0.00003481826782225639,
+    "elapsed_seconds": 84.98305106163025,
+    "result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "rows": [
+      {"step": 0, "logged_validation_ce": 10.9991, "replayed_validation_ce": 10.999120712280273, "absolute_delta_ce": 0.000020712280273116335},
+      {"step": 594, "logged_validation_ce": 4.2058, "replayed_validation_ce": 4.205812454223633, "absolute_delta_ce": 0.000012454223632829553},
+      {"step": 1188, "logged_validation_ce": 3.8408, "replayed_validation_ce": 3.8407981395721436, "absolute_delta_ce": 0.0000018604278566591859},
+      {"step": 1782, "logged_validation_ce": 3.6896, "replayed_validation_ce": 3.6895651817321777, "absolute_delta_ce": 0.00003481826782225639},
+      {"step": 2373, "logged_validation_ce": 3.6267, "replayed_validation_ce": 3.6266965866088867, "absolute_delta_ce": 0.0000034133911133160666}
+    ],
+    "passed": true
+  },
+  "artifact_validation": {
+    "trajectory_schema_version": "nanogpt_parameter_trajectory_v2",
+    "snapshot_steps": [0, 594, 1188, 1782, 2373],
+    "snapshot_named_parameters_each": 327,
+    "snapshot_persistent_buffers_each": 24,
+    "snapshot_all_tensors_finite": true,
+    "optimizer_probe_schema_version": "nanogpt_optimizer_probe_v2",
+    "optimizer_probe_steps": [0, 594, 1188, 1782],
+    "optimizer_probe_layers_each": 8,
+    "optimizer_probe_fields_each": 7,
+    "probe_weight_before_equals_same_step_snapshot": true,
+    "probe_applied_direction_formula_max_absolute_error": 0.0,
+    "terminal_snapshot_equals_checkpoint_unique_state_tensors": true,
+    "terminal_checkpoint_unique_state_tensor_count": 351,
+    "checkpoint_extra_key": "lm_head.weight tied alias",
+    "checkpoint_schema_version": "nanogpt_exact_resume_v2",
+    "checkpoint_next_iter": 2373,
+    "checkpoint_tensor_count": 1333,
+    "checkpoint_float_tensor_count": 1321,
+    "checkpoint_model_and_optimizer_all_finite": true,
+    "checkpoint_rng_envelopes_complete": true
+  },
+  "artifacts": {
+    "log_sha256": "9045e042619bacb29204f470d6725e31bd7168af4199ba23c271f3a9e34e93ce",
+    "status_sha256": "fe47172cdb8c31d91a3a383d749ef907a448f321e49a5c0d9ee9dcb5ffd26f72",
+    "checkpoint_sha256": "8f79a93153d50cc1bac00c6d3cc08947ecab9ca3e53d93a60938e8707f97d378",
+    "checkpoint_metadata_sha256": "c1fe876604d1b685735282a61c10540f1503483fda54ae596d4008734eb206c5",
+    "snapshot_sha256_by_step": {
+      "0": "1ecd51165e54bf820d173226653afa79903f59aae1268831780b8e176a99b125",
+      "594": "5cf799e5253083cf9ad8b757d0a10d2d593dc45875190970f388761da8636650",
+      "1188": "bd75f0adc443703719dd85f44136c0aead4135b51df448889efb9ae3957f2a7d",
+      "1782": "cf41593fb26254e2158befe682f39a40865dfd6038c5941c243f8bc66fc3f6a8",
+      "2373": "6619c7106a367a39d47f1b5405dfab4d6f662844c59cd9232e6170335cd09b4e"
+    },
+    "optimizer_probe_sha256_by_step": {
+      "0": "4095b8de15fbc05f689fed6b93a92f6d4c55ba570da8ad71fbdade01a7e5041e",
+      "594": "d4123de9fd00b7a8ca091132b98ed03c48e1751925994aa3132e241f0bff2720",
+      "1188": "93ece4fe36c0c294651e7ef5e2d9b4bf353185e032964f73d6434ba056b2dcf0",
+      "1782": "0c60ca41a4ea625d49999b4779f8700e6903a9cf390e023d0ace6d9fa424ee20"
+    }
+  },
+  "monitoring": {
+    "policy": "terminal_only",
+    "callback_received": true,
+    "progress_callbacks_sent": false,
+    "heartbeat_callbacks_sent": false,
+    "watcher_exit_code": 0,
+    "stdout_lines": 0,
+    "stderr_lines": 0
+  },
+  "interpretation": {
+    "accepted_claim": "The corrected v2 trajectory schema captures enough state to reconstruct the live parent function exactly, while the nonintervening c_proj probes preserve the accepted parent trajectory.",
+    "superseded_claim": "The parameter-only v1 snapshots are not valid inputs to a functional metric calibration because they omit procedural c_fc state.",
+    "metric_conclusion": "No functional metric conclusion is made by this acquisition alone."
+  },
+  "authorization": {
+    "run_zero_update_metric_calibration": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
