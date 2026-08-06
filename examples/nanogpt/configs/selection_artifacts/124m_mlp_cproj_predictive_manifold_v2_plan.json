@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_predictive_manifold_v2_plan_v1",
+  "registered_at": "2026-08-07T00:00:00Z",
+  "question": "Does an early-fit compact affine oracle predict disjoint future endpoints or causal one-step tangents of the accepted co-adapted late-c_proj path?",
+  "repair_scope": {
+    "source_invalid_seal_sha256": "ba9531b38fba10dd90ddb06fb47f5d61a070aa7ade9d60eec1e42b75b1925059",
+    "unchanged_scientific_split": true,
+    "unchanged_ranks": true,
+    "unchanged_endpoint_and_tangent_estimators": true,
+    "unchanged_functional_metric": true,
+    "only_change": "replace exact-arithmetic tolerances with forward-error bounds for long FP32 Givens chains",
+    "audit_observations_not_used_as_bounds": {
+      "radius_relative_error": 0.0010436795863335642,
+      "last_step_replay_relative_error": 0.000007174174243118614
+    }
+  },
+  "numerical_analysis": {
+    "float32_unit_roundoff_approx": 0.00000011920928955078125,
+    "cumulative_radius_bound": "2373 updates times 88 staged Givens rotations gives about 208824 local transformations; the conservative first-order gamma bound is about 0.0249, rounded upward to 0.03",
+    "last_step_replay_bound": "one inverse plus forward replay traverses 176 staged rotations; a conservative constant-factor float32 accumulation allowance is 3e-5",
+    "scientific_interpretation": "Observed errors below these independent bounds validate mechanics; they do not improve any endpoint or tangent recovery score."
+  },
+  "identity": {
+    "analyzer_source_commit": "134977bd496b71e033f7dd31dcadddb29d82178c",
+    "analyzer_sha256": "df3509e1df4174a0b4a088f46a438a71a5993f43bcb948c8227b4cdfdd861775",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "orbit_v2_result_sha256": "269d43561dd5f14a66c9c66433dbba6a382b97ece7f5c8dc04f9786f72ed0784",
+    "config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "supporting_source_sha256": {
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_mlp_cproj_coadapted_orbit_geometry.py": "28183ae24b25425306d213e22524f1e767dcd1864c31f64315aad7d1b3a1ca40",
+      "examples/nanogpt/model.py": "85b5a69f6fd3042bf3b4c5d40a67c380f75f4cb1a88467b8e9dbdbd20fcb93cb",
+      "examples/nanogpt/muon_matched_givens.py": "33810ce922e1d1436ffc2981b04c13870831dd8810ef9d1f79c8266b1801f05e",
+      "examples/nanogpt/train.py": "0b914aa0b6a91d36032e5dc68a034420e172e38a535b59d7ceab5eac78a4e650"
+    }
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [8, 9, 10, 11],
+    "discovery_steps": [0, 99, 198, 297, 396, 495, 594, 693, 792, 891, 990, 1089, 1188, 1287, 1386, 1485, 1584, 1683, 1782],
+    "holdout_steps": [1881, 1980, 2079, 2178, 2277, 2373],
+    "ranks": [1, 2, 4, 8, 16],
+    "primary_rank": 8,
+    "learned_basis_role": "diagnostic_oracle_only",
+    "radial_normalization": "normalize each weight to its observed step-zero Frobenius norm after checking cumulative drift against the FP32 forward-error bound",
+    "endpoint_basis": "through-step-zero PCA of normalized discovery endpoint displacements",
+    "tangent_basis": "through-origin PCA of reconstructed normalized discovery last-update tangents",
+    "functional_metric": {
+      "model_state": "accepted terminal full-state snapshot at step 2373",
+      "split": "train",
+      "fixed_eval_batch_index": 0,
+      "activation_point": "post_gelu input to c_proj",
+      "activation_rows": 2048
+    },
+    "estimated_runtime": "under five minutes",
+    "monitoring": "direct foreground polling; no watchdog or callback"
+  },
+  "decision_rule": {
+    "thresholds": {
+      "normalization_schedule_max_relative_error": 0.03,
+      "last_step_replay_max_relative_error": 0.00003,
+      "rank8_holdout_endpoint_weight_recovery": 0.80,
+      "rank8_holdout_endpoint_functional_recovery": 0.80,
+      "rank8_holdout_tangent_functional_recovery": 0.25,
+      "rank8_endpoint_functional_minus_weight_recovery": 0.10
+    },
+    "outcomes": {
+      "PREDICTIVE_ENDPOINT_AND_CAUSAL_TANGENT_ORACLE": "Integrated endpoints and causal functional tangents are both predictable; next design must still use a paper-style fixed random/modulated map, never this learned oracle.",
+      "SMOOTH_ENDPOINT_WITH_NONTRANSPORTABLE_TANGENTS": "Integrated endpoints are compact but local directions remain state-conditioned; only nonlinear or modulated state-dependent mapping theory remains open.",
+      "FUNCTION_SPACE_ENDPOINT_WITHOUT_WEIGHT_CHART": "Only a task-metric quotient is compact; identify a fixed analytic metric before any structure.",
+      "LOCAL_FUNCTIONAL_TANGENT_WITHOUT_ENDPOINT_CHART": "Local directions are predictable but do not integrate into one affine chart.",
+      "NO_PREDICTIVE_FIXED_AFFINE_CHART": "Close the fixed affine chart family.",
+      "INVALID_MECHANICAL_RECONSTRUCTION": "Do not interpret geometry."
+    }
+  },
+  "interpretation_contract": {
+    "no_training_selection": true,
+    "no_validation_selection": true,
+    "no_cross_run_parameter_displacement": true,
+    "rank16_is_descriptive_only_because_discovery_has_18_nonzero_states": true,
+    "paper_manifold_hypothesis_is_not_equated_with_fixed_affine_subspace": true,
+    "dense_state_and_gradient_conditioning_are_counted_as_part_of_the_working_method": true
+  },
+  "authorization": {
+    "source_v2_authorized_action": "functional_metric_path_analysis",
+    "run_zero_update_predictive_analysis": true,
+    "use_learned_basis_in_candidate": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
