@@ -1,0 +1,152 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_diagonal_kfac_selector_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_diagonal_kfac_zero_update_selector_plan",
+  "registered_at": "2026-08-06",
+  "status": "registered_before_implementation_or_execution",
+  "scientific_question": "Does adding backpropagated c_proj output-error geometry to post-GELU activation geometry identify task-useful output-side Givens coordinates that generalize across disjoint windows better than raw Frobenius, activation-only, or output-error-only selection?",
+  "evidence": {
+    "volume_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_volume_cproj_5tpp_result.json",
+      "sha256": "dbd8b8aecfdb66c9f772c07c1eb332b84dfd4812bdd37ecf146b7e9244ec06d4",
+      "conclusion": "Repairing the c_proj mean-log-singular deficit while preserving spectral shape worsened every fixed checkpoint, closing global volume as a causal explanation."
+    },
+    "activation_only_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_weighted_output_selector_result.json",
+      "sha256": "1dbbec0196683e0aa2506a8af4701ce44e4c38139b801997eb16934b78f394a5",
+      "conclusion": "Activation-weighted angle fitting amplified correlated output coordinates and produced about 33x residual-stream error despite better first-order descent."
+    },
+    "task_gradient_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_gradient_output_selector_result.json",
+      "sha256": "c18b7d4535a34743fe908c77eb815633a399e170f89ee233ae8e7d17be0843e9",
+      "conclusion": "Direct task-gradient pair selection won all eight finite-step cells but retained only 8.33 percent of its fit-gradient advantage on holdout."
+    },
+    "moving_activation_frame_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_moving_activation_frame_oracle_result.json",
+      "sha256": "43e6e61a460d4ce914f1e1a75d784f9eb459689184c807f44ebf49792d676d6b",
+      "conclusion": "Activation covariance alone omits the backpropagated task-error factor; the registered next missing discriminator is activation-error cross geometry."
+    }
+  },
+  "identity": {
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_activation_selector_phase_acquisition_result.json",
+    "acquisition_result_sha256": "8a34b0fafdfd56bf6eb6842fc3bd481a96bbcd073e8d5f09a96470e983f5c6dd",
+    "run_identity_sha256": "4bd2716e73a6dabfffa0917709c4942890f746647ed317d063f7854ac7a0c9e2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 3, 6, 9, 11],
+    "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048,
+      "participates_in_selection": true
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048,
+      "participates_in_selection": false
+    },
+    "shared_chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260804,
+      "coordinate_count_per_layer": 147456,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in every arm"
+    },
+    "output_error_scale": {
+      "source": "RMS of the gradient of next-token CE with respect to each c_proj output channel on the fit window",
+      "normalization": "divide by the RMS across output channels, clamped below at 1e-30",
+      "bounds": [0.25, 4.0],
+      "holdout_usage": "scoring only; holdout output errors never alter pairs, scales, or angles"
+    },
+    "arms": {
+      "frobenius_output32": "select pairs from unprojected source and residual; fit ordinary Frobenius angles",
+      "activation_selector_output32": "select pairs from H_fit times source/residual; refit ordinary Frobenius angles on the unprojected matrices",
+      "error_selector_output32": "select pairs after multiplying source/residual output columns by bounded fit-window output-error RMS; refit ordinary Frobenius angles on unprojected matrices",
+      "diagonal_kfac_selector_output32": "select pairs from (H_fit times source/residual) with output columns multiplied by bounded fit-window output-error RMS; refit ordinary Frobenius angles on unprojected matrices"
+    },
+    "common_application": "Apply the selected pairs with raw Frobenius angles to the unprojected c_proj transposed weight, transpose back, and apply decoupled weight decay once.",
+    "smallest_pass_order": [
+      "activation_selector_output32",
+      "error_selector_output32",
+      "diagonal_kfac_selector_output32"
+    ],
+    "prohibited": [
+      "weighted-angle fitting",
+      "selection on holdout data",
+      "learned dense basis",
+      "LoRA or dense residual adapter",
+      "extra chart coordinates",
+      "residual HyperConnection",
+      "persistent output-error covariance",
+      "language-model parameter update"
+    ]
+  },
+  "evaluation": {
+    "primary": "paired finite-step complete-model CE after simultaneous selected-layer updates on fit and holdout windows",
+    "secondary": [
+      "fit and holdout task-gradient predicted CE decrease",
+      "fit and holdout post-GELU residual-output energy",
+      "weight error and update energy",
+      "fit-to-holdout task-advantage retention",
+      "output-error scale distribution and clamp fraction"
+    ]
+  },
+  "decision_rule": {
+    "common_requirements": [
+      "all outputs, losses, gradients, activations, output errors, scales, and updates are finite",
+      "the matched acquisition identities and hashes are exact",
+      "all arms use exactly 147456 coordinates per selected layer",
+      "holdout data is scoring-only",
+      "all arms use raw Frobenius angles and identical decay ordering"
+    ],
+    "candidate_requirements": {
+      "mean_finite_step_ce_gain_over_frobenius_minimum": 0.0005,
+      "finite_step_wins_minimum": 6,
+      "finite_step_comparisons": 8,
+      "holdout_wins_minimum": 3,
+      "holdout_comparisons": 4,
+      "minimum_holdout_finite_step_ce_gain": 0.0,
+      "holdout_predicted_ce_decrease_not_worse_than_frobenius": true,
+      "holdout_activation_residual_energy_ratio_maximum": 1.25,
+      "candidate_update_energy_ratio_maximum": 1.25,
+      "fit_and_holdout_task_advantage_positive": true,
+      "holdout_to_fit_task_advantage_retention_minimum": 0.25,
+      "output_error_scale_clamp_fraction_maximum": 0.25
+    },
+    "pass": "Select the first arm in smallest-pass order that clears every common and candidate rule. A pass authorizes only production implementation and focused correctness/exact-resume tests, then one fresh exact-config MFU preflight at or above 20 percent.",
+    "fail": "Close diagonal activation-error/Kronecker selector geometry and do not launch a causal run. Return to the accepted c_fc-only partial replacement while designing a qualitatively new c_proj generator.",
+    "automatic_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update oracle; any passing production training path requires a separate exact-config MFU gate before launch",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_diagonal_kfac_selector_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "implement_production_path_after_pass": true,
+    "run_exact_config_mfu_after_pass": true,
+    "run_language_model_training": false
+  }
+}
