@@ -1,0 +1,157 @@
+{
+  "acquisition": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "--foreground",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp",
+      "/home/pro6000-9980x/MappingNetworks"
+    ],
+    "expected_duration_minutes": [
+      80,
+      90
+    ],
+    "gpu": 0,
+    "host": "PRO6",
+    "optimizer_probe_layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "optimizer_probe_scope": "weight, clipped gradient, old and combined momentum, polar update, and exact applied direction per LR for dense mlp.c_proj",
+    "optimizer_probe_steps": [
+      0,
+      594,
+      1188,
+      1782
+    ],
+    "out_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/scientific",
+    "phase_boundaries": [
+      0,
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "snapshot_scope": "all named model parameters in float32"
+  },
+  "acquisition_acceptance": {
+    "required": [
+      "exact-config MFU >=0.20 with diagnostic I/O charged and native BlockFHT loaded",
+      "clean terminal 2373/2373 and complete exact-resume checkpoint",
+      "all-parameter snapshots exactly at 0,594,1188,1782,2373",
+      "dense c_proj optimizer probes exactly at 0,594,1188,1782 for layers 0-7",
+      "one common run identity across snapshots, probes, and checkpoint",
+      "dataset and fixed-evaluation digests match the accepted parent",
+      "all losses and floating model, optimizer, snapshot, and probe tensors are finite",
+      "absolute validation CE difference from the accepted parent is <=0.005 at every fixed checkpoint"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "automatic_rerun": false,
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "generate_config_and_run_focused_tests": true,
+    "larger_rung": false,
+    "one_diagnostic_acquisition_after_mfu_pass": true,
+    "one_exact_config_mfu_preflight": true,
+    "zero_update_metric_calibration_after_acquisition_pass": true
+  },
+  "causal_basis": [
+    "The late-band LWT run recovered about 67.8% of the all-layer c_proj penalty by keeping layers 0-7 dense.",
+    "The accepted c_fc-only parent is the exact same-attention, same-c_fc gauge needed to study those dense c_proj layers.",
+    "Only terminal checkpoints exist; prior 0.5TPP or independently trained trajectories cannot be spliced into this 5TPP state.",
+    "The replay changes no model, optimizer, schedule, seed, data, or evaluation setting; it adds observational snapshots and probes only."
+  ],
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp.json",
+    "candidate_config_sha256": "904863f60d88bd6fc86e096cefe058eb262f97cb77fe7097abe79cba022c2c4c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "use one clean pushed commit containing this immutable plan and config",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "late_lwt_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+    "source_config_sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857",
+    "source_result_sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f"
+  },
+  "monitoring": {
+    "callback_action": "verify terminal identity, fixed losses, snapshots, probes, checkpoint, hashes, GPU and storage; seal acquisition; then run only the preregistered zero-update metric calibration",
+    "callbacks": [
+      "100% clean completion",
+      "error or actionable stall"
+    ],
+    "heartbeats": false,
+    "milestones": false,
+    "scientific_run_policy": "one idempotent terminal-only watchdog"
+  },
+  "paper_link": {
+    "boundary": "This acquisition tests the layer-local premise. It does not assume that paper modulation, Mapping Loss, or a random orthogonal chart spans the measured residual.",
+    "mechanism": "LWT and layer-specific manifolds"
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "direct_foreground_polling": true,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "native_extension_required": true,
+    "watchdog": false
+  },
+  "post_acquisition_analysis_only": {
+    "confirmation_window": {
+      "batch_size": 2,
+      "batches": 4,
+      "block_size": 256,
+      "participates_in_metric_fitting": false,
+      "seed": 20260807,
+      "split": "validation"
+    },
+    "fit_window": {
+      "batch_size": 2,
+      "batches": 4,
+      "block_size": 256,
+      "participates_in_metric_fitting": true,
+      "seed": 20260806,
+      "split": "validation"
+    },
+    "measurements": [
+      "exact post-GELU output action ||H deltaW|| and task-gradient inner product per layer and phase",
+      "exact finite-CE effect of bounded dense-Muon, current hidden64+24, and equal-coordinate Haar controls",
+      "fit-to-confirmation sign and ordering calibration for identity, activation-covariance, and downstream-gradient block metrics",
+      "uncaptured residual decomposition by layer, phase, hidden channel, output side, and effective rank",
+      "short teacher-forced multi-step rotation of the residual before any candidate chart is proposed"
+    ],
+    "metric_gate": "Freeze thresholds from duplicate-window noise before inspecting any new chart. A metric must predict held-out finite-CE sign and ordering across phases; Frobenius recovery alone cannot pass."
+  },
+  "recorded_at": "2026-08-06",
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_functional_metric_acquisition_plan_v1",
+  "scientific_question": "What same-gauge task-weighted dense-Muon c_proj action remains uncaptured in early/middle layers 0-7 across the 5TPP trajectory?",
+  "status": "registered_before_preflight_or_execution"
+}
