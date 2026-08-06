@@ -1,0 +1,86 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_predictive_manifold_v2_sealed_result_v1",
+  "classification": "SMOOTH_ENDPOINT_WITH_NONTRANSPORTABLE_TANGENTS",
+  "identity": {
+    "execution_commit": "bc04f50700ff982dcde329cf58e1092fc048804e",
+    "plan_sha256": "c3aafc7f14c9d64418d40608a6d6f6f75de25660469d58a553084376296c33ec",
+    "analyzer_sha256": "df3509e1df4174a0b4a088f46a438a71a5993f43bcb948c8227b4cdfdd861775",
+    "raw_result_sha256": "cbfe256a8999d237ba3df8e6f9b5b24ceb9d9cfaeb56902656f87862d3e12049",
+    "raw_rows_sha256": "80bb6390b90932f87737f0cf0cfb522ef98a67815ea9fbb8e2ed23dff505a850",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "orbit_v2_result_sha256": "269d43561dd5f14a66c9c66433dbba6a382b97ece7f5c8dc04f9786f72ed0784",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9"
+  },
+  "execution": {
+    "parameter_updates": 0,
+    "runtime_seconds": 3.612166166305542,
+    "device": "cuda"
+  },
+  "mechanical_validation": {
+    "maximum_normalization_schedule_relative_error": 0.0010436795863335642,
+    "normalization_schedule_bound": 0.03,
+    "maximum_last_step_replay_relative_error": 0.000007174174243118614,
+    "last_step_replay_bound": 0.00003,
+    "passed": true
+  },
+  "descriptive_mean_holdout_recovery_by_rank_rounded": {
+    "1": {
+      "endpoint_weight": 0.920319378,
+      "endpoint_functional": 0.916218460,
+      "tangent_weight": 0.000006929,
+      "tangent_functional": 0.000030175
+    },
+    "2": {
+      "endpoint_weight": 0.966980606,
+      "endpoint_functional": 0.967887074,
+      "tangent_weight": 0.000007421,
+      "tangent_functional": 0.000034243
+    },
+    "4": {
+      "endpoint_weight": 0.982515171,
+      "endpoint_functional": 0.981765226,
+      "tangent_weight": 0.000009462,
+      "tangent_functional": 0.000042289
+    },
+    "8": {
+      "endpoint_weight": 0.9875468909740448,
+      "endpoint_functional": 0.985863670706749,
+      "endpoint_functional_minus_weight": -0.0016832202672958374,
+      "tangent_weight": 0.000016182661056518555,
+      "tangent_functional": 0.00008606910705566406,
+      "tangent_functional_in_endpoint_basis": 0.0004585385322570801
+    },
+    "16": {
+      "endpoint_weight": 0.990364805,
+      "endpoint_functional": 0.988016263,
+      "tangent_weight": 0.000064522,
+      "tangent_functional": 0.000062138
+    }
+  },
+  "rank8_by_layer": {
+    "8": {"endpoint_weight": 0.9872627258300781, "endpoint_functional": 0.9853726625442505, "tangent_weight": 0.000014603137969970703, "tangent_functional": 0.00005036592483520508},
+    "9": {"endpoint_weight": 0.9874438047409058, "endpoint_functional": 0.9857061505317688, "tangent_weight": 0.000014424324035644531, "tangent_functional": 0.00005829334259033203},
+    "10": {"endpoint_weight": 0.9876208305358887, "endpoint_functional": 0.9857827425003052, "tangent_weight": 0.00001823902130126953, "tangent_functional": 0.00008171796798706055},
+    "11": {"endpoint_weight": 0.9878602027893066, "endpoint_functional": 0.9865931272506714, "tangent_weight": 0.000017464160919189453, "tangent_functional": 0.0001538991928100586}
+  },
+  "gates": {
+    "endpoint_weight_predictive": true,
+    "endpoint_function_predictive": true,
+    "tangent_function_predictive": false,
+    "functional_metric_materially_changes_fit": false
+  },
+  "interpretation": {
+    "positive": "The accepted integrated path has a chronologically transferable low-dimensional affine envelope: an early rank-1 oracle already recovers about 92% of future endpoint energy and rank 8 recovers about 98.75%.",
+    "negative": "The same discovery prefix predicts effectively zero future instantaneous tangent energy. Fresh dense-gradient-conditioned direction selection is essential to the working optimizer path.",
+    "metric": "The fixed terminal post-GELU metric does not reveal hidden transportability; rank-8 functional recovery is 0.00168 below raw weight recovery.",
+    "scope": "A learned trajectory basis is a diagnostic oracle and must not be used as a candidate. This result supports a nonlinear/state-conditioned manifold model, not LoRA or a fixed learned affine basis."
+  },
+  "authorization": {
+    "multiscale_causal_path_analysis": true,
+    "use_learned_basis_in_candidate": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
