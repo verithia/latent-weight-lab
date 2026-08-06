@@ -80,9 +80,24 @@ def collect_parameters(
         )
     if dtype not in DTYPES:
         raise ValueError(f"unsupported trajectory snapshot dtype: {dtype}")
+    candidates = dict(model.named_parameters())
+    # Structured replacement weights are deliberately registered as
+    # trainable persistent buffers so the target module does not duplicate
+    # them as ordinary parameters.  Targeted trajectory acquisition must see
+    # those tensors in the same namespace as ordinary weights.  Full-state
+    # acquisition keeps its historical split (parameters here, buffers in
+    # ``collect_persistent_buffers``) to avoid duplicating trainable buffers.
+    if not all_parameters:
+        candidates.update(
+            {
+                name: value
+                for name, value in model.named_buffers()
+                if value.requires_grad
+            }
+        )
     selected = {
         name: parameter.detach().to(device="cpu", dtype=DTYPES[dtype]).contiguous()
-        for name, parameter in model.named_parameters()
+        for name, parameter in candidates.items()
         if parameter_matches(
             name,
             targets,

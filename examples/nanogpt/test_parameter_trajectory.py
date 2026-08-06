@@ -143,6 +143,37 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 all_parameters=True,
             )
 
+    def test_targeted_snapshot_collects_trainable_structured_buffer(self) -> None:
+        model = StructuredTinyModel()
+        model.transformer.h[0].mlp.c_proj.weight.requires_grad_(True)
+        selected = collect_parameters(
+            model,
+            targets=["mlp.c_proj"],
+            dtype="float32",
+            layers=[0],
+        )
+        self.assertEqual(
+            set(selected),
+            {"transformer.h.0.mlp.c_proj.weight"},
+        )
+        self.assertTrue(
+            torch.equal(
+                selected["transformer.h.0.mlp.c_proj.weight"],
+                model.transformer.h[0].mlp.c_proj.weight.detach().cpu(),
+            )
+        )
+        # Full-state snapshots retain the old parameter/buffer partition and
+        # therefore do not duplicate this structured weight as a parameter.
+        self.assertEqual(
+            collect_parameters(
+                model,
+                targets=[],
+                dtype="float32",
+                all_parameters=True,
+            ),
+            {},
+        )
+
     def test_collects_only_persistent_buffers_and_preserves_integer_dtype(self) -> None:
         selected = collect_persistent_buffers(TinyModel(), dtype="float16")
         self.assertEqual(
