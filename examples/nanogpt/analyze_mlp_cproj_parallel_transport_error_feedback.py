@@ -18,10 +18,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from examples.nanogpt.analyze_mlp_activation_update_alignment import (
-    load_snapshot,
-    model_from_snapshot,
-)
 from examples.nanogpt.analyze_mlp_cproj_activation_weighted_output_selector import (
     all_finite,
 )
@@ -37,6 +33,7 @@ from examples.nanogpt.analyze_mlp_muon_matched_functional_metric import (
 from examples.nanogpt.analyze_parameter_trajectory import write_csv
 from examples.nanogpt.analyze_residual_compatibility import (
     fixed_validation_batches,
+    load_model,
 )
 from examples.nanogpt.fast_task_matching import (
     fast_muon_matched_permutations,
@@ -48,7 +45,7 @@ from examples.nanogpt.muon_matched_givens import (
 
 
 SCHEMA_VERSION = "mai_124m_mlp_cproj_parallel_transport_error_feedback_result_v1"
-EXPECTED_PLAN_SCHEMA = "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v1"
+EXPECTED_PLAN_SCHEMA = "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v2"
 ARMS = ("ambient_carry", "pushforward_carry", "pullback_carry")
 CANDIDATE_ORDER = ARMS[1:]
 WINDOWS = ("fit", "holdout")
@@ -62,6 +59,7 @@ def validate_plan(plan: dict[str, Any]) -> None:
         "parameter_updates": 0,
         "layers": [0, 3, 6, 9, 11],
         "score_steps": [60, 120, 180, 238],
+        "finite_ce_score_steps": [238],
         "fit_seed": 20260804,
         "holdout_seed": 20260805,
         "parent_stages": 64,
@@ -76,6 +74,7 @@ def validate_plan(plan: dict[str, Any]) -> None:
         "parameter_updates": analysis.get("parameter_updates"),
         "layers": analysis.get("layers"),
         "score_steps": analysis.get("score_steps"),
+        "finite_ce_score_steps": analysis.get("finite_ce_score_steps"),
         "fit_seed": analysis.get("fit_window", {}).get("seed"),
         "holdout_seed": analysis.get("holdout_window", {}).get("seed"),
         "parent_stages": chart.get("hidden_parent_stages"),
@@ -96,6 +95,22 @@ def validate_plan(plan: dict[str, Any]) -> None:
 
 def parameter_name(layer: int) -> str:
     return f"transformer.h.{layer}.mlp.c_proj.weight"
+
+
+def load_tracked_snapshot(path: Path, names: list[str]) -> dict[str, Any]:
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") != "nanogpt_parameter_trajectory_v1"
+        or payload.get("all_parameters") is not False
+    ):
+        raise ValueError(f"not a tracked-parameter trajectory snapshot: {path}")
+    parameters = payload.get("parameters")
+    if not isinstance(parameters, dict) or set(parameters) != set(names):
+        raise ValueError(
+            f"tracked snapshot parameter inventory mismatch: {path}"
+        )
+    return payload
 
 
 def fit_right_pass_with_recipe(
@@ -246,6 +261,13 @@ def aggregate_results(
     }
     requirements = decision_rule["candidate_requirements"]
     ambient_terminal = scores["ambient_carry@238"]
+    finite_cells = sorted(
+        {
+            (int(row["score_step"]), str(row["window"]))
+            for row in finite_rows
+            if row["arm"] == "ambient_carry"
+        }
+    )
     ambient_cells = {
         int(row["layer"]): row
         for row in rows
@@ -255,19 +277,18 @@ def aggregate_results(
     selected_arm = None
     for arm in CANDIDATE_ORDER:
         comparisons = []
-        for score_step in (60, 120, 180, 238):
-            for window in WINDOWS:
-                control = indexed_losses[(score_step, window, "ambient_carry")]
-                candidate = indexed_losses[(score_step, window, arm)]
-                comparisons.append(
-                    {
-                        "score_step": score_step,
-                        "window": window,
-                        "control_loss": control,
-                        "candidate_loss": candidate,
-                        "gain": control - candidate,
-                    }
-                )
+        for score_step, window in finite_cells:
+            control = indexed_losses[(score_step, window, "ambient_carry")]
+            candidate = indexed_losses[(score_step, window, arm)]
+            comparisons.append(
+                {
+                    "score_step": score_step,
+                    "window": window,
+                    "control_loss": control,
+                    "candidate_loss": candidate,
+                    "gain": control - candidate,
+                }
+            )
         gains = [float(row["gain"]) for row in comparisons]
         holdout_gains = [
             float(row["gain"])
@@ -374,6 +395,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", required=True, type=Path)
     parser.add_argument("--snapshot-dir", required=True, type=Path)
+    parser.add_argument("--terminal-checkpoint", required=True, type=Path)
     parser.add_argument("--data-dir", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--device", default="cuda")
@@ -399,6 +421,10 @@ def main() -> None:
         raise ValueError("first snapshot SHA-256 mismatch")
     if file_sha256(paths[-1]) != plan["identity"]["last_snapshot_sha256"]:
         raise ValueError("last snapshot SHA-256 mismatch")
+    if file_sha256(args.terminal_checkpoint) != plan["identity"][
+        "terminal_checkpoint_sha256"
+    ]:
+        raise ValueError("terminal checkpoint SHA-256 mismatch")
 
     windows = {
         name: fixed_validation_batches(
@@ -410,12 +436,12 @@ def main() -> None:
         )
         for name in WINDOWS
     }
-    first = load_snapshot(paths[0])
+    names = [parameter_name(layer) for layer in layers]
+    first = load_tracked_snapshot(paths[0], names)
     run_identity = plan["identity"]["trajectory_run_identity_sha256"]
     if first.get("run_identity_sha256") != run_identity:
         raise ValueError("trajectory identity mismatch")
     config = first["run_identity"]["resolved_config"]
-    names = [parameter_name(layer) for layer in layers]
     starts = {
         layer: first["parameters"][name].to(args.device).float()
         for layer, name in zip(layers, names, strict=True)
@@ -431,7 +457,7 @@ def main() -> None:
     finite_rows: list[dict[str, Any]] = []
 
     for step in range(238):
-        payload = load_snapshot(paths[step + 1])
+        payload = load_tracked_snapshot(paths[step + 1], names)
         if payload.get("run_identity_sha256") != run_identity:
             raise ValueError(f"trajectory identity mismatch at step {step + 1}")
         lr = cosine_lr(
@@ -487,7 +513,15 @@ def main() -> None:
                             **last_diagnostics[key],
                         }
                     )
-            model = model_from_snapshot(payload, args.device)
+        if score_step in analysis["finite_ce_score_steps"]:
+            model = load_model(args.terminal_checkpoint, args.device)
+            for layer, name in zip(layers, names, strict=True):
+                torch.testing.assert_close(
+                    model.transformer.h[layer].mlp.c_proj.weight.detach().cpu(),
+                    payload["parameters"][name].float(),
+                    rtol=0.0,
+                    atol=0.0,
+                )
             for window in WINDOWS:
                 finite_rows.append(
                     {
@@ -503,9 +537,11 @@ def main() -> None:
                     updates = {
                         layer: (
                             states[(arm, layer)]
-                            - payload["parameters"][name].to(args.device).float()
+                            - model.transformer.h[
+                                layer
+                            ].mlp.c_proj.weight.detach().float()
                         ).cpu()
-                        for layer, name in zip(layers, names, strict=True)
+                        for layer in layers
                     }
                     finite_rows.append(
                         {
@@ -554,6 +590,9 @@ def main() -> None:
             "run_identity_sha256": run_identity,
             "first_snapshot_sha256": file_sha256(paths[0]),
             "last_snapshot_sha256": file_sha256(paths[-1]),
+            "terminal_checkpoint_sha256": file_sha256(
+                args.terminal_checkpoint
+            ),
         },
         "aggregate": aggregate,
     }

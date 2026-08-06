@@ -16,11 +16,12 @@ from examples.nanogpt.muon_matched_givens import apply_givens_flow
 
 def valid_plan() -> dict:
     return {
-        "schema_version": "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v1",
+        "schema_version": "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v2",
         "analysis": {
             "parameter_updates": 0,
             "layers": [0, 3, 6, 9, 11],
             "score_steps": [60, 120, 180, 238],
+            "finite_ce_score_steps": [238],
             "fit_window": {"seed": 20260804},
             "holdout_window": {"seed": 20260805},
             "shared_chart": {
@@ -113,16 +114,25 @@ def synthetic_rows(gain: float = 0.001) -> tuple[list[dict], list[dict]]:
                         "transport_norm_ratio": 1.0,
                     }
                 )
-        for window in ("fit", "holdout"):
-            for arm in ("ambient_carry", "pushforward_carry", "pullback_carry"):
-                finite.append(
-                    {
-                        "score_step": step,
-                        "window": window,
-                        "arm": arm,
-                        "loss": 2.0 if arm == "ambient_carry" else 2.0 - gain,
-                    }
-                )
+        if step == 238:
+            for window in ("fit", "holdout"):
+                for arm in (
+                    "ambient_carry",
+                    "pushforward_carry",
+                    "pullback_carry",
+                ):
+                    finite.append(
+                        {
+                            "score_step": step,
+                            "window": window,
+                            "arm": arm,
+                            "loss": (
+                                2.0
+                                if arm == "ambient_carry"
+                                else 2.0 - gain
+                            ),
+                        }
+                    )
     return rows, finite
 
 
@@ -130,8 +140,8 @@ def rule() -> dict:
     return {
         "candidate_requirements": {
             "mean_finite_step_ce_gain_over_ambient_minimum": 0.0005,
-            "finite_step_wins_minimum": 6,
-            "holdout_wins_minimum": 3,
+            "finite_step_wins_minimum": 2,
+            "holdout_wins_minimum": 1,
             "minimum_holdout_finite_step_ce_gain": 0.0,
             "terminal_endpoint_recovery_ratio_over_ambient_minimum": 1.02,
             "terminal_layers_beating_ambient_minimum": 4,
