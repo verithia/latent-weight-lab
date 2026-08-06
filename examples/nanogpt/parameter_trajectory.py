@@ -8,7 +8,7 @@ import json
 import os
 import tempfile
 import time
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -16,7 +16,7 @@ import torch
 
 
 SCHEMA_VERSION = "nanogpt_parameter_trajectory_v1"
-OPTIMIZER_PROBE_SCHEMA_VERSION = "nanogpt_optimizer_probe_v1"
+OPTIMIZER_PROBE_SCHEMA_VERSION = "nanogpt_optimizer_probe_v2"
 DTYPES = {
     "float32": torch.float32,
     "bfloat16": torch.bfloat16,
@@ -101,6 +101,21 @@ def optimizer_probe_path(out_dir: Path, step: int) -> Path:
     if step < 0:
         raise ValueError("optimizer probe step must be non-negative")
     return out_dir / "optimizer_probe" / f"step_{step:06d}.pt"
+
+
+@dataclass
+class PendingOptimizerProbe:
+    """CPU-resident pre-step state awaiting the real optimizer result.
+
+    Preparing a probe may copy tensors from the accelerator, but it must not
+    run an alternate optimizer calculation on the live accelerator.  The
+    actual applied direction is reconstructed from the post-step weight.
+    """
+
+    destination: Path
+    existing: bool
+    payload: dict[str, Any]
+    parameter_references: dict[str, torch.nn.Parameter]
 
 
 def _atomic_torch_save(path: Path, payload: dict[str, Any]) -> None:
@@ -188,7 +203,7 @@ def write_parameter_snapshot(
     return destination
 
 
-def write_optimizer_probe(
+def prepare_optimizer_probe(
     *,
     model: torch.nn.Module,
     optimizer: Any,
@@ -200,9 +215,9 @@ def write_optimizer_probe(
     model_config: Any,
     run_identity: dict[str, Any],
     execution_provenance: dict[str, Any] | None,
-) -> Path:
-    """Atomically capture pre-step gradients and exact Muon state directions."""
-    from examples.nanogpt.muon import Muon, zeropower_via_newtonschulz5
+) -> PendingOptimizerProbe:
+    """Copy raw pre-step Muon state to CPU without extra accelerator math."""
+    from examples.nanogpt.muon import Muon
 
     destination = optimizer_probe_path(out_dir, step)
     run_identity_sha256 = canonical_digest(run_identity)
@@ -220,7 +235,12 @@ def write_optimizer_probe(
             raise ValueError(
                 f"existing optimizer probe identity mismatch: {destination}"
             )
-        return destination
+        return PendingOptimizerProbe(
+            destination=destination,
+            existing=True,
+            payload={},
+            parameter_references={},
+        )
     if dtype not in DTYPES:
         raise ValueError(f"unsupported optimizer probe dtype: {dtype}")
     if not targets or not layers:
@@ -252,43 +272,32 @@ def write_optimizer_probe(
         muon, group = owner
         if parameter.grad is None:
             raise ValueError(f"optimizer probe parameter has no gradient: {name}")
-        gradient = parameter.grad.detach().float()
+        gradient = parameter.grad.detach()
         state = muon.state.get(parameter, {})
         buffer = state.get("momentum_buffer")
         if buffer is None:
-            buffer = torch.zeros_like(gradient)
+            buffer = torch.zeros_like(gradient, device="cpu")
         else:
-            buffer = buffer.detach().float()
+            buffer = buffer.detach().to(
+                device="cpu", dtype=storage_dtype, copy=True
+            ).contiguous()
         momentum = float(group["momentum"])
         ns_steps = int(group["ns_steps"])
         weight_decay = float(group["weight_decay"])
-        new_buffer = momentum * buffer + gradient
-        combined = gradient + momentum * new_buffer
-        polar = zeropower_via_newtonschulz5(
-            combined, steps=ns_steps
-        ).float()
-        scale = max(
-            1.0,
-            polar.shape[0] / max(1, polar.numel() / polar.shape[0]),
-        ) ** 0.5
-        applied_direction = (
-            -weight_decay * parameter.detach().float()
-            - scale * polar
-        )
 
         def cpu(value: torch.Tensor) -> torch.Tensor:
             return value.to(
-                device="cpu", dtype=storage_dtype
+                device="cpu", dtype=storage_dtype, copy=True
             ).contiguous()
 
         tensors[name] = {
             "weight_before_step": cpu(parameter.detach()),
             "gradient_after_clip": cpu(gradient),
-            "momentum_buffer_before_step": cpu(buffer),
-            "combined_momentum_update": cpu(combined),
-            "polar_update": cpu(polar),
-            "applied_direction_per_lr": cpu(applied_direction),
+            "momentum_buffer_before_step": buffer,
         }
+        rows = parameter.shape[0]
+        columns = max(1, parameter.numel() / rows)
+        scale = max(1.0, rows / columns) ** 0.5
         hyperparameters[name] = {
             "lr": float(group["lr"]),
             "momentum": momentum,
@@ -297,7 +306,77 @@ def write_optimizer_probe(
             "polar_scale": scale,
         }
 
-    inventory = {
+    payload = {
+        "schema_version": OPTIMIZER_PROBE_SCHEMA_VERSION,
+        "capture_protocol": "pre_step_cpu_state_post_step_realized_direction_v2",
+        "step": step,
+        "targets": list(targets),
+        "layers": list(layers),
+        "storage_dtype": dtype,
+        "model_config": asdict(model_config),
+        "run_identity": run_identity,
+        "run_identity_sha256": run_identity_sha256,
+        "execution_provenance": execution_provenance,
+        "hyperparameters": hyperparameters,
+        "parameters": tensors,
+        "prepared_at_unix": time.time(),
+    }
+    return PendingOptimizerProbe(
+        destination=destination,
+        existing=False,
+        payload=payload,
+        parameter_references=selected_parameters,
+    )
+
+
+def write_optimizer_probe(pending: PendingOptimizerProbe) -> Path:
+    """Seal a prepared probe after the real optimizer step.
+
+    All derived matrix arithmetic runs on CPU after the live optimizer has
+    already mutated the model.  ``applied_direction_per_lr`` is the realized
+    weight-space action, including floating-point effects, rather than a
+    second pre-step simulation of Muon on the training accelerator.
+    """
+    if pending.existing:
+        return pending.destination
+    payload = pending.payload
+    storage_dtype = DTYPES[str(payload["storage_dtype"])]
+    tensors = payload["parameters"]
+    for name, parameter in pending.parameter_references.items():
+        state = tensors[name]
+        hyperparameters = payload["hyperparameters"][name]
+        before = state["weight_before_step"].float()
+        after = parameter.detach().to(
+            device="cpu", dtype=storage_dtype, copy=True
+        ).contiguous()
+        gradient = state["gradient_after_clip"].float()
+        buffer = state["momentum_buffer_before_step"].float()
+        momentum = float(hyperparameters["momentum"])
+        learning_rate = float(hyperparameters["lr"])
+        weight_decay = float(hyperparameters["weight_decay"])
+        polar_scale = float(hyperparameters["polar_scale"])
+        if learning_rate == 0.0:
+            raise ValueError("optimizer probe requires a non-zero learning rate")
+        new_buffer = momentum * buffer + gradient
+        combined = gradient + momentum * new_buffer
+        realized = (after.float() - before) / learning_rate
+        inferred_polar = -(
+            realized + weight_decay * before
+        ) / polar_scale
+
+        def stored(value: torch.Tensor) -> torch.Tensor:
+            return value.to(dtype=storage_dtype).contiguous()
+
+        state.update(
+            {
+                "weight_after_step": after,
+                "combined_momentum_update": stored(combined),
+                "polar_update": stored(inferred_polar),
+                "applied_direction_per_lr": stored(realized),
+            }
+        )
+
+    payload["tensor_inventory"] = {
         name: {
             key: {
                 "shape": list(value.shape),
@@ -309,23 +388,9 @@ def write_optimizer_probe(
         }
         for name, values in tensors.items()
     }
-    payload = {
-        "schema_version": OPTIMIZER_PROBE_SCHEMA_VERSION,
-        "step": step,
-        "targets": list(targets),
-        "layers": list(layers),
-        "storage_dtype": dtype,
-        "model_config": asdict(model_config),
-        "run_identity": run_identity,
-        "run_identity_sha256": run_identity_sha256,
-        "execution_provenance": execution_provenance,
-        "tensor_inventory": inventory,
-        "hyperparameters": hyperparameters,
-        "parameters": tensors,
-        "created_at_unix": time.time(),
-    }
-    _atomic_torch_save(destination, payload)
-    return destination
+    payload["created_at_unix"] = time.time()
+    _atomic_torch_save(pending.destination, payload)
+    return pending.destination
 
 
 def add_arguments(parser: argparse.ArgumentParser) -> None:

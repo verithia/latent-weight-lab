@@ -27,6 +27,7 @@ from examples.nanogpt.dense_scaling_fit import (
 from examples.nanogpt.mai_selection_artifacts import validate_v2_launch_config
 from examples.nanogpt.parameter_trajectory import (
     add_arguments as add_parameter_trajectory_arguments,
+    prepare_optimizer_probe,
     validate_arguments as validate_parameter_trajectory_arguments,
     write_optimizer_probe,
     write_parameter_snapshot,
@@ -3234,11 +3235,12 @@ def main() -> None:
                     continue
                 grad_rms = latent.grad.float().square().mean().sqrt().clamp_min(1e-12)
                 latent.grad.mul_(float(args.block_fht_latent_grad_target_rms) / grad_rms)
+        pending_optimizer_probe = None
         if (
             args.optimizer_probe_steps is not None
             and iter_num in set(args.optimizer_probe_steps)
         ):
-            probe_path = write_optimizer_probe(
+            pending_optimizer_probe = prepare_optimizer_probe(
                 model=raw_model,
                 optimizer=optimizer,
                 out_dir=out_dir,
@@ -3250,15 +3252,17 @@ def main() -> None:
                 run_identity=run_identity,
                 execution_provenance=trajectory_execution_provenance,
             )
-            print(
-                f"optimizer probe step={iter_num} path={probe_path}",
-                flush=True,
-            )
         if args.perf_profile:
             grad_postprocess_ms += (perf_now() - section_start) * 1000.0
             section_start = perf_now()
         scaler.step(optimizer)
         scaler.update()
+        if pending_optimizer_probe is not None:
+            probe_path = write_optimizer_probe(pending_optimizer_probe)
+            print(
+                f"optimizer probe step={iter_num} path={probe_path}",
+                flush=True,
+            )
         consume_givens_diagnostics = getattr(
             optimizer,
             "consume_muon_matched_givens_diagnostics",
