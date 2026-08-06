@@ -60,15 +60,14 @@ def test_config_changes_only_observational_optimizer_capture() -> None:
         "candidate_scope", "diagnostic_acquisition_plan", "diagnostic_caveat",
         "diagnostic_protocol", "estimated_trajectory_payload_bytes", "hpo_stage",
         "implementation_source_hashes", "ladder_role", "ladder_slot",
-        "launch_block_reason", "launch_ready", "mfu_measurement_protocol",
+        "mfu_measurement_protocol",
         "mfu_preflight_certificate", "monitoring_policy", "operator_override",
         "optimizer_probe_dtype", "optimizer_probe_layers", "optimizer_probe_steps",
         "optimizer_probe_targets", "optimizer_state_registration_parent_commit",
-        "out_dir", "registered_plan", "registered_plan_sha256", "screen_only",
-        "selection_endpoint", "terminal_eval_required", "trajectory_acquisition_provenance",
+        "out_dir", "registered_plan", "selection_endpoint",
+        "trajectory_acquisition_provenance",
         "trajectory_snapshot_all_buffers", "trajectory_snapshot_all_parameters",
-        "trajectory_snapshot_interval", "trajectory_snapshot_layers",
-        "trajectory_snapshot_targets",
+        "trajectory_snapshot_interval",
     }
     changed = {
         key for key in set(source) | set(candidate)
