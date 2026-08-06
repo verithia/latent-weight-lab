@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_multiscale_path_sealed_result_v1",
+  "classification": "SCHEDULED_ENDPOINT_CURVE_WITHOUT_LOCAL_SECANT_TRANSPORT",
+  "identity": {
+    "execution_commit": "90dbc413a5985dd9696174da2b2ff2d04f503c6f",
+    "plan_sha256": "ced8e275cc441b8d1b9b233ae0d1abb2c82232a4ffb9eea06963c7ce2534981a",
+    "analyzer_sha256": "4c3fa7149a1636e1af2aa47ad1444322f84cb14046247bccd69c629a47e314b3",
+    "raw_result_sha256": "5eabe387bb71df03fdc0ad82d17a8324c0ac1634b2bbde674458a90e753f286b",
+    "raw_rows_sha256": "f45762d91c04d3c4e1160d896c547d715b46936ede2c4df94298f397c93d502d",
+    "predictive_result_sha256": "b6edd4fefd6a6c957bcb147c5e394ae68c96ba88bccd03ca382ed06c621d0ac8",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9"
+  },
+  "execution": {
+    "parameter_updates": 0,
+    "runtime_seconds": 2.676126718521118,
+    "device": "cuda"
+  },
+  "rank8_rolling_secant_recovery": {
+    "98_updates": {"weight": 0.008859232068061829, "functional": 0.005064189434051514},
+    "197_updates": {"weight": 0.016935274004936218, "functional": 0.011673793196678162},
+    "296_updates": {"weight": 0.02469708025455475, "functional": 0.01874108612537384},
+    "395_updates": {"weight": 0.03172995150089264, "functional": 0.025386884808540344},
+    "494_updates": {"weight": 0.03789961338043213, "functional": 0.031169921159744263},
+    "591_updates": {"weight": 0.04328177869319916, "functional": 0.035045430064201355}
+  },
+  "rank8_secant_onset_updates": null,
+  "quadratic_cumulative_lr_endpoint_recovery": {
+    "rank1": {"weight": 0.9203063398599625, "functional": 0.9160466492176056},
+    "rank2": {"weight": 0.9310024082660675, "functional": 0.9245636761188507},
+    "rank4": {"weight": 0.9433605968952179, "functional": 0.9384571015834808},
+    "rank8": {"weight": 0.9446661919355392, "functional": 0.93962062895298},
+    "rank16": {"weight": 0.9448814243078232, "functional": 0.9398202300071716}
+  },
+  "gates": {
+    "online_secant_transport": false,
+    "phase_scale_secant_transport": false,
+    "quadratic_endpoint_extrapolation": true
+  },
+  "interpretation": {
+    "scheduled_trend": "A quadratic function of cumulative LR fitted only on the discovery prefix predicts most future endpoint displacement, with rank 1 already recovering about 92%.",
+    "adaptive_residual": "No tested 98-591 update secant enters the early endpoint basis materially. The smooth common-origin trend does not provide a causal local transport law.",
+    "consequence": "Before designing a mapper, exact CE must determine whether the unpredicted task-adaptive residual matters functionally. A learned PCA basis or training-time latent remains prohibited."
+  },
+  "authorization": {
+    "terminal_polynomial_oracle_fixed_ce": true,
+    "use_learned_basis_in_candidate": false,
+    "use_training_time_as_candidate_latent": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
