@@ -1,0 +1,88 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_bounded_integrated_trajectory_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_bounded_integrated_trajectory_sealed_result",
+  "sealed_at": "2026-08-07T02:10:00+00:00",
+  "classification": "REJECT_BILATERAL_MATURE_PATH_AFTER_BOUNDED_CARRY",
+  "passed": false,
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "git_commit": "0780ebaa43fe14631979fa8469bd9c4c3aef091c",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_bounded_integrated_trajectory",
+    "parameter_updates": 0,
+    "elapsed_seconds": 122.92295503616333,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan_sha256": "4052c0e4678e13335b6217256c0afd82c102820ee58a086ee530e1216ef638ca",
+    "analysis_source_sha256": "abb02586370632dfdcffc27233878fbe8b6e93faf4e50f98929a9952c5b3c495",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "raw_result_sha256": "7e4bc38499e3aed99624f2c14da591ae5f19f7815ac9faf3b209b255152cc748",
+    "cells_sha256": "75c0c95418f0ae9a3e342f6c8bc99213b2f1f4a4f9cc325778280ad29724c8f3",
+    "fixed_ce_sha256": "720ebd2f157fe0edf668cf5ee8e87937af15b0a749f31c42fd0fa4b28e89929c",
+    "log_sha256": "ba6218c72146d29ce0ff67a4a9445f0892ecbcfa5dba56dc9e3bc354fb54fc34",
+    "cell_rows": 96,
+    "fixed_ce_rows": 6,
+    "all_metrics_finite": true
+  },
+  "metrics": {
+    "phase_decay0p5_geometric_recovery": 0.5124638361123028,
+    "phase_decay0p5_minimum_layer_phase_recovery": 0.4777991423816338,
+    "phase_decay0p5_maximum_feedback_fro": 1.622361183166504,
+    "phase_decay0p5_maximum_validation_ce_gap": 1.429415225982666,
+    "phase_decay0p5_terminal_validation_ce_gap": 0.0076906681060791016,
+    "phase_zero_feedback_geometric_recovery": 0.37080642014916954,
+    "phase_zero_feedback_terminal_validation_ce_gap": 0.010463714599609375,
+    "decay0p5_terminal_ce_improvement_over_zero": 0.0027730464935302734,
+    "sequential_decay0p5_geometric_recovery": 0.5293111893446734,
+    "sequential_decay0p5_terminal_validation_ce_gap": 2.9925832748413086
+  },
+  "phase_decay0p5": {
+    "geometric_recovery_by_end_step": {
+      "594": 0.5168131940032188,
+      "1188": 0.5035936805086547,
+      "1782": 0.5058809636962884,
+      "2373": 0.49833780659271887
+    },
+    "validation_ce_gap_by_end_step": {
+      "594": 1.429415225982666,
+      "1188": 0.1689612865447998,
+      "1782": 0.03216361999511719,
+      "2373": 0.0076906681060791016
+    },
+    "maximum_feedback_fro_by_end_step": {
+      "594": 1.622361183166504,
+      "1188": 0.9903330206871033,
+      "1782": 0.49002885818481445,
+      "2373": 0.1966264396905899
+    }
+  },
+  "decision": {
+    "phase_capacity_passed": false,
+    "transport_passed": false,
+    "passed_gates": ["minimum_cell_recovery", "bounded_feedback"],
+    "failed_gates": ["geometric_recovery", "maximum_validation_gap", "terminal_validation_gap", "transport"],
+    "zero_feedback_terminal_closes": false,
+    "bilateral_mature_path_family_closed": true
+  },
+  "interpretation": [
+    "Decay 0.5 works as a stability mechanism: it cuts the maximum phase-local feedback norm from the prior full-carry value 5.23060 to 1.62236 and improves terminal CE by 0.00277 over zero carry.",
+    "That stabilization is insufficient. It lowers aggregate path recovery to 51.25 percent, misses the exact terminal gate at +0.00769 CE, and has large early-phase functional gaps despite positive recovery in every layer-phase cell.",
+    "Non-reset decay-0.5 transport is not causal closure: it ends +2.99258 CE behind the same-gauge parent. The path tangent changes with model state, so carrying compression error does not identify the missing chart.",
+    "The result closes additional bilateral cadence, feedback, connectivity, and fixed-basis sweeps. The remaining paper-consistent route is LWT allocation: preserve dense c_proj only in functionally sensitive early/middle layers while retaining the accepted procedural chart where it is already compatible."
+  ],
+  "authorization": {
+    "run_zero_update_lwt_layer_allocation_attribution": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
