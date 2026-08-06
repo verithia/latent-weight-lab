@@ -1,0 +1,114 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_parallel_transport_error_feedback_zero_update_plan",
+  "registered_at": "2026-08-06",
+  "status": "registered_before_implementation_or_execution",
+  "scientific_question": "Does c_proj compression error need parallel transport by the actual right-orthogonal Givens flow, rather than ambient-coordinate carry, to preserve task-useful temporal direction across the moving chart?",
+  "evidence": {
+    "fixed_time_half_switch": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_error_feedback_half_switch_0p5tpp_training_result.json",
+      "sha256": "5fcbf46e5603a3dc48f6f711581d963fead0bf9779b1db8dd0adcf927267459c",
+      "conclusion": "Teacher-forced endpoint reconstruction selected a half switch, but causal validation CE worsened by 0.02097 versus full carry; temporal direction, not residual magnitude alone, carries useful information."
+    },
+    "materialized_action_transport": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_task_frame_materialized_action_transport_result.json",
+      "sha256": "d8ff5d2341834def9dcb30900e80e616bf65f446958c4b9c9d0ff8d87350b8dd",
+      "conclusion": "Frozen endpoint coordinate and materialized-action transport are nonportable; the registered remaining target is deployable c_proj generator and compression-error temporal state."
+    },
+    "diagonal_kfac_selector": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_diagonal_kfac_selector_result.json",
+      "sha256": "9b693d6caa961018b873211fcc0e000e09ae72dc184e9f2d75cfc35974725844",
+      "conclusion": "Activation-only and diagonal activation-error selectors gain only 0.0000254/0.0000227 mean CE and regress on late held-out windows, closing another static pair-scoring branch."
+    }
+  },
+  "identity": {
+    "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/parameter_trajectory",
+    "trajectory_run_identity_sha256": "792a87c43fbd4f5105c7e2e8f2ed228e2ff6dcb06731925e132ab8a10758090c",
+    "snapshot_inventory": "steps 0 through 238 inclusive",
+    "first_snapshot_sha256": "7a06f939746cd0403c30a786a168809c43277e41e905937ef7cc2b8cfff5332c",
+    "last_snapshot_sha256": "5e30624a111f8ec5c5a424dadc1f7cd6431fddf3cdbc4daa7809745680e19ddc",
+    "snapshot_bytes_each": 47210841,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 3, 6, 9, 11],
+    "score_steps": [60, 120, 180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260804,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "participates_in_selection": true
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260805,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "participates_in_selection": false
+    },
+    "shared_chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "neighbors": 64,
+      "feedback_decay": 1.0,
+      "learning_rate_and_weight_decay": "replayed exactly from each dense trajectory step",
+      "matching_seed": "20260804 + layer*100000 + step*10 + pass_index",
+      "all_non_cproj_parameters": "teacher-forced dense snapshot at each score step"
+    },
+    "arms": {
+      "ambient_carry": "Store the exact compression residual E_t in ambient parameter coordinates; this is the current production rule and immutable control.",
+      "pushforward_carry": "After fitting and applying the two right-Givens passes with composed Q_t, store E_t Q_t by applying the same rotations to E_t in forward order.",
+      "pullback_carry": "Orientation control: store E_t Q_t^T by applying inverse rotations in reverse order."
+    },
+    "common_step": "At step t, request the dense non-decay c_proj update plus candidate-relative decoupled decay; add the arm's carried residual; fit hidden64 then residual24 with raw Frobenius geometry; apply decay once; compute the new exact compression residual; only then apply the arm-specific norm-preserving transport for the next step.",
+    "finite_ce": "At each score step, load the complete full-attention dense snapshot, replace only layers 0/3/6/9/11 c_proj weights with the replayed candidate state, and evaluate identical fit and held-out fixed token windows.",
+    "smallest_pass_order": ["pushforward_carry", "pullback_carry"],
+    "prohibited": [
+      "selection or fitting on held-out tokens",
+      "changing stages, neighbors, decay, learning rate, or coordinate budget between arms",
+      "learned basis, LoRA, dense residual adapter, gain, shear, or volume coordinate",
+      "language-model parameter update",
+      "automatic training run"
+    ]
+  },
+  "decision_rule": {
+    "candidate_requirements": {
+      "mean_finite_step_ce_gain_over_ambient_minimum": 0.0005,
+      "finite_step_wins_minimum": 6,
+      "finite_step_comparisons": 8,
+      "holdout_wins_minimum": 3,
+      "holdout_comparisons": 4,
+      "minimum_holdout_finite_step_ce_gain": 0.0,
+      "terminal_endpoint_recovery_ratio_over_ambient_minimum": 1.02,
+      "terminal_layers_beating_ambient_minimum": 4,
+      "maximum_feedback_fro_ratio_over_ambient": 1.01,
+      "all_metrics_and_states_finite": true
+    },
+    "pass": "Select the first arm in smallest-pass order clearing every requirement. A pass authorizes only default-off production implementation, correctness and exact-resume tests, then a separately preregistered exact-config MFU gate at or above 20 percent.",
+    "fail": "Close parallel-transported compression error and retain ambient carry. Do not tune orientation, decay, stages, or thresholds after measurement.",
+    "automatic_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update diagnostic",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_parallel_transport_error_feedback_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "implement_production_path_after_pass": true,
+    "run_exact_config_mfu_after_pass": true,
+    "run_language_model_training": false
+  }
+}
