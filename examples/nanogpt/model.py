@@ -184,6 +184,8 @@ class GPTConfig:
     block_fht_mlp_cproj_output_symmetric_shear_stages: int = 0
     block_fht_mlp_cproj_output_symmetric_shear_neighbors: int = 64
     block_fht_mlp_cproj_output_symmetric_shear_max_condition_number: float = 1.1
+    block_fht_mlp_cproj_global_log_volume: bool = False
+    block_fht_mlp_cproj_global_log_volume_max_abs: float = math.log(1.01)
     block_fht_mlp_cproj_hybrid_output: bool = False
     block_fht_mlp_cproj_hybrid_task_stages: int = 16
     block_fht_mlp_cproj_hybrid_directed_incoming: int = 8
@@ -2104,6 +2106,12 @@ class MLP(nn.Module):
                 output_symmetric_shear_max_condition_number=float(
                     config
                     .block_fht_mlp_cproj_output_symmetric_shear_max_condition_number
+                ),
+                global_log_volume=bool(
+                    config.block_fht_mlp_cproj_global_log_volume
+                ),
+                global_log_volume_max_abs=float(
+                    config.block_fht_mlp_cproj_global_log_volume_max_abs
                 ),
             )
         elif grouped_proj_targets:

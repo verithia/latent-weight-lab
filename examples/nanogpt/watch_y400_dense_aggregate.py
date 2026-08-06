@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""One aggregate GPU-ladder heartbeat with progress-aware clock resets.
+"""One aggregate GPU-ladder monitor with selectable callback cadence.
 
 Milestone watchers own 20/50/terminal callbacks.  This supervisor sends a
 single combined health update only when no successfully delivered milestone has
 reset the shared clock during the preceding heartbeat period.  It also reports
-per-run stalls or log errors immediately.
+per-run stalls or log errors immediately.  ``--terminal-only`` suppresses
+healthy milestones and heartbeats for one-to-two-hour runs while retaining
+clean completion and actionable error ownership.
 """
 from __future__ import annotations
 
@@ -274,6 +276,11 @@ def main() -> None:
     parser.add_argument("--stall-minutes", type=int, default=15)
     parser.add_argument("--missing-grace-minutes", type=int, default=2)
     parser.add_argument("--interval", type=int, default=60)
+    parser.add_argument(
+        "--terminal-only",
+        action="store_true",
+        help="send callbacks only for clean completion or actionable errors",
+    )
     args = parser.parse_args()
     if (
         args.heartbeat_minutes < 1
@@ -318,7 +325,9 @@ def main() -> None:
             current_iter = sample.get("last_iter")
             maximum = sample.get("max_iters")
             sent_milestones = set(run_state.get("sent_milestones", []))
-            if previous_iter is None and current_iter is not None and maximum is not None:
+            if args.terminal_only:
+                sent_milestones.update((20, 50))
+            elif previous_iter is None and current_iter is not None and maximum is not None:
                 # The first sample is a baseline, never a catch-up notification.
                 sent_milestones.update(percent for percent in (20, 50) if current_iter * 100 >= percent * maximum)
             else:
@@ -403,7 +412,15 @@ def main() -> None:
             state["last_callback_at"] = max(float(state.get("last_callback_at", 0.0)), progress_at, now)
             initialized = True
             state["initialized"] = True
-        if heartbeat_due(now, float(state.get("last_callback_at", now)), progress_at, args.heartbeat_minutes * 60):
+        if (
+            not args.terminal_only
+            and heartbeat_due(
+                now,
+                float(state.get("last_callback_at", now)),
+                progress_at,
+                args.heartbeat_minutes * 60,
+            )
+        ):
             if send(args.chat_id, heartbeat_text(args.label, samples)):
                 state["last_callback_at"] = now
         state["updated_at"] = now

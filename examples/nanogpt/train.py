@@ -1365,6 +1365,16 @@ def parse_args() -> argparse.Namespace:
         default=1.1,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-global-log-volume",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-global-log-volume-max-abs",
+        type=float,
+        default=math.log(1.01),
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-hybrid-output",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2038,9 +2048,40 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "output symmetric-shear c_proj stages must be nonnegative"
             )
+        global_log_volume = bool(
+            namespace.block_fht_mlp_cproj_global_log_volume
+        )
+        global_log_volume_max_abs = float(
+            namespace.block_fht_mlp_cproj_global_log_volume_max_abs
+        )
+        if global_log_volume:
+            if (
+                namespace
+                .block_fht_mlp_cproj_muon_matched_givens_output_stages
+                or namespace.block_fht_mlp_cproj_hybrid_output
+                or namespace.block_fht_mlp_cproj_activation_energy_metric
+                or shear_stages
+                or not math.isfinite(global_log_volume_max_abs)
+                or global_log_volume_max_abs <= 0.0
+            ):
+                raise ValueError(
+                    "global log-volume c_proj requires hidden-side "
+                    "Muon-matched Givens only and a positive finite bound"
+                )
+        elif (
+            not math.isfinite(global_log_volume_max_abs)
+            or global_log_volume_max_abs <= 0.0
+        ):
+            raise ValueError(
+                "global log-volume c_proj bound must be positive and finite"
+            )
     elif namespace.block_fht_mlp_cproj_output_symmetric_shear_stages:
         raise ValueError(
             "output symmetric-shear c_proj requires Muon-matched Givens"
+        )
+    elif namespace.block_fht_mlp_cproj_global_log_volume:
+        raise ValueError(
+            "global log-volume c_proj requires Muon-matched Givens"
         )
     if namespace.block_fht_mlp_cproj_activation_energy_metric:
         if not namespace.block_fht_mlp_cproj_muon_matched_givens:
@@ -2578,6 +2619,12 @@ def main() -> None:
         ),
         block_fht_mlp_cproj_output_symmetric_shear_max_condition_number=(
             args.block_fht_mlp_cproj_output_symmetric_shear_max_condition_number
+        ),
+        block_fht_mlp_cproj_global_log_volume=(
+            args.block_fht_mlp_cproj_global_log_volume
+        ),
+        block_fht_mlp_cproj_global_log_volume_max_abs=(
+            args.block_fht_mlp_cproj_global_log_volume_max_abs
         ),
         block_fht_mlp_cproj_hybrid_output=(
             args.block_fht_mlp_cproj_hybrid_output

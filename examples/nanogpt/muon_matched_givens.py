@@ -922,6 +922,72 @@ def _fit_weight_shear_flow(
 
 
 @torch.no_grad()
+def _fit_global_log_volume(
+    source: torch.Tensor,
+    remaining_update: torch.Tensor,
+    *,
+    max_abs_log_coordinate: float,
+    epsilon: float = 1e-30,
+) -> tuple[torch.Tensor, torch.Tensor, dict[str, float | bool]]:
+    """Fit one folded global scale to the remaining matrix target.
+
+    The positive scale is parameterized as ``exp(a)``.  Its unconstrained
+    least-squares solution is ``<target, source> / ||source||_F^2``; fitting
+    in log space makes the scalar an exact mean-log-singular coordinate.
+    Uniform scaling changes pseudo-determinant volume while leaving condition
+    number unchanged.
+    """
+    if source.ndim != 2 or remaining_update.shape != source.shape:
+        raise ValueError("source and remaining update must be same-shaped matrices")
+    if (
+        not math.isfinite(max_abs_log_coordinate)
+        or max_abs_log_coordinate <= 0.0
+        or not math.isfinite(epsilon)
+        or epsilon <= 0.0
+    ):
+        raise ValueError("global log-volume bounds must be positive and finite")
+    if not bool(
+        torch.isfinite(source).all()
+        and torch.isfinite(remaining_update).all()
+    ):
+        raise RuntimeError("global log-volume fit received non-finite tensors")
+    source64 = source.double()
+    target64 = source64 + remaining_update.double()
+    denominator = source64.square().sum().clamp_min(epsilon)
+    raw_scale = (source64 * target64).sum() / denominator
+    safe_scale = raw_scale.clamp_min(epsilon)
+    raw_coordinate = safe_scale.log()
+    coordinate = raw_coordinate.clamp(
+        min=-max_abs_log_coordinate,
+        max=max_abs_log_coordinate,
+    )
+    scale = coordinate.exp()
+    updated = source.float() * scale.to(dtype=torch.float32)
+    residual = target64 - updated.double()
+    requested_energy = remaining_update.double().square().sum().clamp_min(epsilon)
+    if not bool(
+        torch.isfinite(coordinate)
+        and torch.isfinite(scale)
+        and torch.isfinite(updated).all()
+    ):
+        raise RuntimeError("global log-volume fit produced non-finite values")
+    diagnostics: dict[str, float | bool] = {
+        "coordinate": float(coordinate),
+        "raw_coordinate": float(raw_coordinate),
+        "scale": float(scale),
+        "raw_scale": float(raw_scale),
+        "clamp_active": bool(coordinate != raw_coordinate),
+        "condition_number_ratio": 1.0,
+        "mean_log_singular_shift": float(coordinate),
+        "remaining_update_recovery": float(
+            1.0 - residual.square().sum() / requested_energy
+        ),
+        "all_finite": True,
+    }
+    return updated.to(dtype=source.dtype), coordinate.float(), diagnostics
+
+
+@torch.no_grad()
 def _fit_functional_shear_recipe(
     source: torch.Tensor,
     requested_update: torch.Tensor,
@@ -1357,6 +1423,8 @@ class MuonMatchedGivensLinear(nn.Module):
         output_symmetric_shear_stages: int = 0,
         output_symmetric_shear_neighbors: int = 64,
         output_symmetric_shear_max_condition_number: float = 1.1,
+        global_log_volume: bool = False,
+        global_log_volume_max_abs: float = math.log(1.01),
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -1406,6 +1474,8 @@ class MuonMatchedGivensLinear(nn.Module):
         self.output_symmetric_shear_max_condition_number = float(
             output_symmetric_shear_max_condition_number
         )
+        self.global_log_volume = bool(global_log_volume)
+        self.global_log_volume_max_abs = float(global_log_volume_max_abs)
         if (
             self.in_features <= 0
             or self.in_features % 2
@@ -1510,6 +1580,26 @@ class MuonMatchedGivensLinear(nn.Module):
                 )
         elif self.output_symmetric_shear_stages < 0:
             raise ValueError("output symmetric-shear stages must be nonnegative")
+        if self.global_log_volume:
+            if (
+                self.output_stages
+                or self.hybrid_output
+                or self.activation_energy_metric
+                or self.output_symmetric_shear_stages
+                or not math.isfinite(self.global_log_volume_max_abs)
+                or self.global_log_volume_max_abs <= 0.0
+            ):
+                raise ValueError(
+                    "global log-volume c_proj requires hidden-side Givens "
+                    "only and a positive finite coordinate bound"
+                )
+        elif (
+            not math.isfinite(self.global_log_volume_max_abs)
+            or self.global_log_volume_max_abs <= 0.0
+        ):
+            raise ValueError(
+                "global log-volume coordinate bound must be positive and finite"
+            )
 
         weight = torch.empty(self.out_features, self.in_features)
         nn.init.normal_(weight, mean=0.0, std=float(weight_std))
@@ -1594,6 +1684,12 @@ class MuonMatchedGivensLinear(nn.Module):
                 ),
                 persistent=True,
             )
+        if self.global_log_volume:
+            self.register_buffer(
+                "last_global_log_volume_coordinate",
+                torch.zeros((), dtype=torch.float32),
+                persistent=True,
+            )
         self.register_buffer(
             "optimizer_step",
             torch.zeros((), dtype=torch.int64),
@@ -1637,6 +1733,7 @@ class MuonMatchedGivensLinear(nn.Module):
             + self.output_stages * (self.out_features // 2)
             + self.output_symmetric_shear_stages
             * (self.out_features // 2)
+            + int(self.global_log_volume)
             + (
                 self.hybrid_directed_incoming * self.out_features
                 if self.hybrid_output
@@ -2529,6 +2626,8 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 output_shear_matching_summary = None
                 output_shear_fit_diagnostics = None
                 output_shear_coordinates = None
+                global_log_volume_coordinate = None
+                global_log_volume_diagnostics = None
                 if refresh:
                     if module.stages == 0:
                         matching_summary = {
@@ -2980,6 +3079,22 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     rotated = output_shear_updated.transpose(
                         0, 1
                     ).contiguous()
+                if module.global_log_volume:
+                    global_volume_remaining_update = (
+                        corrected_update.float()
+                        - (rotated.float() - weight.float())
+                    )
+                    (
+                        rotated,
+                        global_log_volume_coordinate,
+                        global_log_volume_diagnostics,
+                    ) = _fit_global_log_volume(
+                        rotated,
+                        global_volume_remaining_update,
+                        max_abs_log_coordinate=(
+                            module.global_log_volume_max_abs
+                        ),
+                    )
                 if weight_decay != 0.0:
                     rotated.mul_(1.0 - lr * weight_decay)
                 update = rotated - weight
@@ -3068,6 +3183,15 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             )
                         )
                     )
+                if global_log_volume_coordinate is not None:
+                    module.last_global_log_volume_coordinate.copy_(
+                        global_log_volume_coordinate.to(
+                            dtype=(
+                                module
+                                .last_global_log_volume_coordinate.dtype
+                            )
+                        )
+                    )
                 module.optimizer_step.add_(1)
                 angle_parts = [parent_angles.reshape(-1)]
                 if residual_angles is not None:
@@ -3133,6 +3257,18 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             else float(
                                 output_shear_coordinates.abs().max()
                             )
+                        ),
+                        "global_log_volume": module.global_log_volume,
+                        "global_log_volume_max_abs": (
+                            module.global_log_volume_max_abs
+                        ),
+                        "global_log_volume_coordinate": (
+                            None
+                            if global_log_volume_coordinate is None
+                            else float(global_log_volume_coordinate)
+                        ),
+                        "global_log_volume_fit": (
+                            global_log_volume_diagnostics
                         ),
                         "hybrid_output": module.hybrid_output,
                         "hybrid_directed_incoming": (
