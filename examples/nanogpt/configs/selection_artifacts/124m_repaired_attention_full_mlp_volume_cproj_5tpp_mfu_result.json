@@ -1,0 +1,125 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_volume_cproj_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_volume_cproj_5tpp_exact_config_mfu_result",
+  "classification": "VOLUME_CPROJ_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "recorded_at": "2026-08-06T10:37:02+08:00",
+  "passed": true,
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_volumecproj_5tpp_lr24e4.json",
+    "config_sha256": "55f353fca4a61fb83b317ffe03c4bf7101c8833fa24ef757df08f31c6f1823dd",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_volume_cproj_5tpp_plan.json",
+    "plan_sha256": "d5446e543e4d4752771d997a38c4587fc58fb41326db68edc5f202454f850a5b",
+    "implementation_commit": "c2a3d01f9f948322e92a1cd7d9911b949a93d8d1",
+    "configuration_provenance_commit": "c35ca33d728aba9ad7032b3c615c744c9c81a925",
+    "execution_git_commit": "c35ca33d728aba9ad7032b3c615c744c9c81a925",
+    "remote_repo": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "passing_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_volumecproj_5tpp/performance_preflight.json",
+      "sha256": "77d6425b257586ab57eb5510c698ea6724ad45cf7423ac254c84bc64343a9775"
+    },
+    "passing_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_volumecproj_5tpp/performance_preflight.log",
+      "sha256": "d6bdd2670bf726439f1b8656c91b47c801fff4c2277a9489b44184bbfe5e4168"
+    },
+    "failed_environment_attempt": {
+      "classification": "PREFLIGHT_REJECTED_BEFORE_TRAINING_WRONG_TORCH211_ENVIRONMENT_NO_NATIVE_EXTENSION",
+      "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_volumecproj_5tpp/performance_preflight_attempt1_failed_torch211.json",
+      "certificate_sha256": "cfdad4a0f55a5e51513f6bce18fe74f90b51d68c2b511f49e870a06970cb7b35",
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "scientific_updates_executed": 0,
+      "operator_or_config_changed_for_retry": false,
+      "remediation": "Use the pinned PRO6 Torch 2.7 CUDA environment that owns latent_weight_lab_block_fht_ext_scaled_v10."
+    }
+  },
+  "measurement": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 23.706877946853638,
+    "iter_ms": 2222.4700000000003,
+    "tokens_per_second": 117951.79125,
+    "model_tflops": 88.09293506557823,
+    "empirical_bf16_gemm_peak_tflops": 414.25337548146706,
+    "mfu_fraction": 0.2126547187773473,
+    "minimum_mfu_fraction": 0.2,
+    "peak_mib": 35699.37,
+    "timing_breakdown_ms": {
+      "prepare": 3.54125,
+      "fwbw": 1655.16625,
+      "optimizer": 555.44875,
+      "gradient": 1.9249999999999998,
+      "flush": 4.335,
+      "data": 0.73125,
+      "other": 1.325
+    },
+    "native_block_fht_extension": {
+      "loaded": true,
+      "required": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    }
+  },
+  "structural_verification": {
+    "cfc_directed_product_active": true,
+    "cfc_schedule": [22, 22, 22, 22, 22, 22],
+    "cfc_error_feedback_decay": 1,
+    "cproj_muon_matched_givens_active": true,
+    "cproj_hidden_main_stages": 64,
+    "cproj_hidden_residual_stages": 24,
+    "cproj_global_log_volume_active": true,
+    "cproj_total_procedural_coordinates_per_layer": 135169,
+    "cproj_total_procedural_coordinates_all_layers": 1622028,
+    "cproj_error_feedback_decay": 0.5,
+    "diagnostic_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "maximum_abs_global_log_volume_coordinate": 0.000011486261428217404,
+    "minimum_global_log_volume_coordinate": -0.000011486261428217404,
+    "maximum_global_log_volume_coordinate": -0.000006819258032919606,
+    "all_global_log_volume_coordinates_finite": true,
+    "any_global_log_volume_coordinate_nonzero": true,
+    "any_coordinate_clamped": false,
+    "minimum_remaining_update_recovery": 0.0006051212524273986,
+    "maximum_remaining_update_recovery": 0.0043375604190697414,
+    "condition_number_ratio_by_construction": 1,
+    "additional_persistent_trainable_coordinates": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0
+  },
+  "performance_comparison": {
+    "rejected_joint_full_mlp_iter_ms": 2214.656,
+    "rejected_symmetric_cproj_iter_ms": 2330.895,
+    "candidate_over_rejected_joint_update_time_ratio": 1.003528313200786,
+    "candidate_over_rejected_symmetric_update_time_ratio": 0.9534835331492838,
+    "interpretation": "The scalar volume fit adds about 0.35% update time over the hidden64+24 joint control and is 4.65% faster than the rejected symmetric-shear chart."
+  },
+  "execution": {
+    "direct_foreground_polling": true,
+    "watchdog_used": false,
+    "scientific_run_duration_estimate_minutes_from_update_rate": 87.8986885,
+    "workspace_bytes_after_gate": 226449976471,
+    "workspace_gib_after_gate": 210.89797510858625,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes_after_gate": 1683042336768,
+    "gpu_memory_mib_after_gate": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent_after_gate": 2,
+    "remote_worktree_clean": true
+  },
+  "decision": {
+    "one_scientific_2373_update_run_authorized": true,
+    "watchdog_required": true,
+    "watchdog_terminal_only": true,
+    "healthy_progress_callbacks": false,
+    "healthy_heartbeat_callbacks": false,
+    "callback_on_clean_completion": true,
+    "callback_on_actionable_error": true,
+    "primary_terminal_validation_ce_maximum": 3.635838041305542,
+    "secondary_terminal_validation_ce_maximum": 3.6478,
+    "automatic_rerun_authorized": false,
+    "parallel_arm_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
