@@ -1,0 +1,528 @@
+{
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "same_run_paired_state_acquisition_after_exact_config_mfu": true,
+    "zero_update_state_transport_analysis": false
+  },
+  "classification": "INVALID_CROSS_RUN_TRAJECTORY_IDENTITY",
+  "cross_run_failure": {
+    "all_post_step_weights_bitwise_equal": false,
+    "initialization_rows": [
+      {
+        "bitwise_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "mismatched_elements": 0,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "relative_frobenius_difference": 0.0
+      },
+      {
+        "bitwise_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "mismatched_elements": 0,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "relative_frobenius_difference": 0.0
+      },
+      {
+        "bitwise_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "mismatched_elements": 0,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "relative_frobenius_difference": 0.0
+      },
+      {
+        "bitwise_equal": true,
+        "maximum_absolute_difference": 0.0,
+        "mismatched_elements": 0,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "relative_frobenius_difference": 0.0
+      }
+    ],
+    "maximum_relative_frobenius_difference": 0.6178879793756079,
+    "minimum_relative_frobenius_difference": 0.06877088953725236,
+    "phase_rows": [
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.0015929650980979204,
+        "mismatched_elements": 2359295,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 99,
+        "pre_step": 98,
+        "relative_frobenius_difference": 0.0691676089800479
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.0017548482865095139,
+        "mismatched_elements": 2359295,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 99,
+        "pre_step": 98,
+        "relative_frobenius_difference": 0.06877088953725236
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.0015110420063138008,
+        "mismatched_elements": 2359294,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 99,
+        "pre_step": 98,
+        "relative_frobenius_difference": 0.06997278528698066
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.0014585911994799972,
+        "mismatched_elements": 2359295,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 99,
+        "pre_step": 98,
+        "relative_frobenius_difference": 0.0693193572891698
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.004027880262583494,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 297,
+        "pre_step": 296,
+        "relative_frobenius_difference": 0.1904482057199067
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.0040303608402609825,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 297,
+        "pre_step": 296,
+        "relative_frobenius_difference": 0.1894568064668645
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.004095043521374464,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 297,
+        "pre_step": 296,
+        "relative_frobenius_difference": 0.19509490369996657
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.003973750397562981,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 297,
+        "pre_step": 296,
+        "relative_frobenius_difference": 0.19242318367181793
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.006757330149412155,
+        "mismatched_elements": 2359295,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 594,
+        "pre_step": 593,
+        "relative_frobenius_difference": 0.34633344374476527
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.006505086086690426,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 594,
+        "pre_step": 593,
+        "relative_frobenius_difference": 0.34236743651122614
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.006654419470578432,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 594,
+        "pre_step": 593,
+        "relative_frobenius_difference": 0.3650286564578688
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.006686205510050058,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 594,
+        "pre_step": 593,
+        "relative_frobenius_difference": 0.35506080123151407
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.007828190922737122,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 891,
+        "pre_step": 890,
+        "relative_frobenius_difference": 0.44539503345269676
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.007445421069860458,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 891,
+        "pre_step": 890,
+        "relative_frobenius_difference": 0.4375728156936305
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.007977490313351154,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 891,
+        "pre_step": 890,
+        "relative_frobenius_difference": 0.47407820452614435
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008734868839383125,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 891,
+        "pre_step": 890,
+        "relative_frobenius_difference": 0.4587535595654561
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008839182555675507,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 1188,
+        "pre_step": 1187,
+        "relative_frobenius_difference": 0.5059872077422919
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.00809954572468996,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 1188,
+        "pre_step": 1187,
+        "relative_frobenius_difference": 0.49566921692127114
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009128233417868614,
+        "mismatched_elements": 2359295,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 1188,
+        "pre_step": 1187,
+        "relative_frobenius_difference": 0.5402631485366213
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008933065459132195,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 1188,
+        "pre_step": 1187,
+        "relative_frobenius_difference": 0.5220410746395461
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009024122729897499,
+        "mismatched_elements": 2359295,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 1485,
+        "pre_step": 1484,
+        "relative_frobenius_difference": 0.5417776005563033
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008356880396604538,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 1485,
+        "pre_step": 1484,
+        "relative_frobenius_difference": 0.5294543874322551
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.00918232649564743,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 1485,
+        "pre_step": 1484,
+        "relative_frobenius_difference": 0.578975234789676
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008694096468389034,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 1485,
+        "pre_step": 1484,
+        "relative_frobenius_difference": 0.5592819799525608
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.00957995280623436,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 1782,
+        "pre_step": 1781,
+        "relative_frobenius_difference": 0.56126355266779
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008083115331828594,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 1782,
+        "pre_step": 1781,
+        "relative_frobenius_difference": 0.547900826294188
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009158884175121784,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 1782,
+        "pre_step": 1781,
+        "relative_frobenius_difference": 0.6004446999359028
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009058778174221516,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 1782,
+        "pre_step": 1781,
+        "relative_frobenius_difference": 0.5798951336021055
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009625038132071495,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 2079,
+        "pre_step": 2078,
+        "relative_frobenius_difference": 0.5714896148385016
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008286762051284313,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 2079,
+        "pre_step": 2078,
+        "relative_frobenius_difference": 0.5573765294522789
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009433029219508171,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 2079,
+        "pre_step": 2078,
+        "relative_frobenius_difference": 0.6115655459048214
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009166931733489037,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 2079,
+        "pre_step": 2078,
+        "relative_frobenius_difference": 0.5904794268941543
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.00936872512102127,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.10.mlp.c_proj.weight",
+        "post_step": 2373,
+        "pre_step": 2372,
+        "relative_frobenius_difference": 0.5773229194130018
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.008225448429584503,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.11.mlp.c_proj.weight",
+        "post_step": 2373,
+        "pre_step": 2372,
+        "relative_frobenius_difference": 0.562828077160202
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009482499212026596,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.8.mlp.c_proj.weight",
+        "post_step": 2373,
+        "pre_step": 2372,
+        "relative_frobenius_difference": 0.6178879793756079
+      },
+      {
+        "bitwise_equal": false,
+        "maximum_absolute_difference": 0.009050997905433178,
+        "mismatched_elements": 2359296,
+        "numel": 2359296,
+        "parameter": "transformer.h.9.mlp.c_proj.weight",
+        "post_step": 2373,
+        "pre_step": 2372,
+        "relative_frobenius_difference": 0.5965805632972933
+      }
+    ],
+    "reference_snapshot_sha256_by_step": {
+      "0": "e2e15982fd826cb18ff2edbcacd0f89a09bf13641136071c15c8da70e3f815d2",
+      "1188": "9045f7a7aa97285dbbcc5d864351e92da7942ffc26469eb63ebd933b1059ca9f",
+      "1485": "adb6b3591b3dfcf9ae5455cc77718f1a8a8fff088c1b0db3e2d594dd21b22b09",
+      "1782": "0f7471b0db92e3d7cd6e29a191fdd8d0c937bff1ec02d1a73feb70c58266c015",
+      "2079": "0721949d12106e0c24c5198eae35862d96e71f8a71040e7a0df729d2f055c045",
+      "2373": "7bdd6b1f61a3025276b152d3a4ce5ab8cc1273e7c2e9e2a21abebff3a300a542",
+      "297": "024d4c9cf97e35ad4871dc23f7233c5e9237ffaf92b13b14578aaa42c89b3a7d",
+      "594": "dbb237169441159cbd7f1cf661996c7beaa40be1c4307d754119998e824b08eb",
+      "891": "660bc6bd817e921c01bdb9c77684fbbdcda2419a7b0715799f26ca1e08e1f515",
+      "99": "fe3959812a59753a19333c99b42923bde5296088e58ece0d8a080bd6ecfd5768"
+    }
+  },
+  "curve_reproduction": {
+    "rows": [
+      {
+        "accepted_validation_ce": 3.851,
+        "delta_ce": 0.002000000000000224,
+        "observed_validation_ce": 3.853,
+        "step": 1188,
+        "within_tolerance": true
+      },
+      {
+        "accepted_validation_ce": 3.6998,
+        "delta_ce": 0.0002999999999997449,
+        "observed_validation_ce": 3.7001,
+        "step": 1782,
+        "within_tolerance": true
+      },
+      {
+        "accepted_validation_ce": 3.636904239654541,
+        "delta_ce": 0.00019576034545920606,
+        "observed_validation_ce": 3.6371,
+        "step": 2373,
+        "within_tolerance": true
+      },
+      {
+        "accepted_validation_ce": 4.2239,
+        "delta_ce": -0.00140000000000029,
+        "observed_validation_ce": 4.2225,
+        "step": 594,
+        "within_tolerance": true
+      }
+    ],
+    "tolerance_ce": 0.005
+  },
+  "execution": {
+    "entrypoint": "examples.nanogpt.audit_late_cproj_optimizer_state_cross_run",
+    "git_commit": "b65a276f8ac9255e95bab5e66703d0ebb2b32303",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "checkpoint_sha256": "7a12439248424d18c8e71968836c0b5b73962fafd9381708eed376a930d9d64e",
+    "config_sha256": "ee1b27b84dc26abf0d245fbb92490a6c96f6649cd37d51dbf7576277b2fd765a",
+    "optimizer_probe_run_identity_sha256": "b5d6b7d1f7776238a3947d91d0a074ebdfaa825c133b8d69fa751827ca83019e",
+    "plan_sha256": "8e81f90c9c8eb0bb2467300aedf773dbeae4e2e6d3c5676709851ee1cbf46165",
+    "provenance_sha256": "41f7bb77ff8b61d1a7d3197a3150f4269d964aa796321b516a10fd27ba6bb733",
+    "status_sha256": "f7bb3b0e5688597454a5341cc919b155c40299ceb6e429dd462bd8efdc0b3769",
+    "training_log_sha256": "6d97868ba507b04eb27c1448c2b8e3131085a9ca8eb41ddbaecabb9aaf98a7f7"
+  },
+  "internal_acquisition": {
+    "all_probe_contracts_valid": true,
+    "fixed_curve_within_tolerance": true,
+    "initialization_bitwise_equal_to_reference": true,
+    "parameter_count_per_probe": 4,
+    "probe_count": 10,
+    "probe_sha256_by_step": {
+      "0": "2b29960945753926b8c489511175b96bb573fe272e4d5914348252d7b4b4b7ce",
+      "1187": "f5c5d1f2ad6b7d322c20b0c0f6ef77faaed24a73b57a6b90624ce8e4d9363a51",
+      "1484": "6df8e41e9dece6314475e4a353777fbc489aa59634d4c2818d2c629469830692",
+      "1781": "50b27789e727a7dc0ddf2142e1f42b7f707b742df17d98884c71e7dd94a5c5f5",
+      "2078": "a610eca316f53f3b186ee9c7e42224e4043005f6ab335e93af399a2e499d2f39",
+      "2372": "8130b6f138f0faf9731045ecc031b3b4d5d94b7f1652937242865cb3174942ce",
+      "296": "bc61e963619e81ff9d71ca7f69a91926d86640d84b3b85827031263b65f98e1e",
+      "593": "50fe30816a1bf7177d172c528df911335479e18bf8119e92f70e43d86bfa8dce",
+      "890": "a1503b0e5d568141b7007e99a16410952f821882ae4fea9b30776ed2cfc0ce2b",
+      "98": "3cd03d14da4265a78cccbef785e85b0a135f41fe7e5fcb32b54c56314531d87f"
+    },
+    "terminal_probe_bitwise_equal_to_own_checkpoint": true
+  },
+  "recorded_at": "2026-08-06T23:27:03.743392+00:00",
+  "schema_version": "mai_124m_late_cproj_optimizer_state_cross_run_audit_v1",
+  "scientific_conclusion": "The optimizer probes are internally valid, start in the exact accepted gauge, reproduce the fixed CE curve, and end bitwise at their own checkpoint; independent CUDA training nevertheless diverges from the prior run's tensor path. Optimizer state and parameter targets must therefore be captured in one run.",
+  "terminal_checkpoint_rows": [
+    {
+      "bitwise_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "mismatched_elements": 0,
+      "numel": 2359296,
+      "parameter": "transformer.h.10.mlp.c_proj.weight",
+      "relative_frobenius_difference": 0.0
+    },
+    {
+      "bitwise_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "mismatched_elements": 0,
+      "numel": 2359296,
+      "parameter": "transformer.h.11.mlp.c_proj.weight",
+      "relative_frobenius_difference": 0.0
+    },
+    {
+      "bitwise_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "mismatched_elements": 0,
+      "numel": 2359296,
+      "parameter": "transformer.h.8.mlp.c_proj.weight",
+      "relative_frobenius_difference": 0.0
+    },
+    {
+      "bitwise_equal": true,
+      "maximum_absolute_difference": 0.0,
+      "mismatched_elements": 0,
+      "numel": 2359296,
+      "parameter": "transformer.h.9.mlp.c_proj.weight",
+      "relative_frobenius_difference": 0.0
+    }
+  ]
+}
