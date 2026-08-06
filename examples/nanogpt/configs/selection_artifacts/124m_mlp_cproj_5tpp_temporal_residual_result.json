@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_temporal_residual_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-07T01:14:51+08:00",
+  "classification": "LOW_DIMENSIONAL_BUT_PHASE_TRANSPORTED",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "073d356eb9c2872872133f995b6c54fc1130696c",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_temporal_residual",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 4.334272146224976
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_temporal_residual_plan.json",
+    "plan_sha256": "125bb4ad2ef76273cc65461de7f56e2376641a8114a9554fcd04ae0ab562c7cd",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "static_metric_result_sha256": "5764cd3def449c25916b2260c68116c00e8497dd9f9f57a929bc1b1333df1c77",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347"
+  },
+  "aggregate": {
+    "chart_fixed_scale_recovery": 0.2741999281665084,
+    "residual_energy_fraction_of_exact_update": 0.7258000718473471,
+    "temporal_pc1_energy_fraction": 0.69520565477245,
+    "temporal_pc2_energy_fraction": 0.9540250652843527,
+    "causal_previous_line_recovery": 0.00003680977719917494,
+    "causal_prior_span_recovery": 0.000037821744404730534,
+    "maximum_absolute_cross_phase_residual_cosine": 0.013252223377885858,
+    "future_chord_exact_update_line_recovery": 0.011617487804624042,
+    "future_chord_chart_line_recovery": 0.0040516614574969256,
+    "future_chord_residual_line_recovery": 0.0062339841001489964,
+    "singular_top1_energy_fraction": 0.0027427887897130882,
+    "singular_top4_energy_fraction": 0.010845215847546757,
+    "singular_top16_energy_fraction": 0.04229240669122247,
+    "singular_top64_energy_fraction": 0.15810567990083538,
+    "singular_participation_rank": 627.8093516982858,
+    "stable_rank": 364.7702859793783,
+    "output_top_quarter_energy_fraction": 0.25763934189642024,
+    "hidden_top_quarter_energy_fraction": 0.2947400572108388,
+    "output_channel_participation_rank": 767.5581949973332,
+    "hidden_channel_participation_rank": 3014.384567266043
+  },
+  "frozen_gate_results": {
+    "temporally_low_dimensional": true,
+    "previous_direction_predictive": false,
+    "prior_span_predictive": false,
+    "residual_predicts_future_chord": false,
+    "matrix_low_rank": false,
+    "output_channel_concentrated": false,
+    "hidden_channel_concentrated": false,
+    "threshold_changed_after_measurement": false
+  },
+  "interpretation": {
+    "temporal_pc_caveat": "The 95.4 percent PC2 fraction is dominated by unequal phase energies. Cross-phase residual cosines are at most 0.0133 in magnitude and causal prior-span energy recovery is 3.78e-5, so this is not a reusable static two-direction subspace.",
+    "accepted_claim": "The unmatched c_proj action is phase-transported, nearly full matrix rank, and close to channel-isotropic under the measured axes.",
+    "rejected_branches": [
+      "static or short-history residual carry",
+      "low-rank residual adapter",
+      "per-output channel modulation as the primary repair",
+      "per-hidden channel modulation as the primary repair",
+      "another static activation/error metric"
+    ],
+    "next_causal_question": "Can a current-state-selected global orthogonal basis represent the fresh high-rank residual materially better than the local BlockFHT family at the same coordinate budget?"
+  },
+  "raw_artifacts": {
+    "result_sha256": "355944dfe2f01219eba572611a3124696137de196ac9ca50c1959620d7d7eba0",
+    "cells_csv_sha256": "02b64f37f0a6d08a1838a396711f5e485ccce690f45f86db0ff4a728e48da6fe",
+    "by_layer_json_sha256": "b0ea106dc256e3dbd7bfa59c3e664dd6ea2dc61a77861509a4324682e7bf9a97",
+    "cells_csv_rows_including_header": 33
+  },
+  "authorization": {
+    "phase_local_transport_theory": true,
+    "global_orthogonal_residual_analysis": true,
+    "compact_residual_state_design": false,
+    "low_rank_design": false,
+    "output_channel_modulation_design": false,
+    "hidden_channel_modulation_design": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
