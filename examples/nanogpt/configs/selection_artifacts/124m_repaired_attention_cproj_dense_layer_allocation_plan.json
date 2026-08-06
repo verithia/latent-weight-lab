@@ -1,0 +1,114 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_dense_layer_allocation_plan_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_dense_layer_allocation_zero_update_plan",
+  "registered_at": "2026-08-06",
+  "status": "registered_before_implementation_or_execution",
+  "scientific_question": "After universal procedural c_proj replacement fails, can an LWT-style exception set of at most four dense c_proj layers recover most of the c_fc-only parent's terminal advantage while the other c_proj layers remain procedural?",
+  "evidence": {
+    "joint_full_mlp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+      "sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2",
+      "validation_ce": 3.660243034362793,
+      "conclusion": "The full procedural MLP is stable but 0.034405 CE behind the accepted c_fc-only parent."
+    },
+    "cfc_only_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+      "sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+      "validation_ce": 3.625838041305542,
+      "conclusion": "c_fc procedural replacement is accepted; dense c_proj is the remaining MLP bottleneck."
+    },
+    "parallel_transport": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_parallel_transport_error_feedback_result.json",
+      "sha256": "4b426a10cc143d708ca442ff0c5159d38a6991e8bec6bfda3af29474c63cd943",
+      "conclusion": "Both forward and inverse compression-error transport lose endpoint recovery in all five layers, closing temporal gauge as the universal repair."
+    },
+    "paper_alignment": "The Mapping Networks paper motivates layer-wise training because different layers occupy different manifolds. This diagnostic tests exception allocation rather than claiming one universal c_proj manifold."
+  },
+  "identity": {
+    "joint_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/scientific/ckpt.pt",
+    "joint_checkpoint_sha256": "6b3c9cadc169b9dd234e111428dc22b4390be79561f98d178e8f105747612a24",
+    "joint_checkpoint_bytes": 1245132956,
+    "dense_cproj_parent_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/scientific/ckpt.pt",
+    "dense_cproj_parent_checkpoint_sha256": "3d4b893cd59d384a404daf439742e03614dc6d7d0992353e0099429261a53a02",
+    "dense_cproj_parent_checkpoint_bytes": 1073450016,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "base_model": "joint full-procedural-MLP checkpoint",
+    "donor_tensors": "only transformer.h.{0..11}.mlp.c_proj.weight from the c_fc-only checkpoint",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "primary_window": {
+      "split": "validation",
+      "seed": 20260905,
+      "batch_size": 16,
+      "block_size": 1024,
+      "batches": 32,
+      "participates_in_layer_ranking": true
+    },
+    "confirmation_window": {
+      "split": "validation",
+      "seed": 20260906,
+      "batch_size": 16,
+      "block_size": 1024,
+      "batches": 32,
+      "participates_in_layer_ranking": false
+    },
+    "variants": {
+      "joint_control": "No donor c_proj layer is inserted.",
+      "all12_restore_control": "All twelve donor dense c_proj tensors are inserted; this measures the maximum immediate cross-run restore signal in the joint context.",
+      "single_layer_restores": "Insert one donor c_proj layer at a time on the primary window and rank by CE gain, breaking ties by smaller layer index.",
+      "primary_ranked_cumulative": "Evaluate cumulative top-k sets for k in [1,2,3,4,6,8,10,12] on both windows. Confirmation tokens never change the ordering."
+    },
+    "restore_contract": "Copy full c_proj tensors only, evaluate, and restore the exact joint tensors bitwise after each arm. No interpolation, rescaling, refit, optimizer step, or other model-state change.",
+    "cumulative_sizes": [1, 2, 3, 4, 6, 8, 10, 12],
+    "maximum_selected_dense_layers": 4,
+    "dense_parameters_per_cproj_layer": 2359296,
+    "prohibited": [
+      "ranking on confirmation tokens",
+      "row or channel selection within a layer",
+      "weight interpolation or donor alignment",
+      "learned basis or LoRA adapter",
+      "training update",
+      "automatic mixed-layer training run"
+    ]
+  },
+  "decision_rule": {
+    "restore_control_requirements": {
+      "all12_primary_ce_gain_minimum": 0.01,
+      "all12_confirmation_ce_gain_minimum": 0.01
+    },
+    "candidate_requirements": {
+      "maximum_dense_layers": 4,
+      "primary_gain_fraction_of_all12_minimum": 0.75,
+      "confirmation_gain_fraction_of_all12_minimum": 0.75,
+      "primary_ce_gain_minimum": 0.01,
+      "confirmation_ce_gain_minimum": 0.01,
+      "confirmation_ce_above_all12_maximum": 0.01,
+      "all_losses_and_tensors_finite": true,
+      "exact_restore_after_each_arm": true
+    },
+    "pass": "Select the smallest cumulative k in ascending order that clears every restore-control and candidate requirement. A pass authorizes only a separately preregistered mixed-layer model/config implementation, correctness and exact-resume tests, then an exact-config MFU gate at or above 20 percent.",
+    "fail": "Reject donor-layer exception allocation as nonportable in the joint context. Do not tune seeds, thresholds, interpolation, or layer subsets after measurement.",
+    "automatic_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update terminal counterfactual",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_dense_layer_allocation_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "implement_mixed_layer_path_after_pass": true,
+    "run_exact_config_mfu_after_pass": true,
+    "run_language_model_training": false
+  }
+}
