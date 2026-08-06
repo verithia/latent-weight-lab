@@ -1,0 +1,86 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_same_gauge_lwt_allocation_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_same_gauge_lwt_allocation_zero_update_sealed_result",
+  "sealed_at": "2026-08-06T18:16:49+00:00",
+  "classification": "REJECT_EARLY_MIDDLE_LWT_EXPANSION_AT_DENSE_BUDGET",
+  "passed": false,
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "git_commit": "75bbb28dedde86b4467dafd18e51842fdc0422f2",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_same_gauge_lwt_allocation",
+    "parameter_updates": 0,
+    "elapsed_seconds": 150.03480768203735,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan_sha256": "c88c7b9f8044026ba166da5cfb9b1378afced975b5b2150911806731736d6d4e",
+    "analysis_source_sha256": "2731bfe1ea2921c0c24cea6241630e0bc09b4ea94620209eba0187bcb41c1c8e",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "bounded_result_sha256": "63b33b4d75b31f25834d7c3e31674aabfeb7014be8da456df4affde1139a5464",
+    "late_band_lwt_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "raw_result_sha256": "0e2ace4e6b8f5a15180f532115db4dd80438f37c54b54dea618ea71c56ac8069",
+    "rows_sha256": "8c01c98970a29641b8ed1e484973ebb9c836e332130ca64a9941c0162c2500e9",
+    "row_count": 22,
+    "all_metrics_finite": true
+  },
+  "allocation_contract": {
+    "always_procedural_layers": [8, 9, 10, 11],
+    "difficult_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "maximum_dense_exceptions": 4
+  },
+  "metrics": {
+    "ranking": [0, 1, 2, 3, 4, 5, 6, 7],
+    "selected_layers": [0, 1, 2, 3],
+    "selected_k": 4,
+    "discovery_all_approx_terminal_gap": 0.009892702102661133,
+    "discovery_selected_terminal_gap": 0.004545450210571289,
+    "holdout_selected_terminal_gap": 0.0046253204345703125,
+    "holdout_predecessor_terminal_gap": 0.00577235221862793,
+    "confirmation_all_approx_terminal_gap": 0.010267019271850586,
+    "confirmation_selected_terminal_gap": 0.004608154296875,
+    "confirmation_predecessor_terminal_gap": 0.0057525634765625,
+    "confirmation_terminal_repair_over_all_approx": 0.005658864974975586,
+    "confirmation_maximum_phase_gap": 0.35245180130004883
+  },
+  "selected_validation_ce_gap_by_end_step": {
+    "594": 0.35245180130004883,
+    "1188": 0.07744407653808594,
+    "1782": 0.01758265495300293,
+    "2373": 0.004608154296875
+  },
+  "decision": {
+    "passed_gates": [
+      "selection_found",
+      "dense_budget",
+      "discovery",
+      "holdout",
+      "confirmation_terminal",
+      "material_repair",
+      "minimality"
+    ],
+    "failed_gates": ["confirmation_phases"],
+    "terminal_mask_capacity_supported": true,
+    "from_scratch_path_supported": false,
+    "early_middle_lwt_expansion_authorized": false
+  },
+  "interpretation": [
+    "The terminal endpoint has a sharp depth ordering: dense c_proj layers 0-3 plus procedural layers 4-11 finishes only 0.00461 CE behind the same-gauge parent, while the three-dense-layer predecessor misses at 0.00575 CE.",
+    "That endpoint result replicates on the disjoint holdout, but the identical mask misses earlier dense phase endpoints by 0.35245, 0.07744, and 0.01758 CE. Endpoint capacity is therefore not evidence of a causal from-scratch path.",
+    "The next discriminator must isolate the accepted procedural late band 8-11 across the same phase endpoints. This determines whether the early mismatch comes from extending into layers 4-7 or from using a dense-parent replay as a proxy for the independently trained procedural path."
+  ],
+  "authorization": {
+    "run_zero_update_late_band_phase_validity_control": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
