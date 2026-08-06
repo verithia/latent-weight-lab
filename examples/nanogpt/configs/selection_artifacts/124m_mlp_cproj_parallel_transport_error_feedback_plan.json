@@ -1,8 +1,8 @@
 {
-  "schema_version": "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v1",
+  "schema_version": "mai_124m_mlp_cproj_parallel_transport_error_feedback_plan_v2",
   "artifact_kind": "124m_mlp_cproj_parallel_transport_error_feedback_zero_update_plan",
   "registered_at": "2026-08-06",
-  "status": "registered_before_implementation_or_execution",
+  "status": "amended_before_successful_execution_or_measurement_after_snapshot_scope_fail_closed",
   "scientific_question": "Does c_proj compression error need parallel transport by the actual right-orthogonal Givens flow, rather than ambient-coordinate carry, to preserve task-useful temporal direction across the moving chart?",
   "evidence": {
     "fixed_time_half_switch": {
@@ -25,9 +25,15 @@
     "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/parameter_trajectory",
     "trajectory_run_identity_sha256": "792a87c43fbd4f5105c7e2e8f2ed228e2ff6dcb06731925e132ab8a10758090c",
     "snapshot_inventory": "steps 0 through 238 inclusive",
+    "snapshot_scope": "five tracked c_proj tensors only; all_parameters=false",
     "first_snapshot_sha256": "7a06f939746cd0403c30a786a168809c43277e41e905937ef7cc2b8cfff5332c",
     "last_snapshot_sha256": "5e30624a111f8ec5c5a424dadc1f7cd6431fddf3cdbc4daa7809745680e19ddc",
     "snapshot_bytes_each": 47210841,
+    "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_fullattn_parent_cproj_stepwise_trajectory_0p5tpp/scientific/ckpt.pt",
+    "terminal_checkpoint_sha256": "7302fe2e880c1cadbb1584ef9367f3f8a9f95746733c41e58d68771a462c5154",
+    "terminal_checkpoint_bytes": 929964225,
+    "terminal_checkpoint_next_iter": 238,
+    "terminal_checkpoint_model_tensors": 220,
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
   },
   "analysis": {
@@ -65,7 +71,8 @@
       "pullback_carry": "Orientation control: store E_t Q_t^T by applying inverse rotations in reverse order."
     },
     "common_step": "At step t, request the dense non-decay c_proj update plus candidate-relative decoupled decay; add the arm's carried residual; fit hidden64 then residual24 with raw Frobenius geometry; apply decay once; compute the new exact compression residual; only then apply the arm-specific norm-preserving transport for the next step.",
-    "finite_ce": "At each score step, load the complete full-attention dense snapshot, replace only layers 0/3/6/9/11 c_proj weights with the replayed candidate state, and evaluate identical fit and held-out fixed token windows.",
+    "finite_ce_score_steps": [238],
+    "finite_ce": "At terminal step 238, load the exact complete full-attention checkpoint belonging to the same trajectory, verify its five tracked c_proj tensors exactly equal the terminal trajectory tensors, replace only layers 0/3/6/9/11 c_proj weights with each replayed candidate state, and evaluate identical fit and held-out fixed token windows.",
     "smallest_pass_order": ["pushforward_carry", "pullback_carry"],
     "prohibited": [
       "selection or fitting on held-out tokens",
@@ -78,10 +85,10 @@
   "decision_rule": {
     "candidate_requirements": {
       "mean_finite_step_ce_gain_over_ambient_minimum": 0.0005,
-      "finite_step_wins_minimum": 6,
-      "finite_step_comparisons": 8,
-      "holdout_wins_minimum": 3,
-      "holdout_comparisons": 4,
+      "finite_step_wins_minimum": 2,
+      "finite_step_comparisons": 2,
+      "holdout_wins_minimum": 1,
+      "holdout_comparisons": 1,
       "minimum_holdout_finite_step_ce_gain": 0.0,
       "terminal_endpoint_recovery_ratio_over_ambient_minimum": 1.02,
       "terminal_layers_beating_ambient_minimum": 4,
@@ -93,7 +100,8 @@
     "automatic_training_authorized": false,
     "automatic_rerun_authorized": false,
     "larger_rung_authorized": false,
-    "threshold_changed_after_measurement": false
+    "threshold_changed_after_measurement": false,
+    "premeasurement_amendment": "The first invocation failed before loading step 0 because the generic all-parameter loader correctly rejected the trajectory's all_parameters=false scope. No output directory, replay step, candidate metric, or model update was produced. The already-existing exact terminal checkpoint is therefore registered as the only complete-model CE state before rerun; four-step endpoint scoring is unchanged."
   },
   "execution_policy": {
     "host": "PRO6",
