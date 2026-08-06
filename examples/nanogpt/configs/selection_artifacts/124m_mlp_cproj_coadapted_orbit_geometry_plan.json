@@ -1,0 +1,118 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_coadapted_orbit_geometry_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_coadapted_orbit_geometry_zero_update_plan",
+  "registered_at": "2026-08-07T04:35:00+00:00",
+  "status": "registered_before_execution",
+  "scientific_question": "Does the accepted co-adapted late c_proj path succeed because it follows the scaled right-orthogonal orbit implemented by Muon-matched Givens, and does that orbit distinguish late layers from the failed early/middle layers strongly enough to inform a compact fixed map?",
+  "theory": {
+    "implemented_family": "For a PyTorch linear weight W[out,in], every enabled update is a product of hidden-side Givens rotations followed by scalar weight decay: W_next = s W Q. Output-side rotations, symmetric shears, activation metrics, and global log-volume coordinates are disabled in the accepted configuration.",
+    "exact_invariant": "A scaled right-orthogonal orbit preserves the normalized output Gram W W^T / ||W||_F^2 and the normalized singular spectrum. Best-orbit endpoint residual is measured with compact output-Gram Bures/Procrustes geometry, without materializing an in_features by in_features matrix.",
+    "layer_localization": "The same-seed dense parent starts in the same gauge. If its late c_proj phase increments are substantially closer to a scaled right orbit than its early increments, the accepted late-only allocation has a geometric explanation; otherwise task-metric projection or co-adaptation, rather than orbit capacity alone, explains the result.",
+    "support_transport": "The optimizer refreshes task-selected Givens edges every update. Reusing a fixed compact map requires edge overlap across the 99-update snapshots to exceed both a 10% absolute retention floor and twice the finite edge-universe random-overlap null.",
+    "temporal_pca_scope": "PCA, chord curvature, and polynomial summaries describe sampled paths only. They are not treated as intrinsic manifold dimension or as evidence that an arbitrary affine chart is trainable.",
+    "scope": "This analysis performs no fitting, model update, optimizer update, validation selection, or architecture change."
+  },
+  "identity": {
+    "analyzer": "examples/nanogpt/analyze_mlp_cproj_coadapted_orbit_geometry.py",
+    "analyzer_sha256": "28183ae24b25425306d213e22524f1e767dcd1864c31f64315aad7d1b3a1ca40",
+    "trajectory_verification": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_full_state_trajectory_verification_result.json",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "trajectory_run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "trajectory_config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "parent_acquisition": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "parent_acquisition_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "parent_run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "late_layers": [8, 9, 10, 11],
+    "early_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phase_steps": [0, 594, 1188, 1782, 2373],
+    "trajectory_steps": [
+      0,
+      99,
+      198,
+      297,
+      396,
+      495,
+      594,
+      693,
+      792,
+      891,
+      990,
+      1089,
+      1188,
+      1287,
+      1386,
+      1485,
+      1584,
+      1683,
+      1782,
+      1881,
+      1980,
+      2079,
+      2178,
+      2277,
+      2373
+    ],
+    "procedural_metrics": [
+      "best scaled-right-orbit recovery for every consecutive 99-update interval",
+      "normalized output-Gram shape drift",
+      "task-selected Givens edge retention and finite-universe enrichment",
+      "fine and phase-sampled temporal PCA descriptions"
+    ],
+    "dense_parent_metrics": [
+      "best scaled-right-orbit recovery for every registered phase interval and c_proj layer",
+      "normalized output-Gram shape drift split into layers 0-7 and 8-11",
+      "phase-sampled temporal PCA descriptions",
+      "same-gauge displacement cosine against the co-adapted path"
+    ],
+    "matrix_shape": [768, 3072],
+    "right_orbit_axis": "hidden/input axis of c_proj"
+  },
+  "decision_rule": {
+    "thresholds": {
+      "same_initialization_max_absolute_error": 0.0,
+      "procedural_minimum_orbit_recovery": 0.995,
+      "late_minus_early_orbit_recovery": 0.05,
+      "late_to_early_gram_drift_ratio": 0.8,
+      "reusable_support_retention_fraction": 0.1,
+      "reusable_support_enrichment": 2.0,
+      "path_alignment_cosine": 0.5
+    },
+    "threshold_rationale": {
+      "procedural_invariant": "The implementation algebra predicts exact recovery; 0.995 allows only accumulated FP32 folding error.",
+      "layer_localization": "Require a material five-percentage-point recovery separation and at least 20% lower normalized Gram drift, rather than declaring localization from ordering alone.",
+      "support_reuse": "Require both a nontrivial absolute overlap and a twofold enrichment over the exact finite edge-universe null.",
+      "path_alignment": "A cosine of 0.5 is a descriptive same-gauge strong-alignment marker; it cannot by itself authorize a candidate."
+    },
+    "outcomes": {
+      "right_orbit_and_reusable_support": "Authorize only a preregistered fixed-support compression analysis; no training.",
+      "right_orbit_but_moving_support": "Authorize only a phase-atlas compression analysis; no training.",
+      "no_layer_localization_or_support_transport": "Authorize only functional-metric path analysis to identify what selects useful orbit directions; no training.",
+      "accepted_path_exceeds_orbit": "Reject the stated family description and inspect implementation/state capture before any new model.",
+      "cross_run_gauge_failure": "Invalidate the comparison."
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_cproj_coadapted_orbit_geometry"
+  },
+  "authorization": {
+    "run_zero_update_orbit_geometry": true,
+    "phase_atlas_compression_analysis": false,
+    "functional_metric_path_analysis": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
