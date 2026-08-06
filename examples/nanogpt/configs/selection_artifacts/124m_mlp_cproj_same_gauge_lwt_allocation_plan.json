@@ -1,0 +1,100 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_same_gauge_lwt_allocation_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_same_gauge_lwt_allocation_zero_update_plan",
+  "registered_at": "2026-08-07T02:30:00+00:00",
+  "status": "registered_before_execution",
+  "scientific_question": "With c_proj layers 8-11 always procedural, can at most four dense LWT exceptions inside difficult layers 0-7 close the exact same-gauge bounded-chart endpoint while every remaining c_proj layer uses the procedural approximation?",
+  "theory": {
+    "paper_mechanism": "LWT is the paper's explicit response to layer-specific manifolds. The accepted same-gauge late-band run independently confirms that procedural c_proj compatibility is depth heterogeneous.",
+    "same_gauge_correction": "Prior donor c_proj and whole-MLP layer allocation was invalidated by cross-run co-adaptation. Here every dense and approximated tensor comes from one accepted full-state parent phase; no tensor or module is imported from another run.",
+    "allocation_not_new_chart": "The bounded hidden64+24/output32 chart and eight-substep phase replay are frozen. Layers 8-11 are always reconstructed procedurally, matching the accepted late-band allocation; only the architectural decision of which early/middle layers must remain dense is measured.",
+    "selection_control": "Rank single-layer dense repairs on the first 64 registered validation batches, choose the smallest top-k prefix with k<=4 and discovery gap <=0.005, then freeze it before viewing a disjoint 128-batch holdout and the full 400-batch multi-phase confirmation.",
+    "oracle_limit": "Phase chords and matching connectivity are target-selected capacity oracles. A pass authorizes only a mask theory and a separately preregistered same-gauge training test after correctness and MFU gates."
+  },
+  "evidence_before_registration": {
+    "all_layer_procedural_cproj_penalty_ce": 0.034404993057251,
+    "late_band_layers_8_11_penalty_ce": 0.011066198348999,
+    "fraction_recovered_by_dense_layers_0_7": 0.6783548733585124,
+    "bounded_difficult_layers_only_terminal_validation_ce_gap": 0.0076906681060791016,
+    "bounded_difficult_layers_only_maximum_phase_validation_ce_gap": 1.429415225982666,
+    "posthoc_cross_run_cproj_allocation_classification": "REJECT_POSTHOC_CPROJ_DENSE_LAYER_EXCEPTION_ALLOCATION",
+    "posthoc_cross_run_whole_mlp_classification": "REJECT_WHOLE_MLP_FUNCTIONAL_LAYER_ALLOCATION"
+  },
+  "identity": {
+    "bounded_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_bounded_integrated_trajectory_result.json",
+    "bounded_result_sha256": "63b33b4d75b31f25834d7c3e31674aabfeb7014be8da456df4affde1139a5464",
+    "late_band_lwt_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_result.json",
+    "late_band_lwt_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp.json",
+    "config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "difficult_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "always_procedural_layers": [8, 9, 10, 11],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "straight_chord_substeps": 8,
+    "feedback_decay": 0.5,
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260807
+    },
+    "fixed_validation": {
+      "split": "validation",
+      "eval_iters": 400,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "eval_seed": 20260715,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "discovery_slice": [0, 64],
+      "holdout_slice": [64, 192],
+      "confirmation_slice": [0, 400]
+    },
+    "selection": {
+      "ranking": "terminal discovery single-dense repair descending",
+      "prefix_sizes": [1, 2, 3, 4],
+      "selected_prefix": "smallest discovery prefix within 0.005 CE of dense",
+      "failure_fallback": "top-four prefix for diagnostic confirmation only"
+    }
+  },
+  "decision_rule": {
+    "thresholds": {
+      "maximum_dense_exceptions": 4,
+      "discovery_terminal_validation_ce_gap": 0.005,
+      "holdout_terminal_validation_ce_gap": 0.005,
+      "confirmation_terminal_validation_ce_gap": 0.005,
+      "confirmation_maximum_phase_validation_ce_gap": 0.01,
+      "minimum_terminal_repair_over_all_approx": 0.002,
+      "predecessor_must_fail_terminal_gap": 0.005
+    },
+    "pass": "A replicated minimal mask authorizes only a same-gauge LWT mask theory. Implementation, MFU, and training require a new plan.",
+    "overselected": "If the predecessor also passes exact confirmation, do not shrink the mask post hoc; register a new independent validation plan.",
+    "fail": "Reject expansion beyond the accepted late 8-11 procedural band at the four-dense-layer budget. Do not sweep masks, thresholds, cadence, or chart structure.",
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_same_gauge_lwt_allocation_v1"
+  },
+  "authorization": {
+    "run_zero_update_same_gauge_lwt_attribution": true,
+    "implement_candidate_mask": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
