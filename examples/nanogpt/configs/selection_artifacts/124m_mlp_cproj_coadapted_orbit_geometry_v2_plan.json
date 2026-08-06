@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_coadapted_orbit_geometry_v2_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_coadapted_orbit_geometry_gauge_invariant_zero_update_plan",
+  "registered_at": "2026-08-07T04:55:00+00:00",
+  "status": "registered_before_v2_execution",
+  "scientific_question": "Without assuming a shared parameter origin, is the accepted co-adapted late c_proj path an exact scaled right-orthogonal orbit, do dense-parent late layers deform more nearly within that orbit than early layers, and are the task-selected Givens supports reusable?",
+  "repair_scope": {
+    "invalid_v1_premise": "A shared model seed did not produce shared c_proj initialization because nn.Linear and MuonMatchedGivensLinear follow different construction and global reinitialization paths.",
+    "removed_measurement": "All raw cross-run parameter displacement and path-alignment calculations are prohibited.",
+    "retained_measurements": "Only within-run scaled-right-orbit recovery, normalized output-Gram deformation, support overlap, and temporal PCA are measured.",
+    "threshold_policy": "Every surviving threshold is copied unchanged from the v1 plan that was frozen before any orbit measurement. No observed v1 value changed a v2 threshold.",
+    "scope": "This analysis performs no fitting, model update, optimizer update, validation selection, or architecture change."
+  },
+  "theory": {
+    "procedural_invariant": "The accepted hidden-side Givens plus scalar-decay implementation predicts W_next = s W Q within its own run, hence invariant normalized W W^T and singular shape.",
+    "dense_parent_localization": "Scaled-right-orbit recovery and normalized Gram drift are invariant to a fixed right-orthogonal change of coordinates and are computed between phases within each dense-parent layer. The early-versus-late comparison therefore does not require a shared gauge with the procedural run.",
+    "support_transport": "A fixed compact map needs stable task-selected edge support. Consecutive 99-update snapshot supports must clear both the frozen 10% retention threshold and twice the finite edge-universe random null.",
+    "pca_caveat": "Temporal PCA is descriptive and limited by the number and cadence of snapshots. It is not an intrinsic-dimension proof or a mapper-fit certificate."
+  },
+  "identity": {
+    "analyzer": "examples/nanogpt/analyze_mlp_cproj_coadapted_orbit_geometry_v2.py",
+    "analyzer_sha256": "d25ba3d2cb1fb992dc1a65bb32e7867e94df014d9f70290c909d30767feebe54",
+    "helper": "examples/nanogpt/analyze_mlp_cproj_coadapted_orbit_geometry.py",
+    "helper_sha256": "28183ae24b25425306d213e22524f1e767dcd1864c31f64315aad7d1b3a1ca40",
+    "invalid_v1_audit": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_coadapted_orbit_geometry_invalid_result.json",
+    "invalid_v1_audit_sha256": "865003955a13bb56982f2071c66bf540d60e85ec7ed69ab369d77c918d5411cc",
+    "trajectory_verification": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_full_state_trajectory_verification_result.json",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "trajectory_run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "parent_acquisition": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "parent_acquisition_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "parent_run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "late_layers": [8, 9, 10, 11],
+    "early_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phase_steps": [0, 594, 1188, 1782, 2373],
+    "trajectory_steps": [
+      0,
+      99,
+      198,
+      297,
+      396,
+      495,
+      594,
+      693,
+      792,
+      891,
+      990,
+      1089,
+      1188,
+      1287,
+      1386,
+      1485,
+      1584,
+      1683,
+      1782,
+      1881,
+      1980,
+      2079,
+      2178,
+      2277,
+      2373
+    ],
+    "cross_run_parameter_displacements": false,
+    "matrix_shape": [768, 3072],
+    "right_orbit_axis": "hidden/input axis of c_proj"
+  },
+  "decision_rule": {
+    "thresholds": {
+      "procedural_minimum_orbit_recovery": 0.995,
+      "late_minus_early_orbit_recovery": 0.05,
+      "late_to_early_gram_drift_ratio": 0.8,
+      "reusable_support_retention_fraction": 0.1,
+      "reusable_support_enrichment": 2.0
+    },
+    "outcomes": {
+      "localized_and_reusable": "Authorize only fixed-support compression analysis; no implementation or training.",
+      "localized_but_moving": "Authorize only phase-atlas compression analysis; no implementation or training.",
+      "not_localized": "Authorize only functional-metric path analysis to explain why adaptive task selection succeeds where static charts fail; no implementation or training.",
+      "procedural_invariant_failure": "Reject the scaled-right-orbit model and inspect implementation or snapshot semantics."
+    },
+    "threshold_changed_after_v1_or_v2_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_cproj_coadapted_orbit_geometry_v2"
+  },
+  "authorization": {
+    "run_gauge_invariant_zero_update_v2": true,
+    "fixed_support_compression_analysis": false,
+    "phase_atlas_compression_analysis": false,
+    "functional_metric_path_analysis": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
