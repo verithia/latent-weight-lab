@@ -1,0 +1,79 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_late_band_phase_validity_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_late_band_phase_validity_zero_update_plan",
+  "registered_at": "2026-08-06T18:20:00+00:00",
+  "status": "registered_before_execution",
+  "scientific_question": "Does the frozen procedural chart reproduce the already accepted late c_proj band 8-11 throughout the dense-parent trajectory, or is dense-parent phase replay itself an invalid proxy for the co-adapted procedural path?",
+  "theory": {
+    "factorial_control": "The selected terminal mask makes layers 4-11 procedural. Factor the same-gauge endpoint into late-only layers 8-11 and middle-only layers 4-7 while leaving every other parameter fixed.",
+    "accepted_band_control": "Layers 8-11 are the only c_proj band with an independently trained same-gauge LWT acceptance result. Failure of their dense-parent replay would invalidate the current phase proxy rather than justify another chart sweep.",
+    "middle_band_localization": "If late-only passes every phase while middle-only fails, the path mismatch is specifically caused by extending procedural c_proj into layers 4-7.",
+    "interaction": "The already sealed combined gaps permit a 2x2 factorial interaction calculation without another combined evaluation or post-result threshold choice.",
+    "scope": "This test measures functional phase capacity only. It does not train, fit thresholds, select layers, change the chart, or authorize a candidate implementation."
+  },
+  "identity": {
+    "allocation_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_same_gauge_lwt_allocation_result.json",
+    "allocation_result_sha256": "99f56823513edb5599f9dc12f7561ac9a0b5c60363012e7ca76814e952ffc5eb",
+    "bounded_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_bounded_integrated_trajectory_result.json",
+    "bounded_result_sha256": "63b33b4d75b31f25834d7c3e31674aabfeb7014be8da456df4affde1139a5464",
+    "late_band_lwt_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_result.json",
+    "late_band_lwt_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "early_dense_layers": [0, 1, 2, 3],
+    "middle_test_layers": [4, 5, 6, 7],
+    "late_test_layers": [8, 9, 10, 11],
+    "straight_chord_substeps": 8,
+    "feedback_decay": 0.5,
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260807
+    },
+    "fixed_validation": {
+      "split": "validation",
+      "eval_iters": 400,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "eval_seed": 20260715,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+    }
+  },
+  "decision_rule": {
+    "thresholds": {
+      "maximum_phase_validation_ce_gap": 0.01,
+      "terminal_validation_ce_gap": 0.005
+    },
+    "late_proxy_failure": "Authorize only a full-state trajectory acquisition of the already accepted late-band structure. Do not infer that its trained path fails from a dense-parent replay.",
+    "middle_only_failure": "Localize the dense-parent path failure to layers 4-7 and retain the accepted late 8-11 allocation; do not launch the expansion.",
+    "interaction_failure": "If each band passes alone but the sealed combination fails, attribute the mismatch to cross-band coupling and require a new theory before intervention.",
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_late_band_phase_validity_v1"
+  },
+  "authorization": {
+    "run_zero_update_band_factorization": true,
+    "run_coadapted_trajectory_acquisition": false,
+    "implement_candidate_mask": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
