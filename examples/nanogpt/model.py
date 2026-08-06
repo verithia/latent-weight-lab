@@ -164,6 +164,7 @@ class GPTConfig:
     block_fht_attn_muon_matched_givens_error_feedback_decay: float = 0.5
     block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps: float | None = None
     block_fht_mlp_cproj_muon_matched_givens: bool = False
+    block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
     block_fht_mlp_cproj_muon_matched_givens_residual_stages: int = 0
     block_fht_mlp_cproj_muon_matched_givens_output_stages: int = 0
@@ -1992,8 +1993,20 @@ class MLP(nn.Module):
             raise ValueError("Use exactly one grouped mlp.c_proj target per run")
         if structured_proj_count and "mlp.c_proj" in config.block_fht_targets:
             raise ValueError("Use either plain mlp.c_proj or grouped mlp.c_proj, not both")
-        muon_matched_cproj = bool(
+        configured_cproj_layers = tuple(
+            config.block_fht_mlp_cproj_muon_matched_givens_layers
+        )
+        muon_matched_cproj_enabled = bool(
             config.block_fht_mlp_cproj_muon_matched_givens
+        )
+        muon_matched_cproj = muon_matched_cproj_enabled and (
+            not configured_cproj_layers
+            or layer_id in configured_cproj_layers
+        )
+        dense_lwt_cproj = (
+            muon_matched_cproj_enabled
+            and bool(configured_cproj_layers)
+            and layer_id not in configured_cproj_layers
         )
         if (
             config.block_fht_mlp_cproj_hybrid_output
@@ -2174,6 +2187,12 @@ class MLP(nn.Module):
                 layer_id * 64 + 97,
             )
             self.c_proj = FixedFHTInputMixLinear(base, 4 * config.n_embd, config.block_fht_seed + layer_id * 64 + 98)
+        elif dense_lwt_cproj:
+            self.c_proj = nn.Linear(
+                4 * config.n_embd,
+                config.n_embd,
+                bias=config.bias,
+            )
         else:
             self.c_proj = make_linear(4 * config.n_embd, config.n_embd, config.bias, config, "mlp.c_proj", layer_id * 4 + 3)
         self.dropout = nn.Dropout(config.dropout)
@@ -3960,6 +3979,28 @@ class Block(nn.Module):
 class GPT(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()
+        cproj_layers = tuple(
+            config.block_fht_mlp_cproj_muon_matched_givens_layers
+        )
+        if len(set(cproj_layers)) != len(cproj_layers):
+            raise ValueError(
+                "Muon-matched c_proj layer IDs must be unique"
+            )
+        if any(
+            isinstance(layer, bool)
+            or not isinstance(layer, int)
+            or layer < 0
+            or layer >= config.n_layer
+            for layer in cproj_layers
+        ):
+            raise ValueError(
+                "Muon-matched c_proj layer IDs must be integers in "
+                "[0, n_layer)"
+            )
+        if cproj_layers and not config.block_fht_mlp_cproj_muon_matched_givens:
+            raise ValueError(
+                "Muon-matched c_proj layer IDs require the c_proj chart"
+            )
         affine_delta_targets = set(config.block_fht_affine_delta_targets)
         if not affine_delta_targets.issubset(config.block_fht_targets):
             raise ValueError("affine-delta targets must also be BlockFHT targets")

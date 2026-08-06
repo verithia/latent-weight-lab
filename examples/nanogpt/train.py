@@ -1265,6 +1265,12 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-muon-matched-givens-layers",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-muon-matched-givens-stages",
         type=int,
         default=32,
@@ -1898,6 +1904,17 @@ def parse_args() -> argparse.Namespace:
                 "Muon-matched Givens c_proj requires the mlp.c_proj "
                 "BlockFHT target"
             )
+        cproj_layers = tuple(
+            namespace.block_fht_mlp_cproj_muon_matched_givens_layers
+        )
+        if len(set(cproj_layers)) != len(cproj_layers) or any(
+            layer < 0 or layer >= namespace.n_layer
+            for layer in cproj_layers
+        ):
+            raise ValueError(
+                "Muon-matched c_proj layer IDs must be unique and in "
+                "[0, n_layer)"
+            )
         if (
             namespace
             .block_fht_mlp_cproj_muon_matched_givens_stages
@@ -2130,6 +2147,10 @@ def parse_args() -> argparse.Namespace:
     ):
         raise ValueError(
             "functional-shear and directed-product c_fc are mutually exclusive"
+        )
+    elif namespace.block_fht_mlp_cproj_muon_matched_givens_layers:
+        raise ValueError(
+            "Muon-matched c_proj layer IDs require the c_proj chart"
         )
     if namespace.block_fht_mlp_cfc_directed_product:
         if namespace.method != "block_fht" or namespace.optimizer != "muon":
@@ -2550,6 +2571,9 @@ def main() -> None:
         block_fht_cproj_product_fht_muon_ns_steps=args.muon_ns_steps,
         block_fht_mlp_cproj_muon_matched_givens=(
             args.block_fht_mlp_cproj_muon_matched_givens
+        ),
+        block_fht_mlp_cproj_muon_matched_givens_layers=tuple(
+            args.block_fht_mlp_cproj_muon_matched_givens_layers
         ),
         block_fht_mlp_cproj_muon_matched_givens_stages=(
             args.block_fht_mlp_cproj_muon_matched_givens_stages
