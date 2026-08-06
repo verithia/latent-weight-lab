@@ -1,0 +1,122 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_coadapted_orbit_geometry_v2_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_coadapted_orbit_geometry_gauge_invariant_zero_update_result",
+  "recorded_at": "2026-08-07T05:00:00+00:00",
+  "classification": "ADAPTIVE_RIGHT_ORBIT_WITH_MOVING_SUPPORT_NOT_LAYER_LOCALIZED",
+  "identity": {
+    "execution_git_commit": "cfc55b2b23fae8f340aee49b839bc5a6ccbcaa05",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_coadapted_orbit_geometry_v2_plan.json",
+    "plan_sha256": "4b3c79d2284f7da013e5972008281b8a44048577d0c508613975d2742d324c2f",
+    "analyzer_sha256": "d25ba3d2cb1fb992dc1a65bb32e7867e94df014d9f70290c909d30767feebe54",
+    "helper_sha256": "28183ae24b25425306d213e22524f1e767dcd1864c31f64315aad7d1b3a1ca40",
+    "invalid_v1_audit_sha256": "865003955a13bb56982f2071c66bf540d60e85ec7ed69ab369d77c918d5411cc",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "trajectory_run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "parent_acquisition_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "parent_run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "remote_output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_cproj_coadapted_orbit_geometry_v2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "wall_seconds": 18,
+    "analyzer_elapsed_seconds": 8.759496688842773,
+    "exit_code": 0,
+    "parameter_updates": 0,
+    "focused_and_regression_tests": "19 passed in 0.73s",
+    "cross_run_parameter_displacement_rows": 0
+  },
+  "aggregate": {
+    "procedural_minimum_orbit_recovery": 0.999999583401473,
+    "procedural_maximum_normalized_output_gram_drift": 0.00008491607807529608,
+    "dense_parent_early_weighted_orbit_recovery": 0.8542937087189089,
+    "dense_parent_late_weighted_orbit_recovery": 0.8693799297402746,
+    "dense_parent_late_minus_early_orbit_recovery": 0.015086221021365698,
+    "dense_parent_early_weighted_gram_drift": 0.49807120328999915,
+    "dense_parent_late_weighted_gram_drift": 0.4641410286436163,
+    "dense_parent_late_to_early_gram_drift_ratio": 0.9318768593280282,
+    "mean_consecutive_support_retention": 0.029689005064625396,
+    "mean_consecutive_support_retention_enrichment": 1.036868160375516
+  },
+  "thresholds": {
+    "procedural_minimum_orbit_recovery": 0.995,
+    "late_minus_early_orbit_recovery": 0.05,
+    "late_to_early_gram_drift_ratio": 0.8,
+    "reusable_support_retention_fraction": 0.1,
+    "reusable_support_enrichment": 2.0,
+    "threshold_changed_after_v1_or_v2_measurement": false
+  },
+  "gates": {
+    "accepted_path_is_scaled_right_orbit": true,
+    "right_orbit_localizes_late_band": false,
+    "support_is_reusable": false
+  },
+  "layer_summary": {
+    "procedural_layers_8_11_minimum_recovery_range": [
+      0.999999583401473,
+      0.9999996076879833
+    ],
+    "procedural_layers_8_11_maximum_gram_drift_range": [
+      0.00008435318181476276,
+      0.00008491607807529608
+    ],
+    "support_retention_range": [
+      0.02943878621269374,
+      0.02986893950139726
+    ],
+    "support_enrichment_range": [
+      1.0280947349012426,
+      1.0432194384350735
+    ],
+    "dense_parent_orbit_recovery_by_layer_0_11": [
+      0.8298776953793877,
+      0.8376296780367968,
+      0.8460093659091327,
+      0.8508948266695481,
+      0.8584720616510153,
+      0.8643554583527084,
+      0.8670227797190506,
+      0.8689250237702887,
+      0.8709224544913855,
+      0.8707902579393438,
+      0.8697948692386401,
+      0.8660869249109479
+    ]
+  },
+  "temporal_pca_description": {
+    "fine_25_snapshot_dimension_90pct": 3,
+    "fine_25_snapshot_dimension_95pct": 5,
+    "fine_25_snapshot_dimension_99pct_by_layer_8_11": [13, 13, 12, 12],
+    "five_phase_dimension_90pct": 2,
+    "five_phase_dimension_95pct": 2,
+    "five_phase_dimension_99pct": 3,
+    "interpretation": "The sampled trajectories are temporally smooth and low-rank in snapshot space, but the optimizer's selected coordinate supports change at random-overlap rates. Temporal PCA therefore does not imply a fixed low-dimensional parameter chart."
+  },
+  "conclusion": {
+    "implemented_family": "The accepted c_proj weights follow the implemented scaled right-orthogonal orbit to accumulated FP32 precision.",
+    "layer_allocation": "Dense-parent late layers are only 1.51 percentage points more right-orbit recoverable than early layers and retain 93.2% of their normalized Gram drift. This misses both preregistered localization effect-size gates.",
+    "coordinate_reuse": "Task-selected Givens edge supports overlap by 2.97%, only 1.04 times the exact finite-universe random null. A fixed edge set or simple phase atlas is not supported.",
+    "theoretical_update": "The success of late-band LWT is not explained by late weights living in a uniquely right-orthogonal manifold or by stable coordinate support. The surviving explanation is adaptive task-metric selection plus depth-dependent network tolerance/co-adaptation."
+  },
+  "raw_artifacts": {
+    "result_json_sha256": "8ebacbe70459af5c72bbd13c4ed0fe6fc01443085caed10cffea60a58ca930bc",
+    "rows_csv_sha256": "077b98341cc0bc3e4660bba0700c4a821784b586aaf9ccdc7bb07bc4ae5e4522",
+    "row_count": 248,
+    "procedural_orbit_rows": 96,
+    "dense_parent_orbit_rows": 48,
+    "support_rows": 92,
+    "pca_rows": 12,
+    "all_aggregate_values_finite": true
+  },
+  "authorization": {
+    "functional_metric_path_analysis": true,
+    "fixed_support_compression_analysis": false,
+    "phase_atlas_compression_analysis": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
