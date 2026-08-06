@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_parallel_transport_error_feedback_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_parallel_transport_error_feedback_zero_update_result",
+  "recorded_at": "2026-08-06",
+  "classification": "REJECT_PARALLEL_TRANSPORT_ERROR_FEEDBACK",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_parallel_transport_error_feedback_plan.json",
+    "sha256": "b9a1a6e1e28f2e7b0c11049170aa541a58b806f01f97910e2f520b53dd6782a6",
+    "original_registration_commit": "ef6e3fa",
+    "premeasurement_scope_amendment_commit": "8a17178"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "4c623b14bd66a5bbf2fd30787411d138ff06ed51",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_parallel_transport_error_feedback",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-06T05:02:55.795494+00:00",
+    "elapsed_seconds": 104.5052547454834,
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_parallel_transport_error_feedback_v1"
+  },
+  "identity": {
+    "trajectory_run_identity_sha256": "792a87c43fbd4f5105c7e2e8f2ed228e2ff6dcb06731925e132ab8a10758090c",
+    "first_snapshot_sha256": "7a06f939746cd0403c30a786a168809c43277e41e905937ef7cc2b8cfff5332c",
+    "last_snapshot_sha256": "5e30624a111f8ec5c5a424dadc1f7cd6431fddf3cdbc4daa7809745680e19ddc",
+    "terminal_checkpoint_sha256": "7302fe2e880c1cadbb1584ef9367f3f8a9f95746733c41e58d68771a462c5154",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "control": {
+    "name": "ambient_carry",
+    "endpoint_recovery": {
+      "step_60": 0.8497365405342361,
+      "step_120": 0.8502834854405166,
+      "step_180": 0.8470232151329739,
+      "step_238": 0.8461170047804648
+    },
+    "terminal_maximum_feedback_fro": 1.315192699432373,
+    "terminal_fit_ce": 5.62267005443573,
+    "terminal_holdout_ce": 5.5631057024002075
+  },
+  "candidates": {
+    "pushforward_carry": {
+      "terminal_endpoint_recovery": 0.8329091951418147,
+      "terminal_endpoint_recovery_ratio_over_ambient": 0.9843900907746477,
+      "terminal_layers_beating_ambient": 0,
+      "terminal_maximum_feedback_fro_ratio_over_ambient": 1.0313556071277978,
+      "maximum_transport_norm_error": 0.0000032782554626464844,
+      "fit_ce_gain": -0.0012542009353637695,
+      "holdout_ce_gain": 0.0033686161041259766,
+      "mean_ce_gain": 0.0010572075843811035,
+      "finite_step_wins": "1/2",
+      "passed": false
+    },
+    "pullback_carry": {
+      "terminal_endpoint_recovery": 0.8366945690683179,
+      "terminal_endpoint_recovery_ratio_over_ambient": 0.9888639092951551,
+      "terminal_layers_beating_ambient": 0,
+      "terminal_maximum_feedback_fro_ratio_over_ambient": 0.9567893837882443,
+      "maximum_transport_norm_error": 0.0000030994415283203125,
+      "fit_ce_gain": -0.0038330554962158203,
+      "holdout_ce_gain": -0.007673859596252441,
+      "mean_ce_gain": -0.005753457546234131,
+      "finite_step_wins": "0/2",
+      "passed": false
+    }
+  },
+  "decision": {
+    "passed": false,
+    "selected_arm": null,
+    "production_implementation_authorized": false,
+    "exact_config_mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "interpretation": [
+      "Ambient compression-error carry is not a coordinate-gauge mistake. Both norm-preserving orientations reduce endpoint recovery at every measured phase and lose in all five terminal layers.",
+      "Pushforward transport has one positive held-out CE cell, but it worsens fit CE, inflates maximum feedback, and misses the endpoint gate; pullback transport is worse on both CE windows.",
+      "Close parallel-transported compression error and retain ambient carry. Do not tune orientation or decay on this result."
+    ],
+    "next_action": "Move from universal full c_proj replacement to an LWT-style layer-allocation discriminator: quantify whether a small preregistered subset of dense c_proj layers recovers most of the gap while the remaining layers stay procedural."
+  },
+  "artifacts": {
+    "cells_sha256": "b3ace1c869b695062b9a13ea37192e19704ecd5f36ca56850aa4062a69c9affc",
+    "finite_ce_sha256": "31964df3e2f1c821c3d7fbb3fdede6ac75e509d0818e835915edd90d0f8b3df0",
+    "raw_result_sha256": "ba072049ee336707fbc4432d3405c7de58591f995704930ff7e3c0bd78e08271",
+    "successful_foreground_log_sha256": "a227ae9f466a016ca58932b94457ab1fde10dc30621bd97e7aac03908a44edb5",
+    "premeasurement_failed_loader_log_sha256": "66319e27b8441398bc39204986724dc0aefdb43c0c3c2674b03b64494f7b3266"
+  },
+  "terminal_health": {
+    "gpu_memory_mib": 282,
+    "gpu_utilization_percent": 0,
+    "workspace_bytes": 227696179953,
+    "filesystem_available_bytes": 1681795989504
+  }
+}
