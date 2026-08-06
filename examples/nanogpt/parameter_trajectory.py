@@ -148,7 +148,8 @@ class PendingOptimizerProbe:
     destination: Path
     existing: bool
     payload: dict[str, Any]
-    parameter_references: dict[str, torch.nn.Parameter]
+    parameter_references: dict[str, torch.Tensor]
+    optimizer_owners: dict[str, Any]
 
 
 def _atomic_torch_save(path: Path, payload: dict[str, Any]) -> None:
@@ -274,6 +275,10 @@ def prepare_optimizer_probe(
 ) -> PendingOptimizerProbe:
     """Copy raw pre-step Muon state to CPU without extra accelerator math."""
     from examples.nanogpt.muon import Muon
+    from examples.nanogpt.muon_matched_givens import (
+        MuonDirectedProduct,
+        MuonMatchedGivens,
+    )
 
     destination = optimizer_probe_path(out_dir, step)
     run_identity_sha256 = canonical_digest(run_identity)
@@ -296,6 +301,7 @@ def prepare_optimizer_probe(
             existing=True,
             payload={},
             parameter_references={},
+            optimizer_owners={},
         )
     if dtype not in DTYPES:
         raise ValueError(f"unsupported optimizer probe dtype: {dtype}")
@@ -303,19 +309,28 @@ def prepare_optimizer_probe(
         raise ValueError("optimizer probe targets and layers must be non-empty")
 
     suboptimizers = getattr(optimizer, "optimizers", [optimizer])
-    owners: dict[int, tuple[Muon, dict[str, Any]]] = {}
+    supported_optimizers = (Muon, MuonDirectedProduct, MuonMatchedGivens)
+    owners: dict[int, tuple[Any, dict[str, Any]]] = {}
     for candidate in suboptimizers:
-        if not isinstance(candidate, Muon):
+        if not isinstance(candidate, supported_optimizers):
             continue
         for group in candidate.param_groups:
             for parameter in group["params"]:
                 owners[id(parameter)] = (candidate, group)
 
     tensors: dict[str, dict[str, torch.Tensor]] = {}
-    hyperparameters: dict[str, dict[str, float | int]] = {}
+    hyperparameters: dict[str, dict[str, Any]] = {}
+    named_trainable_tensors = dict(model.named_parameters())
+    named_trainable_tensors.update(
+        {
+            name: value
+            for name, value in model.named_buffers()
+            if value.requires_grad
+        }
+    )
     selected_parameters = {
         name: parameter
-        for name, parameter in model.named_parameters()
+        for name, parameter in named_trainable_tensors.items()
         if parameter_matches(name, targets, layers)
     }
     if not selected_parameters:
@@ -325,11 +340,11 @@ def prepare_optimizer_probe(
         owner = owners.get(id(parameter))
         if owner is None:
             raise ValueError(f"optimizer probe parameter is not Muon-owned: {name}")
-        muon, group = owner
+        owned_optimizer, group = owner
         if parameter.grad is None:
             raise ValueError(f"optimizer probe parameter has no gradient: {name}")
         gradient = parameter.grad.detach()
-        state = muon.state.get(parameter, {})
+        state = owned_optimizer.state.get(parameter, {})
         buffer = state.get("momentum_buffer")
         if buffer is None:
             buffer = torch.zeros_like(gradient, device="cpu")
@@ -351,16 +366,48 @@ def prepare_optimizer_probe(
             "gradient_after_clip": cpu(gradient),
             "momentum_buffer_before_step": buffer,
         }
+        if isinstance(
+            owned_optimizer, (MuonDirectedProduct, MuonMatchedGivens)
+        ):
+            compression_residual = state.get("compression_residual")
+            if compression_residual is None:
+                compression_residual = torch.zeros_like(
+                    gradient, device="cpu"
+                )
+            else:
+                compression_residual = compression_residual.detach().to(
+                    device="cpu", dtype=storage_dtype, copy=True
+                ).contiguous()
+            tensors[name]["compression_residual_before_step"] = (
+                compression_residual
+            )
         rows = parameter.shape[0]
         columns = max(1, parameter.numel() / rows)
         scale = max(1.0, rows / columns) ** 0.5
         hyperparameters[name] = {
+            "optimizer_kind": type(owned_optimizer).__name__,
             "lr": float(group["lr"]),
             "momentum": momentum,
             "weight_decay": weight_decay,
             "ns_steps": ns_steps,
             "polar_scale": scale,
         }
+        if isinstance(
+            owned_optimizer, (MuonDirectedProduct, MuonMatchedGivens)
+        ):
+            hyperparameters[name].update(
+                {
+                    "error_feedback": bool(
+                        group.get("error_feedback", False)
+                    ),
+                    "error_feedback_decay": float(
+                        group.get("error_feedback_decay", 1.0)
+                    ),
+                    "error_feedback_max_nominal_steps": group.get(
+                        "error_feedback_max_nominal_steps"
+                    ),
+                }
+            )
 
     payload = {
         "schema_version": OPTIMIZER_PROBE_SCHEMA_VERSION,
@@ -382,6 +429,10 @@ def prepare_optimizer_probe(
         existing=False,
         payload=payload,
         parameter_references=selected_parameters,
+        optimizer_owners={
+            name: owners[id(parameter)][0]
+            for name, parameter in selected_parameters.items()
+        },
     )
 
 
@@ -427,10 +478,34 @@ def write_optimizer_probe(pending: PendingOptimizerProbe) -> Path:
             {
                 "weight_after_step": after,
                 "combined_momentum_update": stored(combined),
-                "polar_update": stored(inferred_polar),
                 "applied_direction_per_lr": stored(realized),
             }
         )
+        optimizer_kind = str(hyperparameters.get("optimizer_kind", "Muon"))
+        if optimizer_kind == "Muon":
+            state["polar_update"] = stored(inferred_polar)
+        else:
+            owner = pending.optimizer_owners[name]
+            optimizer_state = owner.state.get(parameter, {})
+            momentum_after = optimizer_state.get("momentum_buffer")
+            if momentum_after is None:
+                raise ValueError(
+                    f"structured optimizer probe lost momentum state: {name}"
+                )
+            state["momentum_buffer_after_step"] = stored(
+                momentum_after.detach().float()
+            )
+            if "compression_residual_before_step" in state:
+                compression_after = optimizer_state.get(
+                    "compression_residual"
+                )
+                if compression_after is None:
+                    compression_after = torch.zeros_like(
+                        parameter, dtype=torch.float32
+                    )
+                state["compression_residual_after_step"] = stored(
+                    compression_after.detach().float()
+                )
 
     payload["tensor_inventory"] = {
         name: {

@@ -22,6 +22,10 @@ from examples.nanogpt.parameter_trajectory import (
     write_parameter_snapshot,
 )
 from examples.nanogpt.muon import Muon
+from examples.nanogpt.muon_matched_givens import (
+    MuonMatchedGivens,
+    MuonMatchedGivensLinear,
+)
 
 
 class MLP(torch.nn.Module):
@@ -48,6 +52,37 @@ class TinyModel(torch.nn.Module):
         self.register_buffer(
             "transient_cache", torch.tensor([9.0]), persistent=False
         )
+
+
+class StructuredMLP(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.c_proj = MuonMatchedGivensLinear(
+            8,
+            4,
+            bias=False,
+            stages=1,
+            residual_stages=0,
+            neighbors=2,
+            refresh_interval=1,
+            fast_fresh_matching=False,
+            matching_seed=23,
+            weight_std=0.02,
+            layer_id=0,
+        )
+
+
+class StructuredBlock(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.mlp = StructuredMLP()
+
+
+class StructuredTinyModel(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.transformer = torch.nn.Module()
+        self.transformer.h = torch.nn.ModuleList([StructuredBlock()])
 
 
 def config_as_dataclass() -> object:
@@ -412,6 +447,99 @@ class ParameterTrajectoryTest(unittest.TestCase):
                     probed_optimizer.state[probed]["momentum_buffer"],
                 )
             )
+
+    def test_optimizer_probe_captures_structured_buffer_state(self) -> None:
+        reference_model = StructuredTinyModel()
+        probed_model = copy.deepcopy(reference_model)
+        reference_module = reference_model.transformer.h[0].mlp.c_proj
+        probed_module = probed_model.transformer.h[0].mlp.c_proj
+        reference_optimizer = MuonMatchedGivens(
+            [reference_module],
+            lr=0.02,
+            momentum=0.9,
+            weight_decay=0.1,
+            ns_steps=3,
+            error_feedback=True,
+            error_feedback_decay=0.5,
+        )
+        probed_optimizer = MuonMatchedGivens(
+            [probed_module],
+            lr=0.02,
+            momentum=0.9,
+            weight_decay=0.1,
+            ns_steps=3,
+            error_feedback=True,
+            error_feedback_decay=0.5,
+        )
+        gradient = torch.full_like(reference_module.weight, 0.2)
+        momentum = torch.full_like(reference_module.weight, 0.05)
+        compression = torch.full_like(reference_module.weight, 0.01)
+        for module, optimizer in (
+            (reference_module, reference_optimizer),
+            (probed_module, probed_optimizer),
+        ):
+            module.weight.grad = gradient.clone()
+            optimizer.state[module.weight]["momentum_buffer"] = (
+                momentum.clone()
+            )
+            optimizer.state[module.weight]["compression_residual"] = (
+                compression.clone()
+            )
+        identity = {
+            "config_sha256": "a" * 64,
+            "data_manifest": {"sha256": "b" * 64},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            pending = prepare_optimizer_probe(
+                model=probed_model,
+                optimizer=probed_optimizer,
+                out_dir=Path(raw),
+                step=0,
+                targets=["mlp.c_proj"],
+                dtype="float32",
+                layers=[0],
+                model_config=config_as_dataclass(),
+                run_identity=identity,
+                execution_provenance={"git_commit": "c" * 40},
+            )
+            reference_optimizer.step()
+            probed_optimizer.step()
+            path = write_optimizer_probe(pending)
+            payload = torch.load(
+                path, map_location="cpu", weights_only=False
+            )
+        key = "transformer.h.0.mlp.c_proj.weight"
+        captured = payload["parameters"][key]
+        self.assertEqual(
+            payload["hyperparameters"][key]["optimizer_kind"],
+            "MuonMatchedGivens",
+        )
+        torch.testing.assert_close(
+            captured["compression_residual_before_step"], compression
+        )
+        torch.testing.assert_close(
+            captured["compression_residual_after_step"],
+            probed_optimizer.state[probed_module.weight][
+                "compression_residual"
+            ],
+        )
+        torch.testing.assert_close(
+            captured["momentum_buffer_after_step"],
+            probed_optimizer.state[probed_module.weight]["momentum_buffer"],
+        )
+        self.assertTrue(
+            torch.equal(reference_module.weight, probed_module.weight)
+        )
+        self.assertTrue(
+            torch.equal(
+                reference_optimizer.state[reference_module.weight][
+                    "compression_residual"
+                ],
+                probed_optimizer.state[probed_module.weight][
+                    "compression_residual"
+                ],
+            )
+        )
 
     @unittest.skipUnless(torch.cuda.is_available(), "CUDA is required")
     def test_optimizer_probe_does_not_change_cuda_muon_trajectory(self) -> None:
