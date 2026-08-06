@@ -1,0 +1,121 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_exact_config_mfu_result",
+  "classification": "SYMMETRIC_CPROJ_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "recorded_at": "2026-08-06T08:17:17+08:00",
+  "passed": true,
+  "identity": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_symmetriccproj_5tpp_lr24e4.json",
+    "config_sha256": "30a7080470e4d4c2578666ac32c54d000bda8a6fcc230a6daf24b2b8958333b6",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_plan.json",
+    "plan_sha256": "6be04cc086f596954ce1f97d18f6cc33ae61b268b80924e27f5ba3ad427bf578",
+    "implementation_commit": "3941c8c7d53e8d73a3bdb032e8c16257d5390165",
+    "execution_git_commit": "b2fefdef507e46a3bb15b0d54291c56b7f7d8b5a",
+    "remote_repo": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "certificate": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_symmetriccproj_5tpp/performance_preflight.json",
+      "sha256": "4a97235dd2f1f7071d990c693b3e222d9a7412ef497c99f53d11951ff7c6c14a"
+    },
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_symmetriccproj_5tpp/performance_preflight.log",
+      "sha256": "4a4a73fa734f8c65cab7450f39c374cfdfe2c6ff8603faa64b12c3804a0926c9"
+    }
+  },
+  "measurement": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 46.999757528305054,
+    "iter_ms": 2330.895,
+    "tokens_per_second": 112466.7875,
+    "model_tflops": 83.99643026423041,
+    "empirical_bf16_gemm_peak_tflops": 417.2668981354795,
+    "mfu_fraction": 0.20130144672285552,
+    "minimum_mfu_fraction": 0.2,
+    "peak_mib": 35697.99,
+    "timing_breakdown_ms": {
+      "prepare": 3.51125,
+      "fwbw": 1654.2275,
+      "optimizer": 664.98,
+      "gradient": 1.91375,
+      "flush": 4.3575,
+      "data": 0.65625,
+      "other": 1.2475
+    },
+    "native_block_fht_extension": {
+      "loaded": true,
+      "required": true,
+      "module": "latent_weight_lab_block_fht_ext_scaled_v10"
+    }
+  },
+  "structural_verification": {
+    "cfc_directed_product_active": true,
+    "cfc_schedule": [22, 22, 22, 22, 22, 22],
+    "cfc_error_feedback_decay": 1,
+    "cproj_muon_matched_givens_active": true,
+    "cproj_hidden_main_stages": 64,
+    "cproj_hidden_residual_stages": 16,
+    "cproj_symmetric_output_shear_stages": 32,
+    "cproj_total_procedural_coordinates_per_layer": 135168,
+    "cproj_total_procedural_coordinates_all_layers": 1622016,
+    "cproj_error_feedback_decay": 0.5,
+    "symmetric_shear_score_family": "symmetric_shear_normalized_squared_tangent",
+    "diagnostic_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "native_parent_matching_validated_all_layers": true,
+    "native_residual_matching_validated_all_layers": true,
+    "native_symmetric_shear_matching_validated_all_layers": true,
+    "additional_persistent_trainable_coordinates": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0
+  },
+  "stability": {
+    "train_exit_code": 0,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "finite_loss_values": 13,
+    "all_symmetric_shear_coordinates_finite": true,
+    "maximum_symmetric_shear_coordinate_abs": 0.00002291924967824053,
+    "maximum_condition_number_upper_bound": 1.000951700451604,
+    "registered_maximum_condition_number": 1.1,
+    "condition_bound_obeyed_all_layers": true,
+    "minimum_singular_value_lower_bound": 0.9995244891552072,
+    "symmetric_shear_residual_recovery_minimum": 0.03868603706359863,
+    "symmetric_shear_residual_recovery_maximum": 0.05658525228500366
+  },
+  "performance_comparison": {
+    "rejected_joint_full_mlp_iter_ms": 2214.656,
+    "accepted_cfc_only_iter_ms": 1933.11375,
+    "candidate_over_rejected_joint_update_time_ratio": 1.052486255201711,
+    "candidate_over_accepted_cfc_only_update_time_ratio": 1.205772293534201,
+    "interpretation": "The direction-aware output chart adds about 5.25% update time over the rejected full-MLP control and 20.58% over c_fc-only, while remaining just above the preregistered 20% MFU floor. Algorithmic generator FLOPs remain uninstrumented; these are execution-time ratios, not EG_FLOPs."
+  },
+  "execution": {
+    "direct_foreground_polling": true,
+    "watchdog_used": false,
+    "scientific_run_duration_estimate_minutes_from_update_rate": 92.19,
+    "workspace_bytes_after_gate": 225205867439,
+    "workspace_gib_after_gate": 209.739308,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes_after_gate": 1684286558208,
+    "gpu_memory_mib_after_gate": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent_after_gate": 0,
+    "remote_worktree_clean": true
+  },
+  "decision": {
+    "one_scientific_2373_update_run_authorized": true,
+    "watchdog_required": true,
+    "watchdog_milestones": [20, 50, 100],
+    "watchdog_heartbeat_minutes": 90,
+    "primary_terminal_validation_ce_maximum": 3.635838041305542,
+    "secondary_terminal_validation_ce_maximum": 3.6478,
+    "automatic_rerun_authorized": false,
+    "parallel_arm_authorized": false,
+    "larger_rung_authorized": false
+  }
+}
