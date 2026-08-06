@@ -1,0 +1,183 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_functional_metric_acquisition_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_parent_functional_metric_acquisition_result",
+  "recorded_at": "2026-08-06T17:20:00+08:00",
+  "classification": "REJECTED_PARENT_EQUIVALENCE_AT_STEP594_WITH_INTACT_DIAGNOSTIC_ARTIFACTS",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp_20260806T074541Z_1111936",
+    "name": "pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1112038,
+    "pgid": 1112038,
+    "started_at": "2026-08-06T15:45:43+08:00",
+    "finished_at": "2026-08-06T17:05:15+08:00",
+    "wall_seconds": 4772,
+    "exit_code": 0,
+    "terminal_state": "finished",
+    "terminal_classification": "clean"
+  },
+  "identity": {
+    "execution_git_commit": "2941562a9afe2da38d2c8853f6087eb3974dbafe",
+    "run_identity_sha256": "3eb67924050f70a729ea71d50319bf073b2a16a78ecef8eee315ebda73cb7e43",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp.json",
+    "config_sha256": "904863f60d88bd6fc86e096cefe058eb262f97cb77fe7097abe79cba022c2c4c",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_plan.json",
+    "plan_sha256": "c9322647f5aad1523fb34291f05bb784c187e8ef75f5cab4704f0a39f7dc88a3",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_mfu_result.json",
+    "mfu_result_sha256": "50cd7634eae317e03c5048323ec572def544e2bd34773b91bc9a0349ba5b215a",
+    "running_metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_run_metadata.json",
+    "running_metadata_sha256": "f73652dd056dbb52ec8f4249e746b93885b3a6b76259fab0fd234dea75f744d5",
+    "source_parent_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+    "source_parent_result_sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "38cfdc8928ae40b709bbe7994841b244ca0c0633bd96890db0ea424ea40d67ba",
+    "archived_config_sha256": "904863f60d88bd6fc86e096cefe058eb262f97cb77fe7097abe79cba022c2c4c",
+    "archived_mfu_certificate_sha256": "3c8ae19d636d2bcf62718a901b0645d02a7a9d2755a4eb5e00cf47ac9d19141b"
+  },
+  "fixed_evaluation": {
+    "steps": [594, 1188, 1782, 2373],
+    "candidate_train_ce": [4.2225, 3.8561, 3.7062, 3.6440],
+    "candidate_validation_ce": [4.2123, 3.8421, 3.6901, 3.6271746158599854],
+    "accepted_parent_validation_ce": [4.2028, 3.8395, 3.6888, 3.625838041305542],
+    "candidate_minus_parent_validation_ce": [0.0095, 0.0026, 0.0013, 0.0013365745544433594],
+    "absolute_tolerance_ce": 0.005,
+    "within_tolerance_by_step": [false, true, true, true],
+    "all_fixed_checkpoints_within_tolerance": false,
+    "failed_steps": [594],
+    "terminal_validation_ce_exact": 3.6271746158599854,
+    "terminal_absolute_delta_from_parent_ce": 0.0013365745544433594,
+    "rounding_note": "The step-594 values are logged to four decimals, but even the most favorable rounding endpoints leave the absolute difference above 0.0094 CE, so the 0.005 gate cannot pass."
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction_with_diagnostic_io": 0.2343769253441129,
+    "tokens_per_second": 130109.2637313126,
+    "diagnostic_io_adjusted_iter_ms": 2014.7988888888888,
+    "model_tflops": 97.17280933037729,
+    "peak_mib": 35534.52,
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "certificate_sha256": "3c8ae19d636d2bcf62718a901b0645d02a7a9d2755a4eb5e00cf47ac9d19141b",
+    "preflight_log_sha256": "667359107b649ad4d96f03adf1e6dde98085d9a4b838c4816be80527de5dc819"
+  },
+  "snapshots": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/scientific/parameter_trajectory",
+    "steps": [0, 594, 1188, 1782, 2373],
+    "count": 5,
+    "all_parameters": true,
+    "parameter_tensors_per_snapshot": 327,
+    "parameter_numel_per_snapshot": 70540512,
+    "dtype": "float32",
+    "bytes_per_snapshot": 282322353,
+    "total_bytes": 1411611765,
+    "all_tensors_finite": true,
+    "sha256_by_step": {
+      "0": "cda9dd6538ba664d3e36c229c656c22ef9ccd22baea807f796f6beda9ef270a6",
+      "594": "79f6678ac50f75a8d7806315cbd68b8fb16e6395dad7b4f4a1cb043191a1f57a",
+      "1188": "215822ee76bf2c5bec7ca26a0bca9369326d90aa1461238d7646d8561c53db84",
+      "1782": "f9f8e0ac3b02fa93adde4f929d5db540f6adfc219d4e7d955fc444c9d2d8173d",
+      "2373": "1954824e66cce40091dd912b740d289b48fc97fcdf5e08080f8290f64127d112"
+    }
+  },
+  "optimizer_probes": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/scientific/optimizer_probe",
+    "steps": [0, 594, 1188, 1782],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "parameters_per_probe": 8,
+    "tensors_per_probe": 48,
+    "tensor_numel_per_probe": 113246208,
+    "dtype": "float32",
+    "bytes_per_probe": 453034131,
+    "total_bytes": 1812136524,
+    "all_tensors_finite": true,
+    "all_expected_fields_present": true,
+    "weight_before_step_exactly_equals_same_step_snapshot": true,
+    "sha256_by_step": {
+      "0": "dc95377f362ffb66801887ecf1cad9c4aa733ad43fbf311b0e10d955a3575076",
+      "594": "4fc05d3d1ea74601598e760c88f46faed17cd9be6c43d6e4e87e8d5e28828bdc",
+      "1188": "a2ab46317fa60db136a79f3e1619878d2c08026048bc0a1519382a764951575d",
+      "1782": "2f80803563dc1e8aa41da618a6aaf157c8b743cb21e110d74e012156c1728508"
+    }
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/scientific/ckpt.pt",
+    "sha256": "8601a0a0aec7d32942ff388cb1343b1952bd5091868d95a90d26b01cc556a53e",
+    "bytes": 1073452256,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "268d2ce4b7355576312caf4de1349d265a0523bf63a6e3fc6e5650f1b325c817",
+    "metadata_bytes": 25593,
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "best_validation_ce_exact": 3.6271746158599854,
+    "model_tensor_count": 352,
+    "model_numel": 137485548,
+    "optimizer_tensor_count": 981,
+    "optimizer_numel": 169392891,
+    "all_model_optimizer_tensors_finite": true,
+    "all_rng_states_present": true,
+    "terminal_snapshot_exactly_equals_checkpoint_model": true
+  },
+  "artifacts": {
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp_20260806T074541Z_1111936.log",
+      "sha256": "2c5a3f7dbc103ea17bf625e970a5b57d84f19d504ef62cc168e458fa5d32d544"
+    },
+    "status": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp_20260806T074541Z_1111936.json",
+      "sha256": "326a72cd240a94f904db8add930fd887e21b0ef3049bfa5a131941703555b155"
+    },
+    "provenance": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp_20260806T074541Z_1111936.json",
+      "sha256": "38cfdc8928ae40b709bbe7994841b244ca0c0633bd96890db0ea424ea40d67ba"
+    }
+  },
+  "verification": {
+    "all_snapshot_probe_checkpoint_identities_equal": true,
+    "all_floating_model_optimizer_snapshot_probe_tensors_finite": true,
+    "all_probe_weights_equal_same_step_snapshot": true,
+    "process_group_absent_after_completion": true,
+    "remote_worktree_clean": true,
+    "artifact_integrity_passed": true,
+    "parent_equivalence_passed": false,
+    "all_acquisition_acceptance_rules_passed": false
+  },
+  "observer_effect_diagnosis": {
+    "status": "causal_suspect_identified_not_yet_confirmed",
+    "finding": "The active optimizer probe is not strictly observational: before each registered optimizer step it runs eight additional dense Newton-Schulz polar decompositions on the training GPU, then copies six full tensors per matrix to CPU and fsyncs them.",
+    "mechanism": "Those extra GPU kernels and allocations can change allocator and GEMM execution state before the real Muon step, so a nominal replay can follow a different floating-point path even with unchanged seeds. The all-parameter snapshot is also synchronous but does not run extra dense matrix products.",
+    "code_path": "examples/nanogpt/parameter_trajectory.py::write_optimizer_probe called before scaler.step in examples/nanogpt/train.py",
+    "evidence_boundary": "This mechanism is a concrete non-intervention violation and the leading cause of the replay miss, but the completed run alone does not prove it caused the step-594 delta."
+  },
+  "terminal_health": {
+    "gpu_memory_mib": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 0,
+    "gpu_temperature_c": 37,
+    "workspace_bytes": 233125781049,
+    "workspace_gib": 217.115302615799,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1676366004224,
+    "filesystem_available_gib": 1561.2375030517578
+  },
+  "watchdog": {
+    "mode": "terminal_only",
+    "progress_callbacks_sent": 0,
+    "heartbeats_sent": 0,
+    "terminal_100_percent_callback_observed_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-06T17:05:15+08:00"],
+    "duplicate_terminal_callbacks_observed": 0,
+    "last_exit_code": 0,
+    "service_running_after_terminal": false
+  },
+  "decision": {
+    "diagnostic_artifacts_structurally_valid": true,
+    "phase_acquisition_accepted_as_parent_equivalent": false,
+    "zero_update_metric_calibration_authorized_from_this_run": false,
+    "candidate_structure_implementation_authorized": false,
+    "candidate_language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "automatic_blind_rerun_authorized": false,
+    "next_action": "Repair the probe into a genuinely non-intervening two-phase recorder: copy only pre-step weight, clipped gradient, momentum state, and hyperparameters to CPU before the real Muon step; copy the post-step weight afterward; derive the realized applied direction and polar residual offline without extra pre-step GPU matrix kernels. Add an exact no-probe-versus-probe trajectory identity test, preregister a distinct corrected acquisition, and require a fresh diagnostic-I/O MFU gate before any successor replay. Do not use this rejected acquisition for metric selection or launch a structural candidate."
+  }
+}
