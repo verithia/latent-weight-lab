@@ -1,0 +1,100 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cproj_dense_layer_allocation_sealed_result_v1",
+  "artifact_kind": "124m_repaired_attention_cproj_dense_layer_allocation_zero_update_result",
+  "recorded_at": "2026-08-06",
+  "classification": "REJECT_POSTHOC_CPROJ_DENSE_LAYER_EXCEPTION_ALLOCATION",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_dense_layer_allocation_plan.json",
+    "sha256": "c73ebbe1b38233485e7e4a583903498a189582a38eb0b3c3212cd0154551dcb5",
+    "registration_commit": "95aa167"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9be9028bb092f166a7ce1a8f661139daeb88aafc",
+    "entrypoint": "examples.nanogpt.analyze_cproj_dense_layer_allocation",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "started_at": "2026-08-06T05:18:58.353540+00:00",
+    "elapsed_seconds": 183.4716808795929,
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_dense_layer_allocation_v1"
+  },
+  "identity": {
+    "joint_checkpoint_sha256": "6b3c9cadc169b9dd234e111428dc22b4390be79561f98d178e8f105747612a24",
+    "dense_cproj_parent_checkpoint_sha256": "3d4b893cd59d384a404daf439742e03614dc6d7d0992353e0099429261a53a02",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_checkpoint_ce": {
+    "joint_control": {
+      "primary": 3.6437273621559143,
+      "confirmation": 3.6552295982837677
+    },
+    "all12_dense_cproj_restore": {
+      "primary": 11.724527537822723,
+      "confirmation": 11.739804685115814,
+      "gain_vs_joint_primary": -8.080800175666809,
+      "gain_vs_joint_confirmation": -8.084575086832047
+    },
+    "least_harmful_single_layer": {
+      "layer": 9,
+      "primary": 4.428561300039291,
+      "confirmation": 4.4389050006866455,
+      "gain_vs_joint_primary": -0.7848339378833771,
+      "gain_vs_joint_confirmation": -0.7836754024028778
+    },
+    "cumulative_top4_by_primary_single_layer_order": {
+      "layers": [9, 10, 8, 11],
+      "primary": 7.054968237876892,
+      "confirmation": 7.059541508555412,
+      "gain_vs_joint_primary": -3.411240875720978,
+      "gain_vs_joint_confirmation": -3.4043119102716446
+    }
+  },
+  "primary_single_layer": {
+    "ranking_least_to_most_harmful": [9, 10, 8, 11, 7, 6, 5, 4, 3, 2, 1, 0],
+    "gain_vs_joint": {
+      "0": -4.754934996366501,
+      "1": -2.7141832411289215,
+      "2": -2.471362352371216,
+      "3": -2.3954851031303406,
+      "4": -2.173300549387932,
+      "5": -1.7118498980998993,
+      "6": -1.2623063176870346,
+      "7": -0.9967160373926163,
+      "8": -0.864049643278122,
+      "9": -0.7848339378833771,
+      "10": -0.8054998070001602,
+      "11": -0.9401377141475677
+    }
+  },
+  "decision": {
+    "passed": false,
+    "selected_k": null,
+    "mixed_layer_implementation_authorized_by_this_plan": false,
+    "exact_config_mfu_preflight_authorized_by_this_plan": false,
+    "language_model_training_authorized": false,
+    "interpretation": [
+      "No dense c_proj donor tensor is portable into the independently trained joint checkpoint, even one layer at a time and on either fixed validation window.",
+      "The monotone damage from one through twelve restored layers shows strong cross-run co-adaptation; the result cannot identify a useful dense exception subset.",
+      "This rejects post-hoc c_proj tensor transplantation. It does not reject a mixed dense/procedural architecture trained jointly from initialization.",
+      "A subsequent discriminator must preserve the donor MLP's internal hidden-coordinate gauge, for example by testing a whole-MLP functional layer intervention rather than another isolated c_proj transplant."
+    ],
+    "next_action": "Preregister a fixed-checkpoint whole-MLP functional layer-allocation oracle. Only if a small donor-block subset improves both untouched windows should a separately preregistered jointly trained mixed architecture proceed to correctness tests and an exact-config MFU gate."
+  },
+  "artifacts": {
+    "raw_result_sha256": "a077021999517c422a4c0786b1135cb56b232c546fe0432e26e10472f56637b6",
+    "rows_sha256": "fbb9b8034e78e12a18b4aa77fb95202a03cab837256672e3005641ad28fde442",
+    "successful_foreground_log_sha256": "b260316df2f6c0d472aaed8f246aa7d6b7f234cf7e0b574cdc8ca5e01f53921a",
+    "premeasurement_failed_loader_log_sha256": "c499832964949e40cf64419970a0725d8ddd75d179af80cc13ab7cd1a0b95b6a",
+    "premeasurement_loader_fix_commit": "9be9028bb092f166a7ce1a8f661139daeb88aafc"
+  },
+  "terminal_health": {
+    "gpu_memory_mib": 282,
+    "gpu_utilization_percent": 0,
+    "gpu_temperature_c": 38,
+    "workspace_bytes": 227696517124,
+    "filesystem_available_bytes": 1681795575808
+  }
+}
