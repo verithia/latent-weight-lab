@@ -1,0 +1,110 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_sealed_result_v2",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-07T01:03:23+08:00",
+  "classification": "REJECT_5TPP_STATIC_FUNCTIONAL_METRIC_SELECTOR",
+  "passed": false,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9690c537989713b48c640a1b2f8dbe473805e726",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_diagonal_kfac_selector",
+    "parameter_updates": 0,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "elapsed_seconds": 14.855149269104004
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_functional_metric_calibration_v2_plan.json",
+    "plan_sha256": "9993c24dbbba42dc3d7cd93ca0fa87a3fb051771cc040deeacc8ca67f26fe68a",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "frozen_gate": {
+    "mean_finite_step_ce_gain_minimum": 0.0005,
+    "finite_step_wins_minimum": 6,
+    "holdout_wins_minimum": 3,
+    "minimum_holdout_gain_ce": 0.0,
+    "threshold_changed_after_measurement": false
+  },
+  "candidates": {
+    "activation_selector_output32": {
+      "mean_finite_step_ce_gain": 0.00003452599048614502,
+      "finite_step_wins": 6,
+      "holdout_wins": 3,
+      "minimum_holdout_gain": -0.000025033950805664062,
+      "fit_task_advantage": 0.0001547745733517722,
+      "holdout_task_advantage": 0.00015221462672718872,
+      "holdout_to_fit_task_advantage_retention": 0.9834601603535664,
+      "holdout_activation_residual_energy_ratio": 0.9987388651188849,
+      "candidate_to_control_update_energy_ratio": 0.9716233533290418,
+      "passed": false,
+      "failed_gates": ["mean_finite_step_ce_gain", "minimum_holdout_gain"]
+    },
+    "error_selector_output32": {
+      "mean_finite_step_ce_gain": 0.0000025257468223571777,
+      "finite_step_wins": 7,
+      "holdout_wins": 3,
+      "minimum_holdout_gain": -0.00007796287536621094,
+      "fit_task_advantage": 0.00006593182510323398,
+      "holdout_task_advantage": -0.000057928481286157255,
+      "holdout_to_fit_task_advantage_retention": -0.8786118266171862,
+      "holdout_activation_residual_energy_ratio": 1.0008272582632656,
+      "candidate_to_control_update_energy_ratio": 0.9989321135510092,
+      "passed": false,
+      "failed_gates": [
+        "mean_finite_step_ce_gain",
+        "minimum_holdout_gain",
+        "holdout_predicted_descent",
+        "positive_fit_and_holdout_task_advantage",
+        "task_advantage_retention"
+      ]
+    },
+    "diagonal_kfac_selector_output32": {
+      "mean_finite_step_ce_gain": 0.000023379921913146973,
+      "finite_step_wins": 5,
+      "holdout_wins": 2,
+      "minimum_holdout_gain": -0.00008738040924072266,
+      "fit_task_advantage": 0.00013780617860718533,
+      "holdout_task_advantage": 0.00006294658178479864,
+      "holdout_to_fit_task_advantage_retention": 0.456776194079273,
+      "holdout_activation_residual_energy_ratio": 1.000716601159644,
+      "candidate_to_control_update_energy_ratio": 0.9714927578001828,
+      "passed": false,
+      "failed_gates": [
+        "mean_finite_step_ce_gain",
+        "finite_step_wins",
+        "holdout_wins",
+        "minimum_holdout_gain"
+      ]
+    }
+  },
+  "interpretation": {
+    "strongest_arm": "activation_selector_output32",
+    "strongest_mean_gain_fraction_of_required": 0.06905198097229004,
+    "accepted_claim": "A current-state static activation, output-error, or diagonal activation-error selector does not materially improve the same-budget c_proj chart over raw Frobenius geometry at 5TPP.",
+    "rejected_claim": "The c_proj direction gap can be closed by changing only a static diagonal coordinate-selection metric.",
+    "next_causal_question": "Does the unmatched dense c_proj update residual have bounded phase-dependent temporal structure that a static metric necessarily misses?"
+  },
+  "raw_artifacts": {
+    "result_sha256": "7f457960d57ac5b2e57fbdc7476b12d46cde203d871d278c971007e30584cc27",
+    "cells_csv_sha256": "455aba57d279e372bcf51f33588e5690f3da943df4800ddc664b01f8335f94f3",
+    "finite_ce_csv_sha256": "b73e709cb7d1728210d9b69d0abc2f158167fff15d553d9f8be5baa664d68062",
+    "scales_csv_sha256": "9dbfe10cb38c198e180d6b34dc63a558b15b218ec49c776e0d45b3569f1fa206",
+    "cells_csv_rows_including_header": 257,
+    "finite_ce_csv_rows_including_header": 41,
+    "scales_csv_rows_including_header": 33
+  },
+  "authorization": {
+    "temporal_residual_decomposition": true,
+    "short_shadow_rollout": false,
+    "production_implementation": false,
+    "exact_config_mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
