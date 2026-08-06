@@ -229,8 +229,18 @@
   "additional_inference_parameters_vs_materialized_attention_parent": 0,
   "additional_inference_flops_vs_materialized_attention_parent": 0,
   "additional_dense_optimizer_state_bytes": 226492416,
-  "implementation_commit": "PENDING_IMPLEMENTATION_COMMIT",
-  "implementation_source_hashes": {},
+  "implementation_commit": "3941c8c7d53e8d73a3bdb032e8c16257d5390165",
+  "implementation_source_hashes": {
+    "examples/nanogpt/fast_task_matching.py": "73c1a86bb469e3fe09e4fbcd65e786ad5f3b0ee6dcb71d0e4f71c2cb011d0bce",
+    "examples/nanogpt/model.py": "135b9652f72fe3867bc2c39afa7ceb751f399316e30533193c0fb52487684f17",
+    "examples/nanogpt/muon.py": "265544e19f1ea1c923bbd0d8cb43655042b494c6aa99bc1ebd00947359dc418e",
+    "examples/nanogpt/muon_matched_givens.py": "fa9057f58b919e7cc70da74d53be7f401a89775055a6e5dd54ab8df991bcf9b7",
+    "examples/nanogpt/train.py": "45f77b0202801b1560c75640c651286f615d7d62f7fcfce11d2d937a0da62d35",
+    "examples/nanogpt/mfu_preflight.py": "02ffc6f2356a0fc0da4493739e1a454a453bc0045b167e1c18c5bfb7e62f74db",
+    "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f",
+    "examples/nanogpt/test_mlp_cproj_symmetric_output_shear.py": "e23624debfe8496ee20fbf69d15ba10ce0dd5504412653a4feb3fdf2f4e71b92",
+    "examples/nanogpt/test_124m_repaired_attention_symmetric_cproj_5tpp_plan.py": "e66cdfa6a6d21c62e40404bac38a3fe212a39da5873514a3ae28c2c7e5816d9c"
+  },
   "registered_plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_plan.json",
   "registered_plan_sha256": "6be04cc086f596954ce1f97d18f6cc33ae61b268b80924e27f5ba3ad427bf578",
   "muon_matched_givens_representation": {
