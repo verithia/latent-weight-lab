@@ -1,0 +1,84 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_multiscale_path_plan_v1",
+  "registered_at": "2026-08-07T00:00:00Z",
+  "question": "At what temporal bandwidth does the accepted path's nontransportable one-step motion average into a transportable low-dimensional secant, and can a frozen smooth scalar coordinate extrapolate future endpoints?",
+  "theory": {
+    "established": "An early-fit rank-8 affine envelope recovers 98.75% of future endpoint energy but only 0.0016% of future exact one-step tangent energy.",
+    "discriminator": "A useful smooth mapping may follow low-bandwidth drift without reproducing every noisy dense Muon update. Secant recovery versus horizon identifies that bandwidth.",
+    "polynomial_control": "Quadratic extrapolation in cumulative learning-rate progress tests a genuinely smooth scheduled curve without fitting holdout coordinates.",
+    "limitations": "The early PCA basis and training-time coordinate are diagnostic oracles. Neither may be used in a candidate."
+  },
+  "identity": {
+    "analyzer_source_commit": "bdb833caa9d54e4ea6cf9582b8d7a7556e2195ca",
+    "analyzer_sha256": "4c3fa7149a1636e1af2aa47ad1444322f84cb14046247bccd69c629a47e314b3",
+    "predictive_result_sha256": "b6edd4fefd6a6c957bcb147c5e394ae68c96ba88bccd03ca382ed06c621d0ac8",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "supporting_source_sha256": {
+      "examples/nanogpt/analyze_mlp_cproj_predictive_manifold.py": "df3509e1df4174a0b4a088f46a438a71a5993f43bcb948c8227b4cdfdd861775",
+      "examples/nanogpt/analyze_mlp_cproj_coadapted_orbit_geometry.py": "28183ae24b25425306d213e22524f1e767dcd1864c31f64315aad7d1b3a1ca40",
+      "examples/nanogpt/train.py": "0b914aa0b6a91d36032e5dc68a034420e172e38a535b59d7ceab5eac78a4e650"
+    }
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [8, 9, 10, 11],
+    "discovery_steps": [0, 99, 198, 297, 396, 495, 594, 693, 792, 891, 990, 1089, 1188, 1287, 1386, 1485, 1584, 1683, 1782],
+    "holdout_steps": [1881, 1980, 2079, 2178, 2277, 2373],
+    "ranks": [1, 2, 4, 8, 16],
+    "primary_rank": 8,
+    "rolling_horizon_indices": [1, 2, 3, 4, 5, 6],
+    "nominal_horizon_updates": [99, 198, 297, 396, 495, 594],
+    "polynomial_degree": 2,
+    "polynomial_coordinate": "cumulative_learning_rate",
+    "learned_basis_role": "diagnostic_oracle_only",
+    "secants": "all rolling pairs in the sequence 1782,1881,1980,2079,2178,2277,2373 at each registered index separation",
+    "functional_metric": {
+      "model_state": "accepted terminal full-state snapshot at step 2373",
+      "split": "train",
+      "fixed_eval_batch_index": 0,
+      "activation_point": "post_gelu input to c_proj",
+      "activation_rows": 2048
+    },
+    "estimated_runtime": "under five minutes",
+    "monitoring": "direct foreground polling; no watchdog or callback"
+  },
+  "decision_rule": {
+    "thresholds": {
+      "secant_weight_recovery": 0.80,
+      "secant_functional_recovery": 0.80,
+      "online_max_updates": 198,
+      "phase_max_updates": 594,
+      "polynomial_endpoint_weight_recovery": 0.80,
+      "polynomial_endpoint_functional_recovery": 0.80
+    },
+    "outcomes": {
+      "ONLINE_LOW_BANDWIDTH_SMOOTH_CURVE": "Transport emerges by 198 updates and quadratic coordinates extrapolate; authorize only a theory design for a smooth state-conditioned mapper.",
+      "ONLINE_LOW_BANDWIDTH_NONSTATIONARY_CURVE": "Transport emerges by 198 updates but coordinates do not extrapolate; a task-state-conditioned coordinate law is required.",
+      "PHASE_SCALE_SMOOTH_CURVE": "Only coarse phase drift is transportable despite smooth endpoint coordinates; no per-step compact optimizer is justified.",
+      "PHASE_SCALE_ENVELOPE_ONLY": "Only coarse phase secants fit and coordinates do not extrapolate; retain LWT allocation but close online affine transport.",
+      "SCHEDULED_ENDPOINT_CURVE_WITHOUT_LOCAL_SECANT_TRANSPORT": "The scheduled endpoint is smooth but does not supply causal local transport.",
+      "ENDPOINT_ENVELOPE_WITHOUT_CAUSAL_SECANT_TRANSPORT": "Endpoint representability is an oracle artifact for optimization purposes; close fixed affine transport."
+    }
+  },
+  "interpretation_contract": {
+    "no_training_selection": true,
+    "no_validation_selection": true,
+    "holdout_coordinates_not_used_by_polynomial_control": true,
+    "secant_projection_is_representability_not_coordinate_prediction": true,
+    "training_time_is_not_a_candidate_latent": true,
+    "learned_pca_basis_is_not_a_candidate": true
+  },
+  "authorization": {
+    "run_zero_update_multiscale_analysis": true,
+    "use_learned_basis_in_candidate": false,
+    "use_training_time_as_candidate_latent": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
