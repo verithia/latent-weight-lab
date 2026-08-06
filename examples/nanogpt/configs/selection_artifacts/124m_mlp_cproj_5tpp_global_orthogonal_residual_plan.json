@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_global_orthogonal_residual_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_global_orthogonal_residual_plan",
+  "registered_at": "2026-08-07T10:35:00+08:00",
+  "status": "registered_before_execution",
+  "scientific_question": "At the identical 147456-coordinate budget, is the fresh high-rank c_proj chart residual materially more compressible in a genuinely global orthogonal basis than in the local BlockFHT control, and is its sparse support causally reusable across phases?",
+  "theory": {
+    "paper_link": "Mapping Networks uses a fixed orthogonally initialized map and motivates layer-wise latent charts. The prior residual analysis shows that the production local chart leaves 72.58 percent of dense-Muon update energy in a fresh high-rank, channel-isotropic direction. This diagnostic isolates whether local BlockFHT mixing, rather than the fixed-map premise itself, explains that miss.",
+    "equal_budget_rule": "Identity coordinates, two-stage signflip local block-FHT256 coordinates, and a genuine global tensor-product orthogonal basis each receive exactly 147456 oracle-selected coefficients out of 2359296 ambient c_proj entries.",
+    "global_basis": "The exact 768=3x256 row and 3072=3x1024 column factorizations use normalized FHTs plus seeded orthogonal 3x3 mixing, yielding a dense global orthogonal tensor-product basis without padding.",
+    "oracle_caveat": "Top-k support is scoring-only and target-inaccessible. A passing oracle is insufficient unless it beats Gaussian order-statistic recovery and the local control; causal previous-phase support carry separately tests whether support could be reused by a fixed map.",
+    "combined_recovery": "combined = chart_recovery + (1-chart_recovery)*residual_oracle_recovery; this is an upper bound because the oracle support is selected from the exact residual.",
+    "future_scoring": "Later phase residuals are inaccessible to previous-support construction and used only for causal scoring."
+  },
+  "causal_basis": [
+    "The corrected mature-state functional metric selector rejected activation-only, error-only, and diagonal activation-error metrics; the best mean CE gain was only 3.45e-5.",
+    "The exact temporal decomposition found 72.58 percent residual energy, top-64 singular energy 15.81 percent, output/hidden top-quartile mass 25.76/29.47 percent, and causal prior-span recovery 3.78e-5.",
+    "Those results reject static metric, low-rank, channel-gain, and history-carry fixes, but do not yet distinguish local BlockFHT from a full global orthogonal map of the type assumed by the paper.",
+    "No trainable candidate is justified unless the global basis passes every preregistered enrichment, locality, causal-support, and combined-recovery gate."
+  ],
+  "identity": {
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "temporal_residual_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_temporal_residual_result.json",
+    "temporal_residual_result_sha256": "2d90be1c16f530180d8907db3f41efece67c47736a24fd82c13c9ed256fef698",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "coordinate_budget": 147456,
+    "orthogonal_seeds": [20260807, 20260808, 20260809],
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260806,
+      "weight_decay_application": "identical production ordering"
+    },
+    "measurements": [
+      "oracle top-k residual-energy recovery for identity, local block-FHT256, and global tensor-FHT bases",
+      "global oracle enrichment over a same-dimensional Gaussian order-statistic reference",
+      "global-to-local recovery ratio and absolute advantage",
+      "causal recovery of each later residual on previous-phase global top-k support",
+      "oracle upper-bound combined exact-update recovery after the accepted local chart"
+    ],
+    "controls": {
+      "ambient_coordinates": 2359296,
+      "raw_coordinate_fraction": 0.0625,
+      "gaussian_reference": "same ambient dimension, same top-k budget, three frozen seeds",
+      "learned_basis": false,
+      "target_selected_support_usable_in_candidate": false,
+      "parameter_updates": 0
+    }
+  },
+  "decision_rule": {
+    "thresholds": {
+      "global_oracle_recovery_minimum": 0.4,
+      "global_over_gaussian_enrichment_minimum": 1.25,
+      "global_over_local_ratio_minimum": 1.1,
+      "global_over_local_absolute_minimum": 0.02,
+      "previous_support_recovery_minimum": 0.1,
+      "previous_support_over_random_minimum": 1.5,
+      "combined_exact_update_recovery_minimum": 0.6
+    },
+    "interpretation": {
+      "pass": "authorize only a global-orthogonal structure theory note; implementation and training remain separately gated",
+      "fail": "BlockFHT locality alone does not explain the miss; reject another fixed global orthogonal-basis guess at this budget",
+      "oracle_warning": "A target-selected top-k oracle is not a realizable latent map and cannot by itself authorize training"
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_global_orthogonal_residual_v1"
+  },
+  "authorization": {
+    "run_zero_update_global_orthogonal_analysis": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
