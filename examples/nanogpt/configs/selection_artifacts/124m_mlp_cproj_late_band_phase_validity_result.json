@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_late_band_phase_validity_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_late_band_phase_validity_zero_update_sealed_result",
+  "sealed_at": "2026-08-06T18:27:00+00:00",
+  "classification": "REQUIRE_COADAPTED_LATE_BAND_TRAJECTORY",
+  "passed": false,
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "git_commit": "53931e3a82e2a7a29a87fa7d99e2da710d32f764",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_late_band_phase_validity",
+    "parameter_updates": 0,
+    "elapsed_seconds": 132.45190572738647,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan_sha256": "949ec412f43a6ce12a48d313e2a12e50c937442f911558661c617e2129af5ade",
+    "analysis_source_sha256": "d9a71aef9fe0b4a0c132b59ffc43e625a657cf0d094680c492ba826c85543b15",
+    "allocation_result_sha256": "99f56823513edb5599f9dc12f7561ac9a0b5c60363012e7ca76814e952ffc5eb",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "raw_result_sha256": "236256cb4db619a98ca996c6059c136028999d4fa8da8cda4bb4524a6a9ba6ae",
+    "rows_sha256": "023a48266279f8f1c530ba67c16bb7a20ac328eb03bde637b60cbbded9dd8ac5",
+    "row_count": 8,
+    "all_metrics_finite": true
+  },
+  "metrics": {
+    "late_only_validation_ce_gap_by_end_step": {
+      "594": 0.13730764389038086,
+      "1188": 0.04934859275817871,
+      "1782": 0.0089263916015625,
+      "2373": 0.0020606517791748047
+    },
+    "middle_only_validation_ce_gap_by_end_step": {
+      "594": 0.15645265579223633,
+      "1188": 0.03202056884765625,
+      "1782": 0.007264852523803711,
+      "2373": 0.001988649368286133
+    },
+    "combined_validation_ce_gap_by_end_step": {
+      "594": 0.35245180130004883,
+      "1188": 0.07744407653808594,
+      "1782": 0.01758265495300293,
+      "2373": 0.004608154296875
+    },
+    "factorial_interaction_gap_by_end_step": {
+      "594": 0.05869150161743164,
+      "1188": -0.0039250850677490234,
+      "1782": 0.0013914108276367188,
+      "2373": 0.0005588531494140625
+    }
+  },
+  "decision": {
+    "late_band_phase_valid": false,
+    "middle_band_phase_valid": false,
+    "combined_band_phase_valid": false,
+    "dense_parent_phase_proxy_valid": false,
+    "reason": "The independently accepted late 8-11 procedural structure fails the dense-parent replay gate early while closing at the terminal endpoint; therefore dense-parent phase replay cannot decide the co-adapted procedural training path."
+  },
+  "interpretation": [
+    "Late-only and middle-only procedural endpoints both have large early dense-parent gaps but converge below 0.003 CE at the terminal endpoint. The phenomenon is not specific to extending the chart into layers 4-7.",
+    "The positive terminal mask remains a capacity observation, but the earlier phase rejection is a path/gauge mismatch: a jointly trained procedural network need not follow the dense parent's phase endpoints.",
+    "The next evidence must come from the accepted late-band structure's own full-state trajectory. No new chart, mask, optimizer, or language-model candidate is authorized by this result."
+  ],
+  "authorization": {
+    "run_one_coadapted_late_band_full_state_trajectory_acquisition": true,
+    "implement_candidate_structure": false,
+    "run_language_model_candidate": false,
+    "larger_rung": false
+  }
+}
