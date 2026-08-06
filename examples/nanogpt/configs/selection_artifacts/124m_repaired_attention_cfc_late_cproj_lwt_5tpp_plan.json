@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_late_cproj_lwt_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_late_cproj_lwt_5tpp_preregistration",
+  "recorded_at": "2026-08-06",
+  "scientific_question": "Can a model trained in one gauge from initialization retain the accepted repaired-attention plus procedural-c_fc loss while replacing c_proj only in the late transformer band (layers 8-11)?",
+  "causal_rationale": [
+    "The accepted c_fc-only 5TPP parent reaches validation CE 3.625838041305542 with dense c_proj.",
+    "Replacing c_proj in all twelve layers raises terminal CE to 3.660243, while the prospective depth diagnostic found no locally destructive four-layer band and instead localized the defect to accumulated full-depth propagation.",
+    "Post-hoc c_proj and whole-MLP donor transplantation failed because independently trained runs are globally co-adapted; those failures do not test a mixed architecture trained jointly from initialization.",
+    "A fixed GPT-initialized dense base plus a zero-initialized BlockFHT delta was already rejected, and rematching c_proj topology every update already removed simple chart staleness. This experiment is therefore layer-wise allocation, not another initialization, refresh, scalar, or static-basis sweep."
+  ],
+  "immutable_inputs": {
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+    "parent_config_sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+    "parent_result_sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+    "all_layer_full_mlp_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+    "all_layer_full_mlp_result_sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2",
+    "posthoc_whole_mlp_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_whole_mlp_functional_layer_allocation_result.json",
+    "posthoc_whole_mlp_result_sha256": "cc6c03e701f95bf2d91a11729b4e4be364cb1c64140498aeed6560cfcb701c79",
+    "affine_delta_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_affine_delta_result.json",
+    "affine_delta_result_sha256": "803c37b5913c8327bcded93bf76ec4f685fd51615ead4d522458077a66546825",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "candidate": {
+    "model": "124M MAI-v3",
+    "token_horizon_tpp": 5.0,
+    "max_iters": 2373,
+    "attention": "unchanged repaired full-attention Cayley parent",
+    "c_fc": "unchanged accepted directed-product [22,22,22,22,22,22], radius 1.0, error-feedback decay 1.0 in all 12 layers",
+    "dense_c_proj_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "procedural_c_proj_layers": [8, 9, 10, 11],
+    "procedural_c_proj": "unchanged hidden64 plus residual24 Muon-matched Givens with error-feedback decay 0.5",
+    "training_gauge": "Every layer is initialized and optimized jointly in the same run; no checkpoint tensor is transplanted.",
+    "inference": "All c_proj weights are materialized dense GEMM weights; no extra inference operation is added.",
+    "forbidden_additions": [
+      "learned dense basis",
+      "LoRA or dense residual adapter",
+      "HyperConnection or residual-topology change",
+      "global scale, volume, shear, gain, or activation modification",
+      "post-hoc donor tensor or module transplantation"
+    ]
+  },
+  "implementation_contract": {
+    "new_config_field": "block_fht_mlp_cproj_muon_matched_givens_layers",
+    "empty_field_backward_compatibility": "An empty list retains the historical all-layer behavior.",
+    "validation": "Configured layer IDs must be unique integers in [0,n_layer). The field is invalid unless Muon-matched c_proj is enabled and mlp.c_proj is a target.",
+    "construction": "Only selected layers construct MuonMatchedGivensLinear c_proj modules. Unselected layers construct ordinary dense nn.Linear c_proj modules even though mlp.c_proj remains a global target for the selected layers.",
+    "optimizer": "Selected c_proj modules use the existing custom Muon-matched optimizer; dense c_proj layers remain ordinary Muon-owned matrices.",
+    "resume": "Module identity and layer mask are part of the resolved config and exact-resume checkpoint identity."
+  },
+  "performance_gate": {
+    "mode": "foreground exact scientific config with real optimizer updates; poll directly and use no watchdog",
+    "minimum_mfu_fraction": 0.2,
+    "native_extension_required": true,
+    "all_losses_finite": true,
+    "candidate_layer_types_exact": true,
+    "no_scientific_launch_before_pass": true
+  },
+  "decision_rule": {
+    "accepted_parent_terminal_validation_ce": 3.625838041305542,
+    "all_layer_procedural_terminal_validation_ce": 3.660243,
+    "pass_validation_ce_maximum": 3.6478,
+    "curve_guard": "At steps 594, 1188, 1782, and 2373, candidate validation CE must not exceed the all-layer procedural control at the same step by more than 0.005.",
+    "pass_action": "Accept late-band LWT replacement as a partial full-MLP structure and preregister one expansion to procedural c_proj layers 4-11 at the same 5TPP horizon; no larger model is automatically authorized.",
+    "fail_action": "Close four-layer late-band c_proj replacement. Do not infer that a smaller two-layer band passes and do not launch an automatic retry, layer sweep, or larger rung.",
+    "threshold_changes_after_measurement": false
+  },
+  "monitoring": {
+    "expected_duration": "approximately 1-2 hours",
+    "policy": "one idempotent terminal-only watchdog",
+    "callbacks": ["100% clean completion", "error or actionable stall"],
+    "milestone_callbacks": false,
+    "heartbeat_callbacks": false,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action_prompt": "verify terminal state and exact artifacts against the active project note; seal losses, mask identity, optimizer ownership, MFU, provenance, and hashes; then continue the layer-wise MLP research plan autonomously"
+  },
+  "authorization": {
+    "implementation_after_plan_commit": true,
+    "one_exact_config_mfu_preflight": true,
+    "one_scientific_run_after_mfu_pass": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false
+  }
+}
