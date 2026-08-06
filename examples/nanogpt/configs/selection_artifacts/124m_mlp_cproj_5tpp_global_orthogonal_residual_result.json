@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_global_orthogonal_residual_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_global_orthogonal_residual_sealed_result",
+  "sealed_at": "2026-08-07T01:35:00+08:00",
+  "classification": "REJECT_GLOBAL_ORTHOGONAL_LOCALITY_HYPOTHESIS",
+  "passed": false,
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "git_commit": "c716682a728bf563abb44f38f615f0679e091667",
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_global_orthogonal_residual",
+    "parameter_updates": 0,
+    "elapsed_seconds": 4.878852367401123,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_global_orthogonal_residual_plan.json",
+    "plan_sha256": "013f35c74303f7fb459e3ad9b8b175ffdae47e9d76d829fa8a9fa077e7967a3c",
+    "analysis_source_sha256": "db463ec9c34381f8101ad86c44bad99ec1651657b35c818ceec32a9bf45e3071",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "temporal_residual_result_sha256": "2d90be1c16f530180d8907db3f41efece67c47736a24fd82c13c9ed256fef698",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_global_orthogonal_residual_v1/global_orthogonal_result.json",
+    "raw_result_sha256": "e7e946802601e1abf82beda5ca8e90f94f6da688bf5f163e689e70b0a3975d73",
+    "cells_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_global_orthogonal_residual_v1/global_orthogonal_cells.csv",
+    "cells_sha256": "7c683fc2504bb2b99b15cf4448b5ddd9add0ba843df2854d02b13ecedf19ee87",
+    "cell_rows": 224,
+    "basis_rows": {
+      "identity": 32,
+      "local_block_fht256": 96,
+      "global_tensor_fht": 96
+    },
+    "all_metrics_finite": true
+  },
+  "metrics": {
+    "coordinate_fraction": 0.0625,
+    "gaussian_oracle_recovery": 0.3243541287028341,
+    "identity_oracle_recovery": 0.32834820411570137,
+    "local_oracle_recovery": 0.3247092538531917,
+    "global_oracle_recovery": 0.3247050223144794,
+    "global_over_gaussian_enrichment": 1.0010818225531724,
+    "global_over_local_ratio": 0.9999869682226111,
+    "global_over_local_absolute": -0.000004231538712318184,
+    "global_previous_support_recovery": 0.06252129127993498,
+    "global_previous_support_over_random": 1.0003406604789598,
+    "global_combined_exact_update_recovery": 0.509832882725018
+  },
+  "gates": {
+    "oracle_recovery": false,
+    "gaussian_enrichment": false,
+    "locality_advantage_ratio": false,
+    "locality_advantage_absolute": false,
+    "previous_support_recovery": false,
+    "previous_support_enrichment": false,
+    "combined_exact_update_recovery": false
+  },
+  "interpretation": {
+    "blockfht_locality": "Rejected as the primary cause. The global and local orthogonal bases are equal to within 4.3e-6 absolute recovery and both match the Gaussian order-statistic control.",
+    "causal_support": "Rejected. Previous-phase global support recovers the random 6.25 percent coordinate fraction, showing no reusable support transport.",
+    "oracle_limit": "Even target-selected global support is only an optimistic 32.47 percent residual recovery and 50.98 percent combined exact-update recovery.",
+    "next_object": "Analyze integrated c_proj weight-trajectory chords and fixed-support transport, which match the paper's parameter-trajectory evidence and avoid treating Muon's intentionally isotropized one-step action as the manifold itself."
+  },
+  "authorization": {
+    "run_zero_update_integrated_trajectory_analysis": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
