@@ -1,0 +1,74 @@
+from __future__ import annotations
+
+import hashlib
+import json
+from pathlib import Path
+
+from examples.nanogpt.muon_matched_givens import MuonMatchedGivensLinear
+from examples.nanogpt.model import GPT, GPTConfig
+
+
+ROOT = Path(__file__).resolve().parents[2]
+CONFIG = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json"
+PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_plan.json"
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_config() -> dict[str, object]:
+    return json.loads(CONFIG.read_text())
+
+
+def test_preregistered_identity_and_thresholds() -> None:
+    config = load_config()
+    plan = json.loads(PLAN.read_text())
+    assert config["registered_plan_sha256"] == sha256(PLAN)
+    assert config["block_fht_mlp_cproj_muon_matched_givens_layers"] == [8, 9, 10, 11]
+    assert plan["decision_rule"]["pass_validation_ce_maximum"] == 3.6478
+    assert plan["decision_rule"]["threshold_changes_after_measurement"] is False
+    assert plan["authorization"]["automatic_rerun"] is False
+    assert plan["monitoring"]["milestone_callbacks"] is False
+    assert plan["monitoring"]["heartbeat_callbacks"] is False
+
+
+def test_scientific_parent_and_geometry_are_preserved() -> None:
+    config = load_config()
+    assert config["max_iters"] == 2373
+    assert config["planned_tpp"] == 5.0
+    assert config["block_fht_mlp_cfc_directed_product_schedule"] == [22] * 6
+    assert config["block_fht_mlp_cfc_directed_product_error_feedback_decay"] == 1.0
+    assert config["block_fht_mlp_cproj_muon_matched_givens_stages"] == 64
+    assert config["block_fht_mlp_cproj_muon_matched_givens_residual_stages"] == 24
+    assert config["block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay"] == 0.5
+    assert config["mfu_min_fraction"] >= 0.20
+    assert config["block_fht_native_extension_required"] is True
+
+
+def test_constructed_module_types_match_layer_mask() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=12,
+        n_head=2,
+        n_embd=8,
+        bias=False,
+        block_fht=True,
+        block_fht_targets=("mlp.c_proj",),
+        block_fht_mlp_cproj_muon_matched_givens=True,
+        block_fht_mlp_cproj_muon_matched_givens_layers=(8, 9, 10, 11),
+        block_fht_mlp_cproj_muon_matched_givens_stages=2,
+        block_fht_mlp_cproj_muon_matched_givens_residual_stages=1,
+        block_fht_mlp_cproj_muon_matched_givens_neighbors=4,
+        block_fht_mlp_cproj_muon_matched_givens_fast_fresh=True,
+    )
+    model = GPT(config)
+    assert all(
+        not isinstance(model.transformer.h[layer].mlp.c_proj, MuonMatchedGivensLinear)
+        for layer in range(8)
+    )
+    assert all(
+        isinstance(model.transformer.h[layer].mlp.c_proj, MuonMatchedGivensLinear)
+        for layer in range(8, 12)
+    )
