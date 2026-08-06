@@ -1,0 +1,83 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_run_metadata_v1",
+  "artifact_kind": "running_experiment_metadata",
+  "recorded_at": "2026-08-06T19:27:07+08:00",
+  "state_at_recording": "running",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp_20260806T112509Z_1265714",
+    "name": "pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1265808,
+    "pgid": 1265808,
+    "started_at": "2026-08-06T19:25:11+08:00",
+    "observed_iter": 40,
+    "max_iters": 2373
+  },
+  "identity": {
+    "execution_git_commit": "cdb06f17439ae6571ddd04120d15600708e0bccc",
+    "repository_origin": "git@github.com:verithia/latent-weight-lab.git",
+    "worktree_dirty_at_launch": false,
+    "config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "plan_sha256": "121c03e91dad080e93e995e677859e21688336823b6961d5d4ab629245f7e11a",
+    "mfu_certificate_sha256": "7c5b540664d74e2114ff958d1b766f14a68b28c2d9329f9ac2fc1183a10ae2db",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "provenance_sha256": "003b0da8ea00fa81c04f2b4b2cbb5a5956c7c359912dc077710d313b534e4a84"
+  },
+  "command": {
+    "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+    "archived_config": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp_20260806T112509Z_1265714.config.json",
+    "launcher_mode": "detached",
+    "registered_foreground_mode_deviation": "PRO6 has no tmux or equivalent persistent foreground supervisor; the same launcher/config/certificate was used in its native detached mode and the required independent terminal-only watchdog was attached immediately.",
+    "scientific_configuration_changed": false
+  },
+  "artifacts": {
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp_20260806T112509Z_1265714.log",
+    "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp_20260806T112509Z_1265714.json",
+    "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp_20260806T112509Z_1265714.json",
+    "archived_config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "initial_snapshot": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp/scientific/parameter_trajectory/step_000000.pt",
+    "initial_snapshot_sha256": "1ecd51165e54bf820d173226653afa79903f59aae1268831780b8e176a99b125",
+    "initial_snapshot_bytes": 395578497
+  },
+  "initial_validation": {
+    "training_ce": 10.9991,
+    "validation_ce": 10.9991,
+    "trajectory_schema_version": "nanogpt_parameter_trajectory_v2",
+    "all_parameters": true,
+    "named_parameter_count": 327,
+    "all_persistent_buffers": true,
+    "persistent_buffer_count": 24,
+    "required_buffer_inventory_exact": true,
+    "gpu_memory_mib": 48276,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 100,
+    "gpu_temperature_c": 57,
+    "errors_observed": []
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.fullstatecfcmetric5tpp",
+    "mode": "terminal_only",
+    "state_key": "pro6_124m_fullstate_cfc_metric_5tpp",
+    "interval_seconds": 60,
+    "stall_minutes": 20,
+    "heartbeats": false,
+    "progress_milestones": false,
+    "callbacks": [
+      "clean terminal completion",
+      "actionable error",
+      "stall"
+    ],
+    "callback_invokes_codex": true,
+    "callback_action": "verify terminal artifacts, exact buffer inventory, parent equivalence, and fixed functional replay; update durable notes and continue autonomously"
+  },
+  "authorization": {
+    "run_in_progress": true,
+    "interpret_metric_calibration": false,
+    "implement_candidate_structure": false,
+    "run_language_model_training_candidate": false,
+    "larger_rung": false
+  }
+}
