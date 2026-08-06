@@ -203,3 +203,85 @@ def fast_muon_matched_permutations(
         }
     )
     return permutations, diagnostics
+
+
+def fast_symmetric_shear_permutations(
+    weight: torch.Tensor,
+    direction: torch.Tensor,
+    *,
+    stages: int,
+    neighbors: int,
+    seed: int,
+    cache_dir: Path | None = None,
+) -> tuple[torch.Tensor, dict[str, Any]]:
+    """Select fresh pair matchings from symmetric tangent gradients.
+
+    For columns ``x_i,x_j`` and requested columns ``r_i,r_j``, a symmetric
+    shear has tangent inner product ``<x_i,r_j> + <x_j,r_i>``.  Normalize
+    its squared value by the exact pair tangent norm before compiling the
+    strongest edges with the same deterministic native coloring used by the
+    skew/Givens selector.
+    """
+    if (
+        weight.ndim != 2
+        or weight.shape != direction.shape
+        or weight.shape[1] <= 0
+        or weight.shape[1] % 2
+    ):
+        raise ValueError(
+            "weight and direction must be same-shaped matrices with even width"
+        )
+    width = int(weight.shape[1])
+    if stages <= 0 or neighbors < stages:
+        raise ValueError("require 0 < stages and neighbors >= stages")
+    if neighbors >= width:
+        raise ValueError("neighbors must be smaller than width")
+
+    if weight.is_cuda:
+        torch.cuda.synchronize(weight.device)
+    started = time.perf_counter()
+    source = weight.float()
+    requested = direction.float()
+    cross = source.T @ requested
+    column_energy = source.square().sum(dim=0)
+    coordinate_norm = (
+        column_energy[:, None] + column_energy[None, :]
+    ).clamp_min(1e-30)
+    scores = (cross + cross.T).square() / coordinate_norm
+    scores.fill_diagonal_(-1.0)
+    top_scores, top_indices = torch.topk(
+        scores, k=neighbors, dim=1
+    )
+    flattened_scores = top_scores.reshape(-1)
+    order = torch.argsort(flattened_scores, descending=True)
+    left = (
+        torch.arange(width, device=weight.device)
+        .repeat_interleave(neighbors)
+        .index_select(0, order)
+    )
+    right = top_indices.reshape(-1).index_select(0, order)
+    edges = torch.stack(
+        (torch.minimum(left, right), torch.maximum(left, right)),
+        dim=1,
+    ).to(device="cpu", dtype=torch.int32)
+    if weight.is_cuda:
+        torch.cuda.synchronize(weight.device)
+    prepared_seconds = time.perf_counter() - started
+    permutations, diagnostics = color_sorted_edges(
+        edges,
+        width=width,
+        stages=stages,
+        seed=seed,
+        cache_dir=cache_dir,
+    )
+    diagnostics.update(
+        {
+            "prepared_seconds": prepared_seconds,
+            "total_seconds": (
+                prepared_seconds + diagnostics["native_seconds"]
+            ),
+            "candidate_edges": int(edges.shape[0]),
+            "score_family": "symmetric_shear_normalized_squared_tangent",
+        }
+    )
+    return permutations, diagnostics

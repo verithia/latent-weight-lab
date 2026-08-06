@@ -181,6 +181,9 @@ class GPTConfig:
     block_fht_mlp_cproj_activation_energy_metric_minimum: float = 0.25
     block_fht_mlp_cproj_activation_energy_metric_maximum: float = 4.0
     block_fht_mlp_cproj_activation_energy_metric_epsilon: float = 1e-6
+    block_fht_mlp_cproj_output_symmetric_shear_stages: int = 0
+    block_fht_mlp_cproj_output_symmetric_shear_neighbors: int = 64
+    block_fht_mlp_cproj_output_symmetric_shear_max_condition_number: float = 1.1
     block_fht_mlp_cproj_hybrid_output: bool = False
     block_fht_mlp_cproj_hybrid_task_stages: int = 16
     block_fht_mlp_cproj_hybrid_directed_incoming: int = 8
@@ -1992,6 +1995,13 @@ class MLP(nn.Module):
             raise ValueError(
                 "hybrid c_proj output requires Muon-matched Givens"
             )
+        if (
+            config.block_fht_mlp_cproj_output_symmetric_shear_stages
+            and not muon_matched_cproj
+        ):
+            raise ValueError(
+                "symmetric-shear c_proj output requires Muon-matched Givens"
+            )
         if muon_matched_cproj and structured_proj_count:
             raise ValueError(
                 "Muon-matched Givens c_proj requires the plain "
@@ -2082,6 +2092,18 @@ class MLP(nn.Module):
                 activation_energy_metric_epsilon=float(
                     config
                     .block_fht_mlp_cproj_activation_energy_metric_epsilon
+                ),
+                output_symmetric_shear_stages=int(
+                    config
+                    .block_fht_mlp_cproj_output_symmetric_shear_stages
+                ),
+                output_symmetric_shear_neighbors=int(
+                    config
+                    .block_fht_mlp_cproj_output_symmetric_shear_neighbors
+                ),
+                output_symmetric_shear_max_condition_number=float(
+                    config
+                    .block_fht_mlp_cproj_output_symmetric_shear_max_condition_number
                 ),
             )
         elif grouped_proj_targets:

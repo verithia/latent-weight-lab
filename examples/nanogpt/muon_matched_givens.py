@@ -14,6 +14,7 @@ from examples.nanogpt.muon import zeropower_via_newtonschulz5
 from examples.nanogpt.fast_task_matching import (
     color_sorted_edges,
     fast_muon_matched_permutations,
+    fast_symmetric_shear_permutations,
 )
 
 
@@ -791,19 +792,133 @@ def _fit_weight_shear_recipe(
     requested_update: torch.Tensor,
     permutations: torch.Tensor,
 ) -> list[tuple[torch.Tensor, torch.Tensor]]:
+    _updated, recipe, _diagnostics = _fit_weight_shear_flow(
+        source,
+        requested_update,
+        permutations,
+    )
+    return recipe
+
+
+@torch.no_grad()
+def _fit_weight_shear_flow(
+    source: torch.Tensor,
+    requested_update: torch.Tensor,
+    permutations: torch.Tensor,
+    *,
+    max_condition_number: float | None = None,
+) -> tuple[
+    torch.Tensor,
+    list[tuple[torch.Tensor, torch.Tensor]],
+    dict[str, float | bool],
+]:
+    """Fit and apply a recursive symmetric-shear flow once.
+
+    The sufficient product-condition bound is
+    ``exp(2 * sum_stage max_pair |s|)``.  Coordinates in each stage are
+    uniformly projected onto the remaining log-condition budget while they
+    are fitted, so the returned materialized update and diagnostics describe
+    exactly the same bounded flow.
+    """
+    if source.ndim != 2 or requested_update.shape != source.shape:
+        raise ValueError("source and requested update must be same-shaped matrices")
+    if (
+        permutations.ndim != 2
+        or permutations.shape[1] != source.shape[1]
+    ):
+        raise ValueError("shear permutations have an incompatible shape")
+    if not bool(
+        torch.isfinite(source).all()
+        and torch.isfinite(requested_update).all()
+    ):
+        raise RuntimeError("symmetric-shear fit received non-finite tensors")
+    maximum_log_condition = math.inf
+    if max_condition_number is not None:
+        if (
+            not math.isfinite(float(max_condition_number))
+            or float(max_condition_number) <= 1.0
+        ):
+            raise ValueError("max condition number must be finite and > 1")
+        maximum_log_condition = 0.5 * math.log(
+            float(max_condition_number)
+        )
     current = source.float().clone()
     target = source.float() + requested_update.float()
     recipe: list[tuple[torch.Tensor, torch.Tensor]] = []
+    used_log_condition = torch.zeros((), device=source.device)
+    condition_projection_active = torch.zeros(
+        (), device=source.device, dtype=torch.bool
+    )
+    minimum_condition_scale = torch.ones((), device=source.device)
+    maximum_abs_coordinate = torch.zeros((), device=source.device)
+    all_coordinates_finite = torch.ones(
+        (), device=source.device, dtype=torch.bool
+    )
+    maximum_log_condition_tensor = torch.tensor(
+        maximum_log_condition,
+        device=source.device,
+        dtype=torch.float32,
+    )
     for permutation in permutations:
         pairs = permutation.to(source.device).reshape(-1, 2)
         coordinates = _shear_coordinates(
             current, target - current, pairs
         )
+        coordinate_finite = torch.isfinite(coordinates).all()
+        all_coordinates_finite.logical_and_(coordinate_finite)
+        safe_coordinates = torch.where(
+            torch.isfinite(coordinates), coordinates, torch.zeros_like(coordinates)
+        )
+        stage_maximum = safe_coordinates.abs().max().float()
+        remaining = torch.clamp_min(
+            maximum_log_condition_tensor - used_log_condition, 0.0
+        )
+        condition_scale = torch.clamp(
+            remaining / stage_maximum.clamp_min(1e-30), max=1.0
+        )
+        condition_scale = torch.where(
+            stage_maximum > 0.0,
+            condition_scale,
+            torch.ones_like(condition_scale),
+        )
+        coordinates = safe_coordinates * condition_scale
+        projected = condition_scale < 1.0
+        condition_projection_active.logical_or_(projected)
+        minimum_condition_scale = torch.minimum(
+            minimum_condition_scale, condition_scale
+        )
+        stage_maximum = stage_maximum * condition_scale
+        used_log_condition += stage_maximum
+        maximum_abs_coordinate = torch.maximum(
+            maximum_abs_coordinate,
+            coordinates.abs().max().float(),
+        )
         current = _apply_symmetric_shear_stage(
             current, pairs, coordinates
         )
         recipe.append((pairs, coordinates))
-    return recipe
+    residual = target - current
+    requested_energy = requested_update.float().square().sum().clamp_min(1e-30)
+    if not bool(all_coordinates_finite):
+        raise RuntimeError("symmetric-shear fit produced non-finite coordinates")
+    used_log_condition_value = float(used_log_condition)
+    diagnostics: dict[str, float | bool] = {
+        "condition_projection_active": bool(condition_projection_active),
+        "condition_projection_minimum_scale": float(minimum_condition_scale),
+        "used_log_singular_budget": used_log_condition_value,
+        "condition_number_upper_bound": math.exp(
+            2.0 * used_log_condition_value
+        ),
+        "minimum_singular_value_lower_bound": math.exp(
+            -used_log_condition_value
+        ),
+        "maximum_abs_coordinate": float(maximum_abs_coordinate),
+        "requested_update_recovery": float(
+            1.0 - residual.square().sum() / requested_energy
+        ),
+        "all_coordinates_finite": True,
+    }
+    return current, recipe, diagnostics
 
 
 @torch.no_grad()
@@ -1239,6 +1354,9 @@ class MuonMatchedGivensLinear(nn.Module):
         activation_energy_metric_minimum: float = 0.25,
         activation_energy_metric_maximum: float = 4.0,
         activation_energy_metric_epsilon: float = 1e-6,
+        output_symmetric_shear_stages: int = 0,
+        output_symmetric_shear_neighbors: int = 64,
+        output_symmetric_shear_max_condition_number: float = 1.1,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -1279,6 +1397,15 @@ class MuonMatchedGivensLinear(nn.Module):
         self.activation_energy_metric_epsilon = float(
             activation_energy_metric_epsilon
         )
+        self.output_symmetric_shear_stages = int(
+            output_symmetric_shear_stages
+        )
+        self.output_symmetric_shear_neighbors = int(
+            output_symmetric_shear_neighbors
+        )
+        self.output_symmetric_shear_max_condition_number = float(
+            output_symmetric_shear_max_condition_number
+        )
         if (
             self.in_features <= 0
             or self.in_features % 2
@@ -1291,7 +1418,11 @@ class MuonMatchedGivensLinear(nn.Module):
             )
         if (
             self.stages < 0
-            or (self.stages == 0 and self.output_stages == 0)
+            or (
+                self.stages == 0
+                and self.output_stages == 0
+                and self.output_symmetric_shear_stages == 0
+            )
             or self.residual_stages < 0
             or self.output_stages < 0
             or self.neighbors < max(
@@ -1358,6 +1489,27 @@ class MuonMatchedGivensLinear(nn.Module):
                 or self.activation_energy_metric_epsilon <= 0.0
             ):
                 raise ValueError("invalid activation-energy metric configuration")
+        if self.output_symmetric_shear_stages:
+            if (
+                not self.fast_fresh_matching
+                or self.output_stages
+                or self.hybrid_output
+                or self.activation_energy_metric
+                or self.out_features % 2
+                or self.output_symmetric_shear_stages < 0
+                or self.output_symmetric_shear_neighbors
+                < self.output_symmetric_shear_stages
+                or self.output_symmetric_shear_neighbors >= self.out_features
+                or not math.isfinite(
+                    self.output_symmetric_shear_max_condition_number
+                )
+                or self.output_symmetric_shear_max_condition_number <= 1.0
+            ):
+                raise ValueError(
+                    "invalid output symmetric-shear c_proj configuration"
+                )
+        elif self.output_symmetric_shear_stages < 0:
+            raise ValueError("output symmetric-shear stages must be nonnegative")
 
         weight = torch.empty(self.out_features, self.in_features)
         nn.init.normal_(weight, mean=0.0, std=float(weight_std))
@@ -1425,6 +1577,23 @@ class MuonMatchedGivensLinear(nn.Module):
                 ),
                 persistent=True,
             )
+        if self.output_symmetric_shear_stages:
+            shear_initial = torch.arange(self.out_features).repeat(
+                self.output_symmetric_shear_stages, 1
+            )
+            self.register_buffer(
+                "output_shear_selected_permutations",
+                shear_initial,
+                persistent=True,
+            )
+            self.register_buffer(
+                "output_shear_last_coordinates",
+                torch.zeros(
+                    self.output_symmetric_shear_stages,
+                    self.out_features // 2,
+                ),
+                persistent=True,
+            )
         self.register_buffer(
             "optimizer_step",
             torch.zeros((), dtype=torch.int64),
@@ -1466,6 +1635,8 @@ class MuonMatchedGivensLinear(nn.Module):
             (self.stages + self.residual_stages)
             * (self.in_features // 2)
             + self.output_stages * (self.out_features // 2)
+            + self.output_symmetric_shear_stages
+            * (self.out_features // 2)
             + (
                 self.hybrid_directed_incoming * self.out_features
                 if self.hybrid_output
@@ -2355,6 +2526,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 matching_summary = None
                 residual_matching_summary = None
                 output_matching_summary = None
+                output_shear_matching_summary = None
+                output_shear_fit_diagnostics = None
+                output_shear_coordinates = None
                 if refresh:
                     if module.stages == 0:
                         matching_summary = {
@@ -2708,6 +2882,104 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         module.output_selected_permutations,
                         module.output_selected_inverse_permutations,
                     ).transpose(0, 1).contiguous()
+                if module.output_symmetric_shear_stages:
+                    output_shear_residual_update = (
+                        corrected_update.float()
+                        - (rotated.float() - weight.float())
+                    )
+                    output_shear_source = rotated.transpose(
+                        0, 1
+                    ).contiguous()
+                    output_shear_direction = (
+                        output_shear_residual_update.transpose(
+                            0, 1
+                        ).contiguous()
+                    )
+                    if refresh:
+                        shear_permutations, shear_selection = (
+                            fast_symmetric_shear_permutations(
+                                output_shear_source,
+                                output_shear_direction,
+                                stages=(
+                                    module.output_symmetric_shear_stages
+                                ),
+                                neighbors=(
+                                    module.output_symmetric_shear_neighbors
+                                ),
+                                seed=(
+                                    module.matching_seed
+                                    + step_index
+                                    * module.matching_seed_step_stride
+                                    + module.output_matching_seed_offset
+                                ),
+                            )
+                        )
+                        module.output_shear_selected_permutations.copy_(
+                            shear_permutations.to(
+                                device=weight.device,
+                                dtype=torch.long,
+                            )
+                        )
+                        output_shear_matching_summary = {
+                            "selector": "fast_fresh_symmetric_output_pass",
+                            "candidate_edge_fraction": float(
+                                shear_selection[
+                                    "candidate_edge_fraction"
+                                ]
+                            ),
+                            "minimum_stage_candidate_edge_fraction": float(
+                                shear_selection[
+                                    "minimum_stage_candidate_edge_fraction"
+                                ]
+                            ),
+                            "prepared_seconds": float(
+                                shear_selection["prepared_seconds"]
+                            ),
+                            "native_seconds": float(
+                                shear_selection["native_seconds"]
+                            ),
+                            "total_seconds": float(
+                                shear_selection["total_seconds"]
+                            ),
+                            "native_output_validated": bool(
+                                shear_selection[
+                                    "native_output_validated"
+                                ]
+                            ),
+                            "native_library_sha256": str(
+                                shear_selection[
+                                    "native_library_sha256"
+                                ]
+                            ),
+                            "native_source_sha256": str(
+                                shear_selection["source_sha256"]
+                            ),
+                            "score_family": str(
+                                shear_selection["score_family"]
+                            ),
+                        }
+                    (
+                        output_shear_updated,
+                        output_shear_recipe,
+                        output_shear_fit_diagnostics,
+                    ) = _fit_weight_shear_flow(
+                        output_shear_source,
+                        output_shear_direction,
+                        module.output_shear_selected_permutations,
+                        max_condition_number=(
+                            module
+                            .output_symmetric_shear_max_condition_number
+                        ),
+                    )
+                    output_shear_coordinates = torch.stack(
+                        [
+                            coordinates
+                            for _pairs, coordinates in output_shear_recipe
+                        ]
+                    )
+                    rotated = output_shear_updated.transpose(
+                        0, 1
+                    ).contiguous()
                 if weight_decay != 0.0:
                     rotated.mul_(1.0 - lr * weight_decay)
                 update = rotated - weight
@@ -2787,6 +3059,15 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             dtype=module.output_last_angles.dtype
                         )
                     )
+                if output_shear_coordinates is not None:
+                    module.output_shear_last_coordinates.copy_(
+                        output_shear_coordinates.to(
+                            dtype=(
+                                module
+                                .output_shear_last_coordinates.dtype
+                            )
+                        )
+                    )
                 module.optimizer_step.add_(1)
                 angle_parts = [parent_angles.reshape(-1)]
                 if residual_angles is not None:
@@ -2826,6 +3107,33 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "parent_stages": module.stages,
                         "residual_stages": module.residual_stages,
                         "output_stages": module.output_stages,
+                        "output_symmetric_shear_stages": (
+                            module.output_symmetric_shear_stages
+                        ),
+                        "output_symmetric_shear_neighbors": (
+                            module.output_symmetric_shear_neighbors
+                        ),
+                        "output_symmetric_shear_max_condition_number": (
+                            module
+                            .output_symmetric_shear_max_condition_number
+                        ),
+                        "output_symmetric_shear_coordinate_rms": (
+                            None
+                            if output_shear_coordinates is None
+                            else float(
+                                output_shear_coordinates
+                                .square()
+                                .mean()
+                                .sqrt()
+                            )
+                        ),
+                        "output_symmetric_shear_coordinate_max_abs": (
+                            None
+                            if output_shear_coordinates is None
+                            else float(
+                                output_shear_coordinates.abs().max()
+                            )
+                        ),
                         "hybrid_output": module.hybrid_output,
                         "hybrid_directed_incoming": (
                             module.hybrid_directed_incoming
@@ -2903,6 +3211,12 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                             residual_matching_summary
                         ),
                         "output_matching": output_matching_summary,
+                        "output_symmetric_shear_matching": (
+                            output_shear_matching_summary
+                        ),
+                        "output_symmetric_shear_fit": (
+                            output_shear_fit_diagnostics
+                        ),
                     }
                 )
         self.last_step_diagnostics = diagnostics

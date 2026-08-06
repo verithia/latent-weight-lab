@@ -1350,6 +1350,21 @@ def parse_args() -> argparse.Namespace:
         default=1e-6,
     )
     parser.add_argument(
+        "--block-fht-mlp-cproj-output-symmetric-shear-stages",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-output-symmetric-shear-neighbors",
+        type=int,
+        default=64,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-cproj-output-symmetric-shear-max-condition-number",
+        type=float,
+        default=1.1,
+    )
+    parser.add_argument(
         "--block-fht-mlp-cproj-hybrid-output",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -1989,6 +2004,44 @@ def parse_args() -> argparse.Namespace:
                 raise ValueError(
                     "Muon-matched Givens c_proj switch-fraction must be in (0, 1)"
                 )
+        shear_stages = int(
+            namespace.block_fht_mlp_cproj_output_symmetric_shear_stages
+        )
+        if shear_stages:
+            shear_neighbors = int(
+                namespace.block_fht_mlp_cproj_output_symmetric_shear_neighbors
+            )
+            shear_max_condition = float(
+                namespace
+                .block_fht_mlp_cproj_output_symmetric_shear_max_condition_number
+            )
+            if (
+                shear_stages < 0
+                or shear_neighbors < shear_stages
+                or shear_neighbors >= namespace.n_embd
+                or not namespace
+                .block_fht_mlp_cproj_muon_matched_givens_fast_fresh
+                or namespace
+                .block_fht_mlp_cproj_muon_matched_givens_output_stages
+                or namespace.block_fht_mlp_cproj_hybrid_output
+                or namespace.block_fht_mlp_cproj_activation_energy_metric
+                or not math.isfinite(shear_max_condition)
+                or shear_max_condition <= 1.0
+            ):
+                raise ValueError(
+                    "output symmetric-shear c_proj requires fast fresh "
+                    "hidden-side matching, 0 < stages <= neighbors < "
+                    "n_embd, no output-Givens/hybrid/activation metric, "
+                    "and a finite maximum condition number > 1"
+                )
+        elif shear_stages < 0:
+            raise ValueError(
+                "output symmetric-shear c_proj stages must be nonnegative"
+            )
+    elif namespace.block_fht_mlp_cproj_output_symmetric_shear_stages:
+        raise ValueError(
+            "output symmetric-shear c_proj requires Muon-matched Givens"
+        )
     if namespace.block_fht_mlp_cproj_activation_energy_metric:
         if not namespace.block_fht_mlp_cproj_muon_matched_givens:
             raise ValueError(
@@ -2516,6 +2569,15 @@ def main() -> None:
         ),
         block_fht_mlp_cproj_activation_energy_metric_epsilon=(
             args.block_fht_mlp_cproj_activation_energy_metric_epsilon
+        ),
+        block_fht_mlp_cproj_output_symmetric_shear_stages=(
+            args.block_fht_mlp_cproj_output_symmetric_shear_stages
+        ),
+        block_fht_mlp_cproj_output_symmetric_shear_neighbors=(
+            args.block_fht_mlp_cproj_output_symmetric_shear_neighbors
+        ),
+        block_fht_mlp_cproj_output_symmetric_shear_max_condition_number=(
+            args.block_fht_mlp_cproj_output_symmetric_shear_max_condition_number
         ),
         block_fht_mlp_cproj_hybrid_output=(
             args.block_fht_mlp_cproj_hybrid_output
