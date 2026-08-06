@@ -395,7 +395,7 @@ def aggregate_results(
         retention = (
             holdout_task_advantage / fit_task_advantage
             if fit_task_advantage > 0.0
-            else float("-inf")
+            else None
         )
         residual_ratio = (
             by_variant[variant]["activation_residual_energy"]["holdout"]
@@ -441,11 +441,14 @@ def aggregate_results(
             "positive_fit_and_holdout_task_advantage": (
                 fit_task_advantage > 0.0 and holdout_task_advantage > 0.0
             ),
-            "task_advantage_retention": retention
-            >= float(
-                requirements[
-                    "holdout_to_fit_task_advantage_retention_minimum"
-                ]
+            "task_advantage_retention": (
+                retention is not None
+                and retention
+                >= float(
+                    requirements[
+                        "holdout_to_fit_task_advantage_retention_minimum"
+                    ]
+                )
             ),
             "output_error_scale_clamp_fraction": candidate_scale_clamp
             <= float(requirements["output_error_scale_clamp_fraction_maximum"]),
