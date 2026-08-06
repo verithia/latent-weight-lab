@@ -531,6 +531,7 @@ class LearnedLowRankCayleyMix(nn.Module):
             self.rank,
             generator=generator,
             dtype=torch.float32,
+            device="cpu",
         )
         right = F.normalize(right, dim=0)
         parameter_shape = (
@@ -538,10 +539,14 @@ class LearnedLowRankCayleyMix(nn.Module):
             if matrix_parameters
             else (self.features * self.rank,)
         )
-        self.left = nn.Parameter(torch.zeros(parameter_shape))
+        self.left = nn.Parameter(
+            torch.zeros(parameter_shape, device=right.device)
+        )
         self.right = nn.Parameter(right.reshape(parameter_shape))
 
-        identity = torch.eye(self.rank, dtype=torch.float32)
+        identity = torch.eye(
+            self.rank, dtype=torch.float32, device=right.device
+        )
         zero = torch.zeros_like(identity)
         symplectic = torch.cat(
             (

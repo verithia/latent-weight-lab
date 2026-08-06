@@ -47,6 +47,17 @@ def test_low_rank_cayley_remains_orthogonal_after_motion() -> None:
     )
 
 
+def test_low_rank_cayley_pins_seeded_initialization_to_cpu() -> None:
+    # Fast checkpoint loaders may construct the surrounding GPT under an
+    # ambient accelerator device.  The seeded generator is deliberately CPU,
+    # so all tensors made from it must stay on CPU until the mixed-device model
+    # is loaded and moved as a unit.
+    with torch.device("meta"):
+        mix = LearnedLowRankCayleyMix(features=8, rank=2, seed=31)
+    assert mix.left.device.type == "cpu"
+    assert mix.right.device.type == "cpu"
+
+
 def test_attention_cayley_preserves_initial_gpt_function() -> None:
     base = GPTConfig(
         block_size=8,
