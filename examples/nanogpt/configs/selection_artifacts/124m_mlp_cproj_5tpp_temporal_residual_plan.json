@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_temporal_residual_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_temporal_residual_decomposition_plan",
+  "registered_at": "2026-08-07T01:10:00+08:00",
+  "status": "registered_before_execution",
+  "scientific_question": "After the production-sized hidden64+24+output32 chart is fitted to each exact dense-Muon c_proj update, is the remaining same-gauge residual compact along matrix/channel axes or causally predictable from earlier phase residuals?",
+  "theory": {
+    "target_and_gauge": "layers 0-7 dense c_proj weights and exact Muon actions from one accepted repaired-attention plus procedural-c_fc 5TPP trajectory; no cross-run or cross-layer transplantation",
+    "paper_link": "The Mapping Networks weight-manifold claim and LWT imply layer-local low-dimensional coordinates, but do not imply a fixed affine tangent. This test asks whether the missing local action is compatible with a compact phase-local chart or modulation before changing g(z).",
+    "residual_equation": "R_l,p = DeltaW_dense_l,p - DeltaW_chart_l,p, where DeltaW_chart is the same hidden64+24+output32 Frobenius chart and identical weight-decay ordering used in the rejected static-metric calibration.",
+    "temporal_equation": "For each layer, eig(X X^T) with X=[vec(R_l,0);...;vec(R_l,3)] measures noncausal temporal dimension; projection of R_l,p onto span(R_l,<p) separately measures causal predictability.",
+    "matrix_equation": "eig(R R^T) measures singular energy; row/column energy participation and top-quartile mass test output- and hidden-channel modulation hypotheses.",
+    "future_scoring": "The within-phase chord W_l,p+1-W_l,p and every later residual are inaccessible to chart construction and used only for scoring."
+  },
+  "causal_basis": [
+    "The corrected static metric calibration rejected activation-only, error-only, and diagonal activation-error selectors; the strongest mean CE gain was 3.45e-5, only 6.91 percent of its frozen gate.",
+    "The earlier 0.5TPP stepwise history found local update smoothness but less than 50 percent future-only chord capture through 12 updates, suggesting tangent transport rather than one fixed direction.",
+    "Bounded error feedback helped c_proj while unbounded carry failed across scale, so missing update action is causal but a dense persistent residual is not an acceptable compressed solution.",
+    "Before proposing phase-local LWT, modulation, low rank, or compact state, the residual itself must select the corresponding branch under frozen thresholds."
+  ],
+  "identity": {
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "static_metric_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_functional_metric_calibration_v2_result.json",
+    "static_metric_result_sha256": "5764cd3def449c25916b2260c68116c00e8497dd9f9f57a929bc1b1333df1c77",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260806,
+      "weight_decay_application": "identical production ordering"
+    },
+    "measurements": [
+      "chart fixed-scale exact-update recovery and residual energy fraction",
+      "residual singular top-1/4/16/64 energy, stable rank, and participation rank",
+      "output and hidden channel top-quartile energy and participation rank",
+      "per-layer temporal PC1/2/3 energy across four phases",
+      "previous-residual positive-line recovery and causal all-prior span recovery",
+      "future phase-chord positive-line recovery by exact update, chart update, and chart residual"
+    ],
+    "controls": {
+      "singular_isotropic_reference": "top64 fraction is approximately 64/768=0.083 for equal singular energy",
+      "channel_isotropic_reference": "top-quartile mass is 0.25 for equal channel energy",
+      "temporal_orthogonal_reference": "two-PC energy is 0.5 for four equal-energy orthogonal phase residuals",
+      "chart_budget": 147456,
+      "learned_dense_basis": false,
+      "lora_or_dense_residual_adapter": false
+    }
+  },
+  "decision_rule": {
+    "thresholds": {
+      "temporal_pc2_energy_fraction_minimum": 0.8,
+      "causal_previous_line_recovery_minimum": 0.1,
+      "causal_prior_span_recovery_minimum": 0.25,
+      "future_chord_residual_line_recovery_minimum": 0.05,
+      "singular_top64_energy_fraction_minimum": 0.5,
+      "channel_top_quarter_energy_fraction_minimum": 0.5
+    },
+    "interpretation": {
+      "low_dimensional_but_phase_transported": "temporal PC2 passes but causal prior-span recovery fails; authorize only phase-local transport-signal design",
+      "causally_compressible_temporal_residual": "causal prior-span recovery passes; authorize only compact residual-state design",
+      "matrix_low_rank": "top-64 singular energy passes; authorize only low-rank structural theory",
+      "channel_concentrated": "output or hidden top-quartile energy passes; authorize only the corresponding structured modulation theory",
+      "none": "do not invent a compact chart; report that the measured residual is diffuse under these axes"
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_temporal_residual_v1"
+  },
+  "authorization": {
+    "run_zero_update_temporal_decomposition": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
