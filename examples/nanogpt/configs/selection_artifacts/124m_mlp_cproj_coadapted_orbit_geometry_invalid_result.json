@@ -1,0 +1,78 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_coadapted_orbit_geometry_invalid_result_v1",
+  "artifact_kind": "invalid_cross_run_gauge_audit",
+  "recorded_at": "2026-08-07T04:30:00+00:00",
+  "classification": "INVALID_CROSS_RUN_GAUGE",
+  "scientific_result": null,
+  "invalidated_claim": "The co-adapted and dense-parent c_proj trajectories do not share a bitwise initialization gauge, so their raw displacement cosine and any interpretation that assumes a common parameter origin are invalid.",
+  "identity": {
+    "execution_git_commit": "8ffca8e4d1f49df4d4329c7ce2fa056c515b0a5d",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_coadapted_orbit_geometry_plan.json",
+    "plan_sha256": "f6486539224fcab7ce0ed86ed2e67351d1642f961909226726a6b92d58ac413c",
+    "analyzer_sha256": "28183ae24b25425306d213e22524f1e767dcd1864c31f64315aad7d1b3a1ca40",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "trajectory_run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "parent_acquisition_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "parent_run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "remote_output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_cproj_coadapted_orbit_geometry"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "wall_seconds": 18,
+    "analyzer_elapsed_seconds": 9.055928707122803,
+    "exit_code": 0,
+    "parameter_updates": 0,
+    "focused_and_regression_tests": "19 passed in 0.81s"
+  },
+  "observed_failure": {
+    "same_initialization_max_absolute_error": 0.031117865815758705,
+    "required_maximum_absolute_error": 0.0,
+    "bitwise_equal_layers_8_11": false,
+    "mean_raw_coadapted_dense_displacement_cosine": 0.11955178758177731,
+    "conclusion": "The registered same-origin prerequisite failed. The raw cross-run displacement comparison is not interpretable."
+  },
+  "root_cause": {
+    "shared_model_seed": 1337,
+    "dense_parent_module": "torch.nn.Linear",
+    "coadapted_module": "MuonMatchedGivensLinear",
+    "mechanism": "The two module classes initialize c_proj through different constructor paths. GPT.apply(_init_weights) subsequently reinitializes nn.Linear but does not reinitialize the MuonMatchedGivensLinear weight buffer. A shared global model seed therefore does not imply a shared c_proj tensor or a shared downstream RNG stream.",
+    "source_evidence": {
+      "dense_branch": "examples/nanogpt/model.py:2191",
+      "procedural_branch": "examples/nanogpt/model.py:2039",
+      "global_initialization": "examples/nanogpt/model.py:4030",
+      "initializer_type_scope": "examples/nanogpt/model.py:4035"
+    }
+  },
+  "non_authorizing_within_run_observations": {
+    "accepted_path_minimum_scaled_right_orbit_recovery": 0.999999583401473,
+    "accepted_path_maximum_normalized_output_gram_drift": 0.00008491607807529608,
+    "mean_consecutive_support_retention": 0.029689005064625396,
+    "mean_support_retention_enrichment_over_random": 1.036868160375516,
+    "dense_parent_late_minus_early_orbit_recovery": 0.015086221021365698,
+    "dense_parent_late_to_early_gram_drift_ratio": 0.9318768593280282,
+    "interpretation": "These gauge-invariant, within-run quantities are recorded for audit only. They require a separately preregistered gauge-invariant analysis before they can drive a decision."
+  },
+  "raw_artifacts": {
+    "result_json_sha256": "16ae1a9187b4f8d307d39edcef686d89d1261a24ac9e4012910db17a15b18f8a",
+    "rows_csv_sha256": "98efbf733eddf6ec3e27b71474f6bae6a31ad9b5e5782bf99d4077806bce8da8",
+    "row_count": 268,
+    "all_aggregate_values_finite": true
+  },
+  "supersession": {
+    "registered_v1_common_gauge_assumption": false,
+    "registered_v1_scientific_authorization": false,
+    "replacement": "Preregister a gauge-invariant v2 that removes raw cross-run displacement and same-origin claims, preserves the exact within-run orbit invariant, and compares only invariant phase deformation statistics within the dense parent."
+  },
+  "authorization": {
+    "interpret_raw_cross_run_alignment": false,
+    "reinterpret_v1_thresholds": false,
+    "run_gauge_invariant_zero_update_v2_after_registration": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
