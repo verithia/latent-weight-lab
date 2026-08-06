@@ -7,6 +7,7 @@ import argparse
 import contextlib
 import datetime as dt
 import json
+import shlex
 import sys
 import time
 from pathlib import Path
@@ -507,6 +508,7 @@ def main() -> None:
             "entrypoint": (
                 "examples.nanogpt.analyze_mlp_cproj_bounded_integrated_trajectory"
             ),
+            "command": " ".join(shlex.quote(value) for value in sys.argv),
             "parameter_updates": 0,
             "direct_foreground_polling": True,
             "watchdog": False,
@@ -518,6 +520,9 @@ def main() -> None:
             "plan_sha256": file_sha256(args.plan),
             "acquisition_result_sha256": file_sha256(args.acquisition_result),
             "run_identity_sha256": identity,
+            "dataset_manifest_sha256": plan["identity"][
+                "dataset_manifest_sha256"
+            ],
         },
         "metrics": metrics,
         "evaluations": evaluation_rows,
