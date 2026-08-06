@@ -22,6 +22,7 @@ def config(**overrides: object) -> GPTConfig:
         "block_fht_mlp_cproj_muon_matched_givens_stages": 2,
         "block_fht_mlp_cproj_muon_matched_givens_residual_stages": 1,
         "block_fht_mlp_cproj_muon_matched_givens_neighbors": 4,
+        "block_fht_mlp_cproj_muon_matched_givens_fast_fresh": True,
     }
     values.update(overrides)
     return GPTConfig(**values)
