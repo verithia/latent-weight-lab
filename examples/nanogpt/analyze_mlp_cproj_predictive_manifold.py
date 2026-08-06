@@ -55,6 +55,13 @@ PLAN_SCHEMA = "mai_124m_mlp_cproj_predictive_manifold_plan_v1"
 RESULT_SCHEMA = "mai_124m_mlp_cproj_predictive_manifold_result_v1"
 LATE_LAYERS = tuple(range(8, 12))
 PRIMARY_RANK = 8
+SUPPORTING_SOURCES = (
+    "examples/nanogpt/analyze_mlp_activation_update_alignment.py",
+    "examples/nanogpt/analyze_mlp_cproj_coadapted_orbit_geometry.py",
+    "examples/nanogpt/model.py",
+    "examples/nanogpt/muon_matched_givens.py",
+    "examples/nanogpt/train.py",
+)
 
 
 def validate_plan(plan: dict[str, Any]) -> None:
@@ -298,6 +305,12 @@ def main() -> None:
     for path, expected in pinned.items():
         if file_sha256(path) != expected:
             raise ValueError(f"pinned artifact SHA-256 mismatch: {path}")
+    if set(identity["supporting_source_sha256"]) != set(SUPPORTING_SOURCES):
+        raise ValueError("supporting-source inventory changed")
+    for relative in SUPPORTING_SOURCES:
+        path = REPO_ROOT / relative
+        if file_sha256(path) != identity["supporting_source_sha256"][relative]:
+            raise ValueError(f"supporting-source SHA-256 mismatch: {relative}")
     verification = json.loads(args.trajectory_verification.read_text())
     if verification.get("classification") != "ACCEPTED_COADAPTED_LATE_CPROJ_FULL_STATE_TRAJECTORY":
         raise ValueError("trajectory verification is not accepted")
