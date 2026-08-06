@@ -1,0 +1,177 @@
+{
+  "acceptance": {
+    "accepted_validation_ce_by_step": {
+      "1188": 3.851,
+      "1782": 3.6998,
+      "2373": 3.636904239654541,
+      "594": 4.2239
+    },
+    "curve_absolute_tolerance_ce": 0.005,
+    "required": [
+      "exact-config MFU >=0.20 with update-0 optimizer-probe I/O charged and native BlockFHT loaded",
+      "clean terminal 2373/2373 and complete exact-resume checkpoint",
+      "exactly ten registered probes with four c_proj tensors and complete finite state inventory",
+      "all nine phase-aligned post-step weights equal accepted same-step full-state tensors bitwise",
+      "the four fixed validation checkpoints reproduce the accepted curve within 0.005 CE"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "acquisition": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp",
+      "/mnt/ssd-data/orj/MappingNetworks"
+    ],
+    "expected_duration_minutes": [
+      80,
+      100
+    ],
+    "gpu": 0,
+    "host": "PRO6",
+    "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp/scientific"
+  },
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "one_optimizer_state_acquisition_after_exact_config_mfu": true,
+    "zero_update_state_transport_analysis_after_acceptance": true
+  },
+  "causal_basis": [
+    "The co-adapted endpoint path is nearly one-dimensional but its static polynomial endpoint costs about 0.044 CE.",
+    "Literal paper modulation is null; output-additive modulation recovers about 53.5% but leaves +0.02035 CE.",
+    "The accepted path already uses fresh task-selected Givens and error feedback decay 0.5, but prior full-state snapshots omit optimizer momentum and compression residual.",
+    "Therefore the only justified next intervention is a nonintervening acquisition of the omitted adaptive state."
+  ],
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp.json",
+    "candidate_config_sha256": "ee1b27b84dc26abf0d245fbb92490a6c96f6649cd37d51dbf7576277b2fd765a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "one clean pushed commit containing instrumentation, maker, verifier, tests, config, and plan",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "reference_snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp/scientific/parameter_trajectory",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp.json",
+    "source_config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "source_verification": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_full_state_trajectory_verification_result.json",
+    "source_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "verifier": "examples/nanogpt/verify_late_cproj_optimizer_state_trajectory.py",
+    "verifier_sha256": "21abae506c364bdd5d0d3ce8cd42034fec7083df99964428d8d571af0e48d613"
+  },
+  "monitoring": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_prompt": "Verify terminal state, all ten optimizer probes, fixed-curve reproduction, phase-aligned snapshot equality, and hashes; seal the acquisition and execute the preregistered zero-update state-transport analysis. Do not merely acknowledge.",
+    "callbacks": [
+      "100% clean completion",
+      "error or actionable stall"
+    ],
+    "heartbeats": false,
+    "milestones": false,
+    "policy": "one idempotent terminal-only watchdog"
+  },
+  "nonintervention_gate": {
+    "fixed_curve_absolute_tolerance_ce": 0.005,
+    "post_step_reference_comparison": "bitwise float32 equality",
+    "scientific_config_changes": false,
+    "terminal_step": 2373,
+    "terminal_validation_ce": 3.6411821842193604
+  },
+  "optimizer_state_contract": {
+    "error_feedback": true,
+    "error_feedback_decay": 0.5,
+    "layers": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "optimizer_kind": "MuonMatchedGivens",
+    "post_step_reference_steps": [
+      99,
+      297,
+      594,
+      891,
+      1188,
+      1485,
+      1782,
+      2079,
+      2373
+    ],
+    "pre_step_probe_steps": [
+      0,
+      98,
+      296,
+      593,
+      890,
+      1187,
+      1484,
+      1781,
+      2078,
+      2372
+    ],
+    "required_tensor_fields": [
+      "weight_before_step",
+      "gradient_after_clip",
+      "momentum_buffer_before_step",
+      "compression_residual_before_step",
+      "weight_after_step",
+      "combined_momentum_update",
+      "applied_direction_per_lr",
+      "momentum_buffer_after_step",
+      "compression_residual_after_step"
+    ],
+    "scientific_full_state_snapshots_duplicated": false,
+    "storage_dtype": "float32",
+    "target": "mlp.c_proj",
+    "trajectory_schema_version": "nanogpt_optimizer_probe_v2"
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "callback": false,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_optimizerstate_trajectory_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "mode": "direct foreground polling",
+    "native_extension_required": true,
+    "required_probe_step_in_preflight": 0,
+    "watchdog": false
+  },
+  "preregistered_zero_update_analysis": {
+    "corrected_target": "requested_update + 0.5*compression_residual_before",
+    "decision_rule": "Only a causal state component with held-out functional recovery >=0.80 may authorize a compressed state-conditioned mapper; otherwise reject this mechanism and revisit the map.",
+    "realized_update": "weight_after - weight_before",
+    "requested_update": "lr*(-polar(combined_momentum)*polar_scale - weight_decay*weight_before)",
+    "tests": [
+      "raw and post-GELU functional energy/cosine of requested, feedback, corrected, realized, and unrepresented directions",
+      "output-additive projection of each component under the fixed terminal activation metric",
+      "whether compression state predicts the next phase's function-critical exact-minus-scheduled residual",
+      "whether transport is stable across discovery and held-out phases rather than fitted at the endpoint"
+    ],
+    "unrepresented_residual": "corrected_target - realized_update"
+  },
+  "recorded_at": "2026-08-07",
+  "schema_version": "mai_124m_repaired_attention_cfc_late_cproj_optimizer_state_acquisition_plan_v1",
+  "scientific_question": "Does the accepted c_proj path's function-critical residual live in the persistent Muon compression state and its task-conditioned transport into the structured chart?",
+  "status": "registered_before_preflight_or_execution"
+}

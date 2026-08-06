@@ -73,6 +73,14 @@ def parse_snapshot_elapsed_seconds(text: str) -> list[float]:
     ]
 
 
+def parse_optimizer_probe_steps(text: str) -> list[int]:
+    """Return optimizer probes whose serialization completed in the timed loop."""
+    return [
+        int(value)
+        for value in re.findall(r"optimizer probe step=(\d+) path=", text)
+    ]
+
+
 def parse_training_loss_values(text: str) -> list[float]:
     """Read only the explicit iteration/evaluation loss fields."""
     token = r"(?:nan|[-+]?inf|[-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)"
@@ -462,6 +470,7 @@ def main() -> None:
         steady = rows[-args.timed_updates:]
         base_iter_ms = sum(row["iter_ms"] for row in steady) / len(steady)
         snapshot_seconds = parse_snapshot_elapsed_seconds(process.stdout)
+        optimizer_probe_steps = parse_optimizer_probe_steps(process.stdout)
         if args.include_diagnostic_io:
             expected_rows = effective_warmup_updates + args.timed_updates
             if len(rows) < expected_rows:
@@ -469,10 +478,26 @@ def main() -> None:
                     "I/O-inclusive preflight emitted only "
                     f"{len(rows)} perf rows; expected {expected_rows}"
                 )
-            if not snapshot_seconds:
+            trajectory_io_requested = int(
+                source.get("trajectory_snapshot_interval", 0) or 0
+            ) > 0
+            optimizer_probe_io_requested = bool(
+                source.get("optimizer_probe_steps")
+            )
+            if trajectory_io_requested and not snapshot_seconds:
                 raise RuntimeError(
                     "I/O-inclusive preflight emitted no parameter-snapshot "
                     "timings"
+                )
+            if optimizer_probe_io_requested and not optimizer_probe_steps:
+                raise RuntimeError(
+                    "I/O-inclusive preflight emitted no optimizer-probe "
+                    "completion"
+                )
+            if not trajectory_io_requested and not optimizer_probe_io_requested:
+                raise RuntimeError(
+                    "I/O-inclusive preflight was requested for a config with "
+                    "no registered diagnostic I/O"
                 )
             measured = rows[-expected_rows:]
             # Evaluation is not training work and is excluded. Optimizer-probe
@@ -521,6 +546,8 @@ def main() -> None:
                         "optimizer_probe_io_included_in_iter_ms": (
                             args.include_diagnostic_io
                         ),
+                        "optimizer_probe_count": len(optimizer_probe_steps),
+                        "optimizer_probe_steps": optimizer_probe_steps,
                     },
                     "timing_breakdown_ms": {
                         key: sum(row.get(key, 0.0) for row in steady) / len(steady)

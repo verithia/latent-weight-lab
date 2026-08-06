@@ -10,6 +10,7 @@ from examples.nanogpt.mfu_preflight import (
     make_preflight_config,
     parse_feedback_cap_events,
     parse_snapshot_elapsed_seconds,
+    parse_optimizer_probe_steps,
     parse_training_loss_values,
     task_frame_preflight_metadata,
     verify_native_block_fht_extension,
@@ -157,6 +158,16 @@ class MfuPreflightTest(unittest.TestCase):
             ]
         )
         self.assertEqual(parse_snapshot_elapsed_seconds(text), [1.25, 0.75])
+
+    def test_optimizer_probe_completion_parser(self) -> None:
+        text = "\n".join(
+            [
+                "optimizer probe step=0 path=/tmp/probe/step_000000.pt",
+                "iter 0: loss 7.0, time 2.0ms",
+                "optimizer probe step=98 path=/tmp/probe/step_000098.pt",
+            ]
+        )
+        self.assertEqual(parse_optimizer_probe_steps(text), [0, 98])
 
     def test_training_loss_parser_exposes_nonfinite_values(self) -> None:
         text = "\n".join(
