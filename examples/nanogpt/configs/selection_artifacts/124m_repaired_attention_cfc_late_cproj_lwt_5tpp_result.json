@@ -1,0 +1,166 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_late_cproj_lwt_5tpp_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_late_cproj_lwt_5tpp_result",
+  "classification": "PASS_SAME_GAUGE_LATE_CPROJ_LWT_LOCALIZATION_NOT_FULL_CPROJ_REPLACEMENT",
+  "recorded_at": "2026-08-06T15:30:40+08:00",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225",
+    "name": "pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-06T14:00:25+08:00",
+    "finished_at": "2026-08-06T15:24:06+08:00",
+    "wall_seconds": 5021,
+    "exit_code": 0,
+    "status": "clean",
+    "process_alive_after_completion": false
+  },
+  "identity": {
+    "execution_git_commit": "7b6cc4986581c37fca05d712f1c7b067f26a44f7",
+    "implementation_commit": "10b64e939e23e3e05d1590b4c379d78ac2caa08c",
+    "configuration_provenance_commit": "b8acd30fd1b16b251367b1e0a8940420463731a8",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json",
+    "config_sha256": "684f24b4aa6482aef98ee776d9e71f101ff9a56d9f72f6a783f9997ea91d717c",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_plan.json",
+    "plan_sha256": "b0c4fea15a310f339bdad4634e3657616918a896d9143c26d63bb21b62bfc296",
+    "run_metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_run_metadata.json",
+    "run_metadata_sha256": "3ab49a859d0ae5564f4cbd2bba01bb7124b0fa8d7e43f9639fa4b279715a0eeb",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_mfu_result.json",
+    "mfu_result_sha256": "98a5c0f5451450d316e56760b83a34e3cad7d260edc2d5230cce649b1fae1b62",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "fixed_eval_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "checkpoint_internal_config_sha256": "383a706b287e8d1620bfcb8f2b031f145eda22ee7221f4cff87b47a1205127ff",
+    "provenance_sha256": "b4b23f7a2e3eeedf7c47a94261bd767a00ca0311d61f96a5f92e81398421dc50",
+    "archived_config_sha256": "684f24b4aa6482aef98ee776d9e71f101ff9a56d9f72f6a783f9997ea91d717c",
+    "archived_mfu_certificate_sha256": "a92b0e956360d9838cee279c7f6ae2540fb04e249b98a40f304da6308287762b"
+  },
+  "architecture": {
+    "repaired_attention_layers": 12,
+    "procedural_cfc_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "dense_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "procedural_cproj_layers": [8, 9, 10, 11],
+    "procedural_cproj": "hidden64 plus residual24 Muon-matched Givens with bounded error-feedback decay 0.5",
+    "joint_training_from_initialization": true,
+    "cross_run_transplants": false,
+    "learned_dense_basis": false,
+    "additional_inference_operation": false
+  },
+  "fixed_evaluation": {
+    "steps": [594, 1188, 1782, 2373],
+    "candidate_train_ce": [4.2328, 3.8645, 3.715, 3.6533],
+    "candidate_validation_ce": [4.2239, 3.851, 3.6998, 3.636904239654541],
+    "all_layer_procedural_full_mlp_validation_ce": [4.2666, 3.8819, 3.7252, 3.660243034362793],
+    "accepted_cfc_only_validation_ce": [4.2028, 3.8395, 3.6888, 3.625838041305542],
+    "repaired_attention_validation_ce": [4.2151, 3.8411, 3.6907, 3.6278],
+    "dense_validation_ce": [4.1739, 3.7622, 3.6038, 3.5401],
+    "cproj_only_validation_ce": [4.2704, 3.877, 3.7206, 3.6562013626098633],
+    "candidate_minus_all_layer_procedural_ce": [-0.0427, -0.0309, -0.0254, -0.023338794708252],
+    "candidate_minus_accepted_cfc_only_ce": [0.0211, 0.0115, 0.011, 0.011066198348999],
+    "candidate_minus_repaired_attention_ce": [0.0088, 0.0099, 0.0091, 0.009104239654541],
+    "candidate_minus_dense_ce": [0.05, 0.0888, 0.096, 0.096804239654541],
+    "candidate_minus_cproj_only_ce": [-0.0465, -0.026, -0.0208, -0.019297122955322],
+    "terminal_validation_ce_exact": 3.636904239654541
+  },
+  "decision_rule": {
+    "primary_terminal_validation_ce_maximum": 3.6478,
+    "primary_gate_passed": true,
+    "primary_gate_margin_ce": -0.010895760345459,
+    "curve_guard_maximum_regression_ce": 0.005,
+    "maximum_observed_candidate_minus_control_ce": -0.023338794708252,
+    "curve_guard_passed": true,
+    "all_fixed_points_better_than_all_layer_control": true,
+    "threshold_changed_after_measurement": false
+  },
+  "causal_accounting": {
+    "all_layer_cproj_penalty_over_cfc_only_ce": 0.034404993057251,
+    "late_band_cproj_penalty_over_cfc_only_ce": 0.011066198348999,
+    "penalty_recovered_by_leaving_layers_0_through_7_dense_ce": 0.023338794708252,
+    "fraction_of_all_layer_cproj_penalty_recovered": 0.6783548733585124,
+    "interpretation": "The all-layer c_proj defect is layer heterogeneous. Jointly training only late layers 8-11 with the procedural c_proj removes about 67.8% of the all-layer procedural penalty, but this architecture leaves two thirds of c_proj layers dense and therefore is not a full c_proj replacement or a solution to the early/middle-layer manifold mismatch."
+  },
+  "performance_and_parameter_accounting": {
+    "exact_config_mfu_fraction": 0.23223464218608555,
+    "tokens_per_second_preflight": 128833.9875,
+    "update_ms_preflight": 2034.75875,
+    "model_tflops_preflight": 96.2203623599232,
+    "peak_mib_preflight": 35592.34,
+    "model_registered_parameters": 61103328,
+    "model_reported_trainable_parameters": 61103328,
+    "generated_weight_elements": 66060288,
+    "procedural_coordinates_per_update": 5689824,
+    "realized_pytorch_trainable_parameter_reduction": 0,
+    "additional_materialized_inference_parameters": 0,
+    "additional_materialized_inference_flops": 0,
+    "accounting_note": "The current PyTorch implementation materializes target weights and does not realize an end-to-end registered-parameter reduction. The result tests structured optimizer-coordinate allocation and loss, not compressed inference storage or FLOPs."
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp/scientific/ckpt.pt",
+    "sha256": "43f8c13eb828671bb8a550c5ff82b1311627dc6209d97d14642f3f6e54c491de",
+    "bytes": 1130677620,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "95ab30a7ba7a32dd755b709642c403a4193cfa479cfc0aa47e518c75a2419ac5",
+    "metadata_bytes": 23257,
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "best_validation_ce_exact": 3.636904239654541,
+    "readable": true,
+    "model_tensor_count": 392,
+    "model_float_tensor_count": 348,
+    "all_model_tensors_finite": true,
+    "optimizer_state_present": true,
+    "optimizer_tensor_count": 985,
+    "all_optimizer_tensors_finite": true,
+    "rng_state_present": true
+  },
+  "artifacts": {
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.log",
+      "sha256": "11c2433661e2fbba9680141fac942678d3c5e582a47a19eacae3fb02ec8539b7",
+      "bytes": 30576
+    },
+    "status": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.json",
+      "sha256": "4e0db7e4ec977177badc219b5066d0a4312aa5c34e45d042bc65167454c71d3e",
+      "bytes": 888
+    },
+    "provenance": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfc_latecproj_lwt_5tpp_20260806T060023Z_1034225.json",
+      "sha256": "b4b23f7a2e3eeedf7c47a94261bd767a00ca0311d61f96a5f92e81398421dc50",
+      "bytes": 2208
+    },
+    "archived_config_bytes": 14292,
+    "archived_mfu_certificate_bytes": 15390
+  },
+  "terminal_health": {
+    "gpu_memory_mib": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 0,
+    "gpu_power_w": 22.62,
+    "gpu_temperature_c": 34,
+    "workspace_bytes": 228828121690,
+    "workspace_gib": 213.11279357410967,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1680663789568,
+    "filesystem_available_gib": 1565.2401275634766
+  },
+  "watchdog": {
+    "service": "com.mappingnetworks.pro6.latecprojlwt5tpp",
+    "terminal_only": true,
+    "terminal_callback_delivered": true,
+    "terminal_signature": ["finished", 0, "2026-08-06T15:24:06+08:00"],
+    "duplicate_terminal_callbacks_observed": 0,
+    "service_running_after_verification": false,
+    "service_last_exit_code": 0
+  },
+  "decision": {
+    "late_band_lwt_partial_replacement_accepted": true,
+    "full_cproj_replacement_accepted": false,
+    "layer_heterogeneity_supported": true,
+    "automatic_expansion_authorized_by_original_plan": true,
+    "automatic_expansion_frozen_by_later_theory_contract": true,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Do not launch the preregistered layers-4-11 expansion yet. Under the 2026-08-06 theory-to-design contract, first perform same-gauge, multi-phase functional-metric analysis of the remaining early/middle layers 0-7, decompose their uncaptured task action, and require held-out and short-rollout evidence before any new training arm or MFU gate."
+  }
+}
