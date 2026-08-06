@@ -1,0 +1,147 @@
+{
+  "schema_version": "mai_124m_repaired_attention_full_mlp_volume_cproj_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_full_mlp_volume_cproj_5tpp_preregistration",
+  "recorded_at": "2026-08-06",
+  "status": "registered_before_implementation_or_execution",
+  "source_commit_before_implementation": "834eb346ad0639c053abcea0357d3c71d01f128b",
+  "scientific_question": "Does one task-conditioned global log-volume coordinate per c_proj layer close the late full-MLP gap left by the trace-free hidden Givens chart, without adding a learned gain, basis, adapter, inference transform, or inference FLOP?",
+  "causal_evidence": {
+    "symmetric_cproj_rejection": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_symmetric_cproj_5tpp_result.json",
+      "sha256": "c0d28885617aad9f2ab01b4f4ceaaefb0058b78b81b09a13051fb98912efe742",
+      "terminal_validation_ce": 3.674018621444702,
+      "classification": "REJECT_SYMMETRIC_CPROJ_LATE_TRACE_FREE_SPECTRAL_COLLAPSE"
+    },
+    "accepted_cfc_only_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+      "sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+      "terminal_validation_ce": 3.625838041305542
+    },
+    "rejected_joint_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+      "sha256": "83f6adb7b0cd0be61aef70bed68f1fa9b2d0684fe17a65547906dd04596de7d2",
+      "validation_ce": [4.2666, 3.8819, 3.7252, 3.660243034362793]
+    },
+    "terminal_spectral_audit": {
+      "dense_parent_minus_joint_mean_log_singular_shift": 0.8115279227495193,
+      "dense_parent_minus_joint_centered_log_singular_rmse": 0.06000332875798146,
+      "dense_parent_minus_symmetric_mean_log_singular_shift": 0.8129906555016836,
+      "dense_parent_minus_symmetric_centered_log_singular_rmse": 0.12459357765813668,
+      "fact": "The determinant-one symmetric shear left the dominant mean-log-singular deficit unchanged while doubling centered spectral-shape error and inflating middle-layer temporal residuals."
+    }
+  },
+  "single_factor_change": {
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json",
+    "parent_config_sha256": "62fc2f9f19f8d3b1c891faef7ace6a3fff4992ceac67f97e82043fbf3246f363",
+    "retain": [
+      "repaired full-attention Cayley parent",
+      "accepted c_fc directed-product schedule [22,22,22,22,22,22], radius 1, and decay-1 error feedback",
+      "c_proj hidden64 plus residual24 fresh Muon-matched Givens chart",
+      "c_proj decay-0.5 temporal error feedback",
+      "learning rate, Muon settings, warmup, cosine schedule, data order, evaluation windows, seeds, and token budget"
+    ],
+    "add": "After the hidden64+residual24 c_proj chart and before ordinary folded weight decay, fit exactly one signed log coordinate whose positive exponential uniformly scales the current materialized c_proj weight toward the remaining corrected Muon target.",
+    "remove": "No symmetric output-shear stages are present.",
+    "not_reopened": [
+      "symmetric-shear stages, neighbors, condition bound, or learning rate",
+      "activation/task-gradient selectors",
+      "learned per-channel/global gain, learned basis, LoRA, HyperConnection, or persistent adapter",
+      "c_fc schedule, optimizer, or token horizon"
+    ]
+  },
+  "operator": {
+    "stage_order": [
+      "dense Muon requested c_proj update plus decay-0.5 temporal residual",
+      "64 fresh hidden-side Givens stages",
+      "24 fresh residual hidden-side Givens stages",
+      "one global log-volume least-squares coordinate",
+      "ordinary folded materialized-weight decay and refreshed compression residual"
+    ],
+    "fit": "Let X be the post-Givens materialized weight and T=X+R the remaining corrected target, where R is corrected_update-(X-W_old). Compute q=max(<T,X>/||X||_F^2, epsilon), a=clamp(log(q), -log(1.01), +log(1.01)), and X_new=exp(a)X.",
+    "cap_max_abs_log_coordinate": 0.009950330853168092,
+    "epsilon": 1e-30,
+    "geometry": "The coordinate adds a equally to every log singular value, changes rectangular pseudo-determinant log-volume by rank*a, and leaves the condition number exactly unchanged before common scalar weight decay.",
+    "fold": "The scale is applied directly to the materialized c_proj weight during the optimizer step; no scale parameter or transform remains in the forward graph.",
+    "distinction_from_closed_gain_family": "This is not an AdamW-trained persistent gain. It is a single ephemeral optimizer coordinate recomputed from the current corrected Muon target each update and folded immediately into the weight.",
+    "additional_persistent_trainable_coordinates": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0
+  },
+  "coordinate_accounting": {
+    "cproj_materialized_elements_per_layer": 2359296,
+    "hidden64_plus_residual24_coordinates_per_layer": 135168,
+    "global_log_volume_coordinates_per_layer": 1,
+    "candidate_total_cproj_coordinates_per_layer": 135169,
+    "candidate_total_cproj_coordinates_all_12_layers": 1622028,
+    "materialized_elements_over_coordinates_per_cproj": 17.45441632326939,
+    "cproj_update_coordinate_reduction_fraction": 0.9427079094780816,
+    "accepted_cfc_coordinates_all_12_layers": 4866048,
+    "candidate_full_mlp_coordinates_all_12_layers": 6488076,
+    "additional_persistent_trainable_coordinates": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0,
+    "accounting_scope": "procedural optimizer-update coordinates only; materialized tensors remain present"
+  },
+  "implementation_gate": {
+    "required_tests": [
+      "exact least-squares scalar recovery and deterministic signed clamp",
+      "uniform singular-value scaling, registered log-volume shift, and unchanged condition number",
+      "all-finite behavior and zero-coordinate no-op",
+      "default-off behavior and invalid configuration rejection",
+      "module/config coordinate accounting",
+      "one-step optimizer compression-residual correctness",
+      "bitwise exact two-step resume including the last log-volume coordinate, optimizer state, momentum, and temporal residual",
+      "exact scientific config parsing and c_fc/c_proj/attention structural binding"
+    ],
+    "all_existing_focused_tests_must_remain_green": true
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "protocol": "Foreground exact-scientific-config run with one warmup plus eight timed real training updates; direct polling and no watchdog because the gate must finish within five minutes.",
+    "minimum_mfu_fraction": 0.2,
+    "require_native_blockfht_extension": true,
+    "require_all_losses_and_log_volume_coordinates_finite": true,
+    "require_nonzero_log_volume_coordinate_in_at_least_one_layer": true,
+    "require_max_abs_log_coordinate_at_most": 0.009950330853168092,
+    "fail_action": "If MFU is below 20% or correctness/finite gates fail, do not launch. Optimize the exact registered implementation without changing the operator, cap, data, or schedule, then repeat the foreground gate."
+  },
+  "scientific_run": {
+    "model": "124M",
+    "token_budget_tpp": 5.0,
+    "updates": 2373,
+    "expected_wall_time_hours": [1.0, 2.0],
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "primary_terminal_validation_ce_maximum": 3.635838041305542,
+    "secondary_terminal_validation_ce_maximum": 3.6478,
+    "accepted_cfc_only_parent_validation_ce": 3.625838041305542,
+    "rejected_joint_validation_ce": 3.660243034362793,
+    "dense_validation_ce": 3.5401,
+    "curve_requirement": "No fixed checkpoint may be worse than the rejected joint full-MLP control by more than 0.005 CE; report every exact difference regardless of pass/fail.",
+    "pass_action": "If terminal CE is <=3.635838041305542, the full curve satisfies the requirement, and all finite/cap gates hold, accept global log-volume as the missing c_proj coordinate and quantify fixed-model token-compute plus execution overhead.",
+    "secondary_only_action": "If primary fails but terminal CE is <=3.6478 and the curve gate passes, classify as partial trace recovery only; do not promote or tune without terminal volume/residual evidence.",
+    "fail_action": "If terminal CE exceeds 3.6478 or the curve/stability gate fails, reject the scalar volume mode and do not sweep its cap, grouping, or learning rate.",
+    "threshold_changed_after_measurement": false,
+    "monitoring": {
+      "watchdog_required": true,
+      "healthy_progress_callbacks": false,
+      "healthy_heartbeat_callbacks": false,
+      "callback_on_clean_completion": true,
+      "callback_on_actionable_error": true,
+      "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+      "callback_mention": "@Codex",
+      "terminal_delivery_once": true,
+      "callback_action_prompt": "verify terminal or error state and exact artifacts against the active project note; seal loss, log-volume/residual diagnostics, GPU health, provenance, and checkpoint hashes; update durable state; then continue the causal MLP plan autonomously"
+    }
+  },
+  "authorization": {
+    "implement_exact_registered_operator": true,
+    "run_focused_tests": true,
+    "run_one_exact_config_mfu_gate": true,
+    "run_one_scientific_5tpp_candidate_only_after_gate": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false,
+    "post_hoc_hyperparameter_sweep": false
+  }
+}
