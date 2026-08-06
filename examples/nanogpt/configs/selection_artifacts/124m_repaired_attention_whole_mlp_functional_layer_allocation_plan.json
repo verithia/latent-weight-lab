@@ -1,0 +1,114 @@
+{
+  "schema_version": "mai_124m_repaired_attention_whole_mlp_functional_layer_allocation_plan_v1",
+  "artifact_kind": "124m_repaired_attention_whole_mlp_functional_layer_allocation_zero_update_plan",
+  "registered_at": "2026-08-06",
+  "status": "registered_before_implementation_or_execution",
+  "scientific_question": "When the donor MLP's complete c_fc-to-GELU-to-c_proj function is kept intact, can at most four donor MLP layers improve the joint full-procedural-MLP checkpoint on two untouched validation windows?",
+  "evidence": {
+    "isolated_cproj_transplant": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cproj_dense_layer_allocation_result.json",
+      "sha256": "87fa437c59c21e109d869eddd68c573d174de6b1b640855e5b8f520d7b5a6c95",
+      "conclusion": "Every isolated dense c_proj transplant was catastrophic, showing that the donor tensor cannot be separated from its learned hidden-coordinate gauge."
+    },
+    "joint_full_mlp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_full_mlp_5tpp_result.json",
+      "validation_ce": 3.660243034362793
+    },
+    "cfc_only_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+      "validation_ce": 3.625838041305542
+    },
+    "causal_distinction": "This oracle preserves each donor MLP's internal hidden-coordinate gauge and tests residual-stream compatibility. It does not transplant c_proj in isolation and does not train a mixed architecture."
+  },
+  "identity": {
+    "joint_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/scientific/ckpt.pt",
+    "joint_checkpoint_sha256": "6b3c9cadc169b9dd234e111428dc22b4390be79561f98d178e8f105747612a24",
+    "joint_checkpoint_bytes": 1245132956,
+    "donor_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedattn_cfconly_decay1_5tpp/scientific/ckpt.pt",
+    "donor_checkpoint_sha256": "3d4b893cd59d384a404daf439742e03614dc6d7d0992353e0099429261a53a02",
+    "donor_checkpoint_bytes": 1073450016,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "base_model": "joint full-procedural-MLP checkpoint",
+    "donor_function": "Replace transformer.h.{layer}.mlp as a complete module for the evaluation arm, so c_fc, GELU, c_proj, gains, biases, procedural coordinates, and any registered MLP buffers remain in the donor's learned internal gauge.",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "primary_window": {
+      "split": "validation",
+      "seed": 20260907,
+      "batch_size": 16,
+      "block_size": 1024,
+      "batches": 32,
+      "participates_in_layer_ranking": true
+    },
+    "confirmation_window": {
+      "split": "validation",
+      "seed": 20260908,
+      "batch_size": 16,
+      "block_size": 1024,
+      "batches": 32,
+      "participates_in_layer_ranking": false
+    },
+    "variants": {
+      "joint_control": "Evaluate the unchanged joint checkpoint.",
+      "donor_control": "Evaluate the unchanged donor checkpoint on the exact same batches.",
+      "all12_functional_patch": "Evaluate the joint transformer with all twelve complete donor MLP modules temporarily installed.",
+      "single_layer_functional_patches": "Temporarily install one complete donor MLP module and rank primary-window CE gain, breaking ties by smaller layer index.",
+      "primary_ranked_cumulative": "Evaluate cumulative top-k sets for k in [1,2,3,4,6,8,10,12] on both windows. Confirmation tokens never change the ordering."
+    },
+    "restore_contract": "After every arm, restore the exact original joint MLP module object at every selected layer. Require original module identities, parameter identities, and parameter values to remain unchanged; require donor module fingerprints to remain unchanged.",
+    "cumulative_sizes": [1, 2, 3, 4, 6, 8, 10, 12],
+    "maximum_selected_donor_layers": 4,
+    "prohibited": [
+      "ranking on confirmation tokens",
+      "isolated c_proj tensor transplant",
+      "weight interpolation or donor alignment",
+      "mixing donor and joint components inside one MLP",
+      "learned basis or LoRA adapter",
+      "training update",
+      "automatic mixed-layer training run"
+    ]
+  },
+  "decision_rule": {
+    "control_requirements": {
+      "donor_primary_ce_gain_over_joint_minimum": 0.01,
+      "donor_confirmation_ce_gain_over_joint_minimum": 0.01,
+      "all12_primary_ce_gain_over_joint_minimum": 0.005,
+      "all12_confirmation_ce_gain_over_joint_minimum": 0.005
+    },
+    "candidate_requirements": {
+      "maximum_donor_layers": 4,
+      "primary_gain_fraction_of_all12_minimum": 0.75,
+      "confirmation_gain_fraction_of_all12_minimum": 0.75,
+      "primary_ce_gain_over_joint_minimum": 0.005,
+      "confirmation_ce_gain_over_joint_minimum": 0.005,
+      "confirmation_ce_above_all12_maximum": 0.005,
+      "all_losses_and_tensors_finite": true,
+      "exact_module_restore_after_each_arm": true,
+      "donor_fingerprint_unchanged": true
+    },
+    "pass": "Select the smallest cumulative k in ascending order that clears every control and candidate requirement. A pass authorizes only a separately preregistered jointly trained mixed-MLP implementation plan, correctness tests, and exact-config MFU preflight.",
+    "fail": "Reject post-hoc whole-MLP functional layer allocation as nonportable. Do not tune seeds, thresholds, donor/joint interpolation, or subsets after measurement.",
+    "automatic_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "larger_rung_authorized": false,
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable to a zero-update terminal counterfactual",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/whole_mlp_functional_layer_allocation_v1"
+  },
+  "authorization": {
+    "implement_and_run_zero_update_analysis": true,
+    "implement_mixed_layer_training_path_after_pass": false,
+    "run_exact_config_mfu_after_pass": false,
+    "run_language_model_training": false
+  }
+}
