@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_functional_metric_acquisition_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_parent_functional_metric_acquisition_exact_config_mfu_result",
+  "recorded_at": "2026-08-06",
+  "classification": "SAME_GAUGE_5TPP_FUNCTIONAL_METRIC_ACQUISITION_MFU_PASSED",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_plan.json",
+    "sha256": "c9322647f5aad1523fb34291f05bb784c187e8ef75f5cab4704f0a39f7dc88a3"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp.json",
+    "sha256": "904863f60d88bd6fc86e096cefe058eb262f97cb77fe7097abe79cba022c2c4c"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "72a0ba67f42852495c1550f9866a94bab487f7ed",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp.json --output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/performance_preflight.json --log-output /home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/performance_preflight.log --min-fraction 0.2 --warmup-updates 1 --timed-updates 8 --include-diagnostic-io",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "train_exit_code": 0
+  },
+  "correctness": {
+    "remote_focused_tests": "19 passed",
+    "phase_boundaries": [0, 594, 1188, 1782, 2373],
+    "optimizer_probe_steps": [0, 594, 1188, 1782],
+    "optimizer_probe_layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "all_parameter_snapshots": true,
+    "terminal_snapshot_forced_by_max_iters": true,
+    "scientific_architecture_and_optimizer_unchanged": true,
+    "native_extension_required": true,
+    "native_extension_loaded": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "certificate": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_functional_metric_probe_5tpp/performance_preflight.json",
+    "sha256": "3c8ae19d636d2bcf62718a901b0645d02a7a9d2755a4eb5e00cf47ac9d19141b",
+    "bytes": 15024,
+    "preflight_log_sha256": "667359107b649ad4d96f03adf1e6dde98085d9a4b838c4816be80527de5dc819",
+    "preflight_log_bytes": 13330
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_peak_tflops": 414.60058061478486,
+    "base_timed_iter_ms": 1938.145,
+    "diagnostic_io_adjusted_iter_ms": 2014.7988888888888,
+    "tokens_per_second": 130109.2637313126,
+    "model_tflops": 97.17280933037729,
+    "mfu_fraction": 0.2343769253441129,
+    "minimum_required_mfu_fraction": 0.2,
+    "headroom_percentage_points": 3.43769253441129,
+    "peak_mib": 35534.52,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "diagnostic_io_included": true,
+    "preflight_snapshot_count": 2,
+    "preflight_snapshot_seconds": 0.47,
+    "optimizer_probe_io_included_in_iter_ms": true,
+    "estimated_raw_training_minutes": 79.68528583333334,
+    "timing_breakdown_ms": {
+      "prepare": 3.435,
+      "forward_backward": 1654.1,
+      "flush": 4.265,
+      "gradient": 1.935,
+      "optimizer": 272.5625,
+      "data": 0.6925,
+      "other": 1.1575
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "resources_after_gate": {
+    "gpu_memory_mib": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 0,
+    "gpu_power_w": 23.12,
+    "gpu_temperature_c": 36,
+    "workspace_bytes": 228828434257,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1680663420928
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "one_2373_update_diagnostic_acquisition_authorized": true,
+    "zero_update_metric_calibration_after_acquisition_acceptance_authorized": true,
+    "candidate_structure_implementation_authorized": false,
+    "candidate_language_model_training_authorized": false,
+    "automatic_rerun_authorized": false,
+    "required_monitoring": "one idempotent terminal-only watchdog; completion, actionable error, or stall callback only"
+  }
+}
