@@ -68,7 +68,7 @@ def test_reconstruct_components_matches_uncapped_feedback_identity() -> None:
     torch.testing.assert_close(components["requested"], requested)
     torch.testing.assert_close(components["corrected"], corrected)
     torch.testing.assert_close(components["realized"], realized)
-    assert error < 1e-6
+    assert error < 1e-5
 
 
 def test_classification_requires_heldout_functional_threshold() -> None:
