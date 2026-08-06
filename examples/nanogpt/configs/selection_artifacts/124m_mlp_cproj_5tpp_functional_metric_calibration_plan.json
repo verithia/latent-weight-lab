@@ -1,0 +1,134 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_functional_metric_calibration_plan",
+  "registered_at": "2026-08-06T18:52:33+08:00",
+  "status": "registered_before_execution",
+  "scientific_question": "On the accepted parent-equivalent 5TPP trajectory, do moving activation-only, output-error-only, or diagonal activation-error metrics select task-useful output-side c_proj coordinates more reliably than raw Frobenius geometry across layers 0-7 and all four phases?",
+  "causal_basis": [
+    "The accepted c_fc-only parent leaves c_proj dense; the v2 acquisition records same-gauge dense c_proj Muon actions in layers 0-7 without changing the optimizer trajectory.",
+    "The all-layer procedural c_proj penalty is concentrated in early and middle layers, while keeping layers 0-7 dense recovers 67.8 percent of that penalty.",
+    "The earlier 0.5TPP diagonal-KFAC selector was static, short-horizon evidence and failed its held-out gate; it cannot answer whether the same metric predicts mature 5TPP actions.",
+    "The next admissible step is calibration against exact finite CE on the newly acquired 5TPP states, not another structural chart guess."
+  ],
+  "identity": {
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_result.json",
+    "acquisition_result_sha256": "105f814e994b9f7f39935c4170cef51353d1683099db4db5aec370cd4c2f6d6a",
+    "run_identity_sha256": "cf3a842f4b46db736ba55e1e4692ebfe75c463e29089749b3bf07b3cb36725aa",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "fit_window": {
+      "split": "validation",
+      "seed": 20260806,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048,
+      "participates_in_selection": true
+    },
+    "holdout_window": {
+      "split": "validation",
+      "seed": 20260807,
+      "batch_size": 2,
+      "block_size": 256,
+      "batches": 4,
+      "rows_per_layer": 2048,
+      "participates_in_selection": false
+    },
+    "shared_chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260806,
+      "coordinate_count_per_layer": 147456,
+      "feedback": "zero for this one-step prospective diagnostic",
+      "weight_decay_application": "identical production ordering in every arm"
+    },
+    "output_error_scale": {
+      "source": "RMS next-token CE derivative with respect to each c_proj output channel on the same-state fit window",
+      "normalization": "unit RMS across output channels before fixed clipping",
+      "bounds": [0.25, 4.0],
+      "holdout_usage": "scoring only"
+    },
+    "arms": {
+      "frobenius_output32": "raw parameter-space pair selection and raw Frobenius angle fit",
+      "activation_selector_output32": "pair selection after left multiplication by current post-GELU fit activations, then raw Frobenius angle fit",
+      "error_selector_output32": "pair selection after bounded current fit-window output-error scaling, then raw Frobenius angle fit",
+      "diagonal_kfac_selector_output32": "pair selection in the current bilinear activation by output-error diagonal metric, then raw Frobenius angle fit"
+    },
+    "smallest_pass_order": [
+      "activation_selector_output32",
+      "error_selector_output32",
+      "diagonal_kfac_selector_output32"
+    ],
+    "prohibited": [
+      "future phase state in selection",
+      "holdout data in selection",
+      "learned dense basis",
+      "LoRA or dense residual adapter",
+      "extra chart coordinates",
+      "persistent metric state",
+      "language-model parameter update"
+    ]
+  },
+  "evaluation": {
+    "primary": "paired exact finite-step complete-model CE after simultaneous layers-0-7 updates on fit and untouched holdout windows",
+    "secondary": [
+      "fit and holdout task-gradient predicted CE decrease",
+      "fit and holdout post-GELU residual-output energy",
+      "weight residual and applied-update energy",
+      "fit-to-holdout task-advantage retention",
+      "output-error scale distribution and clamp fraction",
+      "layer and phase decomposition of every metric"
+    ],
+    "future_phase_chords": "not used by this selector; the accepted snapshots remain reserved for a separate temporal residual decomposition"
+  },
+  "decision_rule": {
+    "common_requirements": [
+      "all states, activations, errors, updates, losses, and metrics are finite",
+      "all accepted acquisition identities and artifact hashes match exactly",
+      "every arm uses exactly 147456 coordinates per selected layer",
+      "holdout data is scoring only",
+      "all arms use raw Frobenius angles and identical decay ordering"
+    ],
+    "candidate_requirements": {
+      "mean_finite_step_ce_gain_over_frobenius_minimum": 0.0005,
+      "finite_step_wins_minimum": 6,
+      "finite_step_comparisons": 8,
+      "holdout_wins_minimum": 3,
+      "holdout_comparisons": 4,
+      "minimum_holdout_finite_step_ce_gain": 0.0,
+      "holdout_predicted_ce_decrease_not_worse_than_frobenius": true,
+      "holdout_activation_residual_energy_ratio_maximum": 1.25,
+      "candidate_update_energy_ratio_maximum": 1.25,
+      "fit_and_holdout_task_advantage_positive": true,
+      "holdout_to_fit_task_advantage_retention_minimum": 0.25,
+      "output_error_scale_clamp_fraction_maximum": 0.25
+    },
+    "pass": "A static metric signal may advance only to a separately preregistered temporal residual decomposition and short no-update shadow rollout; it does not authorize production implementation, MFU preflight, or training.",
+    "fail": "Close static diagonal activation/error coordinate selection at both 0.5TPP and 5TPP and focus the next analysis on bounded temporal residual structure by layer and phase.",
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis executes zero optimizer or language-model training updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_functional_metric_calibration_v1"
+  },
+  "authorization": {
+    "run_zero_update_metric_calibration": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}

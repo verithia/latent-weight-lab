@@ -7,6 +7,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_cproj_diagonal_kfac_selector import (
     aggregate_results,
+    apply_plan_authorization,
     fit_metric_selected_raw_angle_pass,
     normalized_output_error_scale,
     validate_plan,
@@ -67,6 +68,38 @@ def test_plan_validation_fails_closed() -> None:
     validate_plan(valid_plan())
     changed = copy.deepcopy(valid_plan())
     changed["analysis"]["output_error_scale"]["bounds"] = [0.1, 10.0]
+    with pytest.raises(ValueError):
+        validate_plan(changed)
+
+
+def test_5tpp_calibration_plan_is_fail_closed_and_never_authorizes_training() -> None:
+    plan = valid_plan()
+    plan["schema_version"] = (
+        "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_plan_v1"
+    )
+    plan["authorization"] = {
+        "run_zero_update_metric_calibration": True,
+        "implement_candidate_structure": False,
+        "run_language_model_training": False,
+    }
+    plan["analysis"]["layers"] = list(range(8))
+    plan["analysis"]["phases"] = [
+        [0, 594],
+        [594, 1188],
+        [1188, 1782],
+        [1782, 2373],
+    ]
+    plan["analysis"]["fit_window"]["seed"] = 20260806
+    plan["analysis"]["holdout_window"]["seed"] = 20260807
+    plan["analysis"]["shared_chart"]["matching_seed"] = 20260806
+    validate_plan(plan)
+    aggregate = {"selected_variant": "activation_selector_output32"}
+    authorized = apply_plan_authorization(aggregate, plan["schema_version"])
+    assert authorized["authorization"]["short_shadow_rollout_authorized"] is True
+    assert authorized["authorization"]["production_implementation_authorized"] is False
+    assert authorized["authorization"]["language_model_training_authorized"] is False
+    changed = copy.deepcopy(plan)
+    changed["authorization"]["implement_candidate_structure"] = True
     with pytest.raises(ValueError):
         validate_plan(changed)
 

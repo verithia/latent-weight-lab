@@ -60,6 +60,12 @@ from examples.nanogpt.muon_matched_givens import (
 
 SCHEMA_VERSION = "mai_124m_mlp_cproj_diagonal_kfac_selector_result_v1"
 EXPECTED_PLAN_SCHEMA = "mai_124m_mlp_cproj_diagonal_kfac_selector_plan_v1"
+CALIBRATION_PLAN_SCHEMA = (
+    "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_plan_v1"
+)
+CALIBRATION_RESULT_SCHEMA = (
+    "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_result_v1"
+)
 VARIANTS = (
     "frobenius_output32",
     "activation_selector_output32",
@@ -72,14 +78,34 @@ WINDOWS = ("fit", "holdout")
 
 def validate_plan(plan: dict[str, Any]) -> None:
     analysis = plan.get("analysis", {})
+    schema = plan.get("schema_version")
+    if schema == EXPECTED_PLAN_SCHEMA:
+        layers = [0, 3, 6, 9, 11]
+        phases = [[0, 60], [60, 120], [120, 180], [180, 238]]
+        fit_seed = 20260804
+        holdout_seed = 20260805
+        matching_seed = 20260804
+    elif schema == CALIBRATION_PLAN_SCHEMA:
+        layers = list(range(8))
+        phases = [
+            [0, 594],
+            [594, 1188],
+            [1188, 1782],
+            [1782, 2373],
+        ]
+        fit_seed = 20260806
+        holdout_seed = 20260807
+        matching_seed = 20260806
+    else:
+        raise ValueError("unknown diagonal-KFAC/calibration plan schema")
     expected = {
-        "schema_version": EXPECTED_PLAN_SCHEMA,
+        "schema_version": schema,
         "parameter_updates": 0,
-        "layers": [0, 3, 6, 9, 11],
-        "phases": [[0, 60], [60, 120], [120, 180], [180, 238]],
+        "layers": layers,
+        "phases": phases,
         "fit_window": {
             "split": "validation",
-            "seed": 20260804,
+            "seed": fit_seed,
             "batch_size": 2,
             "block_size": 256,
             "batches": 4,
@@ -88,7 +114,7 @@ def validate_plan(plan: dict[str, Any]) -> None:
         },
         "holdout_window": {
             "split": "validation",
-            "seed": 20260805,
+            "seed": holdout_seed,
             "batch_size": 2,
             "block_size": 256,
             "batches": 4,
@@ -100,7 +126,7 @@ def validate_plan(plan: dict[str, Any]) -> None:
             "hidden_residual_stages": 24,
             "output_stages": 32,
             "neighbors": 64,
-            "matching_seed": 20260804,
+            "matching_seed": matching_seed,
             "coordinate_count_per_layer": 147456,
             "feedback": "zero for this one-step prospective diagnostic",
             "weight_decay_application": (
@@ -123,12 +149,39 @@ def validate_plan(plan: dict[str, Any]) -> None:
     }
     if observed != expected:
         raise ValueError("diagonal-KFAC plan does not match the v1 contract")
-    if plan.get("authorization", {}).get(
-        "implement_and_run_zero_update_analysis"
-    ) is not True:
-        raise ValueError("zero-update diagonal-KFAC analysis is not authorized")
-    if plan.get("authorization", {}).get("run_language_model_training") is not False:
+    authorization = plan.get("authorization", {})
+    if schema == EXPECTED_PLAN_SCHEMA:
+        if authorization.get("implement_and_run_zero_update_analysis") is not True:
+            raise ValueError("zero-update diagonal-KFAC analysis is not authorized")
+    else:
+        if authorization.get("run_zero_update_metric_calibration") is not True:
+            raise ValueError("zero-update 5TPP metric calibration is not authorized")
+        if authorization.get("implement_candidate_structure") is not False:
+            raise ValueError("calibration must not authorize candidate implementation")
+    if authorization.get("run_language_model_training") is not False:
         raise ValueError("the plan must not authorize language-model training")
+
+
+def apply_plan_authorization(
+    aggregate: dict[str, Any], plan_schema: str
+) -> dict[str, Any]:
+    """Keep the 5TPP audit diagnostic even if its metric clears the old gate."""
+    if plan_schema != CALIBRATION_PLAN_SCHEMA:
+        return aggregate
+    passed = aggregate.get("selected_variant") is not None
+    aggregate["classification"] = (
+        "5TPP_STATIC_METRIC_SIGNAL_PRESENT_NEEDS_TEMPORAL_VALIDATION"
+        if passed
+        else "REJECT_5TPP_STATIC_FUNCTIONAL_METRIC_SELECTOR"
+    )
+    aggregate["authorization"] = {
+        "temporal_residual_decomposition_authorized": True,
+        "short_shadow_rollout_authorized": passed,
+        "production_implementation_authorized": False,
+        "exact_config_mfu_preflight_authorized": False,
+        "language_model_training_authorized": False,
+    }
+    return aggregate
 
 
 class CProjGeometryCollector:
@@ -729,8 +782,15 @@ def main() -> None:
     aggregate = aggregate_results(
         rows, finite_rows, scale_rows, plan["decision_rule"]
     )
+    aggregate = apply_plan_authorization(
+        aggregate, str(plan.get("schema_version"))
+    )
     result = {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": (
+            CALIBRATION_RESULT_SCHEMA
+            if plan.get("schema_version") == CALIBRATION_PLAN_SCHEMA
+            else SCHEMA_VERSION
+        ),
         "recorded_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "classification": aggregate["classification"],
         "execution": {

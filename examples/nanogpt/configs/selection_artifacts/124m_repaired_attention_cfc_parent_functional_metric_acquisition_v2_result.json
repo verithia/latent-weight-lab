@@ -1,0 +1,182 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_parent_nonintervening_functional_metric_acquisition_result",
+  "recorded_at": "2026-08-06T18:52:33+08:00",
+  "classification": "ACCEPTED_PARENT_EQUIVALENT_NONINTERVENING_ACQUISITION",
+  "run": {
+    "id": "pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442",
+    "name": "pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1186544,
+    "pgid": 1186544,
+    "started_at": "2026-08-06T17:27:08+08:00",
+    "finished_at": "2026-08-06T18:47:11+08:00",
+    "wall_seconds": 4803,
+    "exit_code": 0,
+    "terminal_state": "finished",
+    "terminal_classification": "clean"
+  },
+  "identity": {
+    "execution_git_commit": "9a9af46b3db276edebab37585c1bbe420b789e93",
+    "run_identity_sha256": "cf3a842f4b46db736ba55e1e4692ebfe75c463e29089749b3bf07b3cb36725aa",
+    "config_path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp.json",
+    "config_sha256": "d9395addcac32933c3c62a7d10aad7e26caa356b4957901482373be1150498fe",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_plan.json",
+    "plan_sha256": "e01cd9bbc56787846c95c9a6948eeafc278365d9398fb47d2f3817896946d4e1",
+    "mfu_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_mfu_result.json",
+    "mfu_result_sha256": "ba02722fbe6e271e27f462fbba51e845b602675cdd8b9377fdea758ca34a03ba",
+    "running_metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_functional_metric_acquisition_v2_run_metadata.json",
+    "running_metadata_sha256": "728479a177f570faad2e8f5142c9ef51633a7dff53adadc8831c6701ac3d2e79",
+    "source_parent_result_path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+    "source_parent_result_sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "ef63973238468d2565cee317734e8173ac9a4e283524eea3470969654063d8e4",
+    "archived_config_sha256": "d9395addcac32933c3c62a7d10aad7e26caa356b4957901482373be1150498fe",
+    "archived_mfu_certificate_sha256": "a40a59cd068e6e71f8fe595a27a38a2c22e9d59cd344826e44c953382a9bc4fc"
+  },
+  "fixed_evaluation": {
+    "steps": [594, 1188, 1782, 2373],
+    "candidate_train_ce": [4.2183, 3.8533, 3.7063, 3.6440],
+    "candidate_validation_ce": [4.2077, 3.8390, 3.6901, 3.627011775970459],
+    "accepted_parent_validation_ce": [4.2028, 3.8395, 3.6888, 3.625838041305542],
+    "candidate_minus_parent_validation_ce": [0.0049, -0.0005, 0.0013, 0.001173734664917],
+    "absolute_tolerance_ce": 0.005,
+    "within_tolerance_by_step": [true, true, true, true],
+    "all_fixed_checkpoints_within_tolerance": true,
+    "failed_steps": [],
+    "terminal_validation_ce_exact": 3.627011775970459,
+    "terminal_absolute_delta_from_parent_ce": 0.001173734664917,
+    "rounding_note": "The first three checkpoint losses are logged to four decimals. At step 594 the displayed delta is 0.0049; the rounding intervals imply a strict delta below 0.005, so the frozen <=0.005 rule passes without assuming hidden precision. The terminal value is taken from the exact-resume checkpoint."
+  },
+  "performance_gate": {
+    "passed": true,
+    "mfu_fraction_with_diagnostic_io": 0.23393890312469937,
+    "tokens_per_second": 129842.464,
+    "diagnostic_io_adjusted_iter_ms": 2018.9389,
+    "model_tflops": 96.9735,
+    "peak_mib": 35535.27,
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "certificate_sha256": "a40a59cd068e6e71f8fe595a27a38a2c22e9d59cd344826e44c953382a9bc4fc",
+    "sealed_result_sha256": "ba02722fbe6e271e27f462fbba51e845b602675cdd8b9377fdea758ca34a03ba",
+    "preflight_log_sha256": "7175eaac33a5a0238b59d05c20473699ddfb55cfd67ad753d4fadbd8f81b3766"
+  },
+  "snapshots": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp/scientific/parameter_trajectory",
+    "steps": [0, 594, 1188, 1782, 2373],
+    "count": 5,
+    "all_parameters": true,
+    "parameter_tensors_per_snapshot": 327,
+    "parameter_numel_per_snapshot": 70540512,
+    "dtype": "float32",
+    "bytes_per_snapshot": 282322545,
+    "total_bytes": 1411612725,
+    "all_tensors_finite": true,
+    "sha256_by_step": {
+      "0": "56ef6bfde1b9f63cde8716890eae9b4b544ef9e9d3a073838c1481dabb081418",
+      "594": "898c7c3ddfa99cfd60dea44fe71e8df50ee4195ddc9807ebf2f7ae3b8a57bb9b",
+      "1188": "dea1dd676fc98ff6fbb1f51d9bb90754c1068ade84514f4bfed33701f8fa613e",
+      "1782": "f9a22dc5de3abffa5683c63e9fc49c13afce590eec162bc6bee804b4303cc3aa",
+      "2373": "a873541cb71c1a60b12e958cd19d5e3dd4054d5a13b3d925cf6a62b202a78897"
+    }
+  },
+  "optimizer_probes": {
+    "directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp/scientific/optimizer_probe",
+    "steps": [0, 594, 1188, 1782],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "schema_version": "nanogpt_optimizer_probe_v2",
+    "capture_protocol": "pre_step_cpu_state_post_step_realized_direction_v2",
+    "parameters_per_probe": 8,
+    "tensors_per_probe": 56,
+    "tensor_numel_per_probe": 132120576,
+    "dtype": "float32",
+    "bytes_per_probe": 528534843,
+    "total_bytes": 2114139372,
+    "all_tensors_finite": true,
+    "all_expected_fields_present": true,
+    "weight_before_step_exactly_equals_same_step_snapshot": true,
+    "applied_direction_per_lr_exactly_equals_post_minus_pre_over_lr": true,
+    "sha256_by_step": {
+      "0": "bf9148f68d590e7720f9e9b6e936391f49b6c7aa1583313bed40664649280cfb",
+      "594": "4a56ed0210be6e9ccb265f3816f45465e5d61b570c2cc19548d259f0f32c057b",
+      "1188": "cb58cab9a067b888028aa928e22ed0573a4eaa50af065dee7e3746b9e56df13f",
+      "1782": "d5da6c899d03da65f44ceba328b2d1d45428bd5967b80359e768c703b0ca7693"
+    }
+  },
+  "checkpoint": {
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp/scientific/ckpt.pt",
+    "sha256": "80f5f94746db5df91d06c353bf7533908795f50ec7233caf13a73ef40b30428e",
+    "bytes": 1073452448,
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "dd1dab6704ea3c808630eca30679bc362ceb0f24c053e3e976a825d926d4bc15",
+    "metadata_bytes": 25734,
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "best_validation_ce_exact": 3.627011775970459,
+    "model_tensor_count": 352,
+    "model_numel": 137485548,
+    "optimizer_tensor_count": 981,
+    "optimizer_numel": 169392891,
+    "all_model_optimizer_tensors_finite": true,
+    "all_rng_states_present": true,
+    "terminal_snapshot_exactly_equals_checkpoint_model": true
+  },
+  "artifacts": {
+    "log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442.log",
+      "sha256": "96d3cb5d2577c8a348270ee6075910ecdd8a1c34cd0a18ac68e9421a35d671e3"
+    },
+    "status": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442.json",
+      "sha256": "596fdb63ed4afcf7c37ac3091d0989a166e2031b6961144106af37e9695cc75f"
+    },
+    "provenance": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_repairedattn_cfconly_nonintervening_metric_probe_5tpp_20260806T092706Z_1186442.json",
+      "sha256": "ef63973238468d2565cee317734e8173ac9a4e283524eea3470969654063d8e4"
+    }
+  },
+  "verification": {
+    "all_snapshot_probe_identities_equal": true,
+    "all_floating_model_optimizer_snapshot_probe_tensors_finite": true,
+    "all_probe_weights_equal_same_step_snapshot_bitwise": true,
+    "all_realized_direction_formulas_equal_bitwise": true,
+    "process_group_absent_after_completion": true,
+    "remote_worktree_clean": true,
+    "artifact_integrity_passed": true,
+    "parent_equivalence_passed": true,
+    "all_acquisition_acceptance_rules_passed": true
+  },
+  "terminal_health": {
+    "gpu_memory_mib": 282,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 0,
+    "gpu_temperature_c": 35,
+    "gpu_power_watts": 23.12,
+    "workspace_bytes": 237725526926,
+    "workspace_gib": 221.399149858,
+    "workspace_cap_gib": 256,
+    "filesystem_available_bytes": 1671766106112,
+    "filesystem_available_gib": 1556.953514099
+  },
+  "watchdog": {
+    "mode": "terminal_only",
+    "progress_callbacks_sent": 0,
+    "heartbeats_sent": 0,
+    "terminal_100_percent_callback_observed_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-06T18:47:11+08:00"],
+    "duplicate_terminal_callbacks_observed": 0,
+    "last_exit_code": 0,
+    "service_running_after_terminal": false
+  },
+  "decision": {
+    "diagnostic_artifacts_structurally_valid": true,
+    "phase_acquisition_accepted_as_parent_equivalent": true,
+    "zero_update_metric_calibration_authorized_from_this_run": true,
+    "candidate_structure_implementation_authorized": false,
+    "candidate_language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "automatic_blind_rerun_authorized": false,
+    "next_action": "Preregister and run only the zero-update same-gauge 5TPP c_proj metric calibration authorized by the v2 plan. Compare moving activation/output-error approximations against exact finite-CE effects and the realized dense-Muon target over layers 0-7 and all four phases on disjoint fit/confirmation windows. Do not implement or train a structural candidate from acquisition acceptance alone."
+  }
+}
