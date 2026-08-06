@@ -46,6 +46,8 @@ def test_scientific_parent_and_geometry_are_preserved() -> None:
     assert config["block_fht_mlp_cproj_muon_matched_givens_error_feedback_decay"] == 0.5
     assert config["mfu_min_fraction"] >= 0.20
     assert config["block_fht_native_extension_required"] is True
+    assert config["registered_resume_determinism_required"] is True
+    assert config["checkpoint_wall_clock_seconds"] == 7200
 
 
 def test_constructed_module_types_match_layer_mask() -> None:

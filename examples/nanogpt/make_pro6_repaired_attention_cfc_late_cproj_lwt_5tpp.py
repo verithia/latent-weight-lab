@@ -52,6 +52,7 @@ def main() -> None:
                 "layers 8-11, all trained jointly from initialization."
             ),
             "block_fht_mlp_cproj_muon_matched_givens_layers": [8, 9, 10, 11],
+            "checkpoint_wall_clock_seconds": 7200,
             "registered_plan": str(PLAN.relative_to(ROOT)),
             "registered_plan_sha256": sha256(PLAN),
             "implementation_commit": git_head(),
@@ -77,7 +78,9 @@ def main() -> None:
             ),
             "operator_override": (
                 "2026-08-06: user requires 1-2h runs to emit only terminal "
-                "or error callbacks; this run tests same-gauge LWT allocation"
+                "or error callbacks; this run tests same-gauge LWT allocation. "
+                "The inherited checkpoint interval is normalized to the "
+                "registered deterministic-resume invariant of 7200 seconds."
             ),
             "launch_ready": True,
             "launch_block_reason": None,
