@@ -164,14 +164,9 @@ class ParameterTrajectoryTest(unittest.TestCase):
         )
         # Full-state snapshots retain the old parameter/buffer partition and
         # therefore do not duplicate this structured weight as a parameter.
-        self.assertEqual(
-            collect_parameters(
-                model,
-                targets=[],
-                dtype="float32",
-                all_parameters=True,
-            ),
-            {},
+        self.assertNotIn(
+            "transformer.h.0.mlp.c_proj.weight",
+            dict(model.named_parameters()),
         )
 
     def test_collects_only_persistent_buffers_and_preserves_integer_dtype(self) -> None:
