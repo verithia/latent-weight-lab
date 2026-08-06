@@ -2,10 +2,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 from examples.nanogpt.muon_matched_givens import MuonMatchedGivensLinear
 from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.train import parse_args
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -72,3 +74,16 @@ def test_constructed_module_types_match_layer_mask() -> None:
         isinstance(model.transformer.h[layer].mlp.c_proj, MuonMatchedGivensLinear)
         for layer in range(8, 12)
     )
+
+
+def test_exact_scientific_json_passes_real_argument_validation(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["train", "--config", str(CONFIG)],
+    )
+    parsed = parse_args()
+    assert parsed.block_fht_mlp_cproj_muon_matched_givens is True
+    assert parsed.block_fht_mlp_cproj_muon_matched_givens_layers == [8, 9, 10, 11]

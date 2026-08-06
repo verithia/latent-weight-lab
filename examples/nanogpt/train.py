@@ -2100,6 +2100,10 @@ def parse_args() -> argparse.Namespace:
         raise ValueError(
             "global log-volume c_proj requires Muon-matched Givens"
         )
+    elif namespace.block_fht_mlp_cproj_muon_matched_givens_layers:
+        raise ValueError(
+            "Muon-matched c_proj layer IDs require the c_proj chart"
+        )
     if namespace.block_fht_mlp_cproj_activation_energy_metric:
         if not namespace.block_fht_mlp_cproj_muon_matched_givens:
             raise ValueError(
@@ -2147,10 +2151,6 @@ def parse_args() -> argparse.Namespace:
     ):
         raise ValueError(
             "functional-shear and directed-product c_fc are mutually exclusive"
-        )
-    elif namespace.block_fht_mlp_cproj_muon_matched_givens_layers:
-        raise ValueError(
-            "Muon-matched c_proj layer IDs require the c_proj chart"
         )
     if namespace.block_fht_mlp_cfc_directed_product:
         if namespace.method != "block_fht" or namespace.optimizer != "muon":
