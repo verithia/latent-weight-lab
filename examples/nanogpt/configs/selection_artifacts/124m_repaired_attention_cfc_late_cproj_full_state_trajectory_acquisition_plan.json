@@ -1,0 +1,159 @@
+{
+  "acceptance": {
+    "accepted_validation_ce_by_step": {
+      "1188": 3.851,
+      "1782": 3.6998,
+      "2373": 3.636904239654541,
+      "594": 4.2239
+    },
+    "curve_absolute_tolerance_ce": 0.005,
+    "functional_replay_absolute_tolerance_ce": 0.005,
+    "required": [
+      "exact-config MFU >=0.20 with diagnostic I/O charged and native BlockFHT loaded",
+      "clean terminal 2373/2373 and complete exact-resume checkpoint",
+      "exactly the 25 registered full-state snapshots exist and share one run identity and one exact inventory",
+      "all snapshot tensors are finite",
+      "the four nonzero fixed validation checkpoints reproduce the accepted run within 0.005 CE",
+      "the five required snapshots replay their own same-step validation CE within 0.005 CE",
+      "the terminal snapshot parameter and buffer values equal the terminal exact-resume checkpoint"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "acquisition": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp.json",
+      "0",
+      "pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp",
+      "/mnt/ssd-data/orj/MappingNetworks"
+    ],
+    "expected_duration_minutes": [
+      85,
+      100
+    ],
+    "gpu": 0,
+    "host": "PRO6",
+    "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp/scientific"
+  },
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "one_full_state_acquisition_after_exact_config_mfu": true,
+    "zero_update_coadapted_manifold_analysis_after_acceptance": true
+  },
+  "causal_basis": [
+    "The terminal layers-4-11 capacity mask is replicated, minimal, and within 0.00461 CE of its same-gauge parent.",
+    "Dense-parent phase replay fails even for the independently accepted late layers 8-11, so it is not a valid proxy for a jointly trained procedural trajectory.",
+    "The accepted late-band scientific implementation is unchanged; the only source delta since its execution is nonintervening full-state snapshot and post-step probe capture in train.py.",
+    "The next valid object is the co-adapted model's own path, not another chart or mask guess."
+  ],
+  "full_state_contract": {
+    "all_named_parameters": true,
+    "all_persistent_named_buffers": true,
+    "capture_interval": 99,
+    "expected_snapshot_steps": [
+      0,
+      99,
+      198,
+      297,
+      396,
+      495,
+      594,
+      693,
+      792,
+      891,
+      990,
+      1089,
+      1188,
+      1287,
+      1386,
+      1485,
+      1584,
+      1683,
+      1782,
+      1881,
+      1980,
+      2079,
+      2178,
+      2277,
+      2373
+    ],
+    "inventory_policy": "the first snapshot freezes the exact parameter and buffer name sets; all 25 snapshots must match it",
+    "optimizer_probes": false,
+    "required_functional_replay_steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "storage_dtype": "float32",
+    "trajectory_schema_version": "nanogpt_parameter_trajectory_v2"
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp.json",
+    "candidate_config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_commit_rule": "use one clean pushed commit containing the maker, verifier, tests, immutable config, and immutable plan",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "phase_control_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_late_band_phase_validity_result.json",
+    "phase_control_result_sha256": "9e1754d5270a37ed6849c4298f711f8202d5c0ae1c6a3dbb24208382d30e4b76",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json",
+    "source_config_sha256": "684f24b4aa6482aef98ee776d9e71f101ff9a56d9f72f6a783f9997ea91d717c",
+    "source_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_result.json",
+    "source_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "verifier": "examples/nanogpt/verify_late_cproj_full_state_trajectory.py",
+    "verifier_sha256": "6edcc5929b47419b34c222d7c005c0808230671948d923b79c01ccd2f0288793"
+  },
+  "monitoring": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_prompt": "Verify terminal status, all 25 snapshots, fixed-curve reproduction, exact functional replay, checkpoint equality, and artifact hashes; seal the acquisition and continue with the preregistered co-adapted manifold analysis.",
+    "callbacks": [
+      "100% clean completion",
+      "error or actionable stall"
+    ],
+    "heartbeats": false,
+    "milestones": false,
+    "policy": "one idempotent terminal-only watchdog"
+  },
+  "nonintervention_gate": {
+    "accepted_execution_commit": "7b6cc4986581c37fca05d712f1c7b067f26a44f7",
+    "scientific_config_changes": false,
+    "source_diff": "model.py, muon.py, muon_matched_givens.py, and block_fht.py are byte-identical; train.py differs only by all-buffer snapshot forwarding and nonintervening post-step probe write"
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "callback": false,
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-symmetric-cproj-5tpp/examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_fullstate_trajectory_5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8",
+      "--include-diagnostic-io"
+    ],
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "mode": "direct foreground polling",
+    "native_extension_required": true,
+    "watchdog": false
+  },
+  "recorded_at": "2026-08-07",
+  "schema_version": "mai_124m_repaired_attention_cfc_late_cproj_full_state_trajectory_acquisition_plan_v1",
+  "scientific_question": "What manifold and phase geometry does the accepted co-adapted late c_proj LWT model follow in its own gauge?",
+  "status": "registered_before_preflight_or_execution"
+}
