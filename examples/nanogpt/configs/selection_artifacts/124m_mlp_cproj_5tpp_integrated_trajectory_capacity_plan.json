@@ -1,0 +1,93 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_5tpp_integrated_trajectory_capacity_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_5tpp_zero_update_integrated_trajectory_capacity_plan",
+  "registered_at": "2026-08-07T02:15:00+08:00",
+  "status": "registered_before_execution",
+  "scientific_question": "Can the accepted bilateral c_proj chart represent mature integrated same-gauge weight-trajectory chords at useful function, and is its remaining failure representational capacity or causal transport cadence?",
+  "theory": {
+    "diagnostic_correction": "Muon deliberately maps a matrix gradient toward a high-rank near-orthogonal action, so isotropy of its one-step direction in fixed bases is not equivalent to high intrinsic dimension of the weight trajectory. The paper's PCA/t-SNE evidence concerns parameter paths, not optimizer actions.",
+    "phase_oracle": "For each accepted 5TPP phase and layer 0-7, fit the dense c_proj chord in the same gauge using hidden64+24 and output32 bilateral passes. Split the exact chord into 1, 8, or 32 equal substeps with full residual carry to distinguish chart-path capacity from one-large-step failure.",
+    "functional_replay": "Install only the fitted c_proj weights into the exact end-phase full-state snapshot and replay the registered 400-batch validation window. All attention, procedural c_fc state, normalization, residual stream, later layers, buffers, and head remain in the same checkpoint gauge.",
+    "transport_control": "A sequential 32-substep arm starts at step zero, consumes only each dense phase chord, carries its residual across phases, and is never reset to the dense c_proj endpoint. Its drift separates phase-local target-selected capacity from coarse causal transport.",
+    "oracle_limit": "Fresh target-selected connectivity and dense phase chords are unavailable to a deployable compact mapper. Passing authorizes only higher-cadence acquisition or a structure theory, never training."
+  },
+  "causal_basis": [
+    "At 0.5TPP, a high-cadence teacher-forced bilateral endpoint reached only +0.00473 to +0.00655 CE versus dense, proving useful early endpoint capacity but not causal trainability.",
+    "At mature 5TPP, the current chart leaves 72.58 percent of each sampled dense-Muon action, and neither a global orthogonal basis nor previous-phase sparse support improves over Gaussian/random controls.",
+    "The apparent conflict can be resolved only by scoring integrated mature weight chords at exact fixed validation loss; another training arm before this discriminator would be an unguided guess."
+  ],
+  "identity": {
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "functional_replay_result_sha256": "7b283aa64709bfb62f92cd85ee7b5aac2ee800114b744b83afdf675117bcfa15",
+    "global_orthogonal_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_global_orthogonal_residual_result.json",
+    "global_orthogonal_result_sha256": "154f85f0f3aabe884d34f98e793a5f4cea4a5bff7bbd11937fd1234d9f6ebc39",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp.json",
+    "config_sha256": "a3dafcedd725c9c0b2173752cc178bddb6e322ce9a1628e779e6a47622604d32",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "straight_chord_substeps": [1, 8, 32],
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260807,
+      "feedback": "full within each oracle path",
+      "weight_decay": 0.0,
+      "learning_rate": 1.0
+    },
+    "fixed_validation": {
+      "split": "validation",
+      "eval_iters": 400,
+      "eval_batch_size": 16,
+      "block_size": 1024,
+      "eval_seed": 20260715,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+    },
+    "measurements": [
+      "phase-local endpoint Frobenius recovery at 1, 8, and 32 straight-chord substeps",
+      "exact fixed-window validation CE for phase-local straight32 at every phase",
+      "terminal exact CE for phase-local straight1 and straight8 cadence controls",
+      "terminal exact CE for sequential straight32 residual-carry transport"
+    ]
+  },
+  "decision_rule": {
+    "thresholds": {
+      "phase_straight32_geometric_recovery_minimum": 0.85,
+      "phase_straight32_maximum_validation_ce_gap": 0.01,
+      "phase_straight32_terminal_validation_ce_gap": 0.005,
+      "sequential_straight32_terminal_validation_ce_gap": 0.02,
+      "straight32_terminal_ce_improvement_over_direct_minimum": 0.01
+    },
+    "interpretation": {
+      "capacity_pass_transport_fail": "authorize only a mature higher-cadence trajectory acquisition to measure the transported chart; do not implement from target-selected chords",
+      "capacity_and_transport_pass": "authorize only a concrete smooth chart-transport theory; implementation and training remain separately gated",
+      "capacity_fail": "reject this bilateral chart family at the tested mature phase cadence; do not blame optimizer transport alone"
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_5tpp_integrated_trajectory_capacity_v1"
+  },
+  "authorization": {
+    "run_zero_update_integrated_trajectory_analysis": true,
+    "acquire_higher_cadence_trajectory": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
