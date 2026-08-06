@@ -64,8 +64,14 @@ EXPECTED_PLAN_SCHEMA = "mai_124m_mlp_cproj_diagonal_kfac_selector_plan_v1"
 CALIBRATION_PLAN_SCHEMA = (
     "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_plan_v1"
 )
+CALIBRATION_PLAN_SCHEMA_V2 = (
+    "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_plan_v2"
+)
 CALIBRATION_RESULT_SCHEMA = (
     "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_result_v1"
+)
+CALIBRATION_RESULT_SCHEMA_V2 = (
+    "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_result_v2"
 )
 VARIANTS = (
     "frobenius_output32",
@@ -89,6 +95,10 @@ def require_full_state_snapshot(snapshot: dict[str, Any]) -> None:
 WINDOWS = ("fit", "holdout")
 
 
+def is_calibration_plan_schema(schema: Any) -> bool:
+    return schema in (CALIBRATION_PLAN_SCHEMA, CALIBRATION_PLAN_SCHEMA_V2)
+
+
 def validate_plan(plan: dict[str, Any]) -> None:
     analysis = plan.get("analysis", {})
     schema = plan.get("schema_version")
@@ -98,7 +108,7 @@ def validate_plan(plan: dict[str, Any]) -> None:
         fit_seed = 20260804
         holdout_seed = 20260805
         matching_seed = 20260804
-    elif schema == CALIBRATION_PLAN_SCHEMA:
+    elif is_calibration_plan_schema(schema):
         layers = list(range(8))
         phases = [
             [0, 594],
@@ -179,7 +189,7 @@ def apply_plan_authorization(
     aggregate: dict[str, Any], plan_schema: str
 ) -> dict[str, Any]:
     """Keep the 5TPP audit diagnostic even if its metric clears the old gate."""
-    if plan_schema != CALIBRATION_PLAN_SCHEMA:
+    if not is_calibration_plan_schema(plan_schema):
         return aggregate
     passed = aggregate.get("selected_variant") is not None
     aggregate["classification"] = (
@@ -195,6 +205,42 @@ def apply_plan_authorization(
         "language_model_training_authorized": False,
     }
     return aggregate
+
+
+def validate_calibration_acquisition(
+    plan: dict[str, Any], acquisition: dict[str, Any]
+) -> None:
+    """Require the v3 functional seal for the corrected calibration plan."""
+    if plan.get("schema_version") != CALIBRATION_PLAN_SCHEMA_V2:
+        return
+    if acquisition.get("classification") != (
+        "ACCEPTED_PARENT_EQUIVALENT_EXACT_FUNCTIONAL_REPLAY"
+    ):
+        raise ValueError("v2 calibration acquisition is not functionally accepted")
+    replay = acquisition.get("functional_replay", {})
+    expected = plan.get("identity", {}).get("functional_replay_result_sha256")
+    if replay.get("passed") is not True or replay.get("result_sha256") != expected:
+        raise ValueError("v2 calibration functional-replay seal mismatch")
+
+
+def acquisition_artifact_hashes(
+    acquisition: dict[str, Any], kind: str
+) -> dict[str, str]:
+    """Read legacy v2 or sealed-v3 artifact hash inventories."""
+    if kind == "snapshots":
+        legacy = acquisition.get("snapshots", {}).get("sha256_by_step")
+        sealed = acquisition.get("artifacts", {}).get("snapshot_sha256_by_step")
+    elif kind == "optimizer_probes":
+        legacy = acquisition.get("optimizer_probes", {}).get("sha256_by_step")
+        sealed = acquisition.get("artifacts", {}).get(
+            "optimizer_probe_sha256_by_step"
+        )
+    else:
+        raise ValueError(f"unknown acquisition artifact kind: {kind}")
+    hashes = legacy if isinstance(legacy, dict) else sealed
+    if not isinstance(hashes, dict):
+        raise ValueError(f"acquisition is missing {kind} hash inventory")
+    return {str(step): str(value) for step, value in hashes.items()}
 
 
 class CProjGeometryCollector:
@@ -596,6 +642,7 @@ def main() -> None:
         "identity"
     ]["run_identity_sha256"]:
         raise ValueError("acquisition run identity mismatch")
+    validate_calibration_acquisition(plan, acquisition)
     manifest = args.data_dir / "manifest.json"
     if file_sha256(manifest) != plan["identity"]["dataset_manifest_sha256"]:
         raise ValueError("dataset manifest SHA-256 mismatch")
@@ -616,11 +663,13 @@ def main() -> None:
         start: args.probe_dir / f"step_{start:06d}.pt"
         for start, _end in phases
     }
+    snapshot_hashes = acquisition_artifact_hashes(acquisition, "snapshots")
+    probe_hashes = acquisition_artifact_hashes(acquisition, "optimizer_probes")
     for step, path in snapshot_paths.items():
-        if file_sha256(path) != acquisition["snapshots"]["sha256_by_step"][str(step)]:
+        if file_sha256(path) != snapshot_hashes[str(step)]:
             raise ValueError(f"snapshot SHA-256 mismatch at step {step}")
     for step, path in probe_paths.items():
-        if file_sha256(path) != acquisition["optimizer_probes"]["sha256_by_step"][str(step)]:
+        if file_sha256(path) != probe_hashes[str(step)]:
             raise ValueError(f"probe SHA-256 mismatch at step {step}")
 
     windows = {}
@@ -801,9 +850,13 @@ def main() -> None:
     )
     result = {
         "schema_version": (
-            CALIBRATION_RESULT_SCHEMA
-            if plan.get("schema_version") == CALIBRATION_PLAN_SCHEMA
-            else SCHEMA_VERSION
+            CALIBRATION_RESULT_SCHEMA_V2
+            if plan.get("schema_version") == CALIBRATION_PLAN_SCHEMA_V2
+            else (
+                CALIBRATION_RESULT_SCHEMA
+                if plan.get("schema_version") == CALIBRATION_PLAN_SCHEMA
+                else SCHEMA_VERSION
+            )
         ),
         "recorded_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "classification": aggregate["classification"],

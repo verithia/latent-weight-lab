@@ -6,11 +6,13 @@ import pytest
 import torch
 
 from examples.nanogpt.analyze_mlp_cproj_diagonal_kfac_selector import (
+    acquisition_artifact_hashes,
     aggregate_results,
     apply_plan_authorization,
     fit_metric_selected_raw_angle_pass,
     normalized_output_error_scale,
     require_full_state_snapshot,
+    validate_calibration_acquisition,
     validate_plan,
 )
 from examples.nanogpt.muon_matched_givens import diagonal_metric_angles
@@ -122,6 +124,49 @@ def test_5tpp_calibration_plan_is_fail_closed_and_never_authorizes_training() ->
     changed["authorization"]["implement_candidate_structure"] = True
     with pytest.raises(ValueError):
         validate_plan(changed)
+
+
+def test_v2_calibration_requires_exact_functional_replay_seal() -> None:
+    plan = valid_plan()
+    plan["schema_version"] = (
+        "mai_124m_mlp_cproj_5tpp_functional_metric_calibration_plan_v2"
+    )
+    plan["authorization"] = {
+        "run_zero_update_metric_calibration": True,
+        "implement_candidate_structure": False,
+        "run_language_model_training": False,
+    }
+    plan["analysis"]["layers"] = list(range(8))
+    plan["analysis"]["phases"] = [
+        [0, 594],
+        [594, 1188],
+        [1188, 1782],
+        [1782, 2373],
+    ]
+    plan["analysis"]["fit_window"]["seed"] = 20260806
+    plan["analysis"]["holdout_window"]["seed"] = 20260807
+    plan["analysis"]["shared_chart"]["matching_seed"] = 20260806
+    plan["identity"] = {"functional_replay_result_sha256": "replay-sha"}
+    validate_plan(plan)
+    acquisition = {
+        "classification": "ACCEPTED_PARENT_EQUIVALENT_EXACT_FUNCTIONAL_REPLAY",
+        "functional_replay": {"passed": True, "result_sha256": "replay-sha"},
+        "artifacts": {
+            "snapshot_sha256_by_step": {"0": "snapshot-sha"},
+            "optimizer_probe_sha256_by_step": {"0": "probe-sha"},
+        },
+    }
+    validate_calibration_acquisition(plan, acquisition)
+    assert acquisition_artifact_hashes(acquisition, "snapshots") == {
+        "0": "snapshot-sha"
+    }
+    assert acquisition_artifact_hashes(acquisition, "optimizer_probes") == {
+        "0": "probe-sha"
+    }
+    changed = copy.deepcopy(acquisition)
+    changed["functional_replay"]["result_sha256"] = "wrong"
+    with pytest.raises(ValueError, match="functional-replay seal mismatch"):
+        validate_calibration_acquisition(plan, changed)
 
 
 def test_output_error_scale_is_unit_rms_bounded_and_finite() -> None:
