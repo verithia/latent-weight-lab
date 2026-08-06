@@ -316,6 +316,76 @@ class ParameterTrajectoryTest(unittest.TestCase):
                 )
             )
 
+    @unittest.skipUnless(torch.cuda.is_available(), "CUDA is required")
+    def test_optimizer_probe_does_not_change_cuda_muon_trajectory(self) -> None:
+        reference_model = TinyModel().cuda()
+        probed_model = copy.deepcopy(reference_model)
+        reference_parameters = [
+            reference_model.transformer.h[index].mlp.c_proj.weight
+            for index in range(2)
+        ]
+        probed_parameters = [
+            probed_model.transformer.h[index].mlp.c_proj.weight
+            for index in range(2)
+        ]
+        reference_optimizer = Muon(
+            reference_parameters,
+            lr=0.02,
+            momentum=0.9,
+            weight_decay=0.1,
+            ns_steps=3,
+        )
+        probed_optimizer = Muon(
+            probed_parameters,
+            lr=0.02,
+            momentum=0.9,
+            weight_decay=0.1,
+            ns_steps=3,
+        )
+        for index, (reference, probed) in enumerate(
+            zip(reference_parameters, probed_parameters, strict=True)
+        ):
+            gradient = torch.full_like(reference, 0.2 + index)
+            momentum = torch.full_like(reference, 0.05 + index)
+            reference.grad = gradient.clone()
+            probed.grad = gradient.clone()
+            reference_optimizer.state[reference]["momentum_buffer"] = (
+                momentum.clone()
+            )
+            probed_optimizer.state[probed]["momentum_buffer"] = (
+                momentum.clone()
+            )
+        identity = {
+            "config_sha256": "a" * 64,
+            "data_manifest": {"sha256": "b" * 64},
+        }
+        with tempfile.TemporaryDirectory() as raw:
+            pending = prepare_optimizer_probe(
+                model=probed_model,
+                optimizer=probed_optimizer,
+                out_dir=Path(raw),
+                step=0,
+                targets=["mlp.c_proj"],
+                dtype="float32",
+                layers=[0, 1],
+                model_config=config_as_dataclass(),
+                run_identity=identity,
+                execution_provenance={"git_commit": "c" * 40},
+            )
+            reference_optimizer.step()
+            probed_optimizer.step()
+            write_optimizer_probe(pending)
+        for reference, probed in zip(
+            reference_parameters, probed_parameters, strict=True
+        ):
+            self.assertTrue(torch.equal(reference, probed))
+            self.assertTrue(
+                torch.equal(
+                    reference_optimizer.state[reference]["momentum_buffer"],
+                    probed_optimizer.state[probed]["momentum_buffer"],
+                )
+            )
+
     def test_validation_rejects_bad_optimizer_probe(self) -> None:
         base = dict(
             trajectory_snapshot_interval=0,
