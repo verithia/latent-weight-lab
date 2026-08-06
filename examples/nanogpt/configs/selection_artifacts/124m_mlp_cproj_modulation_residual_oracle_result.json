@@ -1,0 +1,68 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_modulation_residual_oracle_sealed_result_v1",
+  "classification": "STATIC_MODULATION_INSUFFICIENT_REQUIRES_ADAPTIVE_STATE",
+  "identity": {
+    "execution_commit": "3ca6fcb4b65df9c516a2c18a142b60efad8bc417",
+    "plan_sha256": "931c7e682e1983c7dfa59dd88903b53e67bb4f567b5ae10c550d47deed08f169",
+    "analyzer_sha256": "fb76212eff41aec9b01f9911c1c20de673d9f510c60195bb06f4d5ced2631a4d",
+    "raw_result_sha256": "23fa9e79e2db69300ca2d2364e84a0b97785c2a88be33f575699fc15ba536273",
+    "raw_rows_sha256": "24b16a944aee1120770e1ffc4656787063adb543993effd7a541671007310f90",
+    "raw_layer_metrics_sha256": "ac1f11162cbb16b1f93734fe7c9bcc6306ba0e96f9e893353497707a04f30720",
+    "polynomial_result_sha256": "9bee7c2f7a18f2b67774c75e54e8894698df3461b19889034f9a51470d9b95f6",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9"
+  },
+  "execution": {
+    "parameter_updates": 0,
+    "runtime_seconds": 165.1755142211914,
+    "device": "cuda",
+    "exact_replay_ce": 3.6411821842193604,
+    "scheduled_rank4_replay_ce": 3.684976577758789,
+    "controls_valid": true
+  },
+  "validation_ce": {
+    "scheduled_rank4": 3.684976577758789,
+    "paper_literal_dc": 3.6849634647369385,
+    "output_additive": 3.6615445613861084,
+    "hidden_additive": 3.6849260330200195,
+    "two_way_additive": 3.661533832550049,
+    "output_gain": 3.6789486408233643,
+    "hidden_gain": 3.6685101985931396,
+    "two_way_gain": 3.666654348373413,
+    "exact_residual": 3.6411821842193604
+  },
+  "validation_ce_gap_to_exact": {
+    "scheduled_rank4": 0.04379439353942871,
+    "paper_literal_dc": 0.043781280517578125,
+    "output_additive": 0.020362377166748047,
+    "hidden_additive": 0.04374384880065918,
+    "two_way_additive": 0.020351648330688477,
+    "output_gain": 0.037766456604003906,
+    "hidden_gain": 0.027328014373779297,
+    "two_way_gain": 0.025472164154052734,
+    "exact_residual": 0.0
+  },
+  "mean_fit_functional_recovery": {
+    "paper_literal_dc": 0.00004252398383430833,
+    "output_additive": 0.08862499565393986,
+    "hidden_additive": 0.00045234114732742303,
+    "two_way_additive": 0.08903319824285641,
+    "output_gain": 0.019902032717549034,
+    "hidden_gain": 0.06615720441897788,
+    "two_way_gain": 0.07967972042819044
+  },
+  "decision": {
+    "frozen_maximum_validation_ce_gap": 0.005,
+    "best_static_family": "two_way_additive",
+    "best_static_family_validation_ce_gap": 0.020351648330688477,
+    "scheduled_gap_recovered_fraction": 0.5352752277319418,
+    "paper_identity_modulation_sufficient": false,
+    "static_structured_modulation_sufficient": false,
+    "static_output_structure_directionally_useful": true,
+    "language_model_training_authorized": false,
+    "next_authorized_action": "Preregister a nonintervening replay of the accepted configuration that captures c_proj compression residual, Muon momentum/requested direction, realized applied direction, and matching state at fixed phases."
+  }
+}
