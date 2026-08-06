@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_polynomial_oracle_ce_plan_v1",
+  "registered_at": "2026-08-07T00:00:00Z",
+  "question": "Is the smooth scheduled late-c_proj envelope functionally sufficient at the accepted terminal checkpoint despite the absence of local secant transport?",
+  "theory": {
+    "established": "Quadratic cumulative-LR coordinates predict 94.47% of terminal-family endpoint weight displacement and 93.96% in a fixed post-GELU metric, while all 98-591 update secants fail transport.",
+    "discriminator": "Exact fixed-window CE determines whether the remaining task-adaptive residual matters to language modeling rather than only to Frobenius geometry.",
+    "oracle_scope": "The early PCA basis and cumulative-LR coordinate are diagnostic upper bounds. Passing CE cannot authorize them as trainable structure."
+  },
+  "identity": {
+    "analyzer_source_commit": "10d973772460ddf58f486dbd71683f0e4be52eb7",
+    "analyzer_sha256": "659e45ffaff483ac96cdc3f42d21b3b65107fd5de9e044c5abdc3a0eb24cdfdf",
+    "multiscale_result_sha256": "622b24054c8733b4e14a9761db941ea4645a8fb5e29784da4f7ae22fe30cb5e0",
+    "trajectory_verification_sha256": "d34a06734733587db069c2de0424e93e16ce952bd71f5c854de91d803ca98489",
+    "config_sha256": "1e8e6aba162ec94a0a8b469b4e5620190f096035585835c8c434126d7e53b20a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "6ad54d921a34db9fbdc9c9c6751a7e55f674df72d3be08a253eca4b644e23de9",
+    "supporting_source_sha256": {
+      "examples/nanogpt/analyze_mlp_cproj_multiscale_path.py": "4c3fa7149a1636e1af2aa47ad1444322f84cb14046247bccd69c629a47e314b3",
+      "examples/nanogpt/analyze_mlp_cproj_predictive_manifold.py": "df3509e1df4174a0b4a088f46a438a71a5993f43bcb948c8227b4cdfdd861775",
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/verify_full_state_functional_replay.py": "40966397bfb34917e2cda03c3048ce796b5c1235811d44a26622c0c6eca19003",
+      "examples/nanogpt/train.py": "0b914aa0b6a91d36032e5dc68a034420e172e38a535b59d7ceab5eac78a4e650"
+    }
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [8, 9, 10, 11],
+    "discovery_steps": [0, 99, 198, 297, 396, 495, 594, 693, 792, 891, 990, 1089, 1188, 1287, 1386, 1485, 1584, 1683, 1782],
+    "terminal_step": 2373,
+    "ranks": [1, 2, 4, 8, 16],
+    "polynomial_degree": 2,
+    "polynomial_coordinate": "cumulative_learning_rate",
+    "restore_terminal_radius": true,
+    "validation_batches": 400,
+    "validation_split": "val",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "learned_basis_role": "diagnostic_oracle_only",
+    "control": "re-evaluate the exact accepted terminal full state before every oracle interpretation",
+    "estimated_runtime": "under five minutes",
+    "monitoring": "direct foreground polling; no watchdog or callback"
+  },
+  "decision_rule": {
+    "thresholds": {
+      "exact_replay_absolute_tolerance_ce": 0.005,
+      "candidate_maximum_validation_ce_gap": 0.005
+    },
+    "outcomes": {
+      "SMOOTH_SCHEDULED_ENVELOPE_FUNCTIONALLY_SUFFICIENT": "At least one frozen rank stays within +0.005 CE. Authorize only theory for a paper-style fixed random nonlinear/modulated representation of the envelope.",
+      "TASK_ADAPTIVE_RESIDUAL_FUNCTIONALLY_NECESSARY": "Every rank exceeds +0.005 CE. Any viable mapping must expose a state-conditioned Jacobian that can represent the locally unpredictable residual.",
+      "INVALID_EXACT_REPLAY": "Do not interpret oracle CE if the exact terminal control does not reproduce the accepted result."
+    }
+  },
+  "interpretation_contract": {
+    "no_training_selection": true,
+    "validation_is_used_only_for_frozen_oracle_evaluation": true,
+    "learned_pca_basis_is_not_a_candidate": true,
+    "training_time_is_not_a_candidate_latent": true,
+    "passing_oracle_is_an_upper_bound_not_an_implementation": true
+  },
+  "authorization": {
+    "run_zero_update_terminal_oracle_ce": true,
+    "use_learned_basis_in_candidate": false,
+    "use_training_time_as_candidate_latent": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
