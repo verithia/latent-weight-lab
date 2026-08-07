@@ -1,0 +1,74 @@
+{
+  "aggregate": {
+    "corrected": {
+      "heldout_future_functional_positive_line_recovery": 0.004533806726442756,
+      "heldout_future_raw_positive_line_recovery": 0.016555127870718635,
+      "heldout_terminal_functional_positive_line_recovery": 0.00034401169495149324,
+      "heldout_terminal_raw_positive_line_recovery": 0.001977545907777021,
+      "mean_component_output_additive_functional_recovery": 0.11991341093314659
+    },
+    "feedback": {
+      "heldout_future_functional_positive_line_recovery": 0.0009125479709590498,
+      "heldout_future_raw_positive_line_recovery": 0.005583547988668807,
+      "heldout_terminal_functional_positive_line_recovery": 0.0003310706451456116,
+      "heldout_terminal_raw_positive_line_recovery": 0.0009586467541765821,
+      "mean_component_output_additive_functional_recovery": 0.19851170874700858
+    },
+    "realized": {
+      "heldout_future_functional_positive_line_recovery": 0.008519135734947015,
+      "heldout_future_raw_positive_line_recovery": 0.014114508456829216,
+      "heldout_terminal_functional_positive_line_recovery": 0.0002277562372681009,
+      "heldout_terminal_raw_positive_line_recovery": 0.0009726258756571967,
+      "mean_component_output_additive_functional_recovery": 0.12722516831201738
+    },
+    "requested": {
+      "heldout_future_functional_positive_line_recovery": 0.006501849625496075,
+      "heldout_future_raw_positive_line_recovery": 0.020694863040678562,
+      "heldout_terminal_functional_positive_line_recovery": 0.000293616735824996,
+      "heldout_terminal_raw_positive_line_recovery": 0.0021494621789336535,
+      "mean_component_output_additive_functional_recovery": 0.15193390271751736
+    },
+    "unrepresented": {
+      "heldout_future_functional_positive_line_recovery": 0.0013482905338034741,
+      "heldout_future_raw_positive_line_recovery": 0.005255523932821542,
+      "heldout_terminal_functional_positive_line_recovery": 0.0002390076347079539,
+      "heldout_terminal_raw_positive_line_recovery": 0.0009698319139389141,
+      "mean_component_output_additive_functional_recovery": 0.11340317166260974
+    }
+  },
+  "artifacts": {
+    "rows": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp/scientific/analysis/exact_state_transport/same_run_optimizer_state_transport_rows.csv",
+    "rows_sha256": "45fc71813401d2c89abaa3c233ae0936dd0f8b203bcf395bef9e691ba6ce5849"
+  },
+  "authorization": {
+    "compact_state_conditioned_mapper": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false
+  },
+  "best_heldout_component": "realized",
+  "classification": "OPTIMIZER_STATE_TRANSPORT_INSUFFICIENT",
+  "exact_state_identity": {
+    "maximum_relative_error": 4.3106175230247853e-10,
+    "method": "post_step_optimizer_algebra_without_polar_replay",
+    "passed": true
+  },
+  "execution": {
+    "device": "cuda",
+    "elapsed_seconds": 2.830901861190796,
+    "entrypoint": "examples.nanogpt.analyze_mlp_cproj_same_run_optimizer_state_transport",
+    "git_commit": "8fdc94980ab83784bdd802ccc81e9c86d85f19da",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "acquisition_result_sha256": "91eade4b4548f52bc44bc59faa22fda60c30ccd09afefde61d53d322b91a6138",
+    "analyzer_sha256": "6608a84daa38cc2d5afdb633579e64e3d6ac156a1c97cae52b35bf6d58aaee63",
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "config_sha256": "d21065ad20593da7fbf3a1a00a450c87b47a6fd9071133e8b677f2b8c8e585e5",
+    "plan_sha256": "9f59515e913faaf81ce43974ea007ba7c11135144687c905ca5967b11d20abe1",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467"
+  },
+  "recorded_at": "2026-08-07T02:49:31.492401+00:00",
+  "schema_version": "mai_124m_mlp_cproj_same_run_optimizer_state_transport_result_v2"
+}
