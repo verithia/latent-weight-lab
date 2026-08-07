@@ -1,0 +1,46 @@
+{
+  "aggregate": {
+    "all_current_functional_image_recovery": 0.008827709770744728,
+    "heldout_current_functional_image_recovery": 0.008605535998589884,
+    "heldout_future_activated_functional_tangent_recovery": 0.23636125607979488,
+    "heldout_future_identity_functional_tangent_recovery": 0.23638065845331854
+  },
+  "artifacts": {
+    "raw_result_sha256": "176b45b95e40883b773d6db89bff93bca3f580c12e21f9dd5222845a68eafc8c",
+    "rows_sha256": "331bf3168c72b2e46f21e9ba9a8be89eca0e0d33896667681bd8031fd4cfe0a1"
+  },
+  "authorization": {
+    "activation_family_capacity_supported": false,
+    "implement_production_candidate": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false
+  },
+  "classification": "PAPER_ACTIVATION_IMAGE_INSUFFICIENT",
+  "execution": {
+    "device": "cuda",
+    "elapsed_seconds": 2.0554251670837402,
+    "git_commit": "29ad676b04786abd26e844792464f67cbdb8cd80",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "acquisition_result_sha256": "91eade4b4548f52bc44bc59faa22fda60c30ccd09afefde61d53d322b91a6138",
+    "analyzer_sha256": "7331d67216736db87f4cf5c8d37d145e53d8eec9f4cb23824b311f28b8006b59",
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "plan_sha256": "c31c13c40a3ff758b4c4fec36c71c73e5bbebf38bc21bc68d396e653a6b88e7b",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467"
+  },
+  "mechanism": {
+    "activation": "signed_scaled_tanh",
+    "activation_scale": "2*max_abs_step0_per_layer",
+    "block_fht_layers": 2,
+    "jacobian": "diag(1-(g(z)/s)^2)*A_BlockFHT",
+    "latent_ratio": 0.01,
+    "oracle_coordinates": true,
+    "oracle_future_tangent_coefficients": true,
+    "weight_scale": 0.20412414523193154
+  },
+  "range_valid": true,
+  "recorded_at": "2026-08-07T03:08:51.923189+00:00",
+  "schema_version": "mai_124m_mlp_cproj_paper_activation_oracle_sealed_result_v1"
+}
