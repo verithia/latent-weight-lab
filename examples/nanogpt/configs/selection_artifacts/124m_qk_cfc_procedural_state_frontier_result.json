@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_qk_cfc_procedural_state_frontier_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-08T06:26:30+08:00",
+  "classification": "PROCEDURAL_STATE_UNREACHABLE_AT_MAXIMUM_TESTED_BUDGET",
+  "identity": {
+    "execution_git_commit": "4cde238deaa3ed0d11eb68a78d8fc5f9fba0aa97",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_procedural_state_frontier_plan.json",
+    "plan_sha256": "186740a7bd40d555fe517d1611aa740e6c9a0b7aa3982a4e9ac7ee536456046b",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "2c02ceb42fcc5783c331101299c27a60881614b806500dc77fbf298670bb8546",
+    "parent_result_sha256": "621f9deaadde86823891b4a66743612d899de23704bfe00f557329105b7a9b67"
+  },
+  "execution": {
+    "device": "cuda",
+    "wall_seconds": 5.311735,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "checkpoint_parameter_updates": 0,
+    "result_bytes": 71366,
+    "result_sha256": "b716ee25eae0cd621bbd6ce959f52f59c906694de5e7cfd8d95ca768cfce7a93"
+  },
+  "frontier": {
+    "stage_counts": [6, 12, 18, 24, 30],
+    "coordinate_fraction_of_dense": [0.171875, 0.34375, 0.515625, 0.6875, 0.859375],
+    "minimum_stored_byte_ratio_with_uint16_supports": [0.2578125, 0.515625, 0.7734375, 1.03125, 1.2890625],
+    "momentum_buffer_all_energy_weighted_recovery": [0.28069161376846075, 0.3485596096612211, 0.380879817591369, 0.3981370429910651, 0.40809915332144225],
+    "momentum_buffer_late_energy_weighted_recovery": [0.3274213752242017, 0.42344098222542326, 0.46561524155711004, 0.4864778117064362, 0.49786919107573824],
+    "momentum_buffer_late_minimum_layer_recovery": [0.1756991147994995, 0.2205401062965393, 0.24405604600906372, 0.258423388004303, 0.2677839398384094],
+    "compression_residual_all_energy_weighted_recovery": [0.251191488111638, 0.2536924004534154, 0.2545622479951447, 0.25489260898643884, 0.25503122165639114],
+    "compression_residual_late_energy_weighted_recovery": [0.97765312327135, 0.9884131856552324, 0.9920354228873807, 0.9933696776716466, 0.9938995047649608],
+    "compression_residual_late_minimum_layer_recovery": [0.9470686912536621, 0.9629718661308289, 0.9686805605888367, 0.9709316492080688, 0.9719504117965698]
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "maximum_credible_stage_count": 12,
+    "threshold_changes_after_measurement": false,
+    "momentum_buffer_first_passing_stage": null,
+    "compression_residual_first_passing_stage": null,
+    "joint_first_passing_stage": null,
+    "credible_compression_budget": false
+  },
+  "interpretation": {
+    "accepted_claim": "The mismatch is structural rather than a small capacity deficit. Recovery saturates far below the registered gates even after the code exceeds dense-state byte storage.",
+    "momentum_finding": "Muon momentum is broadly misaligned with the output-mixing directed-product dictionary: at 30 stages it recovers only 0.40810 all-layer and 0.49787 late energy, with a 0.26778 worst late layer.",
+    "feedback_finding": "Late error-feedback lies almost entirely in the output-mixing family, but the energetic layer-1 backlog remains nearly orthogonal: all-layer recovery stays near 0.255 while late recovery reaches 0.99390.",
+    "branch_decision": "Close wider directed-product temporal-state codes and do not acquire a paired state trajectory. A true compressed MLP optimizer must maintain its history in latent coordinates from initialization; retrofitting dense Muon state into this output-mixing chart is rejected."
+  },
+  "authorization": {
+    "wider_procedural_state_candidate": false,
+    "paired_temporal_state_acquisition": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "latent_native_optimizer_theory": true
+  }
+}
