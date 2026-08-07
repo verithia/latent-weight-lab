@@ -1,0 +1,176 @@
+{
+  "aggregate": {
+    "HEAD": {
+      "cells": 12,
+      "postgelu_hard_rank_candidate_to_parent": 1.0271993683960148,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 1.0246487700639964,
+      "pregelu_hard_rank_candidate_to_parent": 1.0024892415884705,
+      "residual_update_cka_delta_mean": 0.020347456137339275,
+      "residual_update_cka_delta_mean_abs": 0.03662211696306864,
+      "residual_update_cos_delta_mean": 0.022091379544387262,
+      "residual_update_cos_delta_mean_abs": 0.03868385854487618,
+      "residual_update_parallel_energy_candidate_to_parent": 0.9702700839520735,
+      "update_to_residual_rms_candidate_to_parent": 0.9870968755423067
+    },
+    "MID": {
+      "cells": 12,
+      "postgelu_hard_rank_candidate_to_parent": 1.0694346877023608,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 1.0707114164199865,
+      "pregelu_hard_rank_candidate_to_parent": 0.9988075883958588,
+      "residual_update_cka_delta_mean": 0.01802102228005727,
+      "residual_update_cka_delta_mean_abs": 0.0522586057583491,
+      "residual_update_cos_delta_mean": 0.016522511723451316,
+      "residual_update_cos_delta_mean_abs": 0.030496482465726633,
+      "residual_update_parallel_energy_candidate_to_parent": 1.0755575749510011,
+      "update_to_residual_rms_candidate_to_parent": 0.9934120057418289
+    },
+    "TAIL": {
+      "cells": 12,
+      "postgelu_hard_rank_candidate_to_parent": 1.0404381392656517,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 1.0097654517553583,
+      "pregelu_hard_rank_candidate_to_parent": 1.030376051643451,
+      "residual_update_cka_delta_mean": 0.001340240240097046,
+      "residual_update_cka_delta_mean_abs": 0.016284455855687458,
+      "residual_update_cos_delta_mean": 0.017102489112100255,
+      "residual_update_cos_delta_mean_abs": 0.027867265530706693,
+      "residual_update_parallel_energy_candidate_to_parent": 0.9925980731137142,
+      "update_to_residual_rms_candidate_to_parent": 0.9918219209236581
+    },
+    "all": {
+      "cells": 36,
+      "postgelu_hard_rank_candidate_to_parent": 1.0455426611787901,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 1.0347195498858934,
+      "pregelu_hard_rank_candidate_to_parent": 1.0104599466532649,
+      "residual_update_cka_delta_mean": 0.013236239552497864,
+      "residual_update_cka_delta_mean_abs": 0.03505505952570173,
+      "residual_update_cos_delta_mean": 0.018572126793312944,
+      "residual_update_cos_delta_mean_abs": 0.0323492021804365,
+      "residual_update_parallel_energy_candidate_to_parent": 1.0118121978625392,
+      "update_to_residual_rms_candidate_to_parent": 0.9907733007311126
+    },
+    "early": {
+      "cells": 12,
+      "postgelu_hard_rank_candidate_to_parent": 1.112411376283453,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 1.1143884081182542,
+      "pregelu_hard_rank_candidate_to_parent": 0.9982259041637562,
+      "residual_update_cka_delta_mean": -0.01933071513970693,
+      "residual_update_cka_delta_mean_abs": 0.03432977696259817,
+      "residual_update_cos_delta_mean": -0.003831248924446603,
+      "residual_update_cos_delta_mean_abs": 0.02259102459841718,
+      "residual_update_parallel_energy_candidate_to_parent": 0.9669941984972394,
+      "update_to_residual_rms_candidate_to_parent": 0.9838690975755583
+    },
+    "late": {
+      "cells": 12,
+      "postgelu_hard_rank_candidate_to_parent": 0.9966488811998628,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 0.9961657789776157,
+      "pregelu_hard_rank_candidate_to_parent": 1.000484961672487,
+      "residual_update_cka_delta_mean": 0.020978592336177826,
+      "residual_update_cka_delta_mean_abs": 0.0269868200023969,
+      "residual_update_cos_delta_mean": 0.04313323113213604,
+      "residual_update_cos_delta_mean_abs": 0.046442788967397064,
+      "residual_update_parallel_energy_candidate_to_parent": 1.2176948285009233,
+      "update_to_residual_rms_candidate_to_parent": 1.0075795785616812
+    },
+    "middle": {
+      "cells": 12,
+      "postgelu_hard_rank_candidate_to_parent": 1.030902680355601,
+      "postgelu_to_pregelu_hard_rank_candidate_to_parent": 0.9979292670142722,
+      "pregelu_hard_rank_candidate_to_parent": 1.033041834157227,
+      "residual_update_cka_delta_mean": 0.0380608414610227,
+      "residual_update_cka_delta_mean_abs": 0.04384858161211014,
+      "residual_update_cos_delta_mean": 0.016414398172249395,
+      "residual_update_cos_delta_mean_abs": 0.02801379297549526,
+      "residual_update_parallel_energy_candidate_to_parent": 0.8797056920317334,
+      "update_to_residual_rms_candidate_to_parent": 0.9810840326169317
+    }
+  },
+  "checkpoints": {
+    "qk_only": {
+      "batch_probe_ce": [
+        3.6505777835845947,
+        3.344681978225708,
+        3.39831280708313,
+        3.4210267066955566,
+        3.3353967666625977,
+        3.3432602882385254,
+        2.931471347808838,
+        3.3095576763153076
+      ],
+      "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/ckpt.pt",
+      "checkpoint_sha256": "8eae3dc2c02775cd722a34bec65811fdf9d670b82d5ddf4ca919d3e635f3b4cc",
+      "mean_probe_ce": 3.3417856693267822
+    },
+    "qk_plus_cfc": {
+      "batch_probe_ce": [
+        3.625373601913452,
+        3.3436574935913086,
+        3.427398204803467,
+        3.433049201965332,
+        3.335425615310669,
+        3.3714914321899414,
+        2.961890697479248,
+        3.3404457569122314
+      ],
+      "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp/ckpt.pt",
+      "checkpoint_sha256": "1ed9f05b34a14f0916e19a33c6cc18d6e75095b2d351a78d274d5c3b659ad58b",
+      "mean_probe_ce": 3.354841500520706
+    }
+  },
+  "decision": {
+    "candidate_minus_parent_probe_ce": 0.01305583119392395,
+    "classification": "RESIDUAL_DIRECTION_COMPATIBILITY_DEFICIT",
+    "interpretation_boundary": "Terminal functional localization only; cross-run tensor directions and parameter transplantation are not interpreted.",
+    "minimum_cosine_shift": 0.02,
+    "minimum_material_ratio": 0.1,
+    "probe_ce": {
+      "qk_only": 3.3417856693267822,
+      "qk_plus_cfc": 3.354841500520706
+    },
+    "probe_reproduces_terminal_order": true,
+    "training_or_structure_authorized": false
+  },
+  "execution": {
+    "callback": false,
+    "command": [
+      "examples/nanogpt/analyze_qk_cfc_20tpp_terminal_activation_drift.py",
+      "--plan",
+      "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_20tpp_terminal_activation_drift_plan.json",
+      "--parent-checkpoint",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/ckpt.pt",
+      "--candidate-checkpoint",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp/ckpt.pt",
+      "--parent-config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json",
+      "--candidate-config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json",
+      "--data-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/analysis/pro6_mai_v3_124m_qk_cfc_20tpp_terminal_activation_drift_20260808a",
+      "--device",
+      "cuda"
+    ],
+    "device": "cuda",
+    "direct_foreground_polling": true,
+    "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-cproj-activation-metric/examples/nanogpt/analyze_qk_cfc_20tpp_terminal_activation_drift.py",
+    "finished_at_unix": 1786119420.9265149,
+    "git_commit": "4eaab6838f6c6dde878c02af2cdc75c8c5c17836",
+    "started_at_unix": 1786119391.1052637,
+    "watchdog": false
+  },
+  "identity": {
+    "activation_rows_sha256": "66e0c5fd8cf108116aa36e275d925a7d73b88dba29c532d6be6809a827326706",
+    "candidate_checkpoint_sha256": "1ed9f05b34a14f0916e19a33c6cc18d6e75095b2d351a78d274d5c3b659ad58b",
+    "candidate_config_sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2",
+    "comparison_rows_sha256": "ad516f9b29fa334f970116e15aaad2d0306027eb4e882a42703cf153debcf195",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "729f11afc1eb81d142a9ab4702191edae157abed2b5e11cfdf2f1c5c1935cb5e",
+    "parent_checkpoint_sha256": "8eae3dc2c02775cd722a34bec65811fdf9d670b82d5ddf4ca919d3e635f3b4cc",
+    "parent_config_sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b",
+    "plan_sha256": "7f3b592e760f83c908857c26e5f57a2e598c4ea323c6a97e66d388fdde01a9ca"
+  },
+  "parameter_updates": 0,
+  "recorded_at": "2026-08-07T16:17:00.924774+00:00",
+  "schema_version": "mai_124m_qk_cfc_20tpp_terminal_activation_drift_v1"
+}
