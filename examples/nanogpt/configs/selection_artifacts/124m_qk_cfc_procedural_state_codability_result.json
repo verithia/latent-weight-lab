@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_qk_cfc_procedural_state_codability_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-08T06:22:27+08:00",
+  "classification": "CFC_PROCEDURAL_STATE_CODE_REJECTED",
+  "identity": {
+    "execution_git_commit": "80b8d1e421b17001ec4c8761c66e1f5ea564f849",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_procedural_state_codability_plan.json",
+    "plan_sha256": "a6ef91844a1ef57547661bc0195ede7f6383f97eca9909b041784dde22cc877b",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "9a4053cbc0e82b391bc053387ebb0bd3e7082d6ac0d5f474c391b72e56471233",
+    "parent_result_sha256": "046f44cf85c0230d30a6451798cf41e9bf6e0f3f55abcf06d6928a726dc0dad4"
+  },
+  "execution": {
+    "device": "cuda",
+    "wall_seconds": 2.803672,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "checkpoint_parameter_updates": 0,
+    "result_bytes": 25274,
+    "result_sha256": "a0ba0d81164e84f6c26c8ee1a99cb54be189dc5a69db2dc27f8b7f2791217552"
+  },
+  "accounting": {
+    "dense_elements_per_layer_per_state": 2359296,
+    "coordinates_per_layer_per_state": 405504,
+    "coordinate_fraction_of_dense": 0.171875,
+    "support_indices_per_layer_per_state": 405504,
+    "support_index_cost_ignored": true,
+    "dense_elements_all_layers_both_states": 56623104,
+    "coordinates_all_layers_both_states": 9732096
+  },
+  "recovery": {
+    "momentum_buffer": {
+      "all_energy_weighted": 0.28069162696581074,
+      "all_minimum_layer": 0.0992276055478355,
+      "late_energy_weighted": 0.3274214314260323,
+      "late_minimum_layer": 0.17569923579405378
+    },
+    "compression_residual": {
+      "all_energy_weighted": 0.25119148014407716,
+      "all_minimum_layer": 0.06283377482192287,
+      "late_energy_weighted": 0.9776531176268695,
+      "late_minimum_layer": 0.94706868335996
+    }
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "threshold_changes_after_measurement": false,
+    "momentum_buffer_passed": false,
+    "compression_residual_passed": false,
+    "all_state_families_passed": false
+  },
+  "interpretation": {
+    "accepted_claim": "The production directed-product matrix family is well aligned with the late-layer error-feedback backlog but poorly aligned with Muon momentum; the same family does not provide a compact code for both temporal states.",
+    "rejected_claim": "The dense temporal state supporting the accepted c_fc loss can be replaced by one answer-conditioned production-coordinate code per state family.",
+    "layer_specific_finding": "Late compression residual is highly codable at 0.97765 weighted recovery, but the unusually energetic layer-1 residual recovers only 0.06283 and reduces the all-layer result to 0.25119. Momentum is broadly noncodable, with 0.32742 late recovery and a 0.17570 worst late layer.",
+    "branch_decision": "Do not launch a paired temporal-state replay or compact-state candidate. Quantify the procedural recovery-versus-coordinate frontier offline before deciding whether widening is merely dense-scale or whether the optimizer itself must be redesigned in latent coordinates."
+  },
+  "authorization": {
+    "paired_temporal_state_acquisition": false,
+    "functional_compact_state_replay": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "offline_coordinate_frontier_analysis": true
+  }
+}

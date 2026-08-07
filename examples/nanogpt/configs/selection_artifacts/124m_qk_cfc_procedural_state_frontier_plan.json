@@ -1,0 +1,70 @@
+{
+  "schema_version": "mai_124m_qk_cfc_procedural_state_frontier_plan_v1",
+  "recorded_at": "2026-08-08",
+  "status": "registered_before_measurement",
+  "scientific_question": "Does answer-conditioned c_fc temporal-state recovery cross the existing gates at a still-credible procedural budget, or only after coefficient and support storage becomes dense-scale?",
+  "identity": {
+    "entrypoint_sha256": "2c02ceb42fcc5783c331101299c27a60881614b806500dc77fbf298670bb8546",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result_sha256": "621f9deaadde86823891b4a66743612d899de23704bfe00f557329105b7a9b67"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "checkpoint_next_iter": 9489,
+    "state_names": [
+      "momentum_buffer",
+      "compression_residual"
+    ],
+    "matrix_shape": [
+      3072,
+      768
+    ],
+    "late_layers": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "incoming_per_stage": 22,
+    "stage_counts": [
+      6,
+      12,
+      18,
+      24,
+      30
+    ],
+    "support_selected_from_dense_answer": true,
+    "fit_support_index_cost_ignored": true,
+    "accounting_support_dtype": "uint16",
+    "accounting_coefficient_dtype": "float32"
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "maximum_credible_stage_count": 12,
+    "threshold_changes_after_measurement": false
+  },
+  "budget_interpretation": {
+    "six_stages": "17.1875% of dense scalar count; 25.78125% of dense bytes after adding the minimum uint16 support payload.",
+    "twelve_stages": "34.375% of dense scalar count; 51.5625% of dense bytes after adding the minimum uint16 support payload.",
+    "eighteen_stages": "51.5625% of dense scalar count; 77.34375% of dense bytes after minimum support storage and therefore classified as dense-scale for this project.",
+    "twenty_four_stages": "68.75% of dense scalar count; 103.125% of dense bytes after minimum support storage, already larger than the dense FP32 state.",
+    "thirty_stages": "85.9375% of dense scalar count; 128.90625% of dense bytes after minimum support storage."
+  },
+  "interpretation_contract": {
+    "moderate_pass": "Both state families first pass by 12 stages. This establishes only terminal codability and authorizes a separately preregistered temporal-causality acquisition, not an optimizer candidate.",
+    "dense_scale_pass": "Both families pass only after 12 stages. Widening is rejected as a credible state-compression fix because minimum coefficient-plus-support storage is at least 77.34% of dense state.",
+    "no_pass": "At least one family still fails at 30 stages. The actual directed-product family is structurally misaligned with the temporal state even at a code larger than dense storage after supports.",
+    "no_training": "Every outcome is a zero-update accounting/geometry result. No model training or larger rung is authorized."
+  },
+  "authorization": {
+    "run_zero_update_coordinate_frontier": true,
+    "paired_temporal_state_acquisition": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
