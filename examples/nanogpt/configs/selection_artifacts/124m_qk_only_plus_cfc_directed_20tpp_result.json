@@ -1,0 +1,143 @@
+{
+  "artifacts": {
+    "config_sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2",
+    "provenance_sha256": "14f176a3e4687baa2d9c252c4c5a3dc685e380f50bb421a513185ced195b3240",
+    "status_sha256": "2e35b838cd9c19450c568432a6e03d567ae1c5082d3c778515bd0b9816bf63ab",
+    "training_log_sha256": "99765655005d95cd17d9729927971c230b05b302e3141f91c747cda7cd8d8f32",
+    "verifier_sha256": "2ceb90116addf1a369eb1e6cf028bbbc2cb5c7a13dfb9d0026d7b5e923f909d2"
+  },
+  "checkpoint": {
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "bytes": 1197677360,
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp/ckpt.pt",
+    "metadata_consistent": true,
+    "metadata_sha256": "11f2742c463323202359c1b17670f99e56e4dc27f751823b96a084a312e34a1e",
+    "model_tensor_bytes": 610201632,
+    "model_tensor_count": 424,
+    "next_iter": 9489,
+    "optimizer_state_present": true,
+    "optimizer_tensor_count": 1149,
+    "readable": true,
+    "rng_state_present": true,
+    "saved_at_unix": 1786118719.5870137,
+    "schema_version": "nanogpt_exact_resume_v2",
+    "sha256": "1ed9f05b34a14f0916e19a33c6cc18d6e75095b2d351a78d274d5c3b659ad58b"
+  },
+  "classification": "FAIL_QK_ONLY_PLUS_CFC_DIRECTED_124M_20TPP",
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "cfc_realized_algorithmic_parameter_reduction": 0,
+    "different_structure_authorized": false,
+    "full_attention_replacement_accepted": false,
+    "full_mlp_replacement_accepted": false,
+    "generated_v_accepted": false,
+    "inference_flop_reduction": 0,
+    "inference_parameter_reduction": 0,
+    "larger_rung_authorized": false,
+    "qk_plus_cfc_partial_architecture_accepted": false
+  },
+  "fixed_evaluation": {
+    "curve_gap_maximum": 0.005,
+    "curve_passed": false,
+    "maximum_fixed_curve_gap_to_qk_only_parent_ce": 0.00990000000000002,
+    "rows": [
+      {
+        "candidate_train_ce": 3.5213,
+        "candidate_validation_ce": 3.5036,
+        "gap_to_qk_only_parent_ce": -0.00019999999999997797,
+        "qk_only_parent_validation_ce": 3.5038,
+        "step": 2373
+      },
+      {
+        "candidate_train_ce": 3.3402,
+        "candidate_validation_ce": 3.3187,
+        "gap_to_qk_only_parent_ce": 0.000800000000000356,
+        "qk_only_parent_validation_ce": 3.3179,
+        "step": 4746
+      },
+      {
+        "candidate_train_ce": 3.2371,
+        "candidate_validation_ce": 3.2145,
+        "gap_to_qk_only_parent_ce": 0.00990000000000002,
+        "qk_only_parent_validation_ce": 3.2046,
+        "step": 7119
+      },
+      {
+        "candidate_train_ce": 3.1796,
+        "candidate_validation_ce": 3.1569,
+        "gap_to_qk_only_parent_ce": 0.008099999999999774,
+        "qk_only_parent_validation_ce": 3.1488,
+        "step": 9489
+      }
+    ],
+    "scientific_gate_passed": false,
+    "terminal_gap_to_dense_ce": 0.0021999999999997577,
+    "terminal_gap_to_qk_only_parent_ce": 0.008099999999999774,
+    "terminal_maximum": 3.1538,
+    "terminal_passed": false,
+    "terminal_validation_ce": 3.1569
+  },
+  "identity_checks": {
+    "accounting_claim_pinned": true,
+    "accounting_correction": true,
+    "accounting_science_unchanged": true,
+    "checkpoint_attention_cproj_dense": true,
+    "checkpoint_cfc_directed_product": true,
+    "checkpoint_cfc_error_feedback": true,
+    "checkpoint_cfc_error_feedback_decay1": true,
+    "checkpoint_cfc_schedule": true,
+    "checkpoint_mlp_cproj_dense": true,
+    "checkpoint_mlp_cproj_no_lowrank": true,
+    "checkpoint_mlp_cproj_no_product_fht": true,
+    "checkpoint_qk_only_generated": true,
+    "checkpoint_qk_output_gain": true,
+    "checkpoint_qk_rank64": true,
+    "checkpoint_v_dense": true,
+    "config": true,
+    "config_attention_cproj_dense": true,
+    "config_cfc_directed_product": true,
+    "config_cfc_error_feedback": true,
+    "config_cfc_error_feedback_decay1": true,
+    "config_cfc_schedule": true,
+    "config_mlp_cproj_dense": true,
+    "config_mlp_cproj_no_lowrank": true,
+    "config_mlp_cproj_no_product_fht": true,
+    "config_qk_only_generated": true,
+    "config_qk_output_gain": true,
+    "config_qk_rank64": true,
+    "config_v_dense": true,
+    "dense_v_and_both_cproj_families_owned_by_muon": true,
+    "generated_weight_count": true,
+    "mfu_passed": true,
+    "mfu_result": true,
+    "ordinary_registered_count": true,
+    "plan": true,
+    "procedural_coordinate_count": true,
+    "provenance": true,
+    "provenance_commit": true,
+    "provenance_config": true,
+    "provenance_dataset": true,
+    "provenance_mfu": true,
+    "provenance_run_id": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "status_run_name": true,
+    "thresholds_unchanged": true
+  },
+  "optimizer_ownership": {
+    "dense_muon_matrix_tensors": 36,
+    "interpretation": "12 V plus 12 attention c_proj plus 12 MLP c_proj"
+  },
+  "recorded_at": "2026-08-07T16:08:01.706303+00:00",
+  "runtime_accounting": {
+    "generated": 42467328,
+    "latent": 5007600,
+    "modules": 156,
+    "total": 85605360,
+    "trainable": 85605360
+  },
+  "schema_version": "mai_124m_qk_only_plus_cfc_directed_20tpp_verification_v1",
+  "scientific_gate_passed": false,
+  "verified": true
+}
