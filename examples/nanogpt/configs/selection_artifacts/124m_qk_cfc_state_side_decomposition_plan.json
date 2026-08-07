@@ -1,0 +1,83 @@
+{
+  "schema_version": "mai_124m_qk_cfc_state_side_decomposition_plan_v1",
+  "recorded_at": "2026-08-08",
+  "status": "registered_before_measurement",
+  "scientific_question": "Is the c_fc temporal-state mismatch caused by using output-channel mixing for a state that lies in an input-side or bilateral weight-relative tangent, or is a compact weight-relative action insufficient?",
+  "identity": {
+    "entrypoint_sha256": "7f65ebb2569eea1f2b10e7fd25bd4713f711554322585a554e00306620f0f8ba",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result_sha256": "1ab3f942a40d7f6e758adbc68985598e8ceaf8a836a0f5b223d16c018fa7e789"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "checkpoint_next_iter": 9489,
+    "state_names": [
+      "momentum_buffer",
+      "compression_residual"
+    ],
+    "matrix_shape": [
+      3072,
+      768
+    ],
+    "late_layers": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "families": [
+      "output6",
+      "input_full",
+      "output6_then_input",
+      "input_then_output6"
+    ],
+    "output_schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "input_action": "unrestricted_right_multiplier_W_times_B",
+    "bilateral_orders": [
+      "output6_then_input",
+      "input_then_output6"
+    ],
+    "support_selected_from_dense_answer": true
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "candidate_priority": [
+      "input_full",
+      "output6_then_input",
+      "input_then_output6"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "accounting": {
+    "output6_coefficients_per_layer_per_state": 405504,
+    "output6_minimum_bytes_with_uint16_supports": 2433024,
+    "input_full_coefficients_per_layer_per_state": 589824,
+    "input_full_bytes": 2359296,
+    "bilateral_minimum_bytes": 4792320,
+    "dense_state_bytes": 9437184,
+    "bilateral_minimum_byte_ratio_to_dense": 0.5078125
+  },
+  "interpretation_contract": {
+    "input_pass": "Both states lie in the input-side column-space action W times B at the frozen gates. This identifies a complementary latent-side decoder but authorizes only further causal theory, not implementation.",
+    "bilateral_pass": "Neither side alone suffices but one fixed sequential bilateral decomposition passes both states. This identifies a two-sided state geometry at a minimum 50.78% dense byte budget and still does not authorize training.",
+    "fail": "No input-side or sequential bilateral family passes. The dense temporal state has a functionally relevant additive-normal component outside the tested compact weight-relative tangents; latent-native design must change the decoder, not merely switch sides.",
+    "oracle_boundary": "Every family sees the dense terminal answer. Output supports are answer-selected and input action is unrestricted. The analysis tests representation, not online causality."
+  },
+  "authorization": {
+    "run_zero_update_side_decomposition": true,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
