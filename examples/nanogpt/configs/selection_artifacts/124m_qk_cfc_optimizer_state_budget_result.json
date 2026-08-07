@@ -1,0 +1,82 @@
+{
+  "schema_version": "mai_124m_qk_cfc_optimizer_state_budget_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-08T06:14:33+08:00",
+  "classification": "CFC_TEMPORAL_STATE_IS_DENSE_SCALE",
+  "identity": {
+    "execution_git_commit": "78f323a8443953b4eedb3ed6df0041bec8bf236f",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_optimizer_state_budget_plan.json",
+    "plan_sha256": "a7ee199f5b4adcecdbf08b1f9aa294a55faf3e28616ae19affec5a0f9e0ea2cd",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "dd735a6ae253c7d955af9e25a2943fea4c6a6018bddd9fe166653541b1b02e73",
+    "parent_result_sha256": "dda6c01c666607eef6623a3b4c5e2189958a358b9972d1c85a2413a5f68c03f3"
+  },
+  "execution": {
+    "device": "cuda",
+    "wall_seconds": 2.6910534,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "checkpoint_parameter_updates": 0,
+    "result_bytes": 45096,
+    "result_sha256": "06999e619387c5d6207f4e9a54f44a7ba9e88cc349fd6ccfd0a0d0d4cdcdc7b1"
+  },
+  "accounting": {
+    "dense_elements_per_layer_per_state": 2359296,
+    "dense_elements_all_layers_both_states": 56623104,
+    "oracle_coordinate_budget_per_layer_per_state": 405504,
+    "oracle_coordinate_budget_all_layers_both_states": 9732096,
+    "oracle_budget_fraction_of_dense_state": 0.171875,
+    "equal_budget_intrinsic_rank": 108,
+    "sparse_index_cost_ignored": true
+  },
+  "recovery": {
+    "momentum_buffer": {
+      "all_energy_weighted_low_rank": 0.7959716662473485,
+      "all_minimum_layer_low_rank": 0.6471001121377806,
+      "all_energy_weighted_sparse": 0.6476065429322653,
+      "all_minimum_layer_sparse": 0.6236478309988648,
+      "late_energy_weighted_low_rank": 0.6982041778452867,
+      "late_minimum_layer_low_rank": 0.6471001121377806,
+      "late_energy_weighted_sparse": 0.6287228056716849,
+      "late_minimum_layer_sparse": 0.6236478309988648,
+      "late_energy_weighted_rank_80pct": 188.60184716559309,
+      "late_rank80_intrinsic_dof_ratio_to_dense": 0.291585188487713
+    },
+    "compression_residual": {
+      "all_energy_weighted_low_rank": 0.8613648142420262,
+      "all_minimum_layer_low_rank": 0.4367705446535879,
+      "all_energy_weighted_sparse": 0.9218770517262234,
+      "all_minimum_layer_sparse": 0.6629205304740886,
+      "late_energy_weighted_low_rank": 0.4886107687096341,
+      "late_minimum_layer_low_rank": 0.4367705446535879,
+      "late_energy_weighted_sparse": 0.7117452899300233,
+      "late_minimum_layer_sparse": 0.6833282960124502,
+      "late_energy_weighted_rank_80pct": 315.09566435797524,
+      "late_rank80_intrinsic_dof_ratio_to_dense": 0.4706483450154817
+    }
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "threshold_changes_after_measurement": false,
+    "momentum_buffer_passed": false,
+    "compression_residual_passed": false,
+    "all_state_families_compact": false
+  },
+  "interpretation": {
+    "accepted_claim": "The accepted procedural c_fc path depends on dense-scale Muon momentum and error-feedback state at its terminal checkpoint. A full procedural-coordinate allowance per state family is insufficient, including under oracle low-rank and index-free sparse representations.",
+    "rejected_claim": "The strong c_fc cross-entropy result already constitutes a trainable-state-compressed Mapping Network replacement.",
+    "boundary": "This terminal-state oracle rejects naive explicit low-rank and unstructured-sparse state. It does not reject a nonlinear causal temporal coder or a shared code learned across the optimizer-state trajectory.",
+    "next_theory_gate": "Before another training variant, test whether the paired c_fc optimizer-state trajectory admits a shared time-conditioned code within the same coordinate budget. If it does not, retain c_fc only as a functional partial replacement and account dense optimizer memory explicitly."
+  },
+  "authorization": {
+    "functional_compact_state_replay": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "shared_temporal_code_analysis": true
+  }
+}
