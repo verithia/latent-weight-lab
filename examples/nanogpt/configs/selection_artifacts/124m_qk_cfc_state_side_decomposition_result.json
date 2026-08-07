@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_124m_qk_cfc_state_side_decomposition_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-08T06:34:39+08:00",
+  "classification": "WEIGHT_RELATIVE_TEMPORAL_STATE_INSUFFICIENT",
+  "identity": {
+    "execution_git_commit": "3127c07d779c353a6fd261d3d6a6fcf2f3aba8cf",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_state_side_decomposition_plan.json",
+    "plan_sha256": "6a5fc577d77dd2730aa9e384c0fb9d2f24f289c1526a87aee92d9ae1baf78068",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "7f65ebb2569eea1f2b10e7fd25bd4713f711554322585a554e00306620f0f8ba",
+    "parent_result_sha256": "1ab3f942a40d7f6e758adbc68985598e8ceaf8a836a0f5b223d16c018fa7e789"
+  },
+  "execution": {
+    "device": "cuda",
+    "wall_seconds": 3.7283575534820557,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "checkpoint_parameter_updates": 0,
+    "result_bytes": 73494,
+    "result_sha256": "74c29a5eaa309b85a2a110cc1edd287e0418066c0fd122cd4bf307dd166f3e79"
+  },
+  "accounting": {
+    "dense_state_bytes_per_layer": 9437184,
+    "output6_minimum_bytes_with_uint16_supports": 2433024,
+    "input_full_bytes": 2359296,
+    "bilateral_minimum_bytes": 4792320,
+    "bilateral_minimum_byte_ratio_to_dense": 0.5078125
+  },
+  "recovery": {
+    "momentum_buffer": {
+      "output6": {"all": 0.28069162696581074, "late": 0.32742143142603236, "late_minimum_layer": 0.17569923579405378},
+      "input_full": {"all": 0.333666976096196, "late": 0.2648864804665903, "late_minimum_layer": 0.25882465021035095},
+      "output6_then_input": {"all": 0.49373863452867245, "late": 0.5038568681774659, "late_minimum_layer": 0.3958527492551118},
+      "input_then_output6": {"all": 0.5034504669877607, "late": 0.5048112874649183, "late_minimum_layer": 0.39895682540510924}
+    },
+    "compression_residual": {
+      "output6": {"all": 0.2511914801440773, "late": 0.9776531176268696, "late_minimum_layer": 0.94706868335996},
+      "input_full": {"all": 0.17372726730640056, "late": 0.27757996794346124, "late_minimum_layer": 0.2673981818789106},
+      "output6_then_input": {"all": 0.3568759939713247, "late": 0.9832906946405757, "late_minimum_layer": 0.9603641554135985},
+      "input_then_output6": {"all": 0.33259367487864794, "late": 0.9282430923771939, "late_minimum_layer": 0.9053334110708027}
+    }
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "threshold_changes_after_measurement": false,
+    "selected_family": null
+  },
+  "interpretation": {
+    "accepted_claim": "Changing the side of the weight-relative action or combining both sides does not compactly encode the useful dense c_fc optimizer state.",
+    "momentum_finding": "The best bilateral order recovers only 0.50345 all-layer and 0.50481 late momentum energy, with a 0.39896 worst late layer.",
+    "feedback_finding": "Output-side geometry explains late feedback but not its energetic early-layer backlog; the best bilateral all-layer recovery is only 0.35688.",
+    "branch_decision": "Close input-side and bilateral retrofits. A compressed design must originate optimizer state in latent coordinates and include a decoder tangent with additive-normal capacity; it cannot compress an already-dense Muon history after the fact."
+  },
+  "authorization": {
+    "paired_temporal_state_acquisition": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "additive_normal_diagnostic": true,
+    "latent_native_optimizer_theory": true
+  }
+}
