@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_attention_muon_layer_attribution_sealed_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "REJECT_ATTENTION_LAYERWISE_ORBIT_ATTRIBUTION",
+  "execution": {
+    "host": "PRO6",
+    "source_commit": "71a3323d6763ef21f6bc1660e034ef7420c9c7b8",
+    "elapsed_seconds": 6.897111177444458,
+    "parameter_updates": 0,
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_muon_layer_attribution_v1/result.json",
+    "raw_result_sha256": "9fc086a6ed9513907e4a7ee2070b122520f53306c7e50f79ca02dc44614567bb",
+    "cells_csv_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_muon_layer_attribution_v1/attention_muon_layer_attribution_cells.csv",
+    "cells_csv_sha256": "98edd2aa0533366e3d7bd446fa4f82b849a01dbe0d31b8f4a8c08b03be307004",
+    "focused_tests": "7 passed",
+    "remote_worktree_clean": true,
+    "gpu_idle_after_execution": true
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_muon_layer_attribution_plan.json",
+    "plan_sha256": "3e2ef19baedf2108b939395e7d19e821f670dd014845b0018cdc51e22484fd3b",
+    "entrypoint": "examples.nanogpt.analyze_attention_muon_layer_attribution",
+    "entrypoint_sha256": "fde7d019779f616b54538ce5b9645407abe7627e8d7e6984d2030e64193c9e37",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "protocol": {
+    "direction": "exact dense Muon applied_direction_per_lr",
+    "layers": 12,
+    "early_steps": [0, 594, 1188],
+    "late_steps": [1782, 2372],
+    "selected_layers_per_target": 6,
+    "v_chart": "right Cayley skew rank 32",
+    "attention_cproj_chart": "left Cayley skew rank 16"
+  },
+  "summaries": {
+    "v": {
+      "early_selected_layers": [2, 1, 3, 5, 4, 0],
+      "late_selected_layers": [2, 1, 3, 4, 0, 7],
+      "early_late_spearman": 0.958041958041958,
+      "top_half_jaccard": 0.7142857142857143,
+      "late_selected_active_recovery": 0.04954323233792062,
+      "late_unselected_active_recovery": 0.040376659519027816,
+      "late_selected_over_unselected": 1.2270265279021655,
+      "late_selected_active_fraction_of_full_orbit": 0.14758375469199395,
+      "failed_checks": ["absolute_recovery", "fraction_of_full_orbit", "separation"]
+    },
+    "cproj": {
+      "early_selected_layers": [2, 1, 0, 3, 4, 5],
+      "late_selected_layers": [2, 1, 3, 4, 5, 7],
+      "early_late_spearman": 0.916083916083916,
+      "top_half_jaccard": 0.7142857142857143,
+      "late_selected_active_recovery": 0.020124193987957076,
+      "late_unselected_active_recovery": 0.017553591559029046,
+      "late_selected_over_unselected": 1.1464431036966785,
+      "late_selected_active_fraction_of_full_orbit": 0.06979216366940354,
+      "failed_checks": ["absolute_recovery", "fraction_of_full_orbit", "separation"]
+    }
+  },
+  "interpretation": {
+    "supported": "Layer ordering is temporally stable, but the active V and attention c_proj Cayley charts recover only tiny fractions of exact applied Muon directions and do not create a material top-half separation.",
+    "excluded": "Paper-style layer masking is not a justified repair for V or attention c_proj in the tested Cayley family.",
+    "scope": "This rejects the tested target-specific orbit family; it does not prove that every possible fixed nonlinear decoder is impossible."
+  },
+  "decision": {
+    "passed_targets": [],
+    "same_gauge_functional_gate_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "accepted_endpoint": "124M/20TPP QK-only with dense V, dense attention c_proj, and dense MLP",
+    "next_action": "Do not launch another V, attention c_proj, or MLP structural arm without a new fixed-decoder theory that passes an offline exact-Muon alignment gate."
+  }
+}
