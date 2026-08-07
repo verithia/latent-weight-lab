@@ -41,6 +41,7 @@ from latent_weight_lab.block_fht import block_fht_grad_latent, block_fht_slice
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PLAN_SCHEMA = "mai_124m_mlp_cproj_paper_activation_oracle_plan_v1"
+TIGHT_PLAN_SCHEMA = "mai_124m_mlp_cproj_paper_activation_oracle_plan_v2_tight"
 RESULT_SCHEMA = "mai_124m_mlp_cproj_paper_activation_oracle_result_v1"
 LAYERS = (8, 9, 10, 11)
 PROBE_STEPS = (0, 593, 1187, 1484, 1781, 2078)
@@ -55,9 +56,13 @@ FUTURE_STEP_BY_PROBE = {
 }
 
 
-def activation_scale(initial_weight: torch.Tensor) -> torch.Tensor:
-    """Frozen signed-tanh range: twice the step-zero maximum magnitude."""
-    return 2.0 * initial_weight.abs().amax().clamp_min(1e-12)
+def activation_scale(
+    initial_weight: torch.Tensor, multiplier: float = 2.0
+) -> torch.Tensor:
+    """Frozen signed-tanh range from the step-zero maximum magnitude."""
+    if not math.isfinite(multiplier) or multiplier <= 1.0:
+        raise ValueError("activation scale multiplier must be finite and > 1")
+    return float(multiplier) * initial_weight.abs().amax().clamp_min(1e-12)
 
 
 def activation_bias(initial_weight: torch.Tensor, scale: torch.Tensor) -> torch.Tensor:
@@ -135,7 +140,8 @@ def classify(
 
 
 def validate_plan(plan: dict[str, Any]) -> None:
-    if plan.get("schema_version") != PLAN_SCHEMA:
+    schema = plan.get("schema_version")
+    if schema not in {PLAN_SCHEMA, TIGHT_PLAN_SCHEMA}:
         raise ValueError("paper activation oracle plan mismatch")
     analysis = plan.get("analysis", {})
     expected = {
@@ -146,7 +152,11 @@ def validate_plan(plan: dict[str, Any]) -> None:
         "heldout_probe_steps": list(HELDOUT_PROBE_STEPS),
         "future_step_by_probe": {str(k): v for k, v in FUTURE_STEP_BY_PROBE.items()},
         "activation": "signed_scaled_tanh",
-        "activation_scale": "2*max_abs_step0_per_layer",
+        "activation_scale": (
+            "2*max_abs_step0_per_layer"
+            if schema == PLAN_SCHEMA
+            else "sqrt(10/9)*max_abs_step0_per_layer"
+        ),
         "activation_bias": "s*atanh(W_step0/s)",
         "fixed_operator": "production_seeded_BlockFHT",
         "latent_ratio": 0.01,
@@ -161,6 +171,13 @@ def validate_plan(plan: dict[str, Any]) -> None:
     for key, value in expected.items():
         if analysis.get(key) != value:
             raise ValueError(f"paper activation analysis field changed: {key}")
+    if schema == TIGHT_PLAN_SCHEMA:
+        if analysis.get("activation_scale_multiplier") != math.sqrt(10.0 / 9.0):
+            raise ValueError("tight activation multiplier changed")
+        if analysis.get("minimum_step0_activation_derivative") != 0.1:
+            raise ValueError("tight activation derivative floor changed")
+        if analysis.get("step0_jacobian_condition_ceiling") != 10.0:
+            raise ValueError("tight activation condition ceiling changed")
     if plan.get("decision_rule", {}).get("thresholds") != {
         "heldout_current_functional_image_recovery_minimum": 0.80,
         "heldout_future_functional_tangent_recovery_minimum": 0.80,
@@ -203,6 +220,10 @@ def main() -> None:
         REPO_ROOT / identity["exact_state_result"]: identity["exact_state_result_sha256"],
         REPO_ROOT / identity["quadratic_result"]: identity["quadratic_result_sha256"],
     }
+    if "parent_activation_result" in identity:
+        pinned[REPO_ROOT / identity["parent_activation_result"]] = identity[
+            "parent_activation_result_sha256"
+        ]
     for path, expected in pinned.items():
         if file_sha256(path) != expected:
             raise ValueError(f"pinned artifact SHA-256 mismatch: {path}")
@@ -261,6 +282,9 @@ def main() -> None:
         probes[step] = payload
 
     cgls_iterations = int(plan["analysis"]["cgls_iterations"])
+    scale_multiplier = float(
+        plan["analysis"].get("activation_scale_multiplier", 2.0)
+    )
     latent_ratio = float(plan["analysis"]["latent_ratio"])
     fht_layers = int(plan["analysis"]["block_fht_layers"])
     base_seed = int(config["block_fht_seed"])
@@ -274,7 +298,7 @@ def main() -> None:
     for layer in LAYERS:
         name = parameter_name(layer)
         initial = snapshots[0]["parameters"][name].float().to(args.device)
-        scale = activation_scale(initial)
+        scale = activation_scale(initial, scale_multiplier)
         bias = activation_bias(initial, scale)
         size = initial.numel()
         latent_dim = max(1, round(size * latent_ratio))
@@ -453,7 +477,8 @@ def main() -> None:
         },
         "mechanism": {
             "activation": "signed_scaled_tanh",
-            "scale": "2*max_abs_step0_per_layer",
+            "scale": plan["analysis"]["activation_scale"],
+            "scale_multiplier": scale_multiplier,
             "bias": "s*atanh(W_step0/s)",
             "jacobian": "diag(1-(g(z)/s)^2)*A_BlockFHT",
             "latent_ratio": latent_ratio,

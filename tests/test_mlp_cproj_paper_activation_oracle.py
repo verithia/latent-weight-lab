@@ -37,6 +37,14 @@ def test_signed_tanh_derivative_matches_finite_difference() -> None:
     torch.testing.assert_close(finite, derivative * direction, atol=1e-9, rtol=1e-8)
 
 
+def test_tight_condition_scale_has_derivative_floor_one_tenth() -> None:
+    initial = torch.tensor([-2.0, 0.0, 1.0])
+    scale = activation_scale(initial, multiplier=(10.0 / 9.0) ** 0.5)
+    bias = activation_bias(initial, scale)
+    _, derivative = activated_weight_and_derivative(bias, scale)
+    torch.testing.assert_close(derivative.amin(), torch.tensor(0.1), atol=1e-6, rtol=1e-6)
+
+
 def test_cgls_recovers_explicit_linear_system() -> None:
     matrix = torch.tensor(
         [[2.0, -1.0], [0.5, 1.0], [1.0, 1.5]], dtype=torch.float32
