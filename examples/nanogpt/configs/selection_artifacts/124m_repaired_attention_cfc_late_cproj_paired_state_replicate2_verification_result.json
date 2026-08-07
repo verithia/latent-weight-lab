@@ -1,0 +1,161 @@
+{
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "zero_update_state_transport_analysis": true
+  },
+  "classification": "ACCEPTED_SAME_RUN_CPROJ_PARAMETER_OPTIMIZER_TRAJECTORY",
+  "curve_reproduction": {
+    "method": "two-sided 95% prediction interval for one future normal observation: mean +/- t(df=3,0.975)*s*sqrt(1+1/n)",
+    "passed": true,
+    "rows": [
+      {
+        "inside_interval": true,
+        "observed_validation_ce": 4.2244,
+        "prediction_lower": 4.218606552514263,
+        "prediction_upper": 4.228743447485737,
+        "step": 594
+      },
+      {
+        "inside_interval": true,
+        "observed_validation_ce": 3.854,
+        "prediction_lower": 3.8415850923954626,
+        "prediction_upper": 3.8679149076045376,
+        "step": 1188
+      },
+      {
+        "inside_interval": true,
+        "observed_validation_ce": 3.7027,
+        "prediction_lower": 3.6890472377684853,
+        "prediction_upper": 3.7172527622315146,
+        "step": 1782
+      },
+      {
+        "inside_interval": true,
+        "observed_validation_ce": 3.6401,
+        "prediction_lower": 3.6264812853412662,
+        "prediction_upper": 3.653568714658734,
+        "step": 2373
+      }
+    ]
+  },
+  "execution": {
+    "entrypoint": "examples.nanogpt.verify_late_cproj_paired_state_replicate",
+    "git_commit": "a40ee0d6e25b799ac776f8cef9e7a4cd571f8a5e",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "config_sha256": "d21065ad20593da7fbf3a1a00a450c87b47a6fd9071133e8b677f2b8c8e585e5",
+    "plan_sha256": "d4297021bfe3b45b1058f8456cb4523b48582606a91668043b742462e630a6bf",
+    "provenance_sha256": "a17c9241cc341291c395f2b9c2522a5250f611b56b93e5f40079fae6399a1728",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467",
+    "status_sha256": "6601f4c0241a81b6381b49b53041f1bb4e26cfe1541afd413bd862792ed735b6",
+    "training_log_sha256": "1932516066475f0dad8b35738ba943db82d2fc8060f98b03227a3b2e278d0835"
+  },
+  "inventory": {
+    "parameter_count_per_record": 4,
+    "probe_count": 10,
+    "probe_sha256_by_step": {
+      "0": "adb8a4dc9e2ab2aef7c4e1d8dd2b07dccaae9c42978af4b7c2ecb0c2958fe9ed",
+      "1187": "47dd2780c3f73846c679df2c7201f922ea15c351f84434dd548ef79859cbe46f",
+      "1484": "b9632a1c7a7935770b998448ac5e80e5fae42034c872c9fd601b630641e6b995",
+      "1781": "9cf59b86256bf5e90807e8234fe656204a774aef75dc3bf710fe1d1d8e1154f1",
+      "2078": "5bf5433b4df1e759a8802d5891a9c257b178ed228107af0807d95b864da27283",
+      "2372": "76d715576534a6075b5136a1084cffe56c14496e894350705cce51f506f71cab",
+      "296": "1f8c5ffe358037bd83d985118d6d26ca890a9dd9beaa01086a0ab4a85cdddb82",
+      "593": "3e733715d66da6666e73fbdaa351619322afff50524ff2b35473f1d82d155839",
+      "890": "68f5ce093063e020f813967b28410208ac3f3902250c351d6297977b8831a53c",
+      "98": "7fb03f31b2b2581ad8347deb9bce5c9f6443aa751719654e76fda8347f5fd3df"
+    },
+    "snapshot_count": 25,
+    "snapshot_sha256_by_step": {
+      "0": "31c264e501d450843684368e223e1082c0a5738d08acee1b3de74eaa44e840f9",
+      "1089": "53be4fa2fc4d711b6204e2dd9c164a03bca3c7d813559c564906367da4bd1cdb",
+      "1188": "755fa070fd95cd2757b3499c892b6b2c06f86259fc33d0db986240649890cac1",
+      "1287": "689315019f1e43f29b1f874e24f431cd9d6523ee593126f192782654ea8cc196",
+      "1386": "9e0cc3a4fbddeb99af515264cce436df5f85b7aaafdef6d36da4b9ac715da8ec",
+      "1485": "c7425baef361473e41e6176a6ba7907f83a04773168c8f6cd1d8781638b2fc82",
+      "1584": "9c9b8d491253b5c93ff1d37e20299ef34eff267d4e9cd5be163122ffbd894f25",
+      "1683": "45f2820afda81b828488c8d226c9a12e92b9a6291835be0cedc133f8bf8bd606",
+      "1782": "f25f74dbd6a6371d788739e5d6e16c888af53a238556406179498a553246e1b9",
+      "1881": "6cf5e4ccc4f8558f4874a1ab9021f5c2024f23c016e573a4a02644f90b1319dd",
+      "198": "1f436da28977306deaf19c0e30430ab09b255f22453b7ad13f0ef3efc0180425",
+      "1980": "89440fc31068b9a9b8a739a846dcf2f708e647ec65db8aa7f170aa8492072346",
+      "2079": "64d176490f00b2335758e12168d32859587b5df9c492e4aa500fac4787b8759d",
+      "2178": "56bd69da4c2b0d58cfe8d65617f0abfaacf0f482b3171896cc6e9c44fc9622d6",
+      "2277": "d0453a0e3cb2b8fad37cb377e1d8e38e15fb8aaa1bc1d683ab08c0beb0990c00",
+      "2373": "62e384bd17a03ff4d9ed3c9011f1d9eba6d3a77c7683f6410cef3de0f2f25259",
+      "297": "54be5d33d62698092dae882759b98f36e3e93b600dc5b2455866427f611893fd",
+      "396": "d05e5d7e93be7f93e6ec629b0ebeefd4bed6e59472161f43d52c3b067c5358b1",
+      "495": "18a0cf7ccef4573cf885d8deb3a712331ba238b8420d5106a3f8e3da67d0226c",
+      "594": "2e7922e8d96f795409bf97e58d3febb6ebeae53ec1de70ddff83058506aa8b00",
+      "693": "0aec97320b347f4e1e0d4e39cde9f5e7d90707a9c4341f8fb61c30a2a2a274cb",
+      "792": "b4da797e87e2b37b238e54ffc2d5bc55a2313e0b8c06a68edc2d0a179e2e474e",
+      "891": "d02cfd330240d74cd80a7eb6da04589adae5cc4d57b4ff3a0190105a8b44202b",
+      "99": "62f63f9a71ae7a56347d726b05c9dfecd4ba461b3fb37f70a3c312b4ef2d468e",
+      "990": "fe493720fe0cb38456bd3de8e848f63cf1af95774308f373e034a3f8e5b46b61"
+    }
+  },
+  "passed": true,
+  "recorded_at": "2026-08-07T02:39:17.690580+00:00",
+  "same_run_pairing": {
+    "bitwise_equal": true,
+    "rows": [
+      {
+        "pre_step": 0,
+        "snapshot_step": 0,
+        "state": "before"
+      },
+      {
+        "pre_step": 98,
+        "snapshot_step": 99,
+        "state": "after"
+      },
+      {
+        "pre_step": 296,
+        "snapshot_step": 297,
+        "state": "after"
+      },
+      {
+        "pre_step": 593,
+        "snapshot_step": 594,
+        "state": "after"
+      },
+      {
+        "pre_step": 890,
+        "snapshot_step": 891,
+        "state": "after"
+      },
+      {
+        "pre_step": 1187,
+        "snapshot_step": 1188,
+        "state": "after"
+      },
+      {
+        "pre_step": 1484,
+        "snapshot_step": 1485,
+        "state": "after"
+      },
+      {
+        "pre_step": 1781,
+        "snapshot_step": 1782,
+        "state": "after"
+      },
+      {
+        "pre_step": 2078,
+        "snapshot_step": 2079,
+        "state": "after"
+      },
+      {
+        "pre_step": 2372,
+        "snapshot_step": 2373,
+        "state": "after"
+      }
+    ],
+    "terminal_snapshot_bitwise_equal_to_checkpoint": true
+  },
+  "schema_version": "mai_124m_late_cproj_paired_state_confirmatory_verification_v1"
+}
