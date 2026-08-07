@@ -1,0 +1,48 @@
+{
+  "artifact_kind": "124m_qk_cfc_20tpp_late_capacity_gate_result",
+  "schema_version": "mai_124m_qk_cfc_20tpp_late_capacity_gate_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "REJECT_LATE_LAYER_CAPACITY_REPAIR",
+  "plan_sha256": "be04bff6443228d756b4b374fe2f4fd3bb2f7275bb224296963931c94c49820a",
+  "result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/scientific/late_capacity_gate/result.json",
+    "sha256": "10d32d9c0476ff8e8a15e18c4009c2fd27a424864fcfa967666083333318665e"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "54d47584b305ef037f8ff2d69707cf7824815d32",
+    "entrypoint_sha256": "f89fc4d6e72f8ede9f344bdb79994de19acb7c7605f6a24db8e2a23847a7bd8e",
+    "wall_seconds": 9.941203,
+    "parameter_updates_to_source": 0,
+    "direct_foreground_polling": true
+  },
+  "failure_phase_metrics": {
+    "7119": {
+      "fit_recovery_improvement": 0.0946138294,
+      "holdout_recovery_improvement": 0.0000024504,
+      "holdout_margin_over_random": 0.0000289519,
+      "candidate_minus_current_mean_ce": 0.0000058115,
+      "paired_upper_confidence_bound_ce": 0.0003810314
+    },
+    "9489": {
+      "fit_recovery_improvement": 0.0939201581,
+      "holdout_recovery_improvement": 0.0000026503,
+      "holdout_margin_over_random": 0.0000208301,
+      "candidate_minus_current_mean_ce": -0.0000756383,
+      "paired_upper_confidence_bound_ce": 0.0003918185
+    }
+  },
+  "interpretation": [
+    "At a 16K-token diagnostic window, extra late-layer coordinates fit the observed task tangent but do not transfer to an independent 16K-token tangent.",
+    "Task-directed wider connectivity is effectively tied with the equal-coordinate random control on the holdout tangent.",
+    "The held-out one-step CE action is neutral rather than a material improvement.",
+    "This freezes rejection for the small-window protocol only; the production optimizer averages 262K tokens per update, so an exact-effective-batch stability audit is required before a global capacity conclusion."
+  ],
+  "authorization": {
+    "late_capacity_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "exact_effective_batch_zero_update_audit": true
+  }
+}

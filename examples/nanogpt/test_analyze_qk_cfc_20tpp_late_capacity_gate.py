@@ -48,7 +48,7 @@ def test_registered_snapshot_inventory_accepts_verified_superset() -> None:
 
 
 def _phase(recovery_current: float, recovery_wide: float, recovery_random: float):
-    return {
+    value = {
         window: {
             "current_132": {"late_positive_line_recovery": recovery_current},
             "late_wide_176": {"late_positive_line_recovery": recovery_wide},
@@ -56,6 +56,8 @@ def _phase(recovery_current: float, recovery_wide: float, recovery_random: float
         }
         for window in ("fit", "holdout")
     }
+    value["dense_cross_window"] = {"late": {"cosine": 0.5}}
+    return value
 
 
 def _functional(mean: float, upper: float):
@@ -87,9 +89,36 @@ def test_classify_promotes_only_complete_causal_pass() -> None:
         "maximum_preservation_recovery_regression": 0.02,
         "maximum_functional_upper_bound_regression_ce": 0.001,
         "minimum_one_phase_mean_ce_improvement": 0.0005,
+        "minimum_dense_cross_window_cosine": 0.1,
     }
     assert classify(rows, functional, rule)["passes"] is True
     rows["9489"]["holdout"]["late_wide_176"][
         "late_positive_line_recovery"
     ] = 0.53
     assert classify(rows, functional, rule)["passes"] is False
+
+
+def test_classify_separates_unstable_tangent_from_capacity_failure() -> None:
+    rows = {
+        "4746": _phase(0.60, 0.60, 0.40),
+        "7119": _phase(0.55, 0.62, 0.56),
+        "9489": _phase(0.50, 0.58, 0.52),
+    }
+    rows["7119"]["dense_cross_window"]["late"]["cosine"] = 0.01
+    functional = {
+        "7119": _functional(-0.0007, 0.0002),
+        "9489": _functional(-0.0007, 0.0002),
+    }
+    rule = {
+        "failure_steps": [7119, 9489],
+        "preservation_step": 4746,
+        "minimum_failure_recovery_improvement": 0.05,
+        "minimum_holdout_margin_over_random": 0.03,
+        "maximum_preservation_recovery_regression": 0.02,
+        "maximum_functional_upper_bound_regression_ce": 0.001,
+        "minimum_one_phase_mean_ce_improvement": 0.0005,
+        "minimum_dense_cross_window_cosine": 0.1,
+    }
+    result = classify(rows, functional, rule)
+    assert result["passes"] is False
+    assert result["classification"] == "REJECT_CAPACITY_DUE_TO_UNSTABLE_TASK_TANGENT"

@@ -1,0 +1,70 @@
+{
+  "schema_version": "mai_124m_qk_cfc_20tpp_late_capacity_gate_plan_v1",
+  "status": "registered_before_any_production_batch_capacity_measurement",
+  "recorded_at": "2026-08-08",
+  "scientific_question": "At the exact 262144-token effective batch used by the source run, is the late c_fc stateless-Muon tangent stable across disjoint windows, and if so does late-only 176-coordinate capacity generalize?",
+  "theory_chain": [
+    "The 20TPP same-run analysis localized a late pre-GELU capacity drift but retained strongly beneficial c_fc/c_proj co-adaptation.",
+    "The preregistered 16K-token audit showed +0.094 fit recovery from added coordinates but no disjoint-window transfer, which identifies chart-selection noise at that diagnostic scale.",
+    "The real optimizer averages 32 sequences across 8 microbatches, or 262144 tokens per update; the small-window result cannot establish production tangent stability.",
+    "A smooth mapping chart requires a stable local task direction. Capacity is tested only after that premise passes at the exact effective batch."
+  ],
+  "identity": {
+    "entrypoint_sha256": "31b7a5b1b28868f5410242a81fd82f74afd4dcfda1b40609c91816ae37b21e31",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "phase_result_sha256": "667221584b7fe54c5ca63f383e9c9d738f08509d4918accafe77855f9e743165",
+    "verification_sha256": "441e6c319f4cdf19f3153dbd08b615b594b2009ba3705f9b6fc0ffc794933e53",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "snapshot_sha256_by_step": {
+    "4746": "28a0de6ac7be3f0064432ba22ef03a4b5a98b50c401044998daef67a483b8523",
+    "7119": "9662bdd85a0b0ebbfc6c9a752d6a491f5a1b565e76a5f50905aaaa4fd6b61608",
+    "9489": "c5031a5721f82dcbfc1b863a5be969f8bd7f4aa64fa4f9c1e05140142ce5f3dc"
+  },
+  "protocol": {
+    "steps": [4746, 7119, 9489],
+    "preservation_step": 4746,
+    "failure_steps": [7119, 9489],
+    "late_layers": [8, 9, 10, 11],
+    "current_schedule": [22, 22, 22, 22, 22, 22],
+    "wide_schedule": [30, 30, 29, 29, 29, 29],
+    "ridge_ratio": 0.000001,
+    "chunk_size": 256,
+    "radius_ratio": 1.0,
+    "fit_seed": 2026080831,
+    "holdout_seed": 2026080837,
+    "gradient_batch_size": 32,
+    "gradient_batches": 8,
+    "tokens_per_gradient_window": 262144,
+    "source_tokens_per_optimizer_step": 262144,
+    "validation_seed": 2026080841,
+    "validation_batch_size": 4,
+    "validation_batches": 8,
+    "random_seed": 2026080847,
+    "confidence_z": 1.96,
+    "parameter_updates_to_source": 0,
+    "execution": "direct foreground polling through process exit; expected under five minutes",
+    "watchdog": false,
+    "callback": false
+  },
+  "decision_rule": {
+    "failure_steps": [7119, 9489],
+    "preservation_step": 4746,
+    "minimum_dense_cross_window_cosine": 0.1,
+    "minimum_failure_recovery_improvement": 0.03,
+    "minimum_holdout_margin_over_random": 0.02,
+    "maximum_preservation_recovery_regression": 0.02,
+    "maximum_functional_upper_bound_regression_ce": 0.001,
+    "minimum_one_phase_mean_ce_improvement": 0.0005,
+    "stable_tangent_pass": "Only if the dense late task tangent cosine is at least 0.1 at both failure phases may chart capacity be interpreted.",
+    "capacity_pass": "With a stable tangent, require wider late capacity to improve both fit and holdout recovery, beat random connectivity, preserve 10TPP, and pass held-out CE.",
+    "unstable_tangent_outcome": "Reject capacity as the immediate intervention and move to a separately preregistered stability/alignment mechanism inspired by the paper's L_stab/L_align terms.",
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "run_zero_update_gate": true,
+    "implementation_or_mfu_preflight_only_after_pass": true,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}

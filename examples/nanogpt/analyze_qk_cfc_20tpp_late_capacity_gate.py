@@ -293,7 +293,16 @@ def classify(
     functional_rows = {
         step: functional[step][wide]["vs_current"] for step in failure_steps
     }
+    dense_cross_window_cosines = {
+        step: float(phase_rows[step]["dense_cross_window"]["late"]["cosine"])
+        for step in failure_steps
+    }
+    tangent_is_stable = min(dense_cross_window_cosines.values()) >= float(
+        rule.get("minimum_dense_cross_window_cosine", -1.0)
+    )
     passes = (
+        tangent_is_stable
+        and
         min(
             value
             for step in failure_improvements.values()
@@ -315,13 +324,17 @@ def classify(
         )
         <= -float(rule["minimum_one_phase_mean_ce_improvement"])
     )
+    if passes:
+        classification = "PROMOTE_LATE_LAYER_CAPACITY_TO_IMPLEMENTATION_AND_MFU_GATE"
+    elif not tangent_is_stable:
+        classification = "REJECT_CAPACITY_DUE_TO_UNSTABLE_TASK_TANGENT"
+    else:
+        classification = "REJECT_LATE_LAYER_CAPACITY_REPAIR"
     return {
-        "classification": (
-            "PROMOTE_LATE_LAYER_CAPACITY_TO_IMPLEMENTATION_AND_MFU_GATE"
-            if passes
-            else "REJECT_LATE_LAYER_CAPACITY_REPAIR"
-        ),
+        "classification": classification,
         "passes": passes,
+        "dense_cross_window_late_cosines": dense_cross_window_cosines,
+        "tangent_is_stable": tangent_is_stable,
         "failure_recovery_improvements": failure_improvements,
         "holdout_margins_over_random": random_margins,
         "preservation_holdout_margin": preservation_margin,
@@ -487,6 +500,13 @@ def main() -> None:
         phase_rows[str(step)] = {
             "scheduled_lr": lr,
             "gradient_mean_ce": {"fit": fit_ce, "holdout": holdout_ce},
+            "dense_cross_window": {
+                "all": aggregate_direction_metrics(dense_holdout, dense_fit),
+                "late": aggregate_direction_metrics(
+                    subset(dense_holdout, late_layers),
+                    subset(dense_fit, late_layers),
+                ),
+            },
             "fit": {},
             "holdout": {},
         }
