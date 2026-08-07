@@ -1,0 +1,82 @@
+{
+  "artifact_kind": "124m_qk_cfc_20tpp_phase_direction_result",
+  "schema_version": "mai_124m_qk_cfc_20tpp_phase_direction_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "PHASE_PRE_GELU_CAPACITY_DRIFT",
+  "acquisition": {
+    "run_name": "pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp",
+    "run_id": "pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp_20260807T163013Z_2137250",
+    "execution_commit": "1fac61b93e0ee8aac280e3c1f70469c64ecac2cf",
+    "launcher_provenance_sha256": "5c4f7fce1c045ea1031bd942e9ab042345c2f2003fb09bdb5f8fa8b01a70e27e",
+    "training_log_sha256": "bcad3b9e92412099d8155e04ecbf0bf8fd5780bfd03c009180fc20f3b9b21eb4",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "checkpoint_bytes": 1197679728,
+    "last_iter": 9489,
+    "exit_code": 0,
+    "fixed_validation_ce": {
+      "2373": 3.5045,
+      "4746": 3.3207,
+      "7119": 3.2109,
+      "9489": 3.1551
+    },
+    "sealed_source_validation_ce": {
+      "2373": 3.5036,
+      "4746": 3.3187,
+      "7119": 3.2145,
+      "9489": 3.1569
+    },
+    "snapshot_sha256_by_step": {
+      "0": "40ecb97b20df18bb5f52ef2965d34ef6fb3b49a250350e29c31b39b18d1dfcd1",
+      "2373": "92193a552f6b080a6975dca3ef57e7d8bedf60040be1950189b5b7967ef23b01",
+      "4746": "28a0de6ac7be3f0064432ba22ef03a4b5a98b50c401044998daef67a483b8523",
+      "7119": "9662bdd85a0b0ebbfc6c9a752d6a491f5a1b565e76a5f50905aaaa4fd6b61608",
+      "9489": "c5031a5721f82dcbfc1b863a5be969f8bd7f4aa64fa4f9c1e05140142ce5f3dc"
+    }
+  },
+  "verification": {
+    "classification": "ACCEPTED_QK_CFC_20TPP_PHASE_ACQUISITION",
+    "passed": true,
+    "repaired_verifier_commit": "90bedab5b5158636e28113ac65a3bf42edb54de3",
+    "verifier_sha256": "8d3f9aa3024e0455cbc515bc93243c64886ce451300070448420d1b80458c40e",
+    "result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/scientific/phase_acquisition_verification.json",
+    "result_sha256": "441e6c319f4cdf19f3153dbd08b615b594b2009ba3705f9b6fc0ffc794933e53",
+    "maximum_functional_replay_absolute_ce_error": 0.00004007,
+    "terminal_parameter_count": 399,
+    "terminal_buffer_count": 24,
+    "terminal_checkpoint_exact_equal": true,
+    "verifier_repair_scope": "Replace the legacy hard-coded 5TPP loss-step parser with the acquisition plan's registered 20TPP required steps; no scientific threshold or classification changed."
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "execution_commit": "90bedab5b5158636e28113ac65a3bf42edb54de3",
+    "entrypoint": "examples/nanogpt/analyze_qk_cfc_20tpp_phase_direction.py",
+    "entrypoint_sha256": "87cf5537853f7c74ac2f8f4794c406bdf3522104e94863b1df1a71d1e996004a",
+    "result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/scientific/phase_direction_analysis/result.json",
+    "result_sha256": "667221584b7fe54c5ca63f383e9c9d738f08509d4918accafe77855f9e743165",
+    "first_failure_step": 7119,
+    "late_band_at_failure_relative_to_step_2373": {
+      "pregelu_hard_rank_ratio": 0.8958646195,
+      "postgelu_hard_rank_ratio": 0.8645748597,
+      "postgelu_to_pregelu_hard_rank_ratio": 0.9650731159,
+      "update_to_residual_rms_ratio": 1.2080796431,
+      "residual_update_cosine_mean_absolute_shift": 0.0214952247
+    },
+    "failure_step_factorial_ce": {
+      "reference_pair_current_context": 6.133342,
+      "current_cfc_reference_cproj": 5.990611,
+      "reference_cfc_current_cproj": 4.476217,
+      "native_current_pair": 3.412501,
+      "cfc_main_with_reference_cproj": -0.142731,
+      "cproj_main_with_reference_cfc": -1.657125,
+      "cfc_cproj_interaction": -0.920985
+    },
+    "trajectory_boundary": "Five sampled states bound centered trajectory rank by four; PCA is descriptive path geometry, not an intrinsic manifold dimension estimate."
+  },
+  "theory_reconciliation": {
+    "rejected_interpretation": "Cross-run terminal direction mismatch does not justify freezing, replacing, or transplanting c_fc or c_proj.",
+    "supported_interpretation": "The same-run c_fc/c_proj pair co-adapts beneficially while the late-layer c_fc chart loses pre-GELU capacity and accumulates branch-scale drift.",
+    "paper_consistent_next_mechanism": "Layer-wise chart allocation: test extra directed-product coordinates only for late layers 8-11, where the measured deficit occurs.",
+    "next_training_authorized": false,
+    "required_next_gate": "Same-gauge multi-phase task-tangent fit and held-out functional CE audit comparing the current chart, a late-only wider chart, and an equal-coordinate random control."
+  }
+}

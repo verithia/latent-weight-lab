@@ -1,0 +1,79 @@
+{
+  "schema_version": "mai_124m_qk_cfc_20tpp_late_capacity_gate_plan_v1",
+  "status": "registered_before_any_late_capacity_measurement",
+  "recorded_at": "2026-08-08",
+  "scientific_question": "Does adding directed-product chart coordinates only in late c_fc layers 8-11 recover the same-run task tangent at the measured 15/20TPP capacity failure without disrupting the 10TPP phase?",
+  "theory_chain": [
+    "Same-run activation analysis localizes the first frozen failure to late-band pre-GELU capacity at 15TPP.",
+    "The c_fc/c_proj factorial interaction is strongly beneficial, so freezing, transplanting, or independently replacing either matrix is rejected.",
+    "The Mapping Networks LWT principle permits layer-specific chart allocation, while broad all-layer widening is not supported by the measured deficit.",
+    "Prior zero-update capacity evidence shows the six-stage 176-coefficient family has more tangent capacity than the production six-stage 132-coefficient family; this gate tests whether that advantage is phase-local, task-functional, and specific to task-directed connectivity."
+  ],
+  "identity": {
+    "entrypoint_sha256": "2a45eb975938780f4255bd9f4ec1ce4de5f84746b29bded47cb09bb6975f50c9",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "phase_result_sha256": "667221584b7fe54c5ca63f383e9c9d738f08509d4918accafe77855f9e743165",
+    "verification_sha256": "441e6c319f4cdf19f3153dbd08b615b594b2009ba3705f9b6fc0ffc794933e53",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "snapshot_sha256_by_step": {
+    "2373": "92193a552f6b080a6975dca3ef57e7d8bedf60040be1950189b5b7967ef23b01",
+    "4746": "28a0de6ac7be3f0064432ba22ef03a4b5a98b50c401044998daef67a483b8523",
+    "7119": "9662bdd85a0b0ebbfc6c9a752d6a491f5a1b565e76a5f50905aaaa4fd6b61608",
+    "9489": "c5031a5721f82dcbfc1b863a5be969f8bd7f4aa64fa4f9c1e05140142ce5f3dc"
+  },
+  "protocol": {
+    "steps": [2373, 4746, 7119, 9489],
+    "preservation_step": 4746,
+    "failure_steps": [7119, 9489],
+    "late_layers": [8, 9, 10, 11],
+    "current_schedule": [22, 22, 22, 22, 22, 22],
+    "wide_schedule": [30, 30, 29, 29, 29, 29],
+    "current_coordinates_per_layer": 405504,
+    "wide_coordinates_per_late_layer": 540672,
+    "ridge_ratio": 0.000001,
+    "chunk_size": 256,
+    "radius_ratio": 1.0,
+    "direction": "scheduled-LR stateless Muon polar descent plus configured weight decay; historical momentum and error-feedback state are unavailable and explicitly excluded",
+    "fit_seed": 2026080801,
+    "holdout_seed": 2026080807,
+    "gradient_batch_size": 4,
+    "gradient_batches": 4,
+    "validation_seed": 2026080813,
+    "validation_batch_size": 4,
+    "validation_batches": 8,
+    "random_seed": 2026080821,
+    "random_control": "same 176 coordinates in late layers with deterministic task-independent no-self unique affine-cycle connectivity; coefficients remain least-squares fitted",
+    "confidence_z": 1.96,
+    "parameter_updates_to_source": 0,
+    "execution": "direct foreground polling through process exit; expected under five minutes",
+    "watchdog": false,
+    "callback": false
+  },
+  "decision_rule": {
+    "failure_steps": [7119, 9489],
+    "preservation_step": 4746,
+    "primary_metric": "late-band positive-line recovery of one fit-window chart update against both fit and disjoint holdout stateless-Muon task directions",
+    "minimum_failure_recovery_improvement": 0.05,
+    "minimum_holdout_margin_over_random": 0.03,
+    "maximum_preservation_recovery_regression": 0.02,
+    "maximum_functional_upper_bound_regression_ce": 0.001,
+    "minimum_one_phase_mean_ce_improvement": 0.0005,
+    "functional_rule": "At both 15TPP and 20TPP, the 95% paired upper bound versus the current chart must be at most +0.001 CE, and at least one phase mean must improve by 0.0005 CE.",
+    "pass": "Promote only per-layer schedule implementation and an exact-config MFU preflight; training remains separately blocked.",
+    "reject": "Reject late-only coordinate widening in this directed-product topology; do not sweep width, radius, modulation, or loss coefficients from this result.",
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "run_zero_update_gate": true,
+    "production_per_layer_schedule_implementation_before_gate": false,
+    "mfu_preflight_after_pass": true,
+    "language_model_training": false,
+    "larger_rung": false
+  },
+  "interpretation_boundaries": [
+    "This is a same-run local tangent and one-step functional audit, not an estimate of global manifold dimension.",
+    "Stateless Muon omits unavailable historical momentum and error-feedback residuals, so the audit cannot be called exact optimizer replay.",
+    "A passing result supports layer-wise coordinate allocation only; it does not validate paper modulation or Mapping Loss."
+  ]
+}
