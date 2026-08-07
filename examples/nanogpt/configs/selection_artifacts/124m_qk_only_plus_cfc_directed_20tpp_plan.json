@@ -1,0 +1,118 @@
+{
+  "artifact_kind": "124m_qk_only_plus_cfc_directed_20tpp_preregistration",
+  "authorization": {
+    "automatic_rerun": false,
+    "larger_rung": false,
+    "one_exact_config_mfu_preflight": true,
+    "one_scientific_run_after_mfu_pass": true,
+    "parallel_arm": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json",
+    "config_sha256": "0c91de4f402379e41d7438b0f6ff2720d3637f3223c386196a848ae0cfb5aec4",
+    "dense_muon": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "mlp.c_proj"
+    ],
+    "forbidden_changes": [
+      "generated V or either c_proj",
+      "different QK or c_fc capacity",
+      "optimizer or learning-rate changes",
+      "automatic retry or parallel arm",
+      "larger rung or post-result threshold change"
+    ],
+    "generated_attention": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "horizon": {
+      "fixed_evaluation_steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "max_iters": 9489,
+      "planned_tpp": 20.0
+    },
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json",
+    "parent_config_sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b",
+    "procedural_mlp": [
+      "mlp.c_fc"
+    ]
+  },
+  "decision_rule": {
+    "all_fixed_losses_must_be_finite": true,
+    "dense_terminal_validation_ce": 3.1547,
+    "fail": "Reject 20TPP transfer of c_fc composition and retain QK-only as the accepted endpoint; launch no variant sweep.",
+    "maximum_fixed_curve_gap_to_qk_only_parent": 0.005,
+    "pass": "Accept QK-only plus directed-product c_fc as the 124M/20TPP partial architecture endpoint; do not call it full replacement.",
+    "qk_only_parent_validation_ce": [
+      3.5038,
+      3.3179,
+      3.2046,
+      3.1488
+    ],
+    "terminal_validation_ce_maximum": 3.1538,
+    "threshold_changed_after_measurement": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples.nanogpt.train",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "gpu": 0,
+    "host": "PRO6",
+    "native_blockfht_required": true
+  },
+  "immutable_evidence": {
+    "cfc_only_5tpp_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+      "sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f"
+    },
+    "qk_only_20tpp_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+      "sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+    },
+    "residual_write_joint_5tpp_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_residual_write_preserving_joint_5tpp_result.json",
+      "sha256": "f264b334b86b1e7ac15fa83318e97ad4239779183152e936c25c5388e2d473c3"
+    },
+    "tail2_cproj_rejection": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_result.json",
+      "sha256": "e80e9001c074664a081d0d29887bc9e66a65e7ca16bc7c03de203699f8be6e18"
+    }
+  },
+  "monitoring": {
+    "callback_action_prompt": "@Codex verify live or terminal identity, fixed losses, GPU health, provenance, and checkpoint hashes; update durable notes, classify the frozen gate, and continue autonomously.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callbacks": [
+      20,
+      50,
+      100,
+      "error or actionable stall"
+    ],
+    "expected_duration": "approximately 5-6 hours from exact-config preflight",
+    "heartbeat_minutes": 90,
+    "heartbeat_resets_after_progress_callback": true,
+    "policy": "one idempotent aggregate watchdog"
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "callbacks": false,
+    "direct_foreground_polling": true,
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1,
+    "watchdog": false
+  },
+  "registered_at": "2026-08-07T20:00:00+08:00",
+  "schema_version": "mai_124m_qk_only_plus_cfc_directed_20tpp_plan_v1",
+  "scientific_question": "Does the accepted procedural c_fc remain neutral or beneficial across 20TPP when jointly trained from initialization with the accepted QK-only attention map while every residual-write projection remains dense?",
+  "status": "registered_before_performance_preflight_and_training",
+  "theory": {
+    "claim_boundary": "A pass establishes a partial QK+c_fc training architecture only. The materialized c_fc remains registered, inference parameter/FLOP reduction is zero, and neither full attention nor full MLP replacement is claimed.",
+    "composition_evidence": "At 5TPP, adding c_fc to generated attention improved all four fixed checkpoints by 0.0015-0.0018 CE, so the 20TPP test is a horizon-transfer confirmation rather than a new structural guess.",
+    "manifold_match": "The accepted QK chart matches the simpler causal score-function path; the c_fc directed-product update matches the observed low-dimensional weight trajectory in the dense tangent gauge rather than imposing a fixed random chart.",
+    "residual_write_boundary": "V and both c_proj matrices stay dense because the measured activation and trajectory geometry, endpoint swaps, and repeated interventions localized failures to residual-stream writing rather than feature formation."
+  }
+}
