@@ -1,0 +1,41 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_geometry_correction_v1",
+  "artifact_kind": "nondecision_preregistration_geometry_correction",
+  "recorded_at": "2026-08-07T03:45:00+00:00",
+  "classification": "CORRECT_DESCRIPTIVE_GEOMETRY_BEFORE_SCIENTIFIC_LAUNCH",
+  "invalid_description": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_plan.json",
+    "plan_sha256": "c3916eb66813c9cd4c54e3a0ab43c16eb1f3ea5d0633825c776ec3ef60dfadc7",
+    "text": "The plan called the frozen accepted training chart hidden64 plus residual24 plus output32 and counted 147456 coordinates per selected c_proj layer."
+  },
+  "authoritative_training_geometry": {
+    "parent_stages": 64,
+    "residual_stages": 24,
+    "output_stages": 0,
+    "coordinates_per_selected_c_proj_layer": 135168,
+    "target_elements_per_selected_c_proj_layer": 2359296,
+    "coordinate_ratio": 0.057291666666666664,
+    "evidence": "The immutable accepted late-four scientific config has no output-stages override, the model default is zero, and the exact candidate preflight emitted output_stages=0 and coordinates=135168 for layers 10 and 11."
+  },
+  "invalidated_preflight": {
+    "config_sha256": "31f201aaacdb74a749ca7db21839b467c7ce5e0d223a841642054a1db24bc073",
+    "certificate_sha256": "cf02afe46a89f99339a22e99936b5133bcd39ec3109d7c3053e323ec28d2b5ae",
+    "preflight_log_sha256": "56fd4e38bee19de8c7bb875a01f6e90636e75b3bac0d0ddd820f83b210cf6256",
+    "mfu_fraction": 0.2377065265960661,
+    "reason": "The performance measurement passed, but the resolved config did not yet pin this correction artifact and carried the wrong descriptive coordinate accounting. It cannot authorize training."
+  },
+  "unchanged_decisions": {
+    "procedural_c_proj_layers": [10, 11],
+    "primary_terminal_gap_to_cfc_only_maximum": 0.005,
+    "primary_terminal_validation_ce_maximum": 3.630838041305542,
+    "fixed_curve_gap_to_cfc_only_maximum": 0.01,
+    "optimizer_chart_and_training_settings": "unchanged from the accepted late-four parent",
+    "scientific_parameter_updates_before_correction": 0,
+    "threshold_changed_after_measurement": false
+  },
+  "required_repair": {
+    "regenerate_config_with_correction_hash": true,
+    "rerun_exact_config_mfu": true,
+    "scientific_launch_before_repair": false
+  }
+}

@@ -19,6 +19,10 @@ PLAN = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_plan.json"
 )
+GEOMETRY_CORRECTION = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_geometry_correction.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -33,6 +37,9 @@ def test_preregistered_identity_and_strict_thresholds() -> None:
     config = load_config()
     plan = json.loads(PLAN.read_text())
     assert config["registered_plan_sha256"] == sha256(PLAN)
+    assert config["registered_plan_geometry_correction_sha256"] == sha256(
+        GEOMETRY_CORRECTION
+    )
     assert config["block_fht_mlp_cproj_muon_matched_givens_layers"] == [10, 11]
     assert plan["decision_rule"]["primary_terminal_gap_to_cfc_only_maximum"] == 0.005
     assert plan["decision_rule"]["primary_terminal_validation_ce_maximum"] == 3.630838041305542
@@ -61,8 +68,8 @@ def test_scientific_parent_and_geometry_are_frozen() -> None:
     assert config["registered_resume_determinism_required"] is True
     assert config["checkpoint_wall_clock_seconds"] == 7200
     assert config["candidate_cproj_target_elements"] == 2 * 768 * 3072
-    assert config["candidate_cproj_procedural_coordinates_per_update"] == 2 * 147456
-    assert config["candidate_cproj_coordinate_ratio"] == 0.0625
+    assert config["candidate_cproj_procedural_coordinates_per_update"] == 2 * 135168
+    assert config["candidate_cproj_coordinate_ratio"] == 0.057291666666666664
     assert config["realized_pytorch_trainable_parameter_reduction"] == 0
     assert config["practical_equivalence_nll"] == 0.005
 

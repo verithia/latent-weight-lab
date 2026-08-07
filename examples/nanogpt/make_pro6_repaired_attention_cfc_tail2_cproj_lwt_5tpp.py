@@ -17,6 +17,10 @@ PLAN = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_plan.json"
 )
+GEOMETRY_CORRECTION = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_geometry_correction.json"
+)
 OUTPUT = ROOT / (
     "examples/nanogpt/configs/"
     "pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp_lr24e4.json"
@@ -66,12 +70,18 @@ def main() -> None:
             ),
             "block_fht_mlp_cproj_muon_matched_givens_layers": [10, 11],
             "candidate_cproj_target_elements": 2 * 768 * 3072,
-            "candidate_cproj_procedural_coordinates_per_update": 2 * 147456,
-            "candidate_cproj_coordinate_ratio": 0.0625,
+            "candidate_cproj_procedural_coordinates_per_update": 2 * 135168,
+            "candidate_cproj_coordinate_ratio": 0.057291666666666664,
             "realized_pytorch_trainable_parameter_reduction": 0,
             "checkpoint_wall_clock_seconds": 7200,
             "registered_plan": str(PLAN.relative_to(ROOT)),
             "registered_plan_sha256": sha256(PLAN),
+            "registered_plan_geometry_correction": str(
+                GEOMETRY_CORRECTION.relative_to(ROOT)
+            ),
+            "registered_plan_geometry_correction_sha256": sha256(
+                GEOMETRY_CORRECTION
+            ),
             "implementation_commit": git_head(),
             "implementation_source_hashes": {
                 path: sha256(ROOT / path) for path in SOURCE_PATHS
