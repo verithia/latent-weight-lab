@@ -1,0 +1,93 @@
+{
+  "acceptance": {
+    "accepted_validation_ce_by_step": {
+      "2373": 3.5036,
+      "4746": 3.3187,
+      "7119": 3.2145,
+      "9489": 3.1569
+    },
+    "curve_absolute_tolerance_ce": 0.005,
+    "functional_replay_absolute_tolerance_ce": 0.005,
+    "terminal_checkpoint_next_iter": 9489,
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "one_exact_replay_after_mfu_pass": true,
+    "phase_analysis_after_acceptance": true
+  },
+  "full_state_contract": {
+    "all_named_parameters": true,
+    "all_persistent_named_buffers": true,
+    "capture_interval": 2373,
+    "expected_snapshot_steps": [
+      0,
+      2373,
+      4746,
+      7119,
+      9489
+    ],
+    "optimizer_probes": false,
+    "required_functional_replay_steps": [
+      0,
+      2373,
+      4746,
+      7119,
+      9489
+    ],
+    "storage_dtype": "float32",
+    "trajectory_schema_version": "nanogpt_parameter_trajectory_v2"
+  },
+  "identity": {
+    "candidate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp.json",
+    "candidate_config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json",
+    "source_config_sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2",
+    "source_result": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_result.json",
+    "source_result_sha256": "2b7bba0e5928d38b073f7b0734a6516eb12f0f3a01be3a168cef9094f4f6582e",
+    "terminal_audit": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_20tpp_terminal_activation_drift_result.json",
+    "terminal_audit_sha256": "50aad2a01ade96a84d9265318c46b00cee1fd41fa7dd879a2d04a1f716ac4876",
+    "verifier": "examples/nanogpt/verify_qk_cfc_20tpp_phase_acquisition.py",
+    "verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f"
+  },
+  "monitoring": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_prompt": "@Codex verify identity, curve, snapshots, GPU/storage health, update the active note, and continue the preregistered phase-localization plan.",
+    "callbacks": [
+      20,
+      50,
+      100,
+      "error or actionable stall"
+    ],
+    "heartbeat_minutes": 90,
+    "heartbeat_resets_after_progress": true
+  },
+  "nonintervention_gate": {
+    "curve_must_reproduce_before_interpretation": true,
+    "only_change": "all-parameter/all-buffer phase snapshots and acquisition metadata",
+    "scientific_config_changes": false
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "callback": false,
+    "include_diagnostic_io": true,
+    "minimum_mfu_fraction": 0.2,
+    "mode": "direct foreground polling",
+    "native_extension_required": true,
+    "watchdog": false
+  },
+  "recorded_at": "2026-08-08",
+  "schema_version": "mai_124m_qk_cfc_20tpp_phase_acquisition_plan_v1",
+  "scientific_question": "At which fixed phase does the QK+c_fc residual-direction geometry drift from its own early trajectory as the CE gap emerges after 10TPP?",
+  "status": "registered_before_preflight_or_execution",
+  "storage_gate": {
+    "atomic_checkpoint_bytes": 1197677360,
+    "estimated_snapshot_payload_bytes": 3051008160,
+    "require_backing_filesystem_free_space": true,
+    "workspace_cap_bytes": 274877906944
+  }
+}
