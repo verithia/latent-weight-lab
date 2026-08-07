@@ -60,6 +60,11 @@ def test_scientific_parent_and_geometry_are_frozen() -> None:
     assert config["block_fht_native_extension_required"] is True
     assert config["registered_resume_determinism_required"] is True
     assert config["checkpoint_wall_clock_seconds"] == 7200
+    assert config["candidate_cproj_target_elements"] == 2 * 768 * 3072
+    assert config["candidate_cproj_procedural_coordinates_per_update"] == 2 * 147456
+    assert config["candidate_cproj_coordinate_ratio"] == 0.0625
+    assert config["realized_pytorch_trainable_parameter_reduction"] == 0
+    assert config["practical_equivalence_nll"] == 0.005
 
 
 def test_constructed_module_types_match_tail_two_mask() -> None:

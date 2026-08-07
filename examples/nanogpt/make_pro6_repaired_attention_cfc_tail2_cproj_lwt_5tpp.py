@@ -54,6 +54,10 @@ def main() -> None:
             "hpo_stage": "repaired_attention_cfc_tail2_cproj_lwt_124m_5tpp",
             "ladder_slot": "124m_5tpp_cfc_all_cproj_layers10_11",
             "ladder_role": "strict_loss_tail2_layerwise_mlp_allocation",
+            "ladder_interpretation": (
+                "single preregistered LWT Pareto-boundary test of the final "
+                "two c_proj layers; not a fitted mask sweep or scaling ladder"
+            ),
             "candidate_scope": (
                 "Repaired attention and accepted c_fc in all layers; ordinary "
                 "dense c_proj in layers 0-9 and the accepted hidden64+residual24 "
@@ -61,6 +65,10 @@ def main() -> None:
                 "jointly from initialization."
             ),
             "block_fht_mlp_cproj_muon_matched_givens_layers": [10, 11],
+            "candidate_cproj_target_elements": 2 * 768 * 3072,
+            "candidate_cproj_procedural_coordinates_per_update": 2 * 147456,
+            "candidate_cproj_coordinate_ratio": 0.0625,
+            "realized_pytorch_trainable_parameter_reduction": 0,
             "checkpoint_wall_clock_seconds": 7200,
             "registered_plan": str(PLAN.relative_to(ROOT)),
             "registered_plan_sha256": sha256(PLAN),
@@ -84,6 +92,14 @@ def main() -> None:
                 "terminal fixed-window validation CE <=3.630838041305542 and "
                 "no fixed curve point more than 0.010 worse than the accepted "
                 "c_fc-only parent"
+            ),
+            "practical_equivalence_nll": 0.005,
+            "practical_equivalence_policy": (
+                "primary incremental MLP gate: terminal fixed-window "
+                "validation CE <=3.630838041305542, at most +0.005 versus "
+                "the accepted c_fc-only parent 3.625838041305542; every fixed "
+                "curve point must be finite and at most +0.010 versus that "
+                "parent; thresholds never change after observation"
             ),
             "operator_override": (
                 "2026-08-07: one preregistered tail-two LWT Pareto-boundary "
