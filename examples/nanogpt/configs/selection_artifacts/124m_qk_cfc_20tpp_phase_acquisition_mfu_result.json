@@ -1,0 +1,74 @@
+{
+  "schema_version": "mai_124m_qk_cfc_20tpp_phase_acquisition_mfu_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "PASS_EXACT_CONFIG_MFU_GATE_WITH_DIAGNOSTIC_IO",
+  "passed": true,
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_20tpp_phase_acquisition_plan.json",
+    "plan_sha256": "05678c4472d10fdbde7885abf21cedf368e8f91c0497ce944f54a7d1aa00430d",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp.json",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "preregistration_git_commit": "940f15a37006957a4235d7eff37aa8418f169d2c",
+    "execution_git_commit": "940f15a37006957a4235d7eff37aa8418f169d2c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "mode": "foreground-polled; no watchdog or callback",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "include_diagnostic_io": true,
+    "elapsed_seconds": 20.41936755180359,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/performance_preflight.json",
+    "certificate_sha256": "1e87fe60cbb97913e80a82bb8ed6dab9ff6ad8917ea908ebda38b17760405a26",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/performance_preflight.log",
+    "log_sha256": "1f08a9db66be84fbd01f31fa6b3ccd22aba8ccf148fdabafc31dd8000864ff38"
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.2576892729934601,
+    "margin_over_minimum_fraction": 0.05768927299346009,
+    "tokens_per_second": 143577.26031265367,
+    "base_timed_iter_ms": 1737.055,
+    "diagnostic_io_charged_iter_ms": 1825.8044444444442,
+    "model_tflops": 107.23145562756532,
+    "empirical_bf16_gemm_peak_tflops": 416.1269671100618,
+    "active_params_6n_estimate": 124475904,
+    "peak_mib": 34042.0,
+    "diagnostic_snapshot_count": 2,
+    "diagnostic_snapshot_seconds": 0.891
+  },
+  "stability": {
+    "native_block_fht_extension_loaded": true,
+    "native_block_fht_extension_required": true,
+    "native_block_fht_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "preflight_train_exit_code": 0,
+    "snapshot_steps_exercised": [
+      0,
+      9
+    ]
+  },
+  "storage_gate": {
+    "workspace_cap_bytes": 274877906944,
+    "workspace_bytes_after_preflight": 267100974325,
+    "headroom_bytes_after_preflight": 7776932619,
+    "estimated_scientific_snapshot_payload_bytes": 3051008160,
+    "estimated_atomic_checkpoint_bytes": 1197677360,
+    "backing_filesystem_available_bytes": 1642426490880,
+    "passed": true
+  },
+  "decision": {
+    "scientific_run_authorized_count": 1,
+    "scientific_run_max_iters": 9489,
+    "persistent_watchdog_required_before_launch": true,
+    "automatic_rerun_authorized": false,
+    "candidate_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The exact preregistered observational replay is finite, loads the required native extension, and remains above the 20 percent MFU floor after charging two full-state snapshot writes."
+  }
+}
