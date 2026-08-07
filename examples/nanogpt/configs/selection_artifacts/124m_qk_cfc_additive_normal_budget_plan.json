@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_124m_qk_cfc_additive_normal_budget_plan_v1",
+  "recorded_at": "2026-08-08",
+  "status": "registered_before_measurement",
+  "scientific_question": "After the best bilateral weight-relative fit, is the remaining c_fc Muon temporal state a small additive-normal low-rank component, or does completing both state families require dense-scale storage?",
+  "identity": {
+    "entrypoint_sha256": "fa161573beec75f7295dce98bfe04d378bd3c04d5e7ccfb73ada5f3dd72f8f74",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result_sha256": "7a34c9f282b27691a1ad16eb0cd9ef39c0dab12048cfa84b81669e2957f473d6"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "checkpoint_next_iter": 9489,
+    "state_names": ["momentum_buffer", "compression_residual"],
+    "matrix_shape": [3072, 768],
+    "late_layers": [8, 9, 10, 11],
+    "bilateral_families": ["output6_then_input", "input_then_output6"],
+    "output_schedule": [22, 22, 22, 22, 22, 22],
+    "rank_frontier": [0, 16, 32, 64, 96, 128, 160, 192, 256, 384, 512, 768],
+    "oracle_answer_conditioned": true,
+    "rank_factor_storage": "fp32_U_and_V",
+    "support_storage": "uint16_lower_bound"
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "maximum_compact_joint_byte_ratio": 0.7,
+    "maximum_dense_equivalent_joint_byte_ratio": 1.0,
+    "threshold_changes_after_measurement": false
+  },
+  "accounting_contract": {
+    "bilateral_base_ratio_to_dense_per_state": 0.5078125,
+    "factor_materialization": "rank times (3072 plus 768) FP32 values per layer and state",
+    "joint_ratio": "sum of bilateral bases and oracle factor materialization for momentum plus feedback, divided by their joint dense FP32 bytes",
+    "interpretation": "The 0.70 compact cutoff is already permissive: it allows temporal state equal to 70% of dense state and does not count online support selection. A result above 1.0 is strictly larger than retaining dense state."
+  },
+  "interpretation_contract": {
+    "compact": "Both state families cross the fixed recovery gates with no more than 70% of dense temporal-state bytes. This identifies missing additive-normal capacity but authorizes theory only because the factors are answer-conditioned and learned factors would be LoRA-like.",
+    "dense_scale": "The oracle crosses the recovery gates only between 70% and 100% of dense bytes. The missing component is representable but not a credible compact optimizer state.",
+    "exceeds_dense": "Even the answer-conditioned bilateral plus low-rank completion costs more bytes than storing dense temporal state. Close retrospective state compression and require a latent-native optimizer/decoder co-design.",
+    "causal_boundary": "This is a terminal-state representation oracle, not an online causal codec or a trainable Mapping Network."
+  },
+  "authorization": {
+    "run_zero_update_additive_normal_analysis": true,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
