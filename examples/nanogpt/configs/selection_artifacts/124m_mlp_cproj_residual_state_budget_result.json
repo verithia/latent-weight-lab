@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_residual_state_budget_sealed_result_v1",
+  "artifact_kind": "124m_mlp_cproj_zero_update_oracle_low_rank_state_budget_result",
+  "recorded_at": "2026-08-07T03:35:00+00:00",
+  "classification": "EXPLICIT_LOW_RANK_STATE_IS_DENSE_SCALE",
+  "identity": {
+    "execution_git_commit": "25f3525a8a503b65e945dba0519431e0f6390090",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_residual_state_budget_plan.json",
+    "plan_sha256": "00b5d8f42baeb591fdc3bebd7e88f9a066640df1abca9f688bb01cb704447d98",
+    "analyzer_sha256": "3b76fc49ca947f3f523116b8c9663d2578d55ebbdece98e7f4dd0fb8d37c6339",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "temporal_result_sha256": "2d90be1c16f530180d8907db3f41efece67c47736a24fd82c13c9ed256fef698",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "parameter_updates": 0,
+    "elapsed_seconds": 3.926156997680664,
+    "focused_and_regression_tests": "9 passed in 0.70s",
+    "gpu_after": "282/97887 MiB, 0% utilization, 32 C, 22.81 W"
+  },
+  "matrix_and_budget": {
+    "shape": [768, 3072],
+    "dense_elements_per_layer": 2359296,
+    "existing_chart_coordinates_per_layer": 147456,
+    "largest_rank_manifold_within_existing_budget": 38
+  },
+  "aggregate": {
+    "rank38_best_oracle_recovery": 0.09707033484261586,
+    "rank50_energy": 242.85817656984375,
+    "rank80_energy": 476.3324719459177,
+    "rank90_energy": 590.7353904269869,
+    "rank95_energy": 664.8961338978338,
+    "rank99_energy": 742.4051274980285,
+    "rank80_intrinsic_dof_ratio_to_dense": 0.6790951029819348,
+    "rank80_intrinsic_dof_over_existing_chart_budget": 10.865521647710956,
+    "rank80_cell_range": [323, 482],
+    "rank80_intrinsic_dof_ratio_cell_range": [0.4814957512749566, 0.6860334608289931],
+    "rank38_recovery_cell_range": [0.0955691625894448, 0.2153119018446135]
+  },
+  "frozen_gates": {
+    "rank38_recovery_minimum": 0.8,
+    "rank38_recovery_passed": false,
+    "rank80_intrinsic_dof_ratio_maximum": 0.25,
+    "rank80_intrinsic_dof_ratio_passed": false,
+    "threshold_changed_after_measurement": false
+  },
+  "interpretation": {
+    "accepted_claim": "Even with noncausal SVD support selected from the exact answer, an equal-budget explicit low-rank state captures only 9.71 percent of the missing c_proj action. Eighty-percent recovery needs roughly rank 476 and 67.9 percent of dense intrinsic state, 10.87 times the complete existing chart budget.",
+    "scope_caveat": "This is a lower bound for explicit low-rank factors or a task-learned basis, not for every possible nonlinear procedural generator.",
+    "closed_family": "A compact learned-basis or LoRA-like residual is not a plausible repair for the measured c_proj miss.",
+    "surviving_family": "Only task-conditioned procedural selection with layer-wise allocation remains consistent with the accepted late-band result and the measured dense-scale residual."
+  },
+  "raw_artifacts": {
+    "result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_residual_state_budget_v1/residual_state_budget_result.json",
+    "result_sha256": "ab2790f82c293eed6355df468f0463416ac29d1040f2737fb9ba17fbc75a96cb",
+    "rows_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_residual_state_budget_v1/residual_state_budget_cells.csv",
+    "rows_sha256": "5b44a259fd34cabd90591655ead4750c350484d98ec3c1c3568e68cc406c7b15",
+    "rows_including_header": 33
+  },
+  "authorization": {
+    "task_conditioned_procedural_selector_theory": true,
+    "explicit_low_rank_candidate": false,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
