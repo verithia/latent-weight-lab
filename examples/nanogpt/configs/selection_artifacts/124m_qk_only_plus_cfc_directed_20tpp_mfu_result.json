@@ -1,0 +1,70 @@
+{
+  "artifact_kind": "124m_qk_only_plus_cfc_directed_20tpp_exact_config_mfu_result",
+  "classification": "PASS_CORRECTED_EXACT_CONFIG_MFU_GATE",
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "different_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "persistent_watchdog_required_before_launch": true,
+    "reason": "The corrected exact preregistered QK-only plus directed-product c_fc config matches runtime accounting, is finite, loads the required native extension, and exceeds the 20 percent MFU floor.",
+    "scientific_run_authorized_count": 1,
+    "scientific_run_max_iters": 9489
+  },
+  "execution": {
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp/performance_preflight_corrected.json",
+    "certificate_sha256": "dbb456101f58b64935bba801b86ef4183db5825d66e56e80a2da96c4c41e49e5",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "elapsed_seconds": 19.50525689125061,
+    "gpu": 0,
+    "host": "PRO6",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp/performance_preflight_corrected.log",
+    "log_sha256": "4a6ab7db3e0593d747e2612d2becb61be0b038a910ba1e4b90d30c19cf79d975",
+    "mode": "foreground-polled; no watchdog or callback",
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "identity": {
+    "accounting_correction": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json",
+    "accounting_correction_sha256": "8143eeab372060216ff7d7d57cbd141e695ff3713f18cfebcc85ce90739d1312",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json",
+    "config_sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "execution_git_commit": "a996fe2c7d5fa70952412761a3e4f5c917366e81",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_plan.json",
+    "plan_sha256": "219d59680a6b535990b70d0dae2105a0af1a46d9f79cb216535cc22ee2458092"
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_gemm_peak_tflops": 396.032898862657,
+    "iter_ms": 1742.795,
+    "margin_over_minimum_fraction": 0.08366223157175906,
+    "mfu_fraction": 0.28366223157175907,
+    "minimum_mfu_fraction": 0.2,
+    "model_tflops": 112.33957586721407,
+    "peak_mib": 34042.0,
+    "tokens_per_second": 150416.76374999998
+  },
+  "passed": true,
+  "recorded_at": "2026-08-07",
+  "schema_version": "mai_124m_qk_only_plus_cfc_directed_20tpp_mfu_result_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "dense_targets": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "mlp.c_proj"
+    ],
+    "finite_loss_values": 13,
+    "generated_targets": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "logged_loss_values": 13,
+    "native_block_fht_extension_loaded": true,
+    "native_block_fht_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "native_block_fht_extension_required": true,
+    "ordinary_registered_trainable_parameters": 85605360,
+    "procedural_targets": [
+      "mlp.c_fc"
+    ]
+  }
+}

@@ -13,6 +13,7 @@ CONFIG = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_dire
 PARENT = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json"
 PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_plan.json"
 ACCOUNTING_CORRECTION = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json"
+MFU_RESULT = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_mfu_result.json"
 
 
 def load(path: Path) -> dict:
@@ -84,3 +85,17 @@ def test_exact_config_passes_train_argument_validation(monkeypatch) -> None:
     assert parsed.block_fht_targets == ["attn.c_attn.qk_headwise"]
     assert parsed.block_fht_mlp_cfc_directed_product is True
     assert parsed.block_fht_mlp_cproj_muon_matched_givens is False
+
+
+def test_corrected_mfu_result_binds_exact_identity_and_one_run() -> None:
+    result = load(MFU_RESULT)
+    assert result["passed"] is True
+    assert result["identity"]["config_sha256"] == sha256(CONFIG)
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["identity"]["accounting_correction_sha256"] == sha256(ACCOUNTING_CORRECTION)
+    assert result["measurement"]["mfu_fraction"] >= 0.2
+    assert result["stability"]["ordinary_registered_trainable_parameters"] == 85605360
+    assert result["stability"]["native_block_fht_extension_loaded"] is True
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["decision"]["scientific_run_authorized_count"] == 1
+    assert result["decision"]["persistent_watchdog_required_before_launch"] is True
