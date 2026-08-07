@@ -1,4 +1,8 @@
 {
+  "accounting_correction": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json",
+    "sha256": "8143eeab372060216ff7d7d57cbd141e695ff3713f18cfebcc85ce90739d1312"
+  },
   "artifact_kind": "124m_qk_only_plus_cfc_directed_20tpp_preregistration",
   "authorization": {
     "automatic_rerun": false,
@@ -9,7 +13,7 @@
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json",
-    "config_sha256": "0c91de4f402379e41d7438b0f6ff2720d3637f3223c386196a848ae0cfb5aec4",
+    "config_sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2",
     "dense_muon": [
       "attn.c_attn.v",
       "attn.c_proj",
@@ -110,7 +114,7 @@
   "scientific_question": "Does the accepted procedural c_fc remain neutral or beneficial across 20TPP when jointly trained from initialization with the accepted QK-only attention map while every residual-write projection remains dense?",
   "status": "registered_before_performance_preflight_and_training",
   "theory": {
-    "claim_boundary": "A pass establishes a partial QK+c_fc training architecture only. The materialized c_fc remains registered, inference parameter/FLOP reduction is zero, and neither full attention nor full MLP replacement is claimed.",
+    "claim_boundary": "A pass establishes a partial QK+c_fc training architecture only. The materialized c_fc and custom optimizer state persist outside the ordinary registered count, so c_fc has no independent realized algorithmic parameter reduction. Inference parameter/FLOP reduction is zero, and neither full attention nor full MLP replacement is claimed.",
     "composition_evidence": "At 5TPP, adding c_fc to generated attention improved all four fixed checkpoints by 0.0015-0.0018 CE, so the 20TPP test is a horizon-transfer confirmation rather than a new structural guess.",
     "manifold_match": "The accepted QK chart matches the simpler causal score-function path; the c_fc directed-product update matches the observed low-dimensional weight trajectory in the dense tangent gauge rather than imposing a fixed random chart.",
     "residual_write_boundary": "V and both c_proj matrices stay dense because the measured activation and trajectory geometry, endpoint swaps, and repeated interventions localized failures to residual-stream writing rather than feature formation."

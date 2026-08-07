@@ -1,4 +1,6 @@
 {
+  "accounting_correction": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json",
+  "accounting_correction_sha256": "8143eeab372060216ff7d7d57cbd141e695ff3713f18cfebcc85ce90739d1312",
   "active_parameter_count_definition": "materialized GPT parameters; never substitute latent trainable count",
   "adamw_fallback_scale_policy": "fixed_0.3_for_registered_main_queue",
   "attention_activation_manifold_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_activation_manifold_result.json",
@@ -130,7 +132,8 @@
   "eval_tokens_per_split": 6553600,
   "eval_total_tokens": 13107200,
   "execution_host": "PRO6",
-  "expected_registered_trainable_parameters": 113916912,
+  "expected_registered_parameter_reduction_fraction_vs_preflight_active_estimate": 0.31227364293735116,
+  "expected_registered_trainable_parameters": 85605360,
   "fixed_eval_index_runtime_digest": "record train.py rng_eval_metadata.fixed_eval_indices_sha256 before launch; all four rungs and their baseline/candidate pairs must match",
   "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
   "fixed_eval_indices": true,

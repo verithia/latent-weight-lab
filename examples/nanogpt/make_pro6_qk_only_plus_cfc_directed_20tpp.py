@@ -13,6 +13,9 @@ ARTIFACT_DIR = CONFIG_DIR / "selection_artifacts"
 PARENT = CONFIG_DIR / "pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json"
 CONFIG = CONFIG_DIR / "pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json"
 PLAN = ARTIFACT_DIR / "124m_qk_only_plus_cfc_directed_20tpp_plan.json"
+ACCOUNTING_CORRECTION = ARTIFACT_DIR / (
+    "124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -25,9 +28,80 @@ def dump(path: Path, payload: dict) -> None:
 
 def main() -> None:
     parent = json.loads(PARENT.read_text())
+    correction = {
+        "schema_version": "mai_124m_qk_only_plus_cfc_directed_20tpp_accounting_correction_v1",
+        "artifact_kind": "nondecision_preregistration_accounting_correction",
+        "recorded_at": "2026-08-07T20:15:00+08:00",
+        "classification": "CORRECT_REGISTERED_COUNT_BEFORE_SCIENTIFIC_LAUNCH",
+        "invalid_description": {
+            "text": (
+                "The first preregistered config expected the QK-only registered count "
+                "113,916,912 after enabling procedural c_fc. Exact construction instead "
+                "reported 85,605,360 ordinary registered/trainable parameters because "
+                "the persistent materialized c_fc and its custom optimizer state are "
+                "owned outside the ordinary model.parameters() count."
+            ),
+            "config_sha256": "0c91de4f402379e41d7438b0f6ff2720d3637f3223c386196a848ae0cfb5aec4",
+        },
+        "authoritative_runtime_accounting": {
+            "active_materialized_parameter_estimate_for_mfu": 124475904,
+            "ordinary_registered_total_parameters": 85605360,
+            "ordinary_registered_trainable_parameters": 85605360,
+            "block_fht_generated_weight_elements_reported": 42467328,
+            "block_fht_latent_elements_reported": 5007600,
+            "ordinary_registered_reduction_vs_active_estimate": 38870544,
+            "ordinary_registered_reduction_fraction_vs_active_estimate": 0.31227364293735116,
+            "cfc_component_realized_algorithmic_parameter_reduction": 0,
+            "cfc_materialized_matrix_elements": 28311552,
+            "cfc_update_coordinate_reduction_fraction": 0.828125,
+            "inference_parameter_reduction": 0,
+            "inference_flop_reduction": 0,
+            "scope": (
+                "The ordinary PyTorch registered count falls because directed-product "
+                "c_fc keeps its persistent materialized matrices and custom dense "
+                "optimizer state outside model.parameters(). This is not an independent "
+                "algorithmic trainable-parameter or optimizer-state reduction for c_fc. "
+                "Generated weights are still materialized for dense inference GEMMs."
+            ),
+        },
+        "invalidated_preflight": {
+            "certificate_path": (
+                "/mnt/ssd-data/orj/MappingNetworks/outputs/"
+                "pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp/"
+                "performance_preflight.json"
+            ),
+            "certificate_sha256": "dfa3d614761b67fe95e43c813ee74343305e096070fcb632ec4c0e39baed0ac0",
+            "preflight_log_sha256": "6f30da44edf0d9b0b0fa5454c0dffa9dce56cb43a9cc71f7de929c90e8b13dc0",
+            "mfu_fraction": 0.2725802865459523,
+            "reason": (
+                "Architecture, finite-state, native-kernel, and speed gates passed, but "
+                "the exact config pinned an incorrect ordinary registered count. The "
+                "certificate cannot authorize scientific training after config repair."
+            ),
+        },
+        "unchanged_science": {
+            "generated_attention": ["attn.c_attn.qk_headwise"],
+            "procedural_mlp": ["mlp.c_fc"],
+            "dense_residual_write_targets": ["attn.c_proj", "mlp.c_proj"],
+            "dense_v": True,
+            "terminal_validation_ce_maximum": 3.1538,
+            "maximum_fixed_curve_gap_to_qk_only_parent": 0.005,
+            "optimizer_data_seed_schedule": "unchanged",
+            "scientific_parameter_updates_before_correction": 0,
+            "threshold_changed_after_measurement": False,
+        },
+        "required_repair": {
+            "pin_correction_in_config": True,
+            "rerun_exact_config_mfu": True,
+            "scientific_launch_before_repair": False,
+        },
+    }
+    dump(ACCOUNTING_CORRECTION, correction)
     config = dict(parent)
     config.update(
         {
+            "accounting_correction": str(ACCOUNTING_CORRECTION.relative_to(ROOT)),
+            "accounting_correction_sha256": sha256(ACCOUNTING_CORRECTION),
             "block_fht_mlp_cfc_directed_product": True,
             "block_fht_mlp_cfc_directed_product_chunk_size": 256,
             "block_fht_mlp_cfc_directed_product_error_feedback": True,
@@ -73,7 +147,8 @@ def main() -> None:
                 "generate QK and use directed-product c_fc while V, attention c_proj, "
                 "and MLP c_proj remain absent from generated/procedural target sets"
             ),
-            "expected_registered_trainable_parameters": 113916912,
+            "expected_registered_parameter_reduction_fraction_vs_preflight_active_estimate": 0.31227364293735116,
+            "expected_registered_trainable_parameters": 85605360,
             "hpo_stage": "qk_only_plus_cfc_directed_124m_20tpp_confirmation",
             "inference_flop_reduction": 0,
             "inference_parameter_reduction": 0,
@@ -168,14 +243,20 @@ def main() -> None:
             ),
             "claim_boundary": (
                 "A pass establishes a partial QK+c_fc training architecture only. The "
-                "materialized c_fc remains registered, inference parameter/FLOP reduction "
-                "is zero, and neither full attention nor full MLP replacement is claimed."
+                "materialized c_fc and custom optimizer state persist outside the ordinary "
+                "registered count, so c_fc has no independent realized algorithmic "
+                "parameter reduction. Inference parameter/FLOP reduction is zero, and "
+                "neither full attention nor full MLP replacement is claimed."
             ),
         },
         "immutable_evidence": {
             key: {"path": f"examples/nanogpt/configs/selection_artifacts/{name}",
                   "sha256": sha256(ARTIFACT_DIR / name)}
             for key, name in evidence.items()
+        },
+        "accounting_correction": {
+            "path": str(ACCOUNTING_CORRECTION.relative_to(ROOT)),
+            "sha256": sha256(ACCOUNTING_CORRECTION),
         },
         "candidate": {
             "config": str(CONFIG.relative_to(ROOT)),

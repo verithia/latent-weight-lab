@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json"
 PARENT = ROOT / "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json"
 PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_plan.json"
+ACCOUNTING_CORRECTION = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json"
 
 
 def load(path: Path) -> dict:
@@ -29,6 +30,8 @@ def test_plan_binds_config_parent_and_evidence() -> None:
     assert plan["candidate"]["parent_config_sha256"] == sha256(PARENT)
     for artifact in plan["immutable_evidence"].values():
         assert sha256(ROOT / artifact["path"]) == artifact["sha256"]
+    assert plan["accounting_correction"]["sha256"] == sha256(ACCOUNTING_CORRECTION)
+    assert load(CONFIG)["accounting_correction_sha256"] == sha256(ACCOUNTING_CORRECTION)
 
 
 def test_candidate_is_exact_accepted_composition() -> None:
@@ -60,7 +63,8 @@ def test_frozen_gate_accounting_and_monitoring() -> None:
     assert rule["terminal_validation_ce_maximum"] == 3.1538
     assert rule["maximum_fixed_curve_gap_to_qk_only_parent"] == 0.005
     assert rule["threshold_changed_after_measurement"] is False
-    assert config["expected_registered_trainable_parameters"] == 113916912
+    assert config["expected_registered_trainable_parameters"] == 85605360
+    assert config["expected_registered_parameter_reduction_fraction_vs_preflight_active_estimate"] == 0.31227364293735116
     assert config["cfc_component_parameter_reduction"] == 0
     assert config["inference_parameter_reduction"] == 0
     assert config["inference_flop_reduction"] == 0
@@ -68,6 +72,9 @@ def test_frozen_gate_accounting_and_monitoring() -> None:
     assert plan["monitoring"]["heartbeat_minutes"] == 90
     assert plan["monitoring"]["heartbeat_resets_after_progress_callback"] is True
     assert plan["authorization"]["automatic_rerun"] is False
+    correction = load(ACCOUNTING_CORRECTION)
+    assert correction["unchanged_science"]["scientific_parameter_updates_before_correction"] == 0
+    assert correction["required_repair"]["rerun_exact_config_mfu"] is True
 
 
 def test_exact_config_passes_train_argument_validation(monkeypatch) -> None:
