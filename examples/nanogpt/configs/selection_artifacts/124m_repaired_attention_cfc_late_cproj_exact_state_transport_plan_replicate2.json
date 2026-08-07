@@ -1,0 +1,189 @@
+{
+  "analysis": {
+    "activation_rows": 2048,
+    "authorization_metric": "heldout_future_functional_positive_line_recovery",
+    "components": [
+      "requested",
+      "feedback",
+      "corrected",
+      "realized",
+      "unrepresented"
+    ],
+    "discovery_steps": [
+      0,
+      99,
+      198,
+      297,
+      396,
+      495,
+      594,
+      693,
+      792,
+      891,
+      990,
+      1089,
+      1188,
+      1287,
+      1386,
+      1485,
+      1584,
+      1683,
+      1782
+    ],
+    "future_phase_target_by_probe": {
+      "0": 99,
+      "1187": 1485,
+      "1484": 1782,
+      "1781": 2079,
+      "2078": 2373,
+      "2372": null,
+      "296": 594,
+      "593": 891,
+      "890": 1188,
+      "98": 297
+    },
+    "heldout_probe_steps": [
+      1781,
+      2078,
+      2372
+    ],
+    "layers": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "output_additive_projection": true,
+    "parameter_updates": 0,
+    "polynomial_degree": 2,
+    "polynomial_rank": 4,
+    "probe_steps": [
+      0,
+      98,
+      296,
+      593,
+      890,
+      1187,
+      1484,
+      1781,
+      2078,
+      2372
+    ],
+    "recomputed_polar_request": "diagnostic_only",
+    "reference_post_steps": [
+      99,
+      297,
+      594,
+      891,
+      1188,
+      1485,
+      1782,
+      2079,
+      2373
+    ],
+    "same_run_only": true,
+    "snapshot_steps": [
+      0,
+      99,
+      198,
+      297,
+      396,
+      495,
+      594,
+      693,
+      792,
+      891,
+      990,
+      1089,
+      1188,
+      1287,
+      1386,
+      1485,
+      1584,
+      1683,
+      1782,
+      1881,
+      1980,
+      2079,
+      2178,
+      2277,
+      2373
+    ],
+    "state_component_reconstruction": "exact_post_step_optimizer_identity",
+    "terminal_activations_from_same_run_checkpoint": true,
+    "terminal_step": 2373
+  },
+  "authorization": {
+    "implement_candidate_structure": false,
+    "larger_rung": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "run_zero_update_state_transport_analysis": true
+  },
+  "causal_basis": [
+    "The accepted paired replay establishes bitwise parameter/probe pairing under one run identity.",
+    "The earlier cross-run pairing was rejected because independent CUDA paths diverged despite matching initialization and CE.",
+    "Static endpoint charts and output-additive fits did not establish causal state transport.",
+    "The first same-run analysis was invalid because a CPU-recomputed Muon request was not exact GPU optimizer state.",
+    "This repair uses exact captured post-step identities, performs zero parameter updates, and retains the frozen chronological threshold."
+  ],
+  "decision_rule": {
+    "selection": "Authorize only when the mechanically reconstructed state is valid and one frozen component reaches at least 0.80 energy-weighted functional positive-line recovery for the chronological heldout future phase.",
+    "threshold_change_after_observation": false,
+    "thresholds": {
+      "causal_heldout_functional_line_recovery_minimum": 0.8,
+      "state_identity_max_relative_error": 0.0001
+    }
+  },
+  "execution": {
+    "analysis_output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp/scientific/analysis/exact_state_transport",
+    "device": "cuda",
+    "foreground_direct_polling": true,
+    "host": "PRO6",
+    "parameter_updates": 0,
+    "probe_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp/scientific/optimizer_probe",
+    "snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp/scientific/parameter_trajectory",
+    "watchdog": false
+  },
+  "identity": {
+    "acquisition_plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_paired_state_replicate2_acquisition_plan.json",
+    "acquisition_plan_sha256": "d4297021bfe3b45b1058f8456cb4523b48582606a91668043b742462e630a6bf",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_paired_state_replicate2_verification_result.json",
+    "acquisition_result_sha256": "91eade4b4548f52bc44bc59faa22fda60c30ccd09afefde61d53d322b91a6138",
+    "analyzer": "examples/nanogpt/analyze_mlp_cproj_same_run_optimizer_state_transport.py",
+    "analyzer_sha256": "6608a84daa38cc2d5afdb633579e64e3d6ac156a1c97cae52b35bf6d58aaee63",
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp/scientific/ckpt.pt",
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp.json",
+    "config_sha256": "d21065ad20593da7fbf3a1a00a450c87b47a6fd9071133e8b677f2b8c8e585e5",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "invalid_analysis_audit": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_same_run_optimizer_state_transport_invalid_recomputed_request_audit.json",
+    "invalid_analysis_audit_sha256": "3d9a364b347b04ece2dcf9fc101b6f16894571d69d98d45c0a36f53e835d558d",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467",
+    "supporting_source_sha256": {
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_mlp_cproj_activation_weighted_output_selector.py": "5710e0a42be3f6775c49f414b52bf17285ead02397e269a1b8a8df4b94c38909",
+      "examples/nanogpt/analyze_mlp_cproj_multiscale_path.py": "4c3fa7149a1636e1af2aa47ad1444322f84cb14046247bccd69c629a47e314b3",
+      "examples/nanogpt/analyze_mlp_cproj_optimizer_state_transport.py": "35eb46a273c93918b3a0c41b6c8a46317e324960991f9c500460644ea4d576ef",
+      "examples/nanogpt/analyze_mlp_cproj_polynomial_oracle_ce.py": "659e45ffaff483ac96cdc3f42d21b3b65107fd5de9e044c5abdc3a0eb24cdfdf",
+      "examples/nanogpt/analyze_mlp_cproj_predictive_manifold.py": "df3509e1df4174a0b4a088f46a438a71a5993f43bcb948c8227b4cdfdd861775",
+      "examples/nanogpt/analyze_parameter_trajectory.py": "447c0f7812388a2220e2339d8dc3da208d20dab965004ac92a43402b6994d3a5",
+      "examples/nanogpt/model.py": "85b5a69f6fd3042bf3b4c5d40a67c380f75f4cb1a88467b8e9dbdbd20fcb93cb",
+      "examples/nanogpt/muon.py": "265544e19f1ea1c923bbd0d8cb43655042b494c6aa99bc1ebd00947359dc418e",
+      "examples/nanogpt/parameter_trajectory.py": "6d06ebfd4b1dfe8814d43f383e091eed8b01180ce3ba0f57feb569fff2866d5d",
+      "examples/nanogpt/train.py": "0b914aa0b6a91d36032e5dc68a034420e172e38a535b59d7ceab5eac78a4e650",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    }
+  },
+  "limitations": [
+    "Terminal post-GELU activations define a local functional metric, not a global nonlinear equivalence proof.",
+    "Requested and corrected components are exact post-step algebraic identities, not a replay of the pre-step GPU Newton-Schulz tensor.",
+    "Passing authorizes only a separately preregistered compact candidate; it does not authorize language-model training directly.",
+    "Failing rejects this optimizer-state transport hypothesis but does not prove that no state-dependent generator can close the gap."
+  ],
+  "recorded_at": "2026-08-07T02:48:48.098958+00:00",
+  "schema_version": "mai_124m_mlp_cproj_same_run_optimizer_state_transport_plan_v2",
+  "scientific_question": "Does same-run structured-Muon optimizer state causally recover the function-critical late-c_proj residual that static charts miss?"
+}
