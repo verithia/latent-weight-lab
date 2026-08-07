@@ -1,0 +1,45 @@
+{
+  "schema_version": "mai_124m_qk_cfc_fixed_decoder_branch_decision_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "MLP_FIXED_DECODER_BRANCH_CLOSED_AT_TESTED_BUDGETS",
+  "claim_boundary": {
+    "optimizer_state_result": "The terminal dense Muon state admits an answer-conditioned bilateral plus low-rank decomposition.",
+    "weight_manifold_result": "The corresponding tested fixed dictionaries do not align with useful c_fc weight motion above near-ambient recovery.",
+    "forbidden_inference": "Low-rank residual structure in dense optimizer state does not by itself authorize a learned low-rank weight basis or a compact Mapping Network decoder."
+  },
+  "evidence": [
+    {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_additive_normal_budget_result.json",
+      "finding": "Answer-conditioned input-then-output bilateral plus additive normals reaches the permissive state gates at 54.1314% of joint dense state bytes; momentum needs 493 total residual ranks and feedback needs one rank."
+    },
+    {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_orbit_radial_pro6_result.json",
+      "finding": "The answer-conditioned bilateral fixed-singular orbit explains 99.90% of c_fc displacement energy and 95.45% to nearly 100% of held-out CE value; radial motion is negligible."
+    },
+    {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_conjugated_general_pro6_result.json",
+      "finding": "Fixed random FHT-conjugated general charts at 135168 coordinates per layer capture only about 5.5-5.7% of dense Muon motion and lose to fresh88 on every held-out CE window."
+    },
+    {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_natural_axis_phase_capture_result.json",
+      "finding": "The natural-axis chart captures 6.03% of motion at a 5.34% coordinate fraction, only about 1.13 times ambient."
+    },
+    {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_joint_tangent_pro6_result.json",
+      "finding": "Task-matched sparse bilateral joint charts fail held-out CE despite same-budget controls, establishing basis/connectivity mismatch rather than a coefficient-solver defect."
+    }
+  ],
+  "accounting": {
+    "accepted_qk_plus_cfc_is_algorithmically_compact": false,
+    "reason": "The procedural c_fc path retains a materialized dense weight and dense custom temporal optimizer state outside ordinary model.parameters().",
+    "learned_oracle_basis_allowed": false,
+    "reason_learned_basis_rejected": "It would be a LoRA-like learned-basis escape and would not test the fixed compact decoder claimed by Mapping Networks."
+  },
+  "decision": {
+    "new_mlp_training_authorized": false,
+    "repeat_fixed_basis_alignment_authorized": false,
+    "larger_rung_mlp_promotion_authorized": false,
+    "accepted_compact_endpoint": "124M/20TPP QK-only attention with dense V, dense attention c_proj, and dense MLP",
+    "next_action": "Return to the full-attention gap and require a zero-update layer/phase attribution for generated V and attention c_proj before any successor training arm."
+  }
+}

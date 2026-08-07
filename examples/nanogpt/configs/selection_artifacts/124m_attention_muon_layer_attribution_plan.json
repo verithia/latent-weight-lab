@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_attention_muon_layer_attribution_plan_v1",
+  "recorded_at": "2026-08-08",
+  "scientific_question": "Are the V and attention c_proj failures concentrated in a temporally stable subset of layers, as required for a paper-consistent functional-LWT repair?",
+  "theory": {
+    "accepted_endpoint": "124M/20TPP QK-only with dense V, dense attention c_proj, and dense MLP",
+    "causal_evidence": [
+      "Generated V costs 0.0365 validation CE at 20TPP relative to QK-only.",
+      "Generated attention c_proj plus interaction accounts for about 77.6% of the 5TPP full-attention penalty.",
+      "Tenfold fixed c_proj chart capacity and activation-metric fitting did not beat equal-coordinate random orientation.",
+      "The Mapping Networks paper favors layer-wise charts when layer manifolds differ."
+    ],
+    "hypothesis": "If an existing target-specific Cayley orbit is useful only in some layers, early Muon-applied directions should select the same high-recovery layers at held-out late phases with a material recovery separation.",
+    "excluded": [
+      "no parameter update",
+      "no checkpoint mutation",
+      "no learned dense basis",
+      "no ratio, rank, seed, or learning-rate sweep",
+      "no direct authorization of language-model training"
+    ]
+  },
+  "identity": {
+    "entrypoint": "examples.nanogpt.analyze_attention_muon_layer_attribution",
+    "entrypoint_sha256": "fde7d019779f616b54538ce5b9645407abe7627e8d7e6984d2030e64193c9e37",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001188.pt": "5fd43fbeb9447a86b673d2b3ee10bd2d7faa1ab0c43cdd7b59d3d783ca871a8a",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_muon_layer_attribution_v1"
+  },
+  "protocol": {
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "steps": [0, 594, 1188, 1782, 2372],
+    "early_steps": [0, 594, 1188],
+    "late_steps": [1782, 2372],
+    "selected_layers": 6,
+    "direction": "exact dense Muon applied_direction_per_lr",
+    "weight": "same-probe weight_before_step",
+    "weighting": "Muon-direction Frobenius energy",
+    "targets": {
+      "v": {
+        "parameter": "attn.c_attn.weight",
+        "slice": "final n_embd rows",
+        "side": "right",
+        "active_skew_rank": 32,
+        "corresponding_cayley_pair_rank": 16
+      },
+      "cproj": {
+        "parameter": "attn.c_proj.weight",
+        "slice": "full matrix",
+        "side": "left",
+        "active_skew_rank": 16,
+        "corresponding_cayley_pair_rank": 8
+      }
+    }
+  },
+  "decision_rule": {
+    "selection": "For each target separately, select the six layers with highest energy-weighted active-orbit recovery over early steps only; evaluate unchanged on late steps.",
+    "targets": {
+      "v": {
+        "minimum_jaccard": 0.5,
+        "minimum_spearman": 0.4,
+        "minimum_separation": 1.25,
+        "minimum_selected_recovery": 0.25,
+        "minimum_fraction_of_full_orbit": 0.75
+      },
+      "cproj": {
+        "minimum_jaccard": 0.5,
+        "minimum_spearman": 0.4,
+        "minimum_separation": 1.25,
+        "minimum_selected_recovery": 0.4,
+        "minimum_fraction_of_full_orbit": 0.8
+      }
+    },
+    "pass": "A target passes only if every target-specific threshold passes. A pass authorizes one preregistered same-gauge held-out one-step functional-CE gate for that fixed layer mask, not an MFU preflight or training run.",
+    "fail": "Keep that target dense and reject functional-LWT training in the tested Cayley family."
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "polling": "foreground because this is a zero-update diagnostic expected to finish within five minutes",
+    "watchdog": false,
+    "callbacks": false
+  }
+}
