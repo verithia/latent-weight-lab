@@ -1,0 +1,49 @@
+{
+  "aggregate": {
+    "all_current_functional_image_recovery": 0.008479837104061293,
+    "heldout_current_functional_image_recovery": 0.008233350417124061,
+    "heldout_future_activated_functional_tangent_recovery": 0.23631151988948992,
+    "heldout_future_identity_functional_tangent_recovery": 0.23638065842303307
+  },
+  "artifacts": {
+    "raw_result_sha256": "a373c4090aa9d8e2546964c7af529658a6f3776b6af47ec8962733f56c909cbd",
+    "rows_sha256": "091581e62b555f53937d5ae4665f1c527ea1f8381b306c591e09557f76c3ea44"
+  },
+  "authorization": {
+    "activation_family_capacity_supported": false,
+    "implement_production_candidate": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false
+  },
+  "classification": "PAPER_ACTIVATION_IMAGE_INSUFFICIENT",
+  "execution": {
+    "device": "cuda",
+    "elapsed_seconds": 1.9724147319793701,
+    "git_commit": "4ce9d68cbb6dcc38399a3e10fceb51264fc6957b",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "acquisition_result_sha256": "91eade4b4548f52bc44bc59faa22fda60c30ccd09afefde61d53d322b91a6138",
+    "analyzer_sha256": "d4fc09ad13e22303242997388f4d06abc890e78d2c7c339e4f050fbc460ffe64",
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "plan_sha256": "703205e9d2fdd3a510c1e46b0024e64605ed8d47fcf634c180b35c8953384c29",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467"
+  },
+  "mechanism": {
+    "activation": "signed_scaled_tanh",
+    "activation_scale": "sqrt(10/9)*max_abs_step0_per_layer",
+    "activation_scale_multiplier": 1.0540925533894598,
+    "block_fht_layers": 2,
+    "jacobian": "diag(1-(g(z)/s)^2)*A_BlockFHT",
+    "latent_ratio": 0.01,
+    "minimum_step0_activation_derivative": 0.1,
+    "oracle_coordinates": true,
+    "oracle_future_tangent_coefficients": true,
+    "step0_jacobian_condition_ceiling": 10.0,
+    "weight_scale": 0.20412414523193154
+  },
+  "range_valid": true,
+  "recorded_at": "2026-08-07T03:13:49.453600+00:00",
+  "schema_version": "mai_124m_mlp_cproj_paper_activation_tight_oracle_sealed_result_v1"
+}
