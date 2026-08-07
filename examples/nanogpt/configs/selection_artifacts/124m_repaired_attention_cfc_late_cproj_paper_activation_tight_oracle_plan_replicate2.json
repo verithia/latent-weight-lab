@@ -1,0 +1,100 @@
+{
+  "analysis": {
+    "activation": "signed_scaled_tanh",
+    "activation_bias": "s*atanh(W_step0/s)",
+    "activation_rows": 2048,
+    "activation_scale": "sqrt(10/9)*max_abs_step0_per_layer",
+    "activation_scale_multiplier": 1.0540925533894598,
+    "block_fht_layers": 2,
+    "cgls_iterations": 32,
+    "coordinate_fit": "oracle_cgls_in_inverse_activation_preactivation",
+    "fixed_operator": "production_seeded_BlockFHT",
+    "future_step_by_probe": {
+      "0": 99,
+      "1187": 1485,
+      "1484": 1782,
+      "1781": 2079,
+      "2078": 2373,
+      "593": 891
+    },
+    "future_tangent_fit": "oracle_cgls_in_terminal_post_gelu_metric",
+    "generic_quadratic_control": "sealed_124m_quadratic_screen",
+    "heldout_probe_steps": [
+      1781,
+      2078
+    ],
+    "latent_ratio": 0.01,
+    "layers": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "minimum_step0_activation_derivative": 0.1,
+    "parameter_updates": 0,
+    "primary_control": "identity_BlockFHT_tangent",
+    "probe_steps": [
+      0,
+      593,
+      1187,
+      1484,
+      1781,
+      2078
+    ],
+    "same_run_only": true,
+    "step0_jacobian_condition_ceiling": 10.0
+  },
+  "authorization": {
+    "implement_production_candidate": false,
+    "larger_rung": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "run_zero_update_oracle": true
+  },
+  "decision_rule": {
+    "interpretation": {
+      "image_failure": "fixed nonlinear manifold cannot represent current states even with oracle coordinates",
+      "pass": "capacity only; requires a separately preregistered causal coordinate-update selector before any training",
+      "range_failure": "fixed init-derived tanh scale cannot contain the path",
+      "tangent_failure": "state-dependent activation Jacobian cannot represent future action even with oracle coefficients"
+    },
+    "thresholds": {
+      "heldout_current_functional_image_recovery_minimum": 0.8,
+      "heldout_future_functional_tangent_recovery_minimum": 0.8
+    }
+  },
+  "identity": {
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_paired_state_replicate2_verification_result.json",
+    "acquisition_result_sha256": "91eade4b4548f52bc44bc59faa22fda60c30ccd09afefde61d53d322b91a6138",
+    "analyzer": "examples/nanogpt/analyze_mlp_cproj_paper_activation_oracle.py",
+    "analyzer_sha256": "d4fc09ad13e22303242997388f4d06abc890e78d2c7c339e4f050fbc460ffe64",
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp/scientific/ckpt.pt",
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedattn_cfc_latecproj_pairedstate_replicate2_5tpp.json",
+    "config_sha256": "d21065ad20593da7fbf3a1a00a450c87b47a6fd9071133e8b677f2b8c8e585e5",
+    "dataset_manifest": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "exact_state_plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_exact_state_transport_plan_replicate2.json",
+    "exact_state_plan_sha256": "9f59515e913faaf81ce43974ea007ba7c11135144687c905ca5967b11d20abe1",
+    "exact_state_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_exact_state_transport_result_replicate2.json",
+    "exact_state_result_sha256": "ec3634d08cbe321d4df5b13fd4aa5cbf3ea850bbf4b33fb1d84d689d44f1b5ea",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "parent_activation_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_paper_activation_oracle_result_replicate2.json",
+    "parent_activation_result_sha256": "5e1966bf7e8a1fc6cd11bb4d708a157cf8b09cb402df7a9d9077ecd8407c766e",
+    "quadratic_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_quadratic_screens_result.json",
+    "quadratic_result_sha256": "788f5ebdfb5bbfd24d78763e7a4b0bc901b8b67715b7d1621f2185a634b2dff6",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467",
+    "supporting_source_sha256": {
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_mlp_cproj_activation_weighted_output_selector.py": "5710e0a42be3f6775c49f414b52bf17285ead02397e269a1b8a8df4b94c38909",
+      "examples/nanogpt/analyze_mlp_cproj_same_run_optimizer_state_transport.py": "6608a84daa38cc2d5afdb633579e64e3d6ac156a1c97cae52b35bf6d58aaee63",
+      "examples/nanogpt/analyze_parameter_trajectory.py": "447c0f7812388a2220e2339d8dc3da208d20dab965004ac92a43402b6994d3a5",
+      "examples/nanogpt/model.py": "85b5a69f6fd3042bf3b4c5d40a67c380f75f4cb1a88467b8e9dbdbd20fcb93cb",
+      "examples/nanogpt/train.py": "0b914aa0b6a91d36032e5dc68a034420e172e38a535b59d7ceab5eac78a4e650",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    }
+  },
+  "question": "Can the paper's elementwise mapping activation make a fixed 1% BlockFHT image and Jacobian contain the accepted late-c_proj path?",
+  "recorded_at": "2026-08-07T03:13:15.629423+00:00",
+  "schema_version": "mai_124m_mlp_cproj_paper_activation_oracle_plan_v2_tight"
+}
