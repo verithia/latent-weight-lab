@@ -1,0 +1,45 @@
+{
+  "schema_version": "mai_124m_residual_write_preserving_joint_5tpp_accounting_correction_v1",
+  "artifact_kind": "nondecision_preregistration_accounting_correction",
+  "recorded_at": "2026-08-07T05:32:00+00:00",
+  "classification": "CORRECT_PARAMETER_SCOPE_BEFORE_SCIENTIFIC_LAUNCH",
+  "invalid_description": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_residual_write_preserving_joint_5tpp_plan.json",
+    "plan_sha256": "93d6c8f33774d11655621ea71dd2364ff5c3261bc45cc63ca29b4707fd8aefe9",
+    "text": "The plan and active note said the current implementation claims no realized parameter reduction or broadly retains materialized trainable weights. That is true for the directed-product c_fc component but false for the inherited BlockFHT QK+V component."
+  },
+  "authoritative_runtime_accounting": {
+    "active_materialized_parameter_estimate_for_mfu": 124475904,
+    "registered_total_parameters": 79197288,
+    "registered_trainable_parameters": 79197288,
+    "block_fht_generated_weight_elements_reported": 49545216,
+    "block_fht_latent_elements_reported": 5078376,
+    "registered_parameter_reduction_vs_active_estimate": 45278616,
+    "registered_parameter_reduction_fraction_vs_active_estimate": 0.3637590127823758,
+    "cfc_component_parameter_reduction": 0,
+    "inference_parameter_reduction": 0,
+    "inference_flop_reduction": 0,
+    "scope": "The overall registered reduction comes from generated QK+V. The directed-product c_fc owns a persistent materialized weight and dense optimizer state and adds no independent parameter reduction. Generated weights are materialized for dense inference GEMMs."
+  },
+  "invalidated_preflight": {
+    "config_sha256": "41ee172546c84b49906b5aa82d23a2cfe75c902fc6ad9dea7fb6c64a3a48a75c",
+    "certificate_sha256": "90b63749c79e100ad1dcc849e20b7307e190380ad67aad5ccb9fc488b859a601",
+    "preflight_log_sha256": "c26162e294a6a58b86fca14a969249cca1373009e81b14414707867494aa9c82",
+    "mfu_fraction": 0.24825403219047304,
+    "reason": "The architecture and speed measurement passed, but the resolved config did not pin the corrected claim boundary. It cannot authorize scientific training."
+  },
+  "unchanged_decisions": {
+    "feature_forming_targets": ["attn.c_attn.qk_headwise", "attn.c_attn.v", "mlp.c_fc"],
+    "dense_residual_write_targets": ["attn.c_proj", "mlp.c_proj"],
+    "terminal_validation_ce_maximum": 3.5248,
+    "maximum_fixed_curve_gap_to_qkv_parent": 0.015,
+    "optimizer_data_seed_schedule": "unchanged",
+    "scientific_parameter_updates_before_correction": 0,
+    "threshold_changed_after_measurement": false
+  },
+  "required_repair": {
+    "pin_correction_in_config": true,
+    "rerun_exact_config_mfu": true,
+    "scientific_launch_before_repair": false
+  }
+}

@@ -17,6 +17,10 @@ PLAN = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "124m_residual_write_preserving_joint_5tpp_plan.json"
 )
+ACCOUNTING_CORRECTION = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "124m_residual_write_preserving_joint_5tpp_accounting_correction.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -31,6 +35,9 @@ def test_plan_identity_and_frozen_thresholds() -> None:
     config = load_config()
     plan = json.loads(PLAN.read_text())
     assert config["resolved_from_plan_sha256"] == sha256(PLAN)
+    assert config["accounting_correction_sha256"] == sha256(
+        ACCOUNTING_CORRECTION
+    )
     assert plan["decision_rule"]["terminal_validation_ce_maximum"] == 3.5248
     assert plan["decision_rule"]["terminal_gap_to_qkv_parent_maximum"] == 0.01
     assert plan["decision_rule"]["maximum_fixed_curve_gap_to_qkv_parent"] == 0.015
@@ -68,6 +75,10 @@ def test_scientific_recipe_and_runtime_policy_are_frozen() -> None:
     assert config["block_fht_native_extension_required"] is True
     assert config["registered_resume_determinism_required"] is True
     assert config["checkpoint_wall_clock_seconds"] == 7200
+    assert config["expected_registered_trainable_parameters"] == 79197288
+    assert config["cfc_component_parameter_reduction"] == 0
+    assert config["inference_parameter_reduction"] == 0
+    assert config["inference_flop_reduction"] == 0
 
 
 def test_exact_scientific_json_passes_argument_validation(monkeypatch) -> None:
@@ -79,4 +90,3 @@ def test_exact_scientific_json_passes_argument_validation(monkeypatch) -> None:
     ]
     assert parsed.block_fht_mlp_cfc_directed_product is True
     assert parsed.block_fht_mlp_cproj_muon_matched_givens is False
-
