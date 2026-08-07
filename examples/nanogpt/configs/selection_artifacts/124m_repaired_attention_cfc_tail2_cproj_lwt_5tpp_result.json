@@ -1,0 +1,95 @@
+{
+  "artifacts": {
+    "config_sha256": "ef0909cd0a74eba36c09a4961c37ac0b4a192e4dd89b416a4c30dd0a3513c119",
+    "provenance_sha256": "5ba21c48f153ff0ad6a2f2f3eadfc3c4788b0d179db37a2364c6a4706e481012",
+    "status_sha256": "b38f544ad37072d0c43369da5e3caf444d22c7e2716e53db139e65714f317686",
+    "training_log_sha256": "38f9bf15aa0a216c9c4addb19adad9b280b32ad3913efd472683d6f272236997",
+    "verifier_sha256": "f0122ec1854e1f6232821d81d30d77a8e09bb188184b03a069c356ff8f44ff2d"
+  },
+  "checkpoint": {
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "bytes": 1102064202,
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp/scientific/ckpt.pt",
+    "metadata_consistent": true,
+    "metadata_sha256": "79b74e69cc928fe277bfc30f46209bc596c4df807a3b110c426f9d2f18dabf30",
+    "model_tensor_bytes": 559674386,
+    "model_tensor_count": 372,
+    "next_iter": 2373,
+    "optimizer_state_present": true,
+    "optimizer_tensor_count": 983,
+    "readable": true,
+    "rng_state_present": true,
+    "saved_at_unix": 1786079220.3273966,
+    "schema_version": "nanogpt_exact_resume_v2",
+    "sha256": "701912e19b6e32e5e03259e180d16da8ac32c379d3c08e46989438d16a287f39"
+  },
+  "classification": "FAIL_STRICT_LOSS_TAIL2_CPROJ_LWT",
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "different_mask_authorized": false,
+    "full_cproj_replacement_accepted": false,
+    "larger_rung_authorized": false,
+    "tail2_partial_mlp_accepted": false
+  },
+  "fixed_evaluation": {
+    "curve_gap_maximum": 0.01,
+    "curve_passed": false,
+    "maximum_fixed_curve_gap_to_cfc_only_ce": 0.01330000000000009,
+    "rows": [
+      {
+        "accepted_cfc_only_validation_ce": 4.2028,
+        "candidate_train_ce": 4.2254,
+        "candidate_validation_ce": 4.2161,
+        "gap_ce": 0.01330000000000009,
+        "step": 594
+      },
+      {
+        "accepted_cfc_only_validation_ce": 3.8395,
+        "candidate_train_ce": 3.8595,
+        "candidate_validation_ce": 3.8459,
+        "gap_ce": 0.006399999999999739,
+        "step": 1188
+      },
+      {
+        "accepted_cfc_only_validation_ce": 3.6888,
+        "candidate_train_ce": 3.7123,
+        "candidate_validation_ce": 3.6966,
+        "gap_ce": 0.007800000000000029,
+        "step": 1782
+      },
+      {
+        "accepted_cfc_only_validation_ce": 3.625838041305542,
+        "candidate_train_ce": 3.6501,
+        "candidate_validation_ce": 3.6336,
+        "gap_ce": 0.007761958694457949,
+        "step": 2373
+      }
+    ],
+    "scientific_gate_passed": false,
+    "terminal_gap_to_cfc_only_ce": 0.007761958694457949,
+    "terminal_maximum": 3.630838041305542,
+    "terminal_passed": false,
+    "terminal_validation_ce": 3.6336
+  },
+  "identity_checks": {
+    "config": true,
+    "corrected_output_stages": true,
+    "geometry_correction": true,
+    "mask": true,
+    "mfu_passed": true,
+    "mfu_result": true,
+    "plan": true,
+    "provenance": true,
+    "provenance_config": true,
+    "provenance_dataset": true,
+    "provenance_mfu": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "thresholds_unchanged": true
+  },
+  "recorded_at": "2026-08-07T05:08:59.331184+00:00",
+  "schema_version": "mai_124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_verification_v1",
+  "scientific_gate_passed": false,
+  "verified": true
+}

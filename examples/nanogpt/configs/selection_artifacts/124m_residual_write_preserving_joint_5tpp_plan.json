@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_residual_write_preserving_joint_5tpp_plan_v1",
+  "artifact_kind": "124m_residual_write_preserving_joint_5tpp_preregistration",
+  "registered_at": "2026-08-07T05:20:00+00:00",
+  "status": "registered_before_config_generation_or_measurement",
+  "scientific_question": "Can the two independently accepted feature-forming procedures coexist: generated QK+V attention and procedural c_fc in all layers, while both attention c_proj and MLP c_proj remain dense residual-stream write maps?",
+  "theory": {
+    "reconciled_observation": "Across attention and MLP, compact procedures succeed on Q/K/V and c_fc but fail on attention c_proj and MLP c_proj. The common boundary is not attention versus MLP; it is feature formation versus writing a transformed feature back into the shared residual stream.",
+    "candidate_principle": "Generate only feature-forming maps and preserve both residual-write projections as dense Muon matrices. This is the smallest joint causal test of the residual-write bottleneck hypothesis and changes no rejected c_proj mechanism.",
+    "why_joint_training": "The endpoint swap studies showed strong co-adaptation. The two accepted components must therefore train together from initialization; terminal checkpoint transplantation cannot test compatibility.",
+    "why_not_another_cproj": "The tail-two LWT run failed both its terminal and fixed-curve gates. Fixed random charts, capacity expansion, activation metrics, bilateral/symmetric/volume corrections, optimizer-state transport, paper activation, low-rank residual state, and layer-mask repair are closed at the current compact budget.",
+    "claim_boundary": "A pass establishes only a residual-write-preserving partial architecture at 124M/5TPP. It is not full attention replacement, full MLP replacement, parameter-count compression, memory reduction, or a larger-rung authorization. The current implementation retains materialized trainable weights and dense optimizer state."
+  },
+  "immutable_inputs": {
+    "qkv_partial_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_partial_control_result.json",
+      "sha256": "bef499f835be994f39fdabe5396c82a7deb6b3878e607e495ecfa56b8b92ebc9"
+    },
+    "cfc_only_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+      "sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f"
+    },
+    "tail2_rejection": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_result.json",
+      "sha256": "e80e9001c074664a081d0d29887bc9e66a65e7ca16bc7c03de203699f8be6e18"
+    },
+    "fair_dense_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_blockwise_qkv_muon_control_result.json",
+      "sha256": "c7ce71da89b3348125d1067876851ea1b18b3dad7c5d5180ba6cfbbd6082ab48"
+    },
+    "qkv_parent_config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_only_qk64_outputgain_5tpp_lr24e4.json",
+      "sha256": "aa0a2e0301e9cba90e9fe108dbd5444d3a165b4d4c0877ef484ccf2df5e403e0"
+    },
+    "cfc_parent_config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfconly_decay1_5tpp_lr24e4.json",
+      "sha256": "baee2a5148f8e66bcd955680b39b7b6ccc7b3a7be00440a535a0dabf60a6c857"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "candidate": {
+    "model": "124M MAI-v3",
+    "token_horizon_tpp": 5.0,
+    "max_iters": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "attention_qkv": "exact accepted QK64 plus V16 generated QK+V structure, Cayley subgroup scale 10/3, output gains, and all associated seeds/settings",
+    "attention_cproj": "dense Muon; no generated chart, gain, Cayley factor, or adapter",
+    "mlp_cfc": "exact accepted directed-product schedule [22,22,22,22,22,22], radius 1.0, ridge 1e-6, chunk 256, error-feedback decay 1.0 in all twelve layers",
+    "mlp_cproj": "dense Muon; no procedural chart, modulation, gain, or adapter",
+    "training_gauge": "all components initialize and co-adapt in one from-scratch run",
+    "frozen_training": "learning rate 2.4e-3, AdamW fallback scale 0.3, Muon momentum 0.95, schedule, batch, data, model seed, data seed, and evaluation windows are unchanged",
+    "forbidden_changes": [
+      "any attention or MLP c_proj replacement",
+      "different QK/V or c_fc capacity, connectivity, optimizer, or feedback",
+      "learned basis, LoRA, dense residual adapter, HyperConnection, modulation, or Mapping Loss",
+      "post-result threshold changes, automatic retry, parallel arm, or larger rung"
+    ]
+  },
+  "decision_rule": {
+    "qkv_parent_validation_ce": [4.0553, 3.7240, 3.5769, 3.5148],
+    "fair_blockwise_dense_validation_ce": [4.1372, 3.7301, 3.5736, 3.5110],
+    "terminal_gap_to_qkv_parent_maximum": 0.01,
+    "terminal_validation_ce_maximum": 3.5248,
+    "maximum_fixed_curve_gap_to_qkv_parent": 0.015,
+    "all_fixed_losses_must_be_finite": true,
+    "pass": "Accept the residual-write-preserving joint structure as the 124M/5TPP partial Pareto endpoint. Do not call it full replacement and do not scale without a separate plan.",
+    "fail": "Reject composition of the two accepted feature-forming procedures because their co-adaptation is adverse. Retain the components as separate local controls and launch no variant sweep.",
+    "threshold_changed_after_measurement": false
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground exact scientific config with one warmup and eight timed real updates; direct polling without a watchdog",
+    "minimum_mfu_fraction": 0.2,
+    "native_extension_required": true,
+    "all_losses_finite": true,
+    "candidate_components_exact": true,
+    "no_scientific_launch_before_pass": true
+  },
+  "monitoring": {
+    "expected_duration": "approximately 60-90 minutes",
+    "policy": "one idempotent terminal-only watchdog",
+    "callbacks": ["100 percent clean completion", "error or actionable stall"],
+    "milestone_callbacks": false,
+    "heartbeat_callbacks": false,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action_prompt": "verify terminal identity, fixed losses, both dense residual-write projections, optimizer ownership, MFU, provenance, checkpoint and hashes; compare against the QK+V parent and fair dense control; seal the result and continue the theory plan autonomously"
+  },
+  "authorization": {
+    "generate_candidate_config_after_plan_commit": true,
+    "one_exact_config_mfu_preflight": true,
+    "one_scientific_run_after_mfu_pass": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_rung": false
+  }
+}
