@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_qk_cfc_additive_normal_budget_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-08T06:40:59+08:00",
+  "classification": "LOW_RANK_NORMAL_COMPLETION_PLAUSIBLE",
+  "identity": {
+    "execution_git_commit": "2fd33dd537b49b60bf1e18bd207df92f1ba7bd42",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_additive_normal_budget_plan.json",
+    "plan_sha256": "8784aea1d053959fde5407971deb9fb9e9ba5dacfc8677de6bab4ba5621042cc",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "fa161573beec75f7295dce98bfe04d378bd3c04d5e7ccfb73ada5f3dd72f8f74",
+    "parent_result_sha256": "7a34c9f282b27691a1ad16eb0cd9ef39c0dab12048cfa84b81669e2957f473d6"
+  },
+  "execution": {
+    "device": "cuda",
+    "wall_seconds": 3.9868323802948,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "checkpoint_parameter_updates": 0,
+    "result_bytes": 23705,
+    "result_sha256": "d495f6a5371672c9b84f73f54c44305109d67db9e038d2e04da1730717769ff7"
+  },
+  "selected_oracle": {
+    "family": "input_then_output6",
+    "joint_byte_ratio_to_dense": 0.5413140190972222,
+    "joint_intrinsic_lower_bound_ratio_to_dense": 0.5409035506071868,
+    "dense_joint_bytes": 226492416,
+    "bilateral_base_joint_bytes": 115015680,
+    "material_factor_bytes": 7587840,
+    "joint_material_bytes": 122603520,
+    "momentum_buffer": {
+      "total_rank": 493,
+      "ranks_by_layer": [12, 36, 47, 54, 42, 56, 55, 56, 47, 39, 43, 6],
+      "all_energy_weighted_recovery": 0.8000273535979814,
+      "late_minimum_layer_recovery": 0.7001074146001994
+    },
+    "compression_residual": {
+      "total_rank": 1,
+      "ranks_by_layer": [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      "all_energy_weighted_recovery": 0.8054870873737058,
+      "late_minimum_layer_recovery": 0.9053334113733118
+    }
+  },
+  "fixed_rank_frontier": {
+    "momentum_rank32": {"all": 0.7806464759237989, "late_minimum": 0.6771496854499865},
+    "momentum_rank64": {"all": 0.8238002287370323, "late_minimum": 0.7347245583811497},
+    "momentum_rank128": {"all": 0.8738865675731787, "late_minimum": 0.8054967551845127},
+    "feedback_rank0": {"all": 0.33259450208494534, "late_minimum": 0.9053334113733118},
+    "feedback_rank16": {"all": 0.9631683642208411, "late_minimum": 0.9220674390353047}
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "maximum_compact_joint_byte_ratio": 0.7,
+    "maximum_dense_equivalent_joint_byte_ratio": 1.0,
+    "threshold_changes_after_measurement": false
+  },
+  "interpretation": {
+    "accepted_claim": "The state outside the bilateral weight-relative tangent is spectrally concentrated enough to pass the permissive oracle storage gate.",
+    "feedback_finding": "The energetic early-layer feedback backlog is essentially rank one after the input-then-output bilateral fit.",
+    "momentum_finding": "Momentum needs 493 answer-conditioned rank units across 12 layers, averaging 41.1 per layer; a fixed rank 64 per layer crosses both recovery gates.",
+    "boundary": "The complete oracle still stores 54.13% of dense temporal-state bytes, sees the terminal dense answer, and uses unrestricted input-side matrices. It is not an online codec and does not authorize learned low-rank factors or training.",
+    "branch_decision": "Use the finding only as a decoder design constraint: a latent-native map needs bilateral tangent capacity plus a modest additive-normal spectrum, with optimizer history born in latent coordinates. Test fixed-basis alignment before any language-model candidate."
+  },
+  "authorization": {
+    "learned_low_rank_candidate": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "fixed_basis_alignment_diagnostic": true,
+    "latent_native_optimizer_theory": true
+  }
+}
