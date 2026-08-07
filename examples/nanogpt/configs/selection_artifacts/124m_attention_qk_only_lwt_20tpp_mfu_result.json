@@ -1,0 +1,63 @@
+{
+  "schema_version": "mai_124m_attention_qk_only_lwt_20tpp_mfu_result_v1",
+  "recorded_at": "2026-08-07",
+  "classification": "PASS_EXACT_CONFIG_MFU_GATE",
+  "passed": true,
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_plan.json",
+    "plan_sha256": "9c0a93888cce64499ff3b02e1941b593aa63184c53d244728b857499fe869409",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json",
+    "config_sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b",
+    "execution_git_commit": "2f47ef050370126a44e673ee6e53d97d3b1330c8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "mode": "foreground-polled; no watchdog or callback",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 39.7788028717041,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/performance_preflight.json",
+    "certificate_sha256": "0c4e7de0cf934d73e4b502aef19992964766555ca25af11739938e9574613776",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/performance_preflight.log",
+    "log_sha256": "cc671be1ec0ef2da132e02376b1c153fb0f4c40c2e40878f9a5f2bd62ef05f2e"
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.3197766282064485,
+    "margin_over_minimum_fraction": 0.11977662820644849,
+    "tokens_per_second": 177004.51875,
+    "iter_ms": 1481.00125,
+    "model_tflops": 132.1967849009472,
+    "empirical_bf16_gemm_peak_tflops": 413.40352371093445,
+    "active_params_6n_estimate": 124475904,
+    "peak_mib": 33926.11
+  },
+  "stability": {
+    "native_block_fht_extension_loaded": true,
+    "native_block_fht_extension_required": true,
+    "native_block_fht_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "generated_targets": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "dense_targets": [
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "mlp_dense": true
+  },
+  "decision": {
+    "scientific_run_authorized_count": 1,
+    "scientific_run_max_iters": 9489,
+    "persistent_watchdog_required_before_launch": true,
+    "automatic_rerun_authorized": false,
+    "different_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The exact preregistered functional-LWT config is finite, loads the required native extension, and exceeds the 20 percent MFU floor by 11.98 percentage points."
+  }
+}

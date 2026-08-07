@@ -22,6 +22,10 @@ PLAN = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "124m_attention_qk_only_lwt_20tpp_plan.json"
 )
+MFU_RESULT = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "124m_attention_qk_only_lwt_20tpp_mfu_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -143,3 +147,15 @@ def test_frozen_gate_and_monitoring_policy() -> None:
     assert monitoring["heartbeat_minutes"] == 90
     assert monitoring["heartbeat_resets_after_progress_callback"] is True
     assert "send-opencode-test" in monitoring["callback_endpoint"]
+
+
+def test_mfu_result_seals_exact_config_and_authorizes_one_run() -> None:
+    result = load(MFU_RESULT)
+    assert result["passed"] is True
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["identity"]["config_sha256"] == sha256(CONFIG)
+    assert result["measurement"]["mfu_fraction"] >= 0.2
+    assert result["stability"]["native_block_fht_extension_loaded"] is True
+    assert result["stability"]["all_logged_losses_finite"] is True
+    assert result["decision"]["scientific_run_authorized_count"] == 1
+    assert result["decision"]["persistent_watchdog_required_before_launch"] is True
