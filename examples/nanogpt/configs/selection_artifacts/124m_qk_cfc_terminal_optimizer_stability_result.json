@@ -1,0 +1,57 @@
+{
+  "artifact_kind": "124m_qk_cfc_terminal_optimizer_stability_result",
+  "schema_version": "mai_124m_qk_cfc_terminal_optimizer_stability_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "MOMENTUM_STABILIZES_TASK_TANGENT",
+  "plan_sha256": "3d8dd793cc472d95350823c284b27571a1f3604a1e903993a198e79c224e1a66",
+  "result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/scientific/terminal_optimizer_stability/result.json",
+    "sha256": "ada9c8db3bf549e3e5708b59847389518cebe8ec289fce372c575a02027683ce",
+    "bytes": 20741
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "b795b0d5ad07027091f6b66f8b721dbf61032539",
+    "entrypoint_sha256": "f74dbd6834b7b4c02bb03b78b708468de64c1276c9aad70ec18a490847c5cb55",
+    "wall_seconds": 6.074014,
+    "parameter_updates_to_source": 0,
+    "tokens_per_gradient_window": 262144
+  },
+  "late_cross_window_cosine": {
+    "stateless_requested": 0.0256945922,
+    "momentum_requested": 0.5490865678,
+    "feedback_corrected": 0.9954267953
+  },
+  "feedback_diagnostics": {
+    "family_feedback_to_requested_fro_ratio": [
+      21.4350061060,
+      21.4414069366
+    ],
+    "late_layer_feedback_to_requested_fro_ratio_range": [
+      8.7374944687,
+      12.2301111221
+    ],
+    "all_layer_feedback_to_requested_fro_ratio_range": [
+      8.7374944687,
+      63.6980628967
+    ],
+    "per_layer_feedback_requested_cosine_range": [
+      0.0095505994,
+      0.0274356678
+    ]
+  },
+  "interpretation": [
+    "The exact persisted Muon momentum buffer raises the late c_fc cross-window task-direction cosine from 0.0257 to 0.5491, establishing a stable temporal task gauge that a stateless gradient audit cannot see.",
+    "The feedback-corrected target is nearly identical across windows because the same persisted residual dominates it; its 0.9954 cosine is not evidence that fresh task geometry is equally stable.",
+    "The stored compression residual is about 21.44 times the requested family norm and 8.74 to 12.23 times the requested norm in late layers, while remaining nearly orthogonal to the fresh requested update.",
+    "The next mechanism must separate stable task-oriented topology selection from backlog fitting and radius, rather than widening the chart or treating the residual as the task tangent."
+  ],
+  "authorization": {
+    "selector_fitter_zero_update_factorial": true,
+    "change_training_structure": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}

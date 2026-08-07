@@ -1,0 +1,68 @@
+{
+  "schema_version": "mai_124m_qk_cfc_selector_fitter_factorial_plan_v1",
+  "status": "registered_before_any_selector_fitter_factorial_measurement",
+  "recorded_at": "2026-08-08",
+  "scientific_question": "Can the stable persisted-Muon task gauge select c_fc topology while error feedback is retained only for coefficient fitting, and does fresh-request radius or corrected-target radius preserve both task alignment and backlog contraction?",
+  "theory_chain": [
+    "Persisted Muon momentum produces a stable late-layer task direction (cross-window cosine 0.5491), whereas a stateless request does not.",
+    "The compression residual is nearly orthogonal to the fresh request and about 21.44 times larger at the family level, so corrected-target stability is primarily backlog persistence.",
+    "The production solver currently uses one backlog-dominated tensor for support selection, coefficient fitting, and radius, entangling chart alignment with delayed error correction.",
+    "The paper's alignment and stability principles imply that chart topology should follow the stable task gauge; error feedback may remain a correction only if residual contraction and functional loss are preserved."
+  ],
+  "identity": {
+    "entrypoint_sha256": "3ee906398ac920757d613db572d9faf99943976609101c298631fe99afff4f47",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "optimizer_stability_result_sha256": "ada9c8db3bf549e3e5708b59847389518cebe8ec289fce372c575a02027683ce"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 9489,
+    "late_layers": [8, 9, 10, 11],
+    "window_seeds": {
+      "fit": 2026080851,
+      "holdout": 2026080857
+    },
+    "gradient_batch_size": 32,
+    "gradient_batches": 8,
+    "tokens_per_gradient_window": 262144,
+    "validation_seed": 2026080863,
+    "validation_batch_size": 8,
+    "validation_batches": 8,
+    "schedule": [22, 22, 22, 22, 22, 22],
+    "ridge_ratio": 0.000001,
+    "chunk_size": 256,
+    "maximum_production_control_error": 0.000001,
+    "confidence_z": 1.96,
+    "candidates": [
+      "current corrected-target selection, fit, and corrected radius",
+      "momentum-request selection, fit, and requested radius",
+      "momentum-request selection with corrected-target fit and corrected radius",
+      "momentum-request selection with corrected-target fit and requested radius"
+    ],
+    "parameter_updates_to_checkpoint": 0,
+    "execution": "direct foreground polling through process exit; expected under five minutes",
+    "watchdog": false,
+    "callback": false
+  },
+  "decision_rule": {
+    "minimum_late_requested_recovery_improvement": 0.05,
+    "minimum_late_action_cross_window_cosine": 0.10,
+    "maximum_outgoing_to_incoming_feedback_ratio": 1.0,
+    "maximum_residual_ratio_increase_over_current": 0.05,
+    "maximum_functional_upper_bound_regression_ce": 0.0,
+    "minimum_one_window_mean_ce_improvement": 0.0001,
+    "candidate_priority": [
+      "task_select_corrected_fit_corrected_radius",
+      "task_select_corrected_fit_requested_radius"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "run_zero_update_factorial": true,
+    "change_training_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
