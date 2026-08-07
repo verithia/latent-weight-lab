@@ -1,0 +1,126 @@
+{
+  "artifacts": {
+    "config_sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b",
+    "provenance_sha256": "215e9f8b8937b78e80944ccf7de1636642bfbbbf9e949d3d6ee16fd7ed0ad0c8",
+    "status_sha256": "77351c9d4a0fa9fe7c46a373ec9f37ba053817a665a9d5eca0a34f911b8687c0",
+    "training_log_sha256": "cdf3102a795b2a50ec0cbb7a5867ce22f3cf2153da6c56cc89cc8a05dc7d7f21",
+    "verifier_sha256": "6be805f5844bb6409fd86e7d984b597ce7fd33a210045138f6e2d15b1bd53124"
+  },
+  "checkpoint": {
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "bytes": 1084422152,
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/ckpt.pt",
+    "metadata_consistent": true,
+    "metadata_sha256": "19becd31de132792caa73b32da6c038bb639bd49d78afda177defb4d434f71b4",
+    "model_tensor_bytes": 610201536,
+    "model_tensor_count": 412,
+    "next_iter": 9489,
+    "optimizer_state_present": true,
+    "optimizer_tensor_count": 1137,
+    "readable": true,
+    "rng_state_present": true,
+    "saved_at_unix": 1786101020.9883409,
+    "schema_version": "nanogpt_exact_resume_v2",
+    "sha256": "8eae3dc2c02775cd722a34bec65811fdf9d670b82d5ddf4ca919d3e635f3b4cc"
+  },
+  "classification": "PASS_FUNCTIONAL_LWT_QK_ONLY_124M_20TPP",
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "different_structure_authorized": false,
+    "full_attention_replacement_accepted": false,
+    "full_mlp_replacement_accepted": false,
+    "functional_lwt_qk_only_partial_attention_accepted": true,
+    "generated_v_accepted": false,
+    "inference_parameter_reduction": 0,
+    "larger_rung_authorized": false
+  },
+  "fixed_evaluation": {
+    "curve_passed": true,
+    "improvement_passed": true,
+    "maximum_fixed_curve_gap_to_qkv": 0.0,
+    "maximum_fixed_curve_gap_to_qkv_ce": -0.0354000000000001,
+    "minimum_terminal_improvement_over_qkv": 0.015,
+    "rows": [
+      {
+        "candidate_train_ce": 3.5219,
+        "candidate_validation_ce": 3.5038,
+        "gap_to_qkv_parent_ce": -0.03589999999999982,
+        "qkv_parent_validation_ce": 3.5397,
+        "step": 2373
+      },
+      {
+        "candidate_train_ce": 3.3391,
+        "candidate_validation_ce": 3.3179,
+        "gap_to_qkv_parent_ce": -0.0354000000000001,
+        "qkv_parent_validation_ce": 3.3533,
+        "step": 4746
+      },
+      {
+        "candidate_train_ce": 3.2275,
+        "candidate_validation_ce": 3.2046,
+        "gap_to_qkv_parent_ce": -0.03669999999999973,
+        "qkv_parent_validation_ce": 3.2413,
+        "step": 7119
+      },
+      {
+        "candidate_train_ce": 3.1714,
+        "candidate_validation_ce": 3.1488,
+        "gap_to_qkv_parent_ce": -0.036499999999999755,
+        "qkv_parent_validation_ce": 3.1853,
+        "step": 9489
+      }
+    ],
+    "scientific_gate_passed": true,
+    "terminal_gap_to_dense_ce": -0.005900000000000016,
+    "terminal_improvement_over_qkv_ce": 0.036499999999999755,
+    "terminal_maximum": 3.1747,
+    "terminal_passed": true,
+    "terminal_validation_ce": 3.1488
+  },
+  "identity_checks": {
+    "checkpoint_mlp_cfc_dense": true,
+    "checkpoint_mlp_cproj_no_givens": true,
+    "checkpoint_mlp_cproj_no_lowrank": true,
+    "checkpoint_mlp_cproj_no_product_fht": true,
+    "checkpoint_qk_bilateral_cayley": true,
+    "checkpoint_qk_cayley": true,
+    "checkpoint_qk_only_generated": true,
+    "checkpoint_qk_output_cayley": true,
+    "checkpoint_qk_output_gain": true,
+    "checkpoint_qk_rank_64": true,
+    "config": true,
+    "config_mlp_cfc_dense": true,
+    "config_mlp_cproj_no_givens": true,
+    "config_mlp_cproj_no_lowrank": true,
+    "config_mlp_cproj_no_product_fht": true,
+    "config_qk_bilateral_cayley": true,
+    "config_qk_cayley": true,
+    "config_qk_only_generated": true,
+    "config_qk_output_cayley": true,
+    "config_qk_output_gain": true,
+    "config_qk_rank_64": true,
+    "dense_v_cproj_and_full_mlp_owned_by_muon": true,
+    "mfu_passed": true,
+    "mfu_result": true,
+    "plan": true,
+    "provenance": true,
+    "provenance_commit": true,
+    "provenance_config": true,
+    "provenance_dataset": true,
+    "provenance_mfu": true,
+    "provenance_run_id": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "status_run_name": true,
+    "thresholds_unchanged": true
+  },
+  "optimizer_ownership": {
+    "dense_muon_matrix_tensors": 48,
+    "interpretation": "12 V plus 12 attention c_proj plus 12 c_fc plus 12 MLP c_proj"
+  },
+  "recorded_at": "2026-08-07T11:12:21.624483+00:00",
+  "schema_version": "mai_124m_attention_qk_only_lwt_20tpp_verification_v1",
+  "scientific_gate_passed": true,
+  "verified": true
+}
