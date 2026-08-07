@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_qk_cfc_terminal_optimizer_stability_plan_v1",
+  "status": "registered_before_any_terminal_optimizer_stability_measurement",
+  "recorded_at": "2026-08-08",
+  "scientific_question": "Do the persisted Muon momentum buffer or directed-product compression residual stabilize the actual terminal c_fc target across disjoint production-sized task windows?",
+  "theory_chain": [
+    "Stateless late c_fc task directions are unstable across exact-effective-batch windows, so coordinate widening is not causally justified.",
+    "Muon momentum is the production temporal smoother and may recover a stable task tangent that model-only phase snapshots cannot represent.",
+    "Error feedback adds a persistent weight-space residual before sparse chart selection; it may stabilize the target, destabilize momentum, or dominate task geometry.",
+    "The Mapping Networks smooth-map premise is only plausible if the actual optimizer target, not merely a fresh minibatch gradient, is stable."
+  ],
+  "identity": {
+    "entrypoint_sha256": "f74dbd6834b7b4c02bb03b78b708468de64c1276c9aad70ec18a490847c5cb55",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "production_batch_result_sha256": "f97acb83412e196d35bc61f5eeb071d2eca20a9654b45c7ad3e8c4d02c4fe5c2"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 9489,
+    "late_layers": [8, 9, 10, 11],
+    "window_seeds": {
+      "fit": 2026080851,
+      "holdout": 2026080857
+    },
+    "gradient_batch_size": 32,
+    "gradient_batches": 8,
+    "tokens_per_window": 262144,
+    "current_schedule": [22, 22, 22, 22, 22, 22],
+    "ridge_ratio": 0.000001,
+    "chunk_size": 256,
+    "radius_ratio": 1.0,
+    "components": [
+      "stateless requested update",
+      "persisted-momentum requested update",
+      "requested update plus persisted compression residual at configured decay 1.0"
+    ],
+    "parameter_updates_to_checkpoint": 0,
+    "execution": "direct foreground polling through process exit; expected under five minutes",
+    "watchdog": false,
+    "callback": false
+  },
+  "decision_rule": {
+    "minimum_stable_late_cosine": 0.1,
+    "minimum_material_cosine_gain": 0.05,
+    "momentum_outcome": "If momentum-conditioned requested targets clear stability and materially improve over stateless targets, design persistent or slow chart selection around the momentum gauge.",
+    "feedback_dominance_outcome": "If only corrected targets clear stability, audit carry magnitude/transport before changing chart capacity or adding Mapping Loss.",
+    "feedback_destabilization_outcome": "If momentum is stable but corrected targets are not, repair or decay error feedback before any structure search.",
+    "unstable_outcome": "If neither state stabilizes the target, reject hard per-step top-k selection and design a soft/persistent atlas before loss regularization.",
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "run_zero_update_gate": true,
+    "language_model_training": false,
+    "mfu_preflight": false,
+    "larger_rung": false
+  }
+}

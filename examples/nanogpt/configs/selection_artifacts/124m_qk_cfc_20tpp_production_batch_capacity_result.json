@@ -1,0 +1,51 @@
+{
+  "artifact_kind": "124m_qk_cfc_20tpp_production_batch_capacity_result",
+  "schema_version": "mai_124m_qk_cfc_20tpp_production_batch_capacity_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "REJECT_CAPACITY_DUE_TO_UNSTABLE_TASK_TANGENT",
+  "plan_sha256": "70a7598fe7cb2783cfa31990f2a54d643417d07251e05a816c9724568e013558",
+  "result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/scientific/production_batch_capacity_gate/result.json",
+    "sha256": "f97acb83412e196d35bc61f5eeb071d2eca20a9654b45c7ad3e8c4d02c4fe5c2"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "1a968364faa3db6cb3f9de841ae7e77339c310af",
+    "entrypoint_sha256": "31b7a5b1b28868f5410242a81fd82f74afd4dcfda1b40609c91816ae37b21e31",
+    "wall_seconds": 15.059314,
+    "parameter_updates_to_source": 0,
+    "tokens_per_gradient_window": 262144
+  },
+  "dense_cross_window_late_cosine": {
+    "4746": 0.0501767923,
+    "7119": 0.0447358947,
+    "9489": 0.0236632219
+  },
+  "failure_phase_metrics": {
+    "7119": {
+      "fit_recovery_improvement": 0.0944611357,
+      "holdout_recovery_improvement": 0.0001245494,
+      "holdout_margin_over_random": 0.0010491400,
+      "candidate_minus_current_mean_ce": -0.0000206530
+    },
+    "9489": {
+      "fit_recovery_improvement": 0.0945465739,
+      "holdout_recovery_improvement": 0.0000396412,
+      "holdout_margin_over_random": 0.0002625244,
+      "candidate_minus_current_mean_ce": -0.0000458956
+    }
+  },
+  "interpretation": [
+    "Even at the exact 262144-token effective batch, disjoint late c_fc stateless-Muon task directions have very low cosine and fail the preregistered 0.10 stability premise.",
+    "The wider task-directed chart again gains about 0.094 recovery only on the window used to select it; disjoint-window recovery and CE improvements remain negligible.",
+    "Additional directed-product coordinates are rejected as the immediate fix.",
+    "The remaining causal ambiguity is whether persisted Muon momentum and error-feedback state stabilize the actual optimizer target or instead dominate it; the exact terminal checkpoint can answer that without training."
+  ],
+  "authorization": {
+    "late_capacity_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "terminal_optimizer_state_zero_update_audit": true
+  }
+}
