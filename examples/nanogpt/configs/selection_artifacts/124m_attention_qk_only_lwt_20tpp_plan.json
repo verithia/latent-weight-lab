@@ -1,0 +1,142 @@
+{
+  "schema_version": "mai_124m_attention_qk_only_lwt_20tpp_plan_v1",
+  "recorded_at": "2026-08-07",
+  "status": "registered_before_performance_preflight_and_training",
+  "scientific_question": "Does paper-style layer/target-wise allocation that generates only the functionally simpler Q/K score map and keeps the more curved V/O residual branch dense close the 124M/20TPP partial-attention gap?",
+  "theory_synthesis": {
+    "paper_mechanism": "Use LWT-style target-specific allocation when different layers or parameter families occupy different manifolds; do not force one uniform latent chart across incompatible functions.",
+    "score_geometry": "The causal-softmax probability path was materially simpler than the raw Q/K score-kernel path: path/chord 1.3697 and PC1 energy 0.9274.",
+    "value_output_geometry": "The residual head-contribution path was more curved than the V/O kernel: path/chord 2.0676 and PC1 energy 0.8071; direct joint V/O directions had effectively zero held-out task alignment.",
+    "causal_training_evidence": "At 5TPP QK-only beat QK+V by 0.0290 CE at terminal and beat the fair blockwise-dense control by 0.0252 CE. At 20TPP QK+V ended +0.0306 CE behind dense. The measured magnitudes identify generated V, not Q/K, as the unresolved partial-attention penalty.",
+    "architecture_boundary": "The accepted residual-write-preserving joint run independently showed that generated Q/K/V and procedural c_fc compose when both c_proj residual writes stay dense. This experiment refines the attention feature allocation only; it does not reopen either c_proj family or change the MLP."
+  },
+  "immutable_evidence": {
+    "qk_only_5tpp_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+      "sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585"
+    },
+    "qkv_only_20tpp_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_20tpp_run_result.json",
+      "sha256": "ad51c59b752886106d8a0e71b2f51577cb0cc23c33e361905b76b11474f6295f"
+    },
+    "qkv_only_20tpp_decision": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_20tpp_decision.json",
+      "sha256": "47468afcf4737cd29c6ccb95a37452a81b1826e1455ef7b755c30590603b518b"
+    },
+    "activation_manifold_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_activation_manifold_result.json",
+      "sha256": "9404751379b1fd27fcfaa58f2b8ad8ed69c42fa11cd075bb8c55a37aa46e921d"
+    },
+    "fair_blockwise_dense_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_blockwise_qkv_muon_control_result.json",
+      "sha256": "c7ce71da89b3348125d1067876851ea1b18b3dad7c5d5180ba6cfbbd6082ab48"
+    },
+    "residual_write_joint_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_residual_write_preserving_joint_5tpp_result.json",
+      "sha256": "f264b334b86b1e7ac15fa83318e97ad4239779183152e936c25c5388e2d473c3"
+    }
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json",
+    "config_sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b",
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4.json",
+    "parent_config_sha256": "a66a8415f72404d4bf8925de50ff4aeef412cb3426fa40d20f45968247f3c7f9",
+    "generated_targets": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "dense_muon_targets": [
+      "attn.c_attn.v",
+      "attn.c_proj"
+    ],
+    "mlp": "fully dense Muon control; no MLP generator is enabled",
+    "qk_recipe": "exact inherited QK64 bilateral Cayley, output-side Cayley, output gain, scale 1.0, Cayley subgroup LR scale 10/3, and fixed seeds",
+    "horizon": {
+      "planned_tpp": 20.0,
+      "max_iters": 9489,
+      "fixed_evaluation_steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ]
+    },
+    "frozen_training": "From-scratch model/data seeds, LR 2.4e-3, minimum LR 2.4e-4, Muon/AdamW fallback recipe, batch, dataset, weight decay, and fixed evaluation windows are unchanged from the accepted 5TPP QK-only parent."
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "entrypoint": "examples.nanogpt.train",
+    "host": "PRO6",
+    "gpu": 0,
+    "native_blockfht_required": true
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "all_losses_finite": true,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/performance_preflight.json",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-qk-only-20tpp/examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/performance_preflight.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ]
+  },
+  "decision_rule": {
+    "dense_terminal_validation_ce": 3.1547,
+    "qkv_parent_validation_ce": [
+      3.5397,
+      3.3533,
+      3.2413,
+      3.1853
+    ],
+    "terminal_validation_ce_maximum": 3.1747,
+    "minimum_terminal_improvement_over_qkv": 0.015,
+    "maximum_fixed_curve_gap_to_qkv": 0.0,
+    "all_fixed_losses_must_be_finite": true,
+    "pass": "Accept generated-QK/dense-V/dense-c_proj as the 124M/20TPP functional-LWT partial-attention endpoint. Do not call it full attention replacement. Only then may a separate plan compose the accepted c_fc procedure.",
+    "fail": "Reject the 5TPP QK-only advantage as non-transferable to 20TPP and launch no capacity, seed, or optimizer sweep.",
+    "threshold_changed_after_measurement": false
+  },
+  "monitoring": {
+    "expected_duration": "approximately 4-5 hours based on the matched QK+V 20TPP run",
+    "policy": "one idempotent aggregate watchdog because the run exceeds two hours",
+    "callbacks": [
+      20,
+      50,
+      100,
+      "error or actionable stall"
+    ],
+    "heartbeat_minutes": 90,
+    "heartbeat_resets_after_progress_callback": true,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action_prompt": "@Codex verify the live or terminal state against the active project note; inspect fixed losses, GPU health, provenance, and checkpoint identity; update durable evidence; on terminal classify the functional-LWT gate and continue autonomously. Do not merely acknowledge."
+  },
+  "scope_guards": [
+    "This is partial attention allocation, not full attention replacement.",
+    "V and both attention/MLP c_proj residual-write maps remain dense.",
+    "The MLP remains completely dense in this causal discriminator.",
+    "Generated weights are materialized; no inference parameter or FLOP reduction is claimed.",
+    "No MFU test or training run may start before this plan and exact config are committed and synchronized into a clean PRO6 worktree.",
+    "No automatic rerun, alternate rank, generated-V repair, MLP composition, larger model, or different token rung is authorized."
+  ]
+}
