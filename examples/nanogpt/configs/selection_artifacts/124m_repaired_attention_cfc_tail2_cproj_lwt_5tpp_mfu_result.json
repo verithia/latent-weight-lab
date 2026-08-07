@@ -1,0 +1,89 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_exact_config_mfu_result",
+  "recorded_at": "2026-08-07T03:43:38.070961+00:00",
+  "classification": "TAIL2_CPROJ_LWT_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "identity": {
+    "execution_git_commit": "c68d5b62018221956fad3888ab07b8e79b21f03e",
+    "implementation_commit": "603409f088a628f4d2cfdbf10055d0b9a5c27f0b",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_plan.json",
+    "plan_sha256": "c3916eb66813c9cd4c54e3a0ab43c16eb1f3ea5d0633825c776ec3ef60dfadc7",
+    "geometry_correction": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_geometry_correction.json",
+    "geometry_correction_sha256": "410efe56d218bd5b7956a4241269cd6d8a83b6575cb0fb6f4442d000f0918740",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp_lr24e4.json",
+    "config_sha256": "ef0909cd0a74eba36c09a4961c37ac0b4a192e4dd89b416a4c30dd0a3513c119",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8 /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp_lr24e4.json --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp/performance_preflight.json --log-output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp/performance_preflight.log --min-fraction 0.2 --warmup-updates 1 --timed-updates 8",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "elapsed_seconds": 21.60475182533264,
+    "train_exit_code": 0
+  },
+  "correctness": {
+    "remote_focused_tests": "22 passed in 0.94s",
+    "dense_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "procedural_cproj_layers": [10, 11],
+    "cproj_parent_stages": 64,
+    "cproj_residual_stages": 24,
+    "cproj_output_stages": 0,
+    "cproj_coordinates_per_selected_layer": 135168,
+    "checkpoint_wall_clock_seconds": 7200,
+    "registered_deterministic_resume_required": true,
+    "native_extension_required": true,
+    "native_extension_loaded": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_tail2cproj_lwt_5tpp/performance_preflight.json",
+    "sha256": "841e3fdc871e7e28b6976d716907f2cbf60b56956c016f0ceb4b114bb5263c9e",
+    "bytes": 15362,
+    "preflight_log_sha256": "74bd929c3a70b76efd96a8e9dd89d7a42c5b02cb8c78dd69abde8a53519d3d7b",
+    "preflight_log_bytes": 17994
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_peak_tflops": 414.5925545934369,
+    "iter_ms": 1986.49625,
+    "tokens_per_second": 131963.66375,
+    "model_tflops": 98.5577780425997,
+    "mfu_fraction": 0.23772201635229243,
+    "minimum_required_mfu_fraction": 0.2,
+    "headroom_percentage_points": 3.7722016352292427,
+    "peak_mib": 35560.43,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "estimated_raw_training_minutes": 78.5659266875,
+    "timing_breakdown_ms": {
+      "prepare": 3.52375,
+      "forward_backward": 1654.31875,
+      "flush": 4.4,
+      "gradient": 1.96375,
+      "optimizer": 319.60625,
+      "data": 0.80875,
+      "other": 1.875
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "terminal_scratch_train_ce": 9.2316,
+    "terminal_scratch_validation_ce": 9.2609
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "one_2373_update_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "parallel_experiment_authorized": false,
+    "different_mask_authorized": false,
+    "larger_rung_authorized": false,
+    "required_monitoring": "one idempotent terminal-only watchdog; callback only on clean completion or actionable error/stall"
+  }
+}
