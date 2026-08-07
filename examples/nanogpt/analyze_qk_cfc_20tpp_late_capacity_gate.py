@@ -250,6 +250,12 @@ def paired_ce(
     }
 
 
+def registered_snapshot_inventory_matches(
+    registered: dict[str, str], verified: dict[str, str]
+) -> bool:
+    return registered == {step: verified.get(step) for step in registered}
+
+
 def classify(
     phase_rows: dict[str, Any],
     functional: dict[str, Any],
@@ -340,9 +346,10 @@ def validate_inputs(args: argparse.Namespace, plan: dict[str, Any]) -> dict[str,
     verification = json.loads(args.verification.read_text())
     if verification.get("passed") is not True:
         raise ValueError("phase acquisition verification is not accepted")
-    if (
-        plan["snapshot_sha256_by_step"]
-        != verification["inventory"]["snapshot_sha256_by_step"]
+    registered_snapshots = plan["snapshot_sha256_by_step"]
+    verified_snapshots = verification["inventory"]["snapshot_sha256_by_step"]
+    if not registered_snapshot_inventory_matches(
+        registered_snapshots, verified_snapshots
     ):
         raise ValueError("registered snapshot inventory changed")
     phase = json.loads(args.phase_result.read_text())

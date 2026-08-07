@@ -2,6 +2,14 @@
   "schema_version": "mai_124m_qk_cfc_20tpp_late_capacity_gate_plan_v1",
   "status": "registered_before_any_late_capacity_measurement",
   "recorded_at": "2026-08-08",
+  "verification_repair": {
+    "stage": "after_fail_closed_identity_check_before_loading_any_snapshot_or_observing_any_candidate_metric",
+    "failure": "The gate compared its registered four analysis phases to the verifier's complete five-phase inventory, which additionally contains the intentionally unused step-0 snapshot.",
+    "repair": "Compare the registered 2373/4746/7119/9489 subset against the corresponding verified inventory entries.",
+    "scientific_steps_changed": false,
+    "candidate_or_threshold_changed": false,
+    "candidate_metrics_observed_before_repair": false
+  },
   "scientific_question": "Does adding directed-product chart coordinates only in late c_fc layers 8-11 recover the same-run task tangent at the measured 15/20TPP capacity failure without disrupting the 10TPP phase?",
   "theory_chain": [
     "Same-run activation analysis localizes the first frozen failure to late-band pre-GELU capacity at 15TPP.",
@@ -10,7 +18,7 @@
     "Prior zero-update capacity evidence shows the six-stage 176-coefficient family has more tangent capacity than the production six-stage 132-coefficient family; this gate tests whether that advantage is phase-local, task-functional, and specific to task-directed connectivity."
   ],
   "identity": {
-    "entrypoint_sha256": "2a45eb975938780f4255bd9f4ec1ce4de5f84746b29bded47cb09bb6975f50c9",
+    "entrypoint_sha256": "f89fc4d6e72f8ede9f344bdb79994de19acb7c7605f6a24db8e2a23847a7bd8e",
     "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
     "phase_result_sha256": "667221584b7fe54c5ca63f383e9c9d738f08509d4918accafe77855f9e743165",
     "verification_sha256": "441e6c319f4cdf19f3153dbd08b615b594b2009ba3705f9b6fc0ffc794933e53",

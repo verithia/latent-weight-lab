@@ -4,6 +4,7 @@ from examples.nanogpt.analyze_qk_cfc_20tpp_late_capacity_gate import (
     classify,
     cosine_lr,
     deterministic_random_sources,
+    registered_snapshot_inventory_matches,
 )
 
 
@@ -34,6 +35,16 @@ def test_cosine_lr_matches_boundaries() -> None:
         warmup_iters=4,
         lr_decay_iters=10,
     ) == 0.1
+
+
+def test_registered_snapshot_inventory_accepts_verified_superset() -> None:
+    registered = {"10": "a", "20": "b"}
+    assert registered_snapshot_inventory_matches(
+        registered, {"0": "z", "10": "a", "20": "b"}
+    )
+    assert not registered_snapshot_inventory_matches(
+        registered, {"0": "z", "10": "a", "20": "changed"}
+    )
 
 
 def _phase(recovery_current: float, recovery_wide: float, recovery_random: float):
