@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_plan_v1",
+  "artifact_kind": "124m_repaired_attention_cfc_tail2_cproj_lwt_5tpp_preregistration",
+  "registered_at": "2026-08-07T04:20:00+00:00",
+  "status": "registered_before_config_generation_or_measurement",
+  "scientific_question": "Can the paper-consistent LWT compromise replace c_fc in all layers and c_proj only in the final two transformer layers while remaining within 0.005 validation CE of the accepted c_fc-only parent at 124M/5TPP?",
+  "theory": {
+    "paper_mechanism": "LWT assigns distinct latent maps by layer because layer parameter manifolds need not share one chart. The accepted layers-8-11 run is direct transformer evidence for this allocation principle.",
+    "why_tail_two": "The only accepted c_proj intervention is the jointly trained terminal band 8-11. Narrowing that contiguous band to the final two layers is fixed ex ante by downstream path length: layers 10-11 have the fewest subsequent nonlinear and residual transformations through which c_proj error can compound.",
+    "why_not_another_chart": "Exact optimizer-state transport, static modulation, paper-style elementwise activation, quadratic charts, learned low-rank residual state, and fixed local/global orthogonal maps all failed preregistered representability or causal gates. The chart, optimizer, feedback decay, and attention/c_fc parents are frozen here.",
+    "coadaptation_constraint": "Dense-parent phase replay was shown invalid even for the independently accepted late band. This mask therefore requires one jointly trained from-scratch causal test; no post-hoc tensor transplantation or endpoint oracle can decide it.",
+    "compression_scope": "The candidate procedurally generates two of twelve c_proj matrices. At each selected layer, 147456 procedural coordinates stand in for a 768x3072 target matrix, a 6.25 percent coordinate ratio. The current PyTorch implementation still materializes dense weights and does not claim registered-parameter, memory, or inference-FLOP reduction.",
+    "single_boundary_test": "This is one Pareto-boundary point, not a layer sweep. It tests whether any nontrivial c_proj replacement survives a strict loss budget after the four-layer band missed that budget by 0.006066 CE."
+  },
+  "immutable_inputs": {
+    "accepted_cfc_only_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_only_5tpp_result.json",
+    "accepted_cfc_only_result_sha256": "309556d0290c4a51fc8535c42b41f4e2982dcb7e3c4a048ceed5dfd3bd734b5f",
+    "accepted_late4_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_late_cproj_lwt_5tpp_result.json",
+    "accepted_late4_result_sha256": "f3a436af76d7bc85bee8301fae8277f878f4b5fad5c7bf24aacefb1c2b288e4f",
+    "late4_config": "examples/nanogpt/configs/pro6_mai_v3_124m_repairedfullattn_plus_cfc_latecproj_lwt_5tpp_lr24e4.json",
+    "late4_config_sha256": "684f24b4aa6482aef98ee776d9e71f101ff9a56d9f72f6a783f9997ea91d717c",
+    "same_gauge_allocation_result_sha256": "99f56823513edb5599f9dc12f7561ac9a0b5c60363012e7ca76814e952ffc5eb",
+    "residual_state_budget_result_sha256": "21c5d86bad6d612f3c26958b39a3cc51f54c61eb48c7443f3f1a57af6760e06b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "candidate": {
+    "model": "124M MAI-v3",
+    "token_horizon_tpp": 5.0,
+    "max_iters": 2373,
+    "fixed_evaluation_steps": [594, 1188, 1782, 2373],
+    "attention": "unchanged repaired full-attention Cayley parent",
+    "c_fc": "unchanged accepted directed-product schedule [22,22,22,22,22,22], radius 1.0, error-feedback decay 1.0 in all twelve layers",
+    "dense_c_proj_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "procedural_c_proj_layers": [10, 11],
+    "procedural_c_proj": "unchanged hidden64 plus residual24 Muon-matched Givens, output32, neighbors64, error-feedback decay 0.5",
+    "training_gauge": "All parameters initialize and co-adapt in one run; no checkpoint transplant or warm start.",
+    "inference": "Generated c_proj matrices are materialized as ordinary dense GEMM weights; no new inference operation is added.",
+    "forbidden_changes": [
+      "different chart capacity or connectivity",
+      "different learning rate, optimizer, schedule, seed, data, or fixed evaluation window",
+      "learned basis, LoRA, dense residual adapter, HyperConnection, activation, gain, shear, or modulation",
+      "post-result threshold change, layer-mask sweep, automatic retry, or larger rung"
+    ]
+  },
+  "decision_rule": {
+    "accepted_cfc_only_validation_ce": [4.2028, 3.8395, 3.6888, 3.625838041305542],
+    "accepted_late4_validation_ce": [4.2239, 3.851, 3.6998, 3.636904239654541],
+    "primary_terminal_gap_to_cfc_only_maximum": 0.005,
+    "primary_terminal_validation_ce_maximum": 3.630838041305542,
+    "fixed_curve_gap_to_cfc_only_maximum": 0.01,
+    "all_fixed_losses_must_be_finite": true,
+    "pass": "Accept tail-two c_proj LWT as the strict-loss partial-MLP Pareto point. It does not authorize another mask, a full-c_proj claim, or a larger rung.",
+    "fail": "Close c_proj replacement at the <=0.005 CE budget with the current chart. Retain c_fc-only as the accepted MLP structure and do not sweep individual layers or chart variants.",
+    "threshold_changed_after_measurement": false
+  },
+  "performance_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground exact scientific config with one warmup and eight timed real updates; direct polling without a watchdog",
+    "minimum_mfu_fraction": 0.2,
+    "native_extension_required": true,
+    "all_losses_finite": true,
+    "candidate_layer_types_exact": true,
+    "no_scientific_launch_before_pass": true
+  },
+  "monitoring": {
+    "expected_duration": "approximately 75-90 minutes",
+    "policy": "one idempotent terminal-only watchdog",
+    "callbacks": ["100 percent clean completion", "error or actionable stall"],
+    "milestone_callbacks": false,
+    "heartbeat_callbacks": false,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action_prompt": "verify terminal state and exact artifacts against the active project note; seal fixed losses, tail-two mask identity, optimizer ownership, MFU, provenance, checkpoint and hashes; compare against c_fc-only and late-four controls; then continue the MLP research plan autonomously"
+  },
+  "authorization": {
+    "generate_candidate_config_after_plan_commit": true,
+    "one_exact_config_mfu_preflight": true,
+    "one_scientific_run_after_mfu_pass": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "different_mask": false,
+    "larger_rung": false
+  }
+}
