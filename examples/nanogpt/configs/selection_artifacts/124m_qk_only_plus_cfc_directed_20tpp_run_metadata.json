@@ -1,0 +1,141 @@
+{
+  "architecture": {
+    "cross_run_transplants": false,
+    "dense_attention_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "dense_mlp_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "dense_v_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "generated_attention_targets": ["attn.c_attn.qk_headwise"],
+    "generated_weight_elements": 42467328,
+    "joint_training_from_initialization": true,
+    "model_registered_parameters": 85605360,
+    "model_reported_trainable_parameters": 85605360,
+    "procedural_cfc_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "reported_latent_or_procedural_coordinate_elements": 5007600
+  },
+  "artifact_kind": "124m_qk_only_plus_cfc_directed_20tpp_running_record",
+  "classification": "RUNNING_AFTER_CORRECTED_PREREGISTERED_EXACT_CONFIG_MFU_GATE",
+  "code_and_command": {
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_20260807T112735Z_1988406.config.json"
+    ],
+    "cuda_visible_devices": "0",
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "launcher": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-qk-only-20tpp/examples/nanogpt/launch_y400_ladder_detached.sh",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-qk-only-20tpp"
+  },
+  "decision_thresholds": {
+    "automatic_rerun_authorized": false,
+    "dense_terminal_validation_ce": 3.1547,
+    "different_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "maximum_fixed_checkpoint_regression_vs_qk_parent_ce": 0.005,
+    "qk_only_parent_fixed_validation_ce": [3.5038, 3.3179, 3.2046, 3.1488],
+    "terminal_validation_ce_maximum": 3.1538
+  },
+  "gates": {
+    "all_losses_finite": true,
+    "all_tests_passed": true,
+    "corrected_exact_config_mfu_fraction": 0.28366223157175907,
+    "corrected_mfu_certificate_sha256": "dbb456101f58b64935bba801b86ef4183db5825d66e56e80a2da96c4c41e49e5",
+    "corrected_ordinary_registered_parameter_count": 85605360,
+    "focused_tests_remote": 16,
+    "iter_ms": 1742.795,
+    "minimum_mfu_fraction": 0.2,
+    "native_block_fht_extension_loaded": true,
+    "peak_vram_mib": 34042.0,
+    "tokens_per_second": 150416.76374999998
+  },
+  "immutable_inputs": {
+    "accounting_correction": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_accounting_correction.json",
+      "sha256": "8143eeab372060216ff7d7d57cbd141e695ff3713f18cfebcc85ce90739d1312"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_20260807T112735Z_1988406.config.json",
+      "sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2"
+    },
+    "archived_mfu_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_20260807T112735Z_1988406.mfu.json",
+      "sha256": "dbb456101f58b64935bba801b86ef4183db5825d66e56e80a2da96c4c41e49e5"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_lr24e4.json",
+      "sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_evaluation_runtime_digest": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_mfu_result.json",
+      "sha256": "d0818c792194517750a860ccc0d622bcbe9e09b358a3073325b992bf83697d82"
+    },
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_only_plus_cfc_directed_20tpp_plan.json",
+      "sha256": "219d59680a6b535990b70d0dae2105a0af1a46d9f79cb216535cc22ee2458092"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_20260807T112735Z_1988406.json",
+      "sha256": "14f176a3e4687baa2d9c252c4c5a3dc685e380f50bb421a513185ced195b3240"
+    }
+  },
+  "initial_live_verification": {
+    "estimated_raw_training_minutes": 275.62,
+    "estimated_wall_time_minutes_including_evaluation_and_checkpointing": 300,
+    "filesystem_available_bytes": 1643171414016,
+    "finite_and_error_free_log": true,
+    "gpu_memory_mib": 46654,
+    "gpu_power_watts": 502.06,
+    "gpu_temperature_celsius": 60,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 100,
+    "initial_train_ce": 10.9955,
+    "initial_validation_ce": 10.9958,
+    "last_iter": 40,
+    "latest_minibatch_loss": 7.3282,
+    "process_alive": true,
+    "status": "running",
+    "verified_at": "2026-08-07T19:29:16+08:00",
+    "workspace_bytes": 266356210263,
+    "workspace_cap_gib": 256,
+    "workspace_gib": 248.0635515069589
+  },
+  "monitoring": {
+    "callback_action": "verify live or terminal identity, fixed losses, GPU health, provenance and checkpoint hashes; update durable notes, classify the frozen gate, and continue autonomously",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "heartbeat_minutes": 90,
+    "initialized_without_callback": true,
+    "milestones": [20, 50, 100],
+    "progress_resets_heartbeat": true,
+    "service": "com.mappingnetworks.pro6.qkpluscfc20tpp",
+    "state": "running",
+    "state_key": "pro6_124m_qk_plus_cfc_20tpp",
+    "stderr_empty": true,
+    "terminal_delivery_once": true
+  },
+  "recorded_at": "2026-08-07T19:29:16+08:00",
+  "schema_version": "mai_124m_qk_only_plus_cfc_directed_20tpp_run_metadata_v1",
+  "scientific_identity": {
+    "execution_git_commit": "c78f70544fbac451430e0807b52b03c5d4134bcb",
+    "fixed_evaluation_steps": [2373, 4746, 7119, 9489],
+    "gpu": 0,
+    "host": "PRO6",
+    "pgid": 1988520,
+    "pid": 1988520,
+    "remote_repository": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-qk-only-20tpp",
+    "remote_worktree_clean_at_launch": true,
+    "run_id": "pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp_20260807T112735Z_1988406",
+    "run_name": "pro6_mai_v3_124m_qk_only_plus_cfc_directed_20tpp",
+    "started_at": "2026-08-07T19:27:36+08:00",
+    "updates": 9489
+  }
+}
