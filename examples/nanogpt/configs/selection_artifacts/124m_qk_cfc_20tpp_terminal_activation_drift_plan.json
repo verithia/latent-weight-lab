@@ -1,0 +1,90 @@
+{
+  "artifact_kind": "124m_qk_cfc_20tpp_terminal_activation_drift_preregistration",
+  "authorization": {
+    "analysis_only": true,
+    "automatic_training_arm": false,
+    "larger_rung": false,
+    "parameter_updates": 0,
+    "structural_variant": false
+  },
+  "decision_rule": {
+    "classification_order": [
+      "POST_GELU_CONVERSION_DEFICIT if conversion ratio <= 0.90 while pre-GELU hard-rank ratio >= 0.90",
+      "PRE_GELU_CAPACITY_DEFICIT if pre-GELU hard-rank ratio <= 0.90",
+      "RESIDUAL_BRANCH_SCALE_DEFICIT if update/residual RMS ratio is outside [0.90, 1.10]",
+      "RESIDUAL_DIRECTION_COMPATIBILITY_DEFICIT if mean absolute residual/update cosine shift >= 0.02",
+      "DISTRIBUTED_OR_UNRESOLVED_TERMINAL_DRIFT otherwise"
+    ],
+    "minimum_cosine_shift": 0.02,
+    "minimum_material_ratio": 0.1,
+    "probe_must_reproduce_terminal_order_for_interpretation": true,
+    "thresholds_changed_after_measurement": false,
+    "training_or_structure_authorized_by_any_outcome": false
+  },
+  "identity": {
+    "candidate_checkpoint_sha256": "1ed9f05b34a14f0916e19a33c6cc18d6e75095b2d351a78d274d5c3b659ad58b",
+    "candidate_config_sha256": "26613d1136d68be8412e3172ca90894a41b9ecc60ca8ac69842e303fb2a504b2",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "729f11afc1eb81d142a9ab4702191edae157abed2b5e11cfdf2f1c5c1935cb5e",
+    "parent_checkpoint_sha256": "8eae3dc2c02775cd722a34bec65811fdf9d670b82d5ddf4ca919d3e635f3b4cc",
+    "parent_config_sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b"
+  },
+  "names": {
+    "candidate": "qk_plus_cfc",
+    "parent": "qk_only"
+  },
+  "protocol": {
+    "batch_size": 2,
+    "batches": 8,
+    "block_size": 256,
+    "dtype": "bfloat16",
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "sample_cap": 256,
+    "sample_seed": 20260808,
+    "token_regimes": [
+      "HEAD",
+      "MID",
+      "TAIL"
+    ]
+  },
+  "registered_at": "2026-08-08T00:35:00+08:00",
+  "scientific_question": "Does the rejected procedural c_fc first lose capacity before GELU, lose conversion through GELU, or distort the MLP residual write at the 20TPP endpoint relative to the accepted QK-only parent?",
+  "schema_version": "mai_124m_qk_cfc_20tpp_terminal_activation_drift_plan_v1",
+  "scope_boundary": {
+    "cross_run_internal_directions": "not interpreted",
+    "gauge_invariant_metrics": [
+      "within-run effective ranks",
+      "post/pre hard-rank conversion",
+      "within-run update/residual RMS",
+      "within-run residual/update cosine and CKA",
+      "fixed-token validation CE"
+    ],
+    "next_action": "A localized outcome permits only a separately registered same-gauge multi-phase acquisition; it does not permit a mapper or training arm.",
+    "parameter_transplantation": false
+  },
+  "systems": {
+    "callback": false,
+    "direct_foreground_polling": true,
+    "expected_duration": "under five minutes",
+    "mfu_gate": "not applicable because the audit performs zero parameter updates",
+    "watchdog": false
+  },
+  "theory": {
+    "causal_evidence": "The QK+c_fc curve matches QK-only through 10TPP, then regresses by +0.0099/+0.0081 CE at 15/20TPP; the diagnostic targets that late functional drift rather than trying another capacity or optimizer variant.",
+    "paper_link": "The Mapping theorem is local and LWT is layer-specific; terminal functional geometry must be localized before choosing a new chart or modulation direction.",
+    "why_terminal_only": "Checkpoint history is disabled. This audit can localize the terminal failure but cannot identify when it emerged; a positive localization authorizes only a later same-gauge phase acquisition."
+  }
+}
