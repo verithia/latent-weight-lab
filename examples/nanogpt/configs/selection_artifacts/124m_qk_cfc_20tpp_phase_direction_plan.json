@@ -1,14 +1,25 @@
 {
   "schema_version": "mai_124m_qk_cfc_20tpp_phase_direction_plan_v1",
   "artifact_kind": "124m_qk_cfc_20tpp_same_run_phase_direction_preregistration",
-  "status": "registered_at_20pct_before_any_post_init_snapshot_was_observed",
+  "status": "registered_at_20pct_then_identity_amended_for_parser_only_repair_before_phase_metrics",
   "registered_at": "2026-08-08T01:33:48+08:00",
+  "verification_repair_dependency": {
+    "recorded_at": "2026-08-08T05:20:00+08:00",
+    "original_acquisition_plan_sha256": "05678c4472d10fdbde7885abf21cedf368e8f91c0497ce944f54a7d1aa00430d",
+    "original_acquisition_verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f",
+    "allowed_identity_changes": [
+      "acquisition_plan_sha256",
+      "acquisition_verifier_sha256"
+    ],
+    "scientific_protocol_or_threshold_changes": false,
+    "phase_metrics_observed_before_amendment": false
+  },
   "scientific_question": "When the accepted-at-5TPP QK+c_fc composition erodes after 10TPP, does the same-run task geometry identify intrinsic c_fc drift, dense c_proj context drift, or a harmful c_fc/c_proj interaction?",
   "identity": {
     "entrypoint_sha256": "87cf5537853f7c74ac2f8f4794c406bdf3522104e94863b1df1a71d1e996004a",
-    "acquisition_plan_sha256": "05678c4472d10fdbde7885abf21cedf368e8f91c0497ce944f54a7d1aa00430d",
+    "acquisition_plan_sha256": "01b75001384face35b3c1525093aa190ba581cf8506667bdc13c6b0cfbef1886",
     "acquisition_config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
-    "acquisition_verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f",
+    "acquisition_verifier_sha256": "8d3f9aa3024e0455cbc515bc93243c64886ce451300070448420d1b80458c40e",
     "source_result_sha256": "2b7bba0e5928d38b073f7b0734a6516eb12f0f3a01be3a168cef9094f4f6582e",
     "terminal_audit_sha256": "50aad2a01ade96a84d9265318c46b00cee1fd41fa7dd879a2d04a1f716ac4876",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"

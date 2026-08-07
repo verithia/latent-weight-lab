@@ -52,7 +52,7 @@
     "terminal_audit": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_20tpp_terminal_activation_drift_result.json",
     "terminal_audit_sha256": "50aad2a01ade96a84d9265318c46b00cee1fd41fa7dd879a2d04a1f716ac4876",
     "verifier": "examples/nanogpt/verify_qk_cfc_20tpp_phase_acquisition.py",
-    "verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f"
+    "verifier_sha256": "8d3f9aa3024e0455cbc515bc93243c64886ce451300070448420d1b80458c40e"
   },
   "monitoring": {
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
@@ -89,5 +89,15 @@
     "estimated_snapshot_payload_bytes": 3051008160,
     "require_backing_filesystem_free_space": true,
     "workspace_cap_bytes": 274877906944
+  },
+  "verification_repair": {
+    "failure": "The verifier imported a 5TPP helper whose parser hard-coded steps 0/594/1188/1782/2373 and rejected the untouched 20TPP log before loading a model or evaluating a snapshot.",
+    "original_verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f",
+    "phase_metrics_observed_before_repair": false,
+    "recorded_at": "2026-08-08T05:20:00+08:00",
+    "repair": "Parse fixed losses locally and require the acquisition plan's already-frozen expected_snapshot_steps.",
+    "scientific_thresholds_changed": false,
+    "snapshot_or_checkpoint_contract_changed": false,
+    "stage": "after_terminal_acquisition_before_functional_replay_or_phase_metrics"
   }
 }

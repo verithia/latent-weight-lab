@@ -123,6 +123,23 @@ def make_plan(config_sha256: str) -> dict[str, Any]:
         "schema_version": "mai_124m_qk_cfc_20tpp_phase_acquisition_plan_v1",
         "status": "registered_before_preflight_or_execution",
         "recorded_at": "2026-08-08",
+        "verification_repair": {
+            "recorded_at": "2026-08-08T05:20:00+08:00",
+            "stage": "after_terminal_acquisition_before_functional_replay_or_phase_metrics",
+            "original_verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f",
+            "failure": (
+                "The verifier imported a 5TPP helper whose parser hard-coded "
+                "steps 0/594/1188/1782/2373 and rejected the untouched 20TPP log "
+                "before loading a model or evaluating a snapshot."
+            ),
+            "repair": (
+                "Parse fixed losses locally and require the acquisition plan's "
+                "already-frozen expected_snapshot_steps."
+            ),
+            "scientific_thresholds_changed": False,
+            "snapshot_or_checkpoint_contract_changed": False,
+            "phase_metrics_observed_before_repair": False,
+        },
         "scientific_question": (
             "At which fixed phase does the QK+c_fc residual-direction geometry drift "
             "from its own early trajectory as the CE gap emerges after 10TPP?"

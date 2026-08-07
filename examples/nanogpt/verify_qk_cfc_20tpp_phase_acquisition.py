@@ -7,6 +7,7 @@ import argparse
 import contextlib
 import datetime as dt
 import json
+import re
 import time
 from pathlib import Path
 from types import SimpleNamespace
@@ -18,7 +19,7 @@ from examples.nanogpt.analyze_mlp_activation_update_alignment import load_snapsh
 from examples.nanogpt.analyze_mlp_cproj_activation_weighted_output_selector import file_sha256, git_commit
 from examples.nanogpt.parameter_trajectory import FULL_STATE_SCHEMA_VERSION
 from examples.nanogpt.train import fixed_eval_indices_digest, make_fixed_eval_indices, require_block_fht_native_extension
-from examples.nanogpt.verify_full_state_functional_replay import evaluate_validation_ce, parse_logged_losses
+from examples.nanogpt.verify_full_state_functional_replay import evaluate_validation_ce
 from examples.nanogpt.verify_late_cproj_full_state_trajectory import compare_terminal_checkpoint, expected_snapshot_steps, validate_snapshot
 from examples.nanogpt.verify_resume_checkpoint_envelope import verify as verify_resume
 
@@ -26,6 +27,35 @@ from examples.nanogpt.verify_resume_checkpoint_envelope import verify as verify_
 PLAN_SCHEMA = "mai_124m_qk_cfc_20tpp_phase_acquisition_plan_v1"
 RESULT_SCHEMA = "mai_124m_qk_cfc_20tpp_phase_acquisition_verification_v1"
 REPO_ROOT = Path(__file__).resolve().parents[2]
+LOSS_PATTERN = re.compile(
+    r"^step (?P<step>\d+): train loss "
+    r"(?P<train>[-+0-9.eE]+), val loss (?P<val>[-+0-9.eE]+)$"
+)
+
+
+def parse_logged_losses(
+    path: Path, required_steps: list[int]
+) -> dict[int, dict[str, float]]:
+    """Parse this acquisition's plan-defined fixed checkpoints.
+
+    The shared full-state verifier is for a 5TPP trajectory and therefore
+    hard-codes its own 0/25/50/75/100% step inventory.  This 20TPP verifier
+    must instead derive the inventory from its already-registered plan.
+    """
+    losses: dict[int, dict[str, float]] = {}
+    for raw in path.read_text(errors="replace").splitlines():
+        match = LOSS_PATTERN.match(raw.strip())
+        if match is None:
+            continue
+        step = int(match.group("step"))
+        losses[step] = {
+            "train": float(match.group("train")),
+            "val": float(match.group("val")),
+        }
+    missing = sorted(set(required_steps) - set(losses))
+    if missing:
+        raise ValueError(f"training log is missing fixed losses: {missing}")
+    return losses
 
 
 def parse_args() -> argparse.Namespace:
@@ -105,7 +135,7 @@ def main() -> None:
             raise ValueError("snapshot run identity changed")
         snapshot_hashes[str(step)] = file_sha256(path)
         snapshots[step] = payload
-    logged = parse_logged_losses(args.training_log)
+    logged = parse_logged_losses(args.training_log, registered)
     tolerance = float(plan["acceptance"]["curve_absolute_tolerance_ce"])
     curve_rows = []
     for raw_step, accepted_ce in plan["acceptance"]["accepted_validation_ce_by_step"].items():
