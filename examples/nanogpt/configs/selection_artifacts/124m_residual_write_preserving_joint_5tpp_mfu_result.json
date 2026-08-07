@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_residual_write_preserving_joint_5tpp_mfu_result_v1",
+  "artifact_kind": "124m_residual_write_preserving_joint_5tpp_exact_config_mfu_result",
+  "recorded_at": "2026-08-07T05:26:01+00:00",
+  "classification": "RESIDUAL_WRITE_PRESERVING_JOINT_124M_5TPP_EXACT_CONFIG_MFU_PASSED",
+  "passed": true,
+  "identity": {
+    "execution_git_commit": "75b654dd2fce2b4b6708257ce476d555dac8e4ef",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_residual_write_preserving_joint_5tpp_plan.json",
+    "plan_sha256": "93d6c8f33774d11655621ea71dd2364ff5c3261bc45cc63ca29b4707fd8aefe9",
+    "accounting_correction": "examples/nanogpt/configs/selection_artifacts/124m_residual_write_preserving_joint_5tpp_accounting_correction.json",
+    "accounting_correction_sha256": "842163e10c5b4080baec010ebd893869719012c2fe5133846e2a22c6343e0c7e",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_residual_write_preserving_joint_5tpp_lr24e4.json",
+    "config_sha256": "1c7cf905de618c554a6afe5f286f33cf2f2e016a6b2d9b0e7901ee4723eb0cd6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8 PYTHONPATH=/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-residual-write-joint-5tpp-v2 /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_residual_write_preserving_joint_5tpp_lr24e4.json --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_residual_write_preserving_joint_5tpp/performance_preflight_corrected.json --log-output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_residual_write_preserving_joint_5tpp/performance_preflight_corrected.log --min-fraction 0.2 --warmup-updates 1 --timed-updates 8",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callback": false,
+    "parameter_updates_persisted": 0,
+    "elapsed_seconds": 44.920814037323,
+    "train_exit_code": 0
+  },
+  "correctness": {
+    "remote_focused_tests": "24 passed",
+    "generated_attention_targets": ["attn.c_attn.qk_headwise", "attn.c_attn.v"],
+    "dense_attention_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "procedural_cfc_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "dense_mlp_cproj_layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "directed_product_schedule": [22, 22, 22, 22, 22, 22],
+    "directed_product_error_feedback_decay": 1.0,
+    "model_registered_parameters": 79197288,
+    "model_reported_trainable_parameters": 79197288,
+    "generated_weight_elements": 49545216,
+    "reported_latent_elements": 5078376,
+    "qkv_registered_parameter_reduction_present": true,
+    "cfc_component_registered_parameter_reduction": 0,
+    "inference_parameter_reduction": 0,
+    "inference_flop_reduction": 0,
+    "native_extension_required": true,
+    "native_extension_loaded": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_residual_write_preserving_joint_5tpp/performance_preflight_corrected.json",
+    "sha256": "f1929faa8faa46d53543bce48dfae2b457e3715086958f6ee96b664b609ee85f",
+    "bytes": 15054,
+    "preflight_log_sha256": "688769bb442fcab8f1684bad79c7aea17e6f0bdbe80a40d0108c1bf35cb68157",
+    "preflight_log_bytes": 12782
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "empirical_bf16_peak_tflops": 414.87720861049786,
+    "iter_ms": 1902.7475,
+    "tokens_per_second": 137771.6575,
+    "model_tflops": 102.89550967734529,
+    "mfu_fraction": 0.24801437037710938,
+    "minimum_required_mfu_fraction": 0.2,
+    "headroom_percentage_points": 4.801437037710938,
+    "peak_mib": 35236.47,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "estimated_raw_training_minutes": 75.257986375,
+    "timing_breakdown_ms": {
+      "prepare": 4.0525,
+      "forward_backward": 1612.045,
+      "flush": 9.08,
+      "gradient": 2.26125,
+      "optimizer": 273.08,
+      "data": 0.63625,
+      "other": 1.5925
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "terminal_scratch_train_ce": 9.1807,
+    "terminal_scratch_validation_ce": 9.1967
+  },
+  "decision": {
+    "exact_config_mfu_gate_passed": true,
+    "one_2373_update_scientific_run_authorized": true,
+    "automatic_rerun_authorized": false,
+    "parallel_experiment_authorized": false,
+    "different_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "required_monitoring": "one idempotent terminal-only watchdog; callback only on clean completion or actionable error/stall"
+  }
+}
