@@ -32,6 +32,10 @@ SUPPORTING_SOURCES = (
 )
 
 
+def repo_relative(path: Path) -> str:
+    return str(path.resolve().relative_to(REPO_ROOT))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--exact-plan", type=Path, required=True)
@@ -72,15 +76,15 @@ def main() -> None:
             "BlockFHT image and Jacobian contain the accepted late-c_proj path?"
         ),
         "identity": {
-            "analyzer": str(args.analyzer.relative_to(REPO_ROOT)),
+            "analyzer": repo_relative(args.analyzer),
             "analyzer_sha256": file_sha256(args.analyzer),
-            "exact_state_plan": str(args.exact_plan.relative_to(REPO_ROOT)),
+            "exact_state_plan": repo_relative(args.exact_plan),
             "exact_state_plan_sha256": file_sha256(args.exact_plan),
-            "exact_state_result": str(args.exact_result.relative_to(REPO_ROOT)),
+            "exact_state_result": repo_relative(args.exact_result),
             "exact_state_result_sha256": file_sha256(args.exact_result),
-            "acquisition_result": str(args.acquisition_result.relative_to(REPO_ROOT)),
+            "acquisition_result": repo_relative(args.acquisition_result),
             "acquisition_result_sha256": file_sha256(args.acquisition_result),
-            "quadratic_result": str(args.quadratic_result.relative_to(REPO_ROOT)),
+            "quadratic_result": repo_relative(args.quadratic_result),
             "quadratic_result_sha256": file_sha256(args.quadratic_result),
             "checkpoint": prior["checkpoint"],
             "checkpoint_sha256": prior["checkpoint_sha256"],
