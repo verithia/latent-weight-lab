@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_mlp_cproj_residual_state_budget_plan_v1",
+  "artifact_kind": "124m_mlp_cproj_zero_update_oracle_low_rank_state_budget_plan",
+  "registered_at": "2026-08-07T03:30:00+00:00",
+  "status": "registered_before_execution",
+  "scientific_question": "How many task-selected singular directions and explicit factor-state degrees of freedom are required to represent the dense c_proj action left outside the production-sized chart?",
+  "theory": {
+    "geometric_scope": "The working c_proj procedure is an adaptive scaled right-orthogonal flow. Dense c_proj motion also changes the row Gram matrix W W^T, so a learned-basis or LoRA-like repair must carry the high-rank residual that the right-orbit chart cannot represent.",
+    "oracle_definition": "For every accepted layer-phase residual R, eig(R R^T) gives the exact best rank-r Frobenius recovery. Singular vectors are selected from R itself, making this an optimistic noncausal capacity bound.",
+    "state_accounting": "A rank-r matrix has intrinsic dimension r(m+n-r); a practical two-factor parameterization stores r(m+n) scalars. Both are compared with the existing 147456 procedural coordinates and the 2359296-element c_proj matrix.",
+    "causal_caveat": "Matrix rank is not a lower bound on arbitrary nonlinear generator dimension. It is a lower bound only for explicit task-selected low-rank/factor/basis state, and therefore cannot authorize training by itself.",
+    "why_not_another_training_arm": "Trace-free output shear over-concentrated the spectrum, scalar log-volume was causally harmful, and a bounded layer-0 full symmetric action recovered only 62-63 percent of dense task gain. This analysis measures the required state before any further structural guess."
+  },
+  "identity": {
+    "analyzer": "examples/nanogpt/analyze_mlp_cproj_residual_state_budget.py",
+    "analyzer_sha256": "3b76fc49ca947f3f523116b8c9663d2578d55ebbdece98e7f4dd0fb8d37c6339",
+    "analysis_source_commit": "bb7d13fd99c625f60c299bf15de1ab408d01202e",
+    "acquisition_result": "examples/nanogpt/configs/selection_artifacts/124m_repaired_attention_cfc_parent_full_state_metric_acquisition_v3_result.json",
+    "acquisition_result_sha256": "5f7cc87026ed9ea4e43a0bc9db6bf20458b43a1c6522d7fd9126b48716ca57d3",
+    "temporal_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_5tpp_temporal_residual_result.json",
+    "temporal_result_sha256": "2d90be1c16f530180d8907db3f41efece67c47736a24fd82c13c9ed256fef698",
+    "run_identity_sha256": "fca85b90e3b55f2c33221acb43aec7671b9b1d02530386beafe01f679ab0f347",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7],
+    "phases": [[0, 594], [594, 1188], [1188, 1782], [1782, 2373]],
+    "matrix_shape": [768, 3072],
+    "energy_thresholds": [0.5, 0.8, 0.9, 0.95, 0.99],
+    "chart_coordinate_budget_per_layer": 147456,
+    "chart": {
+      "hidden_parent_stages": 64,
+      "hidden_residual_stages": 24,
+      "output_stages": 32,
+      "neighbors": 64,
+      "matching_seed": 20260806,
+      "weight_decay_application": "identical production ordering"
+    }
+  },
+  "decision_rule": {
+    "thresholds": {
+      "equal_budget_best_rank_recovery_minimum": 0.8,
+      "rank80_intrinsic_dof_ratio_maximum": 0.25
+    },
+    "interpretation": {
+      "equal_budget_pass": "An explicit equal-budget low-rank state remains capacity-plausible; authorize theory only, not implementation.",
+      "quarter_dense_pass_only": "At least a materially larger explicit factor state is required; quantify it but do not implement.",
+      "both_fail": "An explicit task-conditioned low-rank/basis state is already dense-scale; retain only task-conditioned procedural-selector theory."
+    },
+    "threshold_changed_after_measurement": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground polling",
+    "watchdog": false,
+    "callback": false,
+    "expected_duration_minutes_maximum": 5,
+    "mfu_gate": "not applicable because this analysis performs zero model or optimizer updates",
+    "snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp/scientific/parameter_trajectory",
+    "probe_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_repairedattn_cfconly_fullstate_metric_probe_5tpp/scientific/optimizer_probe",
+    "output_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/cproj_residual_state_budget_v1/residual_state_budget_result.json"
+  },
+  "authorization": {
+    "run_zero_update_state_budget_analysis": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
