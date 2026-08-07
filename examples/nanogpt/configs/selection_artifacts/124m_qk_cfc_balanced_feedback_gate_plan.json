@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_124m_qk_cfc_balanced_feedback_gate_plan_v1",
+  "status": "registered_before_any_balanced_feedback_measurement",
+  "recorded_at": "2026-08-08",
+  "scientific_question": "Can a norm-balanced coefficient target retain the CE benefit of error feedback without allowing its 21.44-times backlog to erase alignment with the stable momentum-conditioned c_fc task gauge?",
+  "theory_chain": [
+    "The task-only chart recovers about 55 percent of the late requested line, proving that the existing chart has task-direction capacity in the persisted-Muon gauge.",
+    "Task-selected supports followed by a raw corrected-target fit recover only about 1.3 percent because the stored residual dominates coefficient fitting.",
+    "Corrected-target radius improves mean CE but grows the residual, whereas requested radius remains bounded; therefore the radius is frozen to the fresh-request family norm.",
+    "Layerwise balancing implements the paper's LWT principle by giving task and feedback equal or half-equal norm within each layer; global balancing is the non-LWT control."
+  ],
+  "identity": {
+    "entrypoint_sha256": "56925805aa27a21c3aa4f70db22d2b518fd84e6b611ff2ba9ec464a93dbec294",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "factorial_result_sha256": "b7c02c3c38ea17e4960e43c566d17293cfda03de07a510f7156534338d225e71"
+  },
+  "protocol": {
+    "checkpoint_next_iter": 9489,
+    "late_layers": [8, 9, 10, 11],
+    "window_seeds": {
+      "fit": 2026080851,
+      "holdout": 2026080857
+    },
+    "gradient_batch_size": 32,
+    "gradient_batches": 8,
+    "tokens_per_gradient_window": 262144,
+    "validation_seed": 2026080863,
+    "validation_batch_size": 8,
+    "validation_batches": 32,
+    "schedule": [22, 22, 22, 22, 22, 22],
+    "ridge_ratio": 0.000001,
+    "chunk_size": 256,
+    "confidence_z": 1.96,
+    "candidates": [
+      "current corrected-target production control",
+      "momentum-request task-only control",
+      "layerwise equal-norm feedback balance gamma 1.0",
+      "layerwise half-norm feedback balance gamma 0.5",
+      "global equal-norm feedback balance gamma 1.0"
+    ],
+    "all_noncontrol_action_radii": "fresh momentum-request family Frobenius norm",
+    "parameter_updates_to_checkpoint": 0,
+    "execution": "direct foreground polling through process exit; expected under five minutes",
+    "watchdog": false,
+    "callback": false
+  },
+  "decision_rule": {
+    "minimum_late_requested_recovery_improvement": 0.10,
+    "minimum_late_action_cross_window_cosine": 0.10,
+    "maximum_outgoing_to_incoming_feedback_ratio": 1.0,
+    "maximum_functional_upper_bound_regression_ce": 0.0,
+    "minimum_one_window_mean_ce_improvement": 0.0001,
+    "candidate_priority": [
+      "layer_equal_balance",
+      "layer_half_balance",
+      "global_equal_balance"
+    ],
+    "threshold_changes_after_measurement": false
+  },
+  "authorization": {
+    "run_zero_update_gate": true,
+    "change_training_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}

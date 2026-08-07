@@ -1,0 +1,43 @@
+{
+  "artifact_kind": "124m_qk_cfc_selector_fitter_factorial_result",
+  "schema_version": "mai_124m_qk_cfc_selector_fitter_factorial_result_v1",
+  "recorded_at": "2026-08-08",
+  "classification": "REJECT_SELECTOR_FITTER_DECOUPLING",
+  "plan_sha256": "15f657aeb38aa0fa5f7752ce7afa815e24aa5ec49d3b468b65a323e48b3e2f1a",
+  "result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_cfc_phase_acquisition_20tpp/scientific/selector_fitter_factorial/result.json",
+    "sha256": "b7c02c3c38ea17e4960e43c566d17293cfda03de07a510f7156534338d225e71",
+    "bytes": 23231
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "82e990ec7498aec09dd0675b77919088fe4f8800",
+    "entrypoint_sha256": "3ee906398ac920757d613db572d9faf99943976609101c298631fe99afff4f47",
+    "wall_seconds": 12.023257,
+    "parameter_updates_to_source": 0
+  },
+  "key_metrics": {
+    "current_late_requested_positive_line_recovery": [0.0040992463, 0.0041641760],
+    "task_only_late_requested_positive_line_recovery": [0.5506925320, 0.5543639400],
+    "task_selected_corrected_fit_late_requested_positive_line_recovery": [0.0127979788, 0.0131578756],
+    "task_selected_corrected_fit_late_cross_window_action_cosine": 0.4102775962,
+    "task_selected_corrected_fit_corrected_radius_residual_ratio": [1.1757476382, 1.1744808007],
+    "task_selected_corrected_fit_requested_radius_residual_ratio": [0.9880475912, 0.9879668135],
+    "task_selected_corrected_fit_corrected_radius_mean_ce_delta": [-0.0015666485, -0.0011069179],
+    "task_selected_corrected_fit_corrected_radius_ce_upper_bound": [-0.0007784542, 0.0001528760]
+  },
+  "interpretation": [
+    "The current production control was reproduced exactly, with zero maximum absolute solver error.",
+    "Momentum-task topology is stable enough to raise cross-window action cosine, but corrected-target coefficient fitting remains dominated by the stored backlog and recovers only about 1.3 percent of the late requested line.",
+    "Corrected radius gives a consistent mean CE improvement but expands the outgoing residual to about 1.175 times the incoming feedback; requested radius preserves the residual but loses the CE signal.",
+    "The next causal lever is a norm-balanced coefficient target that retains a bounded fraction of feedback instead of allowing the 21.44-times backlog to dominate."
+  ],
+  "authorization": {
+    "balanced_coefficient_zero_update_gate": true,
+    "change_training_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
