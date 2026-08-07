@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_qk_cfc_procedural_state_codability_plan_v1",
+  "recorded_at": "2026-08-08",
+  "status": "registered_before_measurement",
+  "scientific_question": "Can the exact production directed-product family encode both dense c_fc temporal-state tensors inside one procedural-coordinate allowance per family, despite generic low-rank and sparse rejection?",
+  "identity": {
+    "entrypoint_sha256": "9a4053cbc0e82b391bc053387ebb0bd3e7082d6ac0d5f474c391b72e56471233",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result_sha256": "046f44cf85c0230d30a6451798cf41e9bf6e0f3f55abcf06d6928a726dc0dad4"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "checkpoint_next_iter": 9489,
+    "state_names": [
+      "momentum_buffer",
+      "compression_residual"
+    ],
+    "matrix_shape": [
+      3072,
+      768
+    ],
+    "coordinate_budget_per_layer_per_state": 405504,
+    "late_layers": [
+      8,
+      9,
+      10,
+      11
+    ],
+    "production_incoming_schedule": [
+      22,
+      22,
+      22,
+      22,
+      22,
+      22
+    ],
+    "support_index_cost_ignored": true,
+    "support_selected_from_dense_answer": true
+  },
+  "decision_rule": {
+    "minimum_aggregate_recovery": 0.8,
+    "minimum_late_layer_recovery": 0.7,
+    "threshold_changes_after_measurement": false
+  },
+  "interpretation_contract": {
+    "why_this_precedes_a_replay": "A time-conditioned state code must at least represent the terminal state. Testing the exact procedural family at the terminal checkpoint can reject an expensive optimizer-state trajectory replay without retraining.",
+    "optimistic_upper_bound": "Each state family receives the full production coordinate count separately. Supports are selected using the dense answer and their index storage is ignored.",
+    "pass": "Both state families pass the aggregate and every-late-layer gates. This authorizes only one paired temporal optimizer-state acquisition and a chronological causality analysis; it does not authorize a compact optimizer or language-model candidate.",
+    "fail": "At least one family fails even this answer-conditioned oracle. The actual directed-product family cannot encode the dense temporal state at the registered budget, so no trajectory replay or compact-state implementation is justified."
+  },
+  "authorization": {
+    "run_zero_update_procedural_state_codability": true,
+    "paired_temporal_state_acquisition_only_after_pass": true,
+    "functional_compact_state_replay": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
