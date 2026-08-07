@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_qk_cfc_balanced_feedback_gate_sealed_result_v1",
+  "artifact_kind": "zero_update_analysis_result",
+  "recorded_at": "2026-08-08T05:19:09+08:00",
+  "classification": "REJECT_NORM_BALANCED_FEEDBACK",
+  "identity": {
+    "execution_git_commit": "f209829779bfe4e19a483170130df7f91a06842d",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_balanced_feedback_gate_plan.json",
+    "plan_sha256": "84ca32341e056954873213907f8af13e314b1c6ecd9ceca753ab1f8cc28693fb",
+    "checkpoint_sha256": "1f49649397b13b59f62d945dc0bda08084320489bb4a1d984efd860d1b8ed45e",
+    "config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "56925805aa27a21c3aa4f70db22d2b518fd84e6b611ff2ba9ec464a93dbec294",
+    "factorial_result_sha256": "b7c02c3c38ea17e4960e43c566d17293cfda03de07a510f7156534338d225e71"
+  },
+  "execution": {
+    "device": "cuda",
+    "wall_seconds": 18.40,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "checkpoint_parameter_updates": 0,
+    "result_bytes": 44874,
+    "result_sha256": "38c0d76ccf31432baa265b1fb7c718d25be12cd4d9deda7e75d45b69e5d90662"
+  },
+  "geometry": {
+    "current_late_requested_positive_line_recovery_fit": 0.004099138372336136,
+    "current_late_requested_positive_line_recovery_holdout": 0.0041649968273996885,
+    "layer_equal_late_requested_positive_line_recovery_fit": 0.36056890876819925,
+    "layer_equal_late_requested_positive_line_recovery_holdout": 0.3635709503110792,
+    "layer_half_late_requested_positive_line_recovery_fit": 0.4856520361484787,
+    "layer_half_late_requested_positive_line_recovery_holdout": 0.4892612254888174,
+    "global_equal_late_requested_positive_line_recovery_fit": 0.49358109137818884,
+    "global_equal_late_requested_positive_line_recovery_holdout": 0.4977110073550286,
+    "layer_equal_late_action_cross_window_cosine": 0.3678534624492964,
+    "layer_half_late_action_cross_window_cosine": 0.3499619925132119,
+    "global_equal_late_action_cross_window_cosine": 0.34845416659893397,
+    "layer_equal_feedback_ratio_fit": 0.9942970316066091,
+    "layer_equal_feedback_ratio_holdout": 0.9941413159068814,
+    "layer_half_feedback_ratio_fit": 0.9968850299664064,
+    "layer_half_feedback_ratio_holdout": 0.9968027314589167,
+    "global_equal_feedback_ratio_fit": 0.9948533660352951,
+    "global_equal_feedback_ratio_holdout": 0.9943242803138685
+  },
+  "functional_candidate_minus_current_ce": {
+    "fit": {
+      "layer_equal": {"mean": 0.00025516003370285034, "upper_95": 0.0009961825036004699},
+      "layer_half": {"mean": 0.00024214386940002441, "upper_95": 0.0009760375427221987},
+      "global_equal": {"mean": 0.0003465712070465088, "upper_95": 0.0011230514554491622},
+      "task_only": {"mean": 0.00046876072883605957, "upper_95": 0.001219615999832337}
+    },
+    "holdout": {
+      "layer_equal": {"mean": 0.00023145228624343872, "upper_95": 0.0010235128468858064},
+      "layer_half": {"mean": 0.00037635862827301025, "upper_95": 0.0011380347211882508},
+      "global_equal": {"mean": 0.0004192367196083069, "upper_95": 0.0012186352223406546},
+      "task_only": {"mean": 0.0004772990942001343, "upper_95": 0.0012704828364988804}
+    }
+  },
+  "interpretation": {
+    "accepted_claim": "Norm balancing separates task alignment from the 21.44x error-feedback backlog: it materially restores requested-direction recovery, cross-window stability, and bounded residual contraction.",
+    "rejected_claim": "Closer agreement with the instantaneous momentum-conditioned Muon request is a sufficient functional objective for c_fc.",
+    "branch_decision": "Do not launch a balanced-feedback c_fc training variant. Retain the existing integrated error-feedback c_fc recipe and redirect structural work to the localized c_proj residual-write bottleneck.",
+    "theoretical_update": "The useful local descent object is path-dependent and optimizer-conditioned. The current corrected action beats more task-aligned actions on both fixed windows, so a manifold matcher must preserve temporal transport, not merely project an instantaneous tangent."
+  },
+  "authorization": {
+    "balanced_feedback_implementation": false,
+    "balanced_feedback_mfu_preflight": false,
+    "balanced_feedback_language_model_training": false,
+    "cproj_residual_write_theory": true,
+    "larger_rung": false
+  }
+}
