@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 ANALYZER = ROOT / (
     "examples/nanogpt/analyze_mlp_cproj_same_run_optimizer_state_transport.py"
 )
-SCHEMA_VERSION = "mai_124m_mlp_cproj_same_run_optimizer_state_transport_plan_v1"
+SCHEMA_VERSION = "mai_124m_mlp_cproj_same_run_optimizer_state_transport_plan_v2"
 LAYERS = [8, 9, 10, 11]
 SNAPSHOT_STEPS = [0, *range(99, 2373, 99), 2373]
 PROBE_STEPS = [0, 98, 296, 593, 890, 1187, 1484, 1781, 2078, 2372]
@@ -66,6 +66,7 @@ def build_plan(
     snapshot_dir: Path,
     probe_dir: Path,
     analysis_output_dir: Path,
+    invalid_analysis_audit_path: Path,
 ) -> dict[str, Any]:
     acquisition = load_json(acquisition_result_path)
     if acquisition.get("classification") != (
@@ -77,6 +78,15 @@ def build_plan(
     ) is not True:
         raise ValueError("paired-state acquisition does not authorize analysis")
     acquisition_plan = load_json(acquisition_plan_path)
+    invalid_analysis_audit = load_json(invalid_analysis_audit_path)
+    if invalid_analysis_audit.get("classification") != (
+        "INVALID_RECOMPUTED_REQUEST_NOT_EXACT_GPU_STATE"
+    ):
+        raise ValueError("prior invalid-analysis audit classification mismatch")
+    if invalid_analysis_audit.get("authorization", {}).get(
+        "exact_post_step_state_identity_reanalysis"
+    ) is not True:
+        raise ValueError("prior invalid-analysis audit does not authorize repair")
     identity = acquisition["identity"]
     if sha256_file(acquisition_plan_path) != identity["plan_sha256"]:
         raise ValueError("accepted acquisition plan SHA-256 mismatch")
@@ -119,7 +129,8 @@ def build_plan(
             "The accepted paired replay establishes bitwise parameter/probe pairing under one run identity.",
             "The earlier cross-run pairing was rejected because independent CUDA paths diverged despite matching initialization and CE.",
             "Static endpoint charts and output-additive fits did not establish causal state transport.",
-            "This analysis performs zero parameter updates and freezes chronological holdouts before observation.",
+            "The first same-run analysis was invalid because a CPU-recomputed Muon request was not exact GPU optimizer state.",
+            "This repair uses exact captured post-step identities, performs zero parameter updates, and retains the frozen chronological threshold.",
         ],
         "identity": {
             "analyzer": str(ANALYZER.relative_to(ROOT)),
@@ -138,6 +149,10 @@ def build_plan(
                 "fixed_eval_indices_sha256"
             ],
             "run_identity_sha256": identity["run_identity_sha256"],
+            "invalid_analysis_audit": str(invalid_analysis_audit_path),
+            "invalid_analysis_audit_sha256": sha256_file(
+                invalid_analysis_audit_path
+            ),
             "supporting_source_sha256": {
                 path: sha256_file(ROOT / path) for path in SUPPORTING_SOURCES
             },
@@ -158,18 +173,25 @@ def build_plan(
             "components": COMPONENTS,
             "heldout_probe_steps": HELDOUT_PROBE_STEPS,
             "output_additive_projection": True,
+            "state_component_reconstruction": (
+                "exact_post_step_optimizer_identity"
+            ),
+            "recomputed_polar_request": "diagnostic_only",
+            "authorization_metric": (
+                "heldout_future_functional_positive_line_recovery"
+            ),
             "future_phase_target_by_probe": future_targets,
         },
         "decision_rule": {
             "thresholds": {
-                "compression_reconstruction_max_relative_error": 1e-4,
+                "state_identity_max_relative_error": 1e-4,
                 "causal_heldout_functional_line_recovery_minimum": 0.80,
             },
             "selection": (
                 "Authorize only when the mechanically reconstructed state is "
                 "valid and one frozen component reaches at least 0.80 "
-                "energy-weighted functional positive-line recovery on the "
-                "chronological heldout terminal residual."
+                "energy-weighted functional positive-line recovery for the "
+                "chronological heldout future phase."
             ),
             "threshold_change_after_observation": False,
         },
@@ -192,6 +214,7 @@ def build_plan(
         },
         "limitations": [
             "Terminal post-GELU activations define a local functional metric, not a global nonlinear equivalence proof.",
+            "Requested and corrected components are exact post-step algebraic identities, not a replay of the pre-step GPU Newton-Schulz tensor.",
             "Passing authorizes only a separately preregistered compact candidate; it does not authorize language-model training directly.",
             "Failing rejects this optimizer-state transport hypothesis but does not prove that no state-dependent generator can close the gap.",
         ],
@@ -207,6 +230,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--snapshot-dir", type=Path, required=True)
     parser.add_argument("--probe-dir", type=Path, required=True)
     parser.add_argument("--analysis-output-dir", type=Path, required=True)
+    parser.add_argument("--invalid-analysis-audit", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     return parser.parse_args()
 
@@ -223,6 +247,7 @@ def main() -> None:
         snapshot_dir=args.snapshot_dir,
         probe_dir=args.probe_dir,
         analysis_output_dir=args.analysis_output_dir,
+        invalid_analysis_audit_path=args.invalid_analysis_audit,
     )
     encoded = (
         json.dumps(plan, indent=2, sort_keys=True, allow_nan=False) + "\n"

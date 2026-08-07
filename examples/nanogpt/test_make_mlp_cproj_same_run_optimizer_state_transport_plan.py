@@ -68,11 +68,24 @@ def fixture(tmp_path: Path) -> dict[str, Path]:
             },
         },
     )
+    invalid_analysis_audit = tmp_path / "invalid_analysis_audit.json"
+    write_json(
+        invalid_analysis_audit,
+        {
+            "classification": (
+                "INVALID_RECOMPUTED_REQUEST_NOT_EXACT_GPU_STATE"
+            ),
+            "authorization": {
+                "exact_post_step_state_identity_reanalysis": True
+            },
+        },
+    )
     return {
         "acquisition_result": acquisition_result,
         "acquisition_plan": acquisition_plan,
         "config": config,
         "checkpoint": checkpoint,
+        "invalid_analysis_audit": invalid_analysis_audit,
     }
 
 
@@ -86,6 +99,7 @@ def make(tmp_path: Path) -> dict[str, object]:
         snapshot_dir=tmp_path / "snapshots",
         probe_dir=tmp_path / "probes",
         analysis_output_dir=tmp_path / "analysis",
+        invalid_analysis_audit_path=paths["invalid_analysis_audit"],
     )
 
 
@@ -94,6 +108,9 @@ def test_builder_emits_analyzer_valid_fail_closed_plan(tmp_path: Path) -> None:
     validate_plan(plan)
     assert plan["analysis"]["probe_steps"][0] == 0
     assert plan["analysis"]["future_phase_target_by_probe"]["2372"] is None
+    assert plan["analysis"]["authorization_metric"] == (
+        "heldout_future_functional_positive_line_recovery"
+    )
     assert plan["authorization"]["run_language_model_training"] is False
 
 
@@ -111,4 +128,5 @@ def test_builder_rejects_unaccepted_or_drifted_inputs(tmp_path: Path) -> None:
             snapshot_dir=tmp_path / "snapshots",
             probe_dir=tmp_path / "probes",
             analysis_output_dir=tmp_path / "analysis",
+            invalid_analysis_audit_path=paths["invalid_analysis_audit"],
         )

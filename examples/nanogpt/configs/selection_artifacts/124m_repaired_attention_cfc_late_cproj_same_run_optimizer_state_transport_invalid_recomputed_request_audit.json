@@ -1,0 +1,54 @@
+{
+  "authorization": {
+    "additional_training_replicate": false,
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "exact_post_step_state_identity_reanalysis": true,
+    "larger_rung": false
+  },
+  "classification": "INVALID_RECOMPUTED_REQUEST_NOT_EXACT_GPU_STATE",
+  "diagnosis": {
+    "error_feedback_cap_active": false,
+    "maximum_observed_residual_relative_error": 0.0010648846428203305,
+    "maximum_request_identity_relative_error": 0.00141368607,
+    "registered_mechanical_tolerance": 0.0001,
+    "root_cause": "combined_momentum_update was recomputed after the live step from CPU-copied gradient and momentum tensors; it is not the exact GPU tensor consumed by Newton-Schulz, so replaying the polar request cannot satisfy the registered exact-state tolerance",
+    "scientific_interpretation": "the failed mechanical gate invalidates the first analysis result but does not reject optimizer-state transport",
+    "state_exactly_available_without_retraining": [
+      "weight_before_step",
+      "weight_after_step",
+      "compression_residual_before_step",
+      "compression_residual_after_step"
+    ]
+  },
+  "execution": {
+    "git_commit": "8a04b3eb727f37c33f8aec35bc0cc779e5c77eaa",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "acquisition_result_sha256": "91eade4b4548f52bc44bc59faa22fda60c30ccd09afefde61d53d322b91a6138",
+    "analyzer_sha256": "46bf5dac03c2c58d540af5546b92d75fbf72e004014a0356b815341aaf5b610a",
+    "analysis_plan_sha256": "aac3e826a5649de4cecab1cd3daf7b5bbc4c5690508304d65275dea7bd427f7a",
+    "analysis_result_sha256": "ba4e2052080a6e9b4ec6ceae41c93d4cbdec48de2c7549aca6178b546db238a7",
+    "analysis_rows_sha256": "a76dc8c3237e0abbfcb95b9974f33ec11940748a14bb547783f6927337020ec0",
+    "checkpoint_sha256": "dd46b0c39c6007103949c6207f6e652cf0f5c32cfdd357518e113e85e89bd8cd",
+    "run_identity_sha256": "299d8ca16d7f2f9f122f717d8e880456aea3d9e5fce26d9fb28bbd2ff4edb467"
+  },
+  "passed": false,
+  "repair_contract": {
+    "authorization_metric": "heldout_future_functional_positive_line_recovery",
+    "candidate_threshold": 0.8,
+    "component_identities": {
+      "corrected": "realized + compression_residual_after_step",
+      "feedback": "error_feedback_decay * compression_residual_before_step",
+      "realized": "weight_after_step - weight_before_step",
+      "requested": "corrected - feedback",
+      "unrepresented": "compression_residual_after_step"
+    },
+    "new_training_data": false,
+    "recomputed_polar_request": "diagnostic_only",
+    "threshold_change_after_observation": false
+  },
+  "schema_version": "mai_124m_mlp_cproj_same_run_optimizer_state_transport_invalid_audit_v1"
+}

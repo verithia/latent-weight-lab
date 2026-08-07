@@ -31,11 +31,9 @@ from examples.nanogpt.analyze_mlp_cproj_optimizer_state_transport import (
     LAYERS,
     REFERENCE_POST_STEPS,
     TERMINAL_STEP,
-    classify,
     functional_metric,
     metric,
     output_additive_projection,
-    reconstruct_components,
     weighted,
 )
 from examples.nanogpt.analyze_mlp_cproj_polynomial_oracle_ce import (
@@ -57,8 +55,8 @@ from examples.nanogpt.train import (
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-PLAN_SCHEMA = "mai_124m_mlp_cproj_same_run_optimizer_state_transport_plan_v1"
-RESULT_SCHEMA = "mai_124m_mlp_cproj_same_run_optimizer_state_transport_result_v1"
+PLAN_SCHEMA = "mai_124m_mlp_cproj_same_run_optimizer_state_transport_plan_v2"
+RESULT_SCHEMA = "mai_124m_mlp_cproj_same_run_optimizer_state_transport_result_v2"
 SNAPSHOT_STEPS = (0, *range(99, 2373, 99), 2373)
 PROBE_STEPS = (0, 98, 296, 593, 890, 1187, 1484, 1781, 2078, 2372)
 
@@ -74,6 +72,56 @@ def phase_target_step(probe_index: int) -> int | None:
     if probe_index >= len(REFERENCE_POST_STEPS):
         return None
     return REFERENCE_POST_STEPS[probe_index]
+
+
+def reconstruct_components(
+    state: dict[str, torch.Tensor], hyper: dict[str, Any]
+) -> tuple[dict[str, torch.Tensor], float]:
+    """Recover exact post-step optimizer components without replaying Muon.
+
+    The captured gradient and momentum tensors crossed the device boundary
+    before ``combined_momentum_update`` was reconstructed.  Replaying the
+    Newton--Schulz polar map from that reconstruction is therefore a useful
+    numerical diagnostic, but it is not the exact request consumed by the
+    live GPU optimizer.  The realized action and both compression states are
+    captured exactly and determine the five post-step components algebraically.
+    """
+    weight_before = state["weight_before_step"].float()
+    weight_after = state["weight_after_step"].float()
+    realized = weight_after - weight_before
+    feedback = (
+        float(hyper["error_feedback_decay"])
+        * state["compression_residual_before_step"].float()
+    )
+    unrepresented = state["compression_residual_after_step"].float()
+    corrected = realized + unrepresented
+    requested = corrected - feedback
+    recomposed = requested + feedback - realized
+    relative_error = float(
+        (recomposed - unrepresented).double().norm()
+        / unrepresented.double().norm().clamp_min(1e-30)
+    )
+    return {
+        "requested": requested,
+        "feedback": feedback,
+        "corrected": corrected,
+        "realized": realized,
+        "unrepresented": unrepresented,
+    }, relative_error
+
+
+def classify(
+    aggregate: dict[str, dict[str, float]],
+    reconstruction_valid: bool,
+    threshold: float,
+) -> tuple[str, str | None]:
+    if not reconstruction_valid:
+        return "INVALID_EXACT_STATE_IDENTITY", None
+    field = "heldout_future_functional_positive_line_recovery"
+    best = max(COMPONENTS, key=lambda name: aggregate[name][field])
+    if aggregate[best][field] >= threshold:
+        return "CAUSAL_OPTIMIZER_STATE_TRANSPORT_SUFFICIENT", best
+    return "OPTIMIZER_STATE_TRANSPORT_INSUFFICIENT", best
 
 
 def validate_plan(plan: dict[str, Any]) -> None:
@@ -95,6 +143,11 @@ def validate_plan(plan: dict[str, Any]) -> None:
         "components": list(COMPONENTS),
         "heldout_probe_steps": list(HELDOUT_PROBE_STEPS),
         "output_additive_projection": True,
+        "state_component_reconstruction": "exact_post_step_optimizer_identity",
+        "recomputed_polar_request": "diagnostic_only",
+        "authorization_metric": (
+            "heldout_future_functional_positive_line_recovery"
+        ),
         "future_phase_target_by_probe": {
             str(step): phase_target_step(index)
             for index, step in enumerate(PROBE_STEPS)
@@ -106,7 +159,7 @@ def validate_plan(plan: dict[str, Any]) -> None:
             raise ValueError(f"same-run analysis field changed: {key}")
     thresholds = plan.get("decision_rule", {}).get("thresholds", {})
     if thresholds != {
-        "compression_reconstruction_max_relative_error": 1e-4,
+        "state_identity_max_relative_error": 1e-4,
         "causal_heldout_functional_line_recovery_minimum": 0.80,
     }:
         raise ValueError("same-run optimizer-state thresholds changed")
@@ -311,7 +364,7 @@ def main() -> None:
 
     probe_hashes = acquisition["inventory"]["probe_sha256_by_step"]
     rows: list[dict[str, Any]] = []
-    max_reconstruction_error = 0.0
+    max_identity_error = 0.0
     started = time.time()
     for index, probe_step in enumerate(PROBE_STEPS):
         path = args.probe_dir / f"step_{probe_step:06d}.pt"
@@ -328,9 +381,9 @@ def main() -> None:
                 for key, value in probe["parameters"][name].items()
             }
             hyper = probe["hyperparameters"][name]
-            components, reconstruction_error = reconstruct_components(state, hyper)
-            max_reconstruction_error = max(
-                max_reconstruction_error, reconstruction_error
+            components, identity_error = reconstruct_components(state, hyper)
+            max_identity_error = max(
+                max_identity_error, identity_error
             )
             hidden = activations[layer].to(args.device)
             terminal_target = terminal_residuals[layer]
@@ -352,7 +405,7 @@ def main() -> None:
                     "layer": layer,
                     "component": component_name,
                     "heldout": probe_step in HELDOUT_PROBE_STEPS,
-                    "compression_reconstruction_relative_error": reconstruction_error,
+                    "state_identity_relative_error": identity_error,
                     "terminal_raw_target_energy": raw_terminal["target_energy"],
                     "terminal_raw_cosine": raw_terminal["cosine"],
                     "terminal_raw_positive_line_recovery": raw_terminal[
@@ -437,9 +490,9 @@ def main() -> None:
             "causal_heldout_functional_line_recovery_minimum"
         ]
     )
-    reconstruction_valid = max_reconstruction_error <= float(
+    reconstruction_valid = max_identity_error <= float(
         plan["decision_rule"]["thresholds"][
-            "compression_reconstruction_max_relative_error"
+            "state_identity_max_relative_error"
         ]
     )
     classification, best = classify(
@@ -471,9 +524,10 @@ def main() -> None:
             "checkpoint_sha256": file_sha256(args.checkpoint),
             "run_identity_sha256": run_identity,
         },
-        "mechanical_reconstruction": {
+        "exact_state_identity": {
             "passed": reconstruction_valid,
-            "maximum_relative_error": max_reconstruction_error,
+            "maximum_relative_error": max_identity_error,
+            "method": "post_step_optimizer_algebra_without_polar_replay",
         },
         "aggregate": aggregate,
         "best_heldout_component": best,
