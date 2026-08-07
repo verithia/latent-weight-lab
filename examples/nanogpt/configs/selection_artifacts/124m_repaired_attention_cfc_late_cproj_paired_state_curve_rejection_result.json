@@ -1,0 +1,175 @@
+{
+  "authorization": {
+    "candidate_language_model_training": false,
+    "candidate_structure_implementation": false,
+    "larger_rung": false,
+    "prospective_replicate_equivalence_diagnosis": true,
+    "zero_update_state_transport_analysis": false
+  },
+  "classification": "REJECTED_FIXED_CE_CURVE_NONREPRODUCTION",
+  "curve_reproduction": {
+    "failed_steps": [
+      1188,
+      1782,
+      2373
+    ],
+    "maximum_absolute_delta_ce": 0.008599999999999941,
+    "passed": false,
+    "rows": [
+      {
+        "absolute_delta_ce": 0.001200000000000756,
+        "accepted_validation_ce": 4.2239,
+        "delta_ce": -0.001200000000000756,
+        "observed_validation_ce": 4.2227,
+        "step": 594,
+        "within_tolerance": true
+      },
+      {
+        "absolute_delta_ce": 0.008599999999999941,
+        "accepted_validation_ce": 3.851,
+        "delta_ce": 0.008599999999999941,
+        "observed_validation_ce": 3.8596,
+        "step": 1188,
+        "within_tolerance": false
+      },
+      {
+        "absolute_delta_ce": 0.008299999999999752,
+        "accepted_validation_ce": 3.6998,
+        "delta_ce": 0.008299999999999752,
+        "observed_validation_ce": 3.7081,
+        "step": 1782,
+        "within_tolerance": false
+      },
+      {
+        "absolute_delta_ce": 0.007995760345458791,
+        "accepted_validation_ce": 3.636904239654541,
+        "delta_ce": 0.007995760345458791,
+        "observed_validation_ce": 3.6449,
+        "step": 2373,
+        "within_tolerance": false
+      }
+    ],
+    "tolerance_ce": 0.005
+  },
+  "execution": {
+    "entrypoint": "examples.nanogpt.audit_late_cproj_paired_state_curve_rejection",
+    "git_commit": "4f06248a6db277ec1db51faf2a0d37f2a7e2731e",
+    "host": "PRO6",
+    "parameter_updates": 0
+  },
+  "identity": {
+    "checkpoint_sha256": "fcffcb665c106de7eca572e1c0785914909acd82f9a5a032ecb3b5a9ced0eea5",
+    "config_sha256": "8a96082e45ec6990d2aa579f53636542be761147cf74b74d95ca70f52aed86e8",
+    "failed_verifier_log_sha256": "db82c8bb440a56d300fb3b7db6a4802ecd1b81054d54c6b362cdead7b2f97df4",
+    "pinned_verifier_sha256": "e94689c91c0276689d9fe91382997800529c9909810a93e590f8f8c607925039",
+    "plan_sha256": "fdfbebca09fb790b3d3cf8edbfd49a926f7c53eb00b9ea2be8355f99b53847aa",
+    "provenance_sha256": "edca24c7baf8b62e28ea0dd094c377864a316e530a35ea4a7c6c124a23b83631",
+    "run_identity_sha256": "41d7de3e7680d372e3b73d6dff0f01ba3959050bb95095effa00aca56b1f312c",
+    "status_sha256": "786d5377479c85ad72320986e56ff445bc49e2e458c98f490660f84b274b4011",
+    "training_log_sha256": "634c2174b2d76871a39bff7b23fd3a359b41c72d71bc3e48967cd55956ec3e52"
+  },
+  "interpretation": "The same-run causal pairing is mechanically valid, but the run is not an accepted scientific replay under the frozen CE-curve gate. Do not execute the state-transport analyzer on it and do not repeat runs until one happens to pass.",
+  "inventory": {
+    "parameter_count_per_record": 4,
+    "probe_count": 10,
+    "probe_sha256_by_step": {
+      "0": "bb8116166dd888a0ea9c9744d3dbb0a951602b9ab4ab3e740941e63c50b1a562",
+      "1187": "4b6844b50168eb3a4f77e14e54d83e0d2f2a083436f424886f517ffadea38d50",
+      "1484": "463ccaf576edbd78ec3894e69993a3b6dacc013d6430b3f1cee0601162a0708c",
+      "1781": "60dd0d32617fc4734bf05e936b6fe2edfc00af815072c1b7fe0743e0c7e68d62",
+      "2078": "2a5d07e5648c38b2555c44c966503bb45f4b4eac396091a99679c3a8c0ac1b30",
+      "2372": "68926c930242a3ae23c6e612730d51824dec7e692fdffff1e44de54cb0d6f1e4",
+      "296": "7aa03610a939d51facfdb4d2a46617fc1f5a0977daad46e8cad5dc1e43b36e8b",
+      "593": "6f0c088b5929156792ea716ba60e083dd59f6c08a765e564b4b8fc4d3571a9cf",
+      "890": "0ec26cee4c38e65a71c4b2024dd784bbefd93f2679562dd9dea9373368512903",
+      "98": "853912cc1e76e0ac8926040a3179d1ef75772dddcb87d9ad7eac1171867c22c2"
+    },
+    "snapshot_count": 25,
+    "snapshot_sha256_by_step": {
+      "0": "e669bd4fdada8dac44131183457b29ededc86f0769378148ce28f1f101f60d83",
+      "1089": "65e66c20169bfa823b9696657b011ba8912a7a1513fdf16aae5bcdda771ba468",
+      "1188": "77c9a3394aa602f52fe0e0a5f4191a4ce6d5075060602d9170f40e376aecac66",
+      "1287": "9d90e890d2d3328141e48f6d597aafd370976c2dbed00ffa3103b83c6658fdff",
+      "1386": "d117e61dafe3c303638ed69e7aecdf1131744c6f626dd1aa923b0846dd83fc89",
+      "1485": "73f35fee2f6bd07d762efa867eea6f1667d019f17c7c878c77d2a4a4edeee449",
+      "1584": "768b84dbf04ad9ccc80a6c897aa7feafd6a5a4ef4d21bbf3e93591675b9be0c9",
+      "1683": "a86006acd2f0ef0bf2845d0b626db4d8e712d8fee8704f011f296025b0ff1785",
+      "1782": "04e7a8b4e5089a73e15d82a97f7e9dff7a26c8a534f3f23ddd9de6710ab426de",
+      "1881": "ce3d0162720a23cec923b9f55c439bda504d012c350654b85966ad87bc37c0be",
+      "198": "3bbad134149accf51718f691b5273c78cb2f6147768001077bee2b8fa6420036",
+      "1980": "c0137d33309a85b1b795b7609b09017adc8ff99a83cd8511bcb921f875ba2f69",
+      "2079": "f4ea42a33679833dd65b44f7da8392dfce9307976777f2ed324369bb17b639db",
+      "2178": "1f63d8dc6a2b12e41391de9217c1b9a7af935199fd893e48e36c3b4488c2500b",
+      "2277": "326a74680bb8055ceee61249902760d4f8436e52b8289a522850b2cede269fe2",
+      "2373": "023208317f5b45144cf47109ebffe46e28c8cabe0877685cbd6e709cac45f396",
+      "297": "73e4d021792dba732aa1550284fc612780412217d40b40e6a622a3f400a9a6ee",
+      "396": "4eeb2e48c6b4f5505ea2d0f92d1539d7c356cda98a1098b31de372cf2982bc76",
+      "495": "7e18219606edef941bd8432ca64b5f86d16e90071dcd2ce9c1de9ce2362906ff",
+      "594": "3111e8ef8ac19743cdca7a84c5b170dbdddc84fa96cd0d3e1672d112eb6b2a95",
+      "693": "ca3c0d132154cc67400b90c9702c7b392f96c961152e5569188b40bcac037f44",
+      "792": "b57d9fcf64151ab97cb29871f0937639b7d8fc031fa5a3fd74142c8950e8189b",
+      "891": "b7b2753b984a65831953147858ad207247ae60947bbae7e44d66f92c45f9243a",
+      "99": "2416fe322966b1c7bee9fa8dd4cc0bb0c104b1f9424821a0c5e51497cfc1d97e",
+      "990": "85b5fc468c4ea9e13e850ac572fa57c8f4d170e1481071945cdf4d8e158e70f5"
+    }
+  },
+  "passed": false,
+  "recorded_at": "2026-08-07T01:01:35.275656+00:00",
+  "same_run_pairing": {
+    "bitwise_equal": true,
+    "rows": [
+      {
+        "pre_step": 0,
+        "snapshot_step": 0,
+        "state": "before"
+      },
+      {
+        "pre_step": 98,
+        "snapshot_step": 99,
+        "state": "after"
+      },
+      {
+        "pre_step": 296,
+        "snapshot_step": 297,
+        "state": "after"
+      },
+      {
+        "pre_step": 593,
+        "snapshot_step": 594,
+        "state": "after"
+      },
+      {
+        "pre_step": 890,
+        "snapshot_step": 891,
+        "state": "after"
+      },
+      {
+        "pre_step": 1187,
+        "snapshot_step": 1188,
+        "state": "after"
+      },
+      {
+        "pre_step": 1484,
+        "snapshot_step": 1485,
+        "state": "after"
+      },
+      {
+        "pre_step": 1781,
+        "snapshot_step": 1782,
+        "state": "after"
+      },
+      {
+        "pre_step": 2078,
+        "snapshot_step": 2079,
+        "state": "after"
+      },
+      {
+        "pre_step": 2372,
+        "snapshot_step": 2373,
+        "state": "after"
+      }
+    ],
+    "terminal_snapshot_bitwise_equal_to_checkpoint": true
+  },
+  "schema_version": "mai_124m_late_cproj_paired_state_curve_rejection_v1"
+}
