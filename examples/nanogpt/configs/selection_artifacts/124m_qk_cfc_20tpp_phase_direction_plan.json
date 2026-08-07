@@ -1,0 +1,139 @@
+{
+  "schema_version": "mai_124m_qk_cfc_20tpp_phase_direction_plan_v1",
+  "artifact_kind": "124m_qk_cfc_20tpp_same_run_phase_direction_preregistration",
+  "status": "registered_at_20pct_before_any_post_init_snapshot_was_observed",
+  "registered_at": "2026-08-08T01:33:48+08:00",
+  "scientific_question": "When the accepted-at-5TPP QK+c_fc composition erodes after 10TPP, does the same-run task geometry identify intrinsic c_fc drift, dense c_proj context drift, or a harmful c_fc/c_proj interaction?",
+  "identity": {
+    "entrypoint_sha256": "87cf5537853f7c74ac2f8f4794c406bdf3522104e94863b1df1a71d1e996004a",
+    "acquisition_plan_sha256": "05678c4472d10fdbde7885abf21cedf368e8f91c0497ce944f54a7d1aa00430d",
+    "acquisition_config_sha256": "1e647528047fc7a7647777011db7b2edb32104bcebd8fc29640f83d0f5c0b4e7",
+    "acquisition_verifier_sha256": "6d62b84635ad1c6957f194991ced230884f010832ccc54f8a8c628cd08b0717f",
+    "source_result_sha256": "2b7bba0e5928d38b073f7b0734a6516eb12f0f3a01be3a168cef9094f4f6582e",
+    "terminal_audit_sha256": "50aad2a01ade96a84d9265318c46b00cee1fd41fa7dd879a2d04a1f716ac4876",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "observed_before_registration": {
+    "acquisition_iteration": 1940,
+    "available_snapshot_steps": [
+      0
+    ],
+    "post_init_snapshot_metrics_observed": false,
+    "terminal_acquisition_result_observed": false,
+    "thresholds_changed_after_measurement": false
+  },
+  "protocol": {
+    "steps": [
+      0,
+      2373,
+      4746,
+      7119,
+      9489
+    ],
+    "reference_step": 2373,
+    "batch_size": 2,
+    "batches": 8,
+    "block_size": 256,
+    "dtype": "bfloat16",
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "sample_cap": 256,
+    "sample_seed": 20260808,
+    "token_regimes": [
+      "HEAD",
+      "MID",
+      "TAIL"
+    ],
+    "primary_band": "late",
+    "factorial_design": {
+      "context": "all non-MLP-pair parameters remain at the current phase",
+      "factor_a": "mlp.c_fc weight from 5TPP reference or current phase",
+      "factor_b": "mlp.c_proj weight from 5TPP reference or current phase",
+      "cells": [
+        "reference c_fc / reference c_proj",
+        "current c_fc / reference c_proj",
+        "reference c_fc / current c_proj",
+        "current c_fc / current c_proj"
+      ],
+      "endpoint": "fixed-token validation CE",
+      "interaction": "CE(current,current) - CE(current,reference) - CE(reference,current) + CE(reference,reference)"
+    }
+  },
+  "decision_rule": {
+    "failure_step": 7119,
+    "source_qk_only_gaps_by_step": {
+      "2373": -0.0002,
+      "4746": 0.0008,
+      "7119": 0.0099,
+      "9489": 0.0081
+    },
+    "minimum_material_ratio": 0.1,
+    "minimum_cosine_shift": 0.02,
+    "minimum_factorial_ce": 0.005,
+    "classification_order": [
+      "PHASE_POST_GELU_CONVERSION_DRIFT if late-band conversion ratio at 7119 is <=0.90 while pre-GELU hard-rank ratio is >=0.90",
+      "PHASE_PRE_GELU_CAPACITY_DRIFT if late-band pre-GELU hard-rank ratio at 7119 is <=0.90",
+      "PHASE_RESIDUAL_BRANCH_SCALE_DRIFT if late-band update/residual RMS ratio at 7119 is outside [0.90,1.10]",
+      "COADAPTED_RESIDUAL_DIRECTION_DRIFT if late-band cosine shift is >=0.02 and the 2x2 interaction is >=+0.005 CE",
+      "CFC_INTRINSIC_DIRECTION_DRIFT if late-band cosine shift is >=0.02 and the c_fc main effect with reference c_proj is >=+0.005 CE",
+      "CPROJ_CONTEXT_DIRECTION_DRIFT if late-band cosine shift is >=0.02 and the c_proj main effect with reference c_fc is >=+0.005 CE",
+      "DIRECTION_DRIFT_WITHOUT_TASK_FACTORIAL_PENALTY if only the cosine threshold is crossed",
+      "PHASE_DRIFT_UNRESOLVED otherwise"
+    ],
+    "earliest_direction_shift": "first post-5TPP phase whose late-band mean absolute residual/update cosine shift reaches 0.02",
+    "thresholds_changed_after_measurement": false,
+    "training_or_structure_authorized_by_any_outcome": false
+  },
+  "required_input_gate": {
+    "terminal_verification_classification": "ACCEPTED_QK_CFC_20TPP_PHASE_ACQUISITION",
+    "terminal_verification_passed": true,
+    "loss_curve_reproduced": true,
+    "all_five_snapshot_hashes_verified": true,
+    "all_five_fixed-token_functional_replays_passed": true,
+    "terminal_snapshot_checkpoint_equality_passed": true,
+    "analysis_before_gate": false
+  },
+  "theory_reconciliation": {
+    "mapping_theorem": "The theorem is local and existential, so raw Euclidean low rank is insufficient; the analysis must test the learned path in the task metric.",
+    "lwt": "Layer-specific manifolds motivate per-layer activation and residual-write measurements rather than one global latent conclusion.",
+    "terminal_evidence": "The terminal audit found preserved pre/post-GELU rank and update scale but a material late-layer residual-direction shift.",
+    "factorial_reason": "Same-run c_fc/c_proj recombination directly tests whether the procedural feature path is intrinsically harmful or only harmful through its co-adapted dense writer.",
+    "pca_boundary": "Five-point raw c_fc and c_proj PCA/path statistics are descriptive trajectory summaries with rank upper bound four, never estimates of ambient manifold dimension or structure-selection evidence alone."
+  },
+  "outputs": {
+    "activation_rows": "activation_rows.csv",
+    "phase_comparison_rows": "phase_comparison_rows.json",
+    "factorial_rows": "factorial_rows.json",
+    "weight_trajectory_rows": "weight_trajectory_rows.json",
+    "result": "result.json"
+  },
+  "systems": {
+    "parameter_updates": 0,
+    "expected_duration": "under five minutes based on the 31-second two-checkpoint terminal audit and the small fixed-token factorial",
+    "mode": "direct foreground polling",
+    "mfu_gate": "not applicable to a zero-update analysis",
+    "watchdog": false,
+    "callback": false,
+    "watchdog_if_observed_runtime_exceeds_five_minutes": true
+  },
+  "authorization": {
+    "zero_update_analysis_after_required_input_gate": true,
+    "candidate_structure": false,
+    "language_model_training": false,
+    "automatic_followup": false,
+    "larger_rung": false,
+    "separate_post_result_theory_reconciliation_required": true
+  }
+}
