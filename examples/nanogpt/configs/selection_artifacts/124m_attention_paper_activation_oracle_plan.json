@@ -23,7 +23,7 @@
       "-m",
       "examples.nanogpt.analyze_attention_paper_activation_oracle",
       "--plan",
-      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-midpoint/examples/nanogpt/configs/selection_artifacts/124m_attention_paper_activation_oracle_plan.json",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-cfc-midpoint-replay/examples/nanogpt/configs/selection_artifacts/124m_attention_paper_activation_oracle_plan.json",
       "--probe-dir",
       "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
       "--terminal-checkpoint",

@@ -30,6 +30,7 @@ OUTPUT = REPO_ROOT / (
     "124m_attention_paper_activation_oracle_plan.json"
 )
 REMOTE_ROOT = Path("/mnt/ssd-data/orj/MappingNetworks")
+REMOTE_REPO = REMOTE_ROOT / "latent-weight-lab-cfc-midpoint-replay"
 PROBE_DIR = REMOTE_ROOT / (
     "outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe"
 )
@@ -177,7 +178,7 @@ def build_plan() -> dict[str, Any]:
                 "-m",
                 "examples.nanogpt.analyze_attention_paper_activation_oracle",
                 "--plan",
-                str(REMOTE_ROOT / "latent-weight-lab-midpoint" / OUTPUT.relative_to(REPO_ROOT)),
+                str(REMOTE_REPO / OUTPUT.relative_to(REPO_ROOT)),
                 "--probe-dir",
                 str(PROBE_DIR),
                 "--terminal-checkpoint",
