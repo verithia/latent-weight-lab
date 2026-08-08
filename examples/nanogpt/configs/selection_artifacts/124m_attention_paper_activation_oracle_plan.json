@@ -1,0 +1,148 @@
+{
+  "authorization": {
+    "language_model_training": false,
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "model_implementation": false
+  },
+  "decision_rule": {
+    "fail": "Close the paper D_sigma activation family for that attention target at the tested 1% budget; keep it dense and launch no MFU or training arm.",
+    "pass": "A target passes only if every state stays inside the frozen range and all three held-out thresholds pass. A pass authorizes one separate causal-coordinate transport analysis, not implementation or training.",
+    "threshold_changed_after_measurement": false,
+    "thresholds": {
+      "activated_tangent_recovery_minimum": 0.8,
+      "activation_gain_over_identity_minimum": 0.05,
+      "functional_image_recovery_minimum": 0.8
+    }
+  },
+  "execution": {
+    "callbacks": false,
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_paper_activation_oracle",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-midpoint/examples/nanogpt/configs/selection_artifacts/124m_attention_paper_activation_oracle_plan.json",
+      "--probe-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+      "--terminal-checkpoint",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+      "--data-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+      "--output-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_paper_activation_oracle_v1",
+      "--device",
+      "cuda"
+    ],
+    "device": "cuda:0",
+    "direct_foreground_polling": true,
+    "expected_duration": "under five minutes; zero-update GPU analysis",
+    "host": "PRO6",
+    "watchdog": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
+    "dense_config_sha256": "b411c14a38a2a3c10813d60b9129fd7aa3b007fbcf39873d7241fac3e726e007",
+    "entrypoint": "examples.nanogpt.analyze_attention_paper_activation_oracle",
+    "entrypoint_sha256": "beee082eac14c04820d622f83e540b062e4155f8c15b2fa08b257b37655c6fdf",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_paper_activation_oracle_v1",
+    "parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_muon_layer_attribution_plan.json",
+    "parent_plan_sha256": "3e2ef19baedf2108b939395e7d19e821f670dd014845b0018cdc51e22484fd3b",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_muon_layer_attribution_result.json",
+    "parent_result_sha256": "8a7556801741cb884ebcd450d7ae93ba1388ab981254eeb32517cf7596381039",
+    "probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001188.pt": "5fd43fbeb9447a86b673d2b3ee10bd2d7faa1ab0c43cdd7b59d3d783ca871a8a",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b"
+  },
+  "protocol": {
+    "activation": "signed_condition_bounded_tanh",
+    "activation_scale_multiplier": 1.0540925533894598,
+    "block_fht_layers": 2,
+    "cgls_iterations": 32,
+    "controls": [
+      "identical-budget identity BlockFHT tangent",
+      "range validity against the frozen step-zero activation scale"
+    ],
+    "coordinate_fit": "oracle_cgls_in_inverse_activation_preactivation",
+    "direction": "exact dense Muon applied_direction_per_lr",
+    "discovery_steps": [
+      0,
+      594,
+      1188
+    ],
+    "heldout_steps": [
+      1782,
+      2372
+    ],
+    "latent_ratio": 0.01,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "maximum_step0_jacobian_condition": 10.0,
+    "metric_batch_size": 2,
+    "metric_batches": 2,
+    "metric_block_size": 256,
+    "metric_policy": "Freeze terminal-dense ln_1 inputs, causal attention probabilities, concatenated head states, and dense attention c_proj. For V measure Delta residual = O * concat_h(A_h X Delta V_h); for c_proj measure Delta residual = H Delta O.",
+    "metric_seed": 20260809,
+    "minimum_step0_activation_derivative": 0.1,
+    "parameter_updates": 0,
+    "steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2372
+    ],
+    "tangent_fit": "oracle_cgls_in_frozen_terminal_attention_output_metric",
+    "targets": {
+      "cproj": {
+        "parameter": "attn.c_proj.weight",
+        "seed_offset": 1,
+        "seed_stride": 4,
+        "slice": "full matrix",
+        "target_std": 0.004082482904638631
+      },
+      "v": {
+        "parameter": "attn.c_attn.weight",
+        "seed_offset": 2,
+        "seed_stride": 8,
+        "slice": "final n_embd rows",
+        "target_std": 0.02
+      }
+    },
+    "weight": "same-probe weight_before_step"
+  },
+  "recorded_at": "2026-08-09",
+  "schema_version": "mai_124m_attention_paper_activation_oracle_plan_v1",
+  "scientific_question": "Can the paper's state-dependent elementwise activation rotate a fixed 1% BlockFHT chart into the dense V or attention-c_proj manifold strongly enough to recover held-out exact Muon action in attention-output geometry?",
+  "status": "registered_before_zero_update_analysis",
+  "theory": {
+    "decoder": "g(z)=s*tanh((b+A z)/s), b=s*atanh(W0/s)",
+    "jacobian": "J_g(z)=diag(1-(g(z)/s)^2) A",
+    "prior_boundary": "The same activation family failed for MLP c_proj, but V/O has a distinct softmax-conditioned functional metric and must be tested rather than inferred.",
+    "scale_derivation": "s=sqrt(10/9)*max(abs(W0)) is uniquely fixed by a step-zero derivative floor 0.1, hence Jacobian condition ceiling 10",
+    "why_an_oracle_first": "Oracle state coordinates and oracle tangent coefficients make this an optimistic representability upper bound. Failure excludes optimizer, Mapping-Loss, and learning-rate explanations.",
+    "why_this_is_new": "The rejected Cayley/LWT audit used a state-independent orbit tangent. This is the paper's algebraically distinct D_sigma(W) mechanism, whose diagonal gate changes with the represented state."
+  }
+}
