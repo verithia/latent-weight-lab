@@ -1,0 +1,112 @@
+{
+  "schema_version": "mai_124m_attention_paper_activation_oracle_result_v1",
+  "recorded_at": "2026-08-09",
+  "classification": "ATTENTION_PAPER_ACTIVATION_ORACLE_REJECT_ALL",
+  "scientific_question": "Can the paper's state-dependent elementwise activation rotate a fixed 1% BlockFHT chart into the dense V or attention-c_proj manifold strongly enough to recover held-out exact Muon action in attention-output geometry?",
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "git_commit": "1dac7b1ea8a9b15d734e790eb3939b06f15654a8",
+    "entrypoint": "examples.nanogpt.analyze_attention_paper_activation_oracle",
+    "parameter_updates": 0,
+    "wall_time_seconds": 6.968195199966431,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false
+  },
+  "identity": {
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_paper_activation_oracle_plan.json",
+    "plan_sha256": "c1a3e6bfd6700abb4ef7d3e761609bf7d585fbae1f03d8e3fcdc1c7cf040ad9a",
+    "implementation_sha256": "b59ffe4702fe9fea9b36e83c1ffae9d27e90bdc35c7cc150819216ca4584d707",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b"
+  },
+  "protocol": {
+    "decoder": "g(z)=s*tanh((b+A z)/s), b=s*atanh(W0/s)",
+    "jacobian": "J_g(z)=diag(1-(g(z)/s)^2) A",
+    "activation_scale_multiplier": 1.0540925533894598,
+    "latent_ratio": 0.01,
+    "block_fht_layers": 2,
+    "block_fht_seed": 1000,
+    "steps": [0, 594, 1188, 1782, 2372],
+    "discovery_steps": [0, 594, 1188],
+    "heldout_steps": [1782, 2372],
+    "direction": "exact dense Muon applied_direction_per_lr",
+    "weight": "same-probe weight_before_step",
+    "metric": "frozen terminal-dense attention residual-write metric",
+    "controls": [
+      "identical-budget identity BlockFHT tangent",
+      "range validity against the frozen step-zero activation scale"
+    ],
+    "thresholds": {
+      "functional_image_recovery_minimum": 0.8,
+      "activated_tangent_recovery_minimum": 0.8,
+      "activation_gain_over_identity_minimum": 0.05,
+      "all_states_must_remain_in_range": true
+    }
+  },
+  "results": {
+    "v": {
+      "heldout_functional_image_recovery": 0.008420181641438344,
+      "heldout_activated_tangent_recovery": 0.9547267132527114,
+      "heldout_identity_tangent_recovery": 0.9547055101005821,
+      "activation_gain_over_identity": 0.000021203152129278813,
+      "range_valid": false,
+      "range_invalid_cells": 39,
+      "total_cells": 60,
+      "maximum_current_to_scale_ratio": 1.53175,
+      "minimum_activation_derivative": 0.09826,
+      "mean_activation_derivative": 0.96104,
+      "heldout_cell_activation_gain_range": [-0.0001006, 0.0001981],
+      "checks": {
+        "functional_image": false,
+        "tangent": true,
+        "activation_gain": false,
+        "range": false
+      },
+      "passed": false
+    },
+    "attention_cproj": {
+      "heldout_functional_image_recovery": -0.022686930735606733,
+      "heldout_activated_tangent_recovery": 0.8108893804456679,
+      "heldout_identity_tangent_recovery": 0.8108679289498845,
+      "activation_gain_over_identity": 0.000021451495783475494,
+      "range_valid": false,
+      "range_invalid_cells": 48,
+      "total_cells": 60,
+      "maximum_current_to_scale_ratio": 3.96733,
+      "minimum_activation_derivative": 0.03721,
+      "mean_activation_derivative": 0.95179,
+      "heldout_cell_activation_gain_range": [-0.0006508, 0.0005742],
+      "checks": {
+        "functional_image": false,
+        "tangent": true,
+        "activation_gain": false,
+        "range": false
+      },
+      "passed": false
+    }
+  },
+  "artifacts": {
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_paper_activation_oracle_v1/result.json",
+    "raw_result_sha256": "8d376aa1aa7747a02145fc2f7e7d3b954f5fb169c1953299db7d7bad01a1a56d",
+    "cells_csv_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_paper_activation_oracle_v1/attention_paper_activation_oracle_cells.csv",
+    "cells_csv_sha256": "71e298230cbd97c885ac1c31b0c6927f63949fc49701bae834fcbb56ccbddceb"
+  },
+  "decision": {
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "closed_family": "condition-bounded paper D_sigma tanh decoder for attention V and c_proj at the tested fixed 1% two-stage BlockFHT budget",
+    "reason": "The nonlinear decoder leaves the frozen range in most cells, recovers essentially none of the held-out dense state image, and changes functional tangent recovery by only about 2.1e-5 versus the identical linear chart.",
+    "new_evidence": "The identical-budget linear BlockFHT chart nevertheless recovers 95.47% of V and 81.09% of attention-c_proj exact-Muon action in the frozen functional metric. This separates a strong local functional tangent from a failed nonlinear state image and motivates a separately preregistered exact-base affine displacement/transport oracle rather than training the rejected activation.",
+    "next_test": "Fit dense displacements from the exact GPT step-zero base directly in the frozen functional metric using the same fixed affine BlockFHT chart, then test whether discovery coordinates transport to held-out steps before considering any training."
+  },
+  "limitations": [
+    "State coordinates and tangent coefficients are oracle fits that see the dense answers.",
+    "The functional metric freezes terminal-dense activations to isolate parameter geometry from residual-stream coevolution.",
+    "High instantaneous tangent recovery does not establish that one causal latent trajectory can represent the dense path."
+  ]
+}
