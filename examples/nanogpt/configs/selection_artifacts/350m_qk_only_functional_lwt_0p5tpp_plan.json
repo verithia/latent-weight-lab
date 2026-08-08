@@ -1,0 +1,139 @@
+{
+  "candidates": {
+    "mult0p50": {
+      "candidate_main_lr_multiplier": 0.5,
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "config_sha256": "ce1f84afca9f840e51ab6821021a3e1787bf45fa2809a80b65fcd84b109cb0e0",
+      "learning_rate": 0.0012,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50"
+    },
+    "mult0p75": {
+      "candidate_main_lr_multiplier": 0.75,
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "config_sha256": "fd34ec0fe94e0840f43f2707f5dbed69f5295ec337e973d9074c2a837cba7323",
+      "learning_rate": 0.0018,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75"
+    },
+    "mult1p00": {
+      "candidate_main_lr_multiplier": 1.0,
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00.json",
+      "config_sha256": "77b16ae5558ab10e649c4374ef98d18cd1c029a2a961348baf6a71cb13b83ef6",
+      "learning_rate": 0.0024,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00.json",
+      "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00"
+    }
+  },
+  "identity": {
+    "attn_cayley_seed": 618033,
+    "block_fht_seed": 1000,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "model_seed": 1337
+  },
+  "immutable_evidence": {
+    "accepted_124m_qk_only_config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_only_qk64_outputgain_20tpp_lr24e4.json",
+      "sha256": "337405ae2ef2554bbf50b0ea2d441ba3c6f6f79de5c6d11e0aa21d9e01d5a34b"
+    },
+    "accepted_124m_qk_only_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+      "sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+    },
+    "mai_ladder_generator": {
+      "path": "examples/nanogpt/make_y400_mai_scaling_ladder_configs.py",
+      "sha256": "e5429b57f0381dc80300687e4f4f140155a1f0da3a2ef9d81cb548d8ca2b6819"
+    },
+    "parent_mult0p50": {
+      "path": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult0p50.json",
+      "sha256": "ab49ddd6247c2ee28381a1ef40c4381c71569d7acf0463d443b85f7db3b2f89f"
+    },
+    "parent_mult0p75": {
+      "path": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult0p75.json",
+      "sha256": "cb7fcae21411cf977daaf705a00a561481ceb07b3792b438ca04f0edc9b12733"
+    },
+    "parent_mult1p00": {
+      "path": "examples/nanogpt/configs/y400_mai_v2_350m_fullattn_blockfht_0p5tpp_mult1p00.json",
+      "sha256": "dcefa50f197cf7b2516ca4357900b5cf9e5d67284cbb99a560226bba706535a3"
+    },
+    "prior_350m_full_attention_ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_0p5tpp_provisional_ranking.json",
+      "sha256": "f19284da78dac9e1a22292802579e61b066b1289ab2ce876d955caab9f6022a4"
+    }
+  },
+  "ladder": {
+    "accepted_dense_main_lr": 0.0024,
+    "candidate_learning_rates": [
+      0.0012,
+      0.0018,
+      0.0024
+    ],
+    "candidate_multipliers": [
+      0.5,
+      0.75,
+      1.0
+    ],
+    "materialized_parameter_count": 354599936,
+    "max_iters": 677,
+    "model_tier": "350m",
+    "planned_tpp": 0.5,
+    "promotion_rule": "only immutable top1/top2 ranking may authorize two 5TPP confirmations",
+    "ranking_rule": "stable ascending terminal validation CE; hard reject nonfinite/failed runs",
+    "scheduled_tokens": 177471488,
+    "selection_endpoint": "terminal held-out NLL on fixed MAI evaluation windows"
+  },
+  "monitoring": {
+    "agent_mention": "@Codex",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callbacks": [
+      "completion",
+      "error",
+      "stall",
+      "monitor_degraded"
+    ],
+    "expected_duration_hours_per_candidate": [
+      1,
+      2
+    ],
+    "terminal_action": "verify and seal exact artifacts, rank when all screens finish, then continue only through the preregistered top1/top2 gate",
+    "terminal_only": true
+  },
+  "performance_gate": {
+    "all_candidates_must_pass_before_queue_launch": true,
+    "exact_config_required": true,
+    "foreground_polling": true,
+    "minimum_mfu_fraction": 0.2,
+    "watchdog": false
+  },
+  "registered_at": "2026-08-09",
+  "resource_admission": {
+    "gpu": 0,
+    "host": "PRO6",
+    "minimum_post_admission_headroom_gib": 8,
+    "no_launch_until_verified_reclaim": true,
+    "project_cap_gib": 256
+  },
+  "schema_version": "mai_350m_qk_only_functional_lwt_0p5tpp_plan_v1",
+  "scientific_status": {
+    "automatic_promotion_from_124m": false,
+    "five_tpp_authorized": false,
+    "larger_rung_claimed": false,
+    "new_user_directed_screen": true
+  },
+  "scope": "350M/0.5TPP QK-only functional-LWT scale-transfer LR screen",
+  "theory": {
+    "accepted_boundary": "Generate Q/K only; V, attention output projection, and MLP remain dense.",
+    "budget_scaling": "layer/head-local charts increase automatically with layer/head count",
+    "excluded_claims": [
+      "full attention replacement",
+      "V replacement",
+      "attention c_proj replacement",
+      "inference parameter reduction"
+    ],
+    "head_dimension_invariant": 64,
+    "qk_cayley_rank": 64,
+    "rank_scaling": "constant because head dimension is constant across MAI tiers"
+  }
+}
