@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_124m_attention_affine_delta_path_oracle_result_v1",
+  "recorded_at": "2026-08-09",
+  "classification": "ATTENTION_AFFINE_DELTA_PATH_GATE_REJECT",
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "git_commit": "28838c91d43bfdb90d11004a569c43e56c9f82f2",
+    "entrypoint": "examples.nanogpt.analyze_attention_affine_delta_path_oracle",
+    "parameter_updates": 0,
+    "wall_time_seconds": 49.4234139919281,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false
+  },
+  "identity": {
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_affine_delta_path_oracle_plan.json",
+    "plan_sha256": "423e66334adc0a7c046dfc10ef3b581323c37cbf43d66fe197d054e31831c914",
+    "entrypoint_sha256": "6818270b1adc4637eedd00d752290cd4d86c2a521a6e7594fa5983ca38b77319",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_metric_batch_sha256": "5618db13ba1e2a7eb9d679e04beccf61662e0fd9f8a04aaa7c81886b078c284a",
+    "eval_metric_batch_sha256": "d2713ea6d1aa1358ff9db08322c5e289f3cd91d14aa1148c742113cd350cc752"
+  },
+  "protocol": {
+    "decoder": "W(z)=W0_gpt+A_blockfht z, z0=0",
+    "latent_ratio": 0.01,
+    "block_fht_layers": 2,
+    "block_fht_seed": 1000,
+    "trajectory_file_count": 41,
+    "trajectory_total_bytes": 4644344659,
+    "trajectory_interval_updates": 60,
+    "discovery_max_step": 1140,
+    "heldout_min_step": 1200,
+    "heldout_probe_steps": [1782, 2372],
+    "fit_and_eval_metrics_are_disjoint": true,
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.8,
+      "minimum_layer_recovery_minimum": 0.6
+    }
+  },
+  "results": {
+    "v": {
+      "heldout_state_fit_recovery": 0.8450433725462978,
+      "heldout_state_eval_recovery": 0.4644243169525237,
+      "heldout_state_euclidean_recovery": -0.8372669364270342,
+      "heldout_local_chord_eval_recovery": 0.28713411810248013,
+      "heldout_discovery_affine_span_eval_recovery": 0.4524731854815471,
+      "heldout_exact_muon_eval_recovery": 0.8025237527515413,
+      "heldout_lr_clock_line_eval_recovery_diagnostic": 0.1293918655763353,
+      "mean_discovery_coordinate_rank_95": 4.333333333333333,
+      "minimum_layer_recovery": {
+        "state": -0.34466871656459885,
+        "local_chord": -0.32346210094727507,
+        "discovery_affine_span": -0.3397067334976744,
+        "exact_muon": 0.2900605348643019
+      },
+      "best_layer_recovery": {
+        "state": 0.8458069609342744,
+        "local_chord": 0.7377148931579695,
+        "discovery_affine_span": 0.8311718761919662,
+        "exact_muon": 0.9513371507803915
+      },
+      "passed": false
+    },
+    "attention_cproj": {
+      "heldout_state_fit_recovery": 0.7532876679565992,
+      "heldout_state_eval_recovery": 0.5872035996635144,
+      "heldout_state_euclidean_recovery": -0.810421636251564,
+      "heldout_local_chord_eval_recovery": 0.10840696669858307,
+      "heldout_discovery_affine_span_eval_recovery": 0.5837688796727092,
+      "heldout_exact_muon_eval_recovery": 0.6647229121587321,
+      "heldout_lr_clock_line_eval_recovery_diagnostic": 0.3736490928586443,
+      "mean_discovery_coordinate_rank_95": 3.9166666666666665,
+      "minimum_layer_recovery": {
+        "state": -0.03741244239071905,
+        "local_chord": -0.31295706838369963,
+        "discovery_affine_span": -0.02780201052382309,
+        "exact_muon": -0.06884787079482302
+      },
+      "best_layer_recovery": {
+        "state": 0.8623412170279241,
+        "local_chord": 0.5792022421882032,
+        "discovery_affine_span": 0.8589288837238642,
+        "exact_muon": 0.915637278305741
+      },
+      "passed": false
+    }
+  },
+  "artifacts": {
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_affine_delta_path_oracle_v1/result.json",
+    "raw_result_sha256": "afef4625dda0e1b01f427872cb9494112e6b3c09e7001556300f205f638f4ba7",
+    "cells_csv_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_affine_delta_path_oracle_v1/attention_affine_delta_path_cells.csv",
+    "cells_csv_sha256": "a1ae259b28317090ea8cc8dea2ffa9994668eb6eb7dd78e8e948d5005d3eb9c1"
+  },
+  "decision": {
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "closed_family": "exact frozen GPT base plus the production-seeded fixed 1% two-stage BlockFHT affine delta for attention V and cproj",
+    "reason": "The apparent in-sample tangent capacity does not generalize across frozen functional batches, layers, or temporal chords. Both targets fail every preregistered path gate; exact initialization cannot repair a nontransportable fixed chart.",
+    "interpretation": [
+      "The 95.47% V and 81.09% cproj identity-tangent numbers from the activation oracle were optimistic same-metric fits.",
+      "V retains 80.25% aggregate exact-Muon recovery out of sample, but late layers collapse and the dense state/chord are not in the chart.",
+      "cproj fails even aggregate exact-Muon generalization, and its local path is substantially less compatible than V.",
+      "The discovery coordinate paths are temporally low-rank inside the fitted chart (about four PCs for 95% energy), but the chart image itself is misaligned with held-out functional geometry."
+    ],
+    "next_action": "Do not implement or train affine delta. Reconcile the remaining V/O branch against the already completed gauge-quotient, direct-coupling, activation-metric, radial, and layerwise controls before specifying any successor family."
+  },
+  "resource_state": {
+    "pro6_gpu0_memory_mib": 282,
+    "pro6_gpu0_utilization_percent": 3,
+    "pro6_gpu0_temperature_c": 28,
+    "pro6_workspace_gib_du": 246,
+    "pro6_project_cap_gib": 256
+  }
+}
