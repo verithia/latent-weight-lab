@@ -1,0 +1,101 @@
+{
+  "schema_version": "pro6_verified_checkpoint_reclaim_v1",
+  "recorded_at": "2026-08-09",
+  "scope": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_perf_gated",
+  "reason": "Reclaim terminal checkpoint payloads from concluded 2026-07-20 performance screens before admitting the preregistered 350M QK-only ladder. Fixed evaluations, provenance, logs, checkpoint metadata, and completed paired diagnostics remain in place; no active trajectory or accepted long-horizon checkpoint is included.",
+  "checkpoint_count": 13,
+  "total_bytes": 10032570975,
+  "retained": [
+    "all ckpt.meta.json sidecars",
+    "all fixed-evaluation logs",
+    "all launch provenance and status records",
+    "all MFU certificates",
+    "all paired residual and spectrum analyses"
+  ],
+  "checkpoints": [
+    {
+      "run": "pro6_350m_cached_control_1b_seed1_perf_b48g16_v1",
+      "bytes": 270933203,
+      "next_iter": 0,
+      "sha256": "7b3fa7bf69a344e952d706dac9d756dadcb7cd72e2480336a80b433a3b21b71c"
+    },
+    {
+      "run": "pro6_350m_cached_control_perf_b48g16_v1",
+      "bytes": 812729121,
+      "next_iter": 128,
+      "sha256": "30140beea25c2d65a4825aa67d6b9651b71e56240f65ac49212e2f71e4f24b21"
+    },
+    {
+      "run": "pro6_350m_cached_control_seed2_perf_b48g16_v1",
+      "bytes": 812729121,
+      "next_iter": 128,
+      "sha256": "5452d0f102e5d556633398bd02ab376b1721eebcaaa0142b9a440f18292c1dc1"
+    },
+    {
+      "run": "pro6_350m_cfc_gain_centeredmod1e6_perf_b48g16_v1",
+      "bytes": 813936865,
+      "next_iter": 128,
+      "sha256": "931cbfb04301edcf18e67dd8e64e198af4eb8f392bfafed3e5b37db31b4b40b8"
+    },
+    {
+      "run": "pro6_350m_cfc_output_gain_perf_b48g16_v1",
+      "bytes": 813936865,
+      "next_iter": 128,
+      "sha256": "4b5e46f835601a4074cdf8356c05447b4a934204db04c2a793e224c0899c6dfe"
+    },
+    {
+      "run": "pro6_350m_cfc_output_gain_seed2_perf_b48g16_v1",
+      "bytes": 813936865,
+      "next_iter": 128,
+      "sha256": "c0f6a7630f01afa07ff28cca9a73e8626d1402206e4510417dd27141c9e9f708"
+    },
+    {
+      "run": "pro6_350m_cproj_output_gain_perf_b48g16_v1",
+      "bytes": 813052129,
+      "next_iter": 128,
+      "sha256": "c86ee35e250151ac646510c6e2b97a7aed10acd92c273c6ec685917e9854b0b3"
+    },
+    {
+      "run": "pro6_350m_mapping_stability_perf_b48g32_v1",
+      "bytes": 812729057,
+      "next_iter": 64,
+      "sha256": "df9500a4c248264eb61d86ee5880e972bbc5b0f5f942cc099b31e2f6edc7129c"
+    },
+    {
+      "run": "pro6_350m_postgelu_spread_perf_b48g16_v1",
+      "bytes": 812729057,
+      "next_iter": 128,
+      "sha256": "d07afd4f4c9a06ecd633caecb3d6fdcd6281b17f631d40262e7df4a259cf7076"
+    },
+    {
+      "run": "pro6_350m_quarter_diag_residual_perf_b48g16_v1",
+      "bytes": 813964641,
+      "next_iter": 128,
+      "sha256": "1a25909f1e32108b671b5ad2afb0078b12a5ef347df1b320e2836eb5c28d71b1"
+    },
+    {
+      "run": "pro6_350m_quarter_diag_residual_seed2_perf_b48g16_v1",
+      "bytes": 813964641,
+      "next_iter": 128,
+      "sha256": "d6068f19113f8be27f111a789b0f7112fd267689e635c62191b6a9200cc02844"
+    },
+    {
+      "run": "pro6_350m_quarter_zeroweight_perf_b48g16_v1",
+      "bytes": 813964641,
+      "next_iter": 128,
+      "sha256": "6a281691281541ff7d6250b47723d8e6f2b727e6264379692d4f58e64de32590"
+    },
+    {
+      "run": "pro6_350m_quarter_zeroweight_seed2_perf_b48g16_v1",
+      "bytes": 813964769,
+      "next_iter": 128,
+      "sha256": "e46965ce3c60dc716dd24b99c4a0bdc2df9d30cde65117b6eef3ea3c85bb0025"
+    }
+  ],
+  "deletion_policy": {
+    "delete_only": "the 13 hash-pinned ckpt.pt payloads listed above",
+    "preserve_metadata": true,
+    "preserve_scientific_results": true,
+    "preserve_active_manifold_trajectories": true
+  }
+}
