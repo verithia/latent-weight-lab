@@ -1,0 +1,70 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_0p5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-09",
+  "host": "PRO6",
+  "gpu": 0,
+  "source_commit": "9fe8de07f3dec48ad82d65c7a9bbaf68813f3022",
+  "classification": "PASS_ALL_EXACT_CONFIG_MFU_GATES",
+  "minimum_mfu_fraction": 0.2,
+  "measurement_definition": "6 * materialized GPT parameters * measured training tokens/s divided by same-run empirical BF16 tensor-core GEMM peak",
+  "foreground_polled": true,
+  "watchdog": false,
+  "native_block_fht_extension_required": true,
+  "candidates": {
+    "mult0p50": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "config_sha256": "ce1f84afca9f840e51ab6821021a3e1787bf45fa2809a80b65fcd84b109cb0e0",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "certificate_sha256": "b8f414e0cd6d28aaa5f6ed5727e381a5864e02c5c697f3ac1e432e403c29fa90",
+      "passed": true,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "mfu_fraction": 0.37785780267775376,
+      "iter_ms": 3546.6433333333334,
+      "tokens_per_second": 73913.30333333333,
+      "peak_mib": 58468.82,
+      "model_tflops": 157.37825847324672,
+      "empirical_bf16_gemm_peak_tflops": 416.50127999993344,
+      "elapsed_seconds": 45.959606885910034
+    },
+    "mult0p75": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "config_sha256": "fd34ec0fe94e0840f43f2707f5dbed69f5295ec337e973d9074c2a837cba7323",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "certificate_sha256": "e2d49738c4babfd82da57cf93c2d6ee709862150b5beeacc837c0f47ca98541d",
+      "passed": true,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "mfu_fraction": 0.37925341434390764,
+      "iter_ms": 3550.4933333333333,
+      "tokens_per_second": 73833.05333333333,
+      "peak_mib": 58468.82,
+      "model_tflops": 157.20738794422272,
+      "empirical_bf16_gemm_peak_tflops": 414.5180557337496,
+      "elapsed_seconds": 23.36955428123474
+    },
+    "mult1p00": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00.json",
+      "config_sha256": "77b16ae5558ab10e649c4374ef98d18cd1c029a2a961348baf6a71cb13b83ef6",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00.json",
+      "certificate_sha256": "fd0e20bbdac346e69db99bc611e9e4f62e1c8aaf7729a9521988f7ac24e77bf0",
+      "passed": true,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "mfu_fraction": 0.3796578376048699,
+      "iter_ms": 3553.2966666666666,
+      "tokens_per_second": 73774.91666666667,
+      "peak_mib": 58468.82,
+      "model_tflops": 157.083601738752,
+      "empirical_bf16_gemm_peak_tflops": 413.7504515374638,
+      "elapsed_seconds": 23.182758808135986
+    }
+  },
+  "decision": {
+    "scientific_screen_authorized": true,
+    "authorized_candidate_count": 3,
+    "five_tpp_authorized": false,
+    "terminal_only_watchdog_required": true,
+    "automatic_retry_authorized": false
+  }
+}

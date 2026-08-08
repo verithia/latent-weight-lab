@@ -24,6 +24,10 @@ from examples.nanogpt.train import parse_args
 
 
 ROOT = Path(__file__).resolve().parents[2]
+MFU_RESULT = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "350m_qk_only_functional_lwt_0p5tpp_mfu_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -115,3 +119,20 @@ def test_plan_pins_configs_evidence_and_nonautomatic_promotion() -> None:
     assert plan["performance_gate"]["watchdog"] is False
     assert plan["monitoring"]["terminal_only"] is True
     assert plan["monitoring"]["agent_mention"] == "@Codex"
+
+
+def test_all_exact_configs_pass_real_mfu_gate() -> None:
+    result = load(MFU_RESULT)
+    assert result["classification"] == "PASS_ALL_EXACT_CONFIG_MFU_GATES"
+    assert result["foreground_polled"] is True
+    assert result["watchdog"] is False
+    assert result["decision"]["scientific_screen_authorized"] is True
+    assert result["decision"]["five_tpp_authorized"] is False
+    assert set(result["candidates"]) == set(MULTIPLIERS)
+    for slug, candidate in result["candidates"].items():
+        assert candidate["config_sha256"] == sha256(OUTPUTS[slug])
+        assert candidate["passed"] is True
+        assert candidate["native_extension_loaded"] is True
+        assert candidate["all_logged_losses_finite"] is True
+        assert candidate["mfu_fraction"] >= 0.2
+        assert candidate["peak_mib"] < 97887
