@@ -1,0 +1,160 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_0p5tpp_candidate_result_v1",
+  "recorded_at": "2026-08-09",
+  "candidate": {
+    "slug": "mult0p75",
+    "candidate_main_lr_multiplier": 0.75,
+    "learning_rate": 0.0018,
+    "max_iters": 677,
+    "scheduled_tokens": 177471488
+  },
+  "immutable_inputs": {
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_plan.json",
+      "sha256": "d7a211b2dc2577815577df4a0113306d6a6773a28d234175d9d0e69afc7755d8"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mfu_result.json",
+      "sha256": "5444d26c38a5c26d1df4838fc9829cc1b3e3d295d2d471260e5605c86299063a"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "sha256": "fd34ec0fe94e0840f43f2707f5dbed69f5295ec337e973d9074c2a837cba7323"
+    },
+    "mult1p00_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult1p00_result.json",
+      "sha256": "0a2c6c42039405aa0f278830bae78e2b1714e64f9174d2430b2778fb9e43650d"
+    },
+    "full_attention_ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_0p5tpp_provisional_ranking.json",
+      "sha256": "f19284da78dac9e1a22292802579e61b066b1289ab2ce876d955caab9f6022a4"
+    }
+  },
+  "run": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75_20260808T211142Z_2909721",
+    "pgid": 2909830,
+    "started_at": "2026-08-09T05:11:44+08:00",
+    "finished_at": "2026-08-09T05:57:06+08:00",
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "source_commit": "4e27f6dc664e4078dfb542d6246816657dbbb774",
+    "worktree_dirty": false,
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ]
+  },
+  "artifacts": {
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75_20260808T211142Z_2909721.json",
+      "sha256": "f8113910c7955049c0b79b6a712736789661802790a8083f92a6ce08cf1e74c6"
+    },
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75_20260808T211142Z_2909721.log",
+      "sha256": "e53741e5e9aca2d4487d95daef7b0f232f150adf6136537b3a08ef549c56af14"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75_20260808T211142Z_2909721.json",
+      "sha256": "9dcc117bd679fb06ccf3d17907b5c62aea738d079130ae1221fc3720c0579c80"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75_20260808T211142Z_2909721.config.json",
+      "sha256": "fd34ec0fe94e0840f43f2707f5dbed69f5295ec337e973d9074c2a837cba7323"
+    },
+    "archived_mfu_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75_20260808T211142Z_2909721.mfu.json",
+      "sha256": "e2d49738c4babfd82da57cf93c2d6ee709862150b5beeacc837c0f47ca98541d"
+    },
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75/ckpt.pt",
+      "sha256": "c765ddbccaf2313c1aeed887adf52a86d86d8cf073b32c03eba7d1e91e33e5ea",
+      "bytes": 2765687240
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75/ckpt.meta.json",
+      "sha256": "3b6b207bb8de279eac4c3b28efc706183da1181b9bdfbb588151f1e1691ed3c6"
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "checkpoint_resolved_config_sha256": "36626f84b7aba8748a8e7dabe9e87d4220180772acc67758b03e26248392c03b"
+  },
+  "optimizer_ownership": {
+    "optimizer": "muon",
+    "dense_muon_matrix_tensors": 96,
+    "attn_cayley_tensors": 96,
+    "adamw_other_tensors": 915,
+    "adamw_learning_rate": 0.00054
+  },
+  "performance": {
+    "mfu_fraction": 0.37925341434390764,
+    "mfu_minimum_fraction": 0.2,
+    "iter_ms": 3550.4933333333333,
+    "tokens_per_second": 73833.05333333333,
+    "peak_mib": 58468.82,
+    "native_extension_loaded": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9823, "validation_ce": 10.9822},
+    {"step": 170, "train_ce": 5.2776, "validation_ce": 5.2782},
+    {"step": 340, "train_ce": 4.4783, "validation_ce": 4.4713},
+    {"step": 510, "train_ce": 4.1548, "validation_ce": 4.1449},
+    {"step": 677, "train_ce": 4.0546, "validation_ce": 4.0437}
+  ],
+  "checkpoint_verification": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 677,
+    "best_validation_ce": 4.04374885559082,
+    "metadata_consistent": true,
+    "resume_envelope_readable": true,
+    "model_tensor_count": 1012,
+    "optimizer_tensor_count": 2841,
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "rng_state_present": true,
+    "block_fht_cache_state": "flushed_not_serialized"
+  },
+  "comparisons": {
+    "completed_qk_only_mult1p00": {
+      "reference_validation_ce": 3.9511,
+      "candidate_validation_ce": 4.0437,
+      "candidate_minus_reference_ce": 0.0926,
+      "evidence": "hash-pinned completed candidate on identical model, data, seeds, schedule, and fixed evaluation windows"
+    },
+    "same_horizon_full_attention_replacement": {
+      "reference_validation_ce": 4.5074,
+      "candidate_validation_ce": 4.0437,
+      "candidate_minus_reference_ce": -0.4637,
+      "evidence": "hash-pinned 350M full-attention candidate at the same 0.75 multiplier and 1.8e-3 learning rate"
+    },
+    "accepted_historical_dense_endpoint": {
+      "reference_validation_ce": 4.1784,
+      "candidate_validation_ce": 4.0437,
+      "candidate_minus_reference_ce": -0.1347,
+      "evidence_limit": "the dense endpoint used 2.4e-3 rather than this candidate's 1.8e-3 and its original Y400 checkpoint/log is unavailable on PRO6"
+    }
+  },
+  "decision": {
+    "candidate_stable": true,
+    "candidate_rank_among_completed": 2,
+    "completed_candidate_count": 2,
+    "total_candidate_count": 3,
+    "classification": "PASS_CANDIDATE_PENDING_COMPLETE_LR_RANKING",
+    "next_candidate": "mult0p50",
+    "next_candidate_exact_mfu_gate_already_passed": true,
+    "next_candidate_authorized": true,
+    "five_tpp_authorized": false,
+    "reason": "the immutable plan requires the final 0.50x terminal result before top-two selection"
+  }
+}

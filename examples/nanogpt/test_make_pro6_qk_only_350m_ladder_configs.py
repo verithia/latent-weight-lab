@@ -32,6 +32,10 @@ MULT1P00_RESULT = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "350m_qk_only_functional_lwt_0p5tpp_mult1p00_result.json"
 )
+MULT0P75_RESULT = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "350m_qk_only_functional_lwt_0p5tpp_mult0p75_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -174,5 +178,44 @@ def test_mult1p00_terminal_result_is_sealed_but_does_not_promote_early() -> None
         "candidate_minus_reference_ce"
     ] == pytest.approx(-0.4118)
     assert result["decision"]["next_candidate"] == "mult0p75"
+    assert result["decision"]["next_candidate_authorized"] is True
+    assert result["decision"]["five_tpp_authorized"] is False
+
+
+def test_mult0p75_terminal_result_is_sealed_and_final_screen_is_next() -> None:
+    result = load(MULT0P75_RESULT)
+    assert result["schema_version"] == (
+        "mai_350m_qk_only_functional_lwt_0p5tpp_candidate_result_v1"
+    )
+    assert result["immutable_inputs"]["config"]["sha256"] == sha256(
+        OUTPUTS["mult0p75"]
+    )
+    assert result["run"]["source_commit"] == (
+        "4e27f6dc664e4078dfb542d6246816657dbbb774"
+    )
+    assert result["run"]["classification"] == "clean"
+    assert result["run"]["exit_code"] == 0
+    assert [row["step"] for row in result["fixed_evaluations"]] == [
+        0,
+        170,
+        340,
+        510,
+        677,
+    ]
+    assert result["fixed_evaluations"][-1]["validation_ce"] == pytest.approx(
+        4.0437
+    )
+    verification = result["checkpoint_verification"]
+    assert verification["metadata_consistent"] is True
+    assert verification["all_model_tensors_finite"] is True
+    assert verification["all_optimizer_tensors_finite"] is True
+    assert verification["rng_state_present"] is True
+    assert result["comparisons"]["completed_qk_only_mult1p00"][
+        "candidate_minus_reference_ce"
+    ] == pytest.approx(0.0926)
+    assert result["comparisons"]["same_horizon_full_attention_replacement"][
+        "candidate_minus_reference_ce"
+    ] == pytest.approx(-0.4637)
+    assert result["decision"]["next_candidate"] == "mult0p50"
     assert result["decision"]["next_candidate_authorized"] is True
     assert result["decision"]["five_tpp_authorized"] is False
