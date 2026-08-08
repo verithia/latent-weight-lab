@@ -30,7 +30,7 @@ OUTPUT = REPO_ROOT / (
     "124m_attention_paper_activation_oracle_plan.json"
 )
 REMOTE_ROOT = Path("/mnt/ssd-data/orj/MappingNetworks")
-REMOTE_REPO = REMOTE_ROOT / "latent-weight-lab-cfc-midpoint-replay"
+REMOTE_REPO = REMOTE_ROOT / "latent-weight-lab-attention-paper-activation"
 PROBE_DIR = REMOTE_ROOT / (
     "outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe"
 )

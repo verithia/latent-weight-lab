@@ -22,4 +22,4 @@ def test_plan_freezes_theory_gate_without_training_authority() -> None:
     }
     assert not any(plan["authorization"].values())
     assert plan["execution"]["watchdog"] is False
-    assert "latent-weight-lab-cfc-midpoint-replay" in plan["execution"]["command"][5]
+    assert "latent-weight-lab-attention-paper-activation" in plan["execution"]["command"][5]
