@@ -1,0 +1,77 @@
+{
+  "confirmations": {
+    "top1": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
+      "config_sha256": "b2429be3ffa01b2eb779196cd18611d52ff34352e3ddf9ec7f6d290166eb92e3",
+      "learning_rate": 0.0024,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
+      "screen_slug": "mult1p00"
+    },
+    "top2": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.json",
+      "config_sha256": "3fe17a88a3a6a2a43c29361fd7acb60d3f9f20db72243485f103ed809baa0fa0",
+      "learning_rate": 0.0018,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.json",
+      "screen_slug": "mult0p75"
+    }
+  },
+  "excluded_candidates": [
+    "mult0p50"
+  ],
+  "execution_order": [
+    "top1",
+    "top2"
+  ],
+  "immutable_ranking": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_ranking.json",
+    "sha256": "db7e25abd49375b6905fed6d70411196a0c9ec9ab8d7ccae02d4ea784bff121b"
+  },
+  "monitoring": {
+    "agent_mention": "@Codex",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "expected_duration_hours_per_candidate": [
+      7,
+      8
+    ],
+    "heartbeat_minutes": 90,
+    "heartbeat_resets_on_progress": true,
+    "progress_callbacks": [
+      0.2,
+      0.5,
+      0.8,
+      1.0
+    ]
+  },
+  "performance_gate": {
+    "both_configs_must_pass_before_first_launch": true,
+    "exact_config_required": true,
+    "foreground_polling": true,
+    "launch_authorized": false,
+    "minimum_mfu_fraction": 0.2,
+    "watchdog": false
+  },
+  "registered_at": "2026-08-09",
+  "resource_admission": {
+    "gpu": 0,
+    "host": "PRO6",
+    "minimum_post_admission_headroom_gib": 8,
+    "no_launch_until_verified_reclaim": true,
+    "project_cap_gib": 256
+  },
+  "schedule": {
+    "eval_interval": 1691,
+    "max_iters": 6764,
+    "planned_tokens": 1772999680,
+    "planned_tpp": 5.0,
+    "scheduled_tokens": 1773142016,
+    "tokens_per_iter": 262144,
+    "warmup_iters": 67
+  },
+  "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_plan_v1",
+  "scope": "top-two 350M/5TPP QK-only functional-LWT confirmations",
+  "selection_after_5tpp": {
+    "endpoint": "terminal fixed-validation CE",
+    "practical_tie_threshold_ce": 0.02,
+    "tie_break": "retain the 0.5TPP leader"
+  }
+}

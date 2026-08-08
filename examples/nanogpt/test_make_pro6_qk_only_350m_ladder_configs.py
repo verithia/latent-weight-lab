@@ -36,6 +36,14 @@ MULT0P75_RESULT = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "350m_qk_only_functional_lwt_0p5tpp_mult0p75_result.json"
 )
+MULT0P50_RESULT = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "350m_qk_only_functional_lwt_0p5tpp_mult0p50_result.json"
+)
+RANKING = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "350m_qk_only_functional_lwt_0p5tpp_ranking.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -219,3 +227,50 @@ def test_mult0p75_terminal_result_is_sealed_and_final_screen_is_next() -> None:
     assert result["decision"]["next_candidate"] == "mult0p50"
     assert result["decision"]["next_candidate_authorized"] is True
     assert result["decision"]["five_tpp_authorized"] is False
+
+
+def test_mult0p50_terminal_result_seals_complete_ranking() -> None:
+    result = load(MULT0P50_RESULT)
+    assert result["immutable_inputs"]["config"]["sha256"] == sha256(
+        OUTPUTS["mult0p50"]
+    )
+    assert result["run"]["source_commit"] == (
+        "80d92c7ad2950e13d4d98fd7a4272546b860967f"
+    )
+    assert result["run"]["classification"] == "clean"
+    assert result["run"]["exit_code"] == 0
+    assert result["fixed_evaluations"][-1]["validation_ce"] == pytest.approx(
+        4.2324
+    )
+    verification = result["checkpoint_verification"]
+    assert verification["metadata_consistent"] is True
+    assert verification["all_model_tensors_finite"] is True
+    assert verification["all_optimizer_tensors_finite"] is True
+    assert result["decision"]["ranking_authorized"] is True
+    assert result["decision"]["top1"] == "mult1p00"
+    assert result["decision"]["top2"] == "mult0p75"
+    assert result["decision"]["five_tpp_runs_authorized"] is False
+
+
+def test_complete_ranking_pins_all_results_and_excludes_third_candidate() -> None:
+    ranking = load(RANKING)
+    assert ranking["decision"]["classification"] == (
+        "PASS_COMPLETE_IMMUTABLE_TOP2_RANKING"
+    )
+    assert [row["slug"] for row in ranking["ranked_candidates"]] == [
+        "mult1p00",
+        "mult0p75",
+        "mult0p50",
+    ]
+    assert [row["terminal_validation_ce"] for row in ranking["ranked_candidates"]] == [
+        3.9511,
+        4.0437,
+        4.2324,
+    ]
+    assert ranking["decision"]["rejected_from_5tpp"] == ["mult0p50"]
+    for slug, path in {
+        "mult1p00": MULT1P00_RESULT,
+        "mult0p75": MULT0P75_RESULT,
+        "mult0p50": MULT0P50_RESULT,
+    }.items():
+        assert ranking["immutable_inputs"][slug]["result_sha256"] == sha256(path)

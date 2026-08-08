@@ -1,0 +1,122 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_0p5tpp_ranking_v1",
+  "recorded_at": "2026-08-09",
+  "scope": "immutable 350M/0.5TPP QK-only functional-LWT learning-rate ranking",
+  "selection_endpoint": "terminal held-out cross entropy on fixed MAI evaluation windows",
+  "ranking_rule": "stable ascending terminal validation CE; reject failed or nonfinite candidates",
+  "identity": {
+    "model_tier": "350m",
+    "planned_tpp": 0.5,
+    "max_iters": 677,
+    "scheduled_tokens": 177471488,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "model_seed": 1337,
+    "train_data_seed": 20260714
+  },
+  "immutable_inputs": {
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_plan.json",
+      "sha256": "d7a211b2dc2577815577df4a0113306d6a6773a28d234175d9d0e69afc7755d8"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mfu_result.json",
+      "sha256": "5444d26c38a5c26d1df4838fc9829cc1b3e3d295d2d471260e5605c86299063a"
+    },
+    "mult1p00": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00.json",
+      "config_sha256": "77b16ae5558ab10e649c4374ef98d18cd1c029a2a961348baf6a71cb13b83ef6",
+      "result_path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult1p00_result.json",
+      "result_sha256": "0a2c6c42039405aa0f278830bae78e2b1714e64f9174d2430b2778fb9e43650d",
+      "checkpoint_sha256": "f9842b87641f73db73cb56484ef346f23dafbc21b2c3bb60a75f4d0db2916e27"
+    },
+    "mult0p75": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "config_sha256": "fd34ec0fe94e0840f43f2707f5dbed69f5295ec337e973d9074c2a837cba7323",
+      "result_path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult0p75_result.json",
+      "result_sha256": "29d5eb8a7e4deda53dded4701031e3e39b5f1cfb9191729a5bb0393a4f5671fa",
+      "checkpoint_sha256": "c765ddbccaf2313c1aeed887adf52a86d86d8cf073b32c03eba7d1e91e33e5ea"
+    },
+    "mult0p50": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "config_sha256": "ce1f84afca9f840e51ab6821021a3e1787bf45fa2809a80b65fcd84b109cb0e0",
+      "result_path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult0p50_result.json",
+      "result_sha256": "97b932d1b8016f08ef9747f5c4f9b16f4614fb353e82324c5f33fc75c1a328d3",
+      "checkpoint_sha256": "b792dd831830a75d064b4bfeeb65f88101ccc0ad00b929488d5fcb648e3ec9cc"
+    }
+  },
+  "ranked_candidates": [
+    {
+      "rank": 1,
+      "slug": "mult1p00",
+      "candidate_main_lr_multiplier": 1.0,
+      "learning_rate": 0.0024,
+      "terminal_validation_ce": 3.9511,
+      "mfu_fraction": 0.3796578376048699,
+      "stable": true,
+      "selected_for_5tpp": true
+    },
+    {
+      "rank": 2,
+      "slug": "mult0p75",
+      "candidate_main_lr_multiplier": 0.75,
+      "learning_rate": 0.0018,
+      "terminal_validation_ce": 4.0437,
+      "mfu_fraction": 0.37925341434390764,
+      "stable": true,
+      "selected_for_5tpp": true
+    },
+    {
+      "rank": 3,
+      "slug": "mult0p50",
+      "candidate_main_lr_multiplier": 0.5,
+      "learning_rate": 0.0012,
+      "terminal_validation_ce": 4.2324,
+      "mfu_fraction": 0.37785780267775376,
+      "stable": true,
+      "selected_for_5tpp": false
+    }
+  ],
+  "matched_full_attention_comparisons": [
+    {
+      "slug": "mult1p00",
+      "full_attention_validation_ce": 4.3629,
+      "qk_only_validation_ce": 3.9511,
+      "qk_only_minus_full_attention_ce": -0.4118
+    },
+    {
+      "slug": "mult0p75",
+      "full_attention_validation_ce": 4.5074,
+      "qk_only_validation_ce": 4.0437,
+      "qk_only_minus_full_attention_ce": -0.4637
+    },
+    {
+      "slug": "mult0p50",
+      "full_attention_validation_ce": 4.7625,
+      "qk_only_validation_ce": 4.2324,
+      "qk_only_minus_full_attention_ce": -0.5301
+    }
+  ],
+  "decision": {
+    "classification": "PASS_COMPLETE_IMMUTABLE_TOP2_RANKING",
+    "all_candidates_completed_cleanly": true,
+    "ranking_complete": true,
+    "top1": "mult1p00",
+    "top2": "mult0p75",
+    "rejected_from_5tpp": [
+      "mult0p50"
+    ],
+    "authorized_5tpp_config_count": 2,
+    "authorized_5tpp_slots": [
+      "top1_mult1p00",
+      "top2_mult0p75"
+    ],
+    "five_tpp_configs_may_be_materialized": true,
+    "five_tpp_runs_authorized": false,
+    "launch_gate": "both exact 5TPP configs must pass a fresh foreground-polled MFU>=0.20 gate before either run starts",
+    "reason": "all three preregistered screens are clean and finite; 1.00x and 0.75x are the immutable top two by terminal fixed-validation CE"
+  }
+}

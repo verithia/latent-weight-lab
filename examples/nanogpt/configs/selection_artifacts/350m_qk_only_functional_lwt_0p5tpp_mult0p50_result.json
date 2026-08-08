@@ -1,0 +1,172 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_0p5tpp_candidate_result_v1",
+  "recorded_at": "2026-08-09",
+  "candidate": {
+    "slug": "mult0p50",
+    "candidate_main_lr_multiplier": 0.5,
+    "learning_rate": 0.0012,
+    "max_iters": 677,
+    "scheduled_tokens": 177471488
+  },
+  "immutable_inputs": {
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_plan.json",
+      "sha256": "d7a211b2dc2577815577df4a0113306d6a6773a28d234175d9d0e69afc7755d8"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mfu_result.json",
+      "sha256": "5444d26c38a5c26d1df4838fc9829cc1b3e3d295d2d471260e5605c86299063a"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "sha256": "ce1f84afca9f840e51ab6821021a3e1787bf45fa2809a80b65fcd84b109cb0e0"
+    },
+    "mult1p00_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult1p00_result.json",
+      "sha256": "0a2c6c42039405aa0f278830bae78e2b1714e64f9174d2430b2778fb9e43650d"
+    },
+    "mult0p75_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult0p75_result.json",
+      "sha256": "29d5eb8a7e4deda53dded4701031e3e39b5f1cfb9191729a5bb0393a4f5671fa"
+    },
+    "full_attention_ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_0p5tpp_provisional_ranking.json",
+      "sha256": "f19284da78dac9e1a22292802579e61b066b1289ab2ce876d955caab9f6022a4"
+    }
+  },
+  "run": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50_20260808T220126Z_2936464",
+    "pgid": 2936592,
+    "started_at": "2026-08-09T06:01:28+08:00",
+    "finished_at": "2026-08-09T06:46:50+08:00",
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "source_commit": "80d92c7ad2950e13d4d98fd7a4272546b860967f",
+    "worktree_dirty": false,
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ]
+  },
+  "artifacts": {
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50_20260808T220126Z_2936464.json",
+      "sha256": "e8abbd4db787f7c790600f14e6cb485d197fc849b7eae3f3a75988ba9a91b3bb"
+    },
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50_20260808T220126Z_2936464.log",
+      "sha256": "bd58ee599d04716f438776e943c0187f280d613c5268e8d932cb688a8d3198ca"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50_20260808T220126Z_2936464.json",
+      "sha256": "3ee4a982a9eea210b2c119685398b65d20561c303ab6c74bd237c65bae233aa6"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50_20260808T220126Z_2936464.config.json",
+      "sha256": "ce1f84afca9f840e51ab6821021a3e1787bf45fa2809a80b65fcd84b109cb0e0"
+    },
+    "archived_mfu_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50_20260808T220126Z_2936464.mfu.json",
+      "sha256": "b8f414e0cd6d28aaa5f6ed5727e381a5864e02c5c697f3ac1e432e403c29fa90"
+    },
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50/ckpt.pt",
+      "sha256": "b792dd831830a75d064b4bfeeb65f88101ccc0ad00b929488d5fcb648e3ec9cc",
+      "bytes": 2765687304
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50/ckpt.meta.json",
+      "sha256": "8bb1c5a88ea057870133bbd1dd637a349c4d9ea6519dcb9e57fa261e9ae27144",
+      "bytes": 20835
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "checkpoint_resolved_config_sha256": "fa36e6d15c3c677574baa495a3e3a0db46807927129d869ebc10f26adca3c708"
+  },
+  "optimizer_ownership": {
+    "optimizer": "muon",
+    "dense_muon_matrix_tensors": 96,
+    "attn_cayley_tensors": 96,
+    "adamw_other_tensors": 915,
+    "adamw_learning_rate": 0.00036
+  },
+  "performance": {
+    "mfu_fraction": 0.37785780267775376,
+    "mfu_minimum_fraction": 0.2,
+    "iter_ms": 3546.64,
+    "tokens_per_second": 73913.0,
+    "peak_mib": 58468.82,
+    "native_extension_loaded": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9823, "validation_ce": 10.9822},
+    {"step": 170, "train_ce": 5.4400, "validation_ce": 5.4423},
+    {"step": 340, "train_ce": 4.7135, "validation_ce": 4.7097},
+    {"step": 510, "train_ce": 4.3552, "validation_ce": 4.3482},
+    {"step": 677, "train_ce": 4.2409, "validation_ce": 4.2324}
+  ],
+  "checkpoint_verification": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 677,
+    "best_validation_ce": 4.232432842254639,
+    "metadata_consistent": true,
+    "resume_envelope_readable": true,
+    "model_tensor_count": 1012,
+    "optimizer_tensor_count": 2841,
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "rng_state_present": true,
+    "block_fht_cache_state": "flushed_not_serialized"
+  },
+  "comparisons": {
+    "completed_qk_only_mult1p00": {
+      "reference_validation_ce": 3.9511,
+      "candidate_validation_ce": 4.2324,
+      "candidate_minus_reference_ce": 0.2813,
+      "evidence": "hash-pinned completed candidate on identical model, data, seeds, schedule, and fixed evaluation windows"
+    },
+    "completed_qk_only_mult0p75": {
+      "reference_validation_ce": 4.0437,
+      "candidate_validation_ce": 4.2324,
+      "candidate_minus_reference_ce": 0.1887,
+      "evidence": "hash-pinned completed candidate on identical model, data, seeds, schedule, and fixed evaluation windows"
+    },
+    "same_horizon_full_attention_replacement": {
+      "reference_validation_ce": 4.7625,
+      "candidate_validation_ce": 4.2324,
+      "candidate_minus_reference_ce": -0.5301,
+      "evidence": "hash-pinned 350M full-attention candidate at the same 0.50 multiplier and 1.2e-3 learning rate"
+    },
+    "accepted_historical_dense_endpoint": {
+      "reference_validation_ce": 4.1784,
+      "candidate_validation_ce": 4.2324,
+      "candidate_minus_reference_ce": 0.0540,
+      "evidence_limit": "the dense endpoint used 2.4e-3 rather than this candidate's 1.2e-3 and its original Y400 checkpoint/log is unavailable on PRO6"
+    }
+  },
+  "decision": {
+    "candidate_stable": true,
+    "candidate_rank_among_completed": 3,
+    "completed_candidate_count": 3,
+    "total_candidate_count": 3,
+    "classification": "PASS_CANDIDATE_COMPLETE_LR_RANKING",
+    "ranking_authorized": true,
+    "top1": "mult1p00",
+    "top2": "mult0p75",
+    "five_tpp_configs_may_be_materialized": true,
+    "five_tpp_runs_authorized": false,
+    "reason": "all three exact-config-gated screens completed cleanly; immutable ranking and fresh exact-config 5TPP MFU certificates are still required before launch"
+  }
+}
