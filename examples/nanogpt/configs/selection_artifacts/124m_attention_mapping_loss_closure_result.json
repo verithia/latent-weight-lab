@@ -1,0 +1,80 @@
+{
+  "artifact_kind": "124m_attention_mapping_loss_closure_result",
+  "schema_version": "mai_124m_attention_mapping_loss_closure_result_v1",
+  "recorded_at": "2026-08-09",
+  "classification": "CLOSE_LITERAL_PAPER_MAPPING_LOSS_FOR_FULL_ATTENTION",
+  "scientific_question": "Can any untested term from the paper's Mapping Loss repair the rejected fixed 1% BlockFHT full-attention decoder without changing its reachable parameter manifold?",
+  "paper_contract": {
+    "source": "pdftotext extraction of arXiv:2602.19134",
+    "source_sha256": "92ff8cb493bd5e7aae90c5fdc2309fae74cc01c2d3dac003932146cc11753877",
+    "equations": {
+      "mapping_loss": "L_task + lambda_st L_stability + lambda_sm L_smooth + lambda_al L_alignment",
+      "stability": "E ||f(M(z+epsilon))-f(M(z))||_2^2",
+      "smoothness": "||dM(z)/dz||_F^2",
+      "alignment": "1-cos(z,rowmean(W_modulated))",
+      "row_modulation": "W_ij <- W_ij + alpha z_i"
+    }
+  },
+  "implementation_audit": {
+    "reproduction_losses_sha256": "fdb77313b9373c07cf4f4f329759b26b59845e8fc50163c4d0673dfa14bf9f00",
+    "reproduction_mapping_sha256": "c3cfae5453a3f7abd9ed6425a5c52d777f8e17c7f7357bc6093bb5079705961d",
+    "reproduction_results_sha256": "1387de5d57d09690901a3dbe2fdd0671a1672261b3a111674854339e99bfd14e",
+    "blockfht_alignment_algebra": "The BlockFHT implementation has zero expected fixed row mean. With modulation, rowmean(W_modulated)=alpha*z, hence 1-cos(z,alpha*z)=0 for alpha>0 away from z=0 and supplies no task direction. Without modulation the row mean is zero and the cosine loss is constant under epsilon stabilization.",
+    "affine_smoothness_algebra": "For M(z)=Az+b with identity activation and no row modulation, dM/dz=A is fixed, so ||A||_F^2 is constant and its latent gradient is exactly zero.",
+    "nonlinear_smoothness_boundary": "With elementwise activation or quadratic scalar modulation, smoothness can only penalize the existing Jacobian. It does not add a direction outside Im(dM/dz), and those nonlinear image families already failed their zero-update representability gates.",
+    "trainable_coefficient_boundary": "A nonnegative trainable coefficient can attenuate a regularizer, including toward zero, but cannot enlarge the decoder image or create the missing V/c_proj tangent."
+  },
+  "empirical_evidence": {
+    "paper_style_stability": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_attention_horizon_capacity_stability_5tpp_result.json",
+      "sha256": "1a7e220fe011217649ee6999e197952dc2c7195275e8316153b8e8bb9e746cd4",
+      "matched_task_only_validation_ce": 3.6579,
+      "stability_validation_ce": 3.7214,
+      "delta_ce": 0.0635,
+      "iteration_time_overhead_fraction": 0.169,
+      "classification": "FIXED_PAPER_STYLE_STABILITY_ANALOGUE_HURTS"
+    },
+    "paper_activation": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_attention_paper_activation_oracle_result.json",
+      "sha256": "87b3aa2111f36942d8b6ceb4c5e6134b2ace74870b91c1daef1bcc56910e746f",
+      "v_heldout_functional_image_recovery": 0.00842,
+      "attention_cproj_heldout_functional_image_recovery": -0.02269,
+      "classification": "ATTENTION_PAPER_ACTIVATION_ORACLE_REJECT_ALL"
+    },
+    "exact_base_affine_path": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_attention_affine_delta_path_oracle_result.json",
+      "sha256": "b40b5fd58a92f7f45479b82299c36b09399d4e45aaf417754a9997e1788d61b4",
+      "v_disjoint_state_recovery": 0.46442,
+      "v_local_chord_recovery": 0.28713,
+      "attention_cproj_disjoint_state_recovery": 0.58720,
+      "attention_cproj_local_chord_recovery": 0.10841,
+      "classification": "ATTENTION_AFFINE_DELTA_PATH_GATE_REJECT"
+    },
+    "cnn_reproduction": {
+      "task_only_fashionmnist_accuracy": 0.8516,
+      "full_mapping_loss_fashionmnist_accuracy": 0.8531,
+      "full_loss_wall_time_multiplier": 2.25,
+      "full_loss_peak_memory_multiplier": 2.9,
+      "interpretation": "The controlled reproduction did not reproduce the paper's claimed 2-3 percentage-point Mapping Loss gain."
+    }
+  },
+  "decision": {
+    "reason": "The remaining full-attention error is a decoder-image and path-transport failure. Every literal paper mechanism is either algebraically direction-inert for the fixed affine BlockFHT chart or already rejected by a matched causal/representability test.",
+    "alignment_oracle_required": false,
+    "alignment_training_required": false,
+    "smoothness_training_required": false,
+    "mapping_loss_sweep_required": false,
+    "full_attention_training_authorized": false,
+    "mfu_preflight_authorized": false,
+    "larger_rung_authorized": false,
+    "accepted_partial_endpoint": "124M/20TPP QK-only Mapping replacement with dense V, dense attention c_proj, and dense MLP",
+    "accepted_partial_endpoint_artifact": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+    "accepted_partial_endpoint_sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+  },
+  "next_scope": {
+    "full_attention_branch": "closed for literal paper Mapping Loss, scalar row modulation, paper elementwise activation, and fixed 1% affine BlockFHT decoders",
+    "qk_cfc_partial_result": "scientifically near-dense but failed its preregistered curve/terminal gate and relies on dense-scale temporal optimizer state",
+    "qk_cfc_result_sha256": "2b7bba0e5928d38b073f7b0734a6516eb12f0f3a01be3a168cef9094f4f6582e",
+    "nonredundant_future_requirement": "Any successor must co-design W=G(z) and optimizer state in latent coordinates from initialization, and pass a zero-update task-functional tangent/path gate before implementation. A learned basis or dense answer-conditioned state is counted as LoRA-like/dense and is outside the current claim."
+  }
+}
