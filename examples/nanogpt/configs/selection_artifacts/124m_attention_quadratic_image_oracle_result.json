@@ -1,0 +1,82 @@
+{
+  "artifact_kind": "124m_attention_quadratic_image_oracle_result",
+  "schema_version": "mai_124m_attention_quadratic_image_oracle_result_v1",
+  "recorded_at": "2026-08-09",
+  "classification": "ATTENTION_QUADRATIC_IMAGE_ORACLE_REJECT_ALL",
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_quadratic_image_oracle_plan.json",
+    "plan_sha256": "3df6a88cccc2da8816db6ab3c83ee2248d98a91bd8cd6ef5c9e3120d8eecfef6",
+    "entrypoint": "examples/nanogpt/analyze_attention_quadratic_image_oracle.py",
+    "entrypoint_sha256": "29e087f2f02f5e0f7c26e47b7757018e18d752b7815ca851719ed51f08e82545",
+    "initial_probe_sha256": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+    "terminal_probe_sha256": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "4b1115e0d80920999f66319c8e413b1e071e550f",
+    "parameter_updates": 0,
+    "elapsed_seconds": 3.721325397491455,
+    "focused_tests_passed": 8,
+    "focused_tests_failed": 0,
+    "direct_foreground_polling": true,
+    "gpu_after": {
+      "memory_used_mib": 282,
+      "memory_total_mib": 97887,
+      "utilization_percent": 0,
+      "temperature_c": 27
+    }
+  },
+  "artifacts": {
+    "raw_result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_quadratic_image_oracle_v1/result.json",
+    "raw_result_sha256": "a1073bdfbba2573a1c35da6c3fa155216929c908901ffb9699ca17abd806893c",
+    "cells": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_quadratic_image_oracle_v1/attention_quadratic_image_oracle_cells.csv",
+    "cells_sha256": "3395422aaee6908818fb2bbd7b124d5412cc2282d053356fbb9fe53495ed0b8a"
+  },
+  "summaries": {
+    "v": {
+      "aggregate_eval_functional_image_recovery": 0.48346855614166884,
+      "minimum_layer_eval_functional_image_recovery": -0.26896381968292715,
+      "median_layer_fit_functional_image_recovery": 0.8988012611960796,
+      "median_layer_eval_functional_image_recovery": 0.5397148866455441,
+      "median_layer_euclidean_image_recovery": -0.8019417777733945,
+      "checks": {
+        "finite": true,
+        "aggregate_image": false,
+        "every_layer_image": false
+      },
+      "passed": false
+    },
+    "cproj": {
+      "aggregate_eval_functional_image_recovery": 0.6122116312633197,
+      "minimum_layer_eval_functional_image_recovery": 0.006758247091225078,
+      "median_layer_fit_functional_image_recovery": 0.738880412188822,
+      "median_layer_eval_functional_image_recovery": 0.4864105867664862,
+      "median_layer_euclidean_image_recovery": -0.6849953339125285,
+      "checks": {
+        "finite": true,
+        "aggregate_image": false,
+        "every_layer_image": false
+      },
+      "passed": false
+    }
+  },
+  "interpretation": {
+    "primary": "A fixed bilinear cross-coordinate term bends the chart materially more than scalar output warps, but it still does not contain a data-independent all-layer terminal attention state at one-percent latent dimension.",
+    "generalization": "The large fit-to-disjoint gap and negative Euclidean recovery show functional-metric fitting chooses data-specific equivalent writes rather than recovering a stable dense weight state.",
+    "depth_pattern": "Early layers can exceed 0.8 held-out recovery, but recovery degrades sharply with depth; V layer 11 is negative and cproj layer 10 is nearly zero. A uniform one-head chart is therefore not a valid full-attention decoder.",
+    "family_boundary": "The preregistered failure closes the one-head q=1 three-map quadratic family. It does not authorize a q sweep, tangent/path oracle, implementation, MFU gate, or training."
+  },
+  "decision": {
+    "passed_targets": [],
+    "tangent_oracle_authorized": false,
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_requirement": "A successor must change the structured coupling family rather than tune q, must explain the depth-dependent held-out collapse, and must pass a separately preregistered data-disjoint image gate before any training."
+  }
+}
