@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One aggregate GPU-ladder monitor with selectable callback cadence.
 
-Milestone watchers own 20/50/terminal callbacks.  This supervisor sends a
+Milestone watchers own 20/50/80/terminal callbacks.  This supervisor sends a
 single combined health update only when no successfully delivered milestone has
 reset the shared clock during the preceding heartbeat period.  It also reports
 per-run stalls or log errors immediately.  ``--terminal-only`` suppresses
@@ -213,7 +213,7 @@ def milestone_crossings(previous: int | None, current: int | None, maximum: int 
         return []
     return [
         percent
-        for percent in (20, 50)
+        for percent in (20, 50, 80)
         if percent not in sent and current * 100 >= percent * maximum
     ]
 
@@ -326,10 +326,14 @@ def main() -> None:
             maximum = sample.get("max_iters")
             sent_milestones = set(run_state.get("sent_milestones", []))
             if args.terminal_only:
-                sent_milestones.update((20, 50))
+                sent_milestones.update((20, 50, 80))
             elif previous_iter is None and current_iter is not None and maximum is not None:
                 # The first sample is a baseline, never a catch-up notification.
-                sent_milestones.update(percent for percent in (20, 50) if current_iter * 100 >= percent * maximum)
+                sent_milestones.update(
+                    percent
+                    for percent in (20, 50, 80)
+                    if current_iter * 100 >= percent * maximum
+                )
             else:
                 for percent in milestone_crossings(previous_iter, current_iter, maximum, sent_milestones):
                     progress_events.append((sample["name"], percent, current_iter, maximum))

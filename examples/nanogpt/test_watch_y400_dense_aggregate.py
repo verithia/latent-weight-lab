@@ -53,3 +53,9 @@ def test_owned_or_unreached_milestones_are_not_replayed() -> None:
     assert watcher.milestone_crossings(330, 340, 677, {20, 50}) == []
     assert watcher.milestone_crossings(300, 320, 677, {20}) == []
     assert watcher.milestone_crossings(350, 349, 677, {20}) == []
+
+
+def test_eighty_percent_milestone_is_owned_and_retryable() -> None:
+    assert watcher.milestone_crossings(530, 542, 677, {20, 50}) == [80]
+    assert watcher.milestone_crossings(542, 550, 677, {20, 50}) == [80]
+    assert watcher.milestone_crossings(550, 560, 677, {20, 50, 80}) == []

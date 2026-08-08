@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-09",
+  "host": "PRO6",
+  "gpu": 0,
+  "source_commit": "b51a2f39ae03354f8d22cd367704f206de9c9c32",
+  "classification": "PASS_BOTH_EXACT_CONFIG_MFU_GATES",
+  "minimum_mfu_fraction": 0.2,
+  "measurement_definition": "6 * materialized GPT parameters * measured training tokens/s divided by same-run empirical BF16 tensor-core GEMM peak",
+  "foreground_polled": true,
+  "watchdog": false,
+  "native_block_fht_extension_required": true,
+  "immutable_inputs": {
+    "ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_ranking.json",
+      "sha256": "db7e25abd49375b6905fed6d70411196a0c9ec9ab8d7ccae02d4ea784bff121b"
+    },
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_plan.json",
+      "sha256": "efd54087d0f2f343d9aaa09dfc36ce749ae51b58c8fe9e66dedecc73cd97ac58"
+    }
+  },
+  "confirmations": {
+    "top1": {
+      "screen_slug": "mult1p00",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
+      "config_sha256": "b2429be3ffa01b2eb779196cd18611d52ff34352e3ddf9ec7f6d290166eb92e3",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
+      "certificate_sha256": "d7f3e9b4f91687a9b2e3e74389babf1c6c30725ad7e2eb64de4dae128362425e",
+      "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.log",
+      "log_sha256": "d08c5a635edc441d3f7ac08cad7b42cc646efe1bb5024aa17fdef4cc3089955d",
+      "passed": true,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "mfu_fraction": 0.3778245785182814,
+      "iter_ms": 3545.28,
+      "tokens_per_second": 73941.62,
+      "peak_mib": 58468.82,
+      "model_tflops": 157.43855110643713,
+      "empirical_bf16_gemm_peak_tflops": 416.6974835884567,
+      "elapsed_seconds": 23.167593717575073
+    },
+    "top2": {
+      "screen_slug": "mult0p75",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.json",
+      "config_sha256": "3fe17a88a3a6a2a43c29361fd7acb60d3f9f20db72243485f103ed809baa0fa0",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.json",
+      "certificate_sha256": "ad47c4b90f4f8d28fa3819b049dbd7440623da366427dedfc61026c34b6bdaa4",
+      "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.log",
+      "log_sha256": "f4da3cbe265ac55382a55978c8afa6487758c90d37992e140a66d7c285e1fa4d",
+      "passed": true,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "mfu_fraction": 0.37817357598894696,
+      "iter_ms": 3548.99,
+      "tokens_per_second": 73864.41333333333,
+      "peak_mib": 58468.82,
+      "model_tflops": 157.27416052727807,
+      "empirical_bf16_gemm_peak_tflops": 415.8782382296186,
+      "elapsed_seconds": 23.27735924720764
+    }
+  },
+  "decision": {
+    "both_exact_configs_passed": true,
+    "authorized_confirmation_count": 2,
+    "top1_launch_authorized": true,
+    "top2_launch_authorized_after_top1_terminal_seal": true,
+    "automatic_retry_authorized": false,
+    "required_execution_order": [
+      "top1",
+      "top2"
+    ],
+    "required_monitoring": "one persistent aggregate watchdog per active confirmation with 20/50/80/100 callbacks, a 90-minute progress-reset heartbeat, and actionable error/stall/degradation callbacks"
+  }
+}
