@@ -1,0 +1,82 @@
+{
+  "artifact_kind": "124m_attention_residual_cubic_oracle_result",
+  "schema_version": "mai_124m_attention_residual_cubic_oracle_result_v1",
+  "recorded_at": "2026-08-09",
+  "classification": "ATTENTION_RESIDUAL_CUBIC_ORACLE_REJECT_ALL",
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_residual_cubic_oracle_plan.json",
+    "plan_sha256": "332584ead0f496d04cb7420133fec702e756b718f4706a42255d63c3c59edf0d",
+    "entrypoint": "examples/nanogpt/analyze_attention_residual_cubic_oracle.py",
+    "entrypoint_sha256": "ca7eba1281ce741ee0a5cf356c6a97cc767ef3ce68c5f960fae5483edc1a668c",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "9403c715df13640fb0b7a5786b4968aefb2058cc",
+    "parameter_updates": 0,
+    "elapsed_seconds": 7.623437404632568,
+    "focused_tests_passed": 9,
+    "focused_tests_failed": 0,
+    "direct_foreground_polling": true,
+    "gpu_after": {
+      "memory_used_mib": 282,
+      "memory_total_mib": 97887,
+      "utilization_percent": 0,
+      "temperature_c": 27
+    }
+  },
+  "artifacts": {
+    "raw_result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_residual_cubic_oracle_v1/result.json",
+    "raw_result_sha256": "da245f9d5d57bdd72e4bc79ae0b4d9d3b2b7479e1f8821e524b0a2b731a63ffe",
+    "cells": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_residual_cubic_oracle_v1/attention_residual_cubic_oracle_cells.csv",
+    "cells_sha256": "447e2f3f2a202d28988bedb592a44b31689840aebd50d1e40395b9b916fba441"
+  },
+  "summaries": {
+    "v": {
+      "maximum_jacobian_diagonal": 1.0121341943740845,
+      "eval_functional_image_recovery": 0.008131014175522255,
+      "eval_cubic_tangent_recovery": 0.8025398004623293,
+      "eval_identity_tangent_recovery": 0.8025294082800086,
+      "eval_cubic_gain_over_identity": 0.000010392182320684284,
+      "checks": {
+        "condition": true,
+        "image": false,
+        "tangent": true,
+        "cubic_gain": false
+      },
+      "passed": false
+    },
+    "cproj": {
+      "maximum_jacobian_diagonal": 1.0118340253829956,
+      "eval_functional_image_recovery": 0.010570966046946333,
+      "eval_cubic_tangent_recovery": 0.6647215846089984,
+      "eval_identity_tangent_recovery": 0.6647229111386098,
+      "eval_cubic_gain_over_identity": -0.0000013265296113784686,
+      "checks": {
+        "condition": true,
+        "image": false,
+        "tangent": false,
+        "cubic_gain": false
+      },
+      "passed": false
+    }
+  },
+  "interpretation": {
+    "primary": "The residual cubic remains almost exactly linear in the oracle-fitted region, so it neither represents accumulated dense states nor rotates the disjoint functional tangent materially.",
+    "v_boundary": "V retains the affine chart's high aggregate instantaneous tangent recovery, but cubic gain is only about 1e-5 and state-image recovery remains about 0.8 percent. This is not path coverage.",
+    "cproj_boundary": "Attention cproj fails both image and tangent gates; cubic recovery is marginally worse than the identical affine control.",
+    "family_boundary": "Together with the condition-bounded tanh and exact-base affine rejections, this closes fixed row-wise scalar output warps at the tested 1 percent BlockFHT budget."
+  },
+  "decision": {
+    "passed_targets": [],
+    "causal_coordinate_transport_authorized": false,
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_requirement": "Do not vary polynomial degree or scale. Any successor must rotate the decoder tangent through structured cross-coordinate coupling while keeping basis and optimizer state compact; it must pass an offline path/tangent gate before implementation."
+  }
+}
