@@ -1,0 +1,182 @@
+{
+  "authorization": {
+    "language_model_training": false,
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "model_implementation": false
+  },
+  "decision_rule": {
+    "fail": "Keep the failed target dense and close the exact-base affine BlockFHT decoder at this budget; do not run MFU or training.",
+    "no_posthoc_threshold_changes": true,
+    "pass": "Both V and cproj must pass aggregate and every-layer held-out state, local-chord, discovery-affine-span, and exact-Muon gates. A pass authorizes implementation and one exact-config MFU preflight, not training.",
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.8,
+      "minimum_layer_recovery_minimum": 0.6
+    }
+  },
+  "execution": {
+    "callbacks": false,
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_affine_delta_path_oracle",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-attention-affine-path/examples/nanogpt/configs/selection_artifacts/124m_attention_affine_delta_path_oracle_plan.json",
+      "--trajectory-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+      "--probe-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+      "--terminal-checkpoint",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+      "--data-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+      "--output-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_affine_delta_path_oracle_v1",
+      "--device",
+      "cuda"
+    ],
+    "device": "cuda:0",
+    "direct_foreground_polling": true,
+    "expected_duration": "under five minutes; zero-update GPU analysis",
+    "host": "PRO6",
+    "watchdog": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
+    "entrypoint": "examples.nanogpt.analyze_attention_affine_delta_path_oracle",
+    "entrypoint_sha256": "6818270b1adc4637eedd00d752290cd4d86c2a521a6e7594fa5983ca38b77319",
+    "mlp_affine_delta_control": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_affine_delta_result.json",
+    "mlp_affine_delta_control_sha256": "803c37b5913c8327bcded93bf76ec4f685fd51615ead4d522458077a66546825",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_affine_delta_path_oracle_v1",
+    "parent_activation_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_paper_activation_oracle_result.json",
+    "parent_activation_result_sha256": "87b3aa2111f36942d8b6ceb4c5e6134b2ace74870b91c1daef1bcc56910e746f",
+    "probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "product_fht_residual_control": "examples/nanogpt/configs/selection_artifacts/124m_attention_product_fht_residual_gate_result.json",
+    "product_fht_residual_control_sha256": "1cabc374bdd8d7c6beba943642b227d15e17e79b25f363e03f6274664d3b4209",
+    "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+    "trajectory_file_count": 41,
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_total_bytes": 4644344659
+  },
+  "protocol": {
+    "block_fht_layers": 2,
+    "block_fht_seed": 1000,
+    "cgls_iterations": 32,
+    "decoder": "exact_base_plus_fixed_linear_delta",
+    "discovery_max_step": 1140,
+    "eval_metric_seed": 20260810,
+    "fit_metric_seed": 20260809,
+    "heldout_min_step": 1200,
+    "heldout_probe_steps": [
+      1782,
+      2372
+    ],
+    "latent_ratio": 0.01,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "metric_batch_size": 2,
+    "metric_batches": 2,
+    "metric_block_size": 256,
+    "metric_policy": "Freeze terminal-dense attention sources separately on fitting and disjoint evaluation batches. V is measured after attention mixing and dense O; cproj is measured as H Delta O.",
+    "near_affine_diagnostics": [
+      "discovery-coordinate PCA ranks at 90/95/99 percent energy",
+      "linear extrapolation in normalized cumulative scheduled LR"
+    ],
+    "parameter_updates": 0,
+    "probe_steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2372
+    ],
+    "span_relative_cutoff": 1e-07,
+    "targets": {
+      "cproj": {
+        "parameter": "attn.c_proj.weight",
+        "seed_offset": 1,
+        "seed_stride": 4,
+        "slice": "full matrix",
+        "target_std": 0.004082482904638631
+      },
+      "v": {
+        "parameter": "attn.c_attn.weight",
+        "seed_offset": 2,
+        "seed_stride": 8,
+        "slice": "final n_embd rows",
+        "target_std": 0.02
+      }
+    },
+    "trajectory_steps": [
+      0,
+      60,
+      120,
+      180,
+      240,
+      300,
+      360,
+      420,
+      480,
+      540,
+      600,
+      660,
+      720,
+      780,
+      840,
+      900,
+      960,
+      1020,
+      1080,
+      1140,
+      1200,
+      1260,
+      1320,
+      1380,
+      1440,
+      1500,
+      1560,
+      1620,
+      1680,
+      1740,
+      1800,
+      1860,
+      1920,
+      1980,
+      2040,
+      2100,
+      2160,
+      2220,
+      2280,
+      2340,
+      2373
+    ]
+  },
+  "recorded_at": "2026-08-09",
+  "schema_version": "mai_124m_attention_affine_delta_path_oracle_plan_v1",
+  "scientific_question": "Does an exact frozen GPT base plus the production-seeded fixed 1% BlockFHT delta contain the dense V and attention-cproj path, local chords, discovery affine span, and exact Muon action in an out-of-sample functional metric?",
+  "status": "registered_before_zero_update_analysis",
+  "theory": {
+    "decoder": "W(z)=W0_gpt+A_blockfht z, z0=0",
+    "paper_link": "The paper asserts smooth low-dimensional layer manifolds and uses fixed orthogonal maps. An affine chart is the first-order model of such a manifold, but it must match both image and tangent.",
+    "storage_caveat": "The frozen dense base preserves trainable-coordinate compression but not fixed storage or materialized inference compression.",
+    "why_disjoint_metrics": "Coordinates are fitted on one frozen terminal-dense batch set and evaluated unchanged on another, preventing metric-batch overfit from masquerading as functional manifold coverage.",
+    "why_not_initialization_only": "The MLP cproj affine-delta control passed exact initialization yet remained +0.2376 CE behind attention-only because its tangent was direction-limited. This gate therefore requires dense path, local chord, early affine-span, and exact-Muon recovery together."
+  }
+}
