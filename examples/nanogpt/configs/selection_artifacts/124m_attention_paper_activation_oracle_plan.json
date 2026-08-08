@@ -46,7 +46,7 @@
     "dense_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
     "dense_config_sha256": "b411c14a38a2a3c10813d60b9129fd7aa3b007fbcf39873d7241fac3e726e007",
     "entrypoint": "examples.nanogpt.analyze_attention_paper_activation_oracle",
-    "entrypoint_sha256": "beee082eac14c04820d622f83e540b062e4155f8c15b2fa08b257b37655c6fdf",
+    "entrypoint_sha256": "b59ffe4702fe9fea9b36e83c1ffae9d27e90bdc35c7cc150819216ca4584d707",
     "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_paper_activation_oracle_v1",
     "parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_muon_layer_attribution_plan.json",
     "parent_plan_sha256": "3e2ef19baedf2108b939395e7d19e821f670dd014845b0018cdc51e22484fd3b",
@@ -68,6 +68,7 @@
     "activation": "signed_condition_bounded_tanh",
     "activation_scale_multiplier": 1.0540925533894598,
     "block_fht_layers": 2,
+    "block_fht_seed": 1000,
     "cgls_iterations": 32,
     "controls": [
       "identical-budget identity BlockFHT tangent",

@@ -110,6 +110,7 @@ def build_plan() -> dict[str, Any]:
             "weight": "same-probe weight_before_step",
             "latent_ratio": 0.01,
             "block_fht_layers": 2,
+            "block_fht_seed": 1000,
             "activation": "signed_condition_bounded_tanh",
             "activation_scale_multiplier": math.sqrt(10.0 / 9.0),
             "minimum_step0_activation_derivative": 0.1,

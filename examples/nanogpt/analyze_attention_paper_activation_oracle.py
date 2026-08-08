@@ -254,6 +254,7 @@ def validate_plan(plan: dict[str, Any], args: argparse.Namespace) -> None:
         "parameter_updates": 0,
         "latent_ratio": 0.01,
         "block_fht_layers": 2,
+        "block_fht_seed": 1000,
         "activation": "signed_condition_bounded_tanh",
         "activation_scale_multiplier": math.sqrt(10.0 / 9.0),
         "minimum_step0_activation_derivative": 0.1,
@@ -318,7 +319,7 @@ def main() -> None:
         raise ValueError("optimizer probe run identity changed")
 
     config = json.loads((REPO_ROOT / plan["identity"]["dense_config"]).read_text())
-    base_seed = int(config["block_fht_seed"])
+    base_seed = int(protocol["block_fht_seed"])
     latent_init_std = float(config.get("block_fht_latent_init_std", 0.02))
     scale_multiplier = float(protocol["activation_scale_multiplier"])
     rows: list[dict[str, Any]] = []

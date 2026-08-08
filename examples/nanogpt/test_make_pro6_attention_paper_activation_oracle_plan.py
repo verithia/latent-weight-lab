@@ -12,6 +12,7 @@ def test_plan_freezes_theory_gate_without_training_authority() -> None:
     protocol = plan["protocol"]
     assert protocol["parameter_updates"] == 0
     assert protocol["heldout_steps"] == [1782, 2372]
+    assert protocol["block_fht_seed"] == 1000
     assert protocol["activation_scale_multiplier"] == math.sqrt(10.0 / 9.0)
     assert protocol["targets"]["v"]["seed_stride"] == 8
     assert protocol["targets"]["cproj"]["seed_stride"] == 4
