@@ -1,0 +1,148 @@
+{
+  "authorization": {
+    "language_model_training": false,
+    "larger_rung": false,
+    "mfu_preflight": false,
+    "model_implementation": false
+  },
+  "decision_rule": {
+    "fail": "Close residual-cubic output warping for the failed target at 1% and launch no implementation, MFU, training, or larger rung.",
+    "pass": "A target must pass condition, held-out disjoint image, held-out disjoint tangent, and gain-over-identical-affine gates. A pass authorizes only a separate cross-step coordinate-transport oracle.",
+    "threshold_changed_after_measurement": false,
+    "thresholds": {
+      "eval_cubic_gain_over_identity_minimum": 0.05,
+      "eval_cubic_tangent_recovery_minimum": 0.8,
+      "eval_functional_image_recovery_minimum": 0.8,
+      "maximum_jacobian_diagonal": 10.0
+    }
+  },
+  "execution": {
+    "callbacks": false,
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_residual_cubic_oracle",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-attention-residual-cubic/examples/nanogpt/configs/selection_artifacts/124m_attention_residual_cubic_oracle_plan.json",
+      "--probe-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+      "--terminal-checkpoint",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+      "--data-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+      "--output-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_residual_cubic_oracle_v1",
+      "--device",
+      "cuda"
+    ],
+    "device": "cuda:0",
+    "direct_foreground_polling": true,
+    "expected_duration": "under five minutes; zero-update GPU analysis",
+    "host": "PRO6",
+    "watchdog": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
+    "dense_config_sha256": "b411c14a38a2a3c10813d60b9129fd7aa3b007fbcf39873d7241fac3e726e007",
+    "entrypoint": "examples.nanogpt.analyze_attention_residual_cubic_oracle",
+    "entrypoint_sha256": "ca7eba1281ce741ee0a5cf356c6a97cc767ef3ce68c5f960fae5483edc1a668c",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_residual_cubic_oracle_v1",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_mapping_loss_closure_result.json",
+    "parent_result_sha256": "0216d5b70f001a9964ee8847396bffe45541bd4a487d5899e0784f9cfd491fd5",
+    "probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "probe_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001188.pt": "5fd43fbeb9447a86b673d2b3ee10bd2d7faa1ab0c43cdd7b59d3d783ca871a8a",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b"
+  },
+  "protocol": {
+    "block_fht_layers": 2,
+    "block_fht_seed": 1000,
+    "cgls_iterations": 32,
+    "controls": [
+      "same 1% affine identity BlockFHT tangent",
+      "fit-metric versus disjoint-eval tangent recovery",
+      "all-state Jacobian diagonal ceiling"
+    ],
+    "decoder": "exact_base_residual_cubic",
+    "direction": "exact dense Muon applied_direction_per_lr",
+    "discovery_steps": [
+      0,
+      594,
+      1188
+    ],
+    "eval_metric_seed": 20260810,
+    "fit_metric_seed": 20260809,
+    "heldout_steps": [
+      1782,
+      2372
+    ],
+    "inverse_iterations": 16,
+    "latent_ratio": 0.01,
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "metric_batch_size": 2,
+    "metric_batches": 2,
+    "metric_block_size": 256,
+    "metric_policy": "Freeze terminal-dense attention sources on disjoint fit/eval batches. V is measured after attention mixing and dense O; cproj is measured as H Delta O.",
+    "minimum_scale": 1e-08,
+    "parameter_updates": 0,
+    "scale_calibration": "per_target_layer_max_abs_dense_delta_over_discovery_steps",
+    "steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2372
+    ],
+    "targets": {
+      "cproj": {
+        "parameter": "attn.c_proj.weight",
+        "seed_offset": 1,
+        "seed_stride": 4,
+        "slice": "full matrix",
+        "target_std": 0.004082482904638631
+      },
+      "v": {
+        "parameter": "attn.c_attn.weight",
+        "seed_offset": 2,
+        "seed_stride": 8,
+        "slice": "final n_embd rows",
+        "target_std": 0.02
+      }
+    },
+    "weight": "same-probe weight_before_step"
+  },
+  "recorded_at": "2026-08-09",
+  "schema_version": "mai_124m_attention_residual_cubic_oracle_plan_v1",
+  "scientific_question": "Can the minimal exact-base unbounded residual cubic give the fixed 1% BlockFHT chart enough state-dependent orientation to represent held-out dense V or attention-cproj states and exact Muon action on disjoint batches?",
+  "status": "registered_before_zero_update_analysis",
+  "theory": {
+    "decoder": "W(z)=W0+h_s(Az), h_s(x)=x+x^3/(3s^2)",
+    "disjoint_metric_requirement": "Tangent coordinates are fitted on seed 20260809 and scored unchanged on seed 20260810, preventing the same-batch tangent overfit exposed by the affine audit.",
+    "jacobian": "diag(1+(Az/s)^2) A",
+    "prior_boundary": "The prior MLP quadratic-FHT arms parameterized coordinate products and the paper tanh acted on the full weight. Neither tested this exact-base unbounded output warp for attention V/O.",
+    "scale_derivation": "For each target/layer, freeze s to max(abs(W_t-W0)) over discovery steps 0/594/1188. Because inverse h_s has |x|<=|delta|, the discovery Jacobian diagonal is at most 2; the preregistered all-state ceiling remains 10.",
+    "why_this_family": "It is the lowest-order odd smooth warp with exact base, identity initialization tangent, unbounded image, and a state-dependent diagonal tangent. It isolates curvature without tanh saturation, learned bases, dense residuals, or extra trainable coordinates."
+  }
+}
