@@ -27,6 +27,10 @@ MFU_RESULT = ROOT / (
     "examples/nanogpt/configs/selection_artifacts/"
     "350m_qk_only_functional_lwt_5tpp_mfu_result.json"
 )
+TOP1_RUN_METADATA = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "350m_qk_only_functional_lwt_5tpp_top1_run_metadata.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -140,3 +144,27 @@ def test_both_exact_5tpp_mfu_gates_are_sealed() -> None:
         assert record["all_logged_losses_finite"] is True
         assert record["mfu_fraction"] >= 0.20
         assert record["peak_mib"] < 97887
+
+
+def test_top1_running_record_pins_command_commit_and_monitoring() -> None:
+    record = load(TOP1_RUN_METADATA)
+    assert record["classification"] == "RUNNING_AFTER_BOTH_EXACT_CONFIG_MFU_GATES"
+    assert record["scientific_identity"]["slot"] == "top1"
+    assert record["scientific_identity"]["execution_git_commit"] == (
+        "c2d105be678248b38ac77ea5ff9cffa490d09b1c"
+    )
+    assert record["immutable_inputs"]["config"]["sha256"] == sha256(
+        OUTPUTS["top1"]
+    )
+    assert record["immutable_inputs"]["mfu_result"]["sha256"] == sha256(
+        MFU_RESULT
+    )
+    assert record["code_and_command"]["command"][2:4] == [
+        "-m",
+        "examples.nanogpt.train",
+    ]
+    assert record["immutable_inputs"]["dataset_manifest"]["sha256"] == (
+        "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    )
+    assert record["monitoring"]["milestones"] == [20, 50, 80, 100]
+    assert record["monitoring"]["callback_mention"] == "@Codex"
