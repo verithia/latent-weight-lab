@@ -2,7 +2,7 @@
   "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
   "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
   "recorded_at": "2026-08-09T14:04:23+08:00",
-  "last_verified_at": "2026-08-09T18:57:47+08:00",
+  "last_verified_at": "2026-08-09T19:29:54+08:00",
   "classification": "RUNNING_AFTER_TOP1_TERMINAL_SEAL_AND_EXACT_CONFIG_MFU_GATE",
   "scientific_identity": {
     "slot": "top2",
@@ -325,6 +325,67 @@
       "intervention_required": false,
       "scientific_interpretation": "The run is stable 163 updates before fixed step 5073. Minibatch losses are used only for health; the next scientific comparison waits for the fixed held-out evaluation.",
       "decision": "continue top2 unchanged under the persistent watchdog"
+    },
+    {
+      "callback_milestone_percent": 80,
+      "callback_iter": 5430,
+      "verified_at": "2026-08-09T19:29:54+08:00",
+      "verified_iter": 5430,
+      "max_iters": 6764,
+      "fixed_evaluations": [
+        {
+          "step": 0,
+          "train_ce": 10.9823,
+          "validation_ce": 10.9822
+        },
+        {
+          "step": 1691,
+          "train_ce": 3.5158,
+          "validation_ce": 3.4986
+        },
+        {
+          "step": 3382,
+          "train_ce": 3.2799,
+          "validation_ce": 3.2591
+        },
+        {
+          "step": 5073,
+          "train_ce": 3.1496,
+          "validation_ce": 3.1265
+        }
+      ],
+      "same_step_top1_train_ce": 3.12,
+      "same_step_top1_validation_ce": 3.0969,
+      "top2_minus_top1_train_ce": 0.0296,
+      "top2_minus_top1_validation_ce": 0.0296,
+      "validation_gap_change_from_step_3382": 0.0038,
+      "latest_minibatch_loss": 3.1625,
+      "recent_minibatch_loss_range": [
+        3.1012,
+        3.1855
+      ],
+      "recent_iter_ms": 3565.63,
+      "next_fixed_evaluation_step": 6764,
+      "process_alive": true,
+      "status": "running",
+      "errors_detected": [],
+      "gpu_memory_mib": 69765,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 99,
+      "gpu_power_watts": 565.05,
+      "gpu_power_limit_watts": 600.0,
+      "gpu_temperature_celsius": 61,
+      "workspace_gib_reported": 250,
+      "workspace_cap_gib": 256,
+      "filesystem_free_reported": "1.5T",
+      "checkpoint_present": true,
+      "checkpoint_bytes": 2765688136,
+      "checkpoint_metadata_bytes": 21576,
+      "checkpoint_mutable_until_terminal_seal": true,
+      "estimated_remaining_raw_training_hours": 1.32,
+      "intervention_required": false,
+      "scientific_interpretation": "At fixed step 5073, top2 trails top1 by 0.0296 validation CE. The gap widened by 0.0038 from midpoint and remains outside the 0.02 practical-equivalence band; top1 is favored pending terminal sealing.",
+      "decision": "continue top2 unchanged to the terminal fixed evaluation"
     }
   ],
   "monitoring": {
@@ -345,9 +406,10 @@
     "initialized": true,
     "sent_milestones": [
       20,
-      50
+      50,
+      80
     ],
-    "last_progress_verified_at": "2026-08-09T17:27:14+08:00",
+    "last_progress_verified_at": "2026-08-09T19:29:54+08:00",
     "last_heartbeat_verified_at": "2026-08-09T18:57:47+08:00"
   },
   "selection_context": {
