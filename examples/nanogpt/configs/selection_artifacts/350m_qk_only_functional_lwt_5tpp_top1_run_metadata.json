@@ -2,6 +2,7 @@
   "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
   "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
   "recorded_at": "2026-08-09T07:06:00+08:00",
+  "last_verified_at": "2026-08-09T10:00:09+08:00",
   "classification": "RUNNING_AFTER_BOTH_EXACT_CONFIG_MFU_GATES",
   "scientific_identity": {
     "slot": "top1",
@@ -163,6 +164,50 @@
       "estimated_remaining_raw_training_hours": 5.33,
       "intervention_required": false,
       "decision": "continue top1 unchanged; top2 remains held until top1 terminal sealing"
+    },
+    {
+      "event": "ninety_minute_heartbeat",
+      "callback_iter": 2860,
+      "verified_at": "2026-08-09T10:00:09+08:00",
+      "verified_iter": 2910,
+      "max_iters": 6764,
+      "fixed_evaluations": [
+        {
+          "step": 0,
+          "train_ce": 10.9823,
+          "validation_ce": 10.9822
+        },
+        {
+          "step": 1691,
+          "train_ce": 3.4835,
+          "validation_ce": 3.4649
+        }
+      ],
+      "latest_minibatch_loss": 3.2949,
+      "recent_minibatch_loss_range": [
+        3.2787,
+        3.3681
+      ],
+      "recent_iter_ms": 3564.34,
+      "process_alive": true,
+      "status": "running",
+      "errors_detected": [],
+      "gpu_memory_mib": 69702,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 99,
+      "gpu_power_watts": 564.53,
+      "gpu_power_limit_watts": 600.0,
+      "gpu_temperature_celsius": 58,
+      "workspace_gib_reported": 247,
+      "workspace_cap_gib": 256,
+      "filesystem_free_reported": "1.5T",
+      "checkpoint_present": true,
+      "checkpoint_bytes": 2765688136,
+      "checkpoint_mutable_until_terminal_seal": true,
+      "estimated_remaining_raw_training_hours": 3.82,
+      "intervention_required": false,
+      "scientific_interpretation": "The first fixed 5TPP evaluation confirms continued finite improvement beyond the 0.5TPP screen, but it is not a terminal matched-budget comparison.",
+      "decision": "continue top1 unchanged; top2 remains held until top1 terminal sealing"
     }
   ],
   "monitoring": {
@@ -184,6 +229,9 @@
     "callback_mention": "@Codex",
     "callback_action": "verify live or terminal identity and exact artifacts, compare fixed losses, update durable notes, and continue the causal research plan autonomously",
     "initialized_without_callback": true,
-    "sent_milestones": []
+    "sent_milestones": [
+      20
+    ],
+    "last_heartbeat_verified_at": "2026-08-09T10:00:09+08:00"
   }
 }
