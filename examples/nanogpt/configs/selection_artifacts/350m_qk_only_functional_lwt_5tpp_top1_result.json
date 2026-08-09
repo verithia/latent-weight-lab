@@ -1,0 +1,158 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_candidate_result_v1",
+  "recorded_at": "2026-08-09",
+  "candidate": {
+    "confirmation_slot": "top1",
+    "screen_slug": "mult1p00",
+    "candidate_main_lr_multiplier": 1.0,
+    "learning_rate": 0.0024,
+    "max_iters": 6764,
+    "scheduled_tokens": 1773142016
+  },
+  "immutable_inputs": {
+    "ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_ranking.json",
+      "sha256": "db7e25abd49375b6905fed6d70411196a0c9ec9ab8d7ccae02d4ea784bff121b"
+    },
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_plan.json",
+      "sha256": "efd54087d0f2f343d9aaa09dfc36ce749ae51b58c8fe9e66dedecc73cd97ac58"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_mfu_result.json",
+      "sha256": "cc3c2748d25f7b47efd2b252cdb06d417094d53947e0d7ca1bcfce8edbc0fc63"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
+      "sha256": "b2429be3ffa01b2eb779196cd18611d52ff34352e3ddf9ec7f6d290166eb92e3"
+    }
+  },
+  "run": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00_20260808T230506Z_2972396",
+    "pgid": 2972503,
+    "started_at": "2026-08-09T07:05:07+08:00",
+    "finished_at": "2026-08-09T13:52:19+08:00",
+    "elapsed_seconds": 24432,
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "source_commit": "c2d105be678248b38ac77ea5ff9cffa490d09b1c",
+    "worktree_dirty": false,
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ]
+  },
+  "artifacts": {
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00_20260808T230506Z_2972396.json",
+      "sha256": "371138d85bc8e3f3c4b943cf8174a5cf07bbe1ea5ee8518b67f7d705ec42be52"
+    },
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00_20260808T230506Z_2972396.log",
+      "sha256": "852c2ff63d167c1a107bd21766c3e478f4be080f71a065ca5291917f1c861def"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00_20260808T230506Z_2972396.json",
+      "sha256": "696115510860a45e78a452377eee110453b97fa9bda510031f5faa6118b14c9a"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00_20260808T230506Z_2972396.config.json",
+      "sha256": "b2429be3ffa01b2eb779196cd18611d52ff34352e3ddf9ec7f6d290166eb92e3"
+    },
+    "archived_mfu_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00_20260808T230506Z_2972396.mfu.json",
+      "sha256": "d7f3e9b4f91687a9b2e3e74389babf1c6c30725ad7e2eb64de4dae128362425e"
+    },
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00/ckpt.pt",
+      "sha256": "648e8154e01ff57b181248712379858340fb409981714456c3523289499c1775",
+      "bytes": 2765688136
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00/ckpt.meta.json",
+      "sha256": "11b668b5d26c40a25cce9d0a4c9be201106333a6f9a4767d93e3883e581b492f"
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "checkpoint_resolved_config_sha256": "46320a994c529de26aabef1f7598febdc7fb6393e9a8fd85580e865849b2048f"
+  },
+  "optimizer_ownership": {
+    "optimizer": "muon",
+    "dense_muon_matrix_tensors": 96,
+    "attn_cayley_tensors": 96,
+    "adamw_other_tensors": 915,
+    "adamw_learning_rate": 0.00072
+  },
+  "performance": {
+    "mfu_fraction": 0.3778245785182814,
+    "mfu_minimum_fraction": 0.2,
+    "iter_ms": 3545.28,
+    "tokens_per_second": 73941.62,
+    "peak_mib": 58468.82,
+    "native_extension_loaded": true,
+    "elapsed_wall_hours": 6.7867
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9823, "validation_ce": 10.9822},
+    {"step": 1691, "train_ce": 3.4835, "validation_ce": 3.4649},
+    {"step": 3382, "train_ce": 3.2550, "validation_ce": 3.2333},
+    {"step": 5073, "train_ce": 3.1200, "validation_ce": 3.0969},
+    {"step": 6764, "train_ce": 3.0537, "validation_ce": 3.0304}
+  ],
+  "checkpoint_verification": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 6764,
+    "metadata_consistent": true,
+    "resume_envelope_readable": true,
+    "model_tensor_count": 1012,
+    "optimizer_tensor_count": 2841,
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "optimizer_state_present": true,
+    "rng_state_present": true,
+    "block_fht_cache_state": "flushed_not_serialized"
+  },
+  "comparisons": {
+    "same_horizon_full_attention_replacement": {
+      "reference_artifact": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_5tpp_provisional_comparison.json",
+      "reference_artifact_sha256": "acb1a372b2b9ea65177f3ace5d1b3f5744d67debd717527f905617ecd17e87aa",
+      "reference_validation_ce": 3.2053,
+      "candidate_validation_ce": 3.0304,
+      "candidate_minus_reference_ce": -0.1749,
+      "candidate_to_reference_perplexity_ratio": 0.8396,
+      "comparability": "same model tier, 5TPP update/token schedule, dataset manifest, fixed-evaluation digest, learning rate, and candidate selection protocol"
+    },
+    "historical_dense_muon": {
+      "reference_validation_ce": 3.0317,
+      "candidate_validation_ce": 3.0304,
+      "candidate_minus_reference_ce": -0.0013,
+      "practical_equivalence_threshold_ce": 0.02,
+      "classification": "PRACTICALLY_TIED",
+      "evidence_limit": "The original Y400 dense checkpoint and log are unavailable on PRO6, so this remains matched historical evidence rather than a newly hash-sealed control."
+    }
+  },
+  "decision": {
+    "candidate_stable": true,
+    "classification": "PASS_CLOSES_ATTENTION_GAP_AT_350M_5TPP",
+    "full_attention_gap_closed": true,
+    "practically_tied_with_historical_dense": true,
+    "top1_terminal_sealed": true,
+    "next_candidate": "top2_mult0p75",
+    "next_candidate_exact_mfu_passed": true,
+    "next_candidate_authorized": true,
+    "automatic_retry_authorized": false,
+    "reason": "The preregistered top-two confirmation requires top2 after a clean, hash-sealed top1 terminal result."
+  }
+}
