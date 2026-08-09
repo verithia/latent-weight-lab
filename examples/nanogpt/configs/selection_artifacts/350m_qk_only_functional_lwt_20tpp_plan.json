@@ -1,0 +1,180 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_20tpp_plan_v1",
+  "recorded_at": "2026-08-09",
+  "status": "registered_before_storage_reclaim_performance_preflight_and_training",
+  "scientific_question": "Does the QK-only functional-LWT boundary that is practically tied with dense Muon at 350M/5TPP remain within the 0.02 CE dense-equivalence band at the selected 20TPP horizon?",
+  "theory_synthesis": {
+    "paper_mechanism": "Use layer/target-wise charts when parameter families occupy different functional manifolds; do not force V/O residual writes or the MLP into the simpler Q/K score-map chart.",
+    "causal_boundary": "At 124M, QK-only isolated generated V as the remaining attention penalty. At 350M/5TPP, generating only headwise Q/K reached validation CE 3.0304, practically tied with historical dense 3.0317 and 0.1749 CE better than full-attention replacement.",
+    "optimizer_resolution": "The 350M top-two confirmation selected LR 2.4e-3 by 0.0341 terminal validation CE, outside the preregistered 0.02 tie band; no LR, capacity, rank, seed, or optimizer sweep remains unresolved.",
+    "horizon_discriminator": "A from-scratch 20TPP replay that changes only schedule length tests whether the accepted chart tracks the useful Q/K manifold for a longer path. Model scale is held at 350M so a failure cannot be attributed to simultaneous width/depth transfer.",
+    "architecture_boundary": "Generate only attn.c_attn.qk_headwise with QK64 bilateral/output Cayley and output gain. Keep V, attention c_proj, c_fc, and MLP c_proj dense and Muon-trained."
+  },
+  "immutable_evidence": {
+    "five_tpp_top1_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_top1_result.json",
+      "sha256": "2547be229b706c4e2678cc82fde01fed9183820bf56ca91f88b46b2fa720c641",
+      "terminal_validation_ce": 3.0304
+    },
+    "five_tpp_top2_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_top2_result.json",
+      "sha256": "b3996e30edcc786b0ffb90fcb12c9d384422300c53cda062b662745c64aa0eb0",
+      "terminal_validation_ce": 3.0645
+    },
+    "five_tpp_plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_plan.json",
+      "sha256": "efd54087d0f2f343d9aaa09dfc36ce749ae51b58c8fe9e66dedecc73cd97ac58"
+    },
+    "full_attention_20tpp_reference": {
+      "source_note": "notes/active/mai-v2-dense-ladder.md",
+      "terminal_validation_ce": 2.9363,
+      "status": "clean provisional operator-override endpoint"
+    },
+    "dense_20tpp_reference": {
+      "source_note": "notes/active/mai-v2-dense-ladder.md",
+      "terminal_validation_ce": 2.7927,
+      "status": "matched historical dense Muon endpoint; original Y400 artifact unavailable on PRO6"
+    }
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.json",
+    "config_sha256": "fed6877984e1b5d27512fa63777ae6a27c785f29f2540aa648d8656aa3a4497e",
+    "parent_config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
+    "parent_config_sha256": "b2429be3ffa01b2eb779196cd18611d52ff34352e3ddf9ec7f6d290166eb92e3",
+    "generated_targets": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "dense_muon_targets": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "mlp.c_fc",
+      "mlp.c_proj"
+    ],
+    "qk_recipe": "Exact inherited QK64 bilateral Cayley, output-side Cayley, output gain, scale 1.0, Cayley subgroup LR scale 10/3, and fixed seeds.",
+    "horizon": {
+      "planned_tpp": 20.0,
+      "max_iters": 27054,
+      "warmup_iters": 270,
+      "fixed_evaluation_steps": [
+        0,
+        6764,
+        13528,
+        20292,
+        27054
+      ],
+      "planned_tokens": 7091998720,
+      "scheduled_tokens": 7092043776
+    },
+    "frozen_training": "From-scratch model/data seeds, LR 2.4e-3, minimum LR 2.4e-4, Muon/AdamW ownership, batch 32 x accumulation 8, dataset manifest, weight decay, fixed validation windows, and eager BF16 execution are unchanged from the selected 5TPP parent."
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "entrypoint": "examples.nanogpt.train",
+    "host": "PRO6",
+    "gpu": 0,
+    "native_blockfht_required": true
+  },
+  "resource_admission": {
+    "project_cap_bytes": 274877906944,
+    "pre_reclaim_workspace_bytes": 267277775795,
+    "pre_reclaim_headroom_bytes": 7600131149,
+    "minimum_headroom_bytes": 8589934592,
+    "launch_blocked_before_reclaim": true,
+    "reclaim_policy": "Remove only the three terminal 0.5TPP screen ckpt.pt files after their SHA-256 values match already committed immutable result artifacts. Preserve logs, status, provenance, checkpoint metadata, rankings, both 5TPP checkpoints, and all manifold trajectories.",
+    "reclaim_candidates": [
+      {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50/ckpt.pt",
+        "sha256": "b792dd831830a75d064b4bfeeb65f88101ccc0ad00b929488d5fcb648e3ec9cc",
+        "result_artifact_sha256": "97b932d1b8016f08ef9747f5c4f9b16f4614fb353e82324c5f33fc75c1a328d3",
+        "bytes": 2765687240
+      },
+      {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75/ckpt.pt",
+        "sha256": "c765ddbccaf2313c1aeed887adf52a86d86d8cf073b32c03eba7d1e91e33e5ea",
+        "result_artifact_sha256": "29d5eb8a7e4deda53dded4701031e3e39b5f1cfb9191729a5bb0393a4f5671fa",
+        "bytes": 2765687304
+      },
+      {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00/ckpt.pt",
+        "sha256": "f9842b87641f73db73cb56484ef346f23dafbc21b2c3bb60a75f4d0db2916e27",
+        "result_artifact_sha256": "0a2c6c42039405aa0f278830bae78e2b1714e64f9174d2430b2778fb9e43650d",
+        "bytes": 2765687304
+      }
+    ],
+    "planned_reclaim_bytes": 8297061848,
+    "predicted_post_reclaim_headroom_gib": 14.80,
+    "predicted_minimum_atomic_checkpoint_headroom_gib": 9.65,
+    "both_five_tpp_checkpoints_preserved_for_manifold_analysis": true,
+    "real_filesystem_free_bytes_before_reclaim": 1642283753472
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "all_losses_finite": true,
+    "native_extension_required": true,
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.log",
+    "command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ]
+  },
+  "decision_rule": {
+    "dense_terminal_validation_ce": 2.7927,
+    "dense_practical_equivalence_threshold_ce": 0.02,
+    "terminal_validation_ce_maximum_for_dense_closure": 2.8127,
+    "full_attention_terminal_validation_ce": 2.9363,
+    "all_fixed_losses_must_be_finite": true,
+    "pass_dense_closure": "Accept QK-only functional LWT as the 350M/20TPP attention endpoint only if terminal validation CE is at most 2.8127. This authorizes a separate 690M preregistration, not an automatic launch.",
+    "partial_recovery": "If terminal CE beats 2.9363 but exceeds 2.8127, record the exact improvement over full attention and residual gap to dense; do not claim closure or automatically promote.",
+    "fail": "If terminal CE is not better than 2.9363, reject long-horizon transfer of the 5TPP closure and launch no capacity, LR, seed, or larger-model sweep.",
+    "threshold_changed_after_measurement": false
+  },
+  "monitoring": {
+    "expected_duration": "approximately 27-30 hours from the measured 3.55 seconds per update plus five fixed evaluations and checkpoint I/O",
+    "policy": "one idempotent persistent watchdog because the run exceeds five minutes",
+    "callbacks": [
+      20,
+      50,
+      80,
+      100,
+      "error or actionable stall"
+    ],
+    "heartbeat_minutes": 90,
+    "heartbeat_resets_after_progress_callback": true,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action_prompt": "@Codex verify the live or terminal state against the active project note; inspect fixed losses, GPU health, provenance, checkpoint identity, and storage headroom; update durable evidence; on terminal classify the preregistered 20TPP dense-closure gate and continue autonomously. Do not merely acknowledge."
+  },
+  "scope_guards": [
+    "This is partial attention allocation, not full attention replacement.",
+    "V and both attention/MLP c_proj residual-write maps remain dense.",
+    "The MLP remains completely dense in this causal discriminator.",
+    "Generated weights are materialized; no inference parameter or FLOP reduction is claimed.",
+    "No storage deletion may occur unless every candidate hash matches this plan and its committed result artifact.",
+    "No MFU test or training run may start before this plan and exact config are committed and synchronized into a clean PRO6 worktree.",
+    "No training run may start unless the exact-config MFU is at least 20%, losses are finite, the native extension is loaded, and project-cap admission preserves at least 8 GiB through atomic checkpoint replacement.",
+    "No automatic rerun, alternate rank, generated-V repair, MLP composition, larger model, or different token rung is authorized."
+  ]
+}
