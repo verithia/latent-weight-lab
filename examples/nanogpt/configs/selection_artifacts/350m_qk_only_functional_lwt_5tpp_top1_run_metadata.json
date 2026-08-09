@@ -2,7 +2,7 @@
   "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
   "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
   "recorded_at": "2026-08-09T07:06:00+08:00",
-  "last_verified_at": "2026-08-09T10:30:43+08:00",
+  "last_verified_at": "2026-08-09T12:01:21+08:00",
   "classification": "RUNNING_AFTER_BOTH_EXACT_CONFIG_MFU_GATES",
   "scientific_identity": {
     "slot": "top1",
@@ -257,6 +257,45 @@
       "intervention_required": false,
       "scientific_interpretation": "Midpoint validation CE improved by 0.2316 from the first fixed evaluation and is 0.0280 above the historical full-attention terminal CE, but that comparison uses mismatched token budgets and is not a terminal verdict.",
       "decision": "continue top1 unchanged; top2 remains held until top1 terminal sealing"
+    },
+    {
+      "event": "ninety_minute_heartbeat",
+      "callback_iter": 4910,
+      "verified_at": "2026-08-09T12:01:21+08:00",
+      "verified_iter": 4930,
+      "max_iters": 6764,
+      "latest_completed_fixed_evaluation": {
+        "step": 3382,
+        "train_ce": 3.255,
+        "validation_ce": 3.2333
+      },
+      "next_fixed_evaluation_step": 5073,
+      "updates_until_next_fixed_evaluation": 143,
+      "latest_minibatch_loss": 3.1291,
+      "recent_minibatch_loss_range": [
+        3.0836,
+        3.1775
+      ],
+      "recent_iter_ms": 3568.34,
+      "process_alive": true,
+      "status": "running",
+      "errors_detected": [],
+      "gpu_memory_mib": 69765,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 99,
+      "gpu_power_watts": 566.05,
+      "gpu_power_limit_watts": 600.0,
+      "gpu_temperature_celsius": 59,
+      "workspace_gib_reported": 247,
+      "workspace_cap_gib": 256,
+      "filesystem_free_reported": "1.5T",
+      "checkpoint_present": true,
+      "checkpoint_bytes": 2765688136,
+      "checkpoint_mutable_until_terminal_seal": true,
+      "estimated_remaining_raw_training_hours": 1.82,
+      "intervention_required": false,
+      "scientific_interpretation": "The run remains stable immediately before the preregistered step-5073 fixed evaluation; minibatch losses alone do not authorize a matched-budget conclusion.",
+      "decision": "continue top1 unchanged; wait for fixed step 5073 and terminal sealing before top2"
     }
   ],
   "monitoring": {
@@ -282,7 +321,7 @@
       20,
       50
     ],
-    "last_heartbeat_verified_at": "2026-08-09T10:00:09+08:00",
+    "last_heartbeat_verified_at": "2026-08-09T12:01:21+08:00",
     "last_progress_verified_at": "2026-08-09T10:30:43+08:00"
   }
 }
