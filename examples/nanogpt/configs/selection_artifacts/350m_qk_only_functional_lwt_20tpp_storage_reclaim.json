@@ -1,0 +1,60 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_20tpp_storage_reclaim_v1",
+  "recorded_at": "2026-08-09",
+  "host": "PRO6",
+  "project_root": "/mnt/ssd-data/orj/MappingNetworks",
+  "project_cap_bytes": 274877906944,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_20tpp_plan.json",
+    "sha256": "ba247f705919abfaf6332dd465dbd53e4bde230ea8b4b7db80e9884dffe43f61",
+    "git_commit": "7c4ab2e3de44d8207174168f82d3bb2424d40f04"
+  },
+  "preconditions": {
+    "remote_worktree_clean": true,
+    "remote_git_commit": "7c4ab2e3de44d8207174168f82d3bb2424d40f04",
+    "gpu_training_processes_present": false,
+    "before_workspace_bytes": 267278016090,
+    "before_headroom_bytes": 7599890854,
+    "before_headroom_gib": 7.0789,
+    "minimum_required_headroom_gib": 8,
+    "admission_blocked_before_reclaim": true
+  },
+  "deleted_files": [
+    {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50/ckpt.pt",
+      "bytes": 2765687240,
+      "sha256_verified_before_delete": "b792dd831830a75d064b4bfeeb65f88101ccc0ad00b929488d5fcb648e3ec9cc",
+      "immutable_result": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult0p50_result.json",
+      "immutable_result_sha256": "97b932d1b8016f08ef9747f5c4f9b16f4614fb353e82324c5f33fc75c1a328d3"
+    },
+    {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75/ckpt.pt",
+      "bytes": 2765687304,
+      "sha256_verified_before_delete": "c765ddbccaf2313c1aeed887adf52a86d86d8cf073b32c03eba7d1e91e33e5ea",
+      "immutable_result": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult0p75_result.json",
+      "immutable_result_sha256": "29d5eb8a7e4deda53dded4701031e3e39b5f1cfb9191729a5bb0393a4f5671fa"
+    },
+    {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00/ckpt.pt",
+      "bytes": 2765687304,
+      "sha256_verified_before_delete": "f9842b87641f73db73cb56484ef346f23dafbc21b2c3bb60a75f4d0db2916e27",
+      "immutable_result": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_mult1p00_result.json",
+      "immutable_result_sha256": "0a2c6c42039405aa0f278830bae78e2b1714e64f9174d2430b2778fb9e43650d"
+    }
+  ],
+  "verification": {
+    "deleted_files_absent": true,
+    "checkpoint_metadata_preserved": true,
+    "logs_status_and_provenance_preserved": true,
+    "five_tpp_top1_checkpoint_preserved": true,
+    "five_tpp_top2_checkpoint_preserved": true,
+    "manifold_trajectory_artifacts_preserved": true,
+    "reclaimed_bytes": 8297061848,
+    "after_workspace_bytes": 258980954242,
+    "after_headroom_bytes": 15896952702,
+    "after_headroom_gib": 14.8052,
+    "real_filesystem_free_bytes_after_reclaim": 1650580557824,
+    "predicted_minimum_headroom_during_atomic_checkpoint_replacement_gib": 9.65,
+    "storage_gate_passed": true
+  }
+}
