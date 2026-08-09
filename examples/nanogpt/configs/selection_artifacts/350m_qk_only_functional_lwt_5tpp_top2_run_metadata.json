@@ -2,7 +2,7 @@
   "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
   "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
   "recorded_at": "2026-08-09T14:04:23+08:00",
-  "last_verified_at": "2026-08-09T17:27:14+08:00",
+  "last_verified_at": "2026-08-09T18:57:47+08:00",
   "classification": "RUNNING_AFTER_TOP1_TERMINAL_SEAL_AND_EXACT_CONFIG_MFU_GATE",
   "scientific_identity": {
     "slot": "top2",
@@ -289,6 +289,42 @@
       "intervention_required": false,
       "scientific_interpretation": "At the matched midpoint, top2 trails top1 by 0.0258 validation CE. The gap narrowed by 0.0079 from step 1691 but remains above the 0.02 practical-equivalence threshold; terminal held-out CE remains the preregistered decision point.",
       "decision": "continue top2 unchanged to terminal selection"
+    },
+    {
+      "event": "ninety_minute_heartbeat",
+      "callback_iter": 4900,
+      "verified_at": "2026-08-09T18:57:47+08:00",
+      "verified_iter": 4910,
+      "max_iters": 6764,
+      "latest_minibatch_loss": 3.1822,
+      "recent_minibatch_loss_range": [
+        3.1112,
+        3.1824
+      ],
+      "recent_iter_ms": 3567.85,
+      "next_fixed_evaluation_step": 5073,
+      "updates_to_next_fixed_evaluation": 163,
+      "process_alive": true,
+      "status": "running",
+      "errors_detected": [],
+      "gpu_memory_mib": 69765,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent_at_audit": 89,
+      "gpu_utilization_percent_at_callback": 99,
+      "gpu_power_watts": 556.72,
+      "gpu_power_limit_watts": 600.0,
+      "gpu_temperature_celsius": 58,
+      "workspace_gib_reported": 250,
+      "workspace_cap_gib": 256,
+      "filesystem_free_reported": "1.5T",
+      "checkpoint_present": true,
+      "checkpoint_bytes": 2765688136,
+      "checkpoint_metadata_bytes": 21576,
+      "checkpoint_mutable_until_terminal_seal": true,
+      "estimated_remaining_raw_training_hours": 1.84,
+      "intervention_required": false,
+      "scientific_interpretation": "The run is stable 163 updates before fixed step 5073. Minibatch losses are used only for health; the next scientific comparison waits for the fixed held-out evaluation.",
+      "decision": "continue top2 unchanged under the persistent watchdog"
     }
   ],
   "monitoring": {
@@ -312,7 +348,7 @@
       50
     ],
     "last_progress_verified_at": "2026-08-09T17:27:14+08:00",
-    "last_heartbeat_verified_at": "2026-08-09T16:56:02+08:00"
+    "last_heartbeat_verified_at": "2026-08-09T18:57:47+08:00"
   },
   "selection_context": {
     "top1_terminal_validation_ce": 3.0304,
