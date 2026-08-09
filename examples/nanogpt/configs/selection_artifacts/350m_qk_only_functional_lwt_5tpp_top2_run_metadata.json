@@ -1,0 +1,179 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
+  "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
+  "recorded_at": "2026-08-09T14:04:23+08:00",
+  "last_verified_at": "2026-08-09T14:04:23+08:00",
+  "classification": "RUNNING_AFTER_TOP1_TERMINAL_SEAL_AND_EXACT_CONFIG_MFU_GATE",
+  "scientific_identity": {
+    "slot": "top2",
+    "screen_slug": "mult0p75",
+    "run_name": "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75",
+    "run_id": "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 3182664,
+    "pgid": 3182664,
+    "started_at": "2026-08-09T14:02:13+08:00",
+    "updates": 6764,
+    "scheduled_tokens": 1773142016,
+    "fixed_evaluation_steps": [
+      0,
+      1691,
+      3382,
+      5073,
+      6764
+    ],
+    "execution_git_commit": "c2d105be678248b38ac77ea5ff9cffa490d09b1c",
+    "top1_terminal_seal_git_commit": "8f189feb1fbe2790782632805f40c90e1e417d64",
+    "preregistration_git_commit": "b51a2f39ae03354f8d22cd367704f206de9c9c32",
+    "remote_repository": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "remote_worktree_clean_at_launch": true
+  },
+  "code_and_command": {
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.config.json"
+    ],
+    "launcher": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/launch_y400_ladder_detached.sh",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "cuda_visible_devices": "0"
+  },
+  "architecture": {
+    "generated_attention_targets": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "qk_cayley_rank_per_head": 64,
+    "qk_output_gain": true,
+    "dense_v": true,
+    "dense_attention_cproj": true,
+    "dense_mlp_cfc": true,
+    "dense_mlp_cproj": true,
+    "joint_training_from_initialization": true,
+    "cross_run_transplants": false,
+    "model_reported_parameters": 314258048,
+    "generated_weight_elements": 50331648,
+    "reported_latent_elements": 503424
+  },
+  "optimization": {
+    "optimizer": "muon",
+    "learning_rate": 0.0018,
+    "candidate_main_lr_multiplier": 0.75,
+    "dense_muon_matrix_tensors": 96,
+    "attention_cayley_tensors": 96,
+    "adamw_other_tensors": 915,
+    "adamw_learning_rate": 0.00054,
+    "muon_momentum": 0.95,
+    "muon_newton_schulz_steps": 5
+  },
+  "immutable_inputs": {
+    "ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_ranking.json",
+      "sha256": "db7e25abd49375b6905fed6d70411196a0c9ec9ab8d7ccae02d4ea784bff121b"
+    },
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_plan.json",
+      "sha256": "efd54087d0f2f343d9aaa09dfc36ce749ae51b58c8fe9e66dedecc73cd97ac58"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_mfu_result.json",
+      "sha256": "cc3c2748d25f7b47efd2b252cdb06d417094d53947e0d7ca1bcfce8edbc0fc63"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.json",
+      "archived_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.config.json",
+      "sha256": "3fe17a88a3a6a2a43c29361fd7acb60d3f9f20db72243485f103ed809baa0fa0"
+    },
+    "dataset_manifest": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_evaluation_runtime_digest": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "performance_preflight": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.mfu.json",
+      "sha256": "ad47c4b90f4f8d28fa3819b049dbd7440623da366427dedfc61026c34b6bdaa4"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.json",
+      "sha256_at_launch": "20f538eb8ef9d94a73508508b967cbec00bcc29054dc9ba51070a3ca22c1db19"
+    }
+  },
+  "gates": {
+    "mfu_fraction": 0.37817357598894696,
+    "minimum_mfu_fraction": 0.2,
+    "iter_ms": 3548.99,
+    "tokens_per_second": 73864.41333333333,
+    "model_tflops": 157.27416052727807,
+    "peak_vram_mib": 58468.82,
+    "native_block_fht_extension_loaded": true,
+    "all_logged_preflight_losses_finite": true,
+    "exact_config_sha256_matched": true,
+    "top1_terminal_sealed_before_launch": true
+  },
+  "mutable_artifacts": {
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.log",
+    "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.json",
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75/ckpt.pt",
+    "note": "Log, status, and checkpoint remain mutable until terminal sealing."
+  },
+  "initial_live_verification": {
+    "verified_at": "2026-08-09T14:04:23+08:00",
+    "process_alive": true,
+    "status": "running",
+    "verified_iter": 0,
+    "phase": "training after completed fixed step-zero evaluation",
+    "fixed_step_zero_train_ce": 10.9823,
+    "fixed_step_zero_validation_ce": 10.9822,
+    "first_minibatch_loss": 10.981,
+    "runtime_identity_present": true,
+    "optimizer_ownership_present": true,
+    "finite_and_error_free_log": true,
+    "gpu_memory_mib": 69765,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 553.82,
+    "gpu_temperature_celsius": 51,
+    "workspace_gib_reported": 247,
+    "workspace_cap_gib": 256,
+    "filesystem_free_reported": "1.5T",
+    "estimated_raw_training_hours": 6.66,
+    "estimated_wall_time_hours_including_evaluation_and_checkpointing": [
+      7,
+      8
+    ],
+    "intervention_required": false
+  },
+  "monitoring": {
+    "service": "com.verithia.mappingnetworks.pro6-qk350-5tpp-top2",
+    "state_key": "pro6_350m_qk_only_5tpp_top2",
+    "state_path": "/Users/verithia/research/MappingNetworks/outputs/watch_state/pro6_350m_qk_only_5tpp_top2.json",
+    "state": "running",
+    "milestones": [
+      20,
+      50,
+      80,
+      100
+    ],
+    "heartbeat_minutes": 90,
+    "heartbeat_reset_by_progress": true,
+    "stall_minutes": 20,
+    "callbacks_invoke_codex": true,
+    "initialized": true,
+    "sent_milestones": []
+  },
+  "selection_context": {
+    "top1_terminal_validation_ce": 3.0304,
+    "top1_classification": "PASS_CLOSES_ATTENTION_GAP_AT_350M_5TPP",
+    "practical_equivalence_threshold_ce": 0.02,
+    "terminal_decision_rule": "If top2 is stable and improves validation CE by more than 0.02, select it; otherwise retain the 0.5TPP leader top1 and record a practical tie when applicable."
+  }
+}
