@@ -1,0 +1,68 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_20tpp_mfu_result_v1",
+  "recorded_at": "2026-08-09",
+  "classification": "PASS_EXACT_CONFIG_MFU_GATE",
+  "passed": true,
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_20tpp_plan.json",
+    "plan_sha256": "ba247f705919abfaf6332dd465dbd53e4bde230ea8b4b7db80e9884dffe43f61",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.json",
+    "config_sha256": "fed6877984e1b5d27512fa63777ae6a27c785f29f2540aa648d8656aa3a4497e",
+    "execution_git_commit": "2cd1702cf6b330380a81cdba47416fd80251dab6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "mode": "foreground-polled; no watchdog or callback",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 37.60241484642029,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.json",
+    "certificate_sha256": "c1a26a9c66572dce74e9392b1199d7b0d0eb87fa1d193d74cb9cbb98e87f22a6",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/preflight/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00.log",
+    "log_sha256": "2e83da9c959a8e8e66cc44e9e4aa482fc8c981f80dbec8fe0f5a0339f21f0864"
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.3766515569472086,
+    "margin_over_minimum_fraction": 0.17665155694720858,
+    "tokens_per_second": 73800.6975,
+    "iter_ms": 3552.05625,
+    "model_tflops": 157.13849500517375,
+    "empirical_bf16_gemm_peak_tflops": 417.19858077527675,
+    "active_params_6n_estimate": 354871296,
+    "peak_mib": 58468.82,
+    "projected_raw_training_hours": 26.6945,
+    "projected_wall_hours_including_evaluation_and_checkpointing": [27, 30]
+  },
+  "stability": {
+    "native_block_fht_extension_loaded": true,
+    "native_block_fht_extension_required": true,
+    "native_block_fht_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "generated_targets": ["attn.c_attn.qk_headwise"],
+    "dense_targets": ["attn.c_attn.v", "attn.c_proj", "mlp.c_fc", "mlp.c_proj"]
+  },
+  "storage_admission": {
+    "reclaim_receipt": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_20tpp_storage_reclaim.json",
+    "reclaim_receipt_sha256": "4cbaf0d0e6ef54a3764d13b8034ebb0193db18867922ca569520dd101dbb16c1",
+    "post_reclaim_workspace_bytes": 258980954242,
+    "post_reclaim_headroom_gib": 14.8052,
+    "predicted_minimum_atomic_checkpoint_headroom_gib": 9.65,
+    "minimum_required_headroom_gib": 8,
+    "passed": true
+  },
+  "decision": {
+    "scientific_run_authorized_count": 1,
+    "scientific_run_max_iters": 27054,
+    "persistent_watchdog_required_before_launch": true,
+    "automatic_rerun_authorized": false,
+    "different_structure_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The exact preregistered horizon-transfer config is finite, loads the required native extension, exceeds the 20 percent MFU floor by 17.67 percentage points, and clears storage admission through atomic checkpoint replacement."
+  }
+}
