@@ -1,0 +1,169 @@
+{
+  "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_candidate_result_v1",
+  "recorded_at": "2026-08-09",
+  "candidate": {
+    "confirmation_slot": "top2",
+    "screen_slug": "mult0p75",
+    "candidate_main_lr_multiplier": 0.75,
+    "learning_rate": 0.0018,
+    "max_iters": 6764,
+    "scheduled_tokens": 1773142016
+  },
+  "immutable_inputs": {
+    "ranking": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_0p5tpp_ranking.json",
+      "sha256": "db7e25abd49375b6905fed6d70411196a0c9ec9ab8d7ccae02d4ea784bff121b"
+    },
+    "plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_plan.json",
+      "sha256": "efd54087d0f2f343d9aaa09dfc36ce749ae51b58c8fe9e66dedecc73cd97ac58"
+    },
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_mfu_result.json",
+      "sha256": "cc3c2748d25f7b47efd2b252cdb06d417094d53947e0d7ca1bcfce8edbc0fc63"
+    },
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75.json",
+      "sha256": "3fe17a88a3a6a2a43c29361fd7acb60d3f9f20db72243485f103ed809baa0fa0"
+    }
+  },
+  "run": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569",
+    "pgid": 3182664,
+    "started_at": "2026-08-09T14:02:13+08:00",
+    "finished_at": "2026-08-09T20:49:39+08:00",
+    "elapsed_seconds": 24446,
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "source_commit": "c2d105be678248b38ac77ea5ff9cffa490d09b1c",
+    "worktree_dirty": false,
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ]
+  },
+  "artifacts": {
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.json",
+      "sha256": "801c9555aaa2c8da70b6b79d794f2dc689f4512acf8ffa6306af7aa6425e53ac"
+    },
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.log",
+      "sha256": "cbd76f541d283d064d0480220e7dc976538246472bdf60b43e1936a5265c15eb"
+    },
+    "provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.json",
+      "sha256": "20f538eb8ef9d94a73508508b967cbec00bcc29054dc9ba51070a3ca22c1db19"
+    },
+    "archived_config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.config.json",
+      "sha256": "3fe17a88a3a6a2a43c29361fd7acb60d3f9f20db72243485f103ed809baa0fa0"
+    },
+    "archived_mfu_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.mfu.json",
+      "sha256": "ad47c4b90f4f8d28fa3819b049dbd7440623da366427dedfc61026c34b6bdaa4"
+    },
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75/ckpt.pt",
+      "sha256": "3a6d5c6afd3db7cc00fb26fd29cd37534c47dc9220d3979b4ba38513b1cfb8bf",
+      "bytes": 2765688136
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75/ckpt.meta.json",
+      "sha256": "178049ade0f4c1841751485dba5c32384f8fcc7609260d18b2918949a869abcb"
+    }
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "fixed_eval_index_spec_sha256": "7cb7f4a2e14eca6229bcca0bde184ab21acaab01cc041cf39d0c87837b90cb52",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_seed": 20260715,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "checkpoint_resolved_config_sha256": "af0aaa4f05cdaa147ef0dda07603a340a3f1f67bc5aeb2c19f2532e69d6143eb"
+  },
+  "optimizer_ownership": {
+    "optimizer": "muon",
+    "dense_muon_matrix_tensors": 96,
+    "attn_cayley_tensors": 96,
+    "adamw_other_tensors": 915,
+    "adamw_learning_rate": 0.00054
+  },
+  "performance": {
+    "mfu_fraction": 0.37817357598894696,
+    "mfu_minimum_fraction": 0.2,
+    "iter_ms": 3548.99,
+    "tokens_per_second": 73864.41333333333,
+    "peak_mib": 58468.82,
+    "native_extension_loaded": true,
+    "elapsed_wall_hours": 6.7906
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9823, "validation_ce": 10.9822},
+    {"step": 1691, "train_ce": 3.5158, "validation_ce": 3.4986},
+    {"step": 3382, "train_ce": 3.2799, "validation_ce": 3.2591},
+    {"step": 5073, "train_ce": 3.1496, "validation_ce": 3.1265},
+    {"step": 6764, "train_ce": 3.0882, "validation_ce": 3.0645}
+  ],
+  "checkpoint_verification": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 6764,
+    "metadata_consistent": true,
+    "resume_envelope_readable": true,
+    "model_tensor_count": 1012,
+    "optimizer_tensor_count": 2841,
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "optimizer_state_present": true,
+    "rng_state_present": true,
+    "block_fht_cache_state": "flushed_not_serialized"
+  },
+  "comparisons": {
+    "same_lr_same_horizon_full_attention_replacement": {
+      "reference_artifact": "examples/nanogpt/configs/selection_artifacts/350m_fullattn_5tpp_provisional_comparison.json",
+      "reference_artifact_sha256": "acb1a372b2b9ea65177f3ace5d1b3f5744d67debd717527f905617ecd17e87aa",
+      "reference_validation_ce": 3.2418,
+      "candidate_validation_ce": 3.0645,
+      "candidate_minus_reference_ce": -0.1773,
+      "candidate_to_reference_perplexity_ratio": 0.8375,
+      "comparability": "same model tier, 5TPP update/token schedule, dataset manifest, fixed-evaluation digest, and learning rate"
+    },
+    "top1_confirmation": {
+      "reference_artifact": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_top1_result.json",
+      "reference_validation_ce": 3.0304,
+      "candidate_validation_ce": 3.0645,
+      "candidate_minus_reference_ce": 0.0341,
+      "candidate_to_reference_perplexity_ratio": 1.0347,
+      "practical_equivalence_threshold_ce": 0.02,
+      "classification": "DISTINCTLY_WORSE"
+    },
+    "historical_dense_muon": {
+      "reference_validation_ce": 3.0317,
+      "candidate_validation_ce": 3.0645,
+      "candidate_minus_reference_ce": 0.0328,
+      "practical_equivalence_threshold_ce": 0.02,
+      "classification": "NOT_PRACTICALLY_TIED",
+      "evidence_limit": "The original Y400 dense checkpoint and log are unavailable on PRO6, so this remains matched historical evidence rather than a newly hash-sealed control."
+    }
+  },
+  "decision": {
+    "candidate_stable": true,
+    "classification": "PASS_STABLE_BUT_NOT_SELECTED",
+    "full_attention_gap_closed": true,
+    "practically_tied_with_historical_dense": false,
+    "top2_terminal_sealed": true,
+    "selected_candidate": "top1_mult1p00",
+    "selected_learning_rate": 0.0024,
+    "selection_margin_ce": 0.0341,
+    "practical_equivalence_threshold_ce": 0.02,
+    "fresh_preregistration_required_before_larger_budget": true,
+    "automatic_retry_authorized": false,
+    "reason": "Top2 is stable and beats the same-LR full-attention replacement, but it trails top1 by 0.0341 terminal validation CE, outside the preregistered 0.02 practical-equivalence band. Top1 is therefore the unambiguous selected 5TPP configuration."
+  }
+}

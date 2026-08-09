@@ -2,8 +2,8 @@
   "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
   "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
   "recorded_at": "2026-08-09T14:04:23+08:00",
-  "last_verified_at": "2026-08-09T19:29:54+08:00",
-  "classification": "RUNNING_AFTER_TOP1_TERMINAL_SEAL_AND_EXACT_CONFIG_MFU_GATE",
+  "last_verified_at": "2026-08-09T20:55:00+08:00",
+  "classification": "FINISHED_CLEAN_TOP1_SELECTED_BY_PREREGISTERED_TERMINAL_RULE",
   "scientific_identity": {
     "slot": "top2",
     "screen_slug": "mult0p75",
@@ -123,7 +123,7 @@
     "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.log",
     "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75_20260809T060211Z_3182569.json",
     "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top2_mult0p75/ckpt.pt",
-    "note": "Log, status, and checkpoint remain mutable until terminal sealing."
+    "note": "Log, status, checkpoint, and checkpoint metadata are terminal and hash-sealed in the top2 result artifact."
   },
   "initial_live_verification": {
     "verified_at": "2026-08-09T14:04:23+08:00",
@@ -388,11 +388,39 @@
       "decision": "continue top2 unchanged to the terminal fixed evaluation"
     }
   ],
+  "terminal_verification": {
+    "verified_at": "2026-08-09T20:55:00+08:00",
+    "finished_at": "2026-08-09T20:49:39+08:00",
+    "elapsed_seconds": 24446,
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "process_alive": false,
+    "terminal_iter": 6764,
+    "terminal_train_ce": 3.0882,
+    "terminal_validation_ce": 3.0645,
+    "checkpoint_bytes": 2765688136,
+    "checkpoint_sha256": "3a6d5c6afd3db7cc00fb26fd29cd37534c47dc9220d3979b4ba38513b1cfb8bf",
+    "checkpoint_metadata_sha256": "178049ade0f4c1841751485dba5c32384f8fcc7609260d18b2918949a869abcb",
+    "checkpoint_schema_version": "nanogpt_exact_resume_v2",
+    "checkpoint_next_iter": 6764,
+    "checkpoint_metadata_consistent": true,
+    "model_tensor_count": 1012,
+    "optimizer_tensor_count": 2841,
+    "all_model_tensors_finite": true,
+    "all_optimizer_tensors_finite": true,
+    "optimizer_state_present": true,
+    "rng_state_present": true,
+    "block_fht_cache_state": "flushed_not_serialized",
+    "gpu_after_exit": "345/97887 MiB, 0%, 32 C",
+    "watchdog_booted_out_after_terminal_callback": true,
+    "intervention_required": false
+  },
   "monitoring": {
     "service": "com.verithia.mappingnetworks.pro6-qk350-5tpp-top2",
     "state_key": "pro6_350m_qk_only_5tpp_top2",
     "state_path": "/Users/verithia/research/MappingNetworks/outputs/watch_state/pro6_350m_qk_only_5tpp_top2.json",
-    "state": "running",
+    "state": "terminal_callback_delivered_and_service_booted_out",
     "milestones": [
       20,
       50,
@@ -407,15 +435,21 @@
     "sent_milestones": [
       20,
       50,
-      80
+      80,
+      100
     ],
-    "last_progress_verified_at": "2026-08-09T19:29:54+08:00",
+    "last_progress_verified_at": "2026-08-09T20:49:48+08:00",
     "last_heartbeat_verified_at": "2026-08-09T18:57:47+08:00"
   },
   "selection_context": {
     "top1_terminal_validation_ce": 3.0304,
     "top1_classification": "PASS_CLOSES_ATTENTION_GAP_AT_350M_5TPP",
     "practical_equivalence_threshold_ce": 0.02,
-    "terminal_decision_rule": "If top2 is stable and improves validation CE by more than 0.02, select it; otherwise retain the 0.5TPP leader top1 and record a practical tie when applicable."
+    "terminal_decision_rule": "If top2 is stable and improves validation CE by more than 0.02, select it; otherwise retain the 0.5TPP leader top1 and record a practical tie when applicable.",
+    "top2_terminal_validation_ce": 3.0645,
+    "top2_minus_top1_validation_ce": 0.0341,
+    "practical_tie": false,
+    "selected_candidate": "top1_mult1p00",
+    "fresh_preregistration_required_before_larger_budget": true
   }
 }
