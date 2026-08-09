@@ -2,7 +2,7 @@
   "schema_version": "mai_350m_qk_only_functional_lwt_5tpp_run_metadata_v1",
   "artifact_kind": "350m_qk_only_functional_lwt_5tpp_running_record",
   "recorded_at": "2026-08-09T14:04:23+08:00",
-  "last_verified_at": "2026-08-09T14:04:23+08:00",
+  "last_verified_at": "2026-08-09T15:25:53+08:00",
   "classification": "RUNNING_AFTER_TOP1_TERMINAL_SEAL_AND_EXACT_CONFIG_MFU_GATE",
   "scientific_identity": {
     "slot": "top2",
@@ -152,6 +152,41 @@
     ],
     "intervention_required": false
   },
+  "progress_observations": [
+    {
+      "callback_milestone_percent": 20,
+      "callback_iter": 1370,
+      "verified_at": "2026-08-09T15:25:53+08:00",
+      "verified_iter": 1380,
+      "max_iters": 6764,
+      "latest_minibatch_loss": 3.5996,
+      "recent_minibatch_loss_range": [
+        3.5944,
+        3.6334
+      ],
+      "recent_iter_ms": 3565.48,
+      "next_fixed_evaluation_step": 1691,
+      "process_alive": true,
+      "status": "running",
+      "errors_detected": [],
+      "gpu_memory_mib": 69765,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 100,
+      "gpu_power_watts": 567.95,
+      "gpu_power_limit_watts": 600.0,
+      "gpu_temperature_celsius": 58,
+      "workspace_gib_reported": 248,
+      "workspace_cap_gib": 256,
+      "filesystem_free_reported": "1.5T",
+      "checkpoint_present": true,
+      "checkpoint_bytes": 1257496993,
+      "checkpoint_mutable_until_terminal_seal": true,
+      "estimated_remaining_raw_training_hours": 5.33,
+      "intervention_required": false,
+      "scientific_interpretation": "The run is stable at the 20% milestone. No new fixed held-out comparison is available until step 1691, so minibatch loss is used only for health monitoring.",
+      "decision": "continue top2 unchanged under the persistent watchdog"
+    }
+  ],
   "monitoring": {
     "service": "com.verithia.mappingnetworks.pro6-qk350-5tpp-top2",
     "state_key": "pro6_350m_qk_only_5tpp_top2",
@@ -168,7 +203,10 @@
     "stall_minutes": 20,
     "callbacks_invoke_codex": true,
     "initialized": true,
-    "sent_milestones": []
+    "sent_milestones": [
+      20
+    ],
+    "last_progress_verified_at": "2026-08-09T15:25:53+08:00"
   },
   "selection_context": {
     "top1_terminal_validation_ce": 3.0304,
