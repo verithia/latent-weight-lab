@@ -86,6 +86,11 @@
       "stored_parameters": 294316800,
       "active_billions": 0.124447488,
       "stored_billions": 0.2943168,
+      "token_schedules": {
+        "0.5TPP": {"max_iters": 238, "scheduled_tokens": 62390272, "scheduled_tpp": 0.501338138701522},
+        "5TPP": {"max_iters": 2374, "scheduled_tokens": 622329856, "scheduled_tpp": 5.0007426104093},
+        "20TPP": {"max_iters": 9495, "scheduled_tokens": 2489057280, "scheduled_tpp": 20.000863978869546}
+      },
       "authorization": "exact_config_mfu_passed_124m_lr_screen_authorized"
     },
     {
@@ -98,6 +103,11 @@
       "stored_parameters": 958776320,
       "active_billions": 0.354796544,
       "stored_billions": 0.95877632,
+      "token_schedules": {
+        "0.5TPP": {"max_iters": 677, "scheduled_tokens": 177471488, "scheduled_tpp": 0.5002063605219333},
+        "5TPP": {"max_iters": 6768, "scheduled_tokens": 1774190592, "scheduled_tpp": 5.000585890712622},
+        "20TPP": {"max_iters": 27069, "scheduled_tokens": 7095975936, "scheduled_tpp": 20.000126991090422}
+      },
       "authorization": "prepared_not_launchable_before_124m_scientific_pass"
     },
     {
@@ -110,6 +120,11 @@
       "stored_parameters": 1953547520,
       "active_billions": 0.69525632,
       "stored_billions": 1.95354752,
+      "token_schedules": {
+        "0.5TPP": {"max_iters": 1327, "scheduled_tokens": 347865088, "scheduled_tpp": 0.5003407779162655},
+        "5TPP": {"max_iters": 13261, "scheduled_tokens": 3476291584, "scheduled_tpp": 5.000014360171512},
+        "20TPP": {"max_iters": 53044, "scheduled_tokens": 13905166336, "scheduled_tpp": 20.00005744068605}
+      },
       "authorization": "prepared_not_launchable_before_124m_scientific_pass"
     },
     {
@@ -122,6 +137,11 @@
       "stored_parameters": 2797241856,
       "active_billions": 0.985302528,
       "stored_billions": 2.797241856,
+      "token_schedules": {
+        "0.5TPP": {"max_iters": 1880, "scheduled_tokens": 492830720, "scheduled_tpp": 0.5001821328930965},
+        "5TPP": {"max_iters": 18794, "scheduled_tokens": 4926734336, "scheduled_tpp": 5.000225002974924},
+        "20TPP": {"max_iters": 75173, "scheduled_tokens": 19706150912, "scheduled_tpp": 20.000101848921673}
+      },
       "authorization": "prepared_not_launchable_before_124m_scientific_pass_and_storage_admission"
     }
   ],
@@ -130,8 +150,9 @@
       "name": "dense_complete_experts_control",
       "purpose": "Measure the benefit and cost of token-conditional expert specialization without a generated-weight confound.",
       "expert_parameterization": "dense W_fc,e and W_proj,e owned by each expert",
-      "launch_ready": false,
-      "blocker": "performant deterministic dropless grouped-GEMM MoE implementation is not yet present"
+      "launch_ready": true,
+      "authorization_scope": "124M-active 0.5TPP LR screen only",
+      "blocker": null
     },
     {
       "name": "adaptive_paired_neuron_generated_experts",

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import math
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -84,7 +85,10 @@ def test_each_expert_owns_projection_and_active_mlp_matches_dense() -> None:
 def test_dense_control_is_distinct_from_generated_candidate() -> None:
     design = load_design()
     arms = {arm["name"]: arm for arm in design["scientific_arms"]}
-    assert arms["dense_complete_experts_control"]["launch_ready"] is False
+    assert arms["dense_complete_experts_control"]["launch_ready"] is True
+    assert arms["dense_complete_experts_control"]["authorization_scope"] == (
+        "124M-active 0.5TPP LR screen only"
+    )
     assert (
         arms["adaptive_paired_neuron_generated_experts"]["launch_ready"]
         is False
@@ -92,7 +96,9 @@ def test_dense_control_is_distinct_from_generated_candidate() -> None:
     assert "negative control" in arms[
         "shared_post_mixture_projection_negative_control"
     ]["blocker"]
-    assert design["launch_authorization"]["current"] == "none"
+    assert design["launch_authorization"]["current"] == (
+        "124m_dense_complete_expert_0p5tpp_lr_screen_only"
+    )
 
 
 def test_performance_and_scaling_gates_are_binding() -> None:
@@ -116,3 +122,16 @@ def test_monitoring_matches_project_callback_policy() -> None:
     assert "completion-or-error" in monitoring[
         "estimated_five_minutes_to_two_hours"
     ]
+
+
+def test_every_rung_has_exact_active_tpp_iteration_schedules() -> None:
+    design = load_design()
+    tokens_per_iter = 32 * 8 * design["architecture"]["block_size"]
+    for rung in design["rungs"]:
+        active = rung["active_parameters"]
+        for label, target_tpp in (("0.5TPP", 0.5), ("5TPP", 5.0), ("20TPP", 20.0)):
+            schedule = rung["token_schedules"][label]
+            expected_iters = math.ceil(target_tpp * active / tokens_per_iter)
+            assert schedule["max_iters"] == expected_iters
+            assert schedule["scheduled_tokens"] == expected_iters * tokens_per_iter
+            assert schedule["scheduled_tpp"] == expected_iters * tokens_per_iter / active
