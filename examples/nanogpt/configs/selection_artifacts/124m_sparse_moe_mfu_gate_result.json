@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_sparse_moe_mfu_gate_result_v1",
+  "recorded_at": "2026-08-10",
+  "decision": "PASS_124M_DENSE_COMPLETE_EXPERT_MOE_MFU_GATE",
+  "scientific_updates": 0,
+  "host": "PRO6",
+  "gpu": 0,
+  "architecture": {
+    "active_parameters": 124447488,
+    "stored_parameters": 294316800,
+    "num_experts": 8,
+    "top_k": 2,
+    "expert_hidden_multiplier": 2,
+    "complete_expert_projection_ownership": true,
+    "dropless_batched_dispatch": true,
+    "expert_optimizer": "Muon independently over every expert matrix",
+    "router_optimizer": "AdamW"
+  },
+  "accepted_attempt": {
+    "git_commit": "01b162502edb222a47c32d2ce50bc82f48a62ffe",
+    "config_sha256": "211a673d3ab62df0ec831b8da3c512b29ff14ecbbc86ca38119ddfa06234f88e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_retry1/performance_preflight.json",
+    "certificate_sha256": "7379a36759a3d55a2cbc88ff9971a3653c1409f47d9444bdbd86230d2be6c097",
+    "log_sha256": "d973c007e94aa1a0e2bbaa42206e4c46133a57d0489d71fb999f838220e76879",
+    "empirical_bf16_peak_tflops": 418.2301869300142,
+    "model_tflops": 87.27459523504128,
+    "mfu_fraction": 0.20867598265843404,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 116882.76,
+    "iteration_milliseconds": 2247.505,
+    "peak_mib": 46642.72,
+    "all_logged_losses_finite": true,
+    "warmup_updates": 1,
+    "timed_updates": 4
+  },
+  "preserved_failed_attempt": {
+    "classification": "implementation integration failure before timed updates; not an MFU or scientific rejection",
+    "git_commit": "4591ea65a19eb4d55634d44f681d2bb1870037bf",
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu/performance_preflight.json",
+    "certificate_sha256": "fbcff775d38ee6233f6e72abb39be5d0b340604b3103735c1d14f0a6115058ac",
+    "log_sha256": "08a5e39a91c69a0deff7de696fda4f578efde6662303d57193d952ec09114dd5",
+    "cause": "an unconditional legacy ProductFHT finalizer accessed block.mlp.c_proj, while SparseMoEMLP correctly owns expert_c_proj",
+    "repair_commit": "01b162502edb222a47c32d2ce50bc82f48a62ffe"
+  },
+  "authorization": {
+    "124m_active_0p5tpp_lr_screen": true,
+    "larger_rung": false,
+    "generated_expert_arm": false,
+    "reason": "The systems gate authorizes only the dense-complete-expert 124M active LR screen. Larger rungs still require the frozen 124M scientific promotion gates; generated experts still require a passing paired-neuron direction oracle."
+  }
+}

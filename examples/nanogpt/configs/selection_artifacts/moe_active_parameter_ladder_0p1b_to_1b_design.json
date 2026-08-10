@@ -1,7 +1,24 @@
 {
   "schema_version": "mai_sparse_moe_active_parameter_ladder_design_v1",
   "recorded_at": "2026-08-10",
-  "status": "preregistered_pending_model_implementation_and_124m_correctness_mfu_gate",
+  "status": "implemented_124m_exact_config_mfu_passed_lr_screen_authorized_larger_rungs_prepared_but_blocked",
+  "implementation_gate_result": {
+    "implementation_commit": "01b162502edb222a47c32d2ce50bc82f48a62ffe",
+    "focused_tests": "23 passed on PRO6",
+    "cuda_correctness": "finite full-model forward, backward, batched per-expert Muon update, router AdamW update, exact state/optimizer roundtrip, and legacy BlockFHT helper no-op compatibility",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_retry1/performance_preflight.json",
+    "mfu_certificate_sha256": "7379a36759a3d55a2cbc88ff9971a3653c1409f47d9444bdbd86230d2be6c097",
+    "mfu_fraction": 0.20867598265843404,
+    "tokens_per_second": 116882.76,
+    "peak_mib": 46642.72,
+    "passed_minimum_fraction": 0.2,
+    "failed_attempt_preserved": {
+      "classification": "integration_failure_before_timed_updates_not_scientific_failure",
+      "certificate_sha256": "fbcff775d38ee6233f6e72abb39be5d0b340604b3103735c1d14f0a6115058ac",
+      "cause": "legacy ProductFHT pullback finalizer assumed every MLP exposed one c_proj; sparse MoE owns expert_c_proj",
+      "repair": "guard all legacy MLP-only cache and pullback helpers and add lifecycle regression coverage"
+    }
+  },
   "scientific_question": "Can input-conditional routing over complete paired-neuron experts provide the adaptive functional atlas missing from fixed BlockFHT, while preserving the dense ladder's active matrix compute and explicitly accounting for all stored expert, router, optimizer, and checkpoint state?",
   "causal_basis": {
     "attention_result": "The frozen one-percent step-zero KFAC attention atlas was rejected for both V and attention cproj. Its basis was unstable across calibration splits and did not beat the identical-budget BlockFHT control, so another fixed basis is not authorized.",
@@ -69,7 +86,7 @@
       "stored_parameters": 294316800,
       "active_billions": 0.124447488,
       "stored_billions": 0.2943168,
-      "authorization": "implementation_correctness_and_mfu_gate_only"
+      "authorization": "exact_config_mfu_passed_124m_lr_screen_authorized"
     },
     {
       "name": "moe_350m_active",
