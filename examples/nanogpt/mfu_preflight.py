@@ -39,6 +39,41 @@ def load_json_object(path: Path) -> dict[str, Any]:
     return value
 
 
+def execution_provenance(config_path: Path, source: dict[str, Any]) -> dict[str, Any]:
+    root = Path(__file__).resolve().parents[2]
+    commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=root,
+        check=True,
+        text=True,
+        stdout=subprocess.PIPE,
+    ).stdout.strip()
+    paths = (
+        root / "examples/nanogpt/mfu_preflight.py",
+        root / "examples/nanogpt/train.py",
+        root / "examples/nanogpt/model.py",
+        root / "examples/nanogpt/muon.py",
+    )
+    data_manifest = Path(source["data_dir"]) / "manifest.json"
+    return {
+        "git_commit": commit,
+        "entrypoint": "examples.nanogpt.mfu_preflight",
+        "literal_command": [sys.executable, *sys.argv],
+        "config": {
+            "path": str(config_path),
+            "sha256": hashlib.sha256(config_path.read_bytes()).hexdigest(),
+        },
+        "source_sha256": {
+            str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in paths
+        },
+        "dataset_manifest": {
+            "path": str(data_manifest),
+            "sha256": hashlib.sha256(data_manifest.read_bytes()).hexdigest(),
+        },
+    }
+
+
 def estimate_active_params(config: dict[str, Any]) -> int:
     """GPT parameter count used by the conventional 6N model-FLOP estimate."""
     n_layer = int(config["n_layer"])
@@ -399,6 +434,7 @@ def main() -> None:
             **feedback_cap_preflight_metadata(source),
         },
         "passed": False,
+        "provenance": execution_provenance(config_path, source),
     }
     try:
         certificate["native_block_fht_extension"] = (
