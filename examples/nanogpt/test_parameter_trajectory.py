@@ -85,6 +85,29 @@ class StructuredTinyModel(torch.nn.Module):
         self.transformer.h = torch.nn.ModuleList([StructuredBlock()])
 
 
+class SparseExpertMLP(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.expert_c_fc = torch.nn.Parameter(torch.randn(8, 5, 3))
+        self.expert_c_proj = torch.nn.Parameter(torch.randn(8, 3, 5))
+        self.router = torch.nn.Linear(3, 8, bias=False)
+
+
+class SparseExpertBlock(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.mlp = SparseExpertMLP()
+
+
+class SparseExpertTinyModel(torch.nn.Module):
+    def __init__(self) -> None:
+        super().__init__()
+        self.transformer = torch.nn.Module()
+        self.transformer.h = torch.nn.ModuleList(
+            [SparseExpertBlock(), SparseExpertBlock()]
+        )
+
+
 def config_as_dataclass() -> object:
     from dataclasses import make_dataclass
 
@@ -120,6 +143,26 @@ class ParameterTrajectoryTest(unittest.TestCase):
         self.assertEqual(
             set(selected),
             {"transformer.h.1.mlp.c_proj.weight"},
+        )
+
+    def test_collects_direct_sparse_expert_parameters_in_same_namespace(self) -> None:
+        selected = collect_parameters(
+            SparseExpertTinyModel(),
+            targets=[
+                "mlp.expert_c_fc",
+                "mlp.expert_c_proj",
+                "mlp.router",
+            ],
+            dtype="float32",
+            layers=[1],
+        )
+        self.assertEqual(
+            set(selected),
+            {
+                "transformer.h.1.mlp.expert_c_fc",
+                "transformer.h.1.mlp.expert_c_proj",
+                "transformer.h.1.mlp.router.weight",
+            },
         )
 
     def test_collects_all_unique_named_parameters(self) -> None:

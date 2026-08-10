@@ -1,0 +1,70 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_neuron_oracle_plan_v1",
+  "status": "acquisition_prepared_seed1_running_no_generated_training_authorized",
+  "scientific_question": "Can a state-conditioned chart recover the co-adapted c_fc/c_proj directions of complete sparse-MoE experts after respecting expert and hidden-neuron permutation symmetries?",
+  "source_control": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
+    "seed": 1,
+    "scheduled_tokens": 2489057280,
+    "active_tpp": 20.000864,
+    "fixed_eval_steps": [0, 2374, 4748, 7122, 9495],
+    "layers": [0, 5, 11],
+    "experts_per_layer": 8,
+    "tensors": [
+      "mlp.expert_c_fc",
+      "mlp.expert_c_proj",
+      "mlp.router.weight"
+    ],
+    "storage_dtype": "float32"
+  },
+  "symmetry_and_gauge": {
+    "expert_identity": "Match experts jointly by router-logit fingerprints and complete expert residual contributions before pooling across runs.",
+    "neuron_identity": "Match each expert's c_fc row and c_proj column as one functional atom; never align the matrices independently.",
+    "functional_atom": "R_ej(X) = GELU(X @ c_fc[e,j,:]^T) outer c_proj[e,:,j]",
+    "pairwise_atom_inner_product": "<R_ej,R_ek> = <GELU(X a_ej), GELU(X a_ek)> * <b_ej,b_ek>",
+    "matching": "Maximum-weight bipartite assignment on normalized functional-atom similarity using discovery activations.",
+    "scale": "Retain original paired magnitudes after matching because GELU is not positively homogeneous; normalized similarity is for assignment only.",
+    "anti_leakage": "Use disjoint discovery and held-out activation/token batches for alignment and recovery scoring."
+  },
+  "oracles": [
+    {
+      "name": "fixed_blockfht_control",
+      "purpose": "Separate generator-basis mismatch from symmetry-alignment failure."
+    },
+    {
+      "name": "static_paired_neuron_chart",
+      "purpose": "Measure the best state-independent same-gauge chart at matched coordinate budget."
+    },
+    {
+      "name": "state_conditioned_paired_neuron_chart",
+      "purpose": "Test whether routing/state conditioning closes direction mismatch without making the decoder a dense learned basis."
+    }
+  ],
+  "frozen_diagnostic_gates": {
+    "discovery_eval_assignment_overlap_min": 0.75,
+    "heldout_residual_output_recovery_mean_min": 0.90,
+    "heldout_residual_output_recovery_every_probed_layer_min": 0.80,
+    "state_conditioned_minus_static_recovery_min": 0.10,
+    "state_conditioned_minus_fixed_blockfht_recovery_min": 0.10,
+    "expert_occupancy_rule": "Do not score an expert until both splits contain at least 256 routed tokens; report excluded experts explicitly.",
+    "authorization": "No generated-expert training is authorized unless all gates pass on seed 1 and a confirmatory seed with the same frozen analysis."
+  },
+  "confirmatory_acquisition": {
+    "required": true,
+    "seed": 2,
+    "native_trajectory_snapshot_interval": 594,
+    "trajectory_snapshot_dtype": "bfloat16",
+    "layers": [0, 5, 11],
+    "targets": [
+      "mlp.expert_c_fc",
+      "mlp.expert_c_proj",
+      "mlp.router"
+    ],
+    "reason": "Seed 1 fixed-eval snapshots give global chords; the denser seed-2 trajectory is required for local tangent and smoothness tests."
+  },
+  "interpretation_limits": [
+    "The dense-expert MoE control validates routing and complete-map specialization, not Mapping Networks compression.",
+    "A passing oracle shows representability after correct symmetry handling; it does not by itself prove an efficient trainable decoder.",
+    "A failed fixed BlockFHT control with a passing state-conditioned chart localizes the problem to fixed pseudo-random direction mismatch, not MoE routing."
+  ]
+}

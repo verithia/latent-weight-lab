@@ -55,7 +55,14 @@ def parameter_matches(
             return False
         if int(components[2]) not in set(layers):
             return False
-    return any(name.endswith(f".{target}.weight") for target in targets)
+    # Dense modules expose ``...c_fc.weight`` while sparse MoE experts keep
+    # their batched matrices as direct Parameters named ``...expert_c_fc``.
+    # Accept both spellings so a trajectory target denotes the logical tensor
+    # rather than a particular PyTorch registration mechanism.
+    return any(
+        name.endswith(f".{target}") or name.endswith(f".{target}.weight")
+        for target in targets
+    )
 
 
 def collect_parameters(
