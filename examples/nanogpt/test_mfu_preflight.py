@@ -6,6 +6,7 @@ import unittest
 from pathlib import Path
 
 from examples.nanogpt.mfu_preflight import (
+    estimate_active_params,
     feedback_cap_preflight_metadata,
     make_preflight_config,
     parse_feedback_cap_events,
@@ -18,6 +19,18 @@ from examples.nanogpt.mfu_preflight import (
 
 
 class MfuPreflightTest(unittest.TestCase):
+    def test_sparse_moe_mfu_counts_only_active_complete_experts(self) -> None:
+        config = {
+            "n_layer": 12,
+            "n_embd": 768,
+            "vocab_size": 50304,
+            "block_size": 1024,
+            "moe_num_experts": 8,
+            "moe_top_k": 2,
+            "moe_expert_hidden_multiplier": 2,
+        }
+        self.assertEqual(estimate_active_params(config), 124447488)
+
     def test_registered_selection_config_becomes_non_scientific_scratch_probe(self) -> None:
         source = {
             "mai_ladder_policy_version": "mai_ladder_selection_v2",

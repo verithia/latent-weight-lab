@@ -45,6 +45,19 @@ def estimate_active_params(config: dict[str, Any]) -> int:
     n_embd = int(config["n_embd"])
     vocab_size = int(config.get("vocab_size", 50304))
     block_size = int(config["block_size"])
+    num_experts = int(config.get("moe_num_experts", 0))
+    if num_experts > 0:
+        top_k = int(config["moe_top_k"])
+        hidden_multiplier = int(config["moe_expert_hidden_multiplier"])
+        shared = (
+            vocab_size * n_embd
+            + block_size * n_embd
+            + n_layer * (4 * n_embd * n_embd + 2 * n_embd)
+            + n_embd
+        )
+        single_expert = 2 * hidden_multiplier * n_embd * n_embd
+        router = n_layer * num_experts * n_embd
+        return int(shared + router + n_layer * top_k * single_expert)
     # GPT decoder block: QKV, projection, two FFN linears and two layer norms.
     per_block = 12 * n_embd * n_embd + 13 * n_embd
     embeddings = vocab_size * n_embd + block_size * n_embd
