@@ -90,6 +90,23 @@
       "next_fixed_eval_iter": 7122,
       "paired_acquisition_errors": 0,
       "intervention_required": false
+    },
+    "heartbeat_iter_7330": {
+      "callback_iter": 7330,
+      "verified_iter": 7360,
+      "recent_training_loss": 3.1544,
+      "best_recent_training_loss": 3.0916,
+      "process_alive": true,
+      "gpu_memory_mib": 68147,
+      "gpu_utilization_percent": 99,
+      "gpu_power_watts": 557.33,
+      "gpu_temperature_c": 58,
+      "iteration_milliseconds_recent": 2097.59,
+      "last_published_checkpoint_iter": 7122,
+      "next_fixed_eval_iter": 9495,
+      "paired_acquisition_errors": 0,
+      "estimated_remaining_wall_hours": 1.3,
+      "intervention_required": false
     }
   },
   "fixed_evaluations": {
@@ -116,6 +133,21 @@
       "paired_snapshot_sha256": "3ffdefca26bb921633e2aa84ff0f4d156ee87a18c8ebee97a554d4912e9001a0",
       "paired_snapshot_bytes": 226591213,
       "interpretation": "The selected MoE continues to improve smoothly at the 10TPP midpoint. Dense-relative acceptance remains terminal because the sealed dense reference exposes only its 20TPP endpoint."
+    },
+    "step_7122": {
+      "train_loss_log_precision": 3.1456,
+      "validation_loss_log_precision": 3.122,
+      "delta_validation_ce_vs_step_4748_log_precision": -0.1212,
+      "delta_validation_ce_vs_step_2374_log_precision": -0.3197,
+      "perplexity_ratio_vs_step_4748": 0.88586,
+      "perplexity_ratio_vs_step_2374": 0.72637,
+      "matched_dense_15tpp_validation_ce": null,
+      "matched_dense_15tpp_reference_status": "not available in the sealed dense artifact; terminal-only dense comparison remains the acceptance criterion",
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "paired_snapshot_sha256": "bb921f0dc28ac39402f6306b67b9a2bd8618f829ea9a14f0ad47828256c6f5e3",
+      "paired_snapshot_bytes": 226591213,
+      "source_checkpoint_sha256": "1b42ea77ef48d85e9a42760e0c3d9f3b06c073f9c3306d99e414a91ffd7e6b31",
+      "interpretation": "The 15TPP checkpoint is finite and continues the monotone fixed-evaluation improvement. Scientific acceptance remains frozen to the 20TPP terminal comparison."
     }
   },
   "paired_neuron_geometry_acquisition": {
@@ -138,6 +170,12 @@
       },
       "step_4748": {
         "sha256": "3ffdefca26bb921633e2aa84ff0f4d156ee87a18c8ebee97a554d4912e9001a0",
+        "bytes": 226591213,
+        "tensor_count": 9,
+        "tensor_bytes": 226566144
+      },
+      "step_7122": {
+        "sha256": "bb921f0dc28ac39402f6306b67b9a2bd8618f829ea9a14f0ad47828256c6f5e3",
         "bytes": 226591213,
         "tensor_count": 9,
         "tensor_bytes": 226566144
@@ -175,6 +213,10 @@
     "project_cap_headroom_bytes_at_50_percent": 4010660595,
     "remaining_compact_snapshot_bytes": 453182426,
     "real_filesystem_free_bytes_at_50_percent": 1638688002048,
+    "workspace_bytes_at_15tpp": 271093848415,
+    "project_cap_headroom_bytes_at_15tpp": 3784058529,
+    "remaining_compact_snapshot_bytes_at_15tpp": 226591213,
+    "real_filesystem_free_bytes_at_15tpp": 1638461403136,
     "compacted_lr24e4_0p5tpp_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
     "compacted_lr20e4_0p5tpp_snapshot_sha256": "4f878977c1c4a6db218492b948742b5de03ef7d931939bd3ee7880f1b7a24016",
     "atomic_checkpoint_headroom_preserved": true
