@@ -85,6 +85,11 @@ class GPTConfig:
     n_embd: int = 768
     dropout: float = 0.0
     bias: bool = False
+    moe_num_experts: int = 0
+    moe_top_k: int = 2
+    moe_expert_hidden_multiplier: int = 2
+    moe_load_balance_aux_coefficient: float = 0.01
+    moe_router_z_loss_coefficient: float = 0.001
     block_fht: bool = False
     block_fht_targets: tuple[str, ...] = ("attn.c_attn", "attn.c_proj", "mlp.c_fc", "mlp.c_proj")
     block_fht_latent_ratio: float = 0.01
@@ -1819,6 +1824,163 @@ class CausalSelfAttention(nn.Module):
             self.active_cayley_atlas_stage,
         )
         return self.resid_dropout(y)
+
+
+class SparseMoEMLP(nn.Module):
+    """Dropless token-choice MoE with complete paired GELU experts.
+
+    Both expert matrices are stored in batched parameters and executed with
+    two batched GEMMs after deterministic token packing.  There is no Python
+    expert loop and no shared post-mixture projection.
+    """
+
+    def __init__(self, config: GPTConfig, layer_id: int) -> None:
+        super().__init__()
+        self.layer_id = int(layer_id)
+        self.n_embd = int(config.n_embd)
+        self.num_experts = int(config.moe_num_experts)
+        self.top_k = int(config.moe_top_k)
+        self.hidden_features = int(
+            config.moe_expert_hidden_multiplier * config.n_embd
+        )
+        if self.num_experts < 2:
+            raise ValueError("sparse MoE requires at least two experts")
+        if self.top_k < 1 or self.top_k > self.num_experts:
+            raise ValueError("moe_top_k must be in [1, moe_num_experts]")
+        if self.hidden_features <= 0:
+            raise ValueError("MoE expert hidden width must be positive")
+        for name, value in (
+            (
+                "moe_load_balance_aux_coefficient",
+                config.moe_load_balance_aux_coefficient,
+            ),
+            (
+                "moe_router_z_loss_coefficient",
+                config.moe_router_z_loss_coefficient,
+            ),
+        ):
+            if not math.isfinite(float(value)) or float(value) < 0.0:
+                raise ValueError(f"{name} must be finite and non-negative")
+
+        self.router = nn.Linear(self.n_embd, self.num_experts, bias=False)
+        self.expert_c_fc = nn.Parameter(
+            torch.empty(self.num_experts, self.hidden_features, self.n_embd)
+        )
+        self.expert_c_proj = nn.Parameter(
+            torch.empty(self.num_experts, self.n_embd, self.hidden_features)
+        )
+        # Muon must orthogonalize each expert matrix independently, not flatten
+        # the expert axis into one unrelated rectangular matrix.
+        self.expert_c_fc._muon_batched_matrices = True
+        self.expert_c_proj._muon_batched_matrices = True
+        nn.init.normal_(self.expert_c_fc, mean=0.0, std=0.02)
+        nn.init.normal_(
+            self.expert_c_proj,
+            mean=0.0,
+            std=0.02 / math.sqrt(2 * config.n_layer),
+        )
+        self.dropout = nn.Dropout(config.dropout)
+        self.last_load_balance_loss: torch.Tensor | None = None
+        self.last_router_z_loss: torch.Tensor | None = None
+        self.last_expert_counts: torch.Tensor | None = None
+        self.last_assignment_count = 0
+        self.last_max_tokens_per_expert: torch.Tensor | None = None
+
+    def _route(
+        self, flat: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        logits = self.router(flat).float()
+        # Use a selection-only expert-index tiebreak. Mixture probabilities are
+        # still computed from the unmodified selected logits.
+        tie = torch.arange(
+            self.num_experts, device=logits.device, dtype=logits.dtype
+        )
+        selection_logits = logits - tie * torch.finfo(logits.dtype).eps
+        _values, expert_indices = torch.topk(
+            selection_logits,
+            self.top_k,
+            dim=-1,
+            largest=True,
+            sorted=True,
+        )
+        selected_logits = logits.gather(-1, expert_indices)
+        selected_probabilities = F.softmax(selected_logits, dim=-1).to(
+            dtype=flat.dtype
+        )
+        return logits, expert_indices, selected_probabilities
+
+    def _router_losses(
+        self, logits: torch.Tensor, expert_indices: torch.Tensor
+    ) -> None:
+        probabilities = F.softmax(logits, dim=-1)
+        importance = probabilities.mean(dim=0)
+        load = F.one_hot(
+            expert_indices, num_classes=self.num_experts
+        ).float().mean(dim=(0, 1))
+        self.last_load_balance_loss = self.num_experts * torch.sum(
+            importance * load
+        )
+        self.last_router_z_loss = torch.logsumexp(logits, dim=-1).square().mean()
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        original_shape = x.shape
+        flat = x.reshape(-1, self.n_embd)
+        logits, expert_indices, selected_probabilities = self._route(flat)
+        self._router_losses(logits, expert_indices)
+
+        assignments = expert_indices.numel()
+        token_indices = torch.arange(
+            flat.shape[0], device=flat.device, dtype=torch.long
+        ).repeat_interleave(self.top_k)
+        flat_experts = expert_indices.reshape(-1)
+        flat_probabilities = selected_probabilities.reshape(-1)
+        order = torch.argsort(flat_experts, stable=True)
+        sorted_experts = flat_experts.index_select(0, order)
+        sorted_tokens = token_indices.index_select(0, order)
+        sorted_probabilities = flat_probabilities.index_select(0, order)
+        counts = torch.bincount(flat_experts, minlength=self.num_experts)
+        offsets = counts.cumsum(0) - counts
+        positions = torch.arange(
+            assignments, device=flat.device, dtype=torch.long
+        ) - offsets.index_select(0, sorted_experts)
+        max_tokens = counts.max()
+
+        # Zero padding is exact because experts are bias-free and GELU(0)=0.
+        packed = flat.new_zeros(
+            (self.num_experts, max_tokens, self.n_embd)
+        )
+        packed[sorted_experts, positions] = flat.index_select(0, sorted_tokens)
+        hidden = torch.bmm(
+            packed, self.expert_c_fc.transpose(1, 2)
+        )
+        hidden = F.gelu(hidden)
+        expert_output = torch.bmm(
+            hidden, self.expert_c_proj.transpose(1, 2)
+        )
+        sorted_output = expert_output[sorted_experts, positions]
+        output = flat.new_zeros(flat.shape)
+        output.index_add_(
+            0,
+            sorted_tokens,
+            sorted_output * sorted_probabilities.unsqueeze(-1),
+        )
+
+        self.last_expert_counts = counts.detach()
+        self.last_assignment_count = int(assignments)
+        self.last_max_tokens_per_expert = max_tokens.detach()
+        return self.dropout(output.reshape(original_shape))
+
+    def router_auxiliary_loss(self) -> tuple[torch.Tensor, torch.Tensor]:
+        if self.last_load_balance_loss is None or self.last_router_z_loss is None:
+            zero = self.expert_c_fc.new_zeros(())
+            return zero, zero
+        return self.last_load_balance_loss, self.last_router_z_loss
+
+    def postgelu_spread_loss(self) -> None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> None:
+        return None
 
 
 class MLP(nn.Module):
@@ -3959,13 +4121,17 @@ class Block(nn.Module):
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
         self.attn = CausalSelfAttention(config, layer_id)
         self.ln_2 = LayerNorm(config.n_embd, bias=config.bias)
-        self.mlp = MLP(config, layer_id)
+        self.mlp = (
+            SparseMoEMLP(config, layer_id)
+            if config.moe_num_experts > 0
+            else MLP(config, layer_id)
+        )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.attn(self.ln_1(x))
         mlp_input = self.ln_2(x)
         mlp_output = self.mlp(mlp_input)
-        if (
+        if isinstance(self.mlp, SparseMoEMLP) or (
             self.mlp.residual_conditioned_output_slope is None
             or self.mlp.conditioned_output_gate_source == "postgelu"
         ):
@@ -3979,6 +4145,10 @@ class Block(nn.Module):
 class GPT(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()
+        if config.moe_num_experts > 0 and config.block_fht:
+            raise ValueError(
+                "dense-complete-expert MoE control cannot be combined with BlockFHT"
+            )
         cproj_layers = tuple(
             config.block_fht_mlp_cproj_muon_matched_givens_layers
         )
@@ -4062,7 +4232,59 @@ class GPT(nn.Module):
         loss = None
         if targets is not None:
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1)
+            if self.training and self.config.moe_num_experts > 0:
+                load_balance, router_z = self.moe_router_losses()
+                loss = (
+                    loss
+                    + float(self.config.moe_load_balance_aux_coefficient)
+                    * load_balance
+                    + float(self.config.moe_router_z_loss_coefficient)
+                    * router_z
+                )
         return logits, loss
+
+    def moe_router_losses(self) -> tuple[torch.Tensor, torch.Tensor]:
+        losses = [
+            block.mlp.router_auxiliary_loss()
+            for block in self.transformer.h
+            if isinstance(block.mlp, SparseMoEMLP)
+        ]
+        if not losses:
+            zero = next(self.parameters()).new_zeros(())
+            return zero, zero
+        load_balance, router_z = zip(*losses, strict=True)
+        return torch.stack(load_balance).mean(), torch.stack(router_z).mean()
+
+    def moe_parameter_stats(self) -> dict[str, int]:
+        if self.config.moe_num_experts <= 0:
+            return {"active": 0, "stored": 0, "expert": 0, "router": 0}
+        experts = [
+            block.mlp
+            for block in self.transformer.h
+            if isinstance(block.mlp, SparseMoEMLP)
+        ]
+        if len(experts) != self.config.n_layer:
+            raise RuntimeError("every transformer layer must own one sparse MoE")
+        expert = sum(
+            module.expert_c_fc.numel() + module.expert_c_proj.numel()
+            for module in experts
+        )
+        router = sum(module.router.weight.numel() for module in experts)
+        stored = sum(parameter.numel() for parameter in self.parameters())
+        inactive_expert = sum(
+            (module.num_experts - module.top_k)
+            * (
+                module.expert_c_fc[0].numel()
+                + module.expert_c_proj[0].numel()
+            )
+            for module in experts
+        )
+        return {
+            "active": stored - inactive_expert,
+            "stored": stored,
+            "expert": expert,
+            "router": router,
+        }
 
     def postgelu_spread_loss(self) -> torch.Tensor:
         losses = []
@@ -4183,7 +4405,8 @@ class GPT(nn.Module):
         functional_shear_pairs = [
             (block.mlp.c_fc, block.mlp.c_proj)
             for block in self.transformer.h
-            if isinstance(block.mlp.c_fc, MuonFunctionalShearLinear)
+            if isinstance(block.mlp, MLP)
+            and isinstance(block.mlp.c_fc, MuonFunctionalShearLinear)
         ]
         directed_product_modules = [
             module
@@ -4199,6 +4422,12 @@ class GPT(nn.Module):
                 "Muon chart optimizers require optimizer='muon'"
             )
         if optimizer == "muon":
+            moe_router_named = [
+                (name, param)
+                for name, param in params.items()
+                if ".mlp.router." in name
+            ]
+            moe_router_ids = {id(param) for _, param in moe_router_named}
             attention_cayley_tokens = (
                 ".qk_input_cayley.",
                 ".qk_output_cayley.",
@@ -4273,17 +4502,21 @@ class GPT(nn.Module):
                 and "lm_head" not in name
                 and id(param) not in product_factor_ids
                 and id(param) not in attention_cayley_matrix_ids
+                and id(param) not in moe_router_ids
             ]
             other = [
                 param
                 for name, param in params.items()
                 if (
-                    param.dim() < 2
-                    or "wte" in name
-                    or "wpe" in name
-                    or "lm_head" in name
+                    (
+                        param.dim() < 2
+                        or "wte" in name
+                        or "wpe" in name
+                        or "lm_head" in name
+                    )
+                    and id(param) not in product_factor_ids
                 )
-                and id(param) not in product_factor_ids
+                or id(param) in moe_router_ids
             ]
             chart_names = (
                 "hidden_block_rotation.coordinates",

@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_attention_vo_moving_tangent_sealed_result_v1",
+  "recorded_at": "2026-08-10T09:58:58.695192+00:00",
+  "classification": "ATTENTION_VO_MOVING_TANGENT_REJECT",
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "git_commit": "6cb2a06189d70cdfe9a3ffe958680ae866b766d1",
+    "parameter_updates": 0,
+    "elapsed_seconds": 7.620306968688965
+  },
+  "identity": {
+    "plan_sha256": "f55ef59c250c09c228fd816cbb5a17612c6d7834f3ad1c4cf908e2441fcb8b00",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_metric_batch_sha256": "5618db13ba1e2a7eb9d679e04beccf61662e0fd9f8a04aaa7c81886b078c284a",
+    "eval_metric_batch_sha256": "d2713ea6d1aa1358ff9db08322c5e289f3cd91d14aa1148c742113cd350cc752"
+  },
+  "selection": {
+    "selected_window": 8,
+    "selection_score": 0.0024479772980069425,
+    "selection_chord_aggregate_recovery": 0.05710919305565285,
+    "selection_muon_aggregate_recovery": 0.02288042050882244
+  },
+  "heldout_test": {
+    "chord": {
+      "aggregate_eval_recovery": 0.0668710038564846,
+      "minimum_layer_eval_recovery": 0.00948145805913516,
+      "minimum_late_layer_eval_recovery": 0.00948145805913516,
+      "maximum_atlas_atoms": 12,
+      "maximum_atlas_rank": 12
+    },
+    "muon_direction": {
+      "aggregate_eval_recovery": 0.03005046445637013,
+      "minimum_layer_eval_recovery": 0.009559542490783057,
+      "minimum_late_layer_eval_recovery": 0.009559542490783057,
+      "maximum_atlas_atoms": 12,
+      "maximum_atlas_rank": 12
+    }
+  },
+  "checks": {
+    "chord_aggregate": false,
+    "chord_every_layer": false,
+    "chord_late_layers": false,
+    "muon_direction_aggregate": false,
+    "muon_direction_every_layer": false,
+    "muon_direction_late_layers": false
+  },
+  "decision": {
+    "causal_moving_tangent_design_gate_authorized": false,
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "deduction": "Strictly past quotient chords and Muon directions do not predict the future tangent bundle. The successor must be nonlinear and state- or token-conditioned; sparse routing is relevant only when each selected expert owns a complete paired feature/readout map."
+  },
+  "remote_raw_artifacts": {
+    "result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_moving_tangent_v1/result.json",
+      "bytes": 6227,
+      "sha256": "3c4caa33b5610016b0ed03c450b0971619d1fcc7c55e7c836e1de65299a65b93"
+    },
+    "cells": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_moving_tangent_v1/attention_vo_moving_tangent_cells.csv",
+      "bytes": 95965,
+      "sha256": "2a3742cc74b634013be23a32d7bcfe076591b35331f078314f3bf02a1e0420a1"
+    }
+  },
+  "all_reported_values_finite": true
+}

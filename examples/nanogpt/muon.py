@@ -68,6 +68,28 @@ def muon_update(
     return torch.cat(blocks, dim=0)
 
 
+def muon_update_batched(update: torch.Tensor, *, steps: int) -> torch.Tensor:
+    """Apply the ordinary Muon polar update independently to a matrix batch."""
+    if update.ndim != 3:
+        raise ValueError("batched Muon expects [batch, rows, columns]")
+    rows, columns = update.shape[-2:]
+    x = update.float()
+    transposed = rows > columns
+    if transposed:
+        x = x.transpose(-2, -1)
+    x = x / (
+        x.square().sum(dim=(-2, -1), keepdim=True).sqrt() + 1e-7
+    )
+    a, b, c = 3.4445, -4.7750, 2.0315
+    for _ in range(int(steps)):
+        xx_t = torch.bmm(x, x.transpose(-2, -1))
+        x = a * x + torch.bmm(b * xx_t + c * torch.bmm(xx_t, xx_t), x)
+    if transposed:
+        x = x.transpose(-2, -1)
+    scale = max(1.0, rows / max(1, columns)) ** 0.5
+    return x.mul(scale).to(dtype=update.dtype)
+
+
 class Muon(torch.optim.Optimizer):
     def __init__(
         self,
@@ -103,10 +125,13 @@ class Muon(torch.optim.Optimizer):
                 buf = state["momentum_buffer"]
                 buf.mul_(momentum).add_(grad)
                 update = grad.add(buf, alpha=momentum)
-                update = muon_update(
-                    update,
-                    steps=ns_steps,
-                    row_splits=getattr(param, "_muon_row_splits", None),
-                )
+                if getattr(param, "_muon_batched_matrices", False):
+                    update = muon_update_batched(update, steps=ns_steps)
+                else:
+                    update = muon_update(
+                        update,
+                        steps=ns_steps,
+                        row_splits=getattr(param, "_muon_row_splits", None),
+                    )
                 param.add_(update, alpha=-lr)
         return loss

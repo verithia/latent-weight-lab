@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DESIGN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_moving_tangent_design.json"
 PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_moving_tangent_plan.json"
+RESULT = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_moving_tangent_result.json"
 
 
 def sha256(path: Path) -> str:
@@ -41,3 +42,14 @@ def test_moving_tangent_plan_pins_code_and_design() -> None:
     assert identity["entrypoint_sha256"] == sha256(entrypoint)
     assert identity["design_sha256"] == sha256(DESIGN)
     assert all(value is False for value in plan["authorization"].values())
+
+
+def test_moving_tangent_result_rejects_past_memory() -> None:
+    result = json.loads(RESULT.read_text())
+    assert result["classification"] == "ATTENTION_VO_MOVING_TANGENT_REJECT"
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["selection"]["selected_window"] == 8
+    assert result["heldout_test"]["chord"]["aggregate_eval_recovery"] < 0.07
+    assert result["heldout_test"]["muon_direction"]["aggregate_eval_recovery"] < 0.04
+    assert all(value is False for value in result["checks"].values())
+    assert result["decision"]["language_model_training_authorized"] is False

@@ -1062,6 +1062,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--vocab-size", type=int, default=50304)
     parser.add_argument("--dropout", type=float, default=0.0)
     parser.add_argument("--bias", action="store_true")
+    parser.add_argument("--moe-num-experts", type=int, default=0)
+    parser.add_argument("--moe-top-k", type=int, default=2)
+    parser.add_argument("--moe-expert-hidden-multiplier", type=int, default=2)
+    parser.add_argument(
+        "--moe-load-balance-aux-coefficient", type=float, default=0.01
+    )
+    parser.add_argument(
+        "--moe-router-z-loss-coefficient", type=float, default=0.001
+    )
     parser.add_argument("--learning-rate", type=float, default=6e-4)
     parser.add_argument("--min-lr", type=float, default=6e-5)
     parser.add_argument("--warmup-iters", type=int, default=100)
@@ -1719,6 +1728,16 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--perf-warmup-iters must be >= 0")
     if namespace.checkpoint_wall_clock_seconds <= 0:
         raise ValueError("--checkpoint-wall-clock-seconds must be > 0")
+    if namespace.moe_num_experts < 0:
+        raise ValueError("--moe-num-experts must be non-negative")
+    if namespace.moe_num_experts > 0 and not (
+        1 <= namespace.moe_top_k <= namespace.moe_num_experts
+    ):
+        raise ValueError("--moe-top-k must be in [1, --moe-num-experts]")
+    if namespace.moe_expert_hidden_multiplier <= 0:
+        raise ValueError("--moe-expert-hidden-multiplier must be positive")
+    if namespace.moe_num_experts > 0 and namespace.method != "baseline":
+        raise ValueError("dense-complete-expert MoE control requires method=baseline")
     atlas_steps = tuple(namespace.block_fht_attn_cayley_atlas_start_steps)
     if atlas_steps and (
         atlas_steps[0] != 0
@@ -2453,6 +2472,13 @@ def main() -> None:
         n_embd=args.n_embd,
         dropout=args.dropout,
         bias=args.bias,
+        moe_num_experts=args.moe_num_experts,
+        moe_top_k=args.moe_top_k,
+        moe_expert_hidden_multiplier=args.moe_expert_hidden_multiplier,
+        moe_load_balance_aux_coefficient=(
+            args.moe_load_balance_aux_coefficient
+        ),
+        moe_router_z_loss_coefficient=args.moe_router_z_loss_coefficient,
         block_fht=args.method == "block_fht",
         block_fht_targets=tuple(args.block_fht_targets),
         block_fht_latent_ratio=args.block_fht_latent_ratio,
@@ -2841,6 +2867,13 @@ def main() -> None:
     total_params = sum(param.numel() for param in raw_model.parameters())
     trainable_params = sum(param.numel() for param in raw_model.parameters() if param.requires_grad)
     print(f"parameters: total={total_params:,} trainable={trainable_params:,}")
+    if args.moe_num_experts > 0:
+        moe_stats = raw_model.moe_parameter_stats()
+        print(
+            "moe: "
+            f"active={moe_stats['active']:,} stored={moe_stats['stored']:,} "
+            f"expert={moe_stats['expert']:,} router={moe_stats['router']:,}"
+        )
     if args.method == "block_fht":
         stats = raw_model.block_fht_stats()
         print(
