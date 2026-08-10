@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_sparse_moe_seed2_geometry_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-11T04:44:28+08:00",
+  "process_group": 151103,
+  "max_iters": 9495,
+  "scheduled_tokens": 2489057280,
+  "scheduled_active_tpp": 20.000863978869546,
+  "git_commit": "17ebd93880e2937c50c09161a4a5ffd9abce712f",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_trajectory_lr24e4.json",
+    "sha256": "aa12926a7a3dd36b5f44ed8fb1bf07c00f3ad9ffb5a1dddc6cf4d90443521a20",
+    "archived": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_20260810T204428Z_151078.config.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_20tpp_seed2_trajectory_lr24e4/performance_preflight.json",
+    "sha256": "7c92eb5eafd2757431ee55cd05706a262ea6c51242ba4a1047c0d97be543ba1e",
+    "mfu_fraction": 0.20395422884040945,
+    "tokens_per_second": 114011.34268118718,
+    "iteration_milliseconds": 2299.2799999999997,
+    "peak_mib": 45105.28,
+    "trajectory_snapshot_io_included": true
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_20260810T204428Z_151078.json",
+    "sha256": "bb83c3f900638e21aca52a3cb6fd82ed1f1de639250c813f1563518ad49b9ca1"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_20260810T204428Z_151078.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_20260810T204428Z_151078.json",
+  "initial_live_verification": {
+    "last_iter": 10,
+    "last_training_loss": 10.4837,
+    "fixed_step_zero_train_ce": 10.9548,
+    "fixed_step_zero_validation_ce": 10.9546,
+    "process_alive": true,
+    "gpu_memory_mib": 63179,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 562.79,
+    "gpu_temperature_c": 52,
+    "iteration_milliseconds_recent": 2431.51,
+    "estimated_total_wall_hours": "6.3-6.7"
+  },
+  "geometry_acquisition": {
+    "model_seed": 1338,
+    "train_data_seed": 20260715,
+    "snapshot_interval": 594,
+    "snapshot_dtype": "bfloat16",
+    "snapshot_layers": [0, 5, 11],
+    "snapshot_targets": [
+      "mlp.expert_c_fc",
+      "mlp.expert_c_proj",
+      "mlp.router"
+    ],
+    "expected_snapshots": 17,
+    "purpose": "Resolve local tangent and smoothness of paired complete-expert trajectories under a second seed; this is an acquisition control, not generated-expert training."
+  },
+  "storage_admission": {
+    "workspace_bytes_after_step_zero_snapshot": 266723087451,
+    "workspace_cap_bytes": 274877906944,
+    "project_cap_headroom_bytes": 8154819493,
+    "atomic_checkpoint_headroom_preserved": true
+  },
+  "monitoring": {
+    "policy": "aggregate 20/50/80/100 milestones plus errors/stalls and a 90-minute heartbeat reset by a delivered progress callback",
+    "launchd_label": "com.mappingnetworks.pro6.moe124.seed2-geometry",
+    "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_sparse_moe_seed2_geometry.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mentions": "@Codex",
+    "callback_action": "verify evidence, update durable state, run the frozen recovery oracle after terminal sealing, and continue autonomously"
+  },
+  "authorization": {
+    "seed2_dense_geometry_acquisition": true,
+    "generated_expert_training": false,
+    "larger_rung": false
+  }
+}

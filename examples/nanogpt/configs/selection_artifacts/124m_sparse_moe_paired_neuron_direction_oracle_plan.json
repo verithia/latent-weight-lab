@@ -95,5 +95,15 @@
     "minimum_mfu_fraction": 0.2,
     "trajectory_snapshot_io_included": true,
     "authorization_scope": "The dense seed-two trajectory acquisition only; generated-expert training and larger rungs remain blocked on the frozen recovery gates."
+  },
+  "seed2_acquisition_run": {
+    "status": "running",
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4",
+    "git_commit": "17ebd93880e2937c50c09161a4a5ffd9abce712f",
+    "process_group": 151103,
+    "started_at": "2026-08-11T04:44:28+08:00",
+    "initial_verified_iter": 10,
+    "watchdog": "com.mappingnetworks.pro6.moe124.seed2-geometry",
+    "next_causal_action": "Seal all 17 BF16 trajectory snapshots and terminal fixed evaluation, then apply the same frozen paired-neuron recovery analysis before authorizing any generated expert."
   }
 }

@@ -220,7 +220,7 @@
     "progress_callback_resets_heartbeat": true
   },
   "launch_authorization": {
-    "current": "124m_dense_complete_expert_20tpp_passed_zero_update_paired_direction_audit_next",
-    "reason": "The selected 2.4e-3 124M-active control finished cleanly at exact validation CE 3.061672449, about 0.09303 below the matched dense endpoint 3.1547. This validates conditional complete-expert specialization. It does not validate generated experts. The preregistered zero-update paired-neuron alignment audit is next; a seed-two structural replication plus its exact snapshot-I/O MFU gate is still required before any larger rung. Generated-expert training remains blocked on the frozen state-conditioned decoder recovery gates."
+    "current": "124m_seed2_dense_complete_expert_geometry_acquisition_running",
+    "reason": "The selected 2.4e-3 124M-active control finished cleanly at exact validation CE 3.061672449, about 0.09303 below the matched dense endpoint 3.1547. The seed-one same-gauge assignment audit passed and rejected hidden permutation as the main direction explanation. After verified storage reclaim and an exact authorized-config diagnostic-I/O gate at 20.3954% MFU, the second-seed dense geometry acquisition was launched. Generated-expert training and every larger rung remain blocked on the frozen state-conditioned decoder recovery gates."
   }
 }
