@@ -38,13 +38,16 @@ class MfuPreflightTest(unittest.TestCase):
             "save_checkpoint": True,
             "checkpoint_history": False,
             "lr_decay_iters": 100,
+            "launch_ready": False,
         }
         probe = make_preflight_config(source, Path("/tmp/probe"), 2, 3)
         self.assertNotIn("mai_ladder_policy_version", probe)
         self.assertFalse(probe["registered_resume_determinism_required"])
         self.assertFalse(probe["save_checkpoint"])
+        self.assertTrue(probe["launch_ready"])
         self.assertEqual(probe["trajectory_snapshot_interval"], 0)
         self.assertEqual(source["mai_ladder_policy_version"], "mai_ladder_selection_v2")
+        self.assertFalse(source["launch_ready"])
 
     def test_diagnostic_io_can_be_preserved_for_strict_gate(self) -> None:
         source = {

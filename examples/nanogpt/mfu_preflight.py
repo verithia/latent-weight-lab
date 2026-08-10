@@ -249,6 +249,10 @@ def make_preflight_config(
     # so it must not masquerade as a registered scientific rung.
     config.pop("mai_ladder_policy_version", None)
     config["registered_resume_determinism_required"] = False
+    # A registered candidate can remain launch-blocked until this exact gate
+    # passes.  The scratch copy must still be executable so the gate can make
+    # that decision; never mutate the immutable scientific source mapping.
+    config["launch_ready"] = True
     config["out_dir"] = str(temporary_out)
     config["init_from"] = "scratch"
     config["max_iters"] = effective_warmups + timed
