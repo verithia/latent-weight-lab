@@ -39,15 +39,13 @@ from examples.nanogpt.analyze_attention_paper_activation_oracle import (
     file_sha256,
     terminal_attention_metrics,
 )
-from examples.nanogpt.analyze_mlp_activation_update_alignment import (
-    load_snapshot,
-    model_from_snapshot,
-)
 from examples.nanogpt.analyze_mlp_cproj_paper_activation_oracle import (
     cgls,
     explained_energy,
 )
 from examples.nanogpt.analyze_residual_compatibility import fixed_validation_batches
+from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.parameter_trajectory import SUPPORTED_SCHEMA_VERSIONS
 from examples.nanogpt.train import require_block_fht_native_extension
 from latent_weight_lab.block_fht import block_fht_grad_latent, block_fht_slice
 
@@ -56,6 +54,55 @@ TARGETS = ("v", "cproj")
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PLAN_SCHEMA = "mai_124m_attention_stepzero_functional_atlas_plan_v1"
 RESULT_SCHEMA = "mai_124m_attention_stepzero_functional_atlas_result_v1"
+
+
+def load_target_snapshot(path: Path) -> dict[str, Any]:
+    """Load a target-complete trajectory snapshot without claiming full state."""
+
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    if (
+        not isinstance(payload, dict)
+        or payload.get("schema_version") not in SUPPORTED_SCHEMA_VERSIONS
+    ):
+        raise ValueError(f"not a supported trajectory snapshot: {path}")
+    parameters = payload.get("parameters")
+    if not isinstance(parameters, dict) or not parameters:
+        raise ValueError(f"snapshot has no parameters: {path}")
+    return payload
+
+
+def model_from_exact_stepzero_targets(
+    payload: dict[str, Any], device: str, model_seed: int
+) -> GPT:
+    """Rebuild dense step zero and prove equality on every stored target tensor.
+
+    The original run initialized on CPU and only then moved the model to CUDA.
+    Repeating that order is necessary: direct CUDA initialization uses a
+    different random stream despite the same seed.
+    """
+
+    if int(payload.get("step", -1)) != 0:
+        raise ValueError("step-zero model reconstruction requires step 0")
+    torch.manual_seed(int(model_seed))
+    model = GPT(GPTConfig(**payload["model_config"]))
+    destination = dict(model.named_parameters())
+    source = payload["parameters"]
+    unexpected = sorted(set(source) - set(destination))
+    if unexpected:
+        raise ValueError(f"step-zero snapshot has unknown parameters: {unexpected}")
+    mismatches = []
+    for name, expected in source.items():
+        observed = destination[name].detach().cpu().to(dtype=expected.dtype)
+        if not torch.equal(observed, expected):
+            mismatches.append(name)
+    if mismatches:
+        raise ValueError(
+            "seeded step-zero reconstruction does not match stored targets: "
+            f"{mismatches}"
+        )
+    model.to(device)
+    model.eval()
+    return model
 
 
 def empirical_second_moment(rows: torch.Tensor) -> torch.Tensor:
@@ -390,6 +437,7 @@ def validate_plan(plan: dict[str, Any], args: argparse.Namespace) -> None:
     protocol = plan["protocol"]
     frozen = {
         "parameter_updates": 0,
+        "model_seed": 1337,
         "coordinate_fraction": 0.01,
         "calibration_centering": False,
         "calibration_batch_size": 2,
@@ -695,11 +743,17 @@ def main() -> None:
     heldout_probes = {int(value) for value in protocol["heldout_probe_steps"]}
     inventory, inventory_sha = trajectory_inventory(args.trajectory_dir)
 
+    config = json.loads((REPO_ROOT / plan["identity"]["dense_config"]).read_text())
+    model_seed = int(config["model_seed"])
+    if model_seed != int(protocol["model_seed"]):
+        raise ValueError("dense-config model seed differs from frozen protocol")
     snapshots: dict[int, dict[str, torch.Tensor]] = {}
     run_identity = None
     stepzero_payload = None
     for step in steps:
-        payload = load_snapshot(args.trajectory_dir / f"step_{step:06d}.pt")
+        payload = load_target_snapshot(
+            args.trajectory_dir / f"step_{step:06d}.pt"
+        )
         if run_identity is None:
             run_identity = payload["run_identity_sha256"]
             stepzero_payload = payload
@@ -731,7 +785,9 @@ def main() -> None:
             int(seed),
         )
         calibration_batch_hashes.append(batch_digest(batches))
-        model = model_from_snapshot(stepzero_payload, args.device)
+        model = model_from_exact_stepzero_targets(
+            stepzero_payload, args.device, model_seed
+        )
         calibration_moments.append(
             collect_stepzero_second_moments(
                 model,
@@ -771,7 +827,6 @@ def main() -> None:
     eval_inputs = terminal_attention_metrics(
         args.terminal_checkpoint, eval_batches, layers, args.device
     )
-    config = json.loads((REPO_ROOT / plan["identity"]["dense_config"]).read_text())
     n_embd = int(config["n_embd"])
     latent_std = float(config.get("block_fht_latent_init_std", 0.02))
     rows: list[dict[str, Any]] = []
@@ -969,6 +1024,8 @@ def main() -> None:
             "device": args.device,
             "git_commit": git_commit(),
             "parameter_updates": 0,
+            "stepzero_model_seed": model_seed,
+            "stepzero_reconstruction_target_tensors_exact": True,
             "elapsed_seconds": time.time() - started,
         },
         "identity": {

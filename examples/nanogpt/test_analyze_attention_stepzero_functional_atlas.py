@@ -1,13 +1,18 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
+import pytest
 import torch
 
 from examples.nanogpt.analyze_attention_stepzero_functional_atlas import (
     KroneckerAtlas,
     empirical_second_moment,
     kronecker_subspace_overlap,
+    model_from_exact_stepzero_targets,
     top_kronecker_pairs,
 )
+from examples.nanogpt.model import GPT, GPTConfig
 
 
 def test_top_pairs_are_ranked_by_kfac_product() -> None:
@@ -55,3 +60,39 @@ def test_second_moment_is_uncentered() -> None:
     expected = torch.tensor([[5.0, 3.0], [3.0, 2.0]])
     torch.testing.assert_close(empirical_second_moment(rows), expected)
 
+
+def test_exact_stepzero_reconstruction_checks_stored_targets() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=1,
+        n_embd=8,
+        bias=False,
+    )
+    seed = 29
+    torch.manual_seed(seed)
+    original = GPT(config)
+    stored = {
+        name: value.detach().clone()
+        for name, value in original.named_parameters()
+        if name.endswith("attn.c_attn.weight")
+        or name.endswith("attn.c_proj.weight")
+    }
+    payload = {
+        "step": 0,
+        "model_config": asdict(config),
+        "parameters": stored,
+    }
+    reconstructed = model_from_exact_stepzero_targets(payload, "cpu", seed)
+    names = dict(reconstructed.named_parameters())
+    assert all(torch.equal(names[name], value) for name, value in stored.items())
+
+    corrupted = {**stored}
+    target = next(iter(corrupted))
+    corrupted[target] = corrupted[target].clone()
+    corrupted[target].view(-1)[0] += 1.0
+    with pytest.raises(ValueError, match="does not match stored targets"):
+        model_from_exact_stepzero_targets(
+            {**payload, "parameters": corrupted}, "cpu", seed
+        )

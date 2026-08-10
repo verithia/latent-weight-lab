@@ -84,7 +84,7 @@
   },
   "execution_policy": {
     "analyzer_not_yet_implemented": false,
-    "implementation_state": "The zero-update path oracle is complete: it reconstructs the exact step-zero model, selects independent split-frozen KFAC atlases, compares identical-budget random-Kronecker and production-seeded BlockFHT controls, scores held-out states, local chords, discovery-span transport, and exact Muon directions in disjoint terminal functional metrics, and records fixed storage. Seven local contract/unit tests pass; only immutable identity sealing and PRO6 execution remain.",
+    "implementation_state": "The zero-update path oracle is complete: it reconstructs the exact CPU-initialized step-zero model from the pinned seed and config, hard-verifies equality against every stored V/O step-zero tensor, selects independent split-frozen KFAC atlases, compares identical-budget random-Kronecker and production-seeded BlockFHT controls, scores held-out states, local chords, discovery-span transport, and exact Muon directions in disjoint terminal functional metrics, and records fixed storage. The first sealed launch correctly rejected misuse of the target-complete replay as an all-parameter snapshot before creating output; the repaired implementation has an explicit reconstruction test and requires resealing before execution.",
     "launch_before_code_and_identity_seal": false,
     "run_while_training_gpu_is_occupied": false,
     "expected_runtime_after_implementation": "under five minutes",

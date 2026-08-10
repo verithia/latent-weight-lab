@@ -4,6 +4,7 @@
   "scientific_question": "At a fixed one-percent coordinate budget, does a layerwise V/O atlas selected only from exact step-zero CE geometry recover the later dense attention functional path where the production BlockFHT chart fails?",
   "protocol": {
     "parameter_updates": 0,
+    "model_seed": 1337,
     "coordinate_fraction": 0.01,
     "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     "targets": {
@@ -69,9 +70,9 @@
   },
   "identity": {
     "entrypoint": "examples.nanogpt.analyze_attention_stepzero_functional_atlas",
-    "entrypoint_sha256": "7fa0e7f9c68c598e875225b2b37dbc230d4d73b6b138c44f5b182c9003138294",
+    "entrypoint_sha256": "2ebde2b64469524b6d1c4da6a44afba0df0e8ec18b832fd71dbbd6644f392ddf",
     "design": "examples/nanogpt/configs/selection_artifacts/124m_attention_stepzero_functional_atlas_design.json",
-    "design_sha256": "cb4b0804d154b7ddcea13822dc3ba42222b7a32379a2d05e728627147bbf1ea4",
+    "design_sha256": "c7eb893343dc7e3113291330cf614d234985670d18aa8c5d97b7011351b68e77",
     "dense_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
     "dense_config_sha256": "b411c14a38a2a3c10813d60b9129fd7aa3b007fbcf39873d7241fac3e726e007",
     "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
