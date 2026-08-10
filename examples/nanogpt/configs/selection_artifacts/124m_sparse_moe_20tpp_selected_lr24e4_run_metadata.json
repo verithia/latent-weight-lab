@@ -1,10 +1,12 @@
 {
   "schema_version": "mai_sparse_moe_run_metadata_v1",
-  "status": "running",
+  "status": "finished_clean_scientific_pass_audit_pending",
   "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-10T22:28:47+08:00",
+  "finished_at": "2026-08-11T04:07:53+08:00",
+  "wall_seconds": 20346,
   "process_group": 4141464,
   "max_iters": 9495,
   "scheduled_tokens": 2489057280,
@@ -35,6 +37,20 @@
   },
   "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4_20260810T142847Z_4141432.log",
   "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4_20260810T142847Z_4141432.json",
+  "terminal_verification": {
+    "exit_code": 0,
+    "checkpoint_next_iter": 9495,
+    "checkpoint_reason": "evaluation",
+    "checkpoint_best_validation_ce": 3.0616724491119385,
+    "model_tensor_count": 88,
+    "optimizer_state_saved": true,
+    "process_gone_after_clean_exit": true,
+    "gpu_released": true,
+    "checkpoint_sha256": "cce1188d9456e3be6e39ecc42558231b8b6f04d4e077e27ed83a8a8f419a7a38",
+    "checkpoint_metadata_sha256": "2fc16453cd594de2b6eb0b9bc28f6419e633efcf0dd108b26a44652021cbbc51",
+    "status_sha256": "238583d200a38c102979b9abe174afb6d396c781d1b57edd7aff19d5b1333829",
+    "log_sha256": "020b4354ba6d19447d2de5ef215c793904bbc1fb21f2de3ee165fcf43470f802"
+  },
   "initial_live_verification": {
     "last_iter": 30,
     "last_training_loss": 8.0741,
@@ -127,6 +143,10 @@
     }
   },
   "fixed_evaluations": {
+    "step_0": {
+      "train_loss_log_precision": 10.9851,
+      "validation_loss_log_precision": 10.9848
+    },
     "step_2374": {
       "train_loss_log_precision": 3.4604,
       "validation_loss_log_precision": 3.4417,
@@ -165,6 +185,19 @@
       "paired_snapshot_bytes": 226591213,
       "source_checkpoint_sha256": "1b42ea77ef48d85e9a42760e0c3d9f3b06c073f9c3306d99e414a91ffd7e6b31",
       "interpretation": "The 15TPP checkpoint is finite and continues the monotone fixed-evaluation improvement. Scientific acceptance remains frozen to the 20TPP terminal comparison."
+    },
+    "step_9495": {
+      "train_loss_log_precision": 3.0843,
+      "validation_loss_log_precision": 3.0617,
+      "checkpoint_best_validation_ce_exact": 3.0616724491119385,
+      "matched_dense_20tpp_validation_ce": 3.1547,
+      "matched_dense_reference_precision": "four decimals from the sealed Y400 terminal record; the source filesystem is unavailable",
+      "delta_validation_ce_vs_matched_dense": -0.09302755088806158,
+      "perplexity_ratio_vs_matched_dense": 0.9111683964518297,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "paired_snapshot_sha256": "bd516b45c13fa4b6e77e747f7214f5c1d82febbf466a4e5f07a0b1cb20f8ba24",
+      "paired_snapshot_bytes": 226591213,
+      "interpretation": "The selected dense complete-expert MoE beats the matched dense 124M endpoint by about 0.093 CE at 20TPP. This validates conditional complete-map specialization, not generated-expert direction matching."
     }
   },
   "paired_neuron_geometry_acquisition": {
@@ -196,6 +229,12 @@
         "bytes": 226591213,
         "tensor_count": 9,
         "tensor_bytes": 226566144
+      },
+      "step_9495": {
+        "sha256": "bd516b45c13fa4b6e77e747f7214f5c1d82febbf466a4e5f07a0b1cb20f8ba24",
+        "bytes": 226591213,
+        "tensor_count": 9,
+        "tensor_bytes": 226566144
       }
     },
     "step_zero_snapshot": {
@@ -218,7 +257,7 @@
   "paired_alignment_audit": {
     "source": "examples/nanogpt/analyze_sparse_moe_paired_alignment.py",
     "git_commit": "b6b62b5",
-    "status": "prepared_not_launched_waiting_for_registered_terminal_checkpoint",
+    "status": "ready_to_launch_terminal_and_storage_preconditions_verified",
     "scope": "zero-update discovery/evaluation assignment stability, expert occupancy, quotient-chord, paired norm-gauge, and functional-output audit",
     "recovery_gate_deferred": "state-conditioned decoder recovery requires the denser seed-two trajectory",
     "focused_tests": "6 passed",
@@ -248,6 +287,9 @@
     "project_cap_headroom_bytes_at_15tpp": 3784058529,
     "remaining_compact_snapshot_bytes_at_15tpp": 226591213,
     "real_filesystem_free_bytes_at_15tpp": 1638461403136,
+    "workspace_bytes_at_terminal": 271320448862,
+    "project_cap_headroom_bytes_at_terminal": 3557458082,
+    "real_filesystem_free_bytes_at_terminal": 1638234820608,
     "compacted_lr24e4_0p5tpp_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
     "compacted_lr20e4_0p5tpp_snapshot_sha256": "4f878977c1c4a6db218492b948742b5de03ef7d931939bd3ee7880f1b7a24016",
     "atomic_checkpoint_headroom_preserved": true
@@ -263,6 +305,7 @@
   "authorization": {
     "selected_124m_20tpp": true,
     "larger_rung": false,
-    "generated_expert_arm": false
+    "generated_expert_arm": false,
+    "second_seed_geometry": "pending_seed1_zero_update_alignment_audit_and_exact_snapshot_io_mfu_gate"
   }
 }

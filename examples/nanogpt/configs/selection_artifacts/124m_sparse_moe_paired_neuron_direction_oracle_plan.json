@@ -1,6 +1,6 @@
 {
   "schema_version": "nanogpt_sparse_moe_paired_neuron_oracle_plan_v1",
-  "status": "acquisition_prepared_seed1_running_no_generated_training_authorized",
+  "status": "seed1_acquisition_complete_zero_update_alignment_audit_ready_no_generated_training_authorized",
   "scientific_question": "Can a state-conditioned chart recover the co-adapted c_fc/c_proj directions of complete sparse-MoE experts after respecting expert and hidden-neuron permutation symmetries?",
   "source_control": {
     "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
