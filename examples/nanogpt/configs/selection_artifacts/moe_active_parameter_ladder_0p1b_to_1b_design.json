@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_sparse_moe_active_parameter_ladder_design_v1",
   "recorded_at": "2026-08-10",
-  "status": "implemented_124m_lr_screen_complete_top_two_5tpp_configs_prepared_pending_exact_mfu_larger_rungs_blocked",
+  "status": "implemented_124m_lr_screen_and_top_two_5tpp_complete_selected_20tpp_prepared_pending_exact_mfu_larger_rungs_blocked",
   "implementation_gate_result": {
     "implementation_commit": "01b162502edb222a47c32d2ce50bc82f48a62ffe",
     "focused_tests": "23 passed on PRO6",
@@ -91,7 +91,7 @@
         "5TPP": {"max_iters": 2374, "scheduled_tokens": 622329856, "scheduled_tpp": 5.0007426104093},
         "20TPP": {"max_iters": 9495, "scheduled_tokens": 2489057280, "scheduled_tpp": 20.000863978869546}
       },
-      "authorization": "exact_config_mfu_passed_124m_lr_screen_authorized"
+      "authorization": "selected_20tpp_prepared_pending_exact_config_mfu"
     },
     {
       "name": "moe_350m_active",
@@ -151,7 +151,7 @@
       "purpose": "Measure the benefit and cost of token-conditional expert specialization without a generated-weight confound.",
       "expert_parameterization": "dense W_fc,e and W_proj,e owned by each expert",
       "launch_ready": true,
-      "authorization_scope": "124M-active top-two 5TPP after each exact-config MFU gate",
+      "authorization_scope": "124M-active selected 20TPP after its exact-config MFU gate",
       "blocker": null
     },
     {
@@ -220,7 +220,7 @@
     "progress_callback_resets_heartbeat": true
   },
   "launch_authorization": {
-    "current": "124m_dense_complete_expert_top_two_5tpp_after_exact_config_mfu",
-    "reason": "The 0.5TPP screen completed on identical fixed evaluation indices. Learning rates 2.4e-3 and 2.0e-3 rank first and second and are the only 5TPP candidates. Each exact 5TPP config must independently pass the 20 percent MFU gate. The 350M, 690M, and 985M-active rungs remain blocked on the frozen 124M scientific promotion gates, and the generated-expert decoder remains blocked on a paired-neuron direction oracle."
+    "current": "124m_dense_complete_expert_selected_20tpp_pending_exact_config_mfu",
+    "reason": "Both preregistered 5TPP arms completed on identical fixed evaluation indices and beat the matched dense replay. Learning rate 2.4e-3 ranks first at validation CE 3.444827318 versus 3.497758865 for 2.0e-3, so only 2.4e-3 advances to the 20TPP horizon. The exact 20TPP configuration must pass the 20 percent MFU gate before launch. The 350M, 690M, and 985M-active rungs remain blocked on the frozen 124M scientific and second-seed promotion gates, and the generated-expert decoder remains blocked on a paired-neuron direction oracle."
   }
 }

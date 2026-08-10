@@ -87,7 +87,7 @@ def test_dense_control_is_distinct_from_generated_candidate() -> None:
     arms = {arm["name"]: arm for arm in design["scientific_arms"]}
     assert arms["dense_complete_experts_control"]["launch_ready"] is True
     assert arms["dense_complete_experts_control"]["authorization_scope"] == (
-        "124M-active 0.5TPP LR screen only"
+        "124M-active selected 20TPP after its exact-config MFU gate"
     )
     assert (
         arms["adaptive_paired_neuron_generated_experts"]["launch_ready"]
@@ -96,8 +96,8 @@ def test_dense_control_is_distinct_from_generated_candidate() -> None:
     assert "negative control" in arms[
         "shared_post_mixture_projection_negative_control"
     ]["blocker"]
-    assert design["launch_authorization"]["current"] == (
-        "124m_dense_complete_expert_0p5tpp_lr_screen_only"
+    assert design["launch_authorization"]["current"].startswith(
+        "124m_dense_complete_expert_selected_20tpp_"
     )
 
 

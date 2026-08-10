@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_sparse_moe_5tpp_result_v1",
+  "recorded_at": "2026-08-10",
+  "classification": "PASS_COMPLETE_124M_DENSE_MOE_5TPP_TOP2_BEATS_MATCHED_DENSE",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "67f95464a033ddab9391effc4ef037996bacdc65",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "72d8c3ae16ee62ef8f866802618d51b8655a47e452c8978f6ccf64e37437df09",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "2fec6f2cc1f8bdce06b0767cbdaf906fca451c3a7dc1fd2110f98c92ecdf21c2",
+    "status_sha256": "32dedb4470a94b8c2b8b0c13bec5f80bc44d281b4f17d7c36f4747c028c47820",
+    "log_sha256": "b812c3f0f2bf5808324ec857eb74f0752a7a095747ad3953eaa54c5c6711a602",
+    "original_checkpoint_sha256": "87a474db62401201b01113cb9f0bfd3756e7e296f4a9f18799223dfecbf16df9",
+    "checkpoint_metadata_sha256": "a3d599fcbacd4c3109ffcb767c9a052d0c4da4099332cfd719ed590271560052",
+    "mfu_certificate_sha256": "bae44724ebf9c13969e2b600ea235274f1016b22ec1be6c9ca8f85cce42c1cc9",
+    "exit_code": 0,
+    "max_iters": 2374,
+    "scheduled_tokens": 622329856,
+    "scheduled_active_tpp": 5.0007426104093,
+    "checkpoint_next_iter": 2374,
+    "wall_seconds": 5269
+  },
+  "architecture": {
+    "active_parameters": 124447488,
+    "stored_parameters": 294316800,
+    "num_experts": 8,
+    "top_k": 2,
+    "expert_hidden_multiplier": 2,
+    "complete_expert_projection_ownership": true
+  },
+  "identity": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_reference_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "dense_reference_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dense_reference_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_5tpp_replay_result.json",
+    "comparison_is_dataset_and_fixed_eval_matched": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9851, "validation_ce": 10.9848},
+    {"step": 594, "train_ce": 4.2284, "validation_ce": 4.2185},
+    {"step": 1188, "train_ce": 3.7444, "validation_ce": 3.7287},
+    {"step": 1782, "train_ce": 3.5809, "validation_ce": 3.5634},
+    {"step": 2374, "train_ce": 3.5163, "validation_ce": 3.4978}
+  ],
+  "comparison": {
+    "checkpoint_best_validation_ce": 3.4977588653564453,
+    "matched_dense_checkpoint_best_validation_ce": 3.5402421951293945,
+    "validation_delta_to_dense": -0.04248332977294922,
+    "perplexity_ratio_to_dense": 0.9584064422407779,
+    "validation_delta_to_top1": 0.05293154716491699,
+    "perplexity_ratio_to_top1": 1.054357468891114,
+    "interpretation": "The second preregistered 5TPP arm also beats the matched dense replay, but it trails lr=2.4e-3 by 0.05293 CE. The frozen rank-one lr=2.4e-3 arm alone advances to 20TPP."
+  },
+  "manifold_snapshot": {
+    "sha256": "74c87f9a610a8b0deb04432d5f29fc183d76cf1c6864496929281bd509032efb",
+    "receipt_sha256": "7b5682dcce2c95afb8b56cfa99e886c82cf5ff01df4089afd7cbddf6df83e6bf",
+    "bytes": 1177334999,
+    "tensor_count": 88,
+    "tensor_bytes": 1331801088,
+    "all_model_tensors_preserved": true,
+    "exact_resume_state_reclaimed_after_verification": true
+  },
+  "decision": {
+    "selected_for_20tpp": false,
+    "top1_lr24e4_selected_for_20tpp": true,
+    "selected_20tpp_requires_exact_config_mfu": true,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}

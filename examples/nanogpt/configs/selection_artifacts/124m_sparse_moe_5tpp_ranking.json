@@ -1,0 +1,36 @@
+{
+  "schema_version": "mai_124m_sparse_moe_5tpp_ranking_v1",
+  "recorded_at": "2026-08-10",
+  "selection_metric": "terminal checkpoint best validation CE on identical fixed evaluation indices",
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "matched_dense_validation_ce": 3.5402421951293945,
+  "ranking": [
+    {
+      "rank": 1,
+      "learning_rate": 0.0024,
+      "checkpoint_best_validation_ce": 3.4448273181915283,
+      "delta_to_dense": -0.09541487693786621,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_5tpp_top1_lr24e4_result.json",
+      "result_sha256": "4063369929e9b7fc4c8806c3a406b23329b7681e4969e2602da63386652adfe9",
+      "promote_to_20tpp": true
+    },
+    {
+      "rank": 2,
+      "learning_rate": 0.002,
+      "checkpoint_best_validation_ce": 3.4977588653564453,
+      "delta_to_dense": -0.04248332977294922,
+      "delta_to_rank1": 0.05293154716491699,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_5tpp_top2_lr20e4_result.json",
+      "result_sha256": "9e48a385e1be95cbe21bb24743ed4327a875e76c499d4333c6c4ffe638842514",
+      "promote_to_20tpp": false
+    }
+  ],
+  "decision": {
+    "selected_20tpp_config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4.json",
+    "selected_learning_rate": 0.0024,
+    "selected_20tpp_requires_own_exact_config_mfu_gate": true,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}

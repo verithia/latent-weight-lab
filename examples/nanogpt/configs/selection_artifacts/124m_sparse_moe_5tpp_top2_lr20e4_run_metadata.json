@@ -1,10 +1,13 @@
 {
   "schema_version": "mai_sparse_moe_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-10T20:49:18+08:00",
+  "finished_at": "2026-08-10T22:17:07+08:00",
+  "wall_seconds": 5269,
+  "exit_code": 0,
   "process_group": 4092777,
   "max_iters": 2374,
   "scheduled_tokens": 622329856,
@@ -32,6 +35,28 @@
   },
   "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4_20260810T124918Z_4092752.log",
   "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4_20260810T124918Z_4092752.json",
+  "terminal": {
+    "checkpoint_best_validation_ce": 3.4977588653564453,
+    "terminal_train_ce": 3.5163,
+    "terminal_validation_ce": 3.4978,
+    "original_checkpoint_bytes": 2512713345,
+    "original_checkpoint_sha256": "87a474db62401201b01113cb9f0bfd3756e7e296f4a9f18799223dfecbf16df9",
+    "checkpoint_metadata_sha256": "a3d599fcbacd4c3109ffcb767c9a052d0c4da4099332cfd719ed590271560052",
+    "status_sha256": "32dedb4470a94b8c2b8b0c13bec5f80bc44d281b4f17d7c36f4747c028c47820",
+    "log_sha256": "b812c3f0f2bf5808324ec857eb74f0752a7a095747ad3953eaa54c5c6711a602",
+    "checkpoint_next_iter": 2374,
+    "classification": "clean_terminal_124m_dense_complete_expert_moe_5tpp_top2"
+  },
+  "manifold_snapshot": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr20e4_5tpp/manifold_snapshot.pt",
+    "bytes": 1177334999,
+    "sha256": "74c87f9a610a8b0deb04432d5f29fc183d76cf1c6864496929281bd509032efb",
+    "receipt_sha256": "7b5682dcce2c95afb8b56cfa99e886c82cf5ff01df4089afd7cbddf6df83e6bf",
+    "model_tensor_count": 88,
+    "model_tensor_bytes": 1331801088,
+    "all_model_tensors_verified_equal": true,
+    "exact_resume_state_reclaimed_after_verification": true
+  },
   "initial_live_verification": {
     "last_iter": 10,
     "last_training_loss": 9.6296,
@@ -48,10 +73,11 @@
     "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_dense_moe_5tpp_top2_terminal.json",
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
     "callback_mentions": "@Codex",
-    "callback_action": "verify and seal terminal artifacts, compare both 5TPP arms, and authorize only the selected 20TPP confirmation if the preregistered rule passes"
+    "callback_action": "terminal callback delivered; artifacts sealed and lr=2.4e-3 selected for an exact-config-MFU-gated 20TPP confirmation"
   },
   "authorization": {
     "selected_20tpp_before_terminal": false,
+    "lr24e4_selected_for_20tpp_after_both_terminal_results": true,
     "larger_rung": false,
     "generated_expert_arm": false
   }
