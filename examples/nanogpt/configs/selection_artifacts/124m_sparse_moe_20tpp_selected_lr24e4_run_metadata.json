@@ -74,6 +74,22 @@
       "next_fixed_eval_iter": 4748,
       "paired_acquisition_errors": 0,
       "intervention_required": false
+    },
+    "50_percent": {
+      "callback_iter": 4770,
+      "verified_iter": 4810,
+      "recent_training_loss": 3.2715,
+      "best_recent_training_loss": 3.2422,
+      "process_alive": true,
+      "gpu_memory_mib": 68147,
+      "gpu_utilization_percent": 99,
+      "gpu_power_watts": 561.6,
+      "gpu_temperature_c": 56,
+      "iteration_milliseconds_recent": 2109.11,
+      "last_published_checkpoint_iter": 4748,
+      "next_fixed_eval_iter": 7122,
+      "paired_acquisition_errors": 0,
+      "intervention_required": false
     }
   },
   "fixed_evaluations": {
@@ -88,6 +104,18 @@
       "paired_snapshot_sha256": "cc10f947fa6bc4bf0ef2f6c74bc35fe74e69db83750724bcdf8fb85fd2a24371",
       "paired_snapshot_bytes": 226591213,
       "interpretation": "The selected 20TPP run reproduces the 5TPP winner at the same token horizon and retains about a 0.10 CE advantage over the matched dense control; this is an intermediate horizon, not the 20TPP selector."
+    },
+    "step_4748": {
+      "train_loss_log_precision": 3.2655,
+      "validation_loss_log_precision": 3.2432,
+      "delta_validation_ce_vs_step_2374_log_precision": -0.1985,
+      "perplexity_ratio_vs_step_2374": 0.81999,
+      "matched_dense_10tpp_validation_ce": null,
+      "matched_dense_10tpp_reference_status": "not available in the sealed dense artifact; do not infer a dense-relative midpoint gap from the terminal-only 20TPP reference",
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "paired_snapshot_sha256": "3ffdefca26bb921633e2aa84ff0f4d156ee87a18c8ebee97a554d4912e9001a0",
+      "paired_snapshot_bytes": 226591213,
+      "interpretation": "The selected MoE continues to improve smoothly at the 10TPP midpoint. Dense-relative acceptance remains terminal because the sealed dense reference exposes only its 20TPP endpoint."
     }
   },
   "paired_neuron_geometry_acquisition": {
@@ -101,6 +129,20 @@
       "mlp.router.weight"
     ],
     "fixed_eval_steps": [0, 2374, 4748, 7122, 9495],
+    "captured_snapshots": {
+      "step_2374": {
+        "sha256": "cc10f947fa6bc4bf0ef2f6c74bc35fe74e69db83750724bcdf8fb85fd2a24371",
+        "bytes": 226591213,
+        "tensor_count": 9,
+        "tensor_bytes": 226566144
+      },
+      "step_4748": {
+        "sha256": "3ffdefca26bb921633e2aa84ff0f4d156ee87a18c8ebee97a554d4912e9001a0",
+        "bytes": 226591213,
+        "tensor_count": 9,
+        "tensor_bytes": 226566144
+      }
+    },
     "step_zero_snapshot": {
       "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots/step_000000_moe_paired_l0_l5_l11.pt",
       "sha256": "a755ca6c146d50d8c04516cb19d1d1f44abac330a90883dbb56f12c099fa1773",
@@ -128,8 +170,11 @@
   },
   "storage_admission": {
     "workspace_bytes_after_verified_compaction": 270640644830,
+    "workspace_bytes_at_50_percent": 270867246349,
     "workspace_cap_bytes": 274877906944,
-    "real_filesystem_free": "1.5T",
+    "project_cap_headroom_bytes_at_50_percent": 4010660595,
+    "remaining_compact_snapshot_bytes": 453182426,
+    "real_filesystem_free_bytes_at_50_percent": 1638688002048,
     "compacted_lr24e4_0p5tpp_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
     "compacted_lr20e4_0p5tpp_snapshot_sha256": "4f878977c1c4a6db218492b948742b5de03ef7d931939bd3ee7880f1b7a24016",
     "atomic_checkpoint_headroom_preserved": true
