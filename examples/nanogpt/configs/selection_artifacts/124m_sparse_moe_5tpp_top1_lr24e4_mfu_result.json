@@ -1,0 +1,43 @@
+{
+  "schema_version": "mai_124m_sparse_moe_5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-10",
+  "decision": "PASS_124M_DENSE_COMPLETE_EXPERT_MOE_5TPP_TOP1_LR24E4_MFU_GATE",
+  "scientific_updates": 0,
+  "host": "PRO6",
+  "gpu": 0,
+  "architecture": {
+    "active_parameters": 124447488,
+    "stored_parameters": 294316800,
+    "num_experts": 8,
+    "top_k": 2,
+    "expert_hidden_multiplier": 2,
+    "complete_expert_projection_ownership": true,
+    "dropless_batched_dispatch": true,
+    "expert_optimizer": "Muon independently over every expert matrix",
+    "router_optimizer": "AdamW"
+  },
+  "accepted_attempt": {
+    "git_commit": "67f95464a033ddab9391effc4ef037996bacdc65",
+    "config_sha256": "46f52259e2fe6f3a3858ef0dc1204b695f0bfaea6be4858315b08a073f492107",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_5tpp_lr24e4/performance_preflight.json",
+    "certificate_sha256": "b6b0a58d1fbfcf97081e7d5d05898b85fac297ebd10242d209284e9e37a965e2",
+    "log_sha256": "191040cf5f2f2b1cd51beba1e9f139b5468c2bde6de039930a521eb8e465f2ac",
+    "empirical_bf16_peak_tflops": 417.0297818235329,
+    "model_tflops": 90.54245622229632,
+    "mfu_fraction": 0.21711268635631775,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 121259.2525,
+    "iteration_milliseconds": 2162.2225,
+    "peak_mib": 44035.53,
+    "all_logged_losses_finite": true,
+    "warmup_updates": 1,
+    "timed_updates": 4
+  },
+  "authorization": {
+    "this_124m_5tpp_top1_arm": true,
+    "selected_20tpp_requires_both_terminal_5tpp_results": true,
+    "larger_rung": false,
+    "generated_expert_arm": false
+  }
+}
