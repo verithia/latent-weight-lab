@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_sparse_moe_0p5tpp_result_v1",
+  "recorded_at": "2026-08-10",
+  "classification": "PASS_FIRST_124M_DENSE_COMPLETE_EXPERT_MOE_LR_SCREEN_ARM",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "55d91cfe7be442d9f71135d0cf747748aff00937",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "211a673d3ab62df0ec831b8da3c512b29ff14ecbbc86ca38119ddfa06234f88e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "7a9070a9e52a723a706b896fe2cfc66a2e430bfa7a26e01cf00949d27a758bdb",
+    "status_sha256": "31184e3c071f358ab3490dedbdd507f817af4818b9832acc3af21e44faa61b57",
+    "log_sha256": "9e390c5b50da547e661848eccacf54533c79f4b56d03531422bb7b6dc93105a8",
+    "checkpoint_sha256": "94649cfb3441e4b6fc7149648fc142ff17735b29eaee9d57828650bcf4d53616",
+    "checkpoint_metadata_sha256": "3f18869d1d5667303c764a331418176aaf6ddbcb7f64acded84b3565781fbd85",
+    "mfu_certificate_sha256": "7379a36759a3d55a2cbc88ff9971a3653c1409f47d9444bdbd86230d2be6c097",
+    "exit_code": 0,
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "scheduled_active_tpp": 0.501338138701522,
+    "checkpoint_next_iter": 238,
+    "checkpoint_bytes": 2512713153,
+    "sampled_peak_mib": 68147
+  },
+  "identity": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_reference_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dense_reference_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_production_selector_result.json",
+    "comparison_is_fixed_eval_matched": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9851, "validation_ce": 10.9848},
+    {"step": 60, "train_ce": 6.2870, "validation_ce": 6.2969},
+    {"step": 120, "train_ce": 5.7470, "validation_ce": 5.7517},
+    {"step": 180, "train_ce": 5.5414, "validation_ce": 5.5441},
+    {"step": 238, "train_ce": 5.4615, "validation_ce": 5.4639}
+  ],
+  "comparison": {
+    "matched_dense_train_ce": 5.485774517059326,
+    "matched_dense_validation_ce": 5.488473415374756,
+    "terminal_train_delta_to_dense": -0.024274517059325707,
+    "terminal_validation_delta_to_dense": -0.02457341537475588,
+    "interpretation": "At the matched short horizon, conditional complete-expert routing is not paying a CE penalty; this first LR candidate improves validation CE by about 0.0246. The LR screen must still finish before promotion, and this dense control does not validate a generated-weight replacement."
+  },
+  "decision": {
+    "continue_124m_lr_screen": true,
+    "next_candidate": "lr20e4 after its exact-config foreground MFU gate",
+    "top_two_5tpp_not_yet_authorized": true,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}
