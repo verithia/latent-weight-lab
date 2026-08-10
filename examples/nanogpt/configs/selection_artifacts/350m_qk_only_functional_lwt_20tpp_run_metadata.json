@@ -802,5 +802,18 @@
     "dense_closure_maximum_validation_ce": 2.8127,
     "full_attention_terminal_validation_ce": 2.9363,
     "terminal_decision_rule": "At terminal fixed validation, <=2.8127 closes the dense gap; (2.8127,2.9363) is partial recovery only; >=2.9363 fails horizon transfer."
+  },
+  "objective_alignment_audit": {
+    "recorded_at": "2026-08-10",
+    "classification": "OFF_OBJECTIVE_PARTIAL_REPLACEMENT_SCALE_RUN",
+    "project_objective": "Full generated replacement, with full attention replacement closed before MLP replacement and whole-network replacement.",
+    "actual_candidate": {
+      "generated": ["attn.c_attn.qk_headwise"],
+      "dense_muon": ["attn.c_attn.v", "attn.c_proj", "mlp.c_fc", "mlp.c_proj"]
+    },
+    "interpretation": "This run measures scale and horizon transfer for a QK-only boundary ablation. It cannot validate full attention replacement or the full replacement objective, regardless of terminal loss.",
+    "procedural_finding": "Launching the 350M scale screen before closing generated V and attention c_proj at 124M was a priority error. The sealed 124M QK-only result explicitly rejected generated V and denied full-attention acceptance and larger-rung authorization.",
+    "successor_policy": "This run authorizes no further model-size, horizon, or architecture promotion. Return to the smallest 124M rung and close generated V plus attention c_proj before any additional scaling; only then proceed to MLP replacement.",
+    "live_run_disposition": "The already running checkpointed process is left unchanged pending explicit operator direction to terminate or finish; no successor will be launched from it."
   }
 }
