@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.mappingnetworks.pro6.moe124.paired-acquisition</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/verithia/research/.venv-latent-weight-lab/bin/python</string>
+    <string>/Users/verithia/research/latent-weight-lab-midpoint/examples/nanogpt/watch_remote_moe_paired_acquisition.py</string>
+    <string>--host</string>
+    <string>PRO6</string>
+    <string>--out-dir</string>
+    <string>/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected</string>
+    <string>--snapshot-dir</string>
+    <string>/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots</string>
+    <string>--extractor</string>
+    <string>/tmp/extract_moe_paired_snapshot_f267237.py</string>
+    <string>--remote-python</string>
+    <string>/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python</string>
+    <string>--steps</string>
+    <string>0,2374,4748,7122,9495</string>
+    <string>--layers</string>
+    <string>0,5,11</string>
+    <string>--state</string>
+    <string>/Users/verithia/research/watch_state/pro6_124m_dense_moe_paired_acquisition.json</string>
+    <string>--poll-seconds</string>
+    <string>60</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/verithia/research</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <false/>
+  <key>StandardOutPath</key>
+  <string>/Users/verithia/research/watch_state/pro6_124m_dense_moe_paired_acquisition.stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/verithia/research/watch_state/pro6_124m_dense_moe_paired_acquisition.stderr.log</string>
+</dict>
+</plist>
