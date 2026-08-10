@@ -90,8 +90,8 @@
     "scientific_updates_before_authorization": 0,
     "storage_reclaim_execution_sha256": "4a03f8a8b48ec34e7e33decc6f420173778844cf9bde67856ab4dc1a99109fcd",
     "strict_diagnostic_io_mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_20tpp_seed2_trajectory_lr24e4/performance_preflight.json",
-    "strict_diagnostic_io_mfu_certificate_sha256": "fe3656afe19a0a194c4c282b49fb856fcf62b43518f3b2f5557c4c117bddcfb4",
-    "mfu_fraction": 0.20430911522933554,
+    "strict_diagnostic_io_mfu_certificate_sha256": "7c92eb5eafd2757431ee55cd05706a262ea6c51242ba4a1047c0d97be543ba1e",
+    "mfu_fraction": 0.20395422884040945,
     "minimum_mfu_fraction": 0.2,
     "trajectory_snapshot_io_included": true,
     "authorization_scope": "The dense seed-two trajectory acquisition only; generated-expert training and larger rungs remain blocked on the frozen recovery gates."

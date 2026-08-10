@@ -73,8 +73,8 @@
     "receipt_sha256": "4a03f8a8b48ec34e7e33decc6f420173778844cf9bde67856ab4dc1a99109fcd",
     "total_reclaimed_bytes": 6044718214,
     "workspace_bytes_after_reclaim": 266609137612,
-    "workspace_bytes_after_strict_mfu_gate": 266609562896,
-    "headroom_bytes_after_strict_mfu_gate": 8268344048,
+    "workspace_bytes_after_strict_mfu_gate": 266609672673,
+    "headroom_bytes_after_strict_mfu_gate": 8268234271,
     "real_filesystem_free_bytes_after_strict_mfu_gate": 1642934796288,
     "seed1_model_snapshot_sha256": "62d7bc04e953036d758111c6fa44d4eb1c97a3eef0188ae989b56be54289e070",
     "seed1_model_snapshot_receipt_sha256_after_reclaim": "5868450d6c6715e46b852dc905cea0a1f68e58bda623868298654a2591243073"
