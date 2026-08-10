@@ -107,6 +107,23 @@
       "paired_acquisition_errors": 0,
       "estimated_remaining_wall_hours": 1.3,
       "intervention_required": false
+    },
+    "80_percent": {
+      "callback_iter": 7620,
+      "verified_iter": 7640,
+      "recent_training_loss": 3.1891,
+      "best_recent_training_loss": 3.1034,
+      "process_alive": true,
+      "gpu_memory_mib": 68147,
+      "gpu_utilization_percent": 99,
+      "gpu_power_watts": 562.63,
+      "gpu_temperature_c": 58,
+      "iteration_milliseconds_recent": 2092.29,
+      "last_published_checkpoint_iter": 7122,
+      "next_fixed_eval_iter": 9495,
+      "paired_acquisition_errors": 0,
+      "estimated_remaining_wall_hours": 1.2,
+      "intervention_required": false
     }
   },
   "fixed_evaluations": {
@@ -204,7 +221,21 @@
     "status": "prepared_not_launched_waiting_for_registered_terminal_checkpoint",
     "scope": "zero-update discovery/evaluation assignment stability, expert occupancy, quotient-chord, paired norm-gauge, and functional-output audit",
     "recovery_gate_deferred": "state-conditioned decoder recovery requires the denser seed-two trajectory",
-    "focused_tests": "6 passed"
+    "focused_tests": "6 passed",
+    "execution_contract": {
+      "preconditions": [
+        "clean terminal status and next_iter=9495",
+        "terminal checkpoint and all five registered paired snapshots hash-verified",
+        "workspace and real-filesystem audit pass",
+        "analysis source identity is synchronized without mutating the sealed training worktree"
+      ],
+      "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/ckpt.pt",
+      "snapshot_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots",
+      "data_dir": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+      "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/paired_alignment_audit",
+      "fixed_arguments": "--batch-size 8 --block-size 256 --batches 2 --sample-cap 2048 --fit-seed 20260811 --eval-seed 20260812 --device cuda",
+      "monitoring": "persistent watchdog required if the exact audit is expected or observed to exceed five minutes; terminal/error callbacks must mention @Codex and require result sealing and causal continuation"
+    }
   },
   "storage_admission": {
     "workspace_bytes_after_verified_compaction": 270640644830,
