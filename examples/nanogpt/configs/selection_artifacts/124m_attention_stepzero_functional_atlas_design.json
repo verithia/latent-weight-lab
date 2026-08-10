@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_attention_stepzero_functional_atlas_design_v1",
   "recorded_at": "2026-08-10",
-  "status": "theory_registered_before_analyzer_implementation",
+  "status": "core_atlas_and_stepzero_kfac_collector_implemented_pending_executable_oracle",
   "scientific_question": "Can a layerwise fixed atlas selected only from step-zero task geometry contain the later dense V and attention-cproj functional manifold at a one-percent coordinate budget, especially in late layers, without a learned basis, dense teacher-derived coordinates, or trainable dense optimizer state?",
   "objective_scope": {
     "project_target": "full generated attention replacement before any further model-size scaling or MLP replacement",
@@ -35,7 +35,7 @@
     "trainable_basis": false,
     "learned_dense_adapter": false,
     "construction": [
-      "For every layer and target, collect the target's input-activation covariance and output-gradient covariance on two frozen calibration splits.",
+      "For every layer and target, collect uncentered empirical second moments of the target's linear inputs and backpropagated CE output errors on two frozen calibration splits; this is the KFAC/Fisher convention, not centered activation PCA.",
       "Eigendecompose the two covariance factors and rank Kronecker outer-product directions by the product of their eigenvalues.",
       "Freeze the first round(P/100) matrix directions, where P is the target matrix size; coordinates alone vary thereafter.",
       "Use separate layerwise atlases for V and attention cproj. V is scored after attention mixing and the dense terminal O functional metric; cproj is scored as H times the candidate displacement.",
@@ -83,7 +83,8 @@
     "fail": "Conclude that a one-percent fixed step-zero atlas is not sufficient for generated V/O. Before full replacement can continue, explicitly relax at least one constraint: permit an adaptive/learned basis, increase coordinate budget with a new cost target, or change the functional factorization. Do not launch another random fixed-chart sweep."
   },
   "execution_policy": {
-    "analyzer_not_yet_implemented": true,
+    "analyzer_not_yet_implemented": false,
+    "implementation_state": "Kronecker atlas, exact adjoint, split-overlap metric, and step-zero V/cproj CE-gradient collector are implemented and locally tested; identity sealing and the complete path/control executable remain pending.",
     "launch_before_code_and_identity_seal": false,
     "run_while_training_gpu_is_occupied": false,
     "expected_runtime_after_implementation": "under five minutes",
