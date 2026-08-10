@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_attention_terminal_functional_atlas_sealed_result_v1",
+  "recorded_at": "2026-08-10T09:41:49.378887+00:00",
+  "classification": "ATTENTION_TERMINAL_FUNCTIONAL_ATLAS_REJECT",
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "git_commit": "f267732e37eafe491bb04120c80d71298cd56c60",
+    "parameter_updates": 0,
+    "basis_uses_terminal_teacher_state": true,
+    "elapsed_seconds": 99.48990654945374
+  },
+  "identity": {
+    "plan_sha256": "9cfdeb47140bbc6c02d02c4dd70cc56529159aff6c5fca89316f06ccbf90605c",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "calibration_batch_sha256": [
+      "1f51476388b365ad5b13ff229e7fec60fcc42a15032ae5531c3dd8d2acf1ed67",
+      "232fd37e79122dcf488639d77e39bb413de72dceb55336d294575ff2beabb247"
+    ],
+    "fit_metric_batch_sha256": "5618db13ba1e2a7eb9d679e04beccf61662e0fd9f8a04aaa7c81886b078c284a",
+    "eval_metric_batch_sha256": "d2713ea6d1aa1358ff9db08322c5e289f3cd91d14aa1148c742113cd350cc752"
+  },
+  "summaries": {
+    "v": {
+      "calibration_overlap": {"mean": 0.23085016881426176, "minimum": 0.07103464007377625},
+      "terminal_kfac": {
+        "state": {"aggregate_eval_recovery": 0.4835962884174177, "absolute_gain_over_blockfht": 0.019168644438035787, "minimum_layer_eval_recovery": -0.1202608073386575},
+        "local_chord": {"aggregate_eval_recovery": 0.33322718207675955, "absolute_gain_over_blockfht": 0.04606869203613073, "minimum_layer_eval_recovery": -0.1754284810265675},
+        "discovery_span": {"aggregate_eval_recovery": 0.47294684303015266, "absolute_gain_over_blockfht": 0.02042784549540927, "minimum_layer_eval_recovery": -0.10577080546104968},
+        "exact_muon": {"aggregate_eval_recovery": 0.7556945201604386, "absolute_gain_over_blockfht": -0.046817602831945804, "minimum_layer_eval_recovery": 0.19182760923317757}
+      },
+      "blockfht": {
+        "state": 0.4644276439793819,
+        "local_chord": 0.2871584900406288,
+        "discovery_span": 0.4525189975347434,
+        "exact_muon": 0.8025121229923844
+      },
+      "passed": false
+    },
+    "cproj": {
+      "calibration_overlap": {"mean": 0.37553388873736065, "minimum": 0.2278536856174469},
+      "terminal_kfac": {
+        "state": {"aggregate_eval_recovery": 0.6681896946236623, "absolute_gain_over_blockfht": 0.080986095150275, "minimum_layer_eval_recovery": -0.06419717176354715},
+        "local_chord": {"aggregate_eval_recovery": 0.11541549635212772, "absolute_gain_over_blockfht": 0.007008530081456174, "minimum_layer_eval_recovery": -0.519873101196904},
+        "discovery_span": {"aggregate_eval_recovery": 0.6641634506747247, "absolute_gain_over_blockfht": 0.0803946979793776, "minimum_layer_eval_recovery": -0.051689785693568774},
+        "exact_muon": {"aggregate_eval_recovery": 0.7285357056876564, "absolute_gain_over_blockfht": 0.06381279422753805, "minimum_layer_eval_recovery": -0.0205121117903967}
+      },
+      "blockfht": {
+        "state": 0.5872035994733873,
+        "local_chord": 0.10840696627067155,
+        "discovery_span": 0.5837687526953471,
+        "exact_muon": 0.6647229114601183
+      },
+      "passed": false
+    }
+  },
+  "decision": {
+    "passed_targets": [],
+    "online_adaptive_atlas_implementation_gate_authorized": false,
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_causal_test": "Work in the coupled per-head V/O functional quotient or a nonseparable paired two-sided chart; do not launch a separable-KFAC training sweep."
+  },
+  "remote_raw_artifacts": {
+    "result": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_terminal_functional_atlas_v1/result.json", "bytes": 10293, "sha256": "a90489f3dd2d88e96d8661ec9738b98ea8de59e78f6b3f3c6579a677aacd89dd"},
+    "cells": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_terminal_functional_atlas_v1/attention_terminal_functional_atlas_cells.csv", "bytes": 768655, "sha256": "621958d170e7ecaa106a5733809073b4115b90aaaecbd48c647d115f7b0fd901"},
+    "overlap": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_terminal_functional_atlas_v1/attention_terminal_functional_atlas_overlap.csv", "bytes": 659, "sha256": "6ef6991ca29f623a11171406178ccdfa3681d257bf41500206e27c747a6d39b3"},
+    "storage": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_terminal_functional_atlas_v1/attention_terminal_functional_atlas_storage.csv", "bytes": 1431, "sha256": "46f045bce51040a61f2c167b699957debfc5d065859f2c960eef0c4b0422877d"}
+  },
+  "all_reported_values_finite": true
+}

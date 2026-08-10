@@ -16,6 +16,11 @@ PLAN = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_attention_terminal_functional_atlas_plan.json"
 )
+RESULT = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_attention_terminal_functional_atlas_result.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -72,3 +77,16 @@ def test_executable_plan_pins_code_design_and_teacher_identity() -> None:
     assert plan["protocol"]["parameter_updates"] == 0
     assert all(value is False for value in plan["authorization"].values())
     assert "foreground polling" in plan["execution"]["monitoring"]
+
+
+def test_terminal_result_rejects_separable_kfac_without_training_authority() -> None:
+    result = json.loads(RESULT.read_text())
+    assert result["classification"] == "ATTENTION_TERMINAL_FUNCTIONAL_ATLAS_REJECT"
+    assert result["execution"]["parameter_updates"] == 0
+    assert result["execution"]["basis_uses_terminal_teacher_state"] is True
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["decision"]["passed_targets"] == []
+    assert result["decision"]["language_model_training_authorized"] is False
+    assert result["decision"]["online_adaptive_atlas_implementation_gate_authorized"] is False
+    assert result["summaries"]["v"]["terminal_kfac"]["exact_muon"]["absolute_gain_over_blockfht"] < 0
+    assert result["summaries"]["v"]["calibration_overlap"]["minimum"] < 0.1
