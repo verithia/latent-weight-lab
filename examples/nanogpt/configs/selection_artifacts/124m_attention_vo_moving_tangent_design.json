@@ -1,0 +1,41 @@
+{
+  "schema_version": "mai_124m_attention_vo_moving_tangent_design_v1",
+  "recorded_at": "2026-08-10",
+  "status": "implemented_pending_identity_seal_and_execution",
+  "scientific_question": "Is the rapidly rotating V/O quotient tangent bundle causally trackable from a compact window of strictly past chords and optimizer directions?",
+  "teacher_upper_bound": {
+    "dense_past_information_used": true,
+    "future_information_used": false,
+    "deployable_decoder": false,
+    "purpose": "Necessary-condition test before designing a structured moving chart; a pass does not authorize training."
+  },
+  "selection_and_test": {
+    "window_candidates": [2, 4, 8, 16],
+    "window_selection_phase": "chords from 1200 through 1740 and Muon tangent 1782",
+    "frozen_test_phase": "chords beginning at 1800 and Muon tangent 2372",
+    "global_window": true,
+    "selection_score": "minimum of aggregate, every-layer, and late-layer recovery across selection chords and Muon tangents",
+    "causality": "Each target atlas contains only chords ending no later than target start and probes strictly earlier than target time.",
+    "coordinate_budget": "one percent of paired V/O parameters; actual atoms are at most window plus four past probes"
+  },
+  "decision_rule": {
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.8,
+      "minimum_every_layer_recovery": 0.6,
+      "minimum_late_layer_8_to_11_recovery": 0.6
+    },
+    "pass": "Authorize only a compact structured causal moving-atlas design and offline approximation gate.",
+    "fail": "Past tangent memory is insufficient; require a nonlinear state-conditioned or token-conditional V/O chart rather than a moving affine basis."
+  },
+  "authorization": {
+    "model_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  },
+  "execution_policy": {
+    "parameter_updates": 0,
+    "expected_runtime": "under five minutes",
+    "monitoring": "foreground polling; no watchdog"
+  }
+}
