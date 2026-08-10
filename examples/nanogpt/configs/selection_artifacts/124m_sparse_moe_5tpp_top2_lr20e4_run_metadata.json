@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_sparse_moe_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-10T20:49:18+08:00",
+  "process_group": 4092777,
+  "max_iters": 2374,
+  "scheduled_tokens": 622329856,
+  "scheduled_active_tpp": 5.0007426104093,
+  "git_commit": "67f95464a033ddab9391effc4ef037996bacdc65",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4.json",
+    "sha256": "72d8c3ae16ee62ef8f866802618d51b8655a47e452c8978f6ccf64e37437df09",
+    "archived": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4_20260810T124918Z_4092752.config.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_5tpp_lr20e4/performance_preflight.json",
+    "sha256": "bae44724ebf9c13969e2b600ea235274f1016b22ec1be6c9ca8f85cce42c1cc9",
+    "mfu_fraction": 0.21856520319665837
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4_20260810T124918Z_4092752.json",
+    "sha256": "2fec6f2cc1f8bdce06b0767cbdaf906fca451c3a7dc1fd2110f98c92ecdf21c2"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4_20260810T124918Z_4092752.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4_20260810T124918Z_4092752.json",
+  "initial_live_verification": {
+    "last_iter": 10,
+    "last_training_loss": 9.6296,
+    "process_alive": true,
+    "gpu_memory_mib": 68147,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 569.59,
+    "gpu_temperature_c": 54,
+    "estimated_total_wall_minutes": "90-95"
+  },
+  "monitoring": {
+    "policy": "terminal-or-actionable-error only; no healthy progress milestones or heartbeat",
+    "launchd_label": "com.mappingnetworks.pro6.moe124.5tpp.top2",
+    "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_dense_moe_5tpp_top2_terminal.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mentions": "@Codex",
+    "callback_action": "verify and seal terminal artifacts, compare both 5TPP arms, and authorize only the selected 20TPP confirmation if the preregistered rule passes"
+  },
+  "authorization": {
+    "selected_20tpp_before_terminal": false,
+    "larger_rung": false,
+    "generated_expert_arm": false
+  }
+}

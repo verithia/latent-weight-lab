@@ -1,10 +1,13 @@
 {
   "schema_version": "mai_sparse_moe_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_dense_moe8_top2_5tpp_top1_lr24e4",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-10T19:17:41+08:00",
+  "finished_at": "2026-08-10T20:45:03+08:00",
+  "wall_seconds": 5242,
+  "exit_code": 0,
   "process_group": 4047544,
   "max_iters": 2374,
   "scheduled_tokens": 622329856,
@@ -32,6 +35,28 @@
   },
   "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top1_lr24e4_20260810T111741Z_4047519.log",
   "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top1_lr24e4_20260810T111741Z_4047519.json",
+  "terminal": {
+    "checkpoint_best_validation_ce": 3.4448273181915283,
+    "terminal_train_ce": 3.4633,
+    "terminal_validation_ce": 3.4448,
+    "original_checkpoint_bytes": 2512713217,
+    "original_checkpoint_sha256": "a9f6f129af2743efdb4a407c8d2e7f92ba80adbc8b7f49cd7e1759a122a25592",
+    "checkpoint_metadata_sha256": "81a6e3ddfaac3be18237fb6f4b38d19cf9f194f3d57bda932ed6ad200ea0e48c",
+    "status_sha256": "9f375e66c853a00c55ca7063f7342b6636faa422643d456c477c64131f4cf482",
+    "log_sha256": "c2c1a0389635a6d33740b436870abbf9501e373f1970710d4113c4e6af8f693c",
+    "checkpoint_next_iter": 2374,
+    "classification": "clean_terminal_124m_dense_complete_expert_moe_5tpp_top1"
+  },
+  "manifold_snapshot": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_5tpp/manifold_snapshot.pt",
+    "bytes": 1177334999,
+    "sha256": "37c16f0cfa7ce2b5958e8a6141e9a1bbf69224aff85910d92448003c2634c36e",
+    "receipt_sha256": "47605a36ea50e7c028460e01a20134a3dbaca1c2dfdd42944eef581ae86725a1",
+    "model_tensor_count": 88,
+    "model_tensor_bytes": 1331801088,
+    "all_model_tensors_verified_equal": true,
+    "exact_resume_state_reclaimed_after_verification": true
+  },
   "initial_live_verification": {
     "last_iter": 20,
     "last_training_loss": 7.6039,
@@ -48,10 +73,10 @@
     "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_dense_moe_5tpp_top1_terminal.json",
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
     "callback_mentions": "@Codex",
-    "callback_action": "verify and seal terminal artifacts, update the active project note, then launch the already-gated top2 5TPP arm after storage admission"
+    "callback_action": "terminal callback delivered; artifacts sealed and the already-gated top2 5TPP arm launched after storage admission"
   },
   "authorization": {
-    "top2_5tpp_after_top1_terminal_and_storage_check": true,
+    "top2_5tpp_launched_after_top1_terminal_and_storage_check": true,
     "selected_20tpp_before_both_terminal_results": false,
     "larger_rung": false,
     "generated_expert_arm": false

@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_sparse_moe_5tpp_result_v1",
+  "recorded_at": "2026-08-10",
+  "classification": "PASS_COMPLETE_124M_DENSE_MOE_5TPP_TOP1_BEATS_MATCHED_DENSE",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_5tpp_top1_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "67f95464a033ddab9391effc4ef037996bacdc65",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "46f52259e2fe6f3a3858ef0dc1204b695f0bfaea6be4858315b08a073f492107",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "24aba11f8428eefb46979f51b9ae7a63847e04ca41fba0b4cd39faedbb1b0d88",
+    "status_sha256": "9f375e66c853a00c55ca7063f7342b6636faa422643d456c477c64131f4cf482",
+    "log_sha256": "c2c1a0389635a6d33740b436870abbf9501e373f1970710d4113c4e6af8f693c",
+    "original_checkpoint_sha256": "a9f6f129af2743efdb4a407c8d2e7f92ba80adbc8b7f49cd7e1759a122a25592",
+    "checkpoint_metadata_sha256": "81a6e3ddfaac3be18237fb6f4b38d19cf9f194f3d57bda932ed6ad200ea0e48c",
+    "mfu_certificate_sha256": "b6b0a58d1fbfcf97081e7d5d05898b85fac297ebd10242d209284e9e37a965e2",
+    "exit_code": 0,
+    "max_iters": 2374,
+    "scheduled_tokens": 622329856,
+    "scheduled_active_tpp": 5.0007426104093,
+    "checkpoint_next_iter": 2374,
+    "wall_seconds": 5242
+  },
+  "architecture": {
+    "active_parameters": 124447488,
+    "stored_parameters": 294316800,
+    "num_experts": 8,
+    "top_k": 2,
+    "expert_hidden_multiplier": 2,
+    "complete_expert_projection_ownership": true
+  },
+  "identity": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_reference_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "dense_reference_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dense_reference_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_5tpp_replay_result.json",
+    "comparison_is_dataset_and_fixed_eval_matched": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9851, "validation_ce": 10.9848},
+    {"step": 594, "train_ce": 4.1417, "validation_ce": 4.1308},
+    {"step": 1188, "train_ce": 3.6910, "validation_ce": 3.6753},
+    {"step": 1782, "train_ce": 3.5293, "validation_ce": 3.5114},
+    {"step": 2374, "train_ce": 3.4633, "validation_ce": 3.4448}
+  ],
+  "comparison": {
+    "checkpoint_best_validation_ce": 3.4448273181915283,
+    "matched_dense_checkpoint_best_validation_ce": 3.5402421951293945,
+    "validation_delta_to_dense": -0.09541487693786621,
+    "perplexity_ratio_to_dense": 0.9089957348609202,
+    "interpretation": "At the matched fixed-evaluation 5TPP horizon, dense complete-expert routing materially outperforms the ordinary dense 124M replay. This validates conditional complete-map specialization, not generated-expert direction matching."
+  },
+  "manifold_snapshot": {
+    "sha256": "37c16f0cfa7ce2b5958e8a6141e9a1bbf69224aff85910d92448003c2634c36e",
+    "receipt_sha256": "47605a36ea50e7c028460e01a20134a3dbaca1c2dfdd42944eef581ae86725a1",
+    "bytes": 1177334999,
+    "tensor_count": 88,
+    "tensor_bytes": 1331801088,
+    "all_model_tensors_preserved": true,
+    "exact_resume_state_reclaimed_after_verification": true
+  },
+  "decision": {
+    "top1_5tpp_passed": true,
+    "top2_5tpp_launched": true,
+    "selected_20tpp_requires_terminal_top2": true,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}
