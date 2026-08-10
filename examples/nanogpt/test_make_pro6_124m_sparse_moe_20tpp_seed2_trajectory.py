@@ -32,9 +32,9 @@ def test_seed2_changes_only_identity_and_geometry_acquisition_fields() -> None:
     }
 
 
-def test_seed2_preserves_scientific_control_and_stays_blocked() -> None:
+def test_seed2_preserves_scientific_control_after_gate_authorization() -> None:
     candidate = make_seed2_trajectory(json.loads(BASE.read_text()))
-    assert candidate["launch_ready"] is False
+    assert candidate["launch_ready"] is True
     assert candidate["model_seed"] == 1338
     assert candidate["train_data_seed"] == 20260715
     assert candidate["max_iters"] == 9495

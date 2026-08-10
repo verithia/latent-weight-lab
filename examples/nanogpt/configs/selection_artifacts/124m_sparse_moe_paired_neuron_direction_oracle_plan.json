@@ -1,6 +1,6 @@
 {
   "schema_version": "nanogpt_sparse_moe_paired_neuron_oracle_plan_v1",
-  "status": "seed1_alignment_gate_passed_seed2_storage_and_exact_io_mfu_pending_no_generated_training_authorized",
+  "status": "seed1_alignment_storage_and_exact_io_mfu_gates_passed_seed2_geometry_acquisition_authorized_no_generated_training_authorized",
   "scientific_question": "Can a state-conditioned chart recover the co-adapted c_fc/c_proj directions of complete sparse-MoE experts after respecting expert and hidden-neuron permutation symmetries?",
   "source_control": {
     "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
@@ -84,5 +84,16 @@
     "occupancy_exclusion_rule_pass": true,
     "quotient_to_raw_chord_ratio_mean": 1.0194292989644138,
     "interpretation": "Hidden assignment is stable after frozen occupancy exclusions, while quotienting permutations does not reduce trajectory chord energy. The main direction problem is not a hidden-index gauge artifact."
+  },
+  "seed2_acquisition_authorization": {
+    "authorized": true,
+    "scientific_updates_before_authorization": 0,
+    "storage_reclaim_execution_sha256": "4a03f8a8b48ec34e7e33decc6f420173778844cf9bde67856ab4dc1a99109fcd",
+    "strict_diagnostic_io_mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_20tpp_seed2_trajectory_lr24e4/performance_preflight.json",
+    "strict_diagnostic_io_mfu_certificate_sha256": "fe3656afe19a0a194c4c282b49fb856fcf62b43518f3b2f5557c4c117bddcfb4",
+    "mfu_fraction": 0.20430911522933554,
+    "minimum_mfu_fraction": 0.2,
+    "trajectory_snapshot_io_included": true,
+    "authorization_scope": "The dense seed-two trajectory acquisition only; generated-expert training and larger rungs remain blocked on the frozen recovery gates."
   }
 }

@@ -1,0 +1,40 @@
+{
+  "schema_version": "mai_124m_sparse_moe_seed2_geometry_mfu_result_v1",
+  "recorded_at": "2026-08-11",
+  "decision": "PASS_124M_DENSE_COMPLETE_EXPERT_MOE_SEED2_GEOMETRY_STRICT_IO_MFU_GATE",
+  "scientific_updates": 0,
+  "host": "PRO6",
+  "gpu": 0,
+  "accepted_attempt": {
+    "git_commit": "7b2a187a02efe7d1dd7ca439892143405aa4082d",
+    "blocked_source_config_sha256": "d886260ab1ad893fd6aae37dfe8d78267366a4348d73dc169b5b4ca73f93a921",
+    "authorized_config_sha256": "aa12926a7a3dd36b5f44ed8fb1bf07c00f3ad9ffb5a1dddc6cf4d90443521a20",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_20tpp_seed2_trajectory_lr24e4/performance_preflight.json",
+    "certificate_sha256": "fe3656afe19a0a194c4c282b49fb856fcf62b43518f3b2f5557c4c117bddcfb4",
+    "log_sha256": "a7c2592f8c8bfe9cdf859cd1ce436def596237a704d854183c5cb0b78f3441c5",
+    "empirical_bf16_peak_tflops": 416.5096785723025,
+    "model_tflops": 85.09672391356206,
+    "mfu_fraction": 0.20430911522933554,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 113966.03938624306,
+    "iteration_milliseconds": 2300.1940000000004,
+    "peak_mib": 45110.36,
+    "all_logged_losses_finite": true,
+    "warmup_updates": 1,
+    "timed_updates": 4,
+    "trajectory_snapshot_io_included": true,
+    "snapshot_count": 2,
+    "snapshot_seconds": 0.363
+  },
+  "rejected_operational_attempt": {
+    "reason": "The scratch MFU config inherited launch_ready=false and was rejected before its first update; no performance or scientific conclusion was drawn.",
+    "certificate_sha256": "0acc77b064cb62a2530ec185515db490c96cdc3de1ab2fba160b8034b32a9c0e",
+    "log_sha256": "55bceebf5a659634310a9755304ea83411bb0338945edafc07eb9ed7ce9385f9"
+  },
+  "authorization": {
+    "seed2_dense_geometry_acquisition": true,
+    "generated_expert_training": false,
+    "larger_rung": false
+  }
+}

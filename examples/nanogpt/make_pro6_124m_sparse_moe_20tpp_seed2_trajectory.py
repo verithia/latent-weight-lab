@@ -23,7 +23,7 @@ def make_seed2_trajectory(source: dict[str, Any]) -> dict[str, Any]:
                 "20TPP geometry confirmation"
             ),
             "hpo_stage": "moe_124m_active_20tpp_seed2_geometry",
-            "launch_ready": False,
+            "launch_ready": True,
             "mfu_preflight_certificate": (
                 "/mnt/ssd-data/orj/MappingNetworks/outputs/"
                 "pro6_mai_v3_124m_dense_moe8_top2_mfu_20tpp_seed2_trajectory_lr24e4/"
