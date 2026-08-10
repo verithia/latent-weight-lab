@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_attention_vo_quotient_manifold_plan_v1",
+  "recorded_at": "2026-08-10",
+  "scientific_question": "Does the discovery-only coupled per-head V/O quotient span transport held-out attention residual states, chords, and exact Muon tangents across disjoint batches and later training time?",
+  "protocol": {
+    "parameter_updates": 0,
+    "coordinate_fraction": 0.01,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "trajectory_steps": [
+      0, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600, 660,
+      720, 780, 840, 900, 960, 1020, 1080, 1140, 1200, 1260, 1320,
+      1380, 1440, 1500, 1560, 1620, 1680, 1740, 1800, 1860, 1920,
+      1980, 2040, 2100, 2160, 2220, 2280, 2340, 2373
+    ],
+    "trajectory_discovery_max_step": 1140,
+    "trajectory_heldout_min_step": 1200,
+    "discovery_probe_steps": [0, 594],
+    "heldout_probe_steps": [1782, 2372],
+    "fit_metric_seed": 20260809,
+    "eval_metric_seed": 20260810,
+    "metric_batch_size": 2,
+    "metric_block_size": 256,
+    "metric_batches": 2,
+    "span_relative_cutoff": 1e-8
+  },
+  "decision_rule": {
+    "all_metrics_must_pass": true,
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.9,
+      "minimum_every_layer_recovery": 0.75,
+      "minimum_late_layer_8_to_11_recovery": 0.75
+    },
+    "pass": "Authorize only gauge-fixed paired two-sided decoder design and offline approximation at the 124M rung.",
+    "fail": "Reject the near-affine quotient-atlas hypothesis under the frozen temporal split and require a nonlinear or input-conditional V/O chart."
+  },
+  "authorization": {
+    "paired_two_sided_decoder_design": false,
+    "model_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  },
+  "identity": {
+    "entrypoint": "examples.nanogpt.analyze_attention_vo_quotient_manifold",
+    "entrypoint_sha256": "47acb1ba0d8a1e741f5fcbef637069716a26818ad48b39f327cfa7099cb1f5ef",
+    "design": "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_quotient_manifold_design.json",
+    "design_sha256": "79314edbee22e2b22c2d909879aef56f9f6f343b678de1b057549567ccf41544",
+    "dense_config": "examples/nanogpt/configs/pro6_mai_v3_124m_muon_5tpp_attention_trajectory_replay_lr24e4.json",
+    "dense_config_sha256": "b411c14a38a2a3c10813d60b9129fd7aa3b007fbcf39873d7241fac3e726e007",
+    "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+    "trajectory_file_count": 41,
+    "trajectory_total_bytes": 4644344659,
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "optimizer_probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "terminal_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_quotient_manifold_v1"
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "expected_runtime": "under five minutes",
+    "monitoring": "foreground polling; zero-update analysis; no watchdog",
+    "command": "python -m examples.nanogpt.analyze_attention_vo_quotient_manifold --plan examples/nanogpt/configs/selection_artifacts/124m_attention_vo_quotient_manifold_plan.json --trajectory-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory --probe-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe --terminal-checkpoint /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/ckpt.pt --data-dir /mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b --output-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_quotient_manifold_v1 --device cuda"
+  }
+}

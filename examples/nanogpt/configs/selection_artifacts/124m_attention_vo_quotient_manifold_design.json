@@ -1,0 +1,41 @@
+{
+  "schema_version": "mai_124m_attention_vo_quotient_manifold_design_v1",
+  "recorded_at": "2026-08-10",
+  "status": "implemented_pending_identity_seal_and_execution",
+  "scientific_question": "After quotienting the V/O hidden-head gauge, does the discovery-phase coupled attention function follow a compact near-affine path that transports to held-out batches and later training time?",
+  "functional_object": {
+    "per_head_product": "M_h = O[:, h_slice] V_h",
+    "tangent": "delta M_h = delta O[:, h_slice] V_h + O[:, h_slice] delta V_h",
+    "gauge": "V_h -> R V_h and O[:,h] -> O[:,h] R^-1 leave M_h unchanged",
+    "metric": "frozen-terminal-QK attention residual outputs on disjoint fixed token batches"
+  },
+  "atlas": {
+    "selection_information": "discovery states and chords through step 1140 plus exact Muon tangents at steps 0 and 594",
+    "heldout_information": "states/chords from step 1200 onward and exact Muon tangents at steps 1782 and 2372",
+    "primary": "exact coupled quotient atoms",
+    "control": "the same parameter atoms linearized at the initial V/O pair",
+    "maximum_atoms": 40,
+    "allowed_coordinate_budget": "round(0.01 * 2 * d^2) = 11796 at d=768",
+    "parameter_updates": 0
+  },
+  "decision_rule": {
+    "all_metrics_must_pass": true,
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.9,
+      "minimum_every_layer_recovery": 0.75,
+      "minimum_late_layer_8_to_11_recovery": 0.75
+    },
+    "pass": "Authorize only design and offline approximation of a compact gauge-fixed paired two-sided V/O decoder at 124M.",
+    "fail": "Reject the near-affine quotient-atlas hypothesis under this temporal split; require a nonlinear or input-conditional V/O chart before any training sweep."
+  },
+  "authorization": {
+    "model_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  },
+  "execution_policy": {
+    "expected_runtime": "under five minutes",
+    "monitoring": "foreground polling; no watchdog"
+  }
+}
