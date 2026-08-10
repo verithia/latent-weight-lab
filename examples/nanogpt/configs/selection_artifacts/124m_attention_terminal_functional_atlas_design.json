@@ -1,0 +1,46 @@
+{
+  "schema_version": "mai_124m_attention_terminal_functional_atlas_design_v1",
+  "recorded_at": "2026-08-10",
+  "status": "implemented_pending_identity_seal_and_execution",
+  "scientific_question": "If the one-percent KFAC basis is allowed to adapt optimistically to the terminal dense model, is separable activation-gradient geometry stable and sufficient for held-out V and attention-cproj path and Muon recovery?",
+  "causal_parent": "The step-zero KFAC atlas was unstable across calibration splits and worse than BlockFHT on every aggregate metric. This oracle changes only basis time: step zero to terminal dense state.",
+  "teacher_information": {
+    "terminal_dense_checkpoint_used_for_basis": true,
+    "deployable_causal_decoder": false,
+    "parameter_updates": 0,
+    "interpretation": "This is an optimistic necessary-condition upper bound. A pass permits only an online adaptive-sketch implementation gate; it is not a trainable result."
+  },
+  "frozen_protocol": {
+    "coordinate_fraction": 0.01,
+    "targets": ["attn.c_attn.v", "attn.c_proj"],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "basis_source": "two disjoint CE KFAC acquisitions at the terminal dense checkpoint",
+    "controls": ["identical-budget production-seeded affine BlockFHT"],
+    "evaluations": ["held-out state", "held-out local chord", "held-out discovery span", "held-out exact Muon action", "split-to-split subspace overlap"],
+    "changed_from_parent": ["basis model state", "calibration seeds"],
+    "unchanged_from_parent": ["coordinate budget", "trajectory", "probes", "functional fit/eval batches", "BlockFHT control", "thresholds"]
+  },
+  "decision_rule": {
+    "all_targets_and_metrics_must_pass": true,
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.8,
+      "minimum_every_layer_recovery": 0.6,
+      "minimum_late_layer_8_to_11_recovery": 0.6,
+      "minimum_absolute_gain_over_blockfht": 0.1,
+      "minimum_calibration_split_subspace_overlap": 0.75
+    },
+    "pass": "Authorize only implementation and offline validation of a causal periodically refreshed structured KFAC sketch at 124M.",
+    "fail": "Reject one-percent separable KFAC as the attention chart even with terminal adaptation. Move to the V/O functional quotient or a nonseparable paired two-sided chart; do not run a KFAC training sweep."
+  },
+  "authorization": {
+    "current_successor": "none",
+    "language_model_training": false,
+    "mfu_preflight": false,
+    "larger_rung": false
+  },
+  "execution_policy": {
+    "expected_runtime": "under five minutes",
+    "monitoring": "foreground polling; no watchdog",
+    "output_must_be_absent": true
+  }
+}
