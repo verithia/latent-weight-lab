@@ -60,6 +60,20 @@
       "intervention_required": false
     }
   },
+  "fixed_evaluations": {
+    "step_2374": {
+      "train_loss_log_precision": 3.4604,
+      "validation_loss_log_precision": 3.4417,
+      "matched_5tpp_moe_validation_ce_exact": 3.4448273181915283,
+      "delta_vs_matched_5tpp_moe_log_precision": -0.0031,
+      "matched_dense_5tpp_validation_ce_exact": 3.5402421951293945,
+      "delta_vs_matched_dense_log_precision": -0.0985,
+      "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+      "paired_snapshot_sha256": "cc10f947fa6bc4bf0ef2f6c74bc35fe74e69db83750724bcdf8fb85fd2a24371",
+      "paired_snapshot_bytes": 226591213,
+      "interpretation": "The selected 20TPP run reproduces the 5TPP winner at the same token horizon and retains about a 0.10 CE advantage over the matched dense control; this is an intermediate horizon, not the 20TPP selector."
+    }
+  },
   "paired_neuron_geometry_acquisition": {
     "design": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_paired_neuron_direction_oracle_plan.json",
     "design_commit": "f26723768",
@@ -89,7 +103,7 @@
     "generated_expert_training_authorized": false
   },
   "storage_admission": {
-    "workspace_bytes_after_verified_compaction": 269078686036,
+    "workspace_bytes_after_verified_compaction": 270640644830,
     "workspace_cap_bytes": 274877906944,
     "real_filesystem_free": "1.5T",
     "compacted_lr24e4_0p5tpp_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
