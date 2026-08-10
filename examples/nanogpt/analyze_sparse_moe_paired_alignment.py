@@ -24,7 +24,7 @@ from examples.nanogpt.analyze_residual_compatibility import fixed_validation_bat
 from examples.nanogpt.extract_moe_paired_snapshot import SCHEMA_VERSION
 from examples.nanogpt.moe_paired_geometry import (
     functional_atom_similarity,
-    match_paired_neurons,
+    maximum_weight_assignment,
 )
 
 
@@ -141,20 +141,6 @@ def paired_alignment_metrics(
     fit_activations: torch.Tensor,
     eval_activations: torch.Tensor,
 ) -> dict[str, float | torch.Tensor]:
-    fit_match = match_paired_neurons(
-        left_c_fc,
-        left_c_proj,
-        right_c_fc,
-        right_c_proj,
-        fit_activations,
-    )
-    eval_match = match_paired_neurons(
-        left_c_fc,
-        left_c_proj,
-        right_c_fc,
-        right_c_proj,
-        eval_activations,
-    )
     fit_similarity = functional_atom_similarity(
         left_c_fc,
         left_c_proj,
@@ -169,9 +155,11 @@ def paired_alignment_metrics(
         right_c_proj,
         eval_activations,
     )
+    fit_permutation = maximum_weight_assignment(fit_similarity)
+    eval_permutation = maximum_weight_assignment(eval_similarity)
     hidden = left_c_fc.shape[0]
     identity = torch.arange(hidden)
-    permutation = fit_match.permutation
+    permutation = fit_permutation
     device_permutation = permutation.to(right_c_fc.device)
     aligned_right_fc = right_c_fc.index_select(0, device_permutation)
     aligned_right_proj = right_c_proj.index_select(1, device_permutation)
@@ -201,14 +189,15 @@ def paired_alignment_metrics(
         output_chord = (right_output - left_output).square().mean().sqrt()
 
     fit_selected_on_eval = _selected_similarity(eval_similarity, permutation)
-    eval_oracle = _selected_similarity(eval_similarity, eval_match.permutation)
+    fit_selected = _selected_similarity(fit_similarity, permutation)
+    eval_oracle = _selected_similarity(eval_similarity, eval_permutation)
     return {
         "fit_permutation": permutation,
-        "eval_permutation": eval_match.permutation,
-        "assignment_overlap": float((permutation == eval_match.permutation).float().mean()),
+        "eval_permutation": eval_permutation,
+        "assignment_overlap": float((permutation == eval_permutation).float().mean()),
         "fit_identity_fraction": float((permutation == identity).float().mean()),
-        "eval_identity_fraction": float((eval_match.permutation == identity).float().mean()),
-        "fit_mean_similarity": fit_match.mean_similarity,
+        "eval_identity_fraction": float((eval_permutation == identity).float().mean()),
+        "fit_mean_similarity": float(fit_selected.mean()),
         "eval_mean_similarity_under_fit_assignment": float(fit_selected_on_eval.mean()),
         "eval_oracle_mean_similarity": float(eval_oracle.mean()),
         "eval_assignment_regret": float(eval_oracle.mean() - fit_selected_on_eval.mean()),
