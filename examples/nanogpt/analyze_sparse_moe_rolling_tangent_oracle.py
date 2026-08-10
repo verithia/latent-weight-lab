@@ -31,7 +31,7 @@ from examples.nanogpt.moe_paired_geometry import (
     maximum_weight_assignment,
 )
 from examples.nanogpt.parameter_trajectory import SCHEMA_VERSION
-from latent_weight_lab.block_fht import block_fht_slice
+from latent_weight_lab.block_fht import _load_block_fht_ext, block_fht_slice
 
 
 @dataclass
@@ -334,6 +334,8 @@ def main() -> None:
     layers = [int(value) for value in source["layers"]]
     steps = [int(value) for value in source["trajectory_steps"]]
     rank = int(plan["matched_coordinate_budget"]["coordinates_per_probed_layer"])
+    if "cuda" in args.device and _load_block_fht_ext() is None:
+        raise RuntimeError("native BlockFHT extension is required for the fixed control")
     discovery_transition_count = int(anti_leakage["trajectory_discovery_transitions"])
     if len(steps) - 1 != discovery_transition_count + int(anti_leakage["trajectory_heldout_transitions"]):
         raise ValueError("trajectory split does not cover every registered transition")

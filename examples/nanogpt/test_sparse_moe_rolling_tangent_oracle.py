@@ -5,10 +5,12 @@ import torch
 from examples.nanogpt.analyze_sparse_moe_rolling_tangent_oracle import (
     LayerState,
     causal_history_indices,
+    fixed_blockfht_basis,
     fit_coordinates,
     flatten_state,
     orthonormal_span,
     recovery_fraction,
+    score_basis,
     sparse_moe_output,
     unflatten_state,
 )
@@ -67,3 +69,37 @@ def test_functional_coordinate_fit_recovers_in_span_target() -> None:
     fitted = fit_coordinates(basis, target, ridge_ratio=1e-10)
     predicted = torch.einsum("k,knd->nd", fitted, basis)
     assert recovery_fraction(predicted, target) > 0.999999
+
+
+def test_fixed_blockfht_basis_is_exact_budget_and_scaled() -> None:
+    state = LayerState(
+        torch.zeros(2, 4),
+        torch.zeros(2, 6, 4),
+        torch.zeros(2, 4, 6),
+    )
+    basis = fixed_blockfht_basis(state, rank=4, scale=2.0, layer=0, device="cpu")
+    assert basis.shape == (4, flatten_state(state).numel())
+    torch.testing.assert_close(basis @ basis.T, torch.eye(4) * 4.0, atol=1e-5, rtol=1e-5)
+
+
+def test_materialized_oracle_recovers_small_in_basis_update() -> None:
+    torch.manual_seed(17)
+    left = LayerState(
+        torch.randn(2, 4) * 0.1,
+        torch.randn(2, 6, 4) * 0.1,
+        torch.randn(2, 4, 6) * 0.1,
+    )
+    raw_basis = torch.randn(4, flatten_state(left).numel())
+    basis = orthonormal_span(raw_basis, 4, scale=1e-3)
+    direction = unflatten_state(0.3 * basis[0] - 0.2 * basis[1], left)
+    right = LayerState(
+        left.router + direction.router,
+        left.c_fc + direction.c_fc,
+        left.c_proj + direction.c_proj,
+    )
+    x = torch.randn(64, 4)
+    result = score_basis(
+        left, right, basis, x[:32], x[32:], top_k=2,
+        ridge_ratio=1e-10, device="cpu",
+    )
+    assert result["heldout_materialized_recovery"] > 0.999
