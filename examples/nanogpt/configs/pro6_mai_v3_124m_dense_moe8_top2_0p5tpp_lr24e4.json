@@ -32,7 +32,7 @@
   "method": "baseline",
   "mfu_measurement_protocol": "foreground real CUDA BF16 training-path preflight with one warmup and four timed updates; execute deterministic dropless top-2 routing, batched expert GEMMs, per-expert batched Muon, router AdamW, and both router auxiliary losses",
   "mfu_min_fraction": 0.2,
-  "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu/performance_preflight.json",
+  "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_retry1/performance_preflight.json",
   "mfu_preflight_required": true,
   "min_lr": 0.00024,
   "model_seed": 1337,

@@ -4827,11 +4827,15 @@ class GPT(nn.Module):
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
         prepare_block_fht_weight_cache(self, dtype=dtype)
         for block in self.transformer.h:
+            if not isinstance(block.mlp, MLP):
+                continue
             block.mlp.prepare_charted_cfc_cache()
             block.mlp.prepare_charted_cproj_cache()
 
     def flush_block_fht_cache(self) -> None:
         for block in self.transformer.h:
+            if not isinstance(block.mlp, MLP):
+                continue
             block.mlp.flush_charted_cfc_cache()
             block.mlp.flush_charted_cproj_cache()
         flush_block_fht_weight_cache(self)
@@ -4880,6 +4884,8 @@ class GPT(nn.Module):
     ) -> list[dict[str, float]]:
         diagnostics = []
         for layer, block in enumerate(self.transformer.h):
+            if not isinstance(block.mlp, MLP):
+                continue
             module = block.mlp.c_proj
             if not isinstance(module, ProductFHTLinear):
                 continue
@@ -4896,6 +4902,7 @@ class GPT(nn.Module):
                 block.mlp.suspend_charted_cproj_cache(),
             )
             for block in self.transformer.h
+            if isinstance(block.mlp, MLP)
         ]
         return suspend_block_fht_weight_cache(self), charted
 

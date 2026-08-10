@@ -171,3 +171,12 @@ def test_state_and_optimizer_roundtrip_preserve_next_step() -> None:
         actual, actual_loss = restored(idx, targets)
     torch.testing.assert_close(actual, expected, atol=0.0, rtol=0.0)
     torch.testing.assert_close(actual_loss, expected_loss, atol=0.0, rtol=0.0)
+
+
+def test_legacy_block_fht_helpers_are_noops_for_sparse_moe() -> None:
+    model = GPT(tiny_config())
+    model.prepare_block_fht_cache(dtype=torch.float32)
+    assert model.finalize_product_fht_pullback_probes() == []
+    suspended = model.suspend_block_fht_cache()
+    model.restore_block_fht_cache(suspended)
+    model.flush_block_fht_cache()
