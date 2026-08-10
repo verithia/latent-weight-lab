@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_sparse_moe_active_parameter_ladder_design_v1",
   "recorded_at": "2026-08-10",
-  "status": "implemented_124m_lr_screen_and_top_two_5tpp_complete_selected_20tpp_exact_mfu_passed_launch_authorized_larger_rungs_blocked",
+  "status": "implemented_124m_lr_screen_and_top_two_5tpp_complete_selected_20tpp_running_larger_rungs_blocked",
   "implementation_gate_result": {
     "implementation_commit": "01b162502edb222a47c32d2ce50bc82f48a62ffe",
     "focused_tests": "23 passed on PRO6",
@@ -91,7 +91,7 @@
         "5TPP": {"max_iters": 2374, "scheduled_tokens": 622329856, "scheduled_tpp": 5.0007426104093},
         "20TPP": {"max_iters": 9495, "scheduled_tokens": 2489057280, "scheduled_tpp": 20.000863978869546}
       },
-      "authorization": "selected_20tpp_exact_config_mfu_passed_launch_authorized"
+      "authorization": "selected_20tpp_exact_config_mfu_passed_running"
     },
     {
       "name": "moe_350m_active",
@@ -220,7 +220,7 @@
     "progress_callback_resets_heartbeat": true
   },
   "launch_authorization": {
-    "current": "124m_dense_complete_expert_selected_20tpp_exact_config_mfu_passed",
+    "current": "124m_dense_complete_expert_selected_20tpp_running_after_exact_config_mfu",
     "reason": "Both preregistered 5TPP arms completed on identical fixed evaluation indices and beat the matched dense replay. Learning rate 2.4e-3 ranks first at validation CE 3.444827318 versus 3.497758865 for 2.0e-3, so only 2.4e-3 advances to the 20TPP horizon. Its exact training-path preflight passed at 21.7865 percent MFU with finite losses. The 350M, 690M, and 985M-active rungs remain blocked on the frozen 124M scientific and second-seed promotion gates, and the generated-expert decoder remains blocked on a paired-neuron direction oracle."
   }
 }

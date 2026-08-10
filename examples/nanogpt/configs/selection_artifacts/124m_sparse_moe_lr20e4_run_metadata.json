@@ -47,6 +47,16 @@
     "log_sha256": "e476d848ea9cbdae8399487d76840aabaea981e2387ef7651e9c47bf8d55e2cc",
     "classification": "clean_terminal_124m_lr_screen_nonwinner_so_far"
   },
+  "manifold_snapshot": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr20e4_0p5tpp/manifold_snapshot.pt",
+    "bytes": 1177334935,
+    "sha256": "4f878977c1c4a6db218492b948742b5de03ef7d931939bd3ee7880f1b7a24016",
+    "receipt_sha256": "92fda28c0ee9294a04d315a3231685a3b632011f6eca9bec5076d0a399cbf6ae",
+    "model_tensor_count": 88,
+    "model_tensor_bytes": 1331801088,
+    "all_model_tensors_verified_equal": true,
+    "exact_resume_state_reclaimed_after_verification": true
+  },
   "monitoring": {
     "policy": "terminal-or-actionable-error only; no healthy progress milestones or heartbeat",
     "launchd_label": "org.mappingnetworks.pro6.moe124.lr20",

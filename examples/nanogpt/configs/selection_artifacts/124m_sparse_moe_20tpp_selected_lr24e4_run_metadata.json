@@ -1,0 +1,69 @@
+{
+  "schema_version": "mai_sparse_moe_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-10T22:28:47+08:00",
+  "process_group": 4141464,
+  "max_iters": 9495,
+  "scheduled_tokens": 2489057280,
+  "scheduled_active_tpp": 20.000863978869546,
+  "git_commit": "4f455f7eef03f63bf5b385dd478e1f2be03f4801",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4.json",
+    "sha256": "650c7286658d2f3aa881586d930702272cfad57d1272b6bb01082f59b6672b4d",
+    "archived": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4_20260810T142847Z_4141432.config.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_20tpp_selected_lr24e4/performance_preflight.json",
+    "sha256": "91c73213d82479ddf1f90626fd6a12069bbf7bccdfa4f17cdc0621bbd17a3f59",
+    "mfu_fraction": 0.21786539280270933,
+    "tokens_per_second": 121891.115,
+    "iteration_milliseconds": 2150.6675,
+    "peak_mib": 43679.97
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4_20260810T142847Z_4141432.json",
+    "sha256": "6a0496a87de4c3a082c53268ab5c6ef92d375c60302c94d402ff5fa4722153f3"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4_20260810T142847Z_4141432.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4_20260810T142847Z_4141432.json",
+  "initial_live_verification": {
+    "last_iter": 30,
+    "last_training_loss": 8.0741,
+    "process_alive": true,
+    "gpu_memory_mib": 61859,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 566.0,
+    "gpu_temperature_c": 54,
+    "estimated_total_wall_hours": "5.8-6.0"
+  },
+  "storage_admission": {
+    "workspace_bytes_after_verified_compaction": 268851923092,
+    "workspace_cap_bytes": 274877906944,
+    "real_filesystem_free": "1.5T",
+    "compacted_lr24e4_0p5tpp_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "compacted_lr20e4_0p5tpp_snapshot_sha256": "4f878977c1c4a6db218492b948742b5de03ef7d931939bd3ee7880f1b7a24016",
+    "atomic_checkpoint_headroom_preserved": true
+  },
+  "monitoring": {
+    "policy": "aggregate 20/50/80/100 milestones plus errors/stalls and a 90-minute heartbeat reset by a delivered progress callback",
+    "launchd_label": "com.mappingnetworks.pro6.moe124.20tpp.selected",
+    "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_dense_moe_selected_20tpp.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mentions": "@Codex",
+    "callback_action": "verify live or terminal evidence, update durable state, and continue the preregistered research plan autonomously"
+  },
+  "authorization": {
+    "selected_124m_20tpp": true,
+    "larger_rung": false,
+    "generated_expert_arm": false
+  }
+}
