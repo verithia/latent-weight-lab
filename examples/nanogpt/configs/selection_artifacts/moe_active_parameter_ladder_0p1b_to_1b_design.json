@@ -199,7 +199,7 @@
     "progress_callback_resets_heartbeat": true
   },
   "launch_authorization": {
-    "current": "none",
-    "reason": "The ladder is prepared and count-sealed, but the repository has no MoE implementation and the generated-expert decoder has not passed a direction oracle. No GPU job may be represented as a MoE verification yet."
+    "current": "124m_dense_complete_expert_0p5tpp_lr_screen_only",
+    "reason": "The dense complete-expert implementation passed correctness and exact-config MFU at 20.87 percent. This authorizes only the three 124M-active 0.5TPP LR-screen configurations. The 350M, 690M, and 985M-active rungs remain blocked on the frozen 124M scientific promotion gates, and the generated-expert decoder remains blocked on a paired-neuron direction oracle."
   }
 }

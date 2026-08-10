@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_sparse_moe_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-10T18:22:08+08:00",
+  "process_group": 4015438,
+  "max_iters": 238,
+  "git_commit": "55d91cfe935a376418f800e6282984ee5aa81a97",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4.json",
+    "sha256": "211a673d3ab62df0ec831b8da3c512b29ff14ecbbc86ca38119ddfa06234f88e",
+    "archived": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4_20260810T102208Z_4015413.config.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_retry1/performance_preflight.json",
+    "sha256": "7379a36759a3d55a2cbc88ff9971a3653c1409f47d9444bdbd86230d2be6c097",
+    "mfu_fraction": 0.20867598265843404
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4_20260810T102208Z_4015413.json",
+    "sha256": "7a9070a9e52a723a706b896fe2cfc66a2e430bfa7a26e01cf00949d27a758bdb"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4_20260810T102208Z_4015413.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4_20260810T102208Z_4015413.json",
+  "monitoring": {
+    "policy": "terminal-or-actionable-error only; no healthy progress milestones or heartbeat",
+    "launchd_label": "org.mappingnetworks.pro6.moe124.lr24",
+    "watchdog_state": "/Users/verithia/research/notes/runtime/pro6_124m_dense_moe_lr24e4_terminal.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action": "verify and seal the exact terminal artifacts, update the active project note, then continue the preregistered 124M LR screen autonomously"
+  },
+  "authorization": {
+    "scientific_claim_before_terminal_fixed_evaluation": false,
+    "larger_rung": false,
+    "generated_expert_arm": false
+  }
+}
