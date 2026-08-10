@@ -45,8 +45,51 @@
     "gpu_temperature_c": 54,
     "estimated_total_wall_hours": "5.8-6.0"
   },
+  "verified_milestones": {
+    "20_percent": {
+      "callback_iter": 1910,
+      "verified_iter": 2260,
+      "recent_training_loss": 3.4689,
+      "process_alive": true,
+      "gpu_memory_mib": 68147,
+      "gpu_utilization_percent": 100,
+      "gpu_power_watts": 558.49,
+      "gpu_temperature_c": 58,
+      "iteration_milliseconds_recent": 2143.5,
+      "fixed_eval_available": false,
+      "intervention_required": false
+    }
+  },
+  "paired_neuron_geometry_acquisition": {
+    "design": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_paired_neuron_direction_oracle_plan.json",
+    "design_commit": "f26723768",
+    "acquisition_commit": "6f39506",
+    "layers": [0, 5, 11],
+    "tensors_per_layer": [
+      "mlp.expert_c_fc",
+      "mlp.expert_c_proj",
+      "mlp.router.weight"
+    ],
+    "fixed_eval_steps": [0, 2374, 4748, 7122, 9495],
+    "step_zero_snapshot": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots/step_000000_moe_paired_l0_l5_l11.pt",
+      "sha256": "a755ca6c146d50d8c04516cb19d1d1f44abac330a90883dbb56f12c099fa1773",
+      "bytes": 226591213,
+      "tensor_count": 9,
+      "tensor_bytes": 226566144,
+      "source_full_snapshot_sha256": "3e39abb1705ad0dafc569deaa8349f8305a7dc79f8dc9c5f44dbb20b2c7f5cc9",
+      "source_full_snapshot_reclaimed_after_exact_verification": true,
+      "reclaimed_bytes": 1177335127
+    },
+    "sidecar": {
+      "launchd_label": "com.mappingnetworks.pro6.moe124.paired-acquisition",
+      "state": "/Users/verithia/research/watch_state/pro6_124m_dense_moe_paired_acquisition.json",
+      "policy": "poll published ckpt.meta.json every 60 seconds and preserve only exact same-gauge paired tensors at fixed-eval checkpoints"
+    },
+    "generated_expert_training_authorized": false
+  },
   "storage_admission": {
-    "workspace_bytes_after_verified_compaction": 268851923092,
+    "workspace_bytes_after_verified_compaction": 269078686036,
     "workspace_cap_bytes": 274877906944,
     "real_filesystem_free": "1.5T",
     "compacted_lr24e4_0p5tpp_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
