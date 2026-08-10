@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 DESIGN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_quotient_manifold_design.json"
 PLAN = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_quotient_manifold_plan.json"
+RESULT = ROOT / "examples/nanogpt/configs/selection_artifacts/124m_attention_vo_quotient_manifold_result.json"
 
 
 def sha256(path: Path) -> str:
@@ -45,3 +46,15 @@ def test_quotient_plan_pins_code_design_and_zero_update() -> None:
     assert identity["design_sha256"] == sha256(DESIGN)
     assert plan["protocol"]["parameter_updates"] == 0
     assert all(value is False for value in plan["authorization"].values())
+
+
+def test_quotient_result_accepts_states_but_rejects_static_tangent_atlas() -> None:
+    result = json.loads(RESULT.read_text())
+    assert result["classification"] == "ATTENTION_VO_QUOTIENT_MANIFOLD_REJECT"
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    primary = result["summaries"]["joint_quotient_discovery"]
+    assert primary["state"]["aggregate_eval_recovery"] > 0.96
+    assert primary["state"]["minimum_layer_eval_recovery"] > 0.90
+    assert primary["chord"]["aggregate_eval_recovery"] < 0.03
+    assert primary["muon_direction"]["aggregate_eval_recovery"] < 0.03
+    assert result["decision"]["language_model_training_authorized"] is False

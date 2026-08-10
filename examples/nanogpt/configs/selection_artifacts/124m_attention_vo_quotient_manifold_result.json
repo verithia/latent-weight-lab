@@ -1,0 +1,58 @@
+{
+  "schema_version": "mai_124m_attention_vo_quotient_manifold_sealed_result_v1",
+  "recorded_at": "2026-08-10T09:50:36.784673+00:00",
+  "classification": "ATTENTION_VO_QUOTIENT_MANIFOLD_REJECT",
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "git_commit": "4273a13e765d19fd4ef6f11500aca777db4f9c5e",
+    "parameter_updates": 0,
+    "elapsed_seconds": 7.7402567863464355
+  },
+  "identity": {
+    "plan_sha256": "3eea12e8d5a24d47b04711840afd0a016ed5c4e92f1d17aa7c4cffe94f96dc44",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fit_metric_batch_sha256": "5618db13ba1e2a7eb9d679e04beccf61662e0fd9f8a04aaa7c81886b078c284a",
+    "eval_metric_batch_sha256": "d2713ea6d1aa1358ff9db08322c5e289f3cd91d14aa1148c742113cd350cc752"
+  },
+  "summaries": {
+    "joint_quotient_discovery": {
+      "state": {"aggregate_eval_recovery": 0.9622241763232463, "minimum_layer_eval_recovery": 0.9050755427708118, "minimum_late_layer_eval_recovery": 0.9050755427708118, "maximum_atlas_atoms": 40, "maximum_atlas_rank": 21},
+      "chord": {"aggregate_eval_recovery": 0.023978431405988994, "minimum_layer_eval_recovery": 0.00003570856215989234, "minimum_late_layer_eval_recovery": 0.00003570856215989234, "maximum_atlas_atoms": 40, "maximum_atlas_rank": 21},
+      "muon_direction": {"aggregate_eval_recovery": 0.023343921482476427, "minimum_layer_eval_recovery": 0.003617460091996253, "minimum_late_layer_eval_recovery": 0.003617460091996253, "maximum_atlas_atoms": 40, "maximum_atlas_rank": 21}
+    },
+    "initial_tangent_discovery": {
+      "state": {"aggregate_eval_recovery": 0.6478197347096883, "minimum_layer_eval_recovery": 0.4503798006081239, "maximum_atlas_rank": 23},
+      "chord": {"aggregate_eval_recovery": 0.01651392749857742, "minimum_layer_eval_recovery": 0.0007552399365042566, "maximum_atlas_rank": 23},
+      "muon_direction": {"aggregate_eval_recovery": 0.019532790139457017, "minimum_layer_eval_recovery": 0.00360943113574597, "maximum_atlas_rank": 23}
+    }
+  },
+  "checks": {
+    "state_aggregate": true,
+    "state_every_layer": true,
+    "state_late_layers": true,
+    "chord_aggregate": false,
+    "chord_every_layer": false,
+    "chord_late_layers": false,
+    "muon_direction_aggregate": false,
+    "muon_direction_every_layer": false,
+    "muon_direction_late_layers": false
+  },
+  "decision": {
+    "paired_two_sided_decoder_design_gate_authorized": false,
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "deduction": "The V/O quotient has a compact global state manifold but a rapidly rotating local tangent bundle. A static affine chart can represent positions but cannot follow local optimization directions; test a causal moving/conditional tangent atlas next."
+  },
+  "remote_raw_artifacts": {
+    "result": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_quotient_manifold_v1/result.json", "bytes": 5119, "sha256": "72ccfb8813c38dfe6bd6c77b95499e84a9e00995bc78112ba3bfd6826d823f52"},
+    "atlas": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_quotient_manifold_v1/attention_vo_quotient_manifold_atlas.csv", "bytes": 6186, "sha256": "3d86cc31a7eec59fcb3f94957dd165681581a0737f193ca5295e2ddecdddf385"},
+    "cells": {"path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_vo_quotient_manifold_v1/attention_vo_quotient_manifold_cells.csv", "bytes": 96985, "sha256": "e72e113cc24c1a5c95be938dcc12e829650ecf57f55a13a2e2046103033b9ecc"}
+  },
+  "all_reported_values_finite": true
+}
