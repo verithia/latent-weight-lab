@@ -1,12 +1,12 @@
 {
   "schema_version": "mai_sparse_moe_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-10T18:55:44+08:00",
-  "finished_at": null,
-  "exit_code": null,
+  "finished_at": "2026-08-10T19:08:37+08:00",
+  "exit_code": 0,
   "process_group": 4034971,
   "max_iters": 238,
   "git_commit": "e4c6a17a490b47c8984cfd3e639b989820b7ecd8",
@@ -31,11 +31,32 @@
   },
   "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4_20260810T105544Z_4034942.log",
   "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4_20260810T105544Z_4034942.json",
-  "live_observation": {
-    "iteration": null,
-    "sampled_gpu_mib": 49281,
-    "sampled_gpu_utilization_percent": 91,
-    "process_alive": true
+  "terminal": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "train_ce": 5.6475,
+    "validation_ce": 5.6517,
+    "checkpoint_best_validation_ce": 5.651678562164307,
+    "matched_dense_validation_ce": 5.488473415374756,
+    "validation_delta_to_dense": 0.16320514678955078,
+    "sampled_peak_mib": 68147,
+    "checkpoint_next_iter": 238,
+    "original_checkpoint_bytes": 2512713217,
+    "original_checkpoint_sha256": "dc7a5a18686a6d9dd05007a495ef698777e6eb8b21733c2607d690ca80707db5",
+    "checkpoint_metadata_sha256": "0080c15524c93482bfa5e6c8a873b6dd1a8c307072447642099a74ac8c060d7f",
+    "status_sha256": "a27a75da0886a2e34e31d1783fed8b2844ca0ccf783b6702d5a05830272fddb8",
+    "log_sha256": "5f280c8b45fe94fb1cbd1ba9cbb3d18a54e6b8a82ef4af16c852a32b02761a8c",
+    "classification": "clean_terminal_124m_lr_screen_third_place"
+  },
+  "manifold_snapshot": {
+    "state": "verified_and_source_resume_payload_reclaimed",
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr16e4_0p5tpp/manifold_snapshot.pt",
+    "bytes": 1177334935,
+    "sha256": "a4f251af50a868e50440d7405bd77e009e3568f145cdd6bbf8cfd493b8d0cd7a",
+    "tensor_count": 88,
+    "tensor_bytes": 1331801088,
+    "receipt_sha256": "dc4da37f2179ad7372ddcb92181957cb2e4e19ab367051790f87cbcf5b9177c4",
+    "preserves_every_model_tensor": true,
+    "optimizer_and_rng_resume_state_reclaimed": true
   },
   "monitoring": {
     "policy": "terminal-or-actionable-error only; no healthy progress milestones or heartbeat",

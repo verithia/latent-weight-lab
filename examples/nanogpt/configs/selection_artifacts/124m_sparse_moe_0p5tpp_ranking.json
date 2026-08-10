@@ -1,0 +1,46 @@
+{
+  "schema_version": "mai_124m_sparse_moe_lr_screen_ranking_v1",
+  "recorded_at": "2026-08-10",
+  "selection_metric": "terminal checkpoint best validation CE on identical fixed evaluation indices",
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "matched_dense_validation_ce": 5.488473415374756,
+  "ranking": [
+    {
+      "rank": 1,
+      "learning_rate": 0.0024,
+      "checkpoint_best_validation_ce": 5.463881015777588,
+      "delta_to_dense": -0.02459239959716797,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr24e4_0p5tpp_result.json",
+      "result_sha256": "e151264cf45bba6939b0f423eb27c981be7d79e50a1b3c0ff4ab990d34571ead",
+      "promote_to_5tpp": true
+    },
+    {
+      "rank": 2,
+      "learning_rate": 0.002,
+      "checkpoint_best_validation_ce": 5.543175220489502,
+      "delta_to_dense": 0.054701805114746094,
+      "delta_to_rank1": 0.07929420471191406,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr20e4_0p5tpp_result.json",
+      "result_sha256": "483b5a236e69ffd56355617dfb6ede50f681695420a81c9bc3db388f70dcf0d4",
+      "promote_to_5tpp": true
+    },
+    {
+      "rank": 3,
+      "learning_rate": 0.0016,
+      "checkpoint_best_validation_ce": 5.651678562164307,
+      "delta_to_dense": 0.16320514678955078,
+      "delta_to_rank1": 0.18779754638671875,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr16e4_0p5tpp_result.json",
+      "promote_to_5tpp": false
+    }
+  ],
+  "decision": {
+    "top1_5tpp_config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top1_lr24e4.json",
+    "top2_5tpp_config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_5tpp_top2_lr20e4.json",
+    "each_config_requires_own_mfu_gate": true,
+    "selected_20tpp_not_yet_authorized": true,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}

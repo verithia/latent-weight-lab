@@ -1,0 +1,59 @@
+{
+  "schema_version": "mai_124m_sparse_moe_0p5tpp_result_v1",
+  "recorded_at": "2026-08-10",
+  "classification": "PASS_COMPLETE_124M_DENSE_MOE_LR16E4_SCREEN_ARM_THIRD_PLACE",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "e4c6a17a490b47c8984cfd3e639b989820b7ecd8",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "811fcfe4b42852db4341d1e239e9ddd2e6b5cf7b125631eb6efa3402bf9bcae3",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "98b8361223221e300257201b6577523429120baa98acb1bdb46def4b109ae581",
+    "status_sha256": "a27a75da0886a2e34e31d1783fed8b2844ca0ccf783b6702d5a05830272fddb8",
+    "log_sha256": "5f280c8b45fe94fb1cbd1ba9cbb3d18a54e6b8a82ef4af16c852a32b02761a8c",
+    "original_checkpoint_sha256": "dc7a5a18686a6d9dd05007a495ef698777e6eb8b21733c2607d690ca80707db5",
+    "checkpoint_metadata_sha256": "0080c15524c93482bfa5e6c8a873b6dd1a8c307072447642099a74ac8c060d7f",
+    "mfu_certificate_sha256": "505b098a039cd06918c7a98c4977ad8b2137bbe8b3e94784553a2f866c7d671a",
+    "exit_code": 0,
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "scheduled_active_tpp": 0.501338138701522,
+    "checkpoint_next_iter": 238,
+    "sampled_peak_mib": 68147
+  },
+  "identity": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_reference_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dense_reference_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_production_selector_result.json",
+    "comparison_is_fixed_eval_matched": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9851, "validation_ce": 10.9848},
+    {"step": 60, "train_ce": 6.4912, "validation_ce": 6.5028},
+    {"step": 120, "train_ce": 5.9242, "validation_ce": 5.9308},
+    {"step": 180, "train_ce": 5.7194, "validation_ce": 5.7242},
+    {"step": 238, "train_ce": 5.6475, "validation_ce": 5.6517}
+  ],
+  "comparison": {
+    "matched_dense_train_ce": 5.485774517059326,
+    "matched_dense_validation_ce": 5.488473415374756,
+    "terminal_train_delta_to_dense": 0.16172548294067357,
+    "checkpoint_best_validation_delta_to_dense": 0.16320514678955078,
+    "checkpoint_best_validation_delta_to_lr24e4": 0.18779754638671875,
+    "interpretation": "The lr16e4 arm is healthy and finite but ranks third. It is excluded from 5TPP by the preregistered top-two rule, not by instability."
+  },
+  "manifold_snapshot": {
+    "sha256": "a4f251af50a868e50440d7405bd77e009e3568f145cdd6bbf8cfd493b8d0cd7a",
+    "receipt_sha256": "dc4da37f2179ad7372ddcb92181957cb2e4e19ab367051790f87cbcf5b9177c4",
+    "all_model_tensors_preserved": true,
+    "exact_resume_state_reclaimed_after_verification": true
+  },
+  "decision": {
+    "promote_to_5tpp": false,
+    "rank": 3,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}
