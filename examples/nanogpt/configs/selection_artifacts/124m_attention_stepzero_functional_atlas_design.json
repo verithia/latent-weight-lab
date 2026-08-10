@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_attention_stepzero_functional_atlas_design_v1",
   "recorded_at": "2026-08-10",
-  "status": "core_atlas_and_stepzero_kfac_collector_implemented_pending_executable_oracle",
+  "status": "executable_oracle_implemented_and_locally_tested_pending_identity_seal_and_execution",
   "scientific_question": "Can a layerwise fixed atlas selected only from step-zero task geometry contain the later dense V and attention-cproj functional manifold at a one-percent coordinate budget, especially in late layers, without a learned basis, dense teacher-derived coordinates, or trainable dense optimizer state?",
   "objective_scope": {
     "project_target": "full generated attention replacement before any further model-size scaling or MLP replacement",
@@ -84,7 +84,7 @@
   },
   "execution_policy": {
     "analyzer_not_yet_implemented": false,
-    "implementation_state": "Kronecker atlas, exact adjoint, split-overlap metric, and step-zero V/cproj CE-gradient collector are implemented and locally tested; identity sealing and the complete path/control executable remain pending.",
+    "implementation_state": "The zero-update path oracle is complete: it reconstructs the exact step-zero model, selects independent split-frozen KFAC atlases, compares identical-budget random-Kronecker and production-seeded BlockFHT controls, scores held-out states, local chords, discovery-span transport, and exact Muon directions in disjoint terminal functional metrics, and records fixed storage. Seven local contract/unit tests pass; only immutable identity sealing and PRO6 execution remain.",
     "launch_before_code_and_identity_seal": false,
     "run_while_training_gpu_is_occupied": false,
     "expected_runtime_after_implementation": "under five minutes",

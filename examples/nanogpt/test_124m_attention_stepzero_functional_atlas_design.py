@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from pathlib import Path
 
 
@@ -10,6 +11,15 @@ DESIGN = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_attention_stepzero_functional_atlas_design.json"
 )
+PLAN = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_attention_stepzero_functional_atlas_plan.json"
+)
+
+
+def sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def test_functional_atlas_is_full_attention_smallest_rung_only() -> None:
@@ -50,3 +60,18 @@ def test_functional_atlas_freezes_strict_heldout_gates() -> None:
     }
     assert design["execution_policy"]["launch_before_code_and_identity_seal"] is False
     assert design["execution_policy"]["run_while_training_gpu_is_occupied"] is False
+
+
+def test_executable_plan_pins_the_reviewed_design_and_entrypoint() -> None:
+    plan = json.loads(PLAN.read_text())
+    identity = plan["identity"]
+    assert plan["schema_version"] == (
+        "mai_124m_attention_stepzero_functional_atlas_plan_v1"
+    )
+    assert identity["design_sha256"] == sha256(DESIGN)
+    entrypoint = ROOT / "examples/nanogpt/analyze_attention_stepzero_functional_atlas.py"
+    assert identity["entrypoint_sha256"] == sha256(entrypoint)
+    assert plan["protocol"]["parameter_updates"] == 0
+    assert len(plan["protocol"]["trajectory_steps"]) == 41
+    assert set(plan["protocol"]["targets"]) == {"v", "cproj"}
+    assert all(value is False for value in plan["authorization"].values())
