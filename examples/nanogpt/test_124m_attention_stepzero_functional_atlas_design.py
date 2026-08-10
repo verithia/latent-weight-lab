@@ -16,6 +16,11 @@ PLAN = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_attention_stepzero_functional_atlas_plan.json"
 )
+RESULT = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_attention_stepzero_functional_atlas_result.json"
+)
 
 
 def sha256(path: Path) -> str:
@@ -75,3 +80,31 @@ def test_executable_plan_pins_the_reviewed_design_and_entrypoint() -> None:
     assert len(plan["protocol"]["trajectory_steps"]) == 41
     assert set(plan["protocol"]["targets"]) == {"v", "cproj"}
     assert all(value is False for value in plan["authorization"].values())
+
+
+def test_terminal_result_rejects_fixed_stepzero_atlas_without_authorization() -> None:
+    result = json.loads(RESULT.read_text())
+    assert result["classification"] == "ATTENTION_STEPZERO_FUNCTIONAL_ATLAS_REJECT"
+    assert result["execution"]["git_commit"] == (
+        "20e673ed0557dbf58b973ecff3d9c2ecb2064c7a"
+    )
+    assert result["execution"]["parameter_updates"] == 0
+    assert result["execution"]["stepzero_reconstruction_target_tensors_exact"]
+    assert result["identity"]["plan_sha256"] == sha256(PLAN)
+    assert result["decision"]["passed_targets"] == []
+    assert all(
+        value is False
+        for key, value in result["decision"].items()
+        if key != "passed_targets"
+    )
+    for target in ("v", "cproj"):
+        summary = result["summaries"][target]
+        assert summary["passed"] is False
+        assert summary["calibration_overlap"]["mean"] < 0.75
+        for metric in ("state", "local_chord", "discovery_span", "exact_muon"):
+            assert (
+                summary["stepzero_kfac"][metric][
+                    "absolute_gain_over_blockfht"
+                ]
+                < 0.0
+            )

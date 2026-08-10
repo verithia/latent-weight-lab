@@ -1,9 +1,9 @@
 {
   "schema_version": "mai_350m_qk_only_functional_lwt_20tpp_run_metadata_v1",
-  "artifact_kind": "350m_qk_only_functional_lwt_20tpp_running_record",
+  "artifact_kind": "350m_qk_only_functional_lwt_20tpp_operator_terminated_record",
   "recorded_at": "2026-08-09T21:13:00+08:00",
-  "last_verified_at": "2026-08-10T16:42:20+08:00",
-  "classification": "RUNNING_AFTER_PREREGISTRATION_STORAGE_ADMISSION_AND_EXACT_CONFIG_MFU_GATE",
+  "last_verified_at": "2026-08-10T16:59:16+08:00",
+  "classification": "OPERATOR_TERMINATED_OFF_OBJECTIVE_WITH_EXACT_RESUME_CHECKPOINT",
   "scientific_identity": {
     "run_name": "pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00",
     "run_id": "pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00_20260809T131047Z_3394185",
@@ -112,7 +112,7 @@
     "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00_20260809T131047Z_3394185.log",
     "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00_20260809T131047Z_3394185.json",
     "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_qk_only_ladder/pro6_mai_v3_350m_qk_only_qk64_outputgain_20tpp_selected_mult1p00/ckpt.pt",
-    "note": "Log, status, and checkpoint remain mutable until terminal sealing."
+    "note": "Operator termination sealed the wrapper status at exit 143. The exact-resume checkpoint is retained at next_iter 19587; no scientific terminal comparison is claimed."
   },
   "initial_live_verification": {
     "verified_at": "2026-08-09T21:13:00+08:00",
@@ -881,6 +881,28 @@
       "finite_and_error_free_log": true,
       "scientific_inference": "No new fixed evaluation has occurred since step 13528. This is health and throughput evidence only; the off-objective QK-only run cannot authorize a full-attention successor. Fixed step 20292 is approximately 39 raw minutes away.",
       "intervention_required": false
+    },
+    {
+      "verified_at": "2026-08-10T16:59:16+08:00",
+      "event": "operator_termination_of_off_objective_qk_only_run",
+      "operator_requested_stop": true,
+      "process_alive": false,
+      "status": "failed",
+      "wrapper_exit_code": 143,
+      "scientific_failure": false,
+      "scientific_terminal_evaluation_available": false,
+      "last_exact_resume_iter": 19587,
+      "checkpoint_bytes": 2765689032,
+      "checkpoint_sha256": "515d19d2b6145793329eb7c52b70bb4810c9cc4d8332a80d13fc056ec0f12a12",
+      "checkpoint_metadata_bytes": 22520,
+      "checkpoint_metadata_sha256": "dc6e7b5dbe2d5ab6427cb1113a81eb9d6b019fd9a4211e99d72798896ae1c446",
+      "terminal_status_sha256": "8b7946d70c1aeaaca0ba0debad7dbe8e171125675dfd2737ef4695f73121130e",
+      "fixed_evaluations_completed": [0, 6764, 13528],
+      "last_fixed_step": 13528,
+      "last_fixed_train_ce": 3.0174,
+      "last_fixed_validation_ce": 2.9935,
+      "scientific_inference": "The run was stopped because it generates Q/K only and is off the full-replacement objective. Exit 143 is an operator stop, not divergence or a failed terminal loss gate. Its checkpoint is preserved only for audit or explicit future boundary-ablation resumption and authorizes no successor.",
+      "intervention_required": false
     }
   ],
   "monitoring": {
@@ -888,7 +910,7 @@
     "plist": "/Users/verithia/research/MappingNetworks/outputs/watch_services/com.verithia.mappingnetworks.pro6-qk350-20tpp.plist",
     "state_key": "pro6_350m_qk_only_20tpp",
     "state_path": "/Users/verithia/research/MappingNetworks/outputs/watch_state/pro6_350m_qk_only_20tpp.json",
-    "state": "running",
+    "state": "operator_stopped",
     "milestones": [20, 50, 80, 100],
     "heartbeat_minutes": 90,
     "heartbeat_reset_by_progress": true,
@@ -899,8 +921,10 @@
     "last_heartbeat_verified_at": "2026-08-10T16:42:20+08:00",
     "last_progress_verified_at": "2026-08-10T10:39:55+08:00",
     "last_callback_verified_at": "2026-08-10T16:42:20+08:00",
-    "last_verified_iter": 19640,
-    "watchdog_process_alive": true
+    "last_verified_iter": 19587,
+    "watchdog_process_alive": false,
+    "service_unloaded": true,
+    "terminal_wrapper_exit_code": 143
   },
   "decision_context": {
     "historical_dense_terminal_validation_ce": 2.7927,
@@ -919,6 +943,6 @@
     "interpretation": "This run measures scale and horizon transfer for a QK-only boundary ablation. It cannot validate full attention replacement or the full replacement objective, regardless of terminal loss.",
     "procedural_finding": "Launching the 350M scale screen before closing generated V and attention c_proj at 124M was a priority error. The sealed 124M QK-only result explicitly rejected generated V and denied full-attention acceptance and larger-rung authorization.",
     "successor_policy": "This run authorizes no further model-size, horizon, or architecture promotion. Return to the smallest 124M rung and close generated V plus attention c_proj before any additional scaling; only then proceed to MLP replacement.",
-    "live_run_disposition": "The already running checkpointed process is left unchanged pending explicit operator direction to terminate or finish; no successor will be launched from it."
+    "live_run_disposition": "The operator explicitly ordered termination. The watchdog was unloaded, the trainer received SIGTERM, the wrapper sealed exit 143, and the exact-resume checkpoint at next_iter 19587 was retained. No successor is authorized."
   }
 }

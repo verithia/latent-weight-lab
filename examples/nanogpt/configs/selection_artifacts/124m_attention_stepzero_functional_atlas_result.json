@@ -1,0 +1,352 @@
+{
+  "all_reported_values_finite": true,
+  "artifacts": {
+    "cells": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_stepzero_functional_atlas_v1/attention_stepzero_functional_atlas_cells.csv",
+      "sha256": "5866ffaf8a08f6f2f2b1fc33fa4ec436270f2ebf809f23ded4c43a5b05a24440"
+    },
+    "overlap": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_stepzero_functional_atlas_v1/attention_stepzero_functional_atlas_overlap.csv",
+      "sha256": "cfa86dc9fda8c1583bc50972c13d1177999d385fdd28315161ed847b1372e9a9"
+    },
+    "storage": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_stepzero_functional_atlas_v1/attention_stepzero_functional_atlas_storage.csv",
+      "sha256": "49dbf02146def450379790a06b058524b5423817fbc9124974d4cae2f1669717"
+    }
+  },
+  "classification": "ATTENTION_STEPZERO_FUNCTIONAL_ATLAS_REJECT",
+  "decision": {
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "mfu_preflight_authorized": false,
+    "model_implementation_authorized": false,
+    "passed_targets": [],
+    "structured_approximation_gate_authorized": false
+  },
+  "execution": {
+    "device": "cuda",
+    "elapsed_seconds": 153.1380066871643,
+    "git_commit": "20e673ed0557dbf58b973ecff3d9c2ecb2064c7a",
+    "host": "PRO6",
+    "parameter_updates": 0,
+    "stepzero_model_seed": 1337,
+    "stepzero_reconstruction_target_tensors_exact": true
+  },
+  "identity": {
+    "calibration_batch_sha256": [
+      "44fda82340a3c10e8c076fdc5117ecefeabe4ce94b8e0bb8cebf6941319ed989",
+      "8f9da55ed7b0852e9cb2b6d373fb7181b4bb8fe0659ff9d9d76de6fb5d4f6d11"
+    ],
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_metric_batch_sha256": "d2713ea6d1aa1358ff9db08322c5e289f3cd91d14aa1148c742113cd350cc752",
+    "fit_metric_batch_sha256": "5618db13ba1e2a7eb9d679e04beccf61662e0fd9f8a04aaa7c81886b078c284a",
+    "plan_sha256": "11ecda7f9f44f6f888b97c4c2ad8a9e4695c223c6e35a2896a99906d2928171d",
+    "terminal_checkpoint_sha256": "522fe8333f2e445066cfdbca4bbe4491d2ffebd71b314464ecf8bdacd3be4b5b",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac"
+  },
+  "protocol": {
+    "block_fht_layers": 2,
+    "block_fht_seed": 1000,
+    "calibration_batch_size": 2,
+    "calibration_batches": 4,
+    "calibration_block_size": 256,
+    "calibration_centering": false,
+    "calibration_metric_seeds": [
+      20260811,
+      20260812
+    ],
+    "calibration_rows_per_layer": 2048,
+    "cgls_iterations": 32,
+    "coordinate_fraction": 0.01,
+    "eval_metric_seed": 20260810,
+    "fit_metric_seed": 20260809,
+    "heldout_probe_steps": [
+      1782,
+      2372
+    ],
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11
+    ],
+    "metric_batch_size": 2,
+    "metric_batches": 2,
+    "metric_block_size": 256,
+    "model_seed": 1337,
+    "parameter_updates": 0,
+    "probe_steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2372
+    ],
+    "random_kronecker_seed": 20260813,
+    "span_relative_cutoff": 1e-08,
+    "targets": {
+      "cproj": {
+        "parameter": "attn.c_proj.weight",
+        "seed_offset": 1,
+        "seed_stride": 4,
+        "target_std": 0.004082482904638631
+      },
+      "v": {
+        "parameter": "attn.c_attn.weight",
+        "seed_offset": 2,
+        "seed_stride": 8,
+        "target_std": 0.02
+      }
+    },
+    "trajectory_discovery_max_step": 1140,
+    "trajectory_heldout_min_step": 1200,
+    "trajectory_steps": [
+      0,
+      60,
+      120,
+      180,
+      240,
+      300,
+      360,
+      420,
+      480,
+      540,
+      600,
+      660,
+      720,
+      780,
+      840,
+      900,
+      960,
+      1020,
+      1080,
+      1140,
+      1200,
+      1260,
+      1320,
+      1380,
+      1440,
+      1500,
+      1560,
+      1620,
+      1680,
+      1740,
+      1800,
+      1860,
+      1920,
+      1980,
+      2040,
+      2100,
+      2160,
+      2220,
+      2280,
+      2340,
+      2373
+    ]
+  },
+  "recorded_at": "2026-08-10T09:20:42.308322+00:00",
+  "schema_version": "mai_124m_attention_stepzero_functional_atlas_result_v1",
+  "summaries": {
+    "cproj": {
+      "blockfht": {
+        "discovery_span": {
+          "aggregate_eval_recovery": 0.5837688704690644,
+          "minimum_late_layer_eval_recovery": -0.02780174052888156,
+          "minimum_layer_eval_recovery": -0.02780174052888156
+        },
+        "exact_muon": {
+          "aggregate_eval_recovery": 0.6647229111984353,
+          "minimum_late_layer_eval_recovery": -0.06884787449996968,
+          "minimum_layer_eval_recovery": -0.06884787449996968
+        },
+        "local_chord": {
+          "aggregate_eval_recovery": 0.10840696643957473,
+          "minimum_late_layer_eval_recovery": -0.3129570702081127,
+          "minimum_layer_eval_recovery": -0.3129570702081127
+        },
+        "state": {
+          "aggregate_eval_recovery": 0.5872035993751655,
+          "minimum_late_layer_eval_recovery": -0.03741244318093725,
+          "minimum_layer_eval_recovery": -0.03741244318093725
+        }
+      },
+      "calibration_overlap": {
+        "mean": 0.2706553240617116,
+        "minimum": 0.23780280351638794
+      },
+      "checks": {
+        "calibration_overlap": false,
+        "discovery_span_aggregate": false,
+        "discovery_span_every_layer": false,
+        "discovery_span_gain_over_blockfht": false,
+        "discovery_span_late_layers": false,
+        "exact_muon_aggregate": false,
+        "exact_muon_every_layer": false,
+        "exact_muon_gain_over_blockfht": false,
+        "exact_muon_late_layers": false,
+        "local_chord_aggregate": false,
+        "local_chord_every_layer": false,
+        "local_chord_gain_over_blockfht": false,
+        "local_chord_late_layers": false,
+        "state_aggregate": false,
+        "state_every_layer": false,
+        "state_gain_over_blockfht": false,
+        "state_late_layers": false
+      },
+      "passed": false,
+      "random_kronecker": {
+        "discovery_span": {
+          "aggregate_eval_recovery": 0.5666923121188847,
+          "minimum_late_layer_eval_recovery": -0.02971924967809402,
+          "minimum_layer_eval_recovery": -0.02971924967809402
+        },
+        "exact_muon": {
+          "aggregate_eval_recovery": 0.6502120197354629,
+          "minimum_late_layer_eval_recovery": -0.08327615558268685,
+          "minimum_layer_eval_recovery": -0.08327615558268685
+        },
+        "local_chord": {
+          "aggregate_eval_recovery": 0.1073345384616905,
+          "minimum_late_layer_eval_recovery": -0.3063492381015643,
+          "minimum_layer_eval_recovery": -0.3063492381015643
+        },
+        "state": {
+          "aggregate_eval_recovery": 0.5702224842426787,
+          "minimum_late_layer_eval_recovery": -0.032784811840203425,
+          "minimum_layer_eval_recovery": -0.032784811840203425
+        }
+      },
+      "stepzero_kfac": {
+        "discovery_span": {
+          "absolute_gain_over_blockfht": -0.01182571564617263,
+          "aggregate_eval_recovery": 0.5719431548228918,
+          "minimum_late_layer_eval_recovery": -0.009982610637645328,
+          "minimum_layer_eval_recovery": -0.009982610637645328
+        },
+        "exact_muon": {
+          "absolute_gain_over_blockfht": -0.018849207525713618,
+          "aggregate_eval_recovery": 0.6458737036727217,
+          "minimum_late_layer_eval_recovery": 0.0026301502697815096,
+          "minimum_layer_eval_recovery": 0.0026301502697815096
+        },
+        "local_chord": {
+          "absolute_gain_over_blockfht": -0.007677682319182033,
+          "aggregate_eval_recovery": 0.1007292841203927,
+          "minimum_late_layer_eval_recovery": -0.3506931629282733,
+          "minimum_layer_eval_recovery": -0.3506931629282733
+        },
+        "state": {
+          "absolute_gain_over_blockfht": -0.012540205632688983,
+          "aggregate_eval_recovery": 0.5746633937424765,
+          "minimum_late_layer_eval_recovery": -0.01771362019468382,
+          "minimum_layer_eval_recovery": -0.01771362019468382
+        }
+      }
+    },
+    "v": {
+      "blockfht": {
+        "discovery_span": {
+          "aggregate_eval_recovery": 0.452488899121609,
+          "minimum_late_layer_eval_recovery": -0.3397088137629807,
+          "minimum_layer_eval_recovery": -0.3397088137629807
+        },
+        "exact_muon": {
+          "aggregate_eval_recovery": 0.8025068372454259,
+          "minimum_late_layer_eval_recovery": 0.2900288031664257,
+          "minimum_layer_eval_recovery": 0.2900288031664257
+        },
+        "local_chord": {
+          "aggregate_eval_recovery": 0.2871403722883253,
+          "minimum_late_layer_eval_recovery": -0.32345833319215794,
+          "minimum_layer_eval_recovery": -0.32345833319215794
+        },
+        "state": {
+          "aggregate_eval_recovery": 0.46443847658455556,
+          "minimum_late_layer_eval_recovery": -0.3446687844466429,
+          "minimum_layer_eval_recovery": -0.3446687844466429
+        }
+      },
+      "calibration_overlap": {
+        "mean": 0.21381988748908043,
+        "minimum": 0.2052808403968811
+      },
+      "checks": {
+        "calibration_overlap": false,
+        "discovery_span_aggregate": false,
+        "discovery_span_every_layer": false,
+        "discovery_span_gain_over_blockfht": false,
+        "discovery_span_late_layers": false,
+        "exact_muon_aggregate": false,
+        "exact_muon_every_layer": false,
+        "exact_muon_gain_over_blockfht": false,
+        "exact_muon_late_layers": false,
+        "local_chord_aggregate": false,
+        "local_chord_every_layer": false,
+        "local_chord_gain_over_blockfht": false,
+        "local_chord_late_layers": false,
+        "state_aggregate": false,
+        "state_every_layer": false,
+        "state_gain_over_blockfht": false,
+        "state_late_layers": false
+      },
+      "passed": false,
+      "random_kronecker": {
+        "discovery_span": {
+          "aggregate_eval_recovery": 0.4527618164813272,
+          "minimum_late_layer_eval_recovery": -0.31397852225418876,
+          "minimum_layer_eval_recovery": -0.31397852225418876
+        },
+        "exact_muon": {
+          "aggregate_eval_recovery": 0.7953255561036443,
+          "minimum_late_layer_eval_recovery": 0.27037520283898425,
+          "minimum_layer_eval_recovery": 0.27037520283898425
+        },
+        "local_chord": {
+          "aggregate_eval_recovery": 0.2769267165789247,
+          "minimum_late_layer_eval_recovery": -0.362821785669779,
+          "minimum_layer_eval_recovery": -0.362821785669779
+        },
+        "state": {
+          "aggregate_eval_recovery": 0.4612917604703663,
+          "minimum_late_layer_eval_recovery": -0.3578665746325383,
+          "minimum_layer_eval_recovery": -0.3578665746325383
+        }
+      },
+      "stepzero_kfac": {
+        "discovery_span": {
+          "absolute_gain_over_blockfht": -0.186888404704126,
+          "aggregate_eval_recovery": 0.265600494417483,
+          "minimum_late_layer_eval_recovery": -0.03705384283063405,
+          "minimum_layer_eval_recovery": -0.03705384283063405
+        },
+        "exact_muon": {
+          "absolute_gain_over_blockfht": -0.3373813216211946,
+          "aggregate_eval_recovery": 0.4651255156242313,
+          "minimum_late_layer_eval_recovery": 0.21706972566113378,
+          "minimum_layer_eval_recovery": 0.1978116044164821
+        },
+        "local_chord": {
+          "absolute_gain_over_blockfht": -0.1202036890865684,
+          "aggregate_eval_recovery": 0.1669366832017569,
+          "minimum_late_layer_eval_recovery": -0.15811953881573057,
+          "minimum_layer_eval_recovery": -0.15811953881573057
+        },
+        "state": {
+          "absolute_gain_over_blockfht": -0.19331736841945985,
+          "aggregate_eval_recovery": 0.2711211081650957,
+          "minimum_late_layer_eval_recovery": -0.03284671731123175,
+          "minimum_layer_eval_recovery": -0.03284671731123175
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,188 @@
+{
+  "schema_version": "mai_sparse_moe_active_parameter_ladder_design_v1",
+  "recorded_at": "2026-08-10",
+  "status": "preregistered_pending_model_implementation_and_124m_correctness_mfu_gate",
+  "scientific_question": "Can input-conditional routing over complete paired-neuron experts provide the adaptive functional atlas missing from fixed BlockFHT, while preserving the dense ladder's active matrix compute and explicitly accounting for all stored expert, router, optimizer, and checkpoint state?",
+  "causal_basis": {
+    "attention_result": "The frozen one-percent step-zero KFAC attention atlas was rejected for both V and attention cproj. Its basis was unstable across calibration splits and did not beat the identical-budget BlockFHT control, so another fixed basis is not authorized.",
+    "mlp_result": "A GELU expert is a collection of paired feature/readout units b_j * GELU(a_j^T x). The c_fc directions and c_proj residual writes must therefore co-adapt; independently generated matrices or a shared post-mixture projection destroy this pairing.",
+    "moe_implication": "Token routing is an input-conditional chart selector, but it is not itself a direction-matching solution. The dense-expert arm isolates routing and specialization. A generated-expert arm is blocked until the expert generator can co-generate paired neurons with an adaptive or input-conditioned functional chart.",
+    "excluded_shortcut": "Do not use one shared c_proj after mixing expert hidden activations as the scientific candidate. That shares the diagnosed residual-write bottleneck across all experts and makes expert hidden gauges incompatible."
+  },
+  "architecture": {
+    "family": "decoder-only GPT with token-choice sparse GELU MoE in every MLP block",
+    "num_experts": 8,
+    "top_k": 2,
+    "expert_hidden_multiplier": 2,
+    "bias": false,
+    "tied_token_embedding_and_lm_head": true,
+    "vocab_size": 50304,
+    "block_size": 1024,
+    "expert_definition": "expert_e(x) = W_proj,e * GELU(W_fc,e * x)",
+    "mixture_definition": "moe(x) = sum_{e in top_k(router(x))} normalized_softmax_e(router(x)) * expert_e(x)",
+    "projection_ownership": "Every expert owns both W_fc,e and W_proj,e. There is no shared output projection in the scientific arms.",
+    "active_dense_mlp_equivalence": "With top_k=2 and expert_hidden_multiplier=2, each token activates 2 * (2*d*d + 2*d*d) = 8*d^2 expert matrix parameters per layer, exactly the two dense GELU MLP matrices' active count, before the small router term.",
+    "dispatch": {
+      "policy": "dropless token-choice dispatch",
+      "capacity_factor": null,
+      "token_drops": false,
+      "router_logits_dtype": "float32",
+      "selected_probability_normalization": true,
+      "implementation_requirement": "grouped or batched expert GEMM; a Python loop over experts is not launchable"
+    },
+    "router_training": {
+      "optimizer": "AdamW",
+      "expert_matrix_optimizer": "Muon",
+      "load_balance_aux_coefficient": 0.01,
+      "router_z_loss_coefficient": 0.001,
+      "deterministic_tie_breaking": true,
+      "exact_resume_required": true
+    }
+  },
+  "parameter_accounting": {
+    "symbols": {
+      "V": "vocab_size",
+      "T": "block_size",
+      "L": "n_layer",
+      "d": "n_embd",
+      "E": "num_experts",
+      "K": "top_k",
+      "h": "expert_hidden_multiplier * d"
+    },
+    "shared_parameters_formula": "V*d + T*d + L*(4*d^2 + 2*d) + d",
+    "single_expert_parameters_formula": "d*h + h*d = 2*expert_hidden_multiplier*d^2",
+    "router_parameters_formula": "L*E*d",
+    "active_parameters_formula": "shared + router + L*K*single_expert",
+    "stored_parameters_formula": "shared + router + L*E*single_expert",
+    "dense_reference_formula": "shared + L*8*d^2",
+    "accounting_rule": "Always report active and stored parameters separately. Active parameters include all shared parameters, all router parameters, and only top-k expert matrices. Stored parameters include every expert. Checkpoint and optimizer admission use stored, not active, parameters.",
+    "flop_rule": "MFU uses measured tokens/second and the executed shared plus top-k expert matmuls; it separately reports router, dispatch, communication, and padding overhead. It must not use stored expert parameters as executed FLOPs."
+  },
+  "rungs": [
+    {
+      "name": "moe_124m_active",
+      "n_layer": 12,
+      "n_head": 12,
+      "n_embd": 768,
+      "dense_reference_parameters": 124373760,
+      "active_parameters": 124447488,
+      "stored_parameters": 294316800,
+      "active_billions": 0.124447488,
+      "stored_billions": 0.2943168,
+      "authorization": "implementation_correctness_and_mfu_gate_only"
+    },
+    {
+      "name": "moe_350m_active",
+      "n_layer": 24,
+      "n_head": 16,
+      "n_embd": 1024,
+      "dense_reference_parameters": 354599936,
+      "active_parameters": 354796544,
+      "stored_parameters": 958776320,
+      "active_billions": 0.354796544,
+      "stored_billions": 0.95877632,
+      "authorization": "prepared_not_launchable_before_124m_scientific_pass"
+    },
+    {
+      "name": "moe_690m_active",
+      "n_layer": 32,
+      "n_head": 20,
+      "n_embd": 1280,
+      "dense_reference_parameters": 694928640,
+      "active_parameters": 695256320,
+      "stored_parameters": 1953547520,
+      "active_billions": 0.69525632,
+      "stored_billions": 1.95354752,
+      "authorization": "prepared_not_launchable_before_124m_scientific_pass"
+    },
+    {
+      "name": "moe_985m_active",
+      "n_layer": 32,
+      "n_head": 24,
+      "n_embd": 1536,
+      "dense_reference_parameters": 984909312,
+      "active_parameters": 985302528,
+      "stored_parameters": 2797241856,
+      "active_billions": 0.985302528,
+      "stored_billions": 2.797241856,
+      "authorization": "prepared_not_launchable_before_124m_scientific_pass_and_storage_admission"
+    }
+  ],
+  "scientific_arms": [
+    {
+      "name": "dense_complete_experts_control",
+      "purpose": "Measure the benefit and cost of token-conditional expert specialization without a generated-weight confound.",
+      "expert_parameterization": "dense W_fc,e and W_proj,e owned by each expert",
+      "launch_ready": false,
+      "blocker": "performant deterministic dropless grouped-GEMM MoE implementation is not yet present"
+    },
+    {
+      "name": "adaptive_paired_neuron_generated_experts",
+      "purpose": "Test the actual Mapping-Networks replacement after routing has selected an input-conditional chart.",
+      "expert_parameterization": "shared layerwise latent co-generates paired (a_j, b_j) neuron directions and per-expert conditional coordinates; FHT may only be an internal mixer, not the final fixed image",
+      "launch_ready": false,
+      "blocker": "the direction-capable paired-neuron decoder has not passed its same-gauge offline oracle"
+    },
+    {
+      "name": "shared_post_mixture_projection_negative_control",
+      "purpose": "Directly test the predicted residual-write bottleneck if needed, never use as the primary scientific candidate.",
+      "expert_parameterization": "expert W_fc,e with one shared W_proj after hidden mixing",
+      "launch_ready": false,
+      "blocker": "negative control only"
+    }
+  ],
+  "ladder_protocol": {
+    "order": [
+      "124M implementation correctness and equivalence tests",
+      "124M exact-config foreground performance poll",
+      "124M dense-expert 0.5TPP learning-rate screen",
+      "124M top-two 5TPP",
+      "124M selected 20TPP",
+      "only after 124M fixed-eval scientific pass: repeat at 350M, 690M, and 985M active"
+    ],
+    "learning_rate_screen": [0.0016, 0.002, 0.0024],
+    "token_horizons_tpp": [0.5, 5.0, 20.0],
+    "selection": "Top two fixed-eval validation CE results at 0.5TPP advance to 5TPP; one preregistered winner advances to 20TPP. No winner is inferred from training loss.",
+    "seeds": [1337],
+    "replication_rule": "A claimed structural gain requires a second seed before scaling beyond 124M."
+  },
+  "gates": {
+    "correctness": [
+      "top_k routing and probability normalization match a scalar reference",
+      "every expert owns both c_fc and c_proj",
+      "no token is dropped",
+      "router receives AdamW and expert matrices receive Muon",
+      "exact checkpoint resume reproduces routing and next-step loss",
+      "active and stored parameter counts match this design"
+    ],
+    "performance": {
+      "minimum_mfu": 0.2,
+      "preflight": "Poll the exact 124M training configuration in the foreground; do not attach a watchdog to the performance test.",
+      "reject": "Do not launch a training arm below 20 percent MFU. Optimize grouped dispatch/GEMMs first."
+    },
+    "scientific": {
+      "fixed_eval_required": true,
+      "dense_moe_control_required": true,
+      "dense_transformer_reference_required": true,
+      "generated_arm_requires_offline_direction_oracle": true,
+      "larger_rungs_authorized": false
+    },
+    "resource": {
+      "checkpoint_headroom_uses_stored_parameters": true,
+      "optimizer_state_headroom_uses_stored_parameters": true,
+      "atomic_checkpoint_headroom_required": true,
+      "workspace_and_filesystem_free_space_both_required": true
+    }
+  },
+  "monitoring": {
+    "estimated_under_five_minutes": "foreground polling; no watchdog",
+    "estimated_five_minutes_to_two_hours": "one terminal completion-or-error callback only",
+    "estimated_over_two_hours": "aggregate watchdog with 20, 50, 80, and 100 percent milestones plus errors/stalls; callback prompt must require state verification and autonomous continuation",
+    "heartbeat_interval_minutes": 90,
+    "progress_callback_resets_heartbeat": true
+  },
+  "launch_authorization": {
+    "current": "none",
+    "reason": "The ladder is prepared and count-sealed, but the repository has no MoE implementation and the generated-expert decoder has not passed a direction oracle. No GPU job may be represented as a MoE verification yet."
+  }
+}
