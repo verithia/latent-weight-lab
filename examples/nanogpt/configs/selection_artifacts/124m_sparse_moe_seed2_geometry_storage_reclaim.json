@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_sparse_moe_seed2_geometry_storage_reclaim_v1",
+  "recorded_at": "2026-08-11",
+  "status": "preregistered_not_executed",
+  "host": "PRO6",
+  "project_root": "/mnt/ssd-data/orj/MappingNetworks",
+  "project_cap_bytes": 274877906944,
+  "purpose": "Preserve the selected seed-one terminal model while creating enough atomic checkpoint and BF16 trajectory headroom for the preregistered seed-two 20TPP geometry acquisition.",
+  "preconditions": {
+    "workspace_bytes_before": 272653769624,
+    "headroom_bytes_before": 2224137320,
+    "seed1_alignment_v2_result_sha256": "bf8a3ad16b0f824974d7497b52145c083983d1379c04e1ec4af9383ff7b6bd8a",
+    "seed1_terminal_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_20tpp_selected_lr24e4_result.json",
+    "seed1_terminal_result_sha256": "0e691ec05335da961590e77f9e1fba59df87ff9bac88a3e091032e5c9b068a55"
+  },
+  "preserve_then_reclaim": {
+    "source": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/ckpt.pt",
+      "bytes": 2512713345,
+      "sha256": "cce1188d9456e3be6e39ecc42558231b8b6f04d4e077e27ed83a8a8f419a7a38"
+    },
+    "verified_model_snapshot": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/manifold_snapshot.pt",
+      "bytes": 1177335127,
+      "sha256": "62d7bc04e953036d758111c6fa44d4eb1c97a3eef0188ae989b56be54289e070",
+      "receipt_sha256_before_reclaim": "9e78130631bf36af3e091a1235a4b4dbfdae216cac5d9c0655b2e61544ab1eb7",
+      "tensor_count": 88,
+      "tensor_bytes": 1331801088,
+      "next_iter": 9495
+    }
+  },
+  "superseded_losing_snapshots_to_reclaim": [
+    {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr20e4_5tpp/manifold_snapshot.pt",
+      "bytes": 1177334999,
+      "sha256": "74c87f9a610a8b0deb04432d5f29fc183d76cf1c6864496929281bd509032efb",
+      "receipt_sha256": "7b5682dcce2c95afb8b56cfa99e886c82cf5ff01df4089afd7cbddf6df83e6bf",
+      "immutable_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_5tpp_top2_lr20e4_result.json",
+      "immutable_result_sha256": "9e48a385e1be95cbe21bb24743ed4327a875e76c499d4333c6c4ffe638842514"
+    },
+    {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr20e4_0p5tpp/manifold_snapshot.pt",
+      "bytes": 1177334935,
+      "sha256": "4f878977c1c4a6db218492b948742b5de03ef7d931939bd3ee7880f1b7a24016",
+      "receipt_sha256": "92fda28c0ee9294a04d315a3231685a3b632011f6eca9bec5076d0a399cbf6ae",
+      "immutable_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr20e4_0p5tpp_result.json",
+      "immutable_result_sha256": "483b5a236e69ffd56355617dfb6ede50f681695420a81c9bc3db388f70dcf0d4"
+    },
+    {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr16e4_0p5tpp/manifold_snapshot.pt",
+      "bytes": 1177334935,
+      "sha256": "a4f251af50a868e50440d7405bd77e009e3568f145cdd6bbf8cfd493b8d0cd7a",
+      "receipt_sha256": "dc4da37f2179ad7372ddcb92181957cb2e4e19ab367051790f87cbcf5b9177c4",
+      "immutable_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr16e4_0p5tpp_result.json",
+      "immutable_result_sha256": "ab3db81a167edc229a05a365098df0cf170ce024a4636837447c2c23dbb7436f"
+    }
+  ],
+  "projected": {
+    "total_reclaimed_bytes": 6044718214,
+    "workspace_bytes_after": 266609051410,
+    "headroom_bytes_after": 8268855534,
+    "headroom_gib_after": 7.700971825,
+    "seed2_peak_rule": "Headroom must cover one existing exact checkpoint, one atomic replacement temporary, all 17 registered BF16 paired snapshots, provenance/logs, and at least 1 GiB reserve."
+  },
+  "preserved": [
+    "seed-one full 88-tensor terminal model snapshot",
+    "all five seed-one paired trajectory snapshots",
+    "all terminal and intermediate scientific results, hashes, logs, statuses, provenance, and checkpoint metadata",
+    "winning 2.4e-3 5TPP model snapshot"
+  ]
+}

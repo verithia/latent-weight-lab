@@ -257,7 +257,7 @@
   "paired_alignment_audit": {
     "source": "examples/nanogpt/analyze_sparse_moe_paired_alignment.py",
     "git_commit": "b6b62b5",
-    "status": "v1_complete_protocol_repair_preregistered_v2_pending",
+    "status": "v2_complete_assignment_gate_pass_seed2_pending",
     "scope": "zero-update discovery/evaluation assignment stability, expert occupancy, quotient-chord, paired norm-gauge, and functional-output audit",
     "recovery_gate_deferred": "state-conditioned decoder recovery requires the denser seed-two trajectory",
     "focused_tests": "6 passed",
@@ -284,6 +284,19 @@
       "eligible_rows": 66,
       "excluded_underoccupied_rows": 30,
       "interpretation": "All rows and the 66 occupancy-eligible rows clear the 0.75 assignment threshold, but v1 encoded the exclusion rule as an all-row occupancy gate. The implementation is amended before a frozen-input v2 rerun."
+    },
+    "v2_result": {
+      "wall_seconds": 9.191889524459839,
+      "result_sha256": "bf8a3ad16b0f824974d7497b52145c083983d1379c04e1ec4af9383ff7b6bd8a",
+      "status_sha256": "e496c8d5b22a6edfb1d7fb47d501666353c654562ac9163a24310bf1911be1b7",
+      "rows_sha256": "029e161dacc3a2d3c99e9fa340e94f7725ce1adf62929b969cf63c3fff6f3102",
+      "eligible_rows": 66,
+      "excluded_underoccupied_rows": 30,
+      "assignment_overlap_mean": 0.9845624204837915,
+      "assignment_overlap_minimum": 0.78125,
+      "assignment_gate_pass": true,
+      "occupancy_exclusion_rule_pass": true,
+      "decoder_recovery_gates_evaluated": false
     }
   },
   "storage_admission": {

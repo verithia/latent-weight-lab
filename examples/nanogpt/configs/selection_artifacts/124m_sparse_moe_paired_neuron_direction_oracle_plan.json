@@ -1,6 +1,6 @@
 {
   "schema_version": "nanogpt_sparse_moe_paired_neuron_oracle_plan_v1",
-  "status": "seed1_acquisition_complete_alignment_v1_protocol_repair_preregistered_no_generated_training_authorized",
+  "status": "seed1_alignment_gate_passed_seed2_storage_and_exact_io_mfu_pending_no_generated_training_authorized",
   "scientific_question": "Can a state-conditioned chart recover the co-adapted c_fc/c_proj directions of complete sparse-MoE experts after respecting expert and hidden-neuron permutation symmetries?",
   "source_control": {
     "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
@@ -72,5 +72,17 @@
     "frozen_repair": "Score assignment gates only on rows with at least 256 routed tokens in both splits and both transition endpoints; explicitly report every excluded row and its minimum count.",
     "unchanged": "Activation batches, seeds, sample cap, checkpoints, layers, transition endpoints, assignment threshold, and all decoder-recovery thresholds remain unchanged.",
     "v1_result_sha256": "e55842d2e7b08628603287d1a586a500fa3bdd2d496d0edb8b2016a78b64051e"
+  },
+  "seed1_alignment_result": {
+    "result_sha256": "bf8a3ad16b0f824974d7497b52145c083983d1379c04e1ec4af9383ff7b6bd8a",
+    "rows_sha256": "029e161dacc3a2d3c99e9fa340e94f7725ce1adf62929b969cf63c3fff6f3102",
+    "eligible_rows": 66,
+    "excluded_rows": 30,
+    "assignment_overlap_mean": 0.9845624204837915,
+    "assignment_overlap_minimum": 0.78125,
+    "assignment_gate_pass": true,
+    "occupancy_exclusion_rule_pass": true,
+    "quotient_to_raw_chord_ratio_mean": 1.0194292989644138,
+    "interpretation": "Hidden assignment is stable after frozen occupancy exclusions, while quotienting permutations does not reduce trajectory chord energy. The main direction problem is not a hidden-index gauge artifact."
   }
 }
