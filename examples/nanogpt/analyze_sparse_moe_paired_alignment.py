@@ -210,6 +210,8 @@ def paired_alignment_metrics(
 
 
 def aggregate(rows: list[dict[str, Any]], occupancy_minimum: int) -> dict[str, Any]:
+    if not rows:
+        raise ValueError("cannot aggregate an empty set of expert rows")
     metrics = [
         "assignment_overlap",
         "fit_identity_fraction",
@@ -243,6 +245,15 @@ def aggregate(rows: list[dict[str, Any]], occupancy_minimum: int) -> dict[str, A
         for row in rows
     )
     return summary
+
+
+def minimum_occupancy(row: dict[str, Any]) -> int:
+    return min(
+        int(row["fit_left_count"]),
+        int(row["fit_right_count"]),
+        int(row["eval_left_count"]),
+        int(row["eval_right_count"]),
+    )
 
 
 def main() -> None:
@@ -351,11 +362,14 @@ def main() -> None:
         writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    summary = aggregate(rows, occupancy_minimum)
+    eligible_rows = [row for row in rows if minimum_occupancy(row) >= occupancy_minimum]
+    excluded_rows = [row for row in rows if minimum_occupancy(row) < occupancy_minimum]
+    summary = aggregate(eligible_rows, occupancy_minimum)
+    all_rows_summary = aggregate(rows, occupancy_minimum)
     assignment_gate = float(plan["frozen_diagnostic_gates"]["discovery_eval_assignment_overlap_min"])
     result = {
-        "schema_version": "nanogpt_sparse_moe_paired_alignment_audit_v1",
-        "scope": "zero-update alignment and occupancy audit; decoder recovery gates remain deferred to the denser seed-two trajectory",
+        "schema_version": "nanogpt_sparse_moe_paired_alignment_audit_v2",
+        "scope": "zero-update alignment audit scored only on experts that satisfy the frozen occupancy rule; decoder recovery gates remain deferred to the denser seed-two trajectory",
         "plan": {"path": str(args.plan), "sha256": file_sha256(args.plan)},
         "terminal_checkpoint": {
             "path": str(args.terminal_checkpoint),
@@ -374,10 +388,31 @@ def main() -> None:
             "eval_token_sha256": tensor_sha256(eval_tokens),
         },
         "summary": summary,
+        "all_rows_summary": all_rows_summary,
+        "occupancy": {
+            "minimum_routed_tokens_per_split_and_endpoint": occupancy_minimum,
+            "eligible_rows": len(eligible_rows),
+            "excluded_rows": len(excluded_rows),
+            "excluded": [
+                {
+                    "start_step": row["start_step"],
+                    "end_step": row["end_step"],
+                    "layer": row["layer"],
+                    "expert": row["expert"],
+                    "minimum_count": minimum_occupancy(row),
+                }
+                for row in excluded_rows
+            ],
+        },
         "gates": {
             "assignment_overlap_threshold": assignment_gate,
             "assignment_overlap_pass": summary["assignment_overlap"]["minimum"] >= assignment_gate,
-            "occupancy_pass": summary["underoccupied_rows"] == 0,
+            "occupancy_exclusion_rule_pass": (
+                len(eligible_rows) > 0
+                and len(eligible_rows) + len(excluded_rows) == len(rows)
+                and summary["underoccupied_rows"] == 0
+            ),
+            "all_rows_occupancy_pass": len(excluded_rows) == 0,
             "decoder_recovery_gates_evaluated": False,
         },
         "rows": {"path": str(csv_path), "sha256": file_sha256(csv_path)},

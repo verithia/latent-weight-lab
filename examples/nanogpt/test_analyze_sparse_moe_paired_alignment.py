@@ -3,6 +3,7 @@ import torch
 from examples.nanogpt.analyze_sparse_moe_paired_alignment import (
     _router_counts,
     aggregate,
+    minimum_occupancy,
     paired_alignment_metrics,
 )
 
@@ -61,3 +62,5 @@ def test_aggregate_freezes_occupancy_and_minimum_overlap() -> None:
     summary = aggregate(rows, occupancy_minimum=256)
     assert summary["assignment_overlap"]["minimum"] == 0.7
     assert summary["underoccupied_rows"] == 1
+    assert minimum_occupancy(rows[0]) == 300
+    assert minimum_occupancy(rows[1]) == 200

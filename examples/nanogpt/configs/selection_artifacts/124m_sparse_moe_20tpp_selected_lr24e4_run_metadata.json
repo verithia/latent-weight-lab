@@ -257,7 +257,7 @@
   "paired_alignment_audit": {
     "source": "examples/nanogpt/analyze_sparse_moe_paired_alignment.py",
     "git_commit": "b6b62b5",
-    "status": "ready_to_launch_terminal_and_storage_preconditions_verified",
+    "status": "v1_complete_protocol_repair_preregistered_v2_pending",
     "scope": "zero-update discovery/evaluation assignment stability, expert occupancy, quotient-chord, paired norm-gauge, and functional-output audit",
     "recovery_gate_deferred": "state-conditioned decoder recovery requires the denser seed-two trajectory",
     "focused_tests": "6 passed",
@@ -274,6 +274,16 @@
       "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/paired_alignment_audit",
       "fixed_arguments": "--batch-size 8 --block-size 256 --batches 2 --sample-cap 2048 --fit-seed 20260811 --eval-seed 20260812 --device cuda",
       "monitoring": "persistent watchdog required if the exact audit is expected or observed to exceed five minutes; terminal/error callbacks must mention @Codex and require result sealing and causal continuation"
+    },
+    "v1_result": {
+      "wall_seconds": 9.272772312164307,
+      "result_sha256": "e55842d2e7b08628603287d1a586a500fa3bdd2d496d0edb8b2016a78b64051e",
+      "rows_sha256": "029e161dacc3a2d3c99e9fa340e94f7725ce1adf62929b969cf63c3fff6f3102",
+      "assignment_overlap_all_rows_mean": 0.977579751983285,
+      "assignment_overlap_all_rows_minimum": 0.78125,
+      "eligible_rows": 66,
+      "excluded_underoccupied_rows": 30,
+      "interpretation": "All rows and the 66 occupancy-eligible rows clear the 0.75 assignment threshold, but v1 encoded the exclusion rule as an all-row occupancy gate. The implementation is amended before a frozen-input v2 rerun."
     }
   },
   "storage_admission": {

@@ -1,6 +1,6 @@
 {
   "schema_version": "nanogpt_sparse_moe_paired_neuron_oracle_plan_v1",
-  "status": "seed1_acquisition_complete_zero_update_alignment_audit_ready_no_generated_training_authorized",
+  "status": "seed1_acquisition_complete_alignment_v1_protocol_repair_preregistered_no_generated_training_authorized",
   "scientific_question": "Can a state-conditioned chart recover the co-adapted c_fc/c_proj directions of complete sparse-MoE experts after respecting expert and hidden-neuron permutation symmetries?",
   "source_control": {
     "run_name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
@@ -66,5 +66,11 @@
     "The dense-expert MoE control validates routing and complete-map specialization, not Mapping Networks compression.",
     "A passing oracle shows representability after correct symmetry handling; it does not by itself prove an efficient trainable decoder.",
     "A failed fixed BlockFHT control with a passing state-conditioned chart localizes the problem to fixed pseudo-random direction mismatch, not MoE routing."
-  ]
+  ],
+  "audit_protocol_amendment_20260811": {
+    "reason": "Audit v1 incorrectly interpreted the frozen occupancy exclusion rule as a requirement that every expert-transition row have at least 256 routed tokens.",
+    "frozen_repair": "Score assignment gates only on rows with at least 256 routed tokens in both splits and both transition endpoints; explicitly report every excluded row and its minimum count.",
+    "unchanged": "Activation batches, seeds, sample cap, checkpoints, layers, transition endpoints, assignment threshold, and all decoder-recovery thresholds remain unchanged.",
+    "v1_result_sha256": "e55842d2e7b08628603287d1a586a500fa3bdd2d496d0edb8b2016a78b64051e"
+  }
 }
