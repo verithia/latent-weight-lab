@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_sparse_moe_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-10T18:55:44+08:00",
+  "finished_at": null,
+  "exit_code": null,
+  "process_group": 4034971,
+  "max_iters": 238,
+  "git_commit": "e4c6a17a490b47c8984cfd3e639b989820b7ecd8",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4.json",
+    "sha256": "811fcfe4b42852db4341d1e239e9ddd2e6b5cf7b125631eb6efa3402bf9bcae3",
+    "archived": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4_20260810T105544Z_4034942.config.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_lr16e4/performance_preflight.json",
+    "sha256": "505b098a039cd06918c7a98c4977ad8b2137bbe8b3e94784553a2f866c7d671a",
+    "mfu_fraction": 0.21382460138229734
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4_20260810T105544Z_4034942.json",
+    "sha256": "98b8361223221e300257201b6577523429120baa98acb1bdb46def4b109ae581"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4_20260810T105544Z_4034942.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr16e4_20260810T105544Z_4034942.json",
+  "live_observation": {
+    "iteration": null,
+    "sampled_gpu_mib": 49281,
+    "sampled_gpu_utilization_percent": 91,
+    "process_alive": true
+  },
+  "monitoring": {
+    "policy": "terminal-or-actionable-error only; no healthy progress milestones or heartbeat",
+    "launchd_label": "org.mappingnetworks.pro6.moe124.lr16",
+    "watchdog_state": "/Users/verithia/research/notes/runtime/pro6_124m_dense_moe_lr16e4_terminal.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action": "@Codex verify and seal terminal artifacts, rank all three LR candidates, then launch only the preregistered top two 5TPP arms after exact-config MFU gates"
+  },
+  "authorization": {
+    "scientific_claim_before_terminal_fixed_evaluation": false,
+    "rank_complete_lr_screen_after_terminal": true,
+    "larger_rung": false,
+    "generated_expert_arm": false
+  }
+}

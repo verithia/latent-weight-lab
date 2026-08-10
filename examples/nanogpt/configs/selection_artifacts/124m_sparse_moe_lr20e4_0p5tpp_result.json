@@ -1,0 +1,55 @@
+{
+  "schema_version": "mai_124m_sparse_moe_0p5tpp_result_v1",
+  "recorded_at": "2026-08-10",
+  "classification": "PASS_COMPLETE_124M_DENSE_MOE_LR20E4_SCREEN_ARM_BUT_NOT_CURRENT_WINNER",
+  "run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr20e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "d228eaae6f95325143ea13417da3b98e4f61a05c",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "bef96c574a5062307708a221687b73aaa9bc767fc53a14af8ac836f47c349515",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "1e69eaf151b570b5bef2f3936b7378995b8e47dec2c14497471f363c394ceba0",
+    "status_sha256": "ab3ef4ea90518418040303f8af182c698c37d6de15ad5d1da0d08bc42a8e46f1",
+    "log_sha256": "e476d848ea9cbdae8399487d76840aabaea981e2387ef7651e9c47bf8d55e2cc",
+    "checkpoint_sha256": "ea409e4d90dd68ef92304dc4a5e6b0425f9bde92a93cf997adf831ed2a991b65",
+    "checkpoint_metadata_sha256": "0142dfc41823f915aca6cb586346cc660ae4c72af1bfca37bc7b20d67a187310",
+    "mfu_certificate_sha256": "8203c541dfbca4988c528ae4c5be208979c565fe58b66dc998e9674b0a1ebb62",
+    "exit_code": 0,
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "scheduled_active_tpp": 0.501338138701522,
+    "checkpoint_next_iter": 238,
+    "checkpoint_bytes": 2512713217,
+    "sampled_peak_mib": 68147
+  },
+  "identity": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_reference_checkpoint_sha256": "d4d1ed3f749c8c95da0f1c4a3fbc7e033a5d793934e3c222b81de61fd3786e6a",
+    "dense_reference_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_bilateral_endpoint_production_selector_result.json",
+    "comparison_is_fixed_eval_matched": true
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9851, "validation_ce": 10.9848},
+    {"step": 60, "train_ce": 6.3767, "validation_ce": 6.3879},
+    {"step": 120, "train_ce": 5.8216, "validation_ce": 5.8269},
+    {"step": 180, "train_ce": 5.6159, "validation_ce": 5.6193},
+    {"step": 238, "train_ce": 5.5402, "validation_ce": 5.5432}
+  ],
+  "comparison": {
+    "matched_dense_train_ce": 5.485774517059326,
+    "matched_dense_validation_ce": 5.488473415374756,
+    "terminal_train_delta_to_dense": 0.0544254829406734,
+    "checkpoint_best_validation_delta_to_dense": 0.054701805114746094,
+    "rounded_terminal_validation_delta_to_lr24e4": 0.0793,
+    "interpretation": "The lr20e4 arm is healthy and finite but pays about +0.0547 validation CE versus matched dense and is about +0.0793 behind the current lr24e4 MoE winner. This is an LR-screen result, not a structural rejection of complete-expert routing."
+  },
+  "decision": {
+    "continue_124m_lr_screen": true,
+    "next_candidate": "lr16e4 after its passed exact-config foreground MFU gate",
+    "top_two_5tpp_not_yet_authorized": true,
+    "larger_rung_authorized": false,
+    "generated_expert_arm_authorized": false
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "schema_version": "mai_sparse_moe_lr_candidate_mfu_result_v1",
+  "recorded_at": "2026-08-10",
+  "decision": "PASS_124M_DENSE_COMPLETE_EXPERT_MOE_LR16E4_MFU_GATE",
+  "scientific_updates": 0,
+  "host": "PRO6",
+  "gpu": 0,
+  "architecture": {
+    "active_parameters": 124447488,
+    "stored_parameters": 294316800,
+    "num_experts": 8,
+    "top_k": 2,
+    "expert_hidden_multiplier": 2,
+    "complete_expert_projection_ownership": true,
+    "dropless_batched_dispatch": true,
+    "expert_optimizer": "Muon independently over every expert matrix",
+    "router_optimizer": "AdamW"
+  },
+  "accepted_attempt": {
+    "git_commit": "e4c6a17a490b47c8984cfd3e639b989820b7ecd8",
+    "config_sha256": "811fcfe4b42852db4341d1e239e9ddd2e6b5cf7b125631eb6efa3402bf9bcae3",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe8_top2_mfu_lr16e4/performance_preflight.json",
+    "certificate_sha256": "505b098a039cd06918c7a98c4977ad8b2137bbe8b3e94784553a2f866c7d671a",
+    "log_sha256": "0b92871b4b3702aaf5eb41fb561d33dab74914c4a694d30032f0308d870a7022",
+    "empirical_bf16_peak_tflops": 416.56447735361877,
+    "model_tflops": 89.07173332016256,
+    "mfu_fraction": 0.21382460138229734,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 119289.5825,
+    "iteration_milliseconds": 2199.3325,
+    "peak_mib": 45272.0,
+    "all_logged_losses_finite": true,
+    "warmup_updates": 1,
+    "timed_updates": 4
+  },
+  "preserved_non_scientific_launch_error": {
+    "classification": "package import failure before model construction and before any update",
+    "failed_invocation": "python examples/nanogpt/mfu_preflight.py without the repository root on PYTHONPATH",
+    "repair": "invoke the same preflight as python -m examples.nanogpt.mfu_preflight",
+    "scientific_or_timed_updates": 0
+  },
+  "authorization": {
+    "this_124m_lr16e4_screen_arm": true,
+    "top_two_5tpp_requires_terminal_lr16e4_result": true,
+    "larger_rung": false,
+    "generated_expert_arm": false
+  }
+}

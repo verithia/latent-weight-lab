@@ -1,12 +1,12 @@
 {
   "schema_version": "mai_sparse_moe_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr20e4",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-10T18:39:37+08:00",
-  "finished_at": null,
-  "exit_code": null,
+  "finished_at": "2026-08-10T18:51:56+08:00",
+  "exit_code": 0,
   "process_group": 4025993,
   "max_iters": 238,
   "git_commit": "d228eaae6f95325143ea13417da3b98e4f61a05c",
@@ -31,12 +31,21 @@
   },
   "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr20e4_20260810T103937Z_4025968.log",
   "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr20e4_20260810T103937Z_4025968.json",
-  "live_observation": {
-    "iteration": 20,
-    "training_loss_including_router_auxiliaries": 7.5180,
-    "sampled_gpu_mib": 68147,
-    "sampled_gpu_utilization_percent": 100,
-    "process_alive": true
+  "terminal": {
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "train_ce": 5.5402,
+    "validation_ce": 5.5432,
+    "checkpoint_best_validation_ce": 5.543175220489502,
+    "matched_dense_validation_ce": 5.488473415374756,
+    "validation_delta_to_dense": 0.054701805114746094,
+    "sampled_peak_mib": 68147,
+    "checkpoint_next_iter": 238,
+    "checkpoint_bytes": 2512713217,
+    "checkpoint_sha256": "ea409e4d90dd68ef92304dc4a5e6b0425f9bde92a93cf997adf831ed2a991b65",
+    "checkpoint_metadata_sha256": "0142dfc41823f915aca6cb586346cc660ae4c72af1bfca37bc7b20d67a187310",
+    "status_sha256": "ab3ef4ea90518418040303f8af182c698c37d6de15ad5d1da0d08bc42a8e46f1",
+    "log_sha256": "e476d848ea9cbdae8399487d76840aabaea981e2387ef7651e9c47bf8d55e2cc",
+    "classification": "clean_terminal_124m_lr_screen_nonwinner_so_far"
   },
   "monitoring": {
     "policy": "terminal-or-actionable-error only; no healthy progress milestones or heartbeat",
