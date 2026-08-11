@@ -1,0 +1,84 @@
+{
+  "schema_version": "nanogpt_sparse_moe_depth_grouped_basis_seal_v1",
+  "recorded_at": "2026-08-11T17:54:05+08:00",
+  "decision": "REJECT_DEPTH_GROUPED_RESIDUAL_OUTPUT_FRAMES",
+  "source_control": {
+    "git_commit": "1270fe15783fbee3baa010d00c9caaa0b0ae1384",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_depth_grouped_basis.py",
+    "entrypoint_sha256": "e620e46e90d625e5da6afadc18b76f90afafdd8effacc755206311f996b3e839",
+    "plan_sha256": "62afc37c4371fe49990f8d9e6d19e79fda265d7b11b7aafd8f9b5c873a5fca0d"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "shared_basis_seal_sha256": "654457d00753374472a9a8472adf8e34feb96ff37eb2e6eae9b08348cf7a94c7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layer_groups": [[0, 1, 2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+    "experts": 8
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "parameter_updates": 0,
+    "wall_seconds": 8.944514036178589,
+    "focused_and_regression_tests": "26 passed in 1.73s",
+    "gpu_after": "153/97887 MiB, 0% utilization, 31 C, 15.95 W",
+    "workspace_bytes_after": 271578117741,
+    "filesystem_bytes_free_after": 1637954228224
+  },
+  "fixed_budget": {
+    "total_shared_basis_rank": 545,
+    "minimum_rank_per_group": 64,
+    "per_matrix_coordinates": 1536,
+    "total_coordinates_used": 566016,
+    "dense_cproj_values_all_layers_experts": 113246208,
+    "realized_global_compression": 200.07598371777476
+  },
+  "results": {
+    "calibration_a_rank_allocation": [188, 202, 155],
+    "calibration_b_rank_allocation": [187, 203, 155],
+    "allocation_l1_difference": 2,
+    "fresh_recovery_mean": 0.708718108634154,
+    "fresh_recovery_minimum": 0.6643297076225281,
+    "minimum_expert_recovery": 0.47882041335105896,
+    "minimum_grouped_minus_local_oracle": -0.16331040859222412,
+    "group_basis_overlap_early_middle_late": [
+      0.8589533567428589,
+      0.8444769978523254,
+      0.8254595398902893
+    ],
+    "minimum_independent_group_basis_overlap": 0.8254595398902893,
+    "minimum_expert_assignments": 293,
+    "all_values_finite": true
+  },
+  "gates": {
+    "fresh_recovery_mean_min_0p9": false,
+    "fresh_recovery_every_layer_min_0p8": false,
+    "grouped_minus_local_oracle_min_neg0p05": false,
+    "independent_group_basis_overlap_min_0p8": true,
+    "occupancy_min_128": true
+  },
+  "interpretation": {
+    "positive": "Independent calibration banks choose virtually identical rank allocations and all three group bases are stable, so depth-dependent residual coordinates are reproducible rather than noise.",
+    "binding_failure": "Dividing the fixed rank-545 state budget among three depth groups drops fresh mean recovery from the parent model-wide frame's 0.9113 to 0.7087, with 0.6643 minimum recovery and -0.1633 minimum regret versus layer-local bases.",
+    "mechanism": "The model-wide frame benefited from pooling one wide residual basis. Fixed-budget depth grouping duplicates frame state and leaves every group too narrow. The evidence therefore rejects both a single imperfectly shared low-rank frame and this fixed-budget grouped repair.",
+    "next_discriminator": "Test direction mismatch without a private low-rank output dictionary: compose each existing full-rank rank-9 MPO with one shared full-rank orthogonal residual gauge. A zero-update alternating Procrustes/MPO oracle must pass before any compact gauge implementation or training is authorized.",
+    "not_yet_authorized": "No group/rank sweep, coefficient generator, candidate training implementation, MFU gate, language-model training, or larger rung is authorized from this rejection."
+  },
+  "raw_artifacts": {
+    "result_sha256": "1b9a22847584e5ddb56bd2a9d815b08952ce5add40d1c1ca524042bcaa6a7024",
+    "rows_sha256": "e70a8077b7ae9719ccdb2e0a25b4880150d210b25a57934aebfc9438bd265983",
+    "bases_sha256": "f6e969c2f3bccc64af5625c6446aadc62e88fc6eabfbc17116439d0be0bb1c54",
+    "status_sha256": "b19e930c8f28695989cd732079cce7e39c2f7c8dced20c36aff9308dc6aad63d",
+    "log_sha256": "565e724192c839a291f68f7df4db5c128031ea2f08ed1fba5fb50593a019628f"
+  },
+  "authorization": {
+    "preregister_shared_orthogonal_gauge_mpo_oracle": true,
+    "group_or_rank_sweep": false,
+    "coefficient_mechanism_oracle": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "training": false,
+    "larger_rung": false
+  }
+}
