@@ -1,0 +1,96 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_context_residual_action_audit_plan_v1",
+  "recorded_at": "2026-08-11T23:30:00+08:00",
+  "status": "preregistered_before_implementation_and_any_residual_action_values",
+  "scientific_question": "After freezing the independently fitted static two-spectrum c_fc coordinates, does the exact same-coordinate context-gate perturbation have reproducible positive projection onto the routed heldout residual left by that static function?",
+  "causal_reconciliation": {
+    "parent_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_context_modulated_spectral_oracle_result.json",
+      "sha256": "7dd97a1bc97089f397bb2728705e82d25f6dc667c0f9efdbeddd0a54021cd755",
+      "raw_result_sha256": "02bef19472dc8f05324418d36f9bf3c70803256007f63942adc0cd35d29af06c",
+      "coordinates_sha256": "2469f584ef854f801355802492f5eab05d36a71c7d9ada0116016ed2ecec8e3c",
+      "finding": "Refitting the beta-1 multiplicatively gated map lowers heldout recovery by 0.0556-0.0557 versus the exact same-run beta-0 control despite healthy fits. No beta or operator sweep is authorized."
+    },
+    "why_this_audit_is_needed": "A direct-sum architecture would preserve the accepted static action and add a separate context component, whereas the rejected treatment multiplied and refit the entire static path. Before allocating any coordinates to a direct summand, the exact context perturbation of the frozen static function must align with the residual it leaves.",
+    "no_new_fit": "This audit loads the already fitted static coordinates and applies no optimizer, coordinate update, checkpoint update, basis selection, or heldout selection.",
+    "residual_projection_equivalence": "For static action y0, target y*, and context perturbation q=y_beta1(z0)-y_beta0(z0), projecting q onto r=y*-y0 is exactly the orthogonal residual-complementarity test. An optimal positive scalar separates direction from the beta=1 magnitude, while a discovery-selected scalar tests transfer."
+  },
+  "source": {
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_context_modulated_spectral_20260811_v1/compact_coordinates.pt",
+    "parent_coordinates_sha256": "2469f584ef854f801355802492f5eab05d36a71c7d9ada0116016ed2ecec8e3c",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "banks": ["discovery_a", "discovery_b"],
+    "checkpoint_updates": 0
+  },
+  "frozen_operator": {
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "padded_width": 2048,
+    "num_experts": 8,
+    "top_k": 2,
+    "fixed_operator_seed": 20260931,
+    "fixed_context_seed_offset": 37,
+    "static_beta": 0.0,
+    "context_beta": 1.0,
+    "coordinates": "Use each bank/layer's parent control state unchanged. Candidate spectra, parent treatment spectra, and every optimizer state are ignored.",
+    "context_action": "q(x)=expert_beta1(x,z_static)-expert_beta0(x,z_static), including the exact GELU and terminal dense c_proj on each side.",
+    "residual": "r(x)=expert_dense_target(x)-expert_beta0(x,z_static), aggregated with terminal top-2 routing and probabilities.",
+    "direction_metrics": {
+      "signed_cosine": "<r,q>/(||r|| ||q||)",
+      "optimal_positive_alpha": "max(0,<r,q>/||q||^2)",
+      "optimal_residual_recovery": "1-||r-alpha*q||^2/||r||^2",
+      "total_recovery_after_alpha": "1-||y0+alpha*q-y*||^2/||y*||^2",
+      "transferred_alpha": "Select alpha on the source discovery bank and apply it unchanged on heldout."
+    }
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260927, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20260928, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20260929, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "anti_leakage": "Each bank's scalar is selected only on its own discovery frame. Heldout values cannot choose signs, coordinates, beta, scalar, threshold, or successor."
+  },
+  "frozen_gates": {
+    "heldout_optimal_residual_recovery_mean_min_each_bank": 0.1,
+    "heldout_optimal_residual_recovery_every_layer_min_each_bank": 0.05,
+    "heldout_transferred_alpha_residual_recovery_mean_min_each_bank": 0.05,
+    "heldout_context_action_cross_bank_cosine_mean_min": 0.8,
+    "all_discovery_optimal_alphas_positive": true,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Only an all-gate pass authorizes theory and preregistration for one fixed-total-coordinate direct-sum allocation. It does not authorize a fit, implementation, MFU preflight, training, or larger rung by itself.",
+    "fail": "Close the exact multiplicative-context component, including direct-sum reuse of this gate. Do not sweep beta, signs, spectra, scalar, data, or gates. Return to a different coefficient/dictionary algebra or retain dense expert c_fc.",
+    "systems": "Expected below five minutes and foreground-polled. If observed runtime reaches five minutes, stop foreground polling and attach one terminal/error-only @Codex watchdog before continuing."
+  },
+  "authorization": {
+    "zero_update_residual_action_audit": true,
+    "new_coordinate_fit": false,
+    "direct_sum_preregistration": false,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "expected_output_bytes_maximum": 16777216,
+    "monitoring": "Foreground polling only; no long-run watchdog for this analysis."
+  },
+  "identity": {
+    "parent_git_commit": "e1fd662f8a1931c18f434da8c753825ecef0f05b",
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_context_residual_action_audit.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
