@@ -1,0 +1,109 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_kfac_maxbudget_oracle_seal_v1",
+  "classification": "MAXBUDGET_KFAC_REPRESENTABILITY_REJECTED",
+  "passed": false,
+  "scientific_conclusion": "The maximum asymmetric two-sided KFAC allocation that preserves at least 200x paired-coordinate compression is stable but far too small. Adding the fourth output/error direction yields only 0.014-0.016 absolute functional recovery and leaves mean recovery below 0.434.",
+  "identity": {
+    "git_commit": "6ab4587b0c3ee1239a548697ee8ef9db149ec4f7",
+    "preregistration_git_commit": "d1e1f10ee5c96a2bc54c0f94cdb812829ae4eb8f",
+    "plan_sha256": "e23351c42c4012a3c69e97a57f0f7d681ba9ec2fd2f56b8af892c43a6567b499",
+    "entrypoint_sha256": "ff254e90c3a5e9d2f718f6e40484c83ae53697c87bb6331bb77b9b22186bd10f",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "raw_artifacts": {
+    "directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_stepzero_kfac_maxbudget_20260812_v1",
+    "result_sha256": "c662172fc4512a598cb7b99d207866b3e53f9b8264323521db4aa5bffb02dffa",
+    "run_log_sha256": "c662172fc4512a598cb7b99d207866b3e53f9b8264323521db4aa5bffb02dffa",
+    "time_log_sha256": "08c5907f6088105039794b7f1c90f004160b6bcd53095305566e1ee56d3dc935"
+  },
+  "execution": {
+    "focused_and_parent_regression_tests": "18 passed in 1.10s",
+    "internal_wall_seconds": 6.820868968963623,
+    "external_wall_seconds": 7.93,
+    "maximum_cuda_memory_allocated_bytes": 4173025280,
+    "maximum_resident_set_size_kib": 6156600,
+    "checkpoint_updates": 0,
+    "coordinate_updates": 0,
+    "exit_status": 0,
+    "post_run_gpu0": {
+      "memory_used_mib": 221,
+      "memory_total_mib": 97887,
+      "utilization_percent": 0,
+      "temperature_c": 27
+    }
+  },
+  "coordinate_accounting": {
+    "control_separate_3_plus_3": {
+      "incoming_rank": 3,
+      "outgoing_rank": 3,
+      "router_rank": 3,
+      "paired_coordinate_compression_ratio": 256.0
+    },
+    "candidate_separate_3_plus_4": {
+      "incoming_rank": 3,
+      "outgoing_rank": 4,
+      "router_rank": 3,
+      "paired_coordinate_compression_ratio": 219.42857142857142
+    },
+    "next_rank_compression_ratio": 192.0
+  },
+  "results": {
+    "discovery_a": {
+      "control_mean": 0.41717952489852905,
+      "candidate_mean": 0.4330363670984904,
+      "candidate_by_layer_0_5_11": [
+        0.2907196283340454,
+        0.5297038555145264,
+        0.4786856174468994
+      ],
+      "candidate_minus_control_mean": 0.015856842199961346,
+      "candidate_minus_control_minimum_layer": 0.011653482913970947
+    },
+    "discovery_b": {
+      "control_mean": 0.4122852285703023,
+      "candidate_mean": 0.42612234751383465,
+      "candidate_by_layer_0_5_11": [
+        0.27750349044799805,
+        0.5234115123748779,
+        0.47745203971862793
+      ],
+      "candidate_minus_control_mean": 0.013837118943532309,
+      "candidate_minus_control_minimum_layer": 0.00929480791091919
+    },
+    "candidate_cross_bank_action_cosine": {
+      "mean": 0.9354267517725626,
+      "by_layer_0_5_11": [
+        0.8860754370689392,
+        0.9729093909263611,
+        0.9472954273223877
+      ]
+    },
+    "candidate_cross_bank_subspace_overlap_mean": {
+      "incoming": 0.5352159440517426,
+      "outgoing": 0.6344573398431143
+    },
+    "minimum_expert_assignments_a_b": [64, 42]
+  },
+  "gate_outcome": {
+    "candidate_mean_min_0p9_each_bank": false,
+    "candidate_every_layer_min_0p8_each_bank": false,
+    "candidate_minus_control_min_0p05_each_bank": false,
+    "candidate_action_cosine_min_0p8": true,
+    "incoming_overlap_min_0p5": true,
+    "outgoing_overlap_min_0p5": true,
+    "minimum_expert_assignments_128_each_bank": false,
+    "all_values_finite": true
+  },
+  "authorization": {
+    "structured_basis_approximation_preregistration": false,
+    "dense_or_lora_basis": false,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "generated_experts": false,
+    "larger_rung": false,
+    "automatic_retry_or_sweep": false,
+    "next_boundary": "Retain dense expert MLPs for the validated QK-mapped MoE composition, or formulate a different architecture-level decomposition. Do not continue static compact-basis rank or context-gate searches."
+  }
+}
