@@ -1,0 +1,91 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_global_tt_oracle_seal_v1",
+  "recorded_at": "2026-08-11T21:18:00+08:00",
+  "classification": "GLOBAL_TT_CFC_REPRESENTABILITY_REJECTED",
+  "source_control": {
+    "git_commit": "26842d9e9c1f5f9e32bfdeefe490967083ce9e2a",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_global_tt_oracle.py",
+    "entrypoint_sha256": "cd5663d1ca1750e358dbe91616b6203620b91c1535b2e158389be245a36dae40",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_global_tt_oracle_plan.json",
+    "plan_sha256": "ed11925d60c31a2a07de43e93908911fa90b54c13d0e6aa7f0fc11dcbf01e3fd"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "functional_probe_layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "wall_seconds": 9.177165508270264,
+    "maximum_memory_allocated_bytes": 2808829952,
+    "remote_focused_and_regression_tests": "17 passed in 1.60s",
+    "preflight_wall_seconds": 0.2893691062927246,
+    "preflight_maximum_memory_allocated_bytes": 2273486848,
+    "preflight_sha256": "5d4f5776068d6b88abe38b49c0011208d744853721c19449d83fa564ea6fade1",
+    "result_sha256": "1e04f985e0d33ca5d00e0b95cd06e9e087d1f856f67a9b0759c42424024a691d",
+    "coordinates_sha256": "a83d943e88ce46e033ef36ca1d4aad8989b944c29f5ca9f32225602ef05d24dd",
+    "log_sha256": "1e04f985e0d33ca5d00e0b95cd06e9e087d1f856f67a9b0759c42424024a691d",
+    "all_values_finite": true
+  },
+  "accounting": {
+    "dense_cfc_parameters": 113246208,
+    "tt_coordinates": 566028,
+    "cfc_compression_ratio": 200.07174203396298,
+    "materialized_dense_cfc_in_candidate": false,
+    "dense_cproj_retained_as_exception": true
+  },
+  "results": {
+    "seed_20261001": {
+      "global_parameter_recovery_interleaved": 0.003753560512529286,
+      "global_parameter_recovery_separated": 0.0036003561988443566,
+      "heldout_a_mixture_recovery_mean": 0.004595418771107991,
+      "heldout_b_mixture_recovery_mean": 0.004650215307871501,
+      "minimum_layer_recovery": 0.004090309143066406,
+      "minimum_expert_recovery": 0.0008569760458354558,
+      "interleaved_gain_heldout_a": 0.000595390796661377,
+      "interleaved_gain_heldout_b": 0.0006674726804097494
+    },
+    "seed_20261002": {
+      "global_parameter_recovery_interleaved": 0.003744035427543424,
+      "global_parameter_recovery_separated": 0.003590064239814783,
+      "heldout_a_mixture_recovery_mean": 0.004240791002909343,
+      "heldout_b_mixture_recovery_mean": 0.0042610764503479,
+      "minimum_layer_recovery": 0.00342714786529541,
+      "minimum_expert_recovery": 0.0016978460922802974,
+      "interleaved_gain_heldout_a": -0.000163118044535319,
+      "interleaved_gain_heldout_b": -0.00014573335647583008
+    },
+    "same_bank_action_cosine_between_seeds": {
+      "mean": 0.016090540448203683,
+      "minimum": 0.007299424614757299,
+      "maximum": 0.022521911188960075
+    }
+  },
+  "gates": {
+    "all_values_finite": true,
+    "mixture_recovery_mean_min_0p8": false,
+    "every_layer_min_0p7": false,
+    "every_expert_min_0p5": false,
+    "interleaved_gain_min_0p1": false,
+    "action_cosine_min_0p8": false,
+    "passed": false
+  },
+  "interpretation": {
+    "binding_failure": "The 200x global TT captures only 0.374-0.375% of c_fc parameter energy and 0.424-0.465% of routed heldout function, orders of magnitude below every absolute gate.",
+    "control_result": "Interleaving hidden and input radix modes changes recovery by only -0.00016 to +0.00067. The equal-coordinate control therefore rejects local cross-axis adjacency as a causal explanation at this budget.",
+    "instability": "Independently randomized decompositions agree in heldout action at cosine only 0.0161. The retained weight-energy directions are weak and non-identifiable rather than a stable compact atlas.",
+    "scope": "This closes the exact rank-150, 200x randomized endpoint TT-SVD route. It is not a proof that any functionally optimized TT could never fit, but the frozen plan forbids converting this miss into a rank, factorization, axis-order, or optimizer sweep."
+  },
+  "authorization": {
+    "tt_cfc_implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "next_allowed_work": "A new zero-update family may learn shared structured orthogonal directions directly, because the prior spectral oracle showed a stable +0.145 functional gain from spectral adaptation while both fixed-frame and TT weight-energy directions remain insufficient. The new family must remain within the c_fc coordinate budget, retain dense c_proj as the established exception, and pass heldout functional gates before training."
+  }
+}
