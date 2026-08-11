@@ -1,0 +1,103 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_kfac_factor_oracle_plan_v1",
+  "recorded_at": "2026-08-11T15:39:00+08:00",
+  "status": "preregistered_after_token_jacobian_rejection_before_kfac_values",
+  "scientific_question": "Does averaging the step-zero functional geometry into expert-conditioned activation/error covariance factors yield stable paired-atom directions that recover the 0.5-TPP expert action at 384x or 256x coordinates?",
+  "causal_source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "run_git_commit": "55d91cfe7be442d9f71135d0cf747748aff00937",
+    "run_config_sha256": "606bdb6f94a895370c5f79c3bf8c9ca9e77b94e9f5cde8acd5fbe61ac002c5ba",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "active_tpp": 0.501338138701522,
+    "layers": [0, 5, 11],
+    "rule": "All covariance factors and eigendirections are computed from the exact step-zero model and one discovery split. Endpoint tensors are excluded until coordinate fitting and scoring."
+  },
+  "geometry_banks": [
+    {
+      "name": "discovery_a",
+      "seed": 20260911,
+      "batches": 1,
+      "batch_size": 8,
+      "block_size": 256,
+      "tokens": 2048
+    },
+    {
+      "name": "discovery_b",
+      "seed": 20260912,
+      "batches": 1,
+      "batch_size": 8,
+      "block_size": 256,
+      "tokens": 2048
+    }
+  ],
+  "kfac_basis": {
+    "routed_quantities": "For each expert assignment at step zero, retain residual input x, gate probability p, MLP-output task error delta, pre-GELU value, post-GELU activation h, and hidden error dh=(p*delta)@W_proj times GELU-prime.",
+    "incoming_factor": "A_e = E[x x^T * mean_j(dh_j^2)] over assignments to expert e. Its top four eigenvectors are shared incoming-row directions within that expert.",
+    "outgoing_factor": "S_e = E[(p*delta)(p*delta)^T * mean_j(h_j^2)] over assignments to expert e. Its top four eigenvectors are shared outgoing-column directions within that expert.",
+    "router_factor": "R_e = E[x x^T * p^2 * mean_d(delta_d^2)] over assignments selecting expert e. Its top four eigenvectors are router-row directions.",
+    "normalization": "Each covariance is divided by its positive scalar-weight sum; add only a numerical diagonal ridge before symmetric eigendecomposition. Basis scale and eigenvector sign are irrelevant to oracle coordinate fitting.",
+    "anti_leakage": "The terminal parameter chord, held-out tokens, and future activations do not participate in factors, weighting, rank selection, or eigenvectors."
+  },
+  "coordinate_families": [
+    {
+      "name": "coupled_four",
+      "coordinates_per_atom": 4,
+      "pairing": "Coordinate k couples incoming eigenvector A_e[k] and outgoing eigenvector S_e[k] for every hidden atom in expert e.",
+      "compression_ratio": 383.8750813272609
+    },
+    {
+      "name": "separate_three_plus_three",
+      "coordinates_per_atom": 6,
+      "pairing": "Use the first three A_e and S_e eigenvectors with independent incoming/outgoing coordinates; hidden identity remains paired.",
+      "compression_ratio": 256.0
+    }
+  ],
+  "controls": {
+    "raw_gradient_result_sha256": "577cdd7a526c981808afeab11466f61ae626fd0d2690bf87e234813c15f89380",
+    "raw_gradient_exact_mean": {
+      "coupled_four": {
+        "discovery_a": 0.3414152264595032,
+        "discovery_b": 0.33374760548273724
+      },
+      "separate_three_plus_three": {
+        "discovery_a": 0.35835087299346924,
+        "discovery_b": 0.3571307261784871
+      }
+    },
+    "token_jacobian_result_sha256": "3bc7f969e1227ec38251bbeda3fe94450bac6a40a91996422070e578ee6bd43f",
+    "fixed_structured": "Rerun the exact matched-budget fixed local BlockFHT control.",
+    "single_change": "Replace stochastic gradient/Jacobian probe directions with discovery-averaged activation/error covariance eigendirections; endpoint, tokens, coordinate counts, fitting, and held-out scoring remain matched."
+  },
+  "evaluation": {
+    "heldout_seed": 20260913,
+    "heldout_batches": 2,
+    "heldout_batch_size": 8,
+    "heldout_block_size": 256,
+    "activation_sample_cap_per_layer": 2048,
+    "primary_metric": "Exact nonlinear held-out residual-write recovery on the fixed step-zero activation frame.",
+    "secondary_metrics": [
+      "per-layer exact recovery",
+      "paired/incoming/outgoing/router parameter recovery",
+      "expert occupancy and covariance effective rank",
+      "discovery-A versus discovery-B KFAC eigenspace overlap",
+      "improvement over token-compute-matched raw gradients"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_exact_recovery_mean_min_each_bank": 0.9,
+    "heldout_exact_recovery_every_layer_min_each_bank": 0.8,
+    "kfac_minus_raw_gradient_mean_min_each_bank": 0.1,
+    "discovery_bank_mean_subspace_overlap_min": 0.5,
+    "minimum_expert_assignments": 128,
+    "all_values_finite": true
+  },
+  "interpretation": {
+    "pass_both_banks": "Expert-conditioned functional factors supply a sufficient stable image. Authorize only a 124M 5-TPP online KFAC-sketch acquisition; generated training stays blocked.",
+    "stable_but_insufficient": "Shared expert factors are reproducible but too coarse; preregister per-atom error-weighted factors or input-conditioned coefficients without increasing coordinate count.",
+    "unstable_or_no_improvement": "Reject static step-zero factor images. The structural requirement is an online input-conditioned latent function, not another fixed basis; stop offline fixed-chart escalation.",
+    "authorization": "Only this zero-update offline oracle is authorized. Generated-expert training, MFU preflight, and larger active-parameter rungs remain prohibited."
+  }
+}
