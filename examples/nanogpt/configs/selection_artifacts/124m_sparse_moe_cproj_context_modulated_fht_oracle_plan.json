@@ -65,6 +65,7 @@
     "maximum_cgls_iterations": 50,
     "relative_normal_residual_tolerance": 1e-5,
     "ridge_ratio": 1e-6,
+    "ridge_trace_estimator": "Deterministic two-probe Rademacher Hutchinson estimate of trace(A^T A)/coordinate_count, with probe seed 20260924. The same estimator and probes are used for beta=1 and beta=0.",
     "primary_metric": "Exact held-out c_proj residual-write recovery after applying the nonlinear activation-conditioned operator.",
     "secondary_metrics": [
       "per-layer recovery",
