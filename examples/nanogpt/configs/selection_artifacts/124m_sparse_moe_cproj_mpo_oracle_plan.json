@@ -1,0 +1,81 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_mpo_oracle_plan_v1",
+  "recorded_at": "2026-08-11T22:05:00+08:00",
+  "status": "preregistered_after_feature_write_rejection_before_any_mpo_value",
+  "scientific_question": "Can an equal-budget hierarchical multilinear map with an independent output-side state represent sparse-MoE c_proj residual writes where feature-derived maps and a globally separable rank-two Kronecker sum fail?",
+  "theory_reconciliation": {
+    "independent_output_requirement": "The two-seed unseen-neuron oracle showed that even a full-c_proj-size dense map from terminal c_fc plus c_fc motion recovers only 2.20 percent of heldout routed write function. The write map must own independent output-oriented state.",
+    "kronecker_boundary": "The learned rank-two Kronecker image improved about 0.093 over a larger static FHT control but stopped at 0.333-0.334 heldout recovery. Its global two-term separability, not merely fixed orientation, is the remaining tested restriction.",
+    "new_topology": "A matrix-product-operator tensor train distributes learned output/input coupling across five radix levels. Every core is latent state; changing any core changes the tangent image. This is hierarchical multilinear entanglement rather than a sum of two globally separable products.",
+    "not_lora": "The constraint is low tensor-train bond rank, not low ordinary matrix rank. An interleaved MPO can materialize a full-rank 768x1536 matrix, and no dense adapter or learned output dictionary is stored.",
+    "equal_budget": "Rank nine over physical modes (3x6),(4x4)^4 uses 4,194 values per expert, fewer than the rejected rank-two Kronecker map's 4,352 and inside the paper-relevant 200-500x range.",
+    "paper_link": "The cores are the compact layer/matrix-wise latent state and materialize the target matrix through a smooth nonlinear map. A representability pass is still required before Mapping Loss, causal basis acquisition, or training can be meaningful."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_context_terminal_frame_oracle_result.json",
+    "parent_result_sha256": "38d984196082c67ae39a3e111b31980b4a1f134681b0a3747ca8d5e2021e746a",
+    "kronecker_seal": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_kronecker_oracle_result.json",
+    "kronecker_seal_sha256": "e6dd5962ae9916c25c1e4ce8aad971149ca74e9016f6e12bed6b292647770696",
+    "layers": [0, 5, 11],
+    "target": "With terminal same-run router and c_fc fixed, represent only terminal c_proj minus exact reproducible step-zero c_proj in the terminal hidden-state functional gauge."
+  },
+  "mechanism": {
+    "name": "rank9_interleaved_mpo",
+    "output_modes": [3, 4, 4, 4, 4],
+    "input_modes": [6, 4, 4, 4, 4],
+    "physical_mode_pairs": [[3, 6], [4, 4], [4, 4], [4, 4], [4, 4]],
+    "bond_rank": 9,
+    "bond_ranks": [1, 9, 9, 9, 9, 1],
+    "coordinates_per_expert": 4194,
+    "coordinate_compression_ratio": 281.2703862660944,
+    "fixed_base": "Exact GPT-seeded step-zero dense c_proj, immutable and reproducible from model seed.",
+    "latent_state": "All five MPO cores; no dense decoder, learned dictionary, LoRA residual, target-gradient state, token-conditioned inference branch, or uncounted basis.",
+    "ordinary_rank": "The interleaved MPO does not impose bond rank nine on the ordinary output-by-input matrix unfolding and may materialize ordinary rank 768."
+  },
+  "functional_protocol": {
+    "activation_state": "terminal",
+    "top_k": 2,
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260921, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192},
+      {"name": "discovery_b", "seed": 20260922, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192}
+    ],
+    "heldout": {"seed": 20260923, "batches": 2, "batch_size": 8, "block_size": 256, "tokens": 4096},
+    "score": "Exact routed residual-write recovery on untouched heldout tokens and heldout action agreement between independently refined discovery fits.",
+    "controls": "The sealed 4,352-coordinate rank-two Kronecker map is the primary equal-budget learned-image control; the 4,608-coordinate static three-factor FHT is a favorable fixed-image control."
+  },
+  "fit": {
+    "initialization": "Exact per-expert rank-nine TT-SVD of the terminal c_proj displacement. Endpoint access deliberately makes this an optimistic representability upper bound, not a causal training simulation.",
+    "functional_refinement": "Independently refine all five cores on each discovery bank with full-batch Adam against normalized routed residual-write error.",
+    "adam_steps": 256,
+    "learning_rate": 0.01,
+    "gradient_clip": 10.0,
+    "weight_decay": 0.0,
+    "no_sweep": true,
+    "anti_leakage": "The endpoint orients only this upper bound. Heldout tokens do not affect modes, rank, initialization policy, optimizer, checkpoint selection, or thresholds."
+  },
+  "frozen_gates": {
+    "heldout_recovery_mean_min": 0.9,
+    "heldout_recovery_every_layer_min": 0.8,
+    "improvement_over_kronecker_min": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_expert_assignments": 128,
+    "functional_fit_must_not_degrade_svd_initialization": true,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing both independent fits authorizes only a separately preregistered causal online output/error-frame acquisition oracle for this exact MPO layout. It does not authorize model training, MFU, generated experts, or a larger rung.",
+    "fail": "Reject the rank-nine five-core MPO at 281x. Do not sweep rank, radix layout, learning rate, optimizer, or seed. Return to theory on whether the 200-500x c_proj objective is compatible with the measured write-direction entropy.",
+    "scope": "This is an equal-budget topology discriminator against the Kronecker map, not an arbitrary tensor-decomposition search."
+  },
+  "execution": {
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cproj_mpo_oracle.py",
+    "entrypoint_sha256": "26a65cf053026f7705abef76adfb6946f22786337fde3c4134315e9d31fa973c",
+    "policy": "Run focused synthetic tests and an exact-shape no-scientific-value performance preflight. Foreground-poll only if estimated under five minutes; otherwise attach a persistent terminal/error watchdog with an event-specific @Codex callback."
+  }
+}
