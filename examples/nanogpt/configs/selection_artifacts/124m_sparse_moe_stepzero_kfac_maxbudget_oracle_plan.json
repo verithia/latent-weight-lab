@@ -1,0 +1,95 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_kfac_maxbudget_oracle_plan_v1",
+  "recorded_at": "2026-08-12T00:25:00+08:00",
+  "status": "preregistered_before_implementation_and_any_rank7_values",
+  "scientific_question": "At the largest asymmetric two-sided KFAC allocation that still exceeds 200x paired-expert coordinate compression, does one additional output/error direction materially close the full-MLP functional gap relative to the matched separate-3+3 control?",
+  "theory": {
+    "linear_map_constraint": "Dense expert c_fc and c_proj are token-independent linear maps around a fixed checkpoint. The rejected beta-1 gate adds an input-quadratic action; its heldout residual cosines of 0.007-0.028 confirm that instantaneous pseudo-random context modulation is the wrong algebra.",
+    "functional_metric_evidence": "Raw task-gradient charts recover about 0.34-0.36 and discovery-averaged separate KFAC charts recover about 0.394 of the exact heldout residual write despite less than one percent paired-parameter recovery. Useful direction is two-sided and functional, not Frobenius.",
+    "asymmetric_allocation": "The existing rank-4 KFAC acquisition captures mean 0.3844 of the incoming covariance trace but only 0.2019 of the output/error covariance trace. The sole maximum-budget successor therefore keeps three independent incoming directions and adds the fourth output direction; the opposite 4+3 allocation is not tested.",
+    "compression_boundary": "A paired hidden atom has 768 incoming plus 768 outgoing dense values. Seven independent coordinates give 1536/7 = 219.4286x compression; eight give only 192x and violate the project 200x floor.",
+    "oracle_scope": "Dense covariance eigenvectors are permitted only as a representability upper bound. They are not a deployable mapping basis and a pass would authorize only structured-basis approximation theory, not a learned dense/LoRA basis or model training."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "run_git_commit": "55d91cfe7be442d9f71135d0cf747748aff00937",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "parent_normalized_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_stepzero_kfac_factor_oracle_result.json",
+    "parent_normalized_result_sha256": "380635c29e4b71f2c944dbe5a1ee86067a83c13cf1070fd9f6848b6550122141",
+    "parent_raw_result_sha256": "879bd5f048b6f094fb413004ef7d5fd6f06e996852b02b75fc1f656661077e76",
+    "parent_geometry_sha256": "cb4fa8d3beea0ecd13ac3f7ff51c12ea4d4ec4df375cf42ed8da553dc5d2af75",
+    "checkpoint_updates": 0
+  },
+  "geometry_protocol": {
+    "model_state": "exact scratch reconstruction at step zero from model seed 1337",
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260911, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192},
+      {"name": "discovery_b", "seed": 20260912, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192}
+    ],
+    "heldout": {"seed": 20260913, "batches": 2, "batch_size": 8, "block_size": 256, "activation_sample_cap_per_layer": 2048},
+    "factors": "For every expert use error-weighted routed input covariance for incoming directions, activation-weighted routed MLP-output-error covariance for outgoing directions, and the exact parent numerical ridge 1e-6.",
+    "anti_leakage": "Terminal tensors and heldout activations do not enter covariance factors, eigendirections, rank allocation, or gates. Endpoint tensors enter only the same oracle coordinate projection used by the parent representability upper bound."
+  },
+  "families": {
+    "control_separate_3_plus_3": {
+      "incoming_rank": 3,
+      "outgoing_rank": 3,
+      "router_rank": 3,
+      "coordinates_per_paired_hidden_atom": 6,
+      "paired_coordinate_compression_ratio": 256.0
+    },
+    "candidate_separate_3_plus_4": {
+      "incoming_rank": 3,
+      "outgoing_rank": 4,
+      "router_rank": 3,
+      "coordinates_per_paired_hidden_atom": 7,
+      "paired_coordinate_compression_ratio": 219.42857142857142,
+      "single_change": "Add only the fourth discovery-derived output/error eigendirection to c_proj; c_fc and router spans, endpoint, projection, activations, and scoring remain matched."
+    }
+  },
+  "frozen_gates": {
+    "candidate_heldout_exact_recovery_mean_min_each_bank": 0.9,
+    "candidate_heldout_exact_recovery_every_layer_min_each_bank": 0.8,
+    "candidate_minus_control_mean_min_each_bank": 0.05,
+    "candidate_cross_bank_action_cosine_mean_min": 0.8,
+    "incoming_cross_bank_subspace_overlap_mean_min": 0.5,
+    "outgoing_cross_bank_subspace_overlap_mean_min": 0.5,
+    "minimum_expert_assignments_each_bank": 128,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Only an all-gate pass authorizes preregistration of a compact structured approximation to the discovery-derived input/output frames. Dense eigenvector storage, implementation, MFU preflight, language-model training, generated experts, and larger rungs remain unauthorized.",
+    "fail": "Close static two-sided KFAC bases at the entire 200x-valid paired-coordinate frontier. Do not test 4+3, rank eight, another covariance seed, ridge, endpoint, or gate. Retain dense expert MLPs while pursuing a different architecture-level decomposition.",
+    "systems": "Expected below five minutes and foreground-polled. If observed runtime reaches five minutes, stop foreground polling and attach one terminal/error-only @Codex watchdog."
+  },
+  "authorization": {
+    "zero_update_maxbudget_oracle": true,
+    "structured_basis_approximation_preregistration": false,
+    "dense_or_lora_basis": false,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "generated_experts": false,
+    "larger_rung": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "expected_output_bytes_maximum": 268435456,
+    "monitoring": "Foreground polling only for the sub-five-minute offline oracle."
+  },
+  "identity": {
+    "parent_git_commit": "8fac90cef5eb8cc63184d1debe9e20c751b65e1d",
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_stepzero_kfac_maxbudget_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
