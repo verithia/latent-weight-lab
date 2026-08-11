@@ -1,0 +1,45 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_context_modulated_fht_oracle_seal_v1",
+  "recorded_at": "2026-08-11T16:45:00+08:00",
+  "status": "rejected_activation_conditioned_fht_modulation_at_384x_and_256x",
+  "source_control": {
+    "git_commit": "4c20799c6fdcd2f5a587b60e2fe87398260de862",
+    "entrypoint_sha256": "f5c8e80a68ec8634ea3bfe38b28565f695e09e967dca932b50a2be2d9231e8d9",
+    "plan_sha256": "99131ee49f981114cafe3ed61051049f7d7fb547c3f514deabd5fd252318fb2c"
+  },
+  "execution": {
+    "wall_seconds": 34.80684471130371,
+    "result_sha256": "db4b4db2a09be6d4d608950c793eec5e45705f48edea122b959bc11cfb352cbb",
+    "rows_sha256": "41e51053d11acfa81f3596e3c3d1b62d243942f02ed56539ba7c1e2e1986046f",
+    "coordinates_sha256": "78dc15468e0500515fac3ec1fd3fed371a2247641e655de7a1963c23c3183cd2",
+    "status_sha256": "65c36301e59a0dd9480a0fb7e619a16ffe22412b1bb600614488144bcc51170c",
+    "log_sha256": "e83ccb03af15248a6cac1f537a1fe94ce8810436de26515304c406804817ef7c",
+    "all_values_finite": true
+  },
+  "summary": {
+    "two_factor_384x": {
+      "dynamic_heldout_mean_a_b": [0.21698586146036783, 0.220820685227712],
+      "static_beta_zero_mean_a_b": [0.3033170898755391, 0.30842230717341107],
+      "dynamic_minus_static_a_b": [-0.08633122841517131, -0.08760162194569905],
+      "heldout_bank_action_cosine_mean": 0.9504656593004862,
+      "dynamic_minimum_layer_a_b": [0.13276135921478271, 0.13329684734344482]
+    },
+    "three_factor_256x": {
+      "dynamic_heldout_mean_a_b": [0.2624499400456746, 0.2675033410390218],
+      "static_beta_zero_mean_a_b": [0.3594247301419576, 0.3649152119954427],
+      "dynamic_minus_static_a_b": [-0.09697479009628296, -0.0974118709564209],
+      "heldout_bank_action_cosine_mean": 0.947994331518809,
+      "dynamic_minimum_layer_a_b": [0.17168188095092773, 0.17232102155685425]
+    },
+    "minimum_expert_assignments_a_b": [12, 30],
+    "minimum_occupancy_layer": 5
+  },
+  "diagnosis": "The activation-conditioned image is reproducible across discovery banks but consistently worse than its identical-coordinate static operator. Coupling the static and context-bilinear terms through one latent coordinate contaminates useful static coverage instead of adding aligned residual action. Severe expert imbalance is independently visible: even 8192-token discovery frames give only 12 or 30 assignments to the rarest layer-5 expert.",
+  "authorization": {
+    "training": false,
+    "mfu_preflight": false,
+    "larger_rungs": false,
+    "beta_rank_or_sign_sweep": false,
+    "next_allowed_work": "Preregister an analysis-only direct-sum residual decomposition that preserves the static operator and tests whether the pure context-modulation component adds held-out recovery to its orthogonal residual at the same total coordinate count. Also report router occupancy as a separate sparse-MoE design defect."
+  }
+}
