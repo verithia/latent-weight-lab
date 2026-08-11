@@ -1,9 +1,18 @@
 from __future__ import annotations
 
+import pytest
 import torch
+from torch import nn
 from torch.nn import functional as F
 
-from examples.nanogpt.model import GPT, GPTConfig, MultiOptimizer, SparseMoEMLP
+from examples.nanogpt.model import (
+    GPT,
+    GPTConfig,
+    HeadwiseLinear,
+    MultiOptimizer,
+    SparseMoEMLP,
+)
+from latent_weight_lab import BlockFHTLinear
 from examples.nanogpt.muon import Muon, muon_update, muon_update_batched
 
 
@@ -180,3 +189,97 @@ def test_legacy_block_fht_helpers_are_noops_for_sparse_moe() -> None:
     suspended = model.suspend_block_fht_cache()
     model.restore_block_fht_cache(suspended)
     model.flush_block_fht_cache()
+
+
+def qk_mapped_moe_config(**overrides) -> GPTConfig:
+    values = dict(
+        block_fht=True,
+        block_fht_targets=("attn.c_attn.qk_headwise",),
+        block_fht_output_gain_targets=("attn.c_attn.qk_headwise",),
+        block_fht_attn_cayley_targets=("attn.c_attn.qk_headwise",),
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+        ),
+        block_fht_attn_cayley_bilateral_targets=(
+            "attn.c_attn.qk_headwise",
+        ),
+        block_fht_attn_cayley_ranks={
+            "attn.c_attn.qk_headwise": 4,
+        },
+    )
+    values.update(overrides)
+    return tiny_config(**values)
+
+
+def test_attention_only_block_fht_composes_with_dense_complete_experts() -> None:
+    torch.manual_seed(23)
+    model = GPT(qk_mapped_moe_config())
+    for block in model.transformer.h:
+        assert isinstance(block.mlp, SparseMoEMLP)
+        assert isinstance(block.attn.c_attn_qk_headwise, HeadwiseLinear)
+        assert all(
+            isinstance(head, BlockFHTLinear)
+            for head in block.attn.c_attn_qk_headwise.heads
+        )
+        assert isinstance(block.attn.c_attn_v, nn.Linear)
+        assert isinstance(block.attn.c_proj, nn.Linear)
+    idx = torch.randint(0, model.config.vocab_size, (2, 8))
+    targets = torch.randint(0, model.config.vocab_size, idx.shape)
+    logits, loss = model(idx, targets)
+    assert torch.isfinite(logits).all()
+    assert loss is not None and torch.isfinite(loss)
+
+
+@pytest.mark.parametrize("target", ["mlp.c_fc", "mlp.c_proj"])
+def test_sparse_moe_rejects_every_block_fht_mlp_target(target: str) -> None:
+    with pytest.raises(
+        ValueError,
+        match="permits BlockFHT only for attention targets",
+    ):
+        GPT(
+            qk_mapped_moe_config(
+                block_fht_targets=(
+                    "attn.c_attn.qk_headwise",
+                    target,
+                )
+            )
+        )
+
+
+def test_mixed_qk_moe_optimizer_ownership_is_disjoint() -> None:
+    model = GPT(qk_mapped_moe_config())
+    optimizer = model.configure_optimizers(
+        0.1,
+        2.4e-3,
+        (0.9, 0.95),
+        "cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=5,
+        muon_adamw_lr_scale=0.3,
+        block_fht_attn_cayley_lr_scale=10.0 / 3.0,
+    )
+    assert isinstance(optimizer, MultiOptimizer)
+    muon_ids = set().union(
+        *(
+            optimizer_parameter_ids(item)
+            for item in optimizer.optimizers
+            if isinstance(item, Muon)
+        )
+    )
+    adamw_ids = set().union(
+        *(
+            optimizer_parameter_ids(item)
+            for item in optimizer.optimizers
+            if isinstance(item, torch.optim.AdamW)
+        )
+    )
+    for block in model.transformer.h:
+        assert id(block.mlp.expert_c_fc) in muon_ids
+        assert id(block.mlp.expert_c_proj) in muon_ids
+        assert id(block.attn.c_attn_v.weight) in muon_ids
+        assert id(block.attn.c_proj.weight) in muon_ids
+        assert id(block.mlp.router.weight) in adamw_ids
+        for head in block.attn.c_attn_qk_headwise.heads:
+            assert id(head.generator.latent) in adamw_ids
+            assert id(head.generator.latent) not in muon_ids

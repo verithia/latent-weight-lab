@@ -18,7 +18,12 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from examples.nanogpt.model import GPT, GPTConfig, freeze_non_block_fht
+from examples.nanogpt.model import (
+    GPT,
+    GPTConfig,
+    freeze_non_block_fht,
+    validate_sparse_moe_block_fht_scope,
+)
 from examples.nanogpt.dense_scaling_fit import (
     ARTIFACT_SCHEMA_VERSION,
     sha256_file,
@@ -1736,8 +1741,19 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("--moe-top-k must be in [1, --moe-num-experts]")
     if namespace.moe_expert_hidden_multiplier <= 0:
         raise ValueError("--moe-expert-hidden-multiplier must be positive")
-    if namespace.moe_num_experts > 0 and namespace.method != "baseline":
-        raise ValueError("dense-complete-expert MoE control requires method=baseline")
+    if namespace.moe_num_experts > 0 and namespace.method not in {
+        "baseline",
+        "block_fht",
+    }:
+        raise ValueError(
+            "dense-complete-expert MoE requires method=baseline or "
+            "attention-only block_fht"
+        )
+    validate_sparse_moe_block_fht_scope(
+        moe_num_experts=namespace.moe_num_experts,
+        block_fht=namespace.method == "block_fht",
+        block_fht_targets=namespace.block_fht_targets,
+    )
     atlas_steps = tuple(namespace.block_fht_attn_cayley_atlas_start_steps)
     if atlas_steps and (
         atlas_steps[0] != 0

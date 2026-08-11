@@ -4142,13 +4142,36 @@ class Block(nn.Module):
         )
 
 
+def validate_sparse_moe_block_fht_scope(
+    *,
+    moe_num_experts: int,
+    block_fht: bool,
+    block_fht_targets: tuple[str, ...] | list[str],
+) -> None:
+    """Keep dense-complete experts untouched in mixed MoE/BlockFHT runs."""
+    if moe_num_experts <= 0 or not block_fht:
+        return
+    non_attention_targets = sorted(
+        target
+        for target in block_fht_targets
+        if not target.startswith("attn.")
+    )
+    if non_attention_targets:
+        raise ValueError(
+            "dense-complete-expert MoE permits BlockFHT only for attention "
+            "targets; unsupported targets: "
+            + ", ".join(non_attention_targets)
+        )
+
+
 class GPT(nn.Module):
     def __init__(self, config: GPTConfig) -> None:
         super().__init__()
-        if config.moe_num_experts > 0 and config.block_fht:
-            raise ValueError(
-                "dense-complete-expert MoE control cannot be combined with BlockFHT"
-            )
+        validate_sparse_moe_block_fht_scope(
+            moe_num_experts=config.moe_num_experts,
+            block_fht=config.block_fht,
+            block_fht_targets=config.block_fht_targets,
+        )
         cproj_layers = tuple(
             config.block_fht_mlp_cproj_muon_matched_givens_layers
         )
