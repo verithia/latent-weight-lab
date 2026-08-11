@@ -1,0 +1,62 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_fused_qkv_performance_amendment",
+  "authorization": {
+    "automatic_scientific_retry": false,
+    "one_exact_fused_qkv_mfu_preflight": true,
+    "scientific_run_only_after_pass": true,
+    "variant_sweep": false
+  },
+  "closed_performance_attempts": {
+    "b32g8": {
+      "certificate_sha256": "debf1b23cbf7fcbafdabba6bebe588f5da0b55185230fac310f8a4ec64743c1a",
+      "forward_backward_ms": 2822.10375,
+      "mfu_fraction": 0.16398701010552078,
+      "peak_mib": 54948.84,
+      "timed_iter_ms": 2889.92875
+    },
+    "b64g4_expandable_segments": {
+      "certificate_sha256": "8087671eebe6a72b8f09f20bf8a4f0ee1ba7608fc28b532edb78757f58b9f614",
+      "failure": "third-backward CUDA OOM requesting 12.28 GiB with 11.06 GiB physically free after two updates at approximately 2.985 and 3.073 seconds",
+      "log_sha256": "8ee7a4bb3d734e6e44278471605753577a9cb34ee8ac6d8063771a2c735b6b65",
+      "peak_mib": 92180,
+      "source_commit": "45e47cad9b86d330c9e05c90ec870ba1285aa4e4"
+    },
+    "b64g4_fragmented": {
+      "certificate_sha256": "9b696abd8e47ab28a34efd0b778a1540261cfc46c462fc9b017295a19244f0f3",
+      "failure": "first-backward CUDA OOM",
+      "log_sha256": "5159a1d0be9006996c5824e58e984d01f61ad713064e11419a006ec4f62943ff"
+    }
+  },
+  "frozen_change": {
+    "after": {
+      "batch_size": 32,
+      "block_fht_attn_pack_cached_qkv": true,
+      "gradient_accumulation_steps": 8,
+      "tokens_per_iter": 262144
+    },
+    "implementation": [
+      "apply the exact transpose of each active input Cayley chart to the cached QK weight in reverse chart order",
+      "apply each active output Cayley chart to the transposed QK weight in forward chart order",
+      "concatenate the folded QK weight with the unchanged dense V weight and execute one F.linear projection",
+      "preserve autograd to BlockFHT cached weights and every Cayley parameter"
+    ],
+    "unchanged": [
+      "materialized function and initialization",
+      "model and mapping trainable state",
+      "262144 tokens per update, 238 updates, and token horizon",
+      "optimizer, learning rate, warmup, decay, data, seeds, and fixed evaluations",
+      "MoE routing, complete dense experts, auxiliary losses, and all decision thresholds"
+    ]
+  },
+  "gate": {
+    "all_losses_finite": true,
+    "functional_and_gradient_equivalence_tests_required": true,
+    "maximum_peak_mib": 95000,
+    "minimum_mfu_fraction": 0.2,
+    "native_block_fht_required": true
+  },
+  "rationale": "B64/G4 is both slower and fundamentally too large, so batch tuning is closed. The B32/G8 profile attributes 97.7% of update time to forward/backward. Bilateral QK currently applies two rank-64 linear Cayley charts to every token and projects QK separately from dense V. Since both charts are linear orthogonal maps, x C_in W^T C_out is exactly F.linear(x, C_out^T W C_in^T). Folding them into the cached QK weight once per microbatch and packing QK with V removes token-wise chart work and split projection launch overhead without changing the represented function or scientific state.",
+  "registered_at": "2026-08-11T20:00:00+08:00",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_fused_qkv_performance_amendment_v1",
+  "status": "registered_after_batch_tuning_closed_before_fused_qkv_implementation"
+}
