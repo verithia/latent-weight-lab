@@ -601,7 +601,7 @@ class LearnedLowRankCayleyMix(nn.Module):
         )
         return factors.to(dtype=values.dtype), middle.to(dtype=values.dtype)
 
-    def _apply(
+    def _apply_cayley(
         self, values: torch.Tensor, *, transpose: bool
     ) -> torch.Tensor:
         factors, middle = self._factors_and_middle(values)
@@ -615,12 +615,12 @@ class LearnedLowRankCayleyMix(nn.Module):
         return values + 2.0 * correction
 
     def forward(self, values: torch.Tensor) -> torch.Tensor:
-        return self._apply(values, transpose=False)
+        return self._apply_cayley(values, transpose=False)
 
     def apply_transpose(self, values: torch.Tensor) -> torch.Tensor:
         """Right-multiply row vectors by the exact transposed Cayley map."""
 
-        return self._apply(values, transpose=True)
+        return self._apply_cayley(values, transpose=True)
 
 
 class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
