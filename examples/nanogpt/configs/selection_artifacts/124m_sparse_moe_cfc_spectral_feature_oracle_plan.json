@@ -111,7 +111,7 @@
   "identity": {
     "preregistration_git_commit": "e9167c5cdc8361348360cf8d21ae143b4f6310a0",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py",
-    "entrypoint_sha256": "e0f5fde9c4431754de26369af2120a5aa2214ed5d2c6f5a03a0607c2065adab3",
+    "entrypoint_sha256": "4c413dc3d97b9bda5f30d8f6f58e7ae1f31dc7b882afbea8e02673ddc72e6dbe",
     "helper_sha256": {
       "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
       "examples/nanogpt/analyze_sparse_moe_rolling_tangent_oracle.py": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",

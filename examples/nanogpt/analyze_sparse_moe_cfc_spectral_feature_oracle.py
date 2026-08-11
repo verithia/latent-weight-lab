@@ -663,7 +663,7 @@ def main() -> None:
         ),
         "passed": passed,
         "identity": {
-            "git_commit": git_commit(),
+            "git_commit": git_commit(Path(__file__).resolve().parents[2]),
             "plan_sha256": file_sha256(args.plan),
             "entrypoint_sha256": file_sha256(Path(__file__)),
             "terminal_snapshot_sha256": file_sha256(args.terminal_snapshot),
