@@ -1,0 +1,76 @@
+{
+  "schema_version": "nanogpt_sparse_moe_rolling_tangent_oracle_seal_v1",
+  "recorded_at": "2026-08-11T14:49:10+08:00",
+  "status": "all_four_coordinate_global_chart_gates_failed_no_generated_training_authorized",
+  "source_control": {
+    "git_commit": "3c96afc2e73b22f58448021d71986ac7df93e88c",
+    "entrypoint": "examples.nanogpt.analyze_sparse_moe_rolling_tangent_oracle",
+    "source_sha256": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",
+    "plan_sha256": "80cf94b5e8793e95628c9ababb4cfbddb30f05eac60812ee0df9916bf0d83ee5"
+  },
+  "dataset": {
+    "manifest_path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "discovery_tokens_sha256": "6e5403b3bd460802bd99f61228a3b7d1997c252545394bdec5f90f1d0ec9ad8d",
+    "heldout_tokens_sha256": "8d2269d0051ce163dea0d6782e5a05a9e55e6772b6c9071011986f4f71f085a9"
+  },
+  "seed2_terminal": {
+    "checkpoint_sha256": "3b19fa796307df8676a8aa77b2183952b14af9a7718f2d2004690878fb3708ae",
+    "best_validation_ce": 3.0587613582611084,
+    "seed1_best_validation_ce": 3.061672449,
+    "seed2_minus_seed1_ce": -0.0029110907388916196,
+    "perplexity_ratio": 0.9970931423770956
+  },
+  "replay_branch_primary": {
+    "wall_seconds": 31.743873834609985,
+    "result_sha256": "10930bda8b7240727c62b0bdbd6261c94238b08a7dc93246e2d2ddfdeb403431",
+    "rows_sha256": "e1b5d8a479b3182bb66a66850801b7c3843cdc981339d7d9cf6ecac414bede52",
+    "alignment_rows_sha256": "b71e66205bf93cebee4fba45c57d75c958633d7e1615ac7459192bf04969f94d",
+    "status_sha256": "d0a2f8246132cb34ebbdf87a87dab8d6f07e23a41969fb5d34d6a6fa7069c2ae",
+    "log_sha256": "d3c3767e2aa12bbf3942fc95aae48b04632c1cbef46d0b395aaec193d1e9be48",
+    "assignment_overlap_minimum": 1.0,
+    "heldout_materialized_recovery_mean": {
+      "fixed_blockfht": -0.003949187695980072,
+      "static_paired_chart": 0.03668690472841263,
+      "state_conditioned_paired_chart": 0.03381306678056717
+    },
+    "state_conditioned_by_layer": {
+      "0": 0.06397359818220139,
+      "5": 0.023964986205101013,
+      "11": 0.013500615954399109
+    },
+    "gates": {
+      "assignment_overlap_pass": true,
+      "state_conditioned_mean_pass": false,
+      "state_conditioned_every_layer_pass": false,
+      "state_minus_static_pass": false,
+      "state_minus_fixed_blockfht_pass": false,
+      "all_values_finite": true,
+      "all_pass": false
+    }
+  },
+  "power_recovery_sensitivity": {
+    "result_sha256": "5687e30906a2f877f6db4b679f0e85bd38dee5a1e0a1032589835044d1c18b96",
+    "heldout_materialized_recovery_mean": {
+      "fixed_blockfht": -0.0037321199973424277,
+      "static_paired_chart": 0.037128522992134094,
+      "state_conditioned_paired_chart": 0.035973481833934784
+    },
+    "gate_vector_identical_to_primary": true
+  },
+  "diagnosis": {
+    "state_conditioned_tangent_recovery_mean": 0.041801060239473976,
+    "state_conditioned_exact_minus_tangent": -0.007987993458906807,
+    "global_static_eight_chord_future_parameter_recovery_mean_by_layer": {
+      "0": 0.00720881083487334,
+      "5": 0.013933637021670135,
+      "11": 0.014969010378783329
+    },
+    "interpretation": "The failure is global direction-span mismatch, not hidden-neuron assignment, nonlinear materialization, or the power-recovery branch. A larger layer-global chart is not authorized."
+  },
+  "authorization": {
+    "generated_expert_training": false,
+    "larger_active_parameter_rungs": false,
+    "next_allowed_work": "Preregister and evaluate a per-expert per-hidden-neuron paired-atom causal oracle at compression-derived 500x and 250x coordinate budgets."
+  }
+}

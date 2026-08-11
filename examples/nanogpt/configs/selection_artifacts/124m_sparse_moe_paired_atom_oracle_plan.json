@@ -1,0 +1,81 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_atom_oracle_plan_v1",
+  "recorded_at": "2026-08-11T14:49:10+08:00",
+  "status": "preregistered_after_global_chart_rejection_before_paired_atom_values",
+  "scientific_question": "Does quotienting the sparse-MoE trajectory into independently moving paired hidden-neuron atoms reveal a causal low-dimensional chart at a coordinate budget consistent with the Mapping Networks paper's 200x to 500x regime?",
+  "causal_basis": {
+    "source_run": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_resume2",
+    "source_git_commit": "17ebd93880e2937c50c09161a4a5ffd9abce712f",
+    "source_config_sha256": "aa12926a7a3dd36b5f44ed8fb1bf07c00f3ad9ffb5a1dddc6cf4d90443521a20",
+    "terminal_checkpoint_sha256": "3b19fa796307df8676a8aa77b2183952b14af9a7718f2d2004690878fb3708ae",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "trajectory_steps": [0, 594, 1188, 1782, 2376, 2970, 3564, 4158, 4752, 5346, 5940, 6534, 7128, 7722, 8316, 8910, 9495],
+    "chronological_discovery_transitions": 8,
+    "chronological_heldout_transitions": 8,
+    "rule": "For transition t to t+1, every atom basis may use only matched chords ending at or before t. The target and future chords are excluded from basis construction."
+  },
+  "functional_gauge": {
+    "atom": "One incoming c_fc row and its coupled outgoing c_proj column, R_ej(X) = GELU(X a_ej) outer b_ej.",
+    "matching": "Sequential maximum-weight assignment on discovery-split functional-atom similarity, with heldout assignment agreement reported before scoring.",
+    "scale": "Retain paired magnitudes after matching because GELU is not positively homogeneous.",
+    "expert_identity": "Within-run expert identity remains coupled to its router row."
+  },
+  "coordinate_families": [
+    {
+      "name": "coupled_four",
+      "coordinates_per_atom": 4,
+      "basis": "The four most recent causal concatenated [delta_c_fc_row, delta_c_proj_column] atom chords.",
+      "coordinate_fit": "Least-squares projection of the target paired parameter chord onto that causal atom span; this is a representability upper bound, not a trainable predictor.",
+      "router": "Four most recent causal router-row chords per expert.",
+      "coordinates_per_layer": 49184,
+      "target_parameters_per_layer": 18880512,
+      "compression_ratio": 383.8750813272609
+    },
+    {
+      "name": "separate_three_plus_three",
+      "coordinates_per_atom": 6,
+      "basis": "The three most recent incoming-row chords and three most recent outgoing-column chords are projected separately, while hidden identity remains paired.",
+      "coordinate_fit": "Separate least-squares parameter projections provide the less constrained 256x upper bound.",
+      "router": "Three most recent causal router-row chords per expert.",
+      "coordinates_per_layer": 73752,
+      "target_parameters_per_layer": 18880512,
+      "compression_ratio": 256.0
+    }
+  ],
+  "controls": {
+    "static": "Use the earliest causal atom chords at the identical coordinate count and freeze them for every heldout transition.",
+    "fixed_structured": "Use deterministic shared local BlockFHT directions at the identical per-atom coordinate count, with independent frozen seeds for incoming, outgoing, and router pieces.",
+    "power_recovery": "Run the continuous replay branch first. If a gate is near threshold, repeat with authoritative pre-power steps 7128/7722/8316; no branch may be silently spliced."
+  },
+  "evaluation": {
+    "activation_discovery_seed": 20260821,
+    "activation_heldout_seed": 20260822,
+    "activation_sample_cap_per_layer": 2048,
+    "batch_size": 8,
+    "block_size": 256,
+    "batches": 2,
+    "primary_metric": "Exact nonlinear heldout residual-write recovery after materializing every projected paired atom and router row.",
+    "secondary_metrics": [
+      "paired-parameter chord recovery",
+      "incoming-only parameter recovery",
+      "outgoing-only parameter recovery",
+      "discovery-versus-heldout assignment overlap",
+      "per-layer and per-transition exact recovery"
+    ]
+  },
+  "frozen_gates": {
+    "assignment_overlap_min": 0.75,
+    "heldout_exact_recovery_mean_min": 0.9,
+    "heldout_exact_recovery_every_layer_min": 0.8,
+    "moving_minus_static_mean_min": 0.1,
+    "moving_minus_fixed_structured_mean_min": 0.1,
+    "all_values_finite": true
+  },
+  "interpretation": {
+    "coupled_four_pass": "A paired-atom causal decoder is representable at approximately 384x coordinate compression; implement only this family and then gate its coordinate predictor and exact-config MFU before training.",
+    "only_separate_pass": "Incoming and outgoing directions require distinct coordinates; implement the 256x family and keep coupling only in identity and functional losses.",
+    "both_fail": "Temporal atom chords are not a sufficient mapping image. Do not train another trajectory-chart generator; move to an input-conditioned or data-derived adaptive basis oracle.",
+    "authorization": "No generated-expert training, larger active rung, or MFU preflight is authorized by this plan itself. A passing offline representability gate authorizes implementation tests at 124M only."
+  }
+}
