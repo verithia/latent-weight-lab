@@ -1,0 +1,119 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_global_tt_oracle_plan_v1",
+  "recorded_at": "2026-08-11T21:16:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Does the complete terminal expert c_fc tensor have learned multiplicative layer/expert/hidden/input structure that a global tensor train can represent at at least 200x c_fc compression, after fixed-frame spectral reweighting failed to identify its pre-GELU directions?",
+  "causal_reconciliation": {
+    "composition_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_5tpp_result.json",
+      "sha256": "799d81d7d6a8e2d2460d6fc4e6e8c13b07073b821c2dceb0601ff0c74eb1e134",
+      "finding": "Mapped QK plus dense complete experts passes its 5TPP confirmation by -0.0443222523 CE, but it does not compress either expert matrix."
+    },
+    "spectral_rejection": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_spectral_feature_oracle_result.json",
+      "sha256": "5cafa8eb52efb8812db876b92396f3f4fc1e1160402c8aa12d4acc25cee4bcc9",
+      "finding": "Two learned spectra improve heldout expert-output recovery over the fixed orthogonal control by about 0.145, but mean recovery remains about 0.382 and pre-GELU direction recovery is near zero. Fixed pseudo-random directions are therefore insufficient even when reweighted."
+    },
+    "directed_product_and_state_boundary": "The directed-product c_fc oracle demonstrates useful task-selected directions but retains dense c_fc weights and dense-scale Muon history. The procedural-state frontier cannot encode that history even beyond dense-state byte cost. This candidate instead represents the weights directly in compact learned coordinates and has no dense c_fc base or optimizer state.",
+    "write_map_boundary": "Attention V/O and expert c_proj remain dense full-state residual-write exceptions. This oracle changes only the expert c_fc read map and retains terminal router and dense c_proj exactly.",
+    "why_tensor_train": "Unlike diagonal modulation of a fixed BlockFHT frame, every tensor-train core learns directions. Interleaving hidden and input radix modes makes cross-axis direction coupling local in the chain, while the equal-coordinate separated-axis control tests whether that coupling rather than coordinate count explains recovery.",
+    "not_lora": "The constraint is tensor-train bond rank across the complete layer-by-expert c_fc tensor, not ordinary matrix rank. It can materialize full-rank expert matrices, stores no learned dense basis, and adds no dense or low-rank residual."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "functional_probe_layers": [0, 5, 11],
+    "terminal_gauge": "Use the complete terminal c_fc tensor for the endpoint decomposition. Collect heldout MLP inputs with the complete terminal model and use its terminal router and terminal dense expert c_proj on both target and candidate sides."
+  },
+  "mechanism": {
+    "hidden_modes": [6, 4, 4, 4, 4],
+    "input_modes": [3, 4, 4, 4, 4],
+    "bond_rank_cap": 150,
+    "actual_bond_ranks": [1, 12, 96, 150, 150, 150, 150, 150, 150, 64, 16, 4, 1],
+    "interleaved_modes": [12, 8, 6, 3, 4, 4, 4, 4, 4, 4, 4, 4],
+    "interleaved_axis_order": ["layer", "expert", "hidden0", "input0", "hidden1", "input1", "hidden2", "input2", "hidden3", "input3", "hidden4", "input4"],
+    "coordinates": 566028,
+    "dense_cfc_parameters": 113246208,
+    "cfc_compression_ratio": 200.07174203396298,
+    "materialized_dense_cfc_allowed": false,
+    "dense_cproj_exception": true,
+    "optimizer_state_rule": "Any later implementation must optimize only TT cores and may not retain a dense c_fc base, dense c_fc gradient accumulator, or dense c_fc optimizer history."
+  },
+  "equal_coordinate_control": {
+    "name": "separated_axis_tensor_train",
+    "modes": [12, 8, 6, 4, 4, 4, 4, 3, 4, 4, 4, 4],
+    "axis_order": ["layer", "expert", "hidden0", "hidden1", "hidden2", "hidden3", "hidden4", "input0", "input1", "input2", "input3", "input4"],
+    "bond_rank_cap": 150,
+    "actual_bond_ranks": [1, 12, 96, 150, 150, 150, 150, 150, 150, 64, 16, 4, 1],
+    "coordinates": 566028,
+    "purpose": "Hold learned-coordinate count and endpoint access fixed while removing local hidden/input radix coupling."
+  },
+  "decomposition_protocol": {
+    "kind": "optimistic endpoint randomized TT-SVD upper bound",
+    "independent_seeds": [20261001, 20261002],
+    "oversample": 24,
+    "power_iterations": 2,
+    "precision": "float32 on CUDA",
+    "algorithm": "At each TT split, compute a seeded randomized left range, perform the Rayleigh-Ritz eigendecomposition of its small Gram matrix, retain the frozen capped bond rank, and propagate U^T times the unfolding. Full feasible bonds use the exact left Gram or QR path.",
+    "selection": "Use the terminal cores emitted by each registered decomposition seed. There is no activation fitting, heldout selection, rank sweep, or checkpoint update.",
+    "storage": "Save compact TT cores and scalar diagnostics only. Stream reconstructed expert matrices for scoring and never persist a dense candidate tensor."
+  },
+  "functional_protocol": {
+    "heldout_banks": [
+      {"name": "heldout_a", "seed": 20261003, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+      {"name": "heldout_b", "seed": 20261004, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768}
+    ],
+    "top_k": 2,
+    "chunk_size": 1024,
+    "anti_leakage": "Heldout activations never affect TT cores, ranks, seeds, mode order, stopping, or thresholds. Both decomposition seeds and both heldout banks are reported without selection."
+  },
+  "metrics": {
+    "primary": "Heldout exact routed-MoE layer-output recovery, 1-||candidate-target||^2/||target||^2, using terminal routing and exact dense c_proj.",
+    "secondary": [
+      "per-layer mixture recovery",
+      "per-expert output recovery",
+      "per-expert pre-GELU recovery",
+      "global and per-layer c_fc parameter recovery",
+      "interleaved-minus-separated-control recovery",
+      "same-heldout action cosine between independently decomposed TT seeds",
+      "all-value finiteness"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_seed_and_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_seed_and_bank": 0.7,
+    "heldout_expert_recovery_min_each_seed_and_bank": 0.5,
+    "interleaved_minus_separated_recovery_mean_min_each_seed_and_bank": 0.1,
+    "same_bank_action_cosine_between_decomposition_seeds_mean_min": 0.8,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every frozen gate for both decomposition seeds and both heldout banks authorizes only a production TT c_fc implementation, correctness tests, and a separately preregistered initialization-fit shadow check. It does not authorize language-model training.",
+    "representability_fail": "Reject this exact 200x global rank-150 TT family. Do not sweep bond rank, factorization, axis order, random seed, power iterations, or thresholds without a new residual decomposition.",
+    "control_fail": "If absolute recovery passes but the equal-coordinate interleaved gain does not, the result does not identify cross-axis coupling as causal and does not authorize implementation.",
+    "systems": "Run an exact-shape runtime preflight first. Foreground-poll only while total observed runtime remains under five minutes; at five minutes install a terminal-or-error watchdog with an explicit @Codex continuation prompt."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_global_tt_oracle.py",
+    "entrypoint_sha256": null
+  }
+}
