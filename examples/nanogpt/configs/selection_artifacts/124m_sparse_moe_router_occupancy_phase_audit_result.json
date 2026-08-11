@@ -1,0 +1,55 @@
+{
+  "schema_version": "nanogpt_sparse_moe_router_occupancy_phase_audit_seal_v1",
+  "recorded_at": "2026-08-11T18:45:00+08:00",
+  "status": "sealed",
+  "decision": "NO_REPLICATED_COLLAPSE_NO_ROUTER_INTERVENTION",
+  "source": {
+    "git_commit": "87155176bae08792a194e80dd763809a2f03411e",
+    "plan_sha256": "0adb569c03bfb1238990e74ead65de71310440837e87f7df8c547d333b7ff0c2",
+    "entrypoint_sha256": "ccb6dd617d11dc303c24d2c3f0486fc4365e31283810032f59df5899ba565837",
+    "result_sha256": "bc4ae2f3173a5e5c378a0435b6f5e3ecb2dce3accc1bf49b495be02a1173438d",
+    "occupancy_rows_sha256": "00bbea2780a1b571426c5d7f612f4e0711226e314dc0231b3ce321179fae9ce4",
+    "gradient_rows_sha256": "fcbf5f8528c6d7aeed0297b65c2b344a841c68fbf0260b029468dae915d8b9e7",
+    "status_sha256": "29ef26cfb35d997e32612d961e640f31f74f6d21ea8b464b12a53cb097cf6381",
+    "log_sha256": "3c01f83baa75a0950143ebea60044d54f97c45f2b58776855ad63fecaff52e63",
+    "elapsed_seconds": 10.205899477005005,
+    "all_values_finite": true
+  },
+  "terminal_occupancy": {
+    "seed1": {
+      "minimum_count_over_layers": 757,
+      "minimum_fraction_over_layers": 0.04620361328125,
+      "per_layer": {
+        "0": {"minimum_count": 757, "hard_effective_experts": 7.028076648712158, "load_balance_loss": 1.0399519205093384},
+        "5": {"minimum_count": 1353, "hard_effective_experts": 7.674785137176514, "load_balance_loss": 1.0536412000656128},
+        "11": {"minimum_count": 911, "hard_effective_experts": 7.608297824859619, "load_balance_loss": 1.0466508865356445}
+      }
+    },
+    "seed2": {
+      "minimum_count_over_layers": 1022,
+      "minimum_fraction_over_layers": 0.0623779296875,
+      "per_layer": {
+        "0": {"minimum_count": 1146, "hard_effective_experts": 7.503296852111816, "load_balance_loss": 1.001563549041748},
+        "5": {"minimum_count": 1335, "hard_effective_experts": 7.643320560455322, "load_balance_loss": 1.0770175457000732},
+        "11": {"minimum_count": 1022, "hard_effective_experts": 7.128466606140137, "load_balance_loss": 1.169365644454956}
+      }
+    }
+  },
+  "terminal_gradient_scale": {
+    "median_combined_weighted_auxiliary_to_task_router_gradient_norm_ratio": 0.014468723442405462,
+    "range": [0.005314129404723644, 0.03133516386151314],
+    "interpretation": "The coefficient-weighted balancing gradient is weak, but the preregistered coefficient-control gate does not open because terminal under-occupancy does not replicate. Do not increase the coefficient."
+  },
+  "protocol_correction": {
+    "prior_counts": "The earlier 12/30 minimum assignments came from the context-modulated c_proj oracle.",
+    "cause": "That implementation reconstructed the exact scratch model to collect MLP inputs, then evaluated the terminal router and terminal c_fc on those scratch hidden states. It did not measure terminal-router occupancy on terminal hidden states.",
+    "consequence": "The router-collapse conclusion is withdrawn. The earlier context-modulation and residual-decomposition results remain measurements on a scratch-hidden/terminal-router/terminal-c_fc mixed-phase frame; they do not close the candidate on the terminal operating distribution.",
+    "next_action": "Preregister one protocol-correction oracle using the full terminal model for hidden-state collection with all coordinate budgets, signs, data seeds, target tensors, and gates otherwise unchanged."
+  },
+  "authorization": {
+    "router_control": false,
+    "generated_expert_training": false,
+    "larger_rung": false,
+    "terminal_frame_context_oracle_only": true
+  }
+}
