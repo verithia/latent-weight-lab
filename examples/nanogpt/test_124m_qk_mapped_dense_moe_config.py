@@ -51,6 +51,7 @@ def test_candidate_horizon_identity_and_performance_gate_are_frozen() -> None:
     assert config["tokens_per_iter"] == 262144
     assert config["batch_size"] == 64
     assert config["gradient_accumulation_steps"] == 4
+    assert config["cuda_allocator_conf"] == "expandable_segments:True"
     assert config["scheduled_tokens"] == config["max_iters"] * 262144
     assert config["max_iters"] == 238
     assert config["mfu_preflight_required"] is True
