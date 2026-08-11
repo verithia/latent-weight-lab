@@ -1,0 +1,37 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_token_jacobian_oracle_seal_v1",
+  "recorded_at": "2026-08-11T15:39:00+08:00",
+  "status": "rejected_token_jacobian_sketch_batch_fragile_no_raw_improvement",
+  "source_control": {
+    "git_commit": "7434abf022a1e33a2a44703ce1c5d25bc4fc277a",
+    "entrypoint_sha256": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+    "plan_sha256": "7fb0587324e43b20206030f4921f6a2ad4e6b4b04065c1276faa3d7ff0ed4650"
+  },
+  "execution": {
+    "wall_seconds": 8.060492277145386,
+    "result_sha256": "3bc7f969e1227ec38251bbeda3fe94450bac6a40a91996422070e578ee6bd43f",
+    "rows_sha256": "b4b488b43e1954da6b6568ff15bc5e9c5fd4a0afce80f5e6c631e27e8eb541d7",
+    "gradient_hashes_sha256": "58e87e82716442b1ec9934c0cb30c21505290a2a3da1c6b73ed234c5e0729eaf",
+    "status_sha256": "9c89704b02b9dde44621b3b8bac7299c069e3b05a7aba2cb99639049890a9621",
+    "all_values_finite": true
+  },
+  "summary": {
+    "coupled_four": {
+      "exact_mean_a_b": [0.36563565333684284, 0.2967061996459961],
+      "minus_raw_a_b": [0.024220426877339662, -0.03704140583674115],
+      "bank_subspace_overlap_mean": 0.058579696963230767
+    },
+    "separate_three_plus_three": {
+      "exact_mean_a_b": [0.3790125250816345, 0.3248576521873474],
+      "minus_raw_a_b": [0.020661652088165283, -0.03227307399113971],
+      "bank_subspace_overlap_mean": 0.08220273877183597
+    }
+  },
+  "diagnosis": "Walsh token-loss contrasts produce a small positive result on discovery A and a larger negative result on discovery B. They neither stabilize the per-atom span nor improve the token-compute-matched raw-gradient control. The next basis must estimate activation/error covariance factors rather than depend on individual signed probes.",
+  "authorization": {
+    "generated_expert_training": false,
+    "larger_active_parameter_rungs": false,
+    "mfu_preflight": false,
+    "next_allowed_work": "Preregister an expert-conditioned activation/error KFAC factor oracle at identical coordinate counts, using discovery-only routed inputs and MLP-output task errors."
+  }
+}
