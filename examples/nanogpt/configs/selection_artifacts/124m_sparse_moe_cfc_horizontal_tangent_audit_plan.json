@@ -105,7 +105,8 @@
   "identity": {
     "preregistration_git_commit": "39e9bc3bd0f62e8db5ab49f5c86fe59d1d3f9e5e",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_horizontal_tangent_audit.py",
-    "entrypoint_sha256": null,
+    "implementation_git_commit": "0ba77c76760c2abe90d2f5fccb5f31535d940fae",
+    "entrypoint_sha256": "87e73b812683f1fc15ef5188c4656d5d3e77c63d79549fa449bb4f749263e2be",
     "helper_sha256": {
       "examples/nanogpt/analyze_sparse_moe_cfc_tt_optimizer_geometry_audit.py": "f14876917a40fc460c344e3b0e4e25a0688afc3fb8688171984dc62d721ac3dd",
       "examples/nanogpt/analyze_sparse_moe_cfc_functional_tt_oracle.py": "f4676a857b2136c0228a0fdaa1af26881587be39cac18ffc36269bd4ef16720f",
