@@ -112,7 +112,7 @@
     "automatic_retry_or_sweep": false
   },
   "identity": {
-    "preregistration_git_commit": null,
+    "preregistration_git_commit": "a3367ff4858afe5249da81e864d714d0c48f5162",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_global_tt_oracle.py",
     "entrypoint_sha256": null
   }
