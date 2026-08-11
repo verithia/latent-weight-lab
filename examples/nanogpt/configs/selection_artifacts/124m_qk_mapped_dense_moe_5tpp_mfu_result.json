@@ -1,0 +1,35 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_5tpp_exact_config_mfu_result",
+  "decision": "PASS_EXACT_STACK_MFU_GATE",
+  "gate": {
+    "all_logged_losses_finite": true,
+    "maximum_peak_mib": 95000,
+    "minimum_mfu_fraction": 0.2,
+    "native_block_fht_required": true
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124447488,
+    "base_timed_iter_ms": 1908.3325,
+    "empirical_bf16_gemm_peak_tflops": 416.07517642485993,
+    "forward_backward_ms": 1840.33625,
+    "mfu_fraction": 0.24652124444429835,
+    "model_tflops": 102.57137027463746,
+    "native_block_fht_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "peak_mib": 38325.87,
+    "timed_updates": 8,
+    "tokens_per_second": 137369.01125,
+    "warmup_updates": 1
+  },
+  "provenance": {
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_mapped_dense_moe_mfu_5tpp_lr24e4_v2/performance_preflight.json",
+    "certificate_sha256": "8f4572d1ad11e56c9a12dce0b60b136d210e9d640d400970a44989bab5199bc9",
+    "config_sha256": "6f3aced8b4d8bd2f7dc0be12bf6c21424a97a0f3def8a3166aff9846e196e3d5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "git_commit": "85ad24f0240112d214677e6edcef1ac8f3fd5fe6",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_mapped_dense_moe_mfu_5tpp_lr24e4_v2/preflight.log",
+    "log_sha256": "ca25243563b470912a98d69f36d9ae176a00cb8c5863f27f59a126be192c3b7d"
+  },
+  "registered_at": "2026-08-11T19:21:00+08:00",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_5tpp_exact_config_mfu_result_v1",
+  "scientific_updates": 0
+}

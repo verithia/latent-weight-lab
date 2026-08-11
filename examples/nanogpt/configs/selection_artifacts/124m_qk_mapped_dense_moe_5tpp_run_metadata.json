@@ -1,0 +1,60 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_5tpp_run_metadata",
+  "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4/ckpt.pt",
+  "config": {
+    "archived": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.config.json",
+    "sha256": "6f3aced8b4d8bd2f7dc0be12bf6c21424a97a0f3def8a3166aff9846e196e3d5",
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "git_commit": "85ad24f0240112d214677e6edcef1ac8f3fd5fe6",
+  "host": "PRO6",
+  "initial_live_verification": {
+    "gpu_memory_mib": 49881,
+    "gpu_power_watts": 499.47,
+    "gpu_temperature_c": 53,
+    "gpu_utilization_percent": 95,
+    "iteration_milliseconds_recent": 1900.84,
+    "last_iter": 30,
+    "last_training_loss": 7.2934,
+    "step_zero_train_ce": 10.9774,
+    "step_zero_validation_ce": 10.978
+  },
+  "literal_command": [
+    "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.config.json"
+  ],
+  "max_iters": 2374,
+  "mfu_certificate": {
+    "mfu_fraction": 0.24652124444429835,
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.mfu.json",
+    "sha256": "8f4572d1ad11e56c9a12dce0b60b136d210e9d640d400970a44989bab5199bc9"
+  },
+  "monitoring": {
+    "callback": "one idempotent terminal-or-error invocation callback with explicit @Codex continuation prompt",
+    "heartbeat": false,
+    "launchd_label": "com.mappingnetworks.pro6.qkmappedmoe124.5tpp",
+    "milestones": false,
+    "state": "/Users/verithia/research/watch_state/pro6_124m_qk_mapped_dense_moe_5tpp.json"
+  },
+  "process_group": 211784,
+  "provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.json",
+    "sha256": "f9cfdead17665b10f01eca7e63dd23789f605d8589de32ee8df93ce622a6ede0"
+  },
+  "run_name": "pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_5tpp_run_metadata_v1",
+  "started_at": "2026-08-11T19:21:22+08:00",
+  "status": "running",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.json",
+  "training_log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.log"
+}
