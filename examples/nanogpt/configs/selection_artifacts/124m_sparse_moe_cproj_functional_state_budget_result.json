@@ -1,0 +1,96 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_functional_state_budget_seal_v1",
+  "recorded_at": "2026-08-11T17:32:03+08:00",
+  "decision": "EXPLICIT_LOW_RANK_WRITE_STATE_INCOMPATIBLE_WITH_200X",
+  "source_control": {
+    "git_commit": "fb772f554eaeeadea0d672b39665277ce62be5c0",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cproj_functional_state_budget.py",
+    "entrypoint_sha256": "90fd8a97e24a4a45768c8b49c240276a820b1e984ca4e12e69441661c014915f",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_functional_state_budget_plan.json",
+    "plan_sha256": "5e6c2a9cfbe339da7270753d3ed5769d70de6aa25552381d9b9ff171ccf48809"
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "mpo_seal_sha256": "bcbcb871c029ec7c13cb7eb16da83376827f8a6900d8861c287201189dd4b017",
+    "dense_budget_seal_sha256": "21c5d86bad6d612f3c26958b39a3cc51f54c61eb48c7443f3f1a57af6760e06b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "banks": ["discovery_a", "discovery_b", "heldout"],
+    "experts": 8,
+    "matrix_shape_per_expert": [768, 1536]
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "parameter_updates": 0,
+    "wall_seconds": 5.97624659538269,
+    "focused_and_regression_tests": "19 passed in 1.68s",
+    "gpu_after": "153/97887 MiB, 0% utilization, 31 C, 16.74 W"
+  },
+  "budget_definition": {
+    "dense_values_per_expert": 1179648,
+    "compression_200x_coordinate_budget_per_expert": 5898,
+    "compression_200x_ordinary_rank_per_expert": 2,
+    "compression_200x_optimistic_joint_action_rank": 16,
+    "compression_281p270386x_coordinate_budget_per_expert": 4194,
+    "compression_281p270386x_ordinary_rank_per_expert": 1,
+    "compression_281p270386x_optimistic_joint_action_rank": 8,
+    "compression_500x_coordinate_budget_per_expert": 2359,
+    "compression_500x_ordinary_rank_per_expert": 1,
+    "compression_500x_optimistic_joint_action_rank": 8
+  },
+  "aggregate": {
+    "compression_200x_joint_best_recovery_mean": 0.4540242061918199,
+    "compression_200x_joint_best_recovery_minimum": 0.3587838445349623,
+    "joint_rank80_mean": 142.88888888888889,
+    "joint_rank90_mean": 273.6666666666667,
+    "joint_rank90_minimum": 191,
+    "rank80_even_per_expert_state_compression_range": [22.485332520061757, 46.768742814098246],
+    "rank90_even_per_expert_state_compression_range": [12.714053220956425, 21.557894736842105],
+    "joint_output_subspace_overlap_rank1_mean": 0.9145010113716125,
+    "joint_output_subspace_overlap_rank16_mean": 0.7879734701580472,
+    "joint_output_subspace_overlap_rank32_mean": 0.8017017311520047,
+    "joint_output_subspace_overlap_rank64_mean": 0.7799540890587701,
+    "minimum_expert_assignments": 262
+  },
+  "by_layer_bank_extrema": {
+    "lowest_200x_recovery": {
+      "bank": "discovery_b",
+      "layer": 5,
+      "value": 0.3587838445349623
+    },
+    "highest_200x_recovery": {
+      "bank": "heldout",
+      "layer": 11,
+      "value": 0.5463662016945663
+    },
+    "joint_rank90_range": [191, 324]
+  },
+  "interpretation": {
+    "low_rank_rejection": "Even the best rank-16 approximation to the summed routed write, an optimistic ceiling for eight rank-2 experts at 200x, recovers only 0.454 on average and 0.359 in the worst layer/bank. Both preregistered gates fail by a wide margin.",
+    "honest_state_scale": "An even per-expert allocation of the joint directions needed for 80% function corresponds to only about 22.5--46.8x c_proj compression; 90% corresponds to about 12.7--21.6x. These are descriptive ordinary-low-rank scales, not universal nonlinear-generator lower bounds.",
+    "frame_stability": "The leading output subspaces are stable across independent token banks: mean canonical-overlap scores remain about 0.78--0.91 from rank 1 through rank 64. The missing capacity is therefore a wide persistent residual-output frame, not mainly transient token-frame noise.",
+    "combined_with_mpo": "The low-rank ceiling does not apply to the full-ordinary-rank rank-nine MPO. Its independent failure at about 0.358 recovery shows that merely hiding full rank inside 4,194 tensor coordinates does not solve the orientation/state problem.",
+    "next_architecture_class": "Test whether the stable wide residual-output frame can be amortized across experts and layers. A shared residual-space basis plus compact per-matrix coefficient generation is the only causally supported compact class; another per-matrix rank/tensor/FHT sweep is not. Cross-layer/expert shareability must pass a zero-update heldout oracle before implementation or training."
+  },
+  "raw_artifacts": {
+    "result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/cproj_functional_state_budget_v1/functional_state_budget_result.json",
+    "result_sha256": "49ac301d21ca22aa6d081a4a263a8b18d70dafc9d89f92ba3a00dc34d55f6ebb",
+    "rows_sha256": "2d66266f7c29e1b0b2ccf3eb3dc68ee8cc45fe6c3a0a63c6084936eae706dcdf",
+    "overlaps_sha256": "be817b790d31e41a790b5b6cf4311b626fd5aa2e372398ebdde553a712dfea49",
+    "spectra_sha256": "6228976292af89632a0570ea97b0e300b4d9350c9a6b10ccd02ad0a85375d525",
+    "status_sha256": "a91b61336db57b48d99d9bdd11e0ed9ce35b833a2928932ff4c1f0f6287d2af6",
+    "log_sha256": "9a92b78775421cdd3835a0f8adaf82489d85d593bd256b44b554ebecf879baca"
+  },
+  "authorization": {
+    "preregister_shared_residual_output_basis_oracle": true,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "training": false,
+    "generated_experts": false,
+    "larger_rung": false
+  },
+  "scope_caveat": "This is an optimistic necessary condition for explicit ordinary-low-rank expert matrices with fixed terminal routing and c_fc. It is not an information-theoretic lower bound for all nonlinear procedural generators; isolated-expert spectra are descriptive because joint function may permit cancellation."
+}
