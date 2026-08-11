@@ -3426,6 +3426,27 @@ def main() -> None:
             peak_mib = 0.0
             if device_type == "cuda":
                 peak_mib = torch.cuda.max_memory_allocated() / (1024.0 * 1024.0)
+            moe_capacity_ratios = []
+            moe_max_tokens = []
+            for block in raw_model.transformer.h:
+                maximum = getattr(
+                    block.mlp, "last_max_tokens_per_expert", None
+                )
+                assignments = int(
+                    getattr(block.mlp, "last_assignment_count", 0)
+                )
+                experts = int(getattr(block.mlp, "num_experts", 0))
+                if maximum is None or assignments <= 0 or experts <= 0:
+                    continue
+                maximum_value = int(maximum.item())
+                moe_max_tokens.append(maximum_value)
+                moe_capacity_ratios.append(
+                    maximum_value / (assignments / experts)
+                )
+            maximum_moe_capacity_ratio = max(
+                moe_capacity_ratios, default=0.0
+            )
+            maximum_moe_tokens = max(moe_max_tokens, default=0)
             print(
                 "perf "
                 f"iter={iter_num} "
@@ -3440,7 +3461,9 @@ def main() -> None:
                 f"data_ms={data_ms:.2f} "
                 f"other_ms={other_ms:.2f} "
                 f"eval_ms={eval_ms:.2f} "
-                f"peak_mib={peak_mib:.2f}"
+                f"peak_mib={peak_mib:.2f} "
+                f"moe_capacity_ratio={maximum_moe_capacity_ratio:.4f} "
+                f"moe_max_tokens={maximum_moe_tokens}"
             )
         t1 = time.perf_counter()
         if iter_num % args.log_interval == 0:
