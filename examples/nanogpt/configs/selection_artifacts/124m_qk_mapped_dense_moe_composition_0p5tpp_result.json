@@ -1,0 +1,134 @@
+{
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_composition_result_v1",
+  "recorded_at": "2026-08-11T19:08:00+08:00",
+  "classification": "PASS_QK_MAPPED_DENSE_COMPLETE_EXPERT_MOE_COMPOSITION_0P5TPP",
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_0p5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "303b8aa0b38b6bbc867e01efb6e728d0079f3642",
+    "entrypoint": "examples.nanogpt.train",
+    "literal_command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_0p5tpp_lr24e4_20260811T105118Z_194219.config.json"
+    ],
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_0p5tpp_lr24e4.json",
+    "source_config_sha256": "991de9453948487d940cd6871fae3a5a037dfdc984b531f761cd7e6f507893d5",
+    "resolved_config_sha256": "d30fa065aafdd2ea26af1593107e5ce3efd16abc21a7ccf9ac451b4585fa534b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "provenance_sha256": "40d834462eebe338d5d0fad7c42903c9be5286df847e4cba7304b28db91b2298",
+    "status_sha256": "594236c0a0ca556bce2effcf81a4f6c149414cfe16d11569f537135f137b479c",
+    "log_sha256": "a02653680b39ea6f8e22ddf35a385d5e5141359e8ea0f291059baa946756290a",
+    "checkpoint_sha256": "5465c4e27e647c5796c77f245693b69779b9ca21f2cb53b59826da4a587228a3",
+    "checkpoint_metadata_sha256": "dae510437e6f7d34f6984ece19eab884dda4ea7d681aea877da1d98a37144ad0",
+    "checkpoint_bytes": 2444269976,
+    "checkpoint_next_iter": 238,
+    "checkpoint_best_validation_ce": 5.192584991455078,
+    "optimizer_and_rng_state_present": true,
+    "exit_code": 0,
+    "max_iters": 238,
+    "scheduled_tokens": 62390272,
+    "scheduled_active_tpp": 0.501338138701522,
+    "wall_seconds": 634
+  },
+  "architecture": {
+    "generated": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "dense_full_state": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "moe.expert_c_fc",
+      "moe.expert_c_proj"
+    ],
+    "materialized_active_parameters": 124447488,
+    "materialized_stored_parameters": 294316800,
+    "runtime_registered_active_trainable_parameters": 113990640,
+    "runtime_registered_stored_trainable_parameters": 283859952,
+    "qk_mapping_trainable_coordinates": 3698928,
+    "qk_materialized_parameters": 14155776,
+    "inference_parameter_and_flop_reduction": false
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_composition_plan.json",
+    "plan_sha256": "a28c77e0c60d209f1a26abe5b848d3daaec7cf156b1e4932970008ecc529b986",
+    "dense_moe_reference": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr24e4_0p5tpp_result.json",
+    "dense_moe_reference_sha256": "e151264cf45bba6939b0f423eb27c981be7d79e50a1b3c0ff4ab990d34571ead",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_unpadded_mfu_result.json",
+    "mfu_result_sha256": "d9d852d999f701c6db73f92927975eeff3aaaa7173b18814c1ddc43721c43010"
+  },
+  "performance": {
+    "mfu_fraction": 0.246743,
+    "minimum_mfu_fraction": 0.2,
+    "mean_iteration_seconds": 1.91335,
+    "tokens_per_second": 137009.75,
+    "peak_allocated_mib": 38320,
+    "native_extension_loaded": true,
+    "all_preflight_losses_finite": true,
+    "gate_passed": true
+  },
+  "fixed_evaluations": [
+    {
+      "step": 0,
+      "train_ce": 10.9774,
+      "validation_ce": 10.9780,
+      "dense_moe_validation_ce": 10.9848,
+      "validation_delta_to_dense_moe": -0.0068
+    },
+    {
+      "step": 60,
+      "train_ce": 6.2754,
+      "validation_ce": 6.2860,
+      "dense_moe_validation_ce": 6.2969,
+      "validation_delta_to_dense_moe": -0.0109
+    },
+    {
+      "step": 120,
+      "train_ce": 5.6490,
+      "validation_ce": 5.6530,
+      "dense_moe_validation_ce": 5.7517,
+      "validation_delta_to_dense_moe": -0.0987
+    },
+    {
+      "step": 180,
+      "train_ce": 5.3260,
+      "validation_ce": 5.3275,
+      "dense_moe_validation_ce": 5.5441,
+      "validation_delta_to_dense_moe": -0.2166
+    },
+    {
+      "step": 238,
+      "train_ce": 5.1915,
+      "validation_ce": 5.1926,
+      "dense_moe_validation_ce": 5.4639,
+      "validation_delta_to_dense_moe": -0.2713
+    }
+  ],
+  "gates": {
+    "all_fixed_losses_finite": true,
+    "maximum_fixed_checkpoint_penalty_ce": -0.0068,
+    "maximum_fixed_checkpoint_penalty_ce_allowed": 0.03,
+    "terminal_validation_ce": 5.1926,
+    "terminal_validation_ce_maximum": 5.4739,
+    "terminal_penalty_to_dense_moe_ce": -0.2713,
+    "terminal_penalty_to_dense_moe_ce_maximum": 0.01,
+    "all_pass": true
+  },
+  "comparison": {
+    "checkpoint_validation_delta_to_dense_moe_log_reference": -0.27131500854492163,
+    "perplexity_ratio_to_dense_moe_log_reference": 0.7623763035255905,
+    "interpretation": "The accepted generated-QK read map composes cleanly with dense complete experts at the short horizon and improves every registered checkpoint. This validates only QK-map plus dense-MoE composition; V/O, expert c_proj, all expert c_fc matrices, materialized inference state, and expert FLOPs remain dense."
+  },
+  "decision": {
+    "passed": true,
+    "one_124m_5tpp_confirmation_authorized": true,
+    "generated_expert_authorized": false,
+    "larger_active_parameter_rung_authorized": false,
+    "parallel_arm_authorized": false
+  }
+}

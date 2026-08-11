@@ -18,6 +18,21 @@ PLAN = (
     / "examples/nanogpt/configs/selection_artifacts/"
     "124m_qk_mapped_dense_moe_composition_plan.json"
 )
+CONFIG_5TPP = (
+    ROOT
+    / "examples/nanogpt/configs/"
+    "pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4.json"
+)
+PLAN_5TPP = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_qk_mapped_dense_moe_5tpp_confirmation_plan.json"
+)
+RESULT_0P5TPP = (
+    ROOT
+    / "examples/nanogpt/configs/selection_artifacts/"
+    "124m_qk_mapped_dense_moe_composition_0p5tpp_result.json"
+)
 
 
 def load(path: Path) -> dict:
@@ -68,3 +83,60 @@ def test_preregistered_parent_hashes_still_match() -> None:
     plan = load(PLAN)
     for record in plan["immutable_evidence"].values():
         assert sha256(ROOT / record["path"]) == record["sha256"]
+
+
+def test_composition_result_passes_every_frozen_short_horizon_gate() -> None:
+    result = load(RESULT_0P5TPP)
+    assert result["gates"]["all_pass"] is True
+    assert result["gates"]["maximum_fixed_checkpoint_penalty_ce"] <= 0.03
+    assert result["gates"]["terminal_penalty_to_dense_moe_ce"] <= 0.01
+    assert result["decision"]["one_124m_5tpp_confirmation_authorized"] is True
+    assert result["decision"]["generated_expert_authorized"] is False
+
+
+def test_5tpp_confirmation_changes_only_horizon_and_recovery_metadata() -> None:
+    short = load(CONFIG)
+    confirmation = load(CONFIG_5TPP)
+    invariant_keys = [
+        "method",
+        "block_fht_targets",
+        "block_fht_attn_cayley_ranks",
+        "block_fht_attn_cayley_bilateral_targets",
+        "block_fht_output_gain_targets",
+        "block_fht_attn_pack_cached_qkv",
+        "moe_num_experts",
+        "moe_top_k",
+        "moe_expert_hidden_multiplier",
+        "moe_unpadded_expert_loop",
+        "optimizer",
+        "learning_rate",
+        "min_lr",
+        "batch_size",
+        "gradient_accumulation_steps",
+        "model_seed",
+        "train_data_seed",
+        "eval_seed",
+        "eval_iters",
+        "fixed_eval_indices",
+        "estimated_materialized_active_params",
+        "estimated_registered_active_trainable_params",
+    ]
+    for key in invariant_keys:
+        assert confirmation[key] == short[key]
+    assert confirmation["max_iters"] == 2374
+    assert confirmation["eval_interval"] == 594
+    assert confirmation["warmup_iters"] == 23
+    assert confirmation["lr_decay_iters"] == 2374
+    assert confirmation["scheduled_tokens"] == 2374 * 262144
+    assert estimate_active_params(confirmation) == 124447488
+
+
+def test_5tpp_plan_hashes_and_authorization_are_frozen() -> None:
+    plan = load(PLAN_5TPP)
+    for record in plan["immutable_evidence"].values():
+        assert sha256(ROOT / record["path"]) == record["sha256"]
+    assert plan["decision_rule"]["terminal_validation_ce_maximum"] == 3.4548
+    assert plan["decision_rule"]["maximum_fixed_checkpoint_penalty_ce"] == 0.03
+    assert plan["authorization"]["one_scientific_5tpp_run_after_mfu_pass"] is True
+    assert plan["authorization"]["generated_expert"] is False
+    assert plan["authorization"]["larger_rung"] is False

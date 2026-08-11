@@ -1,0 +1,106 @@
+{
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_5tpp_confirmation_plan_v1",
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_5tpp_confirmation_preregistration",
+  "registered_at": "2026-08-11T19:10:00+08:00",
+  "status": "registered_before_exact_config_mfu_preflight_and_training",
+  "scientific_question": "Does the short-horizon gain from composing the accepted QK read map with dense complete experts persist through the matched 5TPP horizon without any residual-write or expert-matrix compression?",
+  "authorization": {
+    "one_exact_config_mfu_preflight": true,
+    "one_scientific_5tpp_run_after_mfu_pass": true,
+    "automatic_retry": false,
+    "parallel_arm": false,
+    "generated_expert": false,
+    "larger_rung": false,
+    "20tpp_extension": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4.json",
+    "generated": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "dense_full_state": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "moe.expert_c_fc",
+      "moe.expert_c_proj"
+    ],
+    "horizon": {
+      "max_iters": 2374,
+      "scheduled_tokens": 622329856,
+      "scheduled_active_tpp": 5.0007426104093,
+      "fixed_evaluation_steps": [
+        0,
+        594,
+        1188,
+        1782,
+        2374
+      ]
+    },
+    "forbidden_changes": [
+      "generated V or any residual-write projection",
+      "generated, shared, or factorized expert matrices",
+      "router, optimizer, learning rate, data, seeds, or horizon changes",
+      "automatic rerun, parallel arm, or post-result threshold change"
+    ]
+  },
+  "decision_rule": {
+    "dense_moe_fixed_validation_ce": [
+      10.9848,
+      4.1308,
+      3.6753,
+      3.5114,
+      3.4448
+    ],
+    "all_fixed_losses_must_be_finite": true,
+    "maximum_fixed_checkpoint_penalty_ce": 0.03,
+    "terminal_penalty_to_dense_moe_ce_maximum": 0.01,
+    "terminal_validation_ce_maximum": 3.4548,
+    "threshold_changed_after_measurement": false,
+    "pass": "Confirm 5TPP horizon compatibility of generated QK with dense complete experts. Return to theory-gated expert representability work; do not infer generated-expert viability or automatically extend to 20TPP or a larger rung.",
+    "fail": "Reject horizon-stable composition despite the 0.5TPP gain. Retain the standalone QK-only and dense-complete-expert controls; do not sweep capacity or modify expert matrices."
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "all_losses_finite": true,
+    "exact_scientific_config_required": true
+  },
+  "identity": {
+    "host": "PRO6",
+    "gpu": 0,
+    "entrypoint": "examples.nanogpt.train",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "immutable_evidence": {
+    "composition_0p5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_composition_0p5tpp_result.json",
+      "sha256": "b9ee433f697ea2f88b52c4c52231155d2a98cd9d68bded6dca9d8ef4298cae56"
+    },
+    "dense_moe_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_5tpp_top1_lr24e4_result.json",
+      "sha256": "4063369929e9b7fc4c8806c3a406b23329b7681e4969e2602da63386652adfe9"
+    },
+    "qk_only_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+      "sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585"
+    },
+    "unpadded_exact_stack_mfu": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_unpadded_mfu_result.json",
+      "sha256": "d9d852d999f701c6db73f92927975eeff3aaaa7173b18814c1ddc43721c43010"
+    }
+  },
+  "monitoring": {
+    "performance_preflight": "foreground-polled because it must finish within five minutes",
+    "scientific_run": "one terminal-or-error invocation callback with explicit @Codex action prompt",
+    "milestone_callbacks": false,
+    "heartbeat": false,
+    "expected_duration": "one to two hours"
+  },
+  "theory": {
+    "positive_claim": "The experiment tests composition and horizon stability of one accepted read-map compression with dense conditional experts.",
+    "claim_boundary": "It does not compress attention V/O, expert c_fc/c_proj, inference parameters, or expert FLOPs, and it does not test full replacement.",
+    "causal_reason": "The 0.5TPP composition passed every checkpoint by at least 0.0068 CE and finished 0.2713 CE below dense MoE. A matched 5TPP confirmation is the sole follow-up authorized by that preregistered result."
+  }
+}
