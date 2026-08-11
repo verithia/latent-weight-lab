@@ -1,0 +1,56 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_task_gradient_oracle_seal_v1",
+  "recorded_at": "2026-08-11T15:25:00+08:00",
+  "status": "strict_gates_failed_but_functional_direction_signal_confirmed",
+  "source_control": {
+    "git_commit": "14c2f80bd6c25f46194fd6d45cccdd20366f5b2e",
+    "entrypoint_sha256": "5ab6f32600dd7445fd85d8a6fc49ad09a20d354aaa76ad2c1880fc779f51805b",
+    "plan_sha256": "e75fb3d4660bee923aeab95edd6ece00f39be962ebaf1ead9ecf58ee8677cbec"
+  },
+  "source_run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "active_tpp": 0.501338138701522
+  },
+  "execution": {
+    "wall_seconds": 8.170577764511108,
+    "result_sha256": "577cdd7a526c981808afeab11466f61ae626fd0d2690bf87e234813c15f89380",
+    "rows_sha256": "51b24a68f14697dd2cb41cff3b6fbbfefc845e0fa082d695cc500f3611b0db22",
+    "gradient_hashes_sha256": "f646914d23a13fa9af0d510d13799d0d398e40cf79dffc2b9814a75d3d14a176",
+    "status_sha256": "c2261876c6c3481c1a4679dbcf95e17618a7e3b769c1b25612d4d1d3537bf842",
+    "all_values_finite": true
+  },
+  "summary": {
+    "coupled_four": {
+      "fixed_structured_mean": 0.00335387388865153,
+      "discovery_a_exact_mean": 0.3414152264595032,
+      "discovery_b_exact_mean": 0.33374760548273724,
+      "discovery_a_by_layer_0_5_11": [0.2289719581604004, 0.45219510793685913, 0.34307861328125],
+      "discovery_b_by_layer_0_5_11": [0.19340068101882935, 0.45681923627853394, 0.3510228991508484],
+      "paired_parameter_recovery_a_b": [0.003409008185068766, 0.0034753084182739258],
+      "bank_subspace_overlap_mean": 0.07301154484351476
+    },
+    "separate_three_plus_three": {
+      "fixed_structured_mean": 0.002766470114390055,
+      "discovery_a_exact_mean": 0.35835087299346924,
+      "discovery_b_exact_mean": 0.3571307261784871,
+      "discovery_a_by_layer_0_5_11": [0.24253243207931519, 0.4672294855117798, 0.36529070138931274],
+      "discovery_b_by_layer_0_5_11": [0.20629161596298218, 0.45236343145370483, 0.4127371311187744],
+      "paired_parameter_recovery_a_b": [0.007709781328837077, 0.007629533608754476],
+      "bank_subspace_overlap_mean": 0.07891484101613362
+    }
+  },
+  "diagnosis": {
+    "strict_gate": "Both families fail the frozen 0.90 mean, 0.80 every-layer, and 0.50 cross-bank span-overlap requirements.",
+    "positive_signal": "Two disjoint raw-gradient banks independently recover approximately 0.34 to 0.36 of exact held-out residual-write action, versus about 0.003 for fixed BlockFHT and 0.024 to 0.053 for temporal charts, despite recovering less than 0.8 percent of paired parameter energy.",
+    "interpretation": "Task-functional orientation is real and reproducible in effect even though the raw stochastic subspaces differ. Frobenius trajectory recovery is the wrong objective; the remaining gap is the optimizer/functional action map and insufficient bank stability."
+  },
+  "authorization": {
+    "generated_expert_training": false,
+    "larger_active_parameter_rungs": false,
+    "mfu_preflight": false,
+    "next_allowed_work": "Preregister a matched-budget step-zero optimizer-action oracle using the exact batched Muon polar action for expert matrices and first-step AdamW action for routers. This is the minimum causal control before a more complex KFAC/Jacobian decoder."
+  }
+}
