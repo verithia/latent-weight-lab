@@ -45,6 +45,17 @@ def action_cosine(left: torch.Tensor, right: torch.Tensor) -> float:
     return float((left @ right) / denominator.clamp_min(1e-30))
 
 
+def result_authorization(passed: bool) -> dict[str, bool]:
+    return {
+        "implementation": bool(passed),
+        "initialization_fit_shadow": bool(passed),
+        "mfu_preflight": False,
+        "language_model_training": False,
+        "larger_rung": False,
+        "generated_cproj": False,
+    }
+
+
 def _seeded_signs(
     reference: torch.Tensor,
     *,
@@ -685,14 +696,7 @@ def main() -> None:
         },
         "gates": bank_gates,
         "all_values_finite": finite,
-        "authorization": {
-            "implementation": passed,
-            "initialization_fit_shadow": passed,
-            "mfu_preflight": false,
-            "language_model_training": false,
-            "larger_rung": false,
-            "generated_cproj": false,
-        },
+        "authorization": result_authorization(passed),
     }
     result_path = args.output / "result.json"
     result_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

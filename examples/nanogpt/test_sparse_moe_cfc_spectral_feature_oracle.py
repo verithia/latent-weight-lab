@@ -8,6 +8,7 @@ from examples.nanogpt.analyze_sparse_moe_cfc_spectral_feature_oracle import (
     action_cosine,
     fit_compact_state,
     normalized_fit_loss,
+    result_authorization,
 )
 
 
@@ -99,3 +100,14 @@ def test_fit_reduces_a_representable_synthetic_objective() -> None:
 def test_action_cosine_identity() -> None:
     values = torch.randn(4, 7)
     assert action_cosine(values, values) > 0.999999
+
+
+def test_result_authorization_never_skips_scientific_training_gate() -> None:
+    passed = result_authorization(True)
+    rejected = result_authorization(False)
+    assert passed["implementation"]
+    assert passed["initialization_fit_shadow"]
+    assert not passed["mfu_preflight"]
+    assert not passed["language_model_training"]
+    assert not rejected["implementation"]
+    assert not rejected["language_model_training"]
