@@ -1,0 +1,117 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_horizontal_tangent_audit_plan_v1",
+  "recorded_at": "2026-08-11T23:38:00+08:00",
+  "status": "preregistered_before_implementation_preflight_and_audit_values",
+  "scientific_question": "After analytically removing ambient QR and TT-bond gauge redundancy, can the true horizontal tangent of the identical fitted rank-150 TT express and stably transfer the remaining routed-function residual?",
+  "causal_reconciliation": {
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_tt_optimizer_geometry_audit_result.json",
+    "parent_result_sha256": "96cca36e1f83c3bf5951954e9dc816addcdf2aef6cd1ec527fb548919e8f69e2",
+    "parent_classification": "OPTIMIZER_GEOMETRY_NUMERICALLY_INCONCLUSIVE",
+    "observed_numerics": "Ambient QR-coordinate J^T J has exact or near-zero diagonal entries, 1e17-1e28 dynamic range, and 16-step diagonal-PCG residual 0.464-0.771. The incomplete coupled solve improves recovery but cannot adjudicate the tangent under the frozen residual gate.",
+    "geometric_cause": "For each left-canonical nonterminal TT unfolding Q in R^(m x r), ambient perturbations contain redundant vertical/bond-gauge directions. The standard fixed-rank TT horizontal gauge imposes Q^T delta_Q = 0; write delta_Q = Q_perp K and place bond motion in the following core.",
+    "why_this_is_not_retuning": "Ranks, modes, endpoint functions, functional targets, activation banks, damping ratio, Hutchinson count, PCG iterations, and every scientific gate are unchanged. Only analytically null/redundant optimizer coordinates are removed.",
+    "scope": "This remains a zero-update local tangent audit. It does not fit TT cores, alter checkpoints, add a dense basis, or authorize language-model training."
+  },
+  "source": {
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "functional_tt_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_functional_tt_20260811_v1/functional_tt_cores.pt",
+    "functional_tt_coordinates_sha256": "27e15170901eb6e0431372fb6f5f56356891511011cc01ff5c93321c288b16d1",
+    "functional_tt_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_functional_tt_oracle_plan.json",
+    "functional_tt_plan_sha256": "03814c734477dfe5472609e667481b8d494e16f37fc99eab601ac1691f632ea2",
+    "fit_input_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_learned_butterfly_frame_oracle_plan.json",
+    "fit_input_plan_sha256": "77e260512c46366db382215826f1eaf8beb00cf97be657b2f049feee6010af45",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fitted_seeds": [20261001, 20261002],
+    "layers": [0, 5, 11],
+    "discovery_banks": ["discovery_a", "discovery_b"],
+    "heldout_banks": [
+      {"name": "heldout_a", "seed": 20261003, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+      {"name": "heldout_b", "seed": 20261004, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768}
+    ],
+    "samples_per_expert_per_bank_layer": 128,
+    "sampling_seed_base": 20261016,
+    "sampling_seed_bank_stride": 1009,
+    "sampling_seed_layer_stride": 17,
+    "heldout_sampling_bank_indices": {"heldout_a": 2, "heldout_b": 3},
+    "top_k": 2,
+    "checkpoint_updates": 0
+  },
+  "horizontal_parameterization": {
+    "base": "Use each saved fitted canonical core exactly. For every nonterminal core reshape to Q in R^(m x r), compute a deterministic complete-QR complement Q_perp, and expose K in R^((m-r) x r) through delta_Q = Q_perp K. Expose the final amplitude core directly.",
+    "gauge_condition": "Q^T delta_Q = 0 for every nonterminal core",
+    "ambient_forward_coordinates": 566028,
+    "horizontal_tangent_coordinates": 417300,
+    "removed_redundant_coordinates": 148728,
+    "per_core_horizontal_coordinates": [0, 0, 63900, 45000, 67500, 67500, 67500, 67500, 34304, 3840, 240, 16],
+    "forward_cfc_compression_ratio": 200.07174203396298,
+    "forward_family_changed": false,
+    "tt_ranks_or_modes_changed": false,
+    "retraction_or_update_applied": false
+  },
+  "metric_protocol": {
+    "functional_feature": "Identical to the parent audit: equal-expert normalized dense-c_proj residual output plus 0.25 normalized pre-GELU residual, averaged across layers by feature scaling.",
+    "jacobian": "Exact torch.func JVP/VJP at K=0 and zero final-core displacement through the multilinear TT contraction, GELU, and fixed dense expert c_proj.",
+    "directions": ["horizontal_euclidean_pullback", "horizontal_diagonal_metric", "horizontal_gauss_newton"],
+    "damping_ratio_to_hutchinson_mean_eigenvalue": 0.01,
+    "hutchinson_samples": 2,
+    "hutchinson_seed": 20261031,
+    "pcg_iterations": 16,
+    "pcg_relative_normal_residual_target": 0.1,
+    "precision": "float32 CUDA with float64 scalar reductions where practical"
+  },
+  "evaluation": {
+    "direction_fit": "At each of the two saved fitted endpoint functions, derive separate horizontal directions from discovery_a and discovery_b; no joint or selected direction.",
+    "direction_scoring": "Score exact JVP images on source discovery, opposite discovery, and both untouched heldout banks.",
+    "scale_free_metrics": ["signed directional cosine", "optimal positive-scalar recovery", "unchanged source-selected scalar recovery on transfer"],
+    "stability_metrics": ["same-endpoint cross-discovery heldout action cosine", "cross-endpoint corresponding heldout action cosine", "diagonal/full recovery fraction", "PCG relative normal residual"],
+    "controls": "The ambient parent and horizontal audit use the same endpoint functions, residuals, banks, metric, damping ratio, estimator count, PCG iterations, and gates."
+  },
+  "frozen_gates": {
+    "pcg_relative_normal_residual_max_each_seed_and_source_bank": 0.1,
+    "gauss_newton_source_optimal_linear_recovery_min": 0.5,
+    "gauss_newton_heldout_optimal_linear_recovery_min_each_direction_and_bank": 0.4,
+    "gauss_newton_minus_euclidean_heldout_recovery_min": 0.2,
+    "gauss_newton_transferred_alpha_heldout_recovery_min": 0.2,
+    "same_endpoint_cross_discovery_direction_heldout_action_cosine_min": 0.8,
+    "cross_endpoint_corresponding_direction_heldout_action_cosine_min": 0.8,
+    "diagonal_within_fraction_of_gauss_newton_for_simple_repair": 0.9,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "simple_metric_pass": "All gates plus diagonal/full fraction pass: authorize only one separately preregistered offline horizontal-diagonal functional refit.",
+    "coupled_metric_pass": "All absolute, gain, transfer, stability, convergence, and finiteness gates pass but diagonal/full fraction fails: authorize only one separately preregistered offline horizontal Gauss-Newton refit.",
+    "local_tangent_fail": "PCG converges but horizontal Gauss-Newton source recovery is below 0.5: reject optimizer preconditioning as sufficient at these fitted endpoints and close local optimization of this exact TT family.",
+    "generalization_fail": "Source passes but heldout, gain, transfer, or stability fails: reject the direction as activation- or endpoint-specific and do not refit.",
+    "solver_fail": "PCG again misses 0.1 after analytic gauge removal: the audit remains numerically inconclusive. Do not change damping, iterations, estimator count, or gates; record that this exact function metric is not practically solvable under the registered method."
+  },
+  "authorization": {
+    "zero_update_horizontal_tangent_audit": true,
+    "checkpoint_update": false,
+    "functional_refit": false,
+    "language_model_training": false,
+    "mfu_preflight": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "preflight": "Run one seed/source with two PCG iterations and one Hutchinson probe; project full runtime from measured exact-JVP/VJP operation counts.",
+    "monitoring": "Foreground-poll only if projected runtime is below five minutes; otherwise install one terminal/error-only @Codex watchdog.",
+    "workspace_cap_gib": 256,
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "identity": {
+    "preregistration_git_commit": "39e9bc3bd0f62e8db5ab49f5c86fe59d1d3f9e5e",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_horizontal_tangent_audit.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {
+      "examples/nanogpt/analyze_sparse_moe_cfc_tt_optimizer_geometry_audit.py": "f14876917a40fc460c344e3b0e4e25a0688afc3fb8688171984dc62d721ac3dd",
+      "examples/nanogpt/analyze_sparse_moe_cfc_functional_tt_oracle.py": "f4676a857b2136c0228a0fdaa1af26881587be39cac18ffc36269bd4ef16720f",
+      "examples/nanogpt/analyze_sparse_moe_cfc_global_tt_oracle.py": "cd5663d1ca1750e358dbe91616b6203620b91c1535b2e158389be245a36dae40",
+      "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py": "5c9564ec74538bfa4b7c886bc22788869bfd922af82c73bfcc123a955117e775",
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1"
+    }
+  }
+}
