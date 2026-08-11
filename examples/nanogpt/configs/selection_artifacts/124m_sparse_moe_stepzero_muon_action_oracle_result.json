@@ -1,0 +1,43 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_muon_action_oracle_seal_v1",
+  "recorded_at": "2026-08-11T15:32:00+08:00",
+  "status": "rejected_optimizer_action_improves_parameter_fit_but_harms_functional_fit",
+  "source_control": {
+    "git_commit": "a2c259ae695f3093734ae785f0d9afd46b14d6ee",
+    "entrypoint_sha256": "11cd850a45d5791f49e4af9c67902def3e67ecb1c959ba0bc65de4644779548e",
+    "plan_sha256": "22352989c78a8300e120709351f4a860602409746da0d2c72b2fda2e30bbe73a"
+  },
+  "execution": {
+    "wall_seconds": 8.404009580612183,
+    "result_sha256": "a5b7ec46af829144cf1a0f518fff079df193ee03b0795eed12ebb664d9fb0bcc",
+    "rows_sha256": "f8bba17efb93a76043b83b5cd85f878c6fef8bbea1999257d85a0961c78fc38e",
+    "action_hashes_sha256": "fa5ddd1f66974758b73ae44039a9311d442aef299887d2d09aff74f554e93049",
+    "status_sha256": "e5323597253fa2ea5eee8f45bb39c04cff1d216d34dc7f4957c71b0faa9eb81d",
+    "all_values_finite": true
+  },
+  "summary": {
+    "coupled_four": {
+      "action_exact_mean_a_b": [0.16881579160690308, 0.16644839445749918],
+      "action_minus_raw_a_b": [-0.1725994348526001, -0.16729921102523806],
+      "paired_parameter_recovery_a_b": [0.015380581219991049, 0.018121580282847088],
+      "bank_subspace_overlap_mean": 0.021120292445023853
+    },
+    "separate_three_plus_three": {
+      "action_exact_mean_a_b": [0.13905193408330283, 0.14033559958140054],
+      "action_minus_raw_a_b": [-0.2192989389101664, -0.21679512659708658],
+      "paired_parameter_recovery_a_b": [0.015751441319783527, 0.01833959420522054],
+      "bank_subspace_overlap_mean": 0.017046289208034675
+    }
+  },
+  "diagnosis": {
+    "parameter_space": "The exact first-step Muon/AdamW action roughly doubles paired Frobenius recovery over raw gradients.",
+    "function_space": "The same transformation removes approximately 0.17 to 0.22 absolute held-out residual-write recovery and further reduces cross-bank stability.",
+    "interpretation": "A one-step production optimizer image is not the missing compact manifold. Muon's polar whitening spreads parameter energy in directions that are less aligned with the endpoint's useful token action. The next decoder must preserve task-Jacobian error modes rather than optimize unweighted matrix coverage."
+  },
+  "authorization": {
+    "generated_expert_training": false,
+    "larger_active_parameter_rungs": false,
+    "mfu_preflight": false,
+    "next_allowed_work": "Preregister a same-budget token-functional Jacobian sketch: one DC task-gradient direction plus orthogonal signed token-loss contrasts on each discovery split, with fixed held-out residual-write scoring."
+  }
+}
