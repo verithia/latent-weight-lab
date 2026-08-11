@@ -1,0 +1,61 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_unpadded_execution_amendment",
+  "authorization": {
+    "automatic_scientific_retry": false,
+    "one_exact_unpadded_execution_mfu_preflight": true,
+    "scientific_run_only_after_pass": true,
+    "variant_sweep": false
+  },
+  "diagnosis": {
+    "dense_moe_same_protocol": {
+      "certificate_sha256": "bbe3ce809d84682c67aba625d29dc5e7886845fe79ca4ce11142f1c2b38ace69",
+      "log_sha256": "e54b70f428c0808e8ca263606a3ee22b18143f7c758e2cfe2492fab16f74eaa9",
+      "mfu_fraction": 0.19204723746679245,
+      "timed_iter_ms_first": 2144.5,
+      "timed_iter_ms_last": 2889.75
+    },
+    "mapped_fused_qkv": {
+      "certificate_sha256": "b5eb2baec98fc8bc0223ca52b88d36e50eb6f302f76de3076a51292869dba004",
+      "log_sha256": "0ca526be0e3c149e3da67d48b202ceb53a8e50a3f75d2e28243b34f55baa2737",
+      "mfu_fraction": 0.17498700108481113,
+      "timed_iter_ms": 2711.31
+    },
+    "padding_telemetry": {
+      "mean_assignments_per_expert": 8192,
+      "maximum_capacity_ratio_first": 2.3997,
+      "maximum_capacity_ratio_last": 3.9988,
+      "maximum_tokens_first": 19658,
+      "maximum_tokens_last": 32758,
+      "interpretation": "Router motion concentrates top-2 assignments while the current [experts,max_tokens,width] bmm pads every expert to the largest expert, increasing executed expert rows from approximately 2.4x to 4.0x the true assignment count."
+    }
+  },
+  "frozen_change": {
+    "after": {
+      "moe_unpadded_expert_loop": true
+    },
+    "implementation": [
+      "retain the exact stable expert sort and selected probabilities",
+      "slice each expert's contiguous real assignments using the already computed counts",
+      "apply the same expert c_fc, GELU, and c_proj only to those rows",
+      "weight and index-add results with the identical sorted token indices and probabilities",
+      "skip experts with zero assignments"
+    ],
+    "unchanged": [
+      "router logits, top-k selection, probabilities, and auxiliary losses",
+      "expert parameters, initialization, Muon ownership, and materialized/registered counts",
+      "generated QK function and packed-QKV repair",
+      "batching, global tokens, horizon, optimizer, learning rate, data, seeds, evaluations, and science thresholds"
+    ]
+  },
+  "gate": {
+    "all_losses_finite": true,
+    "functional_and_gradient_equivalence_tests_required": true,
+    "maximum_peak_mib": 95000,
+    "minimum_mfu_fraction": 0.2,
+    "native_block_fht_required": true
+  },
+  "rationale": "The same monotonic slowdown occurs in dense and mapped MoE, and direct telemetry identifies max-capacity zero padding as the cause. The current bmm path executes up to four times the real expert rows. A no-padding per-expert execution is an exact computational refactor, not a routing or architecture change, and is the only causally authorized next performance repair.",
+  "registered_at": "2026-08-11T21:00:00+08:00",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_unpadded_execution_amendment_v1",
+  "status": "registered_after_padding_telemetry_before_unpadded_implementation"
+}
