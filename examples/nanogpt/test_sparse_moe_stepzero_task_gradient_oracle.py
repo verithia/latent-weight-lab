@@ -7,6 +7,7 @@ from examples.nanogpt.analyze_sparse_moe_stepzero_task_gradient_oracle import (
     reconstruct_gradient_family,
     row_span_overlap,
     stepzero_optimizer_action,
+    walsh_token_mask,
 )
 from examples.nanogpt.muon import muon_update_batched
 from examples.nanogpt.analyze_sparse_moe_paired_atom_oracle import (
@@ -109,3 +110,21 @@ def test_muon_action_matches_batched_polar_and_first_adam_step() -> None:
     torch.testing.assert_close(action.router, expected_router)
     torch.testing.assert_close(action.c_fc, expected_fc)
     torch.testing.assert_close(action.c_proj, expected_proj)
+
+
+def test_first_four_walsh_token_masks_are_orthogonal() -> None:
+    masks = torch.stack([walsh_token_mask(2048, coordinate, "cpu") for coordinate in range(4)])
+    gram = masks @ masks.T
+    torch.testing.assert_close(gram, 2048 * torch.eye(4))
+
+
+def test_jacobian_sketch_action_preserves_raw_gradient_orientation() -> None:
+    torch.manual_seed(59)
+    gradient = LayerState(torch.randn(2, 4), torch.randn(2, 5, 4), torch.randn(2, 4, 5))
+    parameter = _zero_state(experts=2, hidden=5, width=4)
+    action = stepzero_optimizer_action(
+        gradient, parameter, direction_transform="jacobian_sketch"
+    )
+    torch.testing.assert_close(action.router, -gradient.router)
+    torch.testing.assert_close(action.c_fc, -gradient.c_fc)
+    torch.testing.assert_close(action.c_proj, -gradient.c_proj)

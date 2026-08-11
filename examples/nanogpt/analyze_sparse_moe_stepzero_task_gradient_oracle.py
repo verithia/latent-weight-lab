@@ -18,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import torch
+import torch.nn.functional as F
 
 from examples.nanogpt.analyze_mlp_activation_update_alignment import git_commit
 from examples.nanogpt.analyze_residual_compatibility import fixed_validation_batches
@@ -46,6 +47,7 @@ from examples.nanogpt.muon import muon_update_batched
 
 PLAN_SCHEMA = "nanogpt_sparse_moe_stepzero_task_gradient_oracle_plan_v1"
 MUON_PLAN_SCHEMA = "nanogpt_sparse_moe_stepzero_muon_action_oracle_plan_v1"
+JACOBIAN_PLAN_SCHEMA = "nanogpt_sparse_moe_stepzero_token_jacobian_oracle_plan_v1"
 SNAPSHOT_SCHEMA = "nanogpt_manifold_snapshot_v1"
 FAMILIES = ("coupled_four", "separate_three_plus_three")
 
@@ -104,6 +106,7 @@ def collect_gradient_bank(
     muon_ns_steps: int,
     weight_decay: float,
     adam_epsilon: float,
+    coordinates: int | None = None,
 ) -> tuple[dict[int, list[LayerState]], list[dict[str, Any]]]:
     selected: dict[int, tuple[torch.nn.Parameter, torch.nn.Parameter, torch.nn.Parameter]] = {}
     for parameter in model.parameters():
@@ -119,7 +122,13 @@ def collect_gradient_bank(
     bank = {layer: [] for layer in layers}
     rows: list[dict[str, Any]] = []
     autocast_enabled = device.startswith("cuda")
-    for microbatch, tokens in enumerate(batches):
+    if direction_transform == "jacobian_sketch":
+        if len(batches) != 1 or coordinates is None or coordinates <= 0:
+            raise ValueError("Jacobian sketch requires one batch and positive coordinates")
+        work = [(coordinate, batches[0]) for coordinate in range(coordinates)]
+    else:
+        work = list(enumerate(batches))
+    for microbatch, tokens in work:
         model.zero_grad(set_to_none=True)
         tokens = tokens.to(device)
         inputs = tokens[:, :-1].contiguous()
@@ -129,7 +138,28 @@ def collect_gradient_bank(
             dtype=torch.bfloat16,
             enabled=autocast_enabled,
         ):
-            _logits, loss = model(inputs, targets)
+            if direction_transform == "jacobian_sketch":
+                logits, _unused_loss = model(inputs, None)
+                token_loss = F.cross_entropy(
+                    logits.reshape(-1, logits.shape[-1]),
+                    targets.reshape(-1),
+                    reduction="none",
+                )
+                mask = walsh_token_mask(
+                    token_loss.numel(), microbatch, token_loss.device
+                ).to(dtype=token_loss.dtype)
+                loss = (token_loss * mask).mean()
+                if microbatch == 0:
+                    load_balance, router_z = model.moe_router_losses()
+                    loss = (
+                        loss
+                        + float(model.config.moe_load_balance_aux_coefficient)
+                        * load_balance
+                        + float(model.config.moe_router_z_loss_coefficient)
+                        * router_z
+                    )
+            else:
+                _logits, loss = model(inputs, targets)
         if loss is None or not torch.isfinite(loss):
             raise RuntimeError("non-finite task loss while collecting gradient bank")
         loss.backward()
@@ -176,6 +206,24 @@ def collect_gradient_bank(
     return bank, rows
 
 
+def walsh_token_mask(length: int, coordinate: int, device: torch.device | str) -> torch.Tensor:
+    """Return DC or a deterministic orthogonal Walsh sign row."""
+    if length <= 0 or coordinate < 0:
+        raise ValueError("Walsh length and coordinate must be non-negative")
+    indices = torch.arange(length, device=device, dtype=torch.long)
+    if coordinate == 0:
+        return torch.ones(length, device=device)
+    parity = torch.zeros(length, device=device, dtype=torch.long)
+    bit = 0
+    value = int(coordinate)
+    while value:
+        if value & 1:
+            parity = parity ^ ((indices >> bit) & 1)
+        value >>= 1
+        bit += 1
+    return 1.0 - 2.0 * parity.float()
+
+
 def stepzero_optimizer_action(
     gradient: LayerState,
     parameter: LayerState,
@@ -186,7 +234,7 @@ def stepzero_optimizer_action(
     adam_epsilon: float = 1e-8,
 ) -> LayerState:
     """Return raw descent or the exact production first-step action."""
-    if direction_transform == "raw":
+    if direction_transform in {"raw", "jacobian_sketch"}:
         return LayerState(-gradient.router, -gradient.c_fc, -gradient.c_proj)
     if direction_transform != "muon_action":
         raise ValueError(f"unknown direction transform: {direction_transform}")
@@ -323,9 +371,13 @@ def main() -> None:
     started = time.time()
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
     plan_schema = plan.get("schema_version")
-    if plan_schema not in {PLAN_SCHEMA, MUON_PLAN_SCHEMA}:
+    if plan_schema not in {PLAN_SCHEMA, MUON_PLAN_SCHEMA, JACOBIAN_PLAN_SCHEMA}:
         raise ValueError("task-gradient oracle plan schema mismatch")
-    direction_transform = "muon_action" if plan_schema == MUON_PLAN_SCHEMA else "raw"
+    direction_transform = {
+        PLAN_SCHEMA: "raw",
+        MUON_PLAN_SCHEMA: "muon_action",
+        JACOBIAN_PLAN_SCHEMA: "jacobian_sketch",
+    }[plan_schema]
     payload = load_terminal_snapshot(args.terminal_snapshot)
     causal = plan["causal_source"]
     if file_sha256(args.terminal_snapshot) != causal["terminal_manifold_snapshot_sha256"]:
@@ -348,11 +400,14 @@ def main() -> None:
     banks: dict[str, dict[int, list[LayerState]]] = {}
     gradient_rows: list[dict[str, Any]] = []
     for bank_spec in plan["gradient_banks"]:
+        batch_count = int(
+            bank_spec.get("batches", bank_spec.get("independent_microbatches", 0))
+        )
         batches = fixed_validation_batches(
             args.data_dir,
             int(bank_spec["batch_size"]),
             int(bank_spec["block_size"]) + 1,
-            int(bank_spec["independent_microbatches"]),
+            batch_count,
             int(bank_spec["seed"]),
         )
         bank, rows = collect_gradient_bank(
@@ -364,6 +419,11 @@ def main() -> None:
             muon_ns_steps=5,
             weight_decay=0.1,
             adam_epsilon=1e-8,
+            coordinates=(
+                int(bank_spec["coordinates"])
+                if "coordinates" in bank_spec
+                else None
+            ),
         )
         banks[bank_spec["name"]] = bank
         for row in rows:
@@ -526,7 +586,7 @@ def main() -> None:
                         ),
                     }
                 )
-            else:
+            elif direction_transform == "muon_action":
                 raw_mean = float(
                     plan["controls"]["raw_gradient_exact_mean"][family][bank_name]
                 )
@@ -539,6 +599,22 @@ def main() -> None:
                     >= float(
                         gates[
                             "optimizer_action_minus_raw_gradient_mean_min_each_bank"
+                        ]
+                    )
+                )
+            else:
+                raw_mean = float(
+                    plan["controls"]["raw_gradient_exact_mean"][family][bank_name]
+                )
+                bank_summary["raw_gradient_mean"] = raw_mean
+                bank_summary["jacobian_sketch_minus_raw_gradient"] = (
+                    bank_summary["mean"] - raw_mean
+                )
+                bank_gates["minus_raw_gradient_pass"] = (
+                    bank_summary["mean"] - raw_mean
+                    >= float(
+                        gates[
+                            "jacobian_sketch_minus_raw_gradient_mean_min_each_bank"
                         ]
                     )
                 )
@@ -560,7 +636,11 @@ def main() -> None:
         decision = (
             "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_OPTIMIZER_ACTION_SKETCH_ACQUISITION_ONLY"
             if direction_transform == "muon_action"
-            else "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_GRADIENT_SKETCH_ACQUISITION_ONLY"
+            else (
+                "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_TOKEN_JACOBIAN_SKETCH_ACQUISITION_ONLY"
+                if direction_transform == "jacobian_sketch"
+                else "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_GRADIENT_SKETCH_ACQUISITION_ONLY"
+            )
         )
     elif finite and one_pass:
         decision = "PASS_ONE_BANK_ONLY_REJECT_BATCH_FRAGILE_BASIS"
@@ -572,6 +652,14 @@ def main() -> None:
         decision = "FAIL_STRICT_GATES_BUT_IMPROVE_RAW_AUTHORIZE_FUNCTIONAL_JACOBIAN_PLAN_ONLY"
     elif direction_transform == "muon_action":
         decision = "FAIL_STRICT_GATES_NO_RAW_IMPROVEMENT_REJECT_OPTIMIZER_ACTION_IMAGE"
+    elif direction_transform == "jacobian_sketch" and finite and all(
+        summary[family][bank]["jacobian_sketch_minus_raw_gradient"] > 0.0
+        for family in FAMILIES
+        for bank in banks
+    ):
+        decision = "FAIL_STRICT_GATES_BUT_IMPROVE_RAW_AUTHORIZE_KFAC_PLAN_ONLY"
+    elif direction_transform == "jacobian_sketch":
+        decision = "FAIL_STRICT_GATES_NO_RAW_IMPROVEMENT_REJECT_TOKEN_JACOBIAN_IMAGE"
     else:
         decision = "FAIL_BOTH_BANKS_REJECT_RAW_TASK_GRADIENT_LATENT_IMAGE"
 
@@ -587,11 +675,11 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(gradient_rows)
     result = {
-        "schema_version": (
-            "nanogpt_sparse_moe_stepzero_muon_action_oracle_result_v1"
-            if direction_transform == "muon_action"
-            else "nanogpt_sparse_moe_stepzero_task_gradient_oracle_result_v1"
-        ),
+        "schema_version": {
+            "raw": "nanogpt_sparse_moe_stepzero_task_gradient_oracle_result_v1",
+            "muon_action": "nanogpt_sparse_moe_stepzero_muon_action_oracle_result_v1",
+            "jacobian_sketch": "nanogpt_sparse_moe_stepzero_token_jacobian_oracle_result_v1",
+        }[direction_transform],
         "direction_transform": direction_transform,
         "decision": decision,
         "passing_families": both_pass,
