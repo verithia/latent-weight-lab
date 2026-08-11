@@ -1,0 +1,85 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_atom_oracle_seal_v1",
+  "recorded_at": "2026-08-11T15:03:22+08:00",
+  "status": "both_temporal_paired_atom_families_failed_no_generated_training_authorized",
+  "source_control": {
+    "git_commit": "176d12568c1fed177e9ecc07bcfc05ef06dfdecf",
+    "entrypoint": "examples.nanogpt.analyze_sparse_moe_paired_atom_oracle",
+    "source_sha256": "271521e22cf443b09c5ccf2ce678fe8c35102378c792173a65d45c20269dea03",
+    "plan_sha256": "319e3b9d958e6369f04762cdc401101ff4d0287388dc39df2c97528482b861cd"
+  },
+  "dataset": {
+    "manifest_path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "discovery_tokens_sha256": "6e5403b3bd460802bd99f61228a3b7d1997c252545394bdec5f90f1d0ec9ad8d",
+    "heldout_tokens_sha256": "8d2269d0051ce163dea0d6782e5a05a9e55e6772b6c9071011986f4f71f085a9"
+  },
+  "source_run": {
+    "name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_resume2",
+    "terminal_checkpoint_sha256": "3b19fa796307df8676a8aa77b2183952b14af9a7718f2d2004690878fb3708ae",
+    "best_validation_ce": 3.0587613582611084,
+    "seed1_best_validation_ce": 3.061672449,
+    "seed2_minus_seed1_ce": -0.0029110907388916196
+  },
+  "execution": {
+    "wall_seconds": 22.75349521636963,
+    "result_sha256": "11e345eb8ef8384189f7599f54868d8aedabdfffa50856a2d344a086b942768f",
+    "rows_sha256": "c5330b2f1f3c9a365f9b25932ce3424100d98b034fa312eada74fffa26197ba8",
+    "alignment_rows_sha256": "b71e66205bf93cebee4fba45c57d75c958633d7e1615ac7459192bf04969f94d",
+    "status_sha256": "1c80163cee59ab8fe10ac844e722ed5ff7f7224888ce72b05870c3d56d3f98d9",
+    "log_sha256": "2ece09e0b2bf9331eeccde524604ea3c34c96ecb0887bd4e63932fb2a6d6d3e2",
+    "assignment_overlap_minimum": 1.0,
+    "all_values_finite": true
+  },
+  "families": {
+    "coupled_four": {
+      "coordinate_compression_ratio": 383.8750813272609,
+      "heldout_exact_recovery_mean": {
+        "fixed_structured": 0.001738324761390686,
+        "causal_moving": 0.02435365815957387,
+        "causal_static": 0.04468156397342682
+      },
+      "moving_by_layer": {
+        "0": 0.014507122337818146,
+        "5": 0.028020009398460388,
+        "11": 0.030533842742443085
+      },
+      "paired_parameter_recovery_mean": {
+        "fixed_structured": 0.002617438634236654,
+        "causal_moving": 0.007826524476210276,
+        "causal_static": 0.01293243964513143
+      },
+      "all_gates_pass": false
+    },
+    "separate_three_plus_three": {
+      "coordinate_compression_ratio": 256.0,
+      "heldout_exact_recovery_mean": {
+        "fixed_structured": 0.0037433976928393045,
+        "causal_moving": 0.02433311939239502,
+        "causal_static": 0.05270041277011236
+      },
+      "moving_by_layer": {
+        "0": 0.01691308617591858,
+        "5": 0.027246832847595215,
+        "11": 0.028839439153671265
+      },
+      "paired_parameter_recovery_mean": {
+        "fixed_structured": 0.003913454711437225,
+        "causal_moving": 0.00864455352226893,
+        "causal_static": 0.01336658000946045
+      },
+      "all_gates_pass": false
+    }
+  },
+  "diagnosis": {
+    "primary": "Per-expert per-hidden-neuron quotienting removes the global symmetry error but not the direction-span error. At both approximately 384x and 256x coordinate compression, temporal atom chords recover only 2.4% of held-out residual-write action on average.",
+    "secondary": "Static early atom chords beat moving recent chords in both families, while paired parameter recovery remains about 1%. The optimizer trajectory at this cadence is not a reusable low-dimensional temporal affine chart.",
+    "blockfht": "Fixed local BlockFHT is near zero recovery, but the learned temporal controls also fail by roughly two orders of magnitude versus the 0.90 gate. BlockFHT is not the sole problem; the latent function must acquire task- and input-conditioned directions."
+  },
+  "authorization": {
+    "generated_expert_training": false,
+    "larger_active_parameter_rungs": false,
+    "mfu_preflight": false,
+    "next_allowed_work": "Preregister and evaluate a causal data-derived functional-basis oracle at 124M. Its bases must be constructed from left-state discovery activations or gradients without future-chord leakage, and scored on fixed held-out tokens before any training implementation."
+  }
+}
