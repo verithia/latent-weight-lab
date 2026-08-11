@@ -1,0 +1,97 @@
+{
+  "schema_version": "nanogpt_sparse_moe_feature_write_predictability_seal_v1",
+  "recorded_at": "2026-08-11T21:45:00+08:00",
+  "decision": "REJECT_FEATURE_ONLY_WRITE_DIRECTION_REQUIRE_INDEPENDENT_OUTPUT_FRAME",
+  "source_control": {
+    "git_commit": "1709572bf76f1d40774bf31fb9b956730f53e70e",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_feature_write_predictability.py",
+    "entrypoint_sha256": "9fea42d87c83072bdabd8cf1b3d6a7ecbede2131582c5baa26818010daefe7c6",
+    "plan_sha256": "405eefab084d153aa56a05772062ec7dd80079e03543d653e9d9bf4ce9234a7a"
+  },
+  "source": {
+    "seed1_stepzero_sha256": "a755ca6c146d50d8c04516cb19d1d1f44abac330a90883dbb56f12c099fa1773",
+    "seed1_terminal_state_sha256": "bd516b45c13fa4b6e77e747f7214f5c1d82febbf466a4e5f07a0b1cb20f8ba24",
+    "seed1_terminal_model_sha256": "62d7bc04e953036d758111c6fa44d4eb1c97a3eef0188ae989b56be54289e070",
+    "seed2_stepzero_sha256": "18c1f87cbcb8d17becc2f7605fb7887b772594c5d281bf2ed32695d927ac8b54",
+    "seed2_terminal_state_sha256": "ece317fb25c3db6a10ab74f3898d489003283cd316202c2fd3344151168e4032",
+    "seed2_terminal_model_sha256": "3b19fa796307df8676a8aa77b2183952b14af9a7718f2d2004690878fb3708ae",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "neuron_partitions": 2,
+    "fit_neurons_per_partition": 1280,
+    "unseen_neurons_per_partition": 256,
+    "untouched_token_frames": 2
+  },
+  "results": {
+    "tied_current_ray": {
+      "coordinate_compression": 768.0,
+      "direction_cosine_squared_mean": 0.0404828010359779,
+      "weight_recovery_mean": 0.04048280417919159,
+      "functional_recovery_mean": 0.053058646619319916,
+      "functional_recovery_minimum": 0.002138674259185791,
+      "functional_by_layer_0_5_11": [0.0844292938709259, 0.06890091300010681, 0.0058457329869270325]
+    },
+    "tied_current_motion_plane": {
+      "coordinate_compression": 384.0,
+      "direction_cosine_squared_mean": 0.042678526137024164,
+      "weight_recovery_mean": 0.04267853498458862,
+      "functional_recovery_mean": 0.055614084005355835,
+      "functional_recovery_minimum": 0.00544208288192749,
+      "functional_by_layer_0_5_11": [0.08654288947582245, 0.07135965675115585, 0.008939705789089203]
+    },
+    "dense_current_ridge": {
+      "compression_valid": false,
+      "direction_cosine_squared_mean": 0.044048006064258516,
+      "weight_recovery_mean": 0.044048006335894264,
+      "functional_recovery_mean": 0.07012942681709926,
+      "functional_recovery_minimum": 0.013211846351623535,
+      "functional_by_layer_0_5_11": [0.16241835802793503, 0.022163689136505127, 0.025806233286857605],
+      "fit_recovery_mean": 0.6743618647257487,
+      "fit_recovery_range": [0.6239112615585327, 0.7617639899253845]
+    },
+    "dense_current_motion_ridge": {
+      "compression_valid": false,
+      "decoder_values_per_expert": 1179648,
+      "direction_cosine_squared_mean": 0.013224090856965631,
+      "weight_recovery_mean": 0.013224090139071146,
+      "functional_recovery_mean": 0.021990271906057995,
+      "functional_recovery_minimum": 0.005396902561187744,
+      "functional_by_layer_0_5_11": [0.04982669651508331, 0.007409185171127319, 0.008734934031963348],
+      "functional_by_seed_1_2": [0.02244323988755544, 0.021537303924560547],
+      "fit_recovery_mean": 1.0,
+      "fit_recovery_minimum": 1.0,
+      "regularized_condition_range": [1010.08935546875, 2453.502197265625]
+    }
+  },
+  "gates": {
+    "dense_upper_bound_functional_mean_min_0p9": false,
+    "dense_upper_bound_every_layer_min_0p8": false,
+    "dense_upper_bound_each_seed_min_0p8": false,
+    "all_values_finite": true
+  },
+  "diagnosis": {
+    "primary": "The maximally favorable two-stream dense decoder exactly interpolates every fit-neuron target but recovers only 2.20 percent of heldout routed write function. This is generalization failure, not solver underfit or insufficient decoder parameter count.",
+    "replication": "The dense upper bound is equally poor in both independent runs: 2.244 percent for seed one and 2.154 percent for seed two.",
+    "compact_controls": "The 768x tied ray and 384x current-plus-motion plane recover only 5.31 and 5.56 percent. Adding c_fc motion supplies negligible directional information.",
+    "blockfht_scope": "No BlockFHT decoder participates in this test. The failure therefore localizes beyond fixed pseudorandom projection: c_fc features do not determine c_proj residual-write orientation.",
+    "information_requirement": "The c_proj latent function must carry an independently oriented output/error stream. Feature/write identity and radial coupling may still be shared, but write direction cannot be derived from c_fc alone."
+  },
+  "artifacts": {
+    "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/feature_write_predictability_v2",
+    "wall_seconds": 9.209595203399658,
+    "result_sha256": "6e47df6aa41041b5e952b60495b27301430cda380b86b94aabb15c475c4390f6",
+    "rows_sha256": "955c906c02be5ffd62947a5775603d539b1827670951c442355e8e3dd12d3574",
+    "status_sha256": "3e76e46a88546ffc237fbe15089d89e98348ce571c75b67a3745f4293c4b7d26",
+    "failed_preimport_attempt_log_sha256": "aedc16a56866644c651d61d5750dce254be7e08288c0ace8a7322fca489aefb3",
+    "failed_preimport_attempt_scope": "The v1 shell invocation omitted repository PYTHONPATH and failed on import before loading any scientific state."
+  },
+  "authorization": {
+    "feature_only_compact_map": false,
+    "tied_diagonal_householder_or_cayley_training": false,
+    "model_training": false,
+    "mfu_preflight": false,
+    "generated_experts": false,
+    "larger_rung": false,
+    "next_allowed_work": "Theory and zero-update design for an independent task-conditioned output/error directional stream. It may share neuron identity and radial coupling with c_fc, but must count its own output-frame state and must not use a learned dense decoder or future/target action to orient a deployable basis."
+  }
+}
