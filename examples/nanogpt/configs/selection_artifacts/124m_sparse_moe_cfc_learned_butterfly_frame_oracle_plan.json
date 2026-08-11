@@ -121,7 +121,7 @@
     "automatic_retry_or_sweep": false
   },
   "identity": {
-    "preregistration_git_commit": null,
+    "preregistration_git_commit": "ea6cf9d3b9394e901b166c5a9931ad517ae663f3",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_learned_butterfly_frame_oracle.py",
     "entrypoint_sha256": null
   }
