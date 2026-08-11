@@ -80,6 +80,16 @@
   "identity": {
     "preregistration_git_commit": "ebea0a8ccc875a45f39649e906acea57c93beeed",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_same_gauge_tangent_decomposition.py",
-    "entrypoint_sha256": null
+    "entrypoint_sha256": "3cec65be902fc3e72d2b688c7421e51d7ac8e8353e1d054f9b52db3ee183ed70",
+    "helper_sha256": {
+      "examples/nanogpt/analyze_sparse_moe_cfc_global_conditional_tangent_audit.py": "e481591553737552b500fc08104fee96328f95e162be9c4296d69d2bc7e55df8",
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_sparse_moe_cfc_learned_butterfly_frame_oracle.py": "91d3818a2f9245ce496b394b6f07526ac41ab6e1d28d1e0d9aeb64581103658b",
+      "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py": "5c9564ec74538bfa4b7c886bc22788869bfd922af82c73bfcc123a955117e775",
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
+      "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+      "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    }
   }
 }
