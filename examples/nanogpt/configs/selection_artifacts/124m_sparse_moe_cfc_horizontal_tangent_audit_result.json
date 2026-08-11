@@ -1,0 +1,113 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_horizontal_tangent_audit_seal_v1",
+  "recorded_at": "2026-08-11T23:10:00+08:00",
+  "classification": "OPTIMIZER_GEOMETRY_NUMERICALLY_INCONCLUSIVE",
+  "source_control": {
+    "git_commit": "5eb3dafa62281c910d3f90e7636ea47bb5ae7daf",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_horizontal_tangent_audit.py",
+    "entrypoint_sha256": "87e73b812683f1fc15ef5188c4656d5d3e77c63d79549fa449bb4f749263e2be",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_horizontal_tangent_audit_plan.json",
+    "plan_sha256": "3fd6908e2fd01f57c470db0cf8b6371bf3b948a6ebfaa5623eb27e8d5bc76dac"
+  },
+  "source": {
+    "parent_optimizer_geometry_result_sha256": "96cca36e1f83c3bf5951954e9dc816addcdf2aef6cd1ec527fb548919e8f69e2",
+    "functional_tt_coordinates_sha256": "27e15170901eb6e0431372fb6f5f56356891511011cc01ff5c93321c288b16d1",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground_polled_sub_five_minute_audit",
+    "internal_wall_seconds": 16.059884071350098,
+    "wrapper_wall_seconds": 17.87,
+    "maximum_memory_allocated_bytes": 2808829952,
+    "maximum_resident_set_kib": 6682436,
+    "remote_focused_and_parent_regression_tests": "15 passed in 1.57s",
+    "preflight_projected_full_wall_seconds": 122.03,
+    "preflight_sha256": "59b56e9825dd0e68b069f493b12642b32cd100ef639817f9c4e9485d7de0a0c8",
+    "result_sha256": "998334a34fcfc176528a98bc8f86877dfd9a4330633e17e1a775e0b69e88bdb9",
+    "log_sha256": "998334a34fcfc176528a98bc8f86877dfd9a4330633e17e1a775e0b69e88bdb9",
+    "time_log_sha256": "0449baaaaeedad5ae1225def10d9c87e1345a2518248d2555602a4000d76381f",
+    "all_values_and_gradients_finite": true,
+    "gpu_idle_after_completion": true,
+    "workspace_gib_after_completion": 253
+  },
+  "horizontal_geometry": {
+    "ambient_forward_coordinates": 566028,
+    "horizontal_tangent_coordinates": 417300,
+    "removed_redundant_coordinates": 148728,
+    "maximum_base_orthogonality_error_fro": 0.000008204611573753004,
+    "maximum_complement_cross_error_fro": 0.0000056799092040895555,
+    "forward_family_changed": false,
+    "tt_ranks_or_modes_changed": false
+  },
+  "results": {
+    "pcg_relative_normal_residual_by_seed_and_source": {
+      "20261001": {
+        "discovery_a": 0.5320855171721698,
+        "discovery_b": 0.5023566469879744
+      },
+      "20261002": {
+        "discovery_a": 0.40356103741576965,
+        "discovery_b": 0.3654088205951808
+      }
+    },
+    "empirical_metric_diagonal": {
+      "minimum": 1.5366694028351446e-11,
+      "maximum": 0.08717484772205353,
+      "dynamic_range_by_seed_and_source": [
+        3288814400.6189685,
+        729004451.2643621,
+        1678100414.308156,
+        626970948.8830264
+      ]
+    },
+    "source_optimal_linear_recovery_ranges": {
+      "horizontal_euclidean_pullback": [0.025086714854977488, 0.02859496338642904],
+      "horizontal_diagonal_metric": [0.0285629246406426, 0.030337034824527806],
+      "incomplete_horizontal_gauss_newton": [0.18116172931729166, 0.19902947251892272]
+    },
+    "heldout_optimal_linear_recovery_ranges": {
+      "incomplete_horizontal_gauss_newton": [0.0999277824345767, 0.10870801568265871]
+    },
+    "incomplete_horizontal_gauss_newton_transferred_alpha_heldout_recovery_range": [
+      0.09036745346244514,
+      0.09904265964635188
+    ],
+    "same_endpoint_cross_discovery_heldout_action_cosine": {
+      "incomplete_horizontal_gauss_newton_range": [0.6318710126119933, 0.6348462300330894]
+    },
+    "cross_endpoint_corresponding_heldout_action_cosine": {
+      "incomplete_horizontal_gauss_newton_range": [0.37769816095234965, 0.3829581185516904]
+    }
+  },
+  "gates": {
+    "pcg_converged": false,
+    "gauss_newton_source_recovery_pass": false,
+    "gauss_newton_heldout_recovery_pass": false,
+    "gauss_newton_gain_pass": false,
+    "gauss_newton_transferred_alpha_pass": false,
+    "same_endpoint_stability_pass": false,
+    "cross_endpoint_stability_pass": false,
+    "diagonal_simple_repair_pass": false,
+    "all_values_and_gradients_finite": true,
+    "all_pass": false
+  },
+  "interpretation": {
+    "formal_boundary": "Analytic gauge removal improves the registered 16-step PCG residual from the ambient 0.464-0.771 range to 0.365-0.532, but every solve still exceeds the frozen 0.1 ceiling. The result remains numerically inconclusive and cannot reject the exact TT local tangent or authorize a refit.",
+    "metric_signal": "Removing 148,728 redundant coordinates eliminates exact metric zeros and reduces the observed diagonal dynamic range from 1e17-1e28 to 6.27e8-3.29e9. The incomplete coupled direction improves source recovery to 18.12-19.90%, versus 2.51-2.86% for Euclidean and 2.86-3.03% for the diagonal metric.",
+    "generalization_signal": "The incomplete coupled direction transfers only 9.99-10.87% under an optimal heldout scalar and 9.04-9.90% with the source-selected scalar. Same-endpoint cross-bank cosine is only 0.632-0.635 and cross-endpoint cosine 0.378-0.383, so no observed direction approaches an authorization gate.",
+    "causal_conclusion": "Ambient gauge redundancy was a real numerical defect, not the explanation for the functional miss. Under the frozen quotient method this exact rank-150 TT is not practically optimizable enough to justify another functional fit. Damping, iteration, rank, mode, and seed sweeps remain closed; the next work must return to the independently observed activation-conditioned functional-direction signal and define a different compact family before any run."
+  },
+  "authorization": {
+    "horizontal_diagonal_functional_refit": false,
+    "horizontal_gauss_newton_functional_refit": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false,
+    "next_allowed_work": "Theory and preregistration only for a non-TT expert c_fc family whose image changes with routed activation state. It must be tested by a zero-update, two-discovery-bank, heldout functional oracle before any fit, MFU preflight, training, or ladder transfer."
+  }
+}
