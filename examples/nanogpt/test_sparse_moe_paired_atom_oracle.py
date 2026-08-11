@@ -10,6 +10,7 @@ from examples.nanogpt.analyze_sparse_moe_paired_atom_oracle import (
     fixed_local_basis,
     project_rows,
     reconstruct_family,
+    union_fieldnames,
 )
 
 
@@ -29,6 +30,14 @@ def test_project_rows_recovers_independent_in_span_targets() -> None:
     projected, coordinates = project_rows(target, basis, ridge_ratio=1e-10)
     assert coordinates.shape == truth.shape
     assert energy_recovery(projected, target) > 0.999999
+
+
+def test_union_fieldnames_accepts_family_specific_coordinate_stats() -> None:
+    assert union_fieldnames([{"common": 1, "pair": 2}, {"common": 3, "fc": 4}]) == [
+        "common",
+        "fc",
+        "pair",
+    ]
 
 
 def test_coupled_four_reconstructs_paired_atom_chord() -> None:

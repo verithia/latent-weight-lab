@@ -221,6 +221,12 @@ def summarize(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return summary
 
 
+def union_fieldnames(rows: list[dict[str, Any]]) -> list[str]:
+    if not rows:
+        raise ValueError("cannot build a CSV schema from no rows")
+    return sorted({key for row in rows for key in row})
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--plan", required=True, type=Path)
@@ -349,7 +355,7 @@ def main() -> None:
     args.output.mkdir(parents=True, exist_ok=True)
     rows_path = args.output / "paired_atom_rows.csv"
     with rows_path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(handle, fieldnames=union_fieldnames(rows))
         writer.writeheader()
         writer.writerows(rows)
     alignment_path = args.output / "paired_atom_alignment_rows.csv"
