@@ -1,0 +1,49 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_context_terminal_frame_oracle_seal_v1",
+  "recorded_at": "2026-08-11T19:20:00+08:00",
+  "status": "sealed",
+  "decision": "REJECT_CONTEXT_MODULATED_FHT_AT_TESTED_BUDGET",
+  "source": {
+    "git_commit": "a8a4f29ccdc55eca861919d500fb5c94abd34e01",
+    "parent_plan_sha256": "99131ee49f981114cafe3ed61051049f7d7fb547c3f514deabd5fd252318fb2c",
+    "protocol_correction_plan_sha256": "d6521bfc290e2757bff6e3cc9aa41c52338feb760d98ccb83339e6172161471f",
+    "entrypoint_sha256": "42c72553e3b6b584e2fb649b5afb5ec5a3b41d5f21e7d56ac30cff8ec117d41b",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "result_sha256": "e17e8e03734ba0b2cdf737efc0bcde47ee0a7f49e622dee65422ce6eec3dc92d",
+    "rows_sha256": "83591f47a574ba62917b4d51b9a999bedd2cbc967536a796586a1ce5084f4e4b",
+    "coordinates_sha256": "23171651607c7fe31cc4a48157332c4168c9f2d9263c7157be9cc031f76dbcd6",
+    "status_sha256": "bce8b11980f520975723e56284b5489a49af06778fe3e7f5280a8897cc620bc5",
+    "log_sha256": "78a640f4e5d57f593bb543eefa9a7e4458a6e99174248768d6863ee82aff88c4",
+    "wall_seconds": 35.03153657913208,
+    "all_values_finite": true
+  },
+  "results": {
+    "two_factor_384x": {
+      "dynamic_heldout_mean_a_b": [0.13505572080612183, 0.13531563679377237],
+      "dynamic_minus_static_a_b": [-0.05547128121058146, -0.05531865358352661],
+      "heldout_bank_action_cosine": 0.9072762529055277,
+      "minimum_layer_recovery_a_b": [0.11322319507598877, 0.11460816860198975],
+      "minimum_expert_assignments_a_b": [542, 630]
+    },
+    "three_factor_256x": {
+      "dynamic_heldout_mean_a_b": [0.17371664444605509, 0.17404858271280924],
+      "dynamic_minus_static_a_b": [-0.06678183873494466, -0.066829780737559],
+      "heldout_bank_action_cosine": 0.9075015385945638,
+      "minimum_layer_recovery_a_b": [0.14684408903121948, 0.1483393907546997],
+      "minimum_expert_assignments_a_b": [542, 630]
+    }
+  },
+  "interpretation": {
+    "phase_correction": "Terminal-model activation collection repairs the mixed-phase protocol and removes the apparent occupancy failure.",
+    "mechanism": "The activation-conditioned FHT gate still points away from the useful c_proj residual in every probed layer. The failure is stable across independent coordinate fits and is worse than the identical-coordinate static map.",
+    "closed_family": "Activation-conditioned FHT modulation at 384x/256x is closed. No beta, rank, sign, or learning-rate sweep is authorized.",
+    "router": "No router repair is authorized; all terminal-frame occupancy gates pass."
+  },
+  "authorization": {
+    "training": false,
+    "mfu_preflight": false,
+    "generated_experts": false,
+    "larger_rung": false,
+    "new_latent_function_only_after_theory_reconciliation": true
+  }
+}
