@@ -1,0 +1,34 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_parameter_accounting",
+  "base_preregistered_config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_0p5tpp_lr24e4.json",
+    "sha256_before_accounting_resolution": "86744b684f6529b764a918258f020dd30824e64f7d122717a314b9f84d9938c7"
+  },
+  "claim_boundary": {
+    "expert_compression": "none",
+    "inference_flop_reduction": "none; QK weights are materialized for the ordinary attention forward",
+    "materialized_active_parameters": 124447488,
+    "materialized_stored_parameters": 294316800,
+    "model_wide_active_registered_reduction_fraction": 0.08402618781666371,
+    "model_wide_stored_registered_reduction_fraction": 0.03552922565072736,
+    "qk_only_trainable_state_compression": 3.826994199400475
+  },
+  "construction": {
+    "dense_attention_v_o_parameters": 14155776,
+    "dense_expert_parameters": 226492416,
+    "dense_router_parameters": 73728,
+    "qk_mapping_trainable_state": 3698928,
+    "qk_materialized_parameters": 14155776,
+    "registered_active_trainable_parameters": 113990640,
+    "registered_stored_trainable_parameters": 283859952
+  },
+  "measurement": {
+    "method": "instantiate the exact 12-layer config on the PyTorch meta device at the implementation commit and count named parameters; reconstruct materialized active/stored counts by replacing QK mapping state with the generated dense QK matrices",
+    "source_commit": "5647b005b7081c097e395df268c7fadfe8165087",
+    "tests_before_measurement": "18 passed on PRO6",
+    "verified_host": "PRO6"
+  },
+  "preregistered_plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_composition_plan.json",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_parameter_accounting_v1",
+  "status": "sealed_before_exact_config_mfu_preflight"
+}

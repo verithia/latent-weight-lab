@@ -38,6 +38,11 @@ def test_candidate_changes_only_attention_qk_from_dense_moe_scope() -> None:
     assert config["optimizer"] == "muon"
     assert config["estimated_materialized_active_params"] == 124447488
     assert estimate_active_params(config) == 124447488
+    assert config["estimated_registered_trainable_params"] == 283859952
+    assert config["estimated_registered_active_trainable_params"] == 113990640
+    assert config["estimated_qk_mapping_trainable_state"] == 3698928
+    assert config["estimated_qk_materialized_parameters"] == 14155776
+    assert config["launch_ready"] is True
 
 
 def test_candidate_horizon_identity_and_performance_gate_are_frozen() -> None:
