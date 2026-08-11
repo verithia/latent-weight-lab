@@ -1,0 +1,80 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_kronecker_oracle_plan_v1",
+  "recorded_at": "2026-08-11T20:30:00+08:00",
+  "status": "preregistered_after_terminal_context_rejection_before_any_kronecker_recovery_value",
+  "scientific_question": "Can a nonlinear intrinsic full-rank matrix parameterization learn c_proj orientation at 200-500x coordinate compression, where fixed random BlockFHT images, deeper ProductFHT, natural-axis orbits, temporal atoms, task-gradient/KFAC images, and token-context FHT modulation all failed?",
+  "theory_reconciliation": {
+    "fixed_image_no_go": "For W=W0+A phi(z), every tangent remains in Im(A); changing only the latent MLP cannot repair direction mismatch.",
+    "product_fht_boundary": "ProductFHT already used learned diagonals between fixed global FHT/sign mixers. Its 12-factor tangent had task cosine 0.12737 below the 0.14546 ambient prediction, and its 24-factor form failed the 20 percent MFU floor. Adding more FHT depth is closed.",
+    "terminal_context_boundary": "At 384x and 256x, terminal activation-conditioned FHT was 0.0553-0.0668 recovery worse than its identical-coordinate static chart in both discovery fits. Token context rotated the chart reproducibly but in the wrong direction.",
+    "new_algebra": "The candidate is W(z)=W0+sum_r A_r tensor-product B_r. Both A and B are latent coordinates, so J_g changes with z and includes additive normal directions delta-A tensor-product B plus A tensor-product delta-B. There is no separately learned dense decoder.",
+    "not_lora": "A generic Kronecker term can have ordinary matrix rank min(output,input), and the exact rank-two sum is not a low-matrix-rank adapter. The compression constraint is low Kronecker rank, not low ordinary rank.",
+    "paper_link": "This preserves the paper's fixed exact base, compact layer/matrix-wise latent state, nonlinear smooth map, and implicit structured materialization, while replacing the empirically misaligned fixed orthogonal projection. Mapping Loss remains inapplicable until this chart passes alignment."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_context_terminal_frame_oracle_result.json",
+    "parent_result_sha256": "38d984196082c67ae39a3e111b31980b4a1f134681b0a3747ca8d5e2021e746a",
+    "layers": [0, 5, 11],
+    "target": "With the terminal same-run router and c_fc fixed, represent only terminal c_proj minus exact step-zero c_proj in the terminal hidden-state functional gauge."
+  },
+  "mechanism": {
+    "equation": "Delta W[e] = sum_{r=1}^2 A[e,r] tensor-product B[e,r]",
+    "kronecker_rank": 2,
+    "output_groups": 24,
+    "output_channels": 32,
+    "input_groups": 48,
+    "input_channels": 32,
+    "matrix_shape": [768, 1536],
+    "coordinates_per_expert": 4352,
+    "coordinate_compression_ratio": 271.05882352941177,
+    "fixed_base": "Exact GPT-seeded step-zero dense c_proj, immutable and reproducible from model seed.",
+    "latent_state": "All entries of A and B; no learned projection, adapter basis, dense residual, target-gradient state, or token-conditioned inference branch.",
+    "ordinary_rank": "Each A tensor-product B term can have ordinary rank 768 when both factors are full rank."
+  },
+  "functional_protocol": {
+    "activation_state": "terminal",
+    "top_k": 2,
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260921, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192},
+      {"name": "discovery_b", "seed": 20260922, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192}
+    ],
+    "heldout": {"seed": 20260923, "batches": 2, "batch_size": 8, "block_size": 256, "tokens": 4096},
+    "score": "Exact routed residual-write recovery on untouched heldout tokens and heldout action agreement between independently refined discovery fits.",
+    "matched_control": "The sealed terminal-frame three-factor static FHT map uses 4608 coordinates per expert (256x), slightly more than the candidate's 4352, and is therefore a favorable control."
+  },
+  "fit": {
+    "initialization": "Exact per-expert best rank-two Kronecker SVD of the terminal endpoint displacement. This deliberately sees the endpoint and makes the test an optimistic representability upper bound, not a causal training simulation.",
+    "functional_refinement": "Independently refine A and B on each discovery bank with full-batch Adam against normalized routed residual-write error.",
+    "adam_steps": 256,
+    "learning_rate": 0.03,
+    "gradient_clip": 10.0,
+    "weight_decay": 0.0,
+    "no_sweep": true,
+    "anti_leakage": "The endpoint is allowed only to initialize this upper bound. No heldout token contributes to fitting, model selection, factor layout, rank, optimizer, or thresholds."
+  },
+  "frozen_gates": {
+    "heldout_recovery_mean_min": 0.9,
+    "heldout_recovery_every_layer_min": 0.8,
+    "improvement_over_parent_static_min": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_expert_assignments": 128,
+    "functional_fit_must_not_degrade_svd_initialization": true,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing both independent fits authorizes only a separately preregistered causal multi-phase and short-shadow oracle for this exact rank-two layout. It does not authorize model implementation, MFU preflight, training, generated experts, or a larger rung.",
+    "fail": "Failure rejects the rank-two 24x32-by-48x32 Kronecker c_proj map at 271x. Do not sweep rank, layout, learning rate, or optimizer. Reconcile which gate failed before proposing a different latent function.",
+    "scope": "This upper bound does not test c_fc/c_proj co-generation. A pass is necessary before spending a paired-map analysis; a failure returns theory to another non-fixed-image mechanism."
+  },
+  "execution": {
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cproj_kronecker_oracle.py",
+    "entrypoint_sha256": "01aebf7a1ae7b1b687d1e2184db943c1c43ee839be788a81b41fd401f6f3a07a",
+    "policy": "Foreground poll; expected under five minutes. If observed runtime reaches five minutes, attach and verify a persistent terminal/error watchdog before continuing."
+  }
+}
