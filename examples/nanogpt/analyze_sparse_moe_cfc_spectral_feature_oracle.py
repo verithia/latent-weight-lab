@@ -112,6 +112,8 @@ class SpectralCFC:
         seed: int,
         layer: int,
         device: str,
+        context_beta: float = 0.0,
+        context_seed_offset: int = 37,
     ) -> None:
         if padded_width & (padded_width - 1):
             raise ValueError("padded width must be a power of two")
@@ -122,6 +124,8 @@ class SpectralCFC:
         self.hidden_width = int(hidden_width)
         self.padded_width = int(padded_width)
         self.device = device
+        self.context_beta = float(context_beta)
+        self.context_seed_offset = int(context_seed_offset)
         reference = torch.empty(1, device=device, dtype=torch.float32)
         self.signs = _seeded_signs(
             reference,
@@ -129,6 +133,18 @@ class SpectralCFC:
             padded_width=padded_width,
             seed=seed,
             layer=layer,
+        ).to(device=device, dtype=torch.float32)
+        self.context_signs = torch.stack(
+            [
+                signs_for(
+                    reference,
+                    expert,
+                    0,
+                    int(seed) + self.context_seed_offset + 1009 * int(layer),
+                    padded_width,
+                )
+                for expert in range(experts)
+            ]
         ).to(device=device, dtype=torch.float32)
         self.base_scale = math.sqrt(float(padded_width)) * 0.02
 
@@ -148,6 +164,45 @@ class SpectralCFC:
         values = normalized_fht_last_dim(values * self.signs[:, 0, None, :])
         return values
 
+    def context_gate(self, inputs: torch.Tensor) -> torch.Tensor:
+        if self.context_beta == 0.0:
+            return torch.ones(
+                *inputs.shape[:-1],
+                self.padded_width,
+                device=self.device,
+                dtype=torch.float32,
+            )
+        values = F.pad(
+            inputs.to(device=self.device, dtype=torch.float32),
+            (0, self.padded_width - self.input_width),
+        )
+        context = normalized_fht_last_dim(
+            values * self.context_signs[:, None, :]
+        )
+        context = context / context.square().mean(
+            dim=-1, keepdim=True
+        ).clamp_min(1e-12).sqrt()
+        beta = self.context_beta
+        return (1.0 + beta * context) / math.sqrt(1.0 + beta * beta)
+
+    def for_expert(self, expert: int) -> "SpectralCFC":
+        if not 0 <= int(expert) < self.experts:
+            raise IndexError("expert index out of range")
+        result = SpectralCFC(
+            experts=1,
+            input_width=self.input_width,
+            hidden_width=self.hidden_width,
+            padded_width=self.padded_width,
+            seed=0,
+            layer=0,
+            device=self.device,
+            context_beta=self.context_beta,
+            context_seed_offset=self.context_seed_offset,
+        )
+        result.signs = self.signs[expert : expert + 1]
+        result.context_signs = self.context_signs[expert : expert + 1]
+        return result
+
     def preactivation(
         self,
         inputs: torch.Tensor,
@@ -165,6 +220,7 @@ class SpectralCFC:
         values = normalized_fht_last_dim(
             values * first * self.signs[:, 1, None, :]
         )
+        values = values * self.context_gate(inputs)
         values = normalized_fht_last_dim(
             values * second * self.signs[:, 2, None, :]
         )
@@ -365,16 +421,7 @@ def routed_outputs(
                 compact.bias[expert : expert + 1],
                 None if compact.scale is None else compact.scale[expert : expert + 1],
             )
-            expert_operator = SpectralCFC(
-                experts=1,
-                input_width=operator.input_width,
-                hidden_width=operator.hidden_width,
-                padded_width=operator.padded_width,
-                seed=0,
-                layer=0,
-                device=operator.device,
-            )
-            expert_operator.signs = operator.signs[expert : expert + 1]
+            expert_operator = operator.for_expert(expert)
             predicted_pre, predicted_output = expert_operator.expert_output(
                 expert_input,
                 state.c_proj[expert : expert + 1],
