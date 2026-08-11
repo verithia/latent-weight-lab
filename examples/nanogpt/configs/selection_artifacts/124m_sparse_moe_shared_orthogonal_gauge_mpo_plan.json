@@ -1,0 +1,109 @@
+{
+  "schema_version": "nanogpt_sparse_moe_shared_orthogonal_gauge_mpo_plan_v1",
+  "recorded_at": "2026-08-11T17:54:05+08:00",
+  "status": "preregistered_after_depth_group_rejection_before_any_shared_gauge_fit_or_fresh_bank_value",
+  "scientific_question": "Is the rank-nine MPO's sparse-MoE c_proj deficit primarily a shared residual-direction gauge mismatch that one model-wide full-rank orthogonal transformation can remove?",
+  "theory_reconciliation": {
+    "direction_evidence": "Feature-to-write decoding failed, equal-budget Kronecker and MPO maps stopped near 0.33-0.36 recovery, and the functional spectrum requires a wide output frame. The model-wide rank-545 oracle nevertheless reached 0.9113 mean recovery with stable independent bases, showing that much of the missing information is a shared residual-output coordinate system.",
+    "grouping_rejection": "Three fixed depth groups at the identical state budget fell to 0.7087 mean recovery. Duplicating narrow output dictionaries is not the solution.",
+    "single_discriminator": "Compose every per-expert rank-nine MPO displacement with one shared R in O(768): Delta W_(l,e)=R M_(l,e). R changes full residual-output direction without imposing an ordinary low-rank write subspace or storing a private basis per matrix.",
+    "matched_control": "On entirely fresh token banks, refit an ungauged rank-nine MPO for exactly the same total number of Adam core steps. The only additional fitting operation in the treatment is a closed-form shared orthogonal Procrustes update.",
+    "paper_scope": "This is a diagnostic extension motivated by the Mapping-Network alignment principle and the measured residual gauge; it is not a technique reported by the original paper and is not yet a training result.",
+    "no_sweep": "The gauge sharing scope, MPO layout, outer rounds, optimizer, fresh seeds, thresholds, and state accounting are frozen. Failure closes this full-gauge upper bound; do not sweep rotations, ranks, radices, optimizers, or seeds."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mpo_seal": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_mpo_oracle_result.json",
+    "mpo_seal_sha256": "bcbcb871c029ec7c13cb7eb16da83376827f8a6900d8861c287201189dd4b017",
+    "depth_group_seal": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_depth_grouped_basis_result.json",
+    "depth_group_seal_sha256": "7857b5e2bc9fec028f483ded3c7402b64c7aad657d391a64ffbfb58a65eb1cd6",
+    "layers": [0, 5, 11],
+    "target": "With terminal same-run router and c_fc fixed, represent terminal c_proj minus exact reproducible step-zero c_proj in the routed terminal functional gauge."
+  },
+  "mechanism": {
+    "name": "modelwide_full_orthogonal_residual_gauge_plus_rank9_interleaved_mpo",
+    "equation": "Delta W_(layer,expert) = R M_(layer,expert)(cores), with one R shared by all layers and experts.",
+    "output_modes": [3, 4, 4, 4, 4],
+    "input_modes": [6, 4, 4, 4, 4],
+    "bond_rank": 9,
+    "mpo_coordinates_per_expert": 4194,
+    "all_96_mpo_coordinates": 402624,
+    "orthogonal_width": 768,
+    "orthogonal_intrinsic_degrees_of_freedom": 294528,
+    "total_intrinsic_trainable_state": 697152,
+    "dense_cproj_values_all_12_layers_8_experts": 113246208,
+    "intrinsic_trainable_state_compression": 162.44120077113743,
+    "cached_materialized_orthogonal_scalars": 589824,
+    "total_state_if_R_is_cached_dense": 992448,
+    "cached_materialized_state_compression": 114.10795124782356,
+    "classification": "A model-wide full-rank change of residual coordinates plus compact per-matrix hierarchical multilinear state; not LoRA and not an ordinary low-rank matrix family.",
+    "budget_caveat": "This diagnostic deliberately relaxes the c_proj-only 200x target. A pass authorizes a separate compression test for R; it does not make this full-gauge form an acceptable final parameterization."
+  },
+  "functional_protocol": {
+    "activation_state": "terminal",
+    "top_k": 2,
+    "discovery_banks": [
+      {"name": "fresh_discovery_a", "seed": 20260926, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192},
+      {"name": "fresh_discovery_b", "seed": 20260927, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192}
+    ],
+    "heldout": {"seed": 20260928, "batches": 2, "batch_size": 8, "block_size": 256, "tokens": 4096},
+    "score": "Exact routed residual-write recovery on untouched heldout tokens and heldout action agreement between independently fitted discovery banks.",
+    "anti_leakage": "All three token seeds are new after selecting this structure. Heldout tokens never update MPO cores, R, checkpoint choice, thresholds, or state accounting."
+  },
+  "fit": {
+    "initialization": "Exact per-expert rank-nine TT-SVD of each terminal c_proj displacement and model-wide R=I. Endpoint access makes this an optimistic representability upper bound, not a causal training simulation.",
+    "outer_rounds": 4,
+    "mpo_adam_steps_per_round": 128,
+    "matched_control_total_adam_steps": 512,
+    "learning_rate": 0.01,
+    "gradient_clip": 10.0,
+    "weight_decay": 0.0,
+    "optimizer_state": "Keep one Adam state per layer throughout all four treatment rounds. The matched ungauged control uses the same initialization, optimizer, and 512 consecutive steps.",
+    "procrustes_update": "For every layer, normalize current ungauged routed action P_l and target T_l by ||T_l||_F, concatenate tokens across layers, compute SVD(P^T T)=U S V^T, set Q=U V^T and R=Q^T. This exactly minimizes sum_l ||P_l R^T-T_l||_F^2/||T_l||_F^2 at fixed cores.",
+    "best_pair_tracking": "After each core update segment and exact Procrustes update, retain the treatment core/R pair with lowest total normalized discovery error. No heldout selection.",
+    "no_sweep": true
+  },
+  "frozen_gates": {
+    "heldout_recovery_mean_min": 0.9,
+    "heldout_recovery_every_layer_min": 0.8,
+    "improvement_over_matched_ungauged_mpo_min": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_expert_assignments": 128,
+    "functional_fit_must_not_degrade_initialization": true,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Both independent gauge fits must pass every gate. A pass authorizes only a separately preregistered compression/parameterization oracle for the shared R, followed by exact-config MFU gating; it does not authorize language-model training.",
+    "fail": "Reject shared residual gauge mismatch as a sufficient explanation for rank-nine MPO failure. Do not sweep gauge scope, rank, radix, optimizer, rounds, or seed; retain dense/full-state residual writes or relax the architecture objective.",
+    "scope": "This is a zero-update representability upper bound on sampled layers 0/5/11. State compression is counted over all 12 layers and 8 experts."
+  },
+  "execution": {
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_shared_orthogonal_gauge_mpo.py",
+    "implementation_identity": "The entrypoint hash and focused-test outcome must be sealed in the first implementation commit before any output path is created.",
+    "policy": "Run focused synthetic tests and an exact-shape no-scientific-value performance preflight. Foreground-poll only if estimated under five minutes; otherwise attach a persistent terminal/error watchdog with an event-specific @Codex callback."
+  },
+  "output_contract": {
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/shared_orthogonal_gauge_mpo_v1",
+    "must_be_absent_before_run": true,
+    "required_files": [
+      "shared_gauge_mpo_result.json",
+      "shared_gauge_mpo_rows.csv",
+      "shared_gauge_mpo_state.pt",
+      "shared_gauge_mpo_status.json"
+    ]
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_zero_update_oracle_after_tests_and_identity_seal": true,
+    "compress_shared_gauge": false,
+    "implement_training_candidate": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
