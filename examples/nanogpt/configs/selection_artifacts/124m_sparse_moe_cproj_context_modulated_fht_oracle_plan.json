@@ -1,0 +1,98 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_context_modulated_fht_oracle_plan_v1",
+  "recorded_at": "2026-08-11T16:20:00+08:00",
+  "status": "preregistered_after_static_kfac_rejection_before_context_modulated_values",
+  "scientific_question": "Can activation-conditioned diagonal modulation between fixed orthogonal FHT mixers rotate a compact c_proj latent image with routed hidden context and recover the same-gauge dense expert write at 384x or 256x coordinates?",
+  "target_and_gauge": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "run_git_commit": "55d91cfe7be442d9f71135d0cf747748aff00937",
+    "run_config_sha256": "606bdb6f94a895370c5f79c3bf8c9ca9e77b94e9f5cde8acd5fbe61ac002c5ba",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "active_tpp": 0.501338138701522,
+    "layers": [0, 5, 11],
+    "isolation": "Use the terminal same-run router and terminal same-run c_fc on both base and target. The only target action is terminal c_proj minus step-zero c_proj, so no tensor is transplanted across runs and dense routers remain an explicitly allowed negligible parameter set."
+  },
+  "paper_link": {
+    "mechanisms": ["layer-wise training", "fixed orthogonal projection", "latent-dependent modulation"],
+    "distinction": "The paper enriches a fixed projection with latent modulation. Here the modulation is channel-wise and activation-conditioned because the measured deficit is a context-dependent residual write. The fixed signs/FHT mixers are never learned; this is not LoRA or a learned dense basis.",
+    "prior_closed_family": "Ordinary ProductFHT used learned diagonals but its materialized W(z) was independent of the current activation and recovered only ambient-coordinate expectation. The proposed G(h) is between mixers, so Im(J_z g(z;h)) rotates with routed hidden state h."
+  },
+  "measured_deficit": {
+    "static_kfac_result_sha256": "879bd5f048b6f094fb413004ef7d5fd6f06e996852b02b75fc1f656661077e76",
+    "best_static_full_expert_recovery": 0.3941311836242676,
+    "raw_gradient_full_expert_recovery": 0.35835087299346924,
+    "fixed_blockfht_full_expert_recovery": 0.00335387388865153,
+    "diagnosis": "Static images can identify a functional direction but cannot represent its routed context dependence; c_proj is the residual-write bottleneck and is isolated here."
+  },
+  "mechanism": {
+    "notation": "For routed expert e, h_e is its post-GELU hidden activation, P pads hidden width to the next power of two, H is normalized FHT, and D_s are fixed seeded sign diagonals.",
+    "context": "u_e(h)=RMSNorm(H D_context P h)",
+    "gate": "G_beta(h)=diag((1 + beta*u_e(h))/sqrt(1+beta^2)) with beta=1",
+    "coordinate_path": "v_ek(h,z)=H D_in,k P(h elementwise-multiplied-by z_ek)",
+    "write": "delta_y_e(h,z)=sum_k crop_d[H D_out,k G_beta(h) v_ek(h,z)]",
+    "mixture": "delta_y(x,z)=sum_{e in top2(x)} p_e(x)*delta_y_e(h_e(x),z_e)",
+    "properties": "The map is linear in trainable z for exact matrix-free least squares, nonlinear in h, uses no labels or errors at inference, and has an activation-dependent tangent image. beta=0 is the identical-coordinate static-operator ablation.",
+    "trust_and_scale": "Every context vector is per-token RMS normalized and the (1+u) gate is divided by sqrt(2). Overall operator scale is immaterial to exact coordinate fitting; ridge is tied to the normal-operator trace."
+  },
+  "coordinate_families": [
+    {
+      "name": "two_factor",
+      "factors": 2,
+      "trainable_coordinates_per_expert": "2*hidden_width",
+      "c_proj_compression_ratio": 384.0
+    },
+    {
+      "name": "three_factor",
+      "factors": 3,
+      "trainable_coordinates_per_expert": "3*hidden_width",
+      "c_proj_compression_ratio": 256.0
+    }
+  ],
+  "discovery_banks": [
+    {"name": "discovery_a", "seed": 20260921, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192},
+    {"name": "discovery_b", "seed": 20260922, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192}
+  ],
+  "evaluation": {
+    "heldout_seed": 20260923,
+    "heldout_batches": 2,
+    "heldout_batch_size": 8,
+    "heldout_block_size": 256,
+    "heldout_tokens": 4096,
+    "fit": "Matrix-free CGLS independently fits z on discovery A and B to the exact same-gauge terminal c_proj residual write.",
+    "maximum_cgls_iterations": 50,
+    "relative_normal_residual_tolerance": 1e-5,
+    "ridge_ratio": 1e-6,
+    "primary_metric": "Exact held-out c_proj residual-write recovery after applying the nonlinear activation-conditioned operator.",
+    "secondary_metrics": [
+      "per-layer recovery",
+      "discovery-to-heldout generalization drop",
+      "heldout action agreement between independently fitted banks",
+      "improvement over beta=0 with identical coordinates",
+      "expert assignment occupancy",
+      "normal-equation convergence and finite-value checks"
+    ]
+  },
+  "ablations_and_controls": {
+    "beta_zero": "Remove only activation-conditioned modulation by setting G(h)=I, retaining signs, mixers, coordinates, tokens, fitting, and target.",
+    "zero_action": "Base uses terminal router/c_fc and step-zero c_proj; target uses terminal router/c_fc/c_proj.",
+    "anti_leakage": "Terminal c_proj appears only as the regression target and held-out scorer. It never determines signs, FHT axes, context gates, rank, seeds, or thresholds. Held-out tokens never enter fitting."
+  },
+  "frozen_gates": {
+    "heldout_exact_recovery_mean_min_each_bank": 0.9,
+    "heldout_exact_recovery_every_layer_min_each_bank": 0.8,
+    "dynamic_minus_beta_zero_mean_min_each_bank": 0.1,
+    "discovery_to_heldout_drop_max_each_layer": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_expert_assignments": 128,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing both data banks authorizes only a separately preregistered same-gauge multi-phase shadow rollout and initialization-fit oracle. It does not authorize training.",
+    "partial": "If only three-factor passes, retain 256x c_proj as the only live candidate; do not increase factors.",
+    "fail": "Reject activation-conditioned FHT modulation at this budget and do not retry beta, rank, signs, or learning rate without a new measured residual decomposition.",
+    "systems": "This offline oracle is expected under five minutes and must be directly foreground-polled. No MFU gate or watchdog is appropriate unless runtime crosses five minutes."
+  }
+}
