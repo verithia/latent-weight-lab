@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import torch
+import pytest
 
 from examples.nanogpt.analyze_sparse_moe_rolling_tangent_oracle import (
     LayerState,
+    align_layer_sequence,
     causal_history_indices,
     fixed_blockfht_basis,
     fit_coordinates,
@@ -103,3 +105,25 @@ def test_materialized_oracle_recovers_small_in_basis_update() -> None:
         ridge_ratio=1e-10, device="cpu",
     )
     assert result["heldout_materialized_recovery"] > 0.999
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA regression test")
+def test_align_layer_sequence_accepts_cpu_assignment_indices_on_cuda() -> None:
+    torch.manual_seed(19)
+    left = LayerState(
+        torch.randn(2, 4),
+        torch.randn(2, 6, 4),
+        torch.randn(2, 4, 6),
+    )
+    right = LayerState(
+        left.router + torch.randn_like(left.router) * 1e-3,
+        left.c_fc + torch.randn_like(left.c_fc) * 1e-3,
+        left.c_proj + torch.randn_like(left.c_proj) * 1e-3,
+    )
+    activations = torch.randn(32, 4, device="cuda")
+    aligned, rows = align_layer_sequence(
+        [left, right], activations[:16], activations[16:], "cuda"
+    )
+    assert len(aligned) == 2
+    assert len(rows) == 2
+    assert aligned[-1].c_fc.device.type == "cpu"

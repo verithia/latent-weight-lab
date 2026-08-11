@@ -27,6 +27,7 @@ from examples.nanogpt.analyze_sparse_moe_paired_alignment import (
     tensor_sha256,
 )
 from examples.nanogpt.moe_paired_geometry import (
+    apply_neuron_permutation,
     functional_atom_similarity,
     maximum_weight_assignment,
 )
@@ -206,8 +207,9 @@ def align_layer_sequence(
             )
             fit_permutation = maximum_weight_assignment(fit_similarity)
             eval_permutation = maximum_weight_assignment(eval_similarity)
-            next_fc[expert] = right.c_fc[expert].index_select(0, fit_permutation)
-            next_proj[expert] = right.c_proj[expert].index_select(1, fit_permutation)
+            next_fc[expert], next_proj[expert] = apply_neuron_permutation(
+                right.c_fc[expert], right.c_proj[expert], fit_permutation
+            )
             identity = torch.arange(fit_permutation.numel(), device=fit_permutation.device)
             rows.append(
                 {
