@@ -1,0 +1,128 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_learned_butterfly_frame_oracle_plan_v1",
+  "recorded_at": "2026-08-11T21:19:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Can a layer-shared learned butterfly input/output frame plus per-expert spectrum and bias match the terminal dense c_fc function at 256x c_fc compression, thereby resolving the direction mismatch that fixed BlockFHT spectra and weight-energy tensor trains could not?",
+  "theory_reconciliation": {
+    "mapping_paper_boundary": "The paper's theorem is existential for a smooth low-dimensional map; it does not prove that a fixed pseudo-random orthogonal map is aligned with a transformer's local weight/function chart. The paper's row modulation changes scale/offset inside its fixed map but does not learn a task-aligned orthogonal frame.",
+    "measured_fixed_frame_signal": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_spectral_feature_oracle_result.json",
+      "sha256": "5cafa8eb52efb8812db876b92396f3f4fc1e1160402c8aa12d4acc25cee4bcc9",
+      "finding": "Two learned spectral diagonals improve heldout routed function by 0.145-0.146 over a fixed orthogonal control, but absolute recovery remains about 0.382 and pre-GELU direction recovery is near zero. Modulation helps, while the fixed directions bind."
+    },
+    "measured_weight_energy_failure": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_global_tt_oracle_result.json",
+      "sha256": "0cd3b655edd06ec6c6a37ec29345656cf1a8dbee90fd72840d639e88c64d3618",
+      "finding": "A 200x global TT-SVD captures only 0.374-0.375% of c_fc weight energy and 0.424-0.465% of function; independent retained directions agree at action cosine 0.016. Weight-Frobenius axes are not a stable functional atlas."
+    },
+    "causal_change": "Replace fixed pseudo-random directions, not merely their diagonal scales. Learn one structured orthogonal input frame and one structured orthogonal hidden frame per transformer layer, shared by all experts in that layer; retain per-expert spectra and hidden biases for expert-specific modulation.",
+    "not_lora": "There is no dense learned basis and no additive low-rank residual. A butterfly frame uses O(n log n) Givens angles, is shared across eight experts, preserves norm, and the resulting 1536x768 expert matrix can have full ordinary rank 768.",
+    "paper_losses_deferred": "Stability, smoothness/Jacobian, and alignment losses are training-path regularizers. They are deliberately absent from this zero-checkpoint-update representability gate; applying them before the function family passes would confound representation with regularization. A pass would require a separate initialization and mapping-loss protocol."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "terminal_gauge": "Collect MLP inputs with the complete terminal model. Use terminal routing, dense terminal c_fc targets, and exact terminal dense c_proj on candidate and control sides."
+  },
+  "candidate": {
+    "name": "layer_shared_learned_butterfly_frame",
+    "input_padded_width": 1024,
+    "hidden_padded_width": 2048,
+    "input_butterfly_stages": 10,
+    "hidden_butterfly_stages": 11,
+    "input_angles_per_layer": 5120,
+    "hidden_angles_per_layer": 11264,
+    "shared_frame_coordinates_all_layers": 196608,
+    "spectrum_coordinates_per_expert": 1024,
+    "bias_coordinates_per_expert": 1536,
+    "expert_modulation_coordinates_all_layers": 245760,
+    "total_coordinates": 442368,
+    "dense_cfc_parameters": 113246208,
+    "cfc_compression_ratio": 256.0,
+    "formula": "u=B_in_layer(theta_in)*sign_in*pad1024(x); v=concat(sqrt(2048)*0.02*(1+s_layer_expert)*u, zeros1024); pre=crop1536(B_hidden_layer(theta_hidden)*sign_hidden*v)+b_layer_expert; expert(x)=dense_cproj*GELU(pre)",
+    "angle_initialization": "Every Givens angle starts at pi/4, giving a Walsh-Hadamard-like full butterfly up to fixed seeded signs. Angles are learned and shared across experts only within a layer.",
+    "spectrum_initialization": "Zero residual around multiplicative one; sqrt(2048)*0.02 matches GPT c_fc preactivation variance after rectangular padding.",
+    "bias_initialization": 0.0,
+    "materialized_dense_cfc_allowed": false,
+    "dense_cproj_exception": true,
+    "optimizer_state_rule": "Any later implementation may hold optimizer state only for butterfly angles, spectra, and biases; dense c_fc weights, dense c_fc bases, dense c_fc gradients, or dense c_fc optimizer history are forbidden."
+  },
+  "control": {
+    "name": "higher_coordinate_fixed_frame_two_spectrum_control",
+    "source_family": "The exact two-spectral-diagonal plus hidden-bias fixed-FHT family from the sealed spectral oracle, refit on the identical discovery samples and heldout banks.",
+    "coordinates_per_expert": 5632,
+    "total_coordinates": 540672,
+    "cfc_compression_ratio": 209.45454545454547,
+    "purpose": "The fixed-frame control has 22.2% more learned coordinates than the candidate. Beating it therefore identifies learned structured directions rather than a larger latent budget."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261011, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261012, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261013, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "For every probed layer and discovery bank, route terminal activations, require 128 assignments for every expert, and deterministically sample 128 inputs per expert using a bank/layer/expert-derived seed.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout activations never determine frames, modulation, stopping, thresholds, or selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on compact coordinates only",
+    "steps": 400,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "objective": "Equal-expert mean normalized dense-c_proj residual-output MSE plus 0.25 times normalized pre-GELU MSE.",
+    "selection": "Use the final registered step for candidate and control. No heldout checkpoint selection or retry.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "metrics": {
+    "primary": "Heldout exact routed-MoE layer-output recovery, 1-||candidate-target||^2/||target||^2.",
+    "secondary": [
+      "per-layer mixture recovery",
+      "per-expert output and pre-GELU recovery",
+      "candidate-minus-higher-coordinate-fixed-frame recovery",
+      "heldout action cosine between independently fitted discovery banks",
+      "butterfly angle displacement and router occupancy",
+      "all-value and gradient finiteness"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "candidate_minus_control_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every frozen gate for both independent discovery fits authorizes only a production learned-butterfly c_fc implementation, correctness tests, and a separately preregistered initialization/mapping-loss shadow. It does not authorize language-model training.",
+    "representability_fail": "Reject this exact one-sweep layer-shared butterfly-frame family. Do not sweep stage count, sharing scope, padding, angle initialization, fit learning rate, or thresholds without a new residual decomposition.",
+    "systems": "Expected under five minutes and foreground-polled. If total observed runtime reaches five minutes, attach a terminal-or-error watchdog with an explicit @Codex continuation prompt."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_learned_butterfly_frame_oracle.py",
+    "entrypoint_sha256": null
+  }
+}
