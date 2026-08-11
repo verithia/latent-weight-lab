@@ -1,0 +1,125 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_functional_tt_oracle_plan_v1",
+  "recorded_at": "2026-08-11T22:27:00+08:00",
+  "status": "preregistered_before_implementation_preflight_and_fit_values",
+  "scientific_question": "Can the exact 200.07x global rank-150 interleaved TT family represent the terminal sparse-MoE c_fc function when its nonlinear cores are optimized jointly on routed function across two activation banks, rather than selected by endpoint weight-energy TT-SVD?",
+  "causal_reconciliation": {
+    "same_gauge_diagnosis": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_same_gauge_tangent_decomposition_result.json",
+      "sha256": "3623c3d82c35bd41ce51cb7afc2a744119d5fd5dee44ad5fb5e51cba506cba33",
+      "finding": "At a fixed mapping endpoint, changing activation banks leaves only 6.4-6.8% of gradient energy in a global rank-7 subspace; changing the fitted endpoint at fixed data leaves about 0.07%. The needed chart is nonlinear and must be judged in function space."
+    },
+    "endpoint_tt_rejection": {
+      "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_global_tt_oracle_plan.json",
+      "plan_sha256": "ed11925d60c31a2a07de43e93908911fa90b54c13d0e6aa7f0fc11dcbf01e3fd",
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_global_tt_oracle_result.json",
+      "result_sha256": "0cd3b655edd06ec6c6a37ec29345656cf1a8dbee90fd72840d639e88c64d3618",
+      "remote_result_sha256": "1e04f985965594bcc5433750c3541a110cedf3286320f46d2a0ba265f4a691d",
+      "finding": "Randomized endpoint TT-SVD recovers only about 0.0044 routed function. Its sealed scope explicitly does not reject functional optimization of the same nonlinear TT coordinates."
+    },
+    "why_not_blockfht": "Fixed BlockFHT directions, learned spectra, a learned shared butterfly, fully unshared one-sweep butterflies, and static rank-7 tangent templates all failed. This candidate changes both direction learning and curvature: every TT core is learned through routed functional loss and the materialized matrix is multilinear in the compact coordinates.",
+    "why_not_lora": "No dense base or learned dense basis is retained. TT bond rank constrains the complete layer/expert/hidden/input tensor but does not impose low ordinary rank on an expert matrix.",
+    "mapping_paper_boundary": "The candidate is a nonlinear compact latent-to-weight map optimized by task-aligned functional loss. Paper-style perturbation stability, smoothness, alignment, and modulation are deferred until representability passes; adding them cannot repair a failed function family."
+  },
+  "source": {
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "fit_and_probe_layers": [0, 5, 11],
+    "fit_input_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_learned_butterfly_frame_oracle_plan.json",
+    "fit_input_plan_sha256": "77e260512c46366db382215826f1eaf8beb00cf97be657b2f049feee6010af45",
+    "fit_banks": ["discovery_a", "discovery_b"],
+    "heldout_banks": [
+      {"name": "heldout_a", "seed": 20261003, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+      {"name": "heldout_b", "seed": 20261004, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768}
+    ],
+    "terminal_gauge": "Use terminal routing, dense target c_fc, and exact terminal dense expert c_proj. Dense V/O and c_proj remain explicit residual-write exceptions."
+  },
+  "mechanism": {
+    "hidden_modes": [6, 4, 4, 4, 4],
+    "input_modes": [3, 4, 4, 4, 4],
+    "interleaved_modes": [12, 8, 6, 3, 4, 4, 4, 4, 4, 4, 4, 4],
+    "bond_rank_cap": 150,
+    "actual_bond_ranks": [1, 12, 96, 150, 150, 150, 150, 150, 150, 64, 16, 4, 1],
+    "coordinates": 566028,
+    "dense_cfc_parameters": 113246208,
+    "cfc_compression_ratio": 200.07174203396298,
+    "parameterization": "Initialize by the registered seeded interleaved endpoint TT-SVD, sweep left-to-right QR while pushing every R into the next core, then optimize raw cores through differentiable reduced-QR left-canonicalization of every core except the last. The last core carries global amplitude. This removes scalar gauge blow-up and fixes the local canonical chart while preserving the full TT family.",
+    "materialized_dense_cfc_allowed": false,
+    "dense_cproj_exception": true
+  },
+  "initialization": {
+    "independent_seeds": [20261001, 20261002],
+    "tt_svd_oversample": 24,
+    "tt_svd_power_iterations": 2,
+    "initial_materialization_relative_error_after_canonicalization_max": 0.00001,
+    "selection": "Both fixed seeds are fit and reported; no seed selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on compact TT cores only",
+    "steps_per_seed": 400,
+    "learning_rate": 0.003,
+    "weight_decay": 0.0001,
+    "gradient_clip": 1.0,
+    "top_k": 2,
+    "fit_samples_per_expert_per_bank_layer": 128,
+    "sampling_seed_base": 20261016,
+    "sampling_seed_bank_stride": 1009,
+    "sampling_seed_layer_stride": 17,
+    "task_schedule": "Cycle deterministically through the six registered bank-layer tasks; each optimizer step uses all eight experts for one task.",
+    "objective": "Equal-expert mean normalized exact-dense-c_proj residual-output MSE plus 0.25 times normalized pre-GELU MSE.",
+    "selection": "Final registered optimizer step only; heldout banks never affect fitting, stopping, hyperparameters, or seed selection.",
+    "precision": "float32 CUDA",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "heldout_top_k": 2,
+    "heldout_chunk_size": 1024,
+    "controls": "Score the same seed's unoptimized canonical TT-SVD initialization on every heldout bank and layer. Functional-fit gain is candidate minus its own initialization.",
+    "metrics": [
+      "fit objective trajectory and relative decrease",
+      "heldout routed residual-output recovery",
+      "every-layer and every-expert recovery",
+      "pre-GELU recovery",
+      "functional-fit gain over the exact initialization",
+      "same-heldout action cosine between fitted seeds",
+      "core and gradient finiteness",
+      "maximum CUDA memory and wall time"
+    ]
+  },
+  "frozen_gates": {
+    "fit_objective_relative_decrease_min_each_seed": 0.5,
+    "heldout_mixture_recovery_mean_min_each_seed_and_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_seed_and_bank": 0.7,
+    "heldout_expert_recovery_min_each_seed_and_bank": 0.5,
+    "candidate_minus_initialization_recovery_mean_min_each_seed_and_bank": 0.5,
+    "same_bank_action_cosine_between_fitted_seeds_mean_min": 0.8,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every fit, heldout, gain, agreement, and finiteness gate for both seeds and both heldout banks authorizes only production TT c_fc implementation and a separately preregistered initialization plus Mapping-Loss shadow. It does not authorize language-model training.",
+    "representability_fail": "Reject the exact left-canonical, jointly function-fit global rank-150 TT route. Do not sweep rank, modes, seed, fit steps, LR, objective weights, thresholds, or canonicalization without a new residual theory.",
+    "optimization_fail": "If the objective does not decrease with finite gradients, classify conditioning separately from representability and permit only a zero-update optimizer-geometry audit; do not infer function-family failure.",
+    "systems": "Run an exact-shape five-step preflight. Foreground-poll only if projected total runtime is below five minutes; otherwise use one terminal/error-only @Codex watchdog with the active-note continuation prompt."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "e7044450a3f0f755094351f04a45d939e33808df",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_functional_tt_oracle.py",
+    "entrypoint_sha256": null
+  }
+}
