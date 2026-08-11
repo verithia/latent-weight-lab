@@ -18,6 +18,8 @@
     "functional_tt_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_functional_tt_20260811_v1/functional_tt_cores.pt",
     "functional_tt_coordinates_sha256": "27e15170901eb6e0431372fb6f5f56356891511011cc01ff5c93321c288b16d1",
     "functional_tt_raw_result_sha256": "f0456da20489a38c6a4dcfa0fafc85013f9bd093a3138d62e0468cc67ab97f29",
+    "functional_tt_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_functional_tt_oracle_plan.json",
+    "functional_tt_plan_sha256": "03814c734477dfe5472609e667481b8d494e16f37fc99eab601ac1691f632ea2",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "fit_input_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_learned_butterfly_frame_oracle_plan.json",
     "fit_input_plan_sha256": "77e260512c46366db382215826f1eaf8beb00cf97be657b2f049feee6010af45",
@@ -32,6 +34,7 @@
     "sampling_seed_base": 20261016,
     "sampling_seed_bank_stride": 1009,
     "sampling_seed_layer_stride": 17,
+    "heldout_sampling_bank_indices": {"heldout_a": 2, "heldout_b": 3},
     "top_k": 2,
     "checkpoint_updates": 0
   },
