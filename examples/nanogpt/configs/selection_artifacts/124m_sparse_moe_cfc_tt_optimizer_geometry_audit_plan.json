@@ -10,7 +10,7 @@
     "observed_boundary": "Two finite 400-step fits reduced the registered functional objective by only 20.0-21.4%, but improved heldout routed recovery from about 0.004 to 0.255-0.270 and agreed at action cosine 0.8956. The forward family is live; the frozen parent rule allows only an optimizer-geometry audit.",
     "tt_geometry": "A left-canonical gauge removes scalar TT rescaling but does not make raw core coordinates isometric in routed-function space. QR/Stiefel tangents, multiplicative TT bonds, GELU, dense expert c_proj, and routing jointly induce a non-diagonal pullback metric J^T J.",
     "why_not_a_hyperparameter_sweep": "Rank, modes, seeds, step count, learning rate, loss weights, thresholds, and canonicalization remain frozen. The audit evaluates three directions in the identical local tangent and applies no update.",
-    "adamw_limitation": "The parent's AdamW moment tensors were not stored. The raw Euclidean pullback and its empirical diagonal J^T J preconditioner are therefore geometry controls, not a claim to reproduce the exact terminal AdamW state."
+    "adamw_limitation": "The parent's AdamW moment tensors and noncanonical raw-core representatives were not stored; the saved artifact contains the exact fitted canonical cores used for scoring. The audit therefore evaluates a deterministic canonical representative. Its raw Euclidean pullback and empirical diagonal J^T J preconditioner are geometry controls, not a claim to reproduce the exact terminal AdamW state or its gauge-dependent derivative."
   },
   "source": {
     "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
