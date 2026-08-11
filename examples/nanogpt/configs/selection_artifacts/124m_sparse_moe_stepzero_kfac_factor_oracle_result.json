@@ -1,0 +1,51 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_kfac_factor_oracle_seal_v1",
+  "recorded_at": "2026-08-11T16:00:00+08:00",
+  "status": "rejected_static_stepzero_kfac_image_requires_online_input_conditioning",
+  "source_control": {
+    "git_commit": "7592f7e73cb228d9c52dea856288cb31cba888b8",
+    "entrypoint_sha256": "fcbf3b3f798598c66d0a395e8a879b0e3eb3e88560c04ab71c1568723ab4606f",
+    "plan_sha256": "1d722a581c34c1f076bd32c118dcaaeefad71c39c0b0990ea67bba1b1fefeb20"
+  },
+  "execution": {
+    "wall_seconds": 7.862360715866089,
+    "result_sha256": "879bd5f048b6f094fb413004ef7d5fd6f06e996852b02b75fc1f656661077e76",
+    "rows_sha256": "594e26e52b0bc75719255dd7c98194dc5a282e478d2cc410bfc1a208f3502077",
+    "geometry_sha256": "cb4fa8d3beea0ecd13ac3f7ff51c12ea4d4ec4df375cf42ed8da553dc5d2af75",
+    "status_sha256": "6b4a2d0808aad53eab51bc0f22937fd03110c5388aec50540239b0e98f676b2e",
+    "log_sha256": "73f49cdaf3f2d91a9d9397d86cdff38435c25625f07efa71b0ab51fb9df74145",
+    "all_values_finite": true
+  },
+  "expert_occupancy": {
+    "discovery_a": {
+      "minimum": 42,
+      "minimum_by_layer_0_5_11": [222, 267, 42]
+    },
+    "discovery_b": {
+      "minimum": 26,
+      "minimum_by_layer_0_5_11": [239, 223, 26]
+    }
+  },
+  "summary": {
+    "coupled_four": {
+      "exact_mean_a_b": [0.32649028301239014, 0.32694506645202637],
+      "minus_raw_a_b": [-0.014924943447113037, -0.006802539030710875],
+      "bank_subspace_overlap_mean": 0.19390220940113068,
+      "minimum_layer_recovery_a_b": [0.18953537940979004, 0.19728994369506836]
+    },
+    "separate_three_plus_three": {
+      "exact_mean_a_b": [0.3941311836242676, 0.39390190442403156],
+      "minus_raw_a_b": [0.03578031063079834, 0.036771178245544434],
+      "bank_subspace_overlap_mean": 0.3936070625980695,
+      "minimum_layer_recovery_a_b": [0.23320460319519043, 0.22728151082992554]
+    }
+  },
+  "diagnosis": "Expert-conditioned KFAC factors are smoother than individual task-gradient directions but remain too coarse and unstable. Separate input/output factors recover about 0.394 of the held-out residual write, only +0.036 over raw gradients and far below the 0.90 mean and 0.80 every-layer gates. Rare routed experts also violate the frozen 128-assignment gate. A single static step-zero image cannot represent the context-dependent routed vector field.",
+  "authorization": {
+    "generated_expert_training": false,
+    "larger_active_parameter_rungs": false,
+    "mfu_preflight": false,
+    "static_fixed_chart_escalation": false,
+    "next_allowed_work": "Theory and preregistration only for a 124M online input-conditioned latent function whose coefficients depend on routed activation/error context while its trainable-coordinate budget remains in the 200-500x compression regime."
+  }
+}
