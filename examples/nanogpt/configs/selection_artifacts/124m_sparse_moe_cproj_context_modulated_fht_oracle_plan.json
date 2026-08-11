@@ -35,6 +35,7 @@
     "write": "delta_y_e(h,z)=sum_k crop_d[H D_out,k G_beta(h) v_ek(h,z)]",
     "mixture": "delta_y(x,z)=sum_{e in top2(x)} p_e(x)*delta_y_e(h_e(x),z_e)",
     "properties": "The map is linear in trainable z for exact matrix-free least squares, nonlinear in h, uses no labels or errors at inference, and has an activation-dependent tangent image. beta=0 is the identical-coordinate static-operator ablation.",
+    "fixed_operator_seed": 20260925,
     "trust_and_scale": "Every context vector is per-token RMS normalized and the (1+u) gate is divided by sqrt(2). Overall operator scale is immaterial to exact coordinate fitting; ridge is tied to the normal-operator trace."
   },
   "coordinate_families": [

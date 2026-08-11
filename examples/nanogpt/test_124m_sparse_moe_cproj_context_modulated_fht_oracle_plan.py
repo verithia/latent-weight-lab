@@ -18,6 +18,7 @@ def test_context_modulated_plan_rotates_image_without_error_at_inference() -> No
     assert "G_beta(h)" in mechanism["gate"]
     assert "linear in trainable z" in mechanism["properties"]
     assert "no labels or errors at inference" in mechanism["properties"]
+    assert mechanism["fixed_operator_seed"] == 20260925
 
 
 def test_context_modulated_plan_preserves_200_to_500x_budget() -> None:
