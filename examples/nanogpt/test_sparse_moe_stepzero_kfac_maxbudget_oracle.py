@@ -41,7 +41,7 @@ def test_asymmetric_reconstruction_uses_fourth_direction_only_for_output() -> No
     target = (
         torch.zeros_like(fourth.router),
         torch.zeros_like(fourth.c_fc),
-        fourth.c_proj.clone(),
+        fourth.c_proj.transpose(1, 2).clone(),
     )
     reconstructed, metrics = reconstruct_asymmetric_family(
         left,
