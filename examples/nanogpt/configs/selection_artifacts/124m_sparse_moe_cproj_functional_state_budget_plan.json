@@ -24,7 +24,7 @@
     "dense_budget_seal": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_residual_state_budget_result.json",
     "dense_budget_seal_sha256": "21c5d86bad6d612f3c26958b39a3cc51f54c61eb48c7443f3f1a57af6760e06b",
     "analyzer": "examples/nanogpt/analyze_sparse_moe_cproj_functional_state_budget.py",
-    "analyzer_sha256": "38e83a67c97e4bd05cbe5f9fb5608b7c93bfb5c9cbe352a4b4b95ae6d9144dbb"
+    "analyzer_sha256": "90fd8a97e24a4a45768c8b49c240276a820b1e984ca4e12e69441661c014915f"
   },
   "functional_protocol": {
     "activation_state": "terminal",

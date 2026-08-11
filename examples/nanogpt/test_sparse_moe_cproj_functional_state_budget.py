@@ -4,6 +4,7 @@ import torch
 
 from examples.nanogpt.analyze_sparse_moe_cproj_functional_state_budget import (
     action_spectrum,
+    compression_label,
     intrinsic_rank_dimension,
     largest_rank_within_budget,
     rank_for_energy,
@@ -19,6 +20,8 @@ def test_registered_sparse_cproj_budgets() -> None:
     assert largest_rank_within_budget(4194, 768, 1536) == 1
     assert largest_rank_within_budget(dense // 500, 768, 1536) == 1
     assert intrinsic_rank_dimension(2, 768, 1536) == 4604
+    assert compression_label(200.0) == "compression_200x"
+    assert compression_label(281.27038626609444) == "compression_281p270386x"
 
 
 def test_spectrum_and_energy_rank() -> None:
@@ -48,7 +51,7 @@ def test_joint_budget_uses_sum_of_expert_ranks() -> None:
         input_width=1536,
         joint=True,
     )
-    assert metrics["compression_200p0x_ordinary_rank_per_expert"] == 2
-    assert metrics["compression_200p0x_optimistic_action_rank"] == 16
-    assert abs(float(metrics["compression_200p0x_best_recovery"]) - 0.5) < 1e-7
-    assert metrics["compression_281p27038626609444x_optimistic_action_rank"] == 8
+    assert metrics["compression_200x_ordinary_rank_per_expert"] == 2
+    assert metrics["compression_200x_optimistic_action_rank"] == 16
+    assert abs(float(metrics["compression_200x_best_recovery"]) - 0.5) < 1e-7
+    assert metrics["compression_281p270386x_optimistic_action_rank"] == 8

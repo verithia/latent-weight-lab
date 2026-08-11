@@ -73,6 +73,11 @@ def recovery_at_rank(eigenvalues: torch.Tensor, rank: int) -> float:
     return float(values[: max(0, min(int(rank), values.numel()))].sum() / total)
 
 
+def compression_label(target: float) -> str:
+    normalized = f"{float(target):.6f}".rstrip("0").rstrip(".").replace(".", "p")
+    return f"compression_{normalized}x"
+
+
 def action_spectrum(action: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
     """Return descending output-space energy and matching directions."""
     action = action.float()
@@ -141,7 +146,7 @@ def spectrum_metrics(
             budget, output_width, input_width
         )
         action_rank = experts * per_expert_rank if joint else per_expert_rank
-        label = f"compression_{str(target).replace('.', 'p')}x"
+        label = compression_label(target)
         metrics[f"{label}_coordinate_budget_per_expert"] = budget
         metrics[f"{label}_ordinary_rank_per_expert"] = per_expert_rank
         metrics[f"{label}_optimistic_action_rank"] = action_rank
@@ -331,7 +336,7 @@ def main() -> None:
                 )
 
     joint_rows = [row for row in rows if row["scope"] == "joint"]
-    budget_key = "compression_200p0x_best_recovery"
+    budget_key = "compression_200x_best_recovery"
     mean_recovery = sum(float(row[budget_key]) for row in joint_rows) / len(joint_rows)
     minimum_recovery = min(float(row[budget_key]) for row in joint_rows)
     gates = plan["decision_rule"]["gates"]
