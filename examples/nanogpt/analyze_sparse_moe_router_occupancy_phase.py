@@ -442,7 +442,7 @@ def main() -> None:
             "gradient_rows": str(args.output / "router_gradient_rows.csv"),
         },
         "provenance": {
-            "git_commit": git_commit(),
+            "git_commit": git_commit(Path(__file__).resolve().parents[2]),
             "entrypoint": str(Path(__file__).resolve()),
             "entrypoint_sha256": file_sha256(Path(__file__).resolve()),
             "command": sys.argv,
@@ -466,4 +466,20 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as error:
+        if "--output" in sys.argv:
+            output_index = sys.argv.index("--output") + 1
+            if output_index < len(sys.argv):
+                output = Path(sys.argv[output_index])
+                if output.is_dir():
+                    atomic_json(
+                        output / "status.json",
+                        {
+                            "status": "failed",
+                            "error": repr(error),
+                            "failed_at_unix": time.time(),
+                        },
+                    )
+        raise
