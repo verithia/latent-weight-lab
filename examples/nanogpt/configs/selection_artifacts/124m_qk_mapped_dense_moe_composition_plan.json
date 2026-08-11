@@ -1,0 +1,108 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_composition_preregistration",
+  "authorization": {
+    "automatic_retry": false,
+    "generated_expert": false,
+    "larger_rung": false,
+    "one_exact_config_mfu_preflight": true,
+    "one_scientific_0p5tpp_run_after_mfu_pass": true,
+    "parallel_arm": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_0p5tpp_lr24e4.json",
+    "dense_full_state": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "moe.expert_c_fc",
+      "moe.expert_c_proj"
+    ],
+    "forbidden_changes": [
+      "generated V or any residual-write projection",
+      "generated or shared expert matrices",
+      "router, optimizer, learning-rate, data, seed, or horizon changes",
+      "automatic rerun, parallel arm, or post-result threshold change",
+      "5TPP confirmation or larger rung before this gate passes"
+    ],
+    "generated": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "horizon": {
+      "fixed_evaluation_steps": [
+        0,
+        60,
+        120,
+        180,
+        238
+      ],
+      "max_iters": 238,
+      "planned_tpp_active": 0.5
+    },
+    "materialized_active_parameters": 124447488,
+    "materialized_stored_parameters": 294316800,
+    "runtime_registered_trainable_parameters": "must be measured and sealed before MFU; it may not replace either materialized count"
+  },
+  "decision_rule": {
+    "all_fixed_losses_must_be_finite": true,
+    "dense_moe_fixed_validation_ce": [
+      10.9848,
+      6.2969,
+      5.7517,
+      5.5441,
+      5.4639
+    ],
+    "fail": "Reject composition of generated QK with sparse MoE; retain the dense-complete-expert MoE and standalone QK-only controls. Do not sweep QK capacity or modify experts.",
+    "maximum_fixed_checkpoint_penalty_ce": 0.03,
+    "pass": "Authorize exactly one 124M 5TPP confirmation of the same composition. Generated experts and larger rungs remain blocked.",
+    "terminal_penalty_to_dense_moe_ce_maximum": 0.01,
+    "terminal_validation_ce_maximum": 5.4739,
+    "threshold_changed_after_measurement": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples.nanogpt.train",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "gpu": 0,
+    "host": "PRO6"
+  },
+  "immutable_evidence": {
+    "dense_moe_0p5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_lr24e4_0p5tpp_result.json",
+      "sha256": "e151264cf45bba6939b0f423eb27c981be7d79e50a1b3c0ff4ab990d34571ead"
+    },
+    "qk_only_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+      "sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585"
+    },
+    "seed2_dense_moe_geometry": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_seed2_rolling_tangent_oracle_result.json",
+      "sha256": "a49927c26b052aa03a67180b9a6f678c538235e39b8dc99c29af7acab230fed4"
+    },
+    "shared_orthogonal_gauge_rejection": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_shared_orthogonal_gauge_mpo_result.json",
+      "sha256": "5093a140a83f117770ccfd8e5247d6cdd7208cc8bae671d45680a5a335b5180d"
+    }
+  },
+  "monitoring": {
+    "callback": "one terminal-or-error invocation callback with explicit @Codex action prompt",
+    "expected_duration": "under two hours",
+    "heartbeat": false,
+    "milestone_callbacks": false,
+    "performance_preflight": "foreground-polled because it must finish within five minutes"
+  },
+  "performance_gate": {
+    "all_losses_finite": true,
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "registered_at": "2026-08-11T00:00:00+08:00",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_composition_plan_v1",
+  "scientific_question": "Does the already validated generated-QK score map compose with the independently validated dense-complete-expert MoE without destroying its loss advantage, when every residual-write matrix and both matrices of each complete expert remain dense?",
+  "status": "registered_before_guard_relaxation_performance_preflight_and_training",
+  "theory": {
+    "claim_boundary": "A pass validates composition of one attention read-map compression with dense sparse experts. It does not compress experts, inference parameters, expert FLOPs, V/O, or c_proj, and is not full replacement.",
+    "evidence_reconciliation": "Mapped QK beat the matched dense 124M transformer at 5TPP, whereas compact V/O and c_proj mappings repeatedly failed. Dense complete-expert MoE beat the matched dense transformer at 0.5TPP and 20TPP and replicated across seeds. The candidate composes only these two positive findings.",
+    "why_cfc_stays_dense_here": "The dense-transformer directed-product c_fc control closed terminal CE but realized zero algorithmic parameter reduction. Sparse expert c_fc has no tested batched generated implementation and no passed representability gate; adding one now would confound composition with a new expert mechanism.",
+    "write_matrix_boundary": "Attention V/O and expert c_proj remain full-state because heldout functional state budgets and the unrestricted shared-gauge MPO upper bound show that residual-write direction cannot be carried by the tested compact shared charts."
+  }
+}
