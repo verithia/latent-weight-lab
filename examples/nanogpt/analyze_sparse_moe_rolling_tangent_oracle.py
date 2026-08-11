@@ -238,10 +238,14 @@ def fixed_blockfht_basis(
 ) -> torch.Tensor:
     pieces: list[list[torch.Tensor]] = [[] for _ in range(rank)]
     seeds = (20260823 + layer * 1009, 20260829 + layer * 1009, 20260831 + layer * 1009)
+    # The production CUDA kernel admits power-of-two blocks starting at 32.
+    # Keep exactly ``rank`` active canonical coordinates while zero-padding
+    # the latent block to that implementation minimum.
+    latent_width = max(rank, 32)
     for reference, seed in zip((template.router, template.c_fc, template.c_proj), seeds):
         size = reference.numel()
         for coordinate in range(rank):
-            latent = torch.zeros(rank, device=device)
+            latent = torch.zeros(latent_width, device=device)
             latent[coordinate] = 1.0
             pieces[coordinate].append(
                 block_fht_slice(latent, size, 3, seed, 0, size).detach().cpu()

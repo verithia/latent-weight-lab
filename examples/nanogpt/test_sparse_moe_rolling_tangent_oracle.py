@@ -84,6 +84,18 @@ def test_fixed_blockfht_basis_is_exact_budget_and_scaled() -> None:
     torch.testing.assert_close(basis @ basis.T, torch.eye(4) * 4.0, atol=1e-5, rtol=1e-5)
 
 
+@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA regression test")
+def test_fixed_blockfht_four_coordinate_basis_uses_native_cuda_minimum() -> None:
+    state = LayerState(
+        torch.zeros(2, 4),
+        torch.zeros(2, 6, 4),
+        torch.zeros(2, 4, 6),
+    )
+    basis = fixed_blockfht_basis(state, rank=4, scale=2.0, layer=0, device="cuda")
+    assert basis.shape == (4, flatten_state(state).numel())
+    torch.testing.assert_close(basis @ basis.T, torch.eye(4) * 4.0, atol=1e-5, rtol=1e-5)
+
+
 def test_materialized_oracle_recovers_small_in_basis_update() -> None:
     torch.manual_seed(17)
     left = LayerState(
