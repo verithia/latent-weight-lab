@@ -1,0 +1,104 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_spectral_feature_oracle_seal_v1",
+  "recorded_at": "2026-08-11T21:15:00+08:00",
+  "classification": "SPECTRAL_CFC_REPRESENTABILITY_REJECTED",
+  "source_control": {
+    "git_commit": "e9407af4a806c2e2abf4d9552fe2d6009594c410",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py",
+    "entrypoint_sha256": "5c9564ec74538bfa4b7c886bc22788869bfd922af82c73bfcc123a955117e775",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_spectral_feature_oracle_plan.json",
+    "plan_sha256": "c5f1fb89f30cb338325203a7c0f63935158d4b1cd0887d47d6c2741d488a0928"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "wall_seconds": 34.60031867027283,
+    "remote_focused_and_regression_tests": "10 passed in 1.52s",
+    "result_sha256": "70f05207c188c4bb6fe14b916f4da9c06ed1458c21d3e059fad4ef72874d060e",
+    "status_sha256": "c5817baeb0fc9efd52163d5c7e22714e9efa786b6ed2569e01e0545aafd6b31b",
+    "coordinates_sha256": "6d4e0c0d6d023a53015fba3cd8e83eef68c5112aa4f92338a1831ac3b63c0e9a",
+    "log_sha256": "70f05207c188c4bb6fe14b916f4da9c06ed1458c21d3e059fad4ef72874d060e",
+    "all_values_finite": true,
+    "pre_result_serializer_failures": [
+      {
+        "log_sha256": "f2c8c647e9985576e1e0eaf5038b2517b6df362156641c10bf980b5930cd3bff",
+        "cause": "git_commit helper called without its required repository argument",
+        "result_exists": false
+      },
+      {
+        "log_sha256": "070d1b1a71cfedc668457194ec6fd697c4e72c73d4e5beabfdf1e080d6ada451",
+        "cause": "JSON-style false token used in Python result authorization dictionary",
+        "result_exists": false
+      }
+    ]
+  },
+  "accounting": {
+    "dense_cfc_parameters_per_expert": 1179648,
+    "spectral_coordinates_per_expert": 5632,
+    "cfc_compression_ratio": 209.45454545454547,
+    "materialized_dense_cfc_in_candidate": false,
+    "dense_cproj_retained_as_exception": true
+  },
+  "results": {
+    "discovery_a_fit": {
+      "heldout_mixture_recovery_mean": 0.3818472623825073,
+      "heldout_mixture_recovery_minimum_layer": 0.34019166231155396,
+      "minimum_expert_recovery": 0.15294467161604963,
+      "candidate_minus_fixed_control_recovery_mean": 0.14508471886316934,
+      "minimum_discovery_assignments": 9360
+    },
+    "discovery_b_fit": {
+      "heldout_mixture_recovery_mean": 0.3820491433143616,
+      "heldout_mixture_recovery_minimum_layer": 0.3364155888557434,
+      "minimum_expert_recovery": 0.1596481909936629,
+      "candidate_minus_fixed_control_recovery_mean": 0.14649879932403564,
+      "minimum_discovery_assignments": 8970
+    },
+    "heldout_bank_action_cosine": {
+      "mean": 0.7397584319114685,
+      "by_layer": {
+        "0": 0.7518345713615417,
+        "5": 0.6954172849655151,
+        "11": 0.7720234394073486
+      }
+    },
+    "pregelu_diagnosis": {
+      "minimum_recovery_discovery_a_fit": -0.030347060845450136,
+      "minimum_recovery_discovery_b_fit": -0.03570853324524692,
+      "maximum_observed_expert_recovery": 0.316760431109152,
+      "interpretation": "Dense c_proj and GELU convert the structured features into a modest residual-output match, but the compact operator does not recover the terminal c_fc pre-GELU directions themselves."
+    }
+  },
+  "gates": {
+    "all_values_finite": true,
+    "occupancy_min_128": true,
+    "candidate_minus_control_mean_min_0p1": true,
+    "mixture_recovery_mean_min_0p8": false,
+    "every_layer_min_0p7": false,
+    "every_expert_min_0p5": false,
+    "bank_action_cosine_min_0p8": false,
+    "passed": false
+  },
+  "interpretation": {
+    "positive": "Learned spectral diagonals add a reproducible 0.145-0.146 heldout recovery over the fixed pseudo-random orthogonal control. Direction adaptation is useful and the failure is not caused by dead experts or non-finite optimization.",
+    "binding_failure": "The absolute function remains far outside the registered gate: about 0.382 mean recovery versus 0.80 required, 0.336-0.340 worst-layer recovery versus 0.70, 0.153-0.160 worst-expert recovery versus 0.50, and 0.740 bank-action cosine versus 0.80.",
+    "mechanism": "Two diagonal spectra can reweight a fixed global frame but cannot learn the expert-, layer-, and neuron-specific pre-GELU directions. Near-zero pre-GELU recovery localizes the failure before GELU rather than to c_proj, which was held exact and dense.",
+    "closed_family": "The exact two-spectral-diagonal fixed-orthogonal c_fc family is closed. No sign, depth, width, learning-rate, or threshold sweep is authorized from this result."
+  },
+  "authorization": {
+    "spectral_cfc_implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "next_allowed_work": "A zero-update decomposition of the terminal c_fc tensor into shared layer/expert/neuron/input tensor-train structure versus an equal-coordinate separated-axis control. This tests a direction-learning multiplicative generator rather than another fixed orthogonal frame."
+  }
+}
