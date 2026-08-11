@@ -1,0 +1,53 @@
+{
+  "artifact_kind": "124m_qk_mapped_dense_complete_expert_moe_performance_amendment",
+  "authorization": {
+    "automatic_scientific_retry": false,
+    "one_b64g4_exact_config_mfu_preflight": true,
+    "scientific_run_only_after_pass": true,
+    "variant_sweep": false
+  },
+  "failed_exact_preflight": {
+    "base_timed_iter_ms": 2889.92875,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_mapped_dense_moe_mfu/performance_preflight.json",
+    "certificate_sha256": "debf1b23cbf7fcbafdabba6bebe588f5da0b55185230fac310f8a4ec64743c1a",
+    "forward_backward_ms": 2822.10375,
+    "log_sha256": "2eb98bd8e7b1b822f9fec7ebac7dad2e8e6d2e83cbda7c366073d27c0401e50a",
+    "mfu_fraction": 0.16398701010552078,
+    "native_block_fht_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "peak_mib": 54948.84,
+    "registered_config_sha256": "7cc7432989de9dde5d86a617394e19fb92c91c9cf33e576752a540ea63ff0328",
+    "source_commit": "58b2069ece4070dcafc6e676b732c20e08517f23",
+    "stability": "all 13 logged losses finite"
+  },
+  "frozen_change": {
+    "after": {
+      "batch_size": 64,
+      "gradient_accumulation_steps": 4,
+      "tokens_per_iter": 262144
+    },
+    "before": {
+      "batch_size": 32,
+      "gradient_accumulation_steps": 8,
+      "tokens_per_iter": 262144
+    },
+    "unchanged": [
+      "model and mapping structure",
+      "materialized and registered parameter counts",
+      "tokens per optimizer update",
+      "238 optimizer updates and token horizon",
+      "optimizer, learning rate, warmup, and decay",
+      "data manifest, train seed, model seed, and fixed evaluation indices",
+      "MoE routing, expert capacity, and auxiliary losses"
+    ]
+  },
+  "gate": {
+    "all_losses_finite": true,
+    "maximum_peak_mib": 95000,
+    "minimum_mfu_fraction": 0.2,
+    "native_block_fht_required": true
+  },
+  "rationale": "The failed profile spends 97.7% of update time in forward/backward while cache prepare, pullback, optimizer, and data are negligible. B64/G4 preserves the exact global batch and schedule but halves sequential microbatch routing/headwise dispatch and enlarges expert GEMMs. The first preflight used only 54.9/97.9 GiB, leaving enough memory for this single registered systems change.",
+  "registered_at": "2026-08-11T18:30:00+08:00",
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_performance_amendment_v1",
+  "status": "registered_after_failed_b32g8_preflight_before_b64g4_preflight"
+}
