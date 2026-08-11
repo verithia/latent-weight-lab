@@ -54,7 +54,21 @@
   "run_name": "pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4",
   "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_5tpp_run_metadata_v1",
   "started_at": "2026-08-11T19:21:22+08:00",
-  "status": "running",
+  "status": "finished_clean",
   "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.json",
+  "terminal_verification": {
+    "checkpoint_best_validation_ce": 3.4005050659179688,
+    "checkpoint_bytes": 2444270488,
+    "checkpoint_metadata_sha256": "5943237c131b61d54e34861dce2dc9ac3c3a33cd12b8fc034ffe59a73d4aebe3",
+    "checkpoint_next_iter": 2374,
+    "checkpoint_sha256": "113e9e02cc29cb0b713be95a013f92aab52eca2bfb74bc5f82621a201614f802",
+    "exit_code": 0,
+    "finished_at": "2026-08-11T20:39:37+08:00",
+    "log_sha256": "999eca2b89ba9c96b28c974bbbf14d17dcf8cfd6c884ce9bc42951629517b564",
+    "optimizer_and_rng_state_present": true,
+    "resolved_config_sha256": "b1565e26ae54576fa6909e3429bd3e105ade1c0582e75f5032888ca68d9b0d0d",
+    "status_sha256": "812757f2701aec83f05e76daae4ec84535620a56ffcefc24768ec45f47bcce2b",
+    "wall_seconds": 4695
+  },
   "training_log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4_20260811T112120Z_211681.log"
 }

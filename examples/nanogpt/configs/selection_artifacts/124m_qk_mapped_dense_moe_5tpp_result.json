@@ -1,0 +1,116 @@
+{
+  "schema_version": "mai_124m_qk_mapped_dense_complete_expert_moe_5tpp_result_v1",
+  "recorded_at": "2026-08-11T20:43:00+08:00",
+  "classification": "PASS_QK_MAPPED_DENSE_COMPLETE_EXPERT_MOE_COMPOSITION_5TPP",
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4",
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "85ad24f0240112d214677e6edcef1ac8f3fd5fe6",
+    "entrypoint": "examples.nanogpt.train",
+    "source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_mapped_dense_moe8_top2_5tpp_lr24e4.json",
+    "source_config_sha256": "6f3aced8b4d8bd2f7dc0be12bf6c21424a97a0f3def8a3166aff9846e196e3d5",
+    "resolved_config_sha256": "b1565e26ae54576fa6909e3429bd3e105ade1c0582e75f5032888ca68d9b0d0d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "f9cfdead17665b10f01eca7e63dd23789f605d8589de32ee8df93ce622a6ede0",
+    "status_sha256": "812757f2701aec83f05e76daae4ec84535620a56ffcefc24768ec45f47bcce2b",
+    "log_sha256": "999eca2b89ba9c96b28c974bbbf14d17dcf8cfd6c884ce9bc42951629517b564",
+    "checkpoint_sha256": "113e9e02cc29cb0b713be95a013f92aab52eca2bfb74bc5f82621a201614f802",
+    "checkpoint_metadata_sha256": "5943237c131b61d54e34861dce2dc9ac3c3a33cd12b8fc034ffe59a73d4aebe3",
+    "checkpoint_bytes": 2444270488,
+    "checkpoint_next_iter": 2374,
+    "checkpoint_best_validation_ce": 3.4005050659179688,
+    "optimizer_and_rng_state_present": true,
+    "exit_code": 0,
+    "max_iters": 2374,
+    "scheduled_tokens": 622329856,
+    "scheduled_active_tpp": 5.0007426104093,
+    "wall_seconds": 4695
+  },
+  "architecture": {
+    "generated": [
+      "attn.c_attn.qk_headwise"
+    ],
+    "dense_full_state": [
+      "attn.c_attn.v",
+      "attn.c_proj",
+      "moe.expert_c_fc",
+      "moe.expert_c_proj"
+    ],
+    "materialized_active_parameters": 124447488,
+    "materialized_stored_parameters": 294316800,
+    "runtime_registered_active_trainable_parameters": 113990640,
+    "runtime_registered_stored_trainable_parameters": 283859952,
+    "qk_mapping_trainable_coordinates": 3698928,
+    "qk_materialized_parameters": 14155776,
+    "inference_parameter_and_flop_reduction": false
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_5tpp_confirmation_plan.json",
+    "dense_moe_reference": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_5tpp_top1_lr24e4_result.json",
+    "qk_only_reference": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+    "mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_5tpp_mfu_result.json",
+    "mfu_certificate_sha256": "8f4572d1ad11e56c9a12dce0b60b136d210e9d640d400970a44989bab5199bc9"
+  },
+  "fixed_evaluations": [
+    {
+      "step": 0,
+      "train_ce": 10.9774,
+      "validation_ce": 10.9780,
+      "dense_moe_validation_ce": 10.9848,
+      "validation_delta_to_dense_moe": -0.0068
+    },
+    {
+      "step": 594,
+      "train_ce": 3.9581,
+      "validation_ce": 3.9447,
+      "dense_moe_validation_ce": 4.1308,
+      "validation_delta_to_dense_moe": -0.1861
+    },
+    {
+      "step": 1188,
+      "train_ce": 3.6321,
+      "validation_ce": 3.6159,
+      "dense_moe_validation_ce": 3.6753,
+      "validation_delta_to_dense_moe": -0.0594
+    },
+    {
+      "step": 1782,
+      "train_ce": 3.4835,
+      "validation_ce": 3.4654,
+      "dense_moe_validation_ce": 3.5114,
+      "validation_delta_to_dense_moe": -0.0460
+    },
+    {
+      "step": 2374,
+      "train_ce": 3.4190,
+      "validation_ce": 3.4005,
+      "dense_moe_validation_ce": 3.4448,
+      "validation_delta_to_dense_moe": -0.0443
+    }
+  ],
+  "gates": {
+    "all_fixed_losses_finite": true,
+    "maximum_fixed_checkpoint_penalty_ce": -0.0068,
+    "maximum_fixed_checkpoint_penalty_ce_allowed": 0.03,
+    "terminal_validation_ce": 3.4005,
+    "terminal_validation_ce_maximum": 3.4548,
+    "terminal_penalty_to_dense_moe_ce": -0.0443,
+    "terminal_penalty_to_dense_moe_ce_maximum": 0.01,
+    "all_pass": true
+  },
+  "comparison": {
+    "checkpoint_validation_delta_to_dense_moe_checkpoint_reference": -0.04432225227355957,
+    "perplexity_ratio_to_dense_moe_checkpoint_reference": 0.956645626567395,
+    "interpretation": "Generated Q/K composes with dense complete experts through 5TPP and beats the matched dense-MoE reference at every registered checkpoint. The early 0.5TPP advantage contracts but remains a material -0.0443 CE at 5TPP. This validates horizon-stable composition only; V/O and all expert c_fc/c_proj matrices remain dense."
+  },
+  "decision": {
+    "passed": true,
+    "qk_dense_moe_composition_confirmed": true,
+    "automatic_20tpp_extension_authorized": false,
+    "generated_expert_training_authorized": false,
+    "larger_active_parameter_rung_authorized": false,
+    "next_allowed_work": "Return to theory-gated expert representability. Any generated-expert candidate requires a separate causal offline pass and exact-config MFU gate."
+  }
+}
