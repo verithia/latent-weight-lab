@@ -1,0 +1,160 @@
+{
+  "schema_version": "nanogpt_sparse_moe_shared_residual_basis_plan_v1",
+  "recorded_at": "2026-08-11T17:38:57+08:00",
+  "status": "preregistered_after_sparse_functional_state_boundary_before_any_shared_basis_value",
+  "scientific_question": "Can the wide but token-stable c_proj residual-output frame be amortized as one learned residual-space basis across all 12 layers and 8 experts while preserving 200--500x total c_proj trainable-state compression?",
+  "theory_reconciliation": {
+    "observed_boundary": "At 200x, eight rank-2 experts can recover at most 0.4540 of the joint routed residual write on average. The joint ranks needed for 80% and 90% energy are about 143 and 274, while cross-bank output-subspace overlap stays about 0.78--0.91 through rank 64.",
+    "selected_class": "The output frame is wide but stable. Per-matrix storage is too expensive, and the equal-budget full-rank MPO recovered only about 0.358. The next distinct class is therefore one residual-space basis shared model-wide, with compact per-matrix coordinates generating coefficients into that basis.",
+    "not_private_lora": "A private learned basis for every matrix would be a low-rank adapter and violates the state budget. This oracle counts exactly one basis over all 96 sparse-expert c_proj matrices. It tests a common residual coordinate system, not 96 private LoRA modules.",
+    "optimism": "For a frozen shared basis U, every evaluated action is projected with oracle coefficients Y U. This ignores whether the registered per-matrix coordinate budgets can causally generate those coefficients and therefore upper-bounds the proposed class.",
+    "cross_bank_causality": "U is derived from all layers on discovery A and scored unchanged on discovery B and heldout; the symmetric B-to-A/heldout direction is also required. Independent bases must agree geometrically.",
+    "state_accounting": "Total dense c_proj state is 12*8*768*1536=113,246,208 values. Every layout counts 96 per-matrix coordinate vectors plus one explicit 768-by-r shared basis. Ranks are the largest integers that do not exceed the registered global compression budget.",
+    "why_not_training": "A pass establishes only shareable output orientation. It authorizes a separate fixed-operator coefficient-generation oracle, never direct implementation, MFU work, language-model training, or a larger rung."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "state_budget_seal": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_functional_state_budget_result.json",
+    "state_budget_seal_sha256": "2529a368576227f375e4a5721b05bf5741c8dcf4892c911f19695cf828bfd1c5",
+    "analyzer": "examples/nanogpt/analyze_sparse_moe_shared_residual_basis.py",
+    "analyzer_sha256": "fbc80c27f07bae3d4ad9747b807f39a60ece9c97977f39c575b5afdf94e3b17c"
+  },
+  "functional_protocol": {
+    "activation_state": "terminal",
+    "top_k": 2,
+    "discovery_banks": [
+      {
+        "name": "discovery_a",
+        "seed": 20260921,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      },
+      {
+        "name": "discovery_b",
+        "seed": 20260922,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      }
+    ],
+    "heldout": {
+      "seed": 20260923,
+      "batches": 2,
+      "batch_size": 8,
+      "block_size": 256,
+      "tokens": 4096
+    },
+    "score": "Exact terminal c_proj minus exact reproducible step-zero c_proj, applied to terminal same-run routing and c_fc activations in every transformer layer.",
+    "anti_leakage": "Each shared basis is derived from exactly one discovery bank. It is scored unchanged on the other discovery bank and heldout bank; no evaluation action changes the basis or layout."
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "experts": 8,
+    "top_k": 2,
+    "matrix_shape": [768, 1536],
+    "dense_cproj_values_all_layers_experts": 113246208,
+    "fit_banks": ["discovery_a", "discovery_b"],
+    "evaluation_banks": ["discovery_a", "discovery_b", "heldout"],
+    "layouts": [
+      {
+        "global_compression_target": 500.0,
+        "per_matrix_coordinates": 1536,
+        "total_coordinate_budget": 226492,
+        "per_matrix_coordinate_total": 147456,
+        "shared_basis_rank": 102,
+        "shared_basis_scalars": 78336,
+        "total_coordinates_used": 225792,
+        "realized_global_compression": 501.55102040816325
+      },
+      {
+        "global_compression_target": 281.2703862660944,
+        "per_matrix_coordinates": 1536,
+        "total_coordinate_budget": 402624,
+        "per_matrix_coordinate_total": 147456,
+        "shared_basis_rank": 332,
+        "shared_basis_scalars": 254976,
+        "total_coordinates_used": 402432,
+        "realized_global_compression": 281.40458015267177
+      },
+      {
+        "global_compression_target": 281.2703862660944,
+        "per_matrix_coordinates": 3072,
+        "total_coordinate_budget": 402624,
+        "per_matrix_coordinate_total": 294912,
+        "shared_basis_rank": 140,
+        "shared_basis_scalars": 107520,
+        "total_coordinates_used": 402432,
+        "realized_global_compression": 281.40458015267177
+      },
+      {
+        "global_compression_target": 200.0,
+        "per_matrix_coordinates": 1536,
+        "total_coordinate_budget": 566231,
+        "per_matrix_coordinate_total": 147456,
+        "shared_basis_rank": 545,
+        "shared_basis_scalars": 418560,
+        "total_coordinates_used": 566016,
+        "realized_global_compression": 200.07598371777476
+      },
+      {
+        "global_compression_target": 200.0,
+        "per_matrix_coordinates": 3072,
+        "total_coordinate_budget": 566231,
+        "per_matrix_coordinate_total": 294912,
+        "shared_basis_rank": 353,
+        "shared_basis_scalars": 271104,
+        "total_coordinates_used": 566016,
+        "realized_global_compression": 200.07598371777476
+      },
+      {
+        "global_compression_target": 200.0,
+        "per_matrix_coordinates": 4194,
+        "total_coordinate_budget": 566231,
+        "per_matrix_coordinate_total": 402624,
+        "shared_basis_rank": 213,
+        "shared_basis_scalars": 163584,
+        "total_coordinates_used": 566208,
+        "realized_global_compression": 200.00813835198372
+      }
+    ]
+  },
+  "decision_rule": {
+    "gates": {
+      "cross_bank_recovery_mean_minimum": 0.9,
+      "cross_bank_recovery_every_layer_minimum": 0.8,
+      "shared_minus_local_oracle_minimum": -0.05,
+      "independent_basis_overlap_minimum": 0.8,
+      "minimum_expert_assignments": 128
+    },
+    "pass": "A layout passes only if both independently fitted bases satisfy every gate on the other discovery bank and heldout bank. The highest-compression passing layout is selected; ties prefer fewer per-matrix coordinates.",
+    "fail": "If no layout passes, a single model-wide residual-output frame is not sufficient at the registered budgets. Do not sweep rank or layouts; return to theory on layer-grouped frames or an explicit residual-write exception.",
+    "post_pass": "A pass authorizes only a separately preregistered oracle for producing the shared-basis coefficients from the registered per-matrix coordinates with a fixed procedural operator."
+  },
+  "scope_caveat": "Projection coefficients are oracle values and the basis is endpoint-selected from one discovery bank. The test establishes only output-frame shareability and state accounting. It does not show that a causal compact coefficient generator, optimizer, or training trajectory can reach the represented function.",
+  "output_contract": {
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/shared_residual_basis_v1",
+    "must_be_absent_before_run": true,
+    "required_files": [
+      "shared_residual_basis_result.json",
+      "shared_residual_basis_rows.csv",
+      "shared_residual_bases.pt",
+      "shared_residual_basis_status.json"
+    ]
+  },
+  "authorization": {
+    "run_zero_update_oracle": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
