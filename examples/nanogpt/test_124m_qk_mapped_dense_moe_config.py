@@ -43,6 +43,7 @@ def test_candidate_changes_only_attention_qk_from_dense_moe_scope() -> None:
     assert config["estimated_qk_mapping_trainable_state"] == 3698928
     assert config["estimated_qk_materialized_parameters"] == 14155776
     assert config["block_fht_attn_pack_cached_qkv"] is True
+    assert config["moe_unpadded_expert_loop"] is True
     assert config["launch_ready"] is True
 
 

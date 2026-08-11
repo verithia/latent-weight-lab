@@ -1076,6 +1076,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--moe-router-z-loss-coefficient", type=float, default=0.001
     )
+    parser.add_argument(
+        "--moe-unpadded-expert-loop",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--learning-rate", type=float, default=6e-4)
     parser.add_argument("--min-lr", type=float, default=6e-5)
     parser.add_argument("--warmup-iters", type=int, default=100)
@@ -2500,6 +2505,7 @@ def main() -> None:
             args.moe_load_balance_aux_coefficient
         ),
         moe_router_z_loss_coefficient=args.moe_router_z_loss_coefficient,
+        moe_unpadded_expert_loop=args.moe_unpadded_expert_loop,
         block_fht=args.method == "block_fht",
         block_fht_targets=tuple(args.block_fht_targets),
         block_fht_latent_ratio=args.block_fht_latent_ratio,

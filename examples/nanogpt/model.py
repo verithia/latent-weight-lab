@@ -90,6 +90,7 @@ class GPTConfig:
     moe_expert_hidden_multiplier: int = 2
     moe_load_balance_aux_coefficient: float = 0.01
     moe_router_z_loss_coefficient: float = 0.001
+    moe_unpadded_expert_loop: bool = False
     block_fht: bool = False
     block_fht_targets: tuple[str, ...] = ("attn.c_attn", "attn.c_proj", "mlp.c_fc", "mlp.c_proj")
     block_fht_latent_ratio: float = 0.01
@@ -1930,6 +1931,9 @@ class SparseMoEMLP(nn.Module):
         self.hidden_features = int(
             config.moe_expert_hidden_multiplier * config.n_embd
         )
+        self.unpadded_expert_loop = bool(
+            config.moe_unpadded_expert_loop
+        )
         if self.num_experts < 2:
             raise ValueError("sparse MoE requires at least two experts")
         if self.top_k < 1 or self.top_k > self.num_experts:
@@ -2032,19 +2036,47 @@ class SparseMoEMLP(nn.Module):
         ) - offsets.index_select(0, sorted_experts)
         max_tokens = counts.max()
 
-        # Zero padding is exact because experts are bias-free and GELU(0)=0.
-        packed = flat.new_zeros(
-            (self.num_experts, max_tokens, self.n_embd)
-        )
-        packed[sorted_experts, positions] = flat.index_select(0, sorted_tokens)
-        hidden = torch.bmm(
-            packed, self.expert_c_fc.transpose(1, 2)
-        )
-        hidden = F.gelu(hidden)
-        expert_output = torch.bmm(
-            hidden, self.expert_c_proj.transpose(1, 2)
-        )
-        sorted_output = expert_output[sorted_experts, positions]
+        if self.unpadded_expert_loop:
+            # stable=True above makes every expert's real assignments one
+            # contiguous slice. The count transfer is one synchronization per
+            # layer, after which no zero-capacity expert rows are executed.
+            count_values = [int(value) for value in counts.tolist()]
+            sorted_output_parts = []
+            cursor = 0
+            for expert, count in enumerate(count_values):
+                if count == 0:
+                    continue
+                stop = cursor + count
+                expert_input = flat.index_select(
+                    0, sorted_tokens[cursor:stop]
+                )
+                hidden = F.gelu(
+                    F.linear(expert_input, self.expert_c_fc[expert])
+                )
+                sorted_output_parts.append(
+                    F.linear(hidden, self.expert_c_proj[expert])
+                )
+                cursor = stop
+            if cursor != assignments:
+                raise RuntimeError("sparse expert assignment accounting drift")
+            sorted_output = torch.cat(sorted_output_parts, dim=0)
+        else:
+            # Zero padding is exact because experts are bias-free and
+            # GELU(0)=0, but can execute far more rows than were routed.
+            packed = flat.new_zeros(
+                (self.num_experts, max_tokens, self.n_embd)
+            )
+            packed[sorted_experts, positions] = flat.index_select(
+                0, sorted_tokens
+            )
+            hidden = torch.bmm(
+                packed, self.expert_c_fc.transpose(1, 2)
+            )
+            hidden = F.gelu(hidden)
+            expert_output = torch.bmm(
+                hidden, self.expert_c_proj.transpose(1, 2)
+            )
+            sorted_output = expert_output[sorted_experts, positions]
         output = flat.new_zeros(flat.shape)
         output.index_add_(
             0,

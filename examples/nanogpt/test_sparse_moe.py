@@ -69,6 +69,62 @@ def test_dropless_batched_dispatch_matches_scalar_complete_experts() -> None:
     assert module.expert_c_proj.shape == (4, 8, 16)
 
 
+def test_unpadded_expert_execution_matches_padded_function_and_gradients() -> None:
+    torch.manual_seed(20260811)
+    padded = SparseMoEMLP(
+        tiny_config(n_layer=1, moe_unpadded_expert_loop=False), layer_id=0
+    ).double()
+    unpadded = SparseMoEMLP(
+        tiny_config(n_layer=1, moe_unpadded_expert_loop=True), layer_id=0
+    ).double()
+    unpadded.load_state_dict(padded.state_dict())
+    padded_input = torch.randn(4, 7, 8, dtype=torch.float64).requires_grad_()
+    unpadded_input = padded_input.detach().clone().requires_grad_()
+    probe = torch.randn_like(padded_input)
+
+    padded_output = padded(padded_input)
+    padded_balance, padded_z = padded.router_auxiliary_loss()
+    padded_objective = (
+        (padded_output * probe).sum()
+        + 0.017 * padded_balance
+        + 0.023 * padded_z
+    )
+    padded_parameters = [padded_input, *padded.parameters()]
+    padded_gradients = torch.autograd.grad(
+        padded_objective, padded_parameters
+    )
+
+    unpadded_output = unpadded(unpadded_input)
+    unpadded_balance, unpadded_z = unpadded.router_auxiliary_loss()
+    unpadded_objective = (
+        (unpadded_output * probe).sum()
+        + 0.017 * unpadded_balance
+        + 0.023 * unpadded_z
+    )
+    unpadded_parameters = [unpadded_input, *unpadded.parameters()]
+    unpadded_gradients = torch.autograd.grad(
+        unpadded_objective, unpadded_parameters
+    )
+
+    torch.testing.assert_close(
+        unpadded_output, padded_output, rtol=1e-10, atol=1e-10
+    )
+    torch.testing.assert_close(
+        unpadded_balance, padded_balance, rtol=0.0, atol=0.0
+    )
+    torch.testing.assert_close(unpadded_z, padded_z, rtol=0.0, atol=0.0)
+    assert torch.equal(unpadded.last_expert_counts, padded.last_expert_counts)
+    for unpadded_gradient, padded_gradient in zip(
+        unpadded_gradients, padded_gradients
+    ):
+        torch.testing.assert_close(
+            unpadded_gradient,
+            padded_gradient,
+            rtol=1e-9,
+            atol=1e-9,
+        )
+
+
 def test_router_tie_break_and_selected_probabilities_are_deterministic() -> None:
     module = SparseMoEMLP(tiny_config(n_layer=1), layer_id=0)
     with torch.no_grad():
