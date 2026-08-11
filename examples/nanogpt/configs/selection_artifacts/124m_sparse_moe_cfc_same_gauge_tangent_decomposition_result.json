@@ -1,0 +1,87 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_same_gauge_tangent_decomposition_seal_v1",
+  "recorded_at": "2026-08-11T22:22:30+08:00",
+  "classification": "ACTIVATION_CONDITIONED_TANGENT_INSTABILITY",
+  "source_control": {
+    "git_commit": "bec04b1bd91f5d22857edec5acb6db98ff431c2e",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_same_gauge_tangent_decomposition.py",
+    "entrypoint_sha256": "63e1ee9693e0d8dd97746ec1268709b010b771fa40ebc17e4fe6b93f6a35ef20",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_same_gauge_tangent_decomposition_plan.json",
+    "plan_sha256": "07c559503568e676c7c995d25d768c4911e292235eb6a12ac949eb1aa32aa2f7"
+  },
+  "source": {
+    "parent_result_sha256": "2449ef060f75d607af548fc53d9c70bd040044da3990ba1c809a9233574274cd",
+    "parent_gradient_artifact_sha256": "e0ba6c304c1e862325ae94d38f216e30338bbd4535253f16cc43cd4a900e3389",
+    "shared_endpoint_coordinates_sha256": "174f585ff1e1caca81493d233733692b336ff50f525f1d5e7211a5d6ca9fd3b8",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground_polled_sub_five_minute_diagnostic",
+    "internal_wall_seconds": 8.535015106201172,
+    "wrapper_wall_seconds": 9.67,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "maximum_resident_set_kib": 6431120,
+    "remote_focused_and_regression_tests": "7 passed in 0.88s after serializer repair; 12 passed in 1.61s before the import-only repair",
+    "non_scientific_failed_attempt": {
+      "cause": "Parent dataclass was serialized under __main__; the new entrypoint had not imported ButterflyCFCState into its global namespace.",
+      "scientific_values_emitted": false,
+      "log_sha256": "f4899a096be24abe28716583e513a14f1626e3dd1e1fe8a8e0e717bc993e797f"
+    },
+    "result_sha256": "c414661a11cf74f20204d57696928464d323b45ca83d003773a66ed989a394d8",
+    "crossed_gradients_sha256": "66cc19048fe4aed980d68cdc50a808e3e2f458a24687a7e28dc655256774a0cb",
+    "log_sha256": "91212f15557152507b204b372ceabf2d7b65f44b74b575b1419b56aa558aabc6",
+    "all_values_and_gradients_finite": true
+  },
+  "results": {
+    "fixed_endpoint_a_data_effect": {
+      "direct_cosine_mean": 0.42247748374938965,
+      "direct_cosine_minimum_layer_mean": 0.36554980278015137,
+      "global_rank7_explained_energy": [0.06843201071023941, 0.06766622513532639],
+      "global_rank7_coefficient_cosine": [0.9947049617767334, 0.9948272109031677],
+      "per_layer_rank7_explained_energy": [0.18317151069641113, 0.18321174879868826]
+    },
+    "fixed_endpoint_b_data_effect": {
+      "direct_cosine_mean": 0.420089453458786,
+      "direct_cosine_minimum_layer_mean": 0.35581469535827637,
+      "global_rank7_explained_energy": [0.0640442818403244, 0.06507039815187454],
+      "global_rank7_coefficient_cosine": [0.9904903769493103, 0.9928291440010071],
+      "per_layer_rank7_explained_energy": [0.18204576273759207, 0.18197459479173025]
+    },
+    "fixed_data_a_endpoint_effect": {
+      "direct_cosine_mean": 0.01021057739853859,
+      "global_rank7_explained_energy": [0.0006851558573544025, 0.0008269433747045696],
+      "per_layer_rank7_explained_energy": [0.0007646019609334568, 0.0007655702065676451]
+    },
+    "fixed_data_b_endpoint_effect": {
+      "direct_cosine_mean": 0.008429378271102905,
+      "global_rank7_explained_energy": [0.0006382540450431406, 0.0007243887521326542],
+      "per_layer_rank7_explained_energy": [0.000831780896987766, 0.000828704098239541]
+    }
+  },
+  "gates": {
+    "fixed_endpoint_data_effect_passed": false,
+    "fixed_data_endpoint_effect_passed": false,
+    "all_values_and_gradients_finite": true
+  },
+  "interpretation": {
+    "activation_effect": "At either fixed endpoint, two activation banks retain moderate direct gradient alignment (~0.42), but their shared rank-7 component contains only 6.4-6.8% of total energy globally and ~18.2% even with a separate basis per layer. Activation-conditioned variation is therefore high-dimensional relative to the 200x budget.",
+    "stable_sliver": "Within the small projected rank-7 component, coefficient cosine is 0.990-0.995. The component is real and stable, but it omits more than 93% of the gradient energy and cannot support the proposed static decoder by itself.",
+    "endpoint_effect": "Holding data fixed while changing the fitted mapping endpoint is far more destructive: direct cosine is 0.008-0.010 and rank-7 cross coverage is only 0.064-0.083%. The learned angle chart rotates almost completely as its shared frame moves.",
+    "structural_conclusion": "A fixed pseudo-random BlockFHT, a fixed low-rank tangent, and a single local butterfly chart all impose the wrong assumption: useful expert c_fc directions are neither input-independent nor stationary in the current angle coordinates. The next candidate must be nonlinear in its latent state and selected in function space across multiple activation banks; static angle-template expansion is closed."
+  },
+  "authorization": {
+    "conditional_tangent_functional_oracle": false,
+    "implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "next_allowed_work": "A preregistered function-space optimization oracle for a genuinely nonlinear compact generator may fit both discovery banks jointly and score untouched heldout activations. The previously rejected endpoint TT-SVD is not sufficient; any TT follow-up must optimize the functional objective, use canonical conditioning, and remain at or above 200x."
+  }
+}
