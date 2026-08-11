@@ -1,0 +1,102 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_butterfly_expert_conflict_audit_seal_v1",
+  "recorded_at": "2026-08-11T21:59:43+08:00",
+  "classification": "ONE_SWEEP_BUTTERFLY_TOPOLOGY_INSUFFICIENT",
+  "source_control": {
+    "git_commit": "b70edbcba7fbe2ef2da8b20f50a1ad8fd5346ff9",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_butterfly_expert_conflict.py",
+    "entrypoint_sha256": "dfbfc33d3d25f4f0ac6ef653f38914d8d528c458758f357138b3eec248a2c768",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_butterfly_expert_conflict_audit_plan.json",
+    "plan_sha256": "ffae31dde8a1e04aae07e628ac3da93b478b2c546b9ebfa5adc0472b8e4eed21"
+  },
+  "source": {
+    "parent_result_sha256": "a12a433c9dceb67fd153b8c5fa2c8d5d3428e923c67cf58a5e3a00551df3fbb4",
+    "parent_coordinates_sha256": "174f585ff1e1caca81493d233733692b336ff50f525f1d5e7211a5d6ca9fd3b8",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground_polled_after_sub_five_minute_exact_shape_preflight",
+    "audit_internal_wall_seconds": 27.26193332672119,
+    "audit_wrapper_wall_seconds": 28.56,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "maximum_resident_set_kib": 7456680,
+    "remote_focused_and_regression_tests": "16 passed in 1.75s",
+    "preflight_five_step_wall_seconds": 0.6156654357910156,
+    "preflight_projected_full_audit_seconds": 295.5194091796875,
+    "preflight_maximum_memory_allocated_bytes": 292549632,
+    "preflight_sha256": "86e0bad972a7a6030e91f24c802bc1f0d787482b47beed701dda4072c423183c",
+    "result_sha256": "d86e01c0b0dfe5292c97aab6ac640c8e9bb28038a5b638917ec00d6a7336d641",
+    "coordinates_sha256": "fa29f91e5b4a48e02bab8ed00674b67b2cde49c4feb5c5655eda45f178e44e4b",
+    "log_sha256": "d52ed6802e1e10810926df93d4528eb6b8622329502185441902ffc9df9e518f",
+    "all_values_finite": true
+  },
+  "accounting": {
+    "upper_bound_coordinates": 1818624,
+    "upper_bound_cfc_compression_ratio": 62.270270270270274,
+    "deployable": false,
+    "dense_cproj_retained_as_exception": true
+  },
+  "results": {
+    "shared_endpoint_gradient_conflict": {
+      "mean_pairwise_cosine": -0.14217956914078622,
+      "mean_cancellation_ratio": 0.0002648636946105398,
+      "minimum_finite_nonzero_gradient_count": 8,
+      "negative_pair_fraction_every_bank_layer": 1.0,
+      "passed": true
+    },
+    "discovery_a_unshared_upper_bound": {
+      "heldout_mixture_recovery_mean": 0.4557393391927083,
+      "heldout_mixture_recovery_minimum_layer": 0.39555931091308594,
+      "minimum_expert_recovery": 0.10237657045919324,
+      "gain_over_shared_parent_mean": 0.08876355489095052
+    },
+    "discovery_b_unshared_upper_bound": {
+      "heldout_mixture_recovery_mean": 0.45704931020736694,
+      "heldout_mixture_recovery_minimum_layer": 0.39169299602508545,
+      "minimum_expert_recovery": 0.09507313981399679,
+      "gain_over_shared_parent_mean": 0.08961564302444458
+    },
+    "heldout_bank_action_cosine": {
+      "mean": 0.6836453874905905,
+      "by_layer": {
+        "0": 0.664596438407898,
+        "5": 0.6385738849639893,
+        "11": 0.747765839099884
+      }
+    },
+    "optimization_diagnosis": {
+      "final_fit_loss_range": [0.38937515020370483, 0.44034504890441895],
+      "maximum_preclip_gradient_norm": 0.006783029995858669
+    }
+  },
+  "gates": {
+    "shared_gradient_conflict": true,
+    "unshared_mean_recovery_min_0p6": false,
+    "unshared_every_layer_min_0p5": false,
+    "unshared_every_expert_min_0p3": false,
+    "unshared_gain_over_shared_min_0p15": false,
+    "unshared_action_cosine_min_0p8": false,
+    "all_values_and_gradients_finite": true,
+    "upper_bound_passed": false
+  },
+  "interpretation": {
+    "expert_conflict": "The eight expert gradients are almost a regular zero-sum simplex: every pair is negative, mean cosine is -0.14218 (near -1/7), and aggregate cancellation is 0.000265. Sharing one frame therefore does erase expert-specific direction updates.",
+    "binding_failure": "Even fully unsharing the frame at only 62.27x compression recovers just 0.456 mean function, below 0.40 in the worst layer and about 0.10 for the worst expert. It gains only 0.089 over the shared endpoint and is unstable across discovery banks.",
+    "closed_family": "The exact one-sweep butterfly topology is closed, not merely its layer-shared parameterization. No sharing, stage, padding, seed, optimizer, or threshold sweep is authorized.",
+    "next_evidence": "Before proposing another generator, measure the cross-bank intrinsic rank of the expert angle-gradient conflict. A globally shared rank-r conditional tangent can remain above 200x only for r <= 7; it is worth representing only if a discovery-bank basis explains a preregistered fraction of the other bank's gradient energy."
+  },
+  "authorization": {
+    "one_sweep_butterfly_implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "next_allowed_work": "A zero-checkpoint-update cross-bank PCA audit of per-expert shared-angle gradients may test whether at most seven global conditional tangent directions capture the conflict while preserving more than 200x c_fc compression. It cannot itself authorize training."
+  }
+}
