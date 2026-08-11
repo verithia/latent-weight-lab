@@ -1,0 +1,98 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_context_residual_action_audit_seal_v1",
+  "classification": "CONTEXT_RESIDUAL_ACTION_REJECTED",
+  "passed": false,
+  "scientific_conclusion": "The exact beta-1 context perturbation of each frozen static two-spectrum c_fc state is nearly orthogonal to the residual left by that state. Preserving the static branch and adding this perturbation as a direct summand is not authorized.",
+  "identity": {
+    "git_commit": "8f6997bd80f48a62e524a7adc91487d63f41d373",
+    "preregistration_git_commit": "e10eff6eeb03a2ec61281076c355f50602528c77",
+    "plan_sha256": "4249f79ca88412286395ae497cc64e54845a6b44ea952f6b7f298d9580ecfd5c",
+    "entrypoint_sha256": "5e36b95cc16454608886e4e2acc707807801cd03ac1b1ea4aaf1ac5f9f1a168d",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "parent_coordinates_sha256": "2469f584ef854f801355802492f5eab05d36a71c7d9ada0116016ed2ecec8e3c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "raw_artifacts": {
+    "directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_context_residual_action_20260811_v1",
+    "result_sha256": "0f5cd369ec25b0bb52e89392423ce4f9928df05db20555e5a1e298194d0e43a1",
+    "run_log_sha256": "0f5cd369ec25b0bb52e89392423ce4f9928df05db20555e5a1e298194d0e43a1",
+    "time_log_sha256": "21acb42e5b65e9a9527c3622251347a2bb60ddf2add1d28bd0c2dc7f71dd8e65"
+  },
+  "execution": {
+    "focused_and_parent_regression_tests": "22 passed in 1.66s",
+    "internal_wall_seconds": 40.229628801345825,
+    "external_wall_seconds": 41.45,
+    "maximum_cuda_memory_allocated_bytes": 2355845120,
+    "maximum_resident_set_size_kib": 13210548,
+    "checkpoint_updates": 0,
+    "coordinate_updates": 0,
+    "exit_status": 0,
+    "post_run_gpu0": {
+      "memory_used_mib": 221,
+      "memory_total_mib": 97887,
+      "utilization_percent": 0,
+      "temperature_c": 28
+    }
+  },
+  "heldout": {
+    "discovery_a_static_state": {
+      "optimal_residual_recovery_mean": 0.0004038855730130371,
+      "optimal_residual_recovery_minimum_layer": 0.00009876782233275705,
+      "transferred_alpha_residual_recovery_mean": 0.0004038712562994447,
+      "transferred_alpha_residual_recovery_minimum_layer": 0.0000987674270740424,
+      "optimal_recovery_by_layer": {
+        "0": 0.000312274630784648,
+        "5": 0.0008006142659217064,
+        "11": 0.00009876782233275705
+      },
+      "signed_cosine_by_layer": {
+        "0": 0.017671293975953926,
+        "5": 0.028295127953799265,
+        "11": 0.009938200155605122
+      },
+      "minimum_discovery_optimal_alpha": 0.021530778064393182
+    },
+    "discovery_b_static_state": {
+      "optimal_residual_recovery_mean": 0.0003642349590679735,
+      "optimal_residual_recovery_minimum_layer": 0.00005556158822517254,
+      "transferred_alpha_residual_recovery_mean": 0.0003634355523952267,
+      "transferred_alpha_residual_recovery_minimum_layer": 0.00005429364239339929,
+      "optimal_recovery_by_layer": {
+        "0": 0.0003699376202396243,
+        "5": 0.0006672056687391237,
+        "11": 0.00005556158822517254
+      },
+      "signed_cosine_by_layer": {
+        "0": 0.01923376250865933,
+        "5": 0.025830324596087518,
+        "11": 0.007453964597806883
+      },
+      "minimum_discovery_optimal_alpha": 0.013758359978384186
+    },
+    "context_action_cross_bank_cosine": {
+      "mean": 0.207822913924853,
+      "by_layer": {
+        "0": 0.19233909249305725,
+        "5": 0.19313788414001465,
+        "11": 0.23799176514148712
+      }
+    }
+  },
+  "gate_outcome": {
+    "heldout_optimal_residual_recovery_mean_min_each_bank": false,
+    "heldout_optimal_residual_recovery_every_layer_min_each_bank": false,
+    "heldout_transferred_alpha_residual_recovery_mean_min_each_bank": false,
+    "heldout_context_action_cross_bank_cosine_mean_min": false,
+    "all_discovery_optimal_alphas_positive": true,
+    "all_values_finite": true
+  },
+  "authorization": {
+    "direct_sum_preregistration": false,
+    "new_coordinate_fit": false,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "automatic_retry_or_sweep": false
+  }
+}
