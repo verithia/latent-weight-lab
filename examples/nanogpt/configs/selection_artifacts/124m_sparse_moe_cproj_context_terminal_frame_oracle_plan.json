@@ -1,0 +1,56 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_context_terminal_frame_oracle_plan_v1",
+  "recorded_at": "2026-08-11T19:00:00+08:00",
+  "status": "preregistered_after_router_phase_audit_before_terminal_frame_recovery_values",
+  "scientific_question": "Does the previously rejected activation-conditioned fixed-FHT c_proj image recover the same-gauge endpoint write when its context and routing are evaluated on the terminal model's actual hidden-state distribution rather than a scratch/terminal mixed-phase frame?",
+  "protocol_correction": {
+    "parent_plan_sha256": "99131ee49f981114cafe3ed61051049f7d7fb547c3f514deabd5fd252318fb2c",
+    "parent_raw_result_sha256": "db4b4db2a09be6d4d608950c793eec5e45705f48edea122b959bc11cfb352cbb",
+    "parent_sealed_result_sha256": "9a4b0ee478177f0e5dd2db3adbb29f96929db59a10cdd1552eb1566447ec428a",
+    "parent_residual_raw_result_sha256": "9e9d4fcda7502e32b983cfb295f245249d96069ecc1953005e0a9d2f47eea77d",
+    "router_phase_audit_raw_result_sha256": "bc4ae2f3173a5e5c378a0435b6f5e3ecb2dce3accc1bf49b495be02a1173438d",
+    "router_phase_audit_sealed_result_sha256": "82ef23d2a31e5e5042f040d96ff8b98270f13725f83c134d9f3ebd894c0a8f67",
+    "identified_error": "The parent implementation reconstructed the exact scratch model for activation collection, then applied terminal router/c_fc tensors. The 12/30 assignment minima and recovery values therefore describe a phase-mixed frame, not the terminal operating distribution.",
+    "only_change": "Load the complete terminal manifold snapshot to collect MLP input activations. Reconstruct the exact scratch model only to obtain the step-zero c_proj endpoint and its tensor hashes."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "target": "With terminal same-run router and c_fc fixed on both sides, fit the exact residual write induced only by terminal c_proj minus exact step-zero c_proj."
+  },
+  "frozen_parent_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260921, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192},
+      {"name": "discovery_b", "seed": 20260922, "batches": 4, "batch_size": 8, "block_size": 256, "tokens": 8192}
+    ],
+    "heldout": {"seed": 20260923, "batches": 2, "batch_size": 8, "block_size": 256, "tokens": 4096},
+    "coordinate_families": [
+      {"name": "two_factor", "factors": 2, "c_proj_compression_ratio": 384.0},
+      {"name": "three_factor", "factors": 3, "c_proj_compression_ratio": 256.0}
+    ],
+    "mechanism": "The exact parent beta=1 context-modulated FHT operator and matched beta=0 static ablation, fixed operator seed 20260925.",
+    "fit": "Independent matrix-free CGLS per discovery bank, maximum 50 iterations, relative normal residual tolerance 1e-5, ridge ratio 1e-6, and identical deterministic two-probe normal-trace estimator seeded from 20260924.",
+    "anti_leakage": "The terminal hidden-state frame is an allowed inference signal and contains no endpoint-selected basis. Coordinates are fit on one discovery bank and scored unchanged on the heldout tokens. Independent discovery banks must agree on heldout action."
+  },
+  "frozen_gates": {
+    "heldout_exact_recovery_mean_min_each_bank": 0.9,
+    "heldout_exact_recovery_every_layer_min_each_bank": 0.8,
+    "dynamic_minus_beta_zero_mean_min_each_bank": 0.1,
+    "discovery_to_heldout_drop_max_each_layer": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_expert_assignments": 128,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing both banks authorizes only a separately preregistered multi-phase shadow oracle; it does not authorize training.",
+    "fail": "If neither family passes, activation-conditioned FHT modulation is closed at 384x/256x on both the phase-mixed and terminal frames. No beta, rank, sign, or learning-rate sweep is allowed.",
+    "occupancy_fail": "Report as a 0.5TPP phase-local occupancy limitation, not terminal router collapse at 20TPP; generated-expert training remains blocked.",
+    "scope": "No training, MFU preflight, generated expert, or larger rung is authorized directly."
+  },
+  "execution": "Foreground-poll this protocol-correction oracle; expected under five minutes. Add a watchdog only if runtime crosses five minutes."
+}
