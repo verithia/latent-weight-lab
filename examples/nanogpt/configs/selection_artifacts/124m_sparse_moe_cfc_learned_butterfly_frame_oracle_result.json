@@ -1,0 +1,105 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_learned_butterfly_frame_oracle_seal_v1",
+  "recorded_at": "2026-08-11T21:22:00+08:00",
+  "classification": "LEARNED_BUTTERFLY_CFC_REPRESENTABILITY_REJECTED",
+  "source_control": {
+    "git_commit": "5493aa601a12a569aec4d1f64ef46655fc11c5bc",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_learned_butterfly_frame_oracle.py",
+    "entrypoint_sha256": "91d3818a2f9245ce496b394b6f07526ac41ab6e1d28d1e0d9aeb64581103658b",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_learned_butterfly_frame_oracle_plan.json",
+    "plan_sha256": "77e260512c46366db382215826f1eaf8beb00cf97be657b2f049feee6010af45"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "detached_status_wrapper_with_terminal_only_watchdog",
+    "internal_wall_seconds": 41.81680989265442,
+    "wrapper_wall_seconds": 43.114792823791504,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "remote_focused_and_regression_tests": "17 passed in 1.53s",
+    "preflight_five_step_wall_seconds": 0.6547930240631104,
+    "preflight_projected_400_step_seconds_one_layer_bank": 52.383480072021484,
+    "preflight_sha256": "2d90c3b1b2fb69830a29d5cf1c92aae7410bd66964008bcb5e828a5c236b99a1",
+    "result_sha256": "a12a433c9dceb67fd153b8c5fa2c8d5d3428e923c67cf58a5e3a00551df3fbb4",
+    "coordinates_sha256": "174f585ff1e1caca81493d233733692b336ff50f525f1d5e7211a5d6ca9fd3b8",
+    "log_sha256": "a12a433c9dceb67fd153b8c5fa2c8d5d3428e923c67cf58a5e3a00551df3fbb4",
+    "status_sha256": "ac99e7ac9158926affeb481ee681ea34948caf5a91a089cdbf8c6df6b7f8767d",
+    "watch_state_sha256": "61b97d60f2824b1361c365d71d813ad3478894a88933f0d085a73e1c77b891bb",
+    "watch_plist_sha256": "c255dec79bc73c1d5ab58739be2ccd3092dd8f9f2f7a412185234f63115b09b0",
+    "callback_policy": "one @Codex terminal callback; delivered exactly once",
+    "all_values_finite": true
+  },
+  "accounting": {
+    "dense_cfc_parameters": 113246208,
+    "candidate_coordinates": 442368,
+    "candidate_cfc_compression_ratio": 256.0,
+    "control_coordinates": 540672,
+    "control_cfc_compression_ratio": 209.45454545454547,
+    "materialized_dense_cfc_in_candidate": false,
+    "dense_cproj_retained_as_exception": true
+  },
+  "results": {
+    "discovery_a_fit": {
+      "heldout_mixture_recovery_mean": 0.3669757843017578,
+      "heldout_mixture_recovery_minimum_layer": 0.31997328996658325,
+      "minimum_expert_recovery": 0.1645169330488695,
+      "minimum_pregelu_recovery": -0.00739208017646753,
+      "candidate_minus_control_recovery_mean": -0.011534929275512695,
+      "minimum_discovery_assignments": 9164
+    },
+    "discovery_b_fit": {
+      "heldout_mixture_recovery_mean": 0.36743366718292236,
+      "heldout_mixture_recovery_minimum_layer": 0.3210223317146301,
+      "minimum_expert_recovery": 0.1591185512712896,
+      "minimum_pregelu_recovery": -0.010508904512158024,
+      "candidate_minus_control_recovery_mean": -0.014117578665415445,
+      "minimum_discovery_assignments": 8990
+    },
+    "heldout_bank_action_cosine": {
+      "mean": 0.7447031339009603,
+      "by_layer": {
+        "0": 0.7604584693908691,
+        "5": 0.6998120546340942,
+        "11": 0.7738388776779175
+      }
+    },
+    "optimization_diagnosis": {
+      "candidate_final_loss_range": [0.740647554397583, 0.8023895025253296],
+      "control_final_loss_range": [0.706354558467865, 0.7677092552185059],
+      "input_angle_mean_absolute_displacement_range": [0.34406858682632446, 0.3564164340496063],
+      "hidden_angle_mean_absolute_displacement_range": [0.24869759380817413, 0.2635941505432129],
+      "maximum_preclip_gradient_norm": 0.11612814664840698
+    }
+  },
+  "gates": {
+    "all_values_and_gradients_finite": true,
+    "occupancy_min_128": true,
+    "mixture_recovery_mean_min_0p8": false,
+    "every_layer_min_0p7": false,
+    "every_expert_min_0p5": false,
+    "candidate_gain_min_0p1": false,
+    "action_cosine_min_0p8": false,
+    "passed": false
+  },
+  "interpretation": {
+    "binding_failure": "Learning a single full butterfly frame per layer does not improve the compact expert map. Mean recovery remains 0.367 and is 0.0115-0.0141 below the higher-coordinate fixed-frame spectral control.",
+    "not_frozen_angles": "Input angles move by 0.344-0.356 radians and hidden angles by 0.249-0.264 radians with finite gradients; the result is not a no-op caused by frozen or disconnected frame parameters.",
+    "localization": "Pre-GELU recovery still reaches negative values and independent-bank action agreement remains 0.745. The learned shared frame neither resolves expert-specific feature directions nor improves their stability.",
+    "closed_family": "The exact one-sweep, layer-shared butterfly-frame family is closed. No stage, padding, initialization, learning-rate, sharing-scope, or threshold sweep is authorized from this result."
+  },
+  "authorization": {
+    "learned_butterfly_cfc_implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "next_allowed_work": "A zero-update expert-conflict audit may compare the rejected layer-shared frame against a deliberately non-deployable per-expert-frame oracle and measure per-expert shared-angle gradient conflict. This is the minimal residual decomposition needed to distinguish expert-sharing conflict from one-sweep butterfly expressivity; it cannot authorize a 62x per-expert implementation."
+  }
+}
