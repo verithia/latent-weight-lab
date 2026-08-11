@@ -80,7 +80,7 @@
   "identity": {
     "preregistration_git_commit": "ebea0a8ccc875a45f39649e906acea57c93beeed",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_same_gauge_tangent_decomposition.py",
-    "entrypoint_sha256": "3cec65be902fc3e72d2b688c7421e51d7ac8e8353e1d054f9b52db3ee183ed70",
+    "entrypoint_sha256": "63e1ee9693e0d8dd97746ec1268709b010b771fa40ebc17e4fe6b93f6a35ef20",
     "helper_sha256": {
       "examples/nanogpt/analyze_sparse_moe_cfc_global_conditional_tangent_audit.py": "e481591553737552b500fc08104fee96328f95e162be9c4296d69d2bc7e55df8",
       "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",

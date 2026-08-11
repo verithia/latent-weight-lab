@@ -21,6 +21,7 @@ from examples.nanogpt.analyze_sparse_moe_cfc_global_conditional_tangent_audit im
     projection_scores,
 )
 from examples.nanogpt.analyze_sparse_moe_cfc_learned_butterfly_frame_oracle import (
+    ButterflyCFCState,  # noqa: F401 - required for __main__ pickle compatibility
     LearnedButterflyCFC,
 )
 from examples.nanogpt.analyze_sparse_moe_cfc_spectral_feature_oracle import (
