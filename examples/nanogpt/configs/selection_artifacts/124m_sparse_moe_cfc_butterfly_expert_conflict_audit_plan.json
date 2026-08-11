@@ -69,7 +69,7 @@
     "automatic_retry_or_sweep": false
   },
   "identity": {
-    "preregistration_git_commit": null,
+    "preregistration_git_commit": "32bcc19f9083032e321500a2bb716c1bbd84893a",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_butterfly_expert_conflict.py",
     "entrypoint_sha256": null
   }
