@@ -1,0 +1,97 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_tt_optimizer_geometry_audit_seal_v1",
+  "recorded_at": "2026-08-11T23:30:00+08:00",
+  "classification": "OPTIMIZER_GEOMETRY_NUMERICALLY_INCONCLUSIVE",
+  "source_control": {
+    "git_commit": "96552467bd63760c927db64a5be9f6cd1dcee4b7",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_tt_optimizer_geometry_audit.py",
+    "entrypoint_sha256": "f14876917a40fc460c344e3b0e4e25a0688afc3fb8688171984dc62d721ac3dd",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_tt_optimizer_geometry_audit_plan.json",
+    "plan_sha256": "f8c52990b4814e279463f86d7ba35b591e036409f59b84f9e5e5d8ac7698ae0f"
+  },
+  "source": {
+    "parent_functional_tt_result_sha256": "86f6b820147bf638202468e30bd806dd240ca8b34088d41a641e3026ae7417e2",
+    "functional_tt_coordinates_sha256": "27e15170901eb6e0431372fb6f5f56356891511011cc01ff5c93321c288b16d1",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground_polled_sub_five_minute_audit",
+    "internal_wall_seconds": 16.048935890197754,
+    "wrapper_wall_seconds": 17.81,
+    "maximum_memory_allocated_bytes": 2808829952,
+    "maximum_resident_set_kib": 6754632,
+    "remote_focused_and_parent_regression_tests": "16 passed in 1.14s",
+    "preflight_projected_full_wall_seconds": 121.25971879959107,
+    "preflight_sha256": "8ee33212ef68d5e05590d868166e76c5d9d5599ce310209912fbe152ea7d2530",
+    "result_sha256": "05e2b85d09ee4ad65933a7ab1141d9a9037c5bd66007fc3df63da4510374c960",
+    "log_sha256": "05e2b85d09ee4ad65933a7ab1141d9a9037c5bd66007fc3df63da4510374c960",
+    "time_log_sha256": "df1d435301fd460b253457e8d8933abffea551bac84d168eda6b32d012bd6261",
+    "all_values_and_gradients_finite": true,
+    "gpu_idle_after_completion": true,
+    "workspace_gib_after_completion": 253
+  },
+  "results": {
+    "pcg_relative_normal_residual_range": [
+      0.46414519785230657,
+      0.7708321343009114
+    ],
+    "empirical_metric_diagonal_dynamic_range": [
+      1.4664923252439123e17,
+      7.283011823892593e28
+    ],
+    "source_optimal_linear_recovery_ranges": {
+      "euclidean_pullback": [0.013556948201788505, 0.021053897624193716],
+      "diagonal_metric": [0.02333688941050767, 0.028895003918786365],
+      "incomplete_gauss_newton": [0.17095162464869304, 0.1878921920653939]
+    },
+    "heldout_optimal_linear_recovery_ranges": {
+      "euclidean_pullback": [0.00929257712951361, 0.015395866606177104],
+      "diagonal_metric": [0.015176495690712938, 0.020291600435537717],
+      "incomplete_gauss_newton": [0.09501890924697123, 0.10584884487684401]
+    },
+    "incomplete_gauss_newton_transferred_alpha_heldout_recovery_range": [
+      0.08609760810301305,
+      0.09668935855740561
+    ],
+    "same_endpoint_cross_discovery_heldout_action_cosine": {
+      "euclidean_pullback_range": [0.8783001194903498, 0.9360928388529192],
+      "diagonal_metric_range": [0.7362080712599256, 0.7400287144298029],
+      "incomplete_gauss_newton_range": [0.6439790143436082, 0.6497169390996719]
+    },
+    "cross_endpoint_corresponding_heldout_action_cosine": {
+      "euclidean_pullback_range": [0.02923619541281903, 0.09937505249910646],
+      "diagonal_metric_range": [0.09076075416147139, 0.1334088664297055],
+      "incomplete_gauss_newton_range": [0.36966682555392416, 0.38127775484004983]
+    }
+  },
+  "gates": {
+    "pcg_converged": false,
+    "gauss_newton_source_recovery_pass": false,
+    "gauss_newton_heldout_recovery_pass": false,
+    "gauss_newton_gain_pass": false,
+    "gauss_newton_transferred_alpha_pass": false,
+    "same_endpoint_stability_pass": false,
+    "cross_endpoint_stability_pass": false,
+    "diagonal_simple_repair_pass": false,
+    "all_values_and_gradients_finite": true,
+    "all_pass": false
+  },
+  "interpretation": {
+    "formal_boundary": "The registered 16-step diagonally preconditioned CG solve ends with relative normal residual 0.464-0.771, above the frozen 0.1 ceiling. The audit is therefore numerically inconclusive and cannot reject the local TT tangent or authorize any metric refit.",
+    "metric_signal": "Core-Euclidean geometry is badly distorted: its source direction recovers only 1.36-2.11% linearly, the empirical diagonal reaches 2.33-2.89%, and the incomplete coupled solve reaches 17.10-18.79%. Coupled pullback structure matters far more than a diagonal Adam-like correction.",
+    "generalization_signal": "The incomplete coupled direction transfers only 9.50-10.58% on heldout banks and is not stable enough: same-endpoint cross-bank action cosine is 0.644-0.650 and cross-endpoint cosine is 0.370-0.381. Even before a converged solve, nothing meets an authorization gate.",
+    "numerical_cause": "The empirical J^T J diagonal contains exact or near-zero coordinates and spans 1e17-1e28. This is consistent with redundant ambient QR/core gauge directions. Increasing PCG iterations or changing damping would violate the frozen plan; the causally justified numerical follow-up is to remove TT gauge-null coordinates analytically and rerun the same zero-update question in a horizontal fixed-rank TT tangent."
+  },
+  "authorization": {
+    "diagonal_functional_refit": false,
+    "coupled_gauss_newton_functional_refit": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "next_allowed_work": "Preregister a gauge-quotiented horizontal-TT tangent audit. Parameterize each nonterminal left-canonical core by Q_perp K and place bond/gauge motion in the following core, retain the final core as the amplitude block, and repeat the same exact functional projection and stability gates without changing TT ranks, modes, endpoint, damping ratio, banks, or thresholds."
+  }
+}
