@@ -1,0 +1,94 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_global_conditional_tangent_audit_plan_v1",
+  "recorded_at": "2026-08-11T22:03:00+08:00",
+  "status": "preregistered_before_implementation_and_audit_values",
+  "scientific_question": "Can the expert-specific angle-gradient conflict left by the rejected shared butterfly be represented by at most seven global conditional tangent directions, the largest rank that keeps the complete c_fc family above 200x compression?",
+  "causal_parent": {
+    "conflict_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_butterfly_expert_conflict_audit_plan.json",
+    "conflict_plan_sha256": "ffae31dde8a1e04aae07e628ac3da93b478b2c546b9ebfa5adc0472b8e4eed21",
+    "conflict_normalized_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_butterfly_expert_conflict_audit_result.json",
+    "conflict_normalized_result_sha256": "fcf514b5b04bd6477e02a05450452a887ba8a8963db95f7205caf49e2b74cdf2",
+    "conflict_remote_result_sha256": "d86e01c0b0dfe5292c97aab6ac640c8e9bb28038a5b638917ec00d6a7336d641",
+    "finding": "All expert pairs have negative shared-angle gradient cosine with mean -0.14218 and cancellation ratio 0.000265, but fully unshared one-sweep frames recover only 0.456 function. Sharing is harmful but one sweep is insufficient."
+  },
+  "source": {
+    "shared_endpoint_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_learned_butterfly_frame_oracle_plan.json",
+    "shared_endpoint_plan_sha256": "77e260512c46366db382215826f1eaf8beb00cf97be657b2f049feee6010af45",
+    "shared_endpoint_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_learned_butterfly_20260811_v1/compact_coordinates.pt",
+    "shared_endpoint_coordinates_sha256": "174f585ff1e1caca81493d233733692b336ff50f525f1d5e7211a5d6ca9fd3b8",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "num_experts": 8,
+    "discovery_banks": ["discovery_a", "discovery_b"],
+    "angle_coordinates_per_template": 16384,
+    "terminal_gauge": "Recompute each expert's normalized functional-objective gradient at its exact saved shared endpoint, using the exact parent routed discovery samples and terminal dense c_proj."
+  },
+  "replay_constants": {
+    "operator_seed": 20261014,
+    "sampling_seed_base": 20261016,
+    "sampling_seed_bank_stride": 1009,
+    "sampling_seed_layer_stride": 17,
+    "top_k": 2,
+    "fit_samples_per_expert": 128,
+    "objective_pre_gelu_weight": 0.25,
+    "center_within_layer": true,
+    "normalize_each_centered_gradient_before_basis_fit": true,
+    "ranks": [1, 2, 3, 4, 5, 6, 7]
+  },
+  "coordinate_budget": {
+    "dense_cfc_parameters": 113246208,
+    "minimum_compression_ratio": 200.0,
+    "maximum_coordinates": 566231,
+    "shared_parent_coordinates": 442368,
+    "remaining_coordinates": 123863,
+    "global_template_coordinates_per_rank": 16384,
+    "layer_expert_coefficients_per_rank": 96,
+    "rank7_total_coordinates": 557728,
+    "rank7_compression_ratio": 203.049170922027,
+    "rank8_total_coordinates": 574208,
+    "rank8_compression_ratio": 197.221578243424,
+    "conclusion": "Seven is the exact largest global conditional tangent rank compatible with the 200x c_fc target; per-layer full templates and rank eight are forbidden by accounting."
+  },
+  "audit": {
+    "global_cross_bank": "Fit a right-singular-vector basis of ranks 1 through 7 to row-normalized, within-layer-centered expert gradients from one discovery bank across all three registered layers; project corresponding gradients from the untouched bank and reverse train/test banks.",
+    "per_layer_localization": "Repeat rank-1 through rank-7 cross-bank projection independently per layer as a nondeployable localization oracle. A strong per-layer but weak global result identifies cross-layer template sharing as the remaining budget bottleneck.",
+    "stability": "Measure direct cosine between corresponding centered expert gradients across banks, plus coefficient cosine after projection into each training-bank basis.",
+    "no_function_claim": "This audit measures first-order tangent coverage only. Even a pass cannot overturn the one-sweep functional rejection or authorize training."
+  },
+  "frozen_rank7_gates": {
+    "global_cross_bank_explained_energy_mean_min_each_direction": 0.75,
+    "global_cross_bank_explained_energy_minimum_layer_min_each_direction": 0.6,
+    "global_cross_bank_explained_energy_minimum_row_min_each_direction": 0.4,
+    "corresponding_gradient_cosine_mean_min": 0.5,
+    "corresponding_gradient_cosine_minimum_layer_min": 0.35,
+    "all_values_and_gradients_finite": true,
+    "per_layer_localization_mean_min_each_direction": 0.8,
+    "per_layer_localization_minimum_row_min_each_direction": 0.5
+  },
+  "decision_rule": {
+    "global_rank7_supported": "All global rank-7 and corresponding-gradient stability gates pass in both A-to-B and B-to-A directions. Authorize only an all-layer zero-update acquisition followed by a separately preregistered functional oracle of a rank-7 global conditional tangent; do not implement training.",
+    "cross_layer_sharing_limit": "A global gate fails but every per-layer localization gate passes in both directions. Record that stable expert conflict exists but a global seven-template basis cannot share it across layers; do not implement because per-layer templates violate 200x.",
+    "cross_bank_instability": "Per-layer localization or direct corresponding-gradient stability fails. Close the fixed-endpoint conditional tangent route because the expert directions are not stable across activation banks.",
+    "budget_route_rejected": "Any remaining failure rejects the rank-at-most-seven global conditional tangent route. No rank-eight, per-layer-template, seed, threshold, or optimizer sweep is authorized."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_audit": true,
+    "all_layer_acquisition_on_pass_only": true,
+    "functional_oracle": false,
+    "implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "b46ba931acce1c4c9a44284b07a8e308de4dab7f",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_global_conditional_tangent_audit.py",
+    "entrypoint_sha256": null
+  }
+}
