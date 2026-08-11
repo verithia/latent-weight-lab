@@ -1,0 +1,118 @@
+{
+  "schema_version": "nanogpt_sparse_moe_depth_grouped_basis_plan_v1",
+  "recorded_at": "2026-08-11T17:47:07+08:00",
+  "status": "preregistered_after_modelwide_sharing_regret_failure_before_any_depth_grouped_or_fresh_bank_value",
+  "scientific_question": "Does the model-wide basis fail only because the residual-output gauge drifts with depth, so that three fixed contiguous depth-group bases can remove sharing regret at the identical 200x total state budget?",
+  "theory_reconciliation": {
+    "parent_positive": "One rank-545 model-wide basis plus 1,536 coordinates per c_proj reached 0.9113 mean and 0.8964 minimum recovery at 200.076x, with 0.9253 independent-basis overlap.",
+    "binding_failure": "The parent was rejected only because early/middle layers lost as much as 0.0787 versus their same-rank local oracle, beyond the frozen 0.05 sharing-regret limit. The regret decreased toward layer 11, identifying depth-dependent gauge drift.",
+    "single_discriminator": "Use exactly three contiguous groups [0--3], [4--7], [8--11]. Keep the parent total rank 545, per-matrix state 1,536, and total coordinate count 566,016 unchanged. This changes sharing topology without changing state.",
+    "allocation": "Each calibration bank independently allocates the 545 ranks across the three groups. Every group first receives rank 64; remaining ranks select the largest normalized marginal eigenvalues across group spectra. Normalization gives each depth group equal total weight and the descending spectrum makes the allocation prefix-valid.",
+    "fresh_evaluation": "The old discovery A/B banks are calibration only. All binding recovery gates are scored on fresh seed 20260924 and fresh heldout seed 20260925, neither used by prior structure selection.",
+    "optimism": "Projection coefficients remain oracle values. A pass establishes depth-grouped output-frame shareability only, not a causal coefficient generator.",
+    "no_sweep": "No alternative grouping, group count, total rank, minimum rank, state split, seed, or topology is authorized if this test fails."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "shared_basis_seal": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_shared_residual_basis_result.json",
+    "shared_basis_seal_sha256": "654457d00753374472a9a8472adf8e34feb96ff37eb2e6eae9b08348cf7a94c7",
+    "analyzer": "examples/nanogpt/analyze_sparse_moe_depth_grouped_basis.py",
+    "analyzer_sha256": "e620e46e90d625e5da6afadc18b76f90afafdd8effacc755206311f996b3e839"
+  },
+  "functional_protocol": {
+    "activation_state": "terminal",
+    "top_k": 2,
+    "discovery_banks": [
+      {
+        "name": "calibration_a",
+        "seed": 20260921,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      },
+      {
+        "name": "calibration_b",
+        "seed": 20260922,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      },
+      {
+        "name": "evaluation_c",
+        "seed": 20260924,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      }
+    ],
+    "heldout": {
+      "seed": 20260925,
+      "batches": 2,
+      "batch_size": 8,
+      "block_size": 256,
+      "tokens": 4096
+    },
+    "score": "Exact terminal c_proj minus exact reproducible step-zero c_proj, applied to terminal same-run routing and c_fc activations in all layers.",
+    "anti_leakage": "Group allocation and bases observe only one old calibration bank. Binding scores use only fresh evaluation_c and heldout banks; neither updates allocation, basis, grouping, or state."
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layer_groups": [
+      [0, 1, 2, 3],
+      [4, 5, 6, 7],
+      [8, 9, 10, 11]
+    ],
+    "experts": 8,
+    "top_k": 2,
+    "matrix_shape": [768, 1536],
+    "calibration_banks": ["calibration_a", "calibration_b"],
+    "fresh_evaluation_banks": ["evaluation_c", "heldout"],
+    "total_shared_basis_rank": 545,
+    "minimum_rank_per_group": 64,
+    "allocation_objective": "maximize the sum of group-normalized captured energy after the fixed rank-64 floor",
+    "per_matrix_coordinates": 1536,
+    "per_matrix_coordinate_total": 147456,
+    "shared_basis_scalars": 418560,
+    "total_coordinates_used": 566016,
+    "dense_cproj_values_all_layers_experts": 113246208,
+    "realized_global_compression": 200.07598371777476
+  },
+  "decision_rule": {
+    "gates": {
+      "fresh_recovery_mean_minimum": 0.9,
+      "fresh_recovery_every_layer_minimum": 0.8,
+      "grouped_minus_local_oracle_minimum": -0.05,
+      "independent_group_basis_overlap_minimum": 0.8,
+      "minimum_expert_assignments": 128
+    },
+    "pass": "Both independently calibrated grouped frames must jointly pass every gate on evaluation_c and heldout. A pass authorizes only a fixed-operator coefficient-generation oracle at this exact grouping, allocation rule, and state budget.",
+    "fail": "A failure rejects the three-group remedy. Do not sweep groups or ranks; choose between an explicit residual-write exception and relaxing the global compression target.",
+    "allocation_stability": "The L1 difference between independent rank allocations is reported descriptively but is not a post-hoc gate."
+  },
+  "scope_caveat": "This is an endpoint-selected, zero-update output-frame upper bound with oracle coefficients. It does not establish causal coefficient generation, optimizer reachability, or language-model loss closure.",
+  "output_contract": {
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/depth_grouped_basis_v1",
+    "must_be_absent_before_run": true,
+    "required_files": [
+      "depth_grouped_basis_result.json",
+      "depth_grouped_basis_rows.csv",
+      "depth_grouped_bases.pt",
+      "depth_grouped_basis_status.json"
+    ]
+  },
+  "authorization": {
+    "run_zero_update_oracle": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
