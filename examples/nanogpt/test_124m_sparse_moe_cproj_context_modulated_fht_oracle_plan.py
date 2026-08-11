@@ -29,7 +29,9 @@ def test_context_modulated_plan_preserves_200_to_500x_budget() -> None:
 
 def test_context_modulated_plan_has_matched_static_ablation() -> None:
     plan = _plan()
-    assert "identical-coordinate" in plan["ablations_and_controls"]["beta_zero"]
+    assert "retaining signs, mixers, coordinates" in (
+        plan["ablations_and_controls"]["beta_zero"]
+    )
     assert plan["frozen_gates"]["dynamic_minus_beta_zero_mean_min_each_bank"] == 0.1
     assert "two-probe Rademacher" in plan["evaluation"]["ridge_trace_estimator"]
 
