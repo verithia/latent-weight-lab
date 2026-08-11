@@ -25,6 +25,20 @@
     "discovery_banks": ["discovery_a", "discovery_b"],
     "terminal_gauge": "Replay the exact parent discovery samples and heldout activations with terminal routing, dense c_fc targets, and exact terminal dense c_proj."
   },
+  "replay_constants": {
+    "operator_seed": 20261014,
+    "sampling_seed_base": 20261016,
+    "sampling_seed_bank_stride": 1009,
+    "sampling_seed_layer_stride": 17,
+    "top_k": 2,
+    "fit_samples_per_expert": 128,
+    "fit_steps": 400,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "objective_pre_gelu_weight": 0.25,
+    "selection": "final registered optimizer step"
+  },
   "shared_endpoint_gradient_audit": {
     "quantity": "For each bank, layer, and expert, compute the normalized parent functional objective gradient with respect to cloned shared input and hidden butterfly angles while holding that expert's fitted spectrum/bias fixed.",
     "pairwise_metric": "Cosine between flattened per-expert shared-angle gradients.",
