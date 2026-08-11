@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import json
+
+import pytest
 import torch
 
 from examples.nanogpt.analyze_sparse_moe_cproj_context_modulated_fht_oracle import (
@@ -7,6 +10,7 @@ from examples.nanogpt.analyze_sparse_moe_cproj_context_modulated_fht_oracle impo
     ExpertFrame,
     action_cosine,
     cgls_fit,
+    validate_protocol_correction,
 )
 
 
@@ -54,3 +58,34 @@ def test_cgls_recovers_synthetic_context_action() -> None:
     predicted = operator.apply(fitted)
     assert action_cosine(predicted, target) > 0.999
     assert diagnostics["relative_normal_residual"] < 1e-4
+
+
+def test_terminal_activation_requires_hash_bound_correction_plan(tmp_path) -> None:
+    parent = tmp_path / "parent.json"
+    parent.write_text("{}\n")
+    terminal = tmp_path / "terminal.pt"
+    terminal.write_bytes(b"terminal")
+    from examples.nanogpt.analyze_sparse_moe_paired_alignment import file_sha256
+
+    correction = tmp_path / "correction.json"
+    correction.write_text(
+        json.dumps(
+            {
+                "schema_version": (
+                    "nanogpt_sparse_moe_cproj_context_terminal_frame_oracle_plan_v1"
+                ),
+                "protocol_correction": {"parent_plan_sha256": file_sha256(parent)},
+                "source": {
+                    "terminal_manifold_snapshot_sha256": file_sha256(terminal)
+                },
+            }
+        )
+    )
+    observed = validate_protocol_correction(
+        parent, correction, terminal, "terminal"
+    )
+    assert observed is not None
+    with pytest.raises(ValueError, match="requires terminal"):
+        validate_protocol_correction(parent, correction, terminal, "stepzero")
+    with pytest.raises(ValueError, match="frozen correction"):
+        validate_protocol_correction(parent, None, terminal, "terminal")

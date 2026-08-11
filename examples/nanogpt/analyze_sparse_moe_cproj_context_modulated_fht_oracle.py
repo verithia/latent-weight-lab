@@ -15,6 +15,7 @@ from typing import Any
 import torch
 import torch.nn.functional as F
 
+from examples.nanogpt.analyze_cproj_manifold import load_model
 from examples.nanogpt.analyze_mlp_activation_update_alignment import git_commit
 from examples.nanogpt.analyze_residual_compatibility import fixed_validation_batches
 from examples.nanogpt.analyze_sparse_moe_paired_alignment import (
@@ -42,6 +43,9 @@ from latent_weight_lab.block_fht import (
 
 
 PLAN_SCHEMA = "nanogpt_sparse_moe_cproj_context_modulated_fht_oracle_plan_v1"
+CORRECTION_PLAN_SCHEMA = (
+    "nanogpt_sparse_moe_cproj_context_terminal_frame_oracle_plan_v1"
+)
 
 
 @dataclass
@@ -342,6 +346,30 @@ def split_inputs(
     return result
 
 
+def validate_protocol_correction(
+    parent_plan_path: Path,
+    correction_plan_path: Path | None,
+    terminal_snapshot: Path,
+    activation_state: str,
+) -> dict[str, Any] | None:
+    if correction_plan_path is None:
+        if activation_state != "stepzero":
+            raise ValueError("terminal activations require a frozen correction plan")
+        return None
+    correction = json.loads(correction_plan_path.read_text(encoding="utf-8"))
+    if correction.get("schema_version") != CORRECTION_PLAN_SCHEMA:
+        raise ValueError("terminal-frame correction plan schema mismatch")
+    if activation_state != "terminal":
+        raise ValueError("correction plan requires terminal activation state")
+    expected_parent = correction["protocol_correction"]["parent_plan_sha256"]
+    if file_sha256(parent_plan_path) != expected_parent:
+        raise ValueError("parent plan hash disagrees with correction plan")
+    expected_terminal = correction["source"]["terminal_manifold_snapshot_sha256"]
+    if file_sha256(terminal_snapshot) != expected_terminal:
+        raise ValueError("terminal snapshot hash disagrees with correction plan")
+    return correction
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", required=True, type=Path)
@@ -349,29 +377,52 @@ def main() -> None:
     parser.add_argument("--data-dir", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--device", default="cuda")
+    parser.add_argument(
+        "--activation-state",
+        choices=("stepzero", "terminal"),
+        default="stepzero",
+    )
+    parser.add_argument("--protocol-correction-plan", type=Path)
     args = parser.parse_args()
     started = time.time()
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
     if plan.get("schema_version") != PLAN_SCHEMA:
         raise ValueError("context-modulated oracle plan schema mismatch")
+    correction_plan = validate_protocol_correction(
+        args.plan,
+        args.protocol_correction_plan,
+        args.terminal_snapshot,
+        args.activation_state,
+    )
     target_spec = plan["target_and_gauge"]
     if file_sha256(args.terminal_snapshot) != target_spec["terminal_manifold_snapshot_sha256"]:
         raise ValueError("terminal snapshot hash disagrees with frozen plan")
     payload = load_terminal_snapshot(args.terminal_snapshot)
     layers = [int(value) for value in target_spec["layers"]]
-    model = model_from_exact_stepzero(
+    stepzero_model = model_from_exact_stepzero(
         payload, int(target_spec["model_seed"]), args.device
     )
-    stepzero_hashes = selected_stepzero_hashes(model, layers)
-    initial_mapping = dict(model.named_parameters())
+    stepzero_hashes = selected_stepzero_hashes(stepzero_model, layers)
+    initial_mapping = dict(stepzero_model.named_parameters())
     initial = {
         layer: layer_state_from_mapping(initial_mapping, layer) for layer in layers
     }
     terminal = {
         layer: layer_state_from_mapping(payload["model"], layer) for layer in layers
     }
-    inputs = split_inputs(model, plan, args.data_dir, layers, args.device)
-    del model
+    del initial_mapping
+    if args.activation_state == "terminal":
+        del stepzero_model
+        torch.cuda.empty_cache()
+        activation_model = load_model(args.terminal_snapshot, args.device)
+    else:
+        activation_model = stepzero_model
+    inputs = split_inputs(
+        activation_model, plan, args.data_dir, layers, args.device
+    )
+    del activation_model
+    if args.activation_state == "stepzero":
+        del stepzero_model
     torch.cuda.empty_cache()
 
     evaluation = plan["evaluation"]
@@ -583,7 +634,11 @@ def main() -> None:
     coordinates_path = args.output / "context_modulated_coordinates.pt"
     torch.save(coordinate_payload, coordinates_path)
     result = {
-        "schema_version": "nanogpt_sparse_moe_cproj_context_modulated_fht_oracle_result_v1",
+        "schema_version": (
+            "nanogpt_sparse_moe_cproj_context_terminal_frame_oracle_result_v1"
+            if args.activation_state == "terminal"
+            else "nanogpt_sparse_moe_cproj_context_modulated_fht_oracle_result_v1"
+        ),
         "decision": decision,
         "passing_families": passing,
         "all_values_finite": finite,
@@ -594,7 +649,21 @@ def main() -> None:
         "source": {
             "terminal_snapshot_sha256": file_sha256(args.terminal_snapshot),
             "plan_sha256": file_sha256(args.plan),
+            "protocol_correction_plan_sha256": (
+                file_sha256(args.protocol_correction_plan)
+                if args.protocol_correction_plan is not None
+                else None
+            ),
             "dataset_manifest_sha256": target_spec["dataset_manifest_sha256"],
+        },
+        "activation_frame": {
+            "state": args.activation_state,
+            "model_seed": int(target_spec["model_seed"]),
+            "correction_plan_schema": (
+                correction_plan["schema_version"]
+                if correction_plan is not None
+                else None
+            ),
         },
         "execution": {
             "git_commit": git_commit(Path(__file__).resolve().parents[2]),
