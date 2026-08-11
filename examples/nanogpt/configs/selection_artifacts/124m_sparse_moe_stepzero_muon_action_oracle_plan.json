@@ -1,0 +1,94 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_muon_action_oracle_plan_v1",
+  "recorded_at": "2026-08-11T15:25:00+08:00",
+  "status": "preregistered_after_raw_gradient_signal_before_optimizer_action_values",
+  "scientific_question": "Does the exact step-zero production optimizer action turn the reproducible one-third functional signal in raw task gradients into a sufficient and stable compact paired-atom image?",
+  "causal_source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "run_git_commit": "55d91cfe7be442d9f71135d0cf747748aff00937",
+    "run_config_sha256": "606bdb6f94a895370c5f79c3bf8c9ca9e77b94e9f5cde8acd5fbe61ac002c5ba",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "active_tpp": 0.501338138701522,
+    "layers": [0, 5, 11],
+    "rule": "Reuse the exact step-zero reconstruction and disjoint token banks from the raw-gradient oracle. Construct directions before reading the endpoint, and use the endpoint only for oracle coordinate fitting and held-out scoring."
+  },
+  "gradient_banks": [
+    {
+      "name": "discovery_a",
+      "seed": 20260911,
+      "independent_microbatches": 4,
+      "batch_size": 2,
+      "block_size": 256
+    },
+    {
+      "name": "discovery_b",
+      "seed": 20260912,
+      "independent_microbatches": 4,
+      "batch_size": 2,
+      "block_size": 256
+    }
+  ],
+  "optimizer_action": {
+    "expert_matrices": "For each expert independently, apply production muon_update_batched with five Newton-Schulz steps to the raw gradient, negate it, and add the exact per-unit-learning-rate decoupled weight-decay action -0.1*W0. At step zero the 0.95 momentum multiplier is positive and therefore leaves the polar orientation unchanged.",
+    "router": "Use the exact first-step AdamW direction -g/(abs(g)+1e-8). Router parameters are in the production AdamW group with zero weight decay; scalar learning-rate factors do not change span orientation.",
+    "loss": "Next-token cross entropy plus production router load-balance and router-z auxiliary losses in train mode with dropout exactly zero.",
+    "anti_leakage": "No endpoint tensor, future chord, held-out token, terminal activation, or optimizer state participates in direction construction."
+  },
+  "coordinate_families": [
+    {
+      "name": "coupled_four",
+      "coordinates_per_atom": 4,
+      "compression_ratio": 383.8750813272609
+    },
+    {
+      "name": "separate_three_plus_three",
+      "coordinates_per_atom": 6,
+      "compression_ratio": 256.0
+    }
+  ],
+  "controls": {
+    "raw_gradient_seal_sha256": "577cdd7a526c981808afeab11466f61ae626fd0d2690bf87e234813c15f89380",
+    "raw_gradient_exact_mean": {
+      "coupled_four": {
+        "discovery_a": 0.3414152264595032,
+        "discovery_b": 0.33374760548273724
+      },
+      "separate_three_plus_three": {
+        "discovery_a": 0.35835087299346924,
+        "discovery_b": 0.3571307261784871
+      }
+    },
+    "fixed_structured": "Rerun the same matched-budget fixed local BlockFHT control.",
+    "single_change": "Only replace raw task-gradient directions with the exact production optimizer action; seeds, endpoint, coordinate counts, fit, and held-out frame are unchanged."
+  },
+  "evaluation": {
+    "heldout_seed": 20260913,
+    "heldout_batches": 2,
+    "heldout_batch_size": 8,
+    "heldout_block_size": 256,
+    "activation_sample_cap_per_layer": 2048,
+    "primary_metric": "Exact nonlinear held-out residual-write recovery on the step-zero activation frame.",
+    "secondary_metrics": [
+      "paired/incoming/outgoing/router parameter recovery",
+      "per-layer exact recovery",
+      "discovery-A versus discovery-B per-atom optimizer-action span overlap",
+      "raw-gradient improvement at identical coordinates"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_exact_recovery_mean_min_each_bank": 0.9,
+    "heldout_exact_recovery_every_layer_min_each_bank": 0.8,
+    "optimizer_action_minus_raw_gradient_mean_min_each_bank": 0.1,
+    "discovery_bank_mean_subspace_overlap_min": 0.5,
+    "all_values_finite": true
+  },
+  "interpretation": {
+    "pass_both_banks": "The actual matrix-space optimizer action supplies the missing image. Authorize only a 124M 5-TPP online optimizer-action sketch acquisition; generated training remains blocked.",
+    "fail_recovery_but_improve_raw": "Muon/KFAC-like matrix geometry is causally useful but insufficient. Use the observed residual to preregister a functional-Jacobian or activation/error KFAC basis without adding coordinates.",
+    "no_improvement": "Reject optimizer-action conditioning and proceed directly to a functional-Jacobian action basis; do not tune Muon parameters or coordinate count.",
+    "authorization": "Only this zero-update offline oracle is authorized. Generated-expert training, MFU preflight, and larger active-parameter rungs remain prohibited."
+  }
+}
