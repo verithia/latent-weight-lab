@@ -45,7 +45,7 @@
   ],
   "controls": {
     "static": "Use the earliest causal atom chords at the identical coordinate count and freeze them for every heldout transition.",
-    "fixed_structured": "Use deterministic shared local BlockFHT directions at the identical per-atom coordinate count, with independent frozen seeds for incoming, outgoing, and router pieces.",
+    "fixed_structured": "Use deterministic shared local BlockFHT directions at the identical per-atom coordinate count, with coupled/router seeds 20260901/20260903 and separate incoming/outgoing/router seeds 20260905/20260907/20260909, each offset by 1009 times the layer index.",
     "power_recovery": "Run the continuous replay branch first. If a gate is near threshold, repeat with authoritative pre-power steps 7128/7722/8316; no branch may be silently spliced."
   },
   "evaluation": {
