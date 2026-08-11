@@ -41,9 +41,11 @@ from examples.nanogpt.analyze_sparse_moe_rolling_tangent_oracle import (
     sparse_moe_output,
 )
 from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.muon import muon_update_batched
 
 
 PLAN_SCHEMA = "nanogpt_sparse_moe_stepzero_task_gradient_oracle_plan_v1"
+MUON_PLAN_SCHEMA = "nanogpt_sparse_moe_stepzero_muon_action_oracle_plan_v1"
 SNAPSHOT_SCHEMA = "nanogpt_manifold_snapshot_v1"
 FAMILIES = ("coupled_four", "separate_three_plus_three")
 
@@ -98,6 +100,10 @@ def collect_gradient_bank(
     batches: list[torch.Tensor],
     layers: list[int],
     device: str,
+    direction_transform: str,
+    muon_ns_steps: int,
+    weight_decay: float,
+    adam_epsilon: float,
 ) -> tuple[dict[int, list[LayerState]], list[dict[str, Any]]]:
     selected: dict[int, tuple[torch.nn.Parameter, torch.nn.Parameter, torch.nn.Parameter]] = {}
     for parameter in model.parameters():
@@ -130,8 +136,24 @@ def collect_gradient_bank(
         for layer, parameters in selected.items():
             if any(parameter.grad is None for parameter in parameters):
                 raise RuntimeError(f"missing selected gradient at layer {layer}")
+            gradient = LayerState(
+                *(parameter.grad.detach().float() for parameter in parameters)
+            )
+            parameter_state = LayerState(
+                *(parameter.detach().float() for parameter in parameters)
+            )
+            state = stepzero_optimizer_action(
+                gradient,
+                parameter_state,
+                direction_transform=direction_transform,
+                muon_ns_steps=muon_ns_steps,
+                weight_decay=weight_decay,
+                adam_epsilon=adam_epsilon,
+            )
             router, c_fc, c_proj = (
-                -parameter.grad.detach().float().cpu().clone() for parameter in parameters
+                state.router.cpu().clone(),
+                state.c_fc.cpu().clone(),
+                state.c_proj.cpu().clone(),
             )
             state = LayerState(router, c_fc, c_proj)
             bank[layer].append(state)
@@ -139,6 +161,7 @@ def collect_gradient_bank(
                 {
                     "microbatch": microbatch,
                     "layer": layer,
+                    "direction_transform": direction_transform,
                     "loss": float(loss.detach()),
                     "router_sha256": tensor_sha256(router),
                     "c_fc_sha256": tensor_sha256(c_fc),
@@ -151,6 +174,29 @@ def collect_gradient_bank(
     model.zero_grad(set_to_none=True)
     model.eval()
     return bank, rows
+
+
+def stepzero_optimizer_action(
+    gradient: LayerState,
+    parameter: LayerState,
+    *,
+    direction_transform: str,
+    muon_ns_steps: int = 5,
+    weight_decay: float = 0.1,
+    adam_epsilon: float = 1e-8,
+) -> LayerState:
+    """Return raw descent or the exact production first-step action."""
+    if direction_transform == "raw":
+        return LayerState(-gradient.router, -gradient.c_fc, -gradient.c_proj)
+    if direction_transform != "muon_action":
+        raise ValueError(f"unknown direction transform: {direction_transform}")
+    router = -gradient.router / (gradient.router.abs() + float(adam_epsilon))
+    c_fc = -muon_update_batched(gradient.c_fc, steps=muon_ns_steps)
+    c_proj = -muon_update_batched(gradient.c_proj, steps=muon_ns_steps)
+    if weight_decay != 0.0:
+        c_fc = c_fc - float(weight_decay) * parameter.c_fc
+        c_proj = c_proj - float(weight_decay) * parameter.c_proj
+    return LayerState(router, c_fc, c_proj)
 
 
 def reconstruct_gradient_family(
@@ -276,8 +322,10 @@ def main() -> None:
     args = parser.parse_args()
     started = time.time()
     plan = json.loads(args.plan.read_text(encoding="utf-8"))
-    if plan.get("schema_version") != PLAN_SCHEMA:
+    plan_schema = plan.get("schema_version")
+    if plan_schema not in {PLAN_SCHEMA, MUON_PLAN_SCHEMA}:
         raise ValueError("task-gradient oracle plan schema mismatch")
+    direction_transform = "muon_action" if plan_schema == MUON_PLAN_SCHEMA else "raw"
     payload = load_terminal_snapshot(args.terminal_snapshot)
     causal = plan["causal_source"]
     if file_sha256(args.terminal_snapshot) != causal["terminal_manifold_snapshot_sha256"]:
@@ -307,7 +355,16 @@ def main() -> None:
             int(bank_spec["independent_microbatches"]),
             int(bank_spec["seed"]),
         )
-        bank, rows = collect_gradient_bank(model, batches, layers, args.device)
+        bank, rows = collect_gradient_bank(
+            model,
+            batches,
+            layers,
+            args.device,
+            direction_transform,
+            muon_ns_steps=5,
+            weight_decay=0.1,
+            adam_epsilon=1e-8,
+        )
         banks[bank_spec["name"]] = bank
         for row in rows:
             row["bank"] = bank_spec["name"]
@@ -404,7 +461,7 @@ def main() -> None:
         }
         for family in FAMILIES
     }
-    temporal = plan["controls"]["temporal_reference"]
+    temporal = plan["controls"].get("temporal_reference")
     temporal_best = {
         "coupled_four": 0.044682,
         "separate_three_plus_three": 0.052700,
@@ -448,13 +505,43 @@ def main() -> None:
                 >= float(gates["heldout_exact_recovery_mean_min_each_bank"]),
                 "every_layer_pass": bank_summary["minimum"]
                 >= float(gates["heldout_exact_recovery_every_layer_min_each_bank"]),
-                "minus_fixed_pass": bank_summary["mean"] - fixed_mean
-                >= float(gates["task_gradient_minus_fixed_structured_mean_min_each_bank"]),
-                "minus_temporal_pass": bank_summary["mean"] - temporal_best[family]
-                >= float(gates["task_gradient_minus_best_temporal_reference_min_each_bank"]),
                 "bank_overlap_pass": overlap_mean
                 >= float(gates["discovery_bank_mean_subspace_overlap_min"]),
             }
+            if direction_transform == "raw":
+                bank_gates.update(
+                    {
+                        "minus_fixed_pass": bank_summary["mean"] - fixed_mean
+                        >= float(
+                            gates[
+                                "task_gradient_minus_fixed_structured_mean_min_each_bank"
+                            ]
+                        ),
+                        "minus_temporal_pass": bank_summary["mean"]
+                        - temporal_best[family]
+                        >= float(
+                            gates[
+                                "task_gradient_minus_best_temporal_reference_min_each_bank"
+                            ]
+                        ),
+                    }
+                )
+            else:
+                raw_mean = float(
+                    plan["controls"]["raw_gradient_exact_mean"][family][bank_name]
+                )
+                bank_summary["raw_gradient_mean"] = raw_mean
+                bank_summary["optimizer_action_minus_raw_gradient"] = (
+                    bank_summary["mean"] - raw_mean
+                )
+                bank_gates["minus_raw_gradient_pass"] = (
+                    bank_summary["mean"] - raw_mean
+                    >= float(
+                        gates[
+                            "optimizer_action_minus_raw_gradient_mean_min_each_bank"
+                        ]
+                    )
+                )
             bank_gates["all_pass"] = all(bank_gates.values())
             decisions[family][bank_name] = bank_gates
 
@@ -470,9 +557,21 @@ def main() -> None:
         if sum(decisions[family][bank]["all_pass"] for bank in banks) == 1
     ]
     if finite and both_pass:
-        decision = "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_GRADIENT_SKETCH_ACQUISITION_ONLY"
+        decision = (
+            "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_OPTIMIZER_ACTION_SKETCH_ACQUISITION_ONLY"
+            if direction_transform == "muon_action"
+            else "PASS_BOTH_DISCOVERY_BANKS_AUTHORIZE_5TPP_GRADIENT_SKETCH_ACQUISITION_ONLY"
+        )
     elif finite and one_pass:
         decision = "PASS_ONE_BANK_ONLY_REJECT_BATCH_FRAGILE_BASIS"
+    elif direction_transform == "muon_action" and finite and all(
+        summary[family][bank]["optimizer_action_minus_raw_gradient"] > 0.0
+        for family in FAMILIES
+        for bank in banks
+    ):
+        decision = "FAIL_STRICT_GATES_BUT_IMPROVE_RAW_AUTHORIZE_FUNCTIONAL_JACOBIAN_PLAN_ONLY"
+    elif direction_transform == "muon_action":
+        decision = "FAIL_STRICT_GATES_NO_RAW_IMPROVEMENT_REJECT_OPTIMIZER_ACTION_IMAGE"
     else:
         decision = "FAIL_BOTH_BANKS_REJECT_RAW_TASK_GRADIENT_LATENT_IMAGE"
 
@@ -488,7 +587,12 @@ def main() -> None:
         writer.writeheader()
         writer.writerows(gradient_rows)
     result = {
-        "schema_version": "nanogpt_sparse_moe_stepzero_task_gradient_oracle_result_v1",
+        "schema_version": (
+            "nanogpt_sparse_moe_stepzero_muon_action_oracle_result_v1"
+            if direction_transform == "muon_action"
+            else "nanogpt_sparse_moe_stepzero_task_gradient_oracle_result_v1"
+        ),
+        "direction_transform": direction_transform,
         "decision": decision,
         "passing_families": both_pass,
         "one_bank_only_families": one_pass,

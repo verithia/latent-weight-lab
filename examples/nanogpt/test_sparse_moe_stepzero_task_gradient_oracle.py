@@ -6,7 +6,9 @@ from examples.nanogpt.analyze_sparse_moe_stepzero_task_gradient_oracle import (
     family_overlap,
     reconstruct_gradient_family,
     row_span_overlap,
+    stepzero_optimizer_action,
 )
+from examples.nanogpt.muon import muon_update_batched
 from examples.nanogpt.analyze_sparse_moe_paired_atom_oracle import (
     _state_chord,
     energy_recovery,
@@ -75,3 +77,35 @@ def test_orthogonal_row_banks_have_zero_overlap() -> None:
     right[0, 0, 0, 2] = 1.0
     right[1, 0, 0, 3] = 1.0
     assert row_span_overlap(left, right) < 1e-8
+
+
+def test_raw_optimizer_action_is_negative_gradient() -> None:
+    torch.manual_seed(47)
+    gradient = LayerState(torch.randn(2, 4), torch.randn(2, 5, 4), torch.randn(2, 4, 5))
+    parameter = _zero_state(experts=2, hidden=5, width=4)
+    action = stepzero_optimizer_action(
+        gradient, parameter, direction_transform="raw"
+    )
+    torch.testing.assert_close(action.router, -gradient.router)
+    torch.testing.assert_close(action.c_fc, -gradient.c_fc)
+    torch.testing.assert_close(action.c_proj, -gradient.c_proj)
+
+
+def test_muon_action_matches_batched_polar_and_first_adam_step() -> None:
+    torch.manual_seed(53)
+    gradient = LayerState(torch.randn(2, 4), torch.randn(2, 5, 4), torch.randn(2, 4, 5))
+    parameter = LayerState(torch.randn(2, 4), torch.randn(2, 5, 4), torch.randn(2, 4, 5))
+    action = stepzero_optimizer_action(
+        gradient,
+        parameter,
+        direction_transform="muon_action",
+        muon_ns_steps=5,
+        weight_decay=0.1,
+        adam_epsilon=1e-8,
+    )
+    expected_router = -gradient.router / (gradient.router.abs() + 1e-8)
+    expected_fc = -muon_update_batched(gradient.c_fc, steps=5) - 0.1 * parameter.c_fc
+    expected_proj = -muon_update_batched(gradient.c_proj, steps=5) - 0.1 * parameter.c_proj
+    torch.testing.assert_close(action.router, expected_router)
+    torch.testing.assert_close(action.c_fc, expected_fc)
+    torch.testing.assert_close(action.c_proj, expected_proj)
