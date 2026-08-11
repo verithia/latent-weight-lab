@@ -1,0 +1,146 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_context_modulated_spectral_oracle_plan_v1",
+  "recorded_at": "2026-08-11T23:15:00+08:00",
+  "status": "preregistered_before_implementation_preflight_and_recovery_values",
+  "scientific_question": "Does routed-input conditioning rotate the already-useful two-spectrum c_fc feature map into the missing expert-, layer-, and neuron-specific directions without adding coordinates, a learned dense basis, or a residual write map?",
+  "causal_reconciliation": {
+    "mapping_paper_boundary": "The paper's row-additive modulation changes the generated preactivation by a global alpha*||z||^2 offset and its Mapping Loss regularizes a chosen chart; neither mechanism can add a missing task-functional direction to a static image. This oracle changes the latent function itself while retaining fixed orthogonal mixers.",
+    "static_spectral_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_spectral_feature_oracle_result.json",
+      "sha256": "5cafa8eb52efb8812db876b92396f3f4fc1e1160402c8aa12d4acc25cee4bcc9",
+      "finding": "Two learned spectra at 209.45x c_fc compression improve heldout recovery by 0.145-0.146 over fixed orthogonal calibration, but reach only 0.382 mean and near-zero pre-GELU recovery. Direction adaptation helps; a static frame is insufficient."
+    },
+    "functional_direction_evidence": [
+      {
+        "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_stepzero_task_gradient_oracle_result.json",
+        "sha256": "fa4cdf6c948e19c8945c7bb8efbfb9a79dada2b11e6c2e989f253d9e16b78482",
+        "finding": "Independent routed task-gradient banks recover 0.34-0.36 of heldout action from less than 0.8% paired parameter energy, showing that the relevant orientation is functional rather than Frobenius."
+      },
+      {
+        "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_stepzero_kfac_factor_oracle_result.json",
+        "sha256": "380635c29e4b71f2c944dbe5a1ee86067a83c13cf1070fd9f6848b6550122141",
+        "finding": "Smoothed separate input/output factors reach about 0.394 but remain too static and unstable; coefficients alone cannot repair a fixed image."
+      }
+    ],
+    "tt_boundary": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_horizontal_tangent_audit_result.json",
+      "sha256": "0c7c2d85e3b80f29081601491a604bee16476e127801ecba707ee492049ca409",
+      "finding": "Gauge-correct horizontal TT Gauss-Newton reaches only 0.181-0.199 source and 0.100-0.109 heldout recovery with poor bank/endpoint stability. Rank, damping, iteration, and TT-topology tuning are closed."
+    },
+    "write_map_negative_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_context_modulated_fht_oracle_result.json",
+      "sha256": "9a4b0ee478177f0e5dd2db3adbb29f96929db59a10cdd1552eb1566447ec428a",
+      "finding": "The analogous context gate reduced c_proj recovery by 0.086-0.097. That rejects it for residual writes, but does not test c_fc, whose generated features are interpreted by exact dense c_proj and whose static learned spectra already produced a positive effect."
+    },
+    "single_change": "Insert one deterministic routed-input gate between the two learned spectral stages. beta=0 is exactly the sealed static two-spectrum parent; beta=1 is the sole treatment. Signs, spectra, bias, coordinate count, fit data, optimizer, objective, scoring, and thresholds otherwise match."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "terminal_gauge": "Collect MLP inputs from the complete terminal model. Use the same terminal router, terminal dense c_fc target, and terminal dense c_proj on target and candidate sides.",
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "padded_width": 2048,
+    "num_experts": 8,
+    "top_k": 2,
+    "fixed_operator_seed": 20260931,
+    "fixed_context_seed_offset": 37,
+    "context_beta": 1.0,
+    "formula": "c=RMSNorm(H(Dc*pad(x))); g=(1+beta*c)/sqrt(1+beta^2); u0=H(D0*pad(x)); u1=H(D1*(1+s1)*u0); u2=H(D2*(1+s2)*(g*u1)); pre=sqrt(2048)*0.02*crop1536(u2)+b; expert(x)=dense_cproj*GELU(pre)",
+    "trainable_coordinates_per_expert": 5632,
+    "dense_cfc_parameters_per_expert": 1179648,
+    "cfc_compression_ratio": 209.45454545454547,
+    "trainable_coordinates_per_layer_all_experts": 45056,
+    "materialized_dense_cfc_allowed": false,
+    "learned_dense_basis_or_residual_allowed": false,
+    "dense_cproj_exception": true,
+    "causal_inference_inputs": ["current routed residual activation", "expert identity", "fixed signs", "learned spectra and bias"],
+    "forbidden_inference_inputs": ["label", "loss gradient", "future activation", "dense c_fc", "dense optimizer state"]
+  },
+  "control": {
+    "name": "same_run_static_two_spectrum_parent",
+    "context_beta": 0.0,
+    "formula": "The identical operator, signs, coordinate tensors, optimizer, and data with g=1. This reduces exactly to the sealed static SpectralCFC formula.",
+    "purpose": "Measure the effect of activation-conditioned image rotation without changing parameter count or fit opportunity."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260927, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20260928, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20260929, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "For each layer and bank, use terminal routing and deterministically sample 128 inputs per expert with the same bank/layer/expert seed rule as the static parent.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout activations cannot affect signs, coordinates, stopping, thresholds, or selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on s1, s2, and b only",
+    "steps": 400,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "objective": "Equal-expert normalized dense-c_proj residual-output MSE plus 0.25 times normalized pre-GELU MSE, identical to the static parent.",
+    "selection": "Use the final registered step for both treatment and control; no heldout selection.",
+    "precision": "float32 fitting and scoring",
+    "fit_health": "Every loss and gradient must be finite and final fit loss must be below initial fit loss for every bank/layer/treatment.",
+    "same_initial_coordinates": true
+  },
+  "metrics": {
+    "primary": "Heldout exact routed-MoE layer-output recovery, 1-||candidate-target||^2/||target||^2.",
+    "secondary": [
+      "per-layer mixture recovery",
+      "per-expert unweighted output recovery",
+      "per-expert pre-GELU recovery",
+      "treatment-minus-same-run-static recovery",
+      "heldout action cosine between independently fitted discovery banks",
+      "fit-loss decrease",
+      "router occupancy and all-value finiteness"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "candidate_minus_same_run_static_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_fit_losses_decrease": true,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every frozen gate for both independent fits authorizes only production implementation, exact-forward/backward tests, and a separately preregistered initialization-fit shadow. It does not authorize language-model training.",
+    "representability_fail": "If fits are healthy but any recovery, gain, expert, layer, or stability gate fails, close this exact beta-1 input-conditioned two-spectrum family without a beta, sign, depth, width, learning-rate, or threshold sweep.",
+    "optimization_inconclusive": "If a treatment fit is non-finite or fails to lower its discovery objective while the matched static control is healthy, classify optimization as inconclusive; do not relax the fit or scientific gates post hoc.",
+    "systems": "Expected below five minutes and foreground-polled. If observed runtime reaches five minutes, stop foreground polling and install one terminal/error-only @Codex watchdog before continuing."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "production_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "expected_output_bytes_maximum": 268435456,
+    "monitoring": "Foreground polling only because the parent took 34.6 seconds and this treatment/control audit is expected below five minutes."
+  },
+  "identity": {
+    "parent_git_commit": "ed25b065c5d6a61c3ee4af75b314f643bc94ab1d",
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_context_modulated_spectral_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
