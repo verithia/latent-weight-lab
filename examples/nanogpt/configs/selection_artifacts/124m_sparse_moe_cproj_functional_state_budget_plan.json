@@ -1,0 +1,103 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_functional_state_budget_plan_v1",
+  "recorded_at": "2026-08-11T17:25:00+08:00",
+  "status": "preregistered_after_equal_budget_mpo_rejection_before_any_functional_spectrum_value",
+  "scientific_question": "How much independently oriented ordinary-rank state is required to reproduce the terminal sparse-expert c_proj residual write in routed function space, and is that requirement compatible with 200--500x trainable-state compression?",
+  "theory_reconciliation": {
+    "dense_precedent": "The sealed dense-MLP c_proj residual analysis found that an equal-chart rank-38 oracle recovered only 0.0971, while 80% residual energy required rank about 476 and 0.679 of dense intrinsic degrees of freedom. That result bounds explicit low-rank/factor/basis state, not arbitrary procedural generators.",
+    "feature_write_nonidentifiability": "The two-seed heldout-neuron oracle rejected even a full-c_proj-size feature-to-write decoder: terminal c_fc features and their motion do not determine c_proj write orientation. Any viable c_proj map must own an independent output/error directional stream.",
+    "full_rank_compact_controls": "A learned 4,352-coordinate rank-two Kronecker image recovered about 0.334, and a 4,194-coordinate rank-nine MPO recovered about 0.358. The MPO may have full ordinary matrix rank, so the present low-rank bound does not subsume that failure; the two results must be interpreted jointly.",
+    "joint_rank_bound": "For fixed terminal routing and c_fc, a rank-r c_proj for each of E experts contributes a routed action matrix of rank at most r. Their sum has rank at most E*r even with perfect cross-expert cancellation. Therefore the best rank-(E*r) SVD of the exact joint routed write is an optimistic upper bound for every explicit per-expert rank-r parameterization.",
+    "state_accounting": "One expert c_proj is 768x1536. An arbitrary rank-r matrix has intrinsic dimension r(768+1536-r). At 200x the per-expert coordinate budget is floor(1179648/200)=5898 and admits rank 2; the 4,194-coordinate MPO budget and 500x admit only rank 1 as ordinary low-rank state.",
+    "frame_stability": "Leading output-space subspaces are compared across two discovery banks and one untouched bank. High overlap would favor a larger persistent output basis; low overlap would favor a task-conditioned nonpersistent online write mechanism.",
+    "why_no_new_training_arm": "This analysis selects an architecture class, not a candidate. A state-budget result cannot by itself justify another rank, radix, FHT, optimizer, learning-rate, generated-expert, or larger-rung run."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "terminal_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mpo_seal": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cproj_mpo_oracle_result.json",
+    "mpo_seal_sha256": "bcbcb871c029ec7c13cb7eb16da83376827f8a6900d8861c287201189dd4b017",
+    "dense_budget_seal": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cproj_residual_state_budget_result.json",
+    "dense_budget_seal_sha256": "21c5d86bad6d612f3c26958b39a3cc51f54c61eb48c7443f3f1a57af6760e06b",
+    "analyzer": "examples/nanogpt/analyze_sparse_moe_cproj_functional_state_budget.py",
+    "analyzer_sha256": "38e83a67c97e4bd05cbe5f9fb5608b7c93bfb5c9cbe352a4b4b95ae6d9144dbb"
+  },
+  "functional_protocol": {
+    "activation_state": "terminal",
+    "top_k": 2,
+    "discovery_banks": [
+      {
+        "name": "discovery_a",
+        "seed": 20260921,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      },
+      {
+        "name": "discovery_b",
+        "seed": 20260922,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      }
+    ],
+    "heldout": {
+      "seed": 20260923,
+      "batches": 2,
+      "batch_size": 8,
+      "block_size": 256,
+      "tokens": 4096
+    },
+    "score": "Exact terminal c_proj minus exact reproducible step-zero c_proj, applied to terminal same-run routing and c_fc activations. The analysis observes spectra only and fits no coordinates.",
+    "anti_leakage": "All three token banks and sampled layers are frozen before spectrum values. The heldout bank is used only for descriptive stability and the preregistered all-bank gate; no candidate is fitted or selected."
+  },
+  "analysis": {
+    "parameter_updates": 0,
+    "layers": [0, 5, 11],
+    "experts": 8,
+    "top_k": 2,
+    "matrix_shape": [768, 1536],
+    "energy_thresholds": [0.5, 0.8, 0.9, 0.95, 0.99],
+    "compression_targets": [200.0, 281.27038626609444, 500.0],
+    "subspace_overlap_ranks": [1, 2, 4, 8, 16, 32, 64],
+    "scopes": [
+      "joint routed action spectrum for an optimistic cross-expert upper bound",
+      "isolated expert routed action spectra for descriptive heterogeneity",
+      "joint output-subspace overlap across all token-bank pairs"
+    ]
+  },
+  "decision_rule": {
+    "gates": {
+      "compression_200x_joint_recovery_mean_minimum": 0.9,
+      "compression_200x_joint_recovery_every_layer_bank_minimum": 0.8
+    },
+    "pass": "If both gates pass, explicit per-expert low-rank write state is not ruled out at 200x; only a separately preregistered causal rank-2 functional oracle may be considered.",
+    "fail": "If either gate fails, explicit ordinary-low-rank c_proj state is incompatible with 200x on this terminal routed function. Reconcile the measured rank and subspace stability with the failed full-rank MPO before choosing among a relaxed c_proj compression target, a dense residual-write exception, or a nonpersistent task-conditioned write mechanism.",
+    "no_sweep": "No rank, tensor, FHT, optimizer, learning-rate, seed, expert-count, or larger-model sweep is authorized."
+  },
+  "scope_caveat": "The joint-rank result is an optimistic necessary condition for explicit ordinary-low-rank per-expert matrices with fixed terminal routing and c_fc. It is not an information-theoretic lower bound for every nonlinear procedural generator, and isolated-expert spectra are descriptive because joint function may permit cancellation. The failed full-rank equal-budget MPO is independent evidence, not a consequence of this bound.",
+  "output_contract": {
+    "output_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/cproj_functional_state_budget_v1",
+    "must_be_absent_before_run": true,
+    "required_files": [
+      "functional_state_budget_result.json",
+      "functional_state_budget_rows.csv",
+      "functional_state_budget_overlaps.csv",
+      "functional_state_budget_spectra.pt",
+      "functional_state_budget_status.json"
+    ]
+  },
+  "authorization": {
+    "run_zero_update_analysis": true,
+    "implement_candidate_structure": false,
+    "run_exact_config_mfu": false,
+    "run_language_model_training": false,
+    "larger_rung": false
+  }
+}
