@@ -45,3 +45,19 @@ def test_kfac_basis_has_expected_paired_shapes() -> None:
     assert all(direction.router.shape == state.router.shape for direction in bank)
     assert all(direction.c_fc.shape == state.c_fc.shape for direction in bank)
     assert all(direction.c_proj.shape == state.c_proj.shape for direction in bank)
+
+
+def test_kfac_basis_records_but_does_not_abort_below_occupancy_gate() -> None:
+    torch.manual_seed(62)
+    state = LayerState(
+        torch.zeros(2, 4),
+        torch.randn(2, 5, 4) * 0.1,
+        torch.randn(2, 4, 5) * 0.1,
+    )
+    inputs = torch.randn(8, 4)
+    errors = torch.randn(8, 4)
+    _bank, rows = build_kfac_basis(
+        state, inputs, errors, rank=2, ridge_ratio=1e-6,
+        minimum_assignments=128, device="cpu",
+    )
+    assert min(int(row["assignments"]) for row in rows) == 8

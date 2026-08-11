@@ -196,9 +196,9 @@ def build_kfac_basis(
     rows: list[dict[str, Any]] = []
     for expert in range(experts):
         locations = (indices == expert).nonzero(as_tuple=False)
-        if locations.shape[0] < minimum_assignments:
+        if locations.shape[0] == 0:
             raise RuntimeError(
-                f"expert {expert} has only {locations.shape[0]} assignments"
+                f"expert {expert} has no assignments; covariance is undefined"
             )
         token = locations[:, 0]
         slot = locations[:, 1]
@@ -363,6 +363,24 @@ def main() -> None:
     summary: dict[str, Any] = {}
     gate_results: dict[str, Any] = {}
     gates = plan["frozen_gates"]
+    occupancy_by_bank = {
+        bank_name: {
+            "minimum": min(
+                int(row["assignments"])
+                for row in geometry_rows
+                if row["bank"] == bank_name
+            ),
+            "by_layer": {
+                str(layer): min(
+                    int(row["assignments"])
+                    for row in geometry_rows
+                    if row["bank"] == bank_name and int(row["layer"]) == layer
+                )
+                for layer in layers
+            },
+        }
+        for bank_name in banks
+    }
     for family in FAMILIES:
         fixed_mean = sum(fixed_by_family_layer[(family, layer)] for layer in layers) / len(layers)
         overlap_mean = sum(overlaps[family].values()) / len(layers)
@@ -386,6 +404,7 @@ def main() -> None:
                 "by_layer": {str(row["layer"]): float(row["heldout_exact_recovery"]) for row in selected},
                 "paired_parameter_recovery_mean": sum(float(row["paired_parameter_recovery"]) for row in selected) / len(selected),
                 "raw_gradient_mean": raw,
+                "minimum_expert_assignments": occupancy_by_bank[bank_name]["minimum"],
             }
             bank_summary["kfac_minus_raw_gradient"] = bank_summary["mean"] - raw
             summary[family][bank_name] = bank_summary
@@ -394,6 +413,8 @@ def main() -> None:
                 "every_layer_pass": bank_summary["minimum"] >= float(gates["heldout_exact_recovery_every_layer_min_each_bank"]),
                 "minus_raw_pass": bank_summary["kfac_minus_raw_gradient"] >= float(gates["kfac_minus_raw_gradient_mean_min_each_bank"]),
                 "bank_overlap_pass": overlap_mean >= float(gates["discovery_bank_mean_subspace_overlap_min"]),
+                "minimum_expert_assignments_pass": occupancy_by_bank[bank_name]["minimum"]
+                >= minimum_assignments,
             }
             bank_gates["all_pass"] = all(bank_gates.values())
             gate_results[family][bank_name] = bank_gates
@@ -407,6 +428,10 @@ def main() -> None:
         family for family in FAMILIES
         if summary[family]["discovery_bank_subspace_overlap"]["mean"]
         >= float(gates["discovery_bank_mean_subspace_overlap_min"])
+        and all(
+            occupancy_by_bank[bank_name]["minimum"] >= minimum_assignments
+            for bank_name in banks
+        )
     ]
     if finite and passing:
         decision = "PASS_BOTH_BANKS_AUTHORIZE_5TPP_ONLINE_KFAC_ACQUISITION_ONLY"
@@ -431,6 +456,7 @@ def main() -> None:
         "all_values_finite": finite,
         "summary": summary,
         "gates": gate_results,
+        "expert_occupancy": occupancy_by_bank,
         "stepzero_selected_tensor_sha256": stepzero_hashes,
         "source": {
             "terminal_snapshot_sha256": file_sha256(args.terminal_snapshot),
