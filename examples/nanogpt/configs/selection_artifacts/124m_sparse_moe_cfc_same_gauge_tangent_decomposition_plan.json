@@ -1,0 +1,85 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_same_gauge_tangent_decomposition_plan_v1",
+  "recorded_at": "2026-08-11T22:15:00+08:00",
+  "status": "preregistered_before_implementation_and_crossed_gradient_values",
+  "scientific_question": "Does the near-orthogonality between discovery-A and discovery-B expert gradients come from changing the activation bank at a fixed shared endpoint, from moving between independently fitted shared endpoints at fixed data, or from both?",
+  "causal_parent": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_global_conditional_tangent_audit_plan.json",
+    "plan_sha256": "f33bd8c7177948d0df70793ad9a6cd4854239e7ea383f4019737d0b0850fa805",
+    "normalized_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_global_conditional_tangent_audit_result.json",
+    "normalized_result_sha256": "26b7caf9485052b053932176750b1106b48d7177f7a882b06470a9137f8dd8cc",
+    "remote_result_sha256": "2449ef060f75d607af548fc53d9c70bd040044da3990ba1c809a9233574274cd",
+    "gradient_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_global_conditional_tangent_20260811_v1/expert_angle_gradients.pt",
+    "gradient_artifact_sha256": "e0ba6c304c1e862325ae94d38f216e30338bbd4535253f16cc43cd4a900e3389",
+    "finding": "A rank-7 global basis transfers only 0.00067-0.00079 energy between bank-specific fitted endpoints; corresponding centered expert gradients have cosine 0.0139."
+  },
+  "source": {
+    "shared_endpoint_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_learned_butterfly_frame_oracle_plan.json",
+    "shared_endpoint_plan_sha256": "77e260512c46366db382215826f1eaf8beb00cf97be657b2f049feee6010af45",
+    "shared_endpoint_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sparse_moe_cfc_learned_butterfly_20260811_v1/compact_coordinates.pt",
+    "shared_endpoint_coordinates_sha256": "174f585ff1e1caca81493d233733692b336ff50f525f1d5e7211a5d6ca9fd3b8",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "num_experts": 8,
+    "endpoints": ["discovery_a", "discovery_b"],
+    "data_banks": ["discovery_a", "discovery_b"]
+  },
+  "replay_constants": {
+    "operator_seed": 20261014,
+    "sampling_seed_base": 20261016,
+    "sampling_seed_bank_stride": 1009,
+    "sampling_seed_layer_stride": 17,
+    "top_k": 2,
+    "fit_samples_per_expert": 128,
+    "objective_pre_gelu_weight": 0.25,
+    "center_within_layer": true,
+    "normalize_each_centered_gradient": true,
+    "diagnostic_rank": 7
+  },
+  "crossed_design": {
+    "saved_diagonal_cells": ["endpoint_a_data_a", "endpoint_b_data_b"],
+    "new_crossed_cells": ["endpoint_a_data_b", "endpoint_b_data_a"],
+    "fixed_endpoint_data_effect": [
+      "endpoint_a_data_a versus endpoint_a_data_b",
+      "endpoint_b_data_a versus endpoint_b_data_b"
+    ],
+    "fixed_data_endpoint_effect": [
+      "endpoint_a_data_a versus endpoint_b_data_a",
+      "endpoint_a_data_b versus endpoint_b_data_b"
+    ],
+    "metrics": "For every comparison, report direct corresponding-gradient cosine plus both directions of global and per-layer rank-7 cross-projected energy in the identical angle coordinate chart."
+  },
+  "frozen_gates": {
+    "global_rank7_cross_projection_mean_min_both_directions": 0.75,
+    "global_rank7_cross_projection_minimum_layer_min_both_directions": 0.6,
+    "global_rank7_cross_projection_minimum_row_min_both_directions": 0.4,
+    "direct_corresponding_gradient_cosine_mean_min": 0.5,
+    "direct_corresponding_gradient_cosine_minimum_layer_min": 0.35,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "activation_conditioned": "Either fixed-endpoint comparison fails the rank-7 gates. The expert tangent is activation-bank-conditioned even in the same mapping gauge; close static latent-only conditional bases and require a theory that conditions the generated operator on routed activation statistics.",
+    "chart_curved": "Both fixed-endpoint comparisons pass, but either fixed-data endpoint comparison fails. Data-conditioned directions are stable locally, while movement of the shared frame rotates the tangent atlas; require parallel transport, a moving local chart, or a generator linear in materialized function space rather than fixed angle coordinates.",
+    "stable": "All fixed-endpoint and fixed-data comparisons pass. The diagonal failure was an interaction artifact; authorize only a separately preregistered zero-update conditional-tangent functional oracle.",
+    "mixed": "Any remaining pattern is nonseparable. Record it and do no implementation or training before a new theory."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_audit": true,
+    "functional_oracle": false,
+    "implementation": false,
+    "initialization_fit_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "ebea0a8ccc875a45f39649e906acea57c93beeed",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_same_gauge_tangent_decomposition.py",
+    "entrypoint_sha256": null
+  }
+}
