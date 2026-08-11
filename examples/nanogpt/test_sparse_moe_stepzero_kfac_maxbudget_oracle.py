@@ -18,6 +18,16 @@ def _state(scale: float) -> LayerState:
     return LayerState(router, c_fc, c_proj)
 
 
+def _basis_state(index: int) -> LayerState:
+    router = torch.zeros(2, 6)
+    c_fc = torch.zeros(2, 4, 6)
+    c_proj = torch.zeros(2, 6, 4)
+    router[:, index] = 1.0
+    c_fc[:, :, index] = 1.0
+    c_proj[:, index, :] = 1.0
+    return LayerState(router, c_fc, c_proj)
+
+
 def test_coordinate_compression_has_unique_200x_valid_seven_coordinate_cap() -> None:
     assert abs(coordinate_compression(3, 4) - 1536.0 / 7.0) < 1e-12
     assert coordinate_compression(3, 4) > 200.0
@@ -26,7 +36,7 @@ def test_coordinate_compression_has_unique_200x_valid_seven_coordinate_cap() -> 
 
 def test_asymmetric_reconstruction_uses_fourth_direction_only_for_output() -> None:
     left = _state(0.0)
-    directions = [_state(float(index + 1)) for index in range(4)]
+    directions = [_basis_state(index) for index in range(4)]
     fourth = directions[3]
     target = (
         torch.zeros_like(fourth.router),
