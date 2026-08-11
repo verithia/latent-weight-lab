@@ -1,0 +1,122 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cfc_spectral_feature_oracle_plan_v1",
+  "recorded_at": "2026-08-11T21:10:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Can a genuinely compact expert c_fc feature map, built from learned spectral diagonals between fixed global orthogonal FHT mixers, reproduce the terminal dense-expert function while c_proj remains the evidence-required dense residual-write exception?",
+  "causal_reconciliation": {
+    "composition_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_5tpp_result.json",
+      "sha256": "799d81d7d6a8e2d2460d6fc4e6e8c13b07073b821c2dceb0601ff0c74eb1e134",
+      "finding": "Mapped QK plus dense complete experts passes at 5TPP by -0.0443222523 CE versus the matched dense-MoE control, but neither expert matrix is compressed."
+    },
+    "directed_product_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_mlp_cfc_multistage_directed_result.json",
+      "sha256": "b3f59359eb9240c29ba83f5b7dcbf0a546e752bab10a625d5e7120f3c8b0b3b7",
+      "finding": "Compositional task-selected c_fc direction matters, but the deployed mechanism is an update chart around a materialized dense c_fc rather than a compact weight or function representation."
+    },
+    "temporal_state_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qk_cfc_procedural_state_frontier_result.json",
+      "sha256": "1ab3f942a40d7f6e758adbc68985598e8ceaf8a836a0f5b223d16c018fa7e789",
+      "finding": "Retrofitting the accepted directed-product family to dense Muon state remains far below the frozen recovery gates even after the code exceeds dense-state byte storage. A new c_fc candidate must therefore be born and optimized in compact coordinates."
+    },
+    "write_map_boundary": "Attention V/O and expert c_proj remain dense full-state exceptions. Existing same-gauge functional and unrestricted shared-gauge oracles reject the tested compact residual-write families; this test changes only c_fc.",
+    "not_a_lora_basis": "No learned dense basis, low-rank residual, or materialized dense c_fc is permitted. Fixed signs and normalized FHTs define the orthogonal mixers; only diagonal spectral coordinates and an output bias are learned."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "terminal_gauge": "Collect MLP inputs with the complete terminal model. Use its terminal router, terminal expert c_fc targets, and terminal dense expert c_proj on both target and candidate sides."
+  },
+  "candidate": {
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "padded_width": 2048,
+    "num_experts": 8,
+    "top_k": 2,
+    "fixed_operator_seed": 20260931,
+    "formula": "u0=H(D0*pad(x)); u1=H(D1*(1+s1)*u0); u2=H(D2*(1+s2)*u1); pre=sqrt(2048)*0.02*crop1536(u2)+b; expert(x)=dense_cproj*GELU(pre)",
+    "trainable_coordinates_per_expert": 5632,
+    "dense_cfc_parameters_per_expert": 1179648,
+    "cfc_compression_ratio": 209.45454545454547,
+    "trainable_coordinates_per_layer_all_experts": 45056,
+    "materialized_dense_cfc_allowed": false,
+    "dense_cproj_exception": true,
+    "optimizer_state_rule": "A later implementation, if authorized, must create optimizer state only for s1, s2, and b; dense c_fc weights or dense c_fc optimizer state are forbidden."
+  },
+  "control": {
+    "name": "fixed_orthogonal_bias_scale",
+    "formula": "Use the identical fixed D0/H/D1/H/D2/H path with s1=s2=0; fit only one scalar scale and one hidden bias per expert.",
+    "purpose": "Separate learned spectral direction matching from a fixed pseudo-random orthogonal feature map plus trivial calibration."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20260927, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20260928, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20260929, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "For each layer and bank, route terminal activations, require at least 128 assignments for every expert, and deterministically subsample 128 inputs per expert with a bank/layer/expert-derived seed.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout activations never affect signs, coordinates, optimizer stopping, thresholds, or sample selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on compact coordinates only",
+    "steps": 400,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "objective": "Equal-expert mean of normalized dense-c_proj residual-output MSE plus 0.25 times normalized pre-GELU MSE.",
+    "selection": "Use the final registered optimizer step; no heldout checkpoint selection.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "metrics": {
+    "primary": "Heldout exact routed-MoE layer-output recovery, 1-||candidate-target||^2/||target||^2.",
+    "secondary": [
+      "per-layer mixture recovery",
+      "per-expert unweighted output recovery",
+      "pre-GELU recovery",
+      "candidate-minus-fixed-control recovery",
+      "heldout action cosine between independently fitted discovery banks",
+      "router occupancy and all-value finiteness"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "candidate_minus_control_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every frozen gate in both independent banks authorizes only production implementation, correctness/exact-resume tests, and a separately preregistered initialization-fit shadow check. It does not directly authorize training.",
+    "occupancy_fail": "If the terminal router cannot supply 128 examples for every expert in 131072 tokens, classify the expert atlas as insufficiently identified at 0.5TPP and do not train a generated expert.",
+    "representability_fail": "Reject this two-spectral-diagonal fixed-orthogonal c_fc family. Do not sweep signs, depth, width, learning rate, or thresholds without a new measured residual decomposition.",
+    "systems": "Expected under five minutes and foreground-polled. If observed runtime reaches five minutes, stop foreground polling, install a terminal-or-error watchdog with an explicit @Codex continuation prompt, and preserve the partial output."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "generated_cproj": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "e3df648dc238dd8e5a88f6c4ce9e970438efba2e",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
+      "examples/nanogpt/analyze_sparse_moe_rolling_tangent_oracle.py": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",
+      "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    }
+  }
+}
