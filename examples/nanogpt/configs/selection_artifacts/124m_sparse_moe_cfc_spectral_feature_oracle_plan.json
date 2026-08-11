@@ -109,7 +109,7 @@
     "automatic_retry_or_sweep": false
   },
   "identity": {
-    "preregistration_git_commit": "e3df648dc238dd8e5a88f6c4ce9e970438efba2e",
+    "preregistration_git_commit": "e9167c5cdc8361348360cf8d21ae143b4f6310a0",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py",
     "entrypoint_sha256": "e0f5fde9c4431754de26369af2120a5aa2214ed5d2c6f5a03a0607c2065adab3",
     "helper_sha256": {
