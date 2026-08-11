@@ -1,0 +1,89 @@
+{
+  "schema_version": "nanogpt_sparse_moe_shared_orthogonal_gauge_mpo_seal_v1",
+  "recorded_at": "2026-08-11T18:04:51+08:00",
+  "decision": "REJECT_SHARED_ORTHOGONAL_GAUGE_AS_SUFFICIENT_MPO_REPAIR",
+  "source_control": {
+    "git_commit": "caa344aa393ab1b8879221a9565d571ec3ce7b6c",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_shared_orthogonal_gauge_mpo.py",
+    "entrypoint_sha256": "37c342e07a68298e32f0de19f8bc3e03b7543e00b90e7bcba8924e12017938c8",
+    "plan_sha256": "19a295b6ad2f0c079d7d42eb1cf6e52d1a7eefbe207d5749b4237da6fea9e33c"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "mpo_seal_sha256": "bcbcb871c029ec7c13cb7eb16da83376827f8a6900d8861c287201189dd4b017",
+    "depth_group_seal_sha256": "7857b5e2bc9fec028f483ded3c7402b64c7aad657d391a64ffbfb58a65eb1cd6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11]
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "parameter_updates": 0,
+    "wall_seconds": 39.96256947517395,
+    "remote_focused_and_regression_tests": "16 passed in 1.12s",
+    "exact_shape_preflight": "three MPO materialize/backward passes plus two 768x768 Procrustes solves in 0.192s",
+    "gpu_after": "153/97887 MiB, 0% utilization, 34 C, 16.47 W",
+    "workspace_bytes_after": 271584792687,
+    "filesystem_bytes_free_after": 1637947473920
+  },
+  "state_accounting": {
+    "rank9_mpo_coordinates_all_96_matrices": 402624,
+    "full_orthogonal_intrinsic_degrees_of_freedom": 294528,
+    "total_intrinsic_trainable_state": 697152,
+    "intrinsic_trainable_state_compression": 162.44120077113743,
+    "total_state_if_R_is_cached_dense": 992448,
+    "cached_materialized_state_compression": 114.10795124782356
+  },
+  "results": {
+    "fresh_discovery_a": {
+      "matched_ungauged_mpo_heldout_recovery_mean": 0.3684188524881999,
+      "gauged_mpo_heldout_recovery_mean": 0.5339767932891846,
+      "gauged_mpo_heldout_recovery_minimum": 0.4859592914581299,
+      "gauged_recovery_by_layer_0_5_11": [0.4859592914581299, 0.510106086730957, 0.6058650016784668],
+      "gain_over_matched_ungauged_mpo": 0.16555794080098468,
+      "minimum_expert_assignments": 478
+    },
+    "fresh_discovery_b": {
+      "matched_ungauged_mpo_heldout_recovery_mean": 0.3657912015914917,
+      "gauged_mpo_heldout_recovery_mean": 0.5318472186724345,
+      "gauged_mpo_heldout_recovery_minimum": 0.48449593782424927,
+      "gauged_recovery_by_layer_0_5_11": [0.48449593782424927, 0.5069905519485474, 0.6040551662445068],
+      "gain_over_matched_ungauged_mpo": 0.16605601708094275,
+      "minimum_expert_assignments": 560
+    },
+    "heldout_bank_action_cosine_mean": 0.7485586802164713,
+    "independent_gauge_normalized_trace": 0.1609536111354828,
+    "all_fits_non_degrading": true,
+    "all_values_finite": true
+  },
+  "gates": {
+    "heldout_recovery_mean_min_0p9": false,
+    "heldout_every_layer_min_0p8": false,
+    "improvement_over_matched_control_min_0p1": true,
+    "bank_action_cosine_min_0p8": false,
+    "occupancy_min_128": true,
+    "fit_non_degrading": true
+  },
+  "interpretation": {
+    "positive": "A full-rank shared residual gauge adds a reproducible 0.166 heldout functional recovery over a matched 512-step ungauged MPO. Direction mismatch is therefore a real contributor, not an artifact of the earlier fixed BlockFHT map.",
+    "binding_failure": "The optimistic treatment still recovers only 0.532-0.534 on average, bottoms near 0.485, and independent heldout actions agree at only 0.749. Even the unrestricted shared O(768) gauge is insufficient and already relaxes c_proj compression below 200x.",
+    "scope_diagnosis": "The low normalized trace between fitted gauges and sub-0.8 action agreement show that a single global rotation is not identifiable or stable enough. The remaining write information is matrix/layer/expert specific, not a shared coordinate mismatch that a compact global latent function can remove.",
+    "architectural_consequence": "Stop latent-direction topology searches for attention V/O and MLP c_proj. Treat residual-write matrices as dense/full-state exceptions and concentrate Mapping-Network compression on read/feature transforms such as Q/K and c_fc, where direction need not be independently written into the residual stream.",
+    "not_authorized": "No gauge compression, rotation/rank/radix/optimizer/seed sweep, MFU gate, generated write matrix, or larger rung follows from this rejection."
+  },
+  "raw_artifacts": {
+    "result_sha256": "7870e6f40fa7bfa035d0bd287cb51371bb61bc73cc98fbcf0473d20669f1c05d",
+    "rows_sha256": "e75c8cc261312f239e2f4d036523a573b6f07d38296cbc6aa2ba112f82f45908",
+    "state_sha256": "7341d13e7aa73ba03421043076de8bdbf9c614fc6baed21d21d05876a4b36520",
+    "status_sha256": "58fa07a35843ca352ec792c624fcd6efc680b6db839bcada11b02d4c4d012ae1",
+    "log_sha256": "180d32ed2a78a1019afe1c8034a1b0be76c80be0a9642ed011a06da18495945b"
+  },
+  "authorization": {
+    "preregister_write_exception_hybrid": true,
+    "compress_shared_gauge": false,
+    "direction_topology_sweep": false,
+    "write_matrix_mapping_training": false,
+    "larger_rung": false
+  }
+}
