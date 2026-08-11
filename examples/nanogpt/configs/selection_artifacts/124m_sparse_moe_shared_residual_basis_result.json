@@ -1,0 +1,84 @@
+{
+  "schema_version": "nanogpt_sparse_moe_shared_residual_basis_seal_v1",
+  "recorded_at": "2026-08-11T17:43:30+08:00",
+  "decision": "REJECT_SHARED_RESIDUAL_OUTPUT_FRAME_AT_REGISTERED_BUDGETS",
+  "source_control": {
+    "git_commit": "80bb6b3ba04aaff29451765a79fff69479828cb8",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_shared_residual_basis.py",
+    "entrypoint_sha256": "fbc80c27f07bae3d4ad9747b807f39a60ece9c97977f39c575b5afdf94e3b17c",
+    "plan_sha256": "e448169275dcbfd59a2a2c2ec6903548fdebd38e974a60c99eff4aab949c41ee"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "state_budget_seal_sha256": "2529a368576227f375e4a5721b05bf5741c8dcf4892c911f19695cf828bfd1c5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "experts": 8
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct_foreground_polling",
+    "parameter_updates": 0,
+    "wall_seconds": 15.079859495162964,
+    "focused_and_regression_tests": "23 passed in 1.69s",
+    "gpu_after": "153/97887 MiB, 0% utilization, 32 C, 15.90 W"
+  },
+  "registered_layouts": {
+    "500x_q1536_r102": {
+      "mean_recovery": 0.5300703874478737,
+      "minimum_recovery": 0.4590475261211395,
+      "basis_overlap": 0.8734101057052612
+    },
+    "281x_q1536_r332": {
+      "mean_recovery": 0.7833049868543943,
+      "minimum_recovery": 0.7494983077049255,
+      "basis_overlap": 0.8878499269485474
+    },
+    "281x_q3072_r140": {
+      "mean_recovery": 0.590589664876461,
+      "minimum_recovery": 0.5291243195533752,
+      "basis_overlap": 0.8744865655899048
+    },
+    "200x_q1536_r545": {
+      "mean_recovery": 0.9113333833714327,
+      "minimum_recovery": 0.8964319229125977,
+      "minimum_expert_recovery": 0.8232860565185547,
+      "basis_overlap": 0.9253190755844116,
+      "minimum_shared_minus_local_oracle": -0.07870370149612427,
+      "absolute_recovery_gates_passed": true,
+      "sharing_regret_gate_passed": false
+    },
+    "200x_q3072_r353": {
+      "mean_recovery": 0.7986171282827854,
+      "minimum_recovery": 0.7671067118644714,
+      "basis_overlap": 0.8920315504074097
+    },
+    "200x_q4194_r213": {
+      "mean_recovery": 0.6786894239485264,
+      "minimum_recovery": 0.6283438801765442,
+      "basis_overlap": 0.8730316162109375
+    }
+  },
+  "interpretation": {
+    "positive": "One rank-545 frame shared across all 96 c_proj matrices is highly stable and exceeds the absolute 0.90 mean and 0.80 every-layer recovery gates at a realized 200.076x total-state compression.",
+    "binding_failure": "The shared frame loses as much as 0.0787 recovery relative to each layer's same-rank oracle, failing the frozen maximum 0.05 sharing-regret gate. The regret is largest in early/middle depth and falls toward the final layer.",
+    "mechanism": "Residual-output directions are shared across token frames but not perfectly across depth. The next justified discriminator is a fixed three-way contiguous depth grouping with the same total basis-rank budget, not a rank or topology sweep.",
+    "not_yet_authorized": "Because the full contract failed, no coefficient generator, candidate implementation, MFU gate, training run, generated expert, or larger rung is authorized."
+  },
+  "raw_artifacts": {
+    "result_sha256": "ec855abd6ebefe87e3a74d6d1574414a77b6745494b9679b75c18b0c3536a71c",
+    "rows_sha256": "3141527f6c7ac2a8fe348d2c1c43d918c8fd63ec79eaae892854bdcb19ab4b46",
+    "bases_sha256": "c7209cfc65660a195daf1472885e9fb1a4c43cf537993269f0cdadbae748d7c6",
+    "status_sha256": "a9d1e924e4e70df44e51ee1de5ffc35a85eeebea73684da8a03545edd62ddc1a",
+    "log_sha256": "1d50ead56042409807a43ea7947692eb73ebada2ca067e8c67919c906a6180ec"
+  },
+  "authorization": {
+    "preregister_depth_grouped_basis_oracle": true,
+    "coefficient_mechanism_oracle": false,
+    "candidate_implementation": false,
+    "mfu_preflight": false,
+    "training": false,
+    "larger_rung": false
+  }
+}
