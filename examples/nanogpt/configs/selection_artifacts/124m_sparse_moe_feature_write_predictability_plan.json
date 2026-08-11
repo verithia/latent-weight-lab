@@ -1,0 +1,122 @@
+{
+  "schema_version": "nanogpt_sparse_moe_feature_write_predictability_plan_v1",
+  "recorded_at": "2026-08-11T21:20:00+08:00",
+  "status": "preregistered_after_kronecker_rejection_before_any_feature_to_write_value",
+  "scientific_question": "Is the terminal c_proj residual-write direction predictably encoded by the same expert's learned c_fc feature frame, or does c_proj require an independent downstream-error/output frame?",
+  "theory": {
+    "mlp_unit": "y(x)=sum_j b_j GELU(a_j^T x), with c_fc feature a_j and c_proj write b_j.",
+    "write_gradient": "grad_b_j L = sum_t delta_t GELU(a_j^T x_t).",
+    "feature_gradient": "grad_a_j L = sum_t x_t GELU'(a_j^T x_t) (b_j^T delta_t).",
+    "nonidentifiability": "The write update observes the full residual-error vector delta_t, whereas the feature update observes only its scalar projection through b_j. Holding x,a,b fixed while changing error components orthogonal to b changes grad_b without changing grad_a. A feature-only write decoder is therefore not generally identifiable.",
+    "norm_correlation_scope": "Prior c_fc-row/c_proj-column norm correlation can measure shared neuron use or scale. It does not establish vector-direction predictability.",
+    "empirical_discriminator": "Give the feature-only hypothesis a maximally favorable dense linear upper bound, fit on 1280 hidden neurons and score 256 unseen neurons per expert. Scored neurons may fit only radial coefficients after their direction is predicted.",
+    "relation_to_prior_failures": "Stable paired-neuron assignment, 2.4-5.3 percent pairing-aware temporal recovery, failed shared hidden gain, failed KFAC/task-gradient images, and one-third Kronecker functional recovery all motivate testing direction predictability directly rather than another training arm."
+  },
+  "source": {
+    "data_dir": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "runs": [
+      {
+        "name": "seed1",
+        "model_seed": 1337,
+        "stepzero_state": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots/step_000000_moe_paired_l0_l5_l11.pt",
+        "stepzero_state_sha256": "a755ca6c146d50d8c04516cb19d1d1f44abac330a90883dbb56f12c099fa1773",
+        "terminal_state": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots/step_009495_moe_paired_l0_l5_l11.pt",
+        "terminal_state_sha256": "bd516b45c13fa4b6e77e747f7214f5c1d82febbf466a4e5f07a0b1cb20f8ba24",
+        "terminal_model": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/manifold_snapshot.pt",
+        "terminal_model_sha256": "62d7bc04e953036d758111c6fa44d4eb1c97a3eef0188ae989b56be54289e070"
+      },
+      {
+        "name": "seed2",
+        "model_seed": 1338,
+        "stepzero_state": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_seed2_geometry/parameter_trajectory/step_000000.pt",
+        "stepzero_state_sha256": "18c1f87cbcb8d17becc2f7605fb7887b772594c5d281bf2ed32695d927ac8b54",
+        "terminal_state": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_seed2_geometry/parameter_trajectory/step_009495.pt",
+        "terminal_state_sha256": "ece317fb25c3db6a10ab74f3898d489003283cd316202c2fd3344151168e4032",
+        "terminal_model": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_seed2_geometry/ckpt.pt",
+        "terminal_model_sha256": "3b19fa796307df8676a8aa77b2183952b14af9a7718f2d2004690878fb3708ae"
+      }
+    ]
+  },
+  "target": {
+    "matrix": "terminal c_proj minus same-run step-zero c_proj, one 768x1536 matrix per expert",
+    "feature_current": "row-normalized terminal c_fc rows",
+    "feature_motion": "row-normalized terminal-minus-step-zero c_fc rows",
+    "gauge": "native same-run hidden identity; prior functional audit found about 98 percent native identity and stable heldout assignment",
+    "target_coordinates_per_expert": 1179648
+  },
+  "neuron_protocol": {
+    "hidden_neurons": 1536,
+    "fit_neurons": 1280,
+    "score_neurons": 256,
+    "partitions": [
+      {"name": "partition_a", "seed": 20261003},
+      {"name": "partition_b", "seed": 20261004}
+    ],
+    "anti_leakage": "Every shared orientation is fit only on the 1280 fit neurons. The 256 scored neurons may fit one or two scalar radial coefficients but cannot change the predicted shared direction."
+  },
+  "families": {
+    "tied_current_ray": {
+      "equation": "predicted Delta b_j = rho_j a_terminal_j",
+      "coordinates_per_expert": 1536,
+      "coordinate_compression": 768.0,
+      "role": "zero-shared-orientation control"
+    },
+    "tied_current_motion_plane": {
+      "equation": "predicted Delta b_j = rho0_j a_terminal_j + rho1_j Delta a_j",
+      "coordinates_per_expert": 3072,
+      "coordinate_compression": 384.0,
+      "role": "strongest no-decoder compact control"
+    },
+    "dense_current_ridge": {
+      "equation": "predicted direction = R a_terminal_j, followed by one oracle radial coefficient",
+      "decoder_values_per_expert": 589824,
+      "role": "non-compression-valid dense linear direction upper bound"
+    },
+    "dense_current_motion_ridge": {
+      "equation": "predicted direction = R0 a_terminal_j + R1 Delta a_j, followed by one oracle radial coefficient",
+      "decoder_values_per_expert": 1179648,
+      "role": "maximally favorable non-compression-valid feature-only linear upper bound and binding gate"
+    }
+  },
+  "fit": {
+    "solver": "batched closed-form ridge; primal when features <= fit neurons and dual otherwise",
+    "ridge_relative": 1e-6,
+    "feature_normalization": "normalize current and motion vectors separately per hidden neuron",
+    "score_radial": "least-squares scalar on the already-predicted direction; this deliberately favors feature-only representability",
+    "no_sweep": true,
+    "diagnostic": "record fit recovery and effective regularized condition number so numerical underfit cannot be mistaken for scientific rejection"
+  },
+  "functional_protocol": {
+    "activation_state": "same-run terminal model, router, and c_fc",
+    "top_k": 2,
+    "token_frames": [
+      {"name": "tokens_a", "seed": 20261001, "batches": 2, "batch_size": 8, "block_size": 256, "tokens": 4096},
+      {"name": "tokens_b", "seed": 20261002, "batches": 2, "batch_size": 8, "block_size": 256, "tokens": 4096}
+    ],
+    "primary_metric": "Exact routed residual-write recovery contributed by the 256 unseen neurons, on both untouched token frames.",
+    "secondary_metrics": [
+      "heldout-neuron c_proj displacement recovery",
+      "target-energy-weighted squared direction cosine",
+      "per-layer, per-seed, per-partition, and per-token-frame recovery",
+      "minimum expert assignments"
+    ]
+  },
+  "frozen_gates": {
+    "dense_upper_bound_functional_mean_min": 0.9,
+    "dense_upper_bound_functional_every_layer_min": 0.8,
+    "dense_upper_bound_functional_each_seed_min": 0.8,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Only if the dense current-plus-motion upper bound passes all gates may a separately preregistered compact shared-orientation map be tested. A pass does not authorize training, MFU, generated experts, or a larger rung.",
+    "fail": "Reject feature-only linear write-direction prediction. Do not launch tied, diagonal, Householder, Cayley, or feature-derived c_proj training. The next latent function must carry an independent task-conditioned output/error directional stream and count its state explicitly.",
+    "scope": "A failure does not prove that no arbitrarily large nonlinear hypernetwork can infer writes from features. It rejects the scientifically relevant shared linear/orthogonal relation even under a dense decoder upper bound; a larger learned nonlinear decoder would violate the intended 200-500x state budget unless separately justified."
+  },
+  "execution": {
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_feature_write_predictability.py",
+    "entrypoint_sha256": "9fea42d87c83072bdabd8cf1b3d6a7ecbede2131582c5baa26818010daefe7c6",
+    "policy": "Run a no-scientific-value synthetic/test preflight first. Foreground-poll only if measured ETA is under five minutes; otherwise launch a persistent terminal/error watchdog with an event-specific @Codex callback."
+  }
+}
