@@ -127,6 +127,7 @@ def test_5tpp_confirmation_changes_only_horizon_and_recovery_metadata() -> None:
     assert confirmation["eval_interval"] == 594
     assert confirmation["warmup_iters"] == 23
     assert confirmation["lr_decay_iters"] == 2374
+    assert confirmation["checkpoint_wall_clock_seconds"] == 7200
     assert confirmation["scheduled_tokens"] == 2374 * 262144
     assert estimate_active_params(confirmation) == 124447488
 

@@ -1,0 +1,38 @@
+{
+  "schema_version": "mai_124m_qk_mapped_dense_moe_5tpp_checkpoint_cadence_amendment_v1",
+  "artifact_kind": "zero_update_launch_validation_repair",
+  "registered_at": "2026-08-11T19:16:00+08:00",
+  "status": "registered_after_zero_update_validation_failure_before_new_exact_config_preflight",
+  "parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_qk_mapped_dense_moe_5tpp_confirmation_plan.json",
+  "failed_attempt": {
+    "git_commit": "77698706aea2eed14ff810e6e878e0adb686bc30",
+    "config_sha256": "501bd73798862233a5b880f2050d851864b584f0c2a3d9d326687dca8d7aa763",
+    "provenance_sha256": "818ac5bcf7fcebbf2f4491e562856c827b7989af534c959dfce74b25789033fd",
+    "status_sha256": "9874cf5107ca1c95171210f2b7861846035efbb6a5e4a90dc6e5abecba0904a8",
+    "log_sha256": "f9081a88b1c3604a90ba833d882b2148a07cc0c903c9a46372b8b388f0ef3949",
+    "exit_code": 1,
+    "scientific_updates": 0,
+    "failure": "validate_launch_config rejected checkpoint_wall_clock_seconds=3600 because registered deterministic runs require 7200",
+    "model_constructed": false,
+    "checkpoint_created": false
+  },
+  "repair": {
+    "field": "checkpoint_wall_clock_seconds",
+    "from": 3600,
+    "to": 7200,
+    "reason": "restore the validator-required deterministic-run identity used by the accepted 0.5TPP parent",
+    "scientific_state_changed": false,
+    "model_optimizer_data_seed_horizon_changed": false
+  },
+  "evidence_preservation": {
+    "failed_attempt_preflight_certificate_retained": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_mapped_dense_moe_mfu_5tpp_lr24e4/performance_preflight.json",
+    "repaired_exact_config_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_mapped_dense_moe_mfu_5tpp_lr24e4_v2/performance_preflight.json",
+    "overwrite_prior_certificate": false
+  },
+  "authorization": {
+    "one_new_exact_config_mfu_preflight": true,
+    "one_scientific_launch_after_pass": true,
+    "automatic_post_update_retry": false,
+    "parallel_arm": false
+  }
+}
