@@ -1,0 +1,95 @@
+{
+  "schema_version": "nanogpt_sparse_moe_stepzero_task_gradient_oracle_plan_v1",
+  "recorded_at": "2026-08-11T15:03:22+08:00",
+  "status": "preregistered_after_temporal_paired_atom_rejection_before_task_gradient_values",
+  "scientific_question": "At the same 384x and 256x per-atom coordinate budgets, do causal step-zero task-gradient banks span the 0.5-TPP expert/router update and its held-out residual-write action substantially better than temporal chords or fixed BlockFHT?",
+  "causal_source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "run_git_commit": "55d91cfe7be442d9f71135d0cf747748aff00937",
+    "run_config_sha256": "606bdb6f94a895370c5f79c3bf8c9ca9e77b94e9f5cde8acd5fbe61ac002c5ba",
+    "archived_config_sha256": "211a673d3ab62df0ec831b8da3c512b29ff14ecbbc86ca38119ddfa06234f88e",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "terminal_source_checkpoint_sha256": "94649cfb3441e4b6fc7149648fc142ff17735b29eaee9d57828650bcf4d53616",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "scheduled_tokens": 62390272,
+    "active_tpp": 0.501338138701522,
+    "layers": [0, 5, 11],
+    "rule": "Reconstruct the exact scratch model on CPU with model_seed=1337, prove that its architecture/config identity matches the terminal manifold snapshot, and construct every candidate basis only from step-zero task gradients. The terminal update is used only for oracle coordinate fitting and scoring."
+  },
+  "gradient_banks": [
+    {
+      "name": "discovery_a",
+      "seed": 20260911,
+      "independent_microbatches": 4,
+      "batch_size": 2,
+      "block_size": 256
+    },
+    {
+      "name": "discovery_b",
+      "seed": 20260912,
+      "independent_microbatches": 4,
+      "batch_size": 2,
+      "block_size": 256
+    }
+  ],
+  "gradient_definition": {
+    "loss": "Next-token cross entropy plus the run's router load-balance and router-z auxiliary losses, evaluated in train mode; dropout is exactly zero.",
+    "direction": "Negative raw task gradient for expert_c_fc, expert_c_proj, and router.weight from each independent microbatch.",
+    "anti_leakage": "No target checkpoint tensor, future chord, held-out token, optimizer state, or terminal activation participates in basis construction.",
+    "coordinate_fit": "Unrestricted ridge least-squares fit of the terminal parameter chord is an upper bound on representability, not a trainable predictor."
+  },
+  "coordinate_families": [
+    {
+      "name": "coupled_four",
+      "coordinates_per_atom": 4,
+      "basis": "Concatenate the incoming-row and outgoing-column descent directions from each of four discovery microbatches, preserving one shared coordinate per paired hidden atom; use the four router-row descent directions.",
+      "coordinates_per_layer": 49184,
+      "target_parameters_per_layer": 18880512,
+      "compression_ratio": 383.8750813272609
+    },
+    {
+      "name": "separate_three_plus_three",
+      "coordinates_per_atom": 6,
+      "basis": "Use the first three discovery-microbatch incoming-row directions and first three outgoing-column directions as independent coordinate banks while preserving atom identity; use the first three router directions.",
+      "coordinates_per_layer": 73752,
+      "target_parameters_per_layer": 18880512,
+      "compression_ratio": 256.0
+    }
+  ],
+  "controls": {
+    "fixed_structured": "Use the exact local BlockFHT controls and seeds from the paired-atom temporal oracle at matched coordinate counts.",
+    "temporal_reference": "Compare against the sealed 20-TPP paired-atom temporal result without refitting: moving exact recovery 0.024354/0.024333 and static exact recovery 0.044682/0.052700 for coupled/separate.",
+    "replicate_bank": "Fit and score discovery_a and discovery_b independently; the second bank is not pooled into a larger coordinate budget."
+  },
+  "evaluation": {
+    "heldout_seed": 20260913,
+    "heldout_batches": 2,
+    "heldout_batch_size": 8,
+    "heldout_block_size": 256,
+    "activation_sample_cap_per_layer": 2048,
+    "frame": "Collect held-out sparse-MLP inputs from the reconstructed step-zero model. Score exact nonlinear residual-write recovery for the terminal local expert/router update on this fixed causal frame.",
+    "secondary_metrics": [
+      "paired, incoming, outgoing, and router parameter recovery",
+      "per-layer exact residual-write recovery",
+      "discovery-A versus discovery-B per-atom subspace overlap",
+      "microbatch gradient losses and tensor hashes",
+      "fixed-structured matched-budget recovery"
+    ]
+  },
+  "frozen_gates": {
+    "heldout_exact_recovery_mean_min_each_bank": 0.9,
+    "heldout_exact_recovery_every_layer_min_each_bank": 0.8,
+    "task_gradient_minus_fixed_structured_mean_min_each_bank": 0.1,
+    "task_gradient_minus_best_temporal_reference_min_each_bank": 0.1,
+    "discovery_bank_mean_subspace_overlap_min": 0.5,
+    "all_values_finite": true
+  },
+  "interpretation": {
+    "pass_both_banks": "Task/data conditioning supplies the missing atom directions at short horizon. Authorize only a 124M 5-TPP online gradient-sketch acquisition to test moving causal refresh; do not yet authorize generated training.",
+    "pass_one_bank_only": "The apparent span is batch-fragile. Reject implementation and increase data averaging without increasing coordinates before repeating the offline oracle.",
+    "fail_both_banks": "Raw task-gradient banks do not identify the required compact image. Reject gradient-conditioned latent generation and move to a preregistered functional-Jacobian/KFAC action basis, not another temporal or random chart.",
+    "authorization": "This plan authorizes only the zero-update offline oracle. It does not authorize generated-expert training, an MFU preflight, or any larger active-parameter rung."
+  }
+}
