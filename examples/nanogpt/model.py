@@ -119,6 +119,7 @@ class GPTConfig:
     block_fht_attn_cayley_ranks: dict[str, int] | None = None
     block_fht_attn_cayley_scale: float = 1.0
     block_fht_attn_cayley_seed: int = 618033
+    block_fht_attn_pack_cached_qkv: bool = False
     block_fht_attn_cayley_atlas_start_steps: tuple[int, ...] = ()
     block_fht_attn_cayley_factor_optimizer: str = "adamw"
     block_fht_ffn_pregelu_gain: bool = False
@@ -563,7 +564,9 @@ class LearnedLowRankCayleyMix(nn.Module):
         )
         self.register_buffer("symplectic", symplectic, persistent=False)
 
-    def forward(self, values: torch.Tensor) -> torch.Tensor:
+    def _factors_and_middle(
+        self, values: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
         if values.shape[-1] != self.features:
             raise ValueError(
                 f"expected last dimension {self.features}, "
@@ -596,15 +599,28 @@ class LearnedLowRankCayleyMix(nn.Module):
             identity - symplectic @ gram,
             symplectic,
         )
+        return factors.to(dtype=values.dtype), middle.to(dtype=values.dtype)
 
-        factors_compute = factors.to(dtype=values.dtype)
-        middle_compute = middle.to(dtype=values.dtype)
-        projected = values @ factors_compute
+    def _apply(
+        self, values: torch.Tensor, *, transpose: bool
+    ) -> torch.Tensor:
+        factors, middle = self._factors_and_middle(values)
+        if transpose:
+            middle = middle.transpose(0, 1)
+        projected = values @ factors
         correction = (
-            (projected @ middle_compute)
-            @ factors_compute.transpose(0, 1)
+            (projected @ middle)
+            @ factors.transpose(0, 1)
         )
         return values + 2.0 * correction
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        return self._apply(values, transpose=False)
+
+    def apply_transpose(self, values: torch.Tensor) -> torch.Tensor:
+        """Right-multiply row vectors by the exact transposed Cayley map."""
+
+        return self._apply(values, transpose=True)
 
 
 class LearnedFHTBlockOrthogonalOutputMix(nn.Module):
@@ -1027,6 +1043,7 @@ class CausalSelfAttention(nn.Module):
         self.qk_pair_c_attn = "attn.c_attn.qk" in config.block_fht_targets
         self.k_headwise_c_attn = "attn.c_attn.k_headwise" in config.block_fht_targets
         self.qk_headwise_c_attn = "attn.c_attn.qk_headwise" in config.block_fht_targets
+        self.pack_cached_qkv = bool(config.block_fht_attn_pack_cached_qkv)
         self.qk_tied_c_attn = "attn.c_attn.qk_tied" in config.block_fht_targets
         self.qk_tied_sign_c_attn = "attn.c_attn.qk_tied_sign" in config.block_fht_targets
         self.qk_tied_headwise_c_attn = "attn.c_attn.qk_tied_headwise" in config.block_fht_targets
@@ -1653,6 +1670,17 @@ class CausalSelfAttention(nn.Module):
             5,
             "attn.c_proj",
         )
+        if self.pack_cached_qkv:
+            if not self.qk_headwise_c_attn:
+                raise ValueError(
+                    "packed cached QKV requires attn.c_attn.qk_headwise"
+                )
+            if not isinstance(self.c_attn_v, nn.Linear):
+                raise ValueError("packed cached QKV requires dense V")
+            if self.v_input_cayley is not None or self.v_output_cayley is not None:
+                raise ValueError("packed cached QKV requires uncharted dense V")
+            if config.bias:
+                raise ValueError("packed cached QKV currently requires bias=False")
         self.attn_dropout = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
         self.n_head = config.n_head
@@ -1678,6 +1706,63 @@ class CausalSelfAttention(nn.Module):
                 break
             result = chart(result)
         return result
+
+    @staticmethod
+    def _active_cayley_charts(
+        primary: LearnedLowRankCayleyMix | None,
+        atlas: nn.ModuleList,
+        active_stage: int,
+    ) -> tuple[LearnedLowRankCayleyMix, ...]:
+        charts = [] if primary is None else [primary]
+        charts.extend(
+            chart
+            for stage, chart in enumerate(atlas, start=1)
+            if stage <= active_stage
+        )
+        return tuple(charts)
+
+    def _fold_cached_qk_weight(self, weight: torch.Tensor) -> torch.Tensor:
+        # Legacy QK is x C_in W^T C_out.  F.linear therefore needs
+        # W_eff = C_out^T W C_in^T.  Atlases compose in forward order.
+        input_charts = self._active_cayley_charts(
+            self.qk_input_cayley,
+            self.qk_input_cayley_atlas,
+            self.active_cayley_atlas_stage,
+        )
+        for chart in reversed(input_charts):
+            weight = chart.apply_transpose(weight)
+
+        output_charts = self._active_cayley_charts(
+            self.qk_output_cayley,
+            self.qk_output_cayley_atlas,
+            self.active_cayley_atlas_stage,
+        )
+        transposed = weight.transpose(0, 1)
+        for chart in output_charts:
+            transposed = chart(transposed)
+        return transposed.transpose(0, 1)
+
+    def _project_packed_cached_qkv(
+        self, x: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        assert self.c_attn_qk_headwise is not None
+        assert isinstance(self.c_attn_v, nn.Linear)
+        cached_weights = [
+            getattr(head, "_cached_weight", None)
+            for head in self.c_attn_qk_headwise.heads
+        ]
+        if not cached_weights or any(weight is None for weight in cached_weights):
+            raise RuntimeError(
+                "packed cached QKV requires a prepared BlockFHT weight cache"
+            )
+        qk_weight = torch.cat(cached_weights, dim=0)
+        qk_weight = self._fold_cached_qk_weight(qk_weight)
+        packed_weight = torch.cat((qk_weight, self.c_attn_v.weight), dim=0)
+        qk, v = F.linear(x, packed_weight).split(
+            (2 * self.n_embd, self.n_embd), dim=2
+        )
+        q, k = qk.split(self.n_embd, dim=2)
+        return q, k, v
 
     def attention_cayley_stage_modules(
         self,
@@ -1711,19 +1796,9 @@ class CausalSelfAttention(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         bsz, seq_len, channels = x.size()
-        qk_input = self._apply_cayley_atlas(
-            x,
-            self.qk_input_cayley,
-            self.qk_input_cayley_atlas,
-            self.active_cayley_atlas_stage,
-        )
-        v_input = self._apply_cayley_atlas(
-            x,
-            self.v_input_cayley,
-            self.v_input_cayley_atlas,
-            self.active_cayley_atlas_stage,
-        )
-        if self.split_c_attn:
+        if self.pack_cached_qkv:
+            q, k, v = self._project_packed_cached_qkv(x)
+        elif self.split_c_attn:
             assert self.c_attn_q is not None and self.c_attn_k is not None and self.c_attn_v is not None
             q = self.c_attn_q(x)
             k = self.c_attn_k(x)
@@ -1739,6 +1814,18 @@ class CausalSelfAttention(nn.Module):
             v = self.c_attn_v(x)
         elif self.qk_headwise_c_attn:
             assert self.c_attn_qk_headwise is not None and self.c_attn_v is not None
+            qk_input = self._apply_cayley_atlas(
+                x,
+                self.qk_input_cayley,
+                self.qk_input_cayley_atlas,
+                self.active_cayley_atlas_stage,
+            )
+            v_input = self._apply_cayley_atlas(
+                x,
+                self.v_input_cayley,
+                self.v_input_cayley_atlas,
+                self.active_cayley_atlas_stage,
+            )
             qk = self.c_attn_qk_headwise(qk_input)
             qk = self._apply_cayley_atlas(
                 qk,

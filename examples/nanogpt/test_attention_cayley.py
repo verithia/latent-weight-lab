@@ -47,6 +47,106 @@ def test_low_rank_cayley_remains_orthogonal_after_motion() -> None:
     )
 
 
+def test_low_rank_cayley_transpose_application_is_exact() -> None:
+    mix = LearnedLowRankCayleyMix(
+        features=8,
+        rank=2,
+        seed=37,
+        coordinate_scale=1.25,
+    ).double()
+    with torch.no_grad():
+        mix.left.normal_(mean=0.0, std=0.15)
+        mix.right.add_(0.1 * torch.randn_like(mix.right))
+    operator = mix(torch.eye(8, dtype=torch.float64))
+    values = torch.randn(5, 8, dtype=torch.float64)
+    torch.testing.assert_close(
+        mix.apply_transpose(values),
+        values @ operator.transpose(0, 1),
+        rtol=1e-9,
+        atol=1e-9,
+    )
+
+
+def test_packed_cached_qkv_matches_bilateral_qk_function_and_gradients() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        block_fht=True,
+        block_fht_targets=("attn.c_attn.qk_headwise",),
+        block_fht_latent_ratio=0.25,
+        block_fht_layers=2,
+        block_fht_match_gpt_init=True,
+        block_fht_output_gain_targets=("attn.c_attn.qk_headwise",),
+        block_fht_attn_cayley_targets=("attn.c_attn.qk_headwise",),
+        block_fht_attn_cayley_output_targets=(
+            "attn.c_attn.qk_headwise",
+        ),
+        block_fht_attn_cayley_bilateral_targets=(
+            "attn.c_attn.qk_headwise",
+        ),
+        block_fht_attn_cayley_rank=2,
+        block_fht_attn_pack_cached_qkv=True,
+    )
+    torch.manual_seed(20260811)
+    model = GPT(config).double()
+    attention = model.transformer.h[0].attn
+    assert attention.qk_input_cayley is not None
+    assert attention.qk_output_cayley is not None
+    with torch.no_grad():
+        attention.qk_input_cayley.left.normal_(mean=0.0, std=0.1)
+        attention.qk_output_cayley.left.normal_(mean=0.0, std=0.1)
+    model.prepare_block_fht_cache(dtype=torch.float64)
+
+    values = torch.randn(2, 5, 8, dtype=torch.float64)
+    qk_input = attention._apply_cayley_atlas(
+        values,
+        attention.qk_input_cayley,
+        attention.qk_input_cayley_atlas,
+        attention.active_cayley_atlas_stage,
+    )
+    legacy_qk = attention.c_attn_qk_headwise(qk_input)
+    legacy_qk = attention._apply_cayley_atlas(
+        legacy_qk,
+        attention.qk_output_cayley,
+        attention.qk_output_cayley_atlas,
+        attention.active_cayley_atlas_stage,
+    )
+    legacy = torch.cat((legacy_qk, attention.c_attn_v(values)), dim=-1)
+    q, k, v = attention._project_packed_cached_qkv(values)
+    packed = torch.cat((q, k, v), dim=-1)
+    torch.testing.assert_close(packed, legacy, rtol=1e-9, atol=1e-9)
+
+    cached_weights = [
+        head._cached_weight for head in attention.c_attn_qk_headwise.heads
+    ]
+    parameters = cached_weights + [
+        attention.qk_input_cayley.left,
+        attention.qk_input_cayley.right,
+        attention.qk_output_cayley.left,
+        attention.qk_output_cayley.right,
+        attention.c_attn_v.weight,
+    ]
+    probe = torch.randn_like(legacy)
+    legacy_gradients = torch.autograd.grad(
+        (legacy * probe).sum(), parameters, retain_graph=True
+    )
+    packed_gradients = torch.autograd.grad(
+        (packed * probe).sum(), parameters
+    )
+    for packed_gradient, legacy_gradient in zip(
+        packed_gradients, legacy_gradients
+    ):
+        torch.testing.assert_close(
+            packed_gradient,
+            legacy_gradient,
+            rtol=1e-8,
+            atol=1e-8,
+        )
+
+
 def test_low_rank_cayley_pins_seeded_initialization_to_cpu() -> None:
     # Fast checkpoint loaders may construct the surrounding GPT under an
     # ambient accelerator device.  The seeded generator is deliberately CPU,

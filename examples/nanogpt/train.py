@@ -1141,6 +1141,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-attn-cayley-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-attn-cayley-seed", type=int, default=618033)
     parser.add_argument(
+        "--block-fht-attn-pack-cached-qkv",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-attn-cayley-atlas-start-steps",
         nargs="+",
         type=int,
@@ -2528,6 +2533,9 @@ def main() -> None:
         block_fht_attn_cayley_ranks=args.block_fht_attn_cayley_ranks,
         block_fht_attn_cayley_scale=args.block_fht_attn_cayley_scale,
         block_fht_attn_cayley_seed=args.block_fht_attn_cayley_seed,
+        block_fht_attn_pack_cached_qkv=(
+            args.block_fht_attn_pack_cached_qkv
+        ),
         block_fht_attn_cayley_atlas_start_steps=tuple(
             args.block_fht_attn_cayley_atlas_start_steps
         ),

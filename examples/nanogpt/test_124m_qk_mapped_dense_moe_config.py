@@ -42,6 +42,7 @@ def test_candidate_changes_only_attention_qk_from_dense_moe_scope() -> None:
     assert config["estimated_registered_active_trainable_params"] == 113990640
     assert config["estimated_qk_mapping_trainable_state"] == 3698928
     assert config["estimated_qk_materialized_parameters"] == 14155776
+    assert config["block_fht_attn_pack_cached_qkv"] is True
     assert config["launch_ready"] is True
 
 
@@ -49,9 +50,9 @@ def test_candidate_horizon_identity_and_performance_gate_are_frozen() -> None:
     config = load(CONFIG)
     plan = load(PLAN)
     assert config["tokens_per_iter"] == 262144
-    assert config["batch_size"] == 64
-    assert config["gradient_accumulation_steps"] == 4
-    assert config["cuda_allocator_conf"] == "expandable_segments:True"
+    assert config["batch_size"] == 32
+    assert config["gradient_accumulation_steps"] == 8
+    assert "cuda_allocator_conf" not in config
     assert config["scheduled_tokens"] == config["max_iters"] * 262144
     assert config["max_iters"] == 238
     assert config["mfu_preflight_required"] is True
