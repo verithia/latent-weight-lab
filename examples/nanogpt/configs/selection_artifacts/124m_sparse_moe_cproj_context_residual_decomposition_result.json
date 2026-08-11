@@ -1,0 +1,44 @@
+{
+  "schema_version": "nanogpt_sparse_moe_cproj_context_residual_decomposition_seal_v1",
+  "recorded_at": "2026-08-11T17:10:00+08:00",
+  "status": "rejected_no_complementarity_context_modulation_closed",
+  "source_control": {
+    "git_commit": "b87f7d934be9c7db06e7faf61a36f2bf06ce6013",
+    "entrypoint_sha256": "10a042ec2bec1d5170df505fa62007d948e23e03eb1c61b70871d10594c85ec2",
+    "plan_sha256": "5857f20a6cea598964dc4b5f85d006f8bb85c4fd1942cd301ef0a2a7e6df9569"
+  },
+  "execution": {
+    "wall_seconds": 58.39938998222351,
+    "result_sha256": "9e9d4fcda7502e32b983cfb295f245249d96069ecc1953005e0a9d2f47eea77d",
+    "rows_sha256": "731accb6515078826599f53056eae5531d6a0bf54d56c3dd4fa34777d2fc9ed8",
+    "coordinates_sha256": "082b77e3ad4feb671887234f876533fc61167ff06e33c0414460e1234a8695fc",
+    "status_sha256": "615a87b4cd902c3fb7473bf5379f26ea92253746ec7e5318fbda36c82e915c59",
+    "log_sha256": "6d105eea624c2e26c4cb6f8ba3e63a35e112f3e34e16cec173dfb37093e05e56",
+    "all_values_finite": true
+  },
+  "summary": {
+    "two_factor_384x": {
+      "direct_sum_mean_a_b": [0.23585228125254312, 0.24074395497639975],
+      "all_static_mean_a_b": [0.3033170898755391, 0.30842230717341107],
+      "direct_sum_minus_static_a_b": [-0.06746480862299602, -0.06767835219701131],
+      "minimum_layer_gain_a_b": [-0.08364087343215942, -0.08377397060394287],
+      "heldout_bank_action_cosine_mean": 0.9512432217597961
+    },
+    "three_factor_256x": {
+      "direct_sum_mean_a_b": [0.31955333550771076, 0.32474809885025024],
+      "all_static_mean_a_b": [0.3594247301419576, 0.3649152119954427],
+      "direct_sum_minus_static_a_b": [-0.039871394634246826, -0.040167113145192467],
+      "minimum_layer_gain_a_b": [-0.043769896030426025, -0.04448437690734863],
+      "heldout_bank_action_cosine_mean": 0.9542033076286316
+    },
+    "minimum_expert_assignments_a_b": [12, 30]
+  },
+  "conclusion": "The exact pure modulation component is not complementary to the static operator. Replacing one static axis with one pure context axis lowers held-out recovery in every layer and both discovery fits. Strong cross-bank agreement makes this a stable structural rejection. Activation-conditioned FHT modulation is closed at 384x and 256x; router collapse remains an independent sparse-MoE defect.",
+  "authorization": {
+    "training": false,
+    "mfu_preflight": false,
+    "larger_rungs": false,
+    "context_modulation_followups": false,
+    "next_allowed_work": "Audit same-run router occupancy over trajectory phase and seeds, then preregister at most one dense-expert router-balancing control before any generated-expert experiment. Return c_proj structure work to a new residual decomposition rather than FHT context modulation."
+  }
+}
