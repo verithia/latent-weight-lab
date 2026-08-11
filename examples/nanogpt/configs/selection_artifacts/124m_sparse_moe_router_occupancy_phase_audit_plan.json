@@ -1,0 +1,95 @@
+{
+  "schema_version": "nanogpt_sparse_moe_router_occupancy_phase_audit_plan_v1",
+  "recorded_at": "2026-08-11T18:20:00+08:00",
+  "status": "preregistered_before_router_occupancy_or_gradient_values",
+  "scientific_question": "Does expert under-occupancy persist across independent 124M-active sparse-MoE seeds, when does it emerge, and is it caused by an under-scaled load-balancing gradient or by a mismatched balancing objective?",
+  "sources": {
+    "seed1": {
+      "name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_selected_lr24e4",
+      "model_seed": 1337,
+      "train_data_seed": 20260714,
+      "terminal_model": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/manifold_snapshot.pt",
+      "terminal_model_sha256": "62d7bc04e953036d758111c6fa44d4eb1c97a3eef0188ae989b56be54289e070",
+      "config_sha256": "67ae6c8074eb194927521fdcdb3fdfe2c68e1ba0057b13254ec9c4c6f89aebfc",
+      "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_selected/trajectory_snapshots",
+      "trajectory_inventory_sha256": "57a35fc7d2c34597968707d780ae053f2d9d787fa9e6a104cc5735552123e45e",
+      "trajectory_steps": [0, 2374, 4748, 7122, 9495],
+      "trajectory_schema": "nanogpt_moe_paired_snapshot_v1"
+    },
+    "seed2": {
+      "name": "pro6_mai_v3_124m_dense_moe8_top2_20tpp_seed2_geometry_lr24e4_resume2",
+      "model_seed": 1338,
+      "train_data_seed": 20260715,
+      "terminal_model": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_seed2_geometry/ckpt.pt",
+      "terminal_model_sha256": "3b19fa796307df8676a8aa77b2183952b14af9a7718f2d2004690878fb3708ae",
+      "config_sha256": "0b231f6b18912a3308362f0e0b355c9891a02900048e1d2adc10680899cbc12b",
+      "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_seed2_geometry/parameter_trajectory",
+      "trajectory_inventory_sha256": "ce53be8ae9fe09b83b3ca38d6f733084077084f0df95ce26e6cea4c33069d5d3",
+      "trajectory_steps": [0, 594, 1188, 1782, 2376, 2970, 3564, 4158, 4752, 5346, 5940, 6534, 7128, 7722, 8316, 8910, 9495],
+      "trajectory_schema": "nanogpt_parameter_trajectory_v1"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "layers": [0, 5, 11],
+    "experts": 8,
+    "top_k": 2,
+    "load_balance_aux_coefficient": 0.01,
+    "router_z_loss_coefficient": 0.001
+  },
+  "activation_protocol": {
+    "rule": "For each seed, collect hidden states from that seed's full terminal model, then evaluate every router snapshot from that same seed on the frozen terminal frame. Compare only permutation-invariant occupancy statistics across seeds; never transplant expert identities or hidden states between seeds.",
+    "validation_seed": 20260931,
+    "batch_size": 8,
+    "block_size": 256,
+    "batches": 4,
+    "sample_cap_per_layer": 8192,
+    "selection": "Exact production top-2 rule, including the expert-index epsilon tiebreak; full-router probabilities use the unmodified FP32 logits.",
+    "phase": "step divided by 9495"
+  },
+  "occupancy_metrics": {
+    "hard": [
+      "per_expert_assignment_count_and_fraction",
+      "normalized_entropy",
+      "effective_expert_count",
+      "coefficient_of_variation",
+      "minimum_and_maximum_fraction",
+      "maximum_to_minimum_ratio",
+      "experts_below_one_percent",
+      "experts_below_128_assignments"
+    ],
+    "soft": [
+      "mean_full_router_probability_per_expert",
+      "normalized_entropy",
+      "effective_expert_count",
+      "importance_load_correlation"
+    ],
+    "production_objectives": [
+      "eight_times_sum_importance_times_load",
+      "router_logsumexp_squared_mean",
+      "coefficient_weighted_values"
+    ]
+  },
+  "gradient_protocol": {
+    "validation_seed": 20260932,
+    "batches": 2,
+    "batch_size": 8,
+    "block_size": 256,
+    "model_state": "Each seed's exact terminal full model; all non-router parameters frozen for the probe.",
+    "components": ["task_cross_entropy", "0.01_times_load_balance", "0.001_times_router_z", "combined_weighted_auxiliary"],
+    "aggregation": "Average component gradients over the two fixed batches before computing per-layer Frobenius norms, auxiliary-to-task norm ratios, and auxiliary/task cosine.",
+    "purpose": "Distinguish an under-scaled useful objective from an adequately strong but structurally blind objective. This is a zero-update measurement, not training."
+  },
+  "frozen_gates": {
+    "replicated_terminal_collapse": "Pass if each seed has at least one probed terminal layer with minimum hard assignment fraction below 0.01 or minimum hard assignments below 128.",
+    "persistent_collapse": "Report the first phase at which the terminal-collapsed layer remains below 0.01 through every later recorded phase; do not interpolate between snapshots.",
+    "objective_blindness": "Flag if a collapsed row has load-balance loss at most 1.10 while its minimum hard assignment fraction is below 0.01.",
+    "under_scaled_auxiliary": "Flag only if collapse replicates and the median terminal combined weighted-auxiliary/router task-gradient norm ratio over the six seed-layer rows is below 0.25.",
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "collapse_and_under_scaled": "Authorize design, separate preregistration, exact-config MFU gating, and one 124M dense-complete-expert coefficient control. Choose its load-balance coefficient from the measured ratio using 0.01 * clip(0.50 / ratio, 2, 16), rounded upward to the next member of [0.02, 0.04, 0.08, 0.16]. Do not launch from this audit alone.",
+    "collapse_without_under_scaled": "Reject coefficient scaling. The next theory design must change the load-control mechanism, such as a direct utilization-aware router bias or marginal-load penalty, and must be preregistered before implementation or values.",
+    "no_replicated_collapse": "Do not intervene in the router. Re-open the generated-expert structural diagnosis using occupancy-stratified reporting only.",
+    "scope": "No generated-expert training, MFU preflight, larger active-parameter rung, or router control is authorized directly by this audit."
+  },
+  "execution": "Foreground-poll this zero-update audit; expected under five minutes. Add a watchdog only if observed runtime crosses five minutes."
+}
