@@ -163,7 +163,7 @@
     "numeric_protocol_amendment_commit": "2cbf710440daeb5282bf6923db90d121dfeb87e6",
     "final_causal_protocol_commit": "186eb7e4c1137852f6b1604abb9dec59d72c0ff1",
     "implementation_git_commit": "9d6c3bc97c3a459b1d6eb8a49fc5d549688e15b2",
-    "identity_validation_git_commit": null,
+    "identity_validation_git_commit": "7a081e1595694e9b449712d8f3d3018dd947c8ae",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_matrix_normal_kfac_chart_oracle.py",
     "entrypoint_sha256": "7e3aedd5a54de0b8a8cbc7b4e44c071ce8cd1438648fcdac81f047394ddcd95b",
     "helper_sha256": {
