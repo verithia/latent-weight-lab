@@ -149,7 +149,7 @@
     "automatic_retry_or_sweep": false
   },
   "identity": {
-    "preregistration_git_commit": "PENDING_PREREGISTRATION_COMMIT",
+    "preregistration_git_commit": "dfb6123cd90586f7a8eb5ef02cf2abca759db7eb",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_paired_sparse_write_chart_oracle.py"
   }
 }
