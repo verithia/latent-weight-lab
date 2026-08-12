@@ -57,7 +57,7 @@
     "total_angles_per_side_expert": 3840,
     "sides": ["input", "output"],
     "fixed_feature_seed": 20261189,
-    "feature_formula": "For each expert, side, and stage, phi_s(state)=tanh(P_s FHT(D_s pad(state))), where D_s and P_s are fixed signed procedural maps. Input stages use the residual activation; output stages use the post-GELU hidden activation through an independently seeded 2048-wide FHT feature stream. No feature tensor or dense basis is learned or stored.",
+    "feature_formula": "For each expert, side, and stage, phi_s(state)=P_s FHT(D_s pad(state)), RMS-normalized for the unpadded width, where D_s and P_s are fixed signed procedural maps. Input stages use the residual activation; output stages use the post-GELU hidden activation through an independently seeded 2048-wide FHT feature stream. No feature tensor or dense basis is learned or stored.",
     "angle_formula": "theta_s,e(state)=(pi/2)*tanh(raw_theta_s,e + feature_shift_scale*beta*tanh(phi_s,e(state))). The same raw angle coordinate controls the static orientation and its bounded local state response; beta and feature_shift_scale are fixed, not learned.",
     "beta": 1.0,
     "feature_shift_scale": 0.25,
