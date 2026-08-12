@@ -37,18 +37,18 @@
       {
         "name": "discovery_a",
         "seed": 20260911,
-        "batches": 4,
+        "batches": 16,
         "batch_size": 8,
         "block_size": 256,
-        "tokens": 8192
+        "tokens": 32768
       },
       {
         "name": "discovery_b",
         "seed": 20260912,
-        "batches": 4,
+        "batches": 16,
         "batch_size": 8,
         "block_size": 256,
-        "tokens": 8192
+        "tokens": 32768
       }
     ],
     "heldout": {
