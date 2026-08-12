@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import json
 import math
+from pathlib import Path
 
 import torch
 
@@ -12,6 +14,7 @@ from examples.nanogpt.analyze_sparse_moe_paired_coordinate_field_oracle import (
     fit_field,
     function_and_jvp,
     result_authorization,
+    validate_plan,
 )
 
 
@@ -34,6 +37,21 @@ def test_registered_coordinate_budget_exceeds_200x() -> None:
     assert per_layer == 91844
     dense = 8 * 2 * 1536 * 768
     assert dense / per_layer > 205.5
+
+
+def test_preregistered_plan_is_hash_sealed() -> None:
+    plan_path = (
+        Path(__file__).parent
+        / "configs"
+        / "selection_artifacts"
+        / "124m_sparse_moe_paired_coordinate_field_oracle_plan.json"
+    )
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    validate_plan(plan, plan_path)
+    assert plan["identity"]["preregistration_git_commit"] == (
+        "7b9fdfd72e0b676bb43c67e573bc37eb58976536"
+    )
+    assert plan["candidate"]["paired_parameter_compression_ratio"] > 200.0
 
 
 def test_channel_encoding_is_fixed_and_finite() -> None:
