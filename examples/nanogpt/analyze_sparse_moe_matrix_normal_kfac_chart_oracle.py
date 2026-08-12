@@ -181,6 +181,8 @@ class MatrixNormalKFACChart(torch.nn.Module):
         roots: dict[str, torch.Tensor] | None,
         latent_width: int,
         fht_layers: int,
+        fc_scale: float,
+        proj_scale: float,
         seed: int,
         layer: int,
         device: str,
@@ -190,6 +192,8 @@ class MatrixNormalKFACChart(torch.nn.Module):
         self.experts, self.hidden_width, self.input_width = base.c_fc.shape
         self.latent_width = int(latent_width)
         self.fht_layers = int(fht_layers)
+        self.fc_scale = float(fc_scale)
+        self.proj_scale = float(proj_scale)
         self.seed = int(seed)
         self.layer = int(layer)
         self.shaped = bool(shaped)
@@ -243,7 +247,7 @@ class MatrixNormalKFACChart(torch.nn.Module):
                     self.fht_layers, proj_seed, 0, self.input_width * self.hidden_width,
                 ).reshape(self.input_width, self.hidden_width)
             )
-        return torch.stack(fc), torch.stack(proj)
+        return self.fc_scale * torch.stack(fc), self.proj_scale * torch.stack(proj)
 
     @staticmethod
     def _apply_metric(
@@ -313,6 +317,8 @@ def make_module(
         roots=roots,
         latent_width=int(plan["candidate"]["c_fc_latent_coordinates_per_expert"]),
         fht_layers=int(plan["candidate"]["block_fht_layers"]),
+        fc_scale=float(plan["candidate"]["raw_c_fc_scale"]),
+        proj_scale=float(plan["candidate"]["raw_c_proj_scale"]),
         seed=int(plan["candidate"]["block_fht_seed"]),
         layer=int(layer),
         device=device,

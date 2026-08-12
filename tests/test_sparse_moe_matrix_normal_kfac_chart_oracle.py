@@ -39,7 +39,8 @@ def identity_roots() -> dict[str, torch.Tensor]:
 def make_tiny(*, shaped: bool) -> MatrixNormalKFACChart:
     return MatrixNormalKFACChart(
         base=tiny_state(), roots=identity_roots() if shaped else None,
-        latent_width=8, fht_layers=3, seed=19, layer=0, device="cpu",
+        latent_width=8, fht_layers=3, fc_scale=0.02,
+        proj_scale=0.02 / (24.0 ** 0.5), seed=19, layer=0, device="cpu",
         shaped=shaped,
     )
 
