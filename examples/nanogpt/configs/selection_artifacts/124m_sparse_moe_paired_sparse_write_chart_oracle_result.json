@@ -1,0 +1,76 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_sparse_write_chart_oracle_seal_v1",
+  "classification": "PAIRED_SPARSE_WRITE_CHART_REPRESENTABILITY_REJECTED",
+  "authorization": {
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "mfu_preflight": false
+  },
+  "identity": {
+    "git_commit": "8a6439dbab4a9b362416f8a76cf8d968e484d69d",
+    "plan_sha256": "de93e34974851b92ad7f31921ef22942e9a8e3591782f46ecf52ee2dcb2ac288",
+    "entrypoint_sha256": "f82a1fabf0f4c8126b4a2c6733e0abfadf5fe29e001db2fb4f38ac51be8e1073",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "run": "pro6_mai_v3_124m_fullmlp_paired_sparse_write_chart_oracle_20260812a",
+    "exit_code": 0,
+    "wrapper_wall_seconds": 182.3888795375824,
+    "internal_wall_seconds": 181.05351400375366,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "checkpoint_updates": 0,
+    "raw_result_sha256": "cd107a47cb7a1301f9f6e9b6a1efce5b4a79999e532765a0be9ca7b3b1d9c4d0",
+    "compact_coordinates_sha256": "176ace972a4ff653f3cc5b559ed9f338b33b3c2bd0ef8330d4ad46bc96d7f692"
+  },
+  "accounting": {
+    "compact_coordinates": 1029120,
+    "dense_paired_parameters": 226492416,
+    "compression_ratio": 220.08358208955224,
+    "materialized_dense_cfc": false,
+    "materialized_dense_cproj": false,
+    "dense_learned_basis": false,
+    "additive_lora_residual": false,
+    "teacher_permutation_deployed": false
+  },
+  "heldout": {
+    "discovery_a": {
+      "mixture_recovery_mean": 0.4037494460741679,
+      "mixture_recovery_minimum_layer": 0.3673062324523926,
+      "minimum_expert_recovery": 0.2022668284471676,
+      "jvp_recovery_mean": -0.076286514600118,
+      "candidate_minus_identity_gauge_control_recovery_mean": -0.00259705384572347,
+      "candidate_minus_sealed_static_ceiling_recovery_mean": -0.027756790320078533
+    },
+    "discovery_b": {
+      "mixture_recovery_mean": 0.40423611799875897,
+      "mixture_recovery_minimum_layer": 0.3705609440803528,
+      "minimum_expert_recovery": 0.21171402832270636,
+      "jvp_recovery_mean": -0.0755990743637085,
+      "candidate_minus_identity_gauge_control_recovery_mean": -0.002156416575113932,
+      "candidate_minus_sealed_static_ceiling_recovery_mean": -0.026423533757527668
+    },
+    "independent_bank_action_cosine": 0.8108803232510885
+  },
+  "gate_summary": {
+    "passing": [
+      "finite",
+      "compression",
+      "occupancy",
+      "independent_action_agreement"
+    ],
+    "failing": [
+      "mean_recovery",
+      "every_layer_recovery",
+      "every_expert_recovery",
+      "jvp_recovery",
+      "identity_gauge_control_gain",
+      "sealed_static_ceiling_gain"
+    ]
+  },
+  "conclusion": "Jointly permuting complete teacher-neuron auxiliary targets greatly improves the auxiliary alignment loss but does not improve heldout function recovery. The candidate is slightly worse than its identical identity-gauge control in both banks and remains below the convergent static-chart ceiling. Hidden-neuron ordering is therefore not the binding full-MLP failure for this chart; this exact assignment/support/flow/spectrum family is closed without sweeps."
+}
