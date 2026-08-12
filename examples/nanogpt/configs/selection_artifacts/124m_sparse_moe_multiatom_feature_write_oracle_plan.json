@@ -1,0 +1,144 @@
+{
+  "schema_version": "nanogpt_sparse_moe_multiatom_feature_write_oracle_plan_v1",
+  "recorded_at": "2026-08-12T17:36:34+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Does a compact sum of multiple independently oriented procedural feature atoms, paired with a minimally sufficient sparse residual-write chart, break the reproducible single-dictionary full-MLP recovery ceiling while retaining at least 200x trainable-state compression?",
+  "theory_reconciliation": {
+    "new_measurement": "The quotient-aware paired sparse-write candidate reaches only 0.403749/0.404236 mean recovery, -0.076287/-0.075599 JVP recovery, and is worse than its identical identity-gauge control by 0.002597/0.002156. Hidden-neuron ordering is not the binding failure.",
+    "static_ceiling": "Maximum-budget KFAC, expert-unshared static butterflies, the static half of the state-conditioned full-rank oracle, and the paired sparse-write chart converge around 0.40--0.46 heldout recovery. More fitting steps, gauges, and rotations of one procedural dictionary are closed.",
+    "cfc_bottleneck": "The two-spectrum c_fc map improves over its fixed control but leaves pre-GELU direction recovery near zero. A serial product of orthogonal FHT factors and diagonal spectra changes singular values inside one fixed procedural dictionary; it cannot synthesize a general non-orthogonal collection of GELU hyperplane normals.",
+    "cproj_budget_fact": "Residual writes are substantially easier: the sealed shared-residual-basis audit recovers 0.911333 mean action and 0.823286 for the weakest expert. Therefore the next exact-budget chart reallocates one of three per-neuron output supports to a genuinely new c_fc atom rather than adding another c_proj repair.",
+    "ridge_function_view": "A complete MLP is a sum of nonlinear ridge atoms w_j GELU(n_j^T x+b_j). c_fc and c_proj must jointly supply both n_j and w_j. One procedural orthogonal image couples all n_j through one dictionary. A sum of independent signed-FHT atoms increases the directional/displacement rank of every generated c_fc matrix without a dense basis or additive dense residual.",
+    "single_causal_change": "Candidate and control have identical coordinates, initialization, two-support c_proj, layer-wise output flow, objective, data, and updates. Candidate uses three independently seeded signed-FHT feature atoms. Control aliases all three branches to the same fixed signs, so its three learned spectra collapse algebraically into one procedural atom. Only fixed dictionary diversity differs.",
+    "why_not_a_spectrum_sweep": "Branch count, seeds, FHT order, supports, and budget are frozen. The candidate sums independently oriented full structured maps; it does not add another diagonal to the already rejected serial spectral chain. The equal-coordinate aliased control isolates image-span expansion from parameter count and optimizer state.",
+    "why_not_lora": "There is no dense baseline path, low-rank adapter, learned dense basis, or stored full matrix. The three full structured atoms and sparse-write flow generate every c_fc and c_proj matrix from compact coordinates and fixed procedural signs.",
+    "paper_connection": "The Mapping-Network claim requires the image of the compact map, not merely its latent trajectory, to cover the useful local parameter/function manifold. This experiment directly expands that image from one near-orthogonal chart to a fixed three-atom structured span while preserving smoothness, bounded procedural maps, layer/expert allocation, and function/JVP evaluation.",
+    "falsifier": "The candidate must beat both its equal-coordinate aliased control and the sealed static ceiling by at least 0.10 in each discovery bank while passing every absolute recovery, expert, tangent, stability, finiteness, and compression gate. Failure closes this exact three-atom/two-support family without branch, support, seed, sign, flow, optimizer, step, or threshold sweeps."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "padded_width": 2048,
+    "terminal_gauge": "Reuse the exact terminal model, routing, dense targets, discovery banks, heldout bank, and analytic input-JVP probes used by the sealed full-MLP controls."
+  },
+  "sealed_controls": {
+    "paired_sparse_write_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_paired_sparse_write_chart_oracle_result.json",
+      "sha256": "e2797c56f7a3b163aaecca35208aed09c47d937bc90bb4be58242592ca914033",
+      "finding": "Quotient-aware complete-neuron alignment does not improve function recovery; a one-dictionary chart remains near 0.404."
+    },
+    "state_conditioned_full_rank_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_state_conditioned_butterfly_transport_oracle_result.json",
+      "sha256": "c67e948f11677ad0f0ca2cd99c17f063f63df94f23ad1c796d61d9cb7f40761d",
+      "finding": "Dynamic rotation is harmful, while its learned static control reproduces the approximately 0.43 ceiling."
+    },
+    "spectral_cfc_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_spectral_feature_oracle_result.json",
+      "sha256": "5cafa8eb52efb8812db876b92396f3f4fc1e1160402c8aa12d4acc25cee4bcc9",
+      "finding": "Serial learned spectra help but do not recover the dense pre-GELU feature directions."
+    },
+    "shared_residual_basis_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_shared_residual_basis_result.json",
+      "sha256": "654457d00753374472a9a8472adf8e34feb96ff37eb2e6eae9b08348cf7a94c7",
+      "finding": "A compact common residual frame recovers over 0.91 mean c_proj action, supporting budget transfer toward c_fc."
+    }
+  },
+  "candidate": {
+    "name": "three_independent_feature_atoms_with_two_sparse_writes",
+    "feature_atoms": 3,
+    "feature_formula": "For atom k, pad x from 768 to 2048 and apply three normalized FHT stages with independent fixed procedural sign vectors D[k,0:3]. Atom 0 uses diagonal 1+s[0]; atoms 1 and 2 use zero-initialized diagonals s[1] and s[2]. Sum the three outputs, crop to 1536, apply the registered GPT-compatible base scale and learned hidden bias, then GELU.",
+    "candidate_sign_seed": 20261241,
+    "branch_seed_formula": "seed(candidate_sign_seed, layer, expert, atom, stage); signs are generated procedurally and are not trainable or counted",
+    "learned_feature_spectra_per_expert": 6144,
+    "learned_hidden_bias_per_expert": 1536,
+    "write_supports_per_neuron": 2,
+    "write_support_formula": "Use the first two frozen balanced streams from the sealed sparse-write chart: r and (437*r+363+292*q) mod 768 for q,r=divmod(j,768). Each stream visits every residual coordinate exactly twice and the two supports never collide.",
+    "learned_write_coefficients_per_expert": 3072,
+    "output_flow": "One learned static 3x256 mixed-radix orthogonal flow per transformer layer, identical to the sealed paired sparse-write chart, totaling 3840 angles/layer.",
+    "initialization": "s[0], s[1], s[2], hidden bias, and write coefficients are zero; atom 0 therefore supplies the sole initial feature map and atoms 1/2 are zero. Output-flow raw angles are initialized to atanh(0.125). Candidate and control are function-identical at step zero.",
+    "learned_coordinates_per_expert": 10752,
+    "learned_output_flow_coordinates_per_layer": 3840,
+    "total_coordinates_per_layer": 89856,
+    "total_coordinates_all_layers": 1078272,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 210.05128205128204,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "fixed_full_matrix_storage_allowed": false,
+    "outer_router_scope": "The source top-2 router is unchanged and independently counted. Every c_fc and c_proj matrix of all eight experts is removed."
+  },
+  "same_run_control": {
+    "name": "three_aliased_feature_branches_with_two_sparse_writes",
+    "single_difference": "All three feature branches reuse atom 0's fixed signs. Their learned spectra, parameter count, initialization, c_proj, flow, data, objective, and update count remain identical, so the three branches algebraically span one procedural feature atom.",
+    "purpose": "Isolate independent procedural dictionary span from added trainable coordinates or optimizer state.",
+    "total_coordinates_all_layers": 1078272,
+    "paired_parameter_compression_ratio": 210.05128205128204
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal routing and deterministic per-expert sampling. Candidate and control receive identical inputs, analytic JVP probes, dense targets, initialization, and updates.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and probes never affect coordinates, stopping, initialization, thresholds, or selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted feature spectra, hidden biases, sparse write coefficients, and layer-wise output-flow angles",
+    "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE. No coordinate-alignment auxiliary is used because the paired-gauge result falsified it as a path to function recovery.",
+    "selection": "Use the final registered step. No heldout selection or atom/support/sign/seed/flow/optimizer/LR/step/regularizer/threshold sweep.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local": "Analytic input-JVP recovery through all three feature atoms, GELU, two-support scatter, and static output flow.",
+    "expert": "Score every source expert before outer top-2 aggregation.",
+    "stability": "Compare heldout routed actions from independently fitted discovery A/B candidates by cosine.",
+    "causal": "Compare independent atoms with the equal-coordinate aliased-branch control and the sealed approximately 0.43 static-chart ceiling."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_aliased_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_sealed_static_ceiling_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "all_values_and_gradients_finite": true,
+    "exact_full_mlp_compression_min": 200.0
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only production implementation/count/correctness and a separately preregistered initialization-plus-Mapping-Loss shadow. It does not authorize LM training directly.",
+    "fail": "Reject this exact three-independent-atom/two-support chart. Do not sweep atom count, support count/formula, signs, seeds, flow, initialization, optimizer, LR, steps, regularization, or thresholds. Return to theory on a different full-MLP latent function.",
+    "systems": "Run exact CPU invariants and a two-step exact-config GPU preflight. If projected or observed full runtime exceeds five minutes, use one verified terminal/error-only @Codex watcher launched through examples/nanogpt/launch_local_detached.py."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  }
+}
