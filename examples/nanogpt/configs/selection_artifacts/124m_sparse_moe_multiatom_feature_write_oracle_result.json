@@ -1,0 +1,73 @@
+{
+  "schema_version": "nanogpt_sparse_moe_multiatom_feature_write_oracle_seal_v1",
+  "classification": "MULTIATOM_FEATURE_WRITE_REPRESENTABILITY_REJECTED",
+  "authorization": {
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "mfu_preflight": false
+  },
+  "identity": {
+    "git_commit": "e977727d381e0e4f3407779c3f554f60afe49202",
+    "plan_sha256": "73ef65a2c778d2354314aca26238ed4128645ec7b10ceeb6e17376b0d0397179",
+    "entrypoint_sha256": "00dc0032c0e5cbadabfd1065b0cfb9c98b3f12a20deeae680672ebdbc8d8c613",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "run": "pro6_mai_v3_124m_fullmlp_multiatom_feature_write_oracle_20260812a",
+    "exit_code": 0,
+    "wrapper_wall_seconds": 245.99541592597961,
+    "internal_wall_seconds": 244.57367730140686,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "checkpoint_updates": 0,
+    "raw_result_sha256": "f73cae01afee5488444e4dce9bf02057fc4fb68347cb48da52a1f82ff8980e45",
+    "compact_coordinates_sha256": "74afab9f25f38e6c717d2334337a1c6dc8c18b92b522383094310813d0041521"
+  },
+  "accounting": {
+    "compact_coordinates": 1078272,
+    "dense_paired_parameters": 226492416,
+    "compression_ratio": 210.05128205128204,
+    "feature_atoms": 3,
+    "write_supports_per_neuron": 2,
+    "materialized_dense_cfc": false,
+    "materialized_dense_cproj": false,
+    "dense_learned_basis": false,
+    "additive_lora_residual": false
+  },
+  "heldout": {
+    "discovery_a": {
+      "mixture_recovery_mean": 0.394559383392334,
+      "mixture_recovery_minimum_layer": 0.34114718437194824,
+      "minimum_expert_recovery": 0.1022096370585055,
+      "jvp_recovery_mean": -0.2912810246149699,
+      "candidate_minus_aliased_control_recovery_mean": 0.016226232051849365,
+      "candidate_minus_sealed_static_ceiling_recovery_mean": -0.03694685300191244
+    },
+    "discovery_b": {
+      "mixture_recovery_mean": 0.39246946573257446,
+      "mixture_recovery_minimum_layer": 0.3380085229873657,
+      "minimum_expert_recovery": 0.09958603134481003,
+      "jvp_recovery_mean": -0.2927188078562419,
+      "candidate_minus_aliased_control_recovery_mean": 0.015281776587168375,
+      "candidate_minus_sealed_static_ceiling_recovery_mean": -0.03819018602371216
+    },
+    "independent_bank_action_cosine": 0.6843856970469157
+  },
+  "gate_summary": {
+    "passing": ["finite", "compression"],
+    "failing": [
+      "mean_recovery",
+      "every_layer_recovery",
+      "every_expert_recovery",
+      "jvp_recovery",
+      "aliased_control_gain",
+      "sealed_static_ceiling_gain",
+      "independent_action_agreement"
+    ]
+  },
+  "conclusion": "Independent procedural feature dictionaries provide a small causal gain over an equal-coordinate aliased dictionary, but the gain does not generalize stably, remains below the single-chart ceiling, and worsens local tangent recovery. Expanding a fixed random subspace with more unconditioned FHT atoms is therefore not sufficient. This exact three-atom/two-support family is closed without sweeps."
+}
