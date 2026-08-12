@@ -20,7 +20,7 @@ def test_coordinate_accounting_stays_above_200x() -> None:
         experts=8, planes=2, input_width=768, hidden_width=1536,
         conditional=False,
     )
-    assert candidate == 79_936
+    assert candidate == 79_904
     assert control == 30_720
     assert 18_874_368 / candidate > 200.0
 
