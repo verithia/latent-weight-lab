@@ -22,6 +22,11 @@
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "model_seed": 1337,
     "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
     "layers": [0, 5, 11],
     "checkpoint_updates": 0
   },
@@ -53,6 +58,7 @@
       "block_size": 256,
       "activation_sample_cap_per_layer": 2048
     },
+    "fit_samples_per_expert": 128,
     "expert_factors": {
       "c_fc_right": "Router-probability-weighted uncentered covariance of assigned residual inputs x.",
       "c_fc_left": "Uncentered covariance of the exact routed pre-GELU backpropagated error delta_h = GELU'(pre) * (p delta_y c_proj).",
@@ -92,6 +98,13 @@
     "objective": "Normalized heldout-excluded discovery residual-output MSE plus 0.10 times analytic input-JVP MSE; candidate and control receive the identical objective.",
     "optimizer": "AdamW over counted coordinates only, no weight decay, independently restarted for each family and discovery bank.",
     "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true,
+    "selection": "Use the final registered step. No heldout selection or factor/root/power/ridge/seed/FHT/optimizer/LR/step/regularizer/threshold sweep.",
     "checkpoint_updates": 0,
     "primary_metric": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
     "local_metric": "Analytic input-JVP recovery through c_fc, GELU, c_proj, and the fixed covariance transforms."
