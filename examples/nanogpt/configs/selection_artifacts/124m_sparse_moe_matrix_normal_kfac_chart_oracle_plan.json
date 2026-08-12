@@ -59,6 +59,7 @@
       "activation_sample_cap_per_layer": 2048
     },
     "fit_samples_per_expert": 128,
+    "routing_and_activation_state": "All discovery assignments, fit inputs, heldout activations, and outer-routing decisions come from the exact step-zero model. Terminal parameters enter only the frozen expert-function target.",
     "expert_factors": {
       "c_fc_right": "Router-probability-weighted uncentered covariance of assigned residual inputs x.",
       "c_fc_left": "Uncentered covariance of the exact routed pre-GELU backpropagated error delta_h = GELU'(pre) * (p delta_y c_proj).",
@@ -87,6 +88,7 @@
     "dense_paired_parameters_all_layers": 226492416,
     "paired_parameter_compression_ratio": 200.34782608695653,
     "block_fht_layers": 3,
+    "block_fht_seed": 20260921,
     "independent_latents_for_feature_and_write": true,
     "full_rank_materialized_generated_matrices": true,
     "dense_c_fc_or_c_proj_parameter_in_candidate": false,
@@ -109,12 +111,19 @@
     "primary_metric": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
     "local_metric": "Analytic input-JVP recovery through c_fc, GELU, c_proj, and the fixed covariance transforms."
   },
+  "random_protocol": {
+    "fit_sample_seed_base": 20260931,
+    "fit_jvp_seed_base": 20260941,
+    "heldout_jvp_seed_base": 20260951,
+    "indexing": "For bank index b and tensor layer l, add 1009*b + 17*l to the registered base. Candidate and isotropic control share the exact samples and JVP probes."
+  },
   "frozen_gates": {
     "candidate_heldout_mixture_recovery_mean_min_each_bank": 0.8,
     "candidate_heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
     "candidate_heldout_expert_recovery_min_each_bank": 0.5,
     "candidate_heldout_jvp_recovery_mean_min_each_bank": 0.6,
     "candidate_minus_isotropic_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_exact_stepzero_base_recovery_mean_min_each_bank": 0.1,
     "candidate_minus_sealed_static_ceiling_recovery_mean_min_each_bank": 0.1,
     "sealed_static_ceiling_recovery_a": 0.43303557485342026,
     "sealed_static_ceiling_recovery_b": 0.42612191041310626,
@@ -125,7 +134,7 @@
     "paired_parameter_compression_ratio_min": 200.0
   },
   "decision_rule": {
-    "pass": "Only an all-gate pass authorizes preregistration of a compact procedural approximation to the stable full KFAC square-root factors plus a separate initialization/Mapping-Loss shadow. It does not authorize dense factor storage, language-model training, a larger rung, or attention work.",
+    "pass": "Only an all-gate pass, including at least +0.10 recovery over the exact fixed step-zero base, authorizes preregistration of a compact procedural approximation to the stable full KFAC square-root factors plus a separate initialization/Mapping-Loss shadow. It does not authorize dense factor/base storage, language-model training, a larger rung, or attention work.",
     "fail": "Close the exact positive-square-root full-KFAC matrix-normal chart. Do not sweep covariance powers, ridge, latent allocation, BlockFHT seed/layers, optimizer, LR, steps, regularizers, or thresholds. Reconsider the 200x full-expert premise or formulate a non-matrix architecture-level expert decomposition before another run.",
     "no_automatic_promotion": true
   },
