@@ -1,0 +1,151 @@
+{
+  "schema_version": "nanogpt_sparse_moe_state_conditioned_butterfly_transport_oracle_plan_v1",
+  "recorded_at": "2026-08-12T16:43:17+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Can a full-rank expert-specific orthogonal flow whose angles depend on the current nonlinear state retain the coupled-direction benefit of the sealed biplane while escaping its rank-four ceiling at at least 200x paired-MLP compression?",
+  "theory_reconciliation": {
+    "new_measurement": "The sealed coupled-biplane candidate reaches 0.324408/0.324287 mean heldout recovery and -0.173892/-0.171215 JVP recovery. It improves over its identical static atom by 0.047833/0.048498 and over bilateral diagonal modulation by 0.016934/0.016576, so nonseparable moving rotation is causal but rank four is insufficient.",
+    "closed_static_evidence": "The earlier expert-unshared one-sweep static butterfly upper bound reached only 0.455739/0.457049 mean c_fc function recovery at 62.27x, with about 0.10 worst-expert recovery and unstable cross-bank actions. A static butterfly, extra stages, sharing changes, and padding sweeps remain closed.",
+    "closed_diagonal_evidence": "Context-FHT spectral gating, complete-atom coefficients, signed coefficients, output-coordinate modulation, and bilateral hidden/output diagonal modulation were neutral or harmful. The successor must rotate rather than rescale the fixed image.",
+    "single_causal_change": "Replace two learned moving input planes and two learned moving output planes by one exact full-rank expert-specific mixed-radix orthogonal sweep on each side. Candidate angles are state-conditioned; the same-run control fits the identical sweep, atom, gains, and bias with conditioning disabled.",
+    "why_this_is_not_a_closed_butterfly_sweep": "No static stage, padding, sharing, seed, or depth is varied. The frozen topology is dictated by the exact 768=3*256 factorization and the 200x budget. The new hypothesis is the activation-dependent angle field causally supported by the biplane result; the static one-sweep instance is the same-run negative control.",
+    "paired_neuron_connection": "The input flow rotates the residual coordinates before the fixed procedural c_fc atom, changing all GELU hyperplane normals. The output flow is independently conditioned on the post-GELU expert state and rotates the complete nonlinear write before outer top-2 routing, so c_fc feature choice and c_proj residual direction are fitted end to end.",
+    "directional_rank": "Eight radix-2 stages within three 256-coordinate blocks plus one exact radix-3 cross-block stage connect every one of the 768 residual coordinates. This changes transport topology from four moving dimensions to a full-rank orthogonal flow without storing a dense basis.",
+    "paper_connection": "The map remains compact, smooth, procedurally orthogonal, layer/expert specific, and locally bounded. Unlike the paper's scalar row modulation, its latent function changes the image directions with the current activation, directly testing the manifold requirement falsified by fixed-image maps.",
+    "falsifier": "Failure against the identical static-flow control closes this exact state-conditioned mixed-radix transport. It cannot authorize beta, feature, stage, seed, angle-init, LR, step, atom, or threshold sweeps."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "terminal_gauge": "Reuse the exact terminal model, routing, targets, discovery banks, heldout bank, and analytic JVP probes used by the sealed complete-atom controls."
+  },
+  "sealed_controls": {
+    "coupled_biplane_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_coupled_biplane_transport_oracle_result.json",
+      "sha256": "f6ca64565ff2845aff876cabc30ec038375e72937b631597adb7a7964fc5e7af",
+      "finding": "Moving rank-four input/output rotation is causally positive but absolutely insufficient."
+    },
+    "unshared_static_butterfly_upper_bound": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_butterfly_expert_conflict_audit_result.json",
+      "sha256": "fcf514b5b04bd6477e02a05450452a887ba8a8963db95f7205caf49e2b74cdf2",
+      "finding": "An expert-specific static one-sweep c_fc butterfly is insufficient even at a nondeployable 62.27x upper bound."
+    },
+    "context_diagonal_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_context_modulated_spectral_oracle_result.json",
+      "sha256": "7dd97a1bc97089f397bb2728705e82d25f6dc667c0f9efdbeddd0a54021cd755",
+      "finding": "Activation-conditioned diagonal FHT gating loses about 0.056 recovery against its static control."
+    }
+  },
+  "candidate": {
+    "name": "one_complete_atom_with_state_conditioned_mixed_radix_butterfly_transport",
+    "atom_count": 1,
+    "residual_width": 768,
+    "factorization": [3, 256],
+    "binary_stages_per_256_block": 8,
+    "binary_angles_per_side_expert": 3072,
+    "radix3_angles_per_side_expert": 768,
+    "total_angles_per_side_expert": 3840,
+    "sides": ["input", "output"],
+    "fixed_feature_seed": 20261189,
+    "feature_formula": "For each expert, side, and stage, phi_s(state)=tanh(P_s FHT(D_s pad(state))), where D_s and P_s are fixed signed procedural maps. Input stages use the residual activation; output stages use the post-GELU hidden activation through an independently seeded 2048-wide FHT feature stream. No feature tensor or dense basis is learned or stored.",
+    "angle_formula": "theta_s,e(state)=(pi/2)*tanh(raw_theta_s,e + beta*tanh(phi_s,e(state))). The same raw angle coordinate controls the static orientation and its bounded local state response; beta is fixed, not learned.",
+    "beta": 1.0,
+    "rotation_formula": "Apply eight exact radix-2 Givens butterfly stages independently within the three 256-coordinate blocks, then three exact cross-block Givens rotations for each of 256 channel positions. Every stage is norm preserving and the analytic JVP differentiates the state-dependent angles and all rotations.",
+    "function_formula": "x_rot=R_in(x)x; pre=cfc_scale*A(x_rot)*(1+h)+q; a=GELU(pre); u=cproj_scale*B(a)*(1+g); f_e(x)=R_out(a)u.",
+    "learned_hidden_gains_per_layer": 12288,
+    "learned_output_gains_per_layer": 6144,
+    "learned_hidden_bias_per_layer": 12288,
+    "learned_input_angles_per_layer": 30720,
+    "learned_output_angles_per_layer": 30720,
+    "total_coordinates_per_layer": 92160,
+    "total_coordinates_all_layers": 1105920,
+    "dense_paired_parameters_per_layer": 18874368,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 204.8,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "fixed_full_matrix_storage_allowed": false,
+    "outer_router_scope": "The source top-2 router is unchanged and independently counted. Every c_fc and c_proj matrix of all eight experts is removed."
+  },
+  "same_run_control": {
+    "name": "one_complete_atom_with_static_mixed_radix_butterfly_transport",
+    "single_difference": "Set beta=0 while fitting the identical expert-specific input/output raw angles, atom, hidden/output gains, and hidden bias.",
+    "purpose": "Isolate state-conditioned full-rank directional transport from a static full-rank orthogonal frame at identical coordinate count.",
+    "total_coordinates_per_layer": 92160,
+    "total_coordinates_all_layers": 1105920,
+    "paired_parameter_compression_ratio": 204.8
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal routing and deterministic per-expert sampling. Candidate and control receive identical inputs, JVP probes, and dense targets.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and probes never affect coordinates, stopping, initialization, thresholds, or candidate selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted raw angles, hidden/output gains, and hidden biases",
+    "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE.",
+    "selection": "Use the final registered step. No heldout selection or beta/feature/stage/seed/angle-init/LR/step/atom/threshold sweep.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local": "Analytic input-JVP recovery including derivatives of the input and post-GELU-conditioned output angle fields.",
+    "expert": "Score every source expert before outer top-2 aggregation.",
+    "stability": "Compare heldout routed actions from independently fitted discovery A/B candidates by cosine.",
+    "causal": "Compare with the identical static-flow same-run control and the sealed coupled-biplane candidate."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_static_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_sealed_biplane_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only production implementation/count/correctness and a separately preregistered initialization-plus-Mapping-Loss shadow; it does not authorize LM training directly.",
+    "fail": "Reject this exact state-conditioned mixed-radix butterfly transport. Do not sweep beta, features, stage count/order, factorization, seeds, angle initialization, optimizer, LR, steps, atoms, regularization, or thresholds. Return to theory before another full-MLP candidate.",
+    "systems": "Run exact CPU correctness tests and a two-step GPU preflight. If projected or observed full runtime exceeds five minutes, use a verified terminal/error-only @Codex watcher launched through examples/nanogpt/launch_local_detached.py."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "PENDING_PREREGISTRATION_COMMIT",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_state_conditioned_butterfly_transport_oracle.py",
+    "entrypoint_sha256": "PENDING_IMPLEMENTATION_HASH",
+    "helper_sha256": {}
+  }
+}
