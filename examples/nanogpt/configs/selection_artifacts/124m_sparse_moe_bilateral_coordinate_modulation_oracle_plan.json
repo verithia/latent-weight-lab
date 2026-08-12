@@ -1,0 +1,143 @@
+{
+  "schema_version": "nanogpt_sparse_moe_bilateral_coordinate_modulation_oracle_plan_v1",
+  "recorded_at": "2026-08-12T16:06:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "At a full 200x-valid paired-MLP budget, does adding bounded activation-conditioned hidden-coordinate modulation before GELU repair the activation hyperplanes and post-GELU spectrum that output-coordinate modulation cannot?",
+  "theory_reconciliation": {
+    "new_measurement": "The sealed three-atom output-coordinate candidate reaches only 0.344834/0.347764 heldout recovery, -0.233612/-0.237430 JVP recovery, is -0.005381/-0.003924 worse than its static control, and is -0.030217/-0.028452 worse than the four-atom signed parent.",
+    "revised_diagnosis": "Whole-function coefficients and output-coordinate modulation both act after fixed c_fc activation hyperplanes and GELU selection. They cannot repair the measured post-GELU capacity collapse if the useful hidden features were never activated.",
+    "single_causal_change": "Relative to a same-run output-conditioned two-atom control, add one bounded input-dependent modulation to every hidden pre-GELU coordinate. All output conditioning, static gains/biases, fixed atom maps, data, optimizer, and evaluation choices remain unchanged.",
+    "spectral_connection": "Vanilla c_fc weights have stronger dominant directions while BlockFHT is overly isotropic; BlockFHT pre-GELU hard rank does not survive GELU. Hidden-coordinate conditioning can shift each fixed feature's token-dependent magnitude and therefore its GELU gate, rather than trying to repair the residual after activation collapse.",
+    "why_not_the_rejected_linear_context_gate": "The prior context audit tried to approximate a linear c_fc residual with a quadratic internal perturbation, which is algebraically mismatched. This oracle fits the complete nonlinear c_fc-GELU-c_proj function and its analytic input-JVP; the hidden modulation is evaluated by whether it repairs nonlinear activation selection.",
+    "why_two_atoms": "Two atoms are the maximum count that allows both hidden- and output-coordinate modulation while counting all learned state and retaining at least 200x compression. This is a frozen budget consequence, not an atom-count sweep.",
+    "paper_connection": "The fixed orthogonal maps remain procedural and the compact learned state modulates them smoothly through bounded tanh features. This instantiates the paper's modulation/local-Lipschitz principle at the activation and residual coordinates without retaining a dense basis."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "terminal_gauge": "Reuse the exact terminal model, routing, targets, discovery banks, heldout bank, and analytic JVP probes used by the sealed complete-atom controls."
+  },
+  "sealed_controls": {
+    "output_coordinate_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_residual_coordinate_modulation_oracle_result.json",
+      "sha256": "911e2d7ad39f2117357f6e7cf2f7cbdad7117de31558fa873255bd0d78b1b86b",
+      "finding": "Three complete atoms with activation-conditioned residual coordinates are worse than their static control and the signed parent."
+    },
+    "signed_complete_atom_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_signed_complete_atom_oracle_result.json",
+      "sha256": "e36d1fe9e081c15bbd39f58e850eab99957341b5b3d9704c4675556810f0a999",
+      "finding": "Signed global atom coefficients add less than 0.005 recovery over a static span and leave the JVP strongly negative."
+    },
+    "maximum_budget_kfac_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_stepzero_kfac_maxbudget_oracle_result.json",
+      "sha256": "3f1a04b4d91c90db458648190d07888dd6f6eb92727db0db325ca9ecb6a48d41",
+      "finding": "The strongest stable static 200x chart reaches only 0.433036/0.426122 mean recovery."
+    }
+  },
+  "candidate": {
+    "name": "two_complete_atoms_with_bilateral_activation_coordinate_modulation",
+    "atom_count": 2,
+    "padded_width": 2048,
+    "fixed_operator_seed": 20261131,
+    "atom_reuse": "Reuse atom-0 and atom-1 input/output/output-modulation signs from the sealed residual-coordinate candidate; allocate new disjoint hidden-modulation signs.",
+    "hidden_feature": "r_e,m(x)=tanh(crop1536(sqrt(2048/768)*H(D_hiddenmod[e,m]*pad(x))))",
+    "output_feature": "s_e,m(x)=tanh(crop768(sqrt(2048/768)*H(D_outputmod[e,m]*pad(x))))",
+    "function_formula": "p=A_e,m(x); pre=cfc_scale*p*(1+h[e,m]+c[e,m]*r_e,m(x))+q[e]; u=cproj_scale*crop768(H(D_out[e,m]*pad(GELU(pre))))*(1+g[e,m]); f_e(x)=sum_m ((1+b[e,m]*s_e,m(x))*u)/2",
+    "jvp_formula": "Differentiate p, r, GELU(pre), u, and s analytically; Jpre=cfc_scale*(Jp*(1+h+c*r)+p*c*Jr); Jf averages both output-scale*Ju and output-scale-JVP*u.",
+    "learned_hidden_gains_per_layer": 24576,
+    "learned_output_gains_per_layer": 12288,
+    "learned_shared_hidden_bias_per_layer": 12288,
+    "learned_hidden_coordinate_modulations_per_layer": 24576,
+    "learned_output_coordinate_modulations_per_layer": 12288,
+    "total_coordinates_per_layer": 86016,
+    "total_coordinates_all_layers": 1032192,
+    "dense_paired_parameters_per_layer": 18874368,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 219.42857142857142,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "fixed_full_matrix_storage_allowed": false,
+    "outer_router_scope": "The source top-2 router is unchanged and independently counted. Every c_fc and c_proj matrix of all eight experts is removed."
+  },
+  "same_run_control": {
+    "name": "two_complete_atoms_with_output_coordinate_modulation_only",
+    "single_difference": "Freeze every hidden-coordinate modulation c at zero; fit the identical two atoms, hidden/output gains, shared hidden bias, and output-coordinate modulation.",
+    "purpose": "Isolate the causal value of changing pre-GELU hidden activation geometry.",
+    "total_coordinates_per_layer": 61440,
+    "total_coordinates_all_layers": 737280,
+    "paired_parameter_compression_ratio": 307.2
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal outer routing and deterministic per-expert sampling. Candidate and control receive identical inputs, JVP probes, and dense targets.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and probes never affect coordinates, stopping, initialization, thresholds, or candidate selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted hidden/output gains, shared hidden biases, output-coordinate modulation, and eligible hidden-coordinate modulation",
+    "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE.",
+    "selection": "Use the final registered step. No heldout selection or atom/sign/feature/modulation-scale/LR/step/seed/threshold sweep.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local": "Analytic input-JVP recovery including hidden- and output-coordinate modulation derivatives.",
+    "expert": "Score every source expert before outer top-2 aggregation.",
+    "stability": "Compare heldout outer-routed actions from independently fitted discovery A/B candidates by cosine.",
+    "causal": "Compare candidate with its same-run output-only two-atom control and the sealed, more favorable three-atom output-coordinate candidate."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_output_only_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_sealed_output_coordinate_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only production implementation/count/correctness and a separately preregistered initialization-plus-Mapping-Loss shadow; it does not authorize LM training directly.",
+    "fail": "Reject this exact bilateral activation-coordinate family. Do not sweep atom count, signs, tanh features, modulation scale, LR, steps, seeds, regularization, or thresholds. Return to theory before another full-MLP candidate.",
+    "systems": "Run an exact two-step GPU preflight. If projected or observed full runtime exceeds five minutes, use a verified terminal/error-only @Codex watcher launched through examples/nanogpt/launch_local_detached.py."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_bilateral_coordinate_modulation_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
