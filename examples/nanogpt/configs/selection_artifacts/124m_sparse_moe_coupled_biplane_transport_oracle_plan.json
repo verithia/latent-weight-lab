@@ -1,0 +1,148 @@
+{
+  "schema_version": "nanogpt_sparse_moe_coupled_biplane_transport_oracle_plan_v1",
+  "recorded_at": "2026-08-12T17:02:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "At a full 200x-valid paired-MLP budget, can a state-conditioned nonseparable rank-four orthogonal transport jointly rotate an expert's input hyperplanes and residual-write frame where all separable coefficient and diagonal modulation families fail?",
+  "theory_reconciliation": {
+    "new_measurement": "The sealed bilateral candidate reaches only 0.307474/0.307711 heldout recovery and -0.273851/-0.274334 JVP recovery. It is 0.010881/0.010806 worse than its output-only control and 0.037360/0.040052 worse than the sealed output-coordinate parent.",
+    "revised_diagnosis": "Input and output diagonal modulation cannot rotate fixed procedural c_fc hyperplanes or c_proj residual directions. Complete-atom scalar routing, signed routing, output diagonals, and bilateral diagonals all preserve the atom's coordinate axes and supply negligible or negative causal gain.",
+    "single_causal_change": "Replace activation-conditioned diagonals with two exact state-conditioned Givens planes on the residual input and two independent exact state-conditioned Givens planes on the residual output of one complete procedural atom. The same-run control fits the identical atom, hidden/output gains, and hidden bias but applies identity transport.",
+    "why_nonseparable": "Each plane is obtained by Gram-Schmidt orthogonalizing two activation-conditioned vectors and rotates all residual coordinates through inner products with those vectors. Its action is not an elementwise scale and its analytic JVP contains derivatives of both learned plane directions and the rotated state.",
+    "paired_neuron_connection": "The input rotation changes the normals seen by every GELU neuron and the output rotation changes the corresponding complete nonlinear residual write. They are fitted in one end-to-end c_fc-GELU-c_proj operator rather than as unrelated matrix charts.",
+    "independent_output_state": "Input- and output-plane gain vectors are separate and fully counted because the sealed feature-write predictability oracle showed that c_fc feature state does not determine c_proj write orientation.",
+    "why_one_atom_two_planes": "The 200x budget permits one complete atom with two input and two output Givens planes, but not two atoms with two planes each. This maximizes directional transport rank while keeping every learned coordinate above the frozen compression floor; it is not an atom/plane-count sweep.",
+    "relation_to_closed_families": "Unlike a static butterfly, KFAC, TT, MPO, ProductFHT, or shared orthogonal gauge, the plane orientation depends on the current activation. Unlike the rejected context-FHT and bilateral maps, the conditioning performs an exact coupled rotation rather than a diagonal rescaling. No dense basis or LoRA residual is stored.",
+    "paper_connection": "The candidate retains procedural orthogonal maps, compact smooth modulation, and a bounded local chart, but changes the latent function so its image rotates with state. This is a strict test of the paper's manifold premise after fixed-image modulation was falsified."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "terminal_gauge": "Reuse the exact terminal model, routing, targets, discovery banks, heldout bank, and analytic JVP probes used by the sealed complete-atom controls."
+  },
+  "sealed_controls": {
+    "bilateral_coordinate_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_bilateral_coordinate_modulation_oracle_result.json",
+      "sha256": "4ac4d4025d02e5a237e1efd787c5fef4abed2592d0cc0a47d38ca03484f7ca46",
+      "finding": "State-dependent hidden/output diagonals are causally negative and leave a strongly negative JVP."
+    },
+    "output_coordinate_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_residual_coordinate_modulation_oracle_result.json",
+      "sha256": "911e2d7ad39f2117357f6e7cf2f7cbdad7117de31558fa873255bd0d78b1b86b",
+      "finding": "Output-coordinate modulation is worse than its static control and does not repair residual direction."
+    },
+    "maximum_budget_kfac_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_stepzero_kfac_maxbudget_oracle_result.json",
+      "sha256": "3f1a04b4d91c90db458648190d07888dd6f6eb92727db0db325ca9ecb6a48d41",
+      "finding": "The strongest stable static 200x chart reaches only 0.433036/0.426122 mean recovery."
+    }
+  },
+  "candidate": {
+    "name": "one_complete_atom_with_coupled_state_conditioned_biplane_transport",
+    "atom_count": 1,
+    "planes_per_side": 2,
+    "padded_width": 2048,
+    "fixed_operator_seed": 20261171,
+    "feature_scale": 1.632993161855452,
+    "plane_construction": "For each expert and plane, independently FHT-project x through two fixed sign patterns; multiply by learned coordinate gains, apply tanh, normalize the first vector, and Gram-Schmidt/normalize the second. A floor of 1e-6 makes the chart smooth on the registered frame.",
+    "rotation_formula": "R(x;theta)z=z+[((cos(theta)-1)<v,z>-sin(theta)<w,z>)v]+[(sin(theta)<v,z>+(cos(theta)-1)<w,z>)w], applied sequentially for two planes.",
+    "function_formula": "x_rot=R_in,2(x)R_in,1(x)x; pre=cfc_scale*A(x_rot)*(1+h)+q; u=cproj_scale*B(GELU(pre))*(1+g); f_e(x)=R_out,2(x)R_out,1(x)u.",
+    "jvp_formula": "Differentiate tanh features, normalization, Gram-Schmidt, both exact plane rotations, procedural c_fc/c_proj FHT actions, and GELU analytically. Rotation angles are parameters, not input-dependent scalars.",
+    "angle_parameterization": "theta=(pi/2)*tanh(raw_theta), initialized at raw_theta=atanh(0.25) so plane-direction gradients are live while identity remains reachable at raw_theta=0.",
+    "learned_hidden_gains_per_layer": 12288,
+    "learned_output_gains_per_layer": 6144,
+    "learned_hidden_bias_per_layer": 12288,
+    "learned_input_plane_vectors_per_layer": 24576,
+    "learned_output_plane_vectors_per_layer": 24576,
+    "learned_angle_scalars_per_layer": 64,
+    "total_coordinates_per_layer": 79936,
+    "total_coordinates_all_layers": 959232,
+    "dense_paired_parameters_per_layer": 18874368,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 236.11849479583668,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "fixed_full_matrix_storage_allowed": false,
+    "outer_router_scope": "The source top-2 router is unchanged and independently counted. Every c_fc and c_proj matrix of all eight experts is removed."
+  },
+  "same_run_control": {
+    "name": "one_static_complete_atom_with_gains_and_bias",
+    "single_difference": "Skip all four Givens planes and fit the identical fixed atom, hidden/output gains, and hidden bias.",
+    "purpose": "Isolate the causal value of state-conditioned nonseparable directional transport.",
+    "total_coordinates_per_layer": 30720,
+    "total_coordinates_all_layers": 368640,
+    "paired_parameter_compression_ratio": 614.4
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal routing and deterministic per-expert sampling. Candidate and control receive identical inputs, JVP probes, and dense targets.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and probes never affect coordinates, stopping, initialization, thresholds, or candidate selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted gains, hidden biases, plane-vector gains, and rotation angles",
+    "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE.",
+    "selection": "Use the final registered step. No heldout selection or atom/plane/sign/angle/LR/step/seed/threshold sweep.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local": "Analytic input-JVP recovery including derivatives of both state-conditioned orthogonal transports.",
+    "expert": "Score every source expert before outer top-2 aggregation.",
+    "stability": "Compare heldout routed actions from independently fitted discovery A/B candidates by cosine.",
+    "causal": "Compare with the identity-transport same-run control and the more favorable sealed bilateral candidate."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_static_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_sealed_bilateral_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only production implementation/count/correctness and a separately preregistered initialization-plus-Mapping-Loss shadow; it does not authorize LM training directly.",
+    "fail": "Reject this exact coupled biplane transport family. Do not sweep atom count, plane count, signs, feature activation, angle scale/init, LR, steps, seeds, regularization, or thresholds. Return to theory before another full-MLP candidate.",
+    "systems": "Run an exact two-step GPU preflight. If projected or observed full runtime exceeds five minutes, use a verified terminal/error-only @Codex watcher launched through examples/nanogpt/launch_local_detached.py."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "PENDING_PREREGISTRATION_COMMIT",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_coupled_biplane_transport_oracle.py",
+    "entrypoint_sha256": "PENDING_IMPLEMENTATION_HASH",
+    "helper_sha256": {}
+  }
+}
