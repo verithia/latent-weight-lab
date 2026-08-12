@@ -103,7 +103,7 @@ class ExpertPairedCoordinateField(torch.nn.Module):
                         [math.log(0.02), math.log(0.02 / math.sqrt(2 * tensor_layers))]
                         for _ in range(self.experts)
                     ]
-                )
+                ).reshape(-1)
             )
             self.decoder_weight_1 = torch.nn.Parameter(
                 torch.empty(self.experts, decoder_input, self.decoder_hidden_width)
@@ -180,7 +180,8 @@ class ExpertPairedCoordinateField(torch.nn.Module):
                 + self.decoder_bias_3[:, None, :]
             ).reshape(self.experts, self.hidden_width, count, 2)
             pieces.append(paired)
-        paired = torch.cat(pieces, dim=2) * self.log_scales.exp()[:, None, None, :]
+        scales = self.log_scales.reshape(self.experts, 2).exp()
+        paired = torch.cat(pieces, dim=2) * scales[:, None, None, :]
         return paired[..., 0], paired[..., 1]
 
     def function_and_jvp(
