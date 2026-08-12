@@ -1,0 +1,123 @@
+{
+  "schema_version": "nanogpt_sparse_moe_expert_paired_coordinate_field_oracle_plan_v1",
+  "recorded_at": "2026-08-12T10:53:15+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Does removing the measured cross-expert decoder conflict let an expert-specific nonlinear coordinate field co-generate every c_fc/c_proj neuron pair at greater than 200x compression?",
+  "theory_reconciliation": {
+    "measured_failure": "The sealed shared-decoder field recovered only 0.106893/0.099240 heldout output and negative JVP, while its discovery output errors remained 0.879--0.950 and JVP errors 1.001--1.006. This is representation failure, not heldout overfit.",
+    "causal_evidence": "The earlier paired-direction audit measured mean cross-expert decoder-gradient cosine -0.14218 and cancellation ratio 2.65e-4. Expert-specific neuron codes did not remove the only shared orientation object: the decoder weights.",
+    "single_change": "Replace the one layer-shared coordinate decoder by eight expert-specific decoders. Reduce each neuron code from six to three coordinates so the complete learned state remains above 200x compression.",
+    "paired_function": "Each expert-specific decoder emits both a_j[k] and b_j[k] from the same neuron code and fixed channel coordinate, preserving the hidden-neuron gauge in y_e(x)=sum_j b_ej GELU(a_ej^T x+q_ej).",
+    "not_lora_or_dense_basis": "No dense target matrix, dense base, additive residual, or learned channel dictionary is retained. Decoder weights, expert-neuron codes, hidden biases, and per-expert scales are all counted.",
+    "mapping_connection": "This remains a smooth layer-wise latent-to-parameter map, but permits the separate expert manifolds demanded by the measured routed-gradient conflict."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "moe_top_k": 2,
+    "terminal_gauge": "Use the exact terminal model, routing, dense c_fc/c_proj teacher, and fixed token banks from the sealed shared-decoder oracle."
+  },
+  "sealed_favorable_control": {
+    "name": "larger_layer_shared_decoder_six_code",
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_paired_coordinate_field_oracle_result.json",
+    "result_sha256": "4aeb6889f68ea2fbd73407160b06973c027b8e9ae3444451e4c31c228709bbcb",
+    "coordinates_per_layer": 91844,
+    "compression_ratio": 205.50498671678656,
+    "heldout_mixture_recovery_mean": {
+      "discovery_a": 0.10689332087834676,
+      "discovery_b": 0.09924020369847615
+    }
+  },
+  "candidate": {
+    "name": "expert_specific_paired_neuron_coordinate_field",
+    "formula": "(a_l,e,j[k],b_l,e,j[k])=exp(s_l,e)*MLP_l,e(concat(z_l,e,j,phi(k))); y_e=sum_j b_l,e,j GELU(a_l,e,j^T x+q_l,e,j)",
+    "neuron_code_width": 3,
+    "channel_encoding": "The same fixed 17-vector [t,sin(pi*2^r*t),cos(pi*2^r*t)] for r=0..7 used by the favorable control.",
+    "channel_encoding_width": 17,
+    "decoder_input_width": 20,
+    "decoder_hidden_width": 56,
+    "decoder_hidden_layers": 2,
+    "decoder_activation": "GELU",
+    "decoder_output_width": 2,
+    "decoder_coordinates_per_expert": 4482,
+    "decoder_coordinates_per_layer": 35856,
+    "neuron_code_coordinates_per_layer": 36864,
+    "hidden_bias_coordinates_per_layer": 12288,
+    "expert_log_scale_coordinates_per_layer": 16,
+    "total_coordinates_per_layer": 85024,
+    "total_coordinates_all_layers": 1020288,
+    "dense_paired_parameters_per_layer": 18874368,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 221.98870907038014,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "router_scope": "The existing top-2 router remains an independently counted non-target component; both matrices of all eight experts are generated."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal routing and deterministic per-expert sampling; no new data seed, token window, or occupancy policy.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and JVP probes never affect coordinates, stopping, scales, or selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted expert-specific field coordinates",
+    "steps": 600,
+    "decoder_learning_rate": 0.003,
+    "code_bias_scale_learning_rate": 0.01,
+    "decoder_weight_decay": 0.0001,
+    "code_weight_decay": 0.0,
+    "gradient_clip": 10.0,
+    "objective": "The identical equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE used by the sealed favorable control.",
+    "selection": "Use the final registered step. No heldout selection, retry, code/decoder/rank/frequency/LR/seed/step sweep, or threshold adjustment.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact routed dense-teacher residual-output recovery on the untouched terminal heldout activations.",
+    "local": "Analytic input-JVP recovery on the same independent frozen Rademacher protocol.",
+    "expert": "Score every expert before top-2 mixture aggregation.",
+    "stability": "Compare heldout routed actions from independently fitted discovery A/B fields by cosine."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_favorable_shared_recovery_mean_min_each_bank": 0.2,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only implementation/count/correctness work and a separately preregistered initialization-plus-Mapping-Loss shadow; it does not authorize LM training directly.",
+    "fail": "Reject expert-specific 20-56-56-2 coordinate fields with three-code neurons. Do not sweep code width, decoder width/depth, frequencies, LR, seed, steps, or thresholds. A failure closes per-neuron implicit weight-coordinate decoding at the 200x boundary and requires an architecture-level latent function rather than another coordinate field."
+  },
+  "authorization": {
+    "checkpoint_updates": 0,
+    "language_model_training": false,
+    "mfu_preflight": false,
+    "larger_rung": false,
+    "full_attention_work_before_terminal_result": false
+  },
+  "identity": {
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_expert_paired_coordinate_field_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
