@@ -1,0 +1,132 @@
+{
+  "schema_version": "nanogpt_sparse_moe_conditional_complete_atom_oracle_plan_v1",
+  "recorded_at": "2026-08-12T15:24:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "At the full 200x-valid paired-MLP budget, can activation-conditioned routing over four complete procedural nonlinear MLP atoms reproduce each terminal dense expert function where static bases, weight-coordinate decoders, and multiplicative context gates failed?",
+  "theory_reconciliation": {
+    "measured_boundary": "Static/tangent learned bases peak near 0.43 heldout recovery at the 200x boundary; the functionally fitted TT reaches 0.25-0.27; shared and expert-specific paired-coordinate decoders reach about 0.10 and 0.206, with negative JVP. All are stable enough to identify representation failure rather than noise.",
+    "direction_drift": "Crossed same-gauge audits show that useful expert directions depend on the activation bank and rotate almost completely across fitted endpoints. A static decoded matrix image is therefore the wrong object even when decoder sharing is removed.",
+    "why_not_more_global_fht": "Fixed global FHT/sign mixers with learned spectra, learned butterfly frames, ProductFHT residuals, and maximum-budget two-sided KFAC have already been tested and rejected. This candidate does not add FHT depth or another static matrix chart.",
+    "architecture_change": "Replace each dense expert MLP by an input-conditioned mixture of four complete procedural nonlinear atoms. Each atom contains its own fixed seeded full-rank FHT c_fc and c_proj path; learned diagonal gains calibrate both sides, while a compact router changes the active function with x.",
+    "why_context_gate_is_not_repeated": "The rejected context gate multiplied an otherwise linear c_fc map, producing a poorly aligned quadratic perturbation. Here conditioning mixes complete GELU nonlinear functions after their residual outputs are formed; it is a direct sum in function space, not a multiplicative insertion into a linear target.",
+    "mapping_connection": "The learned state is still a smooth layer-wise compact latent state: gains, hidden bias, and router coordinates modulate fixed orthogonal procedural atoms. The target architecture is changed to make its compact functional atlas state-adaptive, which is the measured missing property.",
+    "not_lora_or_dense_basis": "No dense c_fc, dense c_proj, dense base, learned dense dictionary, additive residual, or dense optimizer state is retained. Fixed atom matrices are never stored; signs plus normalized FHTs generate their actions procedurally."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "terminal_gauge": "Use the exact terminal model, outer routing, dense complete-expert target, and fixed discovery/heldout token banks used by the two sealed paired-coordinate controls."
+  },
+  "sealed_controls": {
+    "expert_coordinate_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_expert_paired_coordinate_field_oracle_result.json",
+      "sha256": "ac820adae4790e8a27d0e33577bd39743d3e7800b4aeffe78ec8e3c2bf4a8b0c",
+      "finding": "Expert-specific decoders improve mean recovery to 0.203061/0.208861 but remain far below 0.80 and preserve negative JVP."
+    },
+    "maximum_budget_kfac_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_stepzero_kfac_maxbudget_oracle_result.json",
+      "sha256": "3f1a04b4d91c90db458648190d07888dd6f6eb92727db0db325ca9ecb6a48d41",
+      "finding": "The maximum admissible 3+4 two-sided static chart reaches only 0.433036/0.426122 mean recovery, establishing the strongest stable 200x static control."
+    }
+  },
+  "candidate": {
+    "name": "four_complete_procedural_atoms_with_activation_router",
+    "atom_count": 4,
+    "padded_width": 2048,
+    "router_feature_width": 8,
+    "fixed_operator_seed": 20261131,
+    "formula": "h_m(x)=GELU(sqrt(2048)*0.02*g_fc[e,m]*crop1536(H(D_fc[e,m]*pad(x)))+b[e]); f_m(x)=sqrt(2048)*0.02/sqrt(24)*g_proj[e,m]*crop768(H(D_proj[e,m]*pad(h_m))); pi(x)=softmax(W_router[e]*crop8(sqrt(2048/768)*H(D_router[e]*pad(x)))+q[e]); f_e(x)=sum_m pi_m(x) f_m(x)",
+    "learned_hidden_gains_per_layer": 49152,
+    "learned_output_gains_per_layer": 24576,
+    "learned_shared_hidden_bias_per_layer": 12288,
+    "learned_router_weights_per_layer": 256,
+    "learned_router_bias_per_layer": 32,
+    "total_coordinates_per_layer": 86304,
+    "total_coordinates_all_layers": 1035648,
+    "dense_paired_parameters_per_layer": 18874368,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 218.6963292547275,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "fixed_full_matrix_storage_allowed": false,
+    "outer_router_scope": "The source top-2 router is unchanged and independently counted. Every c_fc and c_proj matrix of all eight complete experts is removed by the candidate."
+  },
+  "same_run_control": {
+    "name": "static_mixture_of_identical_complete_atoms",
+    "single_difference": "Set the activation-router weight matrix to zero and freeze it; fit only one input-independent four-way router bias per expert plus the identical gains and shared hidden bias.",
+    "purpose": "Measure whether state-adaptive atom selection, rather than four fixed atoms and diagonal calibration alone, supplies the missing function direction.",
+    "total_coordinates_per_layer": 86048,
+    "paired_parameter_compression_ratio": 219.3469691335069
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal outer routing and deterministic per-expert sampling. Candidate and static control receive identical discovery inputs and targets.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and JVP probes never affect coordinates, stopping, initialization, thresholds, or candidate selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted gains, shared hidden biases, and eligible router coordinates",
+    "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE.",
+    "selection": "Use the final registered step. No heldout selection, atom-count/seed/router-width/LR/step/gain/threshold sweep, retry, or warm-start from heldout values.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local": "Analytic input-JVP recovery, including the derivative of the inner atom router, on an independent frozen Rademacher protocol.",
+    "expert": "Score every source expert before outer top-2 mixture aggregation.",
+    "stability": "Compare heldout outer-routed actions from independently fitted discovery A/B candidates by cosine."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_static_control_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only a production implementation/count/correctness phase and a separately preregistered initialization-plus-Mapping-Loss shadow. It does not authorize LM training directly.",
+    "fail": "Reject four conditionally routed complete procedural atoms with the exact gain/router allocation. Do not sweep atom count, atom seeds, router width, gains, LR, steps, regularization, or thresholds. Return to theory before another full-MLP candidate.",
+    "systems": "Run an exact two-step GPU preflight. If projected or observed full runtime exceeds five minutes, use a verified terminal/error-only @Codex watcher launched through examples/nanogpt/launch_local_detached.py."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_conditional_complete_atom_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
