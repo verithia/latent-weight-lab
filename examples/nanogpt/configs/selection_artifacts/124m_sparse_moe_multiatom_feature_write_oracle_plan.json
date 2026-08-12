@@ -140,5 +140,25 @@
     "larger_rung": false,
     "full_attention_work": false,
     "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "83a310e123fd956b87f3472e96e07d6dc9c72c5c",
+    "implementation_git_commit": "ef01d0f0cc706208ad02d3433af381b350b46d4c",
+    "identity_validation_git_commit": "1b13b9706d870f85eb28b583fb0df43ed942b38e",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_multiatom_feature_write_oracle.py",
+    "entrypoint_sha256": "00dc0032c0e5cbadabfd1065b0cfb9c98b3f12a20deeae680672ebdbc8d8c613",
+    "helper_sha256": {
+      "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py": "d6300dc7cef4c55bbfd8ed6c1fcaa1a22adb35743f8400f02d2db5cb7d934905",
+      "examples/nanogpt/analyze_sparse_moe_conditional_complete_atom_oracle.py": "40426d90c61ae37966bc83cce9d855e79dffa57776565715e62dbdabeaa8bc07",
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
+      "examples/nanogpt/analyze_sparse_moe_paired_sparse_write_chart_oracle.py": "f82a1fabf0f4c8126b4a2c6733e0abfadf5fe29e001db2fb4f38ac51be8e1073",
+      "examples/nanogpt/analyze_sparse_moe_paired_coordinate_field_oracle.py": "4216f89da0d88563547a2b6e2481555f47bd8ed79da5cb4a4cb8f23d4a099d1f",
+      "examples/nanogpt/analyze_sparse_moe_rolling_tangent_oracle.py": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",
+      "examples/nanogpt/analyze_sparse_moe_state_conditioned_butterfly_transport_oracle.py": "42983cf24438f64ef72fc56e4fc8c3c22c083d5091142830b8c3dccf8ebc8950",
+      "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    }
   }
 }
