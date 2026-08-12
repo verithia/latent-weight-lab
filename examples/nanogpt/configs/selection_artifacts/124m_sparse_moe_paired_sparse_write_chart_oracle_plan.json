@@ -1,0 +1,155 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_sparse_write_chart_oracle_plan_v1",
+  "recorded_at": "2026-08-12T17:12:24+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Can the exact hidden-neuron permutation symmetry of a GELU MLP align compact c_fc feature slots and compact c_proj residual-write slots strongly enough for complete full-MLP replacement at at least 200x trainable-state compression?",
+  "theory_reconciliation": {
+    "new_measurement": "The sealed state-conditioned full-rank butterfly is worse than its identical learned static-flow control by 0.038891/0.038724, with only 0.392616/0.391936 mean recovery and strongly negative JVP recovery. Activation-conditioned pseudo-random rotation is causally harmful; no state-conditioning sweep is authorized.",
+    "static_ceiling": "Independent maximum-budget KFAC, full-rank static butterfly, and expert-unshared c_fc butterfly fits converge near 0.43--0.46 recovery. This is a chart ceiling, not evidence that more angles or optimizer steps will help.",
+    "cfc_localization": "The sealed two-spectrum c_fc map reaches 0.381847/0.382049 residual-function recovery with dense c_proj but near-zero pre-GELU recovery. Two spectra alone are closed; the new causal variable is a joint hidden-neuron gauge that changes which dense c_fc row/write-column pair each procedural slot must represent.",
+    "cproj_localization": "A model-wide rank-545 residual basis at the exact 200x c_proj budget recovers 0.911333 mean action and 0.823286 for the weakest expert, with 0.925319 cross-bank basis overlap, but loses 0.078704 against layer-local bases. Residual directions are broadly shared and stable but depth dependent.",
+    "failed_repairs": "Splitting the fixed basis budget across depth groups falls to 0.708718 mean recovery, while one unrestricted global orthogonal gauge improves a matched MPO by 0.166 but reaches only 0.533 and violates 200x. Dense private bases, global gauges, depth-rank division, and activation-conditioned rotations remain closed.",
+    "missing_symmetry": "For any permutation P of hidden neurons, c_proj*GELU(c_fc*x+b) is unchanged when c_fc rows and b are permuted by P and c_proj columns by the same P. Every previous full-MLP fit fixed this gauge implicitly and fitted feature normals and write directions against unrelated procedural slots.",
+    "single_causal_change": "Fit the same compact architecture twice. The candidate performs one frozen discovery-only joint assignment of complete dense teacher atoms to compact hidden slots, permuting each c_fc row, bias, and matching c_proj column together. The control keeps identity teacher order. Both then restart from the same initialization and fit the same objective for the same number of steps.",
+    "why_not_lora": "No additive dense path or private learned output basis survives. Each layer owns only a procedural 3x256 mixed-radix orthogonal flow; every expert write is a three-sparse coefficient vector in that generated frame. The flow and sparse coefficients replace all 96 c_proj matrices rather than adapt them.",
+    "why_this_changes_the_closed_spectral_family": "The fixed two-spectrum c_fc topology, signs, width, and optimizer are not swept. Joint permutation changes the target gauge seen by that topology while leaving the teacher function exactly invariant. Failure closes the hypothesis that slot-direction misassignment, rather than insufficient c_fc topology, caused the spectral map's failure.",
+    "paper_connection": "This directly tests the paper's local-manifold premise in function space: quotient an exact parameter symmetry before judging whether a compact smooth chart matches the trained trajectory. The compact chart is layer/expert specific where measurements require it, procedurally orthogonal, bounded, and evaluated on heldout function and tangent actions rather than parameter PCA alone.",
+    "falsifier": "The candidate must beat its identical unpaired control by at least 0.10 and pass every absolute function, expert, tangent, stability, accounting, and occupancy gate in both independent banks. Failure forbids support-count, assignment, flow, spectrum, seed, optimizer, step, and threshold sweeps."
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "terminal_gauge": "Reuse the exact terminal model, routing, dense targets, discovery banks, heldout bank, and analytic input-JVP probes used by the sealed full-MLP controls."
+  },
+  "sealed_controls": {
+    "state_conditioned_full_rank_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_state_conditioned_butterfly_transport_oracle_result.json",
+      "sha256": "c67e948f11677ad0f0ca2cd99c17f063f63df94f23ad1c796d61d9cb7f40761d",
+      "finding": "Dynamic full-rank rotation is harmful relative to the identical static learned frame."
+    },
+    "spectral_cfc_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_cfc_spectral_feature_oracle_result.json",
+      "sha256": "5cafa8eb52efb8812db876b92396f3f4fc1e1160402c8aa12d4acc25cee4bcc9",
+      "finding": "Two learned spectra help versus a fixed map but fail to recover dense pre-GELU directions in the fixed teacher gauge."
+    },
+    "shared_residual_basis_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_shared_residual_basis_result.json",
+      "sha256": "654457d00753374472a9a8472adf8e34feb96ff37eb2e6eae9b08348cf7a94c7",
+      "finding": "Residual actions admit a stable wide common frame, but one model-wide dense basis misses the layer-local sharing-regret gate."
+    },
+    "depth_grouped_basis_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_depth_grouped_basis_result.json",
+      "sha256": "7857b5e2bc9fec028f483ded3c7402b64c7aad657d391a64ffbfb58a65eb1cd6",
+      "finding": "Duplicating basis state across depth groups makes each group too narrow under a fixed budget."
+    },
+    "shared_orthogonal_gauge_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_shared_orthogonal_gauge_mpo_result.json",
+      "sha256": "5093a140a83f117770ccfd8e5247d6cdd7208cc8bae671d45680a5a335b5180d",
+      "finding": "Direction alignment is causal, but one global gauge is insufficient and already violates 200x."
+    }
+  },
+  "candidate": {
+    "name": "paired_hidden_gauge_with_layerwise_three_sparse_residual_writes",
+    "cfc_generator": "For every layer/expert, three fixed 2048-wide signed global FHT mixers with two learned 2048-diagonal spectra and one learned 1536-vector bias. No dense c_fc is stored or added.",
+    "cfc_coordinates_per_expert": 5632,
+    "cproj_generator": "For hidden activation h_j, scatter three learned coefficients into three fixed canonical residual coordinates, sum over all 1536 neurons, then apply one learned static layer-wise 3x256 mixed-radix orthogonal flow. No dense c_proj is stored or added.",
+    "fixed_support_count_per_neuron": 3,
+    "fixed_support_formula": "Let q,r=divmod(j,768). The three indices are (a_t*r+b_t+q*c_t) mod 768 for (a,b,c)=(1,0,0),(437,363,292),(721,606,474). Each stream is exactly balanced at two visits per residual coordinate and all three indices are distinct for every j. The support is procedural and stores no metadata.",
+    "output_flow": "One static learned mixed-radix orthogonal flow per transformer layer: eight radix-2 stages within each of three 256-coordinate blocks and one three-Givens radix-3 cross-block stage, totaling 3840 angles/layer.",
+    "output_coefficients_per_expert": 4608,
+    "joint_gauge": "The candidate derives one permutation per evaluated layer/expert from discovery data only and applies it jointly to dense teacher c_fc rows, biases, and c_proj columns. The permutation is a teacher-side equality transformation used only during oracle fitting and is neither counted nor deployed; the compact model is generated directly in canonical slot order.",
+    "assignment_warmup_steps": 100,
+    "assignment_cost": "After an identity-gauge warmup, form one 1536x1536 cost matrix per layer/expert from equal-weight sign-sensitive cosine distances between discovery activation traces and residual-write vectors of dense complete neurons versus compact slots. Solve the exact deterministic linear sum assignment with lexicographic epsilon tie-breaking, freeze it, discard warmup coordinates, and restart both fits.",
+    "learned_cfc_coordinates_all_layers": 540672,
+    "learned_sparse_cproj_coordinates_all_layers": 442368,
+    "learned_output_flow_coordinates_all_layers": 46080,
+    "total_coordinates_all_layers": 1029120,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 220.08358208955224,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "fixed_full_matrix_storage_allowed": false,
+    "outer_router_scope": "The source top-2 router is unchanged and independently counted. Every c_fc and c_proj matrix of all eight experts is removed."
+  },
+  "same_run_control": {
+    "name": "identity_hidden_gauge_with_identical_layerwise_three_sparse_residual_writes",
+    "single_difference": "Keep the teacher's original hidden-neuron order instead of applying the discovery-derived joint complete-neuron permutation.",
+    "equal_compute": "Run the same 100-step warmup and cost construction, but ignore the assignment; restart and fit for the same registered steps.",
+    "total_coordinates_all_layers": 1029120,
+    "paired_parameter_compression_ratio": 220.08358208955224
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "assignment_samples_per_expert": 128,
+    "sampling": "Reuse exact terminal routing and deterministic per-expert sampling. Candidate and control receive identical inputs, JVP probes, dense target functions, initialization, and update count.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and probes never affect the permutation, coordinates, stopping, initialization, thresholds, or candidate selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on all counted spectra, biases, sparse output coefficients, and layerwise flow angles",
+    "warmup_steps": 100,
+    "post_assignment_steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0001,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 normalized analytic input-JVP MSE. The warmup additionally records the two assignment signatures but receives no heldout information.",
+    "selection": "Use the final registered step. No heldout selection or support-count/assignment/flow/spectrum/seed/optimizer/LR/step/regularizer/threshold sweep.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local": "Analytic input-JVP recovery through the fixed spectral c_fc, GELU, sparse scatter, and static layerwise orthogonal output flow.",
+    "expert": "Score every source expert before outer top-2 aggregation.",
+    "stability": "Compare heldout routed actions from independently fitted discovery A/B candidates by cosine.",
+    "causal": "Compare paired hidden gauge against the identical identity-gauge control and against the sealed approximately 0.43 static-chart ceiling."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_identity_gauge_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_sealed_static_ceiling_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true,
+    "exact_full_mlp_compression_min": 200.0
+  },
+  "decision_rule": {
+    "pass": "Passing every gate in both banks authorizes only production implementation/count/correctness and a separately preregistered initialization-plus-Mapping-Loss shadow. It does not authorize LM training directly.",
+    "fail": "Reject joint hidden-neuron gauge alignment as sufficient for this exact spectral-c_fc plus three-sparse layerwise-write chart. Do not sweep support count/formula, assignment metric/solver, output flow, spectra, signs, seeds, optimizer, LR, steps, regularization, or thresholds. Return to theory on a genuinely different full-MLP latent function.",
+    "systems": "Run exact CPU invariants and a two-step GPU preflight. If projected or observed full runtime exceeds five minutes, use a verified terminal/error-only @Codex watcher launched through examples/nanogpt/launch_local_detached.py."
+  },
+  "authorization": {
+    "offline_zero_checkpoint_update_oracle": true,
+    "implementation": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_git_commit": "PENDING_PREREGISTRATION_COMMIT",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_paired_sparse_write_chart_oracle.py"
+  }
+}
