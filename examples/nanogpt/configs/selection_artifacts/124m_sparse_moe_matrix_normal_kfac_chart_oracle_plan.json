@@ -1,0 +1,147 @@
+{
+  "schema_version": "nanogpt_sparse_moe_matrix_normal_kfac_chart_oracle_plan_v1",
+  "recorded_at": "2026-08-12T18:04:16+08:00",
+  "status": "preregistered_before_implementation_and_any_candidate_recovery_values",
+  "scientific_question": "At the exact 200x full-MLP coordinate boundary, does shaping a full-rank random vectorized-weight chart by the complete two-sided expert KFAC metric recover the dense terminal expert function and input tangent, relative to an equal-coordinate isotropic BlockFHT control?",
+  "theory": {
+    "gradient_factorization": "For one expert matrix, the task gradient is an outer product delta x^T. Under the standard KFAC independence approximation, Cov(vec(delta x^T)) is C_x tensor C_delta. A matrix-normal direction S_delta R S_x with S S^T equal to the corresponding covariance therefore samples the measured task-gradient metric rather than the Euclidean/Haar metric.",
+    "why_plain_blockfht_fails": "The production one-percent BlockFHT tangent captures about one percent of dense chords, task gradients, and Muon directions, matching Haar expectation. Independent three-atom BlockFHT enlarged discovery span by only 0.015-0.016 recovery and destabilized heldout JVP/action agreement. Orthogonality and more random dictionaries do not orient the chart toward the anisotropic task metric.",
+    "correction_to_prior_kfac_label": "The sealed rank-3+4 KFAC oracle is a useful one-sided control, not a complete Kronecker chart: it extracts error-weighted residual-input eigenvectors for c_fc and activation-weighted residual-output-error eigenvectors for c_proj, then expands each vector uniformly across the other matrix axis. It never supplies c_fc hidden-error covariance or c_proj post-GELU activation covariance. Its 0.426-0.433 ceiling therefore closes low-rank one-sided images, not a full-rank matrix-normal random subspace.",
+    "candidate_image": "Each expert owns independent 5120-coordinate BlockFHT latents for c_fc and c_proj plus its 1536 hidden bias. The raw vectorized random matrices R_fc and R_proj are reshaped, then transformed as S_hidden_error R_fc S_residual_input and S_residual_error R_proj S_postgelu. Every covariance square root is full rank, symmetrized, ridged, and normalized to unit mean eigenvalue. This keeps the chart static at inference while changing its metric and orientation, not its coordinate count.",
+    "control_image": "The same-run control uses the identical latent counts, BlockFHT signs/seeds, hidden bias, zero coordinate initialization, optimizer, objective, batches, and steps, but replaces all four normalized covariance square roots by identity. Candidate and control are exactly the same step-zero dense expert function before their generated displacements move.",
+    "paper_reconciliation": "The Mapping Networks paper requires a compact latent map, layer-wise allocation, and local stability/alignment; it does not establish that a Euclidean random projection is aligned to transformer task geometry. This oracle tests a fixed mapping projection whose column distribution is aligned to the measured local Fisher/KFAC metric while retaining vectorized full-rank generated matrices.",
+    "oracle_limitation": "Dense covariance square roots are deliberately permitted only as a nondeployable representability upper bound. They are fixed, discovery-derived state and their storage is reported separately. Passing does not authorize storing them in a model; it only authorizes theory for a procedural/sketched approximation."
+  },
+  "source": {
+    "parent_git_commit": "6e6abdb7240b03fd43ee3878650262b5369e4e98",
+    "parent_normalized_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_multiatom_feature_write_oracle_result.json",
+    "parent_normalized_result_sha256": "439d40f11fe728085d3e2ba5d80849860c6fef3dbce03ed8becac1c9764cdc2c",
+    "parent_raw_result_sha256": "f73cae01afee5488444e4dce9bf02057fc4fb68347cb48da52a1f82ff8980e45",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "geometry_protocol": {
+    "left_state": "Exact dense sparse-MoE step-zero reconstruction from model seed 1337.",
+    "target": "Exact step-zero-to-terminal dense expert c_fc, hidden bias, and c_proj chord, scored through the complete routed GELU expert function.",
+    "discovery_banks": [
+      {
+        "name": "discovery_a",
+        "seed": 20260911,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      },
+      {
+        "name": "discovery_b",
+        "seed": 20260912,
+        "batches": 4,
+        "batch_size": 8,
+        "block_size": 256,
+        "tokens": 8192
+      }
+    ],
+    "heldout": {
+      "seed": 20260913,
+      "batches": 2,
+      "batch_size": 8,
+      "block_size": 256,
+      "activation_sample_cap_per_layer": 2048
+    },
+    "expert_factors": {
+      "c_fc_right": "Router-probability-weighted uncentered covariance of assigned residual inputs x.",
+      "c_fc_left": "Uncentered covariance of the exact routed pre-GELU backpropagated error delta_h = GELU'(pre) * (p delta_y c_proj).",
+      "c_proj_right": "Router-probability-weighted uncentered covariance of assigned post-GELU activations h.",
+      "c_proj_left": "Uncentered covariance of routed residual errors p delta_y.",
+      "ridge_ratio": 0.000001,
+      "normalization": "For covariance C of width d, use C_bar = d C / trace(C), add ridge_ratio times identity, and take the unique symmetric PSD square root by eigh.",
+      "minimum_assignments_per_expert_each_bank": 128
+    },
+    "anti_leakage": "Terminal parameters and heldout tokens do not enter routes, covariance factors, roots, normalization, random signs, or fit hyperparameters. Terminal parameters enter only the frozen chord target. Heldout tokens are used only for final function/JVP scoring.",
+    "stability_measurements": [
+      "cross-bank covariance-root operator cosine for all four factors",
+      "cross-bank candidate heldout action cosine",
+      "minimum expert occupancy",
+      "finite eigenvalues, coordinates, outputs, JVPs, and objectives"
+    ]
+  },
+  "candidate": {
+    "c_fc_latent_coordinates_per_expert": 5120,
+    "c_proj_latent_coordinates_per_expert": 5120,
+    "hidden_bias_coordinates_per_expert": 1536,
+    "coordinates_per_expert": 11776,
+    "experts_per_layer": 8,
+    "layers": 12,
+    "total_coordinates_all_layers": 1130496,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 200.34782608695653,
+    "block_fht_layers": 3,
+    "independent_latents_for_feature_and_write": true,
+    "full_rank_materialized_generated_matrices": true,
+    "dense_c_fc_or_c_proj_parameter_in_candidate": false,
+    "dense_or_lora_learned_basis": false,
+    "fixed_dense_covariance_state_in_oracle_only": true
+  },
+  "fit_protocol": {
+    "coordinate_initialization": "All generated chord coordinates and hidden-bias chord start at zero for exact candidate/control function equality at step zero.",
+    "objective": "Normalized heldout-excluded discovery residual-output MSE plus 0.10 times analytic input-JVP MSE; candidate and control receive the identical objective.",
+    "optimizer": "AdamW over counted coordinates only, no weight decay, independently restarted for each family and discovery bank.",
+    "steps": 600,
+    "checkpoint_updates": 0,
+    "primary_metric": "Exact outer-routed dense-teacher residual-output recovery on untouched heldout activations.",
+    "local_metric": "Analytic input-JVP recovery through c_fc, GELU, c_proj, and the fixed covariance transforms."
+  },
+  "frozen_gates": {
+    "candidate_heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "candidate_heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "candidate_heldout_expert_recovery_min_each_bank": 0.5,
+    "candidate_heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_isotropic_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_sealed_static_ceiling_recovery_mean_min_each_bank": 0.1,
+    "sealed_static_ceiling_recovery_a": 0.43303557485342026,
+    "sealed_static_ceiling_recovery_b": 0.42612191041310626,
+    "candidate_cross_bank_action_cosine_mean_min": 0.8,
+    "candidate_cross_bank_factor_operator_cosine_mean_min": 0.8,
+    "minimum_expert_assignments_each_bank": 128,
+    "all_values_finite": true,
+    "paired_parameter_compression_ratio_min": 200.0
+  },
+  "decision_rule": {
+    "pass": "Only an all-gate pass authorizes preregistration of a compact procedural approximation to the stable full KFAC square-root factors plus a separate initialization/Mapping-Loss shadow. It does not authorize dense factor storage, language-model training, a larger rung, or attention work.",
+    "fail": "Close the exact positive-square-root full-KFAC matrix-normal chart. Do not sweep covariance powers, ridge, latent allocation, BlockFHT seed/layers, optimizer, LR, steps, regularizers, or thresholds. Reconsider the 200x full-expert premise or formulate a non-matrix architecture-level expert decomposition before another run.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_zero_update_oracle_after_tests_and_identity_seal": true,
+    "dense_factor_storage_in_model": false,
+    "production_implementation": false,
+    "mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "expected_duration_policy": "Foreground-poll only if the measured full protocol is below five minutes; otherwise launch one detached terminal/error-only @Codex watcher immediately after the run.",
+    "callback_policy": "For a one-to-two-hour analysis, emit only terminal success or actionable failure/error."
+  },
+  "identity": {
+    "preregistration_parent_commit": "6e6abdb7240b03fd43ee3878650262b5369e4e98",
+    "preregistration_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_matrix_normal_kfac_chart_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {},
+    "exact_execution_commit": null,
+    "plan_sha256_at_execution": null
+  }
+}
