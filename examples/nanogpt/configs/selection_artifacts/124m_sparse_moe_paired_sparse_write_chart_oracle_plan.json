@@ -66,6 +66,7 @@
     "fixed_support_count_per_neuron": 3,
     "fixed_support_formula": "Let q,r=divmod(j,768). The three indices are (a_t*r+b_t+q*c_t) mod 768 for (a,b,c)=(1,0,0),(437,363,292),(721,606,474). Each stream is exactly balanced at two visits per residual coordinate and all three indices are distinct for every j. The support is procedural and stores no metadata.",
     "output_flow": "One static learned mixed-radix orthogonal flow per transformer layer: eight radix-2 stages within each of three 256-coordinate blocks and one three-Givens radix-3 cross-block stage, totaling 3840 angles/layer.",
+    "initialization": "Both gauges restart from identical coordinates: spectral diagonals, hidden bias, and sparse write coefficients are zero; every output-flow raw angle is atanh(0.125). Warmup uses the same initialization and is discarded before the registered fits.",
     "output_coefficients_per_expert": 4608,
     "joint_gauge": "The candidate derives one permutation per evaluated layer/expert from discovery data only and applies it jointly to dense teacher c_fc rows, biases, and c_proj columns in the auxiliary coordinate-alignment targets. The dense teacher function/JVP target remains exactly unchanged. The permutation is a teacher-side equality transformation used only during oracle fitting and is neither counted nor deployed; the compact model is generated directly in canonical slot order.",
     "assignment_warmup_steps": 100,
