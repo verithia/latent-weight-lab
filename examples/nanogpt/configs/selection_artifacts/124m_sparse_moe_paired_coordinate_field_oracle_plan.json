@@ -1,0 +1,121 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_coordinate_field_oracle_plan_v1",
+  "recorded_at": "2026-08-12T12:20:00+08:00",
+  "status": "preregistered_before_implementation_and_recovery_values",
+  "scientific_question": "Can a nonlinear implicit coordinate field co-generate each expert neuron's c_fc feature vector and c_proj residual-write vector at greater than 200x trainable compression?",
+  "theory_reconciliation": {
+    "neuron_pair_object": "Generate the coupled pair (a_j,b_j) used by y(x)=sum_j b_j GELU(a_j^T x+bias_j); never align c_fc and c_proj hidden indices independently.",
+    "causal_change": "Replace matrix-basis coordinates with per-neuron latent codes decoded jointly as a nonlinear function of residual-channel position. Expert-specific codes avoid measured shared-rotation cancellation; learned layerwise decoders avoid a fixed pseudo-random output image; joint two-sided outputs avoid predicting c_proj from c_fc alone.",
+    "not_a_closed_family": "This is not a fixed FHT/spectral image, sparse Givens orbit, low-rank additive basis, Kronecker/KFAC span, or tensor-train weight decomposition. The coordinate field is nonlinear in neuron code and residual-channel coordinate and may generate full-ordinary-rank matrices.",
+    "not_lora": "There is no dense learned dictionary, stored dense base matrix, or additive low-rank residual. All codes, decoder weights, biases, and scales are counted.",
+    "mapping_paper_connection": "This implements a smooth low-dimensional latent-to-parameter map at layerwise/neuron-pair granularity. A local Jacobian-action term is included because the theorem is local and the residual-link failure is functional.",
+    "prior_constraints": {
+      "feature_does_not_predict_write": "The sealed cross-neuron feature-to-write ridge audit recovered only about 0.07 of heldout write function, so the decoder emits independent feature/write values from a shared code rather than tying b_j to a_j.",
+      "shared_rotation_conflict": "Layer-shared butterfly expert gradients had mean pairwise cosine -0.14218 and cancellation ratio 2.65e-4, so every expert owns its neuron codes.",
+      "fixed_basis_ceiling": "The 209.45x spectral map recovered about 0.382 and the 219.43x maximum KFAC chart about 0.43, motivating a nonlinear coordinate field rather than another wider static basis."
+    }
+  },
+  "source": {
+    "run_name": "pro6_mai_v3_124m_dense_moe8_top2_0p5tpp_lr24e4",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "moe_top_k": 2,
+    "terminal_gauge": "Collect inputs through the exact terminal model and routing. Fit and score the coupled expert function with both dense matrices used only as the frozen teacher."
+  },
+  "candidate": {
+    "name": "layerwise_paired_neuron_coordinate_field",
+    "formula": "(a_l,e,j[k],b_l,e,j[k])=exp(s_l)*MLP_l(concat(z_l,e,j,phi(k))); y=sum_j b_j GELU(a_j^T x+q_l,e,j)",
+    "neuron_code_width": 6,
+    "channel_encoding": "Fixed 17-vector [t,sin(pi*2^r*t),cos(pi*2^r*t)] for r=0..7 and t=2k/(d-1)-1",
+    "channel_encoding_width": 17,
+    "decoder_input_width": 23,
+    "decoder_hidden_width": 64,
+    "decoder_hidden_layers": 2,
+    "decoder_activation": "GELU",
+    "decoder_output_width": 2,
+    "decoder_coordinates_per_layer": 5826,
+    "neuron_code_coordinates_per_layer": 73728,
+    "hidden_bias_coordinates_per_layer": 12288,
+    "log_scale_coordinates_per_layer": 2,
+    "total_coordinates_per_layer": 91844,
+    "total_coordinates_all_layers": 1102128,
+    "dense_paired_parameters_per_layer": 18874368,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_parameter_compression_ratio": 205.50498671678656,
+    "materialized_dense_cfc_allowed": false,
+    "materialized_dense_cproj_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "router_scope": "The small top-2 router remains an independently counted non-target component; both expert matrices are generated."
+  },
+  "control": {
+    "name": "fixed_decoder_fit_codes_only",
+    "description": "Use the identical initialized nonlinear decoder but freeze decoder weights; fit only neuron codes, hidden biases, and two layer scales.",
+    "trainable_coordinates_per_layer": 86018,
+    "paired_parameter_compression_ratio": 219.42500174335883
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Route terminal activations and deterministically sample 128 assigned tokens per expert for each discovery bank and probed layer.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and tangent probes never affect coordinates, stopping, scales, or selection."
+  },
+  "fit_protocol": {
+    "optimizer": "AdamW on compact coordinates only",
+    "steps": 600,
+    "decoder_learning_rate": 0.003,
+    "code_bias_scale_learning_rate": 0.01,
+    "decoder_weight_decay": 0.0001,
+    "code_weight_decay": 0.0,
+    "gradient_clip": 10.0,
+    "objective": "Equal-expert normalized residual-output MSE plus 0.10 times normalized analytic input-JVP MSE along one frozen Rademacher probe per fitted token.",
+    "selection": "Use the final registered step. No heldout selection, retry, LR/rank/code-width sweep, or threshold adjustment.",
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true
+  },
+  "evaluation": {
+    "primary": "Exact routed dense-teacher residual-output recovery on untouched terminal activations.",
+    "local": "Analytic input-JVP recovery on an independently seeded frozen Rademacher direction.",
+    "expert": "Score every expert before top-2 mixture aggregation.",
+    "stability": "Compare heldout routed actions from independently fitted discovery A/B fields by cosine."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_control_recovery_mean_min_each_bank": 0.1,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Passing every gate for both fits authorizes only implementation, exact-count/correctness tests, and a separately preregistered initialization-plus-Mapping-Loss shadow.",
+    "fail": "Reject this exact six-code, 64-wide field. Diagnose expressivity versus optimization only from preregistered diagnostics; do not sweep code width, hidden width, Fourier frequencies, LR, seed, steps, or thresholds."
+  },
+  "authorization": {
+    "checkpoint_updates": 0,
+    "language_model_training": false,
+    "mfu_preflight": false,
+    "larger_rung": false,
+    "full_attention_work_before_terminal_result": false
+  },
+  "identity": {
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_paired_coordinate_field_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  }
+}
