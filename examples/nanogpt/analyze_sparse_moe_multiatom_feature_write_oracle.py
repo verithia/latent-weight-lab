@@ -308,6 +308,13 @@ def validate_plan(plan: dict[str, Any], plan_path: Path) -> None:
     if plan.get("schema_version") != PLAN_SCHEMA:
         raise ValueError("multi-atom plan schema mismatch")
     root = Path(__file__).resolve().parents[2]
+    identity = plan.get("identity")
+    if identity is not None:
+        if identity.get("entrypoint_sha256") != file_sha256(Path(__file__)):
+            raise ValueError("entrypoint hash is not sealed")
+        for relative, expected in identity.get("helper_sha256", {}).items():
+            if file_sha256(root / relative) != expected:
+                raise ValueError(f"helper hash drift: {relative}")
     for control in plan["sealed_controls"].values():
         if file_sha256(root / control["path"]) != control["sha256"]:
             raise ValueError(f"sealed control hash drift: {control['path']}")
