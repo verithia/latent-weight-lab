@@ -275,6 +275,17 @@ def preflight(plan: dict[str, Any], device: str) -> dict[str, Any]:
         candidate=True,
         device=device,
     )
+    # The scientific parent endpoints have fitted nonzero modulation.  A fresh
+    # parent module has exact zero output and therefore an identically zero
+    # frame gradient, which is unsuitable for a timing/finite smoke only.
+    with torch.no_grad():
+        module.output_modulation.fill_(0.05)
+        module.hidden_bias.copy_(
+            torch.randn(
+                module.hidden_bias.shape, generator=generator,
+                dtype=module.hidden_bias.dtype,
+            ).to(device) * 0.1
+        )
     samples = 1024
     inputs = torch.randn(1, samples, int(source["input_width"]), generator=generator).to(device)
     directions = torch.randn_like(inputs)
