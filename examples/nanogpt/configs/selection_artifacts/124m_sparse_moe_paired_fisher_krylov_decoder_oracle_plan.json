@@ -23,6 +23,7 @@
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "model_seed": 1337,
     "next_iter": 238,
+    "tensor_layers": 12,
     "layers": [0, 5, 11],
     "num_experts": 8,
     "outer_moe_top_k": 2,
@@ -85,6 +86,53 @@
     "relative_damping": 0.0001,
     "selection": "Use the final registered iterate; no heldout selection or polynomial-order, map, seed, normalization, damping, iteration, allocation, or threshold sweep.",
     "scoring": "Materialize theta_init+Kz only for exact heldout routed output and analytic input-JVP scoring against the terminal teacher."
+  },
+  "implementation_protocol_amendment_before_implementation_or_candidate_values": {
+    "recorded_at": "2026-08-14T03:02:00+08:00",
+    "reason": "The theory preregistration fixed the image and gates but did not uniquely specify BlockFHT column normalization, Fisher sample normalization, relative damping, routing gauge, or residual convention. These implementation-only choices are frozen before writing the oracle or observing any candidate value.",
+    "routing_and_teacher_gauge": {
+      "activation_source": "terminal teacher model on each registered discovery or heldout bank",
+      "routing_source": "terminal teacher router, held fixed for candidate, control, and teacher",
+      "router_coordinates_counted": false,
+      "expert_sample_rule": "For each routed expert assignment, retain that expert's normalized top-k router probability; deterministic without-replacement sampling uses the registered sample seed and exactly 1024 assignments per expert.",
+      "fisher_sample_reduction": "J^T J divided by the registered samples_per_expert, with router probability present once in J and therefore squared in F.",
+      "terminal_target_delta": "terminal paired (c_fc,c_proj) weights minus the exactly reconstructed scratch-initial paired weights in the same expert/neuron gauge"
+    },
+    "procedural_map": {
+      "block_fht_layers": 3,
+      "paired_flatten_order": "c_fc row-major followed by c_proj row-major, independently for each expert",
+      "branch_seed_formula": "procedural_seed_base + 1000003*bank_index + 1009*layer + 131*expert + 104729*polynomial_order",
+      "normalization": "Each repeated-block BlockFHT output is multiplied by sqrt(next_power_of_two(branch_coordinates)/paired_parameter_count_per_expert), giving unit mean column energy exactly because every restricted normalized-Hadamard output row has squared norm branch_coordinates/next_power_of_two(branch_coordinates).",
+      "coordinate_dtype": "float32",
+      "operator_dtype": "float32"
+    },
+    "fisher_normalization": {
+      "power_initialization": "deterministic dense paired Rademacher vector from power_seed_base + 1009*bank_index + 17*layer",
+      "power_iterations": 8,
+      "largest_eigenvalue": "final Rayleigh quotient after eight normalized F applications, clamped below by normalization_epsilon",
+      "normalized_operator": "Fbar=F/largest_eigenvalue",
+      "objective_metric": "Use Fbar, not unnormalized F, in both candidate and control normal equations; this changes only a common scalar and makes relative damping reproducible."
+    },
+    "linear_solver": {
+      "name": "identity-preconditioned conjugate gradients",
+      "normal_equation": "(K^T Fbar K + ridge I) z = K^T Fbar terminal_delta",
+      "relative_damping_definition": "ridge=relative_damping*average_diagonal(K^T Fbar K)",
+      "average_diagonal_estimator": "mean of two deterministic latent Rademacher Rayleigh probes with seeds power_seed_base + 5000003 + 1009*bank_index + 17*layer + 104729*family_index",
+      "maximum_iterations": 64,
+      "stopping_residual": "Euclidean norm of the latent normal residual divided by the Euclidean norm of the initial right-hand side",
+      "family_index": {"candidate": 0, "control": 1},
+      "final_iterate_only": true
+    },
+    "heldout_scoring": {
+      "mixture_output": "Exact nonlinear candidate/control expert output mixed with the fixed terminal router probabilities, scored as 1-SSE/teacher_energy against the terminal teacher output.",
+      "expert_output": "Unweighted per-expert exact nonlinear output recovery on all heldout assignments for that expert.",
+      "input_jvp": "Exact analytic derivative of each materialized candidate/control expert with respect to the heldout input Rademacher direction, mixed by fixed terminal probabilities; router-probability derivatives are excluded equally for teacher, candidate, and control.",
+      "cross_bank_action": "Cosine of the flattened absolute heldout candidate mixture outputs for independently fitted discovery banks."
+    },
+    "preflight": {
+      "rule": "One full registered-width, registered-expert, registered-sample Fisher power action and one candidate/control normal action on CUDA, with adjoint and finite checks. Project runtime from measured operator counts; do not run the scientific audit unless the exact-shape preflight passes.",
+      "scientific_polling": "Foreground only if projected full audit runtime is at most five minutes; otherwise use one terminal/error-only @Codex watcher, adding a resettable 90-minute heartbeat only after observed elapsed time exceeds two hours."
+    }
   },
   "frozen_gates": {
     "candidate_heldout_output_recovery_mean_min_each_bank": 0.8,
