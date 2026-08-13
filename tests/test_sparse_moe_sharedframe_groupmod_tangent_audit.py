@@ -32,7 +32,7 @@ def test_group_tangent_projection_recovers_right_group_direction() -> None:
 
 
 def test_conflict_metrics_detect_exact_cancellation() -> None:
-    gradients = torch.tensor([[1.0, 0.0], [-1.0, 0.0]])
+    gradients = torch.tensor([[[1.0, 0.0]], [[-1.0, 0.0]]])
     row = conflict_metrics(gradients)
     assert row["pairwise_cosine_mean"] == -1.0
     assert row["cancellation_ratio"] == 0.0
@@ -40,7 +40,7 @@ def test_conflict_metrics_detect_exact_cancellation() -> None:
 
 
 def test_corresponding_cosines_and_side_gate() -> None:
-    values = torch.eye(3).repeat(2, 1, 1)
+    values = torch.eye(3).repeat(2, 1, 1).unsqueeze(-1)
     row = corresponding_cosines(values, values)
     assert row["mean"] == 1.0
     gates = {

@@ -49,9 +49,9 @@ COORDINATE_SCHEMA = "nanogpt_sparse_moe_sharedframe_fullrank_pregelu_coordinates
 
 def conflict_metrics(gradients: torch.Tensor) -> dict[str, Any]:
     """Summarize expert conflict for one [expert, coordinate] gradient matrix."""
-    if gradients.ndim != 2 or gradients.shape[0] < 2:
-        raise ValueError("gradients must be [expert, coordinate]")
-    gradients = gradients.float()
+    if gradients.ndim < 2 or gradients.shape[0] < 2:
+        raise ValueError("gradients must begin with an expert dimension")
+    gradients = gradients.float().reshape(gradients.shape[0], -1)
     norms = gradients.norm(dim=-1)
     finite = torch.isfinite(gradients).all(dim=-1) & torch.isfinite(norms)
     nonzero = finite & (norms > 1e-12)
@@ -77,9 +77,11 @@ def conflict_metrics(gradients: torch.Tensor) -> dict[str, Any]:
 
 
 def corresponding_cosines(left: torch.Tensor, right: torch.Tensor) -> dict[str, Any]:
-    if left.shape != right.shape or left.ndim != 3:
-        raise ValueError("crossed tensors must be [layer, expert, coordinate]")
-    values = F.cosine_similarity(left.float(), right.float(), dim=-1, eps=1e-12)
+    if left.shape != right.shape or left.ndim < 3:
+        raise ValueError("crossed tensors must begin with layer and expert dimensions")
+    left = left.float().reshape(left.shape[0], left.shape[1], -1)
+    right = right.float().reshape(right.shape[0], right.shape[1], -1)
+    values = F.cosine_similarity(left, right, dim=-1, eps=1e-12)
     return {
         "mean": float(values.mean()),
         "minimum_layer_mean": float(values.mean(dim=1).min()),

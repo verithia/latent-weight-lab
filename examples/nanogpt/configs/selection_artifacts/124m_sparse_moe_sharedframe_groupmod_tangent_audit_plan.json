@@ -110,7 +110,7 @@
     "causal_parent_result_commit": "63d7f9ad951644cf834d065f175d315f5b6ef965",
     "preregistration_git_commit": "e139c12e8eb765e02b62d7f9c6ba3ee74ab67c79",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_sharedframe_groupmod_tangent_audit.py",
-    "entrypoint_sha256": "2c98b8bc29cb7a2d7cc8ea6e55a900ae30c4a4a01f3c3d472f281ac50c4b5686",
+    "entrypoint_sha256": "a04379be823cee5edbccaab5d61fb2f01669c57e3dc14209071aa774a2a6afc7",
     "helper_sha256": {
       "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
       "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
