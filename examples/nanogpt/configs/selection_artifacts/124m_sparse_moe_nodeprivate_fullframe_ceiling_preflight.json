@@ -1,0 +1,40 @@
+{
+  "all_values_and_gradients_finite": true,
+  "candidate_control_initial_max_abs_difference": 5.21540641784668e-08,
+  "candidate_control_two_step_seconds": 1.4297641190059949,
+  "candidate_diagnostics": {
+    "all_gradients_finite": true,
+    "final_jvp_loss": 0.8619386553764343,
+    "final_loss": 1.7288081645965576,
+    "final_output_loss": 0.8668694496154785,
+    "hidden_bias_rms": 0.10013232380151749,
+    "initial_jvp_loss": 1.0998892784118652,
+    "initial_loss": 2.2014856338500977,
+    "initial_output_loss": 1.101596474647522,
+    "maximum_preclip_gradient_norm": 0.08358114212751389,
+    "minimum_loss": 1.7288081645965576,
+    "output_modulation_rms": 0.0471380315721035,
+    "private_raw_frame_movement_rms": 0.017332499846816063,
+    "steps": 2
+  },
+  "candidate_selected_frame_coordinates": 14155776,
+  "control_diagnostics": {
+    "all_gradients_finite": true,
+    "final_jvp_loss": 1.0632015466690063,
+    "final_loss": 2.124063491821289,
+    "final_output_loss": 1.0608620643615723,
+    "hidden_bias_rms": 0.10026416182518005,
+    "initial_jvp_loss": 1.0998892784118652,
+    "initial_loss": 2.2014856338500977,
+    "initial_output_loss": 1.101596474647522,
+    "maximum_preclip_gradient_norm": 0.08027227967977524,
+    "minimum_loss": 2.124063491821289,
+    "output_modulation_rms": 0.0458584688603878,
+    "private_raw_frame_movement_rms": 0.0,
+    "steps": 2
+  },
+  "device": "cuda",
+  "maximum_memory_allocated_bytes": 2568476160,
+  "projected_full_two_bank_seconds": 857.8584714035969,
+  "schema_version": "nanogpt_sparse_moe_nodeprivate_fullframe_ceiling_preflight_v1"
+}
