@@ -1,0 +1,111 @@
+{
+  "schema_version": "nanogpt_sparse_moe_input_atlas_ceiling_normalized_result_v1",
+  "recorded_at": "2026-08-14T17:12:00+08:00",
+  "classification": "GLOBAL_RANK480_INPUT_REALIZATION_REJECTED",
+  "source": {
+    "git_commit": "565e3862f7314939c8adc1123c146fe64dc84082",
+    "theory_preregistration_git_commit": "72bd4b0dd17c43df67b1c7d66707ebbafe9f0ecc",
+    "plan_sha256": "df877d5df45b7e513e45d1dab0a5215d43810c4bfde0789a681afcf02afeec44",
+    "entrypoint_sha256": "7bbd167fcff67bfa185340ed07bc774e0410211c813b9fb7b911fbd209e4e476",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "checkpoint_updates": 0
+  },
+  "artifacts": {
+    "output": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_input_atlas_ceiling_20260814a",
+    "raw_result_sha256": "c948bac85a2d527e4ff73a136c28403400993a8942c8a011a5021c7872902a2f",
+    "input_bases_sha256": "1814807558562c278466e1bba1a85c90529a4680bfdf20d99a8a34eb26ffb3bc",
+    "launch_metadata_sha256": "f4537cf6876bc0007b2e650c77b70526a41457ea44822026681ddc5773da3b3c",
+    "run_log_sha256": "c948bac85a2d527e4ff73a136c28403400993a8942c8a011a5021c7872902a2f",
+    "status_sha256": "cd2562ffa800f9d37b22cd03e37031b28b131f36c7e1c6f71cdaa5f3d8607aa5"
+  },
+  "execution": {
+    "wall_seconds": 11.697698593139648,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "foreground_polled": true,
+    "watchdog_required": false,
+    "terminal_exit_code": 0,
+    "gpu_returned_idle": true
+  },
+  "input_atlas": {
+    "rank": 480,
+    "discovery_a_heldout_jacobian_energy_recovery": 0.7178740548339004,
+    "discovery_b_heldout_jacobian_energy_recovery": 0.7179058107616465,
+    "heldout_same_split_jacobian_energy_recovery": 0.7283859112043446,
+    "discovery_a_minimum_node_recovery": 0.7097133512482539,
+    "discovery_b_minimum_node_recovery": 0.7094460478598742,
+    "heldout_minimum_node_recovery": 0.7209623421267589,
+    "cross_bank_subspace_overlap": 0.9137101814943587,
+    "metric_capacity_gate_passed": true,
+    "causal_identification_gate_passed": true
+  },
+  "preactivation_ridge_fit": {
+    "discovery_a_mean_recovery_by_layer_0_5_11": [0.9584844335913658, 0.9787418767809868, 0.9823499843478203],
+    "discovery_b_mean_recovery_by_layer_0_5_11": [0.9585390388965607, 0.978398822247982, 0.982585497200489],
+    "heldout_mean_recovery_by_layer_0_5_11": [0.959680899977684, 0.9793942719697952, 0.9832301512360573],
+    "maximum_relative_normal_equation_residual": 1.4397337328191561e-15,
+    "numerical_fit_is_not_the_failure": true
+  },
+  "heldout_functional_recovery": {
+    "discovery_a_input_only": {
+      "output": 0.9162261497722373,
+      "minimum_layer": 0.8785053065569116,
+      "minimum_expert": 0.75165133421323,
+      "jvp": 0.21473334911382821
+    },
+    "discovery_b_input_only": {
+      "output": 0.9163704489093857,
+      "minimum_layer": 0.8778187518039524,
+      "minimum_expert": 0.7516818688590704,
+      "jvp": 0.21058890768274385
+    },
+    "heldout_same_split_input_only": {
+      "output": 0.927179486586958,
+      "minimum_layer": 0.8931693417250143,
+      "minimum_expert": 0.7846508149656559,
+      "jvp": 0.1962952825007668
+    },
+    "discovery_a_paired": {
+      "output": 0.8385292296141781,
+      "minimum_layer": 0.8063137191132161,
+      "minimum_expert": 0.651531096083511,
+      "jvp": 0.16594961723394822
+    },
+    "discovery_b_paired": {
+      "output": 0.8387961529302964,
+      "minimum_layer": 0.8064945431423084,
+      "minimum_expert": 0.6514985969065485,
+      "jvp": 0.1629909423904443
+    },
+    "heldout_same_split_paired": {
+      "output": 0.848454508802959,
+      "minimum_layer": 0.8184032062818887,
+      "minimum_expert": 0.6769698453962865,
+      "jvp": 0.15337733174463428
+    },
+    "cross_bank_paired_action_cosine": 0.9395126547162408
+  },
+  "oracle_accounting": {
+    "input_atlas_coordinates": 368640,
+    "dense_node_coefficient_coordinates": 17694720,
+    "input_only_retains_dense_cproj": true,
+    "deployable_candidate": false
+  },
+  "gate_summary": {
+    "all_output_layer_and_expert_gates_pass": true,
+    "all_jvp_gates_fail": true,
+    "same_split_realization_pass": false,
+    "causal_paired_pass": false
+  },
+  "conclusion": "One stable global rank-480 atlas contains about 72% of the dense teacher input-Jacobian row energy, and unrestricted node-specific coefficients reproduce 92-98% of sampled preactivation energy and more than 91.6% of routed output. Nevertheless their self-consistent GELU tangent recovers only 19.6-21.5% of dense input JVP, including the heldout-leaking arm. The rank and cross-bank atlas identification are not the primary failure; unweighted preactivation regression does not preserve activation-boundary motion. The registered ridge realization is closed, and the compact pseudo-random map cannot yet be named the sole bottleneck.",
+  "authorization": {
+    "compact_coefficient_map_theory": false,
+    "causal_atlas_acquisition_theory": false,
+    "joint_input_write_atlas_theory": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  }
+}
