@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import torch
 
 from examples.nanogpt.analyze_sparse_moe_fullwidth_pregelu_chart_oracle import (
     FullWidthPreGeluChart,
     coordinate_count,
     procedural_signs,
+    validate_plan,
 )
 
 
@@ -151,3 +155,15 @@ def test_procedural_fullwidth_map_has_requested_dimensions() -> None:
         inputs, torch.randn_like(inputs), layer=0
     )
     assert output.shape == output_jvp.shape == (2, 3, 8)
+
+
+def test_preregistered_plan_and_helper_inventory_are_hash_sealed() -> None:
+    plan_path = (
+        Path(__file__).parent / "configs" / "selection_artifacts"
+        / "124m_sparse_moe_fullwidth_pregelu_chart_oracle_plan.json"
+    )
+    plan = json.loads(plan_path.read_text(encoding="utf-8"))
+    validate_plan(plan, plan_path)
+    assert plan["identity"]["theory_preregistration_git_commit"] == (
+        "2f21fe2cee4623bffe5650be1d7ede9af31193b1"
+    )
