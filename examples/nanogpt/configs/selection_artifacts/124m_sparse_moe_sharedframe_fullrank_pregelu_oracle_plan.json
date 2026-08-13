@@ -1,0 +1,159 @@
+{
+  "schema_version": "nanogpt_sparse_moe_sharedframe_fullrank_pregelu_oracle_plan_v1",
+  "recorded_at": "2026-08-14T15:10:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "After fixed full-rank pseudo-random normal fields fail, can one counted learned global input frame align all complete sparse-MoE expert pre-GELU normals while a previously sufficient shared write atlas preserves their residual writes at at least 200x paired-matrix compression?",
+  "theory": {
+    "binding_observations": [
+      "The rank-480 input-atlas counterfactual preserves 91.6-92.7% routed output but only 19.6-21.5% self-consistent input JVP.",
+      "Holding the projected gates while restoring dense c_fc normals recovers 96.7% input JVP; holding teacher gates while keeping rank-480 normals recovers only 23.4-23.8%. About 97.1% of tangent-error energy is the normal term and about 4.0% is boundary motion.",
+      "The full-rank multiplicatively gated fixed pseudo-random normal field recovers only 29.1% output and approximately zero JVP despite stable independent fits, so materialized rank without task-aligned orientation is not sufficient.",
+      "The global shared write eigensystem needs rank 414 for the frozen joint output>=0.8 and JVP>=0.6 gates in both discovery banks. Rank 448 therefore leaves write-side margin while fitting the 200x coordinate budget.",
+      "The paired Fisher-Krylov image improves JVP by about 0.102 over its fixed-map control but improves output by only about 0.013, proving that metric rotation conditions an existing image but does not insert missing endpoint directions."
+    ],
+    "candidate_formula": "For node n=(layer,expert), x in R^768, a learned shared row-normalized input frame U in R^(768x768), fixed node signs defining S_n:R^768->R^1536 and T_n:R^1536->R^448, node bias b_n in R^1536, node output modulation d_n in R^448, and the sealed bank-specific global write basis V in R^(768x448): p_n=S_n(Ux)+b_n; h_n=GELU(p_n); q_n=d_n elementwise T_n(h_n); f_n(x)=V q_n.",
+    "procedural_maps": "S_n and T_n are independent signed normalized 2048-point FHT expansion/contraction maps. Pad, sign, normalized-FHT, sign, truncate, and scale by sqrt(2048/input_width) for S_n or sqrt(2048/hidden_width) for T_n. No fixed dense map is stored.",
+    "full_input_rank_argument": "U is square and S_n has 768 input columns, so the materialized c_fc normal field can have full input rank 768. Unlike the rejected rank-480 atlas, no 288-dimensional input-normal complement is deleted. Unlike the rejected fixed full-rank gated field, U is a counted learned task frame rather than a row-local seed-only span.",
+    "write_argument": "V is the already sealed joint global write eigensystem truncated to rank 448. The registered global joint curve crosses output 0.8 and JVP 0.6 at rank 414 in both discovery banks, and the preceding rank-480 routed prerequisite recovered about 0.895 output, 0.690 JVP, and at least 0.818 weakest-expert output.",
+    "why_not_lora": "There is no dense expert base, no additive dense residual, and no frozen target matrix. U, procedural S/T, GELU, node bias/output modulation, and V define the complete expert. The learned frame is nevertheless an explicit relaxation of the paper's fixed orthogonal mapping and must be counted honestly.",
+    "paper_reconciliation": "The paper's modulation is represented by node output modulation and bias, while the analytic JVP term is a local functional smoothness/alignment test. The learned U relaxation is not claimed to be the paper's fixed mapping; it is the minimal architecture change forced by the measured normal-direction failure.",
+    "scope": "This is an optimistic zero-checkpoint-update terminal oracle. The bank-specific V and teacher-supervised functional objective are noncausal. A pass authorizes only a separate causal initialization and end-to-end acquisition preregistration."
+  },
+  "source": {
+    "parent_git_commit": "3a194ae951f33c6804943ad18f1beb753df16a2d",
+    "write_ceiling_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_write_subspace_ceiling_result.json",
+    "write_ceiling_result_sha256": "ea95071667ce81cdaa25f40d4616f991b26acb458d9b90af8f640004e16ca7e3",
+    "input_atlas_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_input_atlas_ceiling_result.json",
+    "input_atlas_result_sha256": "63e2fe121649dc2345943422ea7e6a051f68b9a434432771042f264f549c00c8",
+    "gelu_boundary_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_gelu_boundary_tangent_decomposition_result.json",
+    "gelu_boundary_result_sha256": "05eae204dd99f0d5f5a65e2f6172b759f9c994e555959ccae4a4d51e6f6d15fd",
+    "fullwidth_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_fullwidth_pregelu_chart_oracle_result.json",
+    "fullwidth_result_sha256": "b0010fe75f5b0be522caeb9eda885944a222cb9b9ad348e983461b9dd6f58eff",
+    "fixed_fullrank_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_fullrank_gated_normal_field_oracle_result.json",
+    "fixed_fullrank_result_sha256": "ecbddd270ac6f10430c680f032ca33e605233d430a85d3e2127d9a0dce65f6ee",
+    "fisher_krylov_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_paired_fisher_krylov_decoder_oracle_result.json",
+    "fisher_krylov_result_sha256": "110bda68050651d70be00af3a1ce477d414e777d2c07360082eb163de3064724",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "procedural_padded_width": 2048,
+    "layers": [0, 5, 11],
+    "dense_paired_parameters_all_layers": 226492416,
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "name": "shared_learned_fullrank_input_frame_rank448_write",
+    "input_frame_rank": 768,
+    "write_rank": 448,
+    "hidden_width": 1536,
+    "input_frame_coordinates": 589824,
+    "counted_write_atlas_coordinates": 344064,
+    "hidden_bias_coordinates": 147456,
+    "output_modulation_coordinates": 43008,
+    "total_coordinates_all_layers": 1124352,
+    "paired_parameter_compression_ratio": 201.44262295081967,
+    "input_frame_seed": 20261601,
+    "procedural_map_seed": 20261602,
+    "procedural_node_seed_rule": "seed = procedural_map_seed + 10007*layer + 1009*expert + 97*map_index, map_index 0,1,2,3",
+    "input_frame_parameterization": "Each of 768 rows is normalized every forward pass and scaled by 0.02*sqrt(768); all 589824 raw entries are counted.",
+    "hidden_bias_initialization": 0.0,
+    "output_modulation_initialization": 0.0,
+    "fixed_dense_map_storage": false,
+    "dense_base_or_residual": false
+  },
+  "fixed_frame_control": {
+    "name": "fixed_seed_fullrank_input_frame_rank448_write",
+    "description": "Identical V, S/T maps, bias, modulation, data, objective, and initialization, but the square input frame is frozen at its seeded initial value. This isolates the explicit learned-frame relaxation from another fixed random normal field.",
+    "counted_materialized_coordinates": 1124352,
+    "trainable_coordinates": 190464,
+    "paired_parameter_compression_ratio_if_all_materialized_coordinates_counted": 201.44262295081967,
+    "same_initial_function": true
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "sample_selection_seed_base": 20261631,
+    "sample_selection_seed_rule": "sample_selection_seed_base + 1009*bank_index + 17*layer",
+    "fit_jvp_probe_seed_base": 20261611,
+    "heldout_jvp_probe_seed_base": 20261612,
+    "sampling": "Use exact terminal top-2 routing and deterministic per-expert samples. Fit discovery A and B independently. Heldout data never affects optimization, topology, rank, stopping, or thresholds."
+  },
+  "fit_protocol": {
+    "target": "Dense complete-expert routed output and analytic input JVP in the fixed bank-specific rank-448 global write coordinates.",
+    "objective": "Equal-layer/equal-expert normalized coefficient MSE plus 1.0 times normalized analytic coefficient-JVP MSE.",
+    "optimizer": "AdamW on the candidate input frame, hidden biases, and output modulation; the control optimizes only bias and output modulation.",
+    "steps": 600,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "jvp_weight": 1.0,
+    "precision": "float32 fitting and scoring; sealed float64 eigensystem V is loaded as float32",
+    "selection": "Use the final registered step. Do not choose a step, LR, rank, sign seed, objective weight, or checkpoint from heldout values.",
+    "candidate_control_same_nonframe_initial_state": true
+  },
+  "prerequisite_gates": {
+    "rank448_fixed_write_mixture_recovery_mean_min_each_bank": 0.8,
+    "rank448_fixed_write_jvp_recovery_mean_min_each_bank": 0.6,
+    "rank448_fixed_write_every_layer_min_each_bank": 0.7,
+    "rank448_fixed_write_every_expert_min_each_bank": 0.5,
+    "rank448_cross_bank_projected_action_cosine_min": 0.8,
+    "procedural_map_repeatability": true,
+    "procedural_expansion_rank": 768,
+    "procedural_expansion_output_width": 1536,
+    "procedural_contraction_output_width": 448
+  },
+  "candidate_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "candidate_minus_fixed_frame_control_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_fixed_frame_control_jvp_recovery_mean_min_each_bank": 0.1,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "all_values_and_gradients_finite": true,
+    "paired_parameter_compression_ratio_min": 200.0
+  },
+  "decision_rule": {
+    "prerequisite_fail": "If the sealed rank-448 write prerequisite or identities fail, stop without fitting and close this allocation.",
+    "candidate_pass": "Pass only if both independently fitted banks clear every absolute gate and improve both output and JVP over the identical fixed-frame control by at least 0.1. A pass authorizes theory and preregistration for a causal exact-initialization/end-to-end acquisition experiment at 124M only.",
+    "fail": "Failure closes the exact shared square input frame, rank-448 sealed write frame, 2048-FHT S/T, bias, and output-modulation family. Do not sweep rank, width, seed, map, normalization, LR, optimizer, steps, objective weight, activation, modulation, or thresholds.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "causal_chart_implementation": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "3a194ae951f33c6804943ad18f1beb753df16a2d",
+    "theory_preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_sharedframe_fullrank_pregelu_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": {}
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run committed tests and an exact 768->1536->448 candidate/control two-step CUDA preflight. Foreground-poll only if the complete frozen oracle projects to <=5 minutes; otherwise launch a persistent watcher and verify its atomic receipt immediately.",
+    "callback_policy": "If projected within one to two hours, terminal success and actionable failure only. If longer than two hours, use a 90-minute resettable heartbeat. Every invocation must mention @Codex and contain the causal continuation prompt."
+  }
+}
