@@ -1,0 +1,170 @@
+{
+  "schema_version": "nanogpt_sparse_moe_fullwidth_pregelu_chart_oracle_plan_v1",
+  "recorded_at": "2026-08-14T00:17:59+08:00",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "Does preserving all 1536 GELU activation hyperplanes, with compact learned direction reassignment on both sides of the nonlinearity, recover the complete sparse-MoE expert function and input tangent that rank-561 post-GELU mixing could not?",
+  "theory": {
+    "evidence_chain": [
+      "The sealed global-write audit proves that a shared output atlas is not the binding constraint: rank 561 recovers heldout routed output 0.9305, analytic input JVP 0.7850, and weakest-expert output 0.8788.",
+      "Four post-GELU Givens stages causally improve mean heldout recovery by 0.1059 to 0.1098 over an exact diagonal control, proving that coefficient-to-write reassignment matters.",
+      "The same candidate still recovers only 0.5809 to 0.5827 mean output and negative input JVP, so 561 already-formed ridge responses are not a sufficient nonlinear feature dictionary.",
+      "For non-affine GELU, S GELU(z) is not equal to GELU(S z). Mixing after GELU can reassign existing features but cannot create new activation hyperplanes; the direction-changing map must therefore be tested before GELU while preserving the teacher hidden width.",
+      "The matrix-normal KFAC chart is the strongest stable prior family at about 0.70 output and 0.417 JVP recovery. It shows that a functional metric helps, but its fixed dense base and covariance roots are nondeployable and its nonlinear tangent remains insufficient."
+    ],
+    "candidate_formula": "For global normalized U in R^(480x768), fixed bank-specific orthonormal V in R^(768x480), and node n=(layer,expert): z=Rin_n(Ux); p=S_n(z); h=GELU(g_n elementwise p + b_n); q=Rout_n(T_n(h)); f_n(x)=V(d_n elementwise q). Rin and Rout are one learned disjoint-Givens stage each. S_n is a fixed signed normalized-FHT expansion 480->1536 and T_n is an independently signed normalized-FHT contraction 1536->480.",
+    "activation_width_argument": "S_n maps the compact input chart into 1536 distinct pre-GELU coordinates, so GELU acts on the full teacher hidden width. T_n is applied only after these nonlinear features have formed. This tests the location of mixing, not another post-GELU rank or stage sweep.",
+    "procedural_expansion": "Pad the 480-vector to 2048, multiply by a frozen node-specific Rademacher sign vector, apply the normalized 2048-point FHT, multiply by an independent frozen sign vector, retain coordinates [0:1536], and scale by sqrt(2048/480) so each retained preactivation has the same expected coordinate variance as the rank-480 input chart.",
+    "procedural_contraction": "Pad the 1536-vector to 2048, multiply by a third frozen node-specific sign vector, apply the normalized 2048-point FHT, multiply by a fourth frozen sign vector, retain coordinates [0:480], and scale by sqrt(2048/1536) so each output coordinate preserves expected activation variance.",
+    "normalization": "Rows of U are normalized in every forward pass and scaled by 0.02*sqrt(768), matching the preceding sealed oracle. V is the sealed bank-specific orthonormal write basis truncated to rank 480. Givens stages preserve norm; only explicit hidden and output gains control amplitude.",
+    "why_not_lora": "There is no dense expert base, no retained dense c_fc or c_proj matrix, and no additive residual. U, V, procedural S/T, node-specific gain/bias, and two compact Givens stages define the complete expert function.",
+    "paper_reconciliation": "The original Mapping Networks paper motivates compact modulation, local smoothness, and layer-wise charts. Here hidden gain/bias are structured modulation; analytic input-JVP loss is a direct local functional smoothness/tangent constraint; and every layer/expert owns compact chart coordinates while dense directions are shared and counted. This is a theory-guided transformer adaptation, not a claim to reproduce the paper's exact CNN parameter generator."
+  },
+  "source": {
+    "parent_git_commit": "7895427c35a5f72c1eca2c9c1ec690d279058dae",
+    "global_write_givens_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_global_write_givens_feature_oracle_result.json",
+    "global_write_givens_result_sha256": "6cdda76cc7b4637a950e4ab98b1dee3165e096ed662276b36baabd82f879082f",
+    "global_write_givens_raw_result_sha256": "f6cd8fac0257c867788c77fa59046df9a7ea05d5b15c9ac30b71d46b5c13149c",
+    "write_ceiling_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_write_subspace_ceiling_result.json",
+    "write_ceiling_result_sha256": "ea95071667ce81cdaa25f40d4616f991b26acb458d9b90af8f640004e16ca7e3",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "procedural_padded_width": 2048,
+    "layers": [0, 5, 11],
+    "dense_paired_parameters_all_layers": 226492416,
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "name": "global_rank480_fullwidth_pregelu_dual_givens",
+    "rank": 480,
+    "hidden_width": 1536,
+    "pre_gelu_givens_stages": 1,
+    "post_gelu_givens_stages": 1,
+    "givens_pairs_per_stage": 240,
+    "feature_coordinates": 368640,
+    "counted_write_atlas_coordinates": 368640,
+    "pre_gelu_angle_coordinates": 23040,
+    "hidden_gain_coordinates": 147456,
+    "hidden_bias_coordinates": 147456,
+    "post_gelu_angle_coordinates": 23040,
+    "output_gain_coordinates": 46080,
+    "total_coordinates_all_layers": 1124352,
+    "paired_parameter_compression_ratio": 201.44262295081967,
+    "feature_seed": 20261501,
+    "pre_gelu_matching_seed": 20261502,
+    "post_gelu_matching_seed": 20261503,
+    "procedural_map_seed": 20261504,
+    "feature_scale": 0.5542562584220407,
+    "hidden_gain_initialization": 1.0,
+    "hidden_bias_initialization": 0.0,
+    "output_gain_initialization": 0.0,
+    "angle_initialization_radians": 0.0,
+    "fixed_dense_map_storage": false,
+    "dense_base_or_residual": false
+  },
+  "location_control": {
+    "name": "global_rank480_fullwidth_fixed_mixing",
+    "description": "Identical full-width S/T chart with both learned Givens stages fixed to identity. U, V, signs, hidden gain/bias, output gain, data, initialization, and fitting protocol are otherwise identical.",
+    "rank": 480,
+    "hidden_width": 1536,
+    "feature_coordinates": 368640,
+    "counted_write_atlas_coordinates": 368640,
+    "hidden_gain_coordinates": 147456,
+    "hidden_bias_coordinates": 147456,
+    "output_gain_coordinates": 46080,
+    "total_coordinates_all_layers": 1078272,
+    "paired_parameter_compression_ratio": 210.05128205128204,
+    "same_feature_seed_and_initial_state": true,
+    "same_bank_specific_write_basis": true,
+    "same_procedural_maps": true
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "sampling": "Use exact terminal top-2 routing and deterministic per-expert samples. Fit discovery A and B independently. Heldout tokens and probes never affect topology, coordinates, stopping, thresholds, or candidate/control choice.",
+    "fit_jvp_probe_seed_base": 20261511,
+    "heldout_jvp_probe_seed_base": 20261512
+  },
+  "fit_protocol": {
+    "target": "Dense complete-expert routed output and analytic input-JVP, expressed in the bank-specific fixed rank-480 global write basis.",
+    "objective": "Equal-layer/equal-expert normalized coefficient MSE plus 1.0 times normalized analytic coefficient-JVP MSE. Equal normalized weighting is frozen because tangent failure, not endpoint fit, is the binding diagnosis.",
+    "optimizer": "AdamW on normalized feature raw coordinates, hidden gains, hidden biases, output gains, and candidate Givens angles. V and procedural S/T signs are fixed but V is counted.",
+    "steps": 600,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "jvp_weight": 1.0,
+    "precision": "float32 fitting/scoring with float32 orthonormal V loaded from the sealed float64 eigensystem audit",
+    "selection": "Use the final registered step. Do not choose a step, LR, rank, FHT sign seed, Givens matching, loss weight, or checkpoint on heldout recovery.",
+    "fit_candidate_and_control_independently_from_exact_same_nonangle_initial_state": true
+  },
+  "prerequisite_gates": {
+    "rank480_fixed_write_mixture_recovery_mean_min_each_bank": 0.8,
+    "rank480_fixed_write_jvp_recovery_mean_min_each_bank": 0.6,
+    "rank480_fixed_write_every_layer_min_each_bank": 0.7,
+    "rank480_fixed_write_every_expert_min_each_bank": 0.5,
+    "rank480_cross_bank_projected_action_cosine_min": 0.8,
+    "procedural_map_repeatability": true,
+    "procedural_expansion_output_width": 1536,
+    "procedural_contraction_output_width": 480
+  },
+  "candidate_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "candidate_minus_location_control_recovery_mean_min_each_bank": 0.05,
+    "candidate_minus_location_control_jvp_recovery_mean_min_each_bank": 0.05,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "all_values_and_gradients_finite": true,
+    "paired_parameter_compression_ratio_min": 200.0
+  },
+  "control_escape_gate": {
+    "purpose": "Avoid discarding a simpler full-width solution if learned Givens are unnecessary.",
+    "rule": "If the location control independently clears every absolute output, layer, expert, JVP, action-agreement, occupancy, finiteness, and compression gate in both banks, seal it as a separate structural pass even if the candidate causal-gain gates fail. Do not choose between candidate and control on heldout values."
+  },
+  "decision_rule": {
+    "prerequisite_fail": "If the truncated rank-480 sealed write bases or exact procedural-map identities fail any prerequisite, stop before fitting and close this allocation without trying another rank, padded width, or sign seed.",
+    "candidate_pass": "Candidate passes only if both independent banks clear every absolute gate and improve both output and JVP recovery over the identical fixed-mixing location control by at least 0.05. A pass authorizes only theory and preregistration for causal step-zero chart acquisition and a separate initialization/Mapping-Loss shadow; terminal-derived U/V remain nondeployable.",
+    "control_escape_pass": "The control may independently establish that full-width pre-GELU procedural mixing is sufficient under the frozen control escape gate. That outcome authorizes only a separately preregistered causal acquisition test of the simpler control; it does not retroactively pass the learned-Givens causal treatment.",
+    "fail": "If neither the candidate nor the control escape clears the absolute gates, close the exact rank-480, 2048-FHT, full-width pre-GELU S/T chart. Do not sweep rank, width, signs, stages, matching, seed, LR, optimizer, steps, JVP weight, activation, regularizers, or thresholds. Reconcile the result with the KFAC and write ceilings before any new family.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "causal_chart_implementation": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "7895427c35a5f72c1eca2c9c1ec690d279058dae",
+    "theory_preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_fullwidth_pregelu_chart_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": null
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run committed-source tests and an exact rank480/hidden1536/1024-sample candidate-control two-step preflight with materialized node-specific signs. Foreground-poll only if the complete frozen oracle projects to <=5 minutes; otherwise launch a persistent watcher through committed launch_local_detached.py and verify its atomic receipt immediately.",
+    "callback_policy": "For a run projected to finish in one to two hours, terminal success and actionable failure only. Add a 90-minute resettable heartbeat only if measured or observed runtime exceeds two hours. Every invocation must mention @Codex and carry the event-specific causal continuation prompt."
+  }
+}
