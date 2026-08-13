@@ -1,0 +1,122 @@
+{
+  "schema_version": "nanogpt_sparse_moe_input_atlas_ceiling_plan_v1",
+  "recorded_at": "2026-08-14T15:18:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_ceiling_values",
+  "scientific_question": "Is the complete sparse-MoE failure caused by insufficient rank-480 input-direction capacity, unstable causal acquisition of that input atlas, or the compact pseudo-random coefficient map used to realize expert hyperplanes inside an otherwise sufficient atlas?",
+  "theory": {
+    "evidence_chain": [
+      "The sealed rank-480 write prerequisite recovers about 0.895 heldout routed output and 0.690 analytic input JVP in both discovery banks, so output-write rank is not the current binding constraint.",
+      "The full-width pre-GELU chart preserves all 1536 GELU slots but recovers only about 0.535 output and 0.018 input JVP. Learned rotations improve the fixed-mixing control by only about 0.025 output and 0.007 JVP.",
+      "Therefore hidden scalar width is not enough: the activation hyperplanes remain a fixed pseudo-random image of one rank-480 input chart, and their directions fail to follow the dense teacher's functional tangent.",
+      "A new learned generator is not yet justified. First grant an oracle dense node-specific coefficient matrix inside a task-functional global rank-480 input atlas, then separately impose the already sealed rank-480 output atlas."
+    ],
+    "dense_expert": "For node n=(layer,expert), f_n(x)=Wproj_n GELU(Wfc_n x) and J_n(x)=Wproj_n diag(GELU'(Wfc_n x)) Wfc_n.",
+    "input_metric": "Estimate each node's input-Jacobian Gram G_n=E[J_n(x)^T J_n(x)] with four deterministic Rademacher output probes per routed discovery sample. Normalize every G_n by its trace before equal-node aggregation, then take the leading 480 eigenvectors as one global input atlas U.",
+    "metric_ceiling": "The heldout energy retained by J_n(x) U^T U is the direct tangent-direction capacity of the selected atlas. Discovery-A and discovery-B atlases are causal; a heldout-fitted atlas is an explicitly leaking same-split capacity reference.",
+    "realizable_input_oracle": "For each node and bank, fit an unrestricted dense coefficient A_n in Wfc_hat_n=A_n U by ridge least squares on routed preactivations. This is the best registered linear preactivation regression inside U for that bank, followed by the exact GELU and untouched dense Wproj. It tests realizability of nonlinear hyperplanes after removing compact-generator error.",
+    "paired_oracle": "Project the realizable oracle's expert outputs and analytic input JVPs into the matching sealed rank-480 global write basis V. This tests simultaneous input and output atlases without fitting a compact generator.",
+    "why_this_is_not_a_candidate": "A_n contains 1536x480 dense coefficients for every selected layer/expert and the input-only arm retains dense Wproj. These oracle-only states violate the >=200x deployment budget and cannot authorize language-model training. A pass authorizes design of a compact causal coefficient map; it is not itself a model pass.",
+    "paper_reconciliation": "The Mapping Networks theorem is local and existential. The paper's PCA/t-SNE motivation does not establish that one pseudo-random global chart is aligned with every expert's GELU boundary geometry. This audit measures the missing local functional atlas condition directly before another modulation or Mapping-Loss experiment."
+  },
+  "source": {
+    "parent_git_commit": "f069dca71fd3a5585bd2fb19928abe85ff49b257",
+    "fullwidth_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_fullwidth_pregelu_chart_oracle_result.json",
+    "fullwidth_result_sha256": "b0010fe75f5b0be522caeb9eda885944a222cb9b9ad348e983461b9dd6f58eff",
+    "write_ceiling_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_write_subspace_ceiling_result.json",
+    "write_ceiling_result_sha256": "ea95071667ce81cdaa25f40d4616f991b26acb458d9b90af8f640004e16ca7e3",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "input_atlas_rank": 480,
+    "write_atlas_rank": 480,
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "samples_per_expert_each_split": 1024,
+    "sample_selection_seed_base": 20261631,
+    "sample_selection_seed_rule": "sample_selection_seed_base + 1009*split_index + 17*layer",
+    "jacobian_output_probes_per_sample": 4,
+    "jacobian_probe_seeds": {"discovery_a": 20261601, "discovery_b": 20261602, "heldout": 20261603},
+    "analytic_jvp_probe_seed": 20261611,
+    "sampling": "Use exact terminal top-2 routing and deterministic 1024-sample expert banks independently in discovery A, discovery B, and heldout. Heldout inputs never affect causal atlases or causal coefficients."
+  },
+  "atlas_protocol": {
+    "node_metric": "For routed x and deterministic Rademacher r in output space, compute g=J_n(x)^T r exactly; accumulate four-probe g^T g estimates in float64, divide each node Gram by its own trace, and sum nodes with equal weight.",
+    "eigensystem": "Compute the leading 480 eigenvectors of each split's 768x768 equal-node global Gram in float64. Use discovery A and B independently as causal atlases; use heldout only for the labeled same-split ceiling.",
+    "cross_bank_overlap": "Report mean squared singular cosine between discovery A and B input atlases.",
+    "metric_ceiling_scoring": "On untouched full heldout routed inputs and deterministic analytic-JVP directions, report energy recovery of the dense teacher input Jacobian after right projection by U^T U, using the same four-probe estimator and exact routed mixture aggregation.",
+    "precision": "float32 model actions and probes; float64 Gram accumulation, eigendecomposition, and normal equations"
+  },
+  "coefficient_protocol": {
+    "fit_target": "Dense node preactivations Wfc_n x on the split's 1024 routed samples per expert.",
+    "formula": "With Z=X U^T, solve A=(Z^T Z + lambda I)^(-1) Z^T (X Wfc_n^T), then use Wfc_hat_n=A^T U.",
+    "ridge": "lambda = 1e-4 * trace(Z^T Z) / 480, frozen independently per node and split",
+    "causal_arms": "Fit A independently from discovery A and discovery B and score both on untouched heldout routed inputs.",
+    "same_split_arm": "Fit U and A from heldout routed samples and score on heldout. This intentionally leaks the scoring split and is reported only as an optimistic registered acquisition/realization ceiling.",
+    "input_only": "Use exact dense Wproj after GELU(A_n U x).",
+    "paired": "Project input-only expert outputs and analytic JVPs into the split-matched sealed global rank-480 write basis before exact top-2 mixture aggregation.",
+    "selection": "No rank, ridge, probe count, bank, layer, expert, or checkpoint selection from measured recovery."
+  },
+  "frozen_gates": {
+    "metric_jacobian_energy_recovery_mean_min_each_causal_atlas": 0.6,
+    "input_only_mixture_recovery_mean_min_each_causal_bank": 0.8,
+    "input_only_mixture_recovery_every_layer_min_each_causal_bank": 0.7,
+    "input_only_expert_recovery_min_each_causal_bank": 0.5,
+    "input_only_jvp_recovery_mean_min_each_causal_bank": 0.6,
+    "paired_mixture_recovery_mean_min_each_causal_bank": 0.8,
+    "paired_mixture_recovery_every_layer_min_each_causal_bank": 0.7,
+    "paired_expert_recovery_min_each_causal_bank": 0.5,
+    "paired_jvp_recovery_mean_min_each_causal_bank": 0.6,
+    "cross_bank_input_atlas_overlap_min": 0.8,
+    "cross_bank_paired_action_cosine_min": 0.8,
+    "minimum_assignments_per_expert_each_split": 1024,
+    "all_values_finite": true,
+    "heldout_same_split_metrics_required": true
+  },
+  "decision_rule": {
+    "input_rank_rejected": "If even the heldout same-split metric ceiling fails 0.6 Jacobian energy recovery, close one global rank-480 input atlas as tangent-direction insufficient at this allocation. Do not try another rank without a new budget theory.",
+    "realization_rejected": "If the metric ceiling passes but the heldout same-split dense-coefficient input-only oracle fails an absolute output or JVP gate, close this global-linear input-atlas plus registered ridge realization. Do not blame the compact pseudo-random generator alone.",
+    "acquisition_rejected": "If heldout same-split input-only and paired arms pass but either causal discovery arm fails, preserve representational sufficiency but require a separately preregistered causal atlas/coefficient acquisition method.",
+    "input_pass_write_interaction_fail": "If both causal input-only arms pass but either causal paired arm fails despite the sealed write-only prerequisite, localize the failure to joint input/write co-adaptation and require a jointly acquired atlas before any compact generator.",
+    "compact_map_localized": "Only if both causal paired arms clear every gate may the fixed pseudo-random coefficient map be named the remaining bottleneck. That outcome authorizes theory and preregistration for one compact coefficient-map design at the smallest rung; it does not authorize language-model training automatically.",
+    "no_automatic_retry_or_sweep": true
+  },
+  "authorization": {
+    "implement_zero_update_audit": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "compact_candidate": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "f069dca71fd3a5585bd2fb19928abe85ff49b257",
+    "theory_preregistration_git_commit": "pending_until_preregistration_commit",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_input_atlas_ceiling.py",
+    "entrypoint_sha256": "pending_until_implementation",
+    "helper_sha256": "pending_until_implementation"
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run committed-source tests and an exact reduced-shape identity/preflight. Foreground-poll the exact frozen audit only if projected <=5 minutes; otherwise launch one persistent @Codex terminal/error watcher immediately through committed launch_local_detached.py.",
+    "callback_policy": "Terminal success and actionable failure only for an expected one-to-two-hour audit; add one resettable 90-minute heartbeat only if measured or observed runtime exceeds two hours."
+  }
+}
