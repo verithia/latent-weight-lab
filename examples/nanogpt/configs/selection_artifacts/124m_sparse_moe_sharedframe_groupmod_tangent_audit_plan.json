@@ -1,0 +1,116 @@
+{
+  "schema_version": "nanogpt_sparse_moe_sharedframe_groupmod_tangent_audit_plan_v1",
+  "recorded_at": "2026-08-14T17:05:00+08:00",
+  "status": "preregistered_before_implementation_and_before_any_sharedframe_gradient_or_group_tangent_values",
+  "scientific_question": "Did the shared learned full-rank pre-GELU frame fail because routed expert objectives cancel in the one shared frame, and is the missing node-specific direction representable by the largest paper-like grouped channel modulation that still preserves at least 200x paired-matrix compression?",
+  "causal_parent": {
+    "normalized_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_sharedframe_fullrank_pregelu_oracle_result.json",
+    "normalized_result_sha256": "2e93d3950d2172d69802ab870df86347dec3acfc8a6539aee4d1e4ccaf7a5b57",
+    "classification": "SHAREDFRAME_FULLRANK_PRE_GELU_REJECTED",
+    "finding": "The learned shared square frame improved heldout endpoint recovery over its fixed-frame control by 0.214207/0.212786, but improved input-JVP recovery by only 0.022823/0.022581 and reached absolute JVP recovery only 0.012193/0.011855. The frame moved substantially, so the residual is representational rather than a disconnected optimizer."
+  },
+  "theory": {
+    "gelu_normal_field": "For f_n(x)=Wproj_n GELU(Wfc_n x+b_n), the local derivative is Wproj_n diag(GELU'(Wfc_n x+b_n)) Wfc_n. The parent result shows that a global input frame can improve values without matching this node- and activation-dependent normal field.",
+    "sharing_hypothesis": "If the 96 routed expert nodes require different normal rotations, gradients of their exact output-plus-JVP objective with respect to the one shared effective frame should cancel within a layer. This is measured at the fitted parent endpoints, not inferred from a different butterfly family.",
+    "paper_modulation_connection": "The Mapping Networks paper modulates a fixed mapping by latent coordinates. The smallest analogous repair here is node-specific grouped multiplicative modulation of either the 768 compact frame outputs or the 768 frame inputs, rather than another learned dense basis or additive residual.",
+    "left_group_formula": "With effective learned frame W in R^(768x768), node n uses c_n = a_n^L elementwise (W x), where one scalar is shared by each contiguous group of 12 compact coordinates.",
+    "right_group_formula": "Alternatively node n uses c_n = W (a_n^R elementwise x), where one scalar is shared by each contiguous group of 12 input coordinates.",
+    "tangent_projection": "For each node objective, differentiate with respect to an unconstrained clone of the fitted effective frame W. Project that full Frobenius gradient onto the 64 mutually orthogonal, unit-Frobenius left-group or right-group scaling directions induced by W. Explained squared gradient energy and crossed coefficient cosine quantify whether a budget-compatible modulation contains a stable descent direction.",
+    "scope": "This is a zero-checkpoint-update same-gauge diagnostic. It does not fit modulation, select language-model loss, or authorize training."
+  },
+  "source": {
+    "parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_sharedframe_fullrank_pregelu_oracle_plan.json",
+    "parent_plan_sha256": "cca7ccc4d80205c8a193cd43dd89af8a5557cadae76be1a5a2f25e7a4027c29c",
+    "parent_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sharedframe_fullrank_pregelu_20260814b/artifacts/compact_coordinates.pt",
+    "parent_coordinates_sha256": "a046366b05b98d185d19f4ec2f4037e0eaebebf769bb683a2f02856f4dc96f35",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "write_rank": 448,
+    "checkpoint_updates": 0
+  },
+  "replay_protocol": {
+    "endpoints": ["discovery_a", "discovery_b"],
+    "data_banks": ["discovery_a", "discovery_b"],
+    "saved_diagonal_cells": ["endpoint_a_data_a", "endpoint_b_data_b"],
+    "crossed_cells": ["endpoint_a_data_b", "endpoint_b_data_a"],
+    "fit_samples_per_expert": 1024,
+    "sample_selection_seed_base": 20261631,
+    "sample_selection_seed_bank_stride": 1009,
+    "sample_selection_seed_layer_stride": 17,
+    "jvp_probe_seed_base": 20261611,
+    "jvp_probe_seed_bank_stride": 1009,
+    "jvp_probe_seed_layer_stride": 17,
+    "objective": "Per-node normalized rank-448 coefficient output MSE plus 1.0 times normalized analytic coefficient-JVP MSE, exactly matching the parent fit objective while holding hidden bias, output modulation, write basis, procedural S/T maps, routing, and dense targets fixed.",
+    "frame_coordinate": "Differentiate with respect to the fitted effective row-normalized frame W, not raw_frame. This avoids the radial null direction introduced by row normalization and makes the modulation tangent exact.",
+    "group_count": 64,
+    "group_width": 12,
+    "save_full_effective_frame_gradients": true,
+    "save_group_coefficients": true
+  },
+  "coordinate_budget": {
+    "parent_coordinates": 1124352,
+    "node_group_modulation_coordinates": 6144,
+    "candidate_coordinates_if_one_side_is_used": 1130496,
+    "dense_paired_parameters_all_layers": 226492416,
+    "compression_ratio_if_one_side_is_used": 200.34782608695653,
+    "both_sides_are_not_budget_compatible": true
+  },
+  "metrics": {
+    "within_layer_conflict": "For each diagonal endpoint/data cell and layer, report pairwise cosine across eight raw full-frame node gradients, negative-pair fraction, finite nonzero count, and cancellation ratio ||sum_e g_e||^2/(E sum_e ||g_e||^2).",
+    "same_endpoint_data_stability": "For each endpoint, compare corresponding node full-frame gradients between discovery A and B at that fixed endpoint.",
+    "same_data_endpoint_drift": "For each data bank, compare corresponding node gradients between independently fitted endpoints; this is descriptive and cannot by itself authorize a static modulation.",
+    "group_tangent_energy": "For left and right 64-group tangent families, report per-node squared Frobenius-gradient energy captured by the orthonormal tangent, its mean and minimum-layer mean for every cell, and corresponding coefficient cosine across data banks at each fixed endpoint.",
+    "selection_rule": "A side is supported only if it passes every frozen energy and fixed-endpoint stability gate. If both pass, choose the side with the larger minimum across diagonal-cell mean explained energies; exact ties choose left. No rank, grouping, threshold, or endpoint may be chosen after values are seen."
+  },
+  "frozen_gates": {
+    "conflict_pairwise_cosine_mean_max_each_diagonal_cell_layer": 0.1,
+    "conflict_cancellation_ratio_max_each_diagonal_cell_layer": 0.25,
+    "minimum_finite_nonzero_node_gradients_each_layer": 8,
+    "group_tangent_explained_energy_mean_min_each_diagonal_cell": 0.1,
+    "group_tangent_explained_energy_minimum_layer_mean_min_each_diagonal_cell": 0.05,
+    "fixed_endpoint_cross_bank_group_coefficient_cosine_mean_min": 0.5,
+    "fixed_endpoint_cross_bank_group_coefficient_cosine_minimum_layer_mean_min": 0.35,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "group_modulation_supported": "Shared-gradient conflict passes in every diagonal layer and at least one 64-group side passes every energy and fixed-endpoint coefficient-stability gate. Authorize only a separately preregistered zero-update functional fit oracle for the selected one-sided node modulation at 124M; do not train.",
+    "conflict_but_group_modulation_insufficient": "Shared-gradient conflict passes but neither budget-compatible group tangent passes. Close static grouped modulation and authorize only a deliberately nondeployable node-private full-frame ceiling to determine whether sharing or the fixed S/T topology is the remaining bound.",
+    "shared_frame_not_cancelled": "Any diagonal layer fails the conflict gates. Do not add node conditioning; close the sharing diagnosis and return to the fixed S/T plus GELU topology.",
+    "activation_conditioned": "A group side has enough diagonal-cell energy but fails either fixed-endpoint crossed-bank coefficient-stability gate. Static node modulation is closed; only a separately preregistered activation-conditioned zero-update theory audit is allowed.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_audit": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "group_modulation_functional_oracle": false,
+    "node_private_frame_ceiling": false,
+    "activation_conditioned_audit": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_rule": "Run focused tests and an exact-shape timing preflight. Foreground-poll only when projected complete runtime is at most five minutes; otherwise launch a persistent @Codex terminal/error watchdog before execution."
+  },
+  "identity": {
+    "causal_parent_result_commit": "63d7f9a",
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_sharedframe_groupmod_tangent_audit.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": null
+  }
+}
