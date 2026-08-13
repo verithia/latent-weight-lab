@@ -134,6 +134,38 @@
       "scientific_polling": "Foreground only if projected full audit runtime is at most five minutes; otherwise use one terminal/error-only @Codex watcher, adding a resettable 90-minute heartbeat only after observed elapsed time exceeds two hours."
     }
   },
+  "identity": {
+    "implementation_commit_before_identity_seal": "06cae6432e96cc3e5a662e0d46af5c9a9d929aec",
+    "entrypoint_sha256": "c0269bbd68748a0bea65fe516d01fdba7dd47581172103e71d0ff45da69b37c1",
+    "helper_sha256": {
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f",
+      "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py": "d6300dc7cef4c55bbfd8ed6c1fcaa1a22adb35743f8400f02d2db5cb7d934905",
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
+      "examples/nanogpt/analyze_sparse_moe_paired_coordinate_field_oracle.py": "4216f89da0d88563547a2b6e2481555f47bd8ed79da5cb4a4cb8f23d4a099d1f",
+      "examples/nanogpt/analyze_sparse_moe_rolling_tangent_oracle.py": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",
+      "examples/nanogpt/analyze_sparse_moe_shared_nonlinear_dictionary_oracle.py": "6e495fbda1d9be23c5490fc54b0b6e88d373eb5e2fa4df2641326222753602ac",
+      "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+      "examples/nanogpt/analyze_residual_compatibility.py": "b09914d673267a7ee3ff6eb7db11957060364ccc526e78e4b40081cc2f106088",
+      "examples/nanogpt/model.py": "997ace29037279aa09d6b6edbe63f17c9301201396e8969610a3ad5a4f759e89"
+    },
+    "focused_tests": "7 passed on PRO6; focused plus BlockFHT suite 88 passed before the timing-only synchronization repair",
+    "exact_shape_cuda_preflight": {
+      "execution_commit": "06cae6432e96cc3e5a662e0d46af5c9a9d929aec",
+      "registered_samples_per_expert": 1024,
+      "candidate_adjoint_relative_error": 3.0115978688627365e-7,
+      "control_adjoint_relative_error": 2.509954128981917e-7,
+      "fisher_action_seconds": 0.005730152130126953,
+      "candidate_normal_seconds": 0.025775432586669922,
+      "control_normal_seconds": 0.0066568851470947266,
+      "projected_full_protocol_seconds_upper_bound": 13.312839031219482,
+      "maximum_memory_allocated_bytes": 990446080,
+      "all_values_finite": true,
+      "passed": true,
+      "invalid_async_timing_attempt_excluded": true
+    }
+  },
   "frozen_gates": {
     "candidate_heldout_output_recovery_mean_min_each_bank": 0.8,
     "candidate_heldout_output_recovery_every_layer_min_each_bank": 0.7,
