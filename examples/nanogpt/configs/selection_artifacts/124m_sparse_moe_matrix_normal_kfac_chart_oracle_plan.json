@@ -177,7 +177,7 @@
     "initial_implementation_git_commit": "9d6c3bc97c3a459b1d6eb8a49fc5d549688e15b2",
     "scale_preflight_repair_commit": "02fef03adeb8ac6d92fe9ee626857fff3340f403",
     "occupancy_preflight_repair_commit": "3e86e4fdfcd56a4f9ecf4fa73122cfba291a856b",
-    "performance_preflight_storage_repair_commit": null,
+    "performance_preflight_storage_repair_commit": "afc1154213e597bb450e5d02612a2b61e353e816",
     "identity_validation_git_commit": "86f917b09bc1538d89213b1ee2dc9e5b2287fdb0",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_matrix_normal_kfac_chart_oracle.py",
     "entrypoint_sha256": "a6b1cbab89f37d1240c2c018c5ac7077234f2127196d8c4a4f2c6bca623b1221",
