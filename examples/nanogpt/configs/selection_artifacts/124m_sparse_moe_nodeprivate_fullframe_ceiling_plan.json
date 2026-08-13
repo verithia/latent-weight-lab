@@ -1,0 +1,132 @@
+{
+  "schema_version": "nanogpt_sparse_moe_nodeprivate_fullframe_ceiling_plan_v1",
+  "recorded_at": "2026-08-14T17:45:00+08:00",
+  "status": "preregistered_before_implementation_and_before_any_node_private_fit_or_heldout_values",
+  "scientific_question": "If every routed expert node receives its own learned full-rank 768x768 input frame, while the fixed node-specific signed-FHT S/T maps and rank-448 write basis are unchanged, can the parent shared-frame family recover both heldout expert outputs and analytic input JVPs?",
+  "causal_parent": {
+    "group_tangent_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_sharedframe_groupmod_tangent_audit_result.json",
+    "group_tangent_result_sha256": "2748350a29916635ebce534bd87ad1086d5967c4cc751969de1e8fc74fd74d1f",
+    "classification": "NODE_CONFLICT_BUT_GROUP_MODULATION_INSUFFICIENT",
+    "full_gradient_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sharedframe_groupmod_tangent_20260814a/sharedframe_groupmod_gradients.pt",
+    "full_gradient_artifact_sha256": "10859347732a5671135cdba6ea759bb1602f6726dc27e5d993ee90ca680a53bc",
+    "finding": "At the learned shared-frame endpoints, within-layer expert frame gradients have mean pairwise cosine -0.03435 to -0.05456 and cancellation 0.07724 to 0.09711, while fixed-endpoint cross-bank gradient cosine is 0.7020 to 0.7067. Yet the largest budget-compatible 64-group modulation captures only 0.0137 to 0.0285 percent of diagonal-cell gradient energy. Expert-specific orientation is real, but grouped scaling is not its geometry."
+  },
+  "theory": {
+    "discriminator": "The parent complete expert is f_n(x)=V[d_n elementwise T_n(GELU(S_n(Wx)+b_n))]. Replacing W by W_n changes only sharing. If independently fitted W_n passes, the one shared frame is the binding restriction. If W_n fails, the remaining fixed S_n/T_n/GELU topology cannot express the dense expert even without frame sharing.",
+    "candidate_formula": "For node n, p_n=S_n(W_n x)+b_n; h_n=GELU(p_n); q_n=d_n elementwise T_n(h_n); f_n(x)=V q_n. Each W_n is independently row-normalized and initialized from the corresponding bank's saved fitted shared frame.",
+    "continued_control": "For every node, continue fitting the already node-private b_n and d_n from the identical saved parent endpoint for the same steps and data while freezing W at the saved shared frame. This controls for additional optimization and node-separable fitting time.",
+    "why_non_deployable": "The full 96-node family contains 96*768^2 private frame coordinates. It is a causal structural ceiling only, not a compression candidate, Mapping Networks implementation, LoRA, or training proposal.",
+    "scope": "Zero checkpoint updates. Bank-specific rank-448 write bases and teacher-supervised dense targets remain terminal-derived and noncausal. A pass authorizes only decomposition theory for the fitted private-frame field."
+  },
+  "source": {
+    "parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_sharedframe_fullrank_pregelu_oracle_plan.json",
+    "parent_plan_sha256": "cca7ccc4d80205c8a193cd43dd89af8a5557cadae76be1a5a2f25e7a4027c29c",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_sharedframe_fullrank_pregelu_oracle_result.json",
+    "parent_result_sha256": "2e93d3950d2172d69802ab870df86347dec3acfc8a6539aee4d1e4ccaf7a5b57",
+    "parent_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_sharedframe_fullrank_pregelu_20260814b/artifacts/compact_coordinates.pt",
+    "parent_coordinates_sha256": "a046366b05b98d185d19f4ec2f4037e0eaebebf769bb683a2f02856f4dc96f35",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "write_rank": 448,
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "name": "node_private_fullrank_input_frame_ceiling",
+    "initialization": "Clone the saved bank-specific learned shared raw_frame into every selected node; clone the same node's saved hidden_bias and output_modulation.",
+    "fitted_parameters": ["node_private_raw_frame", "node_hidden_bias", "node_output_modulation"],
+    "selected_layer_frame_coordinates": 14155776,
+    "extrapolated_all_layer_frame_coordinates": 56623104,
+    "write_basis_coordinates": 344064,
+    "hidden_bias_coordinates": 147456,
+    "output_modulation_coordinates": 43008,
+    "total_extrapolated_coordinates": 57157632,
+    "dense_paired_parameters_all_layers": 226492416,
+    "compression_ratio": 3.962592712028378,
+    "deployable": false,
+    "fixed_dense_base_or_residual": false
+  },
+  "continued_control": {
+    "name": "continued_saved_shared_frame_control",
+    "initialization": "Identical saved parent endpoint and node bias/modulation.",
+    "fitted_parameters": ["node_hidden_bias", "node_output_modulation"],
+    "frozen_parameters": ["saved_shared_raw_frame"],
+    "same_data_steps_lr_and_selection": true
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101},
+      {"name": "discovery_b", "seed": 20261102}
+    ],
+    "heldout": {"seed": 20261103, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "sample_selection_seed_base": 20261631,
+    "sample_selection_seed_bank_stride": 1009,
+    "sample_selection_seed_layer_stride": 17,
+    "fit_jvp_probe_seed_base": 20261611,
+    "fit_jvp_probe_seed_bank_stride": 1009,
+    "fit_jvp_probe_seed_layer_stride": 17,
+    "heldout_jvp_probe_seed_base": 20261612,
+    "sampling": "Exact terminal top-2 routing. Fit discovery A and B independently. Heldout activations do not affect optimization, topology, step, LR, thresholds, or selection."
+  },
+  "fit_protocol": {
+    "objective": "Equal-layer/equal-expert normalized rank-448 coefficient output MSE plus 1.0 times normalized analytic coefficient-JVP MSE.",
+    "optimizer": "AdamW",
+    "steps": 600,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "jvp_weight": 1.0,
+    "precision": "float32",
+    "selection": "Final registered step only. No heldout model selection or hyperparameter change."
+  },
+  "gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "candidate_minus_continued_control_recovery_mean_min_each_bank": 0.15,
+    "candidate_minus_continued_control_jvp_recovery_mean_min_each_bank": 0.15,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Both independently fitted banks pass every absolute, gain, action, occupancy, and finite gate. Conclude shared orientation is binding. Save private frames and authorize only a preregistered zero-update cross-bank decomposition/predictability audit seeking a genuinely nonlinear node-conditioned decoder above 200x; do not implement or train the private family.",
+    "output_pass_jvp_fail": "Endpoint geometry can be repaired by node-private frames but the fixed S/T normal topology still fails local derivatives. Close the topology for full replacement; no FHT stage, seed, LR, or width sweep.",
+    "fail": "Either bank misses any output absolute/gain gate. Close the fixed signed-FHT S/T plus GELU topology even with node-private dense frames. No retry, optimizer, step, rank, seed, activation, or threshold sweep.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_ceiling": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "private_frame_implementation": false,
+    "decomposition_audit": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_rule": "Run focused tests and an exact-shape candidate/control timing and memory gate. Foreground-poll only if projected complete runtime is at most five minutes; otherwise attach and verify a terminal/error @Codex watchdog before launch."
+  },
+  "identity": {
+    "causal_parent_commit": "977834fb90ff2880bbc3fec687fc92e1a02d39d8",
+    "preregistration_git_commit": null,
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_nodeprivate_fullframe_ceiling.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": null
+  }
+}
