@@ -1,0 +1,138 @@
+{
+  "schema_version": "nanogpt_sparse_moe_fullwidth_pregelu_chart_oracle_normalized_result_v1",
+  "recorded_at": "2026-08-14T00:59:00+08:00",
+  "classification": "FULLWIDTH_PRE_GELU_CHART_REJECTED",
+  "passed": false,
+  "candidate_passed": false,
+  "control_escape_passed": false,
+  "identity": {
+    "git_commit": "32851dc7efd252d08756f663c896ad46d8a6bbfb",
+    "plan_sha256": "0adb62e50b2f15a5cfcfc40193156f02fd09456d6f0740376f926501386311f5",
+    "entrypoint_sha256": "10e26c8401d694aa0f462183f8a4eeddf44ba0c56edcfee54188c63efabc86da",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "raw_result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_fullwidth_pregelu_chart_oracle_20260814a/result.json",
+    "raw_result_sha256": "c37bf0cac1dc5a9e79b0faf0d75ee95455e5934fb063561444d7dcd9ccff9dca",
+    "compact_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_fullwidth_pregelu_chart_oracle_20260814a/compact_coordinates.pt",
+    "compact_coordinates_sha256": "608a2ae5565fbcd69174261d81d2b6af3b369f170487973261c8f3e00a14d264",
+    "status_sha256": "66744df3e05165b14923ae95c108bb959b8e48c0d8d92b8a67cd84e9e5e68c39",
+    "run_log_sha256": "c37bf0cac1dc5a9e79b0faf0d75ee95455e5934fb063561444d7dcd9ccff9dca",
+    "launch_metadata_sha256": "eda95d6adbfc612d2a93d4d8225df451df64aa17b3ade7459c8cf1e20ed495d7",
+    "preflight_sha256": "cfb2a4a52198301d7f2d2262f783fd50fe590fcb5c89174143c0a128c2a07a5e",
+    "performance_result_sha256": "008480337bcedce59049d3345b772447020bad1b9dfb905052043304d93341c5",
+    "performance_samples_sha256": "bdabefe4604494f929aed2c5a82c829aecbce3a69f9dff9fbb88e671d7ca4bb8"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "process_group": 1795628,
+    "exit_code": 0,
+    "wrapper_wall_seconds": 576.4391334056854,
+    "oracle_wall_seconds": 575.0100796222687,
+    "maximum_memory_allocated_bytes": 2602290688,
+    "checkpoint_updates": 0,
+    "terminal_gpu": "221/97887 MiB, 0%, 17.44 W, 30 C",
+    "watcher_terminal_callback_delivered": true,
+    "watcher_exited_after_terminal_delivery": true
+  },
+  "accounting": {
+    "candidate_coordinates": 1124352,
+    "candidate_compression_ratio": 201.44262295081967,
+    "control_coordinates": 1078272,
+    "control_compression_ratio": 210.05128205128204,
+    "dense_base_or_residual": false,
+    "fixed_dense_procedural_map_storage": false,
+    "terminal_derived_input_or_write_atlas_is_deployable": false
+  },
+  "rank480_write_prerequisite": {
+    "passed": true,
+    "discovery_a": {
+      "mixture_recovery_mean": 0.8947214881579081,
+      "minimum_layer_recovery": 0.8814956545829773,
+      "minimum_expert_recovery": 0.8184879514526092,
+      "jvp_recovery_mean": 0.6900750001271566
+    },
+    "discovery_b": {
+      "mixture_recovery_mean": 0.8949635028839111,
+      "minimum_layer_recovery": 0.8816835284233093,
+      "minimum_expert_recovery": 0.8192286647386107,
+      "jvp_recovery_mean": 0.6902442773183187
+    },
+    "cross_bank_action_cosine": 0.9778440992037455
+  },
+  "heldout": {
+    "discovery_a": {
+      "candidate": {
+        "mixture_recovery_mean": 0.5353437264760336,
+        "minimum_layer_recovery": 0.4865964651107788,
+        "minimum_expert_recovery": 0.32638570549652046,
+        "jvp_recovery_mean": 0.018600106239318848,
+        "cross_bank_action_cosine": 0.904078205426534
+      },
+      "control": {
+        "mixture_recovery_mean": 0.5103295644124349,
+        "minimum_layer_recovery": 0.45793187618255615,
+        "minimum_expert_recovery": 0.3011190240418117,
+        "jvp_recovery_mean": 0.011569639046986898,
+        "cross_bank_action_cosine": 0.8969639937082926
+      },
+      "candidate_minus_control_output": 0.025014162063598633,
+      "candidate_minus_control_jvp": 0.007030467192331949
+    },
+    "discovery_b": {
+      "candidate": {
+        "mixture_recovery_mean": 0.5348938504854838,
+        "minimum_layer_recovery": 0.4866967797279358,
+        "minimum_expert_recovery": 0.32481502705257836,
+        "jvp_recovery_mean": 0.01826443274815877,
+        "cross_bank_action_cosine": 0.904078205426534
+      },
+      "control": {
+        "mixture_recovery_mean": 0.5093429883321127,
+        "minimum_layer_recovery": 0.46026891469955444,
+        "minimum_expert_recovery": 0.3028881840786739,
+        "jvp_recovery_mean": 0.01106351613998413,
+        "cross_bank_action_cosine": 0.8969639937082926
+      },
+      "candidate_minus_control_output": 0.0255508621533711,
+      "candidate_minus_control_jvp": 0.007200916608174641
+    }
+  },
+  "fit_diagnostics": {
+    "candidate_final_output_loss_a_b": [0.440629243850708, 0.4409482479095459],
+    "candidate_final_jvp_loss_a_b": [0.9204599261283875, 0.9208089709281921],
+    "candidate_angle_rms_radians_a_b": [0.39644351601600647, 0.3948090076446533],
+    "candidate_hidden_bias_rms_a_b": [0.46983158588409424, 0.4725632667541504],
+    "candidate_output_gain_rms_a_b": [0.04347025603055954, 0.043544284999370575],
+    "all_values_and_gradients_finite": true
+  },
+  "gate_summary": {
+    "passing_both_banks": [
+      "rank480_write_prerequisite",
+      "cross_bank_action_agreement",
+      "occupancy",
+      "finiteness",
+      "compression"
+    ],
+    "failing_both_banks": [
+      "candidate_mean_recovery",
+      "candidate_every_layer_recovery",
+      "candidate_every_expert_recovery",
+      "candidate_jvp_recovery",
+      "candidate_output_causal_gain",
+      "candidate_jvp_causal_gain",
+      "control_escape_absolute_gates"
+    ]
+  },
+  "conclusion": "Preserving 1536 GELU slots does not solve the complete-MLP problem when their preactivation hyperplanes remain a fixed pseudo-random image of one shared rank-480 input atlas. Rank-480 write capacity is sufficient, and learned pre/post Givens rotations are stable but add only about 0.025 output and 0.007 JVP recovery. The exact rank480/2048-FHT/full-width family is closed; the next admissible discriminator is an algebraic task-functional input-atlas ceiling, not another generator sweep.",
+  "authorization": {
+    "input_atlas_ceiling_theory_and_zero_update_audit": true,
+    "retry_or_parameter_sweep": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false
+  }
+}
