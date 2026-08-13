@@ -63,6 +63,7 @@
     "pre_gelu_matching_seed": 20261502,
     "post_gelu_matching_seed": 20261503,
     "procedural_map_seed": 20261504,
+    "procedural_node_seed_rule": "seed = procedural_map_seed + 10007*layer + 1009*expert + 97*map_index, with map_index 0,1,2,3 for expansion-input, expansion-output, contraction-input, contraction-output signs",
     "feature_scale": 0.5542562584220407,
     "hidden_gain_initialization": 1.0,
     "hidden_bias_initialization": 0.0,
@@ -94,6 +95,8 @@
     ],
     "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
     "fit_samples_per_expert": 1024,
+    "sample_selection_seed_base": 20261531,
+    "sample_selection_seed_rule": "sample_selection_seed_base + 1009*bank_index + 17*layer",
     "sampling": "Use exact terminal top-2 routing and deterministic per-expert samples. Fit discovery A and B independently. Heldout tokens and probes never affect topology, coordinates, stopping, thresholds, or candidate/control choice.",
     "fit_jvp_probe_seed_base": 20261511,
     "heldout_jvp_probe_seed_base": 20261512
