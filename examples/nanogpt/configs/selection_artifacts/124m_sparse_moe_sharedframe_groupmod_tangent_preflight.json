@@ -7,12 +7,12 @@
     "output_loss": 1.0002797842025757
   },
   "maximum_memory_allocated_bytes": 166666240,
-  "one_exact_node_seconds": 0.15847580999252386,
+  "one_exact_node_seconds": 0.1576860960049089,
   "one_gradient_shape": [
     768,
     768
   ],
-  "projected_gradient_audit_seconds": 15.213677759282291,
+  "projected_gradient_audit_seconds": 15.137865216471255,
   "projection_smoke": {
     "left": 0.0006650796858593822,
     "right": 0.0006440370343625546
