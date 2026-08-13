@@ -1,0 +1,129 @@
+{
+  "schema_version": "nanogpt_sparse_moe_global_write_givens_feature_oracle_normalized_result_v1",
+  "recorded_at": "2026-08-14T00:30:00+08:00",
+  "classification": "GLOBAL_WRITE_GIVENS_FEATURE_REJECTED_WITH_CAUSAL_MIXING_GAIN",
+  "passed": false,
+  "identity": {
+    "git_commit": "f0e0805186b049bbe3ac5eb8335d8816ed922d3a",
+    "plan_sha256": "334f2581e831b19f38241bcf488c1241cf69a868fd9c76674dccc787a7ea3fee",
+    "entrypoint_sha256": "654eeef9a576a5990b2f6a20764039d167bd402e3e3e1f334bd84192861572e7",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "raw_result_sha256": "f6cd8fac0257c867788c77fa59046df9a7ea05d5b15c9ac30b71d46b5c13149c",
+    "coordinates_sha256": "94c88052ebbeb483e3d400ba5472f7b64fcad733136f2e85bac057e622e51690",
+    "status_sha256": "ff3eb7267356ceac599e007bc9cdb2d70ae00f7c1761200b3168ed11de8d8f74",
+    "preflight_sha256": "731f6fe3b2b5d5972bb2e63f38ac3e05c73a6e0199523166b064f12a0ec1f682",
+    "run_log_sha256": "f6cd8fac0257c867788c77fa59046df9a7ea05d5b15c9ac30b71d46b5c13149c"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "process_group": 1781919,
+    "wrapper_wall_seconds": 39.27830386161804,
+    "oracle_wall_seconds": 37.927868604660034,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "checkpoint_updates": 0,
+    "output": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_global_write_givens_feature_oracle_20260814a",
+    "terminal_gpu": "221/97887 MiB, 0% utilization, 16.94 W, 26 C"
+  },
+  "monitoring": {
+    "terminal_callback_delivered": false,
+    "failure": "The GNU-setsid bootstrap failed on macOS. The nohup-only replacement produced one verified live probe but did not persist after its tool execution session, so its state remained stale at running and no terminal callback was delivered.",
+    "remediation": "All future local watchdogs must be launched through examples/nanogpt/launch_local_detached.py, which uses subprocess start_new_session=True and writes an atomic PID receipt."
+  },
+  "preflight": {
+    "candidate_control_two_step_seconds": 0.7222280502319336,
+    "projected_full_two_bank_seconds": 433.33683013916016,
+    "candidate_coordinates": 1130784,
+    "control_coordinates": 1023264,
+    "exact_step_zero_pass": true,
+    "all_values_and_gradients_finite": true,
+    "maximum_memory_allocated_bytes": 1859081728
+  },
+  "accounting": {
+    "candidate_coordinates": 1130784,
+    "candidate_compression_ratio": 200.29679938874267,
+    "control_coordinates": 1023264,
+    "control_compression_ratio": 221.34309034618633,
+    "dense_base_or_residual": false,
+    "terminal_derived_write_atlas_is_deployable": false
+  },
+  "rank561_write_prerequisite": {
+    "passed": true,
+    "discovery_a": {
+      "mixture_recovery_mean": 0.9305377801259359,
+      "mixture_recovery_minimum_layer": 0.9219082593917847,
+      "minimum_expert_recovery": 0.8788336625794554,
+      "jvp_recovery_mean": 0.7849362095197042
+    },
+    "discovery_b": {
+      "mixture_recovery_mean": 0.9307066003481547,
+      "mixture_recovery_minimum_layer": 0.9220497012138367,
+      "minimum_expert_recovery": 0.8787606922707879,
+      "jvp_recovery_mean": 0.7849568923314413
+    },
+    "cross_bank_projected_action_cosine": 0.9823505282402039
+  },
+  "heldout": {
+    "discovery_a": {
+      "candidate_mixture_recovery_mean": 0.5827155113220215,
+      "control_mixture_recovery_mean": 0.47294676303863525,
+      "candidate_minus_control_recovery_mean": 0.10976874828338623,
+      "candidate_mixture_recovery_minimum_layer": 0.5377073287963867,
+      "candidate_minimum_expert_recovery": 0.3655525650372544,
+      "candidate_jvp_recovery_mean": -0.03342942396799723,
+      "control_jvp_recovery_mean": -0.07889099915822347
+    },
+    "discovery_b": {
+      "candidate_mixture_recovery_mean": 0.5809446374575297,
+      "control_mixture_recovery_mean": 0.4750542640686035,
+      "candidate_minus_control_recovery_mean": 0.10589037338892615,
+      "candidate_mixture_recovery_minimum_layer": 0.5355061292648315,
+      "candidate_minimum_expert_recovery": 0.3653015961863969,
+      "candidate_jvp_recovery_mean": -0.03411062558492025,
+      "control_jvp_recovery_mean": -0.07705028851826985
+    },
+    "candidate_cross_bank_action_cosine": 0.8917541901270548
+  },
+  "fit_diagnostics": {
+    "discovery_a": {
+      "candidate_final_output_loss": 0.40574321150779724,
+      "control_final_output_loss": 0.5255133509635925,
+      "candidate_final_jvp_loss": 1.0238302946090698,
+      "control_final_jvp_loss": 1.0654761791229248,
+      "candidate_angle_rms_radians": 0.3220919370651245
+    },
+    "discovery_b": {
+      "candidate_final_output_loss": 0.4065282344818115,
+      "control_final_output_loss": 0.5253809690475464,
+      "candidate_final_jvp_loss": 1.0256965160369873,
+      "control_final_jvp_loss": 1.062598466873169,
+      "candidate_angle_rms_radians": 0.3205399811267853
+    }
+  },
+  "gate_summary": {
+    "passing_both_banks": [
+      "rank561_write_prerequisite",
+      "candidate_minus_control_recovery_mean_at_least_0p10",
+      "cross_bank_action_agreement",
+      "occupancy",
+      "finiteness",
+      "compression"
+    ],
+    "failing_both_banks": [
+      "mean_recovery",
+      "every_layer_recovery",
+      "every_expert_recovery",
+      "jvp_recovery"
+    ]
+  },
+  "conclusion": "Compact coefficient-to-write reassignment is causally useful: four Givens stages improve heldout recovery by more than 0.10 over the exact diagonal control in both independent banks and preserve stable actions. It is insufficient because the candidate retains only 561 post-GELU ridge features; its analytic input-JVP remains worse than zero recovery. The stable write atlas is not the bottleneck. The next discriminator must preserve the 1536-neuron nonlinear width and move structured mixing before GELU rather than sweeping rank, stage count, seed, optimizer, or thresholds in this closed family.",
+  "authorization": {
+    "full_width_pre_gelu_theory_and_preregistration": true,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  }
+}
