@@ -1,0 +1,21 @@
+{
+  "all_values_finite": true,
+  "device": "cuda",
+  "diagnostics": {
+    "jvp_loss": 1.0003401041030884,
+    "objective": 2.000619888305664,
+    "output_loss": 1.0002797842025757
+  },
+  "maximum_memory_allocated_bytes": 166666240,
+  "one_exact_node_seconds": 0.15847580999252386,
+  "one_gradient_shape": [
+    768,
+    768
+  ],
+  "projected_gradient_audit_seconds": 15.213677759282291,
+  "projection_smoke": {
+    "left": 0.0006650796858593822,
+    "right": 0.0006440370343625546
+  },
+  "schema_version": "nanogpt_sparse_moe_sharedframe_groupmod_tangent_preflight_v1"
+}
