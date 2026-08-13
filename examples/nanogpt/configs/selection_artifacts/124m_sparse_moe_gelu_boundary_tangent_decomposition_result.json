@@ -1,0 +1,111 @@
+{
+  "schema_version": "nanogpt_sparse_moe_gelu_boundary_tangent_decomposition_normalized_result_v1",
+  "recorded_at": "2026-08-14T01:12:37+08:00",
+  "classification": "RANK480_NORMAL_FIELD_BINDING_FULL_INPUT_RANK_REQUIRED",
+  "source": {
+    "git_commit": "7988ac6a90df0d03059ddb6ead8c5d9e484ea83d",
+    "theory_preregistration_git_commit": "5c9e85f5ccb8ccbf81fc5509c53d7195fc0c4e63",
+    "plan_sha256": "d7ee46499538788650bb9cdbb60f1c40fba939e9586c0acfe03f6b17ddd7bb40",
+    "entrypoint_sha256": "c523c53e26532df11017183ef76048705d6fbd0f3c37173401693d799ad444f3",
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "input_bases_sha256": "1814807558562c278466e1bba1a85c90529a4680bfdf20d99a8a34eb26ffb3bc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "checkpoint_updates": 0
+  },
+  "artifacts": {
+    "output": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_gelu_boundary_tangent_decomposition_20260814a",
+    "raw_result_sha256": "a84f0f0722f2323dc236f089975d3ee2d8e98643465a84905ff8e38eaffaccf2",
+    "run_log_sha256": "a84f0f0722f2323dc236f089975d3ee2d8e98643465a84905ff8e38eaffaccf2",
+    "launch_metadata_sha256": "f5bb437c206a5d828c7c7bf3c4afd90311c8fa2eea3cf4da715d21049c26b517",
+    "status_sha256": "331cd31424ed72846e522e055840fcf69252238e50318680b222de296a18285b"
+  },
+  "execution": {
+    "terminal_exit_code": 0,
+    "foreground_polled": true,
+    "watchdog_required": false,
+    "wall_seconds": 11.131576299667358,
+    "maximum_memory_allocated_bytes": 2355845120,
+    "gpu_returned_idle": true
+  },
+  "counterfactual_jvp_recovery": {
+    "discovery_a": {
+      "teacher_gate_projected_normal": 0.23778775762345009,
+      "projected_gate_dense_normal": 0.9669934322099696,
+      "self_consistent": 0.21473334911382821,
+      "first_order_normal_plus_boundary": 0.19876805953572807
+    },
+    "discovery_b": {
+      "teacher_gate_projected_normal": 0.23379509500175968,
+      "projected_gate_dense_normal": 0.9670476865302856,
+      "self_consistent": 0.21058890768274385,
+      "first_order_normal_plus_boundary": 0.1948177847089985
+    },
+    "heldout_same_split": {
+      "teacher_gate_projected_normal": 0.21613566906825674,
+      "projected_gate_dense_normal": 0.9712286704242418,
+      "self_consistent": 0.1962952825007668,
+      "first_order_normal_plus_boundary": 0.18176792135748945
+    }
+  },
+  "minimum_recovery": {
+    "projected_gate_dense_normal_minimum_layer_discovery_a": 0.9451962922141082,
+    "projected_gate_dense_normal_minimum_layer_discovery_b": 0.9450404864961033,
+    "projected_gate_dense_normal_minimum_expert_discovery_a": 0.9178094691463606,
+    "projected_gate_dense_normal_minimum_expert_discovery_b": 0.9180044720483475,
+    "teacher_gate_projected_normal_minimum_layer_discovery_a": 0.14598065942448502,
+    "teacher_gate_projected_normal_minimum_layer_discovery_b": 0.13056410573550503,
+    "teacher_gate_projected_normal_minimum_expert_discovery_a": -0.5274305309173648,
+    "teacher_gate_projected_normal_minimum_expert_discovery_b": -0.49669414512747645
+  },
+  "error_decomposition": {
+    "discovery_a": {
+      "normal_fraction_of_exact_error_energy": 0.9713299745084114,
+      "boundary_fraction_of_exact_error_energy": 0.04071184083854785,
+      "normal_exact_error_cosine": 0.9741879885204986,
+      "boundary_exact_error_cosine": 0.15116527163733842,
+      "normal_boundary_cosine": 0.019882538907564466,
+      "first_order_exact_error_recovery": 0.961295201843643,
+      "higher_order_residual_fraction": 0.03870479815635694
+    },
+    "discovery_b": {
+      "normal_fraction_of_exact_error_energy": 0.971286961663703,
+      "boundary_fraction_of_exact_error_energy": 0.040492215338602366,
+      "normal_exact_error_cosine": 0.9742835685977567,
+      "boundary_exact_error_cosine": 0.15050141678371443,
+      "normal_boundary_cosine": 0.01975653178185869,
+      "first_order_exact_error_recovery": 0.9613432977935286,
+      "higher_order_residual_fraction": 0.038656702206471424
+    },
+    "heldout_same_split": {
+      "normal_fraction_of_exact_error_energy": 0.9758905075836601,
+      "boundary_fraction_of_exact_error_energy": 0.03469845480003888,
+      "normal_exact_error_cosine": 0.9777974379612635,
+      "boundary_exact_error_cosine": 0.14051382514722593,
+      "normal_boundary_cosine": 0.019407004867506576,
+      "first_order_exact_error_recovery": 0.9664939579595128,
+      "higher_order_residual_fraction": 0.033506042040487204
+    }
+  },
+  "cross_bank_action_cosine": {
+    "teacher_gate_projected_normal": 0.6664339938755702,
+    "projected_gate_dense_normal": 0.9802791291109682,
+    "self_consistent": 0.6540589903035032,
+    "first_order_normal_plus_boundary": 0.6557308721606282
+  },
+  "gate_summary": {
+    "all_predecessor_replay_tolerances_pass": true,
+    "projected_gate_dense_normal_passes_both_causal_banks": true,
+    "teacher_gate_projected_normal_fails_both_causal_banks": true,
+    "first_order_error_recovery_passes_both_causal_banks": true,
+    "normal_capacity_is_binding": true
+  },
+  "conclusion": "Moving GELU gates while retaining the dense c_fc normal field preserves 96.7% of analytic input-JVP energy, whereas freezing teacher gates while imposing the rank-480 normal field preserves only 23.4-23.8%. The normal term explains about 97.1% of exact tangent-error energy and the activation-boundary term only about 4.0%; their first-order sum explains about 96.1%. The principal failure is therefore the rank(c_fc)<=480 normal-field restriction, not GELU boundary phase. Low-dimensional parameter evolution does not imply a low-rank materialized c_fc. The next family must generate full-input-rank c_fc and must not spend the next experiment on a boundary-only loss.",
+  "authorization": {
+    "full_input_rank_theory": true,
+    "new_parameter_candidate": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  }
+}
