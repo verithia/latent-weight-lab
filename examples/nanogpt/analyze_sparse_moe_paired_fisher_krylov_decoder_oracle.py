@@ -615,6 +615,11 @@ def verify_stepzero_identity(
         raise ValueError("exact step-zero reconstruction hash drift")
 
 
+def synchronize(device: str) -> None:
+    if device.startswith("cuda"):
+        torch.cuda.synchronize()
+
+
 def run_preflight(plan: dict[str, Any], device: str) -> dict[str, Any]:
     source = plan["source"]
     experts = int(source["num_experts"])
@@ -631,8 +636,10 @@ def run_preflight(plan: dict[str, Any], device: str) -> dict[str, Any]:
     )
     fisher = PairedEmpiricalFisher(inputs, probabilities, teacher, device=device)
     reference = pair_rademacher(teacher, 20261862, device)
+    synchronize(device)
     started = time.time()
     image = fisher.apply(reference)
+    synchronize(device)
     fisher_seconds = time.time() - started
     fisher.largest_eigenvalue = max(
         float(pair_dot(reference, image) / pair_dot(reference, reference).clamp_min(1e-30)),
@@ -649,8 +656,10 @@ def run_preflight(plan: dict[str, Any], device: str) -> dict[str, Any]:
         left = pair_dot(decoder.apply(coordinates), cotangent)
         right = latent_dot(coordinates, decoder.adjoint(cotangent))
         adjoint_errors[name] = float((left - right).abs() / left.abs().clamp_min(1e-30))
+        synchronize(device)
         started = time.time()
         normal = decoder.normal_without_ridge(coordinates)
+        synchronize(device)
         timings[name + "_normal_seconds"] = time.time() - started
         if not all(torch.isfinite(value).all() for value in normal.branches):
             raise RuntimeError("non-finite preflight normal action")
