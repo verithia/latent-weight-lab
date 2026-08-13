@@ -1,0 +1,141 @@
+{
+  "schema_version": "nanogpt_sparse_moe_global_write_givens_feature_oracle_plan_v1",
+  "recorded_at": "2026-08-14T00:32:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "Once the globally shared write span is fixed to a causally stable sufficient subspace, can compact layer/expert-specific orthogonal coefficient mixing close the full-MLP function and JVP gap that the rejected one-feature-to-one-write diagonal map could not?",
+  "theory": {
+    "evidence_chain": [
+      "Global rank-619 write projection passes every output/JVP/stability gate, while layer rank 60 and expert-local rank 7 fail even with heldout leakage.",
+      "The learned global rank-619 dictionary drove discovery output loss down but generalized catastrophically and left normalized JVP loss near one.",
+      "Its feature/write basis RMS values grew far beyond initialization, so unrestricted basis norms confounded direction learning with scale.",
+      "The diagonal coefficient map tied each GELU feature to one write direction; it could not reassign a useful feature response to a different global write coordinate for each layer/expert."
+    ],
+    "candidate_formula": "For a bank-specific orthonormal global write basis V and one learned row-normalized global feature bank U: h = GELU((0.02*sqrt(768)) * (x U^T) elementwise a_{l,e} + b_{l,e}); q = O_{l,e}(h), where O is four learned disjoint-Givens matching stages; f_{l,e}(x) = (q elementwise c_{l,e}) V^T.",
+    "why_not_lora": "There is no dense expert base and no additive residual. U, the counted V atlas, modulation, and compact orthogonal mixing define the entire expert function.",
+    "why_rank561": "Four Givens stages cost 4*12*8*floor(r/2) coordinates. Under the same dense-paired/compact >=200x constraint, r=561 is the largest integer satisfying 2*r*768 + 3*12*8*r + 4*12*8*floor(r/2) <= 226492416/200.",
+    "why_four_stages": "Four fixed disjoint matching patterns are the maximum registered mixing depth chosen before candidate values while retaining a write rank far above the measured global joint lower bound 414. The stages are norm preserving and directly test coefficient-to-write reassignment without introducing dense mixing.",
+    "normalization": "Feature rows are normalized in every forward pass and receive the GPT-compatible fixed 0.02*sqrt(768) scale. V is orthonormal and fixed inside each discovery-bank fit. Only explicit gains control amplitude, preventing the basis-norm explosion observed in the rejected learned dictionary.",
+    "paper_reconciliation": "The construction keeps the original paper's compact modulation idea but replaces its effectively diagonal/global offset with structured per-layer/expert modulation. Direct analytic JVP supervision operationalizes local smoothness more strongly than an endpoint-only mapping loss; no claim is made that this is the paper's exact implementation."
+  },
+  "source": {
+    "parent_git_commit": "cb488ebd06adf453af7394fd083efba97d576b46",
+    "write_ceiling_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_write_subspace_ceiling_result.json",
+    "write_ceiling_result_sha256": "ea95071667ce81cdaa25f40d4616f991b26acb458d9b90af8f640004e16ca7e3",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "layers": [0, 5, 11],
+    "dense_paired_parameters_all_layers": 226492416,
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "name": "global_write_rank561_four_givens",
+    "rank": 561,
+    "givens_stages": 4,
+    "givens_pairs_per_stage": 280,
+    "feature_coordinates": 430848,
+    "counted_write_atlas_coordinates": 430848,
+    "modulation_coordinates": 161568,
+    "givens_angle_coordinates": 107520,
+    "total_coordinates_all_layers": 1130784,
+    "paired_parameter_compression_ratio": 200.29679938874267,
+    "feature_seed": 20261401,
+    "matching_seed": 20261402,
+    "output_gain_initialization": 0.0,
+    "input_gain_initialization": 1.0,
+    "hidden_bias_initialization": 0.0,
+    "angle_initialization_radians": 0.0,
+    "dense_base_or_residual": false
+  },
+  "same_rank_control": {
+    "name": "global_write_rank561_diagonal",
+    "rank": 561,
+    "givens_stages": 0,
+    "feature_coordinates": 430848,
+    "counted_write_atlas_coordinates": 430848,
+    "modulation_coordinates": 161568,
+    "total_coordinates_all_layers": 1023264,
+    "paired_parameter_compression_ratio": 221.34309034618633,
+    "same_feature_seed_and_initial_state": true,
+    "same_bank_specific_write_basis": true
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "sampling": "Use exact terminal top-2 routing and deterministic per-expert samples. Fit discovery A and B independently; heldout inputs and probes never affect coordinates, stopping, thresholds, or topology.",
+    "fit_jvp_probe_seed_base": 20261411,
+    "heldout_jvp_probe_seed_base": 20261412
+  },
+  "fit_protocol": {
+    "target": "Dense complete-expert output projected into the bank-specific fixed rank-561 global write basis, plus the corresponding analytic input-JVP coefficients.",
+    "objective": "Equal-layer/equal-expert normalized coefficient MSE plus 0.10 normalized analytic coefficient-JVP MSE. Because V is orthonormal, coefficient error equals in-span output error.",
+    "optimizer": "AdamW on normalized feature raw coordinates, input gains, hidden biases, output gains, and candidate Givens angles; V is fixed but counted.",
+    "steps": 600,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "jvp_weight": 0.1,
+    "precision": "float32 fitting/scoring with float32 orthonormal V loaded from the sealed float64-eigensystem audit",
+    "selection": "Use the final registered step. Do not choose a step, LR, rank, stage count, seed, or checkpoint on heldout recovery.",
+    "fit_candidate_and_same_rank_control_independently_from_exact_same_initial_feature_state": true
+  },
+  "prerequisite_gates": {
+    "rank561_fixed_write_mixture_recovery_mean_min_each_bank": 0.8,
+    "rank561_fixed_write_jvp_recovery_mean_min_each_bank": 0.6,
+    "rank561_fixed_write_every_layer_min_each_bank": 0.7,
+    "rank561_fixed_write_every_expert_min_each_bank": 0.5,
+    "rank561_cross_bank_projected_action_cosine_min": 0.8
+  },
+  "candidate_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "candidate_minus_same_rank_control_recovery_mean_min_each_bank": 0.1,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "all_values_and_gradients_finite": true,
+    "paired_parameter_compression_ratio_min": 200.0
+  },
+  "decision_rule": {
+    "prerequisite_fail": "If the truncated rank-561 sealed write bases fail any prerequisite, stop before fitting and close this allocation without trying another rank or stage count.",
+    "pass": "Candidate passes only if both banks independently clear every absolute output/JVP/layer/expert/agreement/occupancy/finiteness/compression gate and exceed the same-rank diagonal control by >=0.10 mean recovery. A pass authorizes only theory and preregistration for a causal-from-step-zero write-atlas acquisition method; the terminal-derived V cannot be deployed.",
+    "fail": "Close the exact normalized-global-feature plus rank561/four-Givens coefficient-mixing family. Do not sweep rank, stages, matching, seed, LR, optimizer, steps, regularizers, activation, or thresholds. Use coefficient diagnostics to derive the next structural factorization or reconsider the >=200x complete-expert constraint.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "causal_write_atlas_implementation": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "cb488ebd06adf453af7394fd083efba97d576b46",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_global_write_givens_feature_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": null
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run exact rank561/1024-sample candidate-control two-step preflight. Foreground-poll only if full projection is <=5 minutes; otherwise attach and verify one @Codex watcher immediately.",
+    "callback_policy": "Terminal success and actionable failure only for an expected one-to-two-hour oracle; add a 90-minute resettable heartbeat only if measured or observed runtime exceeds two hours."
+  }
+}
