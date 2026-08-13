@@ -1,0 +1,129 @@
+{
+  "schema_version": "nanogpt_sparse_moe_fullrank_gated_normal_field_oracle_plan_v1",
+  "recorded_at": "2026-08-14T01:25:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "Can a multiplicatively gated pair of independent full-input-rank procedural maps represent the dense terminal c_fc function and analytic input tangent, or is task-aligned normal information still missing even when the effective normal field is state-dependent and full rank?",
+  "theory": {
+    "binding_observation": "The sealed decomposition shows that projected gates with dense c_fc normals recover 0.966993/0.967048 causal JVP, while teacher gates with rank-480 normals recover only 0.237788/0.233795. Normal-direction error explains about 97.1% of exact tangent-error energy; GELU boundary motion explains about 4.0%.",
+    "manifold_correction": "Low-dimensional parameter evolution does not imply rank(c_fc)<768. A valid compact latent map must be allowed to materialize a full-column-rank 1536x768 feature matrix.",
+    "closed_additive_families": "Independent procedural atom sums, complete-function mixtures, signed coefficients, residual-coordinate modulation, one-sweep and state-conditioned butterflies, vectorized full-rank KFAC charts, and implicit coordinate decoders are already rejected. Their common limitation is an additive or single-orbit pseudo-random normal image.",
+    "new_mechanism": "Use two independently seeded full-column-rank procedural maps A and B. The candidate hidden function is h(x)=exp(s) * GELU(p(x)) elementwise (1+q(x)), where p(x)=scale*A*x elementwise (1+g_A)+b and q(x)=scale*B*x elementwise (1+g_B). Its exact input tangent contains diag(1+q)diag(GELU'(p))A and diag(GELU(p))B. Thus the normal field changes with x through a multiplicative cross term and spans both full-rank maps; it is not a low-rank atlas, a sum of independent atoms, or another orthogonal-frame sweep.",
+    "same_run_control": "The equal-coordinate additive control is h_control(x)=exp(s) * (GELU(p(x))+q(x)). It sees the same A, B, gains, bias, scale coordinate, data, optimizer, and dense c_proj, but has no multiplicative cross term. Candidate-minus-control recovery isolates bilinear gating rather than extra random features or coordinates.",
+    "literature_anchor": "GLU variants explicitly replace a pointwise FFN activation by an elementwise product of two linear projections. This audit uses the same algebraic mechanism only as a causal full-rank normal-field discriminator; it does not claim that generic SwiGLU quality gains imply Mapping-Network closure.",
+    "paper_reconciliation": "The Mapping Networks theorem is existential and local; it does not require the materialized matrix to be low rank. The paper's fixed projection, activation, modulation, stability, smoothness, and alignment ideas permit a smooth nonlinear latent map. Here the fixed procedural projections remain untrained, per-channel modulation is counted, the analytic JVP is the local smoothness/alignment target, and no dense learned basis or dense target state is retained in the candidate.",
+    "oracle_scope": "Dense teacher c_proj is retained only to isolate c_fc. Passing does not solve the paired full MLP; it authorizes composition theory with the separately sealed write-side evidence. Failure closes this exact bilinear full-rank feature family before any paired implementation or LM training."
+  },
+  "source": {
+    "parent_git_commit": "83ecfe8c69d79c9fd515a4a464829744732b2015",
+    "gelu_boundary_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_gelu_boundary_tangent_decomposition_result.json",
+    "gelu_boundary_result_sha256": "05eae204dd99f0d5f5a65e2f6172b759f9c994e555959ccae4a4d51e6f6d15fd",
+    "multiatom_result_sha256": "439d40f11fe728085d3e2ba5d80849860c6fef3dbce03ed8becac1c9764cdc2c",
+    "state_conditioned_butterfly_result_sha256": "c67e948f11677ad0f0ca2cd99c17f063f63df94f23ad1c796d61d9cb7f40761d",
+    "matrix_normal_kfac_result_sha256": "a72d0f52cc29cc4fd4799d6a67d5ed32f28ca9a344c9aadf0a2889cbf770cb75",
+    "expert_coordinate_field_result_sha256": "ac820adae4790e8a27d0e33577bd39743d3e7800b4aeffe78ec8e3c2bf4a8b0c",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "name": "two_map_fullrank_multiplicative_normal_field",
+    "gate_activation": "exact-erf GELU",
+    "formula": "h=exp(log_scale)*GELU(cfc_scale*A(x)*(1+gate_gain)+gate_bias)*(1+cfc_scale*B(x)*(1+value_gain))",
+    "analytic_jvp": "exp(log_scale)*[(1+q)*GELU'(p)*dp + GELU(p)*dq]",
+    "procedural_maps": "A and B are independent normalized sign-FHT maps from padded 2048 coordinates, cropped to hidden width 1536, with distinct deterministic signs for every layer/expert/map.",
+    "full_input_rank_required": true,
+    "fixed_full_matrix_storage_allowed": false,
+    "dense_learned_basis_allowed": false,
+    "materialized_dense_cfc_allowed": false,
+    "dense_cproj_retained_as_isolation_exception": true,
+    "additive_lora_residual_allowed": false,
+    "learned_gate_gain_per_node": 1536,
+    "learned_value_gain_per_node": 1536,
+    "learned_gate_bias_per_node": 1536,
+    "learned_log_scale_per_node": 1,
+    "coordinates_per_node": 4609,
+    "total_coordinates_all_layers": 442464,
+    "dense_cfc_parameters_all_layers": 113246208,
+    "cfc_coordinate_compression_ratio": 255.94445649815577,
+    "padded_width": 2048,
+    "procedural_seed": 20261701
+  },
+  "control": {
+    "name": "two_map_fullrank_additive_normal_field",
+    "formula": "h_control=exp(log_scale)*(GELU(p)+q)",
+    "same_coordinates_and_initial_state": true,
+    "purpose": "Measure whether multiplicative gating, rather than merely exposing two full-rank random maps, supplies the missing state-dependent normal directions."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "fit_jvp_probe_seed_base": 20261711,
+    "heldout_jvp_probe_seed_base": 20261712,
+    "sample_selection_seed_base": 20261731,
+    "sample_selection_seed_rule": "sample_selection_seed_base + 1009*bank_index + 17*layer",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and JVP probes never affect coordinates, stopping, initialization, thresholds, or candidate selection."
+  },
+  "fit_protocol": {
+    "steps": 600,
+    "optimizer": "AdamW on counted gate gain, value gain, gate bias, and log scale only",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "jvp_weight": 1.0,
+    "objective": "Equal-layer/equal-expert normalized dense-cproj residual-output MSE plus 1.0 times normalized exact analytic input-JVP MSE.",
+    "precision": "float32 fitting and scoring with float64 scalar accumulation",
+    "selection": "Use the final registered step. No heldout selection or gate/additive scale, seed, activation, LR, step, optimizer, loss-weight, rank, width, or threshold sweep."
+  },
+  "frozen_gates": {
+    "candidate_heldout_output_recovery_mean_min_each_bank": 0.8,
+    "candidate_heldout_output_recovery_every_layer_min_each_bank": 0.7,
+    "candidate_heldout_output_recovery_minimum_expert_each_bank": 0.5,
+    "candidate_heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_additive_control_output_recovery_mean_min_each_bank": 0.05,
+    "candidate_minus_additive_control_jvp_recovery_mean_min_each_bank": 0.05,
+    "cross_bank_candidate_action_cosine_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "cfc_coordinate_compression_ratio_min": 200.0,
+    "all_values_and_gradients_finite": true
+  },
+  "decision_rule": {
+    "pass": "Only a two-bank all-gate pass authorizes preregistration of a paired composition oracle with the sealed write-side structure plus an initialization/Mapping-Loss shadow. It does not directly authorize LM training, MFU qualification, a larger rung, or attention work.",
+    "candidate_absolute_pass_control_gain_fail": "If the candidate passes absolute output/JVP gates but not the frozen gain over the additive control, the causal mechanism is two-map capacity rather than multiplication; authorize only the simpler additive family for paired-theory reconciliation.",
+    "fail": "Close this exact two-map multiplicative/additive full-rank feature family. Do not sweep activation, product offset, map count, seeds, FHT layers, scales, gains, bias, LR, optimizer, steps, JVP weight, or thresholds. Return to full-rank normal-field theory before another candidate.",
+    "no_automatic_retry_or_sweep": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "paired_full_mlp_candidate": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "83ecfe8c69d79c9fd515a4a464829744732b2015",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_fullrank_gated_normal_field_oracle.py",
+    "paper_reference": "https://arxiv.org/abs/2002.05202"
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run committed-source unit tests and an exact two-step candidate/control GPU preflight. Foreground-poll only if the full frozen audit projects to no more than five minutes; otherwise launch one verified terminal/error-only @Codex watcher immediately.",
+    "callback_policy": "For an expected one-to-two-hour run, terminal success and actionable failure only. Add one resettable 90-minute heartbeat only if observed runtime exceeds two hours."
+  }
+}
