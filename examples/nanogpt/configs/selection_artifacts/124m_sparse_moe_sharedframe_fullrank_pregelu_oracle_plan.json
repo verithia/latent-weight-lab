@@ -1,7 +1,7 @@
 {
   "schema_version": "nanogpt_sparse_moe_sharedframe_fullrank_pregelu_oracle_plan_v1",
   "recorded_at": "2026-08-14T15:10:00+08:00",
-  "status": "implementation_and_source_identity_sealed_before_preflight_or_candidate_values",
+  "status": "implementation_identity_and_exact_cuda_preflight_sealed_before_candidate_values",
   "scientific_question": "After fixed full-rank pseudo-random normal fields fail, can one counted learned global input frame align all complete sparse-MoE expert pre-GELU normals while a previously sufficient shared write atlas preserves their residual writes at at least 200x paired-matrix compression?",
   "theory": {
     "binding_observations": [
@@ -147,6 +147,7 @@
     "theory_preregistration_git_commit": "93af188861c266617f3349ba02b5277a66887153",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_sharedframe_fullrank_pregelu_oracle.py",
     "implementation_git_commit": "b99564d0d13ded36e2863a44dda0b7082fa776af",
+    "source_identity_git_commit": "ac63fb7efe8392f680f341e3261a7684f890fa68",
     "entrypoint_sha256": "4b959e19cc793177c0dc803f8360c4bf0d7ddacadcd48a579bbb9f1e3cff4cfe",
     "helper_sha256": {
       "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
@@ -159,7 +160,9 @@
       "examples/nanogpt/analyze_sparse_moe_shared_nonlinear_dictionary_oracle.py": "6e495fbda1d9be23c5490fc54b0b6e88d373eb5e2fa4df2641326222753602ac",
       "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
       "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
-    }
+    },
+    "exact_cuda_preflight": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_sharedframe_fullrank_pregelu_preflight.json",
+    "exact_cuda_preflight_sha256": "9a6bee94ad0c6859cc9f9f779d344aef926b8d7b8e3205c4d39943d79be193d5"
   },
   "systems": {
     "host": "PRO6",
