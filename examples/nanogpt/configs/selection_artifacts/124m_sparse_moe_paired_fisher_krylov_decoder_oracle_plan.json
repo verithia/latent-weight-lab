@@ -1,0 +1,124 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_fisher_krylov_decoder_oracle_plan_v1",
+  "recorded_at": "2026-08-14T02:10:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "Can the exact coupled empirical-Fisher operator rotate a seed-only 200x procedural paired-MLP decoder into the dense terminal functional tangent, or is even task-metric polynomial shaping insufficient without a learned dense basis?",
+  "theory": {
+    "binding_observation": "The full-rank multiplicative normal-field candidate is stable across banks but recovers only 0.291 routed output and negative analytic input JVP. Algebraic full rank, two independent FHT maps, per-node modulation, bias, scale, and multiplicative state dependence therefore do not align the dense neuron normals.",
+    "positive_predecessor": "The complete matrix-normal KFAC chart is the only large positive structural movement: about 0.701 output and 0.417 JVP, versus roughly 0.29 or less for seed-only full-rank fields. Its separable covariance square roots improve endpoint alignment but do not encode the coupled nonlinear paired-neuron functional metric.",
+    "manifold_reconciliation": "Temporal PCA dimension describes coordinate-path dimension, not the description complexity of its spatial tangent. A seed-only generator must still encode task-aligned full-rank spatial directions. The Mapping theorem is existential and does not imply that a random fixed projection or compact procedural program supplies those directions.",
+    "new_mechanism": "Use the exact paired expert functional Jacobian J on a terminal discovery bank and its empirical Gauss-Newton/Fisher operator F=J^T J. For a paired perturbation (dW_fc,dW_proj), J applies routed GELU feature-boundary and residual-write terms jointly. The candidate decoder image is the direct sum of A0, normalized-F*A1, and normalized-F^2*A2, where A0/A1/A2 are independent seeded matrix-free BlockFHT maps and the total latent count is unchanged. Unlike KFAC, F is nonseparable across c_fc, GELU gates, c_proj, routed samples, and residual outputs.",
+    "exact_base": "Materialized candidate weights are theta_hat=theta_init+Delta_theta(z). theta_init is reconstructed exactly from the frozen model configuration and seed, so the random initialization need not be encoded in z. The same initialization and joint paired update preserve hidden-neuron gauge. No learned dense basis, dense adapter, or answer-selected factor is retained.",
+    "oracle_boundary": "The terminal dense teacher defines F and the target delta, so this is an intentionally optimistic representability ceiling, not a causal training decoder. Failure is decisive for this exact polynomial image; passing authorizes only a separately preregistered step-zero/multi-phase causal transport audit."
+  },
+  "source": {
+    "parent_git_commit": "a4ab9a07b968c8c584f82f1779167bd5bcfc45ee",
+    "fullrank_gated_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_fullrank_gated_normal_field_oracle_result.json",
+    "fullrank_gated_result_sha256": "ecbddd270ac6f10430c680f032ca33e605233d430a85d3e2127d9a0dce65f6ee",
+    "matrix_normal_kfac_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_matrix_normal_kfac_chart_oracle_result.json",
+    "matrix_normal_kfac_result_sha256": "a72d0f52cc29cc4fd4799d6a67d5ed32f28ca9a344c9aadf0a2889cbf770cb75",
+    "gelu_boundary_result_sha256": "05eae204dd99f0d5f5a65e2f6172b759f9c994e555959ccae4a4d51e6f6d15fd",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "layers": [0, 5, 11],
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "checkpoint_updates": 0
+  },
+  "paired_functional_operator": {
+    "teacher_preactivation": "p=x W_fc",
+    "teacher_hidden": "h=GELU(p)",
+    "paired_jvp": "J(dW_fc,dW_proj)=router_weight*[(GELU'(p)*(x dW_fc)) W_proj + h dW_proj]",
+    "paired_vjp": "J^T r=(x^T*((router_weight*r) W_proj^T*GELU'(p)), h^T*(router_weight*r))",
+    "fisher_action": "F(v)=J^T J(v), summed over the frozen routed discovery samples and normalized per layer by an eight-step deterministic power estimate of lambda_max(F)",
+    "normalization_epsilon": 1e-8,
+    "power_iterations": 8,
+    "power_seed_base": 20261801,
+    "operator_is_frozen_during_each_fit": true,
+    "fixed_dense_operator_storage_allowed": false,
+    "matrix_free_jvp_vjp_required": true
+  },
+  "candidate": {
+    "name": "exact_base_paired_empirical_fisher_krylov2",
+    "formula": "theta_hat=theta_init+A0*z0+Fbar*A1*z1+Fbar*(Fbar*A2*z2)",
+    "procedural_maps": "A0, A1, and A2 are independent normalized seeded BlockFHT maps into the paired (c_fc,c_proj) parameter vector for each layer/expert.",
+    "coordinates_per_expert": 11776,
+    "coordinate_split_by_polynomial_order": [3926, 3925, 3925],
+    "coordinates_per_layer": 94208,
+    "total_coordinates_all_layers": 1130496,
+    "dense_paired_parameters_all_layers": 226492416,
+    "paired_coordinate_compression_ratio": 200.34782608695653,
+    "materialized_dense_delta_allowed_only_during_forward_or_scoring": true,
+    "fixed_full_matrix_storage_allowed": false,
+    "learned_dense_basis_allowed": false,
+    "additive_lora_residual_allowed": false,
+    "dense_optimizer_state_allowed": false,
+    "procedural_seed_base": 20261811
+  },
+  "control": {
+    "name": "exact_base_three_unfiltered_procedural_maps",
+    "formula": "theta_control=theta_init+A0*z0+A1*z1+A2*z2",
+    "same_coordinates_maps_base_data_solver_and_target": true,
+    "purpose": "Isolate rotation by the coupled empirical Fisher from exact initialization and three independent procedural images."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "heldout_jvp_probe_seed_base": 20261821,
+    "sample_selection_seed_base": 20261831,
+    "anti_leakage": "Discovery A and B independently define F, its normalization, and fitted coordinates. Heldout tokens and probes affect only final scoring. The terminal teacher makes this an explicitly noncausal upper bound; no result may be labeled a deployable decoder."
+  },
+  "fit_protocol": {
+    "objective": "Minimize the terminal parameter delta error in the frozen discovery empirical-Fisher metric plus relative L2 damping: (Kz-delta)^T F (Kz-delta)+lambda*||z||^2.",
+    "solver": "matrix-free preconditioned conjugate gradients on the latent normal equations",
+    "maximum_iterations": 64,
+    "relative_residual_tolerance": 0.05,
+    "relative_damping": 0.0001,
+    "selection": "Use the final registered iterate; no heldout selection or polynomial-order, map, seed, normalization, damping, iteration, allocation, or threshold sweep.",
+    "scoring": "Materialize theta_init+Kz only for exact heldout routed output and analytic input-JVP scoring against the terminal teacher."
+  },
+  "frozen_gates": {
+    "candidate_heldout_output_recovery_mean_min_each_bank": 0.8,
+    "candidate_heldout_output_recovery_every_layer_min_each_bank": 0.7,
+    "candidate_heldout_output_recovery_minimum_expert_each_bank": 0.5,
+    "candidate_heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "candidate_minus_unfiltered_control_output_recovery_mean_min_each_bank": 0.1,
+    "candidate_minus_unfiltered_control_jvp_recovery_mean_min_each_bank": 0.1,
+    "cross_bank_candidate_action_cosine_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "paired_coordinate_compression_ratio_min": 200.0,
+    "maximum_latent_normal_relative_residual": 0.05,
+    "exact_initialization_reconstruction_required": true,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Only a two-bank all-gate pass authorizes preregistration of a causal step-zero and multi-phase Fisher-Krylov transport audit. It does not authorize implementation, MFU qualification, language-model training, or a larger rung.",
+    "fail": "Close the exact [A,F*A,F^2*A] paired empirical-Fisher polynomial image at 200.35x. Do not sweep order, branch allocation, map count, seeds, normalization, damping, iterations, fit metric, or gates. At that point the tested evidence does not support full MLP replacement at the current budget without relaxing the fixed-seed/no-learned-basis constraint or changing the architecture.",
+    "no_automatic_retry_or_sweep": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "causal_decoder_or_training": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run committed-source tests and an exact-shape CUDA preflight. Foreground-poll only if projected total audit time is no more than five minutes; otherwise launch one verified terminal/error-only @Codex watcher.",
+    "callback_policy": "Terminal success and actionable failure only for an expected one-to-two-hour run; add one resettable 90-minute heartbeat only if observed runtime exceeds two hours."
+  }
+}
