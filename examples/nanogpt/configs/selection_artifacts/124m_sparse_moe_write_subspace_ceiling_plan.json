@@ -1,0 +1,110 @@
+{
+  "schema_version": "nanogpt_sparse_moe_write_subspace_ceiling_plan_v1",
+  "recorded_at": "2026-08-13T23:58:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_ceiling_values",
+  "scientific_question": "Does the exact >=200x rank allocation already exclude the terminal expert output/JVP write subspaces, or did the learned nonlinear dictionary fail because it could not identify feature-side nonlinear coordinates?",
+  "theory": {
+    "diagnosis": "The learned nonlinear dictionaries reduced discovery output MSE but did not reduce JVP loss and generalized poorly, while fixed task-metric KFAC structure remained stable near 0.70 recovery. Before another architecture is trained, isolate the necessary write-space condition with an algebraic projection audit.",
+    "necessary_condition": "A complete rank-r GELU dictionary writes both its output and input-JVP into the span of its r write vectors. Orthogonal projection of the dense teacher actions into the best allowed write span is therefore an optimistic ceiling that removes all feature-map and optimizer errors.",
+    "three_outcomes": {
+      "same_split_ceiling_fails": "The registered rank/sharing topology lacks write capacity even with heldout leakage; it cannot pass as a complete dictionary at this budget.",
+      "same_split_passes_but_causal_fails": "A sufficient write span exists but is not stable across routed data banks; a causal metric/community prior is required before feature learning.",
+      "causal_ceiling_passes": "Write capacity and identification are sufficient; the rejected learned dictionary localizes the remaining failure to nonlinear feature/gating identification and JVP matching."
+    },
+    "not_a_model_sweep": "No trainable candidate, optimizer, learning rate, checkpoint, or architecture is selected. The audit measures fixed algebraic bounds at exactly the three preregistered topology ranks and reports descriptive minimum-rank lower bounds."
+  },
+  "source": {
+    "parent_git_commit": "336e9f6675138b8ec4009276e63c62023a6d9c73",
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_shared_nonlinear_dictionary_oracle_result.json",
+    "parent_result_sha256": "cd9a50ebf629b35f5da017c8a611af9064259008a578bb3bf1139f42b014f045",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "topologies": {
+    "global_shared_rank619": {
+      "rank": 619,
+      "sharing": "one write subspace shared across all selected layers and experts",
+      "paired_parameter_compression_ratio": 200.603350055267
+    },
+    "layer_shared_rank60": {
+      "rank": 60,
+      "sharing": "one write subspace per layer shared across its experts",
+      "paired_parameter_compression_ratio": 201.649230769231
+    },
+    "expert_local_rank7": {
+      "rank": 7,
+      "sharing": "one private write subspace per layer/expert",
+      "paired_parameter_compression_ratio": 219.000835421888
+    }
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "samples_per_expert_each_split": 1024,
+    "sampling": "Use exact terminal top-2 routing and deterministic per-expert samples independently in discovery A, discovery B, and heldout. Heldout samples never affect causal bases or thresholds.",
+    "analytic_jvp_probe_seeds": {"discovery_a": 20261301, "discovery_b": 20261302, "heldout": 20261303}
+  },
+  "basis_protocol": {
+    "joint_metric": "For every sharing group, eigendecompose C = Y^T Y + 0.10 * J^T J in float64, where Y is the dense complete-expert action and J its analytic input-JVP. Use the leading registered-rank eigenvectors as the shared write basis.",
+    "causal_bases": "Fit discovery A and B bases independently and project untouched heldout routed actions/JVPs.",
+    "same_split_ceiling": "Fit a heldout basis on heldout actions and evaluate the same heldout actions. This intentionally leaking number is only an optimistic representational ceiling and cannot authorize training by itself.",
+    "optimistic_marginal_bounds": "Also report output-only and JVP-only cumulative spectral recovery and their minimum ranks for the absolute gates. These may use different bases and are lower bounds on the rank required by one joint basis.",
+    "minimum_rank_scan": "Evaluate integer ranks 1 through 768 algebraically from the frozen eigensystems; this is a descriptive capacity curve, not a candidate rank sweep.",
+    "precision": "float32 dense actions/JVPs and float64 covariance/eigendecomposition",
+    "ridge_or_centering": "none; use origin-through action subspaces because the complete experts are bias-free at their output",
+    "checkpoint_updates": 0
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_discovery_basis": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_discovery_basis": 0.7,
+    "heldout_expert_recovery_min_each_discovery_basis": 0.5,
+    "heldout_jvp_recovery_mean_min_each_discovery_basis": 0.6,
+    "heldout_cross_bank_projected_action_cosine_mean_min": 0.8,
+    "minimum_assignments_per_expert_each_split": 1024,
+    "all_values_finite": true,
+    "same_split_output_and_jvp_ceiling_report_required": true
+  },
+  "decision_rule": {
+    "topology_write_pass": "A topology passes the causal write necessary condition only if both discovery bases independently clear every absolute output, per-layer, per-expert, JVP, cross-bank action, occupancy, and finiteness gate on untouched heldout actions.",
+    "capacity_rejected": "If its heldout same-split joint ceiling fails an absolute gate, close that topology at the registered rank as write-capacity insufficient.",
+    "identification_rejected": "If same-split passes but causal bases fail, preserve the rank as representationally possible but require a separately preregistered causal functional metric/community estimator before any learned feature map.",
+    "feature_localized": "If causal write gates pass, authorize only theory and preregistration of a feature-side nonlinear/JVP discriminator using the passing fixed write topology. Do not train a language model automatically.",
+    "no_automatic_retry_or_sweep": true
+  },
+  "authorization": {
+    "implement_zero_update_audit": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "learned_candidate": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "336e9f6675138b8ec4009276e63c62023a6d9c73",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_write_subspace_ceiling.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": null
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Foreground-poll the exact algebraic audit only if projected <=5 minutes; otherwise attach one verified @Codex terminal/error watcher immediately.",
+    "callback_policy": "Terminal success and actionable failure only for an expected one-to-two-hour audit; add a 90-minute resettable heartbeat only if measured or observed runtime exceeds two hours."
+  }
+}
