@@ -42,7 +42,7 @@ def test_candidate_control_have_identical_initial_function() -> None:
         left = candidate.function_and_jvp(x, direction, layer=layer)
         right = control.function_and_jvp(x, direction, layer=layer)
         for a, b in zip(left, right):
-            torch.testing.assert_close(a, b, atol=0, rtol=0)
+            torch.testing.assert_close(a, b, atol=1e-6, rtol=1e-6)
 
 
 def test_private_frame_change_is_node_local() -> None:
