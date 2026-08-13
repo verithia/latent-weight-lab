@@ -14,7 +14,9 @@ from examples.nanogpt.analyze_sparse_moe_fullwidth_pregelu_chart_oracle import (
 
 
 def _module(*, learn_angles: bool) -> FullWidthPreGeluChart:
-    write, _ = torch.linalg.qr(torch.randn(8, 5))
+    with torch.random.fork_rng(devices=[]):
+        torch.manual_seed(5)
+        write, _ = torch.linalg.qr(torch.randn(8, 5))
     return FullWidthPreGeluChart(
         write_basis=write,
         hidden_width=12,
