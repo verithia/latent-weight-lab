@@ -1,0 +1,157 @@
+{
+  "schema_version": "nanogpt_sparse_moe_shared_nonlinear_dictionary_oracle_plan_v1",
+  "recorded_at": "2026-08-13T22:35:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "At the exact >=200x paired-MLP compression frontier, can a directly learned nonlinear feature/write dictionary represent the terminal complete-expert functions once useful directions are allowed to move, and over which sharing axis is that representation stable?",
+  "theory": {
+    "diagnosis": "The full KFAC matrix-normal chart is the strongest stable fixed-image result so far, but its ~0.70 output recovery and ~0.417 JVP recovery show that covariance shaping does not recover the coupled nonlinear feature/write tangent. Fixed random dictionaries, hidden-gauge repair, conditional modulation, and multiple FHT atoms all failed lower. The remaining identifiable question is whether the 200x coordinate budget is intrinsically too small or whether it becomes sufficient when complete ridge-function atoms are learned and shared across the stable residual coordinate system.",
+    "nonlinear_atom": "Each learned atom is complete: v_r * GELU(u_r^T x * a_{l,e,r} + b_{l,e,r}) * c_{l,e,r}. Feature direction u_r and write direction v_r are trained jointly through the nonlinearity; they are not separately generated matrices.",
+    "not_lora": "There is no frozen or trainable dense expert base and no additive low-rank residual. The dictionary is the entire expert function. If deployed it uses the compact atom bank directly and reduces expert inference width/FLOPs as well as trainable parameters.",
+    "relation_to_mapping_networks": "This is a deliberate upper bound beyond the paper's fixed random projection. The Mapping theorem is existential and does not establish that a pseudo-random image is aligned to the transformer task metric. If even a counted learned direction atlas fails at 200x, another fixed BlockFHT map is not causally justified.",
+    "residual_coordinate_argument": "The identity residual stream supplies a common channel gauge across depth. A global bank tests whether this common gauge carries reusable nonlinear atoms; layer-local and expert-local banks test the two failure alternatives without changing the total compression premise.",
+    "literature_context": [
+      {
+        "paper": "Parameter-Efficient Mixture-of-Experts Architecture for Pre-trained Language Models",
+        "url": "https://arxiv.org/abs/2203.01104",
+        "relevance": "Shares an MPO central tensor among experts and uses auxiliary tensors for expert specificity, supporting an explicitly counted shared-core decomposition rather than independent compressed matrices."
+      },
+      {
+        "paper": "SD-MoE: Spectral Decomposition for Effective Expert Specialization",
+        "url": "https://arxiv.org/abs/2602.12556",
+        "relevance": "Reports overlap in dominant expert parameter/gradient subspaces while retaining a need for specialization; this motivates comparing global, layer-local, and expert-local sharing at fixed budget."
+      },
+      {
+        "paper": "Shape Mutating Expert Compression: LorExperts and BTExperts",
+        "url": "https://arxiv.org/abs/2608.07814",
+        "relevance": "Reports that one shared component can fail as expert directions diverge and motivates treating the sharing topology as the causal variable rather than assuming one global basis."
+      }
+    ]
+  },
+  "source": {
+    "parent_git_commit": "5cbef18a7fd891dd5904b032ad5d8697967ca568",
+    "parent_normalized_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_matrix_normal_kfac_chart_oracle_result.json",
+    "parent_normalized_result_sha256": "a72d0f52cc29cc4fd4799d6a67d5ed32f28ca9a344c9aadf0a2889cbf770cb75",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "layers": [0, 5, 11],
+    "dense_paired_parameters_all_layers": 226492416,
+    "checkpoint_updates": 0
+  },
+  "families": {
+    "global_shared_rank619": {
+      "sharing": "One learned U[619,768] and V[619,768] shared by all 12 layers and 8 experts; every layer/expert owns input gain, hidden bias, and output gain vectors of width 619.",
+      "rank": 619,
+      "basis_coordinates": 950784,
+      "modulation_coordinates": 178272,
+      "total_coordinates_all_layers": 1129056,
+      "paired_parameter_compression_ratio": 200.603350055267,
+      "fixed_seed": 20261201
+    },
+    "layer_shared_rank60": {
+      "sharing": "Each layer owns learned U[60,768] and V[60,768], shared by its 8 experts; every expert owns input gain, hidden bias, and output gain vectors of width 60.",
+      "rank": 60,
+      "basis_coordinates": 1105920,
+      "modulation_coordinates": 17280,
+      "total_coordinates_all_layers": 1123200,
+      "paired_parameter_compression_ratio": 201.649230769231,
+      "fixed_seed": 20261202
+    },
+    "expert_local_rank7": {
+      "sharing": "Every layer/expert owns its own learned U[7,768], V[7,768], input gain, hidden bias, and output gain; no learned atom direction is shared.",
+      "rank": 7,
+      "basis_coordinates": 1032192,
+      "modulation_coordinates": 2016,
+      "total_coordinates_all_layers": 1034208,
+      "paired_parameter_compression_ratio": 219.000835421888,
+      "fixed_seed": 20261203
+    }
+  },
+  "operator": {
+    "formula": "For family-specific U_s,V_s and layer/expert modulation a,b,c, f_{l,e}(x) = (c_{l,e} elementwise GELU((x U_s^T) elementwise a_{l,e} + b_{l,e})) V_s. The sharing index s is global, layer, or layer/expert according to the frozen family.",
+    "feature_basis_initialization": "Normal(0,0.02) from the family fixed seed.",
+    "write_basis_initialization": "Normal(0,0.02/sqrt(2*12)) from the family fixed seed.",
+    "input_gain_initialization": 1.0,
+    "hidden_bias_initialization": 0.0,
+    "output_gain_initialization": 0.0,
+    "stepzero_equality": "All families produce exactly zero output and zero input-JVP at initialization because output gains are zero. This prevents a dense or architecture-specific base from inflating recovery.",
+    "dense_c_fc_or_c_proj_stored": false,
+    "additive_lora_residual": false,
+    "fixed_full_matrix_storage": false,
+    "all_learned_basis_values_counted": true,
+    "outer_router": "The exact terminal top-2 router is fixed for sampling/scoring and is outside the paired c_fc/c_proj compression denominator, exactly as in all sealed complete-expert oracles."
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 128,
+    "sampling": "Use exact terminal outer routing and deterministic per-expert samples. Unlike earlier per-layer fits, each family is optimized jointly over layers 0,5,11 so its registered sharing constraint is exercised during fitting.",
+    "anti_leakage": "Fit discovery A and B independently. Heldout tokens and JVP probes never affect initialization, coordinates, stopping, thresholds, or family selection."
+  },
+  "fit_protocol": {
+    "target": "The exact terminal dense complete-expert function, not a dense-base delta. Every compact family replaces both expert matrices.",
+    "objective": "Equal-layer/equal-expert normalized terminal-output MSE plus 0.10 normalized analytic input-JVP MSE.",
+    "optimizer": "AdamW over every counted basis and modulation coordinate; no uncounted learned state.",
+    "steps": 600,
+    "learning_rate": 0.03,
+    "weight_decay": 0.0,
+    "gradient_clip": 10.0,
+    "jvp_weight": 0.1,
+    "precision": "float32 fitting and scoring",
+    "finite_gradients_required": true,
+    "selection": "Use the final registered step. Do not select a family, rank, seed, learning rate, step, or checkpoint on heldout recovery. The three sharing topologies are a frozen structural frontier, not a sweep."
+  },
+  "frozen_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.8,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.7,
+    "heldout_expert_recovery_min_each_bank": 0.5,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.6,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "minimum_discovery_assignments_per_expert": 128,
+    "all_values_and_gradients_finite": true,
+    "paired_parameter_compression_ratio_min": 200.0,
+    "sealed_static_ceiling_recovery_a": 0.43303557485342026,
+    "sealed_static_ceiling_recovery_b": 0.42612191041310626,
+    "descriptive_not_promotional_static_ceiling_margin": 0.1
+  },
+  "decision_rule": {
+    "pass": "A family passes only if it independently clears every absolute recovery, JVP, agreement, occupancy, finiteness, and compression gate in both banks. A pass authorizes only a clean production implementation, exact-config MFU gate, and separately preregistered 124M 0.5TPP initialization/Mapping-Loss training shadow for that family; no larger rung or attention work.",
+    "multiple_passes": "If more than one family passes, choose the family with the highest lower-bank mean recovery; break an exact tie by higher lower-bank JVP, then fewer coordinates. No heldout rank or hyperparameter adaptation is allowed.",
+    "fail": "If no family passes, close the exact directly learned global-rank619, layer-rank60, and expert-rank7 GELU dictionary frontier. Do not sweep ranks, sharing partitions, seeds, optimizer, LR, steps, regularizers, activations, or thresholds. Reconsider the >=200x complete-expert premise or derive a separately preregistered functional expert-community architecture from the observed topology diagnostics before another run.",
+    "no_automatic_promotion": true
+  },
+  "authorization": {
+    "implement_zero_update_oracle": true,
+    "run_zero_update_oracle_after_tests_identity_and_exact_runtime_gate": true,
+    "production_implementation": false,
+    "mapping_loss_shadow": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "5cbef18a7fd891dd5904b032ad5d8697967ca568",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_shared_nonlinear_dictionary_oracle.py",
+    "entrypoint_sha256": null,
+    "helper_sha256": null
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run a real contiguous candidate/control two-step joint-layer preflight. Foreground poll only if the measured full protocol is <=5 minutes. Otherwise launch one verified @Codex watcher immediately.",
+    "callback_policy": "For a predicted one-to-two-hour oracle, terminal success and actionable failure only. If prediction or observed runtime exceeds two hours, add one 90-minute heartbeat clock reset by every successful callback."
+  }
+}
