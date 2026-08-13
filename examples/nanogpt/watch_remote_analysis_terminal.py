@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Send exactly one terminal/error callback for a remote zero-update audit."""
+"""Monitor a remote zero-update audit and send idempotent callbacks."""
 from __future__ import annotations
 
 import argparse
@@ -22,6 +22,12 @@ TERMINAL_ACTION = (
 ERROR_ACTION = (
     "Action required: inspect the remote status and log, diagnose the failure, "
     "update durable state, and repair or requeue only if scientifically justified."
+)
+LIVE_ACTION = (
+    "Action required: verify the live process, GPU health, status, and active "
+    "project note; intervene only if needed, record durable changes, and "
+    "continue the causally authorized analysis. Do not merely acknowledge this "
+    "callback."
 )
 
 
@@ -50,16 +56,29 @@ def send(chat_id: str, text: str) -> bool:
         return False
 
 
-def probe(host: str, pgid: int, status: str, result: str, log: str) -> dict[str, Any]:
+def probe(
+    host: str,
+    pgid: int,
+    status: str,
+    result: str,
+    log: str,
+    gpu: int,
+) -> dict[str, Any]:
     script = r'''
 set -u
-pgid=$1; status=$2; result=$3; log=$4
+pgid=$1; status=$2; result=$3; log=$4; gpu=$5
 alive=0
 kill -0 -- "-$pgid" 2>/dev/null && alive=1
-python3 - "$alive" "$status" "$result" "$log" <<'PY'
+gpu_health=$(
+    nvidia-smi -i "$gpu" \
+        --query-gpu=memory.used,memory.total,utilization.gpu,power.draw,temperature.gpu \
+        --format=csv,noheader,nounits 2>/dev/null | head -n 1 || true
+)
+python3 - "$alive" "$status" "$result" "$log" "$gpu_health" <<'PY'
 import hashlib, json, pathlib, sys
 alive = bool(int(sys.argv[1]))
-status_path, result_path, log_path = map(pathlib.Path, sys.argv[2:])
+status_path, result_path, log_path = map(pathlib.Path, sys.argv[2:5])
+gpu_health = sys.argv[5]
 def load(path):
     try: return json.loads(path.read_text())
     except Exception: return None
@@ -74,6 +93,7 @@ print(json.dumps({
     'status': load(status_path),
     'result_exists': result_path.is_file(),
     'result_sha256': digest(result_path),
+    'gpu_health': gpu_health,
     'log_tail': '\n'.join(log_path.read_text(errors='replace').splitlines()[-30:]) if log_path.is_file() else '',
 }))
 PY
@@ -81,7 +101,7 @@ PY
     completed = subprocess.run(
         [
             "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", host,
-            "bash", "-s", "--", str(pgid), status, result, log,
+            "bash", "-s", "--", str(pgid), status, result, log, str(gpu),
         ],
         input=script,
         text=True,
@@ -105,9 +125,16 @@ def main() -> None:
     parser.add_argument("--run-label", required=True)
     parser.add_argument("--chat-id", required=True)
     parser.add_argument("--poll-seconds", type=float, default=60.0)
+    parser.add_argument("--gpu", type=int, default=0)
+    parser.add_argument(
+        "--heartbeat-minutes",
+        type=float,
+        default=0.0,
+        help="Send live heartbeats at this interval; zero preserves terminal-only mode.",
+    )
     args = parser.parse_args()
     state: dict[str, Any] = {
-        "schema_version": "remote_analysis_terminal_watch_v1",
+        "schema_version": "remote_analysis_watch_v2",
         "run_label": args.run_label,
         "pgid": args.pgid,
         "state": "running",
@@ -120,11 +147,19 @@ def main() -> None:
         if previous.get("pgid") != args.pgid:
             raise ValueError("watch state PGID identity mismatch")
         state.update(previous)
+    state["schema_version"] = "remote_analysis_watch_v2"
     atomic_json(args.state, state)
 
     while True:
         try:
-            sample = probe(args.host, args.pgid, args.status, args.result, args.log)
+            sample = probe(
+                args.host,
+                args.pgid,
+                args.status,
+                args.result,
+                args.log,
+                args.gpu,
+            )
             state["last_sample"] = sample
             state["consecutive_probe_errors"] = 0
             status = sample.get("status") or {}
@@ -157,6 +192,26 @@ def main() -> None:
                         return
             else:
                 state["missing_process_samples"] = 0
+                now = time.time()
+                last_callback = float(
+                    state.get("last_callback_at_unix", state["started_at_unix"])
+                )
+                if (
+                    args.heartbeat_minutes > 0
+                    and now - last_callback >= args.heartbeat_minutes * 60
+                ):
+                    remote_started = float(status.get("started_at_unix", now))
+                    elapsed_hours = max(0.0, now - remote_started) / 3600.0
+                    message = (
+                        f"[bot] @Codex {args.run_label} HEARTBEAT: "
+                        f"alive=true status={status.get('state', 'unknown')} "
+                        f"elapsed={elapsed_hours:.1f}h "
+                        f"gpu={sample.get('gpu_health') or 'unavailable'} "
+                        f"result_exists={sample.get('result_exists')}\n\n{LIVE_ACTION}"
+                    )
+                    if send(args.chat_id, message):
+                        state["last_callback_at_unix"] = now
+                        state["last_callback_kind"] = "heartbeat"
             atomic_json(args.state, state)
         except Exception as error:  # noqa: BLE001
             state["consecutive_probe_errors"] = int(state.get("consecutive_probe_errors", 0)) + 1

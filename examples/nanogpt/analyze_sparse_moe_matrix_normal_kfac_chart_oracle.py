@@ -504,11 +504,14 @@ def validate_plan(plan: dict[str, Any], plan_path: Path) -> None:
 
 
 def _identity_roots(experts: int, input_width: int, hidden_width: int) -> dict[str, torch.Tensor]:
+    # Materialize the expert batch.  ``expand`` would create zero-stride roots
+    # and make the performance preflight radically cheaper than the real,
+    # expert-specific dense KFAC factors.
     return {
-        "fc_left": torch.eye(hidden_width).expand(experts, -1, -1),
-        "fc_right": torch.eye(input_width).expand(experts, -1, -1),
-        "proj_left": torch.eye(input_width).expand(experts, -1, -1),
-        "proj_right": torch.eye(hidden_width).expand(experts, -1, -1),
+        "fc_left": torch.eye(hidden_width).expand(experts, -1, -1).clone(),
+        "fc_right": torch.eye(input_width).expand(experts, -1, -1).clone(),
+        "proj_left": torch.eye(input_width).expand(experts, -1, -1).clone(),
+        "proj_right": torch.eye(hidden_width).expand(experts, -1, -1).clone(),
     }
 
 

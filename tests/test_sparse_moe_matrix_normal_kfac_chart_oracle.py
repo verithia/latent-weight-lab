@@ -5,6 +5,7 @@ import torch
 
 from examples.nanogpt.analyze_sparse_moe_matrix_normal_kfac_chart_oracle import (
     MatrixNormalKFACChart,
+    _identity_roots,
     build_full_kfac_roots,
     coordinate_count,
     factor_operator_cosine,
@@ -107,6 +108,14 @@ def test_identity_shaping_is_exact_control_and_stepzero_is_dense_base() -> None:
     control_live = control.function_and_jvp(inputs, directions, conditional=False)
     for left, right in zip(candidate_live, control_live):
         torch.testing.assert_close(left, right, rtol=2e-6, atol=2e-6)
+
+
+def test_preflight_identity_roots_materialize_the_expert_batch() -> None:
+    roots = _identity_roots(experts=2, input_width=4, hidden_width=6)
+    for root in roots.values():
+        assert root.is_contiguous()
+        assert root.stride(0) > 0
+        assert root[0].data_ptr() != root[1].data_ptr()
 
 
 def test_analytic_jvp_matches_finite_difference_and_all_coordinates_get_gradient() -> None:

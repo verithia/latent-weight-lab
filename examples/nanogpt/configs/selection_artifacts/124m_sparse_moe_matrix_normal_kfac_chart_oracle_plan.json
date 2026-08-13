@@ -158,7 +158,16 @@
     "gpu": 0,
     "workspace_cap_gib": 256,
     "expected_duration_policy": "Foreground-poll only if the measured full protocol is below five minutes; otherwise launch one detached terminal/error-only @Codex watcher immediately after the run.",
-    "callback_policy": "For a one-to-two-hour analysis, emit only terminal success or actionable failure/error."
+    "callback_policy": "For a one-to-two-hour analysis, emit only terminal success or actionable failure/error. If observed runtime exceeds two hours, switch the same idempotent watcher to one 90-minute live heartbeat clock plus terminal/error callbacks.",
+    "postlaunch_performance_repair": {
+      "recorded_at": "2026-08-13T12:40:00+08:00",
+      "candidate_values_observed": false,
+      "cause": "The original identity-factor preflight used zero-stride expand views across experts, while the scientific candidate owns distinct contiguous dense roots. The broadcast storage path understated the two-sided batched-matmul cost.",
+      "original_candidate_control_two_step_seconds": 0.6361,
+      "contiguous_candidate_control_two_step_seconds": 58.04329252243042,
+      "corrected_projected_fit_seconds": 104477.92654037476,
+      "repair": "Materialize every expert identity factor in the performance preflight so its storage layout matches the candidate factors. This changes only systems admission measurement, not coordinates, factors, objectives, data, gates, or candidate values."
+    }
   },
   "identity": {
     "preregistration_parent_commit": "6e6abdb7240b03fd43ee3878650262b5369e4e98",
@@ -168,9 +177,10 @@
     "initial_implementation_git_commit": "9d6c3bc97c3a459b1d6eb8a49fc5d549688e15b2",
     "scale_preflight_repair_commit": "02fef03adeb8ac6d92fe9ee626857fff3340f403",
     "occupancy_preflight_repair_commit": "3e86e4fdfcd56a4f9ecf4fa73122cfba291a856b",
+    "performance_preflight_storage_repair_commit": null,
     "identity_validation_git_commit": "86f917b09bc1538d89213b1ee2dc9e5b2287fdb0",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_matrix_normal_kfac_chart_oracle.py",
-    "entrypoint_sha256": "02de65851b95f9fbd6440c414327a297fe5bf31e18e8db5516fb9de7b484f5ef",
+    "entrypoint_sha256": "a6b1cbab89f37d1240c2c018c5ac7077234f2127196d8c4a4f2c6bca623b1221",
     "helper_sha256": {
       "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
       "examples/nanogpt/analyze_residual_compatibility.py": "b09914d673267a7ee3ff6eb7db11957060364ccc526e78e4b40081cc2f106088",
