@@ -1,0 +1,115 @@
+{
+  "schema_version": "nanogpt_sparse_moe_gelu_boundary_tangent_decomposition_plan_v1",
+  "recorded_at": "2026-08-14T17:28:00+08:00",
+  "status": "theory_preregistered_before_implementation_or_decomposition_values",
+  "scientific_question": "Why does a stable rank-480 atlas retain about 72% of the dense input-Jacobian row energy and 92% of routed output, yet a realizable ridge expert retains only about 20% of analytic input JVP?",
+  "theory": {
+    "identity": "For p=Wfc x, t=Wfc d, p_hat=Wfc_hat x, and t_hat=Wfc_hat d, the dense and realizable expert tangents are Jd=Wproj[gelu'(p) elementwise t] and J_hat d=Wproj[gelu'(p_hat) elementwise t_hat].",
+    "teacher_gate_projected_normal": "Wproj[gelu'(p) elementwise t_hat] freezes the dense activation boundaries and tests only whether the atlas-constrained normal directions carry the tangent.",
+    "projected_gate_dense_normal": "Wproj[gelu'(p_hat) elementwise t] keeps the dense directional derivative but moves the activation boundaries to the fitted expert; it isolates gate/phase displacement.",
+    "self_consistent": "Wproj[gelu'(p_hat) elementwise t_hat] is the actual realizable ridge tangent already known to fail.",
+    "first_order_decomposition": "For delta_p=p_hat-p and delta_t=t_hat-t, J_hat d-Jd is approximated by Wproj[gelu'(p) elementwise delta_t + gelu''(p) elementwise delta_p elementwise t]. The first term is normal-direction error and the second is activation-boundary error. Residual beyond their sum measures higher-order gate interaction.",
+    "structural_consequence": "A compact parameter generator may materialize a full-rank 768-dimensional c_fc even when its trainable parameter manifold is low-dimensional. The rejected S U chart instead imposed rank(c_fc)<=480. If projected normals fail even under teacher gates, the next family must restore full input rank. If teacher-gated normals pass but moved gates fail, the next family must preserve or explicitly fit activation-boundary phase. If each counterfactual passes alone but the self-consistent tangent fails, the binding error is their nonlinear interaction and requires joint boundary-aware functional fitting.",
+    "not_a_fit_or_candidate": "This audit recomputes the already registered ridge coefficients and evaluates frozen algebraic counterfactuals. It has no optimizer, checkpoint update, parameter candidate, rank sweep, or LM loss."
+  },
+  "source": {
+    "parent_git_commit": "f68baaca758f9aa3d23420379282bba2fbce2e22",
+    "input_atlas_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_input_atlas_ceiling_result.json",
+    "input_atlas_result_sha256": "63e2fe121649dc2345943422ea7e6a051f68b9a434432771042f264f549c00c8",
+    "input_bases_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_input_atlas_ceiling_20260814a/input_bases.pt",
+    "input_bases_artifact_sha256": "1814807558562c278466e1bba1a85c90529a4680bfdf20d99a8a34eb26ffb3bc",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "input_atlas_rank": 480,
+    "layers": [0, 5, 11],
+    "checkpoint_updates": 0
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "samples_per_expert_each_split": 1024,
+    "sample_selection_seed_base": 20261631,
+    "sample_selection_seed_rule": "sample_selection_seed_base + 1009*split_index + 17*layer",
+    "analytic_jvp_probe_seed": 20261611,
+    "sampling": "Recompute the predecessor's exact terminal top-2 routed expert samples and frozen ridge coefficients independently for discovery A, discovery B, and heldout; score all counterfactuals on untouched full heldout activations with fixed routing and probabilities."
+  },
+  "coefficient_replay": {
+    "formula": "With the sealed split basis U and Z=X U^T, solve A=(Z^T Z + lambda I)^(-1) Z^T(X Wfc^T), Wfc_hat=A^T U.",
+    "ridge": "lambda = 1e-4 * trace(Z^T Z) / 480",
+    "required_replay_checks": {
+      "discovery_a_input_only_output_tolerance": [0.916216, 0.916236],
+      "discovery_b_input_only_output_tolerance": [0.916360, 0.916381],
+      "heldout_input_only_output_tolerance": [0.927169, 0.927190],
+      "discovery_a_self_jvp_tolerance": [0.214723, 0.214744],
+      "discovery_b_self_jvp_tolerance": [0.210578, 0.210600],
+      "heldout_self_jvp_tolerance": [0.196285, 0.196306]
+    }
+  },
+  "decomposition_protocol": {
+    "gelu_second_derivative": "Differentiate the exact-erf GELU derivative analytically in float32 and verify against a central finite difference before execution.",
+    "arms": [
+      "dense_target",
+      "teacher_gate_projected_normal",
+      "projected_gate_dense_normal",
+      "self_consistent",
+      "first_order_normal_plus_boundary"
+    ],
+    "routed_scoring": "For every arm, use exact terminal top-2 router selections and frozen mixture probabilities, then report mean heldout tangent recovery, every-layer recovery, minimum expert recovery, and two-bank action agreement.",
+    "error_accounting": "Report normal-term energy, boundary-term energy, their cosine, each term's cosine with the exact self-minus-dense tangent error, the fraction of exact error energy recovered by their sum, and the higher-order residual energy fraction.",
+    "precision": "float32 action/JVP evaluation and float64 scalar accumulation",
+    "selection": "No threshold, bank, layer, expert, rank, ridge, probe, or checkpoint may be selected from the observed decomposition."
+  },
+  "frozen_gates": {
+    "teacher_gate_projected_normal_jvp_recovery_mean_min_each_bank": 0.6,
+    "teacher_gate_projected_normal_every_layer_min_each_bank": 0.5,
+    "teacher_gate_projected_normal_minimum_expert_min_each_bank": 0.4,
+    "projected_gate_dense_normal_jvp_recovery_mean_min_each_bank": 0.6,
+    "projected_gate_dense_normal_every_layer_min_each_bank": 0.5,
+    "projected_gate_dense_normal_minimum_expert_min_each_bank": 0.4,
+    "first_order_exact_error_recovery_min_each_bank": 0.8,
+    "cross_bank_counterfactual_action_cosine_min": 0.8,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "normal_capacity_binding": "If teacher-gated projected normals fail in either causal bank, restore full input rank in the next theoretical family. Do not attempt boundary loss or another rank-480 coefficient fit first.",
+    "boundary_phase_binding": "If teacher-gated projected normals pass but projected-gate dense normals fail, preregister a full-rank compact generator whose primary constraint/loss preserves pre-GELU phase and derivative gates; do not use preactivation MSE alone.",
+    "nonlinear_interaction_binding": "If both isolated counterfactuals pass but the self-consistent tangent fails, require a joint output-plus-exact-JVP coefficient oracle before designing a compact generator. A diagonal or separately fitted correction is not authorized.",
+    "higher_order_binding": "If the frozen first-order normal-plus-boundary expansion recovers less than 0.8 of exact tangent-error energy, treat local linear boundary penalties as insufficient and require direct exact-JVP fitting in the next oracle.",
+    "unexpected_self_pass": "If the replayed self-consistent tangent clears 0.6, stop because it contradicts the sealed predecessor; diagnose identity or scoring drift before further work.",
+    "no_automatic_retry_or_sweep": true
+  },
+  "authorization": {
+    "implement_zero_update_decomposition": true,
+    "run_after_tests_identity_and_exact_runtime_gate": true,
+    "new_parameter_candidate": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  },
+  "identity": {
+    "preregistration_parent_commit": "f68baaca758f9aa3d23420379282bba2fbce2e22",
+    "theory_preregistration_git_commit": "pending_until_preregistration_commit",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_gelu_boundary_tangent_decomposition.py",
+    "entrypoint_sha256": "pending_until_implementation",
+    "helper_sha256": "pending_until_implementation"
+  },
+  "systems": {
+    "host": "PRO6",
+    "gpu": 0,
+    "workspace_cap_gib": 256,
+    "performance_gate": "Run committed-source analytic-derivative, replay, and reduced-shape tests. Foreground-poll only if the exact audit projects to <=5 minutes; otherwise attach one verified terminal/error @Codex watcher immediately.",
+    "callback_policy": "Terminal success and actionable failure only for a one-to-two-hour run; no milestone callbacks."
+  }
+}
