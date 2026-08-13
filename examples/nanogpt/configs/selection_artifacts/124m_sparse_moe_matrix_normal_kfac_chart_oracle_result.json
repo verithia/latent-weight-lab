@@ -1,0 +1,2447 @@
+{
+  "accounting": {
+    "additive_lora_residual": false,
+    "compact_coordinates": 1130496,
+    "coordinate_compression_ratio": 200.34782608695653,
+    "dense_fixed_state_is_deployable": false,
+    "dense_learned_basis": false,
+    "dense_paired_parameters": 226492416,
+    "fixed_dense_factor_elements_oracle_only": 566231040,
+    "fixed_dense_state_bytes_float32_oracle_only": 3170893824,
+    "fixed_dense_stepzero_base_elements_oracle_only": 226492416
+  },
+  "all_values_finite": true,
+  "authorization": {
+    "automatic_retry_or_sweep": false,
+    "dense_factor_or_base_storage_in_model": false,
+    "full_attention_work": false,
+    "initialization_and_mapping_loss_shadow": false,
+    "language_model_training": false,
+    "larger_rung": false,
+    "procedural_factor_theory": false
+  },
+  "base_summaries": {
+    "0": {
+      "jvp_recovery": 0.40296220779418945,
+      "minimum_expert_recovery": 0.24427887771188772,
+      "mixture_recovery": 0.2454695701599121
+    },
+    "11": {
+      "jvp_recovery": 0.46805763244628906,
+      "minimum_expert_recovery": 0.31675243325477,
+      "mixture_recovery": 0.2606184482574463
+    },
+    "5": {
+      "jvp_recovery": 0.42741215229034424,
+      "minimum_expert_recovery": 0.2302478188885656,
+      "mixture_recovery": 0.17362278699874878
+    }
+  },
+  "classification": "MATRIX_NORMAL_KFAC_CHART_REJECTED",
+  "execution": {
+    "checkpoint_updates": 0,
+    "coordinates_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_fullmlp_matrix_normal_kfac_oracle_20260812b/artifacts/compact_coordinates.pt",
+    "coordinates_sha256": "6339537cf0530ab8e3821b2c2fde1e3d32ef7761082d12a716e2028b063ade45",
+    "device": "cuda",
+    "maximum_memory_allocated_bytes": 4201697280,
+    "wall_seconds": 98589.64242506027
+  },
+  "factor_acquisition": {
+    "discovery_a": {
+      "layers": {
+        "0": [
+          {
+            "assignments": 3936,
+            "expert": 0,
+            "fc_left": {
+              "effective_rank": 615.1788940429688,
+              "maximum_eigenvalue": 77.34135437011719,
+              "minimum_eigenvalue": 0.044534504413604736,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 1.4419171412427545e-10,
+              "rows": 3936,
+              "weight_sum": 3936.0
+            },
+            "fc_right": {
+              "effective_rank": 255.6068878173828,
+              "maximum_eigenvalue": 45.222190856933594,
+              "minimum_eigenvalue": 1.155857376033964e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.1402587890625,
+              "rows": 3936,
+              "weight_sum": 1919.71435546875
+            },
+            "proj_left": {
+              "effective_rank": 417.6628723144531,
+              "maximum_eigenvalue": 52.70669174194336,
+              "minimum_eigenvalue": 1.0073224530060543e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.521898340683947e-08,
+              "rows": 3936,
+              "weight_sum": 3936.0
+            },
+            "proj_right": {
+              "effective_rank": 217.7363739013672,
+              "maximum_eigenvalue": 231.1377716064453,
+              "minimum_eigenvalue": 0.013353412970900536,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 164.72067260742188,
+              "rows": 3936,
+              "weight_sum": 1919.71435546875
+            }
+          },
+          {
+            "assignments": 6885,
+            "expert": 1,
+            "fc_left": {
+              "effective_rank": 387.8020324707031,
+              "maximum_eigenvalue": 214.79698181152344,
+              "minimum_eigenvalue": 0.061492834240198135,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.112916092089634e-10,
+              "rows": 6885,
+              "weight_sum": 6885.0
+            },
+            "fc_right": {
+              "effective_rank": 294.59747314453125,
+              "maximum_eigenvalue": 47.60813522338867,
+              "minimum_eigenvalue": 7.103735697455704e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.4320068359375,
+              "rows": 6885,
+              "weight_sum": 3369.556640625
+            },
+            "proj_left": {
+              "effective_rank": 237.6896514892578,
+              "maximum_eigenvalue": 139.0845184326172,
+              "minimum_eigenvalue": 7.163736199800042e-07,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 2.2260129739493095e-08,
+              "rows": 6885,
+              "weight_sum": 6885.0
+            },
+            "proj_right": {
+              "effective_rank": 256.3295593261719,
+              "maximum_eigenvalue": 222.49171447753906,
+              "minimum_eigenvalue": 0.027722716331481934,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 161.28787231445312,
+              "rows": 6885,
+              "weight_sum": 3369.556640625
+            }
+          },
+          {
+            "assignments": 9142,
+            "expert": 2,
+            "fc_left": {
+              "effective_rank": 361.0285339355469,
+              "maximum_eigenvalue": 228.43212890625,
+              "minimum_eigenvalue": 0.07197816669940948,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.3271008731118314e-10,
+              "rows": 9142,
+              "weight_sum": 9142.0
+            },
+            "fc_right": {
+              "effective_rank": 303.9364929199219,
+              "maximum_eigenvalue": 45.776668548583984,
+              "minimum_eigenvalue": 1.591583213667036e-06,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 759.6065673828125,
+              "rows": 9142,
+              "weight_sum": 4479.38671875
+            },
+            "proj_left": {
+              "effective_rank": 200.95529174804688,
+              "maximum_eigenvalue": 154.21034240722656,
+              "minimum_eigenvalue": 1.3407967571765766e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 2.484073391428865e-08,
+              "rows": 9142,
+              "weight_sum": 9142.0
+            },
+            "proj_right": {
+              "effective_rank": 262.32379150390625,
+              "maximum_eigenvalue": 228.4320068359375,
+              "minimum_eigenvalue": 0.035821333527565,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 161.05374145507812,
+              "rows": 9142,
+              "weight_sum": 4479.38671875
+            }
+          },
+          {
+            "assignments": 9489,
+            "expert": 3,
+            "fc_left": {
+              "effective_rank": 261.7159729003906,
+              "maximum_eigenvalue": 299.547607421875,
+              "minimum_eigenvalue": 0.06002693250775337,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 3.2562283425185967e-10,
+              "rows": 9489,
+              "weight_sum": 9489.0
+            },
+            "fc_right": {
+              "effective_rank": 350.250732421875,
+              "maximum_eigenvalue": 40.459930419921875,
+              "minimum_eigenvalue": 1.2302712093514856e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.8013916015625,
+              "rows": 9489,
+              "weight_sum": 4699.84375
+            },
+            "proj_left": {
+              "effective_rank": 135.35446166992188,
+              "maximum_eigenvalue": 199.1847686767578,
+              "minimum_eigenvalue": 1.2514821037257207e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 3.432398898439715e-08,
+              "rows": 9489,
+              "weight_sum": 9489.0
+            },
+            "proj_right": {
+              "effective_rank": 295.1849365234375,
+              "maximum_eigenvalue": 221.20294189453125,
+              "minimum_eigenvalue": 0.04056768864393234,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 161.76596069335938,
+              "rows": 9489,
+              "weight_sum": 4699.84375
+            }
+          },
+          {
+            "assignments": 11170,
+            "expert": 4,
+            "fc_left": {
+              "effective_rank": 571.1429443359375,
+              "maximum_eigenvalue": 135.39187622070312,
+              "minimum_eigenvalue": 0.10355516523122787,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.791925496874569e-10,
+              "rows": 11170,
+              "weight_sum": 11170.0
+            },
+            "fc_right": {
+              "effective_rank": 263.39947509765625,
+              "maximum_eigenvalue": 52.80068588256836,
+              "minimum_eigenvalue": 2.420781584078213e-07,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 759.4072875976562,
+              "rows": 11170,
+              "weight_sum": 5694.81298828125
+            },
+            "proj_left": {
+              "effective_rank": 356.9878234863281,
+              "maximum_eigenvalue": 88.39036560058594,
+              "minimum_eigenvalue": 1.0680238347049453e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.8884236396843335e-08,
+              "rows": 11170,
+              "weight_sum": 11170.0
+            },
+            "proj_right": {
+              "effective_rank": 236.89207458496094,
+              "maximum_eigenvalue": 230.33892822265625,
+              "minimum_eigenvalue": 0.03561932593584061,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.36727905273438,
+              "rows": 11170,
+              "weight_sum": 5694.81298828125
+            }
+          },
+          {
+            "assignments": 12207,
+            "expert": 5,
+            "fc_left": {
+              "effective_rank": 403.5742492675781,
+              "maximum_eigenvalue": 212.1162567138672,
+              "minimum_eigenvalue": 0.08988386392593384,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 2.3295781970134044e-10,
+              "rows": 12207,
+              "weight_sum": 12207.0
+            },
+            "fc_right": {
+              "effective_rank": 341.79278564453125,
+              "maximum_eigenvalue": 42.63964080810547,
+              "minimum_eigenvalue": 8.664608230901649e-07,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 759.4193115234375,
+              "rows": 12207,
+              "weight_sum": 6315.462890625
+            },
+            "proj_left": {
+              "effective_rank": 244.37327575683594,
+              "maximum_eigenvalue": 136.4877166748047,
+              "minimum_eigenvalue": 1.0149341278520296e-06,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 2.4355248484653202e-08,
+              "rows": 12207,
+              "weight_sum": 12207.0
+            },
+            "proj_right": {
+              "effective_rank": 284.8356018066406,
+              "maximum_eigenvalue": 225.5829620361328,
+              "minimum_eigenvalue": 0.043434176594018936,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 163.21839904785156,
+              "rows": 12207,
+              "weight_sum": 6315.462890625
+            }
+          },
+          {
+            "assignments": 7894,
+            "expert": 6,
+            "fc_left": {
+              "effective_rank": 456.0391540527344,
+              "maximum_eigenvalue": 184.089111328125,
+              "minimum_eigenvalue": 0.0774301141500473,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.0152271518192322e-10,
+              "rows": 7894,
+              "weight_sum": 7894.0
+            },
+            "fc_right": {
+              "effective_rank": 328.43914794921875,
+              "maximum_eigenvalue": 41.62784957885742,
+              "minimum_eigenvalue": 6.733142754455912e-07,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 759.5804443359375,
+              "rows": 7894,
+              "weight_sum": 3925.607421875
+            },
+            "proj_left": {
+              "effective_rank": 254.4519805908203,
+              "maximum_eigenvalue": 129.56117248535156,
+              "minimum_eigenvalue": 5.551784170165774e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 2.1694056329124578e-08,
+              "rows": 7894,
+              "weight_sum": 7894.0
+            },
+            "proj_right": {
+              "effective_rank": 282.06781005859375,
+              "maximum_eigenvalue": 220.59901428222656,
+              "minimum_eigenvalue": 0.034784525632858276,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 159.79457092285156,
+              "rows": 7894,
+              "weight_sum": 3925.607421875
+            }
+          },
+          {
+            "assignments": 4813,
+            "expert": 7,
+            "fc_left": {
+              "effective_rank": 556.803955078125,
+              "maximum_eigenvalue": 105.96294403076172,
+              "minimum_eigenvalue": 0.0546712651848793,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 1.5718269741338275e-10,
+              "rows": 4813,
+              "weight_sum": 4813.0
+            },
+            "fc_right": {
+              "effective_rank": 264.5334167480469,
+              "maximum_eigenvalue": 51.44723129272461,
+              "minimum_eigenvalue": 1.1976067071373109e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.2464599609375,
+              "rows": 4813,
+              "weight_sum": 2363.61572265625
+            },
+            "proj_left": {
+              "effective_rank": 374.85113525390625,
+              "maximum_eigenvalue": 70.54066467285156,
+              "minimum_eigenvalue": 4.846614274356398e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.6678207259701594e-08,
+              "rows": 4813,
+              "weight_sum": 4813.0
+            },
+            "proj_right": {
+              "effective_rank": 232.3287811279297,
+              "maximum_eigenvalue": 224.3270721435547,
+              "minimum_eigenvalue": 0.018646199256181717,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.70492553710938,
+              "rows": 4813,
+              "weight_sum": 2363.61572265625
+            }
+          }
+        ],
+        "11": [
+          {
+            "assignments": 212,
+            "expert": 0,
+            "fc_left": {
+              "effective_rank": 126.90019989013672,
+              "maximum_eigenvalue": 66.55734252929688,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 1.4893798000459313e-11,
+              "rows": 212,
+              "weight_sum": 212.0
+            },
+            "fc_right": {
+              "effective_rank": 56.091392517089844,
+              "maximum_eigenvalue": 208.63168334960938,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.7679443359375,
+              "rows": 212,
+              "weight_sum": 90.67401123046875
+            },
+            "proj_left": {
+              "effective_rank": 99.6227798461914,
+              "maximum_eigenvalue": 39.40846633911133,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.5791573604317932e-09,
+              "rows": 212,
+              "weight_sum": 212.0
+            },
+            "proj_right": {
+              "effective_rank": 48.06731414794922,
+              "maximum_eigenvalue": 490.68194580078125,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 1536.0020751953125,
+              "raw_trace": 164.55111694335938,
+              "rows": 212,
+              "weight_sum": 90.67401123046875
+            }
+          },
+          {
+            "assignments": 17080,
+            "expert": 1,
+            "fc_left": {
+              "effective_rank": 527.9633178710938,
+              "maximum_eigenvalue": 52.15150833129883,
+              "minimum_eigenvalue": 0.04468522220849991,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.0038810888411973e-11,
+              "rows": 17080,
+              "weight_sum": 17080.0
+            },
+            "fc_right": {
+              "effective_rank": 118.78070068359375,
+              "maximum_eigenvalue": 219.12139892578125,
+              "minimum_eigenvalue": 1.4599465885112295e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.7752685546875,
+              "rows": 17080,
+              "weight_sum": 8556.55078125
+            },
+            "proj_left": {
+              "effective_rank": 346.1634216308594,
+              "maximum_eigenvalue": 32.09552001953125,
+              "minimum_eigenvalue": 6.44166959773429e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 2.0830399627413954e-09,
+              "rows": 17080,
+              "weight_sum": 17080.0
+            },
+            "proj_right": {
+              "effective_rank": 99.01902770996094,
+              "maximum_eigenvalue": 524.5191040039062,
+              "minimum_eigenvalue": 0.013707755133509636,
+              "normalized_trace": 1536.0009765625,
+              "raw_trace": 168.85479736328125,
+              "rows": 17080,
+              "weight_sum": 8556.55078125
+            }
+          },
+          {
+            "assignments": 4869,
+            "expert": 2,
+            "fc_left": {
+              "effective_rank": 494.8053894042969,
+              "maximum_eigenvalue": 58.18117141723633,
+              "minimum_eigenvalue": 0.03557491675019264,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 1.710711954039379e-11,
+              "rows": 4869,
+              "weight_sum": 4869.0
+            },
+            "fc_right": {
+              "effective_rank": 110.72301483154297,
+              "maximum_eigenvalue": 213.8972930908203,
+              "minimum_eigenvalue": 1.2771862429872272e-06,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.7808837890625,
+              "rows": 4869,
+              "weight_sum": 2300.68359375
+            },
+            "proj_left": {
+              "effective_rank": 328.4217529296875,
+              "maximum_eigenvalue": 36.71235275268555,
+              "minimum_eigenvalue": 1.2104650295441388e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 1.8101520282698402e-09,
+              "rows": 4869,
+              "weight_sum": 4869.0
+            },
+            "proj_right": {
+              "effective_rank": 102.60884857177734,
+              "maximum_eigenvalue": 487.3022766113281,
+              "minimum_eigenvalue": 0.01115335151553154,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 161.5310516357422,
+              "rows": 4869,
+              "weight_sum": 2300.68359375
+            }
+          },
+          {
+            "assignments": 3272,
+            "expert": 3,
+            "fc_left": {
+              "effective_rank": 445.5914306640625,
+              "maximum_eigenvalue": 54.233768463134766,
+              "minimum_eigenvalue": 0.016173740848898888,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 1.795356571743234e-11,
+              "rows": 3272,
+              "weight_sum": 3272.0
+            },
+            "fc_right": {
+              "effective_rank": 101.94009399414062,
+              "maximum_eigenvalue": 232.47203063964844,
+              "minimum_eigenvalue": 9.339729558632826e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.765625,
+              "rows": 3272,
+              "weight_sum": 1532.505615234375
+            },
+            "proj_left": {
+              "effective_rank": 296.6454772949219,
+              "maximum_eigenvalue": 33.74336624145508,
+              "minimum_eigenvalue": 6.869254320918117e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.8915302657518396e-09,
+              "rows": 3272,
+              "weight_sum": 3272.0
+            },
+            "proj_right": {
+              "effective_rank": 92.47403717041016,
+              "maximum_eigenvalue": 519.8748168945312,
+              "minimum_eigenvalue": 0.005963742733001709,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 162.10609436035156,
+              "rows": 3272,
+              "weight_sum": 1532.505615234375
+            }
+          },
+          {
+            "assignments": 8788,
+            "expert": 4,
+            "fc_left": {
+              "effective_rank": 511.7393493652344,
+              "maximum_eigenvalue": 50.65778350830078,
+              "minimum_eigenvalue": 0.05338750407099724,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.8494877504493523e-11,
+              "rows": 8788,
+              "weight_sum": 8788.0
+            },
+            "fc_right": {
+              "effective_rank": 113.25748443603516,
+              "maximum_eigenvalue": 225.05223083496094,
+              "minimum_eigenvalue": 5.876863724552095e-07,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 767.7678833007812,
+              "rows": 8788,
+              "weight_sum": 4186.67578125
+            },
+            "proj_left": {
+              "effective_rank": 336.073974609375,
+              "maximum_eigenvalue": 33.157569885253906,
+              "minimum_eigenvalue": 8.39614187952975e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.9512027549239974e-09,
+              "rows": 8788,
+              "weight_sum": 8788.0
+            },
+            "proj_right": {
+              "effective_rank": 99.02886199951172,
+              "maximum_eigenvalue": 518.7247314453125,
+              "minimum_eigenvalue": 0.017620276659727097,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 165.87588500976562,
+              "rows": 8788,
+              "weight_sum": 4186.67578125
+            }
+          },
+          {
+            "assignments": 6410,
+            "expert": 5,
+            "fc_left": {
+              "effective_rank": 492.28582763671875,
+              "maximum_eigenvalue": 50.982120513916016,
+              "minimum_eigenvalue": 0.043996620923280716,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.775078521670803e-11,
+              "rows": 6410,
+              "weight_sum": 6410.0
+            },
+            "fc_right": {
+              "effective_rank": 110.22626495361328,
+              "maximum_eigenvalue": 224.25892639160156,
+              "minimum_eigenvalue": 7.770502179482719e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.771240234375,
+              "rows": 6410,
+              "weight_sum": 3030.03173828125
+            },
+            "proj_left": {
+              "effective_rank": 324.5372009277344,
+              "maximum_eigenvalue": 31.128232955932617,
+              "minimum_eigenvalue": 7.560270205431152e-07,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 1.8855210726087535e-09,
+              "rows": 6410,
+              "weight_sum": 6410.0
+            },
+            "proj_right": {
+              "effective_rank": 101.01361846923828,
+              "maximum_eigenvalue": 507.6571350097656,
+              "minimum_eigenvalue": 0.014301544055342674,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 160.78585815429688,
+              "rows": 6410,
+              "weight_sum": 3030.03173828125
+            }
+          },
+          {
+            "assignments": 3981,
+            "expert": 6,
+            "fc_left": {
+              "effective_rank": 476.8209228515625,
+              "maximum_eigenvalue": 53.86052322387695,
+              "minimum_eigenvalue": 0.03186339512467384,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 1.7274468314121272e-11,
+              "rows": 3981,
+              "weight_sum": 3981.0
+            },
+            "fc_right": {
+              "effective_rank": 110.18412017822266,
+              "maximum_eigenvalue": 218.23519897460938,
+              "minimum_eigenvalue": 7.99541794549441e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.77001953125,
+              "rows": 3981,
+              "weight_sum": 1857.155517578125
+            },
+            "proj_left": {
+              "effective_rank": 312.2880859375,
+              "maximum_eigenvalue": 33.527099609375,
+              "minimum_eigenvalue": 8.361119512301229e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.8458969908152767e-09,
+              "rows": 3981,
+              "weight_sum": 3981.0
+            },
+            "proj_right": {
+              "effective_rank": 99.86985778808594,
+              "maximum_eigenvalue": 499.806884765625,
+              "minimum_eigenvalue": 0.011446499265730381,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 160.8710479736328,
+              "rows": 3981,
+              "weight_sum": 1857.155517578125
+            }
+          },
+          {
+            "assignments": 20924,
+            "expert": 7,
+            "fc_left": {
+              "effective_rank": 521.4769897460938,
+              "maximum_eigenvalue": 57.99820327758789,
+              "minimum_eigenvalue": 0.05232853442430496,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.2498648777347086e-11,
+              "rows": 20924,
+              "weight_sum": 20924.0
+            },
+            "fc_right": {
+              "effective_rank": 120.44715881347656,
+              "maximum_eigenvalue": 217.60018920898438,
+              "minimum_eigenvalue": 1.1834608812932856e-06,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 767.775634765625,
+              "rows": 20924,
+              "weight_sum": 11213.72265625
+            },
+            "proj_left": {
+              "effective_rank": 336.61431884765625,
+              "maximum_eigenvalue": 34.65801239013672,
+              "minimum_eigenvalue": 1.453855361432943e-06,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 2.368247820072611e-09,
+              "rows": 20924,
+              "weight_sum": 20924.0
+            },
+            "proj_right": {
+              "effective_rank": 109.74832916259766,
+              "maximum_eigenvalue": 495.2126770019531,
+              "minimum_eigenvalue": 0.015848498791456223,
+              "normalized_trace": 1536.0010986328125,
+              "raw_trace": 163.6773681640625,
+              "rows": 20924,
+              "weight_sum": 11213.72265625
+            }
+          }
+        ],
+        "5": [
+          {
+            "assignments": 11022,
+            "expert": 0,
+            "fc_left": {
+              "effective_rank": 621.10546875,
+              "maximum_eigenvalue": 40.89705276489258,
+              "minimum_eigenvalue": 0.04693516716361046,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 3.206957963075574e-11,
+              "rows": 11022,
+              "weight_sum": 11022.0
+            },
+            "fc_right": {
+              "effective_rank": 162.32772827148438,
+              "maximum_eigenvalue": 192.6881561279297,
+              "minimum_eigenvalue": 9.031134595716139e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.4136962890625,
+              "rows": 11022,
+              "weight_sum": 5588.2978515625
+            },
+            "proj_left": {
+              "effective_rank": 428.9219665527344,
+              "maximum_eigenvalue": 25.510753631591797,
+              "minimum_eigenvalue": 1.539359004709695e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.413276772334939e-09,
+              "rows": 11022,
+              "weight_sum": 11022.0
+            },
+            "proj_right": {
+              "effective_rank": 141.1589813232422,
+              "maximum_eigenvalue": 459.3359069824219,
+              "minimum_eigenvalue": 0.014208709821105003,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 160.87362670898438,
+              "rows": 11022,
+              "weight_sum": 5588.2978515625
+            }
+          },
+          {
+            "assignments": 3897,
+            "expert": 1,
+            "fc_left": {
+              "effective_rank": 563.0005493164062,
+              "maximum_eigenvalue": 46.78081130981445,
+              "minimum_eigenvalue": 0.03822130337357521,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 2.9611743612711905e-11,
+              "rows": 3897,
+              "weight_sum": 3897.0
+            },
+            "fc_right": {
+              "effective_rank": 162.97828674316406,
+              "maximum_eigenvalue": 183.86831665039062,
+              "minimum_eigenvalue": 4.788913656739169e-07,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 767.399169921875,
+              "rows": 3897,
+              "weight_sum": 1882.1365966796875
+            },
+            "proj_left": {
+              "effective_rank": 401.19195556640625,
+              "maximum_eigenvalue": 29.583097457885742,
+              "minimum_eigenvalue": 1.609157493476232e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 3.1265718902773187e-09,
+              "rows": 3897,
+              "weight_sum": 3897.0
+            },
+            "proj_right": {
+              "effective_rank": 131.85186767578125,
+              "maximum_eigenvalue": 462.2025451660156,
+              "minimum_eigenvalue": 0.013664154335856438,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 164.34811401367188,
+              "rows": 3897,
+              "weight_sum": 1882.1365966796875
+            }
+          },
+          {
+            "assignments": 9575,
+            "expert": 2,
+            "fc_left": {
+              "effective_rank": 615.6631469726562,
+              "maximum_eigenvalue": 43.818199157714844,
+              "minimum_eigenvalue": 0.08327457308769226,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 3.092599787368755e-11,
+              "rows": 9575,
+              "weight_sum": 9575.0
+            },
+            "fc_right": {
+              "effective_rank": 166.7079315185547,
+              "maximum_eigenvalue": 187.012939453125,
+              "minimum_eigenvalue": 5.717940325666859e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.412841796875,
+              "rows": 9575,
+              "weight_sum": 4781.337890625
+            },
+            "proj_left": {
+              "effective_rank": 416.18341064453125,
+              "maximum_eigenvalue": 26.1961669921875,
+              "minimum_eigenvalue": 7.642466925972258e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.313827212636511e-09,
+              "rows": 9575,
+              "weight_sum": 9575.0
+            },
+            "proj_right": {
+              "effective_rank": 153.02487182617188,
+              "maximum_eigenvalue": 433.4168701171875,
+              "minimum_eigenvalue": 0.03013726882636547,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 158.86863708496094,
+              "rows": 9575,
+              "weight_sum": 4781.337890625
+            }
+          },
+          {
+            "assignments": 6696,
+            "expert": 3,
+            "fc_left": {
+              "effective_rank": 609.8207397460938,
+              "maximum_eigenvalue": 40.03006362915039,
+              "minimum_eigenvalue": 0.06266183406114578,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 3.045827479120078e-11,
+              "rows": 6696,
+              "weight_sum": 6696.0
+            },
+            "fc_right": {
+              "effective_rank": 163.2088623046875,
+              "maximum_eigenvalue": 184.71287536621094,
+              "minimum_eigenvalue": 1.1311170737826615e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 767.4212036132812,
+              "rows": 6696,
+              "weight_sum": 3284.6279296875
+            },
+            "proj_left": {
+              "effective_rank": 423.0162048339844,
+              "maximum_eigenvalue": 24.497848510742188,
+              "minimum_eigenvalue": 1.5450897308255662e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.2360740753745176e-09,
+              "rows": 6696,
+              "weight_sum": 6696.0
+            },
+            "proj_right": {
+              "effective_rank": 146.41058349609375,
+              "maximum_eigenvalue": 438.31494140625,
+              "minimum_eigenvalue": 0.02429903857409954,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 159.93511962890625,
+              "rows": 6696,
+              "weight_sum": 3284.6279296875
+            }
+          },
+          {
+            "assignments": 9751,
+            "expert": 4,
+            "fc_left": {
+              "effective_rank": 616.33837890625,
+              "maximum_eigenvalue": 40.1831169128418,
+              "minimum_eigenvalue": 0.06222200393676758,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 3.2152433493415344e-11,
+              "rows": 9751,
+              "weight_sum": 9751.0
+            },
+            "fc_right": {
+              "effective_rank": 161.80848693847656,
+              "maximum_eigenvalue": 189.58883666992188,
+              "minimum_eigenvalue": 1.5507484931731597e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.4212646484375,
+              "rows": 9751,
+              "weight_sum": 4933.0869140625
+            },
+            "proj_left": {
+              "effective_rank": 422.4624938964844,
+              "maximum_eigenvalue": 25.253414154052734,
+              "minimum_eigenvalue": 1.0162075341213495e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.4295226658542788e-09,
+              "rows": 9751,
+              "weight_sum": 9751.0
+            },
+            "proj_right": {
+              "effective_rank": 146.08018493652344,
+              "maximum_eigenvalue": 443.1623229980469,
+              "minimum_eigenvalue": 0.018739944323897362,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 159.8868408203125,
+              "rows": 9751,
+              "weight_sum": 4933.0869140625
+            }
+          },
+          {
+            "assignments": 8862,
+            "expert": 5,
+            "fc_left": {
+              "effective_rank": 612.4954833984375,
+              "maximum_eigenvalue": 43.231536865234375,
+              "minimum_eigenvalue": 0.05129888653755188,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 3.1424255558798464e-11,
+              "rows": 8862,
+              "weight_sum": 8862.0
+            },
+            "fc_right": {
+              "effective_rank": 164.28269958496094,
+              "maximum_eigenvalue": 181.85150146484375,
+              "minimum_eigenvalue": 5.409806362877134e-07,
+              "normalized_trace": 768.0006103515625,
+              "raw_trace": 767.435791015625,
+              "rows": 8862,
+              "weight_sum": 4450.8837890625
+            },
+            "proj_left": {
+              "effective_rank": 416.2201232910156,
+              "maximum_eigenvalue": 27.55615997314453,
+              "minimum_eigenvalue": 9.82493361334491e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.361378730915021e-09,
+              "rows": 8862,
+              "weight_sum": 8862.0
+            },
+            "proj_right": {
+              "effective_rank": 152.8970947265625,
+              "maximum_eigenvalue": 422.8259582519531,
+              "minimum_eigenvalue": 0.020881470292806625,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 157.81387329101562,
+              "rows": 8862,
+              "weight_sum": 4450.8837890625
+            }
+          },
+          {
+            "assignments": 5997,
+            "expert": 6,
+            "fc_left": {
+              "effective_rank": 593.8825073242188,
+              "maximum_eigenvalue": 39.876007080078125,
+              "minimum_eigenvalue": 0.05961277335882187,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 3.088413899621223e-11,
+              "rows": 5997,
+              "weight_sum": 5997.0
+            },
+            "fc_right": {
+              "effective_rank": 163.3546142578125,
+              "maximum_eigenvalue": 190.33595275878906,
+              "minimum_eigenvalue": 1.969050771322145e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.3905029296875,
+              "rows": 5997,
+              "weight_sum": 2945.96142578125
+            },
+            "proj_left": {
+              "effective_rank": 408.45355224609375,
+              "maximum_eigenvalue": 24.85361099243164,
+              "minimum_eigenvalue": 1.1260201517870883e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.3058411563757772e-09,
+              "rows": 5997,
+              "weight_sum": 5997.0
+            },
+            "proj_right": {
+              "effective_rank": 144.09280395507812,
+              "maximum_eigenvalue": 449.6424560546875,
+              "minimum_eigenvalue": 0.021955907344818115,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 160.4817657470703,
+              "rows": 5997,
+              "weight_sum": 2945.96142578125
+            }
+          },
+          {
+            "assignments": 9736,
+            "expert": 7,
+            "fc_left": {
+              "effective_rank": 599.5564575195312,
+              "maximum_eigenvalue": 44.38273239135742,
+              "minimum_eigenvalue": 0.08101865649223328,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.28708935071198e-11,
+              "rows": 9736,
+              "weight_sum": 9736.0
+            },
+            "fc_right": {
+              "effective_rank": 168.5115203857422,
+              "maximum_eigenvalue": 180.43251037597656,
+              "minimum_eigenvalue": 9.731772934173932e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.436279296875,
+              "rows": 9736,
+              "weight_sum": 4901.66796875
+            },
+            "proj_left": {
+              "effective_rank": 411.9691467285156,
+              "maximum_eigenvalue": 27.66139793395996,
+              "minimum_eigenvalue": 1.1517390703374986e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.3930598331011197e-09,
+              "rows": 9736,
+              "weight_sum": 9736.0
+            },
+            "proj_right": {
+              "effective_rank": 130.60931396484375,
+              "maximum_eigenvalue": 472.21661376953125,
+              "minimum_eigenvalue": 0.027242552489042282,
+              "normalized_trace": 1536.0010986328125,
+              "raw_trace": 171.87759399414062,
+              "rows": 9736,
+              "weight_sum": 4901.66796875
+            }
+          }
+        ]
+      },
+      "loss": 10.996961176395416
+    },
+    "discovery_b": {
+      "layers": {
+        "0": [
+          {
+            "assignments": 3987,
+            "expert": 0,
+            "fc_left": {
+              "effective_rank": 604.0810546875,
+              "maximum_eigenvalue": 82.05968475341797,
+              "minimum_eigenvalue": 0.043975718319416046,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.5111015216895396e-10,
+              "rows": 3987,
+              "weight_sum": 3987.0
+            },
+            "fc_right": {
+              "effective_rank": 256.5183410644531,
+              "maximum_eigenvalue": 47.52195739746094,
+              "minimum_eigenvalue": 1.4586382803827291e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.152587890625,
+              "rows": 3987,
+              "weight_sum": 1956.28173828125
+            },
+            "proj_left": {
+              "effective_rank": 418.0075988769531,
+              "maximum_eigenvalue": 53.40138244628906,
+              "minimum_eigenvalue": 1.5009811704658205e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.5862957170043046e-08,
+              "rows": 3987,
+              "weight_sum": 3987.0
+            },
+            "proj_right": {
+              "effective_rank": 218.33782958984375,
+              "maximum_eigenvalue": 232.30126953125,
+              "minimum_eigenvalue": 0.013550618663430214,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 164.69284057617188,
+              "rows": 3987,
+              "weight_sum": 1956.28173828125
+            }
+          },
+          {
+            "assignments": 7100,
+            "expert": 1,
+            "fc_left": {
+              "effective_rank": 425.4596862792969,
+              "maximum_eigenvalue": 182.3500518798828,
+              "minimum_eigenvalue": 0.066480353474617,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 2.083324068813397e-10,
+              "rows": 7100,
+              "weight_sum": 7100.0
+            },
+            "fc_right": {
+              "effective_rank": 298.64410400390625,
+              "maximum_eigenvalue": 47.082794189453125,
+              "minimum_eigenvalue": 1.0430112524772994e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.424560546875,
+              "rows": 7100,
+              "weight_sum": 3494.02001953125
+            },
+            "proj_left": {
+              "effective_rank": 261.792724609375,
+              "maximum_eigenvalue": 119.52653503417969,
+              "minimum_eigenvalue": 1.0553924312262097e-06,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 2.2059648330241544e-08,
+              "rows": 7100,
+              "weight_sum": 7100.0
+            },
+            "proj_right": {
+              "effective_rank": 258.9368896484375,
+              "maximum_eigenvalue": 221.68392944335938,
+              "minimum_eigenvalue": 0.02911391295492649,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.23907470703125,
+              "rows": 7100,
+              "weight_sum": 3494.02001953125
+            }
+          },
+          {
+            "assignments": 9075,
+            "expert": 2,
+            "fc_left": {
+              "effective_rank": 389.30426025390625,
+              "maximum_eigenvalue": 207.07095336914062,
+              "minimum_eigenvalue": 0.07372667640447617,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 2.3010804373058136e-10,
+              "rows": 9075,
+              "weight_sum": 9075.0
+            },
+            "fc_right": {
+              "effective_rank": 307.1969299316406,
+              "maximum_eigenvalue": 44.93114471435547,
+              "minimum_eigenvalue": 1.0714843483583536e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.58740234375,
+              "rows": 9075,
+              "weight_sum": 4451.0224609375
+            },
+            "proj_left": {
+              "effective_rank": 218.4769744873047,
+              "maximum_eigenvalue": 141.65792846679688,
+              "minimum_eigenvalue": 1.689683358563343e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 2.4656429786773515e-08,
+              "rows": 9075,
+              "weight_sum": 9075.0
+            },
+            "proj_right": {
+              "effective_rank": 264.88848876953125,
+              "maximum_eigenvalue": 226.66000366210938,
+              "minimum_eigenvalue": 0.03612283617258072,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.14137268066406,
+              "rows": 9075,
+              "weight_sum": 4451.0224609375
+            }
+          },
+          {
+            "assignments": 9574,
+            "expert": 3,
+            "fc_left": {
+              "effective_rank": 252.67100524902344,
+              "maximum_eigenvalue": 303.3954772949219,
+              "minimum_eigenvalue": 0.058259718120098114,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.4944419580185127e-10,
+              "rows": 9574,
+              "weight_sum": 9574.0
+            },
+            "fc_right": {
+              "effective_rank": 351.5640563964844,
+              "maximum_eigenvalue": 40.049373626708984,
+              "minimum_eigenvalue": 1.4655623772341642e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.8291015625,
+              "rows": 9574,
+              "weight_sum": 4758.8876953125
+            },
+            "proj_left": {
+              "effective_rank": 131.0732421875,
+              "maximum_eigenvalue": 200.452392578125,
+              "minimum_eigenvalue": 8.689983133081114e-07,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 3.660941061411904e-08,
+              "rows": 9574,
+              "weight_sum": 9574.0
+            },
+            "proj_right": {
+              "effective_rank": 296.3521423339844,
+              "maximum_eigenvalue": 220.6547393798828,
+              "minimum_eigenvalue": 0.040382251143455505,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.75198364257812,
+              "rows": 9574,
+              "weight_sum": 4758.8876953125
+            }
+          },
+          {
+            "assignments": 11043,
+            "expert": 4,
+            "fc_left": {
+              "effective_rank": 572.670654296875,
+              "maximum_eigenvalue": 135.5564422607422,
+              "minimum_eigenvalue": 0.10272487998008728,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 1.8376447585843891e-10,
+              "rows": 11043,
+              "weight_sum": 11043.0
+            },
+            "fc_right": {
+              "effective_rank": 265.90142822265625,
+              "maximum_eigenvalue": 52.17332458496094,
+              "minimum_eigenvalue": 7.379870226031926e-07,
+              "normalized_trace": 768.0006713867188,
+              "raw_trace": 759.4146118164062,
+              "rows": 11043,
+              "weight_sum": 5629.9658203125
+            },
+            "proj_left": {
+              "effective_rank": 357.1833190917969,
+              "maximum_eigenvalue": 88.91487884521484,
+              "minimum_eigenvalue": 1.693529497970303e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 1.937650928596213e-08,
+              "rows": 11043,
+              "weight_sum": 11043.0
+            },
+            "proj_right": {
+              "effective_rank": 238.98878479003906,
+              "maximum_eigenvalue": 228.68081665039062,
+              "minimum_eigenvalue": 0.035789068788290024,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.31922912597656,
+              "rows": 11043,
+              "weight_sum": 5629.9658203125
+            }
+          },
+          {
+            "assignments": 11915,
+            "expert": 5,
+            "fc_left": {
+              "effective_rank": 415.0202941894531,
+              "maximum_eigenvalue": 193.53057861328125,
+              "minimum_eigenvalue": 0.08983515948057175,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 2.3196550236193048e-10,
+              "rows": 11915,
+              "weight_sum": 11915.0
+            },
+            "fc_right": {
+              "effective_rank": 345.1777648925781,
+              "maximum_eigenvalue": 40.64641571044922,
+              "minimum_eigenvalue": 7.630051754858869e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 759.3934936523438,
+              "rows": 11915,
+              "weight_sum": 6113.78759765625
+            },
+            "proj_left": {
+              "effective_rank": 258.7935791015625,
+              "maximum_eigenvalue": 123.69906616210938,
+              "minimum_eigenvalue": 1.1339212733219028e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 2.425401746108946e-08,
+              "rows": 11915,
+              "weight_sum": 11915.0
+            },
+            "proj_right": {
+              "effective_rank": 288.0611267089844,
+              "maximum_eigenvalue": 223.05575561523438,
+              "minimum_eigenvalue": 0.0435858778655529,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 163.07469177246094,
+              "rows": 11915,
+              "weight_sum": 6113.78759765625
+            }
+          },
+          {
+            "assignments": 7974,
+            "expert": 6,
+            "fc_left": {
+              "effective_rank": 428.09954833984375,
+              "maximum_eigenvalue": 184.4697723388672,
+              "minimum_eigenvalue": 0.07442682981491089,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.2316977432712548e-10,
+              "rows": 7974,
+              "weight_sum": 7974.0
+            },
+            "fc_right": {
+              "effective_rank": 337.72479248046875,
+              "maximum_eigenvalue": 40.48562240600586,
+              "minimum_eigenvalue": 6.246775683393935e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.6068725585938,
+              "rows": 7974,
+              "weight_sum": 3977.1435546875
+            },
+            "proj_left": {
+              "effective_rank": 237.78692626953125,
+              "maximum_eigenvalue": 129.197998046875,
+              "minimum_eigenvalue": 8.948892400439945e-07,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 2.4031756140630023e-08,
+              "rows": 7974,
+              "weight_sum": 7974.0
+            },
+            "proj_right": {
+              "effective_rank": 288.7077331542969,
+              "maximum_eigenvalue": 218.91448974609375,
+              "minimum_eigenvalue": 0.03542036935687065,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 159.80201721191406,
+              "rows": 7974,
+              "weight_sum": 3977.1435546875
+            }
+          },
+          {
+            "assignments": 4868,
+            "expert": 7,
+            "fc_left": {
+              "effective_rank": 585.2015991210938,
+              "maximum_eigenvalue": 94.76406860351562,
+              "minimum_eigenvalue": 0.05725301057100296,
+              "normalized_trace": 1536.0015869140625,
+              "raw_trace": 1.5420693888490433e-10,
+              "rows": 4868,
+              "weight_sum": 4868.0
+            },
+            "fc_right": {
+              "effective_rank": 271.266357421875,
+              "maximum_eigenvalue": 48.8950080871582,
+              "minimum_eigenvalue": 1.2115735898987623e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 759.257080078125,
+              "rows": 4868,
+              "weight_sum": 2386.89013671875
+            },
+            "proj_left": {
+              "effective_rank": 397.224609375,
+              "maximum_eigenvalue": 61.81015396118164,
+              "minimum_eigenvalue": 9.426847213944711e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.6327646790159633e-08,
+              "rows": 4868,
+              "weight_sum": 4868.0
+            },
+            "proj_right": {
+              "effective_rank": 238.28440856933594,
+              "maximum_eigenvalue": 220.8900909423828,
+              "minimum_eigenvalue": 0.019431378692388535,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 161.51681518554688,
+              "rows": 4868,
+              "weight_sum": 2386.89013671875
+            }
+          }
+        ],
+        "11": [
+          {
+            "assignments": 137,
+            "expert": 0,
+            "fc_left": {
+              "effective_rank": 93.27125549316406,
+              "maximum_eigenvalue": 62.401695251464844,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.5164518946120253e-11,
+              "rows": 137,
+              "weight_sum": 137.0
+            },
+            "fc_right": {
+              "effective_rank": 38.5439338684082,
+              "maximum_eigenvalue": 235.32005310058594,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 768.0009155273438,
+              "raw_trace": 767.771728515625,
+              "rows": 137,
+              "weight_sum": 59.64713668823242
+            },
+            "proj_left": {
+              "effective_rank": 79.44575500488281,
+              "maximum_eigenvalue": 37.87184143066406,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.5925301077857057e-09,
+              "rows": 137,
+              "weight_sum": 137.0
+            },
+            "proj_right": {
+              "effective_rank": 33.325469970703125,
+              "maximum_eigenvalue": 543.845458984375,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 1536.002197265625,
+              "raw_trace": 164.82102966308594,
+              "rows": 137,
+              "weight_sum": 59.64713668823242
+            }
+          },
+          {
+            "assignments": 17576,
+            "expert": 1,
+            "fc_left": {
+              "effective_rank": 536.8436889648438,
+              "maximum_eigenvalue": 49.04413604736328,
+              "minimum_eigenvalue": 0.04962652921676636,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 2.035701468505735e-11,
+              "rows": 17576,
+              "weight_sum": 17576.0
+            },
+            "fc_right": {
+              "effective_rank": 115.91577911376953,
+              "maximum_eigenvalue": 225.7729949951172,
+              "minimum_eigenvalue": 1.1551850320756785e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 767.7739868164062,
+              "rows": 17576,
+              "weight_sum": 8840.2421875
+            },
+            "proj_left": {
+              "effective_rank": 359.1204833984375,
+              "maximum_eigenvalue": 29.59125328063965,
+              "minimum_eigenvalue": 1.154798496827425e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 2.116136377239286e-09,
+              "rows": 17576,
+              "weight_sum": 17576.0
+            },
+            "proj_right": {
+              "effective_rank": 96.39765930175781,
+              "maximum_eigenvalue": 534.7398681640625,
+              "minimum_eigenvalue": 0.013679678551852703,
+              "normalized_trace": 1536.0009765625,
+              "raw_trace": 169.072021484375,
+              "rows": 17576,
+              "weight_sum": 8840.2421875
+            }
+          },
+          {
+            "assignments": 4392,
+            "expert": 2,
+            "fc_left": {
+              "effective_rank": 491.5628967285156,
+              "maximum_eigenvalue": 53.0167350769043,
+              "minimum_eigenvalue": 0.03534247353672981,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.6372563027555742e-11,
+              "rows": 4392,
+              "weight_sum": 4392.0
+            },
+            "fc_right": {
+              "effective_rank": 107.05602264404297,
+              "maximum_eigenvalue": 217.45611572265625,
+              "minimum_eigenvalue": 1.5231419183692196e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.782470703125,
+              "rows": 4392,
+              "weight_sum": 2038.783935546875
+            },
+            "proj_left": {
+              "effective_rank": 332.49169921875,
+              "maximum_eigenvalue": 32.38861083984375,
+              "minimum_eigenvalue": 1.2394270925142337e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.7360421988854569e-09,
+              "rows": 4392,
+              "weight_sum": 4392.0
+            },
+            "proj_right": {
+              "effective_rank": 97.60296630859375,
+              "maximum_eigenvalue": 496.9872131347656,
+              "minimum_eigenvalue": 0.011936906725168228,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 162.2272491455078,
+              "rows": 4392,
+              "weight_sum": 2038.783935546875
+            }
+          },
+          {
+            "assignments": 3490,
+            "expert": 3,
+            "fc_left": {
+              "effective_rank": 443.82757568359375,
+              "maximum_eigenvalue": 68.79914093017578,
+              "minimum_eigenvalue": 0.021030191332101822,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.711248677482846e-11,
+              "rows": 3490,
+              "weight_sum": 3490.0
+            },
+            "fc_right": {
+              "effective_rank": 98.95172119140625,
+              "maximum_eigenvalue": 238.84059143066406,
+              "minimum_eigenvalue": 6.080530283725238e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.7655029296875,
+              "rows": 3490,
+              "weight_sum": 1593.0496826171875
+            },
+            "proj_left": {
+              "effective_rank": 299.4779052734375,
+              "maximum_eigenvalue": 46.05560302734375,
+              "minimum_eigenvalue": 1.0171428357352852e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.8062077389302544e-09,
+              "rows": 3490,
+              "weight_sum": 3490.0
+            },
+            "proj_right": {
+              "effective_rank": 91.35603332519531,
+              "maximum_eigenvalue": 527.8646240234375,
+              "minimum_eigenvalue": 0.0060958340764045715,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 161.0614471435547,
+              "rows": 3490,
+              "weight_sum": 1593.0496826171875
+            }
+          },
+          {
+            "assignments": 7705,
+            "expert": 4,
+            "fc_left": {
+              "effective_rank": 510.7267150878906,
+              "maximum_eigenvalue": 49.930145263671875,
+              "minimum_eigenvalue": 0.04344978928565979,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 1.784875025556687e-11,
+              "rows": 7705,
+              "weight_sum": 7705.0
+            },
+            "fc_right": {
+              "effective_rank": 110.53912353515625,
+              "maximum_eigenvalue": 232.70945739746094,
+              "minimum_eigenvalue": 1.2921697134515853e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 767.7659912109375,
+              "rows": 7705,
+              "weight_sum": 3592.155517578125
+            },
+            "proj_left": {
+              "effective_rank": 343.9140319824219,
+              "maximum_eigenvalue": 32.49440383911133,
+              "minimum_eigenvalue": 1.0457607686475967e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.8820949243547602e-09,
+              "rows": 7705,
+              "weight_sum": 7705.0
+            },
+            "proj_right": {
+              "effective_rank": 96.4247817993164,
+              "maximum_eigenvalue": 533.4196166992188,
+              "minimum_eigenvalue": 0.014723950996994972,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 165.25726318359375,
+              "rows": 7705,
+              "weight_sum": 3592.155517578125
+            }
+          },
+          {
+            "assignments": 7005,
+            "expert": 5,
+            "fc_left": {
+              "effective_rank": 487.992919921875,
+              "maximum_eigenvalue": 57.04604721069336,
+              "minimum_eigenvalue": 0.0308512132614851,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.756639625427603e-11,
+              "rows": 7005,
+              "weight_sum": 7005.0
+            },
+            "fc_right": {
+              "effective_rank": 114.248046875,
+              "maximum_eigenvalue": 223.53187561035156,
+              "minimum_eigenvalue": 1.2598405874086893e-06,
+              "normalized_trace": 768.0009155273438,
+              "raw_trace": 767.769775390625,
+              "rows": 7005,
+              "weight_sum": 3277.68359375
+            },
+            "proj_left": {
+              "effective_rank": 316.9107666015625,
+              "maximum_eigenvalue": 36.087730407714844,
+              "minimum_eigenvalue": 1.5152986634348053e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 1.862180187828244e-09,
+              "rows": 7005,
+              "weight_sum": 7005.0
+            },
+            "proj_right": {
+              "effective_rank": 103.44114685058594,
+              "maximum_eigenvalue": 506.9581298828125,
+              "minimum_eigenvalue": 0.009868309833109379,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 162.07400512695312,
+              "rows": 7005,
+              "weight_sum": 3277.68359375
+            }
+          },
+          {
+            "assignments": 3839,
+            "expert": 6,
+            "fc_left": {
+              "effective_rank": 474.84735107421875,
+              "maximum_eigenvalue": 52.56516647338867,
+              "minimum_eigenvalue": 0.02773524634540081,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 1.7462999796213907e-11,
+              "rows": 3839,
+              "weight_sum": 3839.0
+            },
+            "fc_right": {
+              "effective_rank": 106.5466537475586,
+              "maximum_eigenvalue": 220.4525909423828,
+              "minimum_eigenvalue": 1.1870887419718201e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.7706909179688,
+              "rows": 3839,
+              "weight_sum": 1795.818603515625
+            },
+            "proj_left": {
+              "effective_rank": 314.3504333496094,
+              "maximum_eigenvalue": 33.78121566772461,
+              "minimum_eigenvalue": 1.3505177776096389e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 1.8640564647398605e-09,
+              "rows": 3839,
+              "weight_sum": 3839.0
+            },
+            "proj_right": {
+              "effective_rank": 98.7115707397461,
+              "maximum_eigenvalue": 498.64764404296875,
+              "minimum_eigenvalue": 0.009829245507717133,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 159.89279174804688,
+              "rows": 3839,
+              "weight_sum": 1795.818603515625
+            }
+          },
+          {
+            "assignments": 21392,
+            "expert": 7,
+            "fc_left": {
+              "effective_rank": 529.0469360351562,
+              "maximum_eigenvalue": 53.95913314819336,
+              "minimum_eigenvalue": 0.05751289054751396,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.3175709615297357e-11,
+              "rows": 21392,
+              "weight_sum": 21392.0
+            },
+            "fc_right": {
+              "effective_rank": 120.71688079833984,
+              "maximum_eigenvalue": 220.25205993652344,
+              "minimum_eigenvalue": 1.7351795804643189e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 767.773193359375,
+              "rows": 21392,
+              "weight_sum": 11570.619140625
+            },
+            "proj_left": {
+              "effective_rank": 345.3258972167969,
+              "maximum_eigenvalue": 33.68080139160156,
+              "minimum_eigenvalue": 0.0,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 2.4432775802551987e-09,
+              "rows": 21392,
+              "weight_sum": 21392.0
+            },
+            "proj_right": {
+              "effective_rank": 110.37142181396484,
+              "maximum_eigenvalue": 498.1474914550781,
+              "minimum_eigenvalue": 0.018589651212096214,
+              "normalized_trace": 1536.0009765625,
+              "raw_trace": 162.9635009765625,
+              "rows": 21392,
+              "weight_sum": 11570.619140625
+            }
+          }
+        ],
+        "5": [
+          {
+            "assignments": 10888,
+            "expert": 0,
+            "fc_left": {
+              "effective_rank": 624.6065063476562,
+              "maximum_eigenvalue": 39.08390426635742,
+              "minimum_eigenvalue": 0.053715433925390244,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.2493837481828436e-11,
+              "rows": 10888,
+              "weight_sum": 10888.0
+            },
+            "fc_right": {
+              "effective_rank": 162.9185333251953,
+              "maximum_eigenvalue": 194.580810546875,
+              "minimum_eigenvalue": 1.2230584616190754e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 767.4069213867188,
+              "rows": 10888,
+              "weight_sum": 5534.00537109375
+            },
+            "proj_left": {
+              "effective_rank": 433.6182556152344,
+              "maximum_eigenvalue": 24.37653160095215,
+              "minimum_eigenvalue": 1.2571480283440906e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.456749997354791e-09,
+              "rows": 10888,
+              "weight_sum": 10888.0
+            },
+            "proj_right": {
+              "effective_rank": 139.4413299560547,
+              "maximum_eigenvalue": 464.1999816894531,
+              "minimum_eigenvalue": 0.018227284774184227,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 162.19606018066406,
+              "rows": 10888,
+              "weight_sum": 5534.00537109375
+            }
+          },
+          {
+            "assignments": 3387,
+            "expert": 1,
+            "fc_left": {
+              "effective_rank": 564.9763793945312,
+              "maximum_eigenvalue": 36.86111831665039,
+              "minimum_eigenvalue": 0.02990948036313057,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 2.9470773044160126e-11,
+              "rows": 3387,
+              "weight_sum": 3387.0
+            },
+            "fc_right": {
+              "effective_rank": 162.63507080078125,
+              "maximum_eigenvalue": 184.03106689453125,
+              "minimum_eigenvalue": 7.984181138454005e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.392578125,
+              "rows": 3387,
+              "weight_sum": 1615.51904296875
+            },
+            "proj_left": {
+              "effective_rank": 411.0563049316406,
+              "maximum_eigenvalue": 22.794267654418945,
+              "minimum_eigenvalue": 1.582992922521953e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.113933111364986e-09,
+              "rows": 3387,
+              "weight_sum": 3387.0
+            },
+            "proj_right": {
+              "effective_rank": 130.6941680908203,
+              "maximum_eigenvalue": 463.7896423339844,
+              "minimum_eigenvalue": 0.011620081961154938,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 164.33706665039062,
+              "rows": 3387,
+              "weight_sum": 1615.51904296875
+            }
+          },
+          {
+            "assignments": 9277,
+            "expert": 2,
+            "fc_left": {
+              "effective_rank": 619.0891723632812,
+              "maximum_eigenvalue": 42.34100341796875,
+              "minimum_eigenvalue": 0.08041950315237045,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.015942703910035e-11,
+              "rows": 9277,
+              "weight_sum": 9277.0
+            },
+            "fc_right": {
+              "effective_rank": 166.24940490722656,
+              "maximum_eigenvalue": 188.55836486816406,
+              "minimum_eigenvalue": 1.2387271226543817e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.4107666015625,
+              "rows": 9277,
+              "weight_sum": 4585.689453125
+            },
+            "proj_left": {
+              "effective_rank": 420.26220703125,
+              "maximum_eigenvalue": 24.899660110473633,
+              "minimum_eigenvalue": 5.585268922914111e-07,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 3.2365252700117253e-09,
+              "rows": 9277,
+              "weight_sum": 9277.0
+            },
+            "proj_right": {
+              "effective_rank": 153.76290893554688,
+              "maximum_eigenvalue": 433.1050109863281,
+              "minimum_eigenvalue": 0.029108334332704544,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 158.78314208984375,
+              "rows": 9277,
+              "weight_sum": 4585.689453125
+            }
+          },
+          {
+            "assignments": 6323,
+            "expert": 3,
+            "fc_left": {
+              "effective_rank": 615.6563720703125,
+              "maximum_eigenvalue": 38.79096603393555,
+              "minimum_eigenvalue": 0.05229511111974716,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.1210152517946455e-11,
+              "rows": 6323,
+              "weight_sum": 6323.0
+            },
+            "fc_right": {
+              "effective_rank": 163.29092407226562,
+              "maximum_eigenvalue": 186.4302978515625,
+              "minimum_eigenvalue": 1.030378143695998e-06,
+              "normalized_trace": 768.0007934570312,
+              "raw_trace": 767.4139404296875,
+              "rows": 6323,
+              "weight_sum": 3109.748046875
+            },
+            "proj_left": {
+              "effective_rank": 433.81512451171875,
+              "maximum_eigenvalue": 23.162776947021484,
+              "minimum_eigenvalue": 9.59784074439085e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.3149563094525547e-09,
+              "rows": 6323,
+              "weight_sum": 6323.0
+            },
+            "proj_right": {
+              "effective_rank": 145.61463928222656,
+              "maximum_eigenvalue": 441.8616027832031,
+              "minimum_eigenvalue": 0.022307725623250008,
+              "normalized_trace": 1536.001220703125,
+              "raw_trace": 159.9291229248047,
+              "rows": 6323,
+              "weight_sum": 3109.748046875
+            }
+          },
+          {
+            "assignments": 10331,
+            "expert": 4,
+            "fc_left": {
+              "effective_rank": 617.960205078125,
+              "maximum_eigenvalue": 43.53669357299805,
+              "minimum_eigenvalue": 0.056056540459394455,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.333951170692018e-11,
+              "rows": 10331,
+              "weight_sum": 10331.0
+            },
+            "fc_right": {
+              "effective_rank": 164.53050231933594,
+              "maximum_eigenvalue": 191.5746612548828,
+              "minimum_eigenvalue": 1.3305055972523405e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 767.4109497070312,
+              "rows": 10331,
+              "weight_sum": 5271.3525390625
+            },
+            "proj_left": {
+              "effective_rank": 424.26605224609375,
+              "maximum_eigenvalue": 26.01431655883789,
+              "minimum_eigenvalue": 1.70546525168902e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.5677822918245283e-09,
+              "rows": 10331,
+              "weight_sum": 10331.0
+            },
+            "proj_right": {
+              "effective_rank": 147.58718872070312,
+              "maximum_eigenvalue": 446.2561950683594,
+              "minimum_eigenvalue": 0.019119879230856895,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 159.78732299804688,
+              "rows": 10331,
+              "weight_sum": 5271.3525390625
+            }
+          },
+          {
+            "assignments": 9699,
+            "expert": 5,
+            "fc_left": {
+              "effective_rank": 623.1853637695312,
+              "maximum_eigenvalue": 42.19868850708008,
+              "minimum_eigenvalue": 0.057196903973817825,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.1967740954375046e-11,
+              "rows": 9699,
+              "weight_sum": 9699.0
+            },
+            "fc_right": {
+              "effective_rank": 165.53668212890625,
+              "maximum_eigenvalue": 183.2735595703125,
+              "minimum_eigenvalue": 1.8606291405376396e-06,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.432861328125,
+              "rows": 9699,
+              "weight_sum": 4890.9287109375
+            },
+            "proj_left": {
+              "effective_rank": 428.2645263671875,
+              "maximum_eigenvalue": 26.926219940185547,
+              "minimum_eigenvalue": 1.1545114375621779e-06,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 3.4223877065642228e-09,
+              "rows": 9699,
+              "weight_sum": 9699.0
+            },
+            "proj_right": {
+              "effective_rank": 150.94236755371094,
+              "maximum_eigenvalue": 430.7441711425781,
+              "minimum_eigenvalue": 0.02300739474594593,
+              "normalized_trace": 1536.0013427734375,
+              "raw_trace": 158.0344696044922,
+              "rows": 9699,
+              "weight_sum": 4890.9287109375
+            }
+          },
+          {
+            "assignments": 5972,
+            "expert": 6,
+            "fc_left": {
+              "effective_rank": 593.7919311523438,
+              "maximum_eigenvalue": 36.32346725463867,
+              "minimum_eigenvalue": 0.05150791257619858,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.088318489830044e-11,
+              "rows": 5972,
+              "weight_sum": 5972.0
+            },
+            "fc_right": {
+              "effective_rank": 164.48092651367188,
+              "maximum_eigenvalue": 190.39479064941406,
+              "minimum_eigenvalue": 8.817585808174044e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.3892822265625,
+              "rows": 5972,
+              "weight_sum": 2922.96875
+            },
+            "proj_left": {
+              "effective_rank": 408.8699951171875,
+              "maximum_eigenvalue": 22.984235763549805,
+              "minimum_eigenvalue": 1.1028657809220022e-06,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.3046916314560804e-09,
+              "rows": 5972,
+              "weight_sum": 5972.0
+            },
+            "proj_right": {
+              "effective_rank": 146.2056121826172,
+              "maximum_eigenvalue": 447.0477600097656,
+              "minimum_eigenvalue": 0.0200071819126606,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 159.8525848388672,
+              "rows": 5972,
+              "weight_sum": 2922.96875
+            }
+          },
+          {
+            "assignments": 9659,
+            "expert": 7,
+            "fc_left": {
+              "effective_rank": 603.3878784179688,
+              "maximum_eigenvalue": 46.96641540527344,
+              "minimum_eigenvalue": 0.07993373274803162,
+              "normalized_trace": 1536.00146484375,
+              "raw_trace": 3.2737153266015895e-11,
+              "rows": 9659,
+              "weight_sum": 9659.0
+            },
+            "fc_right": {
+              "effective_rank": 167.82757568359375,
+              "maximum_eigenvalue": 181.9185333251953,
+              "minimum_eigenvalue": 6.744591587448667e-07,
+              "normalized_trace": 768.0008544921875,
+              "raw_trace": 767.43505859375,
+              "rows": 9659,
+              "weight_sum": 4837.78857421875
+            },
+            "proj_left": {
+              "effective_rank": 417.2023010253906,
+              "maximum_eigenvalue": 29.249107360839844,
+              "minimum_eigenvalue": 8.706627454557747e-07,
+              "normalized_trace": 768.000732421875,
+              "raw_trace": 3.387282898614785e-09,
+              "rows": 9659,
+              "weight_sum": 9659.0
+            },
+            "proj_right": {
+              "effective_rank": 131.21018981933594,
+              "maximum_eigenvalue": 471.0442199707031,
+              "minimum_eigenvalue": 0.025470176711678505,
+              "normalized_trace": 1536.001708984375,
+              "raw_trace": 171.39132690429688,
+              "rows": 9659,
+              "weight_sum": 4837.78857421875
+            }
+          }
+        ]
+      },
+      "loss": 10.993731796741486
+    }
+  },
+  "factor_operator_cosine": {
+    "by_layer": {
+      "0": {
+        "fc_left": 0.9051278445071077,
+        "fc_right": 0.9794014657147426,
+        "mean": 0.9479146977391952,
+        "proj_left": 0.9305191844658456,
+        "proj_right": 0.9766102962690848
+      },
+      "11": {
+        "fc_left": 0.874700724504233,
+        "fc_right": 0.8589322174431256,
+        "mean": 0.8736412873012407,
+        "proj_left": 0.8934613258582298,
+        "proj_right": 0.8674708813993742
+      },
+      "5": {
+        "fc_left": 0.958449651725155,
+        "fc_right": 0.948438444120215,
+        "mean": 0.9571878327611738,
+        "proj_left": 0.9700183345192687,
+        "proj_right": 0.9518449006800564
+      }
+    },
+    "mean": 0.9262479392672033
+  },
+  "fit_diagnostics": {
+    "discovery_a": {
+      "0": {
+        "candidate": {
+          "conditional": true,
+          "final_jvp_loss": 0.5504781007766724,
+          "final_loss": 0.40014025568962097,
+          "final_output_loss": 0.34509244561195374,
+          "initial_jvp_loss": 0.5591747164726257,
+          "initial_loss": 0.7322906255722046,
+          "initial_output_loss": 0.6763731241226196,
+          "maximum_preclip_gradient_norm": 6.66769552230835,
+          "minimum_loss": 0.40014025568962097,
+          "steps": 600
+        },
+        "control": {
+          "conditional": false,
+          "final_jvp_loss": 0.6682606935501099,
+          "final_loss": 0.44891157746315,
+          "final_output_loss": 0.38208550214767456,
+          "initial_jvp_loss": 0.5591747164726257,
+          "initial_loss": 0.7322906255722046,
+          "initial_output_loss": 0.6763731241226196,
+          "maximum_preclip_gradient_norm": 0.015059157274663448,
+          "minimum_loss": 0.44891157746315,
+          "steps": 600
+        }
+      },
+      "11": {
+        "candidate": {
+          "conditional": true,
+          "final_jvp_loss": 0.528817892074585,
+          "final_loss": 0.31434720754623413,
+          "final_output_loss": 0.2614654302597046,
+          "initial_jvp_loss": 0.49235713481903076,
+          "initial_loss": 0.6949105262756348,
+          "initial_output_loss": 0.6456748247146606,
+          "maximum_preclip_gradient_norm": 22.05858039855957,
+          "minimum_loss": 0.31434720754623413,
+          "steps": 600
+        },
+        "control": {
+          "conditional": false,
+          "final_jvp_loss": 0.5643844604492188,
+          "final_loss": 0.2991257309913635,
+          "final_output_loss": 0.24268728494644165,
+          "initial_jvp_loss": 0.49235713481903076,
+          "initial_loss": 0.6949105262756348,
+          "initial_output_loss": 0.6456748247146606,
+          "maximum_preclip_gradient_norm": 0.021862827241420746,
+          "minimum_loss": 0.2991257309913635,
+          "steps": 600
+        }
+      },
+      "5": {
+        "candidate": {
+          "conditional": true,
+          "final_jvp_loss": 0.5373130440711975,
+          "final_loss": 0.28951889276504517,
+          "final_output_loss": 0.23578760027885437,
+          "initial_jvp_loss": 0.5207972526550293,
+          "initial_loss": 0.7866759896278381,
+          "initial_output_loss": 0.7345962524414062,
+          "maximum_preclip_gradient_norm": 6.464064121246338,
+          "minimum_loss": 0.28951889276504517,
+          "steps": 600
+        },
+        "control": {
+          "conditional": false,
+          "final_jvp_loss": 0.5961748361587524,
+          "final_loss": 0.29749324917793274,
+          "final_output_loss": 0.23787575960159302,
+          "initial_jvp_loss": 0.5207972526550293,
+          "initial_loss": 0.7866759896278381,
+          "initial_output_loss": 0.7345962524414062,
+          "maximum_preclip_gradient_norm": 0.021372640505433083,
+          "minimum_loss": 0.29749324917793274,
+          "steps": 600
+        }
+      }
+    },
+    "discovery_b": {
+      "0": {
+        "candidate": {
+          "conditional": true,
+          "final_jvp_loss": 0.5498981475830078,
+          "final_loss": 0.39923036098480225,
+          "final_output_loss": 0.34424054622650146,
+          "initial_jvp_loss": 0.5592383742332458,
+          "initial_loss": 0.7302675247192383,
+          "initial_output_loss": 0.6743437051773071,
+          "maximum_preclip_gradient_norm": 5.797098636627197,
+          "minimum_loss": 0.39923036098480225,
+          "steps": 600
+        },
+        "control": {
+          "conditional": false,
+          "final_jvp_loss": 0.6661714315414429,
+          "final_loss": 0.448771595954895,
+          "final_output_loss": 0.3821544647216797,
+          "initial_jvp_loss": 0.5592383742332458,
+          "initial_loss": 0.7302675247192383,
+          "initial_output_loss": 0.6743437051773071,
+          "maximum_preclip_gradient_norm": 0.015021974220871925,
+          "minimum_loss": 0.448771595954895,
+          "steps": 600
+        }
+      },
+      "11": {
+        "candidate": {
+          "conditional": true,
+          "final_jvp_loss": 0.5257281064987183,
+          "final_loss": 0.31023797392845154,
+          "final_output_loss": 0.25766515731811523,
+          "initial_jvp_loss": 0.49264129996299744,
+          "initial_loss": 0.6924139857292175,
+          "initial_output_loss": 0.6431498527526855,
+          "maximum_preclip_gradient_norm": 24.74420928955078,
+          "minimum_loss": 0.31023797392845154,
+          "steps": 600
+        },
+        "control": {
+          "conditional": false,
+          "final_jvp_loss": 0.5633649230003357,
+          "final_loss": 0.29554539918899536,
+          "final_output_loss": 0.2392089068889618,
+          "initial_jvp_loss": 0.49264129996299744,
+          "initial_loss": 0.6924139857292175,
+          "initial_output_loss": 0.6431498527526855,
+          "maximum_preclip_gradient_norm": 0.022007940337061882,
+          "minimum_loss": 0.29554539918899536,
+          "steps": 600
+        }
+      },
+      "5": {
+        "candidate": {
+          "conditional": true,
+          "final_jvp_loss": 0.5389620065689087,
+          "final_loss": 0.28979071974754333,
+          "final_output_loss": 0.23589453101158142,
+          "initial_jvp_loss": 0.521616518497467,
+          "initial_loss": 0.7890011668205261,
+          "initial_output_loss": 0.7368395328521729,
+          "maximum_preclip_gradient_norm": 6.212734699249268,
+          "minimum_loss": 0.28979071974754333,
+          "steps": 600
+        },
+        "control": {
+          "conditional": false,
+          "final_jvp_loss": 0.593247652053833,
+          "final_loss": 0.295804500579834,
+          "final_output_loss": 0.2364797443151474,
+          "initial_jvp_loss": 0.521616518497467,
+          "initial_loss": 0.7890011668205261,
+          "initial_output_loss": 0.7368395328521729,
+          "maximum_preclip_gradient_norm": 0.02159961313009262,
+          "minimum_loss": 0.295804500579834,
+          "steps": 600
+        }
+      }
+    }
+  },
+  "gates": {
+    "discovery_a": {
+      "action_agreement_pass": true,
+      "all_pass": false,
+      "compression_pass": true,
+      "every_expert_pass": true,
+      "every_layer_pass": false,
+      "factor_agreement_pass": true,
+      "finite_pass": true,
+      "isotropic_control_gain_pass": false,
+      "jvp_pass": false,
+      "mean_recovery_pass": false,
+      "minimum_occupancy_pass": true,
+      "static_ceiling_gain_pass": true,
+      "stepzero_base_gain_pass": true
+    },
+    "discovery_b": {
+      "action_agreement_pass": true,
+      "all_pass": false,
+      "compression_pass": true,
+      "every_expert_pass": true,
+      "every_layer_pass": false,
+      "factor_agreement_pass": true,
+      "finite_pass": true,
+      "isotropic_control_gain_pass": false,
+      "jvp_pass": false,
+      "mean_recovery_pass": false,
+      "minimum_occupancy_pass": true,
+      "static_ceiling_gain_pass": true,
+      "stepzero_base_gain_pass": true
+    }
+  },
+  "heldout_bank_action_cosine": {
+    "by_layer": {
+      "0": 0.9581063389778137,
+      "11": 0.9747762680053711,
+      "5": 0.9810508489608765
+    },
+    "mean": 0.9713111519813538
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint_sha256": "02de65851b95f9fbd6440c414327a297fe5bf31e18e8db5516fb9de7b484f5ef",
+    "factor_root_sha256": {
+      "discovery_a": {
+        "0": {
+          "fc_left": "9cba3a9a39726d44cdaaecebbbf75682373c8df96bb2a1c9ecd0cd141a67ae77",
+          "fc_right": "9d2bdacb205e049a45bdf9dcace90066290cc94fbd360227f1501fd193a9a4c9",
+          "proj_left": "6056c764729aa04b1a895b252eb40e1d482dfd1d459d6995ffec98749ebc22eb",
+          "proj_right": "0db08d96187e1c9c8a0e0a2a6d15959232d763da763063723998cac8c4de1c4c"
+        },
+        "11": {
+          "fc_left": "4813bbfb4dcbb725652c32a70c265032530bbc1b865b51729ac75ef4416e5f5a",
+          "fc_right": "e95937342ecf86fe51d26a69719eff75f737703c950c4ab17c12058742ceba9f",
+          "proj_left": "00be689b5e12b77ec2c6bc7869afed8815b5f2c67ddae1f06fb1d7c6011fc3d8",
+          "proj_right": "fd8bc8258dedf9bb8cfe1c735ef091115b185a621c650f414ffa0d97e95887d6"
+        },
+        "5": {
+          "fc_left": "f23690139ffa4ffd0cb35064d6b3b06307b96792dd3f90e580b180ac63bd5b09",
+          "fc_right": "59fbb9d69358787689a333f63ec828977a56e4ff070e915476ef2f0bad3e85a8",
+          "proj_left": "e5c296994ccb7af1b7e4d22a052187d1d7c2c7a4de50dc580bcccf3ed8f2c9c9",
+          "proj_right": "7b7c25c2f59887b025c1ed01ae53ad317bd862a8396258713c4b48bf7b408164"
+        }
+      },
+      "discovery_b": {
+        "0": {
+          "fc_left": "b874245cc32fcfac61a79a4c52706293c3ec78ebdcd633dd5945a579b50119af",
+          "fc_right": "bbec8706fd8992100e7760bc5f99240266609bd0d0ae5e80b8857df659be7453",
+          "proj_left": "d86ccdee892ee958c03932c72bfa819528f420d037ab1376fb7429a29c0a6031",
+          "proj_right": "71c7e420f1d08349a12fcad8af22e8a83dd310e0e06a206904bb7a1c6e086b45"
+        },
+        "11": {
+          "fc_left": "577bcec39ec2669f5f91ae00a96e469257232996bbc73f1a6827c4022c196515",
+          "fc_right": "09e6e77036c5e0aaeb4e9c08d4bbc007aef701f8a2816fea6b99cd339b6123fe",
+          "proj_left": "5401f05af88b2fcd3d4b8ab15a800ad050ed1ac93cb384b5366c808cbd50ef54",
+          "proj_right": "12acbf0c829d97257d681c1d49fbd2681d36e04fac31fee529da6553fd46f830"
+        },
+        "5": {
+          "fc_left": "56d81ea48d94721cde52eb804817f57b6068d26f4f5585fbb1cadcc94930fd5a",
+          "fc_right": "f401a41dacfec638cc298736b2fdaaaa7d5e4f450e177f95258b1a1a82d640dc",
+          "proj_left": "83cfa6e3d120dc8fd4fb011493710a78aada988255f12a3fe1bd689f3af14243",
+          "proj_right": "b41188522ebb9034620b580f2873780e02631ba6b7736268fba33c1ae5f5eae9"
+        }
+      }
+    },
+    "git_commit": "d7efe70d8862be27daba64450c6dfaa216446bac",
+    "plan_sha256": "83cb5eed7ae8ba171892a37364a3d2409dca10d0d4397038f6d756b825f41eb4",
+    "stepzero_parameter_hashes": {
+      "transformer.h.0.mlp.expert_c_fc": "8266b5a3206f0c7ed4c5f084a94836068f60ceef70dbb44635a9919d6fe6b8dc",
+      "transformer.h.0.mlp.expert_c_proj": "782866d623f21135a909390593d331541f18ab05efcd0049f098030f9b5677a8",
+      "transformer.h.0.mlp.router.weight": "b996b8332249c9a4d098e94cdf94235b4a226a5d3c63d585d8ddfbbeadfb1abd",
+      "transformer.h.11.mlp.expert_c_fc": "f1c953b786dc5881dbb96e3cac760ea15e3a568cb1600e2609c4849e295cdbc9",
+      "transformer.h.11.mlp.expert_c_proj": "8dcd03263ba393584093b0e6ff92a8305b7daae51cfadafee8f3f70427802b94",
+      "transformer.h.11.mlp.router.weight": "52bf7df76d90e3e898b82ecac501c7f7133d545d14e20b246eb51ba32a06f9b6",
+      "transformer.h.5.mlp.expert_c_fc": "a11e9316f8ffb62d47a22dc791678ff500fbbc8c13d13caf2ebb75957423a305",
+      "transformer.h.5.mlp.expert_c_proj": "05d5f958a3ad49eece5b721101363a65ace0192ee8e86ed07c72e955415129b9",
+      "transformer.h.5.mlp.router.weight": "916f9e5d9ebfe98b4fa09558a5a9bef0c5d32a4c6ddfeff4f6a3dc4f849551b7"
+    },
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b"
+  },
+  "occupancy": {
+    "discovery_a": {
+      "0": [
+        3936,
+        6885,
+        9142,
+        9489,
+        11170,
+        12207,
+        7894,
+        4813
+      ],
+      "11": [
+        212,
+        17080,
+        4869,
+        3272,
+        8788,
+        6410,
+        3981,
+        20924
+      ],
+      "5": [
+        11022,
+        3897,
+        9575,
+        6696,
+        9751,
+        8862,
+        5997,
+        9736
+      ]
+    },
+    "discovery_b": {
+      "0": [
+        3987,
+        7100,
+        9075,
+        9574,
+        11043,
+        11915,
+        7974,
+        4868
+      ],
+      "11": [
+        137,
+        17576,
+        4392,
+        3490,
+        7705,
+        7005,
+        3839,
+        21392
+      ],
+      "5": [
+        10888,
+        3387,
+        9277,
+        6323,
+        10331,
+        9699,
+        5972,
+        9659
+      ]
+    }
+  },
+  "passed": false,
+  "schema_version": "nanogpt_sparse_moe_matrix_normal_kfac_chart_oracle_result_v1",
+  "summaries": {
+    "discovery_a": {
+      "0": {
+        "candidate_minus_exact_stepzero_base_recovery": 0.3635367155075073,
+        "candidate_minus_isotropic_control_recovery": 0.0853416919708252,
+        "candidate_minus_sealed_static_ceiling_recovery": 0.17597071081399918,
+        "exact_stepzero_base_recovery": 0.2454695701599121,
+        "isotropic_control_recovery": 0.5236645936965942,
+        "jvp_recovery": 0.41020429134368896,
+        "minimum_expert_jvp_recovery": 0.3983074562865234,
+        "minimum_expert_recovery": 0.5462292863395515,
+        "mixture_recovery": 0.6090062856674194,
+        "sealed_static_ceiling_recovery": 0.43303557485342026
+      },
+      "11": {
+        "candidate_minus_exact_stepzero_base_recovery": 0.4727044105529785,
+        "candidate_minus_isotropic_control_recovery": 0.016350507736206055,
+        "candidate_minus_sealed_static_ceiling_recovery": 0.30028728395700455,
+        "exact_stepzero_base_recovery": 0.2606184482574463,
+        "isotropic_control_recovery": 0.7169723510742188,
+        "jvp_recovery": 0.42899537086486816,
+        "minimum_expert_jvp_recovery": 0.4319291975474405,
+        "minimum_expert_recovery": 0.6564982741404118,
+        "mixture_recovery": 0.7333228588104248,
+        "sealed_static_ceiling_recovery": 0.43303557485342026
+      },
+      "5": {
+        "candidate_minus_exact_stepzero_base_recovery": 0.5892477631568909,
+        "candidate_minus_isotropic_control_recovery": 0.034471094608306885,
+        "candidate_minus_sealed_static_ceiling_recovery": 0.3298349753022194,
+        "exact_stepzero_base_recovery": 0.17362278699874878,
+        "isotropic_control_recovery": 0.7283994555473328,
+        "jvp_recovery": 0.4128721356391907,
+        "minimum_expert_jvp_recovery": 0.39678836503674064,
+        "minimum_expert_recovery": 0.7043150508857392,
+        "mixture_recovery": 0.7628705501556396,
+        "sealed_static_ceiling_recovery": 0.43303557485342026
+      },
+      "aggregate": {
+        "candidate_minus_exact_stepzero_base_recovery_mean": 0.4751629630724589,
+        "candidate_minus_isotropic_control_recovery_mean": 0.04538776477177938,
+        "candidate_minus_sealed_static_ceiling_recovery_mean": 0.26869765669107437,
+        "jvp_recovery_mean": 0.41735726594924927,
+        "minimum_discovery_assignments": 212,
+        "minimum_expert_recovery": 0.5462292863395515,
+        "mixture_recovery_mean": 0.7017332315444946,
+        "mixture_recovery_minimum_layer": 0.6090062856674194
+      }
+    },
+    "discovery_b": {
+      "0": {
+        "candidate_minus_exact_stepzero_base_recovery": 0.3620486259460449,
+        "candidate_minus_isotropic_control_recovery": 0.08588910102844238,
+        "candidate_minus_sealed_static_ceiling_recovery": 0.18139628569285077,
+        "exact_stepzero_base_recovery": 0.2454695701599121,
+        "isotropic_control_recovery": 0.5216290950775146,
+        "jvp_recovery": 0.4092634916305542,
+        "minimum_expert_jvp_recovery": 0.3957475918627291,
+        "minimum_expert_recovery": 0.5366485772117549,
+        "mixture_recovery": 0.607518196105957,
+        "sealed_static_ceiling_recovery": 0.42612191041310626
+      },
+      "11": {
+        "candidate_minus_exact_stepzero_base_recovery": 0.4735848903656006,
+        "candidate_minus_isotropic_control_recovery": 0.01711094379425049,
+        "candidate_minus_sealed_static_ceiling_recovery": 0.3080814282099406,
+        "exact_stepzero_base_recovery": 0.2606184482574463,
+        "isotropic_control_recovery": 0.7170923948287964,
+        "jvp_recovery": 0.4312562346458435,
+        "minimum_expert_jvp_recovery": 0.4299780329380799,
+        "minimum_expert_recovery": 0.6378893143475675,
+        "mixture_recovery": 0.7342033386230469,
+        "sealed_static_ceiling_recovery": 0.42612191041310626
+      },
+      "5": {
+        "candidate_minus_exact_stepzero_base_recovery": 0.586207926273346,
+        "candidate_minus_isotropic_control_recovery": 0.03239065408706665,
+        "candidate_minus_sealed_static_ceiling_recovery": 0.33370880285898846,
+        "exact_stepzero_base_recovery": 0.17362278699874878,
+        "isotropic_control_recovery": 0.7274400591850281,
+        "jvp_recovery": 0.41090983152389526,
+        "minimum_expert_jvp_recovery": 0.387833805437129,
+        "minimum_expert_recovery": 0.6940517525787999,
+        "mixture_recovery": 0.7598307132720947,
+        "sealed_static_ceiling_recovery": 0.42612191041310626
+      },
+      "aggregate": {
+        "candidate_minus_exact_stepzero_base_recovery_mean": 0.4739471475283305,
+        "candidate_minus_isotropic_control_recovery_mean": 0.04513023296991984,
+        "candidate_minus_sealed_static_ceiling_recovery_mean": 0.27439550558725995,
+        "jvp_recovery_mean": 0.41714318593343097,
+        "minimum_discovery_assignments": 137,
+        "minimum_expert_recovery": 0.5366485772117549,
+        "mixture_recovery_mean": 0.7005174160003662,
+        "mixture_recovery_minimum_layer": 0.607518196105957
+      }
+    }
+  }
+}
