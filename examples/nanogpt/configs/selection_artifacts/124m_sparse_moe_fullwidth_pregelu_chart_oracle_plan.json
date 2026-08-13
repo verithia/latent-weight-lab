@@ -158,10 +158,20 @@
   },
   "identity": {
     "preregistration_parent_commit": "7895427c35a5f72c1eca2c9c1ec690d279058dae",
-    "theory_preregistration_git_commit": null,
+    "theory_preregistration_git_commit": "2f21fe2cee4623bffe5650be1d7ede9af31193b1",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_fullwidth_pregelu_chart_oracle.py",
-    "entrypoint_sha256": null,
-    "helper_sha256": null
+    "entrypoint_sha256": "10e26c8401d694aa0f462183f8a4eeddf44ba0c56edcfee54188c63efabc86da",
+    "helper_sha256": {
+      "examples/nanogpt/analyze_sparse_moe_global_write_givens_feature_oracle.py": "654eeef9a576a5990b2f6a20764039d167bd402e3e3e1f334bd84192861572e7",
+      "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py": "d6300dc7cef4c55bbfd8ed6c1fcaa1a22adb35743f8400f02d2db5cb7d934905",
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
+      "examples/nanogpt/analyze_sparse_moe_rolling_tangent_oracle.py": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",
+      "examples/nanogpt/analyze_sparse_moe_shared_nonlinear_dictionary_oracle.py": "6e495fbda1d9be23c5490fc54b0b6e88d373eb5e2fa4df2641326222753602ac",
+      "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    }
   },
   "systems": {
     "host": "PRO6",

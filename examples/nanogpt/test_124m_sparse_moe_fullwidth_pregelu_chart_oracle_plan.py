@@ -68,9 +68,11 @@ def test_procedural_widths_and_scales_are_frozen() -> None:
 def test_plan_is_fail_closed_before_implementation() -> None:
     plan = _plan()
     assert plan["status"] == "theory_preregistered_before_implementation_or_candidate_values"
-    assert plan["identity"]["theory_preregistration_git_commit"] is None
-    assert plan["identity"]["entrypoint_sha256"] is None
-    assert plan["identity"]["helper_sha256"] is None
+    assert plan["identity"]["theory_preregistration_git_commit"] == (
+        "2f21fe2cee4623bffe5650be1d7ede9af31193b1"
+    )
+    assert len(plan["identity"]["entrypoint_sha256"]) == 64
+    assert len(plan["identity"]["helper_sha256"]) == 9
     assert plan["authorization"] == {
         "implement_zero_update_oracle": True,
         "run_after_tests_identity_and_exact_runtime_gate": True,
