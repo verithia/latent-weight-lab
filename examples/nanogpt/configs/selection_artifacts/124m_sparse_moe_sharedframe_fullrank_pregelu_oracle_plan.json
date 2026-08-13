@@ -144,7 +144,7 @@
   },
   "identity": {
     "preregistration_parent_commit": "3a194ae951f33c6804943ad18f1beb753df16a2d",
-    "theory_preregistration_git_commit": null,
+    "theory_preregistration_git_commit": "93af188861c266617f3349ba02b5277a66887153",
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_sharedframe_fullrank_pregelu_oracle.py",
     "entrypoint_sha256": null,
     "helper_sha256": {}
