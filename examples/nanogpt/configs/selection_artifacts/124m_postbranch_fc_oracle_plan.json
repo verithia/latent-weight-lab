@@ -1,0 +1,89 @@
+{
+  "schema_version": "nanogpt_124m_postbranch_fc_oracle_plan_v1",
+  "artifact_kind": "preregistered_zero_update_postbranch_fc_oracle",
+  "recorded_at": "2026-08-14",
+  "scientific_question": "Can a full dense linear map on the MLP branch immediately before the identity residual addition repair the residual-coordinate direction mismatch left by the compact full-MLP family?",
+  "architecture": {
+    "equation": "x_{l+1} = x_l + C_l F_l(LN(x_l))",
+    "nonlinearity": false,
+    "bias": false,
+    "initialization_for_causal_training": "identity",
+    "moe_placement": "after the probability-weighted routed-expert sum, so one FC is shared by all experts in a layer",
+    "attention_scope": "excluded from the first discriminator; test the MLP residual write first",
+    "distinction_from_prior_residual_write_run": "The prior residual-write-preserving joint run retained dense attention c_proj and dense MLP c_proj. It did not add or test a learned post-branch FC on a compact MLP output."
+  },
+  "algebraic_scope": {
+    "can_change": [
+      "the residual-stream output basis and scale of the already formed branch",
+      "the left/output factor of the branch Jacobian"
+    ],
+    "cannot_change": [
+      "c_fc pre-GELU hyperplanes",
+      "GELU gate incidence",
+      "the hidden-coordinate row space of an already formed c_proj",
+      "features absent from F_l"
+    ],
+    "jacobian": "J_residual = I + C_l J_F",
+    "linear_mlp_invariant": "For F(x)=B phi(Ax), C_l F(x)=(C_l B)phi(Ax), and rowspace(C_l B) is contained in rowspace(B)."
+  },
+  "frozen_124m_moe_accounting": {
+    "layers": 12,
+    "residual_width": 768,
+    "experts_per_layer": 8,
+    "active_experts": 2,
+    "expert_hidden_width": 1536,
+    "all_expert_cfc_plus_cproj_parameters": 226492416,
+    "layer_private_fc_parameters": 7077888,
+    "layer_private_fc_fraction_of_all_expert_matrices": 0.03125,
+    "layer_private_fc_active_mlp_matmul_overhead_fraction": 0.125,
+    "layer_private_fc_compression_ceiling_before_other_coordinates": 32.0,
+    "one_globally_shared_fc_parameters": 589824,
+    "shared_fc_plus_layerwise_input_output_diagonal_parameters": 608256,
+    "shared_fc_plus_modulation_compression_ratio": 372.3636363636364
+  },
+  "frozen_evidence": {
+    "full_mlp_5tpp_validation_ce": 3.660243034362793,
+    "repaired_attention_parent_validation_ce": 3.6278,
+    "incremental_mlp_gap_ce": 0.03244303436279283,
+    "dense_transformer_validation_ce": 3.5401,
+    "global_write_atlas_rank_619_output_recovery": 0.953535,
+    "global_write_atlas_rank_619_jvp_recovery": 0.849058,
+    "minimum_global_write_rank_crossing_output_0p8_and_jvp_0p6": 414,
+    "node_private_input_frame_output_recovery": 0.776901,
+    "node_private_input_frame_jvp_recovery": 0.272582,
+    "interpretation": "Residual writes have a stable shared output atlas, so a shared post-branch FC is evidence-aligned. The low node-private JVP also proves that an output FC cannot by itself cure the binding pre-GELU normal-field defect."
+  },
+  "oracle_protocol": {
+    "parent": "sealed 124M/5TPP repaired-attention full-MLP endpoint and its matched dense/repaired-attention controls",
+    "data": "two independent discovery banks and untouched fixed heldout validation batches",
+    "fit": "ridge-fit C on the candidate branch outputs with an explicitly weighted analytic input-JVP term; never fit on heldout targets",
+    "arms": [
+      "identity control",
+      "one unrestricted C_l per layer as a nondeployable structural ceiling",
+      "one globally shared C with layerwise input/output diagonal modulation as the >=200x-compatible arm"
+    ],
+    "primary_metrics": [
+      "heldout validation CE after sequential block intervention",
+      "normalized MLP residual-output recovery",
+      "analytic input-JVP recovery",
+      "cross-bank fitted-action agreement"
+    ],
+    "no_checkpoint_update": true
+  },
+  "frozen_gates": {
+    "layer_private_ce_maximum": 3.6428,
+    "layer_private_incremental_gap_to_repaired_attention_maximum": 0.015,
+    "heldout_output_recovery_minimum": 0.8,
+    "heldout_jvp_recovery_minimum": 0.6,
+    "cross_bank_action_cosine_minimum": 0.8,
+    "shared_arm_must_retain_fraction_of_layer_private_ce_gain": 0.8,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "layer_private_failure": "Reject a post-branch FC as the MLP solution; it cannot recover information absent from F_l.",
+    "layer_private_pass_shared_failure": "Record an output-direction solution that is incompatible with the >=200x trainable-state objective; do not launch training.",
+    "shared_pass": "Implement the shared identity-initialized FC plus layer modulation, run an exact-config foreground MFU gate, and only then launch the 124M 0.5TPP causal discriminator.",
+    "automatic_training_authorized": false,
+    "automatic_larger_rung_authorized": false
+  }
+}
