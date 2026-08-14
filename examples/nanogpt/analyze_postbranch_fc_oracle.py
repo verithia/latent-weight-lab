@@ -26,8 +26,6 @@ from examples.nanogpt.analyze_residual_compatibility import (
 from examples.nanogpt.model import GPT, MLP
 from examples.nanogpt.optimize_mlp_bilateral_endpoint_ce import (
     autocast_context,
-    discard_chart_caches,
-    prepare_chart_caches,
     prepare_frozen_base_cache,
 )
 
@@ -458,7 +456,6 @@ def main() -> None:
     candidate_cache_count = prepare_frozen_base_cache(
         candidate, torch.bfloat16
     )
-    prepare_chart_caches(candidate)
 
     discovery = {
         seed: fixed_validation_batches(
@@ -598,7 +595,6 @@ def main() -> None:
     print(json.dumps(result["validation_ce"], sort_keys=True), flush=True)
     print(result["classification"], flush=True)
     print(f"result={output} sha256={sha256(output)}", flush=True)
-    discard_chart_caches(candidate)
 
 
 if __name__ == "__main__":
