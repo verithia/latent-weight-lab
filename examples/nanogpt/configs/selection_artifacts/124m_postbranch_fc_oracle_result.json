@@ -1,0 +1,443 @@
+{
+  "classification": "LAYER_PRIVATE_POSTBRANCH_FC_CEILING_REJECTED",
+  "decision": {
+    "bank_passes": {
+      "2026081401": false,
+      "2026081402": false
+    },
+    "causal_training_authorized": false,
+    "larger_rung_authorized": false,
+    "scientific_gate_passed": false,
+    "shared_fc_oracle_authorized": false
+  },
+  "elapsed_seconds": 48.9301540851593,
+  "fit": {
+    "2026081401": [
+      {
+        "condition_number": 42687.01953125,
+        "discovery_jvp_recovery": 0.7999050617218018,
+        "discovery_output_recovery": 0.9593002796173096,
+        "jvp_scale": 28.665817260742188,
+        "layer": 0,
+        "matrix_identity_relative_frobenius": 3.189218282699585,
+        "ridge": 0.003201549275716146
+      },
+      {
+        "condition_number": 84952.078125,
+        "discovery_jvp_recovery": 0.8129444122314453,
+        "discovery_output_recovery": 0.9688827395439148,
+        "jvp_scale": 29.200735092163086,
+        "layer": 1,
+        "matrix_identity_relative_frobenius": 2.734571695327759,
+        "ridge": 0.0036517908732096355
+      },
+      {
+        "condition_number": 100872.9296875,
+        "discovery_jvp_recovery": 0.8249793648719788,
+        "discovery_output_recovery": 0.9721795916557312,
+        "jvp_scale": 29.363155364990234,
+        "layer": 2,
+        "matrix_identity_relative_frobenius": 2.87180233001709,
+        "ridge": 0.003689243570963542
+      },
+      {
+        "condition_number": 109404.4921875,
+        "discovery_jvp_recovery": 0.8325648307800293,
+        "discovery_output_recovery": 0.9740414023399353,
+        "jvp_scale": 28.247711181640625,
+        "layer": 3,
+        "matrix_identity_relative_frobenius": 2.922635555267334,
+        "ridge": 0.0038132080078125004
+      },
+      {
+        "condition_number": 123653.5078125,
+        "discovery_jvp_recovery": 0.8330531120300293,
+        "discovery_output_recovery": 0.9738379716873169,
+        "jvp_scale": 28.069242477416992,
+        "layer": 4,
+        "matrix_identity_relative_frobenius": 2.9756321907043457,
+        "ridge": 0.0037873441060384118
+      },
+      {
+        "condition_number": 113215.9140625,
+        "discovery_jvp_recovery": 0.8290618658065796,
+        "discovery_output_recovery": 0.9733989238739014,
+        "jvp_scale": 28.39618682861328,
+        "layer": 5,
+        "matrix_identity_relative_frobenius": 3.0411596298217773,
+        "ridge": 0.0038436439514160157
+      },
+      {
+        "condition_number": 121253.21875,
+        "discovery_jvp_recovery": 0.814337432384491,
+        "discovery_output_recovery": 0.9698387384414673,
+        "jvp_scale": 27.310739517211914,
+        "layer": 6,
+        "matrix_identity_relative_frobenius": 2.997892141342163,
+        "ridge": 0.0040569305419921875
+      },
+      {
+        "condition_number": 120192.5234375,
+        "discovery_jvp_recovery": 0.8052183389663696,
+        "discovery_output_recovery": 0.9681403636932373,
+        "jvp_scale": 27.884044647216797,
+        "layer": 7,
+        "matrix_identity_relative_frobenius": 3.081005573272705,
+        "ridge": 0.0040547637939453126
+      },
+      {
+        "condition_number": 122839.6328125,
+        "discovery_jvp_recovery": 0.7929877638816833,
+        "discovery_output_recovery": 0.9648392796516418,
+        "jvp_scale": 27.301719665527344,
+        "layer": 8,
+        "matrix_identity_relative_frobenius": 3.021902084350586,
+        "ridge": 0.004404971313476563
+      },
+      {
+        "condition_number": 109737.859375,
+        "discovery_jvp_recovery": 0.7828859090805054,
+        "discovery_output_recovery": 0.9623818397521973,
+        "jvp_scale": 27.571998596191406,
+        "layer": 9,
+        "matrix_identity_relative_frobenius": 3.0354528427124023,
+        "ridge": 0.004654535929361979
+      },
+      {
+        "condition_number": 101868.265625,
+        "discovery_jvp_recovery": 0.7849246263504028,
+        "discovery_output_recovery": 0.9628375768661499,
+        "jvp_scale": 28.50261116027832,
+        "layer": 10,
+        "matrix_identity_relative_frobenius": 3.165724515914917,
+        "ridge": 0.004797206624348959
+      },
+      {
+        "condition_number": 98031.109375,
+        "discovery_jvp_recovery": 0.7980080842971802,
+        "discovery_output_recovery": 0.9668407440185547,
+        "jvp_scale": 30.487001419067383,
+        "layer": 11,
+        "matrix_identity_relative_frobenius": 3.3121891021728516,
+        "ridge": 0.004911696370442709
+      }
+    ],
+    "2026081402": [
+      {
+        "condition_number": 42833.80078125,
+        "discovery_jvp_recovery": 0.7990899085998535,
+        "discovery_output_recovery": 0.9593828320503235,
+        "jvp_scale": 28.77271270751953,
+        "layer": 0,
+        "matrix_identity_relative_frobenius": 3.196854829788208,
+        "ridge": 0.003210868326822917
+      },
+      {
+        "condition_number": 81865.828125,
+        "discovery_jvp_recovery": 0.8130311965942383,
+        "discovery_output_recovery": 0.9688276648521423,
+        "jvp_scale": 29.2951717376709,
+        "layer": 1,
+        "matrix_identity_relative_frobenius": 2.733978033065796,
+        "ridge": 0.003642931874593099
+      },
+      {
+        "condition_number": 102153.2578125,
+        "discovery_jvp_recovery": 0.8283470869064331,
+        "discovery_output_recovery": 0.972148597240448,
+        "jvp_scale": 29.496681213378906,
+        "layer": 2,
+        "matrix_identity_relative_frobenius": 2.863701581954956,
+        "ridge": 0.0036993364969889323
+      },
+      {
+        "condition_number": 106509.9375,
+        "discovery_jvp_recovery": 0.8295038342475891,
+        "discovery_output_recovery": 0.9737380146980286,
+        "jvp_scale": 28.241865158081055,
+        "layer": 3,
+        "matrix_identity_relative_frobenius": 2.91483736038208,
+        "ridge": 0.003793969472249349
+      },
+      {
+        "condition_number": 120431.296875,
+        "discovery_jvp_recovery": 0.8300646543502808,
+        "discovery_output_recovery": 0.9734615087509155,
+        "jvp_scale": 28.006145477294922,
+        "layer": 4,
+        "matrix_identity_relative_frobenius": 2.966278314590454,
+        "ridge": 0.0037842953999837245
+      },
+      {
+        "condition_number": 115891.0546875,
+        "discovery_jvp_recovery": 0.8290295600891113,
+        "discovery_output_recovery": 0.9731312990188599,
+        "jvp_scale": 28.26981544494629,
+        "layer": 5,
+        "matrix_identity_relative_frobenius": 3.034562587738037,
+        "ridge": 0.003836363220214844
+      },
+      {
+        "condition_number": 120600.890625,
+        "discovery_jvp_recovery": 0.8118548393249512,
+        "discovery_output_recovery": 0.9693086743354797,
+        "jvp_scale": 27.271318435668945,
+        "layer": 6,
+        "matrix_identity_relative_frobenius": 2.997053861618042,
+        "ridge": 0.004022098032633464
+      },
+      {
+        "condition_number": 117568.4140625,
+        "discovery_jvp_recovery": 0.8014618754386902,
+        "discovery_output_recovery": 0.9676561951637268,
+        "jvp_scale": 27.878128051757812,
+        "layer": 7,
+        "matrix_identity_relative_frobenius": 3.065941572189331,
+        "ridge": 0.004013241322835286
+      },
+      {
+        "condition_number": 117151.8671875,
+        "discovery_jvp_recovery": 0.7900655269622803,
+        "discovery_output_recovery": 0.9640697836875916,
+        "jvp_scale": 27.3294677734375,
+        "layer": 8,
+        "matrix_identity_relative_frobenius": 3.0070102214813232,
+        "ridge": 0.004336562093098959
+      },
+      {
+        "condition_number": 104059.75,
+        "discovery_jvp_recovery": 0.781914472579956,
+        "discovery_output_recovery": 0.9619070291519165,
+        "jvp_scale": 27.393695831298828,
+        "layer": 9,
+        "matrix_identity_relative_frobenius": 3.0199427604675293,
+        "ridge": 0.004623845926920573
+      },
+      {
+        "condition_number": 98666.21875,
+        "discovery_jvp_recovery": 0.7802039980888367,
+        "discovery_output_recovery": 0.9623681306838989,
+        "jvp_scale": 28.658931732177734,
+        "layer": 10,
+        "matrix_identity_relative_frobenius": 3.154066801071167,
+        "ridge": 0.004758875528971355
+      },
+      {
+        "condition_number": 96013.125,
+        "discovery_jvp_recovery": 0.7952460646629333,
+        "discovery_output_recovery": 0.9660061597824097,
+        "jvp_scale": 30.535930633544922,
+        "layer": 11,
+        "matrix_identity_relative_frobenius": 3.292739152908325,
+        "ridge": 0.004931506347656251
+      }
+    ]
+  },
+  "heldout": {
+    "2026081401": {
+      "layers": [
+        {
+          "cross_bank_action_cosine": 0.9835056066513062,
+          "jvp_recovery": 0.5516527891159058,
+          "layer": 0,
+          "output_recovery": 0.9323179721832275
+        },
+        {
+          "cross_bank_action_cosine": 0.9842685461044312,
+          "jvp_recovery": 0.2700057625770569,
+          "layer": 1,
+          "output_recovery": 0.9501731991767883
+        },
+        {
+          "cross_bank_action_cosine": 0.9843969345092773,
+          "jvp_recovery": 0.21023517847061157,
+          "layer": 2,
+          "output_recovery": 0.9540411829948425
+        },
+        {
+          "cross_bank_action_cosine": 0.9842039346694946,
+          "jvp_recovery": 0.21325427293777466,
+          "layer": 3,
+          "output_recovery": 0.9553209543228149
+        },
+        {
+          "cross_bank_action_cosine": 0.9838089942932129,
+          "jvp_recovery": 0.2064492106437683,
+          "layer": 4,
+          "output_recovery": 0.9550821781158447
+        },
+        {
+          "cross_bank_action_cosine": 0.9831120371818542,
+          "jvp_recovery": 0.18013018369674683,
+          "layer": 5,
+          "output_recovery": 0.9540917873382568
+        },
+        {
+          "cross_bank_action_cosine": 0.9806231260299683,
+          "jvp_recovery": 0.18491429090499878,
+          "layer": 6,
+          "output_recovery": 0.9460436701774597
+        },
+        {
+          "cross_bank_action_cosine": 0.9793771505355835,
+          "jvp_recovery": 0.1453639268875122,
+          "layer": 7,
+          "output_recovery": 0.942992091178894
+        },
+        {
+          "cross_bank_action_cosine": 0.9775296449661255,
+          "jvp_recovery": 0.1369321346282959,
+          "layer": 8,
+          "output_recovery": 0.9360500574111938
+        },
+        {
+          "cross_bank_action_cosine": 0.976639449596405,
+          "jvp_recovery": 0.12380963563919067,
+          "layer": 9,
+          "output_recovery": 0.9330378770828247
+        },
+        {
+          "cross_bank_action_cosine": 0.9768195152282715,
+          "jvp_recovery": 0.1326979398727417,
+          "layer": 10,
+          "output_recovery": 0.9340890645980835
+        },
+        {
+          "cross_bank_action_cosine": 0.9781559705734253,
+          "jvp_recovery": 0.12226563692092896,
+          "layer": 11,
+          "output_recovery": 0.9406080842018127
+        }
+      ],
+      "mean_cross_bank_action_cosine": 0.9810367425282797,
+      "mean_jvp_recovery": 0.20647591352462769,
+      "mean_output_recovery": 0.9444873432318369,
+      "minimum_cross_bank_action_cosine": 0.976639449596405,
+      "minimum_jvp_recovery": 0.12226563692092896,
+      "minimum_output_recovery": 0.9323179721832275
+    },
+    "2026081402": {
+      "layers": [
+        {
+          "cross_bank_action_cosine": 0.9835056066513062,
+          "jvp_recovery": 0.5527385473251343,
+          "layer": 0,
+          "output_recovery": 0.9333181381225586
+        },
+        {
+          "cross_bank_action_cosine": 0.9841180443763733,
+          "jvp_recovery": 0.26983731985092163,
+          "layer": 1,
+          "output_recovery": 0.9500547051429749
+        },
+        {
+          "cross_bank_action_cosine": 0.9842647314071655,
+          "jvp_recovery": 0.21828120946884155,
+          "layer": 2,
+          "output_recovery": 0.9542152285575867
+        },
+        {
+          "cross_bank_action_cosine": 0.9840260744094849,
+          "jvp_recovery": 0.21170669794082642,
+          "layer": 3,
+          "output_recovery": 0.95558762550354
+        },
+        {
+          "cross_bank_action_cosine": 0.9837197065353394,
+          "jvp_recovery": 0.19867265224456787,
+          "layer": 4,
+          "output_recovery": 0.9549435973167419
+        },
+        {
+          "cross_bank_action_cosine": 0.9827603697776794,
+          "jvp_recovery": 0.18252545595169067,
+          "layer": 5,
+          "output_recovery": 0.9540086984634399
+        },
+        {
+          "cross_bank_action_cosine": 0.9802504181861877,
+          "jvp_recovery": 0.18431341648101807,
+          "layer": 6,
+          "output_recovery": 0.9450421929359436
+        },
+        {
+          "cross_bank_action_cosine": 0.9788578748703003,
+          "jvp_recovery": 0.13844460248947144,
+          "layer": 7,
+          "output_recovery": 0.9416322112083435
+        },
+        {
+          "cross_bank_action_cosine": 0.9769733548164368,
+          "jvp_recovery": 0.1388658881187439,
+          "layer": 8,
+          "output_recovery": 0.9354312419891357
+        },
+        {
+          "cross_bank_action_cosine": 0.9759223461151123,
+          "jvp_recovery": 0.13171088695526123,
+          "layer": 9,
+          "output_recovery": 0.9312606453895569
+        },
+        {
+          "cross_bank_action_cosine": 0.9761086106300354,
+          "jvp_recovery": 0.12802648544311523,
+          "layer": 10,
+          "output_recovery": 0.9320539236068726
+        },
+        {
+          "cross_bank_action_cosine": 0.9776952266693115,
+          "jvp_recovery": 0.12321507930755615,
+          "layer": 11,
+          "output_recovery": 0.9388499855995178
+        }
+      ],
+      "mean_cross_bank_action_cosine": 0.9806835303703944,
+      "mean_jvp_recovery": 0.2065281867980957,
+      "mean_output_recovery": 0.9438665161530176,
+      "minimum_cross_bank_action_cosine": 0.9759223461151123,
+      "minimum_jvp_recovery": 0.12321507930755615,
+      "minimum_output_recovery": 0.9312606453895569
+    }
+  },
+  "identity": {
+    "candidate_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_cfcdecay1_cprojdecay0p5_5tpp_v2/scientific/ckpt.pt",
+    "candidate_checkpoint_sha256": "6b3c9cadc169b9dd234e111428dc22b4390be79561f98d178e8f105747612a24",
+    "entrypoint_sha256": "09afd2afb749871831fd5f2a4ae81192e654798960fc59a172e7cfb0feea618e",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_postbranch_fc_oracle_plan.json",
+    "plan_sha256": "8b1f23b1f502f121e23bb8ba7157f4f7056bc80236156417de292a612e43f202",
+    "teacher_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_dense_blockwise_qkv_muon_5tpp_lr24e4/ckpt.pt",
+    "teacher_checkpoint_sha256": "ce7aadffd104c893e368181ffaf09d12ebe7b12df05a8ea45f2640bf3d55ecb7"
+  },
+  "protocol": {
+    "block_size": 1024,
+    "candidate_cache_count": 168,
+    "checkpoint_updates": 0,
+    "discovery_batch_size": 4,
+    "discovery_batches": 2,
+    "discovery_seeds": [
+      2026081401,
+      2026081402
+    ],
+    "eval_batch_size": 16,
+    "eval_batches": 400,
+    "eval_seed": 20260715,
+    "jvp_sample_cap": 256,
+    "metric_batch_size": 4,
+    "metric_batches": 2,
+    "metric_seed": 2026081403,
+    "ridge_ratio": 0.0001,
+    "sample_cap": 4096
+  },
+  "schema_version": "nanogpt_124m_postbranch_fc_oracle_result_v1",
+  "validation_ce": {
+    "fitted": {
+      "2026081401": 12.09339238166809,
+      "2026081402": 12.043182644844055
+    },
+    "gain": {
+      "2026081401": -8.42619885623455,
+      "2026081402": -8.375989119410516
+    },
+    "identity": 3.6671935254335404
+  }
+}
