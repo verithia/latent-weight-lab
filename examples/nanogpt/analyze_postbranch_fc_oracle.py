@@ -459,7 +459,6 @@ def main() -> None:
         candidate, torch.bfloat16
     )
     prepare_chart_caches(candidate)
-    prepare_chart_caches(teacher)
 
     discovery = {
         seed: fixed_validation_batches(
@@ -600,7 +599,6 @@ def main() -> None:
     print(result["classification"], flush=True)
     print(f"result={output} sha256={sha256(output)}", flush=True)
     discard_chart_caches(candidate)
-    discard_chart_caches(teacher)
 
 
 if __name__ == "__main__":
