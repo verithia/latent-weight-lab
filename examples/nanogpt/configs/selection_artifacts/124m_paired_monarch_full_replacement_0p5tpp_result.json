@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_paired_monarch_full_replacement_0p5tpp_result_v1",
+  "classification": "REJECT_PAIRED_MONARCH_FULL_REPLACEMENT_LM_LOSS",
+  "identity": {
+    "git_commit": "cb026fadd4d90a36d1e9c113869dca38560e8c14",
+    "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_paired_monarch16_0p5tpp_20260819T104824Z_1108665",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "6acab760afe338e8d987b42e2b3f1dbd8330ff7cce9d9f6cefbaeb2f98b98b24",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "d2053915d63ce96cdb307356fdb6092a334e11b72ee34dded5d086f423a62d84",
+    "status_sha256": "fcbc3e6d19efa872f8f7bc80a47fd887724453380acc6e8696b2ce3c89923987",
+    "log_sha256": "acfc15b47d3e6ba98bc917f0b8dc80b1c20cb53303846abc7ec2083c56393e6f",
+    "mfu_certificate_sha256": "74f8c8517d5508d0a928e127fd60308a0599f8e6f2f4a52f7d71f19c21d528ba",
+    "checkpoint_sha256": "260a85b6371c1f6659a0c32867943271d0fd3ff856676a1e756455167bd8a3bf",
+    "checkpoint_metadata_sha256": "731a3c7a103088d864fdd837448b7b3377f8359f799ffeef491320dca46a2ad9"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-19T18:48:25+08:00",
+    "finished_at": "2026-08-19T18:54:53+08:00",
+    "wall_seconds_including_fixed_evaluations": 388.0,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "watchdog_terminal_callback_delivered_once": true,
+    "log_errors": []
+  },
+  "parameter_accounting": {
+    "dense_mlp_parameters": 56623104,
+    "blockfht_mlp_coordinates": 566232,
+    "paired_monarch_coordinates": 1179648,
+    "total_compact_mlp_coordinates": 1745880,
+    "mlp_parameter_compression_ratio": 32.432414,
+    "mlp_parameter_saving_fraction": 0.969166814,
+    "dense_temporal_error_feedback_state": false
+  },
+  "fixed_window_loss": {
+    "curve": [
+      {"step": 0, "train_ce": 10.9458, "validation_ce": 10.9456},
+      {"step": 60, "train_ce": 6.7052, "validation_ce": 6.7152},
+      {"step": 120, "train_ce": 6.1943, "validation_ce": 6.2026},
+      {"step": 180, "train_ce": 6.0015, "validation_ce": 6.0075},
+      {"step": 238, "train_ce": 5.9327, "validation_ce": 5.9383}
+    ],
+    "terminal_validation_ce": 5.9383,
+    "attention_only_control_validation_ce": 5.4918,
+    "ce_gap_to_attention_only": 0.4465,
+    "perplexity_ratio_to_attention_only": 1.562832688,
+    "full_mlp_error_feedback_validation_ce": 5.529316425323486,
+    "ce_gap_to_full_mlp_error_feedback": 0.408983575,
+    "perplexity_ratio_to_full_mlp_error_feedback": 1.505286995,
+    "preregistered_ce_maximum": 5.5918,
+    "threshold_miss_ce": 0.3465
+  },
+  "exact_config_benchmark": {
+    "mfu_fraction": 0.388711021,
+    "tokens_per_second": 215978.0425,
+    "iter_ms": 1213.7525,
+    "peak_allocated_mib": 31168.74,
+    "native_block_fht_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "relative_to_full_mlp_error_feedback": {
+      "throughput_fraction_change": 0.43948,
+      "mfu_absolute_change": 0.118621021,
+      "mfu_fraction_change": 0.43919,
+      "peak_allocated_mib_change": -689.79,
+      "peak_allocated_fraction_change": -0.02165
+    }
+  },
+  "decision": {
+    "mfu_gate_passed": true,
+    "finite_terminal_loss_passed": true,
+    "loss_gate_passed": false,
+    "larger_rung_authorized": false,
+    "repeat_or_hyperparameter_sweep_authorized": false,
+    "interpretation": "The folded shared Monarch transport is computationally efficient but fails the language-model objective by a large margin. Co-adaptation from initialization does not rescue the static shared hidden-plane restriction that the paired teacher oracle rejected.",
+    "next_action": "Do not sweep Monarch width, depth, seed, or learning rate. Test a latent-native shared learned full-rank MLP trunk with layer-private diagonal modulation: it explicitly relaxes static pseudo-random direction generation while retaining cross-layer parameter sharing, dense tensor-core execution, and no dense per-layer optimizer state."
+  }
+}
