@@ -1,0 +1,146 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_ambient_transport_oracle_plan_v1",
+  "recorded_at": "2026-08-19T17:00:00+08:00",
+  "status": "theory_preregistered_before_candidate_values",
+  "scientific_question": "Can a layer-shared paired hidden-space transport move the procedural MLP activation plane enough to recover the dense complete-expert function and input JVP, without retaining dense expert matrices?",
+  "theory": {
+    "householder": "Apply the same layer-specific chain U of eight global Householder reflectors before GELU and U^T after GELU. This changes activation hyperplanes globally with kh coordinates per layer while preserving feature/write index pairing.",
+    "monarch": "Apply U=B2 P B1 P^T before GELU and U^T after GELU, where B1 and B2 are layer-specific block-diagonal width-16 matrices and P is fixed. Identity blocks give exact identity transport at initialization.",
+    "causal_control": "Use the exact same full-width procedural chart, seeds, feature coordinates, gains, biases, output gains, write atlas, data, fit objective, and initialization with U fixed to identity.",
+    "decision": "These are zero-update representability tests. Language-model training is authorized only if both independently fitted discovery banks pass frozen heldout output, JVP, cross-bank action, layer, and expert gates."
+  },
+  "source": {
+    "parent_git_commit": "2ad11f31c8d3028b3e37b819a022d824447050aa",
+    "global_write_givens_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_global_write_givens_feature_oracle_result.json",
+    "global_write_givens_result_sha256": "6cdda76cc7b4637a950e4ab98b1dee3165e096ed662276b36baabd82f879082f",
+    "write_ceiling_result": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_write_subspace_ceiling_result.json",
+    "write_ceiling_result_sha256": "ea95071667ce81cdaa25f40d4616f991b26acb458d9b90af8f640004e16ca7e3",
+    "write_basis_artifact": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_write_subspace_ceiling_20260813a/artifacts/write_bases.pt",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "terminal_manifold_snapshot": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_0p5tpp/manifold_snapshot.pt",
+    "terminal_manifold_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "model_seed": 1337,
+    "next_iter": 238,
+    "tensor_layers": 12,
+    "num_experts": 8,
+    "outer_moe_top_k": 2,
+    "input_width": 768,
+    "expert_hidden_width": 1536,
+    "procedural_padded_width": 2048,
+    "layers": [0, 5, 11],
+    "dense_paired_parameters_all_layers": 226492416,
+    "dense_flops_per_active_expert_token": 4718592,
+    "checkpoint_updates": 0
+  },
+  "candidate": {
+    "rank": 480
+  },
+  "shared_chart": {
+    "rank": 480,
+    "feature_seed": 20261501,
+    "pre_matching_seed": 20261502,
+    "post_matching_seed": 20261503,
+    "procedural_map_seed": 20261504,
+    "base_coordinates_all_layers": 1078272,
+    "counted_fixed_write_atlas_coordinates": 368640,
+    "fixed_dense_map_storage": false,
+    "dense_base_or_residual": false
+  },
+  "transports": {
+    "householder": {
+      "reflectors": 8,
+      "transport_coordinates_per_layer": 12288,
+      "transport_coordinates_all_layers": 147456,
+      "total_coordinates_all_layers": 1225728,
+      "paired_parameter_compression_ratio": 184.78195488721803,
+      "parameter_saving_fraction_vs_dense": 0.9945882161458334,
+      "fused_extra_flops_per_active_expert_token": 98304,
+      "fused_overhead_fraction_vs_dense_expert": 0.020833333333333332,
+      "materialization_flops_per_expert_update": 75497472
+    },
+    "monarch": {
+      "block_width": 16,
+      "permutation_seed": 20261903,
+      "transport_coordinates_per_layer": 49152,
+      "transport_coordinates_all_layers": 589824,
+      "total_coordinates_all_layers": 1668096,
+      "paired_parameter_compression_ratio": 135.77900552486187,
+      "parameter_saving_fraction_vs_dense": 0.9926350911458334,
+      "fused_extra_flops_per_active_expert_token": 196608,
+      "fused_overhead_fraction_vs_dense_expert": 0.041666666666666664,
+      "materialization_flops_per_expert_update": 150994944
+    },
+    "control": {
+      "transport_coordinates_all_layers": 0,
+      "total_coordinates_all_layers": 1078272,
+      "paired_parameter_compression_ratio": 210.05128205128204,
+      "parameter_saving_fraction_vs_dense": 0.9952392578125,
+      "fused_extra_flops_per_active_expert_token": 0,
+      "fused_overhead_fraction_vs_dense_expert": 0.0,
+      "materialization_flops_per_expert_update": 0
+    }
+  },
+  "data_protocol": {
+    "discovery_banks": [
+      {"name": "discovery_a", "seed": 20261101, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072},
+      {"name": "discovery_b", "seed": 20261102, "batches": 64, "batch_size": 8, "block_size": 256, "tokens": 131072}
+    ],
+    "heldout": {"seed": 20261103, "batches": 16, "batch_size": 8, "block_size": 256, "tokens": 32768},
+    "fit_samples_per_expert": 1024,
+    "sample_selection_seed_base": 20261531,
+    "fit_jvp_probe_seed_base": 20261511,
+    "heldout_jvp_probe_seed_base": 20261512,
+    "sampling": "Exact terminal top-2 routing; deterministic per-expert samples; independent discovery-bank fitting; heldout never selects topology, coordinates, stopping, thresholds, or candidate."
+  },
+  "fit_protocol": {
+    "target": "Dense complete-expert routed output and analytic input-JVP in the fixed bank-specific rank-480 write basis.",
+    "objective": "Equal-layer/equal-expert normalized coefficient MSE plus 1.0 times normalized analytic coefficient-JVP MSE.",
+    "optimizer": "AdamW on the compact full-width chart and paired transport coordinates.",
+    "steps": 600,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "jvp_weight": 1.0,
+    "precision": "float32",
+    "selection": "Final registered step only; no heldout selection or retry sweep."
+  },
+  "candidate_gates": {
+    "heldout_mixture_recovery_mean_min_each_bank": 0.9,
+    "heldout_mixture_recovery_every_layer_min_each_bank": 0.8,
+    "heldout_expert_recovery_min_each_bank": 0.6,
+    "heldout_jvp_recovery_mean_min_each_bank": 0.7,
+    "heldout_bank_action_cosine_mean_min": 0.8,
+    "candidate_minus_control_recovery_mean_min_each_bank": 0.05,
+    "candidate_minus_control_jvp_recovery_mean_min_each_bank": 0.05,
+    "minimum_discovery_assignments_per_expert": 1024,
+    "all_values_and_gradients_finite": true
+  },
+  "identity": {
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_paired_ambient_transport_oracle.py",
+    "entrypoint_sha256": "9865e4b042ac421a706f82b5d2afad6f7583946ee96e9f800859a957ee3b1836",
+    "helper_sha256": {
+      "examples/nanogpt/analyze_sparse_moe_fullwidth_pregelu_chart_oracle.py": "10e26c8401d694aa0f462183f8a4eeddf44ba0c56edcfee54188c63efabc86da",
+      "examples/nanogpt/analyze_sparse_moe_global_write_givens_feature_oracle.py": "654eeef9a576a5990b2f6a20764039d167bd402e3e3e1f334bd84192861572e7",
+      "examples/nanogpt/analyze_cproj_manifold.py": "2fef98426fc64adaa1de677ab607c52a97fa41b3c5c316fc1bf826e449ff7d76",
+      "examples/nanogpt/analyze_mlp_activation_update_alignment.py": "e59f89c57a17b129b9305c73cfc7d6bc10b9e4982fcf6cdbe91ff6cda046b542",
+      "examples/nanogpt/analyze_sparse_moe_cfc_spectral_feature_oracle.py": "d6300dc7cef4c55bbfd8ed6c1fcaa1a22adb35743f8400f02d2db5cb7d934905",
+      "examples/nanogpt/analyze_sparse_moe_paired_alignment.py": "f8ba72a1371f7b783dc0f51e5bff810d41fec9dc09e093d85e946b1dbebaf1f1",
+      "examples/nanogpt/analyze_sparse_moe_rolling_tangent_oracle.py": "12f9661d8059f73ff36567ff2a5d680d3c22e407d3c6c5cb2d07c20becba20cd",
+      "examples/nanogpt/analyze_sparse_moe_shared_nonlinear_dictionary_oracle.py": "6e495fbda1d9be23c5490fc54b0b6e88d373eb5e2fa4df2641326222753602ac",
+      "examples/nanogpt/analyze_sparse_moe_stepzero_task_gradient_oracle.py": "c47b7f956e09902b426bc31f443093b9c0feb2d33425117afd4b24d9eba9de2c",
+      "latent_weight_lab/block_fht.py": "5c3d70aa145809b32a8b819b63bb70dc618c7af750e503327dc07bf4c95f1c8f"
+    },
+    "source_artifact_sha256": {
+      "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_global_write_givens_feature_oracle_result.json": "6cdda76cc7b4637a950e4ab98b1dee3165e096ed662276b36baabd82f879082f",
+      "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_write_subspace_ceiling_result.json": "ea95071667ce81cdaa25f40d4616f991b26acb458d9b90af8f640004e16ca7e3"
+    }
+  },
+  "authorization": {
+    "run_zero_update_oracle_after_tests_and_preflight": true,
+    "language_model_training": false,
+    "larger_rung": false,
+    "full_attention_work": false,
+    "automatic_retry_or_sweep": false
+  }
+}
