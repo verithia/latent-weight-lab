@@ -1,0 +1,112 @@
+{
+  "artifact_kind": "124m_full_mlp_hybrid_state_0p5tpp_training_result",
+  "candidate": {
+    "additional_trainable_parameters": 0,
+    "dense_fp32_temporal_state_bytes": 452984832,
+    "feedback": {
+      "block_size": 4096,
+      "code_bytes": 56623104,
+      "code_dtype": "torch.int8",
+      "elements": 56623104,
+      "scale_bytes": 27648,
+      "scale_dtype": "torch.float16",
+      "scale_elements": 13824
+    },
+    "momentum": {
+      "bytes": 113246208,
+      "dtype": "torch.float16",
+      "elements": 56623104
+    },
+    "persistent_temporal_state_bytes": 169896960,
+    "storage_ratio": 0.37506103515625,
+    "storage_reduction_factor": 2.6662327095199347
+  },
+  "checkpoint": {
+    "best_validation_ce": 5.529868125915527,
+    "checkpoint_reason": "evaluation",
+    "config_resolved_sha256": "1a16994c0f042f61e2994bac2a8bbb613424b71df9edbc44b965ee06a4484d8f",
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_hybridstate_0p5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "97ab2249d6dc5f3bcc44d766441eabe2f791298270d9bd2c4d13721ef2a071b0",
+    "next_iter": 238,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_full_mlp_hybridstate_0p5tpp/scientific/ckpt.pt",
+    "sha256": "27c151c3ff06496456e6597d60aed1a45615e9fc52db1a35ed91daea8db420c6",
+    "size_bytes": 931823524,
+    "state_dtype_audit": "all 24 MLP matrix states store FP16 momentum, signed-int8 feedback codes, and FP16 block scales; no MLP compact state was silently restored as a floating-point code tensor"
+  },
+  "classification": "PASS_124M_FULL_REPLACEMENT_HYBRID_STATE_PRESERVES_PARENT",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_hybridstate_0p5tpp.json",
+    "sha256": "05a0459cd57d8c07b4acd10b0529aa3a48dbb77c04f32e523a13764261f90703"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_rung_launch_authorized": false,
+    "next_action": "Register one 350M 0.5-TPP hybrid-state transfer by changing only the already accepted 350M c_fc-decay-1 plus c_proj-decay-0.5 full-MLP recipe's persistent state representation; require a fresh exact-config MFU and peak-VRAM gate before launch.",
+    "next_model_rung_registration_authorized": true,
+    "selected_for_compact_state_scaling": true
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 10.9672, "validation_ce": 10.9669},
+    {"step": 60, "train_ce": 6.2565, "validation_ce": 6.2662},
+    {"step": 120, "train_ce": 5.8148, "validation_ce": 5.8192},
+    {"step": 180, "train_ce": 5.6199, "validation_ce": 5.623},
+    {"step": 238, "train_ce": 5.527, "validation_ce": 5.529868125915527}
+  ],
+  "fixed_evaluation": {
+    "digest": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_batch_size": 16,
+    "eval_iters": 400,
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "eval_seed": 20260715,
+    "eval_tokens_per_split": 6553600
+  },
+  "measurement": {
+    "attention_control_validation_ce": 5.4918,
+    "attention_gap_ce_exact": 0.03806812591552777,
+    "candidate_minus_fp32_state_parent_ce_exact": 0.0005517005920410156,
+    "candidate_perplexity_ratio_vs_attention": 1.0388019998052282,
+    "candidate_perplexity_ratio_vs_fp32_state_parent": 1.0005518528068036,
+    "fp32_state_parent_validation_ce": 5.529316425323486,
+    "pass_validation_ce_maximum": 5.5918,
+    "success_ceiling_margin_exact": 0.06193187408447276,
+    "terminal_step": 238,
+    "terminal_train_ce_log": 5.527,
+    "terminal_validation_ce_exact": 5.529868125915527
+  },
+  "performance": {
+    "exact_config_mfu_fraction": 0.269621230019401,
+    "parent_fp32_state_peak_vram_mib": 44410.0,
+    "peak_vram_mib": 31592.13,
+    "peak_vram_reduction_mib": 12817.87,
+    "steady_update_ms": 1748.17375,
+    "tokens_per_second": 149953.79625
+  },
+  "provenance": {
+    "config_archive_sha256": "05a0459cd57d8c07b4acd10b0529aa3a48dbb77c04f32e523a13764261f90703",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "git_commit": "44ec68a9e21ec13c397662afeb2194a7d83482f2",
+    "log_sha256": "bca684242fc0cf10640d655a7361ef9a179da57cb0ee6b6818b36bafd59b6bef",
+    "mfu_certificate_sha256": "0eb240f1887f28dafe00423c640c1670555e3b64d5df021b6830a2232fde62db",
+    "provenance_sha256": "6f65cbba28667c1de4ffa9f20e4ebe8be3875771b42171d4c37f0c99d3fb10ed",
+    "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_hybridstate_0p5tpp_20260819T123953Z_1167072",
+    "status_sha256": "78750e503b6edaafb8ea271dde2e4bb9250aa91ae23aef44fdf6888b6050c41f"
+  },
+  "run": {
+    "exit_code": 0,
+    "finished_at": "2026-08-19T20:48:30+08:00",
+    "gpu": 0,
+    "host": "PRO6",
+    "started_at": "2026-08-19T20:39:54+08:00",
+    "status": "clean",
+    "wall_seconds": 516
+  },
+  "schema_version": "mai_124m_full_mlp_hybrid_state_0p5tpp_result_v1",
+  "watchdog": {
+    "callback_policy": "terminal/error-only",
+    "duplicate_terminal_callbacks": 0,
+    "gpu_released_after_exit": true,
+    "terminal_callback_delivered": true,
+    "terminal_signature": ["finished", 0, "2026-08-19T20:48:30+08:00"]
+  }
+}
