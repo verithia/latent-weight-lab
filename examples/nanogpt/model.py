@@ -4556,6 +4556,13 @@ class GPT(nn.Module):
         for name, param in self.named_parameters():
             if name.endswith("c_proj.weight"):
                 nn.init.normal_(param, mean=0.0, std=0.02 / math.sqrt(2 * config.n_layer))
+        if (
+            config.mlp_shared_dense_trunk
+            and config.mlp_shared_dense_block_fht_residual
+        ):
+            raise ValueError(
+                "shared dense trunk and shared dense BlockFHT residual are mutually exclusive"
+            )
         if config.mlp_shared_dense_trunk:
             self._tie_shared_dense_mlp_trunk()
         if config.mlp_shared_dense_block_fht_residual:
