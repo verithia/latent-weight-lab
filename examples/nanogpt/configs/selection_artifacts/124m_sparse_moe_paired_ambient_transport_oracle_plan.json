@@ -118,7 +118,7 @@
   },
   "identity": {
     "entrypoint": "examples/nanogpt/analyze_sparse_moe_paired_ambient_transport_oracle.py",
-    "entrypoint_sha256": "9865e4b042ac421a706f82b5d2afad6f7583946ee96e9f800859a957ee3b1836",
+    "entrypoint_sha256": "38432b87765a08886b973e1b847ad0b593e2a47ee82b94dfda35fd528a5bd598",
     "helper_sha256": {
       "examples/nanogpt/analyze_sparse_moe_fullwidth_pregelu_chart_oracle.py": "10e26c8401d694aa0f462183f8a4eeddf44ba0c56edcfee54188c63efabc86da",
       "examples/nanogpt/analyze_sparse_moe_global_write_givens_feature_oracle.py": "654eeef9a576a5990b2f6a20764039d167bd402e3e3e1f334bd84192861572e7",

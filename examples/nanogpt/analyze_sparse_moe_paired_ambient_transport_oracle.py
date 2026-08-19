@@ -332,7 +332,7 @@ def run_preflight(plan: dict[str, Any], device: str) -> dict[str, Any]:
         for kind in TRIALS:
             diagnostics[kind] = fit_joint(
                 modules[kind], samples, states, layers=layers, plan=plan,
-                probe_seed=20261902 + index,
+                probe_seed=20261902,
             )
     finally:
         fit["steps"] = original_steps
