@@ -1,0 +1,93 @@
+{
+  "schema_version": "mai_124m_shared_dense_mlp_trunk_0p5tpp_result_v1",
+  "classification": "REJECT_SHARED_DENSE_MLP_TRUNK_RANK1_LAYER_AXIS_LOSS",
+  "identity": {
+    "git_commit": "c9ca0e703ec9a71efcefa9f38218ef50db828898",
+    "run_id": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_0p5tpp_20260819T110806Z_1118490",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "785d3b2f9b6cf0116fd7fbfb781d3fe138ede0d6223ba68e4d1613fefd8f812f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "90557429515b7e05d13a730937a0960e1b3111fd37c119e688db3ed7d5fba67d",
+    "status_sha256": "6f87fe97c25bb8557a5a007293c912de907ce7b816235bea24dd75597eafac1a",
+    "log_sha256": "45f83e62ad294c612c2f679fa1cbad46a43a67a112e531a81bb12c3dff33dece",
+    "mfu_certificate_sha256": "95521a39602a519951a40b32807055c0f69e2d47e0ae8e4fd683b34f3c68375e",
+    "checkpoint_sha256": "72ff2c8d51f3f891aae2194d778e062135df36c2805cc23f88a64900d363b825",
+    "checkpoint_metadata_sha256": "320392b2afed2b078b74a4be60cf376e658a1247900e965932b2e4e21c746786"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-19T19:08:08+08:00",
+    "finished_at": "2026-08-19T19:15:04+08:00",
+    "wall_seconds_including_fixed_evaluations": 416.0,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "watchdog_terminal_callback_delivered_once": true,
+    "log_errors": []
+  },
+  "parameter_accounting": {
+    "dense_mlp_parameters": 56623104,
+    "shared_dense_matrix_parameters": 4718592,
+    "layer_private_diagonal_parameters": 46080,
+    "total_compact_mlp_parameters": 4764672,
+    "actual_model_trainable_parameters": 44486880,
+    "mlp_parameter_compression_ratio": 11.883946,
+    "mlp_parameter_saving_fraction": 0.915852865,
+    "generated_weight_expansion_required": false,
+    "dense_per_layer_optimizer_state": false
+  },
+  "fixed_window_loss": {
+    "curve": [
+      {"step": 0, "train_ce": 10.9477, "validation_ce": 10.9480},
+      {"step": 60, "train_ce": 6.3304, "validation_ce": 6.3402},
+      {"step": 120, "train_ce": 5.9225, "validation_ce": 5.9281},
+      {"step": 180, "train_ce": 5.7594, "validation_ce": 5.7634},
+      {"step": 238, "train_ce": 5.6934, "validation_ce": 5.6971}
+    ],
+    "terminal_validation_ce": 5.6971,
+    "attention_only_control_validation_ce": 5.4918,
+    "ce_gap_to_attention_only": 0.2053,
+    "perplexity_ratio_to_attention_only": 1.227893378,
+    "full_mlp_error_feedback_validation_ce": 5.5293164253,
+    "ce_gap_to_full_mlp_error_feedback": 0.1677835747,
+    "perplexity_ratio_to_full_mlp_error_feedback": 1.182680621,
+    "paired_monarch_validation_ce": 5.9383,
+    "ce_improvement_over_paired_monarch": 0.2412,
+    "paired_monarch_perplexity_ratio_to_shared_trunk": 1.272775601,
+    "preregistered_ce_maximum": 5.5918,
+    "threshold_miss_ce": 0.1053,
+    "threshold_miss_perplexity_ratio": 1.111040508
+  },
+  "exact_config_benchmark": {
+    "mfu_fraction": 0.361964096,
+    "tokens_per_second": 201178.545,
+    "iter_ms": 1303.0425,
+    "peak_allocated_mib": 33447.75,
+    "native_block_fht_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "relative_to_paired_monarch": {
+      "throughput_fraction_change": -0.068523,
+      "mfu_absolute_change": -0.026746925,
+      "mfu_fraction_change": -0.068809,
+      "peak_allocated_mib_change": 2279.01,
+      "peak_allocated_fraction_change": 0.073118
+    },
+    "relative_to_full_mlp_error_feedback": {
+      "throughput_fraction_change": 0.340843,
+      "mfu_absolute_change": 0.091874096,
+      "mfu_fraction_change": 0.340160,
+      "peak_allocated_mib_change": 1589.22,
+      "peak_allocated_fraction_change": 0.049884
+    }
+  },
+  "decision": {
+    "mfu_gate_passed": true,
+    "finite_terminal_loss_passed": true,
+    "loss_gate_passed": false,
+    "larger_rung_authorized": false,
+    "repeat_or_hyperparameter_sweep_authorized": false,
+    "interpretation": "A fully learned full-rank shared MLP trunk recovers 0.2412 CE relative to paired Monarch, proving that learned feature/write directions materially help. It still misses the matched attention-only control by 0.2053 CE and the preregistered ceiling by 0.1053 CE. The remaining error is therefore layer-private directional demand, not BlockFHT execution speed or within-matrix rank.",
+    "next_action": "Do not promote this rank-one layer-axis trunk to 5TPP. Existing dense-trajectory evidence shows near-zero cross-layer displacement cosine, so do not blindly add a second global trunk atom. Test the smallest full-replacement hybrid that preserves the learned shared trunk while adding separately seeded layer-private BlockFHT residual directions, after an exact-config MFU gate."
+  }
+}
