@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_attention_cproj_lowbit_polar_gate_plan_v1",
+  "recorded_at": "2026-08-20",
+  "scientific_question": "Can the full-rank attention c_proj Muon request be represented directly by a full-support low-bit code at useful direction fidelity and materially lower persistent storage?",
+  "theory": {
+    "causal_parent": "Equal-budget Givens reached recovery 0.236724/cosine 0.493535, while unconstrained directed sparse transport was worse. Both act through the current weight and fail to encode the spectrally flat full-rank polar request.",
+    "binary_prediction": "For isotropic Gaussian-like entries, the least-squares sign projection has expected cosine sqrt(2/pi)=0.797885. Normalized to the target radius its expected recovery is 2*sqrt(2/pi)-1=0.595769.",
+    "scope": "This is a memory-compression relaxation with one discrete code per ambient element, not evidence for a low-dimensional parameter manifold. A pass authorizes only a trajectory accumulation and compact-weight-state oracle."
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "probe_steps": [0, 594, 1188, 1782, 2372],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "target": "attn.c_proj applied dense-Muon request",
+    "matrix_elements_per_layer": 589824,
+    "family_radius_ratio": 1.0,
+    "ternary_threshold_rms": 0.6,
+    "candidates": {
+      "binary_b256": {"codec": "binary", "bits": 1, "block_size": 256},
+      "binary_b1024": {"codec": "binary", "bits": 1, "block_size": 1024},
+      "binary_b4096": {"codec": "binary", "bits": 1, "block_size": 4096},
+      "ternary_b256": {"codec": "ternary", "bits": 2, "block_size": 256},
+      "ternary_b1024": {"codec": "ternary", "bits": 2, "block_size": 1024},
+      "ternary_b4096": {"codec": "ternary", "bits": 2, "block_size": 4096},
+      "int4_b256": {"codec": "int4", "bits": 4, "block_size": 256},
+      "int4_b1024": {"codec": "int4", "bits": 4, "block_size": 1024},
+      "int4_b4096": {"codec": "int4", "bits": 4, "block_size": 4096}
+    }
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.5,
+      "minimum_phase_recovery": 0.45,
+      "minimum_layer_recovery": 0.4,
+      "minimum_cell_recovery": 0.2,
+      "aggregate_cosine_minimum": 0.75,
+      "maximum_storage_ratio": 0.13
+    },
+    "selection": "Among passing candidates choose minimum theoretical packed storage ratio, then maximum aggregate recovery, then smaller block size.",
+    "pass": "Authorize only a separately preregistered multi-step compact residual/weight reconstruction oracle with exact resume and storage accounting. No implementation, MFU preflight, LM training, or larger rung is authorized.",
+    "fail": "Reject low-bit full-support polar coding at up to four bits and return to a dense c_proj exception or a changed optimizer objective; do not sweep BlockFHT geometry."
+  },
+  "identity": {
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "optimizer_probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001188.pt": "5fd43fbeb9447a86b673d2b3ee10bd2d7faa1ab0c43cdd7b59d3d783ca871a8a",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "expected_runtime": "under five minutes",
+    "monitoring": "direct foreground polling; no watchdog or callback",
+    "command": ".venv/bin/python -m examples.nanogpt.analyze_attention_cproj_lowbit_polar_gate --plan examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_lowbit_polar_gate_plan.json --probe-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_lowbit_polar_gate_v1 --device cuda"
+  },
+  "authorization": {
+    "zero_update_oracle": true,
+    "trajectory_oracle": false,
+    "implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
