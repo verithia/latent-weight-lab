@@ -1,0 +1,87 @@
+{
+  "authorization": {
+    "automatic_20tpp": false,
+    "automatic_rerun": false,
+    "combined_full_replacement": false,
+    "exact_config_mfu_preflight": true,
+    "larger_model": false,
+    "one_124m_5tpp_training_after_mfu_pass": true,
+    "training_before_mfu_pass": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4.json",
+    "config_sha256": "5ec27b4fd2b725d8a87efa4bb8110f6d6521643618610f2c7589502a176c4e1a",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_attention_v_int8_lattice_error_feedback_124m_5tpp.py",
+    "max_iters": 2373,
+    "model_size": "124M",
+    "only_structural_change_from_qk_parent": "dense V -> signed-int8 block-4096 ambient lattice with FP16 optimizer error feedback",
+    "planned_tpp": 5.0
+  },
+  "causal_basis": {
+    "cayley_v_penalty_20tpp_ce": 0.0365,
+    "cayley_v_penalty_5tpp_ce": 0.029,
+    "qk_only_20tpp_validation_ce": 3.1488,
+    "qk_only_5tpp_validation_ce": 3.4858,
+    "qkv_cayley_20tpp_validation_ce": 3.1853,
+    "qkv_cayley_5tpp_validation_ce": 3.5148,
+    "reason_for_5tpp_first": "The V penalty is already stable at 5TPP, while 0.5TPP is too short for a reliable V-direction decision."
+  },
+  "created_at": "2026-08-20",
+  "evidence": {
+    "full_mlp_temporal_closure_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_5tpp_training_result.json",
+      "sha256": "3584d2607962e4a557d5278db30e34de2192fc587a3d4cdafcad779772bf61cf"
+    },
+    "qk_only_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+      "sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+    },
+    "qk_only_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+      "sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585"
+    },
+    "qkv_cayley_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_20tpp_run_result.json",
+      "sha256": "ad51c59b752886106d8a0e71b2f51577cb0cc23c33e361905b76b11474f6295f"
+    },
+    "qkv_cayley_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_partial_control_result.json",
+      "sha256": "bef499f835be994f39fdabe5396c82a7deb6b3878e607e495ecfa56b8b92ebc9"
+    }
+  },
+  "execution_gate": {
+    "callback_action_prompt": "Verify terminal artifacts and hashes against the active project note, seal fixed-checkpoint comparisons, update durable notes, and continue only with the next causally authorized action. Do not merely acknowledge this callback.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one idempotent terminal/error-only @Codex watchdog; no intermediate milestones or heartbeat"
+  },
+  "persistent_state_accounting": {
+    "codec_bytes": 7081344,
+    "codec_compression_ratio": 3.998048780487805,
+    "dense_fp32_muon_momentum_is_additional_optimizer_state": true,
+    "fp16_error_feedback_bytes_during_training": 14155776,
+    "fp16_scale_bytes": 3456,
+    "fp32_dense_weight_bytes": 28311552,
+    "int8_code_bytes": 7077888,
+    "materialized_forward_flops_unchanged": true,
+    "v_matrices": 12,
+    "v_values": 7077888
+  },
+  "question": "Can an ambient signed-int8 V lattice with FP16 temporal error feedback preserve the useful Muon V direction better than the static Cayley/BlockFHT chart?",
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_5tpp_plan_v1",
+  "status": "preregistered_pending_exact_config_mfu",
+  "terminal_gate": {
+    "fail_classification": "ATTENTION_V_REMAINS_DIRECTION_LIMITED",
+    "maximum_delta_to_qk_only_ce": 0.02,
+    "maximum_validation_ce": 3.5058,
+    "minimum_improvement_over_cayley_v_ce": 0.009,
+    "pass_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "threshold_changes_after_measurement": false
+  }
+}

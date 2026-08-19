@@ -177,6 +177,10 @@ class GPTConfig:
     block_fht_attn_cproj_int8_lattice: bool = False
     block_fht_attn_cproj_int8_lattice_block_size: int = 4096
     block_fht_attn_cproj_int8_lattice_seed: int = 271828
+    block_fht_attn_v_int8_lattice: bool = False
+    block_fht_attn_v_int8_lattice_block_size: int = 4096
+    block_fht_attn_v_int8_lattice_seed: int = 161804
+    block_fht_attn_v_int8_lattice_error_feedback: bool = False
     block_fht_mlp_int8_lattice_targets: tuple[str, ...] = ()
     block_fht_mlp_int8_lattice_block_size: int = 4096
     block_fht_mlp_int8_lattice_seed: int = 314159
@@ -1285,6 +1289,22 @@ class CausalSelfAttention(nn.Module):
                     "attention c_proj int8 lattice is the c_proj target; "
                     "remove attn.c_proj from BlockFHT targets"
                 )
+        if config.block_fht_attn_v_int8_lattice:
+            if structured == 0:
+                raise ValueError(
+                    "attention V int8 lattice requires a split or structured "
+                    "QKV attention family"
+                )
+            if "attn.c_attn.v" in attention_muon_targets:
+                raise ValueError(
+                    "attention V cannot use both int8 lattice and "
+                    "Muon-matched Givens"
+                )
+            if "attn.c_attn.v" in config.block_fht_targets:
+                raise ValueError(
+                    "attention V int8 lattice is the V target; remove "
+                    "attn.c_attn.v from BlockFHT targets"
+                )
 
         def attention_linear(
             in_features: int,
@@ -1293,6 +1313,27 @@ class CausalSelfAttention(nn.Module):
             target_name: str,
             seed_offset: int,
         ) -> nn.Module:
+            if (
+                target_name == "attn.c_attn.v"
+                and config.block_fht_attn_v_int8_lattice
+            ):
+                return MuonInt8LatticeLinear(
+                    in_features,
+                    out_features,
+                    bias=bias,
+                    block_size=int(
+                        config.block_fht_attn_v_int8_lattice_block_size
+                    ),
+                    base_seed=(
+                        int(config.block_fht_attn_v_int8_lattice_seed)
+                        + layer_id * 4096
+                    ),
+                    weight_std=0.02,
+                    layer_id=layer_id,
+                    error_feedback=bool(
+                        config.block_fht_attn_v_int8_lattice_error_feedback
+                    ),
+                )
             if (
                 target_name == "attn.c_proj"
                 and config.block_fht_attn_cproj_int8_lattice
@@ -1389,8 +1430,6 @@ class CausalSelfAttention(nn.Module):
             self.c_attn_q = None
             self.c_attn_k = None
             self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
             self.c_attn_qk = attention_linear(config.n_embd, 2 * config.n_embd, config.bias, "attn.c_attn.qk", layer_id * 8)
             self.c_attn_k_headwise = None
             self.c_attn_qk_headwise = None
@@ -1408,9 +1447,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             self.c_attn_qk = None
             self.c_attn_k_headwise = HeadwiseLinear(config.n_embd, head_dim, config.n_head, config.bias, config, "attn.c_attn.k_headwise", layer_id * 32)
             self.c_attn_qk_headwise = None
@@ -1428,9 +1465,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             self.c_attn_qk = None
             self.c_attn_k_headwise = None
             self.c_attn_qk_headwise = HeadwiseLinear(config.n_embd, 2 * head_dim, config.n_head, config.bias, config, "attn.c_attn.qk_headwise", layer_id * 32)
@@ -1447,9 +1482,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             target = "attn.c_attn.qk_tied_sign" if self.qk_tied_sign_c_attn else "attn.c_attn.qk_tied"
             self.c_attn_qk = None
             self.c_attn_k_headwise = None
@@ -1474,9 +1507,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             target = "attn.c_attn.qk_tied_sign_headwise" if self.qk_tied_sign_headwise_c_attn else "attn.c_attn.qk_tied_headwise"
             self.c_attn_qk = None
             self.c_attn_k_headwise = None
@@ -1501,9 +1532,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             if self.qk_mix25_headwise_c_attn:
                 target = "attn.c_attn.qk_mix25_headwise"
                 self.qk_mix_alpha = 0.25
@@ -1528,9 +1557,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             self.c_attn_qk = None
             self.c_attn_k_headwise = None
             self.c_attn_qk_headwise = None
@@ -1548,9 +1575,7 @@ class CausalSelfAttention(nn.Module):
             self.c_attn = None
             self.c_attn_q = None
             self.c_attn_k = None
-            self.c_attn_v = make_linear(config.n_embd, config.n_embd, config.bias, config, "attn.c_attn.v", layer_id * 8 + 2)
-            if "attn.c_attn.v" not in config.block_fht_targets:
-                self.c_attn_v = nn.Linear(config.n_embd, config.n_embd, bias=config.bias)
+            self.c_attn_v = attention_linear(config.n_embd, config.n_embd, config.bias, "attn.c_attn.v", layer_id * 8 + 2)
             self.c_attn_qk = None
             self.c_attn_k_headwise = None
             self.c_attn_qk_headwise = None

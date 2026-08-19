@@ -67,7 +67,7 @@
     "Dense transient materialization and materialized inference FLOPs remain unchanged.",
     "A 5TPP pass authorizes no larger model or 20TPP run automatically."
   ],
-  "status": "authorized_scientific_run_launched_terminal_pending",
+  "status": "terminal_passed",
   "terminal_gate": {
     "fail_classification": "MLP_TEMPORAL_CLOSURE_DOES_NOT_TRANSFER_TO_5TPP",
     "full_attention_parent_terminal_validation_ce": 3.5499,
@@ -78,6 +78,10 @@
     "pass_classification": "FULL_MLP_PERSISTENT_STATE_NEAR_DENSE_AT_124M_5TPP",
     "require_all_fixed_evaluations_finite": true,
     "require_clean_exit": true,
-    "threshold_changes_after_measurement": false
+    "threshold_changes_after_measurement": false,
+    "terminal_validation_ce": 3.549762010574341,
+    "delta_to_ordinary_dense_ce": 0.009562010574340807,
+    "delta_to_full_attention_parent_ce": -0.00012636184692354457,
+    "passed": true
   }
 }

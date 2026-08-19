@@ -1,0 +1,144 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "FULL_MLP_PERSISTENT_STATE_NEAR_DENSE_AT_124M_5TPP",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_5tpp_plan.json",
+    "preterminal_sha256": "634f714aecdf556f2f2ce806a18a0df594bc9e62e1990f37a18402fcfddda723"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp",
+    "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp_20260819T213908Z_1435942",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1436037,
+    "pgid": 1436037,
+    "source_commit": "5d0bd7f87335381ab496d052752b107449a122ac",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp.json",
+    "archived_config_sha256": "cd69c497e3ba9858146438490bbecdb9defc77952ba2636d307a0498514287c6",
+    "resolved_config_sha256": "1b886002b94e21ab9b54035ba9beed2b49cf6882d1555cff2ef606ca674ddc4f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "2c4d94f595b1f1fb133f1ce40e33c754b3ab4cbc72d4561093c6cd766e9af982",
+    "preflight_mfu_fraction": 0.2866845134262591,
+    "started_at": "2026-08-20T05:39:09+08:00",
+    "finished_at": "2026-08-20T06:47:07+08:00",
+    "wall_seconds": 4078,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp_20260819T213908Z_1435942.json",
+        "bytes": 946,
+        "sha256": "9ec118ef9bf28929555bd3e96dad92c7b0df7a8b5b1085ad3fc17fdd9accd4d2"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp_20260819T213908Z_1435942.log",
+        "bytes": 21863,
+        "sha256": "4315679a500eb0d9f05bd914306771943f54647f797cdc4e3e7769fa31932c4f"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp_20260819T213908Z_1435942.json",
+        "bytes": 2189,
+        "sha256": "b47c4f9a4d950228ba6059529bce31f9674b9685bbe73ab940f3b1888bf44236"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp/scientific/ckpt.pt",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_mlp_int8_lattice_errorfeedback_5tpp/ckpt.pt",
+        "bytes": 958145240,
+        "sha256": "cfec0731329ba59b631ded1ed248e758314e54734acf67cdfa55f013ce8ed6d2"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp/scientific/ckpt.meta.json",
+        "bytes": 24005,
+        "sha256": "18c3af62655423dd5e21cdbc9e3fa337b4afaa4b553fa2bbc38df8b4aa3a5692"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9959, "validation_ce": 10.9960},
+    {"step": 594, "train_ce": 4.0677, "validation_ce": 4.0566},
+    {"step": 1188, "train_ce": 3.7587, "validation_ce": 3.7438},
+    {"step": 1782, "train_ce": 3.6245, "validation_ce": 3.6074},
+    {"step": 2373, "train_ce": 3.5674, "validation_ce": 3.549762010574341}
+  ],
+  "frozen_gate": {
+    "ordinary_dense_terminal_validation_ce": 3.5402,
+    "full_attention_parent_terminal_validation_ce": 3.5498883724212646,
+    "maximum_terminal_validation_ce": 3.5602,
+    "terminal_validation_ce": 3.549762010574341,
+    "delta_to_ordinary_dense_ce": 0.009562010574340807,
+    "delta_to_full_attention_parent_ce": -0.00012636184692354457,
+    "headroom_to_gate_ce": 0.010437989425659433,
+    "perplexity_ratio_to_ordinary_dense": 1.009607876158231,
+    "passed": true,
+    "threshold_changed_after_measurement": false
+  },
+  "compute_equivalence": {
+    "sop": "notes/active/fixed-model-compute-equivalence-sop-20260804.md",
+    "versus_full_attention_parent": {
+      "terminal_candidate_over_parent_compute": 0.9993631433380444,
+      "terminal_method": "one_interval_extrapolation",
+      "median_common_loss_candidate_over_parent_compute": 1.0042746591267424,
+      "common_loss_ratio_range": [0.9993722711518193, 1.0053324318864056]
+    },
+    "versus_ordinary_dense": {
+      "terminal_candidate_over_dense_compute": 1.0439319646567595,
+      "terminal_method": "interpolation",
+      "dense_match_updates": 2273.136641409608,
+      "dense_terminal_local_alpha_eff_total_loss": 0.06282179533406797
+    }
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "best_validation_ce": 3.549762010574341,
+    "mlp_compression_residuals": {
+      "count": 24,
+      "elements": 56623104,
+      "bytes": 113246208,
+      "dtype": "float16",
+      "all_finite": true,
+      "rms_min": 0.000049570182454772294,
+      "rms_max": 0.00014455085329245776,
+      "absolute_max": 0.0003981590270996094
+    },
+    "attention_cproj_codes_versus_sealed_full_attention_parent": {
+      "common_matrices": 12,
+      "elements": 7077888,
+      "fraction_different": 0.989230403193721,
+      "mean_absolute_code_difference": 30.067548116048176,
+      "relative_l2_code_difference": 1.3832305988493059,
+      "interpretation": "The equal-loss endpoint is a jointly co-adapted solution, not an unchanged attention-parent codebook with a passive MLP codec."
+    }
+  },
+  "efficiency_scope": {
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_persistent_int8_codec_bytes": 56650752,
+    "persistent_mlp_weight_reduction": 3.998047828208882,
+    "mlp_fp16_optimizer_residual_bytes": 113246208,
+    "dense_fp32_muon_momentum_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "materialized_inference_flops_reduced": false,
+    "claim": "Practical 4x persistent MLP-weight compression with near-dense 5TPP CE; not a 200x continuous-latent Mapping-Network result."
+  },
+  "mechanistic_conclusion": {
+    "supported": "MLP ambient directions were sufficient once discarded sub-quantum Muon motion was accumulated causally in optimizer state.",
+    "rejected": "The 0.5TPP direct-rounding gap was not evidence that an int8 ambient lattice could not express the needed MLP directions.",
+    "remaining": "Long-horizon full-system validation and the independently observed 20TPP V-path attention gap remain unresolved."
+  },
+  "storage_reclamation": {
+    "performed_at": "2026-08-20",
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "reclaimed_bytes": 958145240,
+    "workspace_bytes_after_reclaim": 271102115206
+  }
+}

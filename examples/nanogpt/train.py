@@ -1268,6 +1268,26 @@ def parse_args() -> argparse.Namespace:
         default=271828,
     )
     parser.add_argument(
+        "--block-fht-attn-v-int8-lattice",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-attn-v-int8-lattice-block-size",
+        type=int,
+        default=4096,
+    )
+    parser.add_argument(
+        "--block-fht-attn-v-int8-lattice-seed",
+        type=int,
+        default=161804,
+    )
+    parser.add_argument(
+        "--block-fht-attn-v-int8-lattice-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-mlp-int8-lattice-targets",
         nargs="+",
         default=[],
@@ -2051,6 +2071,28 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "invalid attention Muon-matched Givens geometry"
             )
+    if namespace.block_fht_attn_v_int8_lattice_error_feedback and not (
+        namespace.block_fht_attn_v_int8_lattice
+    ):
+        raise ValueError(
+            "attention V int8 lattice error feedback requires the V lattice"
+        )
+    if namespace.block_fht_attn_v_int8_lattice:
+        if namespace.method != "block_fht":
+            raise ValueError("attention V int8 lattice requires method=block_fht")
+        if namespace.optimizer != "muon":
+            raise ValueError("attention V int8 lattice requires optimizer=muon")
+        if namespace.block_fht_attn_v_int8_lattice_block_size <= 0:
+            raise ValueError("attention V int8 lattice block size must be positive")
+        if "attn.c_attn.v" in attention_muon_targets:
+            raise ValueError(
+                "attention V cannot use both int8 lattice and Muon-matched Givens"
+            )
+        if "attn.c_attn.v" in set(namespace.block_fht_targets):
+            raise ValueError(
+                "remove attn.c_attn.v from BlockFHT targets when using the "
+                "attention V int8 lattice"
+            )
     mlp_int8_lattice_targets = set(
         namespace.block_fht_mlp_int8_lattice_targets
     )
@@ -2786,6 +2828,18 @@ def main() -> None:
         ),
         block_fht_attn_cproj_int8_lattice_seed=(
             args.block_fht_attn_cproj_int8_lattice_seed
+        ),
+        block_fht_attn_v_int8_lattice=(
+            args.block_fht_attn_v_int8_lattice
+        ),
+        block_fht_attn_v_int8_lattice_block_size=(
+            args.block_fht_attn_v_int8_lattice_block_size
+        ),
+        block_fht_attn_v_int8_lattice_seed=(
+            args.block_fht_attn_v_int8_lattice_seed
+        ),
+        block_fht_attn_v_int8_lattice_error_feedback=(
+            args.block_fht_attn_v_int8_lattice_error_feedback
         ),
         block_fht_mlp_int8_lattice_targets=tuple(
             args.block_fht_mlp_int8_lattice_targets

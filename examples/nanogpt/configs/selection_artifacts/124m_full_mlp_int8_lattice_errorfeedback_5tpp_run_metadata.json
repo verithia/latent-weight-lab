@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_5tpp_run_metadata_v1",
   "recorded_at": "2026-08-20",
-  "state": "running",
+  "state": "finished",
   "run": {
     "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp",
     "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp_20260819T213908Z_1435942",
@@ -80,7 +80,20 @@
     "ordinary_dense_reference_validation_ce": 3.5402,
     "full_attention_parent_validation_ce": 3.5499,
     "threshold_frozen_before_launch": true,
-    "terminal_validation_ce": null,
-    "passed": null
+    "terminal_validation_ce": 3.549762010574341,
+    "passed": true
+  },
+  "terminal": {
+    "finished_at": "2026-08-20T06:47:07+08:00",
+    "elapsed_seconds": 4078,
+    "exit_code": 0,
+    "last_iter": 2373,
+    "best_validation_ce": 3.549762010574341,
+    "status_sha256": "9ec118ef9bf28929555bd3e96dad92c7b0df7a8b5b1085ad3fc17fdd9accd4d2",
+    "log_sha256": "4315679a500eb0d9f05bd914306771943f54647f797cdc4e3e7769fa31932c4f",
+    "checkpoint_sha256": "cfec0731329ba59b631ded1ed248e758314e54734acf67cdfa55f013ce8ed6d2",
+    "checkpoint_metadata_sha256": "18c3af62655423dd5e21cdbc9e3fa337b4afaa4b553fa2bbc38df8b4aa3a5692",
+    "watchdog_last_exit_code": 0,
+    "watchdog_terminal_callback_count": 1
   }
 }

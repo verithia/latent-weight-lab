@@ -237,6 +237,98 @@ def test_conflicting_cproj_representations_are_rejected() -> None:
         raise AssertionError("conflicting c_proj representations must fail")
 
 
+def test_gpt_routes_qk_headwise_plus_v_lattice_with_error_feedback() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=("attn.c_attn.qk_headwise",),
+            block_fht_attn_v_int8_lattice=True,
+            block_fht_attn_v_int8_lattice_block_size=16,
+            block_fht_attn_v_int8_lattice_error_feedback=True,
+        )
+    )
+    module = model.transformer.h[0].attn.c_attn_v
+    assert isinstance(module, MuonInt8LatticeLinear)
+    assert module.error_feedback is True
+    assert model.attention_int8_lattice_stats() == {
+        "modules": 1,
+        "elements": 64,
+        "codec_bytes": 72,
+        "fp32_weight_bytes": 256,
+        "storage_ratio": 72 / 256,
+    }
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=1,
+    )
+    lattice_optimizers = [
+        item for item in optimizer.optimizers if isinstance(item, MuonInt8Lattice)
+    ]
+    assert len(lattice_optimizers) == 1
+    tokens = torch.randint(0, 32, (2, 8))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None and torch.isfinite(loss)
+    loss.backward()
+    assert module.weight.grad is not None
+    optimizer.step()
+    state = lattice_optimizers[0].state[module.weight]
+    assert state["compression_residual"].dtype == torch.float16
+    assert int(module.optimizer_step) == 1
+
+
+def test_conflicting_v_lattice_representations_are_rejected() -> None:
+    try:
+        GPT(
+            GPTConfig(
+                block_size=8,
+                vocab_size=32,
+                n_layer=1,
+                n_head=2,
+                n_embd=8,
+                bias=False,
+                block_fht=True,
+                block_fht_targets=("attn.c_attn.qk", "attn.c_attn.v"),
+                block_fht_attn_v_int8_lattice=True,
+            )
+        )
+    except ValueError as error:
+        assert "remove attn.c_attn.v" in str(error)
+    else:
+        raise AssertionError("conflicting attention V representations must fail")
+
+
+def test_v_lattice_without_split_attention_is_rejected() -> None:
+    try:
+        GPT(
+            GPTConfig(
+                block_size=8,
+                vocab_size=32,
+                n_layer=1,
+                n_head=2,
+                n_embd=8,
+                bias=False,
+                block_fht=True,
+                block_fht_targets=(),
+                block_fht_attn_v_int8_lattice=True,
+            )
+        )
+    except ValueError as error:
+        assert "split or structured QKV" in str(error)
+    else:
+        raise AssertionError("V lattice without split attention must fail")
+
+
 def test_gpt_routes_both_mlp_matrices_to_the_lattice_optimizer() -> None:
     model = GPT(
         GPTConfig(
