@@ -126,7 +126,7 @@ def test_error_feedback_accumulates_subquantum_muon_updates() -> None:
         [feedback], lr=1e-6, momentum=0.0, weight_decay=0.0, ns_steps=1
     )
     gradient = torch.randn_like(direct.weight)
-    for _ in range(256):
+    for _ in range(2048):
         direct.weight.grad = gradient.clone()
         feedback.weight.grad = gradient.clone()
         direct_optimizer.step()

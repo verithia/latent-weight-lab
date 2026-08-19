@@ -247,6 +247,19 @@ class MuonInt8Lattice(torch.optim.Optimizer):
             [{"params": [module.weight for module in modules]}], defaults
         )
 
+    def load_state_dict(self, state_dict):
+        """Restore compression residuals in their registered FP16 codec."""
+
+        result = super().load_state_dict(state_dict)
+        for weight, state in self.state.items():
+            module = self.modules_by_id[id(weight)]
+            residual = state.get("compression_residual")
+            if module.error_feedback and residual is not None:
+                state["compression_residual"] = residual.to(
+                    device=weight.device, dtype=torch.float16
+                )
+        return result
+
     @torch.no_grad()
     def step(self, closure=None):
         loss = None
