@@ -1532,6 +1532,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-mlp-pregelu-block-rotation-coordinate-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-mlp-pregelu-block-rotation-seed", type=int, default=161803)
     parser.add_argument("--block-fht-mlp-pregelu-cache-retain-graph", action="store_true")
+    parser.add_argument(
+        "--block-fht-mlp-paired-monarch-block-width", type=int, default=0
+    )
+    parser.add_argument(
+        "--block-fht-mlp-paired-monarch-coordinate-scale",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-paired-monarch-seed", type=int, default=20260819
+    )
     parser.add_argument("--block-fht-mlp-hidden-block-rotation-stages", type=int, default=0)
     parser.add_argument("--block-fht-mlp-hidden-block-rotation-size", type=int, default=32)
     parser.add_argument("--block-fht-mlp-hidden-block-rotation-basis-size", type=int, default=256)
@@ -2789,6 +2800,15 @@ def main() -> None:
         block_fht_mlp_pregelu_block_rotation_coordinate_scale=args.block_fht_mlp_pregelu_block_rotation_coordinate_scale,
         block_fht_mlp_pregelu_block_rotation_seed=args.block_fht_mlp_pregelu_block_rotation_seed,
         block_fht_mlp_pregelu_cache_retain_graph=args.block_fht_mlp_pregelu_cache_retain_graph,
+        block_fht_mlp_paired_monarch_block_width=(
+            args.block_fht_mlp_paired_monarch_block_width
+        ),
+        block_fht_mlp_paired_monarch_coordinate_scale=(
+            args.block_fht_mlp_paired_monarch_coordinate_scale
+        ),
+        block_fht_mlp_paired_monarch_seed=(
+            args.block_fht_mlp_paired_monarch_seed
+        ),
         block_fht_mlp_hidden_block_rotation_stages=args.block_fht_mlp_hidden_block_rotation_stages,
         block_fht_mlp_hidden_block_rotation_size=args.block_fht_mlp_hidden_block_rotation_size,
         block_fht_mlp_hidden_block_rotation_basis_size=args.block_fht_mlp_hidden_block_rotation_basis_size,

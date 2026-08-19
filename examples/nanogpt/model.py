@@ -229,6 +229,9 @@ class GPTConfig:
     block_fht_mlp_pregelu_block_rotation_coordinate_scale: float = 1.0
     block_fht_mlp_pregelu_block_rotation_seed: int = 161803
     block_fht_mlp_pregelu_cache_retain_graph: bool = False
+    block_fht_mlp_paired_monarch_block_width: int = 0
+    block_fht_mlp_paired_monarch_coordinate_scale: float = 1.0
+    block_fht_mlp_paired_monarch_seed: int = 20260819
     block_fht_mlp_hidden_block_rotation_stages: int = 0
     block_fht_mlp_hidden_block_rotation_size: int = 32
     block_fht_mlp_hidden_block_rotation_basis_size: int = 256
@@ -494,6 +497,113 @@ class LearnedGivensOutputMix(nn.Module):
             rotated = torch.stack((first, second), dim=-1).reshape_as(permuted)
             result = rotated.index_select(-1, self.inverse_permutations[stage])
         return result
+
+
+class LearnedMonarchHiddenMix(nn.Module):
+    """Identity-initialized two-factor Monarch transport.
+
+    The same hidden-space operator is folded into both MLP matrices.  For row
+    activations ``h``, the paired function is
+
+    ``c_proj(U.T @ gelu(U @ c_fc(x)))``.
+
+    Each factor is block diagonal and the fixed permutation between factors
+    provides global channel exchange.  Coordinates are stored as one vector
+    so Muon does not mistake the small blocks for independent dense weights.
+    """
+
+    def __init__(
+        self,
+        features: int,
+        block_width: int,
+        seed: int,
+        coordinate_scale: float = 1.0,
+    ) -> None:
+        super().__init__()
+        self.features = int(features)
+        self.block_width = int(block_width)
+        self.coordinate_scale = float(coordinate_scale)
+        if self.features <= 0:
+            raise ValueError("Monarch features must be positive")
+        if (
+            self.block_width <= 1
+            or self.features % self.block_width
+        ):
+            raise ValueError(
+                "Monarch block width must be > 1 and divide features"
+            )
+        if (
+            not math.isfinite(self.coordinate_scale)
+            or self.coordinate_scale <= 0.0
+        ):
+            raise ValueError(
+                "Monarch coordinate scale must be positive and finite"
+            )
+        self.block_count = self.features // self.block_width
+        self.coordinates = nn.Parameter(
+            torch.zeros(
+                2 * self.block_count * self.block_width * self.block_width
+            )
+        )
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(int(seed))
+        permutation = torch.randperm(
+            self.features, generator=generator, device="cpu"
+        )
+        self.register_buffer("permutation", permutation, persistent=True)
+        self.register_buffer(
+            "inverse_permutation",
+            torch.argsort(permutation),
+            persistent=True,
+        )
+
+    def _blocks(self, values: torch.Tensor) -> torch.Tensor:
+        coordinates = self.coordinates.view(
+            2,
+            self.block_count,
+            self.block_width,
+            self.block_width,
+        ).to(device=values.device, dtype=values.dtype)
+        identity = torch.eye(
+            self.block_width, device=values.device, dtype=values.dtype
+        ).view(1, 1, self.block_width, self.block_width)
+        return identity + self.coordinate_scale * coordinates
+
+    def _apply_blocks(
+        self, values: torch.Tensor, blocks: torch.Tensor
+    ) -> torch.Tensor:
+        grouped = values.reshape(
+            *values.shape[:-1], self.block_count, self.block_width
+        )
+        return torch.einsum("...bi,bij->...bj", grouped, blocks).reshape_as(
+            values
+        )
+
+    def forward(self, values: torch.Tensor) -> torch.Tensor:
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, "
+                f"got {values.shape[-1]}"
+            )
+        first, second = self._blocks(values).unbind(0)
+        result = values.index_select(-1, self.inverse_permutation)
+        result = self._apply_blocks(result, first)
+        result = result.index_select(-1, self.permutation)
+        return self._apply_blocks(result, second)
+
+    def apply_transpose(self, values: torch.Tensor) -> torch.Tensor:
+        """Apply the exact transpose of :meth:`forward` to row vectors."""
+
+        if values.shape[-1] != self.features:
+            raise ValueError(
+                f"expected last dimension {self.features}, "
+                f"got {values.shape[-1]}"
+            )
+        first, second = self._blocks(values).unbind(0)
+        result = self._apply_blocks(values, second.transpose(-1, -2))
+        result = result.index_select(-1, self.inverse_permutation)
+        result = self._apply_blocks(result, first.transpose(-1, -2))
+        return result.index_select(-1, self.permutation)
 
 
 class LearnedLowRankCayleyMix(nn.Module):
@@ -2476,6 +2586,43 @@ class MLP(nn.Module):
             )
         else:
             self.c_proj = make_linear(4 * config.n_embd, config.n_embd, config.bias, config, "mlp.c_proj", layer_id * 4 + 3)
+        paired_monarch_width = int(
+            config.block_fht_mlp_paired_monarch_block_width
+        )
+        if paired_monarch_width < 0:
+            raise ValueError(
+                "block_fht_mlp_paired_monarch_block_width must be "
+                "non-negative"
+            )
+        if paired_monarch_width:
+            if not (
+                isinstance(self.c_fc, BlockFHTLinear)
+                and isinstance(self.c_proj, BlockFHTLinear)
+            ):
+                raise ValueError(
+                    "paired Monarch requires generated plain mlp.c_fc and "
+                    "mlp.c_proj BlockFHT targets"
+                )
+            if self.pregelu_block_rotation is not None:
+                raise ValueError(
+                    "paired Monarch cannot be combined with a separate "
+                    "pre-GELU rotation"
+                )
+        self.paired_monarch = (
+            LearnedMonarchHiddenMix(
+                features=4 * config.n_embd,
+                block_width=paired_monarch_width,
+                seed=(
+                    int(config.block_fht_mlp_paired_monarch_seed)
+                    + layer_id * 64
+                ),
+                coordinate_scale=float(
+                    config.block_fht_mlp_paired_monarch_coordinate_scale
+                ),
+            )
+            if paired_monarch_width
+            else None
+        )
         self.dropout = nn.Dropout(config.dropout)
         self.pregelu_gain = nn.Parameter(torch.ones(4 * config.n_embd)) if config.block_fht_ffn_pregelu_gain else None
         if config.block_fht_ffn_pregelu_bias:
@@ -2701,6 +2848,11 @@ class MLP(nn.Module):
             raise ValueError(
                 "block-orthogonal hidden rotation cannot be combined with "
                 "a separate c_proj residual add-on"
+            )
+        if hidden_block_rotation_stages and self.paired_monarch is not None:
+            raise ValueError(
+                "paired Monarch cannot be combined with a separate hidden "
+                "rotation"
             )
         self.hidden_block_rotation = (
             LearnedFHTBlockOrthogonalOutputMix(
@@ -3370,11 +3522,35 @@ class MLP(nn.Module):
                 self.hidden_log_gain,
                 self.output_block_rotation,
                 self.residual_output_log_gain,
+                self.paired_monarch,
             )
         )
 
     def has_charted_cfc(self) -> bool:
-        return self.pregelu_block_rotation is not None
+        return any(
+            value is not None
+            for value in (
+                self.pregelu_block_rotation,
+                self.paired_monarch,
+            )
+        )
+
+    def _cfc_chart_parameters(
+        self, *, require_grad_only: bool
+    ) -> list[torch.Tensor]:
+        parameters: list[torch.Tensor] = []
+        for module in (
+            self.pregelu_block_rotation,
+            self.paired_monarch,
+        ):
+            if module is None:
+                continue
+            parameters.extend(
+                parameter
+                for parameter in module.parameters()
+                if not require_grad_only or parameter.requires_grad
+            )
+        return parameters
 
     def _cfc_base_weight(self) -> torch.Tensor:
         weight = getattr(self.c_fc, "_cached_weight", None)
@@ -3389,15 +3565,20 @@ class MLP(nn.Module):
     def _materialize_charted_cfc_weight(
         self, weight: torch.Tensor
     ) -> torch.Tensor:
-        if self.pregelu_block_rotation is None:
-            return weight
+        charted = weight
         # Row activations use h' = h @ R.  Since h = x @ W^T, folding the
         # frame into F.linear requires W' = R^T @ W.  Apply R to W^T and
         # transpose the result instead of materializing the O(hidden^2)
         # rotation matrix.
-        return self.pregelu_block_rotation(
-            weight.transpose(0, 1)
-        ).transpose(0, 1).contiguous()
+        if self.pregelu_block_rotation is not None:
+            charted = self.pregelu_block_rotation(
+                charted.transpose(0, 1)
+            ).transpose(0, 1)
+        if self.paired_monarch is not None:
+            charted = self.paired_monarch(
+                charted.transpose(0, 1)
+            ).transpose(0, 1)
+        return charted.contiguous()
 
     def prepare_charted_cfc_cache(self) -> None:
         if not self.has_charted_cfc():
@@ -3411,7 +3592,9 @@ class MLP(nn.Module):
         base_weight = self._cfc_base_weight()
         chart_requires_grad = any(
             parameter.requires_grad
-            for parameter in self.pregelu_block_rotation.parameters()
+            for parameter in self._cfc_chart_parameters(
+                require_grad_only=False
+            )
         )
         retain_graph = bool(
             self.pregelu_cache_retain_graph
@@ -3450,14 +3633,12 @@ class MLP(nn.Module):
             return
         if cached.grad is None:
             return
-        if self.pregelu_block_rotation is None:
+        if not self.has_charted_cfc():
             raise RuntimeError("cached pre-GELU frame is missing")
         base_weight = self._cfc_base_weight()
-        chart_parameters = [
-            parameter
-            for parameter in self.pregelu_block_rotation.parameters()
-            if parameter.requires_grad
-        ]
+        chart_parameters = self._cfc_chart_parameters(
+            require_grad_only=True
+        )
         if graph_weight is not None:
             gradient_targets = (
                 [base_weight, *chart_parameters]
@@ -3566,6 +3747,8 @@ class MLP(nn.Module):
         self, weight: torch.Tensor
     ) -> torch.Tensor:
         charted = weight
+        if self.paired_monarch is not None:
+            charted = self.paired_monarch(charted)
         if self.hidden_block_rotation is not None:
             rotation = self.hidden_block_rotation.matrix(charted)
             charted = charted @ rotation.transpose(0, 1)
@@ -3611,6 +3794,12 @@ class MLP(nn.Module):
             or self.residual_output_log_gain.requires_grad
         ):
             parameters.append(self.residual_output_log_gain)
+        if self.paired_monarch is not None:
+            parameters.extend(
+                parameter
+                for parameter in self.paired_monarch.parameters()
+                if not require_grad_only or parameter.requires_grad
+            )
         return parameters
 
     def _cproj_base_weight(self) -> torch.Tensor:
@@ -4670,6 +4859,7 @@ class GPT(nn.Module):
                 ".activation_chart_channel_log_gain",
                 ".activation_chart_common_log_gain",
                 ".activation_chart_gauge_log_gain",
+                ".paired_monarch.coordinates",
             )
             other_parameter_ids = {id(param) for param in other}
             chart_other = [
