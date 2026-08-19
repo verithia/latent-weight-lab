@@ -1,0 +1,83 @@
+{
+  "schema_version": "mai_124m_attention_cproj_lowbit_polar_gate_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "PROMOTE_ATTENTION_CPROJ_LOWBIT_TRAJECTORY_ORACLE",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground zero-update oracle; no watchdog or callback",
+    "source_commit": "7f62c4d9a512d28d26344284c7684c9aea055460",
+    "source_sha256": "577fe776543fa0536e088a683805f9afb3aa49ad69ca934f8d0b3b0f89552fdd",
+    "elapsed_seconds": 2.4161815643310547,
+    "focused_tests": "3 passed in 0.69s"
+  },
+  "identity": {
+    "plan_sha256": "323af4d59068a524724c8553ec734c7ae1fdad52d0fd9107d4b16b2b867a1a61",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "raw_result_sha256": "8d333b0276314370da9f59b0a8e2405b14a3d3197068b25972f6d277eb4321c6",
+    "cells_sha256": "57ab0fb4645d53595fbc39a4e8541a26c55bc759a911571734b196eeb7b60cb6",
+    "codec_rows_sha256": "89a62f552c5fba6e9d7569523ad1477f616ec2d5077d5f8314f7ae26aae48a04"
+  },
+  "measurements": {
+    "binary_b256": {
+      "fixed_scale_recovery": 0.5909574227681582,
+      "cosine": 0.7954787096563535,
+      "minimum_phase_recovery": 0.5899306718620065,
+      "minimum_layer_recovery": 0.5747279735414785,
+      "minimum_cell_recovery": 0.569821559431551
+    },
+    "binary_b1024": {
+      "fixed_scale_recovery": 0.5875453649099813,
+      "cosine": 0.7937726815728189,
+      "minimum_phase_recovery": 0.586388607158082,
+      "minimum_layer_recovery": 0.5609814477615079,
+      "minimum_cell_recovery": 0.5570859943477647
+    },
+    "binary_b4096_selected": {
+      "fixed_scale_recovery": 0.5871512052226155,
+      "cosine": 0.7935756067262333,
+      "minimum_phase_recovery": 0.5859706805849411,
+      "minimum_layer_recovery": 0.5596353016509669,
+      "minimum_cell_recovery": 0.5556238181536266,
+      "storage_ratio": 0.0313720703125,
+      "storage_reduction_factor": 31.875486381322958,
+      "compact_bytes": 888192
+    },
+    "ternary_b4096": {
+      "fixed_scale_recovery": 0.7935857115526299,
+      "cosine": 0.8967928575887817,
+      "minimum_phase_recovery": 0.792722995942981,
+      "minimum_layer_recovery": 0.7694136533749802,
+      "minimum_cell_recovery": 0.7660268678494693,
+      "storage_ratio": 0.0626220703125,
+      "storage_reduction_factor": 15.968810916179336
+    },
+    "int4_b4096": {
+      "fixed_scale_recovery": 0.972883712199972,
+      "cosine": 0.9864418559440282,
+      "minimum_phase_recovery": 0.9724647357397466,
+      "minimum_layer_recovery": 0.9613203635121191,
+      "minimum_cell_recovery": 0.958564654212447,
+      "storage_ratio": 0.1251220703125,
+      "storage_reduction_factor": 7.9921951219512195
+    }
+  },
+  "decision": {
+    "passed": true,
+    "selected_candidate": "binary_b4096",
+    "all_nine_candidates_passed": true,
+    "trajectory_oracle_authorized": true,
+    "implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "interpretation": [
+    "The binary result matches the preregistered isotropic prediction: measured cosine 0.79358 is close to sqrt(2/pi)=0.79788 and same-radius recovery 0.58715 is close to 0.59577.",
+    "Binary/block-4096 clears every phase, layer, and cell direction floor while using 3.1372 percent of FP32 storage, or 31.88x less. Smaller blocks improve recovery only slightly and lose storage efficiency.",
+    "Ternary and int4 establish a smooth rate-distortion frontier rather than a binary anomaly: 0.79359 and 0.97288 recovery at 15.97x and 7.99x storage reduction.",
+    "This solves the instantaneous direction-coverage test but not compact parameter accumulation. The code has ambient discrete support and may drift badly when used to represent a persistent weight residual. No training is authorized until that trajectory problem passes."
+  ],
+  "next_action": "Preregister a 41-snapshot attention c_proj compact-residual trajectory oracle. Encode each dense trajectory displacement relative to its initial weight with binary/block-4096, ternary/block-4096, and int4/block-4096; measure endpoint/chord recovery, temporal increment fidelity, code churn, storage, and exact decode reproducibility."
+}
