@@ -9,6 +9,10 @@ import torch.nn as nn
 from torch.nn import functional as F
 
 from examples.nanogpt.muon import Muon
+from examples.nanogpt.muon_int8_lattice import (
+    MuonInt8Lattice,
+    MuonInt8LatticeLinear,
+)
 from examples.nanogpt.muon_matched_givens import (
     MuonDirectedProduct,
     MuonDirectedProductLinear,
@@ -170,6 +174,9 @@ class GPTConfig:
     block_fht_attn_muon_matched_givens_error_feedback: bool = False
     block_fht_attn_muon_matched_givens_error_feedback_decay: float = 0.5
     block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps: float | None = None
+    block_fht_attn_cproj_int8_lattice: bool = False
+    block_fht_attn_cproj_int8_lattice_block_size: int = 4096
+    block_fht_attn_cproj_int8_lattice_seed: int = 271828
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -1263,6 +1270,17 @@ class CausalSelfAttention(nn.Module):
                 "bilateral attention Muon-matched Givens requires the "
                 "native fast matcher"
             )
+        if config.block_fht_attn_cproj_int8_lattice:
+            if "attn.c_proj" in attention_muon_targets:
+                raise ValueError(
+                    "attention c_proj cannot use both int8 lattice and "
+                    "Muon-matched Givens"
+                )
+            if "attn.c_proj" in config.block_fht_targets:
+                raise ValueError(
+                    "attention c_proj int8 lattice is the c_proj target; "
+                    "remove attn.c_proj from BlockFHT targets"
+                )
 
         def attention_linear(
             in_features: int,
@@ -1271,6 +1289,24 @@ class CausalSelfAttention(nn.Module):
             target_name: str,
             seed_offset: int,
         ) -> nn.Module:
+            if (
+                target_name == "attn.c_proj"
+                and config.block_fht_attn_cproj_int8_lattice
+            ):
+                return MuonInt8LatticeLinear(
+                    in_features,
+                    out_features,
+                    bias=bias,
+                    block_size=int(
+                        config.block_fht_attn_cproj_int8_lattice_block_size
+                    ),
+                    base_seed=(
+                        int(config.block_fht_attn_cproj_int8_lattice_seed)
+                        + layer_id * 4096
+                    ),
+                    weight_std=0.02 / math.sqrt(2 * config.n_layer),
+                    layer_id=layer_id,
+                )
             if target_name not in attention_muon_targets:
                 return make_linear(
                     in_features,
@@ -4964,6 +5000,12 @@ class GPT(nn.Module):
         muon_matched_givens_modules = [
             module for _name, module in muon_matched_givens_named_modules
         ]
+        attention_int8_lattice_modules = [
+            module
+            for name, module in self.named_modules()
+            if isinstance(module, MuonInt8LatticeLinear)
+            and ".attn." in name
+        ]
         functional_shear_pairs = [
             (block.mlp.c_fc, block.mlp.c_proj)
             for block in self.transformer.h
@@ -4977,6 +5019,7 @@ class GPT(nn.Module):
         ]
         if (
             muon_matched_givens_modules
+            or attention_int8_lattice_modules
             or functional_shear_pairs
             or directed_product_modules
         ) and optimizer != "muon":
@@ -5234,6 +5277,18 @@ class GPT(nn.Module):
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
                     group["attention_error_feedback"] = True
+            if attention_int8_lattice_modules:
+                optimizers.append(
+                    MuonInt8Lattice(
+                        attention_int8_lattice_modules,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
             if mlp_muon_matched_givens_modules:
                 optimizers.append(
                     MuonMatchedGivens(
@@ -5351,6 +5406,8 @@ class GPT(nn.Module):
                 f"{len(muon_matched_givens_modules)} "
                 "attention_muon_matched_givens_tensors="
                 f"{len(attention_muon_matched_givens_modules)} "
+                "attention_int8_lattice_tensors="
+                f"{len(attention_int8_lattice_modules)} "
                 "mlp_muon_matched_givens_tensors="
                 f"{len(mlp_muon_matched_givens_modules)} "
                 "muon_functional_shear_tensors="
@@ -5399,6 +5456,9 @@ class GPT(nn.Module):
                 modules += 1
                 generated += module.in_features * module.out_features
                 latent += module.coordinate_count
+            elif isinstance(module, MuonInt8LatticeLinear):
+                modules += 1
+                generated += module.in_features * module.out_features
             elif isinstance(module, MuonFunctionalShearLinear):
                 modules += 1
                 generated += module.in_features * module.out_features
@@ -5408,6 +5468,24 @@ class GPT(nn.Module):
                 generated += module.in_features * module.out_features
                 latent += module.coordinate_count
         return {"modules": modules, "generated": generated, "latent": latent}
+
+    def attention_int8_lattice_stats(self) -> dict[str, int | float]:
+        modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, MuonInt8LatticeLinear)
+        ]
+        codec_bytes = sum(module.persistent_codec_bytes for module in modules)
+        fp32_bytes = sum(module.fp32_weight_bytes for module in modules)
+        return {
+            "modules": len(modules),
+            "elements": sum(module.element_count for module in modules),
+            "codec_bytes": codec_bytes,
+            "fp32_weight_bytes": fp32_bytes,
+            "storage_ratio": (
+                codec_bytes / fp32_bytes if fp32_bytes else 0.0
+            ),
+        }
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
         prepare_block_fht_weight_cache(self, dtype=dtype)
@@ -5457,6 +5535,7 @@ class GPT(nn.Module):
                 module,
                 (
                     MuonMatchedGivensLinear,
+                    MuonInt8LatticeLinear,
                     MuonFunctionalShearLinear,
                     MuonDirectedProductLinear,
                 ),

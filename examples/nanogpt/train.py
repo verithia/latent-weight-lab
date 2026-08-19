@@ -89,6 +89,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/train.py",
         root / "examples/nanogpt/model.py",
         root / "examples/nanogpt/muon.py",
+        root / "examples/nanogpt/muon_int8_lattice.py",
         root / "examples/nanogpt/muon_matched_givens.py",
         root / "examples/nanogpt/fast_task_matching.py",
         root / "examples/nanogpt/csrc/task_edge_coloring.cpp",
@@ -1251,6 +1252,21 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=None,
     )
+    parser.add_argument(
+        "--block-fht-attn-cproj-int8-lattice",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-attn-cproj-int8-lattice-block-size",
+        type=int,
+        default=4096,
+    )
+    parser.add_argument(
+        "--block-fht-attn-cproj-int8-lattice-seed",
+        type=int,
+        default=271828,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -1974,6 +1990,29 @@ def parse_args() -> argparse.Namespace:
                 "attention Muon-matched Givens targets must also be "
                 "BlockFHT targets"
             )
+    if namespace.block_fht_attn_cproj_int8_lattice:
+        if namespace.method != "block_fht":
+            raise ValueError(
+                "attention c_proj int8 lattice requires method=block_fht"
+            )
+        if namespace.optimizer != "muon":
+            raise ValueError(
+                "attention c_proj int8 lattice requires optimizer=muon"
+            )
+        if namespace.block_fht_attn_cproj_int8_lattice_block_size <= 0:
+            raise ValueError(
+                "attention c_proj int8 lattice block size must be positive"
+            )
+        if "attn.c_proj" in attention_muon_targets:
+            raise ValueError(
+                "attention c_proj cannot use both int8 lattice and "
+                "Muon-matched Givens"
+            )
+        if "attn.c_proj" in set(namespace.block_fht_targets):
+            raise ValueError(
+                "remove attn.c_proj from BlockFHT targets when using the "
+                "attention c_proj int8 lattice"
+            )
         if (
             namespace.block_fht_attn_muon_matched_givens_stages <= 0
             or namespace.block_fht_attn_muon_matched_givens_neighbors
@@ -2673,6 +2712,15 @@ def main() -> None:
             args
             .block_fht_attn_muon_matched_givens_error_feedback_max_nominal_steps
         ),
+        block_fht_attn_cproj_int8_lattice=(
+            args.block_fht_attn_cproj_int8_lattice
+        ),
+        block_fht_attn_cproj_int8_lattice_block_size=(
+            args.block_fht_attn_cproj_int8_lattice_block_size
+        ),
+        block_fht_attn_cproj_int8_lattice_seed=(
+            args.block_fht_attn_cproj_int8_lattice_seed
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -3022,6 +3070,19 @@ def main() -> None:
             "block_fht: "
             f"modules={stats['modules']} generated={stats['generated']:,} latent={stats['latent']:,}"
         )
+        lattice_stats = raw_model.attention_int8_lattice_stats()
+        if lattice_stats["modules"]:
+            print(
+                "attention_int8_lattice: "
+                f"modules={lattice_stats['modules']} "
+                f"elements={lattice_stats['elements']:,} "
+                f"codec_bytes={lattice_stats['codec_bytes']:,} "
+                f"fp32_weight_bytes={lattice_stats['fp32_weight_bytes']:,} "
+                f"storage_ratio={lattice_stats['storage_ratio']:.8f} "
+                "runtime_materialization=dense_fp32 "
+                "optimizer_momentum=dense_fp32",
+                flush=True,
+            )
 
     # This is the state immediately before ``x, y``.  Evaluation checkpoints
     # persist it so a continuation replays the pending current batch exactly.
