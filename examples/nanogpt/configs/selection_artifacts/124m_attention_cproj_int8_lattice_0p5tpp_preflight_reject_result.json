@@ -1,0 +1,24 @@
+{
+  "classification": "IMPLEMENTATION_LIFECYCLE_REJECTED_BEFORE_UPDATES",
+  "config_sha256": "f604b8291385d61d7194eb002714457370313a9962fce914af954548319c00ba",
+  "decision": {
+    "codec_or_threshold_changed": false,
+    "repair_authorized": true,
+    "scientific_updates_completed": 0
+  },
+  "error": "PyTorch optimizer rejected the CUDA-migrated transient weight because nn.Module.to had made the requires-grad buffer non-leaf",
+  "execution": {
+    "commit": "62b2476ff9991b586118d753d6590a4c7a868207",
+    "gpu": 0,
+    "host": "PRO6",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.log",
+    "log_sha256": "8a4dc4356129729f1cd9440a4bdcfa2a14e90d4bd3717324ea357f0403ec073b",
+    "preflight_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.json",
+    "preflight_sha256": "dc058d3f31e0815c25e4e0240ba4a920dfd054be9c7d541234e4a10885f47862"
+  },
+  "repair": {
+    "commit": "6ea84c5283feb0bac5a6650bf5e5d06d04d53d90",
+    "scope": "detach only the transient materialized weight after module device migration so it remains an optimizer-owned leaf; add a regression test and include the codec source in MFU provenance"
+  },
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_preflight_reject_v1"
+}

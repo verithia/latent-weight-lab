@@ -30,13 +30,13 @@ def build_config() -> dict[str, object]:
             "confirmation_slot": "qkv_plus_cproj_int8_lattice_0p5tpp",
             "eval_interval": 60,
             "hpo_stage": "attention_cproj_int8_lattice_124m_0p5tpp",
-            "implementation_commit": "c6061b273bec2e59413be8b8c1a8b6e30e02dde4",
+            "implementation_commit": "6ea84c5283feb0bac5a6650bf5e5d06d04d53d90",
             "implementation_source_hashes": {
-                "examples/nanogpt/mfu_preflight.py": "4f244e23be072602ef959694095a743306b35d1d2dcb27b7462fdbc002a28303",
+                "examples/nanogpt/mfu_preflight.py": "eac4e899a8be6fb6857940e5070f759becd3a97b59af82bf9b1a2c79fcdeee40",
                 "examples/nanogpt/model.py": "3fbc923f0fb992a1fab4179af67f102c017368d7518b974a9e8e1963ad08d5d9",
                 "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
-                "examples/nanogpt/muon_int8_lattice.py": "647d7a56dbe15be53348c9f1c7b3b480b747468d6cce7e325d187c287b764249",
-                "examples/nanogpt/test_muon_int8_lattice.py": "fc6269e3ddc07776edc40c1b92217e2566fe8948ea22879795839d99fe2b33ea",
+                "examples/nanogpt/muon_int8_lattice.py": "0bda5ed83a4392507c42c9b09b9bb7e09ca033b2b2236cd3263fb2942f4b70e6",
+                "examples/nanogpt/test_muon_int8_lattice.py": "e5bd91118e84d6363cae6ec1a1a3140a456a51865c99fb496509c6080d6c99fa",
                 "examples/nanogpt/train.py": "4209f92d8eb7a7d0fdb4fed9182aa49bc8fe8c97acd4b40d34d2574907c290eb",
             },
             "int8_lattice_representation": {

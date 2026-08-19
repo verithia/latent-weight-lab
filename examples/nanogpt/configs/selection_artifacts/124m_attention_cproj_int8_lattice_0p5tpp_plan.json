@@ -12,7 +12,7 @@
     "causal_scale_policy": "monotone running maximum",
     "code": "signed int8 nearest-integer displacement",
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json",
-    "config_sha256": "f604b8291385d61d7194eb002714457370313a9962fce914af954548319c00ba",
+    "config_sha256": "ed5b6f7d6b6481ef78c92da42a7f6089f14f8065d42fbbb74499fb17bc1b26e5",
     "dense_gradient": true,
     "dense_materialized_weight": true,
     "dense_muon_momentum": true,
@@ -33,15 +33,17 @@
   "identity": {
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
-    "implementation_commit": "c6061b273bec2e59413be8b8c1a8b6e30e02dde4",
+    "implementation_commit": "6ea84c5283feb0bac5a6650bf5e5d06d04d53d90",
     "implementation_source_hashes": {
       "examples/nanogpt/model.py": "3fbc923f0fb992a1fab4179af67f102c017368d7518b974a9e8e1963ad08d5d9",
       "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
-      "examples/nanogpt/muon_int8_lattice.py": "647d7a56dbe15be53348c9f1c7b3b480b747468d6cce7e325d187c287b764249",
+      "examples/nanogpt/muon_int8_lattice.py": "0bda5ed83a4392507c42c9b09b9bb7e09ca033b2b2236cd3263fb2942f4b70e6",
       "examples/nanogpt/train.py": "4209f92d8eb7a7d0fdb4fed9182aa49bc8fe8c97acd4b40d34d2574907c290eb"
     },
     "integer_lattice_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_integer_lattice_gate_result.json",
-    "integer_lattice_gate_result_sha256": "6f659c31d75ae8a9c9a7b6bceb165c0d3c03b69b2e59aa6d152bfc4c46433619"
+    "integer_lattice_gate_result_sha256": "6f659c31d75ae8a9c9a7b6bceb165c0d3c03b69b2e59aa6d152bfc4c46433619",
+    "preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_preflight_reject_result.json",
+    "preflight_reject_result_sha256": "58e0d66fe198a99446d60846eb2b39f3496448ddb1c840e4231234df0a338612"
   },
   "protocol": {
     "exact_resume": "focused test serializes only int8 codes, FP16 scales, base identity, optimizer step, and dense Muon momentum; reloading regenerates the base and reproduces the next projected update bit-exactly",
@@ -87,6 +89,7 @@
     "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab"
   },
   "question": "Can the trajectory-qualified causal int8 lattice replace dense learned attention c_proj state without losing smallest-rung CE or falling below the 20% MFU floor?",
+  "revision": 2,
   "schema_version": "mai_124m_attention_cproj_int8_lattice_0p5tpp_plan_v1",
   "status": "registered_before_exact_config_mfu_and_training"
 }
