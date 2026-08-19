@@ -17,10 +17,12 @@ def test_plan_pins_parent_candidate_and_strict_terminal_gate() -> None:
     parent = ROOT / plan["promotion_basis"]["smallest_rung_result"]["path"]
     qkv_control = ROOT / plan["promotion_basis"]["qkv_dense_cproj_control"]["path"]
     dense_control = ROOT / plan["promotion_basis"]["ordinary_dense_control"]["path"]
+    mfu_result = ROOT / plan["mfu_result"]["path"]
     assert sha256(candidate) == plan["candidate"]["config_sha256"]
     assert sha256(parent) == plan["promotion_basis"]["smallest_rung_result"]["sha256"]
     assert sha256(qkv_control) == plan["promotion_basis"]["qkv_dense_cproj_control"]["sha256"]
     assert sha256(dense_control) == plan["promotion_basis"]["ordinary_dense_control"]["sha256"]
+    assert sha256(mfu_result) == plan["mfu_result"]["sha256"]
     config = json.loads(candidate.read_text())
     assert config["max_iters"] == 2373
     assert config["planned_tpp"] == 5.0
@@ -29,3 +31,5 @@ def test_plan_pins_parent_candidate_and_strict_terminal_gate() -> None:
     assert plan["terminal_gate"]["maximum_terminal_validation_ce"] == 3.5602
     assert plan["authorization"]["automatic_20tpp"] is False
     assert plan["authorization"]["larger_model"] is False
+    assert plan["authorization"]["exact_config_mfu_passed"] is True
+    assert plan["mfu_result"]["mfu_fraction"] >= 0.2

@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_attention_cproj_int8_lattice_5tpp_plan_v1",
   "created_at": "2026-08-20",
-  "status": "preregistered_exact_config_mfu_required",
+  "status": "exact_config_mfu_passed_one_124m_5tpp_run_authorized",
   "question": "Does the causal int8 attention-c_proj lattice retain the smallest-rung closure over 5TPP at the same 124M model size?",
   "promotion_basis": {
     "smallest_rung_result": {
@@ -56,6 +56,12 @@
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
     "callback_action_prompt": "Verify terminal artifacts and hashes against the active project note, seal the fixed-checkpoint result, update durable notes, and choose only the next causally authorized action. Do not merely acknowledge this callback."
   },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_5tpp_mfu_result.json",
+    "sha256": "696780493682656d4484e2b5d583829501b2d72b5209e3bfc08b247f13efbcd3",
+    "mfu_fraction": 0.28545680272704244,
+    "passed": true
+  },
   "terminal_gate": {
     "ordinary_dense_terminal_validation_ce": 3.5402,
     "maximum_validation_ce_delta_to_dense": 0.0200,
@@ -73,6 +79,7 @@
   "authorization": {
     "mfu_preflight_before_training": true,
     "one_124m_5tpp_training_after_mfu_pass": true,
+    "exact_config_mfu_passed": true,
     "training_before_mfu_pass": false,
     "automatic_rerun": false,
     "automatic_20tpp": false,
