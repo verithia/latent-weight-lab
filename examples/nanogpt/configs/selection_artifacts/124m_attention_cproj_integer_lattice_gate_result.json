@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_124m_attention_cproj_integer_lattice_gate_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "PROMOTE_ATTENTION_CPROJ_CAUSAL_INTEGER_LATTICE",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground zero-update oracle; no watchdog or callback",
+    "source_commit": "032f0b7bf976c7bf6f38404e8bf2c6490f9cf0b7",
+    "source_sha256": "07e468e87013926c68058558ad6bdefb631d31146450a413c60b59778ad3119f",
+    "elapsed_seconds": 5.069565773010254,
+    "focused_tests": "6 passed in 0.76s"
+  },
+  "identity": {
+    "plan_sha256": "a0568523f1389fa70ebf5cb8378d5004ebd618aea92b25754cd91de6b942746f",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "previous_result_sha256": "376b77506019da56a60025ab74da4e1b97135647e01b731e1cac5b01fb4c6e47",
+    "oracle_scale_sha256": "744a614487ca64d17c3eaa6002921ff86cec3084365681ba7b70babee0e3792a",
+    "raw_result_sha256": "865c7cbeef118dd2a0a643e0836760fcc3db81dfa253541d71d844f714da905e",
+    "cells_sha256": "96063c8f789b338390b7e562e0945a7ed3db61bb12c3b1258c761fd296a052ec",
+    "codec_rows_sha256": "14320d48fc5e7edfddd65f5603071e6b624a02878ddf5d4459c77326c0efb564"
+  },
+  "causal_measurements": {
+    "int4_runningmax": {
+      "state_recovery": 0.9576491369056207,
+      "endpoint_state_recovery": 0.9554004913769153,
+      "minimum_layer_state_recovery": 0.9175782530147436,
+      "minimum_snapshot_state_recovery": 0.9554004913769153,
+      "chord_recovery": -0.6265976825230097,
+      "chord_cosine": 0.6170333206153974,
+      "chord_norm_ratio": 1.6206905336481505,
+      "minimum_phase_chord_recovery": -12.824185819034978,
+      "minimum_layer_chord_recovery": -1.9968843646268435,
+      "storage_ratio": 0.1251220703125,
+      "passed": false
+    },
+    "int6_runningmax": {
+      "state_recovery": 0.9978402275214588,
+      "endpoint_state_recovery": 0.9977249490569071,
+      "minimum_layer_state_recovery": 0.995796134385981,
+      "minimum_snapshot_state_recovery": 0.9977249490569071,
+      "chord_recovery": 0.855838616464988,
+      "chord_cosine": 0.9348815737578692,
+      "chord_norm_ratio": 1.069658947552591,
+      "minimum_phase_chord_recovery": -1.350023724752814,
+      "minimum_layer_chord_recovery": 0.6644591813345883,
+      "storage_ratio": 0.1876220703125,
+      "passed": false,
+      "failed_only": "minimum phase chord recovery"
+    },
+    "int8_runningmax_selected": {
+      "state_recovery": 0.9998713088520288,
+      "endpoint_state_recovery": 0.9998644356447004,
+      "minimum_layer_state_recovery": 0.9997496136680099,
+      "minimum_snapshot_state_recovery": 0.9998644356447004,
+      "chord_recovery": 0.9904017597531792,
+      "chord_cosine": 0.9952352154999805,
+      "chord_norm_ratio": 1.004794212210601,
+      "minimum_phase_chord_recovery": 0.8003976516215736,
+      "minimum_layer_chord_recovery": 0.9758668450698073,
+      "mean_code_churn_fraction": 0.8169530004262924,
+      "mean_scale_growth_fraction": 0.4280526633374393,
+      "storage_ratio": 0.2501220703125,
+      "storage_reduction_factor": 3.998047828208882,
+      "passed": true
+    }
+  },
+  "oracle_measurements": {
+    "int6_oraclemax": {
+      "chord_recovery": 0.8079459684479047,
+      "minimum_phase_chord_recovery": -1.3539215791883916,
+      "passed": false
+    },
+    "int8_oraclemax": {
+      "state_recovery": 0.9998336556330694,
+      "chord_recovery": 0.9875424100721875,
+      "chord_cosine": 0.99382889251224,
+      "minimum_phase_chord_recovery": 0.7999166584417247,
+      "minimum_layer_chord_recovery": 0.9695764005367666,
+      "passed_measurement_gate": true,
+      "eligible_for_selection": false
+    }
+  },
+  "decision": {
+    "passed": true,
+    "selected_candidate": "int8_runningmax",
+    "prototype_implementation_authorized": true,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "interpretation": [
+    "A causal monotone running-scale int8 lattice preserves both the dense attention-c_proj states and their local motion without a dense carry buffer. Its chord recovery is 0.99040 with cosine 0.99524 and near-unit norm ratio 1.00479.",
+    "Int6 is not accepted despite 0.85584 aggregate chord recovery because one late training phase has recovery -1.3500. This is the measured rate-distortion boundary, not a selection preference.",
+    "Int4 remains temporally unusable. Removing independent least-squares scale changes does not cure its quantization resolution at the 60-update chord scale.",
+    "The selected state occupies 25.0122 percent of FP32 storage, or 3.998x less. It is an ambient quantized-weight representation, not a 200x Mapping Networks latent.",
+    "A counted prototype must now implement the exact running-max FP16 scales and signed-int8 codes, prove exact resume and deterministic decode, and pass a separately registered exact-config MFU gate before any LM training can be considered."
+  ],
+  "next_action": "Implement only the selected int8/block-4096 running-max attention-c_proj residual codec with exact checkpoint/resume accounting and focused tests; then preregister and run an exact-config zero/short-update MFU gate."
+}
