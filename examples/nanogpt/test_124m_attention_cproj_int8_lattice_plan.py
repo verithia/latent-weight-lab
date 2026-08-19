@@ -26,3 +26,5 @@ def test_plan_pins_the_selected_codec_and_blocks_training_before_mfu() -> None:
     assert sha256(oracle) == plan["identity"]["integer_lattice_gate_result_sha256"]
     rejected_launch = ROOT / plan["identity"]["scientific_launch_reject_result"]
     assert sha256(rejected_launch) == plan["identity"]["scientific_launch_reject_result_sha256"]
+    mfu_result = ROOT / plan["identity"]["valid_mfu_result"]
+    assert sha256(mfu_result) == plan["identity"]["valid_mfu_result_sha256"]

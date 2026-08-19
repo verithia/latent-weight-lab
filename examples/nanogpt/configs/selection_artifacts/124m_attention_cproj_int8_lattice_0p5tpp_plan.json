@@ -45,7 +45,9 @@
     "preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_preflight_reject_result.json",
     "preflight_reject_result_sha256": "58e0d66fe198a99446d60846eb2b39f3496448ddb1c840e4231234df0a338612",
     "scientific_launch_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_scientific_launch_reject_result.json",
-    "scientific_launch_reject_result_sha256": "36bbb049bf60ed7a5c17c1cf2e70e1a8f40af2e0ef4db708453b8498fb5a329b"
+    "scientific_launch_reject_result_sha256": "36bbb049bf60ed7a5c17c1cf2e70e1a8f40af2e0ef4db708453b8498fb5a329b",
+    "valid_mfu_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_mfu_result_v2.json",
+    "valid_mfu_result_sha256": "a7472b2125a6b065026563dc57e4be5dcce8e6b1bd9cbb6136a21ffcf9f9d79b"
   },
   "protocol": {
     "exact_resume": "focused test serializes only int8 codes, FP16 scales, base identity, optimizer step, and dense Muon momentum; reloading regenerates the base and reproduces the next projected update bit-exactly",
@@ -93,5 +95,5 @@
   "question": "Can the trajectory-qualified causal int8 lattice replace dense learned attention c_proj state without losing smallest-rung CE or falling below the 20% MFU floor?",
   "revision": 3,
   "schema_version": "mai_124m_attention_cproj_int8_lattice_0p5tpp_plan_v1",
-  "status": "registered_after_deterministic_launch_cadence_repair_before_repeated_exact_config_mfu"
+  "status": "exact_config_mfu_passed_one_124m_0p5tpp_scientific_run_authorized"
 }
