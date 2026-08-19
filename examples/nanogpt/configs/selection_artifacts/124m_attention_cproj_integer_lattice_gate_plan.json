@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_attention_cproj_integer_lattice_gate_plan_v1",
+  "recorded_at": "2026-08-20",
+  "status": "registered_before_zero_update_analysis",
+  "scientific_question": "Does correlating quantization error through one persistent blockwise integer lattice repair the attention-c_proj chord failure without a dense residual or future information?",
+  "theory": {
+    "causal_decoder": "At step t, keep signed integer codes q_t and FP16 block scales s_t. Decode Delta W_t = s_t q_t. The running-max scale is monotone and depends only on displacements observed through t; q_t is the nearest lattice state.",
+    "oracle_ceiling": "Trajectory-max scale uses future maxima and is ineligible for selection. It answers whether a single fixed lattice can represent the path at all; a gap between oracle and running-max isolates scale acquisition rather than coordinate support.",
+    "causal_difference": "Independent least-squares scales changed every snapshot and made int4 decoded chords 1.609x too large despite 96.06% state recovery. A shared scale correlates state errors, so decode(q_t)-decode(q_{t-1}) no longer contains a global per-snapshot rescaling term.",
+    "bitwidth_frontier": "Int4 preserves the prior 7.99x storage reduction. Int6 is a theoretically packed 5.33x intermediate. Int8 is the native full-support control at approximately 4x less storage than FP32. All use the same block-4096 geometry.",
+    "no_dense_carry": "No dense residual, error feedback, momentum surrogate, learned dense basis, or future snapshot is available to a causal arm. Current codes and FP16 scales are the entire persistent displacement state.",
+    "unchanged_gate": "State and chord thresholds are copied from the rejected independent-code plan. Only the temporal lattice structure and the explicitly reported storage ceiling change."
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "matrix_elements_per_layer": 589824,
+    "block_size": 4096,
+    "trajectory_steps": [
+      0, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600,
+      660, 720, 780, 840, 900, 960, 1020, 1080, 1140, 1200,
+      1260, 1320, 1380, 1440, 1500, 1560, 1620, 1680, 1740,
+      1800, 1860, 1920, 1980, 2040, 2100, 2160, 2220, 2280,
+      2340, 2373
+    ],
+    "phase_end_steps": [600, 1200, 1800, 2373],
+    "candidates": {
+      "int4_oraclemax": {"bits": 4, "qmax": 7, "block_size": 4096, "scale_policy": "trajectory_max_oracle", "causal": false},
+      "int6_oraclemax": {"bits": 6, "qmax": 31, "block_size": 4096, "scale_policy": "trajectory_max_oracle", "causal": false},
+      "int8_oraclemax": {"bits": 8, "qmax": 127, "block_size": 4096, "scale_policy": "trajectory_max_oracle", "causal": false},
+      "int4_runningmax": {"bits": 4, "qmax": 7, "block_size": 4096, "scale_policy": "running_max", "causal": true},
+      "int6_runningmax": {"bits": 6, "qmax": 31, "block_size": 4096, "scale_policy": "running_max", "causal": true},
+      "int8_runningmax": {"bits": 8, "qmax": 127, "block_size": 4096, "scale_policy": "running_max", "causal": true}
+    },
+    "selection_order": "Only causal running-max arms are eligible. Among arms passing every frozen check, select minimum bits, then maximum aggregate chord recovery. Oracle arms are diagnostic ceilings only."
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "state_aggregate_recovery_minimum": 0.55,
+      "state_endpoint_recovery_minimum": 0.55,
+      "state_minimum_layer_recovery": 0.45,
+      "state_minimum_snapshot_recovery": 0.45,
+      "chord_aggregate_recovery_minimum": 0.30,
+      "chord_aggregate_cosine_minimum": 0.65,
+      "chord_minimum_phase_recovery": 0.10,
+      "chord_minimum_layer_recovery": 0.10,
+      "maximum_storage_ratio": 0.26
+    },
+    "pass": "A causal pass authorizes only a counted prototype codec, focused correctness tests, and a separately registered exact-config performance gate. It does not authorize LM training or a larger rung.",
+    "oracle_only": "If only a future-informed oracle arm passes, do not implement or train. Isolate a causal scale-acquisition rule in another zero-update gate.",
+    "fail": "Close one-code-per-weight fixed integer lattices through int8 for persistent attention c_proj and return to an explicitly richer temporal representation."
+  },
+  "identity": {
+    "entrypoint": "examples.nanogpt.analyze_attention_cproj_integer_lattice_gate",
+    "entrypoint_sha256": "b67251af1f50d878c7837bba395a06620c4f6484e934d7240cd49394c22bbb61",
+    "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+    "trajectory_file_count": 41,
+    "trajectory_total_bytes": 4644344659,
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "previous_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_lowbit_trajectory_gate_result.json",
+    "previous_result_sha256": "376b77506019da56a60025ab74da4e1b97135647e01b731e1cac5b01fb4c6e47",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_integer_lattice_gate_v1"
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "expected_duration": "under five minutes; zero-update two-pass trajectory lattice analysis",
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_cproj_integer_lattice_gate",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_integer_lattice_gate_plan.json",
+      "--trajectory-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+      "--output-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_integer_lattice_gate_v1",
+      "--device",
+      "cuda:0"
+    ]
+  },
+  "authorization": {
+    "prototype_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
