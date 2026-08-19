@@ -1,0 +1,93 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_0p5tpp_plan_v1",
+  "created_at": "2026-08-20",
+  "status": "theory_registered_implementation_tests_and_exact_config_mfu_required",
+  "question": "Does full ambient persistent weight freedom close the remaining full-MLP loss gap when the static BlockFHT/directed/Givens spatial charts are replaced by causal blockwise int8 lattices?",
+  "causal_basis": {
+    "attention_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_5tpp_training_result.json",
+      "sha256": "9c02ff532b049b1f619c34b00b91ac3bcf6a557e9f4923d59eca6b1929b57332",
+      "finding": "A full-support causal int8 lattice reduced the prior continuous full-attention gap by 0.0652 CE and reached +0.0097 CE versus ordinary dense at 5TPP."
+    },
+    "accepted_structured_full_mlp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_hybrid_state_0p5tpp_result.json",
+      "terminal_validation_ce": 5.529868,
+      "delta_to_its_attention_only_parent_ce": 0.038068,
+      "finding": "Compressing temporal optimizer state is loss-neutral, but the spatial chart retains a measurable CE gap."
+    },
+    "geometry_finding": "Static frames improve endpoint values but fail held-out input-JVP recovery; the missing MLP object is a moving layer-private ambient direction field across c_fc, GELU boundaries, and c_proj residual writes.",
+    "why_this_is_not_another_transform_sweep": "The candidate removes the low-dimensional spatial image entirely. Every MLP weight receives its own signed int8 coordinate; only precision, not direction support, is constrained."
+  },
+  "candidate": {
+    "generator": "examples/nanogpt/make_pro6_full_mlp_int8_lattice_124m.py",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp.json",
+    "config_sha256": "0202dc68b865ad87cbb62a246f11e634be48aced50aedee360b426b4df528c32",
+    "base_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json",
+    "model_size": "124M",
+    "planned_tpp": 0.5,
+    "max_iters": 238,
+    "mlp_targets": ["mlp.c_fc", "mlp.c_proj"],
+    "block_size": 4096,
+    "fresh_from_scratch": true
+  },
+  "representation": {
+    "equation": "W_t = W_0 + decode(q_t, s_t), with q_t in signed int8^P and causal monotone running-max FP16 block scales s_t",
+    "mlp_weight_elements": 56623104,
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_int8_code_bytes": 56623104,
+    "mlp_fp16_scale_count": 13824,
+    "mlp_fp16_scale_bytes": 27648,
+    "mlp_persistent_codec_bytes": 56650752,
+    "mlp_codec_storage_ratio": 0.2501220703125,
+    "mlp_persistent_weight_reduction": 3.998047828208882,
+    "attention_cproj_plus_mlp_codec_bytes": 63732096,
+    "matching_fp32_weight_bytes": 254803968,
+    "ambient_direction_support": true,
+    "dense_runtime_base": true,
+    "dense_runtime_materialized_weight": true,
+    "dense_fp32_muon_momentum": true,
+    "inference_shape_and_flops": "unchanged"
+  },
+  "frozen_invariants": [
+    "Inherit the sealed QK64, V16, and attention-c_proj int8-lattice 124M/0.5TPP configuration.",
+    "Change only the MLP c_fc and c_proj persistent weight representations to the identical causal int8 lattice family.",
+    "Use independent reproducible bases for every layer and matrix family.",
+    "Keep optimizer, LR, schedule, data manifest, seeds, evaluation windows, and checkpoint cadence unchanged.",
+    "Keep dense FP32 Muon momentum to isolate persistent spatial representation from optimizer-state precision.",
+    "Do not combine MLP lattice targets with BlockFHT, directed-product, matched-Givens, or dense MLP parameters."
+  ],
+  "execution_gate": {
+    "implementation_tests_required": true,
+    "exact_resume_test_required": true,
+    "host": "PRO6",
+    "gpu": 0,
+    "exact_config_mfu_minimum": 0.20,
+    "peak_vram_mib_maximum": 97887,
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one idempotent terminal/error-only @Codex watcher; no progress or healthy-heartbeat callbacks because the expected run is within one to two hours"
+  },
+  "terminal_gate": {
+    "matched_full_attention_parent_validation_ce": 5.2917,
+    "maximum_validation_ce_delta_to_parent": 0.0200,
+    "maximum_terminal_validation_ce": 5.3117,
+    "require_clean_exit": true,
+    "require_all_fixed_evaluations_finite": true,
+    "threshold_changes_after_measurement": false,
+    "pass_classification": "FULL_MLP_AMBIENT_INT8_LATTICE_CLOSES_SMALLEST_RUNG_SPATIAL_GAP",
+    "fail_classification": "FULL_AMBIENT_DIRECTION_SUPPORT_IS_NOT_SUFFICIENT_FOR_MLP_CLOSURE"
+  },
+  "decision_rules": {
+    "pass": "Conclude that spatial direction support, rather than temporal-state codec precision, was the remaining smallest-rung obstruction. Seal the 4x persistent-weight boundary and analyze a separately registered 5TPP transfer; do not automatically launch it.",
+    "fail": "Separate trajectory quantization error from nonlinear co-adaptation using fixed-checkpoint/chord diagnostics. Do not return to another low-dimensional FHT/Monarch/Householder sweep.",
+    "automatic_rerun": false,
+    "automatic_5tpp": false,
+    "automatic_larger_model": false,
+    "mapping_network_200x_claim": false
+  },
+  "scope_guards": [
+    "This is a persistent-weight memory codec, not the paper's low-dimensional continuous latent.",
+    "One int8 code per ambient MLP weight gives full direction support but only about 4x persistent-weight compression.",
+    "Dense transient materialization and dense optimizer momentum remain and must be counted in peak VRAM and wall time.",
+    "A short-rung pass cannot establish 5TPP, 20TPP, model-size transfer, or inference-memory reduction."
+  ]
+}

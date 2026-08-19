@@ -1267,6 +1267,21 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=271828,
     )
+    parser.add_argument(
+        "--block-fht-mlp-int8-lattice-targets",
+        nargs="+",
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-int8-lattice-block-size",
+        type=int,
+        default=4096,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-int8-lattice-seed",
+        type=int,
+        default=314159,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -2031,6 +2046,44 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "invalid attention Muon-matched Givens geometry"
             )
+    mlp_int8_lattice_targets = set(
+        namespace.block_fht_mlp_int8_lattice_targets
+    )
+    if mlp_int8_lattice_targets:
+        supported_mlp_int8_lattice_targets = {"mlp.c_fc", "mlp.c_proj"}
+        if namespace.method != "block_fht":
+            raise ValueError("MLP int8 lattice requires method=block_fht")
+        if namespace.optimizer != "muon":
+            raise ValueError("MLP int8 lattice requires optimizer=muon")
+        if not mlp_int8_lattice_targets.issubset(
+            supported_mlp_int8_lattice_targets
+        ):
+            raise ValueError("unsupported MLP int8 lattice target")
+        if namespace.block_fht_mlp_int8_lattice_block_size <= 0:
+            raise ValueError("MLP int8 lattice block size must be positive")
+        overlap = mlp_int8_lattice_targets & set(namespace.block_fht_targets)
+        if overlap:
+            raise ValueError(
+                "remove MLP int8 lattice targets from BlockFHT targets: "
+                + ", ".join(sorted(overlap))
+            )
+        if (
+            "mlp.c_fc" in mlp_int8_lattice_targets
+            and (
+                namespace.block_fht_mlp_cfc_directed_product
+                or namespace.block_fht_mlp_cfc_functional_shear
+            )
+        ):
+            raise ValueError(
+                "MLP c_fc int8 lattice conflicts with the configured c_fc chart"
+            )
+        if (
+            "mlp.c_proj" in mlp_int8_lattice_targets
+            and namespace.block_fht_mlp_cproj_muon_matched_givens
+        ):
+            raise ValueError(
+                "MLP c_proj int8 lattice conflicts with matched Givens"
+            )
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2721,6 +2774,15 @@ def main() -> None:
         block_fht_attn_cproj_int8_lattice_seed=(
             args.block_fht_attn_cproj_int8_lattice_seed
         ),
+        block_fht_mlp_int8_lattice_targets=tuple(
+            args.block_fht_mlp_int8_lattice_targets
+        ),
+        block_fht_mlp_int8_lattice_block_size=(
+            args.block_fht_mlp_int8_lattice_block_size
+        ),
+        block_fht_mlp_int8_lattice_seed=(
+            args.block_fht_mlp_int8_lattice_seed
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -3079,6 +3141,19 @@ def main() -> None:
                 f"codec_bytes={lattice_stats['codec_bytes']:,} "
                 f"fp32_weight_bytes={lattice_stats['fp32_weight_bytes']:,} "
                 f"storage_ratio={lattice_stats['storage_ratio']:.8f} "
+                "runtime_materialization=dense_fp32 "
+                "optimizer_momentum=dense_fp32",
+                flush=True,
+            )
+        mlp_lattice_stats = raw_model.mlp_int8_lattice_stats()
+        if mlp_lattice_stats["modules"]:
+            print(
+                "mlp_int8_lattice: "
+                f"modules={mlp_lattice_stats['modules']} "
+                f"elements={mlp_lattice_stats['elements']:,} "
+                f"codec_bytes={mlp_lattice_stats['codec_bytes']:,} "
+                f"fp32_weight_bytes={mlp_lattice_stats['fp32_weight_bytes']:,} "
+                f"storage_ratio={mlp_lattice_stats['storage_ratio']:.8f} "
                 "runtime_materialization=dense_fp32 "
                 "optimizer_momentum=dense_fp32",
                 flush=True,

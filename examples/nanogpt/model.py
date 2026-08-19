@@ -177,6 +177,9 @@ class GPTConfig:
     block_fht_attn_cproj_int8_lattice: bool = False
     block_fht_attn_cproj_int8_lattice_block_size: int = 4096
     block_fht_attn_cproj_int8_lattice_seed: int = 271828
+    block_fht_mlp_int8_lattice_targets: tuple[str, ...] = ()
+    block_fht_mlp_int8_lattice_block_size: int = 4096
+    block_fht_mlp_int8_lattice_seed: int = 314159
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2281,6 +2284,18 @@ class SparseMoEMLP(nn.Module):
 class MLP(nn.Module):
     def __init__(self, config: GPTConfig, layer_id: int) -> None:
         super().__init__()
+        mlp_int8_lattice_targets = set(
+            config.block_fht_mlp_int8_lattice_targets
+        )
+        unsupported_mlp_int8_targets = mlp_int8_lattice_targets - {
+            "mlp.c_fc",
+            "mlp.c_proj",
+        }
+        if unsupported_mlp_int8_targets:
+            raise ValueError(
+                "unsupported MLP int8 lattice targets: "
+                + ", ".join(sorted(unsupported_mlp_int8_targets))
+            )
         grouped_targets = [target for target in MLP_C_FC_GROUP_TARGETS if target in config.block_fht_targets]
         if len(grouped_targets) > 1:
             raise ValueError("Use exactly one grouped mlp.c_fc target per run")
@@ -2292,6 +2307,17 @@ class MLP(nn.Module):
         directed_product_cfc = bool(
             config.block_fht_mlp_cfc_directed_product
         )
+        int8_lattice_cfc = "mlp.c_fc" in mlp_int8_lattice_targets
+        if int8_lattice_cfc and (
+            functional_shear_cfc
+            or directed_product_cfc
+            or grouped_targets
+            or "mlp.c_fc" in config.block_fht_targets
+        ):
+            raise ValueError(
+                "MLP c_fc int8 lattice cannot be combined with another "
+                "c_fc representation"
+            )
         if functional_shear_cfc and directed_product_cfc:
             raise ValueError(
                 "functional-shear and directed-product c_fc are mutually exclusive"
@@ -2303,7 +2329,20 @@ class MLP(nn.Module):
                 "functional-shear c_fc requires the materialized plain "
                 "c_fc path"
             )
-        if directed_product_cfc:
+        if int8_lattice_cfc:
+            self.c_fc = MuonInt8LatticeLinear(
+                config.n_embd,
+                4 * config.n_embd,
+                bias=config.bias,
+                block_size=int(config.block_fht_mlp_int8_lattice_block_size),
+                base_seed=(
+                    int(config.block_fht_mlp_int8_lattice_seed)
+                    + layer_id * 8192
+                ),
+                weight_std=0.02,
+                layer_id=layer_id,
+            )
+        elif directed_product_cfc:
             self.c_fc = MuonDirectedProductLinear(
                 config.n_embd,
                 4 * config.n_embd,
@@ -2456,6 +2495,16 @@ class MLP(nn.Module):
         muon_matched_cproj_enabled = bool(
             config.block_fht_mlp_cproj_muon_matched_givens
         )
+        int8_lattice_cproj = "mlp.c_proj" in mlp_int8_lattice_targets
+        if int8_lattice_cproj and (
+            muon_matched_cproj_enabled
+            or structured_proj_count
+            or "mlp.c_proj" in config.block_fht_targets
+        ):
+            raise ValueError(
+                "MLP c_proj int8 lattice cannot be combined with another "
+                "c_proj representation"
+            )
         muon_matched_cproj = muon_matched_cproj_enabled and (
             not configured_cproj_layers
             or layer_id in configured_cproj_layers
@@ -2492,7 +2541,21 @@ class MLP(nn.Module):
                 "Muon-matched Givens c_proj requires mlp.c_proj in "
                 "block_fht_targets"
             )
-        if muon_matched_cproj:
+        if int8_lattice_cproj:
+            self.c_proj = MuonInt8LatticeLinear(
+                4 * config.n_embd,
+                config.n_embd,
+                bias=config.bias,
+                block_size=int(config.block_fht_mlp_int8_lattice_block_size),
+                base_seed=(
+                    int(config.block_fht_mlp_int8_lattice_seed)
+                    + layer_id * 8192
+                    + 4096
+                ),
+                weight_std=0.02 / math.sqrt(2 * config.n_layer),
+                layer_id=layer_id,
+            )
+        elif muon_matched_cproj:
             self.c_proj = MuonMatchedGivensLinear(
                 4 * config.n_embd,
                 config.n_embd,
@@ -5000,11 +5063,23 @@ class GPT(nn.Module):
         muon_matched_givens_modules = [
             module for _name, module in muon_matched_givens_named_modules
         ]
-        attention_int8_lattice_modules = [
-            module
+        int8_lattice_named_modules = [
+            (name, module)
             for name, module in self.named_modules()
             if isinstance(module, MuonInt8LatticeLinear)
-            and ".attn." in name
+        ]
+        attention_int8_lattice_modules = [
+            module
+            for name, module in int8_lattice_named_modules
+            if ".attn." in name
+        ]
+        mlp_int8_lattice_modules = [
+            module
+            for name, module in int8_lattice_named_modules
+            if ".mlp." in name
+        ]
+        int8_lattice_modules = [
+            module for _name, module in int8_lattice_named_modules
         ]
         functional_shear_pairs = [
             (block.mlp.c_fc, block.mlp.c_proj)
@@ -5019,7 +5094,7 @@ class GPT(nn.Module):
         ]
         if (
             muon_matched_givens_modules
-            or attention_int8_lattice_modules
+            or int8_lattice_modules
             or functional_shear_pairs
             or directed_product_modules
         ) and optimizer != "muon":
@@ -5277,10 +5352,10 @@ class GPT(nn.Module):
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
                     group["attention_error_feedback"] = True
-            if attention_int8_lattice_modules:
+            if int8_lattice_modules:
                 optimizers.append(
                     MuonInt8Lattice(
-                        attention_int8_lattice_modules,
+                        int8_lattice_modules,
                         lr=learning_rate,
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
@@ -5408,6 +5483,8 @@ class GPT(nn.Module):
                 f"{len(attention_muon_matched_givens_modules)} "
                 "attention_int8_lattice_tensors="
                 f"{len(attention_int8_lattice_modules)} "
+                "mlp_int8_lattice_tensors="
+                f"{len(mlp_int8_lattice_modules)} "
                 "mlp_muon_matched_givens_tensors="
                 f"{len(mlp_muon_matched_givens_modules)} "
                 "muon_functional_shear_tensors="
@@ -5469,12 +5546,26 @@ class GPT(nn.Module):
                 latent += module.coordinate_count
         return {"modules": modules, "generated": generated, "latent": latent}
 
-    def attention_int8_lattice_stats(self) -> dict[str, int | float]:
-        modules = [
-            module
-            for module in self.modules()
+    def _int8_lattice_stats(
+        self, *, scope: str
+    ) -> dict[str, int | float]:
+        named_modules = [
+            (name, module)
+            for name, module in self.named_modules()
             if isinstance(module, MuonInt8LatticeLinear)
         ]
+        if scope == "attention":
+            modules = [
+                module for name, module in named_modules if ".attn." in name
+            ]
+        elif scope == "mlp":
+            modules = [
+                module for name, module in named_modules if ".mlp." in name
+            ]
+        elif scope == "all":
+            modules = [module for _name, module in named_modules]
+        else:
+            raise ValueError(f"unknown int8 lattice scope: {scope}")
         codec_bytes = sum(module.persistent_codec_bytes for module in modules)
         fp32_bytes = sum(module.fp32_weight_bytes for module in modules)
         return {
@@ -5486,6 +5577,12 @@ class GPT(nn.Module):
                 codec_bytes / fp32_bytes if fp32_bytes else 0.0
             ),
         }
+
+    def attention_int8_lattice_stats(self) -> dict[str, int | float]:
+        return self._int8_lattice_stats(scope="attention")
+
+    def mlp_int8_lattice_stats(self) -> dict[str, int | float]:
+        return self._int8_lattice_stats(scope="mlp")
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
         prepare_block_fht_weight_cache(self, dtype=dtype)

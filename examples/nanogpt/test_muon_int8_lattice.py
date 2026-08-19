@@ -173,3 +173,74 @@ def test_conflicting_cproj_representations_are_rejected() -> None:
         assert "remove attn.c_proj" in str(error)
     else:
         raise AssertionError("conflicting c_proj representations must fail")
+
+
+def test_gpt_routes_both_mlp_matrices_to_the_lattice_optimizer() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_mlp_int8_lattice_targets=(
+                "mlp.c_fc",
+                "mlp.c_proj",
+            ),
+            block_fht_mlp_int8_lattice_block_size=16,
+        )
+    )
+    mlp = model.transformer.h[0].mlp
+    assert isinstance(mlp.c_fc, MuonInt8LatticeLinear)
+    assert isinstance(mlp.c_proj, MuonInt8LatticeLinear)
+    assert model.mlp_int8_lattice_stats() == {
+        "modules": 2,
+        "elements": 512,
+        "codec_bytes": 576,
+        "fp32_weight_bytes": 2048,
+        "storage_ratio": 576 / 2048,
+    }
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=1,
+    )
+    lattice_optimizers = [
+        item for item in optimizer.optimizers if isinstance(item, MuonInt8Lattice)
+    ]
+    assert len(lattice_optimizers) == 1
+    tokens = torch.randint(0, 32, (2, 8))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None and torch.isfinite(loss)
+    loss.backward()
+    optimizer.step()
+    assert int(mlp.c_fc.optimizer_step) == 1
+    assert int(mlp.c_proj.optimizer_step) == 1
+
+
+def test_mlp_lattice_rejects_overlapping_block_fht_targets() -> None:
+    try:
+        GPT(
+            GPTConfig(
+                block_size=8,
+                vocab_size=32,
+                n_layer=1,
+                n_head=2,
+                n_embd=8,
+                bias=False,
+                block_fht=True,
+                block_fht_targets=("mlp.c_fc",),
+                block_fht_mlp_int8_lattice_targets=("mlp.c_fc",),
+            )
+        )
+    except ValueError as error:
+        assert "cannot be combined" in str(error)
+    else:
+        raise AssertionError("overlapping MLP representations must fail")

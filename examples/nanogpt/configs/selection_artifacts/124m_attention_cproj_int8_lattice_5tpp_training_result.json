@@ -1,0 +1,138 @@
+{
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "FULL_ATTENTION_PERSISTENT_STATE_NEAR_DENSE_AT_124M_5TPP",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_5tpp_plan.json",
+    "premeasurement_sha256": "114214ef61edbc30dd859d684c8994f7f8092cfcd09c337b1d6e498611308362"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4",
+    "run_id": "pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4_20260819T192402Z_1367360",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1367457,
+    "pgid": 1367457,
+    "source_commit": "03a107c50a97b5fc33541e413c0f50130d42a340",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4.json",
+    "archived_config_sha256": "291bf2930557e9e8fead990f873482296502e437834d78807df73f304899d054",
+    "resolved_config_sha256": "c00ea6d36387c3d3f67fce42e76d48512414c02aa6face6c3e3bbedcaccfea73",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "5e8f49ac12e255e8cab8dcfab21a56c3b62bbd2151560b36258ab96c81ebf842",
+    "preflight_mfu_fraction": 0.28545680272704244,
+    "started_at": "2026-08-20T03:24:04+08:00",
+    "finished_at": "2026-08-20T04:31:57+08:00",
+    "elapsed_seconds": 4073,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4_20260819T192402Z_1367360.json",
+        "bytes": 890,
+        "sha256": "d35bbeab6a33ec447032d331215388ca2fe5f7729db26f803405f57ca618e9dd"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4_20260819T192402Z_1367360.log",
+        "bytes": 21360,
+        "sha256": "843d957d14b229e157ee18375e678b116612806b8f3cd810cc220d1a363bd3d1"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4_20260819T192402Z_1367360.json",
+        "bytes": 2106,
+        "sha256": "068477d8b18d435411c3b7e24ebf268854911ce5b3982e4f63aeab35ce4e0f44"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4/scientific/ckpt.pt",
+        "bytes": 1014701712,
+        "sha256": "dc4fd4431b9b9e3948e0b1ae2d23f35d6c13cb62582b74efff29a85b3d052887"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4/scientific/ckpt.meta.json",
+        "bytes": 22631,
+        "sha256": "8a3c8ad914c2c0b10264ade918f963ff3c8d32c1031a54c906eb96944de5a424"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9563, "validation_ce": 10.9564},
+    {"step": 594, "train_ce": 4.0650, "validation_ce": 4.0542},
+    {"step": 1188, "train_ce": 3.7570, "validation_ce": 3.7421},
+    {"step": 1782, "train_ce": 3.6236, "validation_ce": 3.6067},
+    {"step": 2373, "train_ce": 3.5675, "validation_ce": 3.5499}
+  ],
+  "comparison": {
+    "ordinary_dense_124m_5tpp_validation_ce": 3.5402,
+    "dense_blockwise_qkv_muon_validation_ce": 3.5110,
+    "qkv_mapped_dense_cproj_validation_ce": 3.5148,
+    "prior_continuous_full_attention_validation_ce": 3.6151,
+    "frozen_maximum_validation_ce": 3.5602,
+    "terminal_validation_ce": 3.5499,
+    "delta_to_ordinary_dense_ce": 0.0097,
+    "delta_to_dense_blockwise_qkv_muon_ce": 0.0389,
+    "delta_to_qkv_mapped_dense_cproj_ce": 0.0351,
+    "delta_to_prior_continuous_full_attention_ce": -0.0652,
+    "margin_to_frozen_maximum_ce": -0.0103,
+    "perplexity_ratio_to_ordinary_dense": 1.0097471974817553,
+    "perplexity_ratio_to_qkv_mapped_dense_cproj": 1.0357232759487744,
+    "perplexity_ratio_to_prior_continuous_full_attention": 0.9368800686248279,
+    "all_fixed_evaluations_finite": true
+  },
+  "fixed_model_compute_equivalence": {
+    "method": "piecewise-linear interpolation of validation CE against log fixed-window update count",
+    "dense_log_compute_slopes": {
+      "last_2": 0.2224017198416674,
+      "last_3": 0.3268549029194218,
+      "last_4": 0.4679486058618979
+    },
+    "candidate_log_compute_slopes": {
+      "last_2": 0.19831110968613383,
+      "last_3": 0.2815296463494969,
+      "last_4": 0.37188512284523556
+    },
+    "dense_updates_interpolated_to_candidate_terminal_ce": 2271.7267083756724,
+    "candidate_terminal_updates": 2373,
+    "terminal_dense_token_penalty": 1.0445798745293353,
+    "paired_common_loss_update_ratios_candidate_over_dense": [
+      0.8168257311354526,
+      0.9479204260325823,
+      1.0071567841136941,
+      1.0445798745293353
+    ],
+    "paired_common_loss_ratio_median": 0.9775386050731383,
+    "paired_common_loss_ratio_range": [0.8168257311354526, 1.0445798745293353],
+    "strict_parity_gate_maximum_terminal_ce_delta": 0.01,
+    "strict_parity_gate_maximum_dense_token_penalty": 1.10,
+    "strict_parity_gate_passed": true
+  },
+  "representation": {
+    "attention_scope": "QK and V use the selected Cayley/BlockFHT maps; c_proj uses the causal signed-int8 displacement lattice",
+    "persistent_codec_bytes": 7081344,
+    "fp32_cproj_weight_bytes": 28311552,
+    "persistent_cproj_storage_reduction": 3.998047828208882,
+    "runtime_materialized_cproj_weight": "dense_fp32_transient",
+    "optimizer_momentum": "dense_fp32_not_in_codec_count",
+    "materialized_inference_shape_and_flops": "unchanged from the dense attention c_proj"
+  },
+  "decision": {
+    "preregistered_5tpp_gate_passed": true,
+    "strict_fixed_model_compute_parity_passed": true,
+    "automatic_20tpp_authorized": false,
+    "larger_model_authorized": false,
+    "mlp_claim": false,
+    "next_action": "Defer a 20TPP attention confirmation. Return PRO6 to the unresolved full-MLP spatial-direction problem and register only a smallest-rung causal test after theory and exact-config MFU gating.",
+    "reason": "The candidate is within +0.01 CE of ordinary dense and needs only 1.0446x the dense fixed-window tokens at its terminal CE, while materially improving the prior continuous full-attention map. The result closes the 124M/5TPP persistent attention-weight path but leaves dense runtime materialization, dense optimizer momentum, long-horizon confirmation, and all MLP claims open."
+  },
+  "watchdog": {
+    "policy": "terminal/error-only",
+    "terminal_callback_delivered_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-20T04:31:57+08:00"],
+    "watcher_exited": true
+  }
+}

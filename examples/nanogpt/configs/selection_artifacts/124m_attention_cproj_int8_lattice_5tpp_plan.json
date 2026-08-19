@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_attention_cproj_int8_lattice_5tpp_plan_v1",
   "created_at": "2026-08-20",
-  "status": "exact_config_mfu_passed_one_124m_5tpp_run_authorized",
+  "status": "terminal_passed_result_sealed_20tpp_requires_separate_decision",
   "question": "Does the causal int8 attention-c_proj lattice retain the smallest-rung closure over 5TPP at the same 124M model size?",
   "promotion_basis": {
     "smallest_rung_result": {
@@ -79,12 +79,23 @@
   "authorization": {
     "mfu_preflight_before_training": true,
     "one_124m_5tpp_training_after_mfu_pass": true,
+    "authorized_124m_5tpp_training_consumed": true,
     "exact_config_mfu_passed": true,
     "training_before_mfu_pass": false,
     "automatic_rerun": false,
     "automatic_20tpp": false,
     "larger_model": false,
     "mlp_claim": false
+  },
+  "terminal_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_5tpp_training_result.json",
+    "sha256": "9c02ff532b049b1f619c34b00b91ac3bcf6a557e9f4923d59eca6b1929b57332",
+    "terminal_validation_ce": 3.5499,
+    "delta_to_ordinary_dense_ce": 0.0097,
+    "terminal_dense_token_penalty": 1.0445798745293353,
+    "preregistered_gate_passed": true,
+    "strict_compute_parity_passed": true,
+    "automatic_20tpp_authorized": false
   },
   "scope_guards": [
     "This tests full attention replacement at persistent model-state level, not 200x continuous-latent compression.",
