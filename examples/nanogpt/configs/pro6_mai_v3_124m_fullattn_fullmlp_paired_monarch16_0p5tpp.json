@@ -40,7 +40,7 @@
   "device": "cuda",
   "dropout": 0.0,
   "dtype": "bfloat16",
-  "estimated_active_params": 124373760,
+  "estimated_active_params": 124475904,
   "estimated_dense_mlp_parameters": 56623104,
   "estimated_monarch_coordinates": 1179648,
   "estimated_mlp_blockfht_coordinates": 566232,

@@ -40,6 +40,14 @@ def test_registered_parameter_and_flop_accounting_is_exact() -> None:
     block_fht = math.ceil(dense * float(config["block_fht_latent_ratio"]))
     compact = monarch + block_fht
 
+    conventional_active = (
+        int(config["vocab_size"]) * model_width
+        + int(config["block_size"]) * model_width
+        + layers * (12 * model_width * model_width + 13 * model_width)
+        + 2 * model_width
+    )
+
+    assert config["estimated_active_params"] == conventional_active
     assert config["estimated_dense_mlp_parameters"] == dense
     assert config["estimated_monarch_coordinates"] == monarch
     assert config["estimated_mlp_blockfht_coordinates"] == block_fht
