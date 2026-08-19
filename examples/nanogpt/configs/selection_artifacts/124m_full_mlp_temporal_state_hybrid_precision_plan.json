@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_124m_full_mlp_temporal_state_hybrid_precision_plan_v1",
+  "recorded_at": "2026-08-19",
+  "status": "registered_before_measurement",
+  "scientific_question": "Does sensitivity-matched precision preserve the successful dense temporal directions while materially reducing their persistent storage?",
+  "identity": {
+    "entrypoint_sha256": "69e364ca96f92951fef87f525008fa08e5019a77fd66839b7ef5730811be2ce6",
+    "checkpoint_sha256": "1efdfcbc8dde0e9c2f584759a5a05f890380dd6c5099fe07ee8a68772b298cee",
+    "config_sha256": "d361e03ef4607bbbd7d8982e11da52fdaa8fcb7666ea16fe3d4fd06ba8bd8712",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_oracle_result_sha256": "b2196c24ca8e8e8b74810e35b7d048173c0edb14f420cf801d768767495b48a4"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "checkpoint_next_iter": 238,
+    "optimizer_roles": [
+      [0, "c_fc"],
+      [1, "c_proj"]
+    ],
+    "candidates": [
+      ["fp16_momentum_int8_feedback", "float16", "int8_block4096"],
+      ["bf16_momentum_int8_feedback", "bfloat16", "int8_block4096"],
+      ["fp16_momentum_fp16_feedback_control", "float16", "float16"]
+    ],
+    "feedback_int8_block_size": 4096,
+    "feedback_int8_scale_dtype": "float16",
+    "muon_state_only_polar_proxy_steps": 5
+  },
+  "decision_rule": {
+    "maximum_persistent_storage_ratio": 0.38,
+    "minimum_global_raw_energy_recovery": 0.9999,
+    "minimum_layer_raw_cosine": 0.9999,
+    "minimum_global_polar_energy_recovery": 0.999,
+    "minimum_layer_polar_cosine": 0.999,
+    "threshold_changes_after_measurement": false
+  },
+  "interpretation_contract": {
+    "mechanism": "Allocate precision according to measured optimizer sensitivity: floating-point momentum protects Muon's polar direction, while full-support int8 feedback preserves the less-sensitive accumulated correction.",
+    "pass": "A hybrid arm meets the unchanged raw and polar gates while using at most 38% of dense FP32 state. Select the smallest passing arm and authorize only its exact-resume implementation plus systems gates.",
+    "fail": "No hybrid meets both direction and storage gates. Close direct reduced-precision storage and do not launch LM training.",
+    "control": "FP16 for both families tests the direction floor but exceeds the 38% storage ceiling and therefore cannot itself be selected.",
+    "boundary": "A pass remains a terminal state-only result. Actual loss, peak VRAM, transient allocation, throughput, and exact resume must be measured after implementation."
+  },
+  "authorization": {
+    "run_zero_update_hybrid_precision_oracle": true,
+    "candidate_implementation_only_after_pass": true,
+    "focused_tests": false,
+    "exact_config_mfu_vram_gate": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "mai_124m_full_mlp_temporal_state_quantization_result_v1",
+  "classification": "BLOCKWISE_AMBIENT_STATE_QUANTIZATION_REJECTED",
+  "recorded_at": "2026-08-19",
+  "identity": {
+    "git_commit": "4cda93ec8a4608ccf203a1615c64c1662e9a3c3d",
+    "plan_sha256": "ffcefa4bfd27ed09ee1b6005df9f95ac6344ed887e453646731e588a051af6fe",
+    "checkpoint_sha256": "1efdfcbc8dde0e9c2f584759a5a05f890380dd6c5099fe07ee8a68772b298cee",
+    "raw_result_sha256": "b2196c24ca8e8e8b74810e35b7d048173c0edb14f420cf801d768767495b48a4",
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_full_mlp_temporal_state_quantization_oracle_20260819/result.json"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "parameter_updates": 0,
+    "foreground_polled": true,
+    "wall_seconds": 1.2476096153,
+    "exit_code": 0
+  },
+  "frontier": [
+    {"bits": 8, "block_size": 256, "storage_ratio": 0.251953125, "momentum_energy_recovery": 0.9999325873, "feedback_energy_recovery": 0.9999504948, "polar_energy_recovery": 0.9969327793, "minimum_layer_polar_cosine": 0.9971934566, "passed": false},
+    {"bits": 8, "block_size": 1024, "storage_ratio": 0.2504882813, "momentum_energy_recovery": 0.9999074265, "feedback_energy_recovery": 0.9999364178, "polar_energy_recovery": 0.9958358883, "minimum_layer_polar_cosine": 0.9960891634, "passed": false},
+    {"bits": 8, "block_size": 4096, "storage_ratio": 0.2501220703, "momentum_energy_recovery": 0.9998656649, "feedback_energy_recovery": 0.9999215751, "polar_energy_recovery": 0.9940631608, "minimum_layer_polar_cosine": 0.9942839569, "passed": false},
+    {"bits": 6, "block_size": 256, "storage_ratio": 0.189453125, "momentum_energy_recovery": 0.9988710506, "feedback_energy_recovery": 0.9991697351, "polar_energy_recovery": 0.9526173126, "minimum_layer_polar_cosine": 0.9569645204, "passed": false},
+    {"bits": 6, "block_size": 1024, "storage_ratio": 0.1879882813, "momentum_energy_recovery": 0.9984478468, "feedback_energy_recovery": 0.9989326869, "polar_energy_recovery": 0.9350918672, "minimum_layer_polar_cosine": 0.9419063838, "passed": false},
+    {"bits": 6, "block_size": 4096, "storage_ratio": 0.1876220703, "momentum_energy_recovery": 0.9977472392, "feedback_energy_recovery": 0.9986836684, "polar_energy_recovery": 0.9094860031, "minimum_layer_polar_cosine": 0.9189440541, "passed": false},
+    {"bits": 4, "block_size": 256, "storage_ratio": 0.126953125, "momentum_energy_recovery": 0.9778462575, "feedback_energy_recovery": 0.9837168283, "polar_energy_recovery": 0.5476752259, "minimum_layer_polar_cosine": 0.6761823947, "passed": false},
+    {"bits": 4, "block_size": 1024, "storage_ratio": 0.1254882813, "momentum_energy_recovery": 0.9695244702, "feedback_energy_recovery": 0.9790685053, "polar_energy_recovery": 0.4862255430, "minimum_layer_polar_cosine": 0.6400942118, "passed": false},
+    {"bits": 4, "block_size": 4096, "storage_ratio": 0.1251220703, "momentum_energy_recovery": 0.9557653401, "feedback_energy_recovery": 0.9741936386, "polar_energy_recovery": 0.4282335181, "minimum_layer_polar_cosine": 0.5978905924, "passed": false}
+  ],
+  "decision": {
+    "joint_int8_codec_authorized": false,
+    "lower_bit_codec_authorized": false,
+    "larger_rung_authorized": false,
+    "interpretation": "Blockwise quantization preserves raw ambient state far better than low-rank or sparse codes, but Muon's polar map amplifies int8 momentum error. The best 8-bit arm has 0.99693 polar energy recovery and 0.99719 worst-layer polar cosine, below the frozen 0.999 gates.",
+    "next_action": "Keep momentum in a 16-bit floating representation and quantize only the less-sensitive compression residual. Preregister this hybrid as a distinct 2.67x storage candidate before measurement."
+  }
+}
