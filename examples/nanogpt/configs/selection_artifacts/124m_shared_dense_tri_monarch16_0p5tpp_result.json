@@ -1,0 +1,84 @@
+{
+  "schema_version": "mai_124m_shared_dense_tri_monarch16_0p5tpp_result_v1",
+  "classification": "REJECT_SHARED_CORE_PRIVATE_TRI_TRANSPORT_ORBIT",
+  "identity": {
+    "git_commit": "9aca9b51c92cfa34d6bc5d973c9630115f0c7d5a",
+    "run_id": "pro6_mai_v3_124m_fullattn_shared_dense_tri_monarch16_0p5tpp_20260819T115540Z_1143707",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "852eed438bd187e13ae05d03dd9a455af6a284cb6635dad9222e9ea81218f49c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "aaa84981768dbbefcc87146cd6698c49138cddcd1d9f951761f538413cb3e338",
+    "status_sha256": "cab9139bec75b3a4f1c209ce71a8d993e1d2d560fadef1dd3c6a4bf2983788c3",
+    "log_sha256": "db762ea29bde092f06e0651e97b9b230b6da06d919990e62f019fa13bf94d920",
+    "mfu_certificate_sha256": "12dffc2d7a22e6bcce054f9f5bc5ffa34f5f6ca5da1cc8cb427f3928f70a6c7b",
+    "checkpoint_sha256": "0f1aeb018ae757974fb39bf41603dbdd2b77bf3c04e461e8fa32a0be5ee60515",
+    "checkpoint_metadata_sha256": "91d311e4542531bbbeb1e7dc74963ca065afb54ce6a3db6e18c491f72736cc27"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-19T19:55:41+08:00",
+    "finished_at": "2026-08-19T20:02:42+08:00",
+    "wall_seconds_including_fixed_evaluations": 421,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "watchdog_terminal_callback_delivered_once": true,
+    "log_errors": []
+  },
+  "parameter_accounting": {
+    "dense_mlp_parameters": 56623104,
+    "shared_dense_matrix_parameters": 4718592,
+    "layer_private_tri_monarch_coordinates": 1769472,
+    "layer_private_diagonal_parameters": 46080,
+    "total_compact_mlp_parameters": 6534144,
+    "actual_model_trainable_parameters": 46256352,
+    "mlp_parameter_compression_ratio": 8.665726375,
+    "mlp_parameter_saving_fraction": 0.884602865,
+    "dense_per_layer_optimizer_state": false
+  },
+  "fixed_window_loss": {
+    "curve": [
+      {"step": 0, "train_ce": 10.9476, "validation_ce": 10.9479},
+      {"step": 60, "train_ce": 6.3572, "validation_ce": 6.3669},
+      {"step": 120, "train_ce": 5.9531, "validation_ce": 5.9588},
+      {"step": 180, "train_ce": 5.7882, "validation_ce": 5.7922},
+      {"step": 238, "train_ce": 5.7278, "validation_ce": 5.7316}
+    ],
+    "terminal_validation_ce": 5.7316,
+    "attention_only_control_validation_ce": 5.4918,
+    "ce_gap_to_attention_only": 0.2398,
+    "perplexity_ratio_to_attention_only": 1.270994926,
+    "full_mlp_error_feedback_validation_ce": 5.5293164253,
+    "ce_gap_to_full_mlp_error_feedback": 0.2022835747,
+    "perplexity_ratio_to_full_mlp_error_feedback": 1.22419511,
+    "shared_dense_trunk_validation_ce": 5.6971,
+    "ce_regression_from_shared_dense_trunk": 0.0345,
+    "perplexity_ratio_to_shared_dense_trunk": 1.035102028,
+    "private_random_residual_validation_ce": 5.6824,
+    "ce_regression_from_private_random_residual": 0.0492,
+    "perplexity_ratio_to_private_random_residual": 1.050430416,
+    "preregistered_ce_maximum": 5.5918,
+    "threshold_miss_ce": 0.1398,
+    "threshold_miss_perplexity_ratio": 1.150043767
+  },
+  "exact_config_benchmark": {
+    "mfu_fraction": 0.3571076524,
+    "tokens_per_second": 198563.0833,
+    "iter_ms": 1320.2033,
+    "peak_allocated_mib": 33733.92,
+    "native_block_fht_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "prepare_ms": 7.0833,
+    "flush_ms": 16.7133
+  },
+  "decision": {
+    "mfu_gate_passed": true,
+    "finite_terminal_loss_passed": true,
+    "loss_gate_passed": false,
+    "larger_rung_authorized": false,
+    "repeat_or_hyperparameter_sweep_authorized": false,
+    "interpretation": "Layer-private learned input, hidden, and output transports around one shared dense core regress validation CE by 0.0345 versus the untransported shared core. The missing layer functions are not predominantly coordinate-frame changes within one shared matrix orbit; layer-private matrix content and temporally accumulated directions remain necessary.",
+    "next_action": "Close shared-core transport width, depth, seed, and learning-rate sweeps. Return to the accepted dynamic dense-direction/error-feedback mechanism and reduce its training-state cost only through a separately gated state-compression experiment. Before training, measure blockwise quantization distortion of both Muon momentum and compression residual states at the sealed 124M checkpoint."
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_full_mlp_temporal_state_quantization_plan_v1",
+  "recorded_at": "2026-08-19",
+  "status": "registered_before_measurement",
+  "scientific_question": "Can the dense ambient Muon momentum and compression-error state that causally closes the full-MLP loss gap be stored blockwise at low precision without changing its useful directions?",
+  "identity": {
+    "entrypoint_sha256": "8e16618c152cb60ccb302328f783700a1d0b763a8eeb50967383d0ac14b84c6b",
+    "checkpoint_sha256": "1efdfcbc8dde0e9c2f584759a5a05f890380dd6c5099fe07ee8a68772b298cee",
+    "config_sha256": "d361e03ef4607bbbd7d8982e11da52fdaa8fcb7666ea16fe3d4fd06ba8bd8712",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_result_sha256": "bec53473035d0128df566be4c20bde563167a6fd4296adf9b58618e3698d6b83"
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "checkpoint_next_iter": 238,
+    "optimizer_roles": [
+      [0, "c_fc"],
+      [1, "c_proj"]
+    ],
+    "state_names": [
+      "momentum_buffer",
+      "compression_residual"
+    ],
+    "bits": [8, 6, 4],
+    "block_sizes": [256, 1024, 4096],
+    "scale_dtype": "float16",
+    "quantizer": "symmetric_per_contiguous_flat_block_maxabs",
+    "muon_state_only_polar_proxy_steps": 5,
+    "lower_bit_storage_is_theoretical_packed": true
+  },
+  "decision_rule": {
+    "maximum_persistent_storage_ratio": 0.26,
+    "minimum_global_raw_energy_recovery": 0.9999,
+    "minimum_layer_raw_cosine": 0.9999,
+    "minimum_global_polar_energy_recovery": 0.999,
+    "minimum_layer_polar_cosine": 0.999,
+    "threshold_changes_after_measurement": false
+  },
+  "interpretation_contract": {
+    "mechanism": "Blockwise scalar quantization retains every ambient coordinate and therefore does not impose the low-rank, sparse, shared-orbit, or procedural-chart direction restrictions already falsified. It changes precision only.",
+    "pass": "At least one arm meets every raw-state, state-only Muon-polar, and storage threshold. Select the smallest passing persistent representation, then authorize only exact-resume codec implementation, focused tests, and an exact-config MFU/peak-VRAM gate.",
+    "fail": "No arm preserves both temporal-state families and the induced Muon polar direction. Close direct blockwise low-precision state and do not launch a training run.",
+    "boundary": "The terminal checkpoint contains no next-step gradient, so the polar metric is a state-only proxy. A pass is necessary but not sufficient for loss preservation; one 124M LM run remains mandatory after implementation and systems gates.",
+    "storage": "Eight-bit values use an actual signed-int8 container. Six- and four-bit byte counts assume packed storage and cannot be promoted without a packed codec. All arms store one FP16 max-absolute scale per contiguous block."
+  },
+  "authorization": {
+    "run_zero_update_quantization_oracle": true,
+    "candidate_implementation_only_after_pass": true,
+    "focused_tests": false,
+    "exact_config_mfu_vram_gate": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
