@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_mlp_int8_lattice_0p5tpp_plan_v1",
   "created_at": "2026-08-20",
-  "status": "theory_registered_implementation_tests_and_exact_config_mfu_required",
+  "status": "exact_config_mfu_passed_one_124m_0p5tpp_run_authorized",
   "question": "Does full ambient persistent weight freedom close the remaining full-MLP loss gap when the static BlockFHT/directed/Givens spatial charts are replaced by causal blockwise int8 lattices?",
   "causal_basis": {
     "attention_result": {
@@ -65,6 +65,21 @@
     "peak_vram_mib_maximum": 97887,
     "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
     "scientific_run_runtime": "one idempotent terminal/error-only @Codex watcher; no progress or healthy-heartbeat callbacks because the expected run is within one to two hours"
+  },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_0p5tpp_mfu_result.json",
+    "sha256": "db370801e0a8a169ce6f6c7810a302ba1b6f66e710ea5ff21ce157d44ce89fc6",
+    "mfu_fraction": 0.2855357309273985,
+    "peak_vram_mib": 35427.37,
+    "passed": true
+  },
+  "authorization": {
+    "exact_config_mfu_passed": true,
+    "one_124m_0p5tpp_training": true,
+    "authorized_training_consumed": false,
+    "automatic_rerun": false,
+    "automatic_5tpp": false,
+    "larger_model": false
   },
   "terminal_gate": {
     "matched_full_attention_parent_validation_ce": 5.2917,

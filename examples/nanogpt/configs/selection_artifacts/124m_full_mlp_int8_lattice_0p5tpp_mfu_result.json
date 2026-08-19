@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_0p5tpp_mfu_result_v1",
+  "measured_at": "2026-08-20",
+  "classification": "PASS",
+  "config_sha256": "0202dc68b865ad87cbb62a246f11e634be48aced50aedee360b426b4df528c32",
+  "evidence": {
+    "execution_commit": "61586f1d8b292fb055d51e04a1df70ad91016936",
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp/performance_preflight.json",
+    "certificate_sha256": "832d54b5264172a7f3e1cd61401b5310754035dfb565a05287931df14cdec504",
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp/performance_preflight.log",
+    "preflight_log_sha256": "148eeb0a5d7e4321c125f6e78d5779240e5decb425e7551360b6232d825afc2d",
+    "elapsed_seconds": 18.33594822883606,
+    "timed_updates": 8,
+    "iter_ms": 1644.45125,
+    "tokens_per_second": 159411.19875,
+    "model_tflops": 119.05711843277953,
+    "empirical_bf16_gemm_peak_tflops": 416.96049053507596,
+    "mfu_fraction": 0.2855357309273985,
+    "minimum_mfu_fraction": 0.2,
+    "peak_vram_mib": 35427.37,
+    "all_logged_losses_finite": true,
+    "native_block_fht_extension_loaded": true,
+    "timing_breakdown_ms": {
+      "data": 0.525,
+      "prepare": 3.91875,
+      "forward_backward": 1608.95625,
+      "gradient": 2.235,
+      "optimizer": 18.7575,
+      "flush": 8.9,
+      "other": 1.16125
+    }
+  },
+  "observed_representation": {
+    "attention_int8_lattice_modules": 12,
+    "attention_elements": 7077888,
+    "attention_codec_bytes": 7081344,
+    "mlp_int8_lattice_modules": 24,
+    "mlp_elements": 56623104,
+    "mlp_codec_bytes": 56650752,
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_storage_ratio": 0.2501220703125,
+    "ordinary_muon_matrix_tensors": 0,
+    "runtime_materialization": "dense_fp32",
+    "optimizer_momentum": "dense_fp32"
+  },
+  "decision": {
+    "one_124m_0p5tpp_training_authorized": true,
+    "automatic_rerun_authorized": false,
+    "automatic_5tpp_authorized": false,
+    "larger_model_authorized": false,
+    "reason": "The exact preregistered full-attention plus full-MLP lattice configuration exceeded the frozen 20% MFU floor, stayed below device capacity, loaded the required native CUDA extension, and produced only finite losses."
+  }
+}
