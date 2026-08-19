@@ -55,7 +55,9 @@
   },
   "watchdog": {
     "host": "local",
-    "pid": 56944,
+    "pid": 58150,
+    "service_label": "com.mappingnetworks.pro6.fullmlp5tpp.20260820",
+    "service_manager": "launchd",
     "state_key": "pro6_124m_full_mlp_lattice_errorfeedback_5tpp",
     "policy": "terminal/error-only",
     "interval_seconds": 60,
@@ -64,7 +66,14 @@
     "progress_milestones_suppressed": [20, 50],
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
     "agent_mention": "@Codex",
-    "action_prompt": "Verify terminal artifacts and hashes, seal fixed-checkpoint comparisons, update durable notes, and continue only with the next causally authorized action."
+    "action_prompt": "Verify terminal artifacts and hashes, seal fixed-checkpoint comparisons, update durable notes, and continue only with the next causally authorized action.",
+    "recovery": {
+      "failed_first_pid": 56944,
+      "failure": "plain nohup child did not remain resident after the command session closed",
+      "scientific_process_affected": false,
+      "replacement_verified_running": true,
+      "replacement_first_observed_iter": 100
+    }
   },
   "terminal_gate": {
     "maximum_validation_ce": 3.5602,
