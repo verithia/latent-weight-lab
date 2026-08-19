@@ -166,7 +166,7 @@ def _restore_persistent_state_dtypes(optimizer: torch.optim.Optimizer) -> None:
                 continue
             residual = state["compression_residual"]
             if feedback_codec == "int8_blockwise":
-                if residual.dtype != torch.int8 or _FEEDBACK_SCALE_KEY not in state:
+                if _FEEDBACK_SCALE_KEY not in state:
                     _store_feedback_state(
                         state,
                         residual.float(),
@@ -174,14 +174,21 @@ def _restore_persistent_state_dtypes(optimizer: torch.optim.Optimizer) -> None:
                         feedback_block_size,
                     )
                 else:
+                    # Optimizer.load_state_dict casts every tensor associated
+                    # with a floating parameter to the parameter dtype.  The
+                    # scale key proves that these values are saved int8 codes,
+                    # even if PyTorch has temporarily converted them to FP32.
+                    state["compression_residual"] = residual.to(
+                        dtype=torch.int8
+                    )
                     state[_FEEDBACK_SCALE_KEY] = state[_FEEDBACK_SCALE_KEY].to(
                         dtype=torch.float16
                     )
                 continue
-            if residual.dtype == torch.int8:
+            if _FEEDBACK_SCALE_KEY in state:
                 scales = state[_FEEDBACK_SCALE_KEY].to(dtype=torch.float16)
                 residual = decode_blockwise_int8_optimizer_state(
-                    residual,
+                    residual.to(dtype=torch.int8),
                     scales,
                     block_size=feedback_block_size,
                 )
