@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_attention_cproj_fresh_residual_gate_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "REJECT_ATTENTION_CPROJ_FRESH_RESIDUAL",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground zero-update oracle; no watchdog or callback",
+    "source_commit": "59f013eaedc0da531bfbfae396879ac0c980c133",
+    "source_sha256": "114d7af40f474f8071012546d7be531b997d8c1ba3da40cb94b1b1afbf91a9bf",
+    "elapsed_seconds": 9.029573917388916,
+    "focused_tests": "3 passed in 0.88s"
+  },
+  "identity": {
+    "plan_sha256": "70d9df748cc3f6d1ee108602d7457f34057d2bdcfa23fa9ae8b3bc368bc80336",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "raw_result_sha256": "d783b1061e53b2b9505ca71d2f9ad1257e55f05467dbaf9a2d881dade4707856",
+    "cells_sha256": "cba845be00f3bdbcd4eeeeab692003f054d52a3cdbc80ada30ea3db81911c2f6",
+    "passes_sha256": "0ab3ae51518213e29c775968603adcff6d3efff3db98c6063fa1765e972d75f6"
+  },
+  "measurements": {
+    "output64": {
+      "coordinate_fraction": 0.041666666666666664,
+      "fixed_scale_recovery": 0.14290654822183846,
+      "cosine": 0.40827074246395034,
+      "minimum_phase_recovery": 0.13982082127612727,
+      "minimum_layer_recovery": 0.07679059936247046
+    },
+    "output80": {
+      "coordinate_fraction": 0.052083333333333336,
+      "fixed_scale_recovery": 0.1488842279501985,
+      "cosine": 0.4289372770775223,
+      "minimum_phase_recovery": 0.1469880193852927,
+      "minimum_layer_recovery": 0.04172311831378739
+    },
+    "output64_residual16": {
+      "coordinate_fraction": 0.052083333333333336,
+      "fixed_scale_recovery": 0.1874498679622335,
+      "cosine": 0.44384822104339716,
+      "minimum_phase_recovery": 0.1826897507237173,
+      "minimum_layer_recovery": 0.15011201214666392
+    },
+    "output96": {
+      "coordinate_fraction": 0.0625,
+      "fixed_scale_recovery": 0.1508747705641863,
+      "cosine": 0.44516887899437557,
+      "minimum_phase_recovery": 0.15005488869341777,
+      "minimum_layer_recovery": 0.0010399301101936542
+    },
+    "output64_residual32": {
+      "coordinate_fraction": 0.0625,
+      "fixed_scale_recovery": 0.20225277718094337,
+      "cosine": 0.45837785450071733,
+      "minimum_phase_recovery": 0.19801612102319055,
+      "minimum_layer_recovery": 0.10531097823398206
+    },
+    "input32_output64": {
+      "coordinate_fraction": 0.0625,
+      "fixed_scale_recovery": 0.22350736044146502,
+      "cosine": 0.4880981345343321,
+      "minimum_phase_recovery": 0.2176168295766796,
+      "minimum_layer_recovery": 0.16030738137255984
+    },
+    "input16_output64_residual16": {
+      "coordinate_fraction": 0.0625,
+      "fixed_scale_recovery": 0.23672358363492807,
+      "cosine": 0.4935354082506628,
+      "minimum_phase_recovery": 0.23077851125505977,
+      "minimum_layer_recovery": 0.21237630050825218,
+      "minimum_cell_descent_fraction": 0.2551402917605512
+    }
+  },
+  "decision": {
+    "passed": false,
+    "selected_candidate": null,
+    "failed_frozen_checks": [
+      "aggregate fixed-scale recovery >= 0.30",
+      "aggregate cosine >= 0.55"
+    ],
+    "implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "interpretation": [
+    "The old one-pass output64 attention c_proj chart recovers only 0.14291 of the exact dense Muon update over all 60 sealed phase/layer cells.",
+    "Blindly increasing one-pass output depth is ineffective: output96 reaches only 0.15087 and has a near-zero worst-layer aggregate.",
+    "Residual refitting and bilateral composition are causally useful. The best input16/output64/residual-output16 candidate reaches 0.23672 recovery, a 65.6 percent relative and 0.09382 absolute gain over output64, while clearing every phase and layer sub-gate.",
+    "The gain remains below the frozen 0.30 recovery and 0.55 cosine floors. No sparse-orthogonal attention implementation or training run is authorized.",
+    "The result localizes the constraint to skew-pair/disjoint-matching expressivity rather than side choice alone. The next admissible gate must remove the orthogonality and pair-coupling constraint at the same coordinate budget."
+  ],
+  "next_action": "Preregister a same-state directed sparse transport gate for attention c_proj. Compare equal-budget multistage schedules and bilateral allocations using the existing production-qualified batched directed solver; require substantially higher exact-current recovery before implementation."
+}
