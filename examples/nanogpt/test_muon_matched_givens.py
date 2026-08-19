@@ -393,6 +393,62 @@ def test_cproj_error_feedback_preserves_first_step_and_resumes_exactly(
     )
 
 
+def test_cproj_compact_optimizer_state_persists_and_resumes_exactly(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        "examples.nanogpt.muon_matched_givens.zeropower_via_newtonschulz5",
+        lambda matrix, steps: matrix,
+    )
+    module = make_module(layer_id=5)
+    kwargs = {
+        "lr": 0.001,
+        "momentum": 0.95,
+        "weight_decay": 0.1,
+        "ns_steps": 2,
+        "error_feedback": True,
+        "error_feedback_decay": 1.0,
+        "momentum_state_dtype": "float16",
+        "feedback_state_codec": "int8_blockwise",
+        "feedback_state_block_size": 8,
+    }
+    optimizer = MuonMatchedGivens([module], **kwargs)
+    generator = torch.Generator().manual_seed(1311)
+    module.weight.grad = torch.randn(module.weight.shape, generator=generator)
+    optimizer.step()
+    state = optimizer.state[module.weight]
+    assert state["momentum_buffer"].dtype == torch.float16
+    assert state["compression_residual"].dtype == torch.int8
+    assert state["compression_residual_block_scale"].dtype == torch.float16
+
+    module_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = make_module(layer_id=5)
+    restored.load_state_dict(module_state)
+    restored_optimizer = MuonMatchedGivens([restored], **kwargs)
+    restored_optimizer.load_state_dict(optimizer_state)
+    restored_state = restored_optimizer.state[restored.weight]
+    assert restored_state["momentum_buffer"].dtype == torch.float16
+    assert restored_state["compression_residual"].dtype == torch.int8
+    assert restored_state["compression_residual_block_scale"].dtype == torch.float16
+
+    gradient = torch.randn(module.weight.shape, generator=generator)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    assert torch.equal(module.weight, restored.weight)
+    for key in (
+        "momentum_buffer",
+        "compression_residual",
+        "compression_residual_block_scale",
+    ):
+        assert torch.equal(
+            optimizer.state[module.weight][key],
+            restored_optimizer.state[restored.weight][key],
+        )
+
+
 def test_cproj_feedback_nominal_step_cap_preserves_direction_and_resumes(
     monkeypatch,
 ) -> None:

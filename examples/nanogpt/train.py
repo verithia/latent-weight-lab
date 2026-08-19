@@ -1545,6 +1545,21 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=1.0,
     )
+    parser.add_argument(
+        "--block-fht-mlp-muon-momentum-state-dtype",
+        choices=["float32", "float16", "bfloat16"],
+        default="float32",
+    )
+    parser.add_argument(
+        "--block-fht-mlp-error-feedback-state-codec",
+        choices=["float32", "int8_blockwise"],
+        default="float32",
+    )
+    parser.add_argument(
+        "--block-fht-mlp-error-feedback-state-block-size",
+        type=int,
+        default=4096,
+    )
     parser.add_argument("--block-fht-ffn-postgelu-std-target", type=float, default=0.0)
     parser.add_argument("--block-fht-ffn-postgelu-std-lambda", type=float, default=0.0)
     parser.add_argument("--mlp-cproj-teacher-checkpoint", default=None)
@@ -2308,6 +2323,28 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "directed-product c_fc requires the unmodified pre-GELU path"
             )
+    if namespace.block_fht_mlp_error_feedback_state_block_size <= 0:
+        raise ValueError("MLP error-feedback state block size must be positive")
+    compact_mlp_optimizer_state = (
+        namespace.block_fht_mlp_muon_momentum_state_dtype != "float32"
+        or namespace.block_fht_mlp_error_feedback_state_codec != "float32"
+    )
+    if compact_mlp_optimizer_state:
+        compact_state_path_ready = all(
+            (
+                namespace.method == "block_fht",
+                namespace.optimizer == "muon",
+                namespace.block_fht_mlp_cfc_directed_product,
+                namespace.block_fht_mlp_cfc_directed_product_error_feedback,
+                namespace.block_fht_mlp_cproj_muon_matched_givens,
+                namespace.block_fht_mlp_cproj_muon_matched_givens_error_feedback,
+            )
+        )
+        if not compact_state_path_ready:
+            raise ValueError(
+                "compact MLP optimizer state is authorized only for the paired "
+                "directed-c_fc/matched-Givens-c_proj Muon error-feedback path"
+            )
     if namespace.block_fht_mlp_cfc_functional_shear:
         if namespace.method != "block_fht" or namespace.optimizer != "muon":
             raise ValueError(
@@ -2733,6 +2770,15 @@ def main() -> None:
         block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction=(
             args
             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_switch_fraction
+        ),
+        block_fht_mlp_muon_momentum_state_dtype=(
+            args.block_fht_mlp_muon_momentum_state_dtype
+        ),
+        block_fht_mlp_error_feedback_state_codec=(
+            args.block_fht_mlp_error_feedback_state_codec
+        ),
+        block_fht_mlp_error_feedback_state_block_size=(
+            args.block_fht_mlp_error_feedback_state_block_size
         ),
         block_fht_mlp_cproj_activation_energy_metric=(
             args.block_fht_mlp_cproj_activation_energy_metric

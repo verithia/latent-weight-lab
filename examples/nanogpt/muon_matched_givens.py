@@ -18,6 +18,190 @@ from examples.nanogpt.fast_task_matching import (
 )
 
 
+_MOMENTUM_STATE_DTYPES = {
+    "float32": torch.float32,
+    "float16": torch.float16,
+    "bfloat16": torch.bfloat16,
+}
+_FEEDBACK_STATE_CODECS = {"float32", "int8_blockwise"}
+_FEEDBACK_SCALE_KEY = "compression_residual_block_scale"
+
+
+def encode_blockwise_int8_optimizer_state(
+    source: torch.Tensor,
+    *,
+    block_size: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Encode a dense tensor as signed int8 plus FP16 max-absolute scales."""
+    if block_size <= 0:
+        raise ValueError("optimizer-state block size must be positive")
+    flat = source.detach().float().reshape(-1)
+    blocks = math.ceil(flat.numel() / block_size)
+    padded_elements = blocks * block_size - flat.numel()
+    padded = F.pad(flat, (0, padded_elements)).reshape(blocks, block_size)
+    exact_scale = padded.abs().amax(dim=1) / 127.0
+    stored_scale = exact_scale.to(torch.float16)
+    nonzero = exact_scale > 0
+    underflow = nonzero & (stored_scale == 0)
+    if underflow.any():
+        smallest = torch.nextafter(
+            torch.zeros((), dtype=torch.float16, device=source.device),
+            torch.ones((), dtype=torch.float16, device=source.device),
+        )
+        stored_scale = torch.where(underflow, smallest, stored_scale)
+    if torch.isinf(stored_scale).any():
+        raise FloatingPointError("FP16 optimizer-state scale overflow")
+    divisor = torch.where(
+        nonzero,
+        stored_scale.float(),
+        torch.ones_like(exact_scale),
+    )
+    quantized = (
+        torch.round(padded / divisor[:, None]).clamp(-127, 127).to(torch.int8)
+    )
+    return quantized.reshape(-1)[: flat.numel()].reshape_as(source), stored_scale
+
+
+def decode_blockwise_int8_optimizer_state(
+    quantized: torch.Tensor,
+    scales: torch.Tensor,
+    *,
+    block_size: int,
+) -> torch.Tensor:
+    """Decode signed-int8 optimizer state into an FP32 transient tensor."""
+    if quantized.dtype != torch.int8:
+        raise ValueError("quantized optimizer state must use signed int8")
+    if scales.dtype != torch.float16:
+        raise ValueError("quantized optimizer-state scales must use FP16")
+    flat = quantized.reshape(-1)
+    blocks = math.ceil(flat.numel() / block_size)
+    if scales.numel() != blocks:
+        raise ValueError("quantized optimizer-state scale count mismatch")
+    padded_elements = blocks * block_size - flat.numel()
+    padded = F.pad(flat, (0, padded_elements)).reshape(blocks, block_size)
+    decoded = padded.float() * scales.float().reshape(-1, 1)
+    return decoded.reshape(-1)[: flat.numel()].reshape_as(quantized)
+
+
+def _momentum_state(
+    state: dict[str, Any],
+    reference: torch.Tensor,
+    dtype_name: str,
+) -> torch.Tensor:
+    if dtype_name not in _MOMENTUM_STATE_DTYPES:
+        raise ValueError(f"unsupported momentum state dtype: {dtype_name}")
+    if "momentum_buffer" not in state:
+        state["momentum_buffer"] = torch.zeros_like(
+            reference, dtype=_MOMENTUM_STATE_DTYPES[dtype_name]
+        )
+    return state["momentum_buffer"].float()
+
+
+def _store_momentum_state(
+    state: dict[str, Any],
+    value: torch.Tensor,
+    dtype_name: str,
+) -> None:
+    state["momentum_buffer"] = value.to(
+        dtype=_MOMENTUM_STATE_DTYPES[dtype_name]
+    ).contiguous()
+
+
+def _feedback_state(
+    state: dict[str, Any],
+    reference: torch.Tensor,
+    codec: str,
+    block_size: int,
+) -> torch.Tensor:
+    if codec not in _FEEDBACK_STATE_CODECS:
+        raise ValueError(f"unsupported feedback state codec: {codec}")
+    if "compression_residual" not in state:
+        _store_feedback_state(
+            state,
+            torch.zeros_like(reference, dtype=torch.float32),
+            codec,
+            block_size,
+        )
+    if codec == "float32":
+        return state["compression_residual"].float()
+    return decode_blockwise_int8_optimizer_state(
+        state["compression_residual"],
+        state[_FEEDBACK_SCALE_KEY],
+        block_size=block_size,
+    )
+
+
+def _store_feedback_state(
+    state: dict[str, Any],
+    value: torch.Tensor,
+    codec: str,
+    block_size: int,
+) -> None:
+    if codec == "float32":
+        state["compression_residual"] = value.float().contiguous()
+        state.pop(_FEEDBACK_SCALE_KEY, None)
+        return
+    if codec != "int8_blockwise":
+        raise ValueError(f"unsupported feedback state codec: {codec}")
+    quantized, scales = encode_blockwise_int8_optimizer_state(
+        value, block_size=block_size
+    )
+    state["compression_residual"] = quantized.contiguous()
+    state[_FEEDBACK_SCALE_KEY] = scales.contiguous()
+
+
+def _restore_persistent_state_dtypes(optimizer: torch.optim.Optimizer) -> None:
+    """Restore storage codecs after Optimizer.load_state_dict recasts state."""
+    for group in optimizer.param_groups:
+        momentum_dtype = str(group.get("momentum_state_dtype", "float32"))
+        feedback_codec = str(group.get("feedback_state_codec", "float32"))
+        feedback_block_size = int(group.get("feedback_state_block_size", 4096))
+        for parameter in group["params"]:
+            state = optimizer.state.get(parameter, {})
+            if "momentum_buffer" in state:
+                state["momentum_buffer"] = state["momentum_buffer"].to(
+                    dtype=_MOMENTUM_STATE_DTYPES[momentum_dtype]
+                )
+            if "compression_residual" not in state:
+                continue
+            residual = state["compression_residual"]
+            if feedback_codec == "int8_blockwise":
+                if residual.dtype != torch.int8 or _FEEDBACK_SCALE_KEY not in state:
+                    _store_feedback_state(
+                        state,
+                        residual.float(),
+                        feedback_codec,
+                        feedback_block_size,
+                    )
+                else:
+                    state[_FEEDBACK_SCALE_KEY] = state[_FEEDBACK_SCALE_KEY].to(
+                        dtype=torch.float16
+                    )
+                continue
+            if residual.dtype == torch.int8:
+                scales = state[_FEEDBACK_SCALE_KEY].to(dtype=torch.float16)
+                residual = decode_blockwise_int8_optimizer_state(
+                    residual,
+                    scales,
+                    block_size=feedback_block_size,
+                )
+            state["compression_residual"] = residual.float().contiguous()
+            state.pop(_FEEDBACK_SCALE_KEY, None)
+
+
+def _restore_optimizer_group_codec_defaults(
+    optimizer: torch.optim.Optimizer,
+) -> None:
+    """Backfill codec keys when loading checkpoints written before this feature."""
+    for group in optimizer.param_groups:
+        for key in (
+            "momentum_state_dtype",
+            "feedback_state_codec",
+            "feedback_state_block_size",
+        ):
+            group.setdefault(key, optimizer.defaults[key])
+
+
 def _complete_unique_matchings(
     edge_scores: dict[tuple[int, int], float],
     *,
@@ -2276,6 +2460,9 @@ class MuonDirectedProduct(torch.optim.Optimizer):
         momentum: float,
         weight_decay: float,
         ns_steps: int,
+        momentum_state_dtype: str = "float32",
+        feedback_state_codec: str = "float32",
+        feedback_state_block_size: int = 4096,
     ) -> None:
         if not modules:
             raise ValueError("MuonDirectedProduct requires at least one module")
@@ -2294,6 +2481,12 @@ class MuonDirectedProduct(torch.optim.Optimizer):
             raise ValueError("directed-product modules must share one geometry")
         for module in modules:
             module.weight.requires_grad_(True)
+        if momentum_state_dtype not in _MOMENTUM_STATE_DTYPES:
+            raise ValueError("unsupported directed-product momentum state dtype")
+        if feedback_state_codec not in _FEEDBACK_STATE_CODECS:
+            raise ValueError("unsupported directed-product feedback state codec")
+        if feedback_state_block_size <= 0:
+            raise ValueError("directed-product feedback state block size must be positive")
         self.modules_by_id = {id(module.weight): module for module in modules}
         self.last_step_diagnostics: list[dict[str, Any]] = []
         defaults = {
@@ -2301,6 +2494,9 @@ class MuonDirectedProduct(torch.optim.Optimizer):
             "momentum": float(momentum),
             "weight_decay": float(weight_decay),
             "ns_steps": int(ns_steps),
+            "momentum_state_dtype": str(momentum_state_dtype),
+            "feedback_state_codec": str(feedback_state_codec),
+            "feedback_state_block_size": int(feedback_state_block_size),
         }
         super().__init__(
             [{"params": [module.weight for module in modules]}], defaults
@@ -2318,6 +2514,9 @@ class MuonDirectedProduct(torch.optim.Optimizer):
             momentum = float(group["momentum"])
             weight_decay = float(group["weight_decay"])
             ns_steps = int(group["ns_steps"])
+            momentum_state_dtype = str(group["momentum_state_dtype"])
+            feedback_state_codec = str(group["feedback_state_codec"])
+            feedback_state_block_size = int(group["feedback_state_block_size"])
             active_weights = [
                 weight
                 for weight in group["params"]
@@ -2331,13 +2530,16 @@ class MuonDirectedProduct(torch.optim.Optimizer):
                 module = self.modules_by_id[id(weight)]
                 modules.append(module)
                 state = self.state[weight]
-                if "momentum_buffer" not in state:
-                    state["momentum_buffer"] = torch.zeros_like(weight)
-                buffer = state["momentum_buffer"]
+                buffer = _momentum_state(
+                    state, weight, momentum_state_dtype
+                )
                 gradient = weight.grad
                 assert gradient is not None
-                buffer.mul_(momentum).add_(gradient)
-                combined = gradient.add(buffer, alpha=momentum)
+                buffer.mul_(momentum).add_(gradient.float())
+                combined = gradient.float().add(buffer, alpha=momentum)
+                _store_momentum_state(
+                    state, buffer, momentum_state_dtype
+                )
                 polar = zeropower_via_newtonschulz5(
                     combined, steps=ns_steps
                 ).float()
@@ -2362,12 +2564,13 @@ class MuonDirectedProduct(torch.optim.Optimizer):
                 feedback = []
                 for weight in active_weights:
                     state = self.state[weight]
-                    if "compression_residual" not in state:
-                        state["compression_residual"] = torch.zeros_like(
-                            weight, dtype=torch.float32
-                        )
                     feedback.append(
-                        state["compression_residual"].float().T
+                        _feedback_state(
+                            state,
+                            weight,
+                            feedback_state_codec,
+                            feedback_state_block_size,
+                        ).T
                     )
                 feedback_target = torch.stack(feedback, dim=0).contiguous()
                 target = requested_target + (
@@ -2403,8 +2606,11 @@ class MuonDirectedProduct(torch.optim.Optimizer):
                 update = prediction[index].T.contiguous()
                 weight.add_(update.to(dtype=weight.dtype))
                 if module.error_feedback:
-                    self.state[weight]["compression_residual"] = (
-                        compression_residual[index].T.contiguous()
+                    _store_feedback_state(
+                        self.state[weight],
+                        compression_residual[index].T,
+                        feedback_state_codec,
+                        feedback_state_block_size,
                     )
                 target_energy = (
                     requested_target[index].square().sum().clamp_min(1e-30)
@@ -2424,6 +2630,9 @@ class MuonDirectedProduct(torch.optim.Optimizer):
                         "family_radius_ratio": module.family_radius_ratio,
                         "error_feedback": module.error_feedback,
                         "error_feedback_decay": module.error_feedback_decay,
+                        "momentum_state_dtype": momentum_state_dtype,
+                        "feedback_state_codec": feedback_state_codec,
+                        "feedback_state_block_size": feedback_state_block_size,
                         "family_scale": float(family_scale),
                         "dense_family_fro": float(dense_family_norm),
                         "corrected_family_fro": float(
@@ -2481,6 +2690,12 @@ class MuonDirectedProduct(torch.optim.Optimizer):
         self.last_step_diagnostics = diagnostics
         return loss
 
+    def load_state_dict(self, state_dict):
+        result = super().load_state_dict(state_dict)
+        _restore_optimizer_group_codec_defaults(self)
+        _restore_persistent_state_dtypes(self)
+        return result
+
     def consume_diagnostics(self) -> list[dict[str, Any]]:
         diagnostics = self.last_step_diagnostics
         self.last_step_diagnostics = []
@@ -2501,6 +2716,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
         error_feedback: bool = False,
         error_feedback_decay: float = 1.0,
         error_feedback_max_nominal_steps: float | None = None,
+        momentum_state_dtype: str = "float32",
+        feedback_state_codec: str = "float32",
+        feedback_state_block_size: int = 4096,
     ) -> None:
         if not modules:
             raise ValueError("MuonMatchedGivens requires at least one module")
@@ -2518,6 +2736,12 @@ class MuonMatchedGivens(torch.optim.Optimizer):
             raise ValueError(
                 "MuonMatchedGivens feedback nominal-step cap must be finite and positive"
             )
+        if momentum_state_dtype not in _MOMENTUM_STATE_DTYPES:
+            raise ValueError("unsupported matched-Givens momentum state dtype")
+        if feedback_state_codec not in _FEEDBACK_STATE_CODECS:
+            raise ValueError("unsupported matched-Givens feedback state codec")
+        if feedback_state_block_size <= 0:
+            raise ValueError("matched-Givens feedback state block size must be positive")
         for module in modules:
             module.weight.requires_grad_(True)
         self.modules_by_id = {id(module.weight): module for module in modules}
@@ -2534,6 +2758,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 if error_feedback_max_nominal_steps is None
                 else float(error_feedback_max_nominal_steps)
             ),
+            "momentum_state_dtype": str(momentum_state_dtype),
+            "feedback_state_codec": str(feedback_state_codec),
+            "feedback_state_block_size": int(feedback_state_block_size),
         }
         super().__init__(
             [{"params": [module.weight for module in modules]}],
@@ -2552,6 +2779,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
             momentum = float(group["momentum"])
             weight_decay = float(group["weight_decay"])
             ns_steps = int(group["ns_steps"])
+            momentum_state_dtype = str(group["momentum_state_dtype"])
+            feedback_state_codec = str(group["feedback_state_codec"])
+            feedback_state_block_size = int(group["feedback_state_block_size"])
             error_feedback = bool(group.get("error_feedback", False))
             error_feedback_decay = float(
                 group.get("error_feedback_decay", 1.0)
@@ -2569,11 +2799,14 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     continue
                 module = self.modules_by_id[id(weight)]
                 state = self.state[weight]
-                if "momentum_buffer" not in state:
-                    state["momentum_buffer"] = torch.zeros_like(weight)
-                buffer = state["momentum_buffer"]
-                buffer.mul_(momentum).add_(gradient)
-                combined = gradient.add(buffer, alpha=momentum)
+                buffer = _momentum_state(
+                    state, weight, momentum_state_dtype
+                )
+                buffer.mul_(momentum).add_(gradient.float())
+                combined = gradient.float().add(buffer, alpha=momentum)
+                _store_momentum_state(
+                    state, buffer, momentum_state_dtype
+                )
                 polar = zeropower_via_newtonschulz5(
                     combined, steps=ns_steps
                 ).float()
@@ -2587,11 +2820,12 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                     direction - weight_decay * weight.float()
                 )
                 if error_feedback:
-                    if "compression_residual" not in state:
-                        state["compression_residual"] = torch.zeros_like(
-                            weight, dtype=torch.float32
-                        )
-                    feedback_input = state["compression_residual"].float()
+                    feedback_input = _feedback_state(
+                        state,
+                        weight,
+                        feedback_state_codec,
+                        feedback_state_block_size,
+                    )
                     corrected_update = requested_update + (
                         error_feedback_decay * feedback_input
                     )
@@ -3156,8 +3390,11 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 requested_residual_energy = requested_residual.square().sum()
                 weight.copy_(rotated)
                 if error_feedback:
-                    state["compression_residual"] = (
-                        compression_residual.contiguous()
+                    _store_feedback_state(
+                        state,
+                        compression_residual,
+                        feedback_state_codec,
+                        feedback_state_block_size,
                     )
                 module.last_angles.copy_(
                     parent_angles.to(dtype=module.last_angles.dtype)
@@ -3219,6 +3456,9 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                         "coordinates": module.coordinate_count,
                         "error_feedback": error_feedback,
                         "error_feedback_decay": error_feedback_decay,
+                        "momentum_state_dtype": momentum_state_dtype,
+                        "feedback_state_codec": feedback_state_codec,
+                        "feedback_state_block_size": feedback_state_block_size,
                         "error_feedback_max_nominal_steps": (
                             error_feedback_max_nominal_steps
                         ),
@@ -3357,6 +3597,12 @@ class MuonMatchedGivens(torch.optim.Optimizer):
                 )
         self.last_step_diagnostics = diagnostics
         return loss
+
+    def load_state_dict(self, state_dict):
+        result = super().load_state_dict(state_dict)
+        _restore_optimizer_group_codec_defaults(self)
+        _restore_persistent_state_dtypes(self)
+        return result
 
     def zero_grad(self, set_to_none: bool = True) -> None:
         super().zero_grad(set_to_none=set_to_none)

@@ -20,6 +20,8 @@ from examples.nanogpt.muon_matched_givens import (
     MuonDirectedProductLinear,
     MuonMatchedGivens,
     batched_multistage_directed_sparse_update,
+    decode_blockwise_int8_optimizer_state,
+    encode_blockwise_int8_optimizer_state,
 )
 
 
@@ -47,6 +49,7 @@ def make_module(
 
 def make_optimizer(
     modules: list[MuonDirectedProductLinear],
+    **kwargs,
 ) -> MuonDirectedProduct:
     return MuonDirectedProduct(
         modules,
@@ -54,6 +57,7 @@ def make_optimizer(
         momentum=0.95,
         weight_decay=0.1,
         ns_steps=5,
+        **kwargs,
     )
 
 
@@ -177,6 +181,121 @@ def test_optimizer_resume_is_exact() -> None:
         assert torch.equal(original.optimizer_step, restored.optimizer_step)
 
 
+def test_blockwise_int8_optimizer_state_codec_is_deterministic() -> None:
+    source = torch.randn(5, 7, generator=torch.Generator().manual_seed(1301))
+    quantized, scales = encode_blockwise_int8_optimizer_state(
+        source, block_size=8
+    )
+    second_quantized, second_scales = encode_blockwise_int8_optimizer_state(
+        source, block_size=8
+    )
+    decoded = decode_blockwise_int8_optimizer_state(
+        quantized, scales, block_size=8
+    )
+    assert quantized.dtype == torch.int8
+    assert scales.dtype == torch.float16
+    assert scales.numel() == 5
+    assert torch.equal(quantized, second_quantized)
+    assert torch.equal(scales, second_scales)
+    assert torch.max(torch.abs(decoded - source)) <= scales.float().max()
+
+
+def test_compact_directed_state_persists_and_resumes_exactly() -> None:
+    modules = [
+        make_module(layer_id=index, error_feedback=True)
+        for index in range(2)
+    ]
+    optimizer = make_optimizer(
+        modules,
+        momentum_state_dtype="float16",
+        feedback_state_codec="int8_blockwise",
+        feedback_state_block_size=8,
+    )
+    generator = torch.Generator().manual_seed(1303)
+    for module in modules:
+        module.weight.grad = torch.randn(
+            module.weight.shape, generator=generator
+        )
+    optimizer.step()
+    for module in modules:
+        state = optimizer.state[module.weight]
+        assert state["momentum_buffer"].dtype == torch.float16
+        assert state["compression_residual"].dtype == torch.int8
+        assert state["compression_residual_block_scale"].dtype == torch.float16
+
+    module_states = [copy.deepcopy(module.state_dict()) for module in modules]
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    resumed = [
+        make_module(layer_id=index, error_feedback=True)
+        for index in range(2)
+    ]
+    resumed_optimizer = make_optimizer(
+        resumed,
+        momentum_state_dtype="float16",
+        feedback_state_codec="int8_blockwise",
+        feedback_state_block_size=8,
+    )
+    for module, state in zip(resumed, module_states, strict=True):
+        module.load_state_dict(state)
+    resumed_optimizer.load_state_dict(optimizer_state)
+    for module in resumed:
+        state = resumed_optimizer.state[module.weight]
+        assert state["momentum_buffer"].dtype == torch.float16
+        assert state["compression_residual"].dtype == torch.int8
+        assert state["compression_residual_block_scale"].dtype == torch.float16
+
+    gradients = [
+        torch.randn(module.weight.shape, generator=generator)
+        for module in modules
+    ]
+    for original, restored, gradient in zip(
+        modules, resumed, gradients, strict=True
+    ):
+        original.weight.grad = gradient.clone()
+        restored.weight.grad = gradient.clone()
+    optimizer.step()
+    resumed_optimizer.step()
+    for original, restored in zip(modules, resumed, strict=True):
+        assert torch.equal(original.weight, restored.weight)
+        for key in (
+            "momentum_buffer",
+            "compression_residual",
+            "compression_residual_block_scale",
+        ):
+            assert torch.equal(
+                optimizer.state[original.weight][key],
+                resumed_optimizer.state[restored.weight][key],
+            )
+
+
+def test_explicit_float32_codec_preserves_default_update() -> None:
+    control = [make_module(layer_id=0, error_feedback=True)]
+    explicit = [make_module(layer_id=0, error_feedback=True)]
+    explicit[0].load_state_dict(copy.deepcopy(control[0].state_dict()))
+    optimizers = (
+        make_optimizer(control),
+        make_optimizer(
+            explicit,
+            momentum_state_dtype="float32",
+            feedback_state_codec="float32",
+            feedback_state_block_size=4096,
+        ),
+    )
+    generator = torch.Generator().manual_seed(1307)
+    for _ in range(2):
+        gradient = torch.randn(control[0].weight.shape, generator=generator)
+        control[0].weight.grad = gradient.clone()
+        explicit[0].weight.grad = gradient.clone()
+        for optimizer in optimizers:
+            optimizer.step()
+    assert torch.equal(control[0].weight, explicit[0].weight)
+    for key in ("momentum_buffer", "compression_residual"):
+        assert torch.equal(
+            optimizers[0].state[control[0].weight][key],
+            optimizers[1].state[explicit[0].weight][key],
+        )
+
+
 def test_error_feedback_carries_exact_compression_residual() -> None:
     modules = [
         make_module(layer_id=index, error_feedback=True)
@@ -288,7 +407,13 @@ def test_error_feedback_optimizer_resume_is_exact() -> None:
 
 
 def test_gpt_wiring_optimizer_assignment_and_stats() -> None:
-    model = GPT(make_gpt_config())
+    config = make_gpt_config()
+    config.block_fht_mlp_cfc_directed_product_error_feedback = True
+    config.block_fht_mlp_cproj_muon_matched_givens_error_feedback = True
+    config.block_fht_mlp_muon_momentum_state_dtype = "float16"
+    config.block_fht_mlp_error_feedback_state_codec = "int8_blockwise"
+    config.block_fht_mlp_error_feedback_state_block_size = 8
+    model = GPT(config)
     modules = [block.mlp.c_fc for block in model.transformer.h]
     assert all(isinstance(module, MuonDirectedProductLinear) for module in modules)
     optimizer = model.configure_optimizers(
@@ -307,6 +432,11 @@ def test_gpt_wiring_optimizer_assignment_and_stats() -> None:
         item for item in optimizer.optimizers if isinstance(item, MuonMatchedGivens)
     )
     assert optimizer.optimizers.index(directed) < optimizer.optimizers.index(cproj)
+    for selected in (directed, cproj):
+        group = selected.param_groups[0]
+        assert group["momentum_state_dtype"] == "float16"
+        assert group["feedback_state_codec"] == "int8_blockwise"
+        assert group["feedback_state_block_size"] == 8
     tokens = torch.randint(0, 32, (2, 8))
     _logits, loss = model(tokens, tokens)
     assert loss is not None
@@ -315,6 +445,47 @@ def test_gpt_wiring_optimizer_assignment_and_stats() -> None:
     assert all(int(module.optimizer_step) == 1 for module in modules)
     # Per layer: 3*32 directed c_fc coordinates and 1*16 c_proj angles.
     assert model.block_fht_stats()["latent"] == 2 * (96 + 16)
+
+
+def test_compact_mlp_state_does_not_leak_into_attention_optimizer() -> None:
+    config = make_gpt_config()
+    config.block_fht_targets = ("attn.c_proj", "mlp.c_proj")
+    config.block_fht_attn_muon_matched_givens_targets = ("attn.c_proj",)
+    config.block_fht_attn_muon_matched_givens_stages = 1
+    config.block_fht_attn_muon_matched_givens_neighbors = 2
+    config.block_fht_attn_muon_matched_givens_fast_matching = True
+    config.block_fht_mlp_cfc_directed_product_error_feedback = True
+    config.block_fht_mlp_cproj_muon_matched_givens_error_feedback = True
+    config.block_fht_mlp_muon_momentum_state_dtype = "float16"
+    config.block_fht_mlp_error_feedback_state_codec = "int8_blockwise"
+    config.block_fht_mlp_error_feedback_state_block_size = 8
+    model = GPT(config)
+    composite = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=1e-3,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+    )
+    matched = [
+        optimizer
+        for optimizer in composite.optimizers
+        if isinstance(optimizer, MuonMatchedGivens)
+    ]
+    assert len(matched) == 2
+    attention_weights = {
+        id(block.attn.c_proj.weight) for block in model.transformer.h
+    }
+    attention = next(
+        optimizer
+        for optimizer in matched
+        if id(optimizer.param_groups[0]["params"][0]) in attention_weights
+    )
+    mlp = next(optimizer for optimizer in matched if optimizer is not attention)
+    assert attention.param_groups[0]["momentum_state_dtype"] == "float32"
+    assert attention.param_groups[0]["feedback_state_codec"] == "float32"
+    assert mlp.param_groups[0]["momentum_state_dtype"] == "float16"
+    assert mlp.param_groups[0]["feedback_state_codec"] == "int8_blockwise"
 
 
 def test_directed_cfc_preserves_dense_paired_seed_initialization() -> None:
@@ -378,6 +549,44 @@ def test_directed_cfc_accepts_dense_cproj_control_and_rejects_unqualified_genera
         sys, "argv", ["train.py", "--config", str(generated_path)]
     ):
         with pytest.raises(ValueError, match="either dense c_proj"):
+            parse_args()
+
+
+def test_compact_mlp_optimizer_state_requires_qualified_paired_path(
+    tmp_path: Path,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    config = json.loads(
+        (
+            root
+            / "examples/nanogpt/configs/"
+            "pro6_mai_v3_124m_repairedfullattn_plus_fullmlp_"
+            "cfcdecay1_cprojdecay0p5_5tpp_lr24e4_v2.json"
+        ).read_text()
+    )
+    config.update(
+        {
+            "block_fht_mlp_muon_momentum_state_dtype": "float16",
+            "block_fht_mlp_error_feedback_state_codec": "int8_blockwise",
+            "block_fht_mlp_error_feedback_state_block_size": 4096,
+        }
+    )
+    accepted_path = tmp_path / "compact_state.json"
+    accepted_path.write_text(json.dumps(config))
+    with patch.object(
+        sys, "argv", ["train.py", "--config", str(accepted_path)]
+    ):
+        parsed = parse_args()
+    assert parsed.block_fht_mlp_muon_momentum_state_dtype == "float16"
+    assert parsed.block_fht_mlp_error_feedback_state_codec == "int8_blockwise"
+
+    config["block_fht_mlp_cfc_directed_product_error_feedback"] = False
+    invalid_path = tmp_path / "compact_state_without_cfc_feedback.json"
+    invalid_path.write_text(json.dumps(config))
+    with patch.object(
+        sys, "argv", ["train.py", "--config", str(invalid_path)]
+    ):
+        with pytest.raises(ValueError, match="compact MLP optimizer state"):
             parse_args()
 
 

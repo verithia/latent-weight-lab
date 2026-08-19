@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_full_mlp_temporal_state_hybrid_precision_result_v1",
+  "classification": "HYBRID_PRECISION_AMBIENT_STATE_PLAUSIBLE",
+  "recorded_at": "2026-08-19",
+  "identity": {
+    "git_commit": "1ff991ef8e1e2e0ba49d3b5b1ae4b45e1095e326",
+    "plan_sha256": "30205bb712c64a11ca1506faea1673e390e8421b3b197726aa90dc94e72adbac",
+    "checkpoint_sha256": "1efdfcbc8dde0e9c2f584759a5a05f890380dd6c5099fe07ee8a68772b298cee",
+    "parent_oracle_result_sha256": "b2196c24ca8e8e8b74810e35b7d048173c0edb14f420cf801d768767495b48a4",
+    "raw_result_sha256": "4ceaf92238c3f0305dfbbdbb4d0dd42dceaed2c652536bfbbb3a7de7cb4e8ee7",
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_full_mlp_temporal_state_hybrid_precision_oracle_20260819/result.json"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "parameter_updates": 0,
+    "foreground_polled": true,
+    "exit_code": 0
+  },
+  "selected": {
+    "name": "fp16_momentum_int8_feedback",
+    "momentum_codec": "float16",
+    "feedback_codec": "int8_block4096_fp16_scale",
+    "persistent_storage_bytes": 169896960,
+    "dense_fp32_bytes": 452984832,
+    "storage_ratio": 0.37506103515625,
+    "storage_reduction_factor": 2.6662327095199347,
+    "momentum_energy_recovery": 0.9999999559988578,
+    "minimum_layer_momentum_cosine": 0.9999999001864364,
+    "feedback_energy_recovery": 0.9999215751031162,
+    "minimum_layer_feedback_cosine": 0.9999497316855658,
+    "polar_energy_recovery": 0.9999956172031941,
+    "minimum_layer_polar_cosine": 0.9999935309459342
+  },
+  "rejected_alternatives": {
+    "bf16_momentum_int8_feedback": {
+      "reason": "Same storage as FP16 but worse polar preservation.",
+      "polar_energy_recovery": 0.9998580911617282,
+      "minimum_layer_polar_cosine": 0.9998999531967716
+    },
+    "fp16_momentum_fp16_feedback_control": {
+      "reason": "Direction control passes but storage ratio 0.5 exceeds the frozen 0.38 ceiling.",
+      "storage_ratio": 0.5
+    }
+  },
+  "decision": {
+    "codec_implementation_authorized": true,
+    "focused_resume_tests_authorized": true,
+    "exact_config_mfu_vram_gate_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false,
+    "next_action": "Implement exactly FP16 momentum and block-4096 int8 feedback for the c_fc directed-product and c_proj matched-Givens optimizers. Prove persistent dtypes, deterministic codec behavior, exact resume, default-path equivalence, and then register an exact 124M config for MFU and peak-VRAM gating."
+  }
+}

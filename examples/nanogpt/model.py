@@ -216,6 +216,9 @@ class GPTConfig:
     block_fht_mlp_cfc_directed_product_family_radius_ratio: float = 0.6589686140591383
     block_fht_mlp_cfc_directed_product_error_feedback: bool = False
     block_fht_mlp_cfc_directed_product_error_feedback_decay: float = 1.0
+    block_fht_mlp_muon_momentum_state_dtype: str = "float32"
+    block_fht_mlp_error_feedback_state_codec: str = "float32"
+    block_fht_mlp_error_feedback_state_block_size: int = 4096
     block_fht_ffn_postgelu_std_target: float = 0.0
     block_fht_mlp_shared_hidden_gain: bool = False
     block_fht_mlp_shared_hidden_gain_scale: float = 1.0
@@ -5193,6 +5196,15 @@ class GPT(nn.Module):
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
                         ns_steps=muon_ns_steps,
+                        momentum_state_dtype=(
+                            self.config.block_fht_mlp_muon_momentum_state_dtype
+                        ),
+                        feedback_state_codec=(
+                            self.config.block_fht_mlp_error_feedback_state_codec
+                        ),
+                        feedback_state_block_size=(
+                            self.config.block_fht_mlp_error_feedback_state_block_size
+                        ),
                     )
                 )
                 for group in optimizers[-1].param_groups:
@@ -5241,6 +5253,15 @@ class GPT(nn.Module):
                         error_feedback_max_nominal_steps=(
                             self.config
                             .block_fht_mlp_cproj_muon_matched_givens_error_feedback_max_nominal_steps
+                        ),
+                        momentum_state_dtype=(
+                            self.config.block_fht_mlp_muon_momentum_state_dtype
+                        ),
+                        feedback_state_codec=(
+                            self.config.block_fht_mlp_error_feedback_state_codec
+                        ),
+                        feedback_state_block_size=(
+                            self.config.block_fht_mlp_error_feedback_state_block_size
                         ),
                     )
                 )
