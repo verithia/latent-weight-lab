@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_0p5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "FULL_AMBIENT_DIRECTION_SUPPORT_ALONE_DOES_NOT_PRESERVE_THE_ATTENTION_PARENT",
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp",
+    "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp_20260819T205109Z_1409578",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "ce42a8c606736d5e27d740833056fd193784c51c",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp.json",
+    "archived_config_sha256": "0202dc68b865ad87cbb62a246f11e634be48aced50aedee360b426b4df528c32",
+    "resolved_config_sha256": "30ca6fe5cc06f4d8e82cde14655822b97180e65734af0eb17664c08ed7554bd3",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "832d54b5264172a7f3e1cd61401b5310754035dfb565a05287931df14cdec504",
+    "preflight_mfu_fraction": 0.2855357309273985,
+    "started_at": "2026-08-20T04:51:11+08:00",
+    "finished_at": "2026-08-20T05:00:24+08:00",
+    "wall_seconds": 553,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp_20260819T205109Z_1409578.json",
+        "sha256": "1ce5becf59e22cdd0ea4ed6dda69a00dc4f5b89261fe4efd1fb5c87115f12523"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp_20260819T205109Z_1409578.log",
+        "sha256": "a6713902b2ef5fca577aa72d5155a2e3fb16b2ab9988724bc677eddee4c9bfb8"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp_20260819T205109Z_1409578.json",
+        "sha256": "836f35b5fcd71050864342ff096c0018cd0e696f85c2bab40392736bafdf9ade"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp/scientific/ckpt.pt",
+        "sha256": "df6b2154e08e7d4a052fd27fe0460f2b89fd493ea4e47fa0118220da680ecde0"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp/scientific/ckpt.meta.json",
+        "sha256": "685ac8858fe84dfa37db10609bf49f7be4dcecbac752a63fbf3eafd6510961e7"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9959, "validation_ce": 10.9960},
+    {"step": 60, "train_ce": 6.1983, "validation_ce": 6.2075},
+    {"step": 120, "train_ce": 5.6737, "validation_ce": 5.6783},
+    {"step": 180, "train_ce": 5.4253, "validation_ce": 5.4280},
+    {"step": 238, "train_ce": 5.3638, "validation_ce": 5.3661}
+  ],
+  "comparison": {
+    "matched_full_attention_parent_validation_ce": 5.2917,
+    "ordinary_dense_124m_0p5tpp_validation_ce": 5.4890,
+    "frozen_maximum_validation_ce": 5.3117,
+    "terminal_validation_ce": 5.3661,
+    "delta_to_parent_ce": 0.0744,
+    "delta_to_dense_ce": -0.1229,
+    "margin_to_frozen_maximum_ce": 0.0544,
+    "perplexity_ratio_to_parent": 1.0772376143744506,
+    "perplexity_ratio_to_dense": 0.884352093348543,
+    "validation_delta_to_parent_by_step_60_120_180_238": [0.0053, -0.0020, 0.0266, 0.0744],
+    "parent_step_matching_candidate_terminal_ce": 196.92763410163724,
+    "terminal_parent_token_penalty": 1.2085657814644983,
+    "common_loss_candidate_to_parent_step_ratios": [
+      1.0069661014105695,
+      0.9973838243110584,
+      0.9970966209149473,
+      1.0394285671436974,
+      1.1275286858000533,
+      1.2085657814644988
+    ],
+    "all_fixed_evaluations_finite": true,
+    "preregistered_parent_preservation_gate_passed": false,
+    "ordinary_dense_endpoint_beaten_at_short_horizon": true
+  },
+  "representation": {
+    "mlp_weight_elements": 56623104,
+    "mlp_persistent_codec_bytes": 56650752,
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_persistent_weight_reduction": 3.998047828208882,
+    "attention_cproj_plus_mlp_codec_bytes": 63732096,
+    "dense_runtime_materialization": true,
+    "dense_fp32_muon_momentum": true,
+    "inference_shape_and_flops": "unchanged"
+  },
+  "decision": {
+    "smallest_rung_parent_gate_passed": false,
+    "automatic_rerun": false,
+    "automatic_5tpp": false,
+    "larger_model": false,
+    "next_action": "Measure the terminal requested-Muon-update projection error and distinguish discarded lattice residual from nonlinear co-adaptation. Do not return to another static low-dimensional transform sweep.",
+    "scope": "The result is already better than ordinary dense at the short endpoint, but it fails the stricter causal requirement that adding full-MLP replacement preserve the matched full-attention parent within 0.02 CE."
+  },
+  "watchdog": {
+    "policy": "terminal/error-only",
+    "terminal_callback_delivered_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-20T05:00:24+08:00"]
+  }
+}

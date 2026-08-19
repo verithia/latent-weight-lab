@@ -11,7 +11,9 @@ from examples.nanogpt.muon_int8_lattice import (
 )
 
 
-def make_module(seed: int = 17) -> MuonInt8LatticeLinear:
+def make_module(
+    seed: int = 17, *, error_feedback: bool = False
+) -> MuonInt8LatticeLinear:
     return MuonInt8LatticeLinear(
         5,
         4,
@@ -20,6 +22,7 @@ def make_module(seed: int = 17) -> MuonInt8LatticeLinear:
         base_seed=seed,
         weight_std=0.02,
         layer_id=2,
+        error_feedback=error_feedback,
     )
 
 
@@ -107,6 +110,65 @@ def test_model_and_optimizer_resume_are_bit_exact_for_the_next_step() -> None:
     assert int(restored.optimizer_step) == int(module.optimizer_step) == 2
 
 
+def test_error_feedback_accumulates_subquantum_muon_updates() -> None:
+    torch.manual_seed(31)
+    direct = make_module(seed=37, error_feedback=False)
+    feedback = make_module(seed=37, error_feedback=True)
+    coarse = direct.base_weight + 0.1 * torch.randn_like(direct.weight)
+    direct.project_weight_(coarse)
+    feedback.load_state_dict(copy.deepcopy(direct.state_dict()), strict=True)
+    initial_codes = direct.codes.clone()
+
+    direct_optimizer = MuonInt8Lattice(
+        [direct], lr=1e-6, momentum=0.0, weight_decay=0.0, ns_steps=1
+    )
+    feedback_optimizer = MuonInt8Lattice(
+        [feedback], lr=1e-6, momentum=0.0, weight_decay=0.0, ns_steps=1
+    )
+    gradient = torch.randn_like(direct.weight)
+    for _ in range(256):
+        direct.weight.grad = gradient.clone()
+        feedback.weight.grad = gradient.clone()
+        direct_optimizer.step()
+        feedback_optimizer.step()
+
+    assert torch.equal(direct.codes, initial_codes)
+    assert not torch.equal(feedback.codes, initial_codes)
+    feedback_state = feedback_optimizer.state[feedback.weight]
+    assert feedback_state["compression_residual"].dtype == torch.float16
+    assert torch.isfinite(feedback_state["compression_residual"]).all()
+
+
+def test_error_feedback_optimizer_resume_is_bit_exact() -> None:
+    torch.manual_seed(41)
+    module = make_module(seed=43, error_feedback=True)
+    optimizer = make_optimizer(module)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = make_module(seed=47, error_feedback=True)
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    assert torch.equal(restored.codes, module.codes)
+    assert torch.equal(restored.scales, module.scales)
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    torch.testing.assert_close(
+        restored_optimizer.state[restored.weight]["compression_residual"],
+        optimizer.state[module.weight]["compression_residual"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
 def test_gpt_routes_attention_cproj_to_its_own_muon_optimizer() -> None:
     model = GPT(
         GPTConfig(
@@ -191,11 +253,14 @@ def test_gpt_routes_both_mlp_matrices_to_the_lattice_optimizer() -> None:
                 "mlp.c_proj",
             ),
             block_fht_mlp_int8_lattice_block_size=16,
+            block_fht_mlp_int8_lattice_error_feedback=True,
         )
     )
     mlp = model.transformer.h[0].mlp
     assert isinstance(mlp.c_fc, MuonInt8LatticeLinear)
     assert isinstance(mlp.c_proj, MuonInt8LatticeLinear)
+    assert mlp.c_fc.error_feedback is True
+    assert mlp.c_proj.error_feedback is True
     assert model.mlp_int8_lattice_stats() == {
         "modules": 2,
         "elements": 512,

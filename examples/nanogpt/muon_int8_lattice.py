@@ -5,7 +5,8 @@ initial weight plus one FP16 scale per block.  A dense FP32 weight is
 materialized transiently for the forward/backward pass; it is deliberately
 excluded from ``state_dict``.  The optimizer computes the ordinary dense Muon
 request and projects the requested next weight onto a monotone running-scale
-integer lattice.
+integer lattice.  An optional FP16 optimizer-side compression residual carries
+sub-quantum requests forward without changing the model or inference codec.
 
 This is a weight-state codec, not a low-dimensional Mapping-Network latent.
 The dense gradient and Muon momentum remain ambient unless a separate codec
@@ -39,12 +40,14 @@ class MuonInt8LatticeLinear(nn.Module):
         base_seed: int = 271828,
         weight_std: float = 0.02,
         layer_id: int = -1,
+        error_feedback: bool = False,
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
         self.out_features = int(out_features)
         self.block_size = int(block_size)
         self.layer_id = int(layer_id)
+        self.error_feedback = bool(error_feedback)
         if self.in_features <= 0 or self.out_features <= 0:
             raise ValueError("int8 lattice dimensions must be positive")
         if self.block_size <= 0:
@@ -121,6 +124,11 @@ class MuonInt8LatticeLinear(nn.Module):
             "transient_reproducible_base_bytes": self.base_weight.numel()
             * self.base_weight.element_size(),
             "optimizer_momentum": "dense_fp32_not_in_codec_count",
+            "optimizer_error_feedback": (
+                "dense_fp16_not_in_codec_count"
+                if self.error_feedback
+                else "disabled"
+            ),
         }
 
     def _make_base(self, *, device: torch.device) -> torch.Tensor:
@@ -266,5 +274,20 @@ class MuonInt8Lattice(torch.optim.Optimizer):
                 if weight_decay != 0.0:
                     requested = requested * (1.0 - lr * weight_decay)
                 requested = requested.add(update.float(), alpha=-lr)
-                self.modules_by_id[id(weight)].project_weight_(requested)
+                module = self.modules_by_id[id(weight)]
+                if module.error_feedback:
+                    if "compression_residual" not in state:
+                        state["compression_residual"] = torch.zeros_like(
+                            weight, dtype=torch.float16
+                        )
+                    residual = state["compression_residual"]
+                    projection_target = requested.add(residual.float())
+                    module.project_weight_(projection_target)
+                    residual.copy_(
+                        (projection_target - module.weight.float()).to(
+                            dtype=residual.dtype
+                        )
+                    )
+                else:
+                    module.project_weight_(requested)
         return loss

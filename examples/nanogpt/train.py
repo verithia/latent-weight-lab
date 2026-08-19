@@ -1282,6 +1282,11 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=314159,
     )
+    parser.add_argument(
+        "--block-fht-mlp-int8-lattice-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -2049,6 +2054,14 @@ def parse_args() -> argparse.Namespace:
     mlp_int8_lattice_targets = set(
         namespace.block_fht_mlp_int8_lattice_targets
     )
+    if (
+        namespace.block_fht_mlp_int8_lattice_error_feedback
+        and not mlp_int8_lattice_targets
+    ):
+        raise ValueError(
+            "MLP int8 lattice error feedback requires at least one MLP "
+            "int8 lattice target"
+        )
     if mlp_int8_lattice_targets:
         supported_mlp_int8_lattice_targets = {"mlp.c_fc", "mlp.c_proj"}
         if namespace.method != "block_fht":
@@ -2783,6 +2796,9 @@ def main() -> None:
         block_fht_mlp_int8_lattice_seed=(
             args.block_fht_mlp_int8_lattice_seed
         ),
+        block_fht_mlp_int8_lattice_error_feedback=(
+            args.block_fht_mlp_int8_lattice_error_feedback
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -3155,7 +3171,11 @@ def main() -> None:
                 f"fp32_weight_bytes={mlp_lattice_stats['fp32_weight_bytes']:,} "
                 f"storage_ratio={mlp_lattice_stats['storage_ratio']:.8f} "
                 "runtime_materialization=dense_fp32 "
-                "optimizer_momentum=dense_fp32",
+                "optimizer_momentum=dense_fp32 "
+                "optimizer_error_feedback="
+                f"{'dense_fp16' if args.block_fht_mlp_int8_lattice_error_feedback else 'disabled'} "
+                "optimizer_error_feedback_bytes="
+                f"{2 * mlp_lattice_stats['elements'] if args.block_fht_mlp_int8_lattice_error_feedback else 0:,}",
                 flush=True,
             )
 

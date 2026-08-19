@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_mlp_int8_lattice_0p5tpp_run_metadata_v1",
   "recorded_at": "2026-08-20",
-  "state": "running",
+  "state": "finished",
   "run": {
     "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp",
     "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_0p5tpp_20260819T205109Z_1409578",
@@ -69,7 +69,22 @@
     "maximum_validation_ce": 5.3117,
     "matched_full_attention_parent_validation_ce": 5.2917,
     "threshold_frozen_before_launch": true,
-    "terminal_validation_ce": null,
-    "passed": null
+    "terminal_validation_ce": 5.3661,
+    "passed": false
+  },
+  "terminal": {
+    "finished_at": "2026-08-20T05:00:24+08:00",
+    "wall_seconds": 553,
+    "exit_code": 0,
+    "classification": "clean",
+    "last_iter": 238,
+    "train_ce": 5.3638,
+    "validation_ce": 5.3661,
+    "process_group_alive": false,
+    "gpu_returned_idle": true,
+    "workspace_bytes": 271101036368,
+    "terminal_callback_delivered_once": true,
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_0p5tpp_training_result.json",
+    "result_sha256": "72c3498ffa326a045227e6b95f1fe91eadf0ff5b423fd881e3b7f18038391734"
   }
 }

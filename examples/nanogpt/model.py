@@ -180,6 +180,7 @@ class GPTConfig:
     block_fht_mlp_int8_lattice_targets: tuple[str, ...] = ()
     block_fht_mlp_int8_lattice_block_size: int = 4096
     block_fht_mlp_int8_lattice_seed: int = 314159
+    block_fht_mlp_int8_lattice_error_feedback: bool = False
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2341,6 +2342,9 @@ class MLP(nn.Module):
                 ),
                 weight_std=0.02,
                 layer_id=layer_id,
+                error_feedback=(
+                    config.block_fht_mlp_int8_lattice_error_feedback
+                ),
             )
         elif directed_product_cfc:
             self.c_fc = MuonDirectedProductLinear(
@@ -2554,6 +2558,9 @@ class MLP(nn.Module):
                 ),
                 weight_std=0.02 / math.sqrt(2 * config.n_layer),
                 layer_id=layer_id,
+                error_feedback=(
+                    config.block_fht_mlp_int8_lattice_error_feedback
+                ),
             )
         elif muon_matched_cproj:
             self.c_proj = MuonMatchedGivensLinear(
