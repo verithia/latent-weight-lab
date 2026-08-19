@@ -4,7 +4,8 @@
     "automatic_rerun": false,
     "exact_config_mfu_passed": true,
     "larger_model": false,
-    "one_124m_5tpp_training_after_mfu_pass": true
+    "one_124m_5tpp_training_after_mfu_pass": true,
+    "authorized_124m_5tpp_training_consumed": true
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp.json",
@@ -66,7 +67,7 @@
     "Dense transient materialization and materialized inference FLOPs remain unchanged.",
     "A 5TPP pass authorizes no larger model or 20TPP run automatically."
   ],
-  "status": "exact_config_mfu_passed_one_scientific_run_authorized",
+  "status": "authorized_scientific_run_launched_terminal_pending",
   "terminal_gate": {
     "fail_classification": "MLP_TEMPORAL_CLOSURE_DOES_NOT_TRANSFER_TO_5TPP",
     "full_attention_parent_terminal_validation_ce": 3.5499,
