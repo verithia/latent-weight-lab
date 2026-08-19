@@ -2,9 +2,9 @@
   "authorization": {
     "automatic_20tpp": false,
     "automatic_rerun": false,
-    "exact_config_mfu_passed": false,
+    "exact_config_mfu_passed": true,
     "larger_model": false,
-    "one_124m_5tpp_training_after_mfu_pass": false
+    "one_124m_5tpp_training_after_mfu_pass": true
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp.json",
@@ -51,6 +51,13 @@
       "terminal_validation_ce": 5.291025161743164
     }
   },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_5tpp_mfu_result.json",
+    "remote_certificate_sha256": "2c4d94f595b1f1fb133f1ce40e33c754b3ab4cbc72d4561093c6cd766e9af982",
+    "mfu_fraction": 0.2866845134262591,
+    "peak_vram_mib": 35540.62,
+    "passed": true
+  },
   "question": "Does MLP-local temporal error feedback preserve full replacement at 5TPP, rather than only repairing the 0.5TPP endpoint?",
   "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_5tpp_plan_v1",
   "scope_guards": [
@@ -59,7 +66,7 @@
     "Dense transient materialization and materialized inference FLOPs remain unchanged.",
     "A 5TPP pass authorizes no larger model or 20TPP run automatically."
   ],
-  "status": "registered_before_exact_config_mfu_and_training",
+  "status": "exact_config_mfu_passed_one_scientific_run_authorized",
   "terminal_gate": {
     "fail_classification": "MLP_TEMPORAL_CLOSURE_DOES_NOT_TRANSFER_TO_5TPP",
     "full_attention_parent_terminal_validation_ce": 3.5499,
