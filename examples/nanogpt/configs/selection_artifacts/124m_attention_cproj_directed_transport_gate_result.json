@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_attention_cproj_directed_transport_gate_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "REJECT_ATTENTION_CPROJ_DIRECTED_TRANSPORT",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground zero-update oracle; no watchdog or callback",
+    "source_commit": "385c4297288de301b815856c69fd7c292aa520b2",
+    "source_sha256": "6465d29b2da91f19d2f0d0ac342a1426c66b044fe1ae3953e9c1f52e31847e00",
+    "elapsed_seconds": 7.1533191204071045,
+    "focused_tests": "2 passed in 0.65s"
+  },
+  "identity": {
+    "plan_sha256": "4e5c10d4e5188d1d550d1e572eee7b2bbf9a1ce1ab2a38ebdfe428fce5fd54a0",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "raw_result_sha256": "66c3e9b0d635e8c960bab63440ba9bef74d0e2635e3b459f4830128da076ae0b",
+    "cells_sha256": "e782f9ca6f5987163ec196fb5d1485201b2e552cf48d624e6e138405a5844647",
+    "diagnostics_sha256": "d1e9aa4d5cd61387309b85fc437bbfae68dff1d8d06ca327804e74bc9b32f31f"
+  },
+  "measurements": {
+    "output_24x2": {
+      "fixed_scale_recovery": -0.5998076406085502,
+      "cosine": 0.20009616427512464,
+      "minimum_phase_recovery": -0.6313267850764441,
+      "minimum_layer_recovery": -0.8949384739944846,
+      "minimum_cell_recovery": -0.9256795320237874,
+      "mean_fit_seconds_per_phase": 0.09775318277534098
+    },
+    "output_16x3": {
+      "fixed_scale_recovery": -0.6684116294230897,
+      "cosine": 0.16579418207838695
+    },
+    "output_12x4": {
+      "fixed_scale_recovery": -0.7114834014436467,
+      "cosine": 0.14425828182384565
+    },
+    "output_8x6": {
+      "fixed_scale_recovery": -0.7632369989229899,
+      "cosine": 0.11838146962337094
+    },
+    "input16_output32": {
+      "fixed_scale_recovery": -0.6800769224129068,
+      "cosine": 0.15996153271684466
+    },
+    "input24_output24": {
+      "fixed_scale_recovery": -0.6130089324008683,
+      "cosine": 0.19349553344773338
+    },
+    "output32_input16": {
+      "fixed_scale_recovery": -0.6802571205047854,
+      "cosine": 0.15987146185903534
+    }
+  },
+  "decision": {
+    "passed": false,
+    "selected_candidate": null,
+    "all_candidates_failed_every_direction_threshold": true,
+    "implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "interpretation": [
+    "Removing antisymmetric pair coupling does not repair attention c_proj at the same 6.25-percent coordinate budget. The best directed schedule has cosine 0.20010 and becomes actively harmful after the production family-radius normalization.",
+    "Greater directed depth monotonically worsens alignment: output-only cosine falls from 0.20010 at 24x2 to 0.11838 at 8x6. This closes schedule depth and input/output reallocation inside this directed-product family.",
+    "The orthogonal bilateral/residual control remains much better at recovery 0.23672 and cosine 0.49354. Its advantage comes from full-rank multiplicative motion, not from pair coupling being intrinsically desirable.",
+    "For square attention c_proj under Muon, the requested polar update is full-rank and close to spectrally flat. Sparse actions on the current weight use too few local coordinates to encode that ambient direction. The next representation must act on the requested polar direction itself and retain full ambient support."
+  ],
+  "next_action": "Preregister a zero-update full-support low-bit polar-direction codec gate on the same 60 sealed cells. Test binary, ternary, and int4 blockwise codes with frozen storage and direction thresholds; do not authorize training from this rejection."
+}
