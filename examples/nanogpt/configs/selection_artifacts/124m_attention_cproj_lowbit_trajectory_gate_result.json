@@ -1,0 +1,82 @@
+{
+  "schema_version": "mai_124m_attention_cproj_lowbit_trajectory_gate_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "REJECT_ATTENTION_CPROJ_LOWBIT_PERSISTENT_STATE",
+  "parameter_updates": 0,
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "direct foreground zero-update oracle; no watchdog or callback",
+    "source_commit": "818bc601aa6453755789d37adfa576f737c2af2a",
+    "source_sha256": "87f3d671af38cf1d2e998490617b15a2b8699f79613d77d657133d585f70f68c",
+    "elapsed_seconds": 6.675242185592651,
+    "focused_tests": "6 passed in 0.71s"
+  },
+  "identity": {
+    "plan_sha256": "56be22e63b58a080f684eab8e432421133e9c9b0341f7cb061d40911c5898946",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "raw_result_sha256": "9daab9396da0ff3cc89048aee5fd74c5ca5faed57a0025cff04eeedd3a3456e3",
+    "cells_sha256": "20d3ccf01106e2969d3264641b2de94cec67935ecea6fac5a0c5f1ccc8579dee",
+    "codec_rows_sha256": "cf6e6d5b537aeec2bd6f2fb655719d4f41ca48ec11c9711b30bc57f5465619e1"
+  },
+  "measurements": {
+    "binary_b4096": {
+      "state_recovery": 0.6066967642382352,
+      "endpoint_state_recovery": 0.6056376565900363,
+      "minimum_layer_state_recovery": 0.5333680678855988,
+      "minimum_snapshot_state_recovery": 0.6039136009501105,
+      "chord_recovery": -2.4550637632822263,
+      "chord_cosine": 0.32824207629705215,
+      "chord_norm_ratio": 1.9291189060169485,
+      "minimum_phase_chord_recovery": -19.748301986760698,
+      "minimum_layer_chord_recovery": -2.785977615195667,
+      "mean_code_churn_fraction": 0.05738893614556545,
+      "storage_ratio": 0.0313720703125
+    },
+    "ternary_b4096": {
+      "state_recovery": 0.7837801200975963,
+      "endpoint_state_recovery": 0.7832524998502974,
+      "minimum_layer_state_recovery": 0.7122999813065551,
+      "minimum_snapshot_state_recovery": 0.7810310400348093,
+      "chord_recovery": -2.0863416827424257,
+      "chord_cosine": 0.4197315240478438,
+      "chord_norm_ratio": 1.9238978163911973,
+      "minimum_phase_chord_recovery": -19.292232246099022,
+      "minimum_layer_chord_recovery": -2.676049639630887,
+      "mean_code_churn_fraction": 0.09306040960244644,
+      "storage_ratio": 0.0626220703125
+    },
+    "int4_b4096": {
+      "state_recovery": 0.9605583963846099,
+      "endpoint_state_recovery": 0.9606506639317166,
+      "minimum_layer_state_recovery": 0.9225248041946765,
+      "minimum_snapshot_state_recovery": 0.9587270388475075,
+      "chord_recovery": -0.5890353626547078,
+      "chord_cosine": 0.6215185500510649,
+      "chord_positive_line_recovery": 0.386285308057578,
+      "chord_norm_ratio": 1.6091017975356938,
+      "minimum_phase_chord_recovery": -12.289468603365169,
+      "minimum_layer_chord_recovery": -1.949416546862945,
+      "mean_code_churn_fraction": 0.21140138800136554,
+      "storage_ratio": 0.1251220703125
+    }
+  },
+  "decision": {
+    "passed": false,
+    "selected_candidate": null,
+    "all_candidates_failed_only_chord_checks": true,
+    "terminal_fixed_checkpoint_replay_authorized": false,
+    "model_implementation_authorized": false,
+    "mfu_preflight_authorized": false,
+    "language_model_training_authorized": false,
+    "larger_rung_authorized": false
+  },
+  "interpretation": [
+    "All three codecs reconstruct persistent displacement states well enough to clear their frozen state checks, including 96.06 percent recovery for int4, but none preserves the adjacent dense training chords.",
+    "Int4 is the closest arm: chord cosine 0.62152 is near the 0.65 floor and its optimal one-dimensional line recovery is 0.38629, but independently decoded chords are 1.6091 times the dense chord norm and fixed-scale recovery is negative.",
+    "The failure is temporal quantization jitter, not lack of ambient direction support. Per-snapshot optimal scales and independently changing codes make small late-training motions much noisier than the individual reconstructed states.",
+    "This closes independent one-to-four-bit displacement re-encoding as the persistent attention-c_proj state. The next causal family must correlate quantization error over time, for example a fixed or slowly moving integer lattice with a proximal code-update rule; it must be tested as another zero-update trajectory oracle before any training."
+  ],
+  "next_action": "Preregister a persistent fixed/slow-scale integer-lattice trajectory gate. Compare int4 and int8 lattices with causal proximal updates, forbid dense carry, and require the same frozen state and chord thresholds before any terminal loss replay."
+}
