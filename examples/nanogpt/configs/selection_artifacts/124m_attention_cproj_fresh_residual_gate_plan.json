@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_attention_cproj_fresh_residual_gate_plan_v1",
+  "recorded_at": "2026-08-20",
+  "scientific_question": "At fixed sparse-coordinate budget, can exact-current, multi-pass residual fitting materially increase attention c_proj coverage beyond the one-pass output chart that failed under refresh-15 feedback?",
+  "theory": {
+    "premise": "Dense trajectory attribution assigns the dominant remaining full-attention penalty to c_proj plus its V interaction. Its dense Muon motion is overwhelmingly rotational, with terminal full output-orbit recovery 0.512522 versus input-orbit recovery 0.138157 and singular-changing recovery about 0.00295.",
+    "mechanism": "Each pass chooses sparse Givens connectivity from the exact same-state residual request. This tests local coordinate coverage only; temporal carry is deliberately excluded because the prior failure confounded stale refresh and carry chasing.",
+    "control_logic": "output96 tests whether more coordinates alone suffice. Structured candidates may be selected only if they also beat output96 by a frozen ratio at the identical 36,864-coordinate budget."
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "probe_steps": [0, 594, 1188, 1782, 2372],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "target": "attn.c_proj",
+    "neighbors": 128,
+    "matching_seed": 161803,
+    "seed_step_stride": 8192,
+    "seed_layer_stride": 512,
+    "seed_candidate_stride": 64,
+    "candidates": {
+      "output64": [{"side": "output", "stages": 64}],
+      "output80": [{"side": "output", "stages": 80}],
+      "output64_residual16": [{"side": "output", "stages": 64}, {"side": "output", "stages": 16}],
+      "output96": [{"side": "output", "stages": 96}],
+      "output64_residual32": [{"side": "output", "stages": 64}, {"side": "output", "stages": 32}],
+      "input32_output64": [{"side": "input", "stages": 32}, {"side": "output", "stages": 64}],
+      "input16_output64_residual16": [{"side": "input", "stages": 16}, {"side": "output", "stages": 64}, {"side": "output", "stages": 16}]
+    }
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "control": "output64",
+    "equal_budget_control": "output96",
+    "promotion_candidates": ["output96", "output64_residual32", "input32_output64", "input16_output64_residual16"],
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.30,
+      "minimum_phase_recovery": 0.20,
+      "minimum_layer_recovery": 0.15,
+      "aggregate_cosine_minimum": 0.55,
+      "minimum_cell_descent_fraction": 0.0,
+      "output64_absolute_improvement": 0.05,
+      "maximum_coordinate_fraction": 0.0625,
+      "structured_over_monolithic_ratio": 1.02
+    },
+    "selection": "Among passing candidates maximize aggregate fixed-scale recovery minus coordinate fraction; ties prefer fewer coordinates.",
+    "pass": "Authorize implementation of only the selected c_proj structure, followed by tests and an exact-config >=20% MFU gate. Training remains separately gated.",
+    "fail": "Reject additional sparse-Givens depth/bilateral composition for c_proj and return to a non-orthogonal low-memory transport design."
+  },
+  "identity": {
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "optimizer_probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001188.pt": "5fd43fbeb9447a86b673d2b3ee10bd2d7faa1ab0c43cdd7b59d3d783ca871a8a",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "expected_runtime": "under five minutes",
+    "monitoring": "direct foreground polling; no watchdog or callback",
+    "command": ".venv/bin/python -m examples.nanogpt.analyze_attention_cproj_fresh_residual_gate --plan examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_fresh_residual_gate_plan.json --probe-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_fresh_residual_gate_v1 --native-cache /mnt/ssd-data/orj/MappingNetworks/outputs/native_cache --device cuda"
+  },
+  "authorization": {
+    "zero_update_oracle": true,
+    "implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
