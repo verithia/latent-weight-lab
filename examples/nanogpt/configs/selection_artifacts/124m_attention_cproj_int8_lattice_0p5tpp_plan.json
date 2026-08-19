@@ -1,0 +1,92 @@
+{
+  "authorization": {
+    "automatic_rerun": false,
+    "exact_config_mfu_preflight": true,
+    "larger_model_or_token_rung": false,
+    "one_124m_0p5tpp_training_after_mfu_pass": true,
+    "training_before_mfu_pass": false
+  },
+  "candidate": {
+    "base": "reproducible frozen Gaussian initialization",
+    "block_size": 4096,
+    "causal_scale_policy": "monotone running maximum",
+    "code": "signed int8 nearest-integer displacement",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json",
+    "config_sha256": "f604b8291385d61d7194eb002714457370313a9962fce914af954548319c00ba",
+    "dense_gradient": true,
+    "dense_materialized_weight": true,
+    "dense_muon_momentum": true,
+    "fp32_weight_bytes": 28311552,
+    "persistent_codec_bytes": 7081344,
+    "storage_ratio": 0.2501220703125,
+    "storage_reduction": 3.998047828208882
+  },
+  "created_at": "2026-08-20",
+  "decision_rule": {
+    "larger_rung": "not authorized by this plan",
+    "mfu_pass": "measured exact-config MFU >= 0.20 with finite losses and peak VRAM below 97,887 MiB",
+    "next_if_0p5tpp_passes": "preregister one 124M/5TPP transfer; do not jump to 350M",
+    "scientific_pass": "finite terminal fixed-window validation CE <= 5.5890 at update 238",
+    "scientific_reject": "instability, exact-resume failure, or terminal validation CE > 5.5890 closes this direct training projection before a longer horizon",
+    "threshold_changes_after_measurement": false
+  },
+  "identity": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "implementation_commit": "c6061b273bec2e59413be8b8c1a8b6e30e02dde4",
+    "implementation_source_hashes": {
+      "examples/nanogpt/model.py": "3fbc923f0fb992a1fab4179af67f102c017368d7518b974a9e8e1963ad08d5d9",
+      "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+      "examples/nanogpt/muon_int8_lattice.py": "647d7a56dbe15be53348c9f1c7b3b480b747468d6cce7e325d187c287b764249",
+      "examples/nanogpt/train.py": "4209f92d8eb7a7d0fdb4fed9182aa49bc8fe8c97acd4b40d34d2574907c290eb"
+    },
+    "integer_lattice_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_integer_lattice_gate_result.json",
+    "integer_lattice_gate_result_sha256": "6f659c31d75ae8a9c9a7b6bceb165c0d3c03b69b2e59aa6d152bfc4c46433619"
+  },
+  "protocol": {
+    "exact_resume": "focused test serializes only int8 codes, FP16 scales, base identity, optimizer step, and dense Muon momentum; reloading regenerates the base and reproduces the next projected update bit-exactly",
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.json",
+    "mfu_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "mfu_monitor": "foreground polling; no watchdog or callback",
+    "scientific_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json"
+    ],
+    "scientific_monitor": "one idempotent terminal/error-only @Codex watchdog; no intermediate progress callbacks",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab"
+  },
+  "question": "Can the trajectory-qualified causal int8 lattice replace dense learned attention c_proj state without losing smallest-rung CE or falling below the 20% MFU floor?",
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}
