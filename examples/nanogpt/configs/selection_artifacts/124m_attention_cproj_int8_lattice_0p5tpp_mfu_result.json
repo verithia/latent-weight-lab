@@ -1,0 +1,38 @@
+{
+  "classification": "PASS",
+  "config_sha256": "ed5b6f7d6b6481ef78c92da42a7f6089f14f8065d42fbbb74499fb17bc1b26e5",
+  "decision": {
+    "larger_rung_authorized": false,
+    "one_124m_0p5tpp_training_authorized": true,
+    "reason": "The repaired exact configuration exceeded the frozen 20% MFU floor, retained finite losses, loaded the required native BlockFHT extension, and stayed below the 97,887 MiB VRAM limit."
+  },
+  "evidence": {
+    "all_logged_losses_finite": true,
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.json",
+    "certificate_sha256": "eb3f42b13720cd58d21d19140106d8eadd68d49fcbecf168375f408771d5a747",
+    "elapsed_seconds": 18.46349835395813,
+    "empirical_bf16_gemm_peak_tflops": 417.17521212125877,
+    "execution_commit": "ac4a210893e2f53c28c7562fa9d1e4505ae33f88",
+    "iter_ms": 1642.025,
+    "mfu_fraction": 0.2858106592089232,
+    "minimum_mfu_fraction": 0.2,
+    "model_tflops": 119.23312238199934,
+    "native_block_fht_extension_loaded": true,
+    "peak_vram_mib": 35155.8,
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/performance_preflight.log",
+    "preflight_log_sha256": "9957e2ea844161ae5c60f584a30c0b9efdf787bb9d4c3a89ecc51b5aa786dd46",
+    "timed_updates": 8,
+    "tokens_per_second": 159646.85874999998
+  },
+  "implementation": {
+    "codec": "signed int8 displacement with per-block FP16 monotone running-maximum scales",
+    "codec_bytes": 7081344,
+    "fp32_weight_bytes": 28311552,
+    "persistent_storage_reduction": 3.998047828208882,
+    "runtime_materialization": "dense FP32 attention c_proj weight",
+    "optimizer_state": "dense FP32 Muon momentum; excluded from codec compression claim"
+  },
+  "measured_at": "2026-08-20",
+  "question": "Can the trajectory-qualified causal int8 attention c_proj lattice meet the exact-host performance gate before smallest-rung language-model training?",
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_mfu_result_v1"
+}
