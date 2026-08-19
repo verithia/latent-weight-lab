@@ -4,7 +4,8 @@
     "automatic_rerun": false,
     "exact_config_mfu_passed": true,
     "larger_model": false,
-    "one_124m_0p5tpp_training": true
+    "one_124m_0p5tpp_training": true,
+    "authorized_training_consumed": true
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp.json",
@@ -62,7 +63,7 @@
     "The model-weight codec remains about 4x smaller than FP32; training state grows by two bytes per MLP weight.",
     "A smallest-rung pass authorizes only a separate decision, never automatic scale-up."
   ],
-  "status": "exact_config_mfu_passed_one_scientific_run_authorized",
+  "status": "authorized_scientific_run_launched_terminal_pending",
   "terminal_gate": {
     "fail_classification": "TEMPORAL_ERROR_FEEDBACK_IS_NOT_SUFFICIENT_FOR_FULL_MLP_CLOSURE",
     "maximum_delta_to_full_attention_parent_ce": 0.02,

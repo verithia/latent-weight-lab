@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_run_metadata_v1",
+  "recorded_at": "2026-08-20",
+  "state": "running",
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp",
+    "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1424336,
+    "pgid": 1424336,
+    "launched_at": "2026-08-20T05:17:29+08:00",
+    "started_at": "2026-08-20T05:17:30+08:00",
+    "source_commit": "eb3009a9a19dc47bc4b2b5ba1580bc1f0c77bf86",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "literal_command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.config.json"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp.json",
+    "archived_config_sha256": "76f0b3d7224be7265303bf165d629346162ddb8c117ed8ba2da8160cf9d99658",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_certificate_sha256": "bb274052e3568049c19f53ceaf30cc4dfd6486831e5293d2e6aa328555254058",
+    "provenance": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.json",
+      "sha256": "6868684ea57d1c8e9f40cceef6ef31550d3162293a4b6180a8507a336430c396"
+    },
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.json",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.log",
+    "output_dir": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp/scientific",
+    "max_iters": 238,
+    "estimated_wall_minutes_from_preflight": 12
+  },
+  "launch_health": {
+    "process_group_alive": true,
+    "last_iter": 0,
+    "last_loss": 10.9949,
+    "gpu_memory_mib": 48149,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 99,
+    "gpu_power_watts": 510.51,
+    "gpu_temperature_c": 46,
+    "logged_errors": []
+  },
+  "watchdog": {
+    "host": "local",
+    "pid": 48552,
+    "state_key": "pro6_124m_full_mlp_int8_lattice_errorfeedback_0p5tpp",
+    "policy": "terminal/error-only",
+    "interval_seconds": 60,
+    "stall_minutes": 20,
+    "heartbeat_suppressed": true,
+    "progress_milestones_suppressed": [20, 50],
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "agent_mention": "@Codex",
+    "receipt_path": ".watchdogs/eb3009a9a19dc47bc4b2b5ba1580bc1f0c77bf86/pro6_124m_full_mlp_int8_lattice_errorfeedback_0p5tpp.receipt.json"
+  },
+  "terminal_gate": {
+    "maximum_validation_ce": 5.3117,
+    "matched_full_attention_parent_validation_ce": 5.2917,
+    "no_feedback_full_mlp_validation_ce": 5.3661,
+    "threshold_frozen_before_launch": true,
+    "terminal_validation_ce": null,
+    "passed": null
+  }
+}
