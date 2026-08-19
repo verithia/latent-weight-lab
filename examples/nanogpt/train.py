@@ -1081,6 +1081,11 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=False,
     )
+    parser.add_argument(
+        "--mlp-shared-dense-trunk",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--learning-rate", type=float, default=6e-4)
     parser.add_argument("--min-lr", type=float, default=6e-5)
     parser.add_argument("--warmup-iters", type=int, default=100)
@@ -2517,6 +2522,7 @@ def main() -> None:
         ),
         moe_router_z_loss_coefficient=args.moe_router_z_loss_coefficient,
         moe_unpadded_expert_loop=args.moe_unpadded_expert_loop,
+        mlp_shared_dense_trunk=args.mlp_shared_dense_trunk,
         block_fht=args.method == "block_fht",
         block_fht_targets=tuple(args.block_fht_targets),
         block_fht_latent_ratio=args.block_fht_latent_ratio,

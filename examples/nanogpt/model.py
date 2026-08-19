@@ -249,6 +249,7 @@ class GPTConfig:
     block_fht_mlp_residual_output_gain: bool = False
     block_fht_mlp_residual_output_gain_scale: float = 1.0
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
+    mlp_shared_dense_trunk: bool = False
     block_fht_mlp_residual_conditioned_output_gate: bool = False
     block_fht_mlp_residual_conditioned_output_gate_scale: float = 1.0
     block_fht_mlp_residual_conditioned_output_gate_layers: tuple[int, ...] = ()
@@ -4532,6 +4533,58 @@ class GPT(nn.Module):
         for name, param in self.named_parameters():
             if name.endswith("c_proj.weight"):
                 nn.init.normal_(param, mean=0.0, std=0.02 / math.sqrt(2 * config.n_layer))
+        if config.mlp_shared_dense_trunk:
+            self._tie_shared_dense_mlp_trunk()
+
+    def _tie_shared_dense_mlp_trunk(self) -> None:
+        """Share one learned full-rank MLP pair across transformer layers.
+
+        The layer-private pre-GELU and residual-output gains remain distinct.
+        Tying after normal GPT initialization preserves the conventional
+        c_proj residual scaling while avoiding unused per-layer dense weights.
+        """
+
+        if self.config.moe_num_experts > 0:
+            raise ValueError("shared dense MLP trunk is incompatible with MoE")
+        mlp_targets = sorted(
+            target
+            for target in self.config.block_fht_targets
+            if target.startswith("mlp.")
+        )
+        if mlp_targets:
+            raise ValueError(
+                "shared dense MLP trunk requires dense MLP matrices; "
+                "remove BlockFHT MLP targets: " + ", ".join(mlp_targets)
+            )
+        if not self.config.block_fht_ffn_pregelu_gain:
+            raise ValueError(
+                "shared dense MLP trunk requires layer-private pre-GELU gain"
+            )
+        if not self.config.block_fht_mlp_residual_output_gain:
+            raise ValueError(
+                "shared dense MLP trunk requires layer-private residual-output gain"
+            )
+        blocks = list(self.transformer.h)
+        if not blocks:
+            raise ValueError("shared dense MLP trunk requires at least one layer")
+        for block in blocks:
+            if not isinstance(block.mlp, MLP):
+                raise ValueError("shared dense MLP trunk requires the dense MLP module")
+            if not isinstance(block.mlp.c_fc, nn.Linear) or not isinstance(
+                block.mlp.c_proj, nn.Linear
+            ):
+                raise ValueError(
+                    "shared dense MLP trunk requires plain dense c_fc and c_proj"
+                )
+
+        root = blocks[0].mlp
+        for block in blocks[1:]:
+            block.mlp.c_fc.weight = root.c_fc.weight
+            block.mlp.c_proj.weight = root.c_proj.weight
+            if self.config.bias:
+                assert root.c_fc.bias is not None and root.c_proj.bias is not None
+                block.mlp.c_fc.bias = root.c_fc.bias
+                block.mlp.c_proj.bias = root.c_proj.bias
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
@@ -4861,6 +4914,8 @@ class GPT(nn.Module):
                 ".activation_chart_gauge_log_gain",
                 ".paired_monarch.coordinates",
             )
+            if self.config.mlp_shared_dense_trunk:
+                chart_names += (".pregelu_gain",)
             other_parameter_ids = {id(param) for param in other}
             chart_other = [
                 param
