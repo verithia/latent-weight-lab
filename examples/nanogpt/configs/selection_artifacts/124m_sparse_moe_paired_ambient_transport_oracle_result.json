@@ -1,0 +1,126 @@
+{
+  "schema_version": "nanogpt_sparse_moe_paired_ambient_transport_oracle_seal_v1",
+  "recorded_at": "2026-08-19T17:20:00+08:00",
+  "classification": "PAIRED_AMBIENT_TRANSPORT_REJECTED",
+  "passed": {
+    "householder": false,
+    "monarch": false
+  },
+  "source_control": {
+    "git_commit": "da92720b92aaa8a3abaa407af10c431a4d0d4899",
+    "branch": "experiment/paired-ambient-transport-20260819",
+    "entrypoint": "examples/nanogpt/analyze_sparse_moe_paired_ambient_transport_oracle.py",
+    "entrypoint_sha256": "38432b87765a08886b973e1b847ad0b593e2a47ee82b94dfda35fd528a5bd598",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_sparse_moe_paired_ambient_transport_oracle_plan.json",
+    "plan_sha256": "807cc622ecb9110b44e83cb306f243d146ccd8873cfa30267a18d91c0e56c16e"
+  },
+  "source": {
+    "terminal_snapshot_sha256": "f7621885edde98fbe5085b29bd8e3061b8d0a80b27e2685636410496d0edd92b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "write_basis_artifact_sha256": "50769cd09483c6a3003073e1752ce4157d9c80b185d9d90262ff007b533cea20",
+    "checkpoint_updates": 0
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "process_group": 961087,
+    "exit_code": 0,
+    "wall_seconds": 908.9854409694672,
+    "maximum_memory_allocated_bytes": 7271888384,
+    "raw_result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_paired_ambient_transport_oracle_20260819a/result.json",
+    "raw_result_sha256": "0cefa185735f43c147d4e4d487bf238f86debd105d20cd1884ec3710f0bb0cea",
+    "compact_coordinates": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_paired_ambient_transport_oracle_20260819a/compact_coordinates.pt",
+    "compact_coordinates_sha256": "7d4256298e65d3e8816b8aa8179e7f1acc9878640e1da32e30c50b417bb4b591",
+    "terminal_gpu": "211/97887 MiB, 0%, 19.65 W, 37 C",
+    "watcher_terminal_callback_delivered": true,
+    "watcher_terminal_result_sha256": "0cefa185735f43c147d4e4d487bf238f86debd105d20cd1884ec3710f0bb0cea"
+  },
+  "accounting": {
+    "control": {
+      "total_coordinates": 1078272,
+      "compression_ratio": 210.05128205128204,
+      "parameter_saving_fraction_vs_dense": 0.9952392578125,
+      "fused_extra_flops_per_active_expert_token": 0,
+      "materialization_flops_per_expert_update": 0
+    },
+    "householder": {
+      "transport_coordinates": 147456,
+      "total_coordinates": 1225728,
+      "compression_ratio": 184.78195488721803,
+      "parameter_saving_fraction_vs_dense": 0.9945882161458334,
+      "fused_extra_flops_per_active_expert_token": 98304,
+      "materialization_flops_per_expert_update": 75497472
+    },
+    "monarch": {
+      "transport_coordinates": 589824,
+      "total_coordinates": 1668096,
+      "compression_ratio": 135.77900552486187,
+      "parameter_saving_fraction_vs_dense": 0.9926350911458334,
+      "fused_extra_flops_per_active_expert_token": 196608,
+      "materialization_flops_per_expert_update": 150994944
+    }
+  },
+  "heldout_two_bank_mean": {
+    "control": {
+      "output_recovery": 0.5098362763722738,
+      "output_gap_to_dense": 0.4901637236277262,
+      "input_jvp_recovery": 0.011316577593485515,
+      "input_jvp_gap_to_dense": 0.9886834224065145,
+      "cross_bank_action_cosine": 0.8969639937082926
+    },
+    "householder": {
+      "output_recovery": 0.5490672985712687,
+      "output_gap_to_dense": 0.4509327014287313,
+      "input_jvp_recovery": 0.02007065216700236,
+      "input_jvp_gap_to_dense": 0.9799293478329977,
+      "cross_bank_action_cosine": 0.9086628158887228,
+      "output_gain_over_control": 0.03923102219899488,
+      "input_jvp_gain_over_control": 0.008754074573516844
+    },
+    "monarch": {
+      "output_recovery": 0.6121391157309215,
+      "output_gap_to_dense": 0.3878608842690785,
+      "input_jvp_recovery": 0.04501800735791524,
+      "input_jvp_gap_to_dense": 0.9549819926420847,
+      "cross_bank_action_cosine": 0.9141729871431986,
+      "output_gain_over_control": 0.1023028393586477,
+      "input_jvp_gain_over_control": 0.03370142976442972
+    }
+  },
+  "frozen_gate_outcomes": {
+    "householder": {
+      "output_absolute": false,
+      "output_causal_gain": false,
+      "jvp_absolute": false,
+      "jvp_causal_gain": false,
+      "every_layer": false,
+      "every_expert": false,
+      "cross_bank_action": true,
+      "finite": true
+    },
+    "monarch": {
+      "output_absolute": false,
+      "output_causal_gain": true,
+      "jvp_absolute": false,
+      "jvp_causal_gain": false,
+      "every_layer": false,
+      "every_expert": false,
+      "cross_bank_action": true,
+      "finite": true
+    }
+  },
+  "interpretation": {
+    "endpoint": "Continuous global ambient-plane freedom is causally useful for fitting dense endpoint values: Monarch improves output recovery by about 0.1023 over the exact identity control.",
+    "local_dynamics": "The same freedom does not recover dense local input dynamics. Monarch reaches only 0.0450 JVP recovery and Householder only 0.0201, leaving 0.9550 and 0.9799 of dense JVP energy unrecovered.",
+    "closed_family": "Static paired Householder and two-factor width-16 Monarch hidden transports are closed at the registered budgets. No depth, block-width, reflector-count, seed, LR, or training sweep is authorized.",
+    "next_action": "Do not launch language-model training. Existing state-conditioned butterfly and conditional complete-atom evidence already rejects a naive token-conditioned rotation successor. Return to theory or retain dense/latent-native expert MLPs."
+  },
+  "authorization": {
+    "language_model_training": false,
+    "larger_rung": false,
+    "householder_sweep": false,
+    "monarch_sweep": false,
+    "token_conditioned_rotation_sweep": false,
+    "theory_work": true
+  }
+}
