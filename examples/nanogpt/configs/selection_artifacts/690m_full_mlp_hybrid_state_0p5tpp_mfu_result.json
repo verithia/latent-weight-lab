@@ -1,0 +1,68 @@
+{
+  "artifact_kind": "690m_full_mlp_hybrid_state_0p5tpp_exact_config_mfu_result",
+  "classification": "FULL_MLP_HYBRID_STATE_690M_0P5TPP_EXACT_CONFIG_MFU_PASSED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_fullmlp_hybridstate_0p5tpp.json",
+    "sha256": "b70e2ec6332752ea1a6477046adbdb1362d8f71ff3e4542fbdd3e71c5d8dbac5"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "larger_model_or_longer_token_rung_authorized": false,
+    "one_full_1326_update_run_authorized": true
+  },
+  "execution": {
+    "direct_foreground_polling": true,
+    "elapsed_seconds": 88.24621629714966,
+    "gpu": 0,
+    "host": "PRO6",
+    "train_exit_code": 0,
+    "watchdog": false
+  },
+  "implementation": {
+    "code_commit": "c7eb1d870c56a0ba82518e4c93fa7e9abee1d035",
+    "native_extension_loaded": true,
+    "native_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "native_matcher_library_sha256": "189cd6f308957364d584c91c21364bc2697d8425ab6d9820c4ace19190f52b13",
+    "native_matcher_source_sha256": "988e1ae64f13061a5ae02eb1227523cea6a5e84b084121ba8f877b391dd8a53f",
+    "source_sha256": {
+      "examples/nanogpt/mfu_preflight.py": "4f244e23be072602ef959694095a743306b35d1d2dcb27b7462fdbc002a28303",
+      "examples/nanogpt/model.py": "c7c6d4a4356ededf717ed5010bf87d16df1dd190f436fca9b7291e98dd38ae14",
+      "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+      "examples/nanogpt/train.py": "f37a02eb3d84a654f03907295823b64912da7311398e2fb447f4a75447901884"
+    }
+  },
+  "measurement": {
+    "active_params_6n_estimate": 695380480,
+    "empirical_bf16_gemm_peak_tflops": 414.5996842693224,
+    "fwbw_ms": 4936.625,
+    "iter_ms": 9180.83375,
+    "mfu_fraction": 0.28734465394081404,
+    "model_tflops": 119.1330028003392,
+    "optimizer_ms": 4198.6425,
+    "peak_mib": 41679.74,
+    "tokens_per_second": 28553.43375
+  },
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/690m_full_mlp_hybrid_state_0p5tpp_plan.json",
+    "preregistered_sha256": "1fdc6120b7f096fc5111593705fecf622ddd167df5b51ba34a576597f18def1c"
+  },
+  "preflight": {
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/performance_preflight.json",
+    "certificate_sha256": "9b4e5454a766ce1cbd47b6a7a7914ae97f0d79ad8fc9430a8c49a5a2ec985597",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/performance_preflight.log",
+    "log_sha256": "965a9ce6765d75558a088666dc191a43a6ca7d26785460a43217e3dd9395cf43",
+    "minimum_mfu_fraction": 0.2,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "schema_version": "mai_690m_full_mlp_hybrid_state_0p5tpp_exact_config_mfu_result_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13,
+    "native_matching_validated": true,
+    "step_nine_train_ce": 7.8803,
+    "step_nine_validation_ce": 7.9515
+  }
+}
