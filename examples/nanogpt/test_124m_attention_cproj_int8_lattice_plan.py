@@ -28,3 +28,7 @@ def test_plan_pins_the_selected_codec_and_blocks_training_before_mfu() -> None:
     assert sha256(rejected_launch) == plan["identity"]["scientific_launch_reject_result_sha256"]
     mfu_result = ROOT / plan["identity"]["valid_mfu_result"]
     assert sha256(mfu_result) == plan["identity"]["valid_mfu_result_sha256"]
+    training_result = ROOT / plan["identity"]["scientific_training_result"]
+    assert sha256(training_result) == plan["identity"]["scientific_training_result_sha256"]
+    assert plan["authorization"]["scientific_run_completed"] is True
+    assert plan["authorization"]["one_124m_5tpp_transfer_after_preregistration"] is True

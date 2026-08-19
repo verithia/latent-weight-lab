@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_0p5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "PASS_SMALL_RUNG_AUTHORIZE_124M_5TPP_ONLY",
+  "run": {
+    "name": "pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_retry1",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "952950de8ffb5a04315a365939456dab29844f79",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json",
+    "archived_config_sha256": "606d4ba2c2a6fa5a38244f7dcb4b2ec544dc24c63fb8f3ecc5e5605806a64e16",
+    "resolved_config_sha256": "527cb55d6835470a26ecfc4f0a4e8f1f45e55d622a0fdb42022674b00e127f76",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "59aecde8a78adcd9cb69b0c2a3eac20e615aafad3156dbfcc22282110ad4abe7",
+    "preflight_mfu_fraction": 0.28561876888224574,
+    "started_at": "2026-08-20T02:59:24+08:00",
+    "finished_at": "2026-08-20T03:08:37+08:00",
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_retry1_20260819T185923Z_1354932.json",
+        "sha256": "92ea1fb80eea900c771aa8478ae44c66d1dbd1146983ee2edf8ee08621d0e88e"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_retry1_20260819T185923Z_1354932.log",
+        "sha256": "8a6299eed3d39a5468e89cf920364ef5d2de83bd64f6646b269d05baede5a622"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_retry1_20260819T185923Z_1354932.json",
+        "sha256": "823241be34cf2aec16af828b032e679da7d2e620a346c1797cf3d9801b540ddd"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/scientific/ckpt.pt",
+        "sha256": "d9eb4bc6c21e9eafad71ce8c69b601900dbfb58147ce8207683fb3a7ef0516e4"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4/scientific/ckpt.meta.json",
+        "sha256": "83e0258d9c17aea3e21612688a46d3310b1a2b94434f5267268d10afd8023504"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9563, "validation_ce": 10.9564},
+    {"step": 60, "train_ce": 6.1933, "validation_ce": 6.2022},
+    {"step": 120, "train_ce": 5.6754, "validation_ce": 5.6803},
+    {"step": 180, "train_ce": 5.3989, "validation_ce": 5.4014},
+    {"step": 238, "train_ce": 5.2898, "validation_ce": 5.2917}
+  ],
+  "comparison": {
+    "dense_124m_0p5tpp_validation_ce": 5.4890,
+    "frozen_maximum_validation_ce": 5.5890,
+    "terminal_validation_ce": 5.2917,
+    "delta_to_dense_ce": -0.1973,
+    "margin_to_frozen_maximum_ce": -0.2973,
+    "all_fixed_evaluations_finite": true
+  },
+  "representation": {
+    "attention_scope": "QK and V use the selected Cayley/BlockFHT maps; c_proj uses the causal signed-int8 displacement lattice",
+    "persistent_codec_bytes": 7081344,
+    "fp32_cproj_weight_bytes": 28311552,
+    "persistent_cproj_storage_reduction": 3.998047828208882,
+    "runtime_materialized_cproj_weight": "dense_fp32_transient",
+    "optimizer_momentum": "dense_fp32_not_in_codec_count"
+  },
+  "decision": {
+    "smallest_rung_passed": true,
+    "one_124m_5tpp_transfer_authorized": true,
+    "larger_model_authorized": false,
+    "automatic_20tpp_authorized": false,
+    "reason": "The clean fixed-window terminal CE beats both the matched dense endpoint and the preregistered acceptance line. This supports a horizon transfer at the same model size, but does not remove the dense runtime materialization and optimizer-state limitations or authorize scaling in model size."
+  },
+  "watchdog": {
+    "policy": "terminal/error-only",
+    "terminal_callback_delivered_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-20T03:08:37+08:00"]
+  }
+}

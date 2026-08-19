@@ -3,7 +3,9 @@
     "automatic_rerun": false,
     "exact_config_mfu_preflight": true,
     "larger_model_or_token_rung": false,
+    "one_124m_5tpp_transfer_after_preregistration": true,
     "one_124m_0p5tpp_training_after_mfu_pass": true,
+    "scientific_run_completed": true,
     "training_before_mfu_pass": false
   },
   "candidate": {
@@ -40,6 +42,8 @@
       "examples/nanogpt/muon_int8_lattice.py": "0bda5ed83a4392507c42c9b09b9bb7e09ca033b2b2236cd3263fb2942f4b70e6",
       "examples/nanogpt/train.py": "4209f92d8eb7a7d0fdb4fed9182aa49bc8fe8c97acd4b40d34d2574907c290eb"
     },
+    "scientific_training_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_training_result.json",
+    "scientific_training_result_sha256": "f23d906cfd09ea1cd66389609183ad87c240b0a55c9a1725ecfe2a5006818e75",
     "integer_lattice_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_integer_lattice_gate_result.json",
     "integer_lattice_gate_result_sha256": "6f659c31d75ae8a9c9a7b6bceb165c0d3c03b69b2e59aa6d152bfc4c46433619",
     "preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_preflight_reject_result.json",
@@ -93,7 +97,7 @@
     "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab"
   },
   "question": "Can the trajectory-qualified causal int8 lattice replace dense learned attention c_proj state without losing smallest-rung CE or falling below the 20% MFU floor?",
-  "revision": 3,
+  "revision": 4,
   "schema_version": "mai_124m_attention_cproj_int8_lattice_0p5tpp_plan_v1",
-  "status": "exact_config_mfu_passed_one_124m_0p5tpp_scientific_run_authorized"
+  "status": "scientific_pass_124m_5tpp_preregistration_authorized"
 }

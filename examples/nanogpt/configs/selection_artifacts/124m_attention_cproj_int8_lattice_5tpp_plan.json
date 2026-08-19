@@ -1,0 +1,88 @@
+{
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_5tpp_plan_v1",
+  "created_at": "2026-08-20",
+  "status": "preregistered_exact_config_mfu_required",
+  "question": "Does the causal int8 attention-c_proj lattice retain the smallest-rung closure over 5TPP at the same 124M model size?",
+  "promotion_basis": {
+    "smallest_rung_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_training_result.json",
+      "sha256": "f23d906cfd09ea1cd66389609183ad87c240b0a55c9a1725ecfe2a5006818e75",
+      "terminal_validation_ce": 5.2917,
+      "dense_validation_ce": 5.4890,
+      "delta_to_dense_ce": -0.1973,
+      "classification": "PASS_SMALL_RUNG_AUTHORIZE_124M_5TPP_ONLY"
+    },
+    "qkv_dense_cproj_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_partial_control_result.json",
+      "sha256": "bef499f835be994f39fdabe5396c82a7deb6b3878e607e495ecfa56b8b92ebc9",
+      "terminal_validation_ce": 3.5148
+    },
+    "ordinary_dense_control": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_blockwise_qkv_muon_control_result.json",
+      "sha256": "c7ce71da89b3348125d1067876851ea1b18b3dad7c5d5180ba6cfbbd6082ab48",
+      "terminal_validation_ce": 3.5402
+    },
+    "prior_continuous_full_attention_terminal_validation_ce": 3.6151
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_5tpp_lr24e4.json",
+    "config_sha256": "291bf2930557e9e8fead990f873482296502e437834d78807df73f304899d054",
+    "generator": "examples/nanogpt/make_pro6_attention_cproj_int8_lattice_124m_5tpp.py",
+    "model_size": "124M",
+    "planned_tpp": 5.0,
+    "max_iters": 2373,
+    "learning_rate": 0.0024,
+    "min_lr": 0.00024,
+    "fresh_from_scratch": true,
+    "attention_parameterization": "QK64 and V16 Cayley mappings plus causal block-4096 signed-int8 running-max c_proj lattice",
+    "persistent_cproj_storage_reduction": 3.998047828208882,
+    "dense_runtime_materialization": true,
+    "dense_muon_momentum": true
+  },
+  "invariants": [
+    "No structural, optimizer, seed, data, or LR change from the passed 0.5TPP candidate",
+    "Only the registered horizon, warmup, evaluation cadence, output path, and horizon metadata change",
+    "FineWeb-Edu manifest SHA-256 remains 1e1de075...92ddf8b",
+    "Fixed evaluation indices SHA-256 remains 5ca31b59...140747",
+    "Fresh initialization; this is not continuation from the 0.5TPP checkpoint",
+    "No dense attention c_proj Parameter is persistent in the model state"
+  ],
+  "execution_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "exact_config_mfu_minimum": 0.20,
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one idempotent terminal/error-only @Codex watchdog; no 20%, 50%, 80%, or heartbeat callbacks",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_action_prompt": "Verify terminal artifacts and hashes against the active project note, seal the fixed-checkpoint result, update durable notes, and choose only the next causally authorized action. Do not merely acknowledge this callback."
+  },
+  "terminal_gate": {
+    "ordinary_dense_terminal_validation_ce": 3.5402,
+    "maximum_validation_ce_delta_to_dense": 0.0200,
+    "maximum_terminal_validation_ce": 3.5602,
+    "qkv_dense_cproj_terminal_validation_ce": 3.5148,
+    "prior_continuous_full_attention_terminal_validation_ce": 3.6151,
+    "require_clean_exit": true,
+    "require_all_fixed_evaluations_finite": true,
+    "threshold_changes_after_measurement": false,
+    "pass_classification": "FULL_ATTENTION_PERSISTENT_STATE_NEAR_DENSE_AT_124M_5TPP",
+    "fail_classification": "INT8_CPROJ_SMALLEST_RUNG_GAIN_DOES_NOT_TRANSFER_TO_5TPP",
+    "pass_action": "Seal the result and analyze the 20TPP decision separately; do not automatically launch 20TPP or any larger model.",
+    "fail_action": "Do not tune on this endpoint. Diagnose fixed-evaluation divergence and close this direct same-recipe transfer before another structural candidate."
+  },
+  "authorization": {
+    "mfu_preflight_before_training": true,
+    "one_124m_5tpp_training_after_mfu_pass": true,
+    "training_before_mfu_pass": false,
+    "automatic_rerun": false,
+    "automatic_20tpp": false,
+    "larger_model": false,
+    "mlp_claim": false
+  },
+  "scope_guards": [
+    "This tests full attention replacement at persistent model-state level, not 200x continuous-latent compression.",
+    "Dense transient c_proj materialization and dense FP32 Muon momentum remain and must be counted in runtime and optimizer memory.",
+    "Materialized inference shape and FLOPs remain unchanged.",
+    "No MLP parameterization is changed."
+  ]
+}
