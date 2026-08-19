@@ -1,0 +1,35 @@
+{
+  "classification": "PASS",
+  "config_sha256": "191fa818e7863d535c3743788f8fe830ccb14fe586996480d7c9a01401a75b81",
+  "decision": {
+    "larger_rung_authorized": false,
+    "one_350m_training_authorized": true,
+    "reason": "The exact 350M configuration exceeded the frozen 20% MFU floor, remained finite, loaded the required native extension, and reduced peak VRAM below the FP32-state parent."
+  },
+  "evidence": {
+    "all_logged_losses_finite": true,
+    "certificate_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_hybridstate_0p5tpp/performance_preflight.json",
+    "certificate_sha256": "c8835605caf82767e476126d5439490d12d6378413cdefec0682aea43d6d4682",
+    "elapsed_seconds": 45.31088972091675,
+    "empirical_bf16_gemm_peak_tflops": 414.36267782001187,
+    "execution_commit": "2aa35840022eddf8e8742e77c7104bfbb4c28e2e",
+    "iter_ms": 4555.4975,
+    "mfu_fraction": 0.2956976795888861,
+    "minimum_mfu_fraction": 0.2,
+    "model_tflops": 122.52608233961472,
+    "native_block_fht_extension_loaded": true,
+    "peak_vram_mib": 52355.39,
+    "preflight_log_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_350m_full_mlp_hybridstate_0p5tpp/performance_preflight.log",
+    "preflight_log_sha256": "d24b2f2ea30b28b3901a06715e119fb5a6877c7b0c2287be47367d9f1ddb6bb5",
+    "timed_updates": 8,
+    "tokens_per_second": 57544.845
+  },
+  "memory_comparison": {
+    "absolute_reduction_mib": 961.66,
+    "parent_fp32_state_peak_vram_mib": 53317.05,
+    "relative_reduction": 0.01803722598735864
+  },
+  "measured_at": "2026-08-19",
+  "question": "Does the 350M sensitivity-matched compact-state transfer clear the exact-host performance and memory gate?",
+  "schema_version": "mai_350m_full_mlp_hybrid_state_mfu_result_v1"
+}
