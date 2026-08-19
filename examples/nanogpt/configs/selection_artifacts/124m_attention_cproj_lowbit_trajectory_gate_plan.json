@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_attention_cproj_lowbit_trajectory_gate_plan_v1",
+  "recorded_at": "2026-08-20",
+  "status": "registered_before_zero_update_analysis",
+  "scientific_question": "Can a reproducible GPT-initialization base plus a persistent full-support low-bit attention-c_proj displacement reconstruct both the saved dense states and the local training motion between them?",
+  "theory": {
+    "decoder": "W_t = W_0 + decode(code_t, fp16_block_scales_t), where W_0 is recreated from the registered initialization seed and is not a trained dense parameter.",
+    "instantaneous_prior": "The sealed exact-Muon gate found binary/block-4096 cosine 0.79358 and same-radius recovery 0.58715; ternary reached 0.79359 recovery and int4 reached 0.97288. Full ambient support solved one-step direction coverage.",
+    "state_prediction": "For an approximately Gaussian displacement, least-squares binary sign coding has expected reconstruction recovery 2/pi = 0.63662. The preregistered state floor 0.55 allows measured non-Gaussianity without making a near-random state fit acceptable.",
+    "why_chords_are_separate": "Two independently accurate decoded states can have a difference dominated by quantization changes. The actual compact trajectory moves by decode(code_t)-decode(code_{t-1}), so chord recovery and cosine are mandatory and cannot be inferred from state recovery.",
+    "chord_floor": "Aggregate chord recovery 0.30 and cosine 0.65 require the decoded motion to preserve a useful majority direction and nontrivial update energy. Minimum phase and layer recovery 0.10 prevent an aggregate pass that reverses an entire training regime or layer.",
+    "storage_interpretation": "This is a low-bit ambient memory codec, not evidence for a 200x low-dimensional continuous manifold. It retains one to four discrete bits per matrix element plus block scales.",
+    "no_dense_carry": "The oracle permits no dense residual, dense error-feedback buffer, learned dense basis, or future-snapshot information. Only the registered base and the current low-bit code/scales are used to decode each state."
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "matrix_elements_per_layer": 589824,
+    "trajectory_steps": [
+      0, 60, 120, 180, 240, 300, 360, 420, 480, 540, 600,
+      660, 720, 780, 840, 900, 960, 1020, 1080, 1140, 1200,
+      1260, 1320, 1380, 1440, 1500, 1560, 1620, 1680, 1740,
+      1800, 1860, 1920, 1980, 2040, 2100, 2160, 2220, 2280,
+      2340, 2373
+    ],
+    "phase_end_steps": [600, 1200, 1800, 2373],
+    "ternary_threshold_rms": 0.6,
+    "candidates": {
+      "binary_b4096": {"codec": "binary", "bits": 1, "block_size": 4096},
+      "ternary_b4096": {"codec": "ternary", "bits": 2, "block_size": 4096},
+      "int4_b4096": {"codec": "int4", "bits": 4, "block_size": 4096}
+    },
+    "selection_order": "Among candidates passing every frozen state, chord, deterministic-decode, and storage check, select minimum storage ratio, then maximum aggregate chord recovery."
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "state_aggregate_recovery_minimum": 0.55,
+      "state_endpoint_recovery_minimum": 0.55,
+      "state_minimum_layer_recovery": 0.45,
+      "state_minimum_snapshot_recovery": 0.45,
+      "chord_aggregate_recovery_minimum": 0.30,
+      "chord_aggregate_cosine_minimum": 0.65,
+      "chord_minimum_phase_recovery": 0.10,
+      "chord_minimum_layer_recovery": 0.10,
+      "maximum_storage_ratio": 0.13
+    },
+    "pass": "Authorize only a separately registered fixed-terminal-checkpoint functional and validation-loss replay for the selected codec. Do not authorize implementation, MFU gating, language-model training, or a larger rung.",
+    "fail": "Close independently re-encoded binary/ternary/int4 displacement state as a persistent attention-c_proj solution. Do not hide the failure with a dense residual or launch training."
+  },
+  "identity": {
+    "entrypoint": "examples.nanogpt.analyze_attention_cproj_lowbit_trajectory_gate",
+    "entrypoint_sha256": "87f3d671af38cf1d2e998490617b15a2b8699f79613d77d657133d585f70f68c",
+    "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+    "trajectory_file_count": 41,
+    "trajectory_total_bytes": 4644344659,
+    "trajectory_inventory_sha256": "03c28add07ad1445d7f049eff56a7e178ae99eb47c4ca32594ddc787110d12e9",
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "instantaneous_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_lowbit_polar_gate_result.json",
+    "output_directory_must_be_absent": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_lowbit_trajectory_gate_v1"
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda:0",
+    "direct_foreground_polling": true,
+    "watchdog": false,
+    "callbacks": false,
+    "expected_duration": "under five minutes; zero-update sequential trajectory codec analysis",
+    "command": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.analyze_attention_cproj_lowbit_trajectory_gate",
+      "--plan",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_lowbit_trajectory_gate_plan.json",
+      "--trajectory-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
+      "--output-dir",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_lowbit_trajectory_gate_v1",
+      "--device",
+      "cuda:0"
+    ]
+  },
+  "authorization": {
+    "terminal_fixed_checkpoint_replay": false,
+    "model_implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
