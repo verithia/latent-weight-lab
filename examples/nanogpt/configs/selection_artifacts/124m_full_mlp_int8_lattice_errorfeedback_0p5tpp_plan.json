@@ -1,0 +1,91 @@
+{
+  "authorization": {
+    "automatic_5tpp": false,
+    "automatic_rerun": false,
+    "exact_config_mfu_passed": false,
+    "larger_model": false,
+    "one_124m_0p5tpp_training": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp.json",
+    "config_sha256": "76f0b3d7224be7265303bf165d629346162ddb8c117ed8ba2da8160cf9d99658",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_full_mlp_int8_lattice_error_feedback_124m.py",
+    "implementation_commit": "63cbe80c1da5904ce287cfde84b181ea1a4768d0",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "eac4e899a8be6fb6857940e5070f759becd3a97b59af82bf9b1a2c79fcdeee40",
+      "examples/nanogpt/model.py": "5dba3d8f545f30069c400475b9856b13ced9e50986aaed488c3e6059e267a8fb",
+      "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+      "examples/nanogpt/muon_int8_lattice.py": "fa15ee2167caba9da74021c20aaecd54b93cfedd5e17423badcb8f8506392fb6",
+      "examples/nanogpt/test_muon_int8_lattice.py": "dccd44c792da5b0605039602cc94fee91d86f01ccd3b773a52dbfbc3b5d6f915",
+      "examples/nanogpt/train.py": "1d07de0439ec3d9ae4489335dcac057e0577687e5e241854718424edc783001c"
+    },
+    "max_iters": 238,
+    "model_size": "124M",
+    "planned_tpp": 0.5
+  },
+  "causal_basis": {
+    "delta_to_parent_ce": 0.0744,
+    "full_attention_parent_validation_ce": 5.2917,
+    "inference": "The endpoint has ample spatial code support and is not saturated, but most late optimizer requests fall inside the current code bin. The next causal intervention must preserve discarded temporal increments, not change the spatial basis.",
+    "no_feedback_terminal_validation_ce": 5.3661,
+    "terminal_update_audit": {
+      "attention_cproj_requested_realized_cosine": 0.02819,
+      "endpoint_code_saturation_fraction_maximum": 0.000232,
+      "mlp_cfc_half_quantum_over_update_rms": 8.39496,
+      "mlp_cfc_realized_delta_zero_fraction": 0.78469,
+      "mlp_cfc_requested_realized_cosine": 0.01525,
+      "mlp_cproj_half_quantum_over_update_rms": 8.03214,
+      "mlp_cproj_realized_delta_zero_fraction": 0.80002,
+      "mlp_cproj_requested_realized_cosine": 0.01337
+    }
+  },
+  "created_at": "2026-08-20",
+  "frozen_invariants": [
+    "Change only optimizer-side MLP lattice error feedback.",
+    "Preserve the exact attention parent, MLP lattice, data, optimizer, LR, schedule, seeds, evaluation windows, and checkpoint cadence.",
+    "Keep the attention c_proj lattice without error feedback so the intervention is MLP-localized.",
+    "Do not change lattice block size, scale rule, code precision, or dense Muon momentum."
+  ],
+  "question": "Is the +0.0744 CE full-MLP lattice gap caused primarily by discarded sub-quantum late Muon requests?",
+  "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_plan_v1",
+  "scope_guards": [
+    "FP16 residual is optimizer state, not an inference parameter or Mapping-Network latent.",
+    "The model-weight codec remains about 4x smaller than FP32; training state grows by two bytes per MLP weight.",
+    "A smallest-rung pass authorizes only a separate decision, never automatic scale-up."
+  ],
+  "status": "registered_before_exact_config_mfu_and_training",
+  "terminal_gate": {
+    "fail_classification": "TEMPORAL_ERROR_FEEDBACK_IS_NOT_SUFFICIENT_FOR_FULL_MLP_CLOSURE",
+    "maximum_delta_to_full_attention_parent_ce": 0.02,
+    "maximum_terminal_validation_ce": 5.3117,
+    "pass_classification": "TEMPORAL_QUANTIZATION_WAS_THE_DOMINANT_MLP_LATTICE_OBSTRUCTION",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "required_improvement_over_no_feedback_ce": 0.0544
+  },
+  "update_rule": {
+    "attention_cproj_feedback": false,
+    "extra_training_state_bytes": 113246208,
+    "inference_parameters_unchanged": true,
+    "model_codec_unchanged": true,
+    "projection": "W_(t+1) = Q_t(U_t)",
+    "requested": "U_t = W_t + Delta_t + R_t",
+    "residual": "R_(t+1) = U_t - W_(t+1)",
+    "residual_dtype": "float16",
+    "scope": [
+      "mlp.c_fc",
+      "mlp.c_proj"
+    ]
+  },
+  "verification": {
+    "exact_config_mfu_minimum": 0.2,
+    "mfu_runtime": "foreground-polled with no watchdog",
+    "training_runtime": "terminal/error-only idempotent @Codex watchdog",
+    "unit_tests": [
+      "sub-quantum requests accumulate into a code transition",
+      "optimizer residual remains FP16 across exact resume",
+      "model routes feedback only to configured MLP lattice modules"
+    ]
+  }
+}
