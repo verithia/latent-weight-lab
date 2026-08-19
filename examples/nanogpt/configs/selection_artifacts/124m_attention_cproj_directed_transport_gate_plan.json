@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_124m_attention_cproj_directed_transport_gate_plan_v1",
+  "recorded_at": "2026-08-20",
+  "scientific_question": "Does removing skew-pair and disjoint-matching constraints let an equal-budget, fresh directed sparse transport cover enough of attention c_proj's exact dense-Muon request to justify implementation?",
+  "theory": {
+    "orthogonal_failure": "The best 6.25-percent bilateral/residual Givens chart recovered 0.236724 with cosine 0.493535. More monolithic output rotations did not help, localizing the missing capacity to the skew-paired coordinate family rather than stale direction or output-side choice alone.",
+    "directed_transport": "For source W and sparse directed action A, the update W A (input side) or A W (output side) gives each target channel independent incoming coefficients. Multistage residual fitting composes fresh actions without a learned dense basis.",
+    "production_correspondence": "The exact batched solver, ridge, chunking, family-radius normalization, and error-feedback-compatible representation are already production-qualified by the accepted MLP c_fc path. This gate changes only target and schedule allocation."
+  },
+  "protocol": {
+    "parameter_updates": 0,
+    "probe_steps": [0, 594, 1188, 1782, 2372],
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "target": "attn.c_proj",
+    "ridge_ratio": 1e-6,
+    "chunk_size": 256,
+    "family_radius_ratio": 1.0,
+    "coordinates_per_candidate": 36864,
+    "coordinate_fraction": 0.0625,
+    "candidates": {
+      "output_24x2": [{"side": "output", "schedule": [24, 24]}],
+      "output_16x3": [{"side": "output", "schedule": [16, 16, 16]}],
+      "output_12x4": [{"side": "output", "schedule": [12, 12, 12, 12]}],
+      "output_8x6": [{"side": "output", "schedule": [8, 8, 8, 8, 8, 8]}],
+      "input16_output32": [
+        {"side": "input", "schedule": [8, 8]},
+        {"side": "output", "schedule": [8, 8, 8, 8]}
+      ],
+      "input24_output24": [
+        {"side": "input", "schedule": [12, 12]},
+        {"side": "output", "schedule": [12, 12]}
+      ],
+      "output32_input16": [
+        {"side": "output", "schedule": [8, 8, 8, 8]},
+        {"side": "input", "schedule": [8, 8]}
+      ]
+    }
+  },
+  "prior_evidence": {
+    "best_equal_budget_orthogonal_candidate": "input16_output64_residual16",
+    "best_equal_budget_orthogonal_recovery": 0.23672358363492807,
+    "best_equal_budget_orthogonal_cosine": 0.4935354082506628
+  },
+  "decision_rule": {
+    "no_posthoc_threshold_changes": true,
+    "thresholds": {
+      "aggregate_recovery_minimum": 0.50,
+      "minimum_phase_recovery": 0.45,
+      "minimum_layer_recovery": 0.40,
+      "minimum_cell_recovery": 0.20,
+      "aggregate_cosine_minimum": 0.75,
+      "orthogonal_absolute_improvement": 0.20,
+      "maximum_coordinate_fraction": 0.0625
+    },
+    "selection": "Among passing candidates maximize aggregate fixed-scale recovery, then worst-cell recovery, then prefer lower measured solver time.",
+    "pass": "Authorize only the selected directed c_proj implementation, focused correctness/resume tests, and an exact-config real-training MFU gate of at least 20 percent.",
+    "fail": "Reject directed sparse transport at this budget and return to a compact state-conditioned dense-action approximation; do not sweep training schedules."
+  },
+  "identity": {
+    "trajectory_run_identity_sha256": "aea2a472e6e5b6013d6254ff2339211796bcedb441db955706ce01b978a961ac",
+    "optimizer_probe_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe",
+    "optimizer_probe_sha256": {
+      "step_000000.pt": "541a1574ad7f231a61d915531e317fe941b603940d70da359c173fba0fffcaf5",
+      "step_000594.pt": "2df500bd72f797454730eb8d6dfbf15da1e7d47e84b5127d754b95a7cf277e3e",
+      "step_001188.pt": "5fd43fbeb9447a86b673d2b3ee10bd2d7faa1ab0c43cdd7b59d3d783ca871a8a",
+      "step_001782.pt": "4fba582c5b9f6ac7e3da366af745d916691e0beb46c7ae54a2a2b27f5fe344e0",
+      "step_002372.pt": "74dcc86b365421f6bc27a0fa296764c522d132a8072f284555bfb23cbe69b474"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "device": "cuda",
+    "expected_runtime": "under five minutes",
+    "monitoring": "direct foreground polling; no watchdog or callback",
+    "command": ".venv/bin/python -m examples.nanogpt.analyze_attention_cproj_directed_transport_gate --plan examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_directed_transport_gate_plan.json --probe-dir /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/optimizer_probe --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_cproj_directed_transport_gate_v1 --device cuda"
+  },
+  "authorization": {
+    "zero_update_oracle": true,
+    "implementation": false,
+    "mfu_preflight": false,
+    "language_model_training": false,
+    "larger_rung": false
+  }
+}
