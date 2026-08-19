@@ -1,0 +1,121 @@
+{
+  "artifact_kind": "690m_full_mlp_hybrid_state_0p5tpp_training_result",
+  "candidate": {
+    "additional_trainable_parameters": 0,
+    "dense_fp32_temporal_state_bytes": 3355443200,
+    "feedback": {
+      "block_size": 4096,
+      "code_bytes": 419430400,
+      "code_dtype": "torch.int8",
+      "elements": 419430400,
+      "scale_bytes": 204800,
+      "scale_dtype": "torch.float16",
+      "scale_elements": 102400
+    },
+    "momentum": {
+      "bytes": 838860800,
+      "dtype": "torch.float16",
+      "elements": 419430400
+    },
+    "persistent_temporal_state_bytes": 1258496000,
+    "storage_ratio": 0.37506103515625,
+    "storage_reduction_factor": 2.6662327095199347
+  },
+  "checkpoint": {
+    "best_validation_ce": 3.7606754302978516,
+    "checkpoint_reason": "evaluation",
+    "config_resolved_sha256": "9599555895aa5c57efdbb2d25f8b8c60b2b76efb28a2a45627adc5918928bb85",
+    "exact_resume_schema": "nanogpt_exact_resume_v2",
+    "metadata_path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/scientific/ckpt.meta.json",
+    "metadata_sha256": "b4963e2f747b334807b3c72af905d407dcf50971962dab0a891378b326824dca",
+    "next_iter": 1326,
+    "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/scientific/ckpt.pt",
+    "sha256": "7860864b8d372c9f460b0c6562d68270c50ffdd1ece90a1294cee2cfbad0ff51",
+    "size_bytes": 4076446376,
+    "state_dtype_audit": "all 64 MLP matrix states store FP16 momentum, signed-int8 feedback codes, and FP16 block scales"
+  },
+  "classification": "PASS_690M_FULL_REPLACEMENT_HYBRID_STATE_PRESERVES_PARENT",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_fullmlp_hybridstate_0p5tpp.json",
+    "sha256": "b70e2ec6332752ea1a6477046adbdb1362d8f71ff3e4542fbdd3e71c5d8dbac5"
+  },
+  "decision": {
+    "automatic_rerun_authorized": false,
+    "full_mlp_compact_state_scaling_complete": true,
+    "larger_model_or_longer_token_rung_authorized": false,
+    "next_action": "Return to the remaining full-attention V/O transport defect. Preregister a 124M component-first, same-state dense-request direction gate that gives attention c_proj fresh per-update connectivity and compact temporal error feedback before considering a 5-TPP training run.",
+    "next_attention_theory_gate_registration_authorized": true,
+    "selected_compact_state_codec": "FP16 Muon momentum plus signed-int8/block-4096 compression feedback"
+  },
+  "evaluation_trajectory": [
+    {"step": 0, "train_ce": 11.1811, "validation_ce": 11.1810},
+    {"step": 332, "train_ce": 4.7348, "validation_ce": 4.7308},
+    {"step": 664, "train_ce": 4.1173, "validation_ce": 4.1065},
+    {"step": 996, "train_ce": 3.8664, "validation_ce": 3.8515},
+    {"step": 1326, "train_ce": 3.7761, "validation_ce": 3.7606754302978516}
+  ],
+  "fixed_evaluation": {
+    "digest": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "eval_batch_size": 16,
+    "eval_iters": 400,
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "eval_seed": 20260715,
+    "eval_tokens_per_split": 6553600
+  },
+  "measurement": {
+    "attention_control_validation_ce": 3.7003,
+    "attention_gap_ce_exact": 0.06037543029785164,
+    "candidate_minus_fp32_state_parent_ce_exact": 0.0017979145050048828,
+    "candidate_perplexity_ratio_vs_attention": 1.0622352669974848,
+    "candidate_perplexity_ratio_vs_fp32_state_parent": 1.0017995317223496,
+    "fp32_state_parent_validation_ce": 3.7588775157928467,
+    "parent_preservation_ce_maximum": 3.7638775157928467,
+    "parent_preservation_margin_exact": 0.0032020854949950106,
+    "pass_validation_ce_maximum": 3.8003,
+    "success_ceiling_margin_exact": 0.03962456970214845,
+    "terminal_step": 1326,
+    "terminal_train_ce_log": 3.7761,
+    "terminal_validation_ce_exact": 3.7606754302978516
+  },
+  "performance": {
+    "actual_wall_seconds": 12565,
+    "checkpoint_bytes_reduction_vs_fp32_parent": 2096938376,
+    "checkpoint_size_ratio_vs_fp32_parent": 0.6603259864338357,
+    "exact_config_mfu_fraction": 0.28734465394081404,
+    "observed_peak_vram_mib": 51657,
+    "parent_fp32_state_observed_peak_vram_mib": 51726,
+    "parent_fp32_state_preflight_peak_vram_mib": 43692.55,
+    "preflight_peak_vram_mib": 41679.74,
+    "preflight_peak_vram_reduction_mib": 2012.81,
+    "steady_update_ms": 9162.53625,
+    "tokens_per_second": 28553.43375
+  },
+  "provenance": {
+    "config_archive_sha256": "b70e2ec6332752ea1a6477046adbdb1362d8f71ff3e4542fbdd3e71c5d8dbac5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "git_commit": "5825856965248c044cbc6cac1c4d602444eba376",
+    "log_sha256": "1fed3bcf057eec736858f2f311d12c3283c2d1759ee161e561292811e822d311",
+    "mfu_certificate_sha256": "9b4e5454a766ce1cbd47b6a7a7914ae97f0d79ad8fc9430a8c49a5a2ec985597",
+    "provenance_sha256": "3bff90ad5154a3fb8ec42644c75ad529d08dca729cd49a54f53f2750e2359add",
+    "run_id": "pro6_mai_v3_690m_fullattn_fullmlp_hybridstate_0p5tpp_20260819T140912Z_1211675",
+    "status_sha256": "825ad7c1c3f6d5c1d2080baab8e4223543748b47234c59aeed59968d22c2590e"
+  },
+  "run": {
+    "exit_code": 0,
+    "finished_at": "2026-08-20T01:38:38+08:00",
+    "gpu": 0,
+    "host": "PRO6",
+    "started_at": "2026-08-19T22:09:13+08:00",
+    "status": "clean",
+    "wall_seconds": 12565
+  },
+  "schema_version": "mai_690m_full_mlp_hybrid_state_0p5tpp_result_v1",
+  "watchdog": {
+    "callback_policy": "20%, 50%, terminal 100%, resettable 90-minute heartbeat, failures and stalls",
+    "duplicate_terminal_callbacks": 0,
+    "gpu_released_after_exit": true,
+    "progress_milestones_delivered": [20, 50],
+    "terminal_callback_delivered": true,
+    "terminal_signature": ["finished", 0, "2026-08-20T01:38:38+08:00"]
+  }
+}
