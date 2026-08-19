@@ -1,10 +1,10 @@
 {
-  "classification": "PASS",
+  "classification": "SUPERSEDED_CONFIGURATION_PERFORMANCE_PASS",
   "config_sha256": "ed5b6f7d6b6481ef78c92da42a7f6089f14f8065d42fbbb74499fb17bc1b26e5",
   "decision": {
     "larger_rung_authorized": false,
-    "one_124m_0p5tpp_training_authorized": true,
-    "reason": "The repaired exact configuration exceeded the frozen 20% MFU floor, retained finite losses, loaded the required native BlockFHT extension, and stayed below the 97,887 MiB VRAM limit."
+    "one_124m_0p5tpp_training_authorized": false,
+    "reason": "The measured configuration exceeded the frozen performance gate but was subsequently rejected by deterministic scientific-launch validation before any update because checkpoint_wall_clock_seconds was 1800 rather than the required 7200. This certificate remains valid evidence only for the superseded configuration identity."
   },
   "evidence": {
     "all_logged_losses_finite": true,
@@ -31,6 +31,11 @@
     "persistent_storage_reduction": 3.998047828208882,
     "runtime_materialization": "dense FP32 attention c_proj weight",
     "optimizer_state": "dense FP32 Muon momentum; excluded from codec compression claim"
+  },
+  "superseded_by": {
+    "config_sha256": "606d4ba2c2a6fa5a38244f7dcb4b2ec544dc24c63fb8f3ecc5e5605806a64e16",
+    "reason": "lifecycle-only deterministic checkpoint cadence repair",
+    "scientific_launch_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_scientific_launch_reject_result.json"
   },
   "measured_at": "2026-08-20",
   "question": "Can the trajectory-qualified causal int8 attention c_proj lattice meet the exact-host performance gate before smallest-rung language-model training?",

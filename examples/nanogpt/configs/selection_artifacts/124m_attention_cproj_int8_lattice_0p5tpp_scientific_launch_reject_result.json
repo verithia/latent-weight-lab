@@ -1,0 +1,33 @@
+{
+  "classification": "SCIENTIFIC_LAUNCH_REJECTED_BEFORE_UPDATES",
+  "decision": {
+    "automatic_rerun": false,
+    "codec_or_scientific_threshold_changed": false,
+    "fresh_exact_config_mfu_required": true,
+    "repair_authorized": true,
+    "scientific_updates_completed": 0
+  },
+  "error": "Registered deterministic launch validation requires checkpoint_wall_clock_seconds=7200; the generated configuration inherited an obsolete explicit value of 1800.",
+  "execution": {
+    "config_sha256": "ed5b6f7d6b6481ef78c92da42a7f6089f14f8065d42fbbb74499fb17bc1b26e5",
+    "git_commit": "f1d12e5afd64065973216fdb65626d13ac72d2f1",
+    "gpu": 0,
+    "host": "PRO6",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_20260819T185430Z_1351890.log",
+    "log_sha256": "6e832d99f750fa9f4c4c269c3168eeb7473076dca45df97c94de30d4c8659fed",
+    "provenance_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_20260819T185430Z_1351890.json",
+    "provenance_sha256": "36640a6434a15db6a1a73cd51c4c3a52e9234d86de1de30d066fd715c7861c06",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4_20260819T185430Z_1351890.json",
+    "status_sha256": "2072da3d717f239d3a8cb17b3ac46df2ef37b94a0a0c69d4aa51d82ca208c096"
+  },
+  "repair": {
+    "new_config_sha256": "606d4ba2c2a6fa5a38244f7dcb4b2ec544dc24c63fb8f3ecc5e5605806a64e16",
+    "scope": "Set checkpoint_wall_clock_seconds to the project-wide deterministic value 7200 in the generator and generated configuration, add a regression assertion, and repeat the exact-config MFU gate before another scientific launch."
+  },
+  "schema_version": "mai_124m_attention_cproj_int8_lattice_scientific_launch_reject_v1",
+  "watchdog": {
+    "callback_delivered": true,
+    "duplicate_callbacks": 0,
+    "mode": "terminal_or_error_only"
+  }
+}

@@ -12,6 +12,7 @@ def test_generated_config_is_the_frozen_smallest_rung() -> None:
         "attn.c_attn.v",
     ]
     assert config["max_iters"] == config["lr_decay_iters"] == 238
+    assert config["checkpoint_wall_clock_seconds"] == 7200
     assert config["planned_tpp"] == 0.5
     assert config["mfu_min_fraction"] == 0.2
     assert config["int8_lattice_representation"] == {

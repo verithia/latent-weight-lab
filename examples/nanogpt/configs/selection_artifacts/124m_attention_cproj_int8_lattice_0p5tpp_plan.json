@@ -12,7 +12,7 @@
     "causal_scale_policy": "monotone running maximum",
     "code": "signed int8 nearest-integer displacement",
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkv_cproj_int8_lattice_0p5tpp_lr24e4.json",
-    "config_sha256": "ed5b6f7d6b6481ef78c92da42a7f6089f14f8065d42fbbb74499fb17bc1b26e5",
+    "config_sha256": "606d4ba2c2a6fa5a38244f7dcb4b2ec544dc24c63fb8f3ecc5e5605806a64e16",
     "dense_gradient": true,
     "dense_materialized_weight": true,
     "dense_muon_momentum": true,
@@ -43,7 +43,9 @@
     "integer_lattice_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_integer_lattice_gate_result.json",
     "integer_lattice_gate_result_sha256": "6f659c31d75ae8a9c9a7b6bceb165c0d3c03b69b2e59aa6d152bfc4c46433619",
     "preflight_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_preflight_reject_result.json",
-    "preflight_reject_result_sha256": "58e0d66fe198a99446d60846eb2b39f3496448ddb1c840e4231234df0a338612"
+    "preflight_reject_result_sha256": "58e0d66fe198a99446d60846eb2b39f3496448ddb1c840e4231234df0a338612",
+    "scientific_launch_reject_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_0p5tpp_scientific_launch_reject_result.json",
+    "scientific_launch_reject_result_sha256": "36bbb049bf60ed7a5c17c1cf2e70e1a8f40af2e0ef4db708453b8498fb5a329b"
   },
   "protocol": {
     "exact_resume": "focused test serializes only int8 codes, FP16 scales, base identity, optimizer step, and dense Muon momentum; reloading regenerates the base and reproduces the next projected update bit-exactly",
@@ -89,7 +91,7 @@
     "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab"
   },
   "question": "Can the trajectory-qualified causal int8 lattice replace dense learned attention c_proj state without losing smallest-rung CE or falling below the 20% MFU floor?",
-  "revision": 2,
+  "revision": 3,
   "schema_version": "mai_124m_attention_cproj_int8_lattice_0p5tpp_plan_v1",
-  "status": "registered_before_exact_config_mfu_and_training"
+  "status": "registered_after_deterministic_launch_cadence_repair_before_repeated_exact_config_mfu"
 }

@@ -26,7 +26,11 @@ def build_config() -> dict[str, object]:
                 "block-4096 int8 running-max displacement lattice. The "
                 "materialized weight, gradient, and Muon momentum remain dense."
             ),
-            "checkpoint_wall_clock_seconds": 1800,
+            # Registered deterministic runs require the project-wide two-hour
+            # wall-clock checkpoint cadence.  The short smallest rung still
+            # writes its terminal checkpoint normally; this value primarily
+            # keeps launch validation and later exact-resume identities aligned.
+            "checkpoint_wall_clock_seconds": 7200,
             "confirmation_slot": "qkv_plus_cproj_int8_lattice_0p5tpp",
             "eval_interval": 60,
             "hpo_stage": "attention_cproj_int8_lattice_124m_0p5tpp",
