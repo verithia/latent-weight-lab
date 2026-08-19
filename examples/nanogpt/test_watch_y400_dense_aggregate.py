@@ -46,6 +46,13 @@ def test_callback_prompt_routes_failures_and_stalls_to_recovery() -> None:
     assert watcher.callback_action_prompt("run ERROR: process missing") == watcher.RECOVERY_ACTION_PROMPT
 
 
+def test_terminal_sample_suppresses_redundant_log_error_callback() -> None:
+    failed = {"status": {"state": "failed"}, "errors": ["Traceback"]}
+    running = {"status": {"state": "running"}, "errors": ["Traceback"]}
+    assert watcher.reportable_log_errors(failed) == []
+    assert watcher.reportable_log_errors(running) == ["Traceback"]
+
+
 def test_failed_milestone_delivery_remains_pending_after_threshold() -> None:
     assert watcher.milestone_crossings(330, 340, 677, {20}) == [50]
     assert watcher.milestone_crossings(340, 350, 677, {20}) == [50]

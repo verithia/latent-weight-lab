@@ -198,6 +198,18 @@ def is_terminal(sample: dict) -> bool:
     return str(sample.get("status", {}).get("state", "")).lower() in {"finished", "failed"}
 
 
+def reportable_log_errors(sample: dict) -> list[str]:
+    """Suppress a redundant log-error callback once terminal status exists.
+
+    A failed terminal transition already owns one actionable recovery callback.
+    Sending the matching traceback marker separately creates two invocations for
+    the same event and can race a subsequently launched retry.
+    """
+    if is_terminal(sample):
+        return []
+    return list(sample.get("errors", []))
+
+
 def terminal_signature(sample: dict) -> list[str | int | None]:
     """Return a JSON-stable identity for one terminal status sidecar."""
     status = sample.get("status", {})
@@ -393,7 +405,7 @@ def main() -> None:
                     missing_events.append((sample["name"], current_iter, key))
             else:
                 run_state.pop("missing_since", None)
-            for error in sample.get("errors", []):
+            for error in reportable_log_errors(sample):
                 key = event_key(sample["name"], "error", error)
                 if key not in state.setdefault("sent", {}) and send(args.chat_id, f"{args.label} {sample['name']} ERROR: {error}"):
                     state["sent"][key] = now
