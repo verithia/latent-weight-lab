@@ -63,7 +63,7 @@
     "The model-weight codec remains about 4x smaller than FP32; training state grows by two bytes per MLP weight.",
     "A smallest-rung pass authorizes only a separate decision, never automatic scale-up."
   ],
-  "status": "authorized_scientific_run_launched_terminal_pending",
+  "status": "terminal_passed_result_sealed_5tpp_requires_separate_preregistration",
   "terminal_gate": {
     "fail_classification": "TEMPORAL_ERROR_FEEDBACK_IS_NOT_SUFFICIENT_FOR_FULL_MLP_CLOSURE",
     "maximum_delta_to_full_attention_parent_ce": 0.02,
@@ -72,6 +72,18 @@
     "require_all_fixed_evaluations_finite": true,
     "require_clean_exit": true,
     "required_improvement_over_no_feedback_ce": 0.0544
+  },
+  "terminal_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_0p5tpp_training_result.json",
+    "sha256": "e86593f8bb8273cd798c9ed4287416cb5fa54ed7df7a9baea2cec58108f97ed7",
+    "terminal_validation_ce": 5.291025161743164,
+    "delta_to_full_attention_parent_ce": -0.0006748382568357851,
+    "improvement_over_no_feedback_ce": 0.07507483825683559,
+    "parent_equivalent_compute_ratio": 0.9982192749239748,
+    "preregistered_gate_passed": true,
+    "one_124m_5tpp_transfer_decision_authorized": true,
+    "automatic_5tpp_launch_authorized": false,
+    "larger_model_authorized": false
   },
   "update_rule": {
     "attention_cproj_feedback": false,

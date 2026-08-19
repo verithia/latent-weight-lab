@@ -1,0 +1,140 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_0p5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "TEMPORAL_QUANTIZATION_WAS_THE_DOMINANT_MLP_LATTICE_OBSTRUCTION",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_0p5tpp_plan.json",
+    "preterminal_sha256": "1f4c149ef48617cfbfad0c594bf3760074737f2b1a0e81a2ffd8c1af71df5297"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp",
+    "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1424336,
+    "pgid": 1424336,
+    "source_commit": "eb3009a9a19dc47bc4b2b5ba1580bc1f0c77bf86",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp.json",
+    "archived_config_sha256": "76f0b3d7224be7265303bf165d629346162ddb8c117ed8ba2da8160cf9d99658",
+    "resolved_config_sha256": "b627aeffa7c0c9f0d0f16d03151284fd676c7933ad896f3007d559f97871aafb",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "bb274052e3568049c19f53ceaf30cc4dfd6486831e5293d2e6aa328555254058",
+    "preflight_mfu_fraction": 0.28504363213876543,
+    "started_at": "2026-08-20T05:17:30+08:00",
+    "finished_at": "2026-08-20T05:26:43+08:00",
+    "wall_seconds": 553,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.json",
+        "bytes": 954,
+        "sha256": "7fd05d935741a5c7b0a73a0df38852195417eab010067dde9bc8330b0f4c90b9"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.log",
+        "bytes": 13592,
+        "sha256": "c5aac5b054e226c0ed99c836d46541f7a83ef4378c83c6b3f1615c573ad11591"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241.json",
+        "bytes": 2202,
+        "sha256": "6868684ea57d1c8e9f40cceef6ef31550d3162293a4b6180a8507a336430c396"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp/scientific/ckpt.pt",
+        "bytes": 958145240,
+        "sha256": "b90d0814b0c9b393411fb1765eed44b2c5fa8da9e7b593889f924fca821c0792"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp/scientific/ckpt.meta.json",
+        "bytes": 23970,
+        "sha256": "d8b008d1147550addeb75dbfa4f4876db81203aa8598947f0793f809df75ba13"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9959, "validation_ce": 10.9960},
+    {"step": 60, "train_ce": 6.2013, "validation_ce": 6.2100},
+    {"step": 120, "train_ce": 5.6737, "validation_ce": 5.6781},
+    {"step": 180, "train_ce": 5.3978, "validation_ce": 5.3998},
+    {"step": 238, "train_ce": 5.2896, "validation_ce": 5.291025161743164}
+  ],
+  "comparison": {
+    "matched_full_attention_parent_validation_ce": 5.2917,
+    "no_feedback_full_mlp_validation_ce": 5.3661,
+    "ordinary_dense_124m_0p5tpp_validation_ce": 5.4890,
+    "frozen_maximum_validation_ce": 5.3117,
+    "terminal_validation_ce": 5.291025161743164,
+    "delta_to_parent_ce": -0.0006748382568357851,
+    "improvement_over_no_feedback_ce": 0.07507483825683559,
+    "delta_to_ordinary_dense_ce": -0.1979748382568356,
+    "margin_to_frozen_maximum_ce": -0.020674838256835804,
+    "perplexity_ratio_to_parent": 0.9993253893952886,
+    "perplexity_ratio_to_no_feedback": 0.9276740582212165,
+    "validation_delta_to_parent_by_step_60_120_180_238": [0.0078, -0.0022, -0.0016, -0.0006748382568357851],
+    "validation_improvement_over_no_feedback_by_step_60_120_180_238": [-0.0025, 0.0002, 0.0282, 0.07507483825683559],
+    "all_fixed_evaluations_finite": true,
+    "preregistered_parent_preservation_gate_passed": true
+  },
+  "fixed_model_compute_equivalence": {
+    "method": "piecewise-linear interpolation of validation CE against log fixed-window update count",
+    "parent_equivalent_updates": 238.42456860806087,
+    "candidate_terminal_updates": 238,
+    "candidate_over_parent_compute": 0.9982192749239748,
+    "terminal_method": "one_interval_extrapolation",
+    "common_loss_candidate_over_parent_median": 0.9987979967399359,
+    "common_loss_candidate_over_parent_range": [0.9961011010041064, 1.0102164298370653],
+    "no_feedback_over_parent_terminal_compute": 1.2085657814644983
+  },
+  "optimizer_state_audit": {
+    "mlp_residual_tensor_count": 24,
+    "mlp_residual_total_elements": 56623104,
+    "mlp_residual_dtype": "float16",
+    "mlp_residual_bytes": 113246208,
+    "all_residuals_finite": true,
+    "residual_rms_min_median_max": [1.767127469065599e-05, 2.8961888347112108e-05, 4.062976950081065e-05],
+    "residual_absolute_maximum": 0.00010883808135986328,
+    "checkpoint_next_iter": 238,
+    "checkpoint_best_validation_ce": 5.291025161743164
+  },
+  "fixed_checkpoint_comparison_to_no_feedback": {
+    "mlp_matrix_count": 24,
+    "total_int8_codes": 56623104,
+    "weighted_code_change_fraction": 0.971465123196443,
+    "weighted_mean_absolute_code_delta": 11.297383387883505,
+    "maximum_absolute_code_delta": 94
+  },
+  "representation": {
+    "mlp_weight_elements": 56623104,
+    "mlp_persistent_codec_bytes": 56650752,
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_persistent_weight_reduction": 3.998047828208882,
+    "extra_fp16_training_state_bytes": 113246208,
+    "dense_runtime_materialization": true,
+    "dense_fp32_muon_momentum": true,
+    "inference_shape_and_flops": "unchanged"
+  },
+  "decision": {
+    "smallest_rung_parent_gate_passed": true,
+    "temporal_error_feedback_was_causally_supported": true,
+    "one_same_size_124m_5tpp_transfer_decision_authorized": true,
+    "automatic_5tpp_launch": false,
+    "automatic_20tpp": false,
+    "larger_model": false,
+    "next_action": "Preregister a fresh 124M/5TPP same-recipe horizon transfer, require its own exact-config MFU gate, and launch only if that gate passes."
+  },
+  "watchdog": {
+    "policy": "terminal/error-only",
+    "terminal_callback_delivered_once": true,
+    "terminal_signature": ["finished", 0, "2026-08-20T05:26:43+08:00"],
+    "watcher_exited": true
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "authorization": {
+    "automatic_20tpp": false,
+    "automatic_rerun": false,
+    "exact_config_mfu_passed": false,
+    "larger_model": false,
+    "one_124m_5tpp_training_after_mfu_pass": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_5tpp.json",
+    "config_sha256": "cd69c497e3ba9858146438490bbecdb9defc77952ba2636d307a0498514287c6",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_full_mlp_int8_lattice_error_feedback_124m_5tpp.py",
+    "learning_rate": 0.0024,
+    "max_iters": 2373,
+    "min_lr": 0.00024,
+    "model_size": "124M",
+    "optimizer_only_feedback": "FP16 residual on the 24 MLP matrices",
+    "persistent_model_state": "QK64/V16 mappings plus signed-int8 attention-c_proj and signed-int8 c_fc/c_proj lattices",
+    "planned_tpp": 5.0
+  },
+  "causal_contract": [
+    "Change only horizon, warmup, evaluation cadence, and output identity from the passed 0.5TPP candidate.",
+    "Preserve the exact model structure, lattice block size, code precision, residual dtype, optimizer, LR, data, seeds, and fixed-evaluation protocol.",
+    "Start from a fresh initialization; do not continue the 0.5TPP checkpoint.",
+    "Keep attention c_proj feedback disabled so the repaired mechanism remains MLP-localized."
+  ],
+  "created_at": "2026-08-20",
+  "execution_gate": {
+    "callback_action_prompt": "Verify terminal artifacts and hashes against the active project note, seal fixed-checkpoint comparisons, update durable notes, and continue only with the next causally authorized action. Do not merely acknowledge this callback.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one idempotent terminal/error-only @Codex watchdog; no 20%, 50%, 80%, or heartbeat callbacks"
+  },
+  "promotion_basis": {
+    "five_tpp_attention_parent": {
+      "ordinary_dense_terminal_validation_ce": 3.5402,
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_cproj_int8_lattice_5tpp_training_result.json",
+      "sha256": "9c02ff532b049b1f619c34b00b91ac3bcf6a557e9f4923d59eca6b1929b57332",
+      "terminal_validation_ce": 3.5499
+    },
+    "smallest_rung_result": {
+      "delta_to_matched_attention_parent_ce": -0.0006748382568357851,
+      "improvement_over_no_feedback_ce": 0.07507483825683559,
+      "parent_equivalent_compute_ratio": 0.9982192749239748,
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_0p5tpp_training_result.json",
+      "sha256": "e86593f8bb8273cd798c9ed4287416cb5fa54ed7df7a9baea2cec58108f97ed7",
+      "terminal_validation_ce": 5.291025161743164
+    }
+  },
+  "question": "Does MLP-local temporal error feedback preserve full replacement at 5TPP, rather than only repairing the 0.5TPP endpoint?",
+  "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_5tpp_plan_v1",
+  "scope_guards": [
+    "The int8 model-weight codec is about 4x smaller than FP32, not 200x.",
+    "The FP16 residual and dense FP32 Muon momentum are optimizer state and must be counted.",
+    "Dense transient materialization and materialized inference FLOPs remain unchanged.",
+    "A 5TPP pass authorizes no larger model or 20TPP run automatically."
+  ],
+  "status": "registered_before_exact_config_mfu_and_training",
+  "terminal_gate": {
+    "fail_classification": "MLP_TEMPORAL_CLOSURE_DOES_NOT_TRANSFER_TO_5TPP",
+    "full_attention_parent_terminal_validation_ce": 3.5499,
+    "maximum_delta_to_full_attention_parent_ce": 0.0103,
+    "maximum_delta_to_ordinary_dense_ce": 0.02,
+    "maximum_terminal_validation_ce": 3.5602,
+    "ordinary_dense_terminal_validation_ce": 3.5402,
+    "pass_classification": "FULL_MLP_PERSISTENT_STATE_NEAR_DENSE_AT_124M_5TPP",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "threshold_changes_after_measurement": false
+  }
+}

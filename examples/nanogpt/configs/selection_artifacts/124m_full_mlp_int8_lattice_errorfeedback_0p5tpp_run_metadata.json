@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_run_metadata_v1",
   "recorded_at": "2026-08-20",
-  "state": "running",
+  "state": "finished",
   "run": {
     "name": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp",
     "run_id": "pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp_20260819T211729Z_1424241",
@@ -69,7 +69,23 @@
     "matched_full_attention_parent_validation_ce": 5.2917,
     "no_feedback_full_mlp_validation_ce": 5.3661,
     "threshold_frozen_before_launch": true,
-    "terminal_validation_ce": null,
-    "passed": null
+    "terminal_validation_ce": 5.291025161743164,
+    "passed": true
+  },
+  "terminal": {
+    "finished_at": "2026-08-20T05:26:43+08:00",
+    "wall_seconds": 553,
+    "exit_code": 0,
+    "classification": "clean",
+    "last_iter": 238,
+    "train_ce": 5.2896,
+    "validation_ce": 5.291025161743164,
+    "best_validation_ce": 5.291025161743164,
+    "process_group_alive": false,
+    "gpu_returned_idle": true,
+    "terminal_callback_delivered_once": true,
+    "watchdog_exited": true,
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_0p5tpp_training_result.json",
+    "result_sha256": "e86593f8bb8273cd798c9ed4287416cb5fa54ed7df7a9baea2cec58108f97ed7"
   }
 }
