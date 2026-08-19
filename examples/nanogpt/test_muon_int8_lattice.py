@@ -50,6 +50,14 @@ def test_codec_state_is_compact_and_dense_materialization_is_transient() -> None
     assert "base_weight" not in state
 
 
+def test_device_style_buffer_migration_preserves_optimizer_leaf() -> None:
+    module = make_module()
+    module._apply(lambda tensor: tensor.clone())
+    assert module.weight.is_leaf
+    assert module.weight.requires_grad
+    make_optimizer(module)
+
+
 def test_projection_has_monotone_fp16_scales_and_deterministic_decode() -> None:
     torch.manual_seed(11)
     module = make_module()

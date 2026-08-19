@@ -136,6 +136,20 @@ class MuonInt8LatticeLinear(nn.Module):
         base.mul_(float(self.base_weight_std.item()))
         return base.to(device=device)
 
+    def _apply(self, fn, recurse: bool = True):
+        """Keep the optimizer-owned transient weight a leaf after device moves.
+
+        ``nn.Module.to`` applies a differentiable copy operation to buffers
+        that require gradients.  Optimizers reject the resulting non-leaf
+        tensor, so detach only the derived materialization after the ordinary
+        buffer migration.  No optimizer may exist when a model is moved in
+        the registered train/resume lifecycle.
+        """
+
+        result = super()._apply(fn, recurse=recurse)
+        self._buffers["weight"] = self.weight.detach().requires_grad_(True)
+        return result
+
     @torch.no_grad()
     def rematerialize_weight_(self) -> None:
         flat_scale = self.scales.float().repeat_interleave(self.block_size)
