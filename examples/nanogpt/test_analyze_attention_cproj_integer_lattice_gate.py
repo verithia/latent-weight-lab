@@ -24,7 +24,7 @@ def test_running_max_scale_is_monotone_and_fp16_representable() -> None:
     second = torch.tensor([[[2.0, -1.0, 6.0, -3.0]]])
     running = block_absmax(first, 4)
     scale1 = fp16_scales(running, 7)
-    running.maximum_(block_absmax(second, 4))
+    running.copy_(torch.maximum(running, block_absmax(second, 4)))
     scale2 = fp16_scales(running, 7)
     assert bool((scale2 >= scale1).all())
     assert torch.equal(scale2, scale2.half().float())

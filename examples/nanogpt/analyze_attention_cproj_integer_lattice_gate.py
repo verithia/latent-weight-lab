@@ -210,7 +210,12 @@ def main() -> None:
             layers=layers,
             expected_identity=run_identity,
         )
-        trajectory_absmax.maximum_(block_absmax(current - initial_cpu, block_size))
+        trajectory_absmax.copy_(
+            torch.maximum(
+                trajectory_absmax,
+                block_absmax(current - initial_cpu, block_size),
+            )
+        )
     oracle_scales = {
         name: fp16_scales(trajectory_absmax.to(args.device), int(spec["qmax"]))
         for name, spec in candidates.items()
@@ -244,7 +249,9 @@ def main() -> None:
             elif policy == "running_max":
                 if candidate not in running_absmax:
                     running_absmax[candidate] = torch.zeros_like(current_absmax)
-                running_absmax[candidate].maximum_(current_absmax)
+                running_absmax[candidate].copy_(
+                    torch.maximum(running_absmax[candidate], current_absmax)
+                )
                 scales = fp16_scales(running_absmax[candidate], qmax)
             else:
                 raise ValueError(f"unsupported scale policy: {policy}")

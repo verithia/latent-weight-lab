@@ -53,7 +53,8 @@
   },
   "identity": {
     "entrypoint": "examples.nanogpt.analyze_attention_cproj_integer_lattice_gate",
-    "entrypoint_sha256": "b67251af1f50d878c7837bba395a06620c4f6484e934d7240cd49394c22bbb61",
+    "entrypoint_sha256": "07e468e87013926c68058558ad6bdefb631d31146450a413c60b59778ad3119f",
+    "source_amendment": "Before any oracle execution, the focused test found that Tensor.maximum_ is not a PyTorch API. The implementation and its matching test were changed to copy_(torch.maximum(...)); no protocol, threshold, candidate, identity, or decision rule changed and no trajectory measurement had been observed.",
     "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_dense_5tpp_replay/scientific/parameter_trajectory",
     "trajectory_file_count": 41,
     "trajectory_total_bytes": 4644344659,
