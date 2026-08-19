@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """One aggregate GPU-ladder monitor with selectable callback cadence.
 
-Milestone watchers own 20/50/80/terminal callbacks.  This supervisor sends a
+Milestone watchers own configurable progress callbacks plus terminal 100%.
+The default is 20/50/terminal, matching the project-wide long-run policy. This
+supervisor sends a
 single combined health update only when no successfully delivered milestone has
 reset the shared clock during the preceding heartbeat period.  It also reports
 per-run stalls or log errors immediately.  ``--terminal-only`` suppresses
@@ -113,6 +115,21 @@ def parse_run(value: str) -> dict[str, object]:
     }
 
 
+def parse_milestones(value: str) -> tuple[int, ...]:
+    """Parse unique, ascending, nonterminal progress percentages."""
+    try:
+        milestones = tuple(int(item.strip()) for item in value.split(",") if item.strip())
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("milestones must be comma-separated integers") from exc
+    if not milestones:
+        raise argparse.ArgumentTypeError("at least one progress milestone is required")
+    if any(percent < 1 or percent > 99 for percent in milestones):
+        raise argparse.ArgumentTypeError("progress milestones must be between 1 and 99")
+    if tuple(sorted(set(milestones))) != milestones:
+        raise argparse.ArgumentTypeError("progress milestones must be unique and ascending")
+    return milestones
+
+
 def callback_action_prompt(text: str) -> str:
     """Return the concrete continuation instruction for a callback event."""
     normalized = text.upper()
@@ -201,7 +218,13 @@ def all_terminal_delivered(samples: list[dict], state: dict) -> bool:
     )
 
 
-def milestone_crossings(previous: int | None, current: int | None, maximum: int | None, sent: set[int]) -> list[int]:
+def milestone_crossings(
+    previous: int | None,
+    current: int | None,
+    maximum: int | None,
+    sent: set[int],
+    milestones: tuple[int, ...] = (20, 50),
+) -> list[int]:
     """Return every reached milestone that still lacks durable ownership.
 
     The first aggregate sample is handled separately as a baseline.  After
@@ -213,7 +236,7 @@ def milestone_crossings(previous: int | None, current: int | None, maximum: int 
         return []
     return [
         percent
-        for percent in (20, 50, 80)
+        for percent in milestones
         if percent not in sent and current * 100 >= percent * maximum
     ]
 
@@ -277,6 +300,12 @@ def main() -> None:
     parser.add_argument("--missing-grace-minutes", type=int, default=2)
     parser.add_argument("--interval", type=int, default=60)
     parser.add_argument(
+        "--progress-milestones",
+        type=parse_milestones,
+        default=(20, 50),
+        help="comma-separated nonterminal progress percentages (default: 20,50)",
+    )
+    parser.add_argument(
         "--terminal-only",
         action="store_true",
         help="send callbacks only for clean completion or actionable errors",
@@ -326,16 +355,22 @@ def main() -> None:
             maximum = sample.get("max_iters")
             sent_milestones = set(run_state.get("sent_milestones", []))
             if args.terminal_only:
-                sent_milestones.update((20, 50, 80))
+                sent_milestones.update(args.progress_milestones)
             elif previous_iter is None and current_iter is not None and maximum is not None:
                 # The first sample is a baseline, never a catch-up notification.
                 sent_milestones.update(
                     percent
-                    for percent in (20, 50, 80)
+                    for percent in args.progress_milestones
                     if current_iter * 100 >= percent * maximum
                 )
             else:
-                for percent in milestone_crossings(previous_iter, current_iter, maximum, sent_milestones):
+                for percent in milestone_crossings(
+                    previous_iter,
+                    current_iter,
+                    maximum,
+                    sent_milestones,
+                    args.progress_milestones,
+                ):
                     progress_events.append((sample["name"], percent, current_iter, maximum))
             if current_iter is not None and (previous_iter is None or current_iter > previous_iter):
                 run_state["last_progress_at"] = now

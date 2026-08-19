@@ -1,0 +1,93 @@
+{
+  "authorization": {
+    "automatic_rerun": false,
+    "exact_config_preflight": true,
+    "larger_model_or_longer_token_rung": false,
+    "one_690m_training_after_preflight_pass": true,
+    "training_before_preflight_pass": false
+  },
+  "candidate": {
+    "attention_only_validation_ce": 3.7003,
+    "config": "examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_fullmlp_hybridstate_0p5tpp.json",
+    "config_sha256": "b70e2ec6332752ea1a6477046adbdb1362d8f71ff3e4542fbdd3e71c5d8dbac5",
+    "dense_fp32_state_bytes": 3355443200,
+    "maximum_validation_ce": 3.8003,
+    "only_scientific_change_from_parent": "FP32 MLP momentum becomes FP16 and FP32 error feedback becomes signed int8 with one FP16 scale per 4096 elements",
+    "parent_terminal_validation_ce": 3.7588775157928467,
+    "persistent_state_bytes": 1258496000
+  },
+  "created_at": "2026-08-19",
+  "decision_rule": {
+    "larger_or_longer_rung": "not authorized by this plan",
+    "memory_pass": "peak VRAM is below the 97,887 MiB device limit and below the 43,692.55 MiB FP32-state 690M parent preflight peak",
+    "mfu_pass": "measured exact-config MFU >= 0.20",
+    "parent_preservation": "nonbinding terminal CE <= 3.7638775157928467",
+    "scientific_success": "finite terminal fixed-window validation CE <= 3.8003"
+  },
+  "identity": {
+    "base_config_sha256": "5403a0bf2905b43f2bfbf8179dd55f2d4d2db1c1c318096260471947a24d4e8d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "hybrid_oracle_sha256": "f6fabd14f604b6f5bd4423a601a57ac8400010066fd7eae295926d2af8552014",
+    "implementation_commit": "bdf19a0b59b1baee8e7ac1863956864840be5fae",
+    "implementation_source_hashes": {
+      "examples/nanogpt/mfu_preflight.py": "4f244e23be072602ef959694095a743306b35d1d2dcb27b7462fdbc002a28303",
+      "examples/nanogpt/model.py": "c7c6d4a4356ededf717ed5010bf87d16df1dd190f436fca9b7291e98dd38ae14",
+      "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+      "examples/nanogpt/muon_matched_givens.py": "11af80c72c54c34492cfaf5c9ef7a93e2f36af0a88a5caf51aa67bfe593b9032",
+      "examples/nanogpt/train.py": "f37a02eb3d84a654f03907295823b64912da7311398e2fb447f4a75447901884",
+      "latent_weight_lab/block_fht.py": "e0b692156130d11d55a240d192e9dde2077a77d0cfc4412356c5ddab49e80f36"
+    },
+    "parent_result_sha256": "d94df6b805a3a45dbd40b91038fe047225c8ceadf8c0d8ad2b4c3a111c2115b3",
+    "result_124m_sha256": "c89118a58bb8e9bd75269f931bf0ef199800c2921bbe45b60e3e8bdd87f72ac5",
+    "result_350m_sha256": "31e8230b04df19390c24a220a9aa5d3e23543cae7cb2f5a065f182d25f5bd42e"
+  },
+  "protocol": {
+    "certificate": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/performance_preflight.json",
+    "gpu": 0,
+    "host": "PRO6",
+    "preflight_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.mfu_preflight",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-paired-ambient-20260819/examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_fullmlp_hybridstate_0p5tpp.json",
+      "--output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/performance_preflight.json",
+      "--log-output",
+      "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/performance_preflight.log",
+      "--min-fraction",
+      "0.2",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "preflight_log": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/performance_preflight.log",
+    "preflight_monitor": "foreground polling",
+    "python": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "run_directory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_690m_full_mlp_hybridstate_0p5tpp/scientific",
+    "training_command": [
+      "env",
+      "CUDA_VISIBLE_DEVICES=0",
+      "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+      "PYTHONPATH=.",
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-paired-ambient-20260819/examples/nanogpt/configs/pro6_mai_v3_690m_fullattn_fullmlp_hybridstate_0p5tpp.json"
+    ],
+    "training_monitor": "one aggregate watchdog with explicit milestones 20,50, terminal 100, a resettable 90-minute heartbeat, and @Codex action prompts",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab-paired-ambient-20260819"
+  },
+  "question": "Does the 124M/350M-neutral temporal-state codec preserve the accepted 690M full-replacement loss while reducing optimizer VRAM?",
+  "schema_version": "mai_690m_full_mlp_hybrid_state_0p5tpp_plan_v1",
+  "status": "registered_before_exact_config_mfu_and_training"
+}

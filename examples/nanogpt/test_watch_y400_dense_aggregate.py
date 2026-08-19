@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import argparse
 import json
+
+import pytest
 
 from examples.nanogpt import watch_y400_dense_aggregate as watcher
 
@@ -55,7 +58,20 @@ def test_owned_or_unreached_milestones_are_not_replayed() -> None:
     assert watcher.milestone_crossings(350, 349, 677, {20}) == []
 
 
-def test_eighty_percent_milestone_is_owned_and_retryable() -> None:
-    assert watcher.milestone_crossings(530, 542, 677, {20, 50}) == [80]
-    assert watcher.milestone_crossings(542, 550, 677, {20, 50}) == [80]
-    assert watcher.milestone_crossings(550, 560, 677, {20, 50, 80}) == []
+def test_default_progress_policy_has_no_redundant_eighty_percent_event() -> None:
+    assert watcher.milestone_crossings(530, 542, 677, {20, 50}) == []
+
+
+def test_explicit_custom_milestone_is_owned_and_retryable() -> None:
+    milestones = (20, 50, 80)
+    assert watcher.milestone_crossings(530, 542, 677, {20, 50}, milestones) == [80]
+    assert watcher.milestone_crossings(542, 550, 677, {20, 50}, milestones) == [80]
+    assert watcher.milestone_crossings(550, 560, 677, {20, 50, 80}, milestones) == []
+
+
+def test_parse_milestones_requires_unique_ascending_nonterminal_values() -> None:
+    assert watcher.parse_milestones("20,50") == (20, 50)
+    assert watcher.parse_milestones("20, 50, 80") == (20, 50, 80)
+    for invalid in ("", "0,50", "20,100", "50,20", "20,20", "twenty,50"):
+        with pytest.raises(argparse.ArgumentTypeError):
+            watcher.parse_milestones(invalid)
