@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_mfu_result_v1",
+  "measured_at": "2026-08-20",
+  "host": "PRO6",
+  "gpu": 0,
+  "passed": true,
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp.json",
+    "sha256": "76f0b3d7224be7265303bf165d629346162ddb8c117ed8ba2da8160cf9d99658"
+  },
+  "execution": {
+    "git_commit": "5415b390e3632700798aac284a6bfb80e6fcbe83",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "foreground_polled": true,
+    "watchdog_used": false
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.28504363213876543,
+    "model_tflops": 118.92921290643456,
+    "empirical_bf16_gemm_peak_tflops": 417.23160771589255,
+    "tokens_per_second": 159239.94,
+    "iteration_ms": 1646.21875,
+    "peak_vram_mib": 35540.62,
+    "all_logged_losses_finite": true,
+    "native_block_fht_extension_loaded": true
+  },
+  "artifacts": {
+    "remote_certificate": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp/performance_preflight.json",
+      "size_bytes": 16996,
+      "sha256": "bb274052e3568049c19f53ceaf30cc4dfd6486831e5293d2e6aa328555254058"
+    },
+    "remote_log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp/performance_preflight.log",
+      "size_bytes": 14797,
+      "sha256": "391173864e0b6ecad1f736927015f44b4323baf7afb3f68ec85e657f7704d317"
+    }
+  },
+  "authorization": {
+    "one_fresh_124m_0p5tpp_scientific_run": true,
+    "automatic_rerun": false,
+    "automatic_5tpp": false,
+    "larger_model": false
+  }
+}

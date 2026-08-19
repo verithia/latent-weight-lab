@@ -2,9 +2,9 @@
   "authorization": {
     "automatic_5tpp": false,
     "automatic_rerun": false,
-    "exact_config_mfu_passed": false,
+    "exact_config_mfu_passed": true,
     "larger_model": false,
-    "one_124m_0p5tpp_training": false
+    "one_124m_0p5tpp_training": true
   },
   "candidate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullattn_fullmlp_int8_lattice_errorfeedback_0p5tpp.json",
@@ -48,13 +48,21 @@
     "Do not change lattice block size, scale rule, code precision, or dense Muon momentum."
   ],
   "question": "Is the +0.0744 CE full-MLP lattice gap caused primarily by discarded sub-quantum late Muon requests?",
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_0p5tpp_mfu_result.json",
+    "sha256": "3444848a3abc291852a45357019c84abeeed756e9cb28cc53715816244eb573e",
+    "remote_certificate_sha256": "bb274052e3568049c19f53ceaf30cc4dfd6486831e5293d2e6aa328555254058",
+    "mfu_fraction": 0.28504363213876543,
+    "peak_vram_mib": 35540.62,
+    "passed": true
+  },
   "schema_version": "mai_124m_full_mlp_int8_lattice_errorfeedback_plan_v1",
   "scope_guards": [
     "FP16 residual is optimizer state, not an inference parameter or Mapping-Network latent.",
     "The model-weight codec remains about 4x smaller than FP32; training state grows by two bytes per MLP weight.",
     "A smallest-rung pass authorizes only a separate decision, never automatic scale-up."
   ],
-  "status": "registered_before_exact_config_mfu_and_training",
+  "status": "exact_config_mfu_passed_one_scientific_run_authorized",
   "terminal_gate": {
     "fail_classification": "TEMPORAL_ERROR_FEEDBACK_IS_NOT_SUFFICIENT_FOR_FULL_MLP_CLOSURE",
     "maximum_delta_to_full_attention_parent_ce": 0.02,
