@@ -1,0 +1,82 @@
+{
+  "schema_version": "mai_124m_shared_dense_block_fht_residual_0p5tpp_result_v1",
+  "classification": "REJECT_SHARED_DENSE_PLUS_PRIVATE_RANDOM_FHT_DIRECTION_COVERAGE",
+  "identity": {
+    "git_commit": "c1bf0683c44a9b21253cc669858ab97745b1f5e0",
+    "run_id": "pro6_mai_v3_124m_fullattn_shared_dense_blockfht_residual_0p5tpp_20260819T113100Z_1131204",
+    "entrypoint": "examples.nanogpt.train",
+    "config_sha256": "13e15c2e533142b3298ba02b795d6383fcaf61046896d53f968376b4ddebebfc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "provenance_sha256": "f50e91cc37bef2a1f0ce89474cb5ee4219fc708db7983220de8df8ca71d7170c",
+    "status_sha256": "5069149ade17698d34b22b73c360774300a81e9a0d10a69f4c9c8b46906ae85a",
+    "log_sha256": "b82396e964e507827682c0e83954c220f717597902fb687bd7926ebe7a242327",
+    "mfu_certificate_sha256": "040f1be6bb9c72c7ed960a44d2f546912aa6b46faa04c23a77bc4a6d7c0f4eb5",
+    "checkpoint_sha256": "dfe9da58f01f98389b26826abc6a80e81de6392b2297ce1c2b53b8d680f57fe3",
+    "checkpoint_metadata_sha256": "c03c1ffb3e2bed38bd9a7c2d9aed69a86a0d37ab1266d3bc81408bc3c663d3f4"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "started_at": "2026-08-19T19:31:02+08:00",
+    "finished_at": "2026-08-19T19:38:00+08:00",
+    "wall_seconds_including_fixed_evaluations": 418.0,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "watchdog_terminal_callback_delivered_once": true,
+    "log_errors": []
+  },
+  "parameter_accounting": {
+    "dense_mlp_parameters": 56623104,
+    "shared_dense_matrix_parameters": 4718592,
+    "layer_private_block_fht_coordinates": 569184,
+    "layer_private_diagonal_parameters": 46080,
+    "total_compact_mlp_parameters": 5333856,
+    "actual_model_trainable_parameters": 45056064,
+    "mlp_parameter_compression_ratio": 10.615792,
+    "mlp_parameter_saving_fraction": 0.905800713,
+    "generated_mlp_weight_elements_per_update": 56623104,
+    "dense_per_layer_optimizer_state": false
+  },
+  "fixed_window_loss": {
+    "curve": [
+      {"step": 0, "train_ce": 10.9798, "validation_ce": 10.9800},
+      {"step": 60, "train_ce": 6.3393, "validation_ce": 6.3490},
+      {"step": 120, "train_ce": 5.9156, "validation_ce": 5.9207},
+      {"step": 180, "train_ce": 5.7464, "validation_ce": 5.7506},
+      {"step": 238, "train_ce": 5.6785, "validation_ce": 5.6824}
+    ],
+    "terminal_validation_ce": 5.6824,
+    "attention_only_control_validation_ce": 5.4918,
+    "ce_gap_to_attention_only": 0.1906,
+    "perplexity_ratio_to_attention_only": 1.209975365,
+    "full_mlp_error_feedback_validation_ce": 5.5293164253,
+    "ce_gap_to_full_mlp_error_feedback": 0.1530835747,
+    "perplexity_ratio_to_full_mlp_error_feedback": 1.165422375,
+    "shared_dense_trunk_validation_ce": 5.6971,
+    "ce_improvement_over_shared_dense_trunk": 0.0147,
+    "shared_trunk_perplexity_ratio_to_hybrid": 1.014808576,
+    "preregistered_ce_maximum": 5.5918,
+    "threshold_miss_ce": 0.0906,
+    "threshold_miss_perplexity_ratio": 1.094830985
+  },
+  "exact_config_benchmark": {
+    "mfu_fraction": 0.3588944419,
+    "tokens_per_second": 199331.9033,
+    "iter_ms": 1315.1167,
+    "peak_allocated_mib": 33437.55,
+    "native_block_fht_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "prepare_ms": 7.0233,
+    "flush_ms": 10.2333
+  },
+  "decision": {
+    "mfu_gate_passed": true,
+    "finite_terminal_loss_passed": true,
+    "loss_gate_passed": false,
+    "larger_rung_authorized": false,
+    "repeat_or_hyperparameter_sweep_authorized": false,
+    "interpretation": "A layer-private one-percent random BlockFHT residual improves the learned shared trunk by only 0.0147 CE and still leaves a 0.1906 CE gap to attention-only. This is consistent with the sealed dense-trajectory result that a random one-percent tangent captures approximately one percent of the dense displacement energy. Private ownership is necessary but random low-dimensional coverage is not sufficient.",
+    "next_action": "Do not sweep the residual scale, seed, learning rate, or BlockFHT depth. The next candidate must make the layer-private directions adaptive to the learned shared core and must preserve full-rank feature/write action without allocating independent dense MLP pairs. It requires a written algebraic gate and an exact-config MFU certificate before one 124M/0.5TPP loss measurement."
+  }
+}

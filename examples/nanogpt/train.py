@@ -1087,6 +1087,21 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--mlp-shared-dense-tri-monarch-block-width",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
+        "--mlp-shared-dense-tri-monarch-coordinate-scale",
+        type=float,
+        default=1.0,
+    )
+    parser.add_argument(
+        "--mlp-shared-dense-tri-monarch-seed",
+        type=int,
+        default=20260819,
+    )
+    parser.add_argument(
         "--mlp-shared-dense-block-fht-residual",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2533,6 +2548,15 @@ def main() -> None:
         moe_router_z_loss_coefficient=args.moe_router_z_loss_coefficient,
         moe_unpadded_expert_loop=args.moe_unpadded_expert_loop,
         mlp_shared_dense_trunk=args.mlp_shared_dense_trunk,
+        mlp_shared_dense_tri_monarch_block_width=(
+            args.mlp_shared_dense_tri_monarch_block_width
+        ),
+        mlp_shared_dense_tri_monarch_coordinate_scale=(
+            args.mlp_shared_dense_tri_monarch_coordinate_scale
+        ),
+        mlp_shared_dense_tri_monarch_seed=(
+            args.mlp_shared_dense_tri_monarch_seed
+        ),
         mlp_shared_dense_block_fht_residual=(
             args.mlp_shared_dense_block_fht_residual
         ),

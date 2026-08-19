@@ -250,6 +250,9 @@ class GPTConfig:
     block_fht_mlp_residual_output_gain_scale: float = 1.0
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
     mlp_shared_dense_trunk: bool = False
+    mlp_shared_dense_tri_monarch_block_width: int = 0
+    mlp_shared_dense_tri_monarch_coordinate_scale: float = 1.0
+    mlp_shared_dense_tri_monarch_seed: int = 20260819
     mlp_shared_dense_block_fht_residual: bool = False
     mlp_shared_dense_block_fht_residual_scale: float = math.sqrt(0.5)
     block_fht_mlp_residual_conditioned_output_gate: bool = False
@@ -2613,10 +2616,23 @@ class MLP(nn.Module):
         paired_monarch_width = int(
             config.block_fht_mlp_paired_monarch_block_width
         )
+        tri_monarch_width = int(
+            config.mlp_shared_dense_tri_monarch_block_width
+        )
         if paired_monarch_width < 0:
             raise ValueError(
                 "block_fht_mlp_paired_monarch_block_width must be "
                 "non-negative"
+            )
+        if tri_monarch_width < 0:
+            raise ValueError(
+                "mlp_shared_dense_tri_monarch_block_width must be "
+                "non-negative"
+            )
+        if paired_monarch_width and tri_monarch_width:
+            raise ValueError(
+                "paired Monarch and shared-dense tri-Monarch are mutually "
+                "exclusive"
             )
         if paired_monarch_width:
             if not (
@@ -2632,19 +2648,64 @@ class MLP(nn.Module):
                     "paired Monarch cannot be combined with a separate "
                     "pre-GELU rotation"
                 )
+        if tri_monarch_width:
+            if not config.mlp_shared_dense_trunk:
+                raise ValueError(
+                    "shared-dense tri-Monarch requires the shared dense MLP "
+                    "trunk"
+                )
+            if not (
+                isinstance(self.c_fc, nn.Linear)
+                and isinstance(self.c_proj, nn.Linear)
+            ):
+                raise ValueError(
+                    "shared-dense tri-Monarch requires plain dense c_fc and "
+                    "c_proj matrices"
+                )
+            if self.pregelu_block_rotation is not None:
+                raise ValueError(
+                    "shared-dense tri-Monarch cannot be combined with a "
+                    "separate pre-GELU rotation"
+                )
+        monarch_width = paired_monarch_width or tri_monarch_width
+        monarch_scale = (
+            float(config.block_fht_mlp_paired_monarch_coordinate_scale)
+            if paired_monarch_width
+            else float(config.mlp_shared_dense_tri_monarch_coordinate_scale)
+        )
+        monarch_seed = (
+            int(config.block_fht_mlp_paired_monarch_seed)
+            if paired_monarch_width
+            else int(config.mlp_shared_dense_tri_monarch_seed)
+        )
         self.paired_monarch = (
             LearnedMonarchHiddenMix(
                 features=4 * config.n_embd,
-                block_width=paired_monarch_width,
-                seed=(
-                    int(config.block_fht_mlp_paired_monarch_seed)
-                    + layer_id * 64
-                ),
-                coordinate_scale=float(
-                    config.block_fht_mlp_paired_monarch_coordinate_scale
-                ),
+                block_width=monarch_width,
+                seed=monarch_seed + layer_id * 64,
+                coordinate_scale=monarch_scale,
             )
-            if paired_monarch_width
+            if monarch_width
+            else None
+        )
+        self.input_monarch = (
+            LearnedMonarchHiddenMix(
+                features=config.n_embd,
+                block_width=tri_monarch_width,
+                seed=monarch_seed + layer_id * 64 + 1,
+                coordinate_scale=monarch_scale,
+            )
+            if tri_monarch_width
+            else None
+        )
+        self.output_monarch = (
+            LearnedMonarchHiddenMix(
+                features=config.n_embd,
+                block_width=tri_monarch_width,
+                seed=monarch_seed + layer_id * 64 + 2,
+                coordinate_scale=monarch_scale,
+            )
+            if tri_monarch_width
             else None
         )
         self.dropout = nn.Dropout(config.dropout)
@@ -3547,6 +3608,7 @@ class MLP(nn.Module):
                 self.output_block_rotation,
                 self.residual_output_log_gain,
                 self.paired_monarch,
+                self.output_monarch,
             )
         )
 
@@ -3556,6 +3618,7 @@ class MLP(nn.Module):
             for value in (
                 self.pregelu_block_rotation,
                 self.paired_monarch,
+                self.input_monarch,
             )
         )
 
@@ -3566,6 +3629,7 @@ class MLP(nn.Module):
         for module in (
             self.pregelu_block_rotation,
             self.paired_monarch,
+            self.input_monarch,
         ):
             if module is None:
                 continue
@@ -3602,6 +3666,8 @@ class MLP(nn.Module):
             charted = self.paired_monarch(
                 charted.transpose(0, 1)
             ).transpose(0, 1)
+        if self.input_monarch is not None:
+            charted = self.input_monarch(charted)
         return charted.contiguous()
 
     def prepare_charted_cfc_cache(self) -> None:
@@ -3791,6 +3857,8 @@ class MLP(nn.Module):
         if self.output_block_rotation is not None:
             rotation = self.output_block_rotation.matrix(transposed)
             transposed = transposed @ rotation
+        if self.output_monarch is not None:
+            transposed = self.output_monarch(transposed)
         return transposed.transpose(0, 1).contiguous()
 
     def _cproj_chart_parameters(
@@ -3822,6 +3890,12 @@ class MLP(nn.Module):
             parameters.extend(
                 parameter
                 for parameter in self.paired_monarch.parameters()
+                if not require_grad_only or parameter.requires_grad
+            )
+        if self.output_monarch is not None:
+            parameters.extend(
+                parameter
+                for parameter in self.output_monarch.parameters()
                 if not require_grad_only or parameter.requires_grad
             )
         return parameters
@@ -5014,6 +5088,8 @@ class GPT(nn.Module):
                 ".activation_chart_common_log_gain",
                 ".activation_chart_gauge_log_gain",
                 ".paired_monarch.coordinates",
+                ".input_monarch.coordinates",
+                ".output_monarch.coordinates",
             )
             if self.config.mlp_shared_dense_trunk:
                 chart_names += (".pregelu_gain",)
