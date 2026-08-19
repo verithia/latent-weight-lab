@@ -787,6 +787,7 @@ class BlockFHTLinear(nn.Module):
         quadratic_seed_offset: int = 104729,
         residual_base_scale: float = 0.0,
         residual_base_std: float = 0.02,
+        residual_base_trainable: bool = False,
         residual_delta_zero_init: bool = False,
         output_gain: bool = False,
         input_gain: bool = False,
@@ -837,6 +838,7 @@ class BlockFHTLinear(nn.Module):
         if self.quadratic_seed_offset <= 0:
             raise ValueError("quadratic_seed_offset must be positive")
         self.residual_base_scale = float(residual_base_scale)
+        self.residual_base_trainable = bool(residual_base_trainable)
         self.residual_delta_zero_init = bool(residual_delta_zero_init)
         if self.residual_delta_zero_init and self.residual_base_scale == 0.0:
             raise ValueError(
@@ -866,8 +868,15 @@ class BlockFHTLinear(nn.Module):
         if self.residual_base_scale != 0.0:
             base_weight = torch.empty(self.out_features, self.in_features)
             nn.init.normal_(base_weight, mean=0.0, std=float(residual_base_std))
-            self.register_buffer("residual_base_weight", base_weight, persistent=True)
+            if self.residual_base_trainable:
+                self.residual_base_weight = nn.Parameter(base_weight)
+            else:
+                self.register_buffer("residual_base_weight", base_weight, persistent=True)
         else:
+            if self.residual_base_trainable:
+                raise ValueError(
+                    "a trainable residual base requires a nonzero generated residual scale"
+                )
             self.residual_base_weight = None
 
     @staticmethod
@@ -1024,6 +1033,14 @@ class BlockFHTLinear(nn.Module):
                 else:
                     self.input_gain.grad.add_(input_gain_grad.to(dtype=self.input_gain.dtype))
                 generated_grad_weight = generated_grad_weight * input_gain.view(1, -1)
+            if isinstance(self.residual_base_weight, nn.Parameter):
+                base_gradient = generated_grad_weight.to(
+                    dtype=self.residual_base_weight.dtype
+                )
+                if self.residual_base_weight.grad is None:
+                    self.residual_base_weight.grad = base_gradient
+                else:
+                    self.residual_base_weight.grad.add_(base_gradient)
             generated_grad_weight = generated_grad_weight.reshape(-1)
             if self.residual_base_weight is not None:
                 generated_grad_weight = generated_grad_weight * self.residual_base_scale

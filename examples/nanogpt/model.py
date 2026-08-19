@@ -250,6 +250,8 @@ class GPTConfig:
     block_fht_mlp_residual_output_gain_scale: float = 1.0
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
     mlp_shared_dense_trunk: bool = False
+    mlp_shared_dense_block_fht_residual: bool = False
+    mlp_shared_dense_block_fht_residual_scale: float = math.sqrt(0.5)
     block_fht_mlp_residual_conditioned_output_gate: bool = False
     block_fht_mlp_residual_conditioned_output_gate_scale: float = 1.0
     block_fht_mlp_residual_conditioned_output_gate_layers: tuple[int, ...] = ()
@@ -1104,16 +1106,36 @@ def make_linear(
         else:
             weight_scale = 1.0
         affine_delta = target_name in config.block_fht_affine_delta_targets
+        shared_mlp_residual = (
+            config.mlp_shared_dense_block_fht_residual
+            and target_name in {"mlp.c_fc", "mlp.c_proj"}
+        )
         if affine_delta and config.block_fht_residual_base_scale != 0.0:
             raise ValueError(
                 "target-selective affine deltas cannot be combined with the "
                 "legacy global residual base"
             )
-        residual_base_scale = (
-            float(config.block_fht_affine_delta_scale)
-            if affine_delta
-            else float(config.block_fht_residual_base_scale)
-        )
+        if shared_mlp_residual:
+            residual_base_scale = float(
+                config.mlp_shared_dense_block_fht_residual_scale
+            )
+            if (
+                not math.isfinite(residual_base_scale)
+                or not 0.0 < residual_base_scale < 1.0
+            ):
+                raise ValueError(
+                    "shared dense BlockFHT residual scale must be finite and in (0, 1)"
+                )
+            residual_base_std = target_std * math.sqrt(
+                1.0 - residual_base_scale * residual_base_scale
+            )
+        else:
+            residual_base_scale = (
+                float(config.block_fht_affine_delta_scale)
+                if affine_delta
+                else float(config.block_fht_residual_base_scale)
+            )
+            residual_base_std = target_std
         if not math.isfinite(residual_base_scale):
             raise ValueError("BlockFHT residual/affine delta scale must be finite")
         return BlockFHTLinear(
@@ -1136,7 +1158,8 @@ def make_linear(
             ),
             quadratic_seed_offset=config.block_fht_quadratic_seed_offset,
             residual_base_scale=residual_base_scale,
-            residual_base_std=target_std,
+            residual_base_std=residual_base_std,
+            residual_base_trainable=shared_mlp_residual,
             residual_delta_zero_init=affine_delta,
             output_gain=target_name in config.block_fht_output_gain_targets,
             input_gain=target_name in config.block_fht_input_gain_targets,
@@ -4535,6 +4558,8 @@ class GPT(nn.Module):
                 nn.init.normal_(param, mean=0.0, std=0.02 / math.sqrt(2 * config.n_layer))
         if config.mlp_shared_dense_trunk:
             self._tie_shared_dense_mlp_trunk()
+        if config.mlp_shared_dense_block_fht_residual:
+            self._tie_shared_dense_block_fht_residual()
 
     def _tie_shared_dense_mlp_trunk(self) -> None:
         """Share one learned full-rank MLP pair across transformer layers.
@@ -4585,6 +4610,75 @@ class GPT(nn.Module):
                 assert root.c_fc.bias is not None and root.c_proj.bias is not None
                 block.mlp.c_fc.bias = root.c_fc.bias
                 block.mlp.c_proj.bias = root.c_proj.bias
+
+    def _tie_shared_dense_block_fht_residual(self) -> None:
+        """Tie the learned dense base while retaining private FHT residuals."""
+
+        if self.config.mlp_shared_dense_trunk:
+            raise ValueError(
+                "shared dense trunk and shared dense BlockFHT residual are mutually exclusive"
+            )
+        if self.config.moe_num_experts > 0:
+            raise ValueError(
+                "shared dense BlockFHT residual is incompatible with MoE"
+            )
+        required_targets = {"mlp.c_fc", "mlp.c_proj"}
+        if not required_targets.issubset(self.config.block_fht_targets):
+            raise ValueError(
+                "shared dense BlockFHT residual requires mlp.c_fc and mlp.c_proj targets"
+            )
+        if self.config.block_fht_residual_base_scale != 0.0:
+            raise ValueError(
+                "shared dense BlockFHT residual cannot use the legacy residual base"
+            )
+        residual_scale = float(
+            self.config.mlp_shared_dense_block_fht_residual_scale
+        )
+        if not math.isfinite(residual_scale) or not 0.0 < residual_scale < 1.0:
+            raise ValueError(
+                "shared dense BlockFHT residual scale must be finite and in (0, 1)"
+            )
+        if not self.config.block_fht_match_gpt_init:
+            raise ValueError(
+                "shared dense BlockFHT residual requires GPT init matching"
+            )
+        if not self.config.block_fht_ffn_pregelu_gain:
+            raise ValueError(
+                "shared dense BlockFHT residual requires layer-private pre-GELU gain"
+            )
+        if not self.config.block_fht_mlp_residual_output_gain:
+            raise ValueError(
+                "shared dense BlockFHT residual requires layer-private residual-output gain"
+            )
+        blocks = list(self.transformer.h)
+        if not blocks:
+            raise ValueError(
+                "shared dense BlockFHT residual requires at least one layer"
+            )
+        for block in blocks:
+            if not isinstance(block.mlp, MLP) or not all(
+                isinstance(module, BlockFHTLinear)
+                for module in (block.mlp.c_fc, block.mlp.c_proj)
+            ):
+                raise ValueError(
+                    "shared dense BlockFHT residual requires plain BlockFHT MLP matrices"
+                )
+            if not all(
+                isinstance(module.residual_base_weight, nn.Parameter)
+                for module in (block.mlp.c_fc, block.mlp.c_proj)
+            ):
+                raise ValueError(
+                    "shared dense BlockFHT residual requires trainable dense bases"
+                )
+
+        root = blocks[0].mlp
+        for block in blocks[1:]:
+            block.mlp.c_fc.residual_base_weight = (
+                root.c_fc.residual_base_weight
+            )
+            block.mlp.c_proj.residual_base_weight = (
+                root.c_proj.residual_base_weight
+            )
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
