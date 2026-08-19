@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_mlp_int8_lattice_0p5tpp_plan_v1",
   "created_at": "2026-08-20",
-  "status": "exact_config_mfu_passed_one_124m_0p5tpp_run_authorized",
+  "status": "authorized_124m_0p5tpp_run_launched_terminal_pending",
   "question": "Does full ambient persistent weight freedom close the remaining full-MLP loss gap when the static BlockFHT/directed/Givens spatial charts are replaced by causal blockwise int8 lattices?",
   "causal_basis": {
     "attention_result": {
@@ -76,7 +76,7 @@
   "authorization": {
     "exact_config_mfu_passed": true,
     "one_124m_0p5tpp_training": true,
-    "authorized_training_consumed": false,
+    "authorized_training_consumed": true,
     "automatic_rerun": false,
     "automatic_5tpp": false,
     "larger_model": false

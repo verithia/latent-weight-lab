@@ -38,4 +38,4 @@ def test_plan_pins_ambient_mlp_codec_and_strict_parent_gate() -> None:
     assert plan["decision_rules"]["mapping_network_200x_claim"] is False
     assert plan["mfu_result"]["mfu_fraction"] >= 0.20
     assert plan["authorization"]["exact_config_mfu_passed"] is True
-    assert plan["authorization"]["authorized_training_consumed"] is False
+    assert plan["authorization"]["authorized_training_consumed"] is True
