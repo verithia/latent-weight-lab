@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "EXACT_CONFIG_MFU_PASS",
+  "plan": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_5tpp_plan.json",
+  "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4.json",
+  "config_sha256": "5ec27b4fd2b725d8a87efa4bb8110f6d6521643618610f2c7589502a176c4e1a",
+  "source_commit": "e2abff4a1e522f61895bfa494c5f0285ee86f2fa",
+  "host": "PRO6",
+  "gpu": 0,
+  "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+  "certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp/preflight/performance_preflight.json",
+    "sha256": "9025efcc3c6f9942e45659514e05b5b84d5c030d4d9de6951f7045f8acd99950"
+  },
+  "log": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp/preflight/performance_preflight.log",
+    "sha256": "fe725aca20ba5e2d91ff8311f0c133b781e6f797015071663c87c87e2328a860"
+  },
+  "measurement": {
+    "mfu_fraction": 0.31750545197608243,
+    "minimum_fraction": 0.2,
+    "passed": true,
+    "tokens_per_second": 177331.335,
+    "iter_ms": 1478.2725,
+    "model_tflops": 132.44086938991103,
+    "empirical_bf16_gemm_peak_tflops": 417.12943373296076,
+    "peak_vram_mib": 33982.64,
+    "all_logged_losses_finite": true,
+    "native_block_fht_extension_loaded": true,
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 17.209482669830322
+  },
+  "literal_command": [
+    "env",
+    "CUDA_VISIBLE_DEVICES=0",
+    "CUDA_HOME=/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+    "PYTHONPATH=.",
+    "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.mfu_preflight",
+    "--config",
+    "/home/pro6000-9980x/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4.json",
+    "--output",
+    "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp/preflight/performance_preflight.json",
+    "--log-output",
+    "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp/preflight/performance_preflight.log",
+    "--min-fraction",
+    "0.2",
+    "--warmup-updates",
+    "1",
+    "--timed-updates",
+    "8"
+  ],
+  "authorization": {
+    "one_124m_5tpp_scientific_run": true,
+    "automatic_rerun": false,
+    "automatic_20tpp": false,
+    "combined_full_replacement": false,
+    "larger_model": false
+  }
+}

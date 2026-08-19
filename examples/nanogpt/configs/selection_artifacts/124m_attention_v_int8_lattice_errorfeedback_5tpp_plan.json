@@ -3,6 +3,7 @@
     "automatic_20tpp": false,
     "automatic_rerun": false,
     "combined_full_replacement": false,
+    "exact_config_mfu_passed": true,
     "exact_config_mfu_preflight": true,
     "larger_model": false,
     "one_124m_5tpp_training_after_mfu_pass": true,
@@ -59,6 +60,15 @@
     "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
     "scientific_run_runtime": "one idempotent terminal/error-only @Codex watchdog; no intermediate milestones or heartbeat"
   },
+  "mfu_result": {
+    "certificate_sha256": "9025efcc3c6f9942e45659514e05b5b84d5c030d4d9de6951f7045f8acd99950",
+    "iter_ms": 1478.2725,
+    "mfu_fraction": 0.31750545197608243,
+    "passed": true,
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_5tpp_mfu_result.json",
+    "peak_vram_mib": 33982.64,
+    "tokens_per_second": 177331.335
+  },
   "persistent_state_accounting": {
     "codec_bytes": 7081344,
     "codec_compression_ratio": 3.998048780487805,
@@ -73,7 +83,7 @@
   },
   "question": "Can an ambient signed-int8 V lattice with FP16 temporal error feedback preserve the useful Muon V direction better than the static Cayley/BlockFHT chart?",
   "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_5tpp_plan_v1",
-  "status": "preregistered_pending_exact_config_mfu",
+  "status": "exact_config_mfu_passed_training_authorized",
   "terminal_gate": {
     "fail_classification": "ATTENTION_V_REMAINS_DIRECTION_LIMITED",
     "maximum_delta_to_qk_only_ce": 0.02,
