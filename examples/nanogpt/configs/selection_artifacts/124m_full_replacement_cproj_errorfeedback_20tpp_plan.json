@@ -120,8 +120,32 @@
     "all_logged_losses_finite": true,
     "passed": true
   },
+  "scientific_run": {
+    "config_archive_sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93",
+    "gpu": 0,
+    "host": "PRO6",
+    "launch_commit": "24cbe1560bb98db3cbcc157678ab739d83887877",
+    "launched_at": "2026-08-20T18:22:11+08:00",
+    "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.log",
+    "pgid": 1817697,
+    "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
+    "provenance_sha256": "0f1f7e49e0a29b9f84c7fe01ab7f871b9c783ae3df1e6d5c3ff6630d51853c84",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594",
+    "run_metadata": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_cproj_errorfeedback_20tpp_run.json",
+    "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
+    "watchdog": {
+      "heartbeat_minutes": 90,
+      "launchd_label": "com.mappingnetworks.pro6.fullreplacementcprojfeedback20tpp.20260820",
+      "progress_milestones": [
+        20,
+        50
+      ],
+      "state": "/Users/verithia/research/latent-weight-lab-midpoint/.watchdogs/24cbe1560bb98db3cbcc157678ab739d83887877/pro6_124m_fullreplacement_cproj_feedback_20tpp.json",
+      "verified_alive": true
+    }
+  },
   "question": "Is discarded sub-quantum attention-c_proj motion the cause of the complete replacement's late 20TPP drift?",
   "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_plan_v1",
-  "status": "mfu_passed_ready_for_one_scientific_run",
+  "status": "scientific_run_running",
   "why_no_5tpp_screen": "The parent already passed 5TPP and first violated its temporal gate at step 7119; a 5TPP rerun cannot test this hypothesis."
 }

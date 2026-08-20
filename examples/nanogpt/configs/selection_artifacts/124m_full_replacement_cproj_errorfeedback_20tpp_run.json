@@ -1,0 +1,43 @@
+{
+  "classification": "RUNNING",
+  "config": {
+    "archive_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.config.json",
+    "sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93"
+  },
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "initial_health": {
+    "errors": [],
+    "gpu_memory_mib": 46937,
+    "gpu_temperature_c": 57,
+    "gpu_utilization_percent": 100,
+    "iteration": 20,
+    "iteration_ms": 1483.26,
+    "loss": 9.2922,
+    "process_alive": true,
+    "watchdog_alive": true
+  },
+  "launch": {
+    "commit": "24cbe1560bb98db3cbcc157678ab739d83887877",
+    "gpu": 0,
+    "host": "PRO6",
+    "launched_at": "2026-08-20T18:22:11+08:00",
+    "pgid": 1817697,
+    "provenance_sha256": "0f1f7e49e0a29b9f84c7fe01ab7f871b9c783ae3df1e6d5c3ff6630d51853c84",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594"
+  },
+  "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.log",
+  "performance_preflight": {
+    "mfu_fraction": 0.318805801704841,
+    "sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e",
+    "tokens_per_second": 176634.6925
+  },
+  "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
+  "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_run_v1",
+  "status": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
+  "watchdog": {
+    "callback_policy": "20%, 50%, terminal, failure/stall, and resettable 90-minute heartbeat",
+    "launchd_label": "com.mappingnetworks.pro6.fullreplacementcprojfeedback20tpp.20260820",
+    "state_path": "/Users/verithia/research/latent-weight-lab-midpoint/.watchdogs/24cbe1560bb98db3cbcc157678ab739d83887877/pro6_124m_fullreplacement_cproj_feedback_20tpp.json"
+  }
+}
