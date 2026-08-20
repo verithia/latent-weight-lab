@@ -56,7 +56,11 @@
     "both_configs_must_pass_before_first_launch": true,
     "exact_config_required": true,
     "foreground_polling": true,
-    "launch_authorized": false,
+    "launch_authorized": true,
+    "mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_mfu_result.json",
+      "sha256": "00c4a12b8366eecab83e0eadee0f7e6ebc4664446fc2d2fa42d04e7852c864da"
+    },
     "minimum_mfu_fraction": 0.2,
     "watchdog": false
   },
@@ -85,5 +89,5 @@
     "No optimizer-state compression claim",
     "No inference-FLOP reduction claim"
   ],
-  "status": "materialized_pending_both_exact_config_mfu_gates"
+  "status": "both_exact_config_mfu_passed_top1_authorized"
 }

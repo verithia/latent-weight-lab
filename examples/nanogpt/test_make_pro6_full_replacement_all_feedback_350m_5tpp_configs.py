@@ -7,6 +7,7 @@ import pytest
 
 from examples.nanogpt.make_pro6_full_replacement_all_feedback_350m_5tpp_configs import (
     OUTPUTS,
+    MFU_RESULT,
     PARENTS,
     PLAN,
     QK,
@@ -65,7 +66,7 @@ def test_every_ambient_family_has_lattice_and_temporal_feedback(slot):
     assert candidate["zero_point_five_tpp_ranking_artifact_sha256"] == sha256(RANKING)
 
 
-def test_plan_materializes_only_ranked_top_two_and_blocks_launch_pending_mfu():
+def test_plan_materializes_only_ranked_top_two_and_authorizes_top1_after_both_mfu_gates():
     plan = load(PLAN)
     assert set(OUTPUTS) == {"top1", "top2"}
     assert plan["execution_order"] == ["top1", "top2"]
@@ -73,9 +74,28 @@ def test_plan_materializes_only_ranked_top_two_and_blocks_launch_pending_mfu():
     assert plan["performance_gate"]["foreground_polling"] is True
     assert plan["performance_gate"]["watchdog"] is False
     assert plan["performance_gate"]["both_configs_must_pass_before_first_launch"] is True
-    assert plan["performance_gate"]["launch_authorized"] is False
+    assert plan["status"] == "both_exact_config_mfu_passed_top1_authorized"
+    assert plan["performance_gate"]["launch_authorized"] is True
+    assert plan["performance_gate"]["mfu_result"] == {
+        "path": str(MFU_RESULT.relative_to(MFU_RESULT.parents[4])),
+        "sha256": sha256(MFU_RESULT),
+    }
     assert plan["immutable_ranking"]["sha256"] == sha256(RANKING)
     for slot in SELECTIONS:
         assert plan["confirmations"][slot]["config_sha256"] == sha256(OUTPUTS[slot])
     assert plan["monitoring"]["agent_mention"] == "@Codex"
     assert plan["monitoring"]["heartbeat_minutes"] == 90
+
+
+def test_sealed_mfu_result_passes_both_exact_configs_and_only_authorizes_top1():
+    result = load(MFU_RESULT)
+    assert result["decision"]["classification"] == "PASS_BOTH_EXACT_CONFIG_MFU_GATES"
+    assert result["decision"]["top1_scientific_launch_authorized"] is True
+    assert result["decision"]["top2_scientific_launch_authorized"] is False
+    for slot in SELECTIONS:
+        gate = result["confirmations"][slot]
+        assert gate["config_sha256"] == sha256(OUTPUTS[slot])
+        assert gate["passed"] is True
+        assert gate["mfu_fraction"] >= 0.20
+        assert gate["all_logged_losses_finite"] is True
+        assert gate["native_block_fht_extension_loaded"] is True

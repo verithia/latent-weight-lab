@@ -15,6 +15,7 @@ CONFIG_DIR = ROOT / "examples/nanogpt/configs"
 ARTIFACT_DIR = CONFIG_DIR / "selection_artifacts"
 RANKING = ARTIFACT_DIR / "350m_full_replacement_all_feedback_0p5tpp_ranking.json"
 PLAN = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_plan.json"
+MFU_RESULT = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_mfu_result.json"
 SELECTIONS = {"top1": "mult1p00", "top2": "mult0p75"}
 PARENTS = {
     "top1": CONFIG_DIR / "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
@@ -148,10 +149,30 @@ def build(parent: dict[str, Any], screen: dict[str, Any], slot: str) -> dict[str
 
 
 def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    mfu_result: dict[str, Any] | None = None
+    if MFU_RESULT.exists():
+        mfu_result = load(MFU_RESULT)
+        if mfu_result.get("decision", {}).get("classification") != "PASS_BOTH_EXACT_CONFIG_MFU_GATES":
+            raise ValueError("5TPP MFU result is not a sealed two-config pass")
+        for slot in SELECTIONS:
+            gate = mfu_result.get("confirmations", {}).get(slot, {})
+            if gate.get("config_sha256") != sha256(OUTPUTS[slot]):
+                raise ValueError(f"{slot} MFU result config hash mismatch")
+            if gate.get("passed") is not True:
+                raise ValueError(f"{slot} MFU gate did not pass")
+            if float(gate.get("mfu_fraction", 0.0)) < 0.20:
+                raise ValueError(f"{slot} MFU is below 20%")
+            if gate.get("all_logged_losses_finite") is not True:
+                raise ValueError(f"{slot} scratch loss was not finite")
+    launch_authorized = mfu_result is not None
     return {
         "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_plan_v1",
         "registered_at": "2026-08-21",
-        "status": "materialized_pending_both_exact_config_mfu_gates",
+        "status": (
+            "both_exact_config_mfu_passed_top1_authorized"
+            if launch_authorized
+            else "materialized_pending_both_exact_config_mfu_gates"
+        ),
         "scope": "top-two 350M/5TPP all-feedback complete-replacement confirmations",
         "immutable_ranking": {"path": str(RANKING.relative_to(ROOT)), "sha256": sha256(RANKING)},
         "schedule": {"planned_tpp": 5.0, "planned_tokens": 1772999680, "scheduled_tokens": 1773142016, "max_iters": 6764, "tokens_per_iter": 262144, "eval_interval": 1691, "warmup_iters": 67},
@@ -168,7 +189,19 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             for slot in SELECTIONS
         },
         "excluded_candidates": ["mult0p50"],
-        "performance_gate": {"minimum_mfu_fraction": 0.20, "exact_config_required": True, "foreground_polling": True, "watchdog": False, "both_configs_must_pass_before_first_launch": True, "launch_authorized": False},
+        "performance_gate": {
+            "minimum_mfu_fraction": 0.20,
+            "exact_config_required": True,
+            "foreground_polling": True,
+            "watchdog": False,
+            "both_configs_must_pass_before_first_launch": True,
+            "launch_authorized": launch_authorized,
+            "mfu_result": (
+                {"path": str(MFU_RESULT.relative_to(ROOT)), "sha256": sha256(MFU_RESULT)}
+                if mfu_result is not None
+                else None
+            ),
+        },
         "execution_order": ["top1", "top2"],
         "monitoring": {"expected_duration_hours_per_candidate": [7, 8], "progress_callbacks": [0.20, 0.50, 0.80, 1.00], "heartbeat_minutes": 90, "heartbeat_resets_on_progress": True, "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test", "agent_mention": "@Codex"},
         "resource_admission": {"host": "PRO6", "gpu": 0, "project_cap_gib": 256, "minimum_post_admission_headroom_gib": 8, "archive_completed_checkpoint_before_next_slot": True},

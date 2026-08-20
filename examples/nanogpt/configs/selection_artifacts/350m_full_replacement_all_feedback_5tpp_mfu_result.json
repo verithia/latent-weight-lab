@@ -1,0 +1,63 @@
+{
+  "confirmations": {
+    "top1": {
+      "all_logged_losses_finite": true,
+      "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00/performance_preflight.json",
+      "certificate_sha256": "c0b19f840b65dcc4d9d1e12300ad6d66e67687ad22d1587da1c6fb830f78bbfd",
+      "config_sha256": "35484fe5ede3431ca852d8a2d48969ff2dc5832e2af0176719227adbf169220c",
+      "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "empirical_bf16_gemm_peak_tflops": 416.84655714683396,
+      "finished_at": "2026-08-21T01:22:38.445156+08:00",
+      "iter_ms": 3558.8633333333332,
+      "mfu_fraction": 0.3762487141394153,
+      "model_tflops": 156.83798111993858,
+      "native_block_fht_extension_loaded": true,
+      "native_block_fht_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+      "passed": true,
+      "peak_mib": 60149.08,
+      "preflight_log_sha256": "b209be2fb35a1f422b49c73169e7a72724eeb9492ac7c787af6ed56a00e6ccfd",
+      "source_commit": "f0af6b0a9f9a8827b6bd67326d5387f0c9e94de7",
+      "tokens_per_second": 73659.56,
+      "train_exit_code": 0
+    },
+    "top2": {
+      "all_logged_losses_finite": true,
+      "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75/performance_preflight.json",
+      "certificate_sha256": "cfaed553f7ee9872b84843393394dbf2cac1da42ccbf41aec03525311c2c7f36",
+      "config_sha256": "13e8626594deba2f5330e491e512dbbbad3de5947b0c6310a22f4600528ea86d",
+      "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+      "empirical_bf16_gemm_peak_tflops": 415.5910504409426,
+      "finished_at": "2026-08-21T01:23:16.023649+08:00",
+      "iter_ms": 3561.0333333333333,
+      "mfu_fraction": 0.3771552422492321,
+      "model_tflops": 156.74234330566654,
+      "native_block_fht_extension_loaded": true,
+      "native_block_fht_extension_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+      "passed": true,
+      "peak_mib": 60149.08,
+      "preflight_log_sha256": "42f2e937e5d1b20f0884686dfb668878bb97ca086472ff836d65228bfc9806d8",
+      "source_commit": "f0af6b0a9f9a8827b6bd67326d5387f0c9e94de7",
+      "tokens_per_second": 73614.64333333333,
+      "train_exit_code": 0
+    }
+  },
+  "decision": {
+    "classification": "PASS_BOTH_EXACT_CONFIG_MFU_GATES",
+    "execution_order": [
+      "top1",
+      "top2"
+    ],
+    "top1_scientific_launch_authorized": true,
+    "top2_scientific_launch_authorized": false,
+    "top2_unlock_condition": "top1 terminal result is sealed and passes its frozen same-slot QK boundary"
+  },
+  "gate": {
+    "both_configs_must_pass_before_first_launch": true,
+    "exact_config_required": true,
+    "foreground_polled": true,
+    "minimum_mfu_fraction": 0.2,
+    "threshold_changed_after_measurement": false
+  },
+  "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_mfu_result_v1",
+  "sealed_at": "2026-08-21T01:24:00+08:00"
+}
