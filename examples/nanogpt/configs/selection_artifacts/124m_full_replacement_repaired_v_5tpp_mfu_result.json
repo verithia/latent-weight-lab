@@ -1,0 +1,50 @@
+{
+  "schema_version": "mai_124m_full_replacement_repaired_v_5tpp_mfu_result_v1",
+  "measured_at": "2026-08-20",
+  "host": "PRO6",
+  "gpu": 0,
+  "passed": true,
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp.json",
+    "sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881"
+  },
+  "execution": {
+    "git_commit": "bb787c8b702a8ed08841fe525430c8ad8eb1c70b",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "foreground_polled": true,
+    "watchdog_used": false
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.31817104050175093,
+    "model_tflops": 131.9182955833075,
+    "empirical_bf16_gemm_peak_tflops": 414.61440166042246,
+    "tokens_per_second": 176631.63624999998,
+    "iteration_ms": 1484.13,
+    "peak_vram_mib": 34403.23,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "native_block_fht_extension_loaded": true,
+    "native_module": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "artifacts": {
+    "remote_certificate": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp/performance_preflight.json",
+      "size_bytes": 17031,
+      "sha256": "bee02eac3146ea7d9a61fd0b0fd65a127f3248b7eed312f9cd9694675646e54b"
+    },
+    "remote_log": {
+      "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp/performance_preflight.log",
+      "size_bytes": 14905,
+      "sha256": "25b5537298f081d7d8460a0344382869cd651be6f088dafcffb02410d18f9c32"
+    }
+  },
+  "authorization": {
+    "one_fresh_124m_5tpp_recombination": true,
+    "automatic_rerun": false,
+    "automatic_20tpp": false,
+    "larger_model": false
+  }
+}

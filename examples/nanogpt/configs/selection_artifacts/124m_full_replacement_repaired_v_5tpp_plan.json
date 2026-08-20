@@ -82,6 +82,18 @@
       ]
     }
   },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_mfu_result.json",
+    "sha256": "4b0245c2e3e7ccae7a7493b6d68c70fb56ff6161747509b72a020c45a4054315",
+    "remote_certificate_sha256": "bee02eac3146ea7d9a61fd0b0fd65a127f3248b7eed312f9cd9694675646e54b",
+    "mfu_fraction": 0.31817104050175093,
+    "tokens_per_second": 176631.63624999998,
+    "iteration_ms": 1484.13,
+    "peak_vram_mib": 34403.23,
+    "native_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "passed": true
+  },
   "question": "Does the validated temporal V codec recombine with the accepted attention-c_proj and full-MLP codecs without reopening a loss gap?",
   "schema_version": "mai_124m_full_replacement_repaired_v_5tpp_plan_v1",
   "scope_guards": [
@@ -89,7 +101,7 @@
     "FP16 feedback residuals and dense FP32 Muon momentum are optimizer state and must be counted.",
     "Dense transient materialization and materialized inference FLOPs remain unchanged."
   ],
-  "status": "preregistered_pending_exact_config_mfu",
+  "status": "exact_config_mfu_passed_training_authorized",
   "terminal_gate": {
     "fail_classification": "FULL_REPLACEMENT_RECOMBINATION_REOPENS_GAP",
     "maximum_delta_to_cayley_v_combined_parent_at_every_fixed_evaluation_ce": 0.02,
