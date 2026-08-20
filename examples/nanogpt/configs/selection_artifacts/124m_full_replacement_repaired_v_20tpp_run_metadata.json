@@ -83,6 +83,50 @@
       "scientific_interpretation": "The callback precedes the first positive fixed evaluation. Minibatch train loss is a health signal only and does not alter the frozen terminal or checkpoint gates.",
       "intervention": "none",
       "estimated_update_only_hours_remaining": 3.11
+    },
+    "fifty_percent": {
+      "callback_iter": 4746,
+      "callback_fraction": 0.5001580777742649,
+      "verified_at": "2026-08-20T16:03:15+08:00",
+      "direct_log_sample": {
+        "iter": 4780,
+        "train_loss": 3.3495,
+        "iteration_ms": 1490.26,
+        "recent_mean_iteration_ms": 1490.2175,
+        "recent_tokens_per_second": 175909.89234792907
+      },
+      "fixed_evaluations": [
+        {
+          "step": 2373,
+          "train_ce": 3.5314,
+          "validation_ce": 3.5139,
+          "delta_to_qk_only_ce": 0.0101,
+          "delta_to_isolated_repaired_v_ce": 0.0099,
+          "frozen_checkpoint_gate_passed": true
+        },
+        {
+          "step": 4746,
+          "train_ce": 3.3588,
+          "validation_ce": 3.3373,
+          "delta_to_qk_only_ce": 0.0194,
+          "delta_to_isolated_repaired_v_ce": 0.0179,
+          "frozen_checkpoint_gate_passed": true,
+          "minimum_margin_to_checkpoint_ceiling": 0.0006
+        }
+      ],
+      "maximum_observed_delta_to_qk_only_ce": 0.0194,
+      "maximum_observed_delta_to_isolated_repaired_v_ce": 0.0179,
+      "process_group_alive": true,
+      "trainer_alive": true,
+      "gpu_memory_mib": 46937,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 100,
+      "gpu_power_watts": 541.27,
+      "gpu_temperature_celsius": 62,
+      "log_error_markers": false,
+      "scientific_interpretation": "Both available fixed checkpoints pass the frozen +0.0200 CE rules, but the step-4746 QK-only margin is only 0.0006 CE. Continue unchanged; the narrow pass is a warning for the remaining checkpoints, not authorization to intervene.",
+      "intervention": "none",
+      "estimated_update_only_hours_remaining": 1.95
     }
   },
   "monitoring": {
@@ -101,9 +145,12 @@
     },
     "twenty_percent_callback_delivered_once": true,
     "sent_milestones_after_verification": [
-      20
+      20,
+      50
     ],
-    "heartbeat_clock_reset_by_twenty_percent_callback": true
+    "heartbeat_clock_reset_by_twenty_percent_callback": true,
+    "fifty_percent_callback_delivered_once": true,
+    "heartbeat_clock_reset_by_fifty_percent_callback": true
   },
   "storage": {
     "workspace_bytes_at_launch_verification": 263760647517,
@@ -111,6 +158,8 @@
     "workspace_headroom_bytes": 11117259427,
     "workspace_bytes_at_twenty_percent": 264004166124,
     "workspace_headroom_bytes_at_twenty_percent": 10873740820,
+    "workspace_bytes_at_fifty_percent": 264760123156,
+    "workspace_headroom_bytes_at_fifty_percent": 10117783788,
     "filesystem_free_bytes_before_launch": 1622811160576
   },
   "authorization": {

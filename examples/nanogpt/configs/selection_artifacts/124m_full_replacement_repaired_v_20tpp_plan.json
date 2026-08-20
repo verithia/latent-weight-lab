@@ -126,11 +126,32 @@
         "first_positive_fixed_evaluation_pending_at_step": 2373,
         "healthy": true,
         "intervention": "none"
+      },
+      "fifty_percent": {
+        "callback_iter": 4746,
+        "verified_iter": 4780,
+        "verified_at": "2026-08-20T16:03:15+08:00",
+        "validation_ce_by_step": {
+          "2373": 3.5139,
+          "4746": 3.3373
+        },
+        "delta_to_qk_only_ce_by_step": {
+          "2373": 0.0101,
+          "4746": 0.0194
+        },
+        "delta_to_isolated_repaired_v_ce_by_step": {
+          "2373": 0.0099,
+          "4746": 0.0179
+        },
+        "all_available_checkpoint_gates_passed": true,
+        "minimum_margin_to_checkpoint_ceiling": 0.0006,
+        "healthy": true,
+        "intervention": "none"
       }
     },
     "provenance_sha256": "0dfa236f8bd6ea1eeb68e00de2bc0c3cd0ca0ced22b6553d69316ef01b91a2e3",
     "metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_run_metadata.json",
-    "metadata_sha256": "69c416f237bb048f24f536639a74ee3fa296df1c2e8f3f01b7bb193a99cdeab0",
+    "metadata_sha256": "8636c7dda17256cc3869c5573b37c199a5a68f0dd88e21d6451e55f911375eec",
     "watchdog_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
     "watchdog_policy": "20%, 50%, terminal, failures/stalls, and resettable 90-minute heartbeat"
   },
