@@ -5,6 +5,7 @@
     "exact_config_mfu_preflight": true,
     "larger_model": false,
     "one_124m_5tpp_recombination_after_mfu_pass": true,
+    "one_124m_5tpp_recombination_authorization_consumed": true,
     "training_before_mfu_pass": false
   },
   "candidate": {
@@ -101,7 +102,22 @@
     "FP16 feedback residuals and dense FP32 Muon momentum are optimizer state and must be counted.",
     "Dense transient materialization and materialized inference FLOPs remain unchanged."
   ],
-  "status": "exact_config_mfu_passed_training_authorized",
+  "scientific_run": {
+    "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 1651676,
+    "source_commit": "c2108bb53e96d342837745174a629d4ac73b742b",
+    "started_at": "2026-08-20T12:44:06+08:00",
+    "state": "running",
+    "initial_fixed_validation_ce": 10.9369,
+    "provenance_sha256": "727a73c667c905fe5b655f8a348ec7ed881ea26652729116d80a96ac094f0fe5",
+    "metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_run_metadata.json",
+    "metadata_sha256": "66b78fd83ed542b7cfeae5ea44de1c83875bd020be887e822c3fae79754cdb11",
+    "watchdog_service": "com.mappingnetworks.pro6.fullreplacementrepairedv5tpp.20260820",
+    "watchdog_policy": "terminal/error-only; no milestones or heartbeats"
+  },
+  "status": "scientific_training_running",
   "terminal_gate": {
     "fail_classification": "FULL_REPLACEMENT_RECOMBINATION_REOPENS_GAP",
     "maximum_delta_to_cayley_v_combined_parent_at_every_fixed_evaluation_ce": 0.02,

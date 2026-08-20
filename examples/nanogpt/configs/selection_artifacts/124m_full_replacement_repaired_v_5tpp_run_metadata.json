@@ -1,0 +1,86 @@
+{
+  "schema_version": "mai_124m_full_replacement_repaired_v_5tpp_run_metadata_v1",
+  "recorded_at": "2026-08-20",
+  "state": "scientific_training_running",
+  "run": {
+    "name": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1651676,
+    "pgid": 1651676,
+    "trainer_pid_at_verification": 1651694,
+    "source_commit": "c2108bb53e96d342837745174a629d4ac73b742b",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp.json",
+    "config_sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "started_at": "2026-08-20T12:44:06+08:00",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.json",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.log",
+    "provenance_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.json",
+    "provenance_sha256": "727a73c667c905fe5b655f8a348ec7ed881ea26652729116d80a96ac094f0fe5",
+    "archived_config_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.config.json",
+    "archived_config_sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881"
+  },
+  "mfu_gate": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_mfu_result.json",
+    "result_sha256": "4b0245c2e3e7ccae7a7493b6d68c70fb56ff6161747509b72a020c45a4054315",
+    "certificate_sha256": "bee02eac3146ea7d9a61fd0b0fd65a127f3248b7eed312f9cd9694675646e54b",
+    "mfu_fraction": 0.31817104050175093,
+    "passed_before_training": true
+  },
+  "launch_verification": {
+    "initial_fixed_evaluation": {
+      "step": 0,
+      "train_ce": 10.9374,
+      "validation_ce": 10.9369
+    },
+    "live_sample": {
+      "iter": 40,
+      "train_loss": 6.7254,
+      "iteration_ms": 1484.75,
+      "gpu_memory_mib": 46937,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 100,
+      "gpu_power_watts": 532.61,
+      "gpu_temperature_celsius": 57,
+      "process_group_alive": true,
+      "trainer_alive": true,
+      "log_error_markers": false
+    },
+    "operational_note": "The first launcher invocation selected a Python without torch and aborted before provenance publication or trainer creation. The successful invocation explicitly bound the workspace venv; it is the sole scientific run identity."
+  },
+  "monitoring": {
+    "launchd_service": "com.mappingnetworks.pro6.fullreplacementrepairedv5tpp.20260820",
+    "policy": "one idempotent terminal/error-only watchdog",
+    "healthy_milestones": false,
+    "heartbeats": false,
+    "failures_and_actionable_stalls": true,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "explicit_agent_mention": "@Codex",
+    "first_persisted_sample": {
+      "iter": 30,
+      "alive": true,
+      "errors": [],
+      "gpu": "46937, 97887, 99, 56"
+    }
+  },
+  "storage": {
+    "workspace_bytes_at_launch_verification": 264003681703,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 10874225241
+  },
+  "authorization": {
+    "one_preregistered_scientific_run_consumed": true,
+    "automatic_rerun": false,
+    "automatic_20tpp": false,
+    "larger_model": false
+  }
+}
