@@ -1,0 +1,88 @@
+{
+  "schema_version": "mai_124m_full_replacement_repaired_v_20tpp_run_metadata_v1",
+  "recorded_at": "2026-08-20",
+  "state": "scientific_training_running",
+  "run": {
+    "name": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1690729,
+    "pgid": 1690729,
+    "trainer_pid_at_verification": 1690747,
+    "source_commit": "34c4efd48dc1de64b098d063d42c640bc1072dad",
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp.json",
+    "config_sha256": "94de5e25083375d602ba314eaad29a51c4ff768acf01f19388add9b498c9a709",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "started_at": "2026-08-20T14:02:37+08:00",
+    "status_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.json",
+    "log_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.log",
+    "provenance_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.json",
+    "provenance_sha256": "0dfa236f8bd6ea1eeb68e00de2bc0c3cd0ca0ced22b6553d69316ef01b91a2e3",
+    "archived_config_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.config.json",
+    "archived_config_sha256": "94de5e25083375d602ba314eaad29a51c4ff768acf01f19388add9b498c9a709"
+  },
+  "mfu_gate": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_mfu_result.json",
+    "result_sha256": "5b5f72a8fcbd2d2f77763989528a6247fb3f07f47101167ee71be204f58a2b3a",
+    "certificate_sha256": "8458a823b71468faecf7dc0dc2dd553fea3ddd4127c3b9f3063f6abba8a7defc",
+    "mfu_fraction": 0.3181208690578437,
+    "passed_before_training": true
+  },
+  "launch_verification": {
+    "initial_fixed_evaluation": {
+      "step": 0,
+      "train_ce": 10.9374,
+      "validation_ce": 10.9369
+    },
+    "live_sample": {
+      "iter": 40,
+      "train_loss": 7.3199,
+      "iteration_ms": 1484.65,
+      "gpu_memory_mib": 46937,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 100,
+      "gpu_power_watts": 532.39,
+      "gpu_temperature_celsius": 57,
+      "process_group_alive": true,
+      "trainer_alive": true,
+      "log_error_markers": false
+    },
+    "scientific_identity_check": "Step-0 train/validation CE exactly matches the sealed 5TPP run, consistent with an unchanged structure and seed."
+  },
+  "monitoring": {
+    "launchd_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
+    "policy": "one idempotent watchdog with 20%, 50%, terminal, failures/stalls, and a resettable 90-minute heartbeat",
+    "progress_milestones": [20, 50],
+    "heartbeat_minutes": 90,
+    "failures_and_actionable_stalls": true,
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "explicit_agent_mention": "@Codex",
+    "first_persisted_sample": {
+      "iter": 30,
+      "alive": true,
+      "errors": [],
+      "gpu": "46937, 97887, 100, 56"
+    }
+  },
+  "storage": {
+    "workspace_bytes_at_launch_verification": 263760647517,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11117259427,
+    "filesystem_free_bytes_before_launch": 1622811160576
+  },
+  "authorization": {
+    "one_preregistered_scientific_run_consumed": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_model": false,
+    "multi_seed_final_closure_claim": false
+  }
+}
