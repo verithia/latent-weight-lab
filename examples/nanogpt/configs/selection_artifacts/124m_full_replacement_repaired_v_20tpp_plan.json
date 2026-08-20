@@ -114,7 +114,7 @@
     "pgid": 1690729,
     "source_commit": "34c4efd48dc1de64b098d063d42c640bc1072dad",
     "started_at": "2026-08-20T14:02:37+08:00",
-    "state": "running",
+    "state": "running_checkpoint_gate_failed",
     "initial_fixed_validation_ce": 10.9369,
     "live_milestones": {
       "twenty_percent": {
@@ -147,16 +147,37 @@
         "minimum_margin_to_checkpoint_ceiling": 0.0006,
         "healthy": true,
         "intervention": "none"
+      },
+      "heartbeat_after_fifty_percent": {
+        "callback_iter": 8370,
+        "verified_iter": 8400,
+        "verified_at": "2026-08-20T17:33:15+08:00",
+        "step_7119_validation_ce": 3.2327,
+        "step_7119_delta_to_qk_only_ce": 0.0281,
+        "step_7119_delta_to_isolated_repaired_v_ce": 0.0272,
+        "checkpoint_gate_status": "failed_at_step_7119",
+        "horizon_transfer_success_classification_still_attainable": false,
+        "terminal_measurement_still_required": true,
+        "healthy": true,
+        "intervention": "none; finish registered run for endpoint diagnosis"
       }
     },
     "provenance_sha256": "0dfa236f8bd6ea1eeb68e00de2bc0c3cd0ca0ced22b6553d69316ef01b91a2e3",
     "metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_run_metadata.json",
-    "metadata_sha256": "8636c7dda17256cc3869c5573b37c199a5a68f0dd88e21d6451e55f911375eec",
+    "metadata_sha256": "56c707b67acf15cb1b84e52c8230e33de723a2294d98b92413a8bc54a6c07d35",
     "watchdog_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
     "watchdog_policy": "20%, 50%, terminal, failures/stalls, and resettable 90-minute heartbeat"
   },
-  "status": "scientific_training_running",
+  "status": "scientific_training_running_checkpoint_gate_failed",
   "terminal_gate": {
+    "checkpoint_gate_already_failed": {
+      "step": 7119,
+      "candidate_validation_ce": 3.2327,
+      "delta_to_qk_only_ce": 0.0281,
+      "delta_to_isolated_repaired_v_ce": 0.0272,
+      "maximum_allowed_delta_ce": 0.02,
+      "retroactive_threshold_change_allowed": false
+    },
     "fail_classification": "FULL_REPLACEMENT_REPAIRED_V_HORIZON_NONTRANSFER_124M_20TPP",
     "maximum_delta_to_isolated_repaired_v_at_every_fixed_evaluation_ce": 0.02,
     "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,
