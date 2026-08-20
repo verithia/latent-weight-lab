@@ -17,6 +17,36 @@
     "process_alive": true,
     "watchdog_alive": true
   },
+  "heartbeats": [
+    {
+      "callback_iteration": 8400,
+      "errors": [],
+      "fixed_evaluations_available": [
+        {
+          "delta_to_no_feedback_parent_ce": -0.0236,
+          "delta_to_qk_only_ce": 0.0045,
+          "delta_to_repaired_v_ce": 0.0036,
+          "step": 7119,
+          "train_ce": 3.2322,
+          "validation_ce": 3.2091
+        }
+      ],
+      "frozen_gate_state": "PASS_STEP_7119_CAUSAL_LOCALIZATION_GATE",
+      "gpu_memory_mib": 46936,
+      "gpu_power_w": 536.03,
+      "gpu_temperature_c": 56,
+      "gpu_utilization_percent": 100,
+      "loss": 3.2039,
+      "mean_last_100_iteration_ms": 1486.149,
+      "remaining_update_hours": 0.4372,
+      "scientific_interpretation": "The candidate is +0.0045 CE to QK-only and improves the no-feedback parent by 0.0236 CE at the preregistered late-drift localization checkpoint. Missing attention-c_proj temporal feedback is strongly supported as causal for the parent's drift; terminal practical closure remains pending.",
+      "tokens_per_second": 176391.47,
+      "verified_at": "2026-08-20T21:53:22+08:00",
+      "verified_iteration": 8430,
+      "workspace_bytes": 264775139836,
+      "workspace_headroom_bytes": 10102767108
+    }
+  ],
   "launch": {
     "commit": "24cbe1560bb98db3cbcc157678ab739d83887877",
     "gpu": 0,
