@@ -1,0 +1,110 @@
+{
+  "authorization": {
+    "automatic_rerun": false,
+    "exact_config_mfu_preflight": true,
+    "larger_model": false,
+    "one_fresh_124m_20tpp_training_after_mfu_pass": true,
+    "parallel_arm": false,
+    "training_before_mfu_pass": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp.json",
+    "config_sha256": "94de5e25083375d602ba314eaad29a51c4ff768acf01f19388add9b498c9a709",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_full_replacement_repaired_v_124m_20tpp.py",
+    "max_iters": 9489,
+    "model_size": "124M",
+    "only_changes_from_passed_5tpp_candidate": [
+      "training and LR-decay horizon 2373 -> 9489",
+      "warmup 23 -> 94",
+      "fixed evaluation interval 594 -> 2373",
+      "output identity and long-run monitoring policy"
+    ],
+    "planned_tpp": 20.0
+  },
+  "causal_contract": [
+    "Do not change QK, V, attention-cproj, c_fc, or MLP-cproj representations.",
+    "Preserve optimizer, LR, data, seeds, microbatch, accumulation, and evaluation set.",
+    "Run fresh from initialization; do not resume or transplant the 5TPP checkpoint.",
+    "No larger model or parallel arm is authorized by this transfer."
+  ],
+  "created_at": "2026-08-20",
+  "evidence": {
+    "complete_replacement_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_training_result.json",
+      "sha256": "f1744e9859108e11c9f06cac4b1da55ca32f7b9d43eaca5bd62291a4dea13132"
+    },
+    "isolated_repaired_v_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_training_result.json",
+      "sha256": "c7c806135aeddbc5bf4a2c43ea876915c4c68389fbbc837365783103834d3335"
+    },
+    "qk_only_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+      "sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+    }
+  },
+  "execution_gate": {
+    "callback_action_prompt": "Verify live state, loss, GPU health, and the active project note; terminal success must seal exact artifacts and choose only the next causally authorized full-replacement action.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one persistent aggregate @Codex watchdog with 20%, 50%, and terminal callbacks; 90-minute heartbeat reset by any callback"
+  },
+  "frozen_comparators": {
+    "isolated_repaired_v": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.504,
+        3.3194,
+        3.2055,
+        3.1489
+      ]
+    },
+    "ordinary_dense_terminal": {
+      "step": 9489,
+      "validation_ce": 3.1547
+    },
+    "qk_only": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.5038,
+        3.3179,
+        3.2046,
+        3.1488
+      ]
+    }
+  },
+  "question": "Does the complete repaired-V replacement retain zero-gap or practical-equivalence performance through 124M/20TPP?",
+  "schema_version": "mai_124m_full_replacement_repaired_v_20tpp_plan_v1",
+  "scope_guards": [
+    "The ambient int8 codecs are approximately 4x smaller than FP32 weights, not 200x latent generators.",
+    "FP16 feedback residuals and dense FP32 Muon momentum remain optimizer state.",
+    "Dense transient materialization and materialized inference FLOPs remain unchanged.",
+    "A single 20TPP seed is horizon confirmation, not multi-seed final closure."
+  ],
+  "status": "preregistered_pending_exact_config_mfu",
+  "terminal_gate": {
+    "fail_classification": "FULL_REPLACEMENT_REPAIRED_V_HORIZON_NONTRANSFER_124M_20TPP",
+    "maximum_delta_to_isolated_repaired_v_at_every_fixed_evaluation_ce": 0.02,
+    "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,
+    "practical_acceptance_maximum_validation_ce": 3.1647,
+    "practical_pass_classification": "FULL_REPLACEMENT_REPAIRED_V_NEAR_DENSE_AT_124M_20TPP",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "threshold_changes_after_measurement": false,
+    "zero_gap_classification": "FULL_REPLACEMENT_REPAIRED_V_ZERO_GAP_AT_124M_20TPP",
+    "zero_gap_closure_validation_ce": 3.1547
+  }
+}

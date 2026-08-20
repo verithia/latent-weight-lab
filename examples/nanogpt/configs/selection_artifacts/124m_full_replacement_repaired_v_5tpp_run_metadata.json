@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_replacement_repaired_v_5tpp_run_metadata_v1",
   "recorded_at": "2026-08-20",
-  "state": "scientific_training_running",
+  "state": "terminal_result_sealed",
   "run": {
     "name": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp",
     "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371",
@@ -28,6 +28,24 @@
     "provenance_sha256": "727a73c667c905fe5b655f8a348ec7ed881ea26652729116d80a96ac094f0fe5",
     "archived_config_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.config.json",
     "archived_config_sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881"
+  },
+  "terminal": {
+    "finished_at": "2026-08-20T13:45:23+08:00",
+    "wall_seconds": 3677,
+    "exit_code": 0,
+    "status": "clean",
+    "next_iter": 2373,
+    "best_validation_ce": 3.5095791816711426,
+    "classification": "FULL_REPLACEMENT_REPAIRED_V_ZERO_GAP_AT_124M_5TPP",
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_training_result.json",
+    "immutable_artifact_hashes": {
+      "status": "4720047f82f8c6e9344f8b63bbcdd0e335c67779fc0a99e9c41065f7c8ca63de",
+      "log": "446e216822b140f9d0c481af33fd0660f9380b0c5a7f0b93a10f0968cef67ed2",
+      "provenance": "727a73c667c905fe5b655f8a348ec7ed881ea26652729116d80a96ac094f0fe5",
+      "archived_config": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881",
+      "checkpoint": "4c656096dd7d94b7935903994b76d75cd6e5c2d6a0cdcc11384c62503bdffb2f",
+      "checkpoint_metadata": "c67654ba096792d778f7e9903c0e00a8921150a9892426379e03643eae57332e"
+    }
   },
   "mfu_gate": {
     "result": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_mfu_result.json",
@@ -75,12 +93,17 @@
   "storage": {
     "workspace_bytes_at_launch_verification": 264003681703,
     "workspace_cap_bytes": 274877906944,
-    "workspace_headroom_bytes": 10874225241
+    "workspace_headroom_bytes": 10874225241,
+    "workspace_bytes_after_terminal_archive": 263760041330,
+    "workspace_headroom_bytes_after_terminal_archive": 11117865614,
+    "checkpoint_archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_replacement_repaired_v_5tpp/ckpt.pt",
+    "checkpoint_archive_verified": true
   },
   "authorization": {
     "one_preregistered_scientific_run_consumed": true,
     "automatic_rerun": false,
     "automatic_20tpp": false,
+    "one_fresh_124m_20tpp_horizon_transfer_after_exact_config_mfu_pass": true,
     "larger_model": false
   }
 }

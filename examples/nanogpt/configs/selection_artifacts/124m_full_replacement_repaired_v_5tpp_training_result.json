@@ -1,0 +1,183 @@
+{
+  "schema_version": "mai_124m_full_replacement_repaired_v_5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "FULL_REPLACEMENT_REPAIRED_V_ZERO_GAP_AT_124M_5TPP",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_5tpp_plan.json",
+    "preterminal_sha256": "2c7137c69cd99ab2e99a245295507330dcbec1cf654179b9bf057394be12d49d"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 1651676,
+    "source_commit": "c2108bb53e96d342837745174a629d4ac73b742b",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp.json",
+    "archived_config_sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "bee02eac3146ea7d9a61fd0b0fd65a127f3248b7eed312f9cd9694675646e54b",
+    "preflight_mfu_fraction": 0.31817104050175093,
+    "started_at": "2026-08-20T12:44:06+08:00",
+    "finished_at": "2026-08-20T13:45:23+08:00",
+    "wall_seconds": 3677,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.json",
+        "bytes": 954,
+        "sha256": "4720047f82f8c6e9344f8b63bbcdd0e335c67779fc0a99e9c41065f7c8ca63de"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.log",
+        "bytes": 21969,
+        "sha256": "446e216822b140f9d0c481af33fd0660f9380b0c5a7f0b93a10f0968cef67ed2"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.json",
+        "bytes": 2202,
+        "sha256": "727a73c667c905fe5b655f8a348ec7ed881ea26652729116d80a96ac094f0fe5"
+      },
+      "archived_config": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp_20260820T044342Z_1651371.config.json",
+        "bytes": 13120,
+        "sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp/scientific/ckpt.pt",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_replacement_repaired_v_5tpp/ckpt.pt",
+        "bytes": 999595684,
+        "sha256": "4c656096dd7d94b7935903994b76d75cd6e5c2d6a0cdcc11384c62503bdffb2f"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp/scientific/ckpt.meta.json",
+        "bytes": 24132,
+        "sha256": "c67654ba096792d778f7e9903c0e00a8921150a9892426379e03643eae57332e"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9374, "validation_ce": 10.9369},
+    {"step": 594, "train_ce": 4.0276, "validation_ce": 4.0163},
+    {"step": 1188, "train_ce": 3.7166, "validation_ce": 3.7012},
+    {"step": 1782, "train_ce": 3.5834, "validation_ce": 3.5664},
+    {"step": 2373, "train_ce": 3.5275, "validation_ce": 3.5095791816711426}
+  ],
+  "frozen_gate": {
+    "ordinary_dense_terminal_validation_ce": 3.5402,
+    "cayley_v_combined_parent_terminal_validation_ce": 3.549762010574341,
+    "zero_gap_closure_validation_ce": 3.5402,
+    "practical_acceptance_maximum_validation_ce": 3.5502,
+    "terminal_validation_ce": 3.5095791816711426,
+    "delta_to_ordinary_dense_ce": -0.030620818328857435,
+    "improvement_over_cayley_v_parent_ce": 0.04018282890319824,
+    "headroom_to_zero_gap_gate_ce": 0.030620818328857435,
+    "headroom_to_practical_gate_ce": 0.04062081832885722,
+    "perplexity_ratio_to_ordinary_dense": 0.9698432501477547,
+    "passed": true,
+    "threshold_changed_after_measurement": false,
+    "replication_scope": "single seed; horizon transfer is required before a final general closure claim"
+  },
+  "fixed_curve_comparison": {
+    "steps": [594, 1188, 1782, 2373],
+    "ordinary_dense_validation_ce": [4.1742, 3.7631, 3.6039, 3.5402],
+    "candidate_validation_ce_rounded_from_log": [4.0163, 3.7012, 3.5664, 3.5096],
+    "candidate_minus_ordinary_dense_ce": [-0.1579, -0.0619, -0.0375, -0.0306],
+    "cayley_v_combined_parent_validation_ce": [4.0566, 3.7438, 3.6074, 3.5498],
+    "candidate_minus_cayley_v_combined_parent_ce": [-0.0403, -0.0426, -0.0410, -0.0402],
+    "all_checkpoints_passed_frozen_parent_plus_0p02_gate": true,
+    "interpretation": "Replacing Cayley-V with the validated temporal ambient codec improves every registered checkpoint and closes the ordinary-dense 5TPP gap."
+  },
+  "compute_equivalence": {
+    "sop": "notes/active/fixed-model-compute-equivalence-sop-20260804.md",
+    "ordinary_dense_local_log_update_fits": {
+      "last_2_points": {"slope": 0.2224017198416674, "alpha": 0.06282179533406797},
+      "last_3_points": {"slope": 0.32685490291942176, "alpha": 0.09232667728360594},
+      "last_4_points": {"slope": 0.4679486058618979, "alpha": 0.13218140383647758}
+    },
+    "versus_ordinary_dense": {
+      "terminal_candidate_over_dense_compute": 0.871456905349645,
+      "terminal_method": "one_interval_extrapolation",
+      "dense_match_updates": 2723.0262167099445,
+      "median_common_loss_candidate_over_dense_compute": 0.8538450843098061,
+      "common_loss_ratio_range": [0.7662614002119403, 0.8921168779374594]
+    },
+    "versus_cayley_v_combined_parent": {
+      "terminal_candidate_over_parent_compute": 0.8188156202565839,
+      "terminal_method": "one_interval_extrapolation",
+      "parent_match_updates": 2898.088337953784,
+      "median_common_loss_candidate_over_parent_compute": 0.9111248942105477,
+      "common_loss_ratio_range": [0.8157136198064718, 0.9145688472259395]
+    },
+    "curve_precision_note": "Curve calculations use immutable four-decimal log values; the frozen terminal gate uses exact checkpoint validation CE."
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "best_validation_ce": 3.5095791816711426,
+    "lattice_categories": {
+      "attention_v": {"matrices": 12, "elements": 7077888, "code_nonzero_fraction": 0.9878734946250916, "code_saturation_fraction": 0.00010864822979783639, "code_entropy_bits": 7.098404161729547, "scale_count": 1728, "scale_min": 0.0002491474151611328, "scale_mean": 0.00039526144973933697, "scale_max": 0.0006055831909179688},
+      "attention_cproj": {"matrices": 12, "elements": 7077888, "code_nonzero_fraction": 0.9847191572189331, "code_saturation_fraction": 0.00010652895434759557, "code_entropy_bits": 6.821700985075005, "scale_count": 1728, "scale_min": 0.00014841556549072266, "scale_mean": 0.0003375368833076209, "scale_max": 0.0005764961242675781},
+      "mlp_cfc": {"matrices": 12, "elements": 28311552, "code_nonzero_fraction": 0.9873477816581726, "code_saturation_fraction": 0.00005835073898197152, "code_entropy_bits": 7.049217953488702, "scale_count": 6912, "scale_min": 0.00034356117248535156, "scale_mean": 0.0004761124146170914, "scale_max": 0.0008220672607421875},
+      "mlp_cproj": {"matrices": 12, "elements": 28311552, "code_nonzero_fraction": 0.9870731234550476, "code_saturation_fraction": 0.000024089107682812028, "code_entropy_bits": 7.018437643171126, "scale_count": 6912, "scale_min": 0.00014281272888183594, "scale_mean": 0.00020842569938395172, "scale_max": 0.00048542022705078125}
+    },
+    "compression_residuals": {
+      "count": 36,
+      "elements": 63700992,
+      "bytes": 127401984,
+      "dtype": "float16",
+      "all_finite": true,
+      "rms": 0.00010777827992569655,
+      "per_tensor_rms_min": 0.00004976910349796526,
+      "per_tensor_rms_max": 0.00014279696915764362,
+      "absolute_max": 0.00041103363037109375,
+      "scope": "V plus both MLP matrices; attention c_proj intentionally has no feedback"
+    }
+  },
+  "efficiency_scope": {
+    "attention_v_and_cproj_fp32_weight_bytes": 56623104,
+    "attention_v_and_cproj_persistent_int8_codec_bytes": 14162688,
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_persistent_int8_codec_bytes": 56650752,
+    "combined_ambient_fp32_weight_bytes": 283115520,
+    "combined_persistent_int8_codec_bytes": 70813440,
+    "persistent_ambient_weight_reduction": 3.998048399921895,
+    "qk_generated_weight_elements": 84934656,
+    "qk_latent_parameters": 141552,
+    "total_trainable_parameters_reported": 43138032,
+    "dense_fp32_muon_momentum_retained": true,
+    "fp16_temporal_feedback_state_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "materialized_inference_flops_reduced": false,
+    "claim": "QK is compactly generated and ambient V/c_proj/MLP persistent weights are about 4x smaller than FP32; this is not an end-to-end 200x state reduction."
+  },
+  "mechanistic_conclusion": {
+    "supported": "The previous full-replacement gap came from Cayley-V directional restriction. Full ambient int8 V support plus temporal error feedback transfers cleanly when recombined with the accepted attention-c_proj and full-MLP codecs.",
+    "rejected": "The attention-cproj and full-MLP ambient codecs do not reopen a loss gap when combined with repaired V at 124M/5TPP.",
+    "remaining": "Verify the identical complete replacement at 124M/20TPP; this single-seed 5TPP pass does not authorize a larger model."
+  },
+  "storage_reclamation": {
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "reclaimed_bytes": 999595684,
+    "workspace_bytes_after_archive": 263760041330,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11117865614,
+    "filesystem_free_bytes": 1622811160576
+  },
+  "decision": {
+    "one_fresh_124m_20tpp_horizon_transfer_after_exact_config_mfu_pass": true,
+    "larger_model_authorized": false,
+    "automatic_rerun_authorized": false,
+    "final_multi_seed_closure_claim_authorized": false
+  }
+}
