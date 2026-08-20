@@ -1,0 +1,25 @@
+{
+  "schema_version": "mai_350m_full_replacement_all_feedback_0p5tpp_ranking_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_COMPLETE_IMMUTABLE_TOP2_RANKING",
+  "ranking_rule": "Stable ascending exact terminal fixed-validation CE after all three candidates finish; reject failed or non-finite runs.",
+  "candidates": [
+    {"rank": 1, "slug": "mult1p00", "learning_rate": 0.0024, "exact_terminal_validation_ce": 3.9475042819976807, "delta_to_same_slot_qk_only_ce": -0.0036110877990723, "passed_frozen_gate": true, "result": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mult1p00_result.json"},
+    {"rank": 2, "slug": "mult0p75", "learning_rate": 0.0018, "exact_terminal_validation_ce": 4.044264793395996, "delta_to_same_slot_qk_only_ce": 0.0005159378051757812, "passed_frozen_gate": true, "result": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mult0p75_result.json"},
+    {"rank": 3, "slug": "mult0p50", "learning_rate": 0.0012, "exact_terminal_validation_ce": 4.2279767990112305, "delta_to_same_slot_qk_only_ce": -0.004456043243408203, "passed_frozen_gate": true, "result": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mult0p50_result.json"}
+  ],
+  "decision": {
+    "classification": "PASS_COMPLETE_IMMUTABLE_TOP2_RANKING",
+    "completed_candidate_count": 3,
+    "total_candidate_count": 3,
+    "all_candidates_passed_same_slot_gate": true,
+    "top1": "mult1p00",
+    "top2": "mult0p75",
+    "rejected_from_5tpp": ["mult0p50"],
+    "authorized_5tpp_config_count": 2,
+    "five_tpp_configs_may_be_materialized": true,
+    "five_tpp_runs_authorized": false,
+    "authorization_condition": "Both immutable 5TPP exact configurations must pass fresh foreground-polled MFU >= 20% before top1 launch; top2 launches only after top1 terminal sealing."
+  },
+  "scope_limits": ["No 690M promotion", "No multi-seed closure claim", "No optimizer-state compression claim", "No inference-FLOP reduction claim"]
+}

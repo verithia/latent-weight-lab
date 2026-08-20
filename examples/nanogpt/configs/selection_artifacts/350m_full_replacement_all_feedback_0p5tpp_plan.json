@@ -12,18 +12,28 @@
       "scientific_run": {
         "run_name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50",
         "run_id": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50_20260820T162604Z_1998846",
-        "status": "running",
+        "status": "finished",
         "host": "PRO6",
         "gpu": 0,
         "pgid": 1998941,
         "started_at": "2026-08-21T00:26:06+08:00",
+        "finished_at": "2026-08-21T01:11:35+08:00",
+        "wall_seconds": 2729,
+        "exit_code": 0,
         "source_commit": "7ccd2b4f270e62833243487fa0f62a37739de94f",
         "provenance_sha256": "5d0b5ff1adb106706a938018e2ce7b6d3721de8d02b90ea5b0853aa48e73e569",
         "archived_config_sha256": "ff123659585a33a2ab13fd8c4587c9cf6aa26ce727245c9547b885af28ed96ec",
         "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50_20260820T162604Z_1998846.log",
         "status_file": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50_20260820T162604Z_1998846.json",
         "watchdog_label": "com.mappingnetworks.pro6.fullreplacement350m.mult0p50.20260821",
-        "watchdog_mode": "terminal_only"
+        "watchdog_mode": "terminal_only",
+        "exact_terminal_validation_ce": 4.2279767990112305,
+        "delta_to_same_slot_qk_only_ce": -0.004456043243408203,
+        "passed_frozen_gate": true,
+        "result": {
+          "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mult0p50_result.json",
+          "sha256": "dcfb665bd0e7cab3a9411da9fa1b21a1d5b21ddd46aec74b0cf63267a86c0494"
+        }
       }
     },
     "mult0p75": {
@@ -194,7 +204,16 @@
     "int8_code_bytes": 251658240,
     "transient_dense_materialization_retained": true
   },
-  "status": "scientific_screen_in_progress_mult0p50",
+  "status": "scientific_screen_complete_top2_ranked_5tpp_materialization_authorized",
+  "ranking_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_ranking.json",
+    "sha256": "a532edbac9fbf31b9efb222551a38ba6009b0c041a9c2ec68579daefec95413b",
+    "classification": "PASS_COMPLETE_IMMUTABLE_TOP2_RANKING",
+    "top1": "mult1p00",
+    "top2": "mult0p75",
+    "five_tpp_configs_may_be_materialized": true,
+    "five_tpp_runs_authorized": false
+  },
   "mfu_result": {
     "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mfu_result.json",
     "classification": "PASS_ALL_EXACT_CONFIG_MFU_GATES",

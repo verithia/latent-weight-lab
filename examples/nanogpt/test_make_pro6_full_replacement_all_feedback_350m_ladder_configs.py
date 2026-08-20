@@ -28,6 +28,13 @@ MULT0P75_RESULT = (
     PLAN.parent
     / "350m_full_replacement_all_feedback_0p5tpp_mult0p75_result.json"
 )
+MULT0P50_RESULT = (
+    PLAN.parent
+    / "350m_full_replacement_all_feedback_0p5tpp_mult0p50_result.json"
+)
+RANKING = (
+    PLAN.parent / "350m_full_replacement_all_feedback_0p5tpp_ranking.json"
+)
 
 
 def load(path):
@@ -93,6 +100,7 @@ def test_plan_freezes_scale_transfer_screen_and_exact_mfu_gates() -> None:
         "scientific_screen_in_progress_mult0p75",
         "mult0p75_sealed_mult0p50_authorized",
         "scientific_screen_in_progress_mult0p50",
+        "scientific_screen_complete_top2_ranked_5tpp_materialization_authorized",
     }
     assert plan["mfu_result"]["classification"] == (
         "PASS_ALL_EXACT_CONFIG_MFU_GATES"
@@ -164,3 +172,38 @@ def test_mult0p75_terminal_result_passes_the_frozen_same_slot_gate() -> None:
     assert result["fixed_checkpoint_audit"]["compression_residuals"][
         "all_finite"
     ] is True
+
+
+def test_mult0p50_terminal_result_passes_the_frozen_same_slot_gate() -> None:
+    plan = load(PLAN)
+    result = load(MULT0P50_RESULT)
+    candidate = plan["candidates"]["mult0p50"]
+    assert result["classification"] == (
+        "PASS_FULL_REPLACEMENT_SCALE_TRANSFER_350M_0P5TPP_MULT0P50"
+    )
+    assert result["run"]["archived_config_sha256"] == candidate["config_sha256"]
+    assert result["frozen_gate"]["candidate_exact_terminal_validation_ce"] <= (
+        candidate["maximum_terminal_validation_ce"]
+    )
+    assert result["frozen_gate"]["delta_to_qk_only_ce"] < 0.0
+    assert result["frozen_gate"]["passed"] is True
+    assert result["fixed_checkpoint_audit"]["compression_residuals"]["count"] == 96
+    assert result["fixed_checkpoint_audit"]["compression_residuals"][
+        "all_finite"
+    ] is True
+
+
+def test_completed_screen_has_immutable_top2_ranking() -> None:
+    ranking = load(RANKING)
+    assert ranking["classification"] == "PASS_COMPLETE_IMMUTABLE_TOP2_RANKING"
+    assert [candidate["slug"] for candidate in ranking["candidates"]] == [
+        "mult1p00",
+        "mult0p75",
+        "mult0p50",
+    ]
+    assert all(candidate["passed_frozen_gate"] for candidate in ranking["candidates"])
+    assert ranking["decision"]["top1"] == "mult1p00"
+    assert ranking["decision"]["top2"] == "mult0p75"
+    assert ranking["decision"]["rejected_from_5tpp"] == ["mult0p50"]
+    assert ranking["decision"]["five_tpp_configs_may_be_materialized"] is True
+    assert ranking["decision"]["five_tpp_runs_authorized"] is False
