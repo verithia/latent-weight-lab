@@ -24,6 +24,10 @@ MULT1P00_RESULT = (
     PLAN.parent
     / "350m_full_replacement_all_feedback_0p5tpp_mult1p00_result.json"
 )
+MULT0P75_RESULT = (
+    PLAN.parent
+    / "350m_full_replacement_all_feedback_0p5tpp_mult0p75_result.json"
+)
 
 
 def load(path):
@@ -87,6 +91,8 @@ def test_plan_freezes_scale_transfer_screen_and_exact_mfu_gates() -> None:
         "scientific_screen_in_progress_mult1p00",
         "mult1p00_sealed_mult0p75_authorized",
         "scientific_screen_in_progress_mult0p75",
+        "mult0p75_sealed_mult0p50_authorized",
+        "scientific_screen_in_progress_mult0p50",
     }
     assert plan["mfu_result"]["classification"] == (
         "PASS_ALL_EXACT_CONFIG_MFU_GATES"
@@ -134,6 +140,25 @@ def test_mult1p00_terminal_result_passes_the_frozen_same_slot_gate() -> None:
         candidate["maximum_terminal_validation_ce"]
     )
     assert result["frozen_gate"]["delta_to_qk_only_ce"] < 0.0
+    assert result["frozen_gate"]["passed"] is True
+    assert result["fixed_checkpoint_audit"]["compression_residuals"]["count"] == 96
+    assert result["fixed_checkpoint_audit"]["compression_residuals"][
+        "all_finite"
+    ] is True
+
+
+def test_mult0p75_terminal_result_passes_the_frozen_same_slot_gate() -> None:
+    plan = load(PLAN)
+    result = load(MULT0P75_RESULT)
+    candidate = plan["candidates"]["mult0p75"]
+    assert result["classification"] == (
+        "PASS_FULL_REPLACEMENT_SCALE_TRANSFER_350M_0P5TPP_MULT0P75"
+    )
+    assert result["run"]["archived_config_sha256"] == candidate["config_sha256"]
+    assert result["frozen_gate"]["candidate_exact_terminal_validation_ce"] <= (
+        candidate["maximum_terminal_validation_ce"]
+    )
+    assert result["frozen_gate"]["delta_to_qk_only_ce"] < 0.001
     assert result["frozen_gate"]["passed"] is True
     assert result["fixed_checkpoint_audit"]["compression_residuals"]["count"] == 96
     assert result["fixed_checkpoint_audit"]["compression_residuals"][

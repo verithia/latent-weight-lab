@@ -22,18 +22,28 @@
       "scientific_run": {
         "run_name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75",
         "run_id": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75_20260820T153201Z_1971807",
-        "status": "running",
+        "status": "finished",
         "host": "PRO6",
         "gpu": 0,
         "pgid": 1971916,
         "started_at": "2026-08-20T23:32:03+08:00",
+        "finished_at": "2026-08-21T00:17:32+08:00",
+        "wall_seconds": 2729,
+        "exit_code": 0,
         "source_commit": "5f0cbe387009c50fd76b9fae414facf293d51448",
         "provenance_sha256": "d1f441461c74ed197213eb9ba2ded487beeee0aa69aa4b8e3948c9deafc29507",
         "archived_config_sha256": "198d84f153ae80f58d6077f9a190ddbb5c69357adf0e6a60e9d31ab242423822",
         "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75_20260820T153201Z_1971807.log",
         "status_file": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75_20260820T153201Z_1971807.json",
         "watchdog_label": "com.mappingnetworks.pro6.fullreplacement350m.mult0p75.20260820",
-        "watchdog_mode": "terminal_only"
+        "watchdog_mode": "terminal_only",
+        "exact_terminal_validation_ce": 4.044264793395996,
+        "delta_to_same_slot_qk_only_ce": 0.0005159378051757812,
+        "passed_frozen_gate": true,
+        "result": {
+          "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mult0p75_result.json",
+          "sha256": "73f1010e910e84f9968d4f5df49346a909f7a0c388e102332e48ae505840bfa8"
+        }
       }
     },
     "mult1p00": {
@@ -168,7 +178,7 @@
     "int8_code_bytes": 251658240,
     "transient_dense_materialization_retained": true
   },
-  "status": "scientific_screen_in_progress_mult0p75",
+  "status": "mult0p75_sealed_mult0p50_authorized",
   "mfu_result": {
     "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mfu_result.json",
     "classification": "PASS_ALL_EXACT_CONFIG_MFU_GATES",
