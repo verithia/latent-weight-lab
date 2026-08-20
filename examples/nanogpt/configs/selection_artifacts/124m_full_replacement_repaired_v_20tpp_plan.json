@@ -52,6 +52,18 @@
     "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
     "scientific_run_runtime": "one persistent aggregate @Codex watchdog with 20%, 50%, and terminal callbacks; 90-minute heartbeat reset by any callback"
   },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_mfu_result.json",
+    "sha256": "5b5f72a8fcbd2d2f77763989528a6247fb3f07f47101167ee71be204f58a2b3a",
+    "remote_certificate_sha256": "8458a823b71468faecf7dc0dc2dd553fea3ddd4127c3b9f3063f6abba8a7defc",
+    "mfu_fraction": 0.3181208690578437,
+    "tokens_per_second": 176690.63375,
+    "iteration_ms": 1483.6325,
+    "peak_vram_mib": 34403.23,
+    "native_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "passed": true
+  },
   "frozen_comparators": {
     "isolated_repaired_v": {
       "steps": [
@@ -94,7 +106,7 @@
     "Dense transient materialization and materialized inference FLOPs remain unchanged.",
     "A single 20TPP seed is horizon confirmation, not multi-seed final closure."
   ],
-  "status": "preregistered_pending_exact_config_mfu",
+  "status": "exact_config_mfu_passed_scientific_run_authorized",
   "terminal_gate": {
     "fail_classification": "FULL_REPLACEMENT_REPAIRED_V_HORIZON_NONTRANSFER_124M_20TPP",
     "maximum_delta_to_isolated_repaired_v_at_every_fixed_evaluation_ce": 0.02,
