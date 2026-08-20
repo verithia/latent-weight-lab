@@ -18,7 +18,23 @@
       "maximum_terminal_validation_ce": 4.0637,
       "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75/performance_preflight.json",
       "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75/scientific",
-      "qk_only_terminal_validation_ce": 4.0437
+      "qk_only_terminal_validation_ce": 4.0437,
+      "scientific_run": {
+        "run_name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75",
+        "run_id": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75_20260820T153201Z_1971807",
+        "status": "running",
+        "host": "PRO6",
+        "gpu": 0,
+        "pgid": 1971916,
+        "started_at": "2026-08-20T23:32:03+08:00",
+        "source_commit": "5f0cbe387009c50fd76b9fae414facf293d51448",
+        "provenance_sha256": "d1f441461c74ed197213eb9ba2ded487beeee0aa69aa4b8e3948c9deafc29507",
+        "archived_config_sha256": "198d84f153ae80f58d6077f9a190ddbb5c69357adf0e6a60e9d31ab242423822",
+        "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75_20260820T153201Z_1971807.log",
+        "status_file": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75_20260820T153201Z_1971807.json",
+        "watchdog_label": "com.mappingnetworks.pro6.fullreplacement350m.mult0p75.20260820",
+        "watchdog_mode": "terminal_only"
+      }
     },
     "mult1p00": {
       "candidate_main_lr_multiplier": 1.0,
@@ -152,7 +168,7 @@
     "int8_code_bytes": 251658240,
     "transient_dense_materialization_retained": true
   },
-  "status": "mult1p00_sealed_mult0p75_authorized",
+  "status": "scientific_screen_in_progress_mult0p75",
   "mfu_result": {
     "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mfu_result.json",
     "classification": "PASS_ALL_EXACT_CONFIG_MFU_GATES",
