@@ -1,0 +1,169 @@
+{
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_5tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_5tpp_plan.json",
+    "preterminal_sha256": "cc37ad4843c094228490d56c38f1a363a9e00b84d708b46c42d3e500fd4f9849"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4",
+    "run_id": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4_20260819T231020Z_1487299",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 1487394,
+    "pgid": 1487394,
+    "source_commit": "0bbe14c372d3b2497a8170476f3becbc1f9e7e75",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4.json",
+    "archived_config_sha256": "5ec27b4fd2b725d8a87efa4bb8110f6d6521643618610f2c7589502a176c4e1a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "9025efcc3c6f9942e45659514e05b5b84d5c030d4d9de6951f7045f8acd99950",
+    "preflight_mfu_fraction": 0.31750545197608243,
+    "started_at": "2026-08-20T07:10:21+08:00",
+    "finished_at": "2026-08-20T08:11:23+08:00",
+    "wall_seconds": 3662,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4_20260819T231020Z_1487299.json",
+        "bytes": 926,
+        "sha256": "c4f93d80ac91fc4e58e26c3176326a0d27ba7f135786877ec52b69567c3bcee2"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4_20260819T231020Z_1487299.log",
+        "bytes": 21676,
+        "sha256": "cdd5844d110d02e218a96f5d0a75f5ddb717215b8ef091144698b8ee953e3825"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp_lr24e4_20260819T231020Z_1487299.json",
+        "bytes": 2160,
+        "sha256": "5428df457c1f5e8f113cd7f90e9b1fbccc39fbd78f04fffeda15df41f48c20ec"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp/scientific/ckpt.pt",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/attention_v_int8_lattice_errorfeedback_5tpp/ckpt.pt",
+        "bytes": 1077368204,
+        "sha256": "040aa0c2e51b35d00c30b2b8c5cd8f71cdfc81d8d5e077f3b8f76881ec3dad29"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_5tpp/scientific/ckpt.meta.json",
+        "bytes": 22994,
+        "sha256": "25a6ef382ab3b838a568c90b1be87e6cc674a2d671d833bee454239d1e0e3902"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9957, "validation_ce": 10.9951},
+    {"step": 594, "train_ce": 4.0226, "validation_ce": 4.0107},
+    {"step": 1188, "train_ce": 3.7074, "validation_ce": 3.6924},
+    {"step": 1782, "train_ce": 3.5652, "validation_ce": 3.5482},
+    {"step": 2373, "train_ce": 3.5039, "validation_ce": 3.486206293106079}
+  ],
+  "frozen_gate": {
+    "qk_only_terminal_validation_ce": 3.4858,
+    "cayley_qkv_terminal_validation_ce": 3.5148,
+    "ordinary_dense_terminal_validation_ce": 3.5402,
+    "maximum_terminal_validation_ce": 3.5058,
+    "terminal_validation_ce": 3.486206293106079,
+    "delta_to_qk_only_ce": 0.00040629310607887037,
+    "improvement_over_cayley_qkv_ce": 0.028593706893921267,
+    "improvement_over_ordinary_dense_ce": 0.05399370689392091,
+    "headroom_to_gate_ce": 0.019593706893920926,
+    "cayley_v_penalty_recovered_fraction": 0.9859898928938168,
+    "perplexity_ratio_to_qk_only": 1.0004063756543025,
+    "passed": true,
+    "threshold_changed_after_measurement": false
+  },
+  "fixed_curve_comparison": {
+    "qk_only_validation_ce": [4.0173, 3.6941, 3.5477, 3.4858],
+    "candidate_minus_qk_only_ce": [-0.0066, -0.0017, 0.0005, 0.00040629310607887037],
+    "cayley_qkv_validation_ce": [4.0553, 3.724, 3.5769, 3.5148],
+    "candidate_improvement_over_cayley_qkv_ce": [0.0446, 0.0316, 0.0287, 0.028593706893921267],
+    "interpretation": "The repair tracks the QK-only curve at all four registered evaluations and removes the stable Cayley-V penalty rather than merely catching up at the endpoint."
+  },
+  "compute_equivalence": {
+    "sop": "notes/active/fixed-model-compute-equivalence-sop-20260804.md",
+    "versus_qk_only": {
+      "terminal_candidate_over_qk_compute": 1.0018817346793685,
+      "terminal_method": "interpolation",
+      "qk_match_updates": 2368.5430304400443,
+      "median_common_loss_candidate_over_qk_compute": 0.9945185883046931,
+      "common_loss_ratio_range": [0.9859450911150028, 1.0022860978857688]
+    },
+    "versus_cayley_qkv": {
+      "terminal_candidate_over_cayley_compute": 0.8764458393722699,
+      "terminal_method": "one_interval_extrapolation",
+      "median_common_loss_candidate_over_cayley_compute": 0.9198179280309873,
+      "common_loss_ratio_range": [0.8760415280823399, 0.9331784624969676]
+    },
+    "ordinary_dense_warning": "The candidate is better than the ordinary dense curve, but the QK-only split-Muon architecture is a known optimizer-factorization confound. Use QK-only, not ordinary dense, for the causal V decision."
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 2373,
+    "best_validation_ce": 3.486206293106079,
+    "v_lattice": {
+      "matrices": 12,
+      "elements": 7077888,
+      "code_nonzero_fraction": 0.9878987669944763,
+      "code_saturation_fraction": 0.00009480229346081614,
+      "code_entropy_bits": 7.096623420715332,
+      "code_min": -127,
+      "code_max": 127,
+      "scale_count": 1728,
+      "scale_min": 0.00023949146270751953,
+      "scale_mean": 0.00039078909321688116,
+      "scale_max": 0.000644683837890625,
+      "optimizer_steps": [2373, 2373, 2373, 2373, 2373, 2373, 2373, 2373, 2373, 2373, 2373, 2373]
+    },
+    "v_compression_residuals": {
+      "count": 12,
+      "elements": 7077888,
+      "bytes": 14155776,
+      "dtype": "float16",
+      "all_finite": true,
+      "rms": 0.00011449315934441984,
+      "per_tensor_rms_min": 0.00010078094783239067,
+      "per_tensor_rms_max": 0.00012078582949470729,
+      "absolute_max": 0.0003223419189453125
+    }
+  },
+  "efficiency_scope": {
+    "v_fp32_weight_bytes": 28311552,
+    "v_persistent_int8_codec_bytes": 7081344,
+    "persistent_v_weight_reduction": 3.998048780487805,
+    "v_fp16_optimizer_residual_bytes": 14155776,
+    "dense_fp32_muon_momentum_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "materialized_inference_flops_reduced": false,
+    "claim": "Practical 4x persistent V-weight compression with QK-only-equivalent 5TPP CE; not a low-dimensional Mapping-Network replacement."
+  },
+  "mechanistic_conclusion": {
+    "supported": "Full ambient V direction support plus causal accumulation of sub-quantum Muon requests removes the Cayley-V deficit at 124M/5TPP.",
+    "rejected": "The V penalty is not an unavoidable consequence of compressing persistent V weights to signed int8 at block size 4096.",
+    "remaining": "A fresh 124M/20TPP run must test whether the temporal repair survives the longer horizon before recombination with compressed attention c_proj and full MLP."
+  },
+  "storage_reclamation": {
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "reclaimed_bytes": 1077368204,
+    "workspace_bytes_after_three_checkpoint_archives": 263759151497,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11118755447
+  },
+  "decision": {
+    "one_124m_20tpp_v_transfer_authorized_after_fresh_exact_config_mfu_pass": true,
+    "combined_full_replacement_authorized": false,
+    "larger_model_authorized": false,
+    "automatic_rerun_authorized": false
+  }
+}

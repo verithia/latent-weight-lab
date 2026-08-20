@@ -1,0 +1,98 @@
+{
+  "authorization": {
+    "automatic_rerun": false,
+    "combined_full_replacement": false,
+    "exact_config_mfu_preflight": true,
+    "larger_model": false,
+    "one_124m_20tpp_training_after_mfu_pass": true,
+    "training_before_mfu_pass": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4.json",
+    "config_sha256": "a40e552a19d3f8131a186b0d8c997394c6444d2419c66b665f47c4f5c9c4f311",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_attention_v_int8_lattice_error_feedback_124m_20tpp.py",
+    "max_iters": 9489,
+    "model_size": "124M",
+    "only_changes_from_passed_5tpp_candidate": [
+      "training horizon and LR-decay horizon 2373 -> 9489",
+      "warmup 23 -> 94",
+      "fixed evaluation interval 594 -> 2373",
+      "output identity and monitoring policy"
+    ],
+    "planned_tpp": 20.0
+  },
+  "created_at": "2026-08-20",
+  "evidence": {
+    "cayley_qkv_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qkv_only_20tpp_run_result.json",
+      "sha256": "ad51c59b752886106d8a0e71b2f51577cb0cc23c33e361905b76b11474f6295f"
+    },
+    "qk_only_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+      "sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+    },
+    "v_repair_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_5tpp_training_result.json",
+      "sha256": "48ee60bd232978be401fd98b696e6d40d903e0ebff83be340ac18c4f7f8d28a2"
+    }
+  },
+  "execution_gate": {
+    "callback_action_prompt": "Verify live state, loss, GPU health, and active project note; terminal success must seal artifacts and continue only with the next causally authorized full-replacement experiment.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one persistent aggregate @Codex watchdog with 20%, 50%, and terminal callbacks; 90-minute heartbeat reset by any callback"
+  },
+  "frozen_comparators": {
+    "cayley_qkv": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.5397,
+        3.3533,
+        3.2413,
+        3.1853
+      ]
+    },
+    "qk_only": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.5038,
+        3.3179,
+        3.2046,
+        3.1488
+      ]
+    }
+  },
+  "question": "Does the V temporal-direction repair remain QK-only-equivalent through the 124M/20TPP horizon?",
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_20tpp_plan_v1",
+  "scope_guards": [
+    "This is V localization with dense attention c_proj and dense MLP, not full replacement.",
+    "The persistent V codec is approximately 4x smaller, but dense materialization and inference FLOPs remain.",
+    "No recombination or larger-rung run is authorized before terminal analysis."
+  ],
+  "status": "preregistered_pending_exact_config_mfu",
+  "terminal_gate": {
+    "fail_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_NONTRANSFER_20TPP",
+    "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,
+    "maximum_delta_to_qk_only_ce": 0.02,
+    "maximum_validation_ce": 3.1688,
+    "minimum_improvement_over_cayley_qkv_ce": 0.0165,
+    "pass_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_CONFIRMED_20TPP",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "threshold_changes_after_measurement": false
+  }
+}
