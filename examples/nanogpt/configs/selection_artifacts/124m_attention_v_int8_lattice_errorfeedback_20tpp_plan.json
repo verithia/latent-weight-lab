@@ -6,6 +6,7 @@
     "exact_config_mfu_preflight": true,
     "larger_model": false,
     "one_124m_20tpp_training_after_mfu_pass": true,
+    "one_124m_20tpp_training_authorization_consumed": true,
     "training_before_mfu_pass": false
   },
   "candidate": {
@@ -57,6 +58,35 @@
     "sha256": "98da4e831e9bf53dfd826d5253d308b79935a2e169df03c090a6c5f1bf89947f",
     "tokens_per_second": 177220.67625
   },
+  "scientific_run": {
+    "gpu": 0,
+    "host": "PRO6",
+    "initial_fixed_evaluation": {
+      "step": 0,
+      "train_ce": 10.9957,
+      "validation_ce": 10.9951
+    },
+    "initial_health": {
+      "gpu_memory_mib": 46607,
+      "gpu_power_watts": 531.64,
+      "gpu_temperature_celsius": 54,
+      "gpu_utilization_percent": 100,
+      "iter": 110,
+      "iter_ms": 1481.43,
+      "process_group_alive": true
+    },
+    "launchd_watchdog": "com.mappingnetworks.pro6.attnv20tpp.20260820",
+    "metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_run_metadata.json",
+    "metadata_sha256": "8f985a549b27814483fd0ed5c8647f55778887bb13987802713c76b964cfe4f6",
+    "pgid": 1527876,
+    "provenance_sha256": "75d7bf97b183d684ba882c9b634a34709c85305dc446ca73a3e717b7c6f84b5c",
+    "run_id": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754",
+    "source_commit": "9d11d506bcd47fab754b9dce1cd287480cca23d4",
+    "started_at": "2026-08-20T08:28:32+08:00",
+    "state": "running",
+    "watchdog_callbacks": [20, 50, 100],
+    "watchdog_heartbeat_minutes": 90
+  },
   "frozen_comparators": {
     "cayley_qkv": {
       "steps": [
@@ -94,7 +124,7 @@
     "The persistent V codec is approximately 4x smaller, but dense materialization and inference FLOPs remain.",
     "No recombination or larger-rung run is authorized before terminal analysis."
   ],
-  "status": "exact_config_mfu_passed_ready_for_one_scientific_run",
+  "status": "scientific_training_running",
   "terminal_gate": {
     "fail_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_NONTRANSFER_20TPP",
     "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,

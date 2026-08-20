@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_20tpp_run_metadata_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_124M_20TPP_RUNNING",
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4",
+    "run_id": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754",
+    "host": "PRO6",
+    "gpu": 0,
+    "launcher_pid": 1527876,
+    "pgid": 1527876,
+    "trainer_pid": 1527894,
+    "source_commit": "9d11d506bcd47fab754b9dce1cd287480cca23d4",
+    "started_at": "2026-08-20T08:28:32+08:00",
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": {
+      "source_path": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4.json",
+      "archive_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.config.json",
+      "bytes": 11517,
+      "sha256": "a40e552a19d3f8131a186b0d8c997394c6444d2419c66b665f47c4f5c9c4f311"
+    },
+    "dataset_manifest": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "performance_preflight": {
+      "certificate_sha256": "ecc088531ae38ab448411f2df56d3295d6fc895b5dca9f47632ac841aecb3c39",
+      "mfu_fraction": 0.3174980620869945,
+      "tokens_per_second": 177220.67625,
+      "iter_ms": 1479.195,
+      "peak_vram_mib": 33982.64
+    },
+    "immutable_provenance": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.json",
+      "bytes": 2161,
+      "sha256": "75d7bf97b183d684ba882c9b634a34709c85305dc446ca73a3e717b7c6f84b5c"
+    },
+    "mutable_artifacts": {
+      "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.json",
+      "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.log",
+      "warning": "Status and log hashes are intentionally not sealed until terminal state because both are still mutable."
+    }
+  },
+  "initial_verification": {
+    "sampled_at_local": "2026-08-20T08:30+08:00",
+    "process_group_alive": true,
+    "latest_iter": 110,
+    "latest_training_loss": 6.004,
+    "latest_iter_ms": 1481.43,
+    "fixed_evaluations": [
+      {
+        "step": 0,
+        "train_ce": 10.9957,
+        "validation_ce": 10.9951
+      }
+    ],
+    "gpu": {
+      "memory_used_mib": 46607,
+      "memory_total_mib": 97887,
+      "utilization_percent": 100,
+      "power_watts": 531.64,
+      "temperature_celsius": 54
+    },
+    "log_errors_observed": []
+  },
+  "watchdog": {
+    "launchd_label": "com.mappingnetworks.pro6.attnv20tpp.20260820",
+    "local_pid_at_verification": 17491,
+    "state_key": "pro6_124m_attention_v_lattice_errorfeedback_20tpp",
+    "state_path": ".watchdogs/9d11d506bcd47fab754b9dce1cd287480cca23d4/pro6_124m_attention_v_lattice_errorfeedback_20tpp.json",
+    "first_persisted_iter": 80,
+    "callbacks": [20, 50, 100],
+    "heartbeat_minutes": 90,
+    "stall_minutes": 20,
+    "missing_grace_minutes": 2,
+    "terminal_only": false,
+    "first_sample_alive": true,
+    "first_sample_errors": [],
+    "callbacks_sent_at_initialization": []
+  },
+  "workspace": {
+    "cap_bytes": 274877906944,
+    "bytes_at_launch_verification": 264194251715,
+    "headroom_bytes_at_launch_verification": 10683655229
+  },
+  "frozen_terminal_gate": {
+    "maximum_delta_to_qk_only_at_every_positive_fixed_evaluation_ce": 0.02,
+    "maximum_terminal_validation_ce": 3.1688,
+    "minimum_terminal_improvement_over_cayley_qkv_ce": 0.0165,
+    "clean_exit_required": true,
+    "all_fixed_evaluations_finite_required": true
+  },
+  "authorization": {
+    "one_scientific_run_consumed": true,
+    "automatic_rerun": false,
+    "combined_full_replacement": false,
+    "larger_model": false
+  }
+}
