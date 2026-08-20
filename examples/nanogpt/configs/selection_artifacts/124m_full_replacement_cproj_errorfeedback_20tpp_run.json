@@ -27,6 +27,36 @@
     "run_id": "pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594"
   },
   "log": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.log",
+  "milestones": [
+    {
+      "callback_iteration": 1920,
+      "callback_percent": 20,
+      "errors": [],
+      "fixed_evaluations_available": [
+        {
+          "step": 0,
+          "train_ce": 10.9374,
+          "validation_ce": 10.9369
+        }
+      ],
+      "gpu_memory_mib": 46937,
+      "gpu_power_w": 545.81,
+      "gpu_temperature_c": 64,
+      "gpu_utilization_percent": 100,
+      "loss": 3.5926,
+      "mean_last_100_iteration_ms": 1490.6093,
+      "remaining_update_hours": 3.1133,
+      "scientific_interpretation": "Health-only milestone before the first positive fixed evaluation at step 2373; no comparator gate is yet evaluable and no intervention is authorized.",
+      "tokens_per_second": 175863.66,
+      "verified_at": "2026-08-20T19:11:57+08:00",
+      "verified_iteration": 1970,
+      "watchdog_sent_milestones": [
+        20
+      ],
+      "workspace_bytes": 264005009135,
+      "workspace_headroom_bytes": 10872897809
+    }
+  ],
   "performance_preflight": {
     "mfu_fraction": 0.318805801704841,
     "sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e",
