@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_mfu_result_v1",
+  "measured_at": "2026-08-20",
+  "host": "PRO6",
+  "gpu": 0,
+  "passed": true,
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp.json",
+    "sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93"
+  },
+  "execution": {
+    "git_commit": "233e914f3e8c652e8bd5af3d617d31a42aa8bb6a",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "foreground_polled": true,
+    "watchdog_used": false
+  },
+  "measurement": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_fraction": 0.318805801704841,
+    "model_tflops": 131.92057816019712,
+    "empirical_bf16_gemm_peak_tflops": 413.7960396415017,
+    "tokens_per_second": 176634.6925,
+    "iteration_ms": 1484.10375,
+    "peak_vram_mib": 34419.98,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "native_block_fht_extension_loaded": true,
+    "native_module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "slowdown_vs_no_cproj_feedback_parent_percent": 0.03176325673641678,
+    "throughput_delta_vs_no_cproj_feedback_parent_percent": -0.03166056333192557
+  },
+  "state_cost": {
+    "additional_trainable_parameters": 0,
+    "additional_attention_cproj_fp16_residual_bytes": 14155776,
+    "additional_attention_cproj_fp16_residual_mib": 13.5,
+    "additional_materialized_inference_flops": 0
+  },
+  "projection": {
+    "max_iters": 9489,
+    "update_only_seconds": 14082.66048375,
+    "update_only_hours": 3.9118501343750003,
+    "monitoring_class": "longer_than_two_hours"
+  },
+  "artifacts": {
+    "remote_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp/performance_preflight.json",
+      "size_bytes": 16952,
+      "sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e"
+    },
+    "remote_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp/performance_preflight.log",
+      "size_bytes": 14966,
+      "sha256": "18af29d7a0fe75c4505c39aaa3a3ef5601c2a2f1f7f886678628bb581c34119b"
+    }
+  },
+  "authorization": {
+    "one_fresh_124m_20tpp_attention_cproj_feedback_attribution_run": true,
+    "automatic_rerun": false,
+    "parallel_arm": false,
+    "larger_model": false
+  }
+}

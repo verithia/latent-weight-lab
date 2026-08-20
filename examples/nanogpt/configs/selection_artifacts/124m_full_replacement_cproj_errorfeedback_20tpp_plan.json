@@ -109,8 +109,19 @@
     "intervention": "Enable the existing FP16 sigma-delta compression residual on the 12 attention-c_proj lattices and change nothing else.",
     "observation": "The failed parent has healthy noncollapsed codecs, validated V feedback, MLP feedback, and no attention-c_proj feedback."
   },
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_cproj_errorfeedback_20tpp_mfu_result.json",
+    "remote_certificate_sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e",
+    "mfu_fraction": 0.318805801704841,
+    "tokens_per_second": 176634.6925,
+    "iteration_ms": 1484.10375,
+    "peak_vram_mib": 34419.98,
+    "native_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "passed": true
+  },
   "question": "Is discarded sub-quantum attention-c_proj motion the cause of the complete replacement's late 20TPP drift?",
   "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_plan_v1",
-  "status": "preregistered_pending_tests_and_exact_config_mfu",
+  "status": "mfu_passed_ready_for_one_scientific_run",
   "why_no_5tpp_screen": "The parent already passed 5TPP and first violated its temporal gate at step 7119; a 5TPP rerun cannot test this hypothesis."
 }
