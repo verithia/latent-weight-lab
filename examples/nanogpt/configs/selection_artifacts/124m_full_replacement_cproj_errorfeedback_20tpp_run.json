@@ -1,5 +1,5 @@
 {
-  "classification": "RUNNING",
+  "classification": "FULL_REPLACEMENT_CPROJ_TEMPORAL_REPAIR_CONFIRMED_124M_20TPP",
   "config": {
     "archive_path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.config.json",
     "sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93"
@@ -132,6 +132,21 @@
     "mfu_fraction": 0.318805801704841,
     "sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e",
     "tokens_per_second": 176634.6925
+  },
+  "terminal": {
+    "all_fixed_checkpoints_within_qk_gate": true,
+    "best_validation_ce": 3.152446985244751,
+    "candidate_minus_dense_ce": -0.002253014755249084,
+    "candidate_minus_qk_only_ce": 0.003646985244750933,
+    "checkpoint_sha256": "b7f5618cfae72b63f124b6867d36627f8ab31367c0fbca60c3c444a0cd9a9d8c",
+    "exit_code": 0,
+    "finished_at": "2026-08-20T22:19:55+08:00",
+    "fixed_validation_ce": [3.5101, 3.3229, 3.2091, 3.152446985244751],
+    "no_feedback_parent_improvement_ce": 0.028253014755249995,
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_cproj_errorfeedback_20tpp_training_result.json",
+    "status": "clean",
+    "temporal_residual_count": 48,
+    "zero_gap_gate_passed": true
   },
   "provenance": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
   "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_run_v1",

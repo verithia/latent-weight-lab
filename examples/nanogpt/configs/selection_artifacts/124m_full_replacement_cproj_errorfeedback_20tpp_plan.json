@@ -149,6 +149,24 @@
   },
   "question": "Is discarded sub-quantum attention-c_proj motion the cause of the complete replacement's late 20TPP drift?",
   "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_plan_v1",
-  "status": "scientific_run_running",
+  "status": "complete_passed_zero_gap_gate",
+  "terminal_result": {
+    "classification": "FULL_REPLACEMENT_CPROJ_TEMPORAL_REPAIR_CONFIRMED_124M_20TPP",
+    "finished_at": "2026-08-20T22:19:55+08:00",
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_cproj_errorfeedback_20tpp_training_result.json",
+    "terminal_validation_ce": 3.152446985244751,
+    "delta_to_dense_ce": -0.002253014755249084,
+    "delta_to_qk_only_ce": 0.003646985244750933,
+    "improvement_over_no_feedback_parent_ce": 0.028253014755249995,
+    "all_frozen_conditions_passed": true,
+    "checkpoint_sha256": "b7f5618cfae72b63f124b6867d36627f8ab31367c0fbca60c3c444a0cd9a9d8c"
+  },
+  "post_result_authorization": {
+    "authorized_next": "350M/0.5TPP full-replacement scale-transfer learning-rate screen",
+    "reason": "The 124M full replacement passed every preregistered fixed-curve condition and the dense zero-gap gate; scale stability is now the unresolved causal question.",
+    "requires_exact_config_mfu_gate": true,
+    "larger_than_350m": false,
+    "multi_seed_closure_claim": false
+  },
   "why_no_5tpp_screen": "The parent already passed 5TPP and first violated its temporal gate at step 7119; a 5TPP rerun cannot test this hypothesis."
 }

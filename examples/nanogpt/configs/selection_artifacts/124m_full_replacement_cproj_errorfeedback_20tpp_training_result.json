@@ -1,0 +1,166 @@
+{
+  "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "FULL_REPLACEMENT_CPROJ_TEMPORAL_REPAIR_CONFIRMED_124M_20TPP",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_cproj_errorfeedback_20tpp_plan.json",
+    "preterminal_sha256": "a45b1ce9b755540268f7308460e6c647e6c7dd578c6f1b24de45e1f4d090e911"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 1817697,
+    "source_commit": "24cbe1560bb98db3cbcc157678ab739d83887877",
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp.json",
+    "archived_config_sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93",
+    "resolved_checkpoint_config_sha256": "b0696d249ba83664c8cf788b1edb107c61c92ca10a2256830ce380f095a6a28d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e",
+    "preflight_mfu_fraction": 0.318805801704841,
+    "preflight_tokens_per_second": 176634.6925,
+    "started_at": "2026-08-20T18:22:12+08:00",
+    "finished_at": "2026-08-20T22:19:55+08:00",
+    "wall_seconds": 14263,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
+        "bytes": 930,
+        "sha256": "c012bec0fe9a1bee31d1557cc42a8bb3264dd22995325de7e93a5cde788431c4"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.log",
+        "bytes": 49756,
+        "sha256": "678b567adbcbd1febe8e6f1045df46bc8feea4d6fc2a58d6b69b0b9c45ce747a"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.json",
+        "bytes": 2160,
+        "sha256": "0f1f7e49e0a29b9f84c7fe01ab7f871b9c783ae3df1e6d5c3ff6630d51853c84"
+      },
+      "archived_config": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.config.json",
+        "bytes": 13297,
+        "sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93"
+      },
+      "mfu_certificate": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp_20260820T102211Z_1817594.mfu.json",
+        "bytes": 16952,
+        "sha256": "1f6bd1db72dae6d37c82cbdc0a793471a1d14ea9394a51dfab5237d16b24166e"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp/scientific/ckpt.pt",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_replacement_all_feedback_20tpp/ckpt.pt",
+        "bytes": 1013755096,
+        "sha256": "b7f5618cfae72b63f124b6867d36627f8ab31367c0fbca60c3c444a0cd9a9d8c"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp/scientific/ckpt.meta.json",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_replacement_all_feedback_20tpp/ckpt.meta.json",
+        "bytes": 24244,
+        "sha256": "ea73c55a739a296c6513cb96182388c11e607c7a5aeb14731ff0ebbbfba8ee2c"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9374, "validation_ce": 10.9369},
+    {"step": 2373, "train_ce": 3.5279, "validation_ce": 3.5101},
+    {"step": 4746, "train_ce": 3.3445, "validation_ce": 3.3229},
+    {"step": 7119, "train_ce": 3.2322, "validation_ce": 3.2091},
+    {"step": 9489, "train_ce": 3.1754, "validation_ce": 3.152446985244751}
+  ],
+  "frozen_gate": {
+    "ordinary_dense_terminal_validation_ce": 3.1547,
+    "qk_only_terminal_validation_ce": 3.1488,
+    "isolated_repaired_v_terminal_validation_ce": 3.1489,
+    "no_feedback_parent_terminal_validation_ce": 3.1807,
+    "terminal_practical_maximum_validation_ce": 3.1647,
+    "terminal_zero_gap_validation_ce": 3.1547,
+    "candidate_terminal_validation_ce": 3.152446985244751,
+    "delta_to_ordinary_dense_ce": -0.002253014755249084,
+    "delta_to_qk_only_ce": 0.003646985244750933,
+    "delta_to_isolated_repaired_v_ce": 0.003546985244751165,
+    "improvement_over_no_feedback_parent_ce": 0.028253014755249995,
+    "perplexity_ratio_to_ordinary_dense": 0.9977495217286313,
+    "all_fixed_checkpoints_within_qk_maximum": true,
+    "step_7119_parent_improvement_ce": 0.0236,
+    "step_9489_parent_improvement_ce": 0.0283,
+    "passed_practical_closure": true,
+    "passed_zero_gap_closure": true,
+    "passed": true,
+    "threshold_changed_after_measurement": false
+  },
+  "fixed_curve_comparison": {
+    "steps": [2373, 4746, 7119, 9489],
+    "qk_only_validation_ce": [3.5038, 3.3179, 3.2046, 3.1488],
+    "isolated_repaired_v_validation_ce": [3.5040, 3.3194, 3.2055, 3.1489],
+    "no_feedback_parent_validation_ce": [3.5139, 3.3373, 3.2327, 3.1807],
+    "candidate_validation_ce_rounded_from_log": [3.5101, 3.3229, 3.2091, 3.1524],
+    "candidate_minus_qk_only_ce": [0.0063, 0.0050, 0.0045, 0.0036],
+    "candidate_minus_isolated_repaired_v_ce": [0.0061, 0.0035, 0.0036, 0.0035],
+    "candidate_minus_no_feedback_parent_ce": [-0.0038, -0.0144, -0.0236, -0.0283],
+    "maximum_observed_delta_to_qk_only_ce": 0.0063,
+    "interpretation": "With attention-c_proj feedback enabled, the QK-only gap contracts instead of accumulating and terminal CE reaches the dense zero-gap criterion. This is the preregistered causal signature of discarded sub-quantum attention-output updates."
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 9489,
+    "best_validation_ce": 3.152446985244751,
+    "lattice_categories": {
+      "attention_v": {"matrices": 12, "elements": 7077888, "code_nonzero_fraction": 0.9872463345527649, "code_saturation_fraction": 0.000011444091796875, "code_entropy_bits": 7.02985156156873, "scale_count": 1728, "scale_min": 0.0004622936248779297, "scale_mean": 0.000631939503364265, "scale_max": 0.0009255409240722656},
+      "attention_cproj": {"matrices": 12, "elements": 7077888, "code_nonzero_fraction": 0.9830573797225952, "code_saturation_fraction": 0.0, "code_entropy_bits": 6.658492193855727, "scale_count": 1728, "scale_min": 0.00027751922607421875, "scale_mean": 0.0004633805947378278, "scale_max": 0.000762939453125},
+      "mlp_cfc": {"matrices": 12, "elements": 28311552, "code_nonzero_fraction": 0.986493706703186, "code_saturation_fraction": 0.0000030023079489183147, "code_entropy_bits": 6.9501733087332696, "scale_count": 6912, "scale_min": 0.0005340576171875, "scale_mean": 0.0006991173140704632, "scale_max": 0.0028209686279296875},
+      "mlp_cproj": {"matrices": 12, "elements": 28311552, "code_nonzero_fraction": 0.9847985506057739, "code_saturation_fraction": 2.472488915827853e-7, "code_entropy_bits": 6.795233565881082, "scale_count": 6912, "scale_min": 0.00021970272064208984, "scale_mean": 0.000306766974972561, "scale_max": 0.003124237060546875}
+    },
+    "compression_residuals": {
+      "count": 48,
+      "elements": 70778880,
+      "bytes": 141557760,
+      "dtype": "float16",
+      "all_finite": true,
+      "rms": 0.0001585729964135279,
+      "absolute_max": 0.0015621185302734375,
+      "scope": "attention V, attention c_proj, MLP c_fc, and MLP c_proj"
+    },
+    "health_interpretation": "All four ambient lattice families are dense in code space, finite, high entropy, and far from saturation. The candidate contains the intended 48/48 FP16 temporal residuals, so the result is not explained by a missing state or codec collapse."
+  },
+  "efficiency_scope": {
+    "combined_ambient_fp32_weight_bytes": 283115520,
+    "combined_persistent_int8_codec_bytes": 70813440,
+    "combined_fp16_temporal_feedback_bytes": 141557760,
+    "persistent_codec_only_reduction": 3.998048399921895,
+    "codec_plus_feedback_reduction": 1.3331163547120404,
+    "qk_generated_weight_elements": 84934656,
+    "qk_latent_parameters": 141552,
+    "total_trainable_parameters_reported": 43138032,
+    "additional_trainable_parameters_vs_no_feedback_parent": 0,
+    "additional_inference_flops_vs_no_feedback_parent": 0,
+    "additional_optimizer_state_bytes_vs_no_feedback_parent": 14155776,
+    "dense_fp32_muon_momentum_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "materialized_inference_flops_reduced": false
+  },
+  "mechanistic_conclusion": {
+    "supported": "Discarded sub-quantum Muon motion in the attention output projection was the primary cause of the no-feedback complete replacement's accumulated 20TPP drift. Adding the same causal FP16 sigma-delta state used by V and the MLP removes the drift and closes the terminal dense gap.",
+    "not_claimed": "This one-seed 124M result does not establish multi-seed or larger-model closure, nor does it reduce dense Muon momentum, transient materialization, or inference FLOPs.",
+    "next_falsifiable_hypothesis": "If the repair is scale-stable, the exact full-replacement mechanism at 350M/0.5TPP should preserve the already selected 350M QK-only learning-rate ordering and remain close to the QK-only and dense fixed-window controls."
+  },
+  "storage_reclamation": {
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "workspace_bytes_after_reclamation": 263761364873,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11116542071
+  }
+}
