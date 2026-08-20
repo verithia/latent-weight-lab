@@ -17,6 +17,10 @@ from examples.nanogpt.make_pro6_full_replacement_all_feedback_350m_ladder_config
     build,
 )
 
+MFU_RESULT = (
+    PLAN.parent / "350m_full_replacement_all_feedback_0p5tpp_mfu_result.json"
+)
+
 
 def load(path):
     return json.loads(path.read_text())
@@ -74,7 +78,10 @@ def test_every_ambient_family_uses_lattice_and_temporal_feedback(slug: str) -> N
 
 def test_plan_freezes_scale_transfer_screen_and_exact_mfu_gates() -> None:
     plan = load(PLAN)
-    assert plan["status"] == "preregistered_pending_tests_and_exact_config_mfu"
+    assert plan["status"] == "mfu_passed_scientific_screen_authorized"
+    assert plan["mfu_result"]["classification"] == (
+        "PASS_ALL_EXACT_CONFIG_MFU_GATES"
+    )
     assert plan["frozen_gate"]["maximum_delta_to_same_slot_qk_only_ce"] == 0.02
     assert plan["performance_gate"]["exact_config_required"] is True
     assert plan["performance_gate"]["foreground_polling"] is True
@@ -89,3 +96,18 @@ def test_plan_freezes_scale_transfer_screen_and_exact_mfu_gates() -> None:
         assert plan["candidates"][slug]["maximum_terminal_validation_ce"] == pytest.approx(
             plan["candidates"][slug]["qk_only_terminal_validation_ce"] + 0.02
         )
+
+
+def test_all_exact_config_mfu_certificates_pass() -> None:
+    result = load(MFU_RESULT)
+    assert result["classification"] == "PASS_ALL_EXACT_CONFIG_MFU_GATES"
+    assert result["foreground_polled"] is True
+    assert result["watchdog"] is False
+    assert result["decision"]["scientific_screen_authorized"] is True
+    assert result["decision"]["five_tpp_authorized"] is False
+    for slug, candidate in result["candidates"].items():
+        assert candidate["config_sha256"] == sha256(OUTPUTS[slug])
+        assert candidate["mfu_fraction"] >= 0.20
+        assert candidate["native_extension_loaded"] is True
+        assert candidate["all_logged_losses_finite"] is True
+        assert candidate["passed"] is True

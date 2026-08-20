@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_350m_full_replacement_all_feedback_0p5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "PASS_ALL_EXACT_CONFIG_MFU_GATES",
+  "source_commit": "45aa0120ce2c672502a3c47c8c9aec05c6a52ca9",
+  "foreground_polled": true,
+  "watchdog": false,
+  "policy": {
+    "minimum_mfu_fraction": 0.2,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "exact_config_required": true,
+    "native_extension_required": true,
+    "finite_losses_required": true
+  },
+  "candidates": {
+    "mult1p00": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult1p00.json",
+      "config_sha256": "d0a4e0304e5d7a08a2acd22023f140b2be2ac6f0a51b9824e2e54e2594da7044",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult1p00/performance_preflight.json",
+      "certificate_sha256": "6b8e73c354fe073b8ec6bf5ec406959deb087d54ada9fef68fac061bbf2f8d94",
+      "log_sha256": "488c61c239be9c53c6850042c2305e57578d6b12584dcb6b52086a52e5b8fa6f",
+      "mfu_fraction": 0.3764085081465182,
+      "tokens_per_second": 73674.395,
+      "iteration_ms": 3558.14375,
+      "peak_mib": 60149.08,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "passed": true
+    },
+    "mult0p75": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75.json",
+      "config_sha256": "198d84f153ae80f58d6077f9a190ddbb5c69357adf0e6a60e9d31ab242423822",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75/performance_preflight.json",
+      "certificate_sha256": "3a394f1454ad02679f81fc6a30fa9b00fcd0b980333b3fd0daf61f3e80fa64e8",
+      "log_sha256": "fe8011610cd885e6c14fa067d2f0d9f53d966c7b47f17c5d6f34b63dec912765",
+      "mfu_fraction": 0.37828269471613046,
+      "tokens_per_second": 73565.92125,
+      "iteration_ms": 3563.39125,
+      "peak_mib": 60149.08,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "passed": true
+    },
+    "mult0p50": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50.json",
+      "config_sha256": "ff123659585a33a2ab13fd8c4587c9cf6aa26ce727245c9547b885af28ed96ec",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50/performance_preflight.json",
+      "certificate_sha256": "0bf3aa3123dcffa3921fbe5f9ee85515b67ff2975e498daec2378cc9fde06bff",
+      "log_sha256": "6c92841d6385171de5ff77dd744258ac7d48576f7c8b5cde1bac41d6ae8f7cf6",
+      "mfu_fraction": 0.37923862691290783,
+      "tokens_per_second": 73509.15625,
+      "iteration_ms": 3566.14125,
+      "peak_mib": 60149.08,
+      "native_extension_loaded": true,
+      "all_logged_losses_finite": true,
+      "passed": true
+    }
+  },
+  "resource_check": {
+    "gpu_memory_used_mib_after_preflights": 212,
+    "gpu_memory_total_mib": 97887,
+    "workspace_bytes": 263762106109,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11115800835,
+    "backing_filesystem_free_bytes": 1620794331136
+  },
+  "decision": {
+    "scientific_screen_authorized": true,
+    "first_slot": "mult1p00",
+    "remaining_slots": ["mult0p75", "mult0p50"],
+    "five_tpp_authorized": false,
+    "larger_model_authorized": false,
+    "monitoring": "terminal-only watchdog for each one-to-two-hour candidate"
+  }
+}

@@ -126,7 +126,13 @@
     "int8_code_bytes": 251658240,
     "transient_dense_materialization_retained": true
   },
-  "status": "preregistered_pending_tests_and_exact_config_mfu",
+  "status": "mfu_passed_scientific_screen_authorized",
+  "mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_mfu_result.json",
+    "classification": "PASS_ALL_EXACT_CONFIG_MFU_GATES",
+    "mfu_range": [0.3764085081465182, 0.37923862691290783],
+    "all_candidates_passed": true
+  },
   "theory": {
     "confirmed_124m_mechanism": "Each ambient projected family needs causal temporal state so sub-quantum Muon motion is accumulated rather than discarded.",
     "excluded_claims": [
