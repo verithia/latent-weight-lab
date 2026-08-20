@@ -63,5 +63,11 @@ def test_plan_pins_evidence_and_freezes_qk_relative_curve_gate() -> None:
     assert gate["maximum_delta_to_qk_only_ce"] == 0.02
     assert gate["minimum_improvement_over_cayley_qkv_ce"] == 0.0165
     assert gate["maximum_delta_to_qk_only_at_every_fixed_evaluation_ce"] == 0.02
+    mfu_result = OUTPUT.parent / (
+        "selection_artifacts/"
+        "124m_attention_v_int8_lattice_errorfeedback_20tpp_mfu_result.json"
+    )
+    assert sha256(mfu_result) == plan["mfu_result"]["sha256"]
+    assert plan["mfu_result"]["mfu_fraction"] >= 0.20
     assert plan["authorization"]["combined_full_replacement"] is False
     assert plan["authorization"]["larger_model"] is False

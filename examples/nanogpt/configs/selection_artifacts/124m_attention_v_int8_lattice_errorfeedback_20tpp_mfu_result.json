@@ -1,0 +1,56 @@
+{
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_20tpp_mfu_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_124M_20TPP_EXACT_CONFIG_MFU_PASSED",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_plan.json",
+    "pre_mfu_sha256": "97f9127f87aa45cf5ec9bbb0fadb07bd4da94a7270a2aab79e4b38b6a633dd5c"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4.json",
+    "sha256": "a40e552a19d3f8131a186b0d8c997394c6444d2419c66b665f47c4f5c9c4f311"
+  },
+  "source_commit": "32823ad8a3de9420e7085ba10a6fac717af2aee0",
+  "host": "PRO6",
+  "gpu": 0,
+  "execution_environment": {
+    "cuda_home": "/mnt/ssd-data/orj/MappingNetworks/.cuda-12.8",
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "native_extension_loaded": true,
+    "scientific_config_changed": false
+  },
+  "passing_preflight": {
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp/preflight/performance_preflight.json",
+    "certificate_bytes": 16887,
+    "certificate_sha256": "ecc088531ae38ab448411f2df56d3295d6fc895b5dca9f47632ac841aecb3c39",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp/preflight/performance_preflight.log",
+    "log_bytes": 14615,
+    "log_sha256": "1448790dee3c4f39996c8aa81f8e7741e4a7305f641db818add4249707ebdfea",
+    "mfu_fraction": 0.3174980620869945,
+    "minimum_fraction": 0.2,
+    "empirical_bf16_gemm_peak_tflops": 416.87883835333236,
+    "model_tflops": 132.35822330226046,
+    "tokens_per_second": 177220.67625,
+    "iter_ms": 1479.195,
+    "peak_mib": 33982.64,
+    "all_logged_losses_finite": true,
+    "logged_loss_values": 13,
+    "train_exit_code": 0
+  },
+  "workspace": {
+    "cap_bytes": 274877906944,
+    "bytes_after_preflight": 263759421398,
+    "headroom_bytes_after_preflight": 11118485546,
+    "headroom_gib_after_preflight": 10.354896584525704,
+    "physical_filesystem_free_bytes": 1624889200640
+  },
+  "decision": {
+    "launch_authorized": true,
+    "scope": "exactly one fresh 124M/20TPP QK64 plus int8-lattice-error-feedback V run with dense attention c_proj and dense MLP",
+    "watchdog_required": true,
+    "callbacks": [20, 50, 100],
+    "heartbeat_minutes": 90,
+    "combined_full_replacement_authorized": false,
+    "larger_model_authorized": false
+  }
+}

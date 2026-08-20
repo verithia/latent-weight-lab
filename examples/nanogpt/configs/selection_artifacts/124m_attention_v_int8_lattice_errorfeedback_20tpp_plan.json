@@ -1,5 +1,6 @@
 {
   "authorization": {
+    "exact_config_mfu_passed": true,
     "automatic_rerun": false,
     "combined_full_replacement": false,
     "exact_config_mfu_preflight": true,
@@ -46,6 +47,16 @@
     "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
     "scientific_run_runtime": "one persistent aggregate @Codex watchdog with 20%, 50%, and terminal callbacks; 90-minute heartbeat reset by any callback"
   },
+  "mfu_result": {
+    "certificate_sha256": "ecc088531ae38ab448411f2df56d3295d6fc895b5dca9f47632ac841aecb3c39",
+    "iter_ms": 1479.195,
+    "mfu_fraction": 0.3174980620869945,
+    "passed": true,
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_mfu_result.json",
+    "peak_vram_mib": 33982.64,
+    "sha256": "98da4e831e9bf53dfd826d5253d308b79935a2e169df03c090a6c5f1bf89947f",
+    "tokens_per_second": 177220.67625
+  },
   "frozen_comparators": {
     "cayley_qkv": {
       "steps": [
@@ -83,7 +94,7 @@
     "The persistent V codec is approximately 4x smaller, but dense materialization and inference FLOPs remain.",
     "No recombination or larger-rung run is authorized before terminal analysis."
   ],
-  "status": "preregistered_pending_exact_config_mfu",
+  "status": "exact_config_mfu_passed_ready_for_one_scientific_run",
   "terminal_gate": {
     "fail_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_NONTRANSFER_20TPP",
     "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,
