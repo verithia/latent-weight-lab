@@ -116,9 +116,21 @@
     "started_at": "2026-08-20T14:02:37+08:00",
     "state": "running",
     "initial_fixed_validation_ce": 10.9369,
+    "live_milestones": {
+      "twenty_percent": {
+        "callback_iter": 1900,
+        "verified_iter": 1970,
+        "verified_at": "2026-08-20T14:52:44+08:00",
+        "train_loss_health_signal_only": 3.5926,
+        "iteration_ms": 1489.71,
+        "first_positive_fixed_evaluation_pending_at_step": 2373,
+        "healthy": true,
+        "intervention": "none"
+      }
+    },
     "provenance_sha256": "0dfa236f8bd6ea1eeb68e00de2bc0c3cd0ca0ced22b6553d69316ef01b91a2e3",
     "metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_run_metadata.json",
-    "metadata_sha256": "f2c77b3060789e24e4268334490fb726e1871d3fa16650d346e7881de868a182",
+    "metadata_sha256": "69c416f237bb048f24f536639a74ee3fa296df1c2e8f3f01b7bb193a99cdeab0",
     "watchdog_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
     "watchdog_policy": "20%, 50%, terminal, failures/stalls, and resettable 90-minute heartbeat"
   },

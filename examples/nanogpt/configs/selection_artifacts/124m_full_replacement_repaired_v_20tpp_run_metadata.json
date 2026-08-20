@@ -57,6 +57,34 @@
     },
     "scientific_identity_check": "Step-0 train/validation CE exactly matches the sealed 5TPP run, consistent with an unchanged structure and seed."
   },
+  "live_milestones": {
+    "twenty_percent": {
+      "callback_iter": 1900,
+      "callback_fraction": 0.2002318474022542,
+      "verified_at": "2026-08-20T14:52:44+08:00",
+      "direct_log_sample": {
+        "iter": 1970,
+        "train_loss": 3.5926,
+        "iteration_ms": 1489.71
+      },
+      "watchdog_sample_iter": 1980,
+      "process_group_alive": true,
+      "trainer_alive": true,
+      "gpu_memory_mib": 46937,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 100,
+      "gpu_power_watts": 540.7,
+      "gpu_temperature_celsius": 63,
+      "log_error_markers": false,
+      "fixed_evaluations_available": [
+        0
+      ],
+      "next_fixed_evaluation_step": 2373,
+      "scientific_interpretation": "The callback precedes the first positive fixed evaluation. Minibatch train loss is a health signal only and does not alter the frozen terminal or checkpoint gates.",
+      "intervention": "none",
+      "estimated_update_only_hours_remaining": 3.11
+    }
+  },
   "monitoring": {
     "launchd_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
     "policy": "one idempotent watchdog with 20%, 50%, terminal, failures/stalls, and a resettable 90-minute heartbeat",
@@ -70,12 +98,19 @@
       "alive": true,
       "errors": [],
       "gpu": "46937, 97887, 100, 56"
-    }
+    },
+    "twenty_percent_callback_delivered_once": true,
+    "sent_milestones_after_verification": [
+      20
+    ],
+    "heartbeat_clock_reset_by_twenty_percent_callback": true
   },
   "storage": {
     "workspace_bytes_at_launch_verification": 263760647517,
     "workspace_cap_bytes": 274877906944,
     "workspace_headroom_bytes": 11117259427,
+    "workspace_bytes_at_twenty_percent": 264004166124,
+    "workspace_headroom_bytes_at_twenty_percent": 10873740820,
     "filesystem_free_bytes_before_launch": 1622811160576
   },
   "authorization": {
