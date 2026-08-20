@@ -8,6 +8,7 @@ import pytest
 from examples.nanogpt.make_pro6_full_replacement_all_feedback_350m_5tpp_configs import (
     OUTPUTS,
     MFU_RESULT,
+    RUN_METADATA,
     PARENTS,
     PLAN,
     QK,
@@ -74,11 +75,15 @@ def test_plan_materializes_only_ranked_top_two_and_authorizes_top1_after_both_mf
     assert plan["performance_gate"]["foreground_polling"] is True
     assert plan["performance_gate"]["watchdog"] is False
     assert plan["performance_gate"]["both_configs_must_pass_before_first_launch"] is True
-    assert plan["status"] == "both_exact_config_mfu_passed_top1_authorized"
+    assert plan["status"] == "top1_running_top2_blocked"
     assert plan["performance_gate"]["launch_authorized"] is True
     assert plan["performance_gate"]["mfu_result"] == {
         "path": str(MFU_RESULT.relative_to(MFU_RESULT.parents[4])),
         "sha256": sha256(MFU_RESULT),
+    }
+    assert plan["execution_state"] == {
+        "path": str(RUN_METADATA.relative_to(RUN_METADATA.parents[4])),
+        "sha256": sha256(RUN_METADATA),
     }
     assert plan["immutable_ranking"]["sha256"] == sha256(RANKING)
     for slot in SELECTIONS:
@@ -99,3 +104,13 @@ def test_sealed_mfu_result_passes_both_exact_configs_and_only_authorizes_top1():
         assert gate["mfu_fraction"] >= 0.20
         assert gate["all_logged_losses_finite"] is True
         assert gate["native_block_fht_extension_loaded"] is True
+
+
+def test_top1_run_metadata_pins_launch_and_keeps_top2_blocked():
+    metadata = load(RUN_METADATA)
+    assert metadata["state"] == "running"
+    assert metadata["config_sha256"] == sha256(OUTPUTS["top1"])
+    assert metadata["source_commit"] == "c947db1b170b3d7a9031cc537899731ee73aaebd"
+    assert metadata["watchdog"]["progress_milestones"] == [20, 50, 80, 100]
+    assert metadata["watchdog"]["heartbeat_minutes"] == 90
+    assert metadata["top2_launch_authorized"] is False

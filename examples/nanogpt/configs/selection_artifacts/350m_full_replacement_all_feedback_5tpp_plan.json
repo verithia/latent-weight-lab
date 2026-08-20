@@ -26,6 +26,10 @@
     "top1",
     "top2"
   ],
+  "execution_state": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top1_run_metadata.json",
+    "sha256": "694810ea0134913dabb440a8140507eee32afb2f0e07ad4100452f5c85269792"
+  },
   "frozen_gate": {
     "maximum_delta_to_same_slot_qk_only_ce": 0.02,
     "require_clean_exit": true,
@@ -89,5 +93,5 @@
     "No optimizer-state compression claim",
     "No inference-FLOP reduction claim"
   ],
-  "status": "both_exact_config_mfu_passed_top1_authorized"
+  "status": "top1_running_top2_blocked"
 }

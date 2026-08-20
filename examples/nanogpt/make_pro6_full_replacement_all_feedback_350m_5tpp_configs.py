@@ -16,6 +16,7 @@ ARTIFACT_DIR = CONFIG_DIR / "selection_artifacts"
 RANKING = ARTIFACT_DIR / "350m_full_replacement_all_feedback_0p5tpp_ranking.json"
 PLAN = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_plan.json"
 MFU_RESULT = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_mfu_result.json"
+RUN_METADATA = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top1_run_metadata.json"
 SELECTIONS = {"top1": "mult1p00", "top2": "mult0p75"}
 PARENTS = {
     "top1": CONFIG_DIR / "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
@@ -165,11 +166,22 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             if gate.get("all_logged_losses_finite") is not True:
                 raise ValueError(f"{slot} scratch loss was not finite")
     launch_authorized = mfu_result is not None
+    run_metadata: dict[str, Any] | None = None
+    if RUN_METADATA.exists():
+        run_metadata = load(RUN_METADATA)
+        if not launch_authorized:
+            raise ValueError("top1 run metadata exists before both MFU gates pass")
+        if run_metadata.get("config_sha256") != sha256(OUTPUTS["top1"]):
+            raise ValueError("top1 run metadata config hash mismatch")
+        if run_metadata.get("state") != "running":
+            raise ValueError("registered top1 run metadata is not live")
     return {
         "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_plan_v1",
         "registered_at": "2026-08-21",
         "status": (
-            "both_exact_config_mfu_passed_top1_authorized"
+            "top1_running_top2_blocked"
+            if run_metadata is not None
+            else "both_exact_config_mfu_passed_top1_authorized"
             if launch_authorized
             else "materialized_pending_both_exact_config_mfu_gates"
         ),
@@ -203,6 +215,11 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             ),
         },
         "execution_order": ["top1", "top2"],
+        "execution_state": (
+            {"path": str(RUN_METADATA.relative_to(ROOT)), "sha256": sha256(RUN_METADATA)}
+            if run_metadata is not None
+            else None
+        ),
         "monitoring": {"expected_duration_hours_per_candidate": [7, 8], "progress_callbacks": [0.20, 0.50, 0.80, 1.00], "heartbeat_minutes": 90, "heartbeat_resets_on_progress": True, "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test", "agent_mention": "@Codex"},
         "resource_admission": {"host": "PRO6", "gpu": 0, "project_cap_gib": 256, "minimum_post_admission_headroom_gib": 8, "archive_completed_checkpoint_before_next_slot": True},
         "frozen_gate": {"maximum_delta_to_same_slot_qk_only_ce": 0.02, "require_clean_exit": True, "require_finite_terminal_evaluation": True, "threshold_changes_after_measurement": False},
