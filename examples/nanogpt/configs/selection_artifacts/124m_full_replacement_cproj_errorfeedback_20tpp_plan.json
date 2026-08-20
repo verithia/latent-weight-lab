@@ -1,0 +1,116 @@
+{
+  "authorization": {
+    "automatic_rerun": false,
+    "larger_model": false,
+    "multi_seed_closure_claim": false,
+    "one_exact_config_mfu_preflight": true,
+    "one_fresh_124m_20tpp_training_after_mfu_pass": true,
+    "parallel_arm": false
+  },
+  "candidate": {
+    "additional_materialized_inference_flops": 0,
+    "additional_persistent_optimizer_state_bytes": 14155776,
+    "additional_trainable_parameters": 0,
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_all_int8_errorfeedback_20tpp.json",
+    "config_sha256": "deb2bf711bab4c633a051d868d45f4ac815fb3aa3c3d82c88d31f3f2e1e80e93",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_full_replacement_cproj_error_feedback_124m_20tpp.py",
+    "max_iters": 9489,
+    "model_size": "124M",
+    "only_scientific_change_from_failed_parent": "block_fht_attn_cproj_int8_lattice_error_feedback: false -> true",
+    "planned_tpp": 20.0
+  },
+  "created_at": "2026-08-20",
+  "evidence": {
+    "failed_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_training_result.json",
+      "sha256": "c0947dd251945d3e841ad2274b18ce1e40e8713114d2fd0a0dedd9ac4caf0f4b"
+    },
+    "isolated_repaired_v_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_training_result.json",
+      "sha256": "c7c806135aeddbc5bf4a2c43ea876915c4c68389fbbc837365783103834d3335"
+    },
+    "qk_only_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_lwt_20tpp_result.json",
+      "sha256": "faf150ce3f4c335947e67adc3415cc254839a7bb83350fdd9b7587511d0ffe2a"
+    }
+  },
+  "execution_gate": {
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one persistent @Codex watchdog with 20%, 50%, terminal, failure/stall, and resettable 90-minute heartbeat callbacks",
+    "unit_tests_before_remote_sync": true
+  },
+  "frozen_comparators": {
+    "isolated_repaired_v": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.504,
+        3.3194,
+        3.2055,
+        3.1489
+      ]
+    },
+    "no_feedback_full_replacement_parent": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.5139,
+        3.3373,
+        3.2327,
+        3.1807
+      ]
+    },
+    "ordinary_dense_terminal": {
+      "step": 9489,
+      "validation_ce": 3.1547
+    },
+    "qk_only": {
+      "steps": [
+        2373,
+        4746,
+        7119,
+        9489
+      ],
+      "validation_ce": [
+        3.5038,
+        3.3179,
+        3.2046,
+        3.1488
+      ]
+    }
+  },
+  "frozen_gate": {
+    "fail_classification": "FULL_REPLACEMENT_CPROJ_TEMPORAL_REPAIR_REJECTED_124M_20TPP",
+    "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,
+    "minimum_improvement_over_parent_at_step_7119_ce": 0.008,
+    "minimum_improvement_over_parent_at_step_9489_ce": 0.008,
+    "pass_classification": "FULL_REPLACEMENT_CPROJ_TEMPORAL_REPAIR_CONFIRMED_124M_20TPP",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "terminal_practical_maximum_validation_ce": 3.1647,
+    "terminal_zero_gap_validation_ce": 3.1547,
+    "threshold_changes_after_measurement": false
+  },
+  "hypothesis": {
+    "falsification": "If late fixed-curve drift is not materially reduced, reject attention c_proj as the primary cause and localize the remaining defect to full-MLP composition.",
+    "intervention": "Enable the existing FP16 sigma-delta compression residual on the 12 attention-c_proj lattices and change nothing else.",
+    "observation": "The failed parent has healthy noncollapsed codecs, validated V feedback, MLP feedback, and no attention-c_proj feedback."
+  },
+  "question": "Is discarded sub-quantum attention-c_proj motion the cause of the complete replacement's late 20TPP drift?",
+  "schema_version": "mai_124m_full_replacement_cproj_errorfeedback_20tpp_plan_v1",
+  "status": "preregistered_pending_tests_and_exact_config_mfu",
+  "why_no_5tpp_screen": "The parent already passed 5TPP and first violated its temporal gate at step 7119; a 5TPP rerun cannot test this hypothesis."
+}

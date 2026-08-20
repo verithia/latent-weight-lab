@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_124m_full_replacement_repaired_v_20tpp_run_metadata_v1",
   "recorded_at": "2026-08-20",
-  "state": "scientific_training_running_checkpoint_gate_failed",
+  "state": "finished_horizon_nontransfer",
   "run": {
     "name": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp",
     "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625",
@@ -169,6 +169,21 @@
       "estimated_update_only_minutes_remaining": 27.1
     }
   },
+  "terminal_result": {
+    "finished_at": "2026-08-20T18:00:44+08:00",
+    "wall_seconds": 14287,
+    "exit_code": 0,
+    "fixed_validation_ce": 3.1807165145874023,
+    "delta_to_ordinary_dense_ce": 0.026016514587402284,
+    "delta_to_qk_only_ce": 0.0319165145874023,
+    "delta_to_isolated_repaired_v_ce": 0.03179097175598145,
+    "classification": "FULL_REPLACEMENT_REPAIRED_V_HORIZON_NONTRANSFER_124M_20TPP",
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_training_result.json",
+    "result_sha256": "c0947dd251945d3e841ad2274b18ce1e40e8713114d2fd0a0dedd9ac4caf0f4b",
+    "checkpoint_sha256": "e694d1f2e33f607a21aab9c709baa91bc9f0df61cb7860d53da4122796a8f3ed",
+    "checkpoint_metadata_sha256": "c6b25de79470f901de5c79eabe10514da591c27f43e10c543ff253710ad06b60",
+    "scientific_interpretation": "The 5TPP zero-gap recombination accumulates a monotone late-horizon deficit and fails the frozen checkpoint and terminal gates despite healthy lattice codes."
+  },
   "monitoring": {
     "launchd_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
     "policy": "one idempotent watchdog with 20%, 50%, terminal, failures/stalls, and a resettable 90-minute heartbeat",
@@ -192,7 +207,10 @@
     "fifty_percent_callback_delivered_once": true,
     "heartbeat_clock_reset_by_fifty_percent_callback": true,
     "post_fifty_percent_heartbeat_delivered_once": true,
-    "heartbeat_clock_reset_by_post_fifty_percent_heartbeat": true
+    "heartbeat_clock_reset_by_post_fifty_percent_heartbeat": true,
+    "terminal_callback_delivered_once": true,
+    "terminal_callback_iter": 9489,
+    "watchdog_terminal_state": "finished_exit_0"
   },
   "storage": {
     "workspace_bytes_at_launch_verification": 263760647517,
@@ -204,7 +222,13 @@
     "workspace_headroom_bytes_at_fifty_percent": 10117783788,
     "workspace_bytes_at_post_fifty_percent_heartbeat": 264760137359,
     "workspace_headroom_bytes_at_post_fifty_percent_heartbeat": 10117769585,
-    "filesystem_free_bytes_before_launch": 1622811160576
+    "filesystem_free_bytes_before_launch": 1622811160576,
+    "workspace_bytes_after_terminal_archive": 263760545991,
+    "workspace_headroom_bytes_after_terminal_archive": 11117360953,
+    "filesystem_free_bytes_after_terminal_archive": 1621810970624,
+    "checkpoint_archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_replacement_repaired_v_20tpp/ckpt.pt",
+    "checkpoint_archive_verified_before_source_reclaim": true,
+    "workspace_checkpoint_replaced_by_symlink": true
   },
   "authorization": {
     "one_preregistered_scientific_run_consumed": true,

@@ -114,7 +114,7 @@
     "pgid": 1690729,
     "source_commit": "34c4efd48dc1de64b098d063d42c640bc1072dad",
     "started_at": "2026-08-20T14:02:37+08:00",
-    "state": "running_checkpoint_gate_failed",
+    "state": "finished_horizon_nontransfer",
     "initial_fixed_validation_ce": 10.9369,
     "live_milestones": {
       "twenty_percent": {
@@ -166,9 +166,15 @@
     "metadata_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_run_metadata.json",
     "metadata_sha256": "56c707b67acf15cb1b84e52c8230e33de723a2294d98b92413a8bc54a6c07d35",
     "watchdog_service": "com.mappingnetworks.pro6.fullreplacementrepairedv20tpp.20260820",
-    "watchdog_policy": "20%, 50%, terminal, failures/stalls, and resettable 90-minute heartbeat"
+    "watchdog_policy": "20%, 50%, terminal, failures/stalls, and resettable 90-minute heartbeat",
+    "finished_at": "2026-08-20T18:00:44+08:00",
+    "exit_code": 0,
+    "terminal_validation_ce": 3.1807165145874023,
+    "classification": "FULL_REPLACEMENT_REPAIRED_V_HORIZON_NONTRANSFER_124M_20TPP",
+    "result_path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_training_result.json",
+    "result_sha256": "c0947dd251945d3e841ad2274b18ce1e40e8713114d2fd0a0dedd9ac4caf0f4b"
   },
-  "status": "scientific_training_running_checkpoint_gate_failed",
+  "status": "finished_horizon_nontransfer",
   "terminal_gate": {
     "checkpoint_gate_already_failed": {
       "step": 7119,

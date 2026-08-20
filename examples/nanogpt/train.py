@@ -1268,6 +1268,11 @@ def parse_args() -> argparse.Namespace:
         default=271828,
     )
     parser.add_argument(
+        "--block-fht-attn-cproj-int8-lattice-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-attn-v-int8-lattice",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2030,6 +2035,13 @@ def parse_args() -> argparse.Namespace:
                 "attention Muon-matched Givens targets must also be "
                 "BlockFHT targets"
             )
+    if namespace.block_fht_attn_cproj_int8_lattice_error_feedback and not (
+        namespace.block_fht_attn_cproj_int8_lattice
+    ):
+        raise ValueError(
+            "attention c_proj int8 lattice error feedback requires the "
+            "c_proj lattice"
+        )
     if namespace.block_fht_attn_cproj_int8_lattice:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2828,6 +2840,9 @@ def main() -> None:
         ),
         block_fht_attn_cproj_int8_lattice_seed=(
             args.block_fht_attn_cproj_int8_lattice_seed
+        ),
+        block_fht_attn_cproj_int8_lattice_error_feedback=(
+            args.block_fht_attn_cproj_int8_lattice_error_feedback
         ),
         block_fht_attn_v_int8_lattice=(
             args.block_fht_attn_v_int8_lattice

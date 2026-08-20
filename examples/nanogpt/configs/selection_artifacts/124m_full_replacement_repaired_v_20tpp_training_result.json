@@ -1,0 +1,122 @@
+{
+  "schema_version": "mai_124m_full_replacement_repaired_v_20tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "FULL_REPLACEMENT_REPAIRED_V_HORIZON_NONTRANSFER_124M_20TPP",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_repaired_v_20tpp_plan.json",
+    "preterminal_sha256": "58ad52219ea8d5c4bbf572d18a9bc3a57b8cedb43471ac2f9f4d35a04d8b6561"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp",
+    "run_id": "pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 1690729,
+    "source_commit": "34c4efd48dc1de64b098d063d42c640bc1072dad",
+    "entrypoint": ["/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python", "-u", "-m", "examples.nanogpt.train"],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp.json",
+    "archived_config_sha256": "94de5e25083375d602ba314eaad29a51c4ff768acf01f19388add9b498c9a709",
+    "resolved_checkpoint_config_sha256": "6e726681270b24b6956c02f263a80f16bf5dec87862b4fcb5f1bb6b3a2ba554a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "8458a823b71468faecf7dc0dc2dd553fea3ddd4127c3b9f3063f6abba8a7defc",
+    "preflight_mfu_fraction": 0.3181208690578437,
+    "started_at": "2026-08-20T14:02:37+08:00",
+    "finished_at": "2026-08-20T18:00:44+08:00",
+    "wall_seconds": 14287,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {"path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.json", "bytes": 958, "sha256": "ab29b96f02ee9d9640e1df074582bb2f5153bcb9585e881be031b03342b9f26b"},
+      "log": {"path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.log", "bytes": 49698, "sha256": "437c79ebe864ebe0a954ce5ab56c9e56bb0c6fd3d8297b312c253874c70f4855"},
+      "provenance": {"path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.json", "bytes": 2203, "sha256": "0dfa236f8bd6ea1eeb68e00de2bc0c3cd0ca0ced22b6553d69316ef01b91a2e3"},
+      "archived_config": {"path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp_20260820T060236Z_1690625.config.json", "bytes": 13245, "sha256": "94de5e25083375d602ba314eaad29a51c4ff768acf01f19388add9b498c9a709"},
+      "checkpoint": {"path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp/scientific/ckpt.pt", "path_kind": "symlink_to_verified_external_archive", "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/full_replacement_repaired_v_20tpp/ckpt.pt", "bytes": 999595748, "sha256": "e694d1f2e33f607a21aab9c709baa91bc9f0df61cb7860d53da4122796a8f3ed"},
+      "checkpoint_metadata": {"path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_20tpp/scientific/ckpt.meta.json", "bytes": 24224, "sha256": "c6b25de79470f901de5c79eabe10514da591c27f43e10c543ff253710ad06b60"}
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9374, "validation_ce": 10.9369},
+    {"step": 2373, "train_ce": 3.5314, "validation_ce": 3.5139},
+    {"step": 4746, "train_ce": 3.3588, "validation_ce": 3.3373},
+    {"step": 7119, "train_ce": 3.2563, "validation_ce": 3.2327},
+    {"step": 9489, "train_ce": 3.2039, "validation_ce": 3.1807165145874023}
+  ],
+  "frozen_gate": {
+    "ordinary_dense_terminal_validation_ce": 3.1547,
+    "qk_only_terminal_validation_ce": 3.1488,
+    "isolated_repaired_v_terminal_validation_ce": 3.148925542831421,
+    "zero_gap_closure_validation_ce": 3.1547,
+    "practical_acceptance_maximum_validation_ce": 3.1647,
+    "terminal_validation_ce": 3.1807165145874023,
+    "delta_to_ordinary_dense_ce": 0.026016514587402284,
+    "delta_to_qk_only_ce": 0.0319165145874023,
+    "delta_to_isolated_repaired_v_ce": 0.03179097175598145,
+    "excess_over_practical_acceptance_ceiling": 0.016016514587402497,
+    "perplexity_ratio_to_ordinary_dense": 1.026357898210699,
+    "passed": false,
+    "first_failed_fixed_checkpoint": 7119,
+    "threshold_changed_after_measurement": false
+  },
+  "fixed_curve_comparison": {
+    "steps": [2373, 4746, 7119, 9489],
+    "qk_only_validation_ce": [3.5038, 3.3179, 3.2046, 3.1488],
+    "isolated_repaired_v_validation_ce": [3.5040, 3.3194, 3.2055, 3.1489],
+    "candidate_validation_ce_rounded_from_log": [3.5139, 3.3373, 3.2327, 3.1807],
+    "candidate_minus_qk_only_ce": [0.0101, 0.0194, 0.0281, 0.0319],
+    "candidate_minus_isolated_repaired_v_ce": [0.0099, 0.0179, 0.0272, 0.0318],
+    "maximum_observed_delta_to_qk_only_ce": 0.0319,
+    "maximum_observed_delta_to_isolated_repaired_v_ce": 0.0318,
+    "all_checkpoints_passed_frozen_0p02_gate": false,
+    "interpretation": "The penalty grows almost monotonically with horizon, so the 5TPP zero-gap result does not transfer to 20TPP. This is accumulated temporal drift, not a terminal-only fluctuation."
+  },
+  "compute_equivalence": {
+    "sop": "notes/active/fixed-model-compute-equivalence-sop-20260804.md",
+    "versus_qk_only": {"terminal_candidate_over_qk_compute": 1.178547436672882, "terminal_method": "interpolation in the frozen QK-only curve", "qk_match_updates": 8051.436628455176},
+    "versus_ordinary_dense": {"method": "one-interval terminal extrapolation because only the sealed dense endpoint is available locally", "last_2_point_slope_ratio": 1.1469951041940556, "last_3_point_slope_ratio": 1.113300309281536, "last_4_point_slope_ratio": 1.10414666718976, "slope_values": [0.1897, 0.2424, 0.2626], "interpretation": "The +0.0260 CE terminal gap is about a 10.4% to 14.7% fixed-model compute penalty under the registered local-slope sensitivity range."},
+    "curve_precision_note": "Curve calculations use immutable four-decimal log values; the frozen terminal gate uses exact checkpoint validation CE."
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 9489,
+    "best_validation_ce": 3.1807165145874023,
+    "lattice_categories": {
+      "attention_v": {"matrices": 12, "elements": 7077888, "code_nonzero_fraction": 0.9872254133224487, "code_saturation_fraction": 0.00001441107815480791, "code_entropy_bits": 7.021175349583484, "scale_count": 1728, "scale_min": 0.00047206878662109375, "scale_mean": 0.0006357830134220421, "scale_max": 0.000865936279296875},
+      "attention_cproj": {"matrices": 12, "elements": 7077888, "code_nonzero_fraction": 0.9841143488883972, "code_saturation_fraction": 0.00007007740350672975, "code_entropy_bits": 6.758412191896624, "scale_count": 1728, "scale_min": 0.00022292137145996094, "scale_mean": 0.0004891706048510969, "scale_max": 0.0010929107666015625},
+      "mlp_cfc": {"matrices": 12, "elements": 28311552, "code_nonzero_fraction": 0.9865332245826721, "code_saturation_fraction": 0.000004273873855709098, "code_entropy_bits": 6.958421823444203, "scale_count": 6912, "scale_min": 0.0005197525024414062, "scale_mean": 0.0007006185478530824, "scale_max": 0.003017425537109375},
+      "mlp_cproj": {"matrices": 12, "elements": 28311552, "code_nonzero_fraction": 0.9850134253501892, "code_saturation_fraction": 0.000000635782896551973, "code_entropy_bits": 6.815342009278241, "scale_count": 6912, "scale_min": 0.00021827220916748047, "scale_mean": 0.0003043462347704917, "scale_max": 0.002567291259765625}
+    },
+    "compression_residuals": {"count": 36, "elements": 63700992, "bytes": 127401984, "dtype": "float16", "all_finite": true, "rms": 0.00016117682839937328, "absolute_max": 0.0015087127685546875, "scope": "V plus both MLP matrices; attention c_proj has no feedback residual"},
+    "health_interpretation": "All four lattice families remain dense in code space, finite, high entropy, and far from saturation. The failure is not codec collapse. Scale means grow 1.45x to 1.61x from 5TPP to 20TPP while the combined feedback RMS grows about 1.50x, making uncorrected sub-quantum accumulation in the sole no-feedback family a falsifiable next hypothesis."
+  },
+  "efficiency_scope": {
+    "attention_v_and_cproj_fp32_weight_bytes": 56623104,
+    "attention_v_and_cproj_persistent_int8_codec_bytes": 14162688,
+    "mlp_fp32_weight_bytes": 226492416,
+    "mlp_persistent_int8_codec_bytes": 56650752,
+    "combined_ambient_fp32_weight_bytes": 283115520,
+    "combined_persistent_int8_codec_bytes": 70813440,
+    "persistent_ambient_weight_reduction": 3.998048399921895,
+    "qk_generated_weight_elements": 84934656,
+    "qk_latent_parameters": 141552,
+    "total_trainable_parameters_reported": 43138032,
+    "dense_fp32_muon_momentum_retained": true,
+    "fp16_temporal_feedback_state_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "materialized_inference_flops_reduced": false
+  },
+  "mechanistic_conclusion": {
+    "supported": "The complete replacement has a real late-horizon composition defect despite healthy codecs and an isolated V repair that remains QK-only-equivalent through 20TPP.",
+    "not_yet_identified": "This run cannot by itself distinguish uncorrected attention-c_proj quantization drift from a late full-MLP interaction.",
+    "next_falsifiable_hypothesis": "Attention c_proj is the only ambient lattice family without temporal error feedback. Add the same FP16 sigma-delta residual to attention c_proj and change nothing else; if the fixed-curve drift disappears, c_proj was causal, while an unchanged drift localizes the remaining defect to the full-MLP composition."
+  },
+  "storage_reclamation": {"archive_verified_before_source_reclaim": true, "workspace_source_replaced_by_symlink": true, "reclaimed_bytes": 999595748, "workspace_bytes_after_archive": 263760545991, "workspace_cap_bytes": 274877906944, "workspace_headroom_bytes": 11117360953, "filesystem_free_bytes": 1621810970624},
+  "decision": {
+    "one_fresh_124m_20tpp_attention_cproj_error_feedback_ablation_after_unit_tests_and_exact_config_mfu_pass": true,
+    "why_direct_20tpp": "The parent passes at 5TPP and first fails only after update 4746, so another 5TPP screen cannot test the registered temporal-drift hypothesis.",
+    "automatic_rerun_authorized": false,
+    "parallel_arm_authorized": false,
+    "larger_model_authorized": false,
+    "multi_seed_closure_claim_authorized": false
+  }
+}

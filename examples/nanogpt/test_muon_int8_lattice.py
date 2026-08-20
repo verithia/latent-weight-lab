@@ -287,6 +287,69 @@ def test_gpt_routes_qk_headwise_plus_v_lattice_with_error_feedback() -> None:
     assert int(module.optimizer_step) == 1
 
 
+def test_gpt_routes_attention_cproj_lattice_with_error_feedback() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_attn_cproj_int8_lattice=True,
+            block_fht_attn_cproj_int8_lattice_block_size=16,
+            block_fht_attn_cproj_int8_lattice_error_feedback=True,
+        )
+    )
+    module = model.transformer.h[0].attn.c_proj
+    assert isinstance(module, MuonInt8LatticeLinear)
+    assert module.error_feedback is True
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=1,
+    )
+    lattice_optimizers = [
+        item for item in optimizer.optimizers if isinstance(item, MuonInt8Lattice)
+    ]
+    assert len(lattice_optimizers) == 1
+    tokens = torch.randint(0, 32, (2, 8))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None and torch.isfinite(loss)
+    loss.backward()
+    optimizer.step()
+    state = lattice_optimizers[0].state[module.weight]
+    assert state["compression_residual"].dtype == torch.float16
+    assert int(module.optimizer_step) == 1
+
+
+def test_cproj_error_feedback_without_lattice_is_rejected() -> None:
+    try:
+        GPT(
+            GPTConfig(
+                block_size=8,
+                vocab_size=32,
+                n_layer=1,
+                n_head=2,
+                n_embd=8,
+                bias=False,
+                block_fht=True,
+                block_fht_targets=(),
+                block_fht_attn_cproj_int8_lattice_error_feedback=True,
+            )
+        )
+    except ValueError as error:
+        assert "requires the c_proj lattice" in str(error)
+    else:
+        raise AssertionError("c_proj feedback without a lattice must fail")
+
+
 def test_conflicting_v_lattice_representations_are_rejected() -> None:
     try:
         GPT(

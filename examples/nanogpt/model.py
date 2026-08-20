@@ -177,6 +177,7 @@ class GPTConfig:
     block_fht_attn_cproj_int8_lattice: bool = False
     block_fht_attn_cproj_int8_lattice_block_size: int = 4096
     block_fht_attn_cproj_int8_lattice_seed: int = 271828
+    block_fht_attn_cproj_int8_lattice_error_feedback: bool = False
     block_fht_attn_v_int8_lattice: bool = False
     block_fht_attn_v_int8_lattice_block_size: int = 4096
     block_fht_attn_v_int8_lattice_seed: int = 161804
@@ -1289,6 +1290,11 @@ class CausalSelfAttention(nn.Module):
                     "attention c_proj int8 lattice is the c_proj target; "
                     "remove attn.c_proj from BlockFHT targets"
                 )
+        elif config.block_fht_attn_cproj_int8_lattice_error_feedback:
+            raise ValueError(
+                "attention c_proj int8 lattice error feedback requires "
+                "the c_proj lattice"
+            )
         if config.block_fht_attn_v_int8_lattice:
             if structured == 0:
                 raise ValueError(
@@ -1351,6 +1357,10 @@ class CausalSelfAttention(nn.Module):
                     ),
                     weight_std=0.02 / math.sqrt(2 * config.n_layer),
                     layer_id=layer_id,
+                    error_feedback=bool(
+                        config
+                        .block_fht_attn_cproj_int8_lattice_error_feedback
+                    ),
                 )
             if target_name not in attention_muon_targets:
                 return make_linear(
