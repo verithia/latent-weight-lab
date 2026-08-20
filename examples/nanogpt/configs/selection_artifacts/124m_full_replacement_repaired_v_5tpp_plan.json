@@ -1,0 +1,108 @@
+{
+  "authorization": {
+    "automatic_20tpp": false,
+    "automatic_rerun": false,
+    "exact_config_mfu_preflight": true,
+    "larger_model": false,
+    "one_124m_5tpp_recombination_after_mfu_pass": true,
+    "training_before_mfu_pass": false
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_fullreplacement_repaired_v_int8_errorfeedback_5tpp.json",
+    "config_sha256": "6d933c5ede34d9454990f142fb392842be464017eef3ac841049156102945881",
+    "fresh_from_scratch": true,
+    "generator": "examples/nanogpt/make_pro6_full_replacement_repaired_v_124m_5tpp.py",
+    "max_iters": 2373,
+    "model_size": "124M",
+    "persistent_attention_state": "QK64 mapping plus signed-int8 V with feedback plus signed-int8 c_proj",
+    "persistent_mlp_state": "signed-int8 c_fc and c_proj, each with FP16 temporal feedback",
+    "planned_tpp": 5.0
+  },
+  "causal_contract": [
+    "Change only the V representation from Cayley rank-16 to block-4096 signed-int8 plus FP16 temporal error feedback.",
+    "Preserve QK64, attention-c_proj lattice without feedback, both MLP lattices with feedback, optimizer, LR, data, seeds, horizon, and fixed evaluations.",
+    "Run fresh from initialization; do not resume or transplant any prior checkpoint.",
+    "This is the smallest 124M/5TPP recombination; no 20TPP or larger-model promotion is implicit."
+  ],
+  "created_at": "2026-08-20",
+  "evidence": {
+    "full_replacement_cayley_v_parent": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_int8_lattice_errorfeedback_5tpp_training_result.json",
+      "sha256": "3584d2607962e4a557d5278db30e34de2192fc587a3d4cdafcad779772bf61cf"
+    },
+    "ordinary_dense_replay": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_5tpp_replay_result.json",
+      "sha256": "b08a1856e0318e89ba8fdc2ada0931723976f201ce66a35a093d0f0165ddb2e5"
+    },
+    "v_repair_20tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_training_result.json",
+      "sha256": "c7c806135aeddbc5bf4a2c43ea876915c4c68389fbbc837365783103834d3335"
+    },
+    "v_repair_5tpp": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_5tpp_training_result.json",
+      "sha256": "48ee60bd232978be401fd98b696e6d40d903e0ebff83be340ac18c4f7f8d28a2"
+    }
+  },
+  "execution_gate": {
+    "callback_action_prompt": "Verify terminal artifacts, fixed-checkpoint gaps, codec state, and hashes; seal the active project note, then choose only the next causally justified full-replacement action.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "exact_config_mfu_minimum": 0.2,
+    "gpu": 0,
+    "host": "PRO6",
+    "mfu_gate_runtime": "foreground-polled; no watchdog or callback",
+    "scientific_run_runtime": "one idempotent terminal/error-only @Codex watchdog; no milestone or heartbeat callbacks"
+  },
+  "frozen_comparators": {
+    "cayley_v_combined_parent": {
+      "steps": [
+        594,
+        1188,
+        1782,
+        2373
+      ],
+      "validation_ce": [
+        4.0566,
+        3.7438,
+        3.6074,
+        3.549762010574341
+      ]
+    },
+    "ordinary_dense": {
+      "steps": [
+        594,
+        1188,
+        1782,
+        2373
+      ],
+      "validation_ce": [
+        4.1742,
+        3.7631,
+        3.6039,
+        3.5402
+      ]
+    }
+  },
+  "question": "Does the validated temporal V codec recombine with the accepted attention-c_proj and full-MLP codecs without reopening a loss gap?",
+  "schema_version": "mai_124m_full_replacement_repaired_v_5tpp_plan_v1",
+  "scope_guards": [
+    "The ambient int8 codecs are approximately 4x smaller than FP32 weights, not 200x latent generators.",
+    "FP16 feedback residuals and dense FP32 Muon momentum are optimizer state and must be counted.",
+    "Dense transient materialization and materialized inference FLOPs remain unchanged."
+  ],
+  "status": "preregistered_pending_exact_config_mfu",
+  "terminal_gate": {
+    "fail_classification": "FULL_REPLACEMENT_RECOMBINATION_REOPENS_GAP",
+    "maximum_delta_to_cayley_v_combined_parent_at_every_fixed_evaluation_ce": 0.02,
+    "maximum_delta_to_ordinary_dense_ce": 0.01,
+    "practical_acceptance_maximum_validation_ce": 3.5502,
+    "practical_pass_classification": "FULL_REPLACEMENT_REPAIRED_V_NEAR_DENSE_AT_124M_5TPP",
+    "require_all_fixed_evaluations_finite": true,
+    "require_clean_exit": true,
+    "secondary_strong_v_transfer_maximum_validation_ce": 3.539762010574341,
+    "secondary_strong_v_transfer_minimum_improvement_ce": 0.01,
+    "secondary_strong_v_transfer_required_for_practical_acceptance": false,
+    "threshold_changes_after_measurement": false,
+    "zero_gap_classification": "FULL_REPLACEMENT_REPAIRED_V_ZERO_GAP_AT_124M_5TPP",
+    "zero_gap_closure_validation_ce": 3.5402
+  }
+}

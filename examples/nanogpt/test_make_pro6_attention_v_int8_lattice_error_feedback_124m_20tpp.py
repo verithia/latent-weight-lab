@@ -69,5 +69,12 @@ def test_plan_pins_evidence_and_freezes_qk_relative_curve_gate() -> None:
     )
     assert sha256(mfu_result) == plan["mfu_result"]["sha256"]
     assert plan["mfu_result"]["mfu_fraction"] >= 0.20
-    assert plan["authorization"]["combined_full_replacement"] is False
+    assert plan["authorization"]["combined_full_replacement"] is True
+    assert (
+        plan["authorization"][
+            "one_124m_5tpp_combined_recombination_after_fresh_mfu"
+        ]
+        is True
+    )
+    assert plan["terminal_gate"]["passed"] is True
     assert plan["authorization"]["larger_model"] is False

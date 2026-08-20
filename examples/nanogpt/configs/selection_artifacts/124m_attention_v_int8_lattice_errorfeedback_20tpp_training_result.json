@@ -1,0 +1,175 @@
+{
+  "schema_version": "mai_124m_attention_v_int8_lattice_errorfeedback_20tpp_training_result_v1",
+  "recorded_at": "2026-08-20",
+  "classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_CONFIRMED_20TPP",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_plan.json",
+    "preterminal_sha256": "6d772b38f81de6ea0dbabc5b3ffcf7122a93764e6ddd8d8d4c7fe13dcc01f850"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4",
+    "run_id": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 1527876,
+    "source_commit": "9d11d506bcd47fab754b9dce1cd287480cca23d4",
+    "entrypoint": [
+      "/home/pro6000-9980x/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4.json",
+    "archived_config_sha256": "a40e552a19d3f8131a186b0d8c997394c6444d2419c66b665f47c4f5c9c4f311",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "ecc088531ae38ab448411f2df56d3295d6fc895b5dca9f47632ac841aecb3c39",
+    "preflight_mfu_fraction": 0.3174980620869945,
+    "started_at": "2026-08-20T08:28:32+08:00",
+    "finished_at": "2026-08-20T12:25:50+08:00",
+    "wall_seconds": 14238,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.json",
+        "bytes": 924,
+        "sha256": "139fa10a13cf2f51bdcb5784d8b52078a5b7aafbb4a549aa82c4dac866a9ec1f"
+      },
+      "log": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.log",
+        "bytes": 49405,
+        "sha256": "5e759f7b08af88733d9619bc9bc5e444da8786dfcac959787ab071818bf3e730"
+      },
+      "provenance": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.json",
+        "bytes": 2161,
+        "sha256": "75d7bf97b183d684ba882c9b634a34709c85305dc446ca73a3e717b7c6f84b5c"
+      },
+      "archived_config": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754.config.json",
+        "bytes": 11517,
+        "sha256": "a40e552a19d3f8131a186b0d8c997394c6444d2419c66b665f47c4f5c9c4f311"
+      },
+      "checkpoint": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp/scientific/ckpt.pt",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/attention_v_int8_lattice_errorfeedback_20tpp/ckpt.pt",
+        "bytes": 1077368076,
+        "sha256": "2ed9364d5a194e20e9ee050e47b261307d92048c6fa0809f3d28c0d9d5bd0130"
+      },
+      "checkpoint_metadata": {
+        "path": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp/scientific/ckpt.meta.json",
+        "bytes": 22824,
+        "sha256": "5d5c7e2471047b08c24f627abab7f95543738952e39a2a0b2b11b67f62349886"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 10.9957, "validation_ce": 10.9951},
+    {"step": 2373, "train_ce": 3.5220, "validation_ce": 3.5040},
+    {"step": 4746, "train_ce": 3.3403, "validation_ce": 3.3194},
+    {"step": 7119, "train_ce": 3.2285, "validation_ce": 3.2055},
+    {"step": 9489, "train_ce": 3.1722, "validation_ce": 3.148925542831421}
+  ],
+  "frozen_gate": {
+    "qk_only_terminal_validation_ce": 3.1488,
+    "cayley_qkv_terminal_validation_ce": 3.1853,
+    "maximum_terminal_validation_ce": 3.1688,
+    "terminal_validation_ce": 3.148925542831421,
+    "delta_to_qk_only_ce": 0.00012554283142085532,
+    "improvement_over_cayley_qkv_ce": 0.036374457168579344,
+    "headroom_to_gate_ce": 0.019874457168579163,
+    "cayley_v_penalty_recovered_fraction": 0.9965604703720314,
+    "perplexity_ratio_to_qk_only": 1.000125550712252,
+    "passed": true,
+    "threshold_changed_after_measurement": false
+  },
+  "fixed_curve_comparison": {
+    "steps": [2373, 4746, 7119, 9489],
+    "qk_only_validation_ce": [3.5038, 3.3179, 3.2046, 3.1488],
+    "candidate_validation_ce_rounded_from_log": [3.5040, 3.3194, 3.2055, 3.1489],
+    "candidate_minus_qk_only_ce": [0.0002, 0.0015, 0.0009, 0.0001],
+    "cayley_qkv_validation_ce": [3.5397, 3.3533, 3.2413, 3.1853],
+    "candidate_improvement_over_cayley_qkv_ce": [0.0357, 0.0339, 0.0358, 0.0364],
+    "maximum_observed_delta_to_qk_only_ce": 0.0015,
+    "all_checkpoints_passed_frozen_0p02_gate": true,
+    "interpretation": "The temporal lattice remains QK-only-equivalent throughout 20TPP and removes the stable Cayley-V deficit at every registered evaluation."
+  },
+  "compute_equivalence": {
+    "sop": "notes/active/fixed-model-compute-equivalence-sop-20260804.md",
+    "qk_only_local_log_update_fits": {
+      "last_2_points": {"slope": 0.19417748248965455, "alpha": 0.0616671374776596},
+      "last_3_points": {"slope": 0.24640017255590776, "alpha": 0.07825208732085485},
+      "last_4_points": {"slope": 0.26035252548140986, "alpha": 0.082683093712338}
+    },
+    "versus_qk_only": {
+      "terminal_candidate_over_qk_compute": 1.0005151254037117,
+      "terminal_method": "interpolation",
+      "qk_match_updates": 9484.11449169362,
+      "median_common_loss_candidate_over_qk_compute": 1.003632295486657,
+      "common_loss_ratio_range": [1.0005151254037121, 1.0055834555647716],
+      "common_loss_grid_points": 101
+    },
+    "curve_precision_note": "The fixed-curve SOP uses the immutable four-decimal log values; the frozen terminal gate and checkpoint audit use the exact checkpoint validation CE."
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 9489,
+    "best_validation_ce": 3.148925542831421,
+    "v_lattice": {
+      "matrices": 12,
+      "elements": 7077888,
+      "code_nonzero_fraction": 0.9872124195098877,
+      "code_saturation_fraction": 0.000013422082702163607,
+      "code_entropy_bits": 7.030671760920385,
+      "code_min": -127,
+      "code_max": 127,
+      "scale_count": 1728,
+      "scale_min": 0.0004496574401855469,
+      "scale_mean": 0.0006330264150165021,
+      "scale_max": 0.0009546279907226562
+    },
+    "v_compression_residuals": {
+      "count": 12,
+      "elements": 7077888,
+      "bytes": 14155776,
+      "dtype": "float16",
+      "all_finite": true,
+      "rms": 0.00018434374942444265,
+      "per_tensor_rms_min": 0.00016818344010971487,
+      "per_tensor_rms_max": 0.0001941826194524765,
+      "absolute_max": 0.0004773139953613281
+    }
+  },
+  "efficiency_scope": {
+    "v_fp32_weight_bytes": 28311552,
+    "v_persistent_int8_codec_bytes": 7081344,
+    "persistent_v_weight_reduction": 3.998048780487805,
+    "v_fp16_optimizer_residual_bytes": 14155776,
+    "dense_fp32_muon_momentum_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "materialized_inference_flops_reduced": false,
+    "claim": "Practical 4x persistent V-weight compression with QK-only-equivalent 20TPP CE; not a low-dimensional Mapping-Network replacement."
+  },
+  "mechanistic_conclusion": {
+    "supported": "Full ambient V direction support plus causal accumulation of sub-quantum Muon requests removes the Cayley-V deficit through 20TPP.",
+    "rejected": "The 5TPP V repair was not a short-horizon artifact, and the V deficit is not intrinsic to a block-4096 signed-int8 persistent codec.",
+    "remaining": "Recombine this V codec with the already passed attention-c_proj and full-MLP lattice codecs at the smallest 124M/5TPP rung before any longer-horizon or larger-model promotion."
+  },
+  "storage_reclamation": {
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "reclaimed_bytes": 1077368076,
+    "workspace_bytes_after_archive": 263759612871,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11118294073,
+    "filesystem_free_bytes": 1623811268608
+  },
+  "decision": {
+    "one_124m_5tpp_combined_full_replacement_recombination_after_fresh_exact_config_mfu_pass": true,
+    "direct_20tpp_recombination_authorized": false,
+    "larger_model_authorized": false,
+    "automatic_rerun_authorized": false
+  }
+}

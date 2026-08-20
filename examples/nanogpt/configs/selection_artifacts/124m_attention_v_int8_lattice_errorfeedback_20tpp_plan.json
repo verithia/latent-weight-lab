@@ -2,11 +2,12 @@
   "authorization": {
     "exact_config_mfu_passed": true,
     "automatic_rerun": false,
-    "combined_full_replacement": false,
+    "combined_full_replacement": true,
     "exact_config_mfu_preflight": true,
     "larger_model": false,
     "one_124m_20tpp_training_after_mfu_pass": true,
     "one_124m_20tpp_training_authorization_consumed": true,
+    "one_124m_5tpp_combined_recombination_after_fresh_mfu": true,
     "training_before_mfu_pass": false
   },
   "candidate": {
@@ -83,7 +84,11 @@
     "run_id": "pro6_mai_v3_124m_qk_v_int8_lattice_errorfeedback_20tpp_lr24e4_20260820T002831Z_1527754",
     "source_commit": "9d11d506bcd47fab754b9dce1cd287480cca23d4",
     "started_at": "2026-08-20T08:28:32+08:00",
-    "state": "running",
+    "finished_at": "2026-08-20T12:25:50+08:00",
+    "wall_seconds": 14238,
+    "terminal_validation_ce": 3.148925542831421,
+    "terminal_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_CONFIRMED_20TPP",
+    "state": "terminal_passed",
     "watchdog_callbacks": [20, 50, 100],
     "watchdog_heartbeat_minutes": 90
   },
@@ -124,7 +129,11 @@
     "The persistent V codec is approximately 4x smaller, but dense materialization and inference FLOPs remain.",
     "No recombination or larger-rung run is authorized before terminal analysis."
   ],
-  "status": "scientific_training_running",
+  "status": "terminal_passed_next_recombination_authorized",
+  "terminal_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_v_int8_lattice_errorfeedback_20tpp_training_result.json",
+    "sha256": "c7c806135aeddbc5bf4a2c43ea876915c4c68389fbbc837365783103834d3335"
+  },
   "terminal_gate": {
     "fail_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_NONTRANSFER_20TPP",
     "maximum_delta_to_qk_only_at_every_fixed_evaluation_ce": 0.02,
@@ -134,6 +143,21 @@
     "pass_classification": "ATTENTION_V_TEMPORAL_DIRECTION_REPAIR_CONFIRMED_20TPP",
     "require_all_fixed_evaluations_finite": true,
     "require_clean_exit": true,
-    "threshold_changes_after_measurement": false
+    "threshold_changes_after_measurement": false,
+    "terminal_validation_ce": 3.148925542831421,
+    "delta_to_qk_only_ce": 0.00012554283142085532,
+    "improvement_over_cayley_qkv_ce": 0.036374457168579344,
+    "maximum_observed_fixed_checkpoint_delta_to_qk_only_ce": 0.0015,
+    "all_fixed_checkpoint_gates_passed": true,
+    "passed": true
+  },
+  "storage_reclamation": {
+    "checkpoint_archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260820/attention_v_int8_lattice_errorfeedback_20tpp/ckpt.pt",
+    "checkpoint_sha256": "2ed9364d5a194e20e9ee050e47b261307d92048c6fa0809f3d28c0d9d5bd0130",
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "workspace_bytes_after_archive": 263759612871,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 11118294073
   }
 }
