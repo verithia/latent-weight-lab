@@ -1,0 +1,141 @@
+{
+  "candidates": {
+    "mult0p50": {
+      "candidate_main_lr_multiplier": 0.5,
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50.json",
+      "config_sha256": "ff123659585a33a2ab13fd8c4587c9cf6aa26ce727245c9547b885af28ed96ec",
+      "learning_rate": 0.0012,
+      "maximum_terminal_validation_ce": 4.2524,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50/performance_preflight.json",
+      "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p50/scientific",
+      "qk_only_terminal_validation_ce": 4.2324
+    },
+    "mult0p75": {
+      "candidate_main_lr_multiplier": 0.75,
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75.json",
+      "config_sha256": "198d84f153ae80f58d6077f9a190ddbb5c69357adf0e6a60e9d31ab242423822",
+      "learning_rate": 0.0018,
+      "maximum_terminal_validation_ce": 4.0637,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75/performance_preflight.json",
+      "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult0p75/scientific",
+      "qk_only_terminal_validation_ce": 4.0437
+    },
+    "mult1p00": {
+      "candidate_main_lr_multiplier": 1.0,
+      "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult1p00.json",
+      "config_sha256": "d0a4e0304e5d7a08a2acd22023f140b2be2ac6f0a51b9824e2e54e2594da7044",
+      "learning_rate": 0.0024,
+      "maximum_terminal_validation_ce": 3.9711,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult1p00/performance_preflight.json",
+      "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_0p5tpp_mult1p00/scientific",
+      "qk_only_terminal_validation_ce": 3.9511
+    }
+  },
+  "frozen_comparators": {
+    "ordinary_dense_350m_0p5tpp_terminal_validation_ce": {
+      "lr16e4": 4.4452,
+      "lr20e4": 4.2984,
+      "lr24e4": 4.1784
+    },
+    "qk_only_same_slot_terminal_validation_ce": {
+      "mult0p50": 4.2324,
+      "mult0p75": 4.0437,
+      "mult1p00": 3.9511
+    }
+  },
+  "frozen_gate": {
+    "fail_classification": "FAIL_FULL_REPLACEMENT_SCALE_TRANSFER_350M_0P5TPP",
+    "maximum_delta_to_same_slot_qk_only_ce": 0.02,
+    "pass_classification": "PASS_FULL_REPLACEMENT_SCALE_TRANSFER_350M_0P5TPP",
+    "require_clean_exit": true,
+    "require_finite_terminal_evaluation": true,
+    "threshold_changes_after_measurement": false
+  },
+  "immutable_evidence": {
+    "confirmed_124m_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_full_replacement_cproj_errorfeedback_20tpp_training_result.json",
+      "sha256": "a68f387215ccc81408312a5b1645a5caf67403e3b70e520648cdd99c0db39744"
+    },
+    "qk_parent_mult0p50": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p50.json",
+      "sha256": "ce1f84afca9f840e51ab6821021a3e1787bf45fa2809a80b65fcd84b109cb0e0"
+    },
+    "qk_parent_mult0p75": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult0p75.json",
+      "sha256": "fd34ec0fe94e0840f43f2707f5dbed69f5295ec337e973d9074c2a837cba7323"
+    },
+    "qk_parent_mult1p00": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_350m_qk_only_qk64_outputgain_0p5tpp_mult1p00.json",
+      "sha256": "77b16ae5558ab10e649c4374ef98d18cd1c029a2a961348baf6a71cb13b83ef6"
+    }
+  },
+  "ladder": {
+    "candidate_learning_rates": [
+      0.0012,
+      0.0018,
+      0.0024
+    ],
+    "candidate_multipliers": [
+      0.5,
+      0.75,
+      1.0
+    ],
+    "max_iters": 677,
+    "model_tier": "350m",
+    "planned_tpp": 0.5,
+    "promotion_rule": "only the immutable top1/top2 ranking may authorize 5TPP; no larger tier is authorized from this screen",
+    "ranking_rule": "stable ascending terminal validation CE after all three exact configs finish; hard reject nonfinite or failed runs",
+    "scheduled_tokens": 177471488
+  },
+  "monitoring": {
+    "agent_mention": "@Codex",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callbacks": [
+      "completion",
+      "error",
+      "stall",
+      "monitor_degraded"
+    ],
+    "terminal_action": "seal the candidate against its same-slot QK control and launch the next preregistered screen slot; rank only when all finish",
+    "terminal_only": true
+  },
+  "performance_gate": {
+    "all_candidates_must_pass_before_scientific_launch": true,
+    "exact_config_required": true,
+    "foreground_polling": true,
+    "minimum_mfu_fraction": 0.2,
+    "watchdog": false
+  },
+  "question": "Does the all-feedback complete replacement that closed 124M/20TPP transfer to 350M without changing its mechanism?",
+  "registered_at": "2026-08-20",
+  "resource_admission": {
+    "archive_completed checkpoints before subsequent slots": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "minimum_post_admission_headroom_gib": 8,
+    "project_cap_gib": 256
+  },
+  "schema_version": "mai_350m_full_replacement_all_feedback_0p5tpp_plan_v1",
+  "state_accounting": {
+    "additional_inference_flops_vs_dense": 0,
+    "ambient_elements": 251658240,
+    "dense_fp32_muon_momentum_retained": true,
+    "equivalent_fp32_weight_bytes": 1006632960,
+    "fp16_feedback_bytes": 503316480,
+    "fp16_scale_bytes": 122880,
+    "int8_code_bytes": 251658240,
+    "transient_dense_materialization_retained": true
+  },
+  "status": "preregistered_pending_tests_and_exact_config_mfu",
+  "theory": {
+    "confirmed_124m_mechanism": "Each ambient projected family needs causal temporal state so sub-quantum Muon motion is accumulated rather than discarded.",
+    "excluded_claims": [
+      "multi-seed closure",
+      "optimizer-state compression",
+      "inference FLOP reduction",
+      "690M transfer"
+    ],
+    "representation_change": "none",
+    "scale_transfer_change": "model width/depth and LR slot only"
+  }
+}
