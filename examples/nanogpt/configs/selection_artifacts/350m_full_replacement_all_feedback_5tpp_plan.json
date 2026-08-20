@@ -1,0 +1,89 @@
+{
+  "confirmations": {
+    "top1": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00.json",
+      "config_sha256": "35484fe5ede3431ca852d8a2d48969ff2dc5832e2af0176719227adbf169220c",
+      "learning_rate": 0.0024,
+      "matched_qk_only_terminal_validation_ce": 3.0304,
+      "maximum_terminal_validation_ce": 3.0504,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00/performance_preflight.json",
+      "screen_slug": "mult1p00"
+    },
+    "top2": {
+      "config_path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75.json",
+      "config_sha256": "13e8626594deba2f5330e491e512dbbbad3de5947b0c6310a22f4600528ea86d",
+      "learning_rate": 0.0018,
+      "matched_qk_only_terminal_validation_ce": 3.0645,
+      "maximum_terminal_validation_ce": 3.0845,
+      "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75/performance_preflight.json",
+      "screen_slug": "mult0p75"
+    }
+  },
+  "excluded_candidates": [
+    "mult0p50"
+  ],
+  "execution_order": [
+    "top1",
+    "top2"
+  ],
+  "frozen_gate": {
+    "maximum_delta_to_same_slot_qk_only_ce": 0.02,
+    "require_clean_exit": true,
+    "require_finite_terminal_evaluation": true,
+    "threshold_changes_after_measurement": false
+  },
+  "immutable_ranking": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_0p5tpp_ranking.json",
+    "sha256": "a532edbac9fbf31b9efb222551a38ba6009b0c041a9c2ec68579daefec95413b"
+  },
+  "monitoring": {
+    "agent_mention": "@Codex",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "expected_duration_hours_per_candidate": [
+      7,
+      8
+    ],
+    "heartbeat_minutes": 90,
+    "heartbeat_resets_on_progress": true,
+    "progress_callbacks": [
+      0.2,
+      0.5,
+      0.8,
+      1.0
+    ]
+  },
+  "performance_gate": {
+    "both_configs_must_pass_before_first_launch": true,
+    "exact_config_required": true,
+    "foreground_polling": true,
+    "launch_authorized": false,
+    "minimum_mfu_fraction": 0.2,
+    "watchdog": false
+  },
+  "registered_at": "2026-08-21",
+  "resource_admission": {
+    "archive_completed_checkpoint_before_next_slot": true,
+    "gpu": 0,
+    "host": "PRO6",
+    "minimum_post_admission_headroom_gib": 8,
+    "project_cap_gib": 256
+  },
+  "schedule": {
+    "eval_interval": 1691,
+    "max_iters": 6764,
+    "planned_tokens": 1772999680,
+    "planned_tpp": 5.0,
+    "scheduled_tokens": 1773142016,
+    "tokens_per_iter": 262144,
+    "warmup_iters": 67
+  },
+  "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_plan_v1",
+  "scope": "top-two 350M/5TPP all-feedback complete-replacement confirmations",
+  "scope_limits": [
+    "No 690M promotion",
+    "No multi-seed closure claim",
+    "No optimizer-state compression claim",
+    "No inference-FLOP reduction claim"
+  ],
+  "status": "materialized_pending_both_exact_config_mfu_gates"
+}
