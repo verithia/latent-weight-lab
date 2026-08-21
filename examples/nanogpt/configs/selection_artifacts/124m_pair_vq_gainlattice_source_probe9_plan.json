@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_pair_vq_gainlattice_source_probe9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "What is the lowest physical bit rate at which an invertible signed-Hadamard transform, one shared log-gain byte per block, and bit-packed scalar normalized coordinates preserve the live full-MLP Muon feedback direction?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_blockmixed_source_probe9_result.json",
+    "result_sha256": "00715cb35be483e76e6c55843db5be665eeb5b2e03d201ae128932172fb8db9e",
+    "classification": "NO_BLOCK_MIXED_PAIR_PRODUCT_WINNER",
+    "best_step0_full_recovery": 0.9960053785,
+    "best_step8_full_recovery": 0.9988101644,
+    "reason": "Orthogonal mixing improved recovery monotonically but did not repair the Cartesian product-cell distortion. The frozen successor changes the cell by sharing one gain across a full transform block and measuring the true rate frontier."
+  },
+  "theory": {
+    "transform": "u = H_B S_B e, g = sqrt(||u||^2/B), y = u/(g+epsilon), and e_hat = S_B H_B^T(g_hat Q_b(y))",
+    "direction_support": "H_B S_B is bijective and orthogonal before quantization; unlike a fixed low-dimensional weight generator it deletes no ambient direction.",
+    "cell_change": "A single gain code couples the radius of all B coordinates, while scalar codes describe the normalized direction in the mixed gauge. This is a block transform lattice rather than another independent pair product.",
+    "persistent_rate_bits_per_weight": {
+      "B64_q4": 4.125,
+      "B32_q4": 4.25,
+      "B64_q5": 5.125,
+      "B32_q5": 5.25,
+      "B64_q6": 6.125,
+      "B32_q6": 6.25,
+      "B64_q7": 7.125,
+      "B32_q7": 7.25
+    },
+    "rate_saving_vs_int8": {
+      "B64_q4": 0.484375,
+      "B64_q5": 0.359375,
+      "B64_q6": 0.234375,
+      "B64_q7": 0.109375
+    },
+    "rate_saving_vs_fp32_feedback": {
+      "B64_q4": 0.87109375,
+      "B64_q5": 0.83984375,
+      "B64_q6": 0.80859375,
+      "B64_q7": 0.77734375
+    },
+    "persistent_metadata": "Per matrix: 256 FP32 log-gain levels plus 2^b FP32 coordinate levels; no dense basis, dense master weight, dense momentum, or ambient residual.",
+    "fit_plus_decode_transform_additions_per_weight": {
+      "B32": 10,
+      "B64": 12
+    },
+    "high_rate_reference_distortion": {
+      "q4": 0.00390625,
+      "q5": 0.0009765625,
+      "q6": 0.000244140625,
+      "q7": 0.00006103515625
+    }
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_gainlattice_source_probe9.json",
+    "config_sha256": "58cd4ba71ce7a354a47e8b43a7a16d40c4607f57d9c045f51e2fe5827e04fdd9",
+    "implementation_commit": "242f9cd755a0ff63bca516c95dc33bbd1fb500f1",
+    "focused_test_result": "31 passed",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "candidate_count": 8,
+    "persistent_candidate_change": false,
+    "selection_endpoint": false
+  },
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "records_per_probe_step": 24,
+    "parseval_relative_error_max": 0.000001,
+    "exact_config_mfu_min_fraction": 0.20
+  },
+  "frozen_candidate_gates": {
+    "full_feedback_energy_weighted_recovery_min_each_probe": 0.99975,
+    "full_feedback_every_matrix_recovery_min_each_probe": 0.999,
+    "coordinate_active_fraction_min_each_matrix": 0.75,
+    "coordinate_entropy_min_each_matrix": "coordinate_bits - 1.0",
+    "gain_active_codes_min_each_matrix": 192,
+    "gain_entropy_bits_min_each_matrix": 6.5
+  },
+  "aggregation": {
+    "full_feedback_recovery": "feedback-target-energy weighted across all 24 matrices, separately by (B,b) and probe step, plus minimum matrix recovery",
+    "occupancy_entropy": "minimum over all matrices and both probe steps for each (B,b)",
+    "parseval": "maximum matrix relative energy error over both probe steps"
+  },
+  "selection_rule": {
+    "winner": "candidate passing every validity and candidate gate at both steps with minimum physical rate b + 8/B bits per weight",
+    "ties": "lower transform work wins; if still tied, larger block wins for lower gain overhead",
+    "production_authorization": "a probe winner authorizes only a bit-packed persistent implementation, focused correctness/resume tests, exact-config MFU gate, and a new nine-update live direction gate"
+  },
+  "decision_policy": {
+    "winner_exists": "Implement only the selected rate. Do not launch 238-step conservation, an LM endpoint, a longer horizon, or a larger model until the live production codec passes direction, resume, and MFU gates.",
+    "no_winner": "Close this scalar-coordinate transform-lattice family. Derive a higher-shaping-gain vector lattice or trellis at a comparable physical rate; do not sweep learning rate, model size, or horizon.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight; all eight diagnostic candidates are included in measured optimizer time",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes; attach a persistent @Codex watchdog immediately only if observed runtime exceeds five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
