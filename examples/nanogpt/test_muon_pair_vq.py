@@ -201,6 +201,17 @@ def test_block_fht_fractional_lattice_rate_and_monotonic_recovery() -> None:
         refinement_fractions=(0.125, 0.5),
         seed=1708,
     )
+    assert diagnostics["parseval_relative_error"] < 1e-6
+    assert diagnostics["base_active_codes"] == 128
+    assert diagnostics["refined_active_codes"] > 192
+    assert diagnostics["p0p125_physical_bits_per_weight"] == 7.40625
+    assert diagnostics["p0p5_physical_bits_per_weight"] == 7.78125
+    assert (
+        diagnostics["base_full_recovery"]
+        < diagnostics["p0p125_full_recovery"]
+        < diagnostics["p0p5_full_recovery"]
+        < diagnostics["uniform_refined_full_recovery"]
+    )
 
 
 def test_fixed_width_pack_roundtrip_is_bit_exact() -> None:
@@ -273,17 +284,6 @@ def test_fractional_lattice_feedback_resume_is_bit_exact_for_next_step() -> None
         original_state["feedback_levels"],
         rtol=0.0,
         atol=0.0,
-    )
-    assert diagnostics["parseval_relative_error"] < 1e-6
-    assert diagnostics["base_active_codes"] == 128
-    assert diagnostics["refined_active_codes"] > 192
-    assert diagnostics["p0p125_physical_bits_per_weight"] == 7.40625
-    assert diagnostics["p0p5_physical_bits_per_weight"] == 7.78125
-    assert (
-        diagnostics["base_full_recovery"]
-        < diagnostics["p0p125_full_recovery"]
-        < diagnostics["p0p5_full_recovery"]
-        < diagnostics["uniform_refined_full_recovery"]
     )
 
 
