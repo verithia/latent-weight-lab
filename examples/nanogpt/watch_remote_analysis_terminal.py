@@ -63,13 +63,15 @@ def probe(
     result: str,
     log: str,
     gpu: int,
+    remote_nvml_library_path: str = "",
 ) -> dict[str, Any]:
     script = r'''
 set -u
-pgid=$1; status=$2; result=$3; log=$4; gpu=$5
+pgid=$1; status=$2; result=$3; log=$4; gpu=$5; nvml_library_path=$6
 alive=0
 kill -0 -- "-$pgid" 2>/dev/null && alive=1
 gpu_health=$(
+    LD_LIBRARY_PATH="${nvml_library_path}${nvml_library_path:+${LD_LIBRARY_PATH:+:}${LD_LIBRARY_PATH:-}}" \
     nvidia-smi -i "$gpu" \
         --query-gpu=memory.used,memory.total,utilization.gpu,power.draw,temperature.gpu \
         --format=csv,noheader,nounits 2>/dev/null | head -n 1 || true
@@ -102,6 +104,7 @@ PY
         [
             "ssh", "-o", "BatchMode=yes", "-o", "ConnectTimeout=20", host,
             "bash", "-s", "--", str(pgid), status, result, log, str(gpu),
+            remote_nvml_library_path,
         ],
         input=script,
         text=True,
@@ -126,6 +129,11 @@ def main() -> None:
     parser.add_argument("--chat-id", required=True)
     parser.add_argument("--poll-seconds", type=float, default=60.0)
     parser.add_argument("--gpu", type=int, default=0)
+    parser.add_argument(
+        "--remote-nvml-library-path",
+        default="",
+        help="Optional remote library directory prepended for nvidia-smi/NVML.",
+    )
     parser.add_argument(
         "--heartbeat-minutes",
         type=float,
@@ -159,6 +167,7 @@ def main() -> None:
                 args.result,
                 args.log,
                 args.gpu,
+                args.remote_nvml_library_path,
             )
             state["last_sample"] = sample
             state["consecutive_probe_errors"] = 0
