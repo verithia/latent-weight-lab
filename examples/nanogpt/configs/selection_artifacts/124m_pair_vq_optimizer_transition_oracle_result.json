@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_pair_vq_optimizer_transition_oracle_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "COMPACT_MOMENTUM_POLAR_PRIMARY",
+  "localization_gate_passed": true,
+  "identity": {
+    "run_id": "pro6_mai_v3_124m_dense_pairvq_optimizer_transition_oracle_0p5tpp_20260821T231918Z_2943382",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "32aae780b1343c621f3c3339c11df3bccbcfc393",
+    "implementation_commit": "fe37f1b1763644259077d5af90508b3622774ef1",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_optimizer_transition_oracle_0p5tpp_lr24e4.json",
+    "config_sha256": "6c13ed3ddac2e95fce0ea2997bfdddf8d8e0e09dc9c06a2ece9b6b082d4d78af",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_optimizer_transition_oracle_plan.json",
+    "plan_sha256": "d38a32c22c93e0dd7354cef356e2d3c7d67e473d0a2d270f4bd5b54f9b8d3931",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "started_at": "2026-08-22T07:19:20+08:00",
+    "finished_at": "2026-08-22T07:27:50+08:00",
+    "exit_code": 0
+  },
+  "artifacts": {
+    "runtime_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_dense_pairvq_optimizer_transition_oracle_0p5tpp_lr24e4/optimizer_transition_result.json",
+      "sha256": "50893494e37df3b0fbed0bf773c37c8328823667f5443cc44d8aa1d39ada7cab"
+    },
+    "dense_shadow_result_sha256": "65b04f1de4ff5c25e6922ad0d5c41d5937709f23ac036a1160a1327b088da1da",
+    "status_sha256": "a4690f0e9f6883aeeff7eb7d11f9c8f935b980b3f1d06e6b7e63041943b6f3da",
+    "log_sha256": "576f6607198c7a5400cf4e5debbdda61de40bd950b09f584614f828782b94b89",
+    "runtime_provenance_sha256": "858d264ea6353cd06efb03a72b0b413a240b6063e44ac092c38c62e526d9719b",
+    "mfu_certificate_sha256": "984df743ddfa136b0ad9736997fc6408edfec6c4976847992405318426417ac4"
+  },
+  "fixed_evaluation": [
+    {"step": 0, "train_ce": 10.9957, "validation_ce": 10.9970},
+    {"step": 60, "train_ce": 6.2079, "validation_ce": 6.2172},
+    {"step": 120, "train_ce": 5.7203, "validation_ce": 5.7248},
+    {"step": 180, "train_ce": 5.4606, "validation_ce": 5.4637},
+    {"step": 238, "train_ce": 5.3584980964660645, "validation_ce": 5.3607258796691895}
+  ],
+  "dense_path_control": {
+    "matched_parent_validation_ce": 5.3610,
+    "replay_validation_ce": 5.3607258796691895,
+    "absolute_difference_ce": 0.0002741203308105469,
+    "maximum_allowed_difference_ce": 0.002,
+    "passed": true,
+    "terminal_shadow_validation_ce": 5.364366054534912,
+    "shadow_minus_dense_validation_ce": 0.0036401748657226562
+  },
+  "trajectory_summary": [
+    {"step": 1, "prepolar_cosine": 0.9999020739528411, "polar_cosine": 0.9611643105388268, "momentum_fraction": 0.4300222947751787, "retraction_fraction": 0.5699829392758224},
+    {"step": 60, "prepolar_cosine": 0.8809932886332629, "polar_cosine": 0.42568992791211496, "momentum_fraction": 0.9993998489974282},
+    {"step": 120, "prepolar_cosine": 0.8021657778352745, "polar_cosine": 0.46129217750826845, "momentum_fraction": 0.9986423283494075},
+    {"step": 180, "prepolar_cosine": 0.6714523218916852, "polar_cosine": 0.44928082534802394, "momentum_fraction": 0.9966825075720657, "retraction_fraction": 0.0030982982025298585},
+    {"step": 238, "prepolar_cosine": 0.6080398750888693, "polar_cosine": 0.4168670459271992, "momentum_fraction": 0.9846046041774122, "retraction_fraction": 0.015320342912135396}
+  ],
+  "late_probe_details": {
+    "step_180": {
+      "all": {"prepolar_cosine": 0.6714523218916852, "polar_cosine": 0.44928082534802394, "momentum_fraction": 0.9966825075720657, "retraction_fraction": 0.0030982982025298585, "compact_retraction_recovery": 0.9965946606829682},
+      "c_fc": {"prepolar_cosine": 0.652908948124583, "polar_cosine": 0.4537329855424985, "momentum_fraction": 0.9972899797219694, "retraction_fraction": 0.0025022508081235673},
+      "c_proj": {"prepolar_cosine": 0.6725026917246393, "polar_cosine": 0.43133724710448945, "momentum_fraction": 0.9943376002179788, "retraction_fraction": 0.005399104780657256}
+    },
+    "step_238": {
+      "all": {"prepolar_cosine": 0.6080398750888693, "polar_cosine": 0.4168670459271992, "momentum_fraction": 0.9846046041774122, "retraction_fraction": 0.015320342912135396, "compact_retraction_recovery": 0.9821155105516434},
+      "c_fc": {"prepolar_cosine": 0.5954250460184822, "polar_cosine": 0.42094189433096507, "momentum_fraction": 0.9870397993766932, "retraction_fraction": 0.012630147745984848},
+      "c_proj": {"prepolar_cosine": 0.6087684631198202, "polar_cosine": 0.4004316016026427, "momentum_fraction": 0.9752321302910819, "retraction_fraction": 0.025674249634406326}
+    }
+  },
+  "gate": {
+    "ready": true,
+    "all_metrics_finite": true,
+    "minimum_late_momentum_polar_fraction": 0.9846046041774122,
+    "minimum_late_retraction_fraction": 0.0030982982025298585,
+    "momentum_exceeds_retraction_at_every_late_probe": true,
+    "maximum_late_decomposition_closure_relative_error": 8.346972722746436e-17,
+    "classification": "COMPACT_MOMENTUM_POLAR_PRIMARY"
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.367403378905397,
+    "preflight_tokens_per_second": 203919.1433333333,
+    "run_tokens_per_second_mean": 201203.0556521739,
+    "run_tokens_per_second_median": 202576.05,
+    "run_iteration_milliseconds_mean": 1303.1739130434783,
+    "run_optimizer_milliseconds_mean": 97.07782608695652,
+    "gpu_peak_mib": 32022.78
+  },
+  "decision": {
+    "automatic_endpoint": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false,
+    "retraction_work_authorized": false,
+    "next_authorized_work": "One nonintervening same-dense-path momentum-chart oracle may separate instantaneous current-code subspace error from historical compact-state transport error before and after Muon polar normalization.",
+    "reason": "At both frozen late probes, compact momentum plus polar error contributes at least 98.46 percent of final request error. The final Pair-VQ plus feedback retraction contributes at most 1.54 percent and is not the primary obstruction."
+  }
+}

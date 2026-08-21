@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_pair_vq_momentum_transport_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Is the late compact-Muon failure caused primarily by the instantaneous inability of the current Pair-VQ code chart to represent dense momentum, or by failure to transport historical code-conditioned momentum when assignments change?",
+  "causal_basis": {
+    "source_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_optimizer_transition_oracle_result.json",
+    "source_classification": "COMPACT_MOMENTUM_POLAR_PRIMARY",
+    "minimum_late_momentum_polar_fraction": 0.9846046041774122,
+    "minimum_late_retraction_fraction": 0.0030982982025298585,
+    "finding": "The dense path reproduces the parent and final retraction is minor. Compact momentum alignment degrades over time and Muon polar normalization preserves the resulting large angular error."
+  },
+  "theory": {
+    "dense_control": "With dense next momentum B_next=mu*B+G, form H_dense=G+mu*B_next.",
+    "instantaneous_chart_control": "Under the current pre-step codes, average and expand the actual dense B_next to form P_t B_next, then H_chart=G+mu*P_t B_next. This has the current chart capacity but no compact historical-state error.",
+    "historical_compact_control": "Update the production code-conditioned compact buffer from the identical G under the identical current codes, expand it, and form H_compact=G+mu*ExpandedCompact_next.",
+    "subspace_component": "H_chart-H_dense measures instantaneous current-code representational error.",
+    "transport_component": "H_compact-H_chart measures historical compact-state evolution and chart-transport error.",
+    "polar_requirement": "Compare all three controls both before and after the identical Newton--Schulz Muon polar map because pre-polar angle alone is not predictive.",
+    "trajectory_intervention": "none"
+  },
+  "frozen_protocol": {
+    "parent": "exact 124M QK-only BlockFHT attention plus dense MLP parent, seed 1337, LR 0.0024, 238 updates",
+    "compact_family": "production full-MLP Pair-VQ assignments and code-conditioned momentum from the failed forward-visible endpoint family",
+    "optimizer_update_indices": [0, 59, 119, 179, 237],
+    "reported_post_update_state_steps": [1, 60, 120, 180, 238],
+    "primary_late_post_update_state_steps": [180, 238],
+    "matrices": "all 24 c_fc and c_proj matrices",
+    "gradient_source": "the exact clipped dense-parent gradient before its Muon update",
+    "code_source": "the current nonintervening teacher-forced Pair-VQ shadow assignments before the dense optimizer step",
+    "controls": ["dense next momentum", "instantaneously current-chart-projected dense next momentum", "production historical compact next momentum"],
+    "candidate_checkpoint_or_dense_state_retained": false
+  },
+  "frozen_metrics": {
+    "per_matrix": ["relative error, cosine, and positive-line energy recovery for dense versus chart and dense versus historical compact before polar", "the same metrics after polar", "chart versus historical compact before and after polar"],
+    "aggregate": ["energy-weighted all-matrix, c_fc, and c_proj metrics", "worst-matrix cosine and relative error", "exact squared-error decomposition with cross term for current-chart subspace versus historical transport components"]
+  },
+  "classification_gate": {
+    "all_metrics_finite": true,
+    "dense_path_reproduction_terminal_ce_tolerance": 0.002,
+    "instantaneous_code_subspace_primary_if": "At both late probes, post-polar chart-versus-dense squared error exceeds transport squared error and is at least 70 percent of historical-compact-versus-dense squared error.",
+    "historical_transport_primary_if": "At both late probes, post-polar historical-compact-versus-chart squared error exceeds chart-versus-dense squared error and is at least 70 percent of historical-compact-versus-dense squared error.",
+    "mixed_or_unresolved_if": "Neither component reaches the frozen 70 percent threshold at both late probes.",
+    "decomposition_closure_relative_error_max": 1e-10
+  },
+  "decision_rule": {
+    "instantaneous_code_subspace_primary": "Authorize theory and a no-training representation oracle for a low-bit block-scaled momentum tangent with temporal error feedback. Do not authorize an LM endpoint.",
+    "historical_transport_primary": "Authorize implementation and exact-config MFU gating of codebook-momentum transport across assignment refresh with no new persistent state. Do not authorize a scale-up or horizon transfer.",
+    "mixed_or_unresolved": "Stop Pair-VQ endpoint trials and derive a joint chart/state model before any new training run.",
+    "automatic_endpoint": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false
+  },
+  "execution_gate": {
+    "focused_tests_required": true,
+    "maximum_foreground_preflight_minutes": 5,
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "long_run_watchdog_required_above_minutes": 5,
+    "watchdog_callbacks": "terminal/error-only because the replay is expected within one to two hours"
+  }
+}
