@@ -125,6 +125,98 @@ def _fit_cartesian_pair_codec_(
     return int((new_codes != old_codes).sum())
 
 
+def _decode_grouped_cartesian_pair_codec(
+    levels: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    pairs_per_group: int,
+) -> torch.Tensor:
+    if levels.ndim != 3 or tuple(levels.shape[1:]) != (2, 16):
+        raise ValueError("grouped Cartesian levels must have shape (groups, 2, 16)")
+    group_count = levels.shape[0]
+    if codes.ndim != 1 or codes.numel() != group_count * pairs_per_group:
+        raise ValueError("grouped Cartesian codes have the wrong shape")
+    selected = codes.reshape(group_count, pairs_per_group).long()
+    first = levels[:, 0, :].gather(1, selected // 16)
+    second = levels[:, 1, :].gather(1, selected % 16)
+    return torch.stack((first, second), dim=2).reshape(-1, 2)
+
+
+@torch.no_grad()
+def _fit_grouped_cartesian_pair_codec_(
+    vectors: torch.Tensor,
+    levels: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    pairs_per_group: int,
+) -> int:
+    """Vectorized Lloyd fitting for output-group-local 4-bit scalar levels."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("Cartesian pair values must have shape (pairs, 2)")
+    if levels.ndim != 3 or tuple(levels.shape[1:]) != (2, 16):
+        raise ValueError("grouped Cartesian levels must have shape (groups, 2, 16)")
+    group_count = levels.shape[0]
+    if vectors.shape[0] != group_count * pairs_per_group:
+        raise ValueError("grouped Cartesian vectors have the wrong shape")
+    if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
+        raise ValueError("grouped Cartesian codes have the wrong shape")
+
+    old_codes = codes.clone()
+    values = vectors.reshape(group_count, pairs_per_group, 2).permute(0, 2, 1)
+    mean = values.mean(dim=2, keepdim=True)
+    std = values.std(dim=2, unbiased=False, keepdim=True)
+    old_mean = levels.mean(dim=2, keepdim=True)
+    old_std = levels.std(dim=2, unbiased=False, keepdim=True)
+    probabilities = (
+        torch.arange(16, device=values.device, dtype=torch.float32) + 0.5
+    ) / 16.0
+    normal_levels = math.sqrt(2.0) * torch.erfinv(2.0 * probabilities - 1.0)
+    normalized_old = (levels - old_mean) / old_std.clamp_min(
+        torch.finfo(torch.float32).tiny
+    )
+    initialized = normal_levels.reshape(1, 1, 16).expand_as(levels)
+    fitted = torch.where(
+        old_std > torch.finfo(torch.float32).tiny,
+        normalized_old,
+        initialized,
+    )
+    fitted = (fitted * std + mean).sort(dim=2).values
+
+    flat_bin_count = group_count * 2 * 16
+    group_offsets = (
+        torch.arange(group_count, device=values.device, dtype=torch.long)
+        .reshape(group_count, 1, 1)
+        .mul_(32)
+    )
+    coordinate_offsets = torch.tensor(
+        [0, 16], device=values.device, dtype=torch.long
+    ).reshape(1, 2, 1)
+    for _iteration in range(2):
+        midpoints = ((fitted[:, :, :-1] + fitted[:, :, 1:]) * 0.5).contiguous()
+        assignments = torch.searchsorted(midpoints, values.contiguous())
+        flat_indices = (
+            assignments + group_offsets + coordinate_offsets
+        ).reshape(-1)
+        sums = torch.zeros(flat_bin_count, device=values.device, dtype=torch.float32)
+        sums.scatter_add_(0, flat_indices, values.reshape(-1))
+        counts = torch.zeros(flat_bin_count, device=values.device, dtype=torch.float32)
+        counts.scatter_add_(0, flat_indices, torch.ones_like(values).reshape(-1))
+        sums = sums.reshape(group_count, 2, 16)
+        counts = counts.reshape(group_count, 2, 16)
+        live = counts > 0
+        fitted[live] = sums[live] / counts[live]
+        fitted = fitted.sort(dim=2).values
+
+    midpoints = ((fitted[:, :, :-1] + fitted[:, :, 1:]) * 0.5).contiguous()
+    assignments = torch.searchsorted(midpoints, values.contiguous())
+    new_codes = (
+        assignments[:, 0, :] * 16 + assignments[:, 1, :]
+    ).reshape(-1).to(torch.uint8)
+    levels.copy_(fitted)
+    codes.copy_(new_codes)
+    return int((new_codes != old_codes).sum())
+
+
 class MuonPairVQLinear(nn.Module):
     """Linear layer whose only persistent matrix state is pair VQ."""
 
@@ -143,6 +235,7 @@ class MuonPairVQLinear(nn.Module):
         layer_id: int,
         fast_residual: bool = False,
         error_feedback: bool = False,
+        feedback_output_group_size: int = 0,
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -153,6 +246,7 @@ class MuonPairVQLinear(nn.Module):
         self.layer_id = int(layer_id)
         self.fast_residual = bool(fast_residual)
         self.error_feedback = bool(error_feedback)
+        self.feedback_output_group_size = int(feedback_output_group_size)
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
         if self.in_features <= 0 or self.out_features <= 0:
@@ -161,6 +255,16 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ element count must be divisible by two")
         if self.stages not in (1, 2):
             raise ValueError("pair-VQ stages must be one or two")
+        if self.feedback_output_group_size < 0:
+            raise ValueError("feedback output group size must be nonnegative")
+        if self.feedback_output_group_size and (
+            self.out_features % self.feedback_output_group_size
+            or self.in_features % self.vector_length
+        ):
+            raise ValueError(
+                "grouped feedback requires an even input width and an output "
+                "width divisible by the group size"
+            )
         if not 1 <= self.neighbor_candidates <= self.codebook_size:
             raise ValueError("pair-VQ neighbor count is invalid")
         if self.code_refresh_interval <= 0:
@@ -239,8 +343,58 @@ class MuonPairVQLinear(nn.Module):
         if not self.error_feedback:
             return 0
         pair_codes = self.element_count // self.vector_length
-        level_bytes = 2 * 16 * torch.tensor([], dtype=torch.float32).element_size()
+        level_bytes = (
+            self.feedback_group_count
+            * 2
+            * 16
+            * torch.tensor([], dtype=torch.float32).element_size()
+        )
         return pair_codes * torch.tensor([], dtype=torch.uint8).element_size() + level_bytes
+
+    @property
+    def feedback_group_count(self) -> int:
+        if self.feedback_output_group_size == 0:
+            return 1
+        return self.out_features // self.feedback_output_group_size
+
+    @property
+    def feedback_pairs_per_group(self) -> int:
+        return (
+            self.element_count
+            // self.vector_length
+            // self.feedback_group_count
+        )
+
+    @property
+    def feedback_level_shape(self) -> tuple[int, ...]:
+        if self.feedback_output_group_size == 0:
+            return (2, 16)
+        return (self.feedback_group_count, 2, 16)
+
+    def decode_feedback(self, levels: torch.Tensor, codes: torch.Tensor) -> torch.Tensor:
+        if self.feedback_output_group_size == 0:
+            return _decode_cartesian_pair_codec(levels, codes)
+        return _decode_grouped_cartesian_pair_codec(
+            levels,
+            codes,
+            pairs_per_group=self.feedback_pairs_per_group,
+        )
+
+    @torch.no_grad()
+    def fit_feedback_(
+        self,
+        vectors: torch.Tensor,
+        levels: torch.Tensor,
+        codes: torch.Tensor,
+    ) -> int:
+        if self.feedback_output_group_size == 0:
+            return _fit_cartesian_pair_codec_(vectors, levels, codes)
+        return _fit_grouped_cartesian_pair_codec_(
+            vectors,
+            levels,
+            codes,
+            pairs_per_group=self.feedback_pairs_per_group,
+        )
 
     @property
     def transient_weight_bytes(self) -> int:
@@ -272,10 +426,16 @@ class MuonPairVQLinear(nn.Module):
             "dense_optimizer_momentum": "disabled",
             "dense_ambient_error_buffer": "disabled",
             "compact_temporal_carry": (
-                "uint8_cartesian_code_per_weight_pair"
+                (
+                    "uint8_cartesian_code_per_weight_pair_global_levels"
+                    if self.feedback_output_group_size == 0
+                    else "uint8_cartesian_code_per_weight_pair_output_group_levels"
+                )
                 if self.error_feedback
                 else "disabled"
             ),
+            "feedback_output_group_size": self.feedback_output_group_size,
+            "feedback_group_count": self.feedback_group_count,
         }
 
     def _apply(self, fn, recurse: bool = True):
@@ -556,13 +716,15 @@ class MuonPairVQ(torch.optim.Optimizer):
                     pair_count = module.element_count // module.vector_length
                     if "feedback_levels" not in state:
                         state["feedback_levels"] = torch.zeros(
-                            2, 16, device=weight.device, dtype=torch.float32
+                            module.feedback_level_shape,
+                            device=weight.device,
+                            dtype=torch.float32,
                         )
                     if "feedback_codes" not in state:
                         state["feedback_codes"] = torch.zeros(
                             pair_count, device=weight.device, dtype=torch.uint8
                         )
-                    feedback_before = _decode_cartesian_pair_codec(
+                    feedback_before = module.decode_feedback(
                         state["feedback_levels"], state["feedback_codes"]
                     ).reshape_as(weight)
                     projection_target = requested + feedback_before
@@ -578,12 +740,12 @@ class MuonPairVQ(torch.optim.Optimizer):
                 diagnostics["error_feedback"] = int(module.error_feedback)
                 if module.error_feedback:
                     raw_feedback = projection_target - weight.float()
-                    feedback_code_changes = _fit_cartesian_pair_codec_(
+                    feedback_code_changes = module.fit_feedback_(
                         raw_feedback.reshape(-1, module.vector_length),
                         state["feedback_levels"],
                         state["feedback_codes"],
                     )
-                    feedback_after = _decode_cartesian_pair_codec(
+                    feedback_after = module.decode_feedback(
                         state["feedback_levels"], state["feedback_codes"]
                     ).reshape_as(weight)
                     conservation_error = raw_feedback - feedback_after

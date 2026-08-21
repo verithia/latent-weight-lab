@@ -2225,6 +2225,18 @@ def parse_args() -> argparse.Namespace:
         and not namespace.block_fht_mlp_pair_vq
     ):
         raise ValueError("pair-VQ c_proj fast residual requires MLP pair VQ")
+    if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
+        raise ValueError("pair-VQ feedback output group size must be nonnegative")
+    if (
+        namespace.block_fht_mlp_pair_vq_feedback_output_group_size
+        and not (
+            namespace.block_fht_mlp_pair_vq
+            and namespace.block_fht_mlp_pair_vq_error_feedback
+        )
+    ):
+        raise ValueError(
+            "grouped pair-VQ feedback requires pair VQ and error feedback"
+        )
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2681,6 +2693,9 @@ def pair_vq_model_kwargs(
         ),
         "block_fht_mlp_pair_vq_cproj_fast_residual": bool(
             namespace.block_fht_mlp_pair_vq_cproj_fast_residual
+        ),
+        "block_fht_mlp_pair_vq_feedback_output_group_size": int(
+            namespace.block_fht_mlp_pair_vq_feedback_output_group_size
         ),
     }
 

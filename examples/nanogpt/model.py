@@ -193,6 +193,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
     block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
+    block_fht_mlp_pair_vq_feedback_output_group_size: int = 0
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2403,6 +2404,9 @@ class MLP(nn.Module):
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback
                 ),
+                feedback_output_group_size=int(
+                    config.block_fht_mlp_pair_vq_feedback_output_group_size
+                ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
@@ -2643,6 +2647,9 @@ class MLP(nn.Module):
                 ),
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback
+                ),
+                feedback_output_group_size=int(
+                    config.block_fht_mlp_pair_vq_feedback_output_group_size
                 ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
