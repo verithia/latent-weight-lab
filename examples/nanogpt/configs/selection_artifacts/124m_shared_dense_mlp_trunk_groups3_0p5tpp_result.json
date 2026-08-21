@@ -1,0 +1,51 @@
+{
+  "schema_version": "mai_124m_shared_dense_mlp_trunk_groups3_result_v1",
+  "classification": "NEAR_MISS",
+  "passed": false,
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_groups3_0p5tpp",
+    "source_commit": "7d60b0f51c13e83e6048ae916eeba49fe64b0d36",
+    "started_at": "2026-08-21T11:35:06+08:00",
+    "finished_at": "2026-08-21T11:42:03+08:00",
+    "exit_code": 0,
+    "status_sha256": "7549a7150905b55f48a3d9c119c46b966e37ed51e33bbbf272fb7ccc418c732f",
+    "log_sha256": "d858e266000e8824c92183e60a03a99e4d3e7fb48357985530358efd300638f6",
+    "provenance_sha256": "5414760067adf2f96d548bc8e7b1dd127a0de6c67c509a9fea07181e4299f8b5",
+    "archived_config_sha256": "e23d36f2c4727da5d938923feb8aa6371c31554fc791ea0095fd2d25aadf9f05",
+    "checkpoint_sha256": "468f2f7c43264599d7880ceffe20166a4f8f1dfa4ce8b7d1ecffee4cf0eaea83",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "terminal": {
+    "step": 238,
+    "train_cross_entropy": 5.6111,
+    "validation_cross_entropy": 5.6143,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "comparisons": {
+    "attention_only_validation_cross_entropy": 5.4918,
+    "gap_to_attention_only": 0.1225,
+    "perplexity_ratio_to_attention_only": 1.130303,
+    "one_trunk_validation_cross_entropy": 5.6971,
+    "improvement_over_one_trunk": 0.0828,
+    "required_validation_cross_entropy_maximum": 5.5918,
+    "miss_to_frozen_maximum": 0.0225
+  },
+  "accounting": {
+    "dense_mlp_parameters": 56623104,
+    "learned_mlp_parameters": 14201856,
+    "mlp_parameter_compression_ratio": 3.987020299172748,
+    "mlp_parameter_saving_fraction": 0.7491861979166666,
+    "actual_total_trainable_parameters": 53924064,
+    "materialized_dense_mlp_flops_unchanged": true,
+    "persistent_ambient_error_buffer": false,
+    "persistent_ambient_momentum_field": false
+  },
+  "performance_gate": {
+    "certificate_sha256": "58f67fbec80105cd3a403359102cf1df8b0b8c0c04688e54ba9109c7203702a0",
+    "mfu_fraction": 0.362046077191749,
+    "tokens_per_second": 200838.22,
+    "iteration_milliseconds": 1305.25,
+    "peak_allocated_mib": 33547.75
+  },
+  "decision": "The depth-local shared-trunk hypothesis is supported but three four-layer groups share too aggressively. Preserve the architecture family, reject promotion, and measure within-group layer-gradient conflict before selecting the smallest further sharing relaxation."
+}

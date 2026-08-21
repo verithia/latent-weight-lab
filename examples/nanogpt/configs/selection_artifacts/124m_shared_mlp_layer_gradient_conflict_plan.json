@@ -1,0 +1,17 @@
+{
+  "schema_version": "mai_shared_mlp_layer_gradient_conflict_plan_v1",
+  "purpose": "Measure whether the three-trunk near miss is caused by destructive task-gradient sharing among the four layers tied to each trunk.",
+  "checkpoint_sha256": "468f2f7c43264599d7880ceffe20166a4f8f1dfa4ce8b7d1ecffee4cf0eaea83",
+  "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "measurement": {
+    "split": "train",
+    "seed": 20260821,
+    "effective_batch_sequences": 32,
+    "tokens": 32768,
+    "optimizer_updates": 0,
+    "method": "load the exact terminal checkpoint, freeze all parameters, locally untie each layer's c_fc/c_proj matrices, and backpropagate one fixed effective task batch"
+  },
+  "candidate_partitions": [1, 2, 3, 4, 6, 12],
+  "primary_metric": "combined c_fc/c_proj common-update energy fraction per contiguous layer group",
+  "decision_rule": "Authorize a less-shared trunk only if the measured four-layer groups show material cancellation and the proposed smaller groups recover substantially more common-update energy. Prefer the smallest group count supported by the conflict transition; otherwise stop this branch."
+}
