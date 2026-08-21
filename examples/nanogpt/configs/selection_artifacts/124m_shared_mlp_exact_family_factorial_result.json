@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_shared_mlp_exact_family_factorial_seal_v1",
+  "recorded_at": "2026-08-21T00:00:00+08:00",
+  "classification": "BILATERAL_RESTRICTION_WITH_STRONG_PAIR_COMPENSATION",
+  "source_control": {
+    "git_commit": "f5c9c624d65a379a7c8215fb1e122289a41aa1ac",
+    "entrypoint": "examples/nanogpt/analyze_shared_mlp_exact_family_factorial.py",
+    "entrypoint_sha256": "b60908503d3e4a22f216e4beb1796dc3d66706bf5ab46df779baf1b9fa854233",
+    "test_sha256": "b621e5c39c964ba432639c1f3a5ba34088f7c83bf974e822834d8979f1068b61"
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_shared_mlp_exact_family_factorial_plan.json",
+    "sha256": "85004e8e11ecd0c562af1cad8e25654ed327cad2672b73e9759da29362e04253"
+  },
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_exact_family_factorial_20260821/result.json",
+    "sha256": "575ec683b0173f77d253d95251ab6eb0adb23178823ce645573d614d90eaba65",
+    "wall_seconds": 52.41050410270691,
+    "maximum_cuda_memory_bytes": 9461620224
+  },
+  "identities": {
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "compact_candidate_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "selected_fit_state_sha256": "acf3a7c72305d15d1c8350f35ad38ea82f07711cd0cffc74c2ba70990f9cc87b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "fixed_evaluation": {
+    "dense_teacher": {"validation_cross_entropy": 3.674412250518799, "gap": 0.0},
+    "shared_both": {"validation_cross_entropy": 4.461759567260742, "gap": 0.7873473167419434},
+    "shared_c_fc_only": {"validation_cross_entropy": 5.612329006195068, "gap": 1.9379167556762695},
+    "shared_c_proj_only": {"validation_cross_entropy": 5.9946699142456055, "gap": 2.3202576637268066},
+    "interaction_gap_shared_both_minus_one_sided_sum": -3.470827102661133
+  },
+  "heldout_function": {
+    "shared_both": {
+      "output_mean_minimum_explained_energy": [0.4488339764731271, 0.266401469707489],
+      "input_jvp_mean_minimum_explained_energy": [-0.07354315689631871, -0.36271023750305176]
+    },
+    "shared_c_fc_only": {
+      "output_mean_minimum_explained_energy": [-0.24595687593732562, -0.7741611003875732],
+      "input_jvp_mean_minimum_explained_energy": [-0.29131308623722623, -0.7760614156723022]
+    },
+    "shared_c_proj_only": {
+      "output_mean_minimum_explained_energy": [-0.558885224717004, -1.1175258159637451],
+      "input_jvp_mean_minimum_explained_energy": [-0.6056740203925542, -1.0627155303955078]
+    }
+  },
+  "interpretation": {
+    "finding": "Both one-sided substitutions fail the frozen output, input-JVP, and fixed-CE gates. The compact c_fc and c_proj are not independently compatible with the dense counterpart.",
+    "hidden_gauge_caveat": "The fitted compact pair is strongly co-adapted: using both sides is much better than either one-sided splice, and the interaction gap is -3.4708 CE. Therefore the factorial does not rank c_fc versus c_proj as isolated causes; it diagnoses a coupled hidden-coordinate/content restriction.",
+    "root_layer_pattern": "The dense-layer-7 and dense-layer-9 initialization roots remain relatively compatible with their own side, while the other layers in each shared group become strongly negative. This is direct evidence for missing layer-private feature and write directions, not a scalar norm problem.",
+    "reconciliation": "Earlier paired-Monarch and shared-core tri-transport tests already showed that adding coordinate transports around one shared core does not create the missing layer-private content. The next family must own independent per-layer c_fc and c_proj state rather than another shared core or fixed BlockFHT chart."
+  },
+  "authorization": {
+    "language_model_training": false,
+    "model_size_scaling": false,
+    "more_shared_core_transports": false,
+    "next_allowed": "Theory and one preregistered fixed-teacher representability ceiling for a genuinely layer-private paired compact family, with exact parameter/materialization accounting."
+  }
+}

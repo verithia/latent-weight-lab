@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_layer_private_paired_kronecker_teacher_fit_plan_v1",
+  "scientific_question": "At a deliberately relaxed 22-44x MLP-state compression, can independent per-layer paired Kronecker sums reproduce the dense teacher's MLP functions, or does the required feature/write field still exceed this nonlinear compact family?",
+  "causal_basis": {
+    "factorial_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_mlp_exact_family_factorial_result.json",
+    "factorial_result_sha256": "61e1b1768ce0694f8c110daf6ae443321315a1bf1937bfe7c31fdc148ee900e7",
+    "finding": "Both sides of the shared pair are nonportable, with a -3.4708 CE compensatory interaction. The next family must own independent paired c_fc/c_proj content for every layer rather than transport one shared core.",
+    "negative_controls": {
+      "paired_monarch": "32.43x MLP compression but +0.4465 CE at 0.5TPP; a compact transport around BlockFHT did not supply private content.",
+      "shared_core_tri_monarch": "8.67x MLP compression but +0.2398 CE at 0.5TPP; private input/hidden/output transports around one shared dense core regressed the untransported shared core.",
+      "sparse_cproj_rank2_kronecker": "At 271x, held-out routed-write recovery was only about 0.334.",
+      "sparse_cproj_rank9_mpo": "At 281x, held-out routed-write recovery was only about 0.359."
+    },
+    "novelty_boundary": "This is not another strict-200x tensor topology sweep. It relaxes the state budget by 6-13x, fits both matrices jointly as functions, and assigns separate factors to every dense layer."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "model_width": 768,
+    "hidden_width": 3072,
+    "inner_channel_width": 32,
+    "c_fc_outer_shape": [96, 24],
+    "c_proj_outer_shape": [24, 96],
+    "inner_factor_shape": [32, 32],
+    "equation": "W_l = sum_{r=1}^K A_{l,r} tensor-product B_{l,r}, independently for c_fc and c_proj",
+    "ranks": [16, 32],
+    "coordinates_per_term_per_matrix": 3328,
+    "coordinates_all_layers_both_matrices": {"16": 1277952, "32": 2555904},
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": {"16": 44.30769230769231, "32": 22.153846153846153},
+    "parameter_saving_fraction": {"16": 0.9774305555555556, "32": 0.9548611111111112},
+    "ordinary_rank_note": "One full-rank Kronecker term can have ordinary matrix rank 768; K is Kronecker separation rank, not LoRA rank.",
+    "state_dependent_image_note": "Both factors are learned state, so the Jacobian includes dA tensor B plus A tensor dB and is not a fixed BlockFHT image."
+  },
+  "fit_protocol": {
+    "optimizer": "Adam on Kronecker factors only",
+    "learning_rate": 0.01,
+    "steps_per_layer_rank": 300,
+    "row_batch_size_per_bank": 128,
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260826,
+    "holdout_token_seed": 20260827,
+    "local_perturbation_relative_rms": 0.01,
+    "initialization": "deterministic rank-32 randomized Kronecker SVD of each exact dense teacher matrix; rank 16 uses the prefix",
+    "svd_seed": 20260828,
+    "svd_power_iterations": 6,
+    "fit_target": "dense-teacher MLP outputs on teacher and compact state banks, including symmetric 1% RMS perturbations",
+    "optimizer_updates_to_language_model": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260829,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": ["Kronecker-SVD weight recovery", "fit objective and held-out output recovery", "held-out input-JVP recovery", "fixed-checkpoint validation CE", "parameter, expansion-FLOP, memory, and wall-time accounting"]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "every layer/rank is finite and either reduces its fit objective by at least 50% or already passes the output gates before fitting",
+    "rank16_pass": "all function, CE, and health gates pass at 44.31x",
+    "rank32_ceiling_pass": "all function, CE, and health gates pass at 22.15x",
+    "family_fail": "rank 32 fails any function or CE gate despite healthy optimization"
+  },
+  "compute_accounting": {
+    "materialized_dense_forward_flops": "unchanged after factor expansion",
+    "factor_expansion_flops_per_refresh": {"16": 1811939328, "32": 3623878656},
+    "factor_expansion_formula": "2 FLOPs per multiply-accumulate times K times 56,623,104 materialized weights",
+    "generated_weight_memory": "dense generated weights remain materialized for tensor-core GEMMs; the saving is trainable/optimizer state, not final dense inference storage"
+  },
+  "authorization": {
+    "allowed": "one preflight and one fixed-teacher paired-family ceiling at ranks 16 and 32",
+    "not_allowed": ["language-model training", "rank, radix, learning-rate, seed, or optimizer sweeps", "model-size scaling", "claiming inference parameter compression before a non-materialized kernel exists"],
+    "next_on_rank16_pass": "implement the exact rank-16 training family, benchmark expansion and end-to-end MFU, then preregister one 124M 0.5TPP verification",
+    "next_on_rank32_only_pass": "report the 22-44x state frontier and decide whether 22x is acceptable before implementation",
+    "next_on_failure": "reject this paired Kronecker family at 22x and derive a different source of layer-private direction; do not sweep K"
+  }
+}
