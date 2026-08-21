@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_shared_mlp_exact_family_teacher_fit_plan_v1",
+  "scientific_question": "Can the exact seven-trunk MLP family represent the dense 124M attention-only endpoint on its relevant residual-stream distribution, or is the calibrated endpoint/JVP deficit caused by representational under-capacity rather than the language-model optimization path?",
+  "theory": {
+    "exact_layer_function": "F_l(x) = diag(r_l) W_proj,g GELU(diag(p_l) W_fc,g x), where g is the contiguous depth group, W_fc,g and W_proj,g are shared, and p_l and r_l are positive layer-private diagonal gains",
+    "tested_partition": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
+    "genuinely_constrained_groups": [[5, 6, 7], [8, 9, 10, 11]],
+    "singleton_handling": "Layers 0-4 retain their exact dense-teacher MLPs because the seven-trunk topology does not constrain them.",
+    "why_teacher_fit": "The terminal common-gradient gate passed while calibrated endpoint and JVP recovery failed. Direct teacher fitting removes the LM trajectory and asks only whether the frozen function family can carry the endpoint.",
+    "why_two_state_banks": "Fit and holdout examples include both dense-teacher and compact-candidate residual-stream states so a result cannot be created by conditioning on only one trajectory.",
+    "why_perturbations": "Clean outputs constrain endpoint values; symmetric local input perturbations constrain the same input Jacobian without differentiating through a JVP objective."
+  },
+  "identities": {
+    "candidate_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+      "terminal_validation_cross_entropy": 3.7442
+    },
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+      "terminal_validation_cross_entropy": 3.6744
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "fit_protocol": {
+    "optimizer": "Adam",
+    "weight_decay": 0.0,
+    "steps_per_restart": 400,
+    "learning_rate": 0.0003,
+    "row_batch_size_per_layer_per_bank": 128,
+    "sample_cap_per_layer_per_bank": 2048,
+    "fit_token_seed": 20260823,
+    "holdout_token_seed": 20260824,
+    "fit_batches": 8,
+    "holdout_batches": 8,
+    "token_batch_size": 4,
+    "local_perturbation_relative_rms": 0.01,
+    "local_perturbation_directions_per_sample": 1,
+    "objective": "mean layer-normalized clean-output MSE plus the mean layer-normalized symmetric-perturbation output MSE",
+    "gain_parameterization": "positive exp(log_gain), clipped after each step to log_gain in [-4, 4]",
+    "restarts_per_group": "one from the trained compact group plus one from each dense teacher layer in that group",
+    "restart_selection": "maximum held-out mean output explained target energy; input-JVP recovery breaks ties",
+    "fit_scope": "only the two constrained groups; no attention, embedding, normalization, residual, singleton MLP, or LM-head parameter changes"
+  },
+  "holdout_measurement": {
+    "state_banks": ["dense_teacher", "compact_candidate"],
+    "output_metric": "explained target energy against the corresponding dense-teacher layer MLP",
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260825,
+    "complete_model_splice": "install the selected exact-family group functions into a clone of the dense teacher, retain exact dense singleton MLPs, and evaluate deterministic CE",
+    "fixed_eval_split": "validation",
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_layer_bank_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_layer_bank_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_health": "every restart must remain finite and the selected restart must reduce its normalized fit objective by at least 50 percent"
+  },
+  "classification": {
+    "representational_pass": "All output, JVP, CE, and optimization-health gates pass. The exact seven-trunk topology has endpoint capacity; the remaining failure is LM optimization/path acquisition.",
+    "representational_fail": "Optimization is healthy but any output, JVP, or CE gate fails. Reject the exact seven-trunk positive-diagonal sharing topology as an endpoint representation.",
+    "optimization_inconclusive": "The selected restart fails the 50 percent objective-reduction gate or becomes non-finite. Do not infer under-capacity; permit only optimizer-geometry diagnosis of this offline fit.",
+    "mixed": "Report every gate and use the ordered classification above; do not hide a CE failure behind a function-space average."
+  },
+  "authorization": {
+    "allowed": "Implement and run exactly this offline teacher-forced representability ceiling after tests and a short runtime preflight.",
+    "not_allowed": [
+      "language-model training",
+      "changing the seven-trunk partition",
+      "adding a new compact mechanism",
+      "model-size scaling",
+      "hyperparameter sweeps outside the frozen restarts"
+    ],
+    "next_if_pass": "Study a causal acquisition rule for the same exact topology before any LM run.",
+    "next_if_fail": "Use the fitted residual decomposition to derive one new compact function family; do not guess another trunk count."
+  }
+}
