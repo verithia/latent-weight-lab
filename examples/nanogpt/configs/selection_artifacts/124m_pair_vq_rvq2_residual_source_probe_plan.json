@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_pair_vq_rvq2_residual_source_probe_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Why does the live second conditional-polar residual byte recover 0.979815 at step 0 rather than the 0.992540 synthetic prediction, despite composed full-carry recovery above 0.99967?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_rvq2_sigma_delta_gate238_result.json",
+    "result_sha256": "0edaf577b8614870357beae98b299ac32eae5f4435ec68f46626461d1950cd52",
+    "observed_residual_stage_recovery_step0": 0.979814886,
+    "frozen_floor": 0.98,
+    "synthetic_topology_recovery": 0.9925403434607866,
+    "composed_full_carry_recovery_min": 0.999678142,
+    "formal_parent_classification": "FAIL_ONLY_RESIDUAL_STAGE_STEP0_BY_0P000185"
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9.json",
+    "config_sha256": "33031901b4571da3c909db5650964a4e191991e1500ec1d46c68ef2bec2ee380",
+    "implementation_commit": "c2082108a13d2f64278772eb09b1c1249fb7d692",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "lloyd_counterfactual_iterations": [3, 6, 12],
+    "training_representation_unchanged": true,
+    "persistent_state_added": false,
+    "selection_endpoint": false
+  },
+  "exact_schedule": {
+    "warmup_iters": 9,
+    "lr_decay_iters": 238,
+    "learning_rate": 0.0024,
+    "min_lr": 0.00024,
+    "reason": "The live residual source must be sampled under the same first-refresh schedule as the sealed 238-step causal parent."
+  },
+  "required_measurements": [
+    "angular and radial fractions of residual-code distortion",
+    "joint, angular, conditional-radius, and marginal-radius entropy",
+    "active joint, angle, and radius symbols",
+    "top-radius frequency and energy plus max-radius-to-RMS",
+    "residual-center energy relative to residual-target energy",
+    "counterfactual codec recovery after 3, 6, and 12 Lloyd passes"
+  ],
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "decomposition_relative_error_max": 0.00001,
+    "residual_active_codes_min": 128,
+    "candidate_mfu_min_fraction": 0.20
+  },
+  "aggregation": {
+    "primary": "residual-target-energy-weighted across all 24 matrices, reported separately at steps 0 and 8 and jointly",
+    "secondary": "unweighted extrema across matrices to expose layer-specific failures",
+    "recovery_gain": "weighted recovery at 12 Lloyd passes minus weighted recovery at 3 Lloyd passes",
+    "center_error_share": "weighted residual-center energy ratio divided by weighted three-pass distortion"
+  },
+  "frozen_branch_thresholds": {
+    "lloyd_convergence_fix": {
+      "required_recovery_12_min": 0.9805,
+      "required_gain_12_minus_3_min": 0.0005,
+      "interpretation": "Extra fitting must both clear the old 0.98 floor with 0.0005 margin and produce a nontrivial absolute gain."
+    },
+    "angular_allocation_fix": {
+      "required_angular_error_fraction_min": 0.70,
+      "requires_lloyd_convergence_fix_false": true
+    },
+    "radial_companding_fix": {
+      "required_radial_error_fraction_min": 0.70,
+      "alternative_top_radius_energy_fraction_min": 0.25,
+      "requires_lloyd_convergence_fix_false": true
+    },
+    "center_gauge_fix": {
+      "required_center_error_share_min": 0.25,
+      "requires_lloyd_convergence_fix_false": true
+    }
+  },
+  "decision_precedence": [
+    "lloyd_convergence_fix",
+    "angular_allocation_fix",
+    "radial_companding_fix",
+    "center_gauge_fix",
+    "reject_two_stage_conditional_polar_family"
+  ],
+  "decision_policy": {
+    "lloyd_convergence_fix": "Authorize only one byte-neutral fit-iteration correction, followed by focused tests and an exact-config MFU and optimizer-overhead gate. No endpoint yet.",
+    "angular_allocation_fix": "Authorize only one second-byte angular/radial reallocation at unchanged two-byte storage, then repeat the temporal direction gate. No endpoint yet.",
+    "radial_companding_fix": "Authorize only one second-byte radial initialization or companding correction at unchanged two-byte storage, then repeat the temporal direction gate. No endpoint yet.",
+    "center_gauge_fix": "Authorize only one byte-neutral residual-center or gauge correction, then repeat the temporal direction gate. No endpoint yet.",
+    "reject_two_stage_conditional_polar_family": "Close this codec family and return to a different compact temporal representation. Do not sweep bit rate, learning rate, model size, or horizon.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "exact config, foreground-polled, MFU at least 20%",
+    "scientific_run": "foreground-polled because the nine-update acquisition is expected to finish within five minutes; attach a persistent @Codex watchdog immediately only if observed runtime exceeds five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
