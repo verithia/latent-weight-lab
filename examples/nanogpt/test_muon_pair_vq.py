@@ -882,6 +882,7 @@ def test_codec_state_excludes_transient_dense_weight() -> None:
         "codes",
         "fast_levels",
         "fast_codes",
+        "fast_group_bounds",
         "optimizer_step",
     }
     assert state["codebooks"].dtype == torch.float32
@@ -1642,6 +1643,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
         "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": 0,
         "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels": False,
+        "block_fht_mlp_pair_vq_stochastic_fast_block_local_levels": False,
         "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
         "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),
