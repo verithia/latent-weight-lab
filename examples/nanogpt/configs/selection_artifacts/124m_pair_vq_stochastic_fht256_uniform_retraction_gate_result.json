@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_uniform_retraction_gate_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_failed_preflight_no_endpoint_launched",
+  "classification": "FAIL_MATRIX_GLOBAL_SUPPORT_RANGE_VARIANCE",
+  "identity": {
+    "execution_commit": "9e8d511274f1a7cbf870fe08aec902d7992d996b",
+    "implementation_commit": "6a2189cdaef5864f973aea73db9050f500e23f52",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_uniform_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "88ba2b035f9d6ce3b236f9034f8e3178af56eba050e67836f52897ece4b2b2ca",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_uniform_retraction_plan.json",
+    "plan_sha256": "fc7f55574aa67ce4170329c67e095b84bd56c312e0d1e6925ea3c4f1c20968a1",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_uniform_retraction_0p5tpp_lr24e4_mfu.json",
+    "certificate_sha256": "3e73d31e6775cd3c20f3cff661d5034b5b0a56cc712d6fb3b1654675d1b9be88",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_uniform_retraction_0p5tpp_lr24e4_mfu.log",
+    "log_sha256": "5f5e724f2dd4f5eb8e0cee2ae97ffa3683db2dc1d00f3d683baa97db46a9f614"
+  },
+  "frozen_gate": {
+    "maximum_weighted_sampling_variance_ratio": 0.10,
+    "minimum_expected_bias_recovery": 0.999,
+    "maximum_boundary_clipped_values": 0,
+    "persistent_training_bytes_exact": 157500864,
+    "minimum_mfu_fraction": 0.20
+  },
+  "measurements": {
+    "weighted_sampling_variance_ratio_by_step": {
+      "0": 0.1502201901095147,
+      "1": 0.17102146911679098,
+      "2": 0.17810836935470023,
+      "3": 0.17397728149642028,
+      "4": 0.16518049054164644,
+      "5": 0.15538643575567104,
+      "6": 0.14154209874333532,
+      "7": 0.12658011895674098,
+      "8": 0.11600416622505329
+    },
+    "maximum_timed_weighted_sampling_variance_ratio": 0.17810836935470023,
+    "minimum_timed_expected_bias_recovery": 0.9999999999999996,
+    "timed_boundary_clipped_values": 0,
+    "persistent_training_bytes": 157500864,
+    "all_logged_losses_finite": true,
+    "tokens_per_second_mean_last_8": 161088.46375,
+    "iteration_ms_mean_last_8": 1627.44375,
+    "optimizer_ms_mean_last_8": 427.22875,
+    "peak_allocated_mib": 31659.68,
+    "empirical_bf16_gemm_peak_tflops": 417.15647532339443,
+    "active_params_6n_estimate": 124475904,
+    "derived_model_tflops": 120.30979289551487,
+    "derived_mfu_fraction": 0.2884044717326909,
+    "native_block_fht_extension_loaded": true
+  },
+  "comparison": {
+    "raw_stochastic_maximum_timed_variance_ratio": 1.2368118674935062,
+    "uniform_fht256_maximum_timed_variance_ratio": 0.17810836935470023,
+    "reduction_factor": 6.944153734234745,
+    "interpretation": "Uniform support removes the Lloyd-plus-extrema pathology, but one matrix-global support interval is still set by millions of transformed coordinates. The remaining 0.1781 variance is a support-locality problem, not bias, clipping, speed, or random-basis direction failure."
+  },
+  "decision": {
+    "endpoint_launched": false,
+    "reason": "The maximum timed variance ratio is 1.781 times the frozen ceiling despite exact unbiasedness and sufficient derived MFU.",
+    "rejected_followups": [
+      "level-count or bit-rate sweep",
+      "learning-rate sweep",
+      "FHT block-size sweep",
+      "global-grid endpoint",
+      "model-width or horizon scaling"
+    ],
+    "next_theory_constraint": "Preserve the one-byte pair alphabet while localizing support bounds to each already-existing FHT block; account for the added bound metadata exactly."
+  }
+}

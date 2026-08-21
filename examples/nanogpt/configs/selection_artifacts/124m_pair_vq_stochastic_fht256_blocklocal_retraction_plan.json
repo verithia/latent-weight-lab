@@ -1,0 +1,57 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_blocklocal_retraction_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Can block-local support scaling make the same one-byte unbiased Pair-VQ retraction low variance without increasing its symbol rate?",
+  "causal_basis": {
+    "global_uniform_gate": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_uniform_retraction_gate_result.json",
+      "classification": "FAIL_MATRIX_GLOBAL_SUPPORT_RANGE_VARIANCE",
+      "maximum_weighted_variance_ratio": 0.17810836935470023,
+      "minimum_expected_bias_recovery": 0.9999999999999996,
+      "boundary_clipped_values": 0,
+      "finding": "The uniform FHT codec reduced variance 6.94x relative to Lloyd-plus-extrema, but its matrix-global extrema still make the 16 intervals too wide."
+    }
+  },
+  "theory": {
+    "representation": "Partition the already signed-FHT-transformed stream into its native 256-scalar blocks. Within each block reshape to 128 pairs and retain the same 16x16 Cartesian alphabet and one uint8 pair code, but derive 16 uniform levels independently for each of the two pair coordinates from that block's exact extrema.",
+    "unbiasedness": "Each block-coordinate interval includes its exact observed minimum and maximum, so stochastic interpolation remains conditionally unbiased with zero clipping.",
+    "variance_localization": "Replacing matrix extrema over millions of coordinates by extrema over 128 samples per pair coordinate changes the sub-Gaussian extremum factor from log(n_matrix) to log(128), while preserving the orthogonal inverse FHT.",
+    "approximate_variance_prediction": "Scaling the observed 0.178108 ratio by log(128)/log(1179648) predicts approximately 0.062, below the fixed 0.10 gate; the real preflight remains decisive.",
+    "fixed_scope": "Keep model, horizon, LR, optimizer, data, seed, FHT B=256, 16x16 alphabet, feedback codec, and all slow Pair-VQ state fixed. This is neither a bit-width nor FHT-size sweep."
+  },
+  "exact_state_accounting": {
+    "fast_pair_codes": "unchanged one uint8 per weight pair",
+    "block_count_all_24_mlp_matrices": 221184,
+    "bounds": "four FP32 values per 256-scalar block",
+    "added_bound_bytes": 3538944,
+    "retained_global_level_bytes": 3072,
+    "expected_persistent_training_bytes": 161039808,
+    "increase_vs_global_uniform_fraction": 0.02246805019200129,
+    "training_compression_vs_dense_fp32_weight_plus_momentum": 2.812874885167464,
+    "additional_inference_parameters": 0,
+    "additional_materialized_inference_flops": 0
+  },
+  "frozen_preflight_gates": {
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "minimum_expected_bias_recovery": 0.999,
+    "maximum_weighted_sampling_variance_ratio_per_timed_update": 0.10,
+    "maximum_boundary_clipped_values": 0,
+    "persistent_training_bytes_exact": 161039808,
+    "all_losses_finite": true
+  },
+  "conditional_endpoint_gate": {
+    "updates": 238,
+    "parent_validation_ce": 5.361,
+    "maximum_terminal_validation_ce": 5.411,
+    "maximum_terminal_candidate_minus_parent_ce": 0.05
+  },
+  "decision_rule": {
+    "implementation": "Implement only block-local bounds, tests, byte accounting, diagnostics, and fail-closed config validation.",
+    "preflight_pass": "Authorize exactly one 238-update endpoint with one idempotent terminal/error-only @Codex watchdog.",
+    "preflight_fail": "Seal and reject block-local unbiased retraction; do not relax the variance gate or increase symbol rate.",
+    "endpoint_fail": "Reject low-variance stochastic retraction as sufficient; the next theory must address temporal correlation or functional-path mismatch.",
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}
