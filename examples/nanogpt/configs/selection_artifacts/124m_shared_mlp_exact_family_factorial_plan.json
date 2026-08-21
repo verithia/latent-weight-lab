@@ -44,6 +44,11 @@
     "fixed_eval_block_size": 1024
   },
   "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
     "per_side_function_pass": "mean/worst output recovery at least 0.90/0.75 and mean/worst input-JVP recovery at least 0.80/0.50",
     "per_side_ce_pass": "fixed validation CE gap no greater than +0.05",
     "c_fc_restriction": "shared_c_fc_only fails either its function or CE gate while shared_c_proj_only passes both",
