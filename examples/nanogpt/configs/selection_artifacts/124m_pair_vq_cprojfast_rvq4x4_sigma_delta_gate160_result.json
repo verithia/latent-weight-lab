@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_rvq4x4_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "REJECT_GREEDY_ADDITIVE_RVQ_AT_ONE_BYTE_PER_PAIR",
+  "passed": false,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "bit_budget_or_learning_rate_sweep_authorized": false,
+    "successful_component": "The repaired run is implementation-valid, exact-resume tested, compact, and passes the systems admission gate.",
+    "failed_component": "Greedy alternating assignment to two learned 16-entry additive 2D codebooks fits the temporal carry worse than fixed polar coding and eventually degrades conserved update recovery.",
+    "next_authorized_work": "Retain one byte per pair and the successful repaired weight charts; replace the shared polar radius alphabet with eight learned radii per angular sector, directly modeling conditional magnitude without greedy additive factorization.",
+    "reason": "Polar improved over Cartesian, so direction sectors are useful. The residual failure can arise when p(radius | direction) varies. Direction-conditioned radii use all 256 states without a global radius-independence assumption and admit exact, cheap assignments."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_rvq4x4_sigma_delta_plan.json",
+    "plan_sha256": "823440575f5bcff0bcc1a9ff5e26474c64a11b30cfc35998035aaaab07084e17",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160_retry1.json",
+    "config_sha256": "a8d18d5a49e9273f1525ccf51a47570833d4a062f7eec0667155cd767a1aa9cb",
+    "execution_git_commit": "df01905216acd90487debf81a2178c7bf817a694",
+    "implementation_commit": "044d42211",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160_retry1_mfu.json",
+    "mfu_certificate_sha256": "13952e5f1edfe8512dfc4906a5171dabe83d8c2908b124d13146b341a80a33a9",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8fd827281c03494249d9aa8e4b2f25a80726b16ec551e7c38ae1b69bb2764ad0",
+    "examples/nanogpt/train.py": "c5908c25294d7a893b3361dc7d65f792c010b86cc76a7f95a103f2e4332c7df7",
+    "examples/nanogpt/muon_pair_vq.py": "4f6719ed760f3ab4ab3707b9b5c919d125f7fe7cd2f6df7f167d93d608658045"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160_retry1.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160_retry1_20260821.log",
+    "log_sha256": "43e05a9495b44a4316ea0bd6eed5988e1b8e33fb657abeb0b6b6d2efbf1ef1b4",
+    "log_bytes": 407817,
+    "started_at": "2026-08-21T22:53:16+08:00",
+    "finished_at": "2026-08-21T22:56:55+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9790,
+    "step160_validation_ce_diagnostic_only": 5.5348,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "rows": [
+      {"step": 0, "all": 0.998235, "c_fc": 0.998132, "c_proj": 0.998833, "feedback_codec": 0.926080},
+      {"step": 8, "all": 0.991304, "c_fc": 0.990146, "c_proj": 0.995233, "feedback_codec": 0.886891},
+      {"step": 40, "all": 0.958510, "c_fc": 0.958683, "c_proj": 0.957959, "feedback_codec": 0.940212},
+      {"step": 80, "all": 0.925732, "c_fc": 0.932294, "c_proj": 0.899823, "feedback_codec": 0.936178},
+      {"step": 120, "all": 0.915532, "c_fc": 0.921511, "c_proj": 0.891758, "feedback_codec": 0.936618},
+      {"step": 152, "all": 0.907117, "c_fc": 0.912738, "c_proj": 0.884714, "feedback_codec": 0.937459}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.907117,
+      "aggregate_conserved_required": 0.95,
+      "every_matrix_conserved_min": 0.857684,
+      "every_matrix_conserved_required": 0.8,
+      "aggregate_feedback_codec_min_on_gated_steps": 0.886891,
+      "aggregate_feedback_codec_required": 0.98,
+      "every_matrix_feedback_codec_min_on_gated_steps": 0.876347,
+      "every_matrix_feedback_codec_required": 0.95,
+      "maximum_feedback_to_weight_energy_ratio": 0.000162858,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "cproj_fast_code_changes_at_step152": 5518147,
+      "late_cproj_fast_code_changes_minimum": 1
+    }
+  },
+  "comparison": {
+    "step8_codec": {"cartesian": 0.926147, "polar_shared_radius": 0.951324, "greedy_additive_rvq": 0.886891},
+    "step152_codec": {"cartesian": 0.980930, "polar_shared_radius": 0.986381, "greedy_additive_rvq": 0.937459},
+    "interpretation": "Free additive atoms do not help when their online greedy coordinate assignment cannot stably occupy the 256 sum states. The polar partition is the stronger base topology."
+  },
+  "performance": {
+    "timed_samples": 28,
+    "tokens_per_second_mean": 194346.12,
+    "iteration_ms_mean": 1349.01,
+    "optimizer_ms_mean": 144.10,
+    "optimizer_fraction": 0.106822,
+    "model_tflops": 145.15,
+    "mfu_fraction": 0.3476,
+    "peak_mib_mean": 31609.02,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99247488,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.564194,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  }
+}
