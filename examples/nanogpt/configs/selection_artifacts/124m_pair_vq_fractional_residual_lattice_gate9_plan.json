@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_pair_vq_fractional_residual_lattice_gate9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does a packed block-scaled q4 residual stage reduce the newest temporal-feedback error enough to clear the live conservation gates at an acceptable physical rate and MFU?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_0p5tpp_result.json",
+    "result_sha256": "4e31e61296be227c1396d62ed445e12d40da15a85753212a60f8de2516edd60b",
+    "classification": "REJECT_TERMINAL_LOSS_AND_LATE_TEMPORAL_CONSERVATION",
+    "measured_step_232_error_fraction": 0.0303858936,
+    "uniform_extra_rate_lower_bound_bits_per_weight": 3.46
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25_rq4",
+    "base_physical_bits_per_weight": 7.53125,
+    "residual_coordinate_bits_per_weight": 4.0,
+    "residual_gain_bits_per_weight": 0.25,
+    "physical_bits_per_weight": 11.78125,
+    "saving_vs_fp32_temporal_state_fraction": 0.6318359375,
+    "metadata_fp32_bytes_per_matrix": 3648,
+    "persistent_dense_master_residual_or_momentum": false,
+    "construction": "Decode the admitted q7/q8 base, transform its ambient quantization residual with the same orthonormal B32 signed FHT, store one q8 log-gain per block, and store q4 scalar coordinates. The decoded temporal state is the additive sum of both stages."
+  },
+  "rate_justification": {
+    "high_rate_model": "D is proportional to 2^(-2R)",
+    "added_rate_bits_per_weight": 4.25,
+    "added_rate_exceeds_measured_uniform_lower_bound": true,
+    "reason_not_q2": "The terminal source requires about 3.46 additional uniform bits/weight, so a q2 residual stage is not authorized by the measured bound."
+  },
+  "implementation_gate": {
+    "focused_tests": "38 passed on PRO6",
+    "pack_unpack_bit_exact": true,
+    "checkpoint_next_step_bit_exact": true,
+    "actual_state_byte_accounting_tested": true,
+    "implementation_commit": "162c306fbc334f53b0814d368bd34232ed27293c"
+  },
+  "frozen_live_gates": {
+    "optimizer_steps": 9,
+    "matrices_per_step": 24,
+    "feedback_codec_weighted_recovery_min": 0.999975,
+    "feedback_codec_every_matrix_recovery_min": 0.9999,
+    "conserved_requested_step_weighted_recovery_min": 0.999975,
+    "conserved_requested_step_every_matrix_recovery_min": 0.9999,
+    "all_logged_losses_finite": true,
+    "exact_config_mfu_min_fraction": 0.20,
+    "optimizer_fraction_max": 0.30,
+    "physical_feedback_bits_per_weight_exact": 11.78125,
+    "dense_fp32_temporal_tensor_present": false
+  },
+  "selection_rule": {
+    "pass": "Seal the packed state and authorize only one matched 124M 0.5-TPP endpoint with the full late-horizon gates. Do not scale model or horizon.",
+    "fail_recovery": "Reject q4 residual closure and measure its residual source; do not loosen thresholds or sweep LR.",
+    "fail_systems": "Optimize the residual FHT/quantizer implementation and repeat without changing scientific thresholds.",
+    "automatic_scale_up": false
+  },
+  "accounting": {
+    "mlp_elements": 56623104,
+    "dense_mlp_parameter_bytes_bf16": 113246208,
+    "compact_mlp_persistent_model_bytes": 70855872,
+    "model_state_reduction_x": 1.59826,
+    "dense_mlp_training_matrix_bytes_fp32_weight_plus_fp32_muon": 452984832,
+    "compact_mlp_persistent_training_matrix_bytes": 154403520,
+    "training_state_reduction_x": 2.93377,
+    "inference_flops": "unchanged materialized dense MLP"
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes",
+    "callbacks": "none for this sub-five-minute gate"
+  }
+}
