@@ -997,6 +997,8 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes": (),
         "block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes": (),
         "block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits": (),
+        "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size": 0,
+        "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits": 7,
     }
     config = GPTConfig(
         block_size=8,
