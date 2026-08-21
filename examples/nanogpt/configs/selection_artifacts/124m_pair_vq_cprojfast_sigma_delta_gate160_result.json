@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_WEIGHT_CHART_CONSERVATION_FAIL_GLOBAL_CARRY_CODEC",
+  "passed": false,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "repeat_or_learning_rate_sweep_authorized": false,
+    "successful_component": "The side-local c_proj fast chart raised aggregate c_proj conservation from 0.6617 to 0.9703 at step 152 and kept every matrix above 0.9582 at all registered steps.",
+    "failed_component": "One global 16-level alphabet per pair coordinate did not meet the frozen feedback-code recovery floor at early and middle registered steps.",
+    "next_authorized_work": "Keep both weight charts fixed and replace only the training-time carry's global levels with output-group-local levels, then rerun the same 160-step gate.",
+    "reason": "The causal conservation and systems gates passed, but the independently preregistered feedback-code recovery gates did not."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_sigma_delta_plan.json",
+    "plan_sha256": "f110ab268448aac123315160b4676849674006003c6bf6ceb6f8cbb00421ef40",
+    "gate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
+    "gate_config_sha256": "71773a7bfb997621d6c463938e2d75f1c6188e070eef2596ba6825649089520c",
+    "execution_git_commit": "5557d84bb2b1c32fbdb09b642ee0ad4940b5388e",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry2.json",
+    "mfu_certificate_sha256": "179ef142571e5ac42fa4a20fe4250aa4d268751f8f8ee6c3710591f6bd1bece6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8c338e57340c7fbb8601f83e774511ed4aa9e9cfdf91fcbd0fb8fa87abc33c75",
+    "examples/nanogpt/train.py": "089dc3da36e92c6b5eab8bffc8a032ab14f43802f867f64e392379112a1a71fc",
+    "examples/nanogpt/muon_pair_vq.py": "9c027bde61e20e08d24d4d9b7942bfee15b2c2402ac7b2d8b77782ba7c9855c3"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_replay1_20260821.log",
+    "log_sha256": "7cde848c044ed6c7a7e0e92f96763f9e070a739077f36d47a110b133871366cc",
+    "log_bytes": 408116,
+    "started_at": "2026-08-21T22:00:49+08:00",
+    "finished_at": "2026-08-21T22:04:27+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9790,
+    "step160_validation_ce_diagnostic_only": 5.5405,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "rows": [
+      {"step": 0, "all": 0.995201, "c_fc": 0.995086, "c_proj": 0.995876, "feedback_codec": 0.799052},
+      {"step": 8, "all": 0.994221, "c_fc": 0.993452, "c_proj": 0.996706, "feedback_codec": 0.926147},
+      {"step": 40, "all": 0.984471, "c_fc": 0.984290, "c_proj": 0.985067, "feedback_codec": 0.972962},
+      {"step": 80, "all": 0.976190, "c_fc": 0.977677, "c_proj": 0.968400, "feedback_codec": 0.975058},
+      {"step": 120, "all": 0.977942, "c_fc": 0.979245, "c_proj": 0.971203, "feedback_codec": 0.978792},
+      {"step": 152, "all": 0.976391, "c_fc": 0.977598, "c_proj": 0.970279, "feedback_codec": 0.980930}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.976190,
+      "aggregate_conserved_required": 0.95,
+      "every_matrix_conserved_min": 0.958209,
+      "every_matrix_conserved_required": 0.8,
+      "aggregate_feedback_codec_min_on_gated_steps": 0.926147,
+      "aggregate_feedback_codec_required": 0.98,
+      "every_matrix_feedback_codec_min_on_gated_steps": 0.913216,
+      "every_matrix_feedback_codec_required": 0.95,
+      "maximum_feedback_to_weight_energy_ratio": 0.0000958154,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "cproj_fast_code_changes_at_step152": 4859314,
+      "late_cproj_fast_code_changes_minimum": 1
+    }
+  },
+  "performance": {
+    "timed_samples": 31,
+    "tokens_per_second_mean": 195483.87,
+    "iteration_ms_mean": 1341.15,
+    "optimizer_ms_mean": 136.20,
+    "optimizer_fraction": 0.101555,
+    "model_tflops": 145.9982,
+    "mfu_fraction": 0.349834,
+    "peak_mib_median": 31608.04,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99244224,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.564345,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "diagnosis": {
+    "weight_chart": "Causally repaired. Both sides now sustain the optimizer field and remain active late.",
+    "carry_codec": "The global scalar alphabets mix row populations with different scales. Four-bit error is small enough for causal conservation but misses the separately frozen distortion threshold until the final registered step.",
+    "minimal_repair": "Use one pair of 16-level alphabets per eight output channels while retaining exactly one uint8 code per weight pair. This changes only training-time level locality and adds no carry codes or inference state."
+  }
+}
