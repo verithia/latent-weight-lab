@@ -1,0 +1,93 @@
+{
+  "schema_version": "mai_124m_pair_vq_forward_visible_center_endpoint_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Does self-training at the compact virtual weight V=C+R_hat close the stable Pair-VQ functional-path loss gap while preserving the existing compact state contract?",
+  "causal_authorization": {
+    "oracle_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_antithetic_functional_gradient_oracle_result.json",
+    "oracle_result_sha256": "38f445e611b5657ab23d3cfcc2f4c7d312c92bcae5d8200d64e03375801da7c6",
+    "oracle_source_result_sha256": "7d02f81f2430a124d6e9a8bd94af7c842234ea334e36af6794d9337fbb737749",
+    "classification": "PASS_SELECT_ONE_PASS_FORWARD_VISIBLE_CENTER",
+    "minimum_late_heldout_gradient_error_closure": 0.9560787414334309,
+    "minimum_late_heldout_gradient_cosine": 0.9999764834558452,
+    "minimum_late_alignment_retention": 0.9988835447535758,
+    "matrix_regression_fraction": 0.0
+  },
+  "frozen_mechanism": {
+    "persistent_compact_base": "C is represented by the existing pair-VQ codebooks, codes, and fast residual state.",
+    "persistent_compact_residual": "R_hat is represented by the already qualified fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16 feedback codec in optimizer state.",
+    "transient_forward_weight": "The nonpersistent materialized module weight is always V=C+R_hat and forward/backward differentiates at V.",
+    "optimizer_transition": [
+      "Start from transient V_t and its task gradient g(V_t).",
+      "Apply the existing compact-momentum Muon request and weight decay to V_t, producing requested virtual target T_t.",
+      "Project T_t once into pair-VQ base C_(t+1); do not add the old feedback residual to T_t because V_t already contains it.",
+      "Encode R_(t+1)=T_t-C_(t+1) with the existing B64/L16 compact feedback codec.",
+      "Materialize the next transient forward weight V_(t+1)=C_(t+1)+decode(R_(t+1))."
+    ],
+    "initialization": "R_hat is zero before the first optimizer step, so V_0=C_0.",
+    "resume": "After loading module codes and optimizer feedback state, reconstruct transient V before the next forward pass.",
+    "forbidden_variants": [
+      "adding old feedback to a request formed from V, which would double count carry",
+      "using a dense master weight, dense momentum, or dense ambient residual",
+      "two-pass antithetic task gradients",
+      "changing codec, bits, FHT block, LR, schedule, seed, or attention parent"
+    ]
+  },
+  "state_and_compute_contract": {
+    "persistent_training_bytes_exact": 157500864,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_residual": false,
+    "task_forward_backward_multiplier": 1.0,
+    "materialized_inference_flop_multiplier": 1.0,
+    "materialized_inference_parameter_count": "unchanged from dense target MLP",
+    "compact_checkpoint_components": "pair-VQ base plus existing B64/L16 residual codec"
+  },
+  "frozen_protocol": {
+    "model": "124M, QK-only BlockFHT attention parent, full MLP Pair-VQ replacement",
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "max_iters": 238,
+    "eval_steps": [0, 60, 120, 180, 238],
+    "learning_rate": 0.0024,
+    "optimizer": "Muon",
+    "dense_parent_terminal_validation_ce": 5.361,
+    "maximum_terminal_validation_ce": 5.411
+  },
+  "implementation_gate": {
+    "focused_tests": [
+      "forward uses C+R_hat after the first optimizer step",
+      "the request is based on V and old feedback is not added twice",
+      "post-step transient weight equals decoded compact base plus decoded compact feedback",
+      "state accounting remains exactly 157500864 bytes",
+      "checkpoint resume reconstructs exactly the pre-save virtual weight",
+      "legacy non-forward-visible Pair-VQ behavior remains unchanged"
+    ],
+    "exact_config_preflight": {
+      "maximum_foreground_duration_minutes": 5,
+      "minimum_mfu_fraction": 0.2,
+      "persistent_training_bytes_exact": 157500864,
+      "native_block_fht_extension_required": true,
+      "finite_losses_required": true,
+      "minimum_timed_updates": 8
+    }
+  },
+  "terminal_gate": {
+    "maximum_validation_ce": 5.411,
+    "maximum_gap_to_dense_parent_ce": 0.05,
+    "all_fixed_eval_steps_finite": true,
+    "persistent_training_bytes_exact": 157500864,
+    "same_fixed_eval_protocol_required": true
+  },
+  "decision_rule": {
+    "preflight_pass": "Authorize exactly one 238-update endpoint with a terminal/error-only @Codex watchdog.",
+    "endpoint_pass": "Seal the 124M compact full-MLP closure. A longer horizon or larger rung requires a new theory and transfer preregistration; no automatic scale-up.",
+    "endpoint_fail": "Localize whether the failure is virtual-state reconstruction drift or remaining self-path optimization mismatch. Do not sweep LR, bits, codec, FHT, width, or horizon.",
+    "automatic_scale_up": false,
+    "automatic_sweep": false
+  },
+  "anticipated_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4.json"
+}
