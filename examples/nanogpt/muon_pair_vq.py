@@ -263,6 +263,10 @@ class MuonPairVQLinear(nn.Module):
         )
         diagnostics: dict[str, float | int] = {
             "layer": self.layer_id,
+            "stages": self.stages,
+            "in_features": self.in_features,
+            "out_features": self.out_features,
+            "optimizer_step": int(self.optimizer_step),
             "request_energy": request_energy,
             "projection_residual_energy": residual_energy,
             "requested_step_energy_recovery": 1.0
