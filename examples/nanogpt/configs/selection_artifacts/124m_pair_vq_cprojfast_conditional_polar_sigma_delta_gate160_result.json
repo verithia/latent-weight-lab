@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "REJECT_DIRECTION_CONDITIONAL_POLAR_AT_FROZEN_CARRY_GATE",
+  "passed": false,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "bit_budget_or_learning_rate_sweep_authorized": false,
+    "successful_component": "Conditioning radial levels on angle improves step-8 carry recovery and makes every individual matrix clear the 0.95 codec floor while preserving compact state and systems efficiency.",
+    "failed_component": "Aggregate step-8 carry recovery is 0.959540, below the frozen 0.98 threshold. The gain over shared polar is only 0.008216 and vanishes late.",
+    "next_authorized_work": "Instrument a short real-trajectory replay to decompose carry distortion into angular and radial components and measure code entropy, angular occupancy, and per-sector radial tails before changing the 256-state partition.",
+    "reason": "The conditional-radius intervention isolates and only partly validates angle-magnitude coupling. Choosing a new angular/radial bit allocation without measuring the remaining distortion would be an ungrounded search."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar_sigma_delta_plan.json",
+    "plan_sha256": "177ba874be9c1dac9738e959f5964cae932c0f779cb5e93408d375f4adac0478",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_sigmadelta_gate160.json",
+    "config_sha256": "4da1392aaa11c4447f8f248e5aea21b241b089c1c522f34ae0a507b47d727a18",
+    "execution_git_commit": "a0f4ab4249790a4feb48750aa2bca9142f7245fd",
+    "implementation_commit": "958ab44d8f6d527dacd55ed8483461a8775ad102",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_sigmadelta_gate160_mfu.json",
+    "mfu_certificate_sha256": "e34c628fc33cbfb2036777e0477dfed2d078c938c8a5f1f75689aeef67756efc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8fd827281c03494249d9aa8e4b2f25a80726b16ec551e7c38ae1b69bb2764ad0",
+    "examples/nanogpt/train.py": "94b339f974fbc116df7661dea23654adbae0bb387f81d2e0eee4f13e55846b5d",
+    "examples/nanogpt/muon_pair_vq.py": "77ef6f19dc968896e7d4e220f35618cbec7f7d10cc7e594a1c26dfc72ed33407"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_sigmadelta_gate160_20260821.log",
+    "log_sha256": "9df3b7da1abf3bdaadbf8465bbfd8fc15a092cf7b188765d3bcbcc76045f9621",
+    "log_bytes": 408177,
+    "started_at": "2026-08-21T23:07:33+08:00",
+    "finished_at": "2026-08-21T23:11:10+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9790,
+    "step160_validation_ce_diagnostic_only": 5.5307,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "rows": [
+      {"step": 0, "all": 0.998196, "c_fc": 0.998106, "c_proj": 0.998718, "feedback_codec": 0.924445},
+      {"step": 8, "all": 0.996049, "c_fc": 0.995442, "c_proj": 0.998012, "feedback_codec": 0.959540},
+      {"step": 40, "all": 0.989376, "c_fc": 0.989375, "c_proj": 0.989382, "feedback_codec": 0.983578},
+      {"step": 80, "all": 0.983374, "c_fc": 0.984467, "c_proj": 0.977796, "feedback_codec": 0.983308},
+      {"step": 120, "all": 0.983197, "c_fc": 0.984185, "c_proj": 0.978329, "feedback_codec": 0.985365},
+      {"step": 152, "all": 0.982428, "c_fc": 0.983358, "c_proj": 0.977992, "feedback_codec": 0.986271}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.982428,
+      "aggregate_conserved_required": 0.95,
+      "every_matrix_conserved_min": 0.970535,
+      "every_matrix_conserved_required": 0.8,
+      "aggregate_feedback_codec_min_on_gated_steps": 0.959540,
+      "aggregate_feedback_codec_required": 0.98,
+      "every_matrix_feedback_codec_min_on_gated_steps": 0.957675,
+      "every_matrix_feedback_codec_required": 0.95,
+      "maximum_feedback_to_weight_energy_ratio": 0.000116586,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "cproj_fast_code_changes_at_step152": 5312695,
+      "late_cproj_fast_code_changes_minimum": 1
+    }
+  },
+  "comparison": {
+    "feedback_codec_delta_conditional_minus_shared_polar": {
+      "step8": 0.008216,
+      "step40": -0.000319,
+      "step80": -0.000368,
+      "step120": -0.000233,
+      "step152": -0.000110
+    },
+    "interpretation": "Angle-conditioned magnitudes help the early transient but are not the dominant late distortion. The frozen 32-angle/eight-radius allocation remains inefficient enough to fail the endpoint-authorization gate."
+  },
+  "performance": {
+    "timed_samples": 28,
+    "tokens_per_second_mean": 195762.23,
+    "iteration_ms_mean": 1339.25,
+    "optimizer_ms_mean": 134.36,
+    "optimizer_fraction": 0.100328,
+    "model_tflops": 146.206,
+    "mfu_fraction": 0.350184,
+    "peak_mib_mean": 31609.57,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99265920,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.563347,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  }
+}
