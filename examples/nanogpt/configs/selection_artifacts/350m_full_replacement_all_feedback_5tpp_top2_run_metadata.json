@@ -1,6 +1,17 @@
 {
   "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_run_metadata_v1",
-  "state": "running",
+  "state": "cancelled",
+  "classification": "operator_cancelled",
+  "exit_code": -15,
+  "cancelled_at": "2026-08-21T12:45:00+08:00",
+  "last_iter": 2630,
+  "last_fixed_evaluation": {
+    "step": 1691,
+    "train_loss": 3.5108,
+    "validation_loss": 3.4927
+  },
+  "retained_resume_checkpoint_step": 1691,
+  "cancellation_reason": "Stop ambient-int8 diagnostic scaling and redirect to a genuinely compact temporal representation without per-weight codes, dense FP16 residuals, or dense optimizer state.",
   "host": "PRO6",
   "gpu": 0,
   "run_name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75",

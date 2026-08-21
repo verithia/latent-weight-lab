@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_124m_mlp_residual_vq_trajectory_gate_plan_v1",
+  "recorded_at": "2026-08-21T13:05:00+08:00",
+  "status": "theory_preregistered_before_candidate_values",
+  "scientific_question": "Can one shared two-stage residual vector-quantized block field represent held-out dense complete-expert MLP trajectory directions and functions at more than 200x persistent BF16 state compression, without any ambient residual, dense basis, or dense optimizer state?",
+  "theory": {
+    "observation": "Dense MLP trajectories are temporally low-dimensional but their temporal directions are spatially high-rank, layer-private, and poorly captured by fixed global BlockFHT tangents.",
+    "candidate": "A seeded exact base plus independently addressed ambient blocks. Each block selects one signed scalar multiple from each of two learned codebooks shared across layers, experts, c_fc, and c_proj.",
+    "why_not_lora": "Independent block codes can assemble a globally high-rank matrix; no matrix-low-rank factor, layer-private dense basis, per-weight code, or per-weight carry is retained.",
+    "rate_distortion_risk": "The gate is intentionally strict: if block directions are effectively isotropic, the 200x budget must fail before any language-model training is attempted."
+  },
+  "candidate": {
+    "name": "shared_residual_vq_block_field",
+    "block_size": 1024,
+    "stages": 2,
+    "atoms_per_stage": 128,
+    "base": "exact seeded dense initialization",
+    "codebook_dtype": "bfloat16",
+    "gain_dtype": "float16",
+    "code_storage": "packed_uint7",
+    "persistent_ambient_residual": false,
+    "persistent_ambient_momentum": false,
+    "stored_dense_basis": false,
+    "heldout_encoder": "optimistic nearest signed atom plus scalar least-squares gain at each residual stage"
+  },
+  "protocol": {
+    "trajectory_steps": [0, 594, 1188, 1782, 2376, 2970, 3564, 4158, 4752, 5346, 5940, 6534, 7128, 7722, 8316, 8910, 9495],
+    "discovery_steps": [594, 1188, 1782, 2376, 2970, 3564, 4158, 4752, 5346, 5940],
+    "heldout_steps": [8316, 8910, 9495],
+    "chronological_split": true,
+    "codebook_sample_blocks": 8192,
+    "sample_seed": 2026082101,
+    "codebook_seed": 2026082102,
+    "kmeans_iterations": 8,
+    "similarity_chunk_size": 2048,
+    "functional_samples_per_expert": 32,
+    "functional_seed": 2026082103,
+    "functional_metric": "change in complete-expert output and analytic input JVP relative to exact step-zero function",
+    "candidate_selection": "single frozen budget; no codebook, block-size, seed, or threshold sweep"
+  },
+  "gates": {
+    "minimum_weight_displacement_recovery": 0.8,
+    "minimum_mean_local_chord_cosine": 0.9,
+    "minimum_output_change_recovery": 0.9,
+    "minimum_input_jvp_change_recovery": 0.8,
+    "minimum_every_layer_output_change_recovery": 0.8,
+    "minimum_continuous_coordinate_compression": 200.0,
+    "minimum_persistent_bf16_state_compression": 200.0,
+    "all_values_finite": true
+  },
+  "full_model_accounting": {
+    "tensor_layers": 12,
+    "experts_per_layer": 8,
+    "input_width": 768,
+    "hidden_width": 1536,
+    "dense_paired_mlp_entries": 226492416,
+    "dense_bf16_matrix_bytes": 452984832,
+    "shared_codebook_coordinates": 262144,
+    "live_gain_coordinates": 442368,
+    "total_continuous_coordinates": 704512,
+    "continuous_coordinate_compression": 321.48837209302326,
+    "packed_code_bytes": 387072,
+    "persistent_model_bytes": 1796096,
+    "persistent_bf16_state_compression": 252.20412844036697,
+    "decode_multiply_adds_per_materialization": 452984832
+  },
+  "identity": {
+    "entrypoint": "examples/nanogpt/analyze_mlp_residual_vq_trajectory_oracle.py",
+    "entrypoint_sha256": "cfe30959e4b4567692f392122d2f9dc6124ed9d7707215fa4a0735377c8423f6",
+    "trajectory_directory": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_moe_ladder/lr24e4_20tpp_seed2_geometry/parameter_trajectory",
+    "trajectory_file_count": 17,
+    "trajectory_total_bytes": 1926218521,
+    "trajectory_inventory_sha256": "5c4431ec46c9bdb9689fe2e3e4753784a5c240b5fa56d8a1a568344ef619778f",
+    "trajectory_run_identity_sha256": "ffd148a14c4c6dff21ae4adc2ce648ac5a7395e66f0068f9835b54c9e57fa1db",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "authorization": {
+    "run_tests": true,
+    "run_foreground_preflight": true,
+    "run_zero_update_oracle_after_preflight": true,
+    "language_model_training": false,
+    "larger_rung": false,
+    "automatic_retry_or_budget_sweep": false
+  }
+}
