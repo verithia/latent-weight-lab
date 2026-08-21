@@ -96,6 +96,12 @@ class DensePairVQShadowObserver:
                     ),
                     layer_id=layer,
                     fast_residual=fast_residual,
+                    stochastic_fast_retraction=bool(
+                        source.get(
+                            "block_fht_mlp_pair_vq_stochastic_fast_retraction",
+                            False,
+                        )
+                    ),
                     error_feedback=False,
                     neighbor_candidates=int(
                         source["block_fht_mlp_pair_vq_neighbor_candidates"]

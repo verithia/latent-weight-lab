@@ -24,6 +24,7 @@ from examples.nanogpt.muon_pair_vq import (
     _fit_residual_conditional_polar_pair_codec_,
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
+    _fit_stochastic_cartesian_pair_codec_,
     _fractional_lattice_feedback_layout,
     _fractional_residual_lattice_feedback_layout,
     _fractional_residual_lattice_source_decomposition,
@@ -41,6 +42,7 @@ def make_module(
     stages: int = 2,
     seed: int = 101,
     fast_residual: bool = False,
+    stochastic_fast_retraction: bool = False,
     error_feedback: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
@@ -57,6 +59,7 @@ def make_module(
         weight_std=0.02,
         layer_id=3,
         fast_residual=fast_residual,
+        stochastic_fast_retraction=stochastic_fast_retraction,
         error_feedback=error_feedback,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
@@ -74,6 +77,56 @@ def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
     return MuonPairVQ(
         [module], lr=0.01, momentum=0.5, weight_decay=0.1, ns_steps=1
     )
+
+
+def test_stochastic_cartesian_retraction_is_replay_exact_and_unbiased() -> None:
+    values = torch.linspace(-0.9, 0.9, 8192).reshape(-1, 2)
+    levels_a = torch.zeros(2, 16)
+    levels_b = torch.zeros(2, 16)
+    codes_a = torch.zeros(values.shape[0], dtype=torch.uint8)
+    codes_b = torch.zeros(values.shape[0], dtype=torch.uint8)
+    changes_a, diagnostics_a = _fit_stochastic_cartesian_pair_codec_(
+        values, levels_a, codes_a, seed=1901
+    )
+    changes_b, diagnostics_b = _fit_stochastic_cartesian_pair_codec_(
+        values, levels_b, codes_b, seed=1901
+    )
+    assert changes_a > 0
+    assert changes_b == changes_a
+    assert torch.equal(codes_b, codes_a)
+    torch.testing.assert_close(levels_b, levels_a, rtol=0.0, atol=0.0)
+    assert diagnostics_b == diagnostics_a
+    assert diagnostics_a["stochastic_fast_expected_bias_recovery"] > 0.999
+
+
+def test_stochastic_fast_retraction_resume_is_exact_without_rng_state() -> None:
+    module = make_module(
+        fast_residual=True,
+        stochastic_fast_retraction=True,
+        error_feedback=True,
+    )
+    optimizer = make_optimizer(module)
+    torch.manual_seed(1903)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = make_module(
+        fast_residual=True,
+        stochastic_fast_retraction=True,
+        error_feedback=True,
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    assert torch.equal(restored.fast_codes, module.fast_codes)
+    assert not any("rng" in key for key in restored.state_dict())
 
 
 def make_fractional_module(
@@ -1342,6 +1395,7 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
             block_fht_mlp_pair_vq=True,
             block_fht_mlp_pair_vq_error_feedback=True,
             block_fht_mlp_pair_vq_cproj_fast_residual=True,
+            block_fht_mlp_pair_vq_stochastic_fast_retraction=True,
             block_fht_mlp_pair_vq_feedback_codec="cartesian4x4",
             block_fht_mlp_pair_vq_feedback_output_group_size=2,
         )
@@ -1350,6 +1404,8 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
     assert isinstance(mlp.c_proj, MuonPairVQLinear)
     assert mlp.c_proj.stages == 1
     assert mlp.c_proj.fast_residual is True
+    assert mlp.c_proj.stochastic_fast_retraction is True
+    assert mlp.c_fc.stochastic_fast_retraction is True
     assert mlp.c_proj.error_feedback is True
     assert mlp.c_proj.feedback_output_group_size == 2
     assert mlp.c_fc.feedback_output_group_size == 2
@@ -1408,6 +1464,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         block_fht_mlp_pair_vq_code_refresh_interval=8,
         block_fht_mlp_pair_vq_error_feedback=True,
         block_fht_mlp_pair_vq_cproj_fast_residual=True,
+        block_fht_mlp_pair_vq_stochastic_fast_retraction=False,
         block_fht_mlp_pair_vq_feedback_codec="polar32x8",
         block_fht_mlp_pair_vq_feedback_output_group_size=0,
     )
@@ -1419,6 +1476,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_code_refresh_interval": 8,
         "block_fht_mlp_pair_vq_error_feedback": True,
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
+        "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
         "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
         "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),

@@ -77,10 +77,13 @@ def test_shadow_tracks_without_mutating_dense_and_restores_install(tmp_path) -> 
     ]
     assert torch.isfinite(torch.tensor([before, after])).all()
     with observer.installed():
-        assert any(
-            not torch.equal(parameter, modified[name])
-            for name, parameter in model.named_parameters()
-        )
+        for name, dense in observer._dense_modules.items():
+            torch.testing.assert_close(
+                dense.weight,
+                observer._shadow_modules[name].weight,
+                rtol=0.0,
+                atol=0.0,
+            )
     for name, parameter in model.named_parameters():
         torch.testing.assert_close(parameter, modified[name])
 

@@ -126,6 +126,72 @@ def _fit_cartesian_pair_codec_(
     return int((new_codes != old_codes).sum())
 
 
+@torch.no_grad()
+def _fit_stochastic_cartesian_pair_codec_(
+    vectors: torch.Tensor,
+    levels: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    seed: int,
+) -> tuple[int, dict[str, float]]:
+    """Fit Cartesian levels, then round each coordinate without local bias."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("Cartesian pair values must have shape (pairs, 2)")
+    old_codes = codes.clone()
+    _fit_cartesian_pair_codec_(vectors, levels, codes)
+    generator = torch.Generator(device=vectors.device)
+    generator.manual_seed(int(seed) % (2**63 - 1))
+    assignments = []
+    expected_parts = []
+    variance_parts = []
+    for coordinate in range(2):
+        values = vectors[:, coordinate].float()
+        ordered = levels[coordinate].sort().values
+        levels[coordinate].copy_(ordered)
+        upper = torch.searchsorted(ordered, values.contiguous()).clamp(0, 15)
+        lower = (upper - 1).clamp(0, 15)
+        below = values <= ordered[0]
+        above = values >= ordered[-1]
+        lower = torch.where(below, torch.zeros_like(lower), lower)
+        upper = torch.where(below, torch.zeros_like(upper), upper)
+        lower = torch.where(above, torch.full_like(lower, 15), lower)
+        upper = torch.where(above, torch.full_like(upper, 15), upper)
+        low_value = ordered.index_select(0, lower)
+        high_value = ordered.index_select(0, upper)
+        width = high_value - low_value
+        probability = torch.where(
+            width > 0,
+            ((values - low_value) / width).clamp(0.0, 1.0),
+            torch.zeros_like(values),
+        )
+        draw = torch.rand(
+            values.shape,
+            generator=generator,
+            device=values.device,
+            dtype=torch.float32,
+        )
+        assignments.append(torch.where(draw < probability, upper, lower))
+        expected_parts.append(low_value + probability * width)
+        variance_parts.append(probability * (1.0 - probability) * width.square())
+    new_codes = (assignments[0] * 16 + assignments[1]).to(torch.uint8)
+    codes.copy_(new_codes)
+    expected = torch.stack(expected_parts, dim=1)
+    expected_bias_energy = float((expected - vectors.float()).square().sum())
+    target_energy = float(vectors.float().square().sum())
+    sampling_variance = float(torch.stack(variance_parts, dim=1).sum())
+    return int((new_codes != old_codes).sum()), {
+        "stochastic_fast_expected_bias_energy": expected_bias_energy,
+        "stochastic_fast_target_energy": target_energy,
+        "stochastic_fast_expected_bias_recovery": (
+            1.0 - expected_bias_energy / max(target_energy, 1e-30)
+        ),
+        "stochastic_fast_sampling_variance": sampling_variance,
+        "stochastic_fast_sampling_variance_ratio": (
+            sampling_variance / max(target_energy, 1e-30)
+        ),
+    }
+
+
 def _decode_grouped_cartesian_pair_codec(
     levels: torch.Tensor,
     codes: torch.Tensor,
@@ -2027,6 +2093,7 @@ class MuonPairVQLinear(nn.Module):
         weight_std: float,
         layer_id: int,
         fast_residual: bool = False,
+        stochastic_fast_retraction: bool = False,
         error_feedback: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
@@ -2050,6 +2117,8 @@ class MuonPairVQLinear(nn.Module):
         self.stages = int(stages)
         self.layer_id = int(layer_id)
         self.fast_residual = bool(fast_residual)
+        self.stochastic_fast_retraction = bool(stochastic_fast_retraction)
+        self.base_seed = int(base_seed)
         self.error_feedback = bool(error_feedback)
         self.feedback_codec = str(feedback_codec)
         self.feedback_output_group_size = int(feedback_output_group_size)
@@ -2096,6 +2165,8 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ element count must be divisible by two")
         if self.stages not in (1, 2):
             raise ValueError("pair-VQ stages must be one or two")
+        if self.stochastic_fast_retraction and not self.fast_residual:
+            raise ValueError("stochastic fast retraction requires a fast residual")
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
         if any(step < 0 for step in self.feedback_residual_probe_steps):
@@ -2323,6 +2394,7 @@ class MuonPairVQLinear(nn.Module):
         self.weight.requires_grad_(True)
         self.bias = nn.Parameter(torch.zeros(self.out_features)) if bias else None
         self._last_projection_diagnostics: dict[str, float | int] | None = None
+        self._last_stochastic_fast_diagnostics: dict[str, float] = {}
 
     @property
     def element_count(self) -> int:
@@ -2862,6 +2934,20 @@ class MuonPairVQLinear(nn.Module):
     def _fit_fast_residual_(self, residual: torch.Tensor) -> int:
         if not self.fast_residual:
             return 0
+        if self.stochastic_fast_retraction:
+            changes, diagnostics = _fit_stochastic_cartesian_pair_codec_(
+                residual,
+                self.fast_levels,
+                self.fast_codes,
+                seed=(
+                    self.base_seed
+                    + 104729 * int(self.optimizer_step)
+                    + 1000003
+                ),
+            )
+            self._last_stochastic_fast_diagnostics = diagnostics
+            return changes
+        self._last_stochastic_fast_diagnostics = {}
         return _fit_cartesian_pair_codec_(
             residual, self.fast_levels, self.fast_codes
         )
@@ -2927,6 +3013,7 @@ class MuonPairVQLinear(nn.Module):
             "fast_code_changes": fast_code_changes,
             "refresh_codes": int(refresh_codes),
         }
+        diagnostics.update(self._last_stochastic_fast_diagnostics)
         self._last_projection_diagnostics = diagnostics
         self.optimizer_step.add_(1)
         return diagnostics

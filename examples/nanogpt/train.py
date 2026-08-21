@@ -1402,6 +1402,11 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-stochastic-fast-retraction",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-feedback-codec",
         default="cartesian4x4",
     )
@@ -2348,6 +2353,15 @@ def parse_args() -> argparse.Namespace:
         and not namespace.block_fht_mlp_pair_vq
     ):
         raise ValueError("pair-VQ c_proj fast residual requires MLP pair VQ")
+    if getattr(
+        namespace, "block_fht_mlp_pair_vq_stochastic_fast_retraction", False
+    ) and not (
+        namespace.block_fht_mlp_pair_vq
+        and namespace.block_fht_mlp_pair_vq_cproj_fast_residual
+    ):
+        raise ValueError(
+            "stochastic fast retraction requires pair VQ and c_proj fast residual"
+        )
     if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
         raise ValueError("pair-VQ feedback output group size must be nonnegative")
     residual_probe_steps = tuple(
@@ -3072,6 +3086,13 @@ def pair_vq_model_kwargs(
         ),
         "block_fht_mlp_pair_vq_cproj_fast_residual": bool(
             namespace.block_fht_mlp_pair_vq_cproj_fast_residual
+        ),
+        "block_fht_mlp_pair_vq_stochastic_fast_retraction": bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_stochastic_fast_retraction",
+                False,
+            )
         ),
         "block_fht_mlp_pair_vq_feedback_codec": str(
             namespace.block_fht_mlp_pair_vq_feedback_codec

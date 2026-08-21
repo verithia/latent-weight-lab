@@ -1,0 +1,101 @@
+{
+  "schema_version": "mai_124m_dense_pairvq_shadow_replay_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "COMPACT_GRADIENT_PATH_DRIFT",
+  "passed": true,
+  "decision": {
+    "dense_replay_valid": true,
+    "live_projector_tracks_dense_path": true,
+    "local_assignment_hysteresis_is_primary": false,
+    "more_capacity_or_feedback_bits_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The dense replay reproduced the historical parent within 0.000182 CE and the live compact shadow finished only 0.003818 CE behind that exact dense path. The same representation is 0.157960 CE behind when its own compact forward supplies the gradients. Endpoint capacity and live path tracking therefore pass; the missing mechanism is a compact update whose functional gradient path is stable under projection."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_dense_pairvq_shadow_replay_plan.json",
+    "plan_sha256": "4958de7d55be74e310ab2d2f64500feb41dcb3cd140a33a222b6b2f85ecd7129",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_shadow_replay_0p5tpp_lr24e4.json",
+    "config_sha256": "ca7f1db81aa93c3c3c2457804fe95113e68b4c3b12a6953d5a320494be01f2f1",
+    "execution_git_commit": "05345dfcf5b88a5f1855672bf1be92782bf0dbe3",
+    "run_id": "pro6_mai_v3_124m_dense_pairvq_shadow_replay_0p5tpp_lr24e4_20260821T201754Z_2850762",
+    "run_identity_sha256": "73e161531a63927f567d462ff930d32f0229169b7b88ff4a70552a2341d07052",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_dense_pairvq_shadow_replay_0p5tpp_lr24e4/dense_pair_vq_shadow_result.json",
+      "sha256": "e71cf4098e2fb35b2421050fb0f1b5576340517ba82f1fec656d94853362e728"
+    },
+    "status_sha256": "a57f582b3e6493897e8ac45f7726db9345563ab96207f787d71c4edf0e8d15ac",
+    "log_sha256": "355abc9bda65df6a69b1e55c2b79077cc61e1893bfd55c1aec1f3fbca9b688c1",
+    "provenance_sha256": "c9229a0be3ef66fe88bd8c4bfee38a106af185069fa284ecb9938d369894cd1f",
+    "mfu_preflight_certificate_sha256": "0635b374d01a9be1ccaf12ca4aa7a1f8a1038f9ea9d2ba6ac003e215284f4bb4"
+  },
+  "fixed_evaluation": [
+    {
+      "step": 0,
+      "dense_validation_ce": 10.997031211853027,
+      "shadow_validation_ce": 10.991430282592773,
+      "shadow_minus_dense_ce": -0.005600929260253906,
+      "absolute_weight_energy_recovery": 0.9826839355858823
+    },
+    {
+      "step": 60,
+      "dense_validation_ce": 6.219628810882568,
+      "shadow_validation_ce": 6.21977424621582,
+      "shadow_minus_dense_ce": 0.00014543533325195312,
+      "absolute_weight_energy_recovery": 0.9993176635381432
+    },
+    {
+      "step": 120,
+      "dense_validation_ce": 5.725562572479248,
+      "shadow_validation_ce": 5.727116584777832,
+      "shadow_minus_dense_ce": 0.0015540122985839844,
+      "absolute_weight_energy_recovery": 0.9991423223482895
+    },
+    {
+      "step": 180,
+      "dense_validation_ce": 5.463804721832275,
+      "shadow_validation_ce": 5.466702938079834,
+      "shadow_minus_dense_ce": 0.0028982162475585938,
+      "absolute_weight_energy_recovery": 0.9993339737977743
+    },
+    {
+      "step": 238,
+      "dense_validation_ce": 5.360817909240723,
+      "shadow_validation_ce": 5.364635467529297,
+      "shadow_minus_dense_ce": 0.0038175582885742188,
+      "absolute_weight_energy_recovery": 0.9993471138483508,
+      "worst_matrix_weight_energy_recovery": 0.9981175140885463,
+      "instantaneous_requested_step_energy_recovery": 0.00011796712311495927,
+      "worst_matrix_requested_step_energy_recovery": 0.00007872080355009192,
+      "code_changes": 114200
+    }
+  ],
+  "registered_gate_outcomes": {
+    "historical_dense_parent_validation_ce": 5.361,
+    "dense_replay_absolute_difference_ce": 0.00018209075927724916,
+    "dense_replay_absolute_difference_ce_max": 0.002,
+    "shadow_minus_dense_terminal_ce": 0.0038175582885742188,
+    "shadow_minus_dense_terminal_ce_max": 0.05,
+    "all_losses_finite": true
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.365093,
+    "preflight_tokens_per_second": 204244,
+    "preflight_iteration_ms": 1283.736,
+    "preflight_peak_mib": 32018.77,
+    "minimum_mfu_fraction": 0.20
+  },
+  "storage": {
+    "observer_pair_vq_matrix_bytes": 70855872,
+    "checkpoint_or_trajectory_tensors_retained": false
+  },
+  "mechanistic_interpretation": {
+    "endpoint_capacity": "The compact family is functionally sufficient on the dense path.",
+    "absolute_tracking": "The projected shadow recovers 99.9347 percent of dense MLP weight energy at the terminal endpoint.",
+    "local_retraction": "The final instantaneous requested update recovers only 0.0118 percent of requested energy, despite 114,200 code changes. Deterministic nearest-cell projection has effectively zero small-step tangent late in training.",
+    "next_design_constraint": "Repair the compact update geometry without adding a dense master weight, dense momentum, ambient residual, an LR sweep, or a larger rung."
+  }
+}
