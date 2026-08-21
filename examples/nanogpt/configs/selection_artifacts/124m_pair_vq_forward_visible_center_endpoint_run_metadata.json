@@ -1,0 +1,78 @@
+{
+  "schema_version": "mai_124m_pair_vq_forward_visible_center_endpoint_run_metadata_v1",
+  "state": "running",
+  "run_id": "pro6_mai_v3_124m_pairvq_forward_visible_center_0p5tpp_20260821T224656Z_2926236",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-22T06:46:57+08:00",
+  "process_group": 2926339,
+  "source_commit": "e3c0066047ed26d0790452cac9c60a2af5c7a2b0",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4.json",
+    "sha256": "3a7528c817dfc493887de6ff3319c2d1e001b24877dbb44a8e2b6b399cfe64a5"
+  },
+  "theory_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_forward_visible_center_endpoint_plan.json",
+    "sha256": "57a16de81b7328595889ef34bf6b11660a7d63e7ef675e0a424c59ba6107be41"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4_mfu.json",
+    "sha256": "19278478fe1f261253f7af0bc10bc68696e338b4b4bb2c39ec1d80d2978ec73f",
+    "log_sha256": "6c27d4837a83208773dae00cd77deeb66e26e4e99888b37361396b637c155dc4",
+    "mfu_fraction": 0.283024954242076,
+    "tokens_per_second": 158217.57875,
+    "iteration_milliseconds": 1657.01875,
+    "peak_mib": 31659.5,
+    "persistent_training_bytes": 157500864
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_pairvq_forward_visible_center_0p5tpp_20260821T224656Z_2926236.json",
+    "sha256": "1514b5001e38258212b3dabacdb0a244a83fcea804fd0159cec99f62caa3d88f"
+  },
+  "status_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_pairvq_forward_visible_center_0p5tpp_20260821T224656Z_2926236.json",
+  "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_pairvq_forward_visible_center_0p5tpp_20260821T224656Z_2926236.log",
+  "checkpoint_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4/ckpt.pt",
+  "initial_live_verification": {
+    "process_alive": true,
+    "iteration": 10,
+    "gpu_memory_mib": 44399,
+    "gpu_total_memory_mib": 97887,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 406.5,
+    "gpu_temperature_c": 44,
+    "recent_tokens_per_second": 159154.61,
+    "refresh_matrix_count": 24,
+    "weighted_feedback_codec_energy_recovery": 0.9999858056184328,
+    "minimum_matrix_feedback_codec_energy_recovery": 0.9999536847400284,
+    "weighted_current_step_energy_recovery": 0.9999996622582727,
+    "minimum_matrix_current_step_energy_recovery": 0.9999988723602826,
+    "minimum_requested_update_cosine": 0.9999993901691038,
+    "all_forward_visible_feedback": true,
+    "old_feedback_double_counted": false,
+    "all_virtual_weights_match_compact_state": true
+  },
+  "monitoring": {
+    "policy": "terminal/error-only; no progress milestones and no heartbeat for this expected sub-two-hour endpoint",
+    "watchdog_pid": 564,
+    "watchdog_receipt": "/Users/verithia/research/monitoring/pro6_pairvq_forward_visible_center/watch.receipt.json",
+    "watchdog_state": "/Users/verithia/research/monitoring/pro6_pairvq_forward_visible_center/watch.state.json",
+    "watchdog_log": "/Users/verithia/research/monitoring/pro6_pairvq_forward_visible_center/watch.log",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mentions": "@Codex",
+    "callback_action": "verify and seal terminal CE, state, hashes, and fixed-eval comparison; then continue only if the frozen decision rule authorizes it"
+  },
+  "terminal_gate": {
+    "dense_parent_validation_ce": 5.361,
+    "candidate_validation_ce_max": 5.411,
+    "persistent_training_bytes_exact": 157500864,
+    "automatic_rerun": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false
+  }
+}
