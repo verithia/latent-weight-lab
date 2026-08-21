@@ -47,7 +47,7 @@ RECOVERY_ACTION_PROMPT = (
 )
 
 REMOTE_PROBE = r'''python3 - "$1" <<'PY'
-import json, pathlib, re, subprocess, sys
+import json, os, pathlib, re, subprocess, sys
 runs = json.loads(sys.argv[1])
 samples = []
 for run in runs:
@@ -73,7 +73,12 @@ for run in runs:
     iters = re.findall(r"(?im)^\s*(?:iter(?:ation)?|step)\s*[=:]?\s*(\d+)\b", text)
     errors = re.findall(r"Traceback|CUDA (?:out of memory|OOM)|\bNaN\b|\bInf\b|AssertionError|\bfatal\b", text, re.I)
     try:
-        gpu = subprocess.check_output(["nvidia-smi", "--id=" + str(run["gpu"]), "--query-gpu=memory.used,memory.total,utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"], text=True, timeout=10).strip()
+        env = os.environ.copy()
+        library_path = run.get("nvidia_library_path")
+        if library_path:
+            existing = env.get("LD_LIBRARY_PATH", "")
+            env["LD_LIBRARY_PATH"] = library_path + ((":" + existing) if existing else "")
+        gpu = subprocess.check_output(["nvidia-smi", "--id=" + str(run["gpu"]), "--query-gpu=memory.used,memory.total,utilization.gpu,temperature.gpu", "--format=csv,noheader,nounits"], text=True, timeout=10, env=env).strip()
     except Exception:
         gpu = ""
     samples.append({"name": run["name"], "alive": alive, "last_iter": int(iters[-1]) if iters else None, "errors": sorted(set(errors)), "status": status, "gpu": gpu})
@@ -312,6 +317,11 @@ def main() -> None:
     parser.add_argument("--missing-grace-minutes", type=int, default=2)
     parser.add_argument("--interval", type=int, default=60)
     parser.add_argument(
+        "--remote-nvidia-library-path",
+        default="",
+        help="Optional remote directory prepended to LD_LIBRARY_PATH for nvidia-smi probes.",
+    )
+    parser.add_argument(
         "--progress-milestones",
         type=parse_milestones,
         default=(20, 50),
@@ -333,6 +343,11 @@ def main() -> None:
 
     if not args.state_key or any(char not in "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.-" for char in args.state_key):
         parser.error("--state-key may contain only letters, digits, dot, underscore, and dash")
+    if args.remote_nvidia_library_path and not args.remote_nvidia_library_path.startswith("/"):
+        parser.error("--remote-nvidia-library-path must be absolute")
+    if args.remote_nvidia_library_path:
+        for run in args.run:
+            run["nvidia_library_path"] = args.remote_nvidia_library_path
     state_path = args.state_dir / f"{args.state_key}.json"
     progress_path = args.state_dir / f"{args.state_key}_progress.json"
     state = load(state_path)

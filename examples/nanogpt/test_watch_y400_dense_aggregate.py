@@ -82,3 +82,9 @@ def test_parse_milestones_requires_unique_ascending_nonterminal_values() -> None
     for invalid in ("", "0,50", "20,100", "50,20", "20,20", "twenty,50"):
         with pytest.raises(argparse.ArgumentTypeError):
             watcher.parse_milestones(invalid)
+
+
+def test_remote_probe_supports_version_matched_nvidia_userspace() -> None:
+    assert 'run.get("nvidia_library_path")' in watcher.REMOTE_PROBE
+    assert 'env["LD_LIBRARY_PATH"]' in watcher.REMOTE_PROBE
+    assert "env=env" in watcher.REMOTE_PROBE
