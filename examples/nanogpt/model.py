@@ -270,6 +270,7 @@ class GPTConfig:
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
     mlp_shared_dense_trunk: bool = False
     mlp_shared_dense_trunk_groups: int = 1
+    mlp_shared_dense_trunk_boundaries: tuple[int, ...] = ()
     mlp_shared_dense_tri_monarch_block_width: int = 0
     mlp_shared_dense_tri_monarch_coordinate_scale: float = 1.0
     mlp_shared_dense_tri_monarch_seed: int = 20260819
@@ -4820,11 +4821,34 @@ class GPT(nn.Module):
         if not blocks:
             raise ValueError("shared dense MLP trunk requires at least one layer")
         groups = int(self.config.mlp_shared_dense_trunk_groups)
-        if groups <= 0 or groups > len(blocks) or len(blocks) % groups:
-            raise ValueError(
-                "shared dense MLP trunk groups must be positive, no greater "
-                "than n_layer, and evenly divide n_layer"
-            )
+        boundaries = tuple(int(value) for value in self.config.mlp_shared_dense_trunk_boundaries)
+        if boundaries:
+            if groups != len(boundaries):
+                raise ValueError(
+                    "shared dense MLP trunk group count must equal the number "
+                    "of explicit boundaries"
+                )
+            if (
+                boundaries[-1] != len(blocks)
+                or any(value <= 0 or value > len(blocks) for value in boundaries)
+                or any(later <= earlier for earlier, later in zip(boundaries, boundaries[1:]))
+            ):
+                raise ValueError(
+                    "shared dense MLP trunk boundaries must increase strictly "
+                    "and terminate at n_layer"
+                )
+            ranges = list(zip((0, *boundaries[:-1]), boundaries, strict=True))
+        else:
+            if groups <= 0 or groups > len(blocks) or len(blocks) % groups:
+                raise ValueError(
+                    "shared dense MLP trunk groups must be positive, no greater "
+                    "than n_layer, and evenly divide n_layer"
+                )
+            group_size = len(blocks) // groups
+            ranges = [
+                (start, start + group_size)
+                for start in range(0, len(blocks), group_size)
+            ]
         for block in blocks:
             if not isinstance(block.mlp, MLP):
                 raise ValueError("shared dense MLP trunk requires the dense MLP module")
@@ -4835,10 +4859,9 @@ class GPT(nn.Module):
                     "shared dense MLP trunk requires plain dense c_fc and c_proj"
                 )
 
-        group_size = len(blocks) // groups
-        for start in range(0, len(blocks), group_size):
+        for start, stop in ranges:
             root = blocks[start].mlp
-            for block in blocks[start + 1 : start + group_size]:
+            for block in blocks[start + 1 : stop]:
                 block.mlp.c_fc.weight = root.c_fc.weight
                 block.mlp.c_proj.weight = root.c_proj.weight
                 if self.config.bias:

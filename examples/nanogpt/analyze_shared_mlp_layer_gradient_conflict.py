@@ -53,8 +53,11 @@ def atomic_json(path: Path, payload: dict[str, Any]) -> None:
 
 
 def _dot(left: Iterable[Tensor], right: Iterable[Tensor]) -> float:
-    total = torch.zeros((), device="cuda", dtype=torch.float64)
-    for lhs, rhs in zip(left, right, strict=True):
+    paired = list(zip(left, right, strict=True))
+    if not paired:
+        raise ValueError("at least one tensor pair is required")
+    total = torch.zeros((), device=paired[0][0].device, dtype=torch.float64)
+    for lhs, rhs in paired:
         total += torch.sum(lhs.to(torch.float64) * rhs.to(torch.float64))
     return float(total.item())
 
@@ -92,6 +95,22 @@ def contiguous_group_recoveries(
     return [
         common_update_energy_fraction(gradients[start : start + size])
         for start in range(0, len(gradients), size)
+    ]
+
+
+def boundary_group_recoveries(
+    gradients: list[tuple[Tensor, ...]], boundaries: tuple[int, ...]
+) -> list[float]:
+    if (
+        not boundaries
+        or boundaries[-1] != len(gradients)
+        or any(value <= 0 or value > len(gradients) for value in boundaries)
+        or any(later <= earlier for earlier, later in zip(boundaries, boundaries[1:]))
+    ):
+        raise ValueError("boundaries must increase strictly and end at the layer count")
+    return [
+        common_update_energy_fraction(gradients[start:stop])
+        for start, stop in zip((0, *boundaries[:-1]), boundaries, strict=True)
     ]
 
 
@@ -192,6 +211,16 @@ def main() -> None:
             }
         partitions[str(group_count)] = entry
 
+    measured_boundaries = (2, 4, 8, 12)
+    nonuniform: dict[str, Any] = {}
+    for name, gradients in (("combined", combined), ("c_fc", c_fc), ("c_proj", c_proj)):
+        values = boundary_group_recoveries(gradients, measured_boundaries)
+        nonuniform[name] = {
+            "per_group": values,
+            "mean": sum(values) / len(values),
+            "minimum": min(values),
+        }
+
     result = {
         "schema_version": "mai_shared_mlp_layer_gradient_conflict_v1",
         "classification": "MEASUREMENT",
@@ -220,6 +249,11 @@ def main() -> None:
         },
         "pairwise_combined_cosine": pairwise,
         "contiguous_partitions": partitions,
+        "measured_nonuniform_partition": {
+            "boundaries": list(measured_boundaries),
+            "layers": [[0, 1], [2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+            "metrics": nonuniform,
+        },
         "wall_seconds": time.time() - started,
         "maximum_cuda_memory_bytes": torch.cuda.max_memory_allocated(),
     }

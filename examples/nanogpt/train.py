@@ -1093,6 +1093,12 @@ def parse_args() -> argparse.Namespace:
         default=1,
     )
     parser.add_argument(
+        "--mlp-shared-dense-trunk-boundaries",
+        nargs="*",
+        type=int,
+        default=(),
+    )
+    parser.add_argument(
         "--mlp-shared-dense-tri-monarch-block-width",
         type=int,
         default=0,
@@ -2750,6 +2756,9 @@ def main() -> None:
         moe_unpadded_expert_loop=args.moe_unpadded_expert_loop,
         mlp_shared_dense_trunk=args.mlp_shared_dense_trunk,
         mlp_shared_dense_trunk_groups=args.mlp_shared_dense_trunk_groups,
+        mlp_shared_dense_trunk_boundaries=tuple(
+            args.mlp_shared_dense_trunk_boundaries
+        ),
         mlp_shared_dense_tri_monarch_block_width=(
             args.mlp_shared_dense_tri_monarch_block_width
         ),

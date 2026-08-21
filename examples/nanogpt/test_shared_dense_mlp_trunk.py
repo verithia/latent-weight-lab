@@ -59,6 +59,38 @@ def test_shared_dense_trunk_supports_contiguous_depth_groups() -> None:
     assert len({id(mlp.residual_output_log_gain) for mlp in mlps}) == 6
 
 
+def test_shared_dense_trunk_supports_measured_nonuniform_boundaries() -> None:
+    model = GPT(
+        _tiny_config(
+            n_layer=8,
+            mlp_shared_dense_trunk_groups=4,
+            mlp_shared_dense_trunk_boundaries=(2, 4, 6, 8),
+        )
+    )
+    mlps = [block.mlp for block in model.transformer.h]
+
+    assert len({id(mlp.c_fc.weight) for mlp in mlps}) == 4
+    for left, right in ((0, 1), (2, 3), (4, 5), (6, 7)):
+        assert id(mlps[left].c_fc.weight) == id(mlps[right].c_fc.weight)
+        assert id(mlps[left].c_proj.weight) == id(mlps[right].c_proj.weight)
+
+
+def test_shared_dense_trunk_supports_unequal_measured_groups() -> None:
+    model = GPT(
+        _tiny_config(
+            n_layer=12,
+            mlp_shared_dense_trunk_groups=4,
+            mlp_shared_dense_trunk_boundaries=(2, 4, 8, 12),
+        )
+    )
+    mlps = [block.mlp for block in model.transformer.h]
+
+    assert len({id(mlp.c_fc.weight) for mlp in mlps}) == 4
+    for indices in ((0, 1), (2, 3), (4, 5, 6, 7), (8, 9, 10, 11)):
+        assert len({id(mlps[index].c_fc.weight) for index in indices}) == 1
+        assert len({id(mlps[index].c_proj.weight) for index in indices}) == 1
+
+
 def test_shared_dense_trunk_backward_aggregates_shared_and_private_gradients() -> None:
     torch.manual_seed(17)
     model = GPT(_tiny_config())
@@ -142,6 +174,22 @@ def test_shared_dense_trunk_rejects_generated_mlp_and_missing_private_charts() -
         (
             {"n_layer": 3, "mlp_shared_dense_trunk_groups": 2},
             "evenly divide n_layer",
+        ),
+        (
+            {
+                "n_layer": 6,
+                "mlp_shared_dense_trunk_groups": 2,
+                "mlp_shared_dense_trunk_boundaries": (2, 4, 6),
+            },
+            "group count",
+        ),
+        (
+            {
+                "n_layer": 6,
+                "mlp_shared_dense_trunk_groups": 2,
+                "mlp_shared_dense_trunk_boundaries": (2, 5),
+            },
+            "terminate at n_layer",
         ),
     )
     for overrides, expected in invalid:
