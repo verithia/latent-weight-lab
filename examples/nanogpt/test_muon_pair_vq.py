@@ -142,7 +142,10 @@ def test_block_fht_gain_lattice_reports_physical_rate_and_recovery() -> None:
     assert diagnostics["physical_bits_per_weight"] == 6.125
     assert diagnostics["full_recovery"] > 0.99
     assert diagnostics["coordinate_active_codes"] == 64
-    assert diagnostics["gain_active_codes"] > 128
+    # The fixture contains exactly 128 gain blocks, so occupancy cannot exceed
+    # 128 even with a 256-level gain codebook.  Requiring a majority of those
+    # blocks to remain distinct still catches a collapsed gain quantizer.
+    assert diagnostics["gain_active_codes"] > 64
 
 
 def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> None:
