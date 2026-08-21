@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_layer_axis_basis7_mlp_teacher_fit_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can the strongest seven-trunk storage budget represent all twelve dense MLP functions when hard depth sharing is replaced by a continuous layer-axis basis with unique static weights for every layer?",
+  "causal_basis": {
+    "hard_em_result": "examples/nanogpt/configs/selection_artifacts/124m_depth_shared_top1_mlp_hard_em_result.json",
+    "hard_em_result_sha256": "2b5c965c2fed08bbe246f9bbb3c7fa6a20a6f78aefaa6ed8f29c20fbb15ba82a",
+    "hard_em_finding": "Four token-routed full-width fields fail even under oracle assignment after healthy hard-EM optimization. Token routing is not the missing degree of freedom.",
+    "seven_trunk_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp_result.json",
+    "seven_trunk_result_sha256": "65f62a9a44c1d68640adc80a2cb6c3eb7497b82cf0026ab79a4a05c44962a96c",
+    "seven_trunk_finding": "Seven hard depth trunks are the strongest storage-compact MLP result: +0.0262 CE at 0.5TPP and +0.0698 CE at 5TPP, but their exact teacher-fit ceiling shows late-layer endpoint and JVP mismatch.",
+    "representation_change": "Replace one-hot depth assignment with unrestricted continuous layer-specific coefficients over the same seven learned full-width matrix-pair atoms. This strictly contains the seven-trunk family, gives every layer unique static matrices, and removes the discontinuous per-token router from the rejected four-expert family.",
+    "not_a_sweep": "The atom count is fixed to seven by the sealed smallest-passing late-horizon depth partition. There is one initialization, one two-stage optimizer path, one seed, and no coefficient-rank, atom-count, regularizer, or restart sweep."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "seven_trunk_initialization_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "atoms": 7,
+    "layers": 12,
+    "residual_width": 768,
+    "hidden_width": 3072,
+    "definition": "W_fc,l = sum_k a_fc[l,k] B_fc[k] and W_proj,l = sum_k a_proj[l,k] B_proj[k], followed by the existing per-layer signed pre-GELU gain and positive residual-output gain.",
+    "initialization": "The seven basis pairs are the seven unique matrix pairs in the sealed seven-trunk checkpoint. Both coefficient matrices start at the exact one-hot depth partition {0},{1},{2},{3},{4},{5,6,7},{8,9,10,11}; gains are copied exactly. The initial function is therefore the sealed seven-trunk function.",
+    "compact_parameters": 33076392,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 1.7118887694885223,
+    "parameter_saving_fraction": 0.4158498975965712,
+    "deployment": "Coefficients are static per layer. Reconstruct and cache one ordinary dense c_fc/c_proj pair per layer after a parameter refresh; token-time and inference GEMM FLOPs are unchanged.",
+    "conservative_reconstruction_flops_per_refresh": 792723456,
+    "persistent_dense_optimizer_state": false,
+    "token_router": false
+  },
+  "fit_protocol": {
+    "objective": "Equal-weight sum of separately normalized clean-output error and central-difference direction error on dense-teacher and seven-trunk state banks, identical to the corrected parent teacher-fit metric.",
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260920,
+    "holdout_token_seed": 20260921,
+    "local_perturbation_relative_rms": 0.01,
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "gradient_clip_norm": 10.0,
+    "algorithm_seed": 20260922,
+    "stages": [
+      {
+        "name": "coefficients_only",
+        "steps": 300,
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "weight_decay": 0.0,
+        "trainable": "the two 12x7 coefficient matrices only"
+      },
+      {
+        "name": "joint_basis_coefficients",
+        "steps": 1200,
+        "optimizer": "Adam",
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0,
+        "trainable": "basis matrices, coefficient matrices, pre-GELU gains, and residual-output gains"
+      }
+    ],
+    "best_state_rule": "Within each stage preserve the state with the smallest discovery objective. The second stage warm-starts the first. Holdout values, fixed CE, wall time, and gate outcomes never select a state.",
+    "parameter_clamps": "Pre-GELU gains are clamped to [-4,4] and residual-output log gains to [-4,4]. Basis matrices and layer coefficients are unconstrained.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260923,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "stagewise discovery and holdout value-direction objectives",
+      "held-out output and analytic input-JVP recovery by layer and state bank",
+      "layer coefficient matrices and effective layer-axis singular spectrum",
+      "fixed-checkpoint validation CE after the terminal stage",
+      "parameter, reconstruction-FLOP, peak-memory, and wall-time accounting"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "Finite terminal execution and either terminal discovery objective at most 0.5 or at least 50-percent reduction from the joint-stage initial objective."
+  },
+  "decision_rule": {
+    "pass": "Implement this exact family in the LM model, measure exact-config MFU, and launch only a 124M/0.5TPP verification if MFU is at least 20 percent.",
+    "healthy_fail": "Reject the seven-atom continuous layer-axis family without sweeping atom count or optimizer. The next representation must generate a locally varying full-width nonlinear field rather than sharing static matrix atoms across depth.",
+    "optimization_inconclusive": "Stop and report without LM training or a capacity conclusion."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update teacher-fit ceiling after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before every functional and CE gate passes",
+      "model-size scaling",
+      "atom-count, optimizer, learning-rate, stage-length, seed, gain, or regularizer sweeps",
+      "holdout-based state selection"
+    ],
+    "callback_policy": "Foreground-poll if measured complete runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}

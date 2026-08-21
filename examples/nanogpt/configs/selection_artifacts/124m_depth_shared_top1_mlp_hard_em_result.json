@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_depth_shared_top1_mlp_hard_em_result_v1",
+  "classification": "FOUR_EXPERT_TOP1_FAMILY_FAIL",
+  "identity": {
+    "repository_commit": "87a3fc0ab6b3397ec0c088cf846872596dc2d112",
+    "entrypoint": "examples/nanogpt/analyze_depth_shared_top1_mlp_hard_em.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_depth_shared_top1_mlp_hard_em_plan.json",
+    "plan_sha256": "2e259d548169bc9baea14800fc286b0601812fc7a98b4697e4574f792b0e558a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "parent_state_sha256": "5083a00ba89a4ee50e5f81de9bd268f3055fc04baa33d16cbb15c3ed5206156e",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_depth_shared_top1_mlp_hard_em_20260821/result.json",
+      "sha256": "34929badb45f0e73f76c4d91239d512dec8fd74695feafe7d92dd413bba412c2"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_depth_shared_top1_mlp_hard_em_20260821/fitted_state.pt",
+      "sha256": "e90d18c48d5639c719baffba35faeff9c9278618243ea2381668158813275233"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 40.153648138046265,
+    "maximum_cuda_memory_bytes": 10669971968,
+    "language_model_updates": 0,
+    "focused_tests": "9 passed",
+    "preflight": {
+      "seconds_per_five_step_two_phase_cycle": 0.614670991897583,
+      "conservative_estimated_fit_seconds": 73.76051902770996,
+      "maximum_cuda_memory_bytes": 2608867328
+    }
+  },
+  "accounting": {
+    "compact_parameters": 18957360,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 2.9868665257187708,
+    "parameter_saving_fraction": 0.6652009752061632,
+    "deployed_extra_fraction_of_dense_mlp_matmul_flops": 0.0006510416666666666
+  },
+  "optimization": {
+    "initial_hard_routed_fit_objective": 3.767971470952034,
+    "best_hard_routed_fit_objective": 1.0570886135101318,
+    "objective_reduction_fraction": 0.719454179761422,
+    "optimization_healthy": true,
+    "fit_router_accuracy": 0.9659423828125,
+    "holdout_router_accuracy": 0.957763671875,
+    "final_oracle_fit_objective": 0.4816986918449402,
+    "assignment_change_fraction_last_cycle": 0.0001220703125,
+    "assignment_counts_last_cycle": [6227, 5156, 7488, 5705]
+  },
+  "heldout_function": {
+    "routed_output_recovery_mean_min_global": [0.500164565940698, 0.07140213251113892, 0.5239702159551753],
+    "routed_input_jvp_recovery_mean_min_global": [0.09822859615087509, -0.35491514205932617, 0.12194248360700888],
+    "oracle_output_recovery_mean_min_global": [0.5028079052766165, 0.0705651044845581, 0.5264921169465129],
+    "oracle_input_jvp_recovery_mean_min_global": [0.10192924241224925, -0.3507460355758667, 0.12499023963926181]
+  },
+  "fixed_validation": {
+    "teacher_cross_entropy": 3.674412250518799,
+    "candidate_cross_entropy": 6.9238362312316895,
+    "gap": 3.2494239807128906
+  },
+  "decision": {
+    "representation_rejected": true,
+    "language_model_training_authorized": false,
+    "expert_count_or_router_sweep_authorized": false,
+    "interpretation": "Exact alternating minimization removes the straight-through optimization ambiguity: the hard-routed discovery objective falls by 71.95 percent and the affine router reproduces 95.8-96.6 percent of oracle assignments. Nevertheless oracle routing itself recovers only 50.3 percent of held-out output energy and 10.2 percent of input-JVP energy, essentially identical to learned routing, while fixed CE is 3.2494 worse than the dense teacher. Four depth-shared full-width fields are therefore insufficient; the remaining failure is representational, not a router-boundary or optimizer issue.",
+    "next_action": "Do not add experts or change top-k. Test one continuous seven-atom layer-axis basis at the same storage as the strongest seven-trunk model. Every layer receives its own static full-width c_fc/c_proj mixture, so the weights can be folded once per refresh and avoid token routing entirely. Require the unchanged held-out output, input-JVP, and fixed-CE gates before any LM run."
+  }
+}
