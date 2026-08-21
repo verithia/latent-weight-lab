@@ -48,6 +48,7 @@ def make_module(
     stochastic_fast_uniform_levels: bool = False,
     stochastic_fast_block_local_levels: bool = False,
     error_feedback: bool = False,
+    forward_visible_feedback: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
     feedback_residual_probe_steps: tuple[int, ...] = (),
@@ -68,6 +69,7 @@ def make_module(
         stochastic_fast_uniform_levels=stochastic_fast_uniform_levels,
         stochastic_fast_block_local_levels=stochastic_fast_block_local_levels,
         error_feedback=error_feedback,
+        forward_visible_feedback=forward_visible_feedback,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
         feedback_residual_probe_steps=feedback_residual_probe_steps,
@@ -1004,6 +1006,92 @@ def test_pair_coded_feedback_resume_is_bit_exact_for_next_step() -> None:
     )
 
 
+def test_forward_visible_feedback_materializes_compact_virtual_center() -> None:
+    torch.manual_seed(20260822)
+    module = make_module(
+        stages=1,
+        fast_residual=True,
+        error_feedback=True,
+        forward_visible_feedback=True,
+    )
+    optimizer = make_optimizer(module)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    state = optimizer.state[module.weight]
+    base = module.decode_weight()
+    feedback = module.decode_feedback(
+        state["feedback_levels"], state["feedback_codes"]
+    ).reshape_as(module.weight)
+    torch.testing.assert_close(
+        module.weight, base + feedback, rtol=0.0, atol=0.0
+    )
+    assert diagnostics["forward_visible_feedback"] == 1
+    assert diagnostics["projection_target_includes_prior_feedback"] == 0
+    assert diagnostics["virtual_weight_matches_compact_state"] == 1
+    assert module.storage_accounting()["persistent_training_bytes"] == (
+        module.persistent_codec_bytes
+        + module.compact_momentum_bytes
+        + module.compact_feedback_bytes
+    )
+
+
+def test_forward_visible_feedback_resume_reconstructs_virtual_weight_exactly() -> None:
+    torch.manual_seed(20260823)
+    module = make_module(
+        stages=1,
+        seed=20260824,
+        fast_residual=True,
+        error_feedback=True,
+        forward_visible_feedback=True,
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    expected_virtual = module.weight.detach().clone()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(
+        stages=1,
+        seed=20260825,
+        fast_residual=True,
+        error_feedback=True,
+        forward_visible_feedback=True,
+    )
+    restored.load_state_dict(model_state, strict=True)
+    assert not torch.equal(restored.weight, expected_virtual)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    torch.testing.assert_close(
+        restored.weight, expected_virtual, rtol=0.0, atol=0.0
+    )
+
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(
+        restored.weight, module.weight, rtol=0.0, atol=0.0
+    )
+
+
+def test_legacy_error_feedback_forward_remains_base_projection() -> None:
+    torch.manual_seed(20260826)
+    module = make_module(stages=1, fast_residual=True, error_feedback=True)
+    optimizer = make_optimizer(module)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    torch.testing.assert_close(
+        module.weight, module.decode_weight(), rtol=0.0, atol=0.0
+    )
+    assert diagnostics["forward_visible_feedback"] == 0
+    assert diagnostics["projection_target_includes_prior_feedback"] == 1
+
+
 def test_output_grouped_feedback_is_compact_and_conserves_motion() -> None:
     torch.manual_seed(139)
     module = make_module(
@@ -1625,6 +1713,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         block_fht_mlp_pair_vq_neighbor_candidates=16,
         block_fht_mlp_pair_vq_code_refresh_interval=8,
         block_fht_mlp_pair_vq_error_feedback=True,
+        block_fht_mlp_pair_vq_forward_visible_feedback=True,
         block_fht_mlp_pair_vq_cproj_fast_residual=True,
         block_fht_mlp_pair_vq_stochastic_fast_retraction=False,
         block_fht_mlp_pair_vq_stochastic_fast_fht_block_size=0,
@@ -1639,6 +1728,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_neighbor_candidates": 16,
         "block_fht_mlp_pair_vq_code_refresh_interval": 8,
         "block_fht_mlp_pair_vq_error_feedback": True,
+        "block_fht_mlp_pair_vq_forward_visible_feedback": True,
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
         "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
         "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": 0,

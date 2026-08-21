@@ -192,6 +192,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_neighbor_candidates: int = 16
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
     block_fht_mlp_pair_vq_error_feedback: bool = False
+    block_fht_mlp_pair_vq_forward_visible_feedback: bool = False
     block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_retraction: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_fht_block_size: int = 0
@@ -2432,6 +2433,9 @@ class MLP(nn.Module):
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback
                 ),
+                forward_visible_feedback=bool(
+                    config.block_fht_mlp_pair_vq_forward_visible_feedback
+                ),
                 feedback_codec=str(
                     config.block_fht_mlp_pair_vq_feedback_codec
                 ),
@@ -2723,6 +2727,9 @@ class MLP(nn.Module):
                 ),
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback
+                ),
+                forward_visible_feedback=bool(
+                    config.block_fht_mlp_pair_vq_forward_visible_feedback
                 ),
                 feedback_codec=str(
                     config.block_fht_mlp_pair_vq_feedback_codec
@@ -5900,6 +5907,9 @@ class GPT(nn.Module):
             "dense_master_weight": "disabled",
             "dense_optimizer_momentum": "disabled",
             "dense_ambient_error_buffer": "disabled",
+            "forward_visible_feedback": any(
+                module.forward_visible_feedback for module in modules
+            ),
             "compact_temporal_carry": (
                 "uint8_cartesian_code_per_weight_pair"
                 if feedback_bytes

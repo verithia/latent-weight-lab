@@ -2197,6 +2197,7 @@ class MuonPairVQLinear(nn.Module):
         stochastic_fast_uniform_levels: bool = False,
         stochastic_fast_block_local_levels: bool = False,
         error_feedback: bool = False,
+        forward_visible_feedback: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
         feedback_residual_probe_steps: tuple[int, ...] = (),
@@ -2231,6 +2232,7 @@ class MuonPairVQLinear(nn.Module):
         )
         self.base_seed = int(base_seed)
         self.error_feedback = bool(error_feedback)
+        self.forward_visible_feedback = bool(forward_visible_feedback)
         self.feedback_codec = str(feedback_codec)
         self.feedback_output_group_size = int(feedback_output_group_size)
         self.feedback_residual_probe_steps = tuple(
@@ -2278,6 +2280,8 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ stages must be one or two")
         if self.stochastic_fast_retraction and not self.fast_residual:
             raise ValueError("stochastic fast retraction requires a fast residual")
+        if self.forward_visible_feedback and not self.error_feedback:
+            raise ValueError("forward-visible feedback requires error feedback")
         if self.stochastic_fast_fht_block_size < 0:
             raise ValueError("stochastic fast FHT block size must be nonnegative")
         if self.stochastic_fast_fht_block_size and (
@@ -2915,6 +2919,7 @@ class MuonPairVQLinear(nn.Module):
             "dense_master_weight": "disabled",
             "dense_optimizer_momentum": "disabled",
             "dense_ambient_error_buffer": "disabled",
+            "forward_visible_feedback": self.forward_visible_feedback,
             "compact_temporal_carry": (
                 (
                     (
@@ -3060,6 +3065,21 @@ class MuonPairVQLinear(nn.Module):
     @torch.no_grad()
     def rematerialize_weight_(self) -> None:
         self.weight.copy_(self.decode_weight())
+
+    @torch.no_grad()
+    def rematerialize_forward_visible_weight_(
+        self,
+        levels: torch.Tensor,
+        codes: torch.Tensor,
+        center: torch.Tensor | None = None,
+    ) -> None:
+        """Rebuild the transient virtual center from compact persistent state."""
+        self.rematerialize_weight_()
+        if self.forward_visible_feedback:
+            feedback = self.decode_feedback(levels, codes, center).reshape_as(
+                self.weight
+            )
+            self.weight.add_(feedback.to(dtype=self.weight.dtype))
 
     @torch.no_grad()
     def _local_reassign_(
@@ -3295,6 +3315,12 @@ class MuonPairVQ(torch.optim.Optimizer):
                     state["feedback_center"] = center.to(
                         device=weight.device, dtype=torch.float32
                     )
+                if levels is not None and codes is not None:
+                    module.rematerialize_forward_visible_weight_(
+                        state["feedback_levels"],
+                        state["feedback_codes"],
+                        state.get("feedback_center"),
+                    )
         return result
 
     @torch.no_grad()
@@ -3365,7 +3391,11 @@ class MuonPairVQ(torch.optim.Optimizer):
                         state["feedback_codes"],
                         state.get("feedback_center"),
                     ).reshape_as(weight)
-                    projection_target = requested + feedback_before
+                    projection_target = (
+                        requested
+                        if module.forward_visible_feedback
+                        else requested + feedback_before
+                    )
                 else:
                     feedback_before = None
                     projection_target = requested
@@ -3376,6 +3406,12 @@ class MuonPairVQ(torch.optim.Optimizer):
                     projection_target, refresh_codes=refresh
                 )
                 diagnostics["error_feedback"] = int(module.error_feedback)
+                diagnostics["forward_visible_feedback"] = int(
+                    module.forward_visible_feedback
+                )
+                diagnostics["projection_target_includes_prior_feedback"] = int(
+                    module.error_feedback and not module.forward_visible_feedback
+                )
                 if module.error_feedback:
                     raw_feedback = projection_target - weight.float()
                     feedback_code_changes = module.fit_feedback_(
@@ -3416,6 +3452,56 @@ class MuonPairVQ(torch.optim.Optimizer):
                             "feedback_code_changes": feedback_code_changes,
                         }
                     )
+                    if module.forward_visible_feedback:
+                        base_projection_residual_energy = float(
+                            diagnostics["projection_residual_energy"]
+                        )
+                        base_requested_step_energy_recovery = float(
+                            diagnostics["requested_step_energy_recovery"]
+                        )
+                        module.rematerialize_forward_visible_weight_(
+                            state["feedback_levels"],
+                            state["feedback_codes"],
+                            state.get("feedback_center"),
+                        )
+                        old_virtual = requested - current_request
+                        achieved_virtual_delta = weight.float() - old_virtual
+                        achieved_virtual_energy = float(
+                            achieved_virtual_delta.square().sum()
+                        )
+                        requested_virtual_energy = float(
+                            current_request.square().sum()
+                        )
+                        requested_virtual_inner = float(
+                            (current_request * achieved_virtual_delta).sum()
+                        )
+                        diagnostics.update(
+                            {
+                                "base_projection_residual_energy": (
+                                    base_projection_residual_energy
+                                ),
+                                "base_requested_step_energy_recovery": (
+                                    base_requested_step_energy_recovery
+                                ),
+                                "projection_residual_energy": (
+                                    conservation_error_energy
+                                ),
+                                "requested_step_energy_recovery": 1.0
+                                - conservation_error_energy
+                                / max(requested_virtual_energy, 1e-30),
+                                "requested_update_cosine": (
+                                    requested_virtual_inner
+                                    / max(
+                                        math.sqrt(
+                                            max(requested_virtual_energy, 0.0)
+                                            * max(achieved_virtual_energy, 0.0)
+                                        ),
+                                        1e-30,
+                                    )
+                                ),
+                                "virtual_weight_matches_compact_state": 1,
+                            }
+                        )
                     if (
                         refresh
                         and module.feedback_codec

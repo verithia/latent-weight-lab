@@ -1428,6 +1428,11 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-forward-visible-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-cproj-fast-residual",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2379,6 +2384,15 @@ def parse_args() -> argparse.Namespace:
         and not namespace.block_fht_mlp_pair_vq
     ):
         raise ValueError("pair-coded feedback requires MLP pair VQ")
+    if getattr(
+        namespace, "block_fht_mlp_pair_vq_forward_visible_feedback", False
+    ) and not (
+        namespace.block_fht_mlp_pair_vq
+        and namespace.block_fht_mlp_pair_vq_error_feedback
+    ):
+        raise ValueError(
+            "forward-visible pair-VQ feedback requires pair VQ and error feedback"
+        )
     if (
         namespace.block_fht_mlp_pair_vq_cproj_fast_residual
         and not namespace.block_fht_mlp_pair_vq
@@ -3168,6 +3182,13 @@ def pair_vq_model_kwargs(
         ),
         "block_fht_mlp_pair_vq_error_feedback": bool(
             namespace.block_fht_mlp_pair_vq_error_feedback
+        ),
+        "block_fht_mlp_pair_vq_forward_visible_feedback": bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_forward_visible_feedback",
+                False,
+            )
         ),
         "block_fht_mlp_pair_vq_cproj_fast_residual": bool(
             namespace.block_fht_mlp_pair_vq_cproj_fast_residual
@@ -4041,7 +4062,9 @@ def main() -> None:
                 f"model_compression_vs_dense_bf16={pair_vq_stats['model_compression_vs_dense_bf16']:.6f} "
                 f"training_compression_vs_dense_fp32_weight_plus_momentum={pair_vq_stats['training_compression_vs_dense_fp32_weight_plus_momentum']:.6f} "
                 "dense_master_weight=disabled dense_optimizer_momentum=disabled "
-                "ambient_error_buffer=disabled",
+                "ambient_error_buffer=disabled "
+                "forward_visible_feedback="
+                f"{int(pair_vq_stats['forward_visible_feedback'])}",
                 flush=True,
             )
 
