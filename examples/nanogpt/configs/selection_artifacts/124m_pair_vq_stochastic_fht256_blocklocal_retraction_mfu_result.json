@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_blocklocal_retraction_mfu_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_pass_endpoint_authorized",
+  "classification": "PASS_BLOCK_LOCAL_UNBIASED_RETRACTION_GATE",
+  "identity": {
+    "execution_commit": "deb58572d960ee3002e720a2f588c6372ad062a0",
+    "implementation_commit": "4b9c35fae8058a510cf3393ea1e07a16b584842f",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_blocklocal_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "c0d75015b43eb46c4bbbc3c54ef356f376b10456acb96e290621897bfb7361bc",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_blocklocal_retraction_plan.json",
+    "preregistered_plan_sha256": "30ea82db128c220ac5b23c0146462ecddd4cbe181f6124cc447cabcb91f020db",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_blocklocal_retraction_0p5tpp_lr24e4_mfu.json",
+    "certificate_sha256": "318df89d42325655a434a3b195b3ad5059382c2d782b4aeac1fb7cfca6a2bd96",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_blocklocal_retraction_0p5tpp_lr24e4_mfu.log",
+    "log_sha256": "bfd42409421329d9bcd00b7b2f3df452f2eed37912044fde857e6ed497516f36"
+  },
+  "frozen_gate": {
+    "maximum_weighted_sampling_variance_ratio": 0.10,
+    "minimum_expected_bias_recovery": 0.999,
+    "maximum_boundary_clipped_values": 0,
+    "persistent_training_bytes_exact": 161039808,
+    "minimum_mfu_fraction": 0.20,
+    "all_losses_finite": true
+  },
+  "measurements": {
+    "weighted_sampling_variance_ratio_by_step": {
+      "0": 0.019878480549853045,
+      "1": 0.019870947601289345,
+      "2": 0.019869124931135643,
+      "3": 0.019889153814305154,
+      "4": 0.019889209085726174,
+      "5": 0.019895916891950544,
+      "6": 0.019897391420387586,
+      "7": 0.019898046637346713,
+      "8": 0.01989425874860112
+    },
+    "maximum_timed_weighted_sampling_variance_ratio": 0.019898046637346713,
+    "minimum_timed_expected_bias_recovery": 0.999999999999952,
+    "timed_boundary_clipped_values": 0,
+    "block_local_groups": 221184,
+    "persistent_training_bytes": 161039808,
+    "all_logged_losses_finite": true,
+    "tokens_per_second": 161606.11375,
+    "iteration_ms": 1622.29125,
+    "optimizer_ms": 421.56125,
+    "peak_allocated_mib": 31663.06,
+    "empirical_bf16_gemm_peak_tflops": 414.3762239397744,
+    "active_params_6n_estimate": 124475904,
+    "model_tflops": 120.69640260574847,
+    "mfu_fraction": 0.2912725094557803,
+    "native_block_fht_extension_loaded": true
+  },
+  "comparison": {
+    "matrix_global_uniform_maximum_variance_ratio": 0.17810836935470023,
+    "block_local_maximum_variance_ratio": 0.019898046637346713,
+    "variance_reduction_factor": 8.951047939570511,
+    "total_reduction_vs_lloyd_extrema_factor": 62.157451434058345,
+    "persistent_state_increase_fraction": 0.02246805019200129,
+    "training_compression_vs_dense_fp32_weight_plus_momentum": 2.812874888673489,
+    "interpretation": "Local support metadata removes the matrix-extreme variance floor without changing the one-byte pair symbol rate, optimizer, FHT, or task schedule."
+  },
+  "decision": {
+    "endpoint_authorized": true,
+    "authorized_run_count": 1,
+    "authorized_updates": 238,
+    "watchdog_policy": "one idempotent terminal/error-only @Codex invocation watchdog",
+    "terminal_validation_ce_max": 5.411,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}
