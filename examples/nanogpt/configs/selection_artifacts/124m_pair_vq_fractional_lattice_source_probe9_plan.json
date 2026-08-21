@@ -1,0 +1,84 @@
+{
+  "schema_version": "mai_pair_vq_fractional_lattice_source_probe9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Can block-adaptive fractional q7/q8 allocation cross the live Muon direction gate at a physical rate strictly below int8?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_v2_result.json",
+    "result_sha256": "0d495b29b69b74dfc2f7b0b69852bcd7206b6024dc36728b1ae1ec4b475da2e4",
+    "classification": "NO_SCALAR_AXIS_OR_KLT_ADAPTATION_WINNER",
+    "reason": "FHT axes are already nearly stationary, axis-private levels add less than 4e-6 recovery, and a valid KLT is worse. The remaining scalar-cell deficit requires fractional rate or vector shaping."
+  },
+  "representation": {
+    "block_size": 32,
+    "base_coordinate_bits": 7,
+    "refined_coordinate_bits": 8,
+    "selector": "one stored flag per 32-coordinate block",
+    "selection_score": "per-block reduction in squared reconstruction error from q7 to q8",
+    "gain": "one 8-bit log-gain code per block",
+    "no_dense_basis": true,
+    "no_dense_master_or_residual": true,
+    "physical_rate_formula": "R(p) = 7 + p + (1 + 8)/32 = 7.28125 + p bits/weight",
+    "candidates": {
+      "p0p125": 7.40625,
+      "p0p25": 7.53125,
+      "p0p5": 7.78125,
+      "p0p6875": 7.96875
+    },
+    "saving_vs_int8": {
+      "p0p125": 0.07421875,
+      "p0p25": 0.05859375,
+      "p0p5": 0.02734375,
+      "p0p6875": 0.00390625
+    },
+    "metadata_fp32_bytes_per_matrix": 2560,
+    "production_status": "probe only; selector update, variable bit packing, and resume correctness are not yet implemented"
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_source_probe9.json",
+    "config_sha256": "76fb95014da2d628566606cb27bf9f39aaa581bff5205200ec35141fc772e7c6",
+    "implementation_commit": "24b2ae1f435f1fe0b11b9c4a3c6abf75c68d5f49",
+    "focused_test_result": "33 passed",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "persistent_candidate_change": false,
+    "selection_endpoint": false
+  },
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "records_per_probe_step": 24,
+    "parseval_relative_error_max": 0.000001,
+    "exact_config_mfu_min_fraction": 0.20
+  },
+  "frozen_candidate_gates": {
+    "full_feedback_energy_weighted_recovery_min_each_probe": 0.99975,
+    "full_feedback_every_matrix_recovery_min_each_probe": 0.999,
+    "base_active_codes_min_each_matrix": 96,
+    "refined_active_codes_min_each_matrix": 192,
+    "base_entropy_bits_min_each_matrix": 6.0,
+    "refined_entropy_bits_min_each_matrix": 7.0,
+    "gain_active_codes_min_each_matrix": 192,
+    "gain_entropy_bits_min_each_matrix": 6.5,
+    "actual_selected_fraction_absolute_tolerance": 0.000001
+  },
+  "selection_rule": {
+    "winner": "minimum physical rate passing every validity and candidate gate at both source phases",
+    "ties": "lower refinement fraction wins",
+    "strict_compactness": "candidate physical rate must be less than 8 bits/weight"
+  },
+  "decision_policy": {
+    "winner_exists": "Implement only that variable-bit rate with exact bit packing, selector-state resume tests, and a fresh nine-update live direction plus exact MFU gate. No endpoint or scale-up yet.",
+    "no_winner": "Close scalar refinement below int8 and derive a vector/trellis lattice with fractional-rate shaping. Do not add a uniform eighth bit or scale the model/horizon.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
