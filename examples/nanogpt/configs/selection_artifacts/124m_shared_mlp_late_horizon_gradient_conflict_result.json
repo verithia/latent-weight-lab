@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_shared_mlp_late_horizon_gradient_conflict_result_v1",
+  "classification": "AUTHORIZE_SEVEN_TRUNKS_SMALLEST_SCREEN",
+  "source_commit": "920658345bb2884451f6936c5f366499018be4d2",
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_late_horizon_gradient_conflict_20260821/result.json",
+    "sha256": "9400391e06cbeb9b16e98132c7a5a399f5bfb2d25f88a5dac7b73e94fdb488b1"
+  },
+  "checkpoint": {
+    "sha256": "29c3497bfacb94a6bb2ed9fda1a14897df94400611b7d5612641af0b7b9bfc95",
+    "next_iter": 2373,
+    "best_validation_cross_entropy": 3.825242519378662
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "tokens": 65536,
+    "seed": 20260821,
+    "mean_task_loss": 3.8228879272937775,
+    "wall_seconds": 2.3940141201019287,
+    "maximum_cuda_memory_bytes": 8934794752
+  },
+  "current_four_trunk_partition": {
+    "boundaries": [2, 4, 8, 12],
+    "combined_per_group_recovery": [
+      0.4788253828597586,
+      0.6176511750672952,
+      0.648038756261962,
+      0.8005527282816591
+    ],
+    "combined_mean_recovery": 0.6362670106176687,
+    "combined_minimum_recovery": 0.4788253828597586,
+    "c_fc_mean_recovery": 0.6473916951823504,
+    "c_proj_mean_recovery": 0.634730195899736
+  },
+  "partition_frontier": {
+    "selection_thresholds": {
+      "minimum_per_group_recovery": 0.8,
+      "minimum_mean_recovery": 0.9
+    },
+    "best_by_group_count": [
+      {"groups": 2, "boundaries": [4, 12], "minimum": 0.251298885223984, "mean": 0.30005263612942307, "passes": false},
+      {"groups": 3, "boundaries": [2, 5, 12], "minimum": 0.40323852268363797, "mean": 0.428856561910618, "passes": false},
+      {"groups": 4, "boundaries": [2, 4, 8, 12], "minimum": 0.47882538291135823, "mean": 0.6362670106181859, "passes": false},
+      {"groups": 5, "boundaries": [1, 2, 4, 8, 12], "minimum": 0.6176511751424367, "mean": 0.8132485319122772, "passes": false},
+      {"groups": 6, "boundaries": [1, 2, 3, 4, 8, 12], "minimum": 0.6480387562297251, "mean": 0.9080985807364915, "passes": false},
+      {"groups": 7, "boundaries": [1, 2, 3, 4, 5, 8, 12], "minimum": 0.8005527281892237, "mean": 0.947604910345188, "passes": true},
+      {"groups": 8, "boundaries": [1, 2, 3, 4, 5, 8, 10, 12], "minimum": 0.8326816442270929, "mean": 0.9655379553836372, "passes": true}
+    ]
+  },
+  "selected_partition": {
+    "group_count": 7,
+    "boundaries": [1, 2, 3, 4, 5, 8, 12],
+    "layers": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
+    "combined_per_group_recovery": [1.0, 1.0, 1.0, 1.0, 1.0, 0.8326816442270929, 0.8005527281892237],
+    "combined_mean_recovery": 0.947604910345188,
+    "combined_minimum_recovery": 0.8005527281892237
+  },
+  "parameter_accounting": {
+    "dense_mlp_parameters": 56623104,
+    "learned_mlp_parameters": 33076224,
+    "mlp_parameter_compression_ratio": 1.711897464474784,
+    "mlp_parameter_saving_fraction": 0.41585286458333337,
+    "expected_total_trainable_parameters": 72798432,
+    "materialized_dense_mlp_flops_unchanged": true
+  },
+  "decision": "The four-trunk failure is consistent with increasing layer-axis manifold rank over training: by 5TPP every current group except the final group has destructive task-gradient cancellation. Seven trunks are the smallest contiguous partition satisfying the preregistered local geometry gate. Authorize only a 124M/0.5TPP causal verification of this partition; do not scale model size or launch a trunk-count sweep."
+}
