@@ -1,10 +1,11 @@
 {
   "schema_version": "mai_124m_pair_vq_forward_visible_center_endpoint_run_metadata_v1",
-  "state": "running",
+  "state": "finished",
   "run_id": "pro6_mai_v3_124m_pairvq_forward_visible_center_0p5tpp_20260821T224656Z_2926236",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-22T06:46:57+08:00",
+  "finished_at": "2026-08-22T06:55:14+08:00",
   "process_group": 2926339,
   "source_commit": "e3c0066047ed26d0790452cac9c60a2af5c7a2b0",
   "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
@@ -74,5 +75,18 @@
     "automatic_rerun": false,
     "automatic_sweep": false,
     "automatic_scale_up": false
+  },
+  "terminal_result": {
+    "classification": "FAIL_FORWARD_VISIBLE_CENTER_SELF_PATH_OPTIMIZER_TRANSITION",
+    "exit_code": 0,
+    "train_ce": 5.514,
+    "validation_ce": 5.5178093910217285,
+    "candidate_minus_parent_ce": 0.1568093910217283,
+    "validation_gate_passed": false,
+    "checkpoint_sha256": "eb181ad26452c36445898e835424989f0bf75011bc76052a96bde5518ea152ca",
+    "status_sha256": "aecc3d62b2d7eb1be08b69ceb62457d7a118b47f6739d2f7bde0a0d51c360a1f",
+    "log_sha256": "72eb6b72ab29c032ee4e0373b8cad2a883f46dbc4bf5f72d02fcc9a8f772fc47",
+    "sealed_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_forward_visible_center_endpoint_result.json",
+    "next_action": "paired dense-path optimizer-transition localization only; no rerun, sweep, horizon transfer, or scale-up"
   }
 }

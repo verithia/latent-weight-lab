@@ -1,0 +1,102 @@
+{
+  "schema_version": "mai_124m_pair_vq_forward_visible_center_endpoint_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "FAIL_FORWARD_VISIBLE_CENTER_SELF_PATH_OPTIMIZER_TRANSITION",
+  "passed": false,
+  "decision": {
+    "endpoint_closed": false,
+    "automatic_rerun": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false,
+    "next_authorized_work": "A paired dense-path optimizer-transition oracle may localize gradient, compact-momentum/polar, and retraction error. No new language-model endpoint is authorized.",
+    "reason": "Forward-visible compact carry reproduced the same approximately 5.518 CE compact self-training floor as three prior temporal mechanisms. The teacher-forced functional-gradient oracle was locally correct but insufficient for self-training, so the remaining causal target is the optimizer vector field along a shared dense path."
+  },
+  "identity": {
+    "run_id": "pro6_mai_v3_124m_pairvq_forward_visible_center_0p5tpp_20260821T224656Z_2926236",
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "e3c0066047ed26d0790452cac9c60a2af5c7a2b0",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4.json",
+    "config_sha256": "3a7528c817dfc493887de6ff3319c2d1e001b24877dbb44a8e2b6b399cfe64a5",
+    "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_forward_visible_center_endpoint_plan.json",
+    "theory_plan_sha256": "57a16de81b7328595889ef34bf6b11660a7d63e7ef675e0a424c59ba6107be41",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "started_at": "2026-08-22T06:46:57+08:00",
+    "finished_at": "2026-08-22T06:55:14+08:00",
+    "exit_code": 0
+  },
+  "artifacts": {
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4/ckpt.pt",
+      "sha256": "eb181ad26452c36445898e835424989f0bf75011bc76052a96bde5518ea152ca",
+      "bytes": 746463520
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4/ckpt.meta.json",
+      "sha256": "0eebaa75d25a969dae3abd05a2d740417681b8de5b6bfdd8a3655c8e936abe24"
+    },
+    "status_sha256": "aecc3d62b2d7eb1be08b69ceb62457d7a118b47f6739d2f7bde0a0d51c360a1f",
+    "log_sha256": "72eb6b72ab29c032ee4e0373b8cad2a883f46dbc4bf5f72d02fcc9a8f772fc47",
+    "runtime_provenance_sha256": "1514b5001e38258212b3dabacdb0a244a83fcea804fd0159cec99f62caa3d88f",
+    "mfu_certificate_sha256": "19278478fe1f261253f7af0bc10bc68696e338b4b4bb2c39ec1d80d2978ec73f"
+  },
+  "fixed_evaluation": [
+    {"step": 0, "train_ce": 10.9826, "validation_ce": 10.9831},
+    {"step": 60, "train_ce": 6.2781, "validation_ce": 6.2876},
+    {"step": 120, "train_ce": 5.8101, "validation_ce": 5.8158},
+    {"step": 180, "train_ce": 5.6066, "validation_ce": 5.6108},
+    {"step": 238, "train_ce": 5.5140, "validation_ce": 5.5178093910217285}
+  ],
+  "terminal_gate": {
+    "dense_parent_validation_ce": 5.361,
+    "candidate_validation_ce": 5.5178093910217285,
+    "candidate_minus_parent_ce": 0.1568093910217283,
+    "maximum_candidate_minus_parent_ce": 0.05,
+    "maximum_candidate_validation_ce": 5.411,
+    "validation_gate_miss_ce": 0.1068093910217287,
+    "validation_gate_passed": false,
+    "all_fixed_eval_steps_finite": true,
+    "persistent_training_bytes": 157500864,
+    "persistent_training_bytes_exact": 157500864,
+    "state_gate_passed": true
+  },
+  "transition_diagnostics": {
+    "matrix_rows": 720,
+    "refresh_steps": 30,
+    "weighted_feedback_codec_recovery_minimum_refresh": 0.9999858056184328,
+    "minimum_matrix_feedback_codec_recovery": 0.9999536847400284,
+    "weighted_current_step_recovery_minimum_refresh": 0.9992004752406128,
+    "minimum_matrix_current_step_recovery": 0.9971437108893781,
+    "minimum_requested_update_cosine": 0.9985746116899934,
+    "all_forward_visible_feedback": true,
+    "all_virtual_weights_match_compact_state": true,
+    "old_feedback_double_counted": false,
+    "feedback_codec_weighted_gate_passed": true,
+    "feedback_codec_every_matrix_gate_passed": true,
+    "current_step_weighted_gate_passed": false,
+    "current_step_every_matrix_gate_passed": false
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.283024954242076,
+    "preflight_tokens_per_second": 158217.57875,
+    "run_tokens_per_second_mean": 156823.79826086957,
+    "run_tokens_per_second_median": 158410.62,
+    "run_iteration_milliseconds_mean": 1672.1734782608696,
+    "optimizer_fraction_mean": 0.27687271826393584,
+    "optimizer_fraction_maximum_sample": 0.30760262801222116,
+    "gpu_peak_mib": 31660.62
+  },
+  "comparison_to_prior_compact_endpoints": {
+    "fractional_lattice_validation_ce": 5.5178,
+    "b64_shadow_validation_ce": 5.5190,
+    "block_local_unbiased_validation_ce": 5.5204,
+    "finding": "Forward-visible carry does not move the stable compact self-training floor."
+  },
+  "mechanistic_interpretation": {
+    "teacher_forced_oracle_scope": "The prior oracle showed that differentiating at C plus decoded residual nearly matches the dense task gradient on synchronized dense-path checkpoints.",
+    "endpoint_falsification": "That local gradient result does not imply that compact Muon momentum and its nonlinear polar map define the correct self-training vector field.",
+    "reconstruction_status": "Checkpoint resume, virtual materialization, feedback codec, and no-double-count invariants passed; virtual-state reconstruction drift is not the primary explanation.",
+    "next_localization": "On one shared dense path, compare dense Muon momentum/polar requests, compact code-conditioned momentum/polar requests, and production retraction of each request."
+  }
+}

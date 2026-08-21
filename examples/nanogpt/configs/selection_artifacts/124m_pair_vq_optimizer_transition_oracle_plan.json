@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_124m_pair_vq_optimizer_transition_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Along one synchronized dense path and one shared task gradient, is the remaining Pair-VQ self-training error caused primarily by compact code-conditioned Muon momentum and its nonlinear polar map, or by the final compact retraction?",
+  "causal_basis": {
+    "dense_shadow_result": "examples/nanogpt/configs/selection_artifacts/124m_dense_pairvq_shadow_replay_result.json",
+    "dense_shadow_terminal_gap_ce": 0.0038175582885742188,
+    "functional_gradient_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_antithetic_functional_gradient_oracle_result.json",
+    "functional_gradient_minimum_late_error_closure": 0.9560787414334309,
+    "failed_endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_forward_visible_center_endpoint_result.json",
+    "failed_endpoint_gap_ce": 0.1568093910217283,
+    "finding": "Endpoint capacity and teacher-forced forward gradients pass, but self-training remains at the same compact floor. The untested map is the accumulated compact momentum followed by Muon's nonlinear polar transform."
+  },
+  "theory": {
+    "dense_transition": "For gradient G_t and dense momentum B_t, compute B_(t+1)=mu*B_t+G_t and U_dense=MuonPolar(G_t+mu*B_(t+1)).",
+    "compact_transition": "Using the same G_t and current teacher-forced Pair-VQ codes, aggregate gradient pairs by code, update only the production compact code-conditioned momentum, expand it through those codes, and compute U_compact=MuonPolar(G_t+mu*ExpandedMomentum_(t+1)).",
+    "polar_nonlinearity": "High cosine before Muon is not sufficient because Newton-Schulz polar normalization can amplify singular-subspace differences. Metrics therefore cover both combined pre-polar tensors and final scaled polar updates.",
+    "retraction_control": "Project both dense-state and compact-state virtual requests through an isolated clone of the production Pair-VQ plus B64/L16 feedback transition. This separates optimizer-field error from the already small but late-degrading retraction error.",
+    "shared_path": "The dense parent path is never modified by any candidate. Dense gradients drive both momentum trackers so gradient-path differences cannot contaminate the primary momentum attribution.",
+    "deployability_scope": "Dense momentum is an oracle reference only and is never candidate state. Passing this localization does not authorize retaining dense momentum."
+  },
+  "frozen_protocol": {
+    "parent": "exact 124M QK-only BlockFHT attention plus dense MLP parent, seed 1337, LR 0.0024, 238 updates",
+    "compact_family": "production full-MLP Pair-VQ with forward-visible fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16 feedback",
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "matrices": "all 24 c_fc and c_proj matrices",
+    "gradient_source": "the exact dense-parent training gradient before its Muon update",
+    "momentum_trackers": [
+      "the parent's actual dense Muon momentum",
+      "a nonintervening production compact code-conditioned momentum tracker updated from the identical dense gradient and current teacher-forced codes"
+    ],
+    "comparisons": [
+      "dense combined momentum tensor versus expanded compact combined momentum tensor",
+      "dense scaled polar update versus compact-state scaled polar update",
+      "dense-state virtual request versus compact-state virtual request",
+      "each request before versus after the identical production Pair-VQ plus feedback retraction"
+    ],
+    "trajectory_intervention": "none",
+    "candidate_checkpoint_or_dense_state_retained": false
+  },
+  "frozen_metrics": {
+    "per_matrix": [
+      "relative error, cosine, and positive-line energy recovery before polar",
+      "relative error, cosine, and positive-line energy recovery after polar",
+      "requested-step energy recovery and cosine after retraction"
+    ],
+    "aggregate": [
+      "energy-weighted metrics for all matrices, c_fc, and c_proj",
+      "worst-matrix metrics",
+      "fraction of total dense-request error attributable to compact momentum/polar versus retraction"
+    ]
+  },
+  "classification_gate": {
+    "all_metrics_finite": true,
+    "dense_path_reproduction_terminal_ce_tolerance": 0.002,
+    "momentum_polar_primary_if": "At both late probes, compact-state polar error exceeds the isolated retraction error and accounts for at least 70 percent of total compact-request squared error.",
+    "retraction_primary_if": "At both late probes, production retraction accounts for at least 70 percent of total compact-request squared error.",
+    "mixed_or_unresolved_if": "Neither source reaches the frozen 70 percent attribution threshold at both late probes."
+  },
+  "decision_rule": {
+    "momentum_polar_primary": "Authorize theory work on a compact momentum representation or polar computation that preserves the dense update field; do not authorize an LM endpoint from this oracle alone.",
+    "retraction_primary": "Return to compact transition geometry only; do not change LR, bits, width, FHT, horizon, or model size without a new theory.",
+    "mixed_or_unresolved": "Stop Pair-VQ endpoint trials and derive a new joint-state model before any new training run.",
+    "automatic_endpoint": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false
+  },
+  "execution_gate": {
+    "focused_tests_required": true,
+    "maximum_foreground_preflight_minutes": 5,
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "long_run_watchdog_required_above_minutes": 5,
+    "watchdog_callbacks": "terminal/error-only because the replay is expected within one to two hours"
+  }
+}
