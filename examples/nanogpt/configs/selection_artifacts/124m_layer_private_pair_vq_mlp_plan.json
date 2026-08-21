@@ -1,0 +1,95 @@
+{
+  "schema_version": "mai_layer_private_pair_vq_mlp_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can layer-private 4-bit-per-weight Euclidean pair coding preserve the dense teacher's complete MLP value and derivative fields while retaining about 4x persistent BF16 matrix-state compression and no dense master, ambient residual, or optimizer state?",
+  "causal_basis": {
+    "product_quantized_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_private_product_quantized_mlp_result.json",
+    "product_quantized_result_sha256": "f8f549657f3c6ddeb1966a84894cad132969d579097ec1468e3accb3a2459beb",
+    "failed_point": "One uint8 signed direction and one BF16 amplitude per 16 weights recovered 48.04% matrix energy, 24.53% mean output energy, 23.99% mean input-JVP energy, and incurred +5.6791 fixed CE at 10.47x storage compression.",
+    "rate_distortion_diagnosis": "For locally isotropic d-dimensional blocks with R direction bits, normalized squared distortion is approximately 2^(-2R/d). R=8 and d=16 predicts 50% recovery, matching the measurement; amplitude tuning cannot repair the missing angular rate.",
+    "representation_change": "Partition each layer-private c_fc and c_proj into contiguous two-value vectors. Fit an independent 256-entry Euclidean BF16 codebook for every layer and matrix side and store one uint8 code per pair. Codewords contain both direction and magnitude, so no block amplitude is stored.",
+    "why_this_single_rate": "Eight bits per two weights is exactly four bits per weight. The same rate-distortion approximation predicts 1-2^(-8)=99.609% energy recovery, while the persistent state remains almost 4x smaller than dense BF16. This is the smallest theory-selected relaxation with a credible chance of satisfying the fixed CE gate; it is not a block-size or bit-width sweep.",
+    "why_high_freedom": "Every weight pair makes an independent layer-private combinatorial choice among 256 learned vectors. The decoded matrices have no shared-layer orbit, low-rank constraint, fixed orthogonal image, or common amplitude field."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "quantizer": {
+    "vector_length": 2,
+    "codebook_size": 256,
+    "codebook_scope": "independent for every layer and matrix side",
+    "code_dtype": "uint8",
+    "codebook_dtype": "bfloat16",
+    "amplitude": "none; Euclidean codewords contain magnitude",
+    "fit": "deterministic Euclidean Lloyd clustering on a fixed random sample, then exact nearest-codeword assignment of every pair",
+    "sample_vectors_per_matrix": 65536,
+    "lloyd_iterations": 8,
+    "assignment_chunk_vectors": 32768,
+    "algorithm_seed": 20261000,
+    "dense_master_weight": false,
+    "ambient_error_buffer": false,
+    "ambient_optimizer_state": false
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "dense_bf16_matrix_bytes": 113246208,
+    "vector_count": 28311552,
+    "uint8_code_bytes": 28311552,
+    "bfloat16_codebook_bytes": 24576,
+    "persistent_matrix_state_bytes": 28336128,
+    "persistent_bf16_storage_compression": 3.9965307892454467,
+    "continuous_coordinates": 12288,
+    "continuous_coordinate_compression": 4608.0,
+    "decode_gathers_per_refresh": 28311552,
+    "cached_token_time_extra_flops": 0
+  },
+  "measurement": {
+    "state_bank_sample_cap_per_layer": 1024,
+    "state_bank_token_batch_size": 4,
+    "state_bank_batches": 4,
+    "state_bank_seed": 20261001,
+    "local_perturbation_relative_rms": 0.01,
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20261002,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024
+  },
+  "frozen_gates": {
+    "minimum_aggregate_matrix_energy_recovery": 0.995,
+    "minimum_every_matrix_energy_recovery": 0.99,
+    "minimum_mean_output_recovery": 0.98,
+    "minimum_worst_output_recovery": 0.95,
+    "minimum_mean_input_jvp_recovery": 0.95,
+    "minimum_worst_input_jvp_recovery": 0.9,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "minimum_persistent_bf16_storage_compression": 3.9,
+    "minimum_continuous_coordinate_compression": 4000.0,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Design one discrete-code training rule with no dense master or ambient error buffer, measure exact optimizer-state bytes and MFU, and only then authorize one 124M/0.5TPP LM run.",
+    "fail": "Reject this exact four-bit pair-code family. Use the matrix/function/CE discriminator to decide whether any discrete code family remains scientifically justified; do not sweep dimensions or bits.",
+    "infrastructure_failure": "Repair only the implementation defect and rerun the immutable plan without inspecting partial scientific metrics."
+  },
+  "authorization": {
+    "allowed": "Implement and run one zero-LM-update dense-teacher pair-VQ ceiling after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before every gate passes",
+      "dense FP16/FP32 master weights, residuals, momentum, or error feedback",
+      "model-size scaling",
+      "vector-length, bit-width, codebook-size, sample-size, iteration, seed, or optimizer sweeps"
+    ],
+    "callback_policy": "Foreground-poll if measured complete runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}

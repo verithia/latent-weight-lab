@@ -1,0 +1,36 @@
+{
+  "schema_version": "mai_layer_private_product_quantized_mlp_result_seal_v1",
+  "classification": "LAYER_PRIVATE_PRODUCT_QUANTIZED_MLP_FAIL",
+  "repository_commit": "15ca3e04b81ba515816bab154d256313766c962b",
+  "plan_sha256": "e096cf7bd12c2620b0c6b7d543d58f8adedd18fa4f82fdad51ccec614264c391",
+  "result_sha256": "4f7f994d571e17431c331055f166daed8309878ce668fbe89ec29685cca12718",
+  "state_sha256": "bedb23d4edd87eaa021034fb16f062685b03c8e99fc79d2a9e4553a0039fbdac",
+  "identities": {
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "persistent_matrix_state_bytes": 10813440,
+    "persistent_bf16_storage_compression": 10.472727272727273,
+    "continuous_coordinates": 3637248,
+    "continuous_coordinate_compression": 15.567567567567568,
+    "cached_token_time_extra_flops": 0
+  },
+  "metrics": {
+    "aggregate_weight_energy_recovery": 0.4804088087119508,
+    "minimum_matrix_weight_energy_recovery": 0.4796733988407,
+    "mean_output_recovery": 0.24525797367095947,
+    "minimum_output_recovery": 0.16281384229660034,
+    "mean_input_jvp_recovery": 0.23985098550717035,
+    "minimum_input_jvp_recovery": 0.17129802703857422,
+    "teacher_validation_cross_entropy": 3.674412250518799,
+    "candidate_validation_cross_entropy": 9.353464126586914,
+    "fixed_validation_cross_entropy_gap": 5.679051876068115,
+    "wall_seconds": 30.962255239486694,
+    "maximum_cuda_memory_bytes": 9979673088
+  },
+  "interpretation": "One signed spherical uint8 direction plus one BF16 amplitude per 16 weights is direction-rate limited. Its 48.04% energy recovery agrees with the isotropic 8-bit/16-dimensional rate-distortion prediction of roughly 50%; depth compounds this to about 24-25% function and derivative recovery. The exact 10.47x point is rejected without tuning."
+}
