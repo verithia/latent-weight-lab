@@ -1,0 +1,132 @@
+{
+  "schema_version": "mai_two_bank_atomwise_recombination_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can two learned late-depth nonlinear atom banks represent the seven late dense MLP functions when every layer may independently recombine the paired c_fc boundary and c_proj write of every matched neuron?",
+  "causal_basis": {
+    "seven_trunk_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp_result.json",
+    "seven_trunk_result_sha256": "65f62a9a44c1d68640adc80a2cb6c3eb7497b82cf0026ab79a4a05c44962a96c",
+    "seven_trunk_finding": "Seven full-width trunks are the strongest compact MLP result: +0.0262 CE at 0.5TPP and +0.0698 CE at 5TPP, but the late shared groups retain endpoint and JVP mismatch.",
+    "layer_axis_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_axis_basis7_mlp_teacher_fit_result.json",
+    "layer_axis_result_sha256": "550f3d41f0fc70ef2b3193fe05c05e0061b8ad6e1c93e085bedcf81a9e00a9c4",
+    "layer_axis_finding": "Seven whole-matrix coefficients per layer are insufficient: held-out output recovery 0.6291, input-JVP recovery 0.2954, and fixed CE gap +2.1089 after healthy optimization.",
+    "selected_atom_result": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_selected_atom_unsharing_result.json",
+    "selected_atom_result_sha256": "be6cfe1fbe87a6a5758953248742fb8a1b092e1f16b75d57fec59eb086f99ce2",
+    "selected_atom_finding": "Privatizing the strongest 128 complete neurons per late layer is insufficient; the missing coordinate change is distributed across the common hidden frame.",
+    "residual_spectrum_result": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_private_residual_spectrum_result.json",
+    "residual_spectrum_result_sha256": "22a4c9dfac54ffb8506752171bd493518d338a02f33292951e14794619efac66",
+    "residual_spectrum_finding": "Rank-64 residual subspaces transfer across token banks, but actual residual directions have only 0.036-0.049 cross-bank cosine. A single static low-rank correction is not authorized.",
+    "representation_change": "Keep the five singleton trunks and two late trunks, align the two late banks by a deterministic function-preserving complete-neuron permutation, then give each late layer and neuron independent c_fc-side and c_proj-side interpolation coefficients. This distributes two-sided coordinate freedom over all 3072 atoms without ambient private matrices.",
+    "not_a_sweep": "There is one deterministic pairing, two scalar coefficients per late-layer atom, one two-stage optimizer path, one seed, and no bank-count, matching, coefficient, optimizer, or restart sweep."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "seven_trunk_initialization_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "early_singleton_banks": 5,
+    "late_banks": 2,
+    "late_layers": 7,
+    "residual_width": 768,
+    "hidden_width": 3072,
+    "definition": "For late layer l and matched atom j, u_lj=a_lj*u_Aj+(1-a_lj)*u_Bpi(j) and v_lj=b_lj*v_Aj+(1-b_lj)*v_Bpi(j), followed by the existing per-layer signed pre-GELU and residual-output gains.",
+    "pairing": "Normalize each c_fc row and paired c_proj column separately, concatenate them with equal norm weight, compute cosine candidates, and deterministically greedily choose a one-to-one maximum-similarity matching from each A atom to a B atom using top-k 64 candidates plus exact unmatched completion. Apply the same permutation to B c_fc rows, B c_proj columns, and B-side initialization gains, preserving the B-bank function exactly.",
+    "initialization": "Layers 0-4 select their singleton banks. Layers 5-7 set both atomwise coefficients to 1 and exactly select late bank A. Layers 8-11 set both coefficients to 0 and exactly select the aligned late bank B. The initial function is exactly the sealed seven-trunk endpoint.",
+    "compact_parameters": 33119232,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 1.7096744272330953,
+    "parameter_saving_fraction": 0.4150933159722222,
+    "deployment": "Materialize and cache one ordinary dense c_fc/c_proj pair per layer after a parameter refresh. Token-time and inference GEMM FLOPs are unchanged and there is no token router.",
+    "conservative_reconstruction_flops_per_refresh": 99090432,
+    "persistent_dense_optimizer_state": false,
+    "token_router": false
+  },
+  "fit_protocol": {
+    "objective": "Equal-weight sum of separately normalized clean-output error and central-difference direction error on dense-teacher and seven-trunk state banks, identical to the corrected parent teacher-fit metric.",
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260970,
+    "holdout_token_seed": 20260971,
+    "local_perturbation_relative_rms": 0.01,
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "gradient_clip_norm": 10.0,
+    "algorithm_seed": 20260972,
+    "stages": [
+      {
+        "name": "coefficients_only",
+        "steps": 300,
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "weight_decay": 0.0,
+        "trainable": "the two 7x3072 late-layer atom coefficient matrices only"
+      },
+      {
+        "name": "joint_banks_coefficients",
+        "steps": 1200,
+        "optimizer": "Adam",
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0,
+        "trainable": "seven bank matrix pairs, atomwise coefficients, pre-GELU gains, and residual-output gains"
+      }
+    ],
+    "best_state_rule": "Within each stage preserve the state with the smallest discovery objective. The second stage warm-starts the first. Holdout values, fixed CE, wall time, and gate outcomes never select a state.",
+    "parameter_clamps": "Atom coefficients are clamped to [-1,2], pre-GELU gains to [-4,4], and residual-output log gains to [-4,4]. Bank matrices are unconstrained.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260973,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "deterministic pairing digest and semantic-similarity statistics",
+      "exact endpoint reconstruction error before fitting",
+      "stagewise discovery and holdout value-direction objectives",
+      "held-out output and analytic input-JVP recovery by layer and state bank",
+      "atomwise coefficient spectra and endpoint displacement by layer",
+      "fixed-checkpoint validation CE after the terminal stage",
+      "parameter, reconstruction-FLOP, peak-memory, and wall-time accounting"
+    ]
+  },
+  "frozen_gates": {
+    "maximum_initial_endpoint_absolute_error": 0.00001,
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "Finite terminal execution and either terminal discovery objective at most 0.5 or at least 50-percent reduction from the joint-stage initial objective."
+  },
+  "decision_rule": {
+    "pass": "Implement this exact family in the LM model, measure exact-config MFU, and launch only a 124M/0.5TPP verification if MFU is at least 20 percent.",
+    "healthy_fail": "Reject two-bank atomwise recombination without sweeping bank count, pairing, or optimizer. The missing transformation requires a richer distributed nonlinear chart than scalar interpolation between two paired atom banks.",
+    "optimization_inconclusive": "Stop and report without LM training or a capacity conclusion."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update teacher-fit ceiling after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before every functional and CE gate passes",
+      "model-size scaling",
+      "bank-count, matching, coefficient, optimizer, learning-rate, stage-length, seed, gain, or regularizer sweeps",
+      "holdout-based state selection"
+    ],
+    "callback_policy": "Foreground-poll if measured complete runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}
