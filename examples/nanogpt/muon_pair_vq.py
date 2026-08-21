@@ -381,6 +381,88 @@ def _fit_conditional_polar_pair_codec_(
 
 
 @torch.no_grad()
+def _conditional_polar_pair_diagnostics(
+    vectors: torch.Tensor,
+    radial_levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> dict[str, float | int]:
+    """Decompose conditional-polar error and report empirical state usage."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("conditional polar diagnostic values must have shape (pairs, 2)")
+    selected = codes.long()
+    angle_indices = selected % 32
+    radius_indices = selected // 32
+    centered = vectors - center
+    directions = _polar_directions(device=vectors.device).index_select(
+        0, angle_indices
+    )
+    projected_radii = (centered * directions).sum(dim=1).clamp_min_(0.0)
+    angular_residual = centered - projected_radii[:, None] * directions
+    fitted_radii = radial_levels[angle_indices, radius_indices]
+    radial_residual = projected_radii - fitted_radii
+    angular_error = angular_residual.square().sum()
+    radial_error = radial_residual.square().sum()
+    quantization_error = (vectors - (center + fitted_radii[:, None] * directions)).square().sum()
+    target_energy = vectors.square().sum().clamp_min(1e-30)
+    projected_energy = projected_radii.square().sum().clamp_min(1e-30)
+    quantization_energy = quantization_error.clamp_min(1e-30)
+
+    def entropy_bits(indices: torch.Tensor, bins: int) -> float:
+        counts = torch.bincount(indices, minlength=bins).to(torch.float32)
+        probabilities = counts[counts > 0] / counts.sum().clamp_min(1.0)
+        return float(-(probabilities * probabilities.log2()).sum())
+
+    code_counts = torch.bincount(selected, minlength=256)
+    angle_counts = torch.bincount(angle_indices, minlength=32)
+    radius_counts = torch.bincount(radius_indices, minlength=8)
+    angle_squares = torch.zeros(32, device=vectors.device, dtype=torch.float32)
+    angle_squares.index_add_(0, angle_indices, projected_radii.square())
+    rms_by_angle = (
+        angle_squares / angle_counts.clamp_min(1).to(torch.float32)
+    ).sqrt()
+    live_angle_rms = rms_by_angle[angle_counts > 0]
+    top_radius = radius_indices == 7
+    decomposition_error = (quantization_error - angular_error - radial_error).abs()
+    joint_entropy = entropy_bits(selected, 256)
+    angle_entropy = entropy_bits(angle_indices, 32)
+    return {
+        "feedback_polar_angular_error_fraction": float(
+            angular_error / quantization_energy
+        ),
+        "feedback_polar_radial_error_fraction": float(
+            radial_error / quantization_energy
+        ),
+        "feedback_polar_angular_distortion": float(angular_error / target_energy),
+        "feedback_polar_radial_distortion": float(radial_error / target_energy),
+        "feedback_polar_decomposition_relative_error": float(
+            decomposition_error / quantization_energy
+        ),
+        "feedback_polar_radial_recovery_given_angle": float(
+            1.0 - radial_error / projected_energy
+        ),
+        "feedback_code_entropy_bits": joint_entropy,
+        "feedback_angle_entropy_bits": angle_entropy,
+        "feedback_conditional_radius_entropy_bits": joint_entropy - angle_entropy,
+        "feedback_radius_entropy_bits": entropy_bits(radius_indices, 8),
+        "feedback_active_codes": int((code_counts > 0).sum()),
+        "feedback_active_angles": int((angle_counts > 0).sum()),
+        "feedback_active_radii": int((radius_counts > 0).sum()),
+        "feedback_top_radius_fraction": float(top_radius.to(torch.float32).mean()),
+        "feedback_top_radius_energy_fraction": float(
+            projected_radii[top_radius].square().sum() / projected_energy
+        ),
+        "feedback_radial_rms_by_angle_cv": float(
+            live_angle_rms.std(unbiased=False)
+            / live_angle_rms.mean().clamp_min(1e-30)
+        ),
+        "feedback_projected_radius_max_to_rms": float(
+            projected_radii.max() / projected_radii.square().mean().sqrt().clamp_min(1e-30)
+        ),
+    }
+
+
+@torch.no_grad()
 def _nearest_small_vector_codes(
     vectors: torch.Tensor, codebook: torch.Tensor
 ) -> torch.Tensor:
@@ -1167,6 +1249,18 @@ class MuonPairVQ(torch.optim.Optimizer):
                             "feedback_code_changes": feedback_code_changes,
                         }
                     )
+                    if (
+                        refresh
+                        and module.feedback_codec == "conditional_polar32x8"
+                    ):
+                        diagnostics.update(
+                            _conditional_polar_pair_diagnostics(
+                                raw_feedback.reshape(-1, module.vector_length),
+                                state["feedback_levels"],
+                                state["feedback_center"],
+                                state["feedback_codes"],
+                            )
+                        )
                 self._diagnostics.append(diagnostics)
         return loss
 

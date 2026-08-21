@@ -9,6 +9,7 @@ from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_pair_vq import (
     MuonPairVQ,
     MuonPairVQLinear,
+    _conditional_polar_pair_diagnostics,
     _decode_conditional_polar_pair_codec,
     _decode_polar_pair_codec,
     _decode_rvq_pair_codec,
@@ -337,6 +338,27 @@ def test_conditional_polar_feedback_state_is_compact() -> None:
     assert state["feedback_codes"].dtype == torch.uint8
     assert module.compact_feedback_bytes == module.element_count // 2 + 1032
     assert all(value.numel() != module.element_count for value in state.values())
+
+
+def test_conditional_polar_diagnostics_form_an_orthogonal_decomposition() -> None:
+    torch.manual_seed(168)
+    vectors = torch.randn(32768, 2)
+    levels = torch.zeros(32, 8)
+    center = torch.zeros(2)
+    codes = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_conditional_polar_pair_codec_(vectors, levels, center, codes)
+    diagnostics = _conditional_polar_pair_diagnostics(
+        vectors, levels, center, codes
+    )
+    assert diagnostics["feedback_polar_decomposition_relative_error"] < 1e-5
+    assert abs(
+        diagnostics["feedback_polar_angular_error_fraction"]
+        + diagnostics["feedback_polar_radial_error_fraction"]
+        - 1.0
+    ) < 1e-5
+    assert diagnostics["feedback_active_codes"] > 200
+    assert diagnostics["feedback_active_angles"] == 32
+    assert diagnostics["feedback_active_radii"] == 8
 
 
 def test_rvq_feedback_learns_joint_pair_atoms_at_same_code_rate() -> None:
