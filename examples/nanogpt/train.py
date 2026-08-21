@@ -18,6 +18,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
+from examples.nanogpt.dense_pair_vq_shadow import DensePairVQShadowObserver
 from examples.nanogpt.model import (
     GPT,
     GPTConfig,
@@ -95,6 +96,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/fast_task_matching.py",
         root / "examples/nanogpt/csrc/task_edge_coloring.cpp",
         root / "examples/nanogpt/parameter_trajectory.py",
+        root / "examples/nanogpt/dense_pair_vq_shadow.py",
         root / "latent_weight_lab/block_fht.py",
     )
     return {
@@ -747,6 +749,43 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
             "block_fht_mlp_pregelu_chart_lr_scale must be positive and finite"
         )
     validate_dense_fit_gate(config, args)
+    if args.pair_vq_dense_shadow_replay:
+        if args.init_from != "scratch":
+            raise ValueError("dense pair-VQ shadow replay requires init_from=scratch")
+        if args.compile:
+            raise ValueError("dense pair-VQ shadow replay requires compile=false")
+        if args.block_fht_mlp_pair_vq:
+            raise ValueError("dense pair-VQ shadow replay requires a dense MLP")
+        if args.optimizer != "muon":
+            raise ValueError("dense pair-VQ shadow replay requires optimizer=muon")
+        required_shadow_fields = {
+            "pair_vq_dense_shadow_source_config": (
+                args.pair_vq_dense_shadow_source_config
+            ),
+            "pair_vq_dense_shadow_source_sha256": (
+                args.pair_vq_dense_shadow_source_sha256
+            ),
+            "pair_vq_dense_shadow_result": args.pair_vq_dense_shadow_result,
+        }
+        missing_shadow_fields = [
+            key for key, value in required_shadow_fields.items() if not value
+        ]
+        if missing_shadow_fields:
+            raise ValueError(
+                "dense pair-VQ shadow replay is missing: "
+                + ", ".join(missing_shadow_fields)
+            )
+    elif any(
+        value
+        for value in (
+            args.pair_vq_dense_shadow_source_config,
+            args.pair_vq_dense_shadow_source_sha256,
+            args.pair_vq_dense_shadow_result,
+        )
+    ):
+        raise ValueError(
+            "dense pair-VQ shadow fields require pair_vq_dense_shadow_replay"
+        )
     return None
 
 
@@ -1043,6 +1082,14 @@ def iter_logits_kl_stability_backward_chunks(
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=None)
+    parser.add_argument(
+        "--pair-vq-dense-shadow-replay",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument("--pair-vq-dense-shadow-source-config", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-source-sha256", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-result", default=None)
     parser.add_argument("--data-dir", required=False)
     parser.add_argument("--out-dir", required=False)
     parser.add_argument("--init-from", choices=["scratch", "resume"], default="scratch")
@@ -3681,6 +3728,38 @@ def main() -> None:
         scaler.load_state_dict(checkpoint["grad_scaler"])
         restore_rng_state(checkpoint, device_type=device_type)
     raw_model = model
+    pair_vq_dense_shadow = None
+    if args.pair_vq_dense_shadow_replay:
+        pair_vq_dense_shadow = DensePairVQShadowObserver(
+            raw_model,
+            source_config_path=Path(args.pair_vq_dense_shadow_source_config),
+            source_config_sha256=str(
+                args.pair_vq_dense_shadow_source_sha256
+            ),
+            result_path=Path(args.pair_vq_dense_shadow_result),
+            device=args.device,
+        )
+        print(
+            "pair_vq_dense_shadow_init "
+            + json.dumps(
+                {
+                    "source_config": args.pair_vq_dense_shadow_source_config,
+                    "source_config_sha256": (
+                        args.pair_vq_dense_shadow_source_sha256
+                    ),
+                    "result": args.pair_vq_dense_shadow_result,
+                    "persistent_matrix_bytes": (
+                        pair_vq_dense_shadow.persistent_matrix_bytes
+                    ),
+                    "initial_projection": (
+                        pair_vq_dense_shadow.projection_metrics()
+                    ),
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
     trajectory_execution_provenance = execution_provenance_from_environment(required=False)
     if args.compile:
         model = torch.compile(model)
@@ -3881,6 +3960,35 @@ def main() -> None:
             if args.perf_profile:
                 eval_ms = (perf_now() - eval_start) * 1000.0
             print(f"step {iter_num}: train loss {losses['train']:.4f}, val loss {losses['val']:.4f}")
+            if pair_vq_dense_shadow is not None:
+                with pair_vq_dense_shadow.installed():
+                    shadow_losses = estimate_loss(
+                        model,
+                        data_dir,
+                        args,
+                        ctx,
+                        cache_model=cache_model,
+                        cache_dtype=ptdtype,
+                        fixed_eval_indices=fixed_eval_indices,
+                        eval_generators=eval_generators,
+                    )
+                shadow_record = pair_vq_dense_shadow.record_evaluation(
+                    step=iter_num,
+                    dense_losses=losses,
+                    shadow_losses=shadow_losses,
+                    run_identity_sha256=run_identity["config_sha256"],
+                    fixed_eval_indices_sha256=str(fixed_eval_digest),
+                    terminal=iter_num >= args.max_iters,
+                )
+                print(
+                    "pair_vq_dense_shadow_eval "
+                    + json.dumps(
+                        shadow_record,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
             if losses["val"] < best_val_loss:
                 best_val_loss = losses["val"]
             if args.save_checkpoint:
@@ -4166,6 +4274,24 @@ def main() -> None:
             section_start = perf_now()
         scaler.step(optimizer)
         scaler.update()
+        if pair_vq_dense_shadow is not None:
+            shadow_projection = pair_vq_dense_shadow.update(
+                optimizer_step=iter_num
+            )
+            if shadow_projection["refresh_codes"]:
+                print(
+                    "pair_vq_dense_shadow_projection "
+                    + json.dumps(
+                        {
+                            key: value
+                            for key, value in shadow_projection.items()
+                            if key != "matrices"
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
         if pending_optimizer_probe is not None:
             probe_path = write_optimizer_probe(pending_optimizer_probe)
             print(

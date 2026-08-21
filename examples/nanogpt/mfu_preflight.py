@@ -267,6 +267,10 @@ def make_preflight_config(
     config["eval_seed"] = None
     config["save_checkpoint"] = False
     config["checkpoint_history"] = False
+    if config.get("pair_vq_dense_shadow_replay"):
+        config["pair_vq_dense_shadow_result"] = str(
+            temporary_out / "pair_vq_dense_shadow_preflight.json"
+        )
     if atlas_start_steps:
         config["block_fht_attn_cayley_atlas_start_steps"] = list(
             range(len(atlas_start_steps))

@@ -1,0 +1,82 @@
+{
+  "schema_version": "mai_124m_dense_pairvq_shadow_replay_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_performance_gate_or_replay_result",
+  "scientific_question": "Does the production pair-VQ MLP family fail because gradients are evaluated on the compact forward path, or because the live local projection operator cannot track even the exact dense path?",
+  "causal_basis": {
+    "endpoint_shadow_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_b64_shadow_endpoint_result.json",
+      "sha256": "3843cd9adf337b9c61963383af5c7b7600f98ffe01fe748f7c479c48408ce9a6",
+      "finding": "The live compact endpoint is +0.1580 CE behind its matched parent. Adding the decoded terminal carry to c_fc, c_proj, or both improves fixed CE by only 0.000269, 0.000199, and 0.000259 respectively, so carry realization is not functionally causal."
+    },
+    "offline_capacity_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_cfc_residual_pair_vq_mlp_result.json",
+      "sha256": "4ca271852036f33289ad3df9cf6507dba4b1a3e9a35af2c97dd5a03468f09c92",
+      "finding": "A fresh terminal fit of the identical two-stage c_fc plus fast residual and one-stage c_proj plus fast residual model family reaches +0.031719 CE, inside the frozen +0.05 gate."
+    },
+    "matched_endpoint_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+      "sha256": "0737e56c10401fa64b7c81e7635a6269d8cc3ac17a564a53a8f423d8edaef3ec",
+      "historical_dense_parent_validation_ce": 5.361,
+      "ordinary_compact_validation_ce": 5.519
+    }
+  },
+  "theory": {
+    "dense_path": "D_{t+1}=Muon(D_t, grad L(D_t)) is the exact matched dense-MLP parent update.",
+    "nonintervening_shadow": "C_{t+1}=P_live(D_{t+1}; C_t), where P_live uses the production layer-private pair codebooks, two-stage c_fc, one-stage c_proj, fast scalar residuals, local 16-neighbor code reassignment every eight steps, and centroid updates every step.",
+    "causal_separation": "C_t is never used for training forward, backward, clipping, momentum, or D_{t+1}. It is installed only during a second fixed-window evaluation. Thus dense-vs-shadow CE measures projection tracking on the same optimization path, whereas ordinary compact-vs-dense CE includes gradient-field drift.",
+    "gradient_path_failure": "If L(C_T)-L(D_T)<=0.05 while ordinary compact training remains +0.158, the representation and local tracker are sufficient on the dense path; the missing mechanism is grad L(C_t) not matching grad L(D_t), amplified by GELU and residual co-adaptation.",
+    "assignment_hysteresis": "If L(C_T)-L(D_T)>0.05 while a fresh terminal fit of the same family remains +0.031719, the live warm-start local projector is trapped in a worse code assignment than the globally refit endpoint.",
+    "excluded_hypotheses": [
+      "more temporal carry precision",
+      "forwarding W+E",
+      "learning-rate or bit-width sweeps",
+      "larger models or longer horizons",
+      "attention V or attention output projection as the cause of this MLP-only comparison"
+    ]
+  },
+  "registered_run": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_shadow_replay_0p5tpp_lr24e4.json",
+    "config_sha256": "ca7f1db81aa93c3c3c2457804fe95113e68b4c3b12a6953d5a320494be01f2f1",
+    "matched_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+    "matched_parent_config_sha256": "0b27fd338b03532427a646a555c7ef0ce2693c3327afb86a7cbeb80225c1a7db",
+    "result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_dense_pairvq_shadow_replay_0p5tpp_lr24e4/dense_pair_vq_shadow_result.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "updates": 238,
+    "evaluation_steps": [0, 60, 120, 180, 238]
+  },
+  "implementation": {
+    "observer_source_sha256": "8b5b1906dfdc25280ae7d08b4d9fe9a4aa3b131e22508f299307079a8dcb78fc",
+    "train_source_sha256": "2dbaeba5bf141be660d3e4501801424cd01b38a47e6ac145d4aec5ac0122ba04",
+    "mfu_preflight_source_sha256": "e16fb71ff369e303ed8124860a9d34c570f26b0bc025ffd01511b14fd4c091e7",
+    "pair_vq_source_sha256": "8d64b019375355a7621e7d362fa503ae14bacf45055fa258cc9717c70fc1b059",
+    "test_source_sha256": "9cc201883fbc361c10b5ca31465d0c8969854eb789f521582995118fec97bd80",
+    "required_tests": [
+      "observer construction does not mutate dense weights",
+      "temporary projected evaluation restores every dense weight exactly",
+      "projection updates are finite and use the registered refresh cadence",
+      "training config validation rejects compact-parent, resume, compile, or missing-identity misuse"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "all_dense_and_shadow_losses_finite": true,
+    "maximum_dense_replay_minus_historical_parent_terminal_ce": 0.002,
+    "maximum_shadow_minus_dense_terminal_ce": 0.05,
+    "historical_ordinary_compact_minus_dense_ce": 0.158,
+    "historical_fresh_fit_minus_dense_ce": 0.031719
+  },
+  "decision_rule": {
+    "dense_replay_mismatch": "Invalidate the causal comparison and repair determinism; do not interpret the shadow.",
+    "shadow_terminal_gap_at_most_0p05": "Classify COMPACT_GRADIENT_PATH_DRIFT. Next design must preserve a dense-equivalent functional gradient path without retaining dense inference weights; do not tune code assignments first.",
+    "shadow_terminal_gap_above_0p05": "Classify LOCAL_ASSIGNMENT_HYSTERESIS because the fresh-fit capacity oracle already passes. Next test must replace local warm-start assignment with a compact global/coarse-to-fine reassignment mechanism before any new LM endpoint.",
+    "no_automatic_training_successor": true,
+    "no_scale_up": true
+  },
+  "operations": {
+    "preflight": "Foreground-poll the exact config through the standard empirical-GEMM MFU gate; require at least 20 percent MFU.",
+    "scientific_run": "Expected above five minutes. Use one idempotent terminal/error-only watchdog whose callback explicitly asks @Codex to seal and continue; no 20/50/80 callback for this sub-two-hour run.",
+    "storage": "No checkpoint or trajectory tensor snapshots; retain the compact JSON replay result, log, status, provenance, MFU certificate, and hashes only."
+  }
+}
