@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_pair_vq_fractional_lattice_gate9_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_terminal_pass",
+  "classification": "PACKED_FRACTIONAL_TEMPORAL_STATE_PASSES_PRODUCTION_ADMISSION",
+  "decision": "Authorize one matched 124M 0.5-TPP loss-gap endpoint against the same QK-only dense-MLP parent. Do not authorize a horizon extension or model scale-up until that endpoint passes the frozen loss-gap gate.",
+  "provenance": {
+    "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_source_probe9_result.json",
+    "scientific_parent_sha256": "d8aa8b865bc60d8c178cea2d7554b9905c1b7fdd2a61e4b71155e8553a645b6f",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_gate9_plan.json",
+    "plan_sha256": "dd549ddc87d7dda3b9de7f051469be44a8fda54ef83e89c683ff48b213f10ef7",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_gate9.json",
+    "config_sha256": "ffff03a0ee5562f106b23ec5260c5558541420baaaa2674a97826b1e0ca18392",
+    "implementation_commit": "5acf6795f6fc7361eb27efb533e89d102c4d816c",
+    "preregistration_commit": "21c37d9b8dd1e1b35fae610317db6b240bdeb592",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "tests": {
+    "focused_suite": "36 passed",
+    "pack_unpack_bit_exact": true,
+    "checkpoint_next_update_bit_exact": true,
+    "packed_rate_accounting": true,
+    "dense_temporal_state_exclusion": true
+  },
+  "systems_gate": {
+    "passed": true,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_gate9_mfu.json",
+    "certificate_sha256": "ef329b97bc05bd28704780beb2ab8c01e3cc381f67ae8870ca6e6c2394170b98",
+    "log_sha256": "6f65095b826afeb6e178d47738581d8b3d41bbd07030308a17ca3a39a3e92659",
+    "tokens_per_second": 183817.68,
+    "mfu_fraction": 0.3307242727,
+    "iter_ms": 1426.135,
+    "optimizer_ms": 225.2825,
+    "optimizer_fraction": 0.15796857,
+    "peak_mib": 31629.2
+  },
+  "scientific_run": {
+    "clean_exit": true,
+    "optimizer_steps": 9,
+    "diagnostic_records": 48,
+    "records_per_probe_step": 24,
+    "diagnostic_steps": [0, 8],
+    "all_logged_losses_finite": true,
+    "last_eval": "step 9: train loss 8.2855, val loss 8.3828",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_gate9_20260822T_exact1.log",
+    "log_sha256": "548861e8a0c9553522ef6714fe05a11109cf798406b6837a7913de02a88dc988",
+    "log_bytes": 53775
+  },
+  "live_direction_results": {
+    "step_0": {
+      "rows": 24,
+      "feedback_codec_weighted_recovery": 0.9997577844,
+      "feedback_codec_every_matrix_min": 0.9995813049,
+      "conserved_requested_step_weighted_recovery": 0.9999942363,
+      "conserved_requested_step_every_matrix_min": 0.9999890819,
+      "packed_byte_changes": 53110243
+    },
+    "step_8": {
+      "rows": 24,
+      "feedback_codec_weighted_recovery": 0.9997942686,
+      "feedback_codec_every_matrix_min": 0.9997647846,
+      "conserved_requested_step_weighted_recovery": 0.9999788945,
+      "conserved_requested_step_every_matrix_min": 0.9999621258,
+      "packed_byte_changes": 52969290
+    }
+  },
+  "checkpoint_storage_audit": {
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_gate9/ckpt.pt",
+    "checkpoint_sha256": "450b66f8e9e00bc276ec1761b20007773321a39065a2129b4225359ca54136f1",
+    "checkpoint_bytes": 713249208,
+    "metadata_sha256": "18906a62441ef64b25f3adbba58916f7d0d2c0158c83ca9ca9f729e3eabe6f61",
+    "pair_vq_mlp_elements": 56623104,
+    "feedback_code_tensors": 24,
+    "feedback_code_dtype": "uint8",
+    "feedback_code_bytes": 53305344,
+    "feedback_level_tensors": 24,
+    "feedback_level_bytes": 61440,
+    "compact_momentum_tensors": 24,
+    "compact_momentum_bytes": 73728,
+    "audited_compact_optimizer_bytes": 53440512,
+    "physical_feedback_bits_per_weight": 7.53125,
+    "dense_fp32_feedback_tensor_present": false
+  },
+  "frozen_gate_evaluation": {
+    "focused_implementation_tests_pass": true,
+    "exact_config_mfu_at_least_0p20": true,
+    "optimizer_fraction_at_most_0p30": true,
+    "feedback_codec_weighted_recovery_at_least_0p99975_both_phases": true,
+    "feedback_codec_every_matrix_recovery_at_least_0p999_both_phases": true,
+    "current_step_conservation_weighted_at_least_0p99975_both_phases": true,
+    "current_step_conservation_every_matrix_at_least_0p999_both_phases": true,
+    "packed_state_and_no_dense_temporal_carry": true,
+    "winner": "fractional_lattice_q7q8_b32_p25"
+  }
+}
