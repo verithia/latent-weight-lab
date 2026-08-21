@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_shared_mlp_exact_family_factorial_plan_v1",
+  "scientific_question": "Is the rejected seven-trunk endpoint restriction caused primarily by tying c_fc, tying c_proj, or their nonlinear interaction?",
+  "causal_basis": {
+    "teacher_fit_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_mlp_exact_family_teacher_fit_result.json",
+    "teacher_fit_result_sha256": "3a263a3c0a1967415a771b9a60973d9a09d202e61db2ec260c7608cae15e4a1f",
+    "reason": "The complete exact-family splice is optimization-healthy but misses held-out output, JVP, and CE gates. Replacing one matrix family at a time in the same dense teacher isolates the two structural constraints without another fit."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "compact_candidate_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "selected_fit_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_exact_family_teacher_fit_20260821/selected_group_states.pt",
+      "sha256": "acf3a7c72305d15d1c8350f35ad38ea82f07711cd0cffc74c2ba70990f9cc87b"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "variants": {
+    "dense_teacher": "all teacher MLP weights",
+    "shared_c_fc_only": "selected effective shared-family c_fc in layers 5-11; exact dense-teacher c_proj",
+    "shared_c_proj_only": "exact dense-teacher c_fc; selected effective shared-family c_proj in layers 5-11",
+    "shared_both": "selected effective shared-family c_fc and c_proj in layers 5-11"
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "fitted_parameters": 0,
+    "holdout_token_seed": 20260824,
+    "holdout_batches": 8,
+    "token_batch_size": 4,
+    "samples_per_layer_per_bank": 2048,
+    "state_banks": ["dense_teacher", "compact_candidate"],
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260825,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024
+  },
+  "frozen_gates": {
+    "per_side_function_pass": "mean/worst output recovery at least 0.90/0.75 and mean/worst input-JVP recovery at least 0.80/0.50",
+    "per_side_ce_pass": "fixed validation CE gap no greater than +0.05",
+    "c_fc_restriction": "shared_c_fc_only fails either its function or CE gate while shared_c_proj_only passes both",
+    "c_proj_restriction": "shared_c_proj_only fails either its function or CE gate while shared_c_fc_only passes both",
+    "bilateral_restriction": "both one-sided variants fail",
+    "interaction": "report shared_both CE gap minus the sum of the two one-sided CE gaps; positive values indicate super-additive nonlinear damage"
+  },
+  "authorization": {
+    "allowed": "one zero-update, no-fit factorial on the exact selected state",
+    "not_allowed": [
+      "new representation fitting",
+      "language-model training",
+      "changing the fit state or teacher",
+      "model-size scaling"
+    ],
+    "next": "derive exactly one new compact function family from the localized failing side and its measured residual; preregister a representability oracle before training"
+  }
+}

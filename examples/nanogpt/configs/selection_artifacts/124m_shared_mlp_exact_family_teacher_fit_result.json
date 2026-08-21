@@ -1,0 +1,83 @@
+{
+  "schema_version": "mai_shared_mlp_exact_family_teacher_fit_result_v1",
+  "classification": "REPRESENTATIONAL_FAIL",
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_exact_family_teacher_fit_20260821/result.json",
+    "sha256": "a2e08d94c13005c8ef5aee971d06c8f485fd16703ec96efdcb75e350ec3b4d5c",
+    "source_commit": "c2a2ee162e9246f31bc45097cd717b934229a750",
+    "wall_seconds": 31.607890367507935,
+    "maximum_cuda_memory_bytes": 11012574720
+  },
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_shared_mlp_exact_family_teacher_fit_plan.json",
+    "sha256": "4049c113d6aa5419d58727fcf80e4b55e22d0ee5644dc7c77e3a8fe90528a867"
+  },
+  "selected_state": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_exact_family_teacher_fit_20260821/selected_group_states.pt",
+    "sha256": "acf3a7c72305d15d1c8350f35ad38ea82f07711cd0cffc74c2ba70990f9cc87b",
+    "bytes": 37859985
+  },
+  "optimization": {
+    "healthy": true,
+    "all_restarts_finite": true,
+    "group_5_7": {
+      "selected_restart": "dense_layer_7",
+      "initial_objective": 1.0859505385160446,
+      "final_objective": 0.21692986600100994,
+      "reduction_fraction": 0.8002396441577851,
+      "holdout_output_mean_recovery": 0.48905060688654584,
+      "holdout_jvp_mean_recovery": -0.0040338536103566485
+    },
+    "group_8_11": {
+      "selected_restart": "dense_layer_9",
+      "initial_objective": 1.0626189708709717,
+      "final_objective": 0.2841058112680912,
+      "reduction_fraction": 0.7326362326891032,
+      "holdout_output_mean_recovery": 0.41867150366306305,
+      "holdout_jvp_mean_recovery": -0.12567513436079025
+    },
+    "restart_reduction_range": [0.7326362326891032, 0.8733514343196431]
+  },
+  "heldout_function": {
+    "output": {
+      "mean_explained_target_energy": 0.4488339764731271,
+      "minimum_explained_target_energy": 0.266401469707489,
+      "global_explained_target_energy": 0.4580422914566039,
+      "mean_cosine": 0.688331697668348
+    },
+    "input_jvp": {
+      "mean_explained_target_energy": -0.07354315689631871,
+      "minimum_explained_target_energy": -0.36271023750305176,
+      "global_explained_target_energy": -0.06888958102288534,
+      "mean_cosine": 0.40999885754925863
+    }
+  },
+  "fixed_evaluation": {
+    "protocol": "mai_ladder_fixed_eval_indices_v2",
+    "indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "teacher_validation_cross_entropy": 3.674412250518799,
+    "exact_family_splice_validation_cross_entropy": 4.461759567260742,
+    "gap": 0.7873473167419434,
+    "maximum_allowed_gap": 0.05
+  },
+  "storage_and_compute": {
+    "dense_mlp_parameters": 56623104,
+    "seven_trunk_mlp_parameters": 33076224,
+    "parameter_reduction_fraction": 0.4158528645833333,
+    "compression_ratio": 1.711897464474784,
+    "materialized_mlp_flops": "unchanged",
+    "gain_flops": "fusible into generated dense weights"
+  },
+  "interpretation": {
+    "finding": "Direct teacher access and healthy multi-start fitting cannot make the exact seven-trunk signed-pre-GELU/positive-output diagonal sharing family reproduce the dense endpoint.",
+    "not_an_lm_optimizer_result": "The oracle removes cross-entropy training and the original trajectory; failure therefore belongs to the function topology under the frozen fit protocol, not merely to Muon or LM path acquisition.",
+    "severity": "The +0.7873 CE splice gap is 15.7 times the allowed +0.05 gap and substantially worse than the trained seven-trunk candidate's original +0.0698 gap because the teacher splice exposes direct functional incompatibility.",
+    "next_action": "Run one zero-update c_fc/c_proj factorial using the selected fit to localize which shared matrix causes the endpoint restriction before designing a replacement family.",
+    "closed": [
+      "more steps or learning-rate sweeps for this frozen exact-family test",
+      "additional trunk counts or boundaries",
+      "model-size scaling of the seven-trunk family",
+      "language-model training of another shared-trunk guess"
+    ]
+  }
+}
