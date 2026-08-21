@@ -1,0 +1,109 @@
+{
+  "schema_version": "mai_depth_shared_top1_mlp_hard_em_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_repair_values",
+  "scientific_question": "Is the failed hard top-1 result caused by straight-through assignment instability rather than insufficient capacity in the exact same four-expert family?",
+  "causal_basis": {
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_depth_shared_top1_mlp_teacher_fit_result.json",
+    "parent_result_sha256": "e90cf3bba3fc2887fee73a6d515edba9d13c8670934556127a52acd2357075e1",
+    "parent_finding": "Soft joint fitting reduces the normalized value-plus-direction objective by 79.4 percent to 0.8187, but hard conversion raises the objective above 3 and straight-through training reduces it only 7.6 percent. The parent is optimization-inconclusive by its frozen rule.",
+    "authorized_repair": "The parent plan permits only offline optimizer-geometry repair of this exact family. Alternating assignment, expert fitting, and router classification changes no representation, parameter count, checkpoint identity, dataset bank, functional gate, or LM state.",
+    "not_a_sweep": "One deterministic six-cycle path is frozen. There is no choice of expert count, top-k, router architecture, temperature, optimizer, seed, or result-selected restart."
+  },
+  "identities": {
+    "parent_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_depth_shared_top1_mlp_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "5083a00ba89a4ee50e5f81de9bd268f3055fc04baa33d16cbb15c3ed5206156e",
+      "stage": "soft_joint"
+    },
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "four_trunk_initialization_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/pro6_mai_v3_124m_shared_dense_mlp_trunk_groups4_2_2_4_4_5tpp/ckpt.pt",
+      "sha256": "29c3497bfacb94a6bb2ed9fda1a14897df94400611b7d5612641af0b7b9bfc95"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "representation": "Identical DepthSharedTop1MLP from the parent: four full-width experts, one active expert per token, per-layer affine router, pre-GELU gain, and residual-output gain.",
+    "compact_parameters": 18957360,
+    "compression_ratio": 2.9868665257187708,
+    "parameter_saving_fraction": 0.6652009752061632,
+    "deployed_extra_fraction_of_dense_mlp_matmul_flops": 0.0006510416666666666
+  },
+  "repair_protocol": {
+    "cycles": 6,
+    "assignment": "At the start of each cycle, assign every discovery-bank layer/bank/row to the expert minimizing the sum of separately normalized clean-output error and central-difference direction error. Ties select the lowest expert index. Targets are used only for this offline ceiling assignment.",
+    "expert_m_step": {
+      "steps_per_cycle": 100,
+      "optimizer": "Adam",
+      "learning_rate": 0.0003,
+      "weight_decay": 0.0,
+      "gradient_clip_norm": 10.0,
+      "trainable": "expert matrices, layer pre-GELU gains, and residual-output gains; router frozen",
+      "objective": "The registered equal-weight normalized clean-value plus central-difference direction loss, evaluated only through each sample's frozen assigned expert."
+    },
+    "router_m_step": {
+      "steps_per_cycle": 100,
+      "optimizer": "Adam",
+      "learning_rate": 0.001,
+      "weight_decay": 0.0,
+      "gradient_clip_norm": 10.0,
+      "trainable": "the unchanged layer-specific affine router only",
+      "objective": "Cross entropy from layer-normalized clean inputs to the frozen oracle expert assignments."
+    },
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "fit_token_seed": 20260910,
+    "holdout_token_seed": 20260911,
+    "algorithm_seed": 20260913,
+    "best_state_rule": "After every complete E/M cycle, evaluate the hard routed discovery objective and preserve the smallest one. Holdout metrics never select a cycle or state.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260912,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "oracle assignment occupancy and change rate per cycle",
+      "router discovery and holdout assignment accuracy",
+      "oracle-assigned and router-routed discovery/holdout value-direction objectives",
+      "hard routed output and analytic input-JVP recovery by layer/bank",
+      "hard routed fixed-checkpoint validation CE",
+      "wall time and peak CUDA memory"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "Finite execution plus at least 25-percent reduction in the best hard-routed discovery objective versus the parent hard-top1 initial objective 3.7679713517427444."
+  },
+  "decision_rule": {
+    "pass": "The four-expert representation is sufficient and the straight-through optimizer was the blocker. Implement and exact-config MFU-gate only a 124M/0.5TPP LM verification.",
+    "oracle_good_router_bad": "If oracle-assigned holdout output/JVP gates pass but routed gates fail, close the affine router and derive one richer router from the measured assignment boundary; do not add experts.",
+    "healthy_fail": "Reject the exact four-expert top-1 family and do not sweep its optimizer or expert count. Move to a finer complete-atom allocation or locally generated full-width field.",
+    "optimization_inconclusive": "Stop and report; do not launch LM training or infer a capacity result."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update hard-EM repair after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before all routed functional gates pass",
+      "model-size scaling",
+      "expert-count, top-k, router, cycle-count, optimizer, learning-rate, seed, activation, or regularizer sweeps",
+      "using holdout data to change assignments or select state"
+    ],
+    "callback_policy": "Foreground-poll if the measured complete protocol is at most five minutes; otherwise use one verified terminal/failure @Codex watchdog."
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": "mai_124m_depth_shared_top1_mlp_teacher_fit_result_v1",
+  "classification": "OPTIMIZATION_INCONCLUSIVE",
+  "identity": {
+    "repository_commit": "131d0afe6b4bb63d9ebb606c20513cbd4865c0bb",
+    "entrypoint": "examples/nanogpt/analyze_depth_shared_top1_mlp_teacher_fit.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_depth_shared_top1_mlp_teacher_fit_plan.json",
+    "plan_sha256": "4dc9f2990df79875c2b44d2a8df9e7e84b6540f560794b3d2be248cf683d1ec1",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "four_trunk_initialization_checkpoint_sha256": "29c3497bfacb94a6bb2ed9fda1a14897df94400611b7d5612641af0b7b9bfc95",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_depth_shared_top1_mlp_teacher_fit_20260821/result.json",
+      "sha256": "684001820e48982b884515086d95c76aec3360c96e0022dd58cb18dc6f77d52b"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_depth_shared_top1_mlp_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "5083a00ba89a4ee50e5f81de9bd268f3055fc04baa33d16cbb15c3ed5206156e"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 60.675479888916016,
+    "maximum_cuda_memory_bytes": 10745670656,
+    "language_model_updates": 0,
+    "focused_tests": "11 passed",
+    "mechanical_recovery": "The first invocation completed every fit stage but the fixed-CE splice hit a BF16-to-FP32 grouped-dispatch assignment error before producing candidate CE or a result artifact. Commit 131d0af added a dtype-safe cast and regression test; the scientific plan, seeds, checkpoints, stages, and gates were unchanged for the successful rerun."
+  },
+  "accounting": {
+    "compact_parameters": 18957360,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 2.9868665257187708,
+    "parameter_saving_fraction": 0.6652009752061632,
+    "deployed_extra_fraction_of_dense_mlp_matmul_flops": 0.0006510416666666666
+  },
+  "teacher_fixed_validation_cross_entropy": 3.674412250518799,
+  "stage_results": {
+    "soft_router_only": {
+      "fit_total_initial_final": [4.80939120054245, 2.992967128753662],
+      "objective_reduction_fraction": 0.3776827452888245,
+      "hard_output_recovery_mean_min_global": [-1.4427292744318645, -2.4847264289855957, -1.3120576478865607],
+      "hard_input_jvp_recovery_mean_min_global": [-1.2394383649031322, -1.9188015460968018, -1.172083030153825],
+      "fixed_validation_cross_entropy": 8.292383193969727,
+      "gap_to_dense_teacher": 4.617970943450928,
+      "optimization_healthy": true,
+      "passes": false
+    },
+    "soft_joint": {
+      "fit_total_initial_final": [3.9774320125579834, 0.818672388792038],
+      "fit_value_final": 0.374732356518507,
+      "fit_direction_final": 0.44394003599882126,
+      "objective_reduction_fraction": 0.7941706140526762,
+      "hard_holdout_total": 5.315003663301468,
+      "hard_output_recovery_mean_min_global": [0.380196750164032, -0.07152724266052246, 0.4194466755181129],
+      "hard_input_jvp_recovery_mean_min_global": [0.014409917096296946, -0.42010629177093506, 0.036472894068269035]
+    },
+    "hard_top1_joint": {
+      "fit_total_initial_final": [3.7679713517427444, 3.4810862839221954],
+      "objective_reduction_fraction": 0.07613780494585243,
+      "hard_holdout_total": 3.1928949654102325,
+      "hard_output_recovery_mean_min_global": [0.025818484524885815, -0.05711770057678223, 0.021298449679421183],
+      "hard_input_jvp_recovery_mean_min_global": [-0.04280651112397512, -0.10228121280670166, -0.04711551912035472],
+      "fixed_validation_cross_entropy": 10.169711112976074,
+      "gap_to_dense_teacher": 6.495298862457275,
+      "optimization_healthy": false,
+      "passes": false
+    }
+  },
+  "decision": {
+    "representation_rejected": false,
+    "language_model_training_authorized": false,
+    "expert_or_hyperparameter_sweep_authorized": false,
+    "interpretation": "The learned soft mixture can reduce the explicitly normalized value-plus-direction fit objective, but the hard top-1 projection destroys the fit and straight-through joint training does not recover. This isolates discrete assignment/optimization as the current obstruction; it does not establish that four full-width experts lack representational capacity.",
+    "next_action": "Run one preregistered hard-assignment alternating-minimization repair of this exact four-expert family. Fit oracle assignments and expert fields on the discovery bank, fit the unchanged affine router to those assignments, and measure the same hard output/JVP/CE gates."
+  }
+}
