@@ -1,0 +1,89 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fast_retraction_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "FAIL_UNBIASED_RETRACTION_VARIANCE_EXPLOSION",
+  "passed": false,
+  "decision": {
+    "smallest_rung_loss_gate_passed": false,
+    "unbiasedness_gate_passed": true,
+    "storage_gate_passed": true,
+    "larger_rung_authorized": false,
+    "learning_rate_bit_width_or_width_sweep_authorized": false,
+    "next_authorized_work": "Implement and foreground-gate one fixed signed block-FHT-preconditioned stochastic fast retraction. It must preserve exact unbiasedness while reducing real-training weighted sampling variance to at most 0.10 before any endpoint is allowed.",
+    "reason": "The stochastic projector was unbiased to numerical precision with zero clipping, but scalar support endpoints inherited global outliers. Sampling variance approached target energy, accumulated feedback reached 93 percent of weight energy, and validation CE diverged from 6.1188 at step 120 to 11.1364 at step 238."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fast_retraction_plan.json",
+    "plan_sha256": "b6dbe1bd8f5119449c3f4fbe3a5950fbebf4c8516bc1898ef51ea83a729c43e6",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fast_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "d44be84520f770c426c2b5337f59189924dc5295457e3da917fd33137bbafe33",
+    "implementation_commit": "6d16e8c9d166bfc04654ba4f3eacbc1b3c64b3c5",
+    "execution_git_commit": "bca1b70ec4851ed01bd5ea5e7d8f825514dab413",
+    "run_id": "pro6_mai_v3_124m_pairvq_stochastic_fast_retraction_0p5tpp_20260821T204919Z_2866577",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "status_sha256": "981f1d45a51478ac4f46485a710f15f885a636738e499ea54a75a37822f0937a",
+    "log_sha256": "46b51e13d4a22c8bb5e04e395b396fd8fac43b4e80fe5b3542d4838de8272095",
+    "provenance_sha256": "43169f47e5175710a160f57a56b2856dc7be66ff95c810489015629152ccab6b",
+    "archived_config_sha256": "d44be84520f770c426c2b5337f59189924dc5295457e3da917fd33137bbafe33",
+    "mfu_preflight_certificate_sha256": "9bfa7bc3b17ba65fe337b5e8a7d75b4aac55aabd09fc0c7892608a299e6744ce",
+    "checkpoint_retained": false
+  },
+  "terminal_status": {
+    "state": "finished",
+    "exit_code": 0,
+    "started_at": "2026-08-22T04:49:20+08:00",
+    "finished_at": "2026-08-22T04:57:44+08:00",
+    "elapsed_seconds": 504
+  },
+  "fixed_evaluation": [
+    {"step": 0, "train_ce": 10.9826, "validation_ce": 10.9831, "parent_validation_ce": 10.9970, "candidate_minus_parent_ce": -0.0139},
+    {"step": 60, "train_ce": 6.3300, "validation_ce": 6.3398, "parent_validation_ce": 6.2180, "candidate_minus_parent_ce": 0.1218},
+    {"step": 120, "train_ce": 6.1118, "validation_ce": 6.1188, "parent_validation_ce": 5.7258, "candidate_minus_parent_ce": 0.3930},
+    {"step": 180, "train_ce": 7.8906, "validation_ce": 7.8972, "parent_validation_ce": 5.4642, "candidate_minus_parent_ce": 2.4330},
+    {"step": 238, "train_ce": 11.1320, "validation_ce": 11.1364, "parent_validation_ce": 5.3610, "candidate_minus_parent_ce": 5.7754}
+  ],
+  "frozen_gate_outcomes": {
+    "terminal_validation_ce": 11.1364,
+    "maximum_terminal_validation_ce": 5.4110,
+    "terminal_gate_excess_ce": 5.7254,
+    "terminal_candidate_minus_parent_ce": 5.7754,
+    "minimum_expected_bias_recovery": 0.9999999999959481,
+    "minimum_expected_bias_recovery_required": 0.999,
+    "maximum_boundary_clipped_values": 0,
+    "all_losses_finite": true,
+    "persistent_matrix_bytes": 157500864,
+    "persistent_matrix_bytes_unchanged": true
+  },
+  "variance_and_feedback_trajectory": [
+    {"step": 0, "weighted_sampling_variance_ratio": 0.363622, "weighted_requested_step_recovery": 0.664904, "mean_feedback_to_weight_energy_ratio": 0.000000063},
+    {"step": 8, "weighted_sampling_variance_ratio": 0.930522, "weighted_requested_step_recovery": -0.740908, "mean_feedback_to_weight_energy_ratio": 0.000375},
+    {"step": 64, "weighted_sampling_variance_ratio": 0.878638, "weighted_requested_step_recovery": -0.232198, "mean_feedback_to_weight_energy_ratio": 0.034146},
+    {"step": 120, "weighted_sampling_variance_ratio": 2.135641, "weighted_requested_step_recovery": -0.274100, "mean_feedback_to_weight_energy_ratio": 0.260336},
+    {"step": 160, "weighted_sampling_variance_ratio": 1.242644, "weighted_requested_step_recovery": 0.073592, "mean_feedback_to_weight_energy_ratio": 0.554584},
+    {"step": 200, "weighted_sampling_variance_ratio": 0.896217, "weighted_requested_step_recovery": 0.217550, "mean_feedback_to_weight_energy_ratio": 0.812393},
+    {"step": 232, "weighted_sampling_variance_ratio": 0.954546, "weighted_requested_step_recovery": 0.160446, "mean_feedback_to_weight_energy_ratio": 0.932991, "maximum_feedback_to_weight_energy_ratio": 0.990170}
+  ],
+  "diagnostic_extrema": {
+    "maximum_sampling_variance_ratio_per_matrix": 2.895173324569829,
+    "minimum_requested_step_recovery_per_matrix": -1.1805888681894658,
+    "maximum_feedback_to_weight_energy_ratio": 0.9901703596115112,
+    "logged_projection_rows": 720
+  },
+  "systems": {
+    "median_tokens_per_second": 153371.94,
+    "median_iteration_ms": 1709.20,
+    "median_optimizer_ms": 500.29,
+    "peak_mib": 31660.74,
+    "preflight_mfu_fraction": 0.28138502520095426,
+    "minimum_mfu_fraction": 0.20
+  },
+  "mechanistic_interpretation": {
+    "what_passed": "The boundary repair made the stochastic fast-code retraction unbiased over every observed coordinate and preserved the compact byte budget.",
+    "what_failed": "Using sample minima and maxima as global support endpoints lets rare residual coordinates create very wide tail intervals. Bernoulli endpoint selection is unbiased but has variance p(1-p)(a_(i+1)-a_i)^2; that variance is repeatedly injected into the compact forward state.",
+    "why_error_feedback_did_not_rescue_it": "Error feedback conserved the accumulated request algebraically, but it also accumulated stochastic projection noise. Its energy grew from negligible at step zero to nearly the weight energy by step 232, changing the forward function and producing loss divergence.",
+    "next_constraint": "Retain unbiasedness while reducing coordinate dynamic range before quantization. A fixed signed orthogonal block transform is authorized because it spreads tail energy without trainable or per-weight state and preserves unbiasedness after inverse decoding."
+  }
+}

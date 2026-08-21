@@ -2362,6 +2362,30 @@ def parse_args() -> argparse.Namespace:
         raise ValueError(
             "stochastic fast retraction requires pair VQ and c_proj fast residual"
         )
+    stochastic_fast_fht_block_size = int(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size",
+            0,
+        )
+    )
+    if stochastic_fast_fht_block_size < 0 or (
+        stochastic_fast_fht_block_size
+        and (
+            not getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_stochastic_fast_retraction",
+                False,
+            )
+            or stochastic_fast_fht_block_size < 2
+            or stochastic_fast_fht_block_size
+            & (stochastic_fast_fht_block_size - 1)
+        )
+    ):
+        raise ValueError(
+            "stochastic fast FHT block size must be zero or a power of two "
+            "with stochastic fast retraction enabled"
+        )
     if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
         raise ValueError("pair-VQ feedback output group size must be nonnegative")
     residual_probe_steps = tuple(
@@ -3092,6 +3116,13 @@ def pair_vq_model_kwargs(
                 namespace,
                 "block_fht_mlp_pair_vq_stochastic_fast_retraction",
                 False,
+            )
+        ),
+        "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size",
+                0,
             )
         ),
         "block_fht_mlp_pair_vq_feedback_codec": str(
@@ -4372,6 +4403,64 @@ def main() -> None:
         )
         if consume_givens_diagnostics is not None:
             givens_diagnostics = consume_givens_diagnostics()
+            stochastic_rows = [
+                row
+                for row in givens_diagnostics
+                if "stochastic_fast_sampling_variance" in row
+            ]
+            if stochastic_rows:
+                stochastic_target_energy = sum(
+                    float(row["stochastic_fast_target_energy"])
+                    for row in stochastic_rows
+                )
+                stochastic_sampling_variance = sum(
+                    float(row["stochastic_fast_sampling_variance"])
+                    for row in stochastic_rows
+                )
+                print(
+                    "pair_vq_stochastic_retraction "
+                    + json.dumps(
+                        {
+                            "step": iter_num,
+                            "matrices": len(stochastic_rows),
+                            "target_energy": stochastic_target_energy,
+                            "sampling_variance": stochastic_sampling_variance,
+                            "weighted_sampling_variance_ratio": (
+                                stochastic_sampling_variance
+                                / max(stochastic_target_energy, 1e-30)
+                            ),
+                            "minimum_expected_bias_recovery": min(
+                                float(
+                                    row[
+                                        "stochastic_fast_expected_bias_recovery"
+                                    ]
+                                )
+                                for row in stochastic_rows
+                            ),
+                            "boundary_clipped_values": sum(
+                                int(
+                                    row[
+                                        "stochastic_fast_boundary_clipped_values"
+                                    ]
+                                )
+                                for row in stochastic_rows
+                            ),
+                            "fht_block_sizes": sorted(
+                                {
+                                    int(
+                                        row.get(
+                                            "stochastic_fast_fht_block_size", 0
+                                        )
+                                    )
+                                    for row in stochastic_rows
+                                }
+                            ),
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
             for row in givens_diagnostics:
                 if row.get(
                     "report_refresh",

@@ -2107,6 +2107,7 @@ class MuonPairVQLinear(nn.Module):
         layer_id: int,
         fast_residual: bool = False,
         stochastic_fast_retraction: bool = False,
+        stochastic_fast_fht_block_size: int = 0,
         error_feedback: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
@@ -2131,6 +2132,9 @@ class MuonPairVQLinear(nn.Module):
         self.layer_id = int(layer_id)
         self.fast_residual = bool(fast_residual)
         self.stochastic_fast_retraction = bool(stochastic_fast_retraction)
+        self.stochastic_fast_fht_block_size = int(
+            stochastic_fast_fht_block_size
+        )
         self.base_seed = int(base_seed)
         self.error_feedback = bool(error_feedback)
         self.feedback_codec = str(feedback_codec)
@@ -2180,6 +2184,20 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ stages must be one or two")
         if self.stochastic_fast_retraction and not self.fast_residual:
             raise ValueError("stochastic fast retraction requires a fast residual")
+        if self.stochastic_fast_fht_block_size < 0:
+            raise ValueError("stochastic fast FHT block size must be nonnegative")
+        if self.stochastic_fast_fht_block_size and (
+            not self.stochastic_fast_retraction
+            or self.stochastic_fast_fht_block_size < 2
+            or self.stochastic_fast_fht_block_size
+            & (self.stochastic_fast_fht_block_size - 1)
+            or self.in_features * self.out_features
+            % self.stochastic_fast_fht_block_size
+        ):
+            raise ValueError(
+                "stochastic fast FHT block size requires stochastic retraction "
+                "and must be a power-of-two divisor of the element count"
+            )
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
         if any(step < 0 for step in self.feedback_residual_probe_steps):
@@ -2871,14 +2889,7 @@ class MuonPairVQLinear(nn.Module):
     def decode_weight(self) -> torch.Tensor:
         pairs = sum(self.decode_pairs(stage) for stage in range(self.stages))
         if self.fast_residual:
-            fast_codes = self.fast_codes.long()
-            pairs = pairs + torch.stack(
-                (
-                    self.fast_levels[0].index_select(0, fast_codes // 16),
-                    self.fast_levels[1].index_select(0, fast_codes % 16),
-                ),
-                dim=1,
-            )
+            pairs = pairs + self.decode_fast_pairs()
         return pairs.reshape(self.out_features, self.in_features).float()
 
     def decode_slow_pairs(self) -> torch.Tensor:
@@ -2888,13 +2899,19 @@ class MuonPairVQLinear(nn.Module):
         if not self.fast_residual:
             return torch.zeros_like(self.decode_pairs(0))
         fast_codes = self.fast_codes.long()
-        return torch.stack(
+        encoded = torch.stack(
             (
                 self.fast_levels[0].index_select(0, fast_codes // 16),
                 self.fast_levels[1].index_select(0, fast_codes % 16),
             ),
             dim=1,
         )
+        if not self.stochastic_fast_fht_block_size:
+            return encoded
+        return _inverse_signed_block_fht(
+            encoded.reshape(-1, self.stochastic_fast_fht_block_size),
+            seed=self.base_seed + 32452843,
+        ).reshape(-1, self.vector_length)
 
     @torch.no_grad()
     def rematerialize_weight_(self) -> None:
@@ -2948,8 +2965,15 @@ class MuonPairVQLinear(nn.Module):
         if not self.fast_residual:
             return 0
         if self.stochastic_fast_retraction:
+            codec_target = residual
+            if self.stochastic_fast_fht_block_size:
+                codec_target = _signed_block_fht(
+                    residual,
+                    block_size=self.stochastic_fast_fht_block_size,
+                    seed=self.base_seed + 32452843,
+                ).reshape(-1, self.vector_length)
             changes, diagnostics = _fit_stochastic_cartesian_pair_codec_(
-                residual,
+                codec_target,
                 self.fast_levels,
                 self.fast_codes,
                 seed=(
@@ -2957,6 +2981,9 @@ class MuonPairVQLinear(nn.Module):
                     + 104729 * int(self.optimizer_step)
                     + 1000003
                 ),
+            )
+            diagnostics["stochastic_fast_fht_block_size"] = (
+                self.stochastic_fast_fht_block_size
             )
             self._last_stochastic_fast_diagnostics = diagnostics
             return changes

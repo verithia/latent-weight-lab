@@ -43,6 +43,7 @@ def make_module(
     seed: int = 101,
     fast_residual: bool = False,
     stochastic_fast_retraction: bool = False,
+    stochastic_fast_fht_block_size: int = 0,
     error_feedback: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
@@ -60,6 +61,7 @@ def make_module(
         layer_id=3,
         fast_residual=fast_residual,
         stochastic_fast_retraction=stochastic_fast_retraction,
+        stochastic_fast_fht_block_size=stochastic_fast_fht_block_size,
         error_feedback=error_feedback,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
@@ -108,6 +110,7 @@ def test_stochastic_fast_retraction_resume_is_exact_without_rng_state() -> None:
     module = make_module(
         fast_residual=True,
         stochastic_fast_retraction=True,
+        stochastic_fast_fht_block_size=16,
         error_feedback=True,
     )
     optimizer = make_optimizer(module)
@@ -119,6 +122,7 @@ def test_stochastic_fast_retraction_resume_is_exact_without_rng_state() -> None:
     restored = make_module(
         fast_residual=True,
         stochastic_fast_retraction=True,
+        stochastic_fast_fht_block_size=16,
         error_feedback=True,
     )
     restored.load_state_dict(model_state, strict=True)
@@ -132,6 +136,36 @@ def test_stochastic_fast_retraction_resume_is_exact_without_rng_state() -> None:
     torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
     assert torch.equal(restored.fast_codes, module.fast_codes)
     assert not any("rng" in key for key in restored.state_dict())
+
+
+def test_stochastic_fast_fht_retraction_roundtrips_and_keeps_byte_accounting() -> None:
+    raw = make_module(
+        fast_residual=True,
+        stochastic_fast_retraction=True,
+        error_feedback=True,
+    )
+    transformed = make_module(
+        fast_residual=True,
+        stochastic_fast_retraction=True,
+        stochastic_fast_fht_block_size=16,
+        error_feedback=True,
+    )
+    transformed.load_state_dict(raw.state_dict(), strict=True)
+    before = transformed.persistent_codec_bytes
+    torch.manual_seed(1907)
+    requested = transformed.weight.detach() + 0.01 * torch.randn_like(
+        transformed.weight
+    )
+    diagnostics = transformed.project_requested_weight_(
+        requested, refresh_codes=True
+    )
+    assert diagnostics["stochastic_fast_fht_block_size"] == 16
+    assert diagnostics["stochastic_fast_expected_bias_recovery"] > 0.999999
+    assert diagnostics["stochastic_fast_boundary_clipped_values"] == 0
+    assert transformed.persistent_codec_bytes == before
+    torch.testing.assert_close(
+        transformed.decode_weight(), transformed.weight, rtol=0.0, atol=0.0
+    )
 
 
 def make_fractional_module(
@@ -1401,6 +1435,7 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
             block_fht_mlp_pair_vq_error_feedback=True,
             block_fht_mlp_pair_vq_cproj_fast_residual=True,
             block_fht_mlp_pair_vq_stochastic_fast_retraction=True,
+            block_fht_mlp_pair_vq_stochastic_fast_fht_block_size=8,
             block_fht_mlp_pair_vq_feedback_codec="cartesian4x4",
             block_fht_mlp_pair_vq_feedback_output_group_size=2,
         )
@@ -1411,6 +1446,8 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
     assert mlp.c_proj.fast_residual is True
     assert mlp.c_proj.stochastic_fast_retraction is True
     assert mlp.c_fc.stochastic_fast_retraction is True
+    assert mlp.c_proj.stochastic_fast_fht_block_size == 8
+    assert mlp.c_fc.stochastic_fast_fht_block_size == 8
     assert mlp.c_proj.error_feedback is True
     assert mlp.c_proj.feedback_output_group_size == 2
     assert mlp.c_fc.feedback_output_group_size == 2
@@ -1470,6 +1507,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         block_fht_mlp_pair_vq_error_feedback=True,
         block_fht_mlp_pair_vq_cproj_fast_residual=True,
         block_fht_mlp_pair_vq_stochastic_fast_retraction=False,
+        block_fht_mlp_pair_vq_stochastic_fast_fht_block_size=0,
         block_fht_mlp_pair_vq_feedback_codec="polar32x8",
         block_fht_mlp_pair_vq_feedback_output_group_size=0,
     )
@@ -1482,6 +1520,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_error_feedback": True,
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
         "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
+        "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": 0,
         "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
         "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),

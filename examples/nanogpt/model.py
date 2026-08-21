@@ -194,6 +194,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_retraction: bool = False
+    block_fht_mlp_pair_vq_stochastic_fast_fht_block_size: int = 0
     block_fht_mlp_pair_vq_feedback_codec: str = "cartesian4x4"
     block_fht_mlp_pair_vq_feedback_output_group_size: int = 0
     block_fht_mlp_pair_vq_feedback_residual_probe_steps: tuple[int, ...] = ()
@@ -2417,6 +2418,9 @@ class MLP(nn.Module):
                 stochastic_fast_retraction=bool(
                     config.block_fht_mlp_pair_vq_stochastic_fast_retraction
                 ),
+                stochastic_fast_fht_block_size=int(
+                    config.block_fht_mlp_pair_vq_stochastic_fast_fht_block_size
+                ),
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback
                 ),
@@ -2699,6 +2703,9 @@ class MLP(nn.Module):
                 ),
                 stochastic_fast_retraction=bool(
                     config.block_fht_mlp_pair_vq_stochastic_fast_retraction
+                ),
+                stochastic_fast_fht_block_size=int(
+                    config.block_fht_mlp_pair_vq_stochastic_fast_fht_block_size
                 ),
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback

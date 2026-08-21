@@ -10,6 +10,8 @@ from examples.nanogpt.mfu_preflight import (
     feedback_cap_preflight_metadata,
     make_preflight_config,
     parse_feedback_cap_events,
+    parse_pair_vq_persistent_training_bytes,
+    parse_stochastic_retraction_events,
     parse_snapshot_elapsed_seconds,
     parse_optimizer_probe_steps,
     parse_training_loss_values,
@@ -163,6 +165,21 @@ class MfuPreflightTest(unittest.TestCase):
                 "scratch_task_frame_start_iter": 0,
                 "timed_task_frame_active": False,
             },
+        )
+
+    def test_stochastic_retraction_and_persistent_byte_parsers(self) -> None:
+        text = "\n".join(
+            [
+                'pair_vq_stochastic_retraction {"step":3,"weighted_sampling_variance_ratio":0.08}',
+                "mlp_pair_vq: modules=24 elements=1 persistent_training_bytes=157,500,864 model_compression_vs_dense_bf16=1",
+            ]
+        )
+        self.assertEqual(
+            parse_stochastic_retraction_events(text),
+            [{"step": 3, "weighted_sampling_variance_ratio": 0.08}],
+        )
+        self.assertEqual(
+            parse_pair_vq_persistent_training_bytes(text), [157500864]
         )
 
     def test_snapshot_elapsed_parser(self) -> None:

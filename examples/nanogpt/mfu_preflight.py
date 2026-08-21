@@ -169,6 +169,30 @@ def parse_feedback_cap_events(text: str) -> list[dict[str, Any]]:
     return rows
 
 
+def parse_stochastic_retraction_events(text: str) -> list[dict[str, Any]]:
+    """Parse one request-energy-weighted aggregate per optimizer update."""
+    rows: list[dict[str, Any]] = []
+    prefix = "pair_vq_stochastic_retraction "
+    for line in text.splitlines():
+        if line.startswith(prefix):
+            value = json.loads(line[len(prefix) :])
+            if not isinstance(value, dict):
+                raise ValueError("stochastic-retraction event must be a JSON object")
+            rows.append(value)
+    return rows
+
+
+def parse_pair_vq_persistent_training_bytes(text: str) -> list[int]:
+    return [
+        int(value.replace(",", ""))
+        for value in re.findall(
+            r"^mlp_pair_vq: .* persistent_training_bytes=([0-9,]+) ",
+            text,
+            flags=re.MULTILINE,
+        )
+    ]
+
+
 def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> float:
     if not torch.cuda.is_available():
         raise RuntimeError("MFU preflight requires CUDA")
@@ -521,6 +545,87 @@ def main() -> None:
             if not timed_cap_events:
                 raise RuntimeError(
                     "registered preflight did not exercise the cap during timed updates"
+                )
+        stochastic_events = parse_stochastic_retraction_events(process.stdout)
+        timed_stochastic_events = [
+            row
+            for row in stochastic_events
+            if int(row.get("step", -1)) >= effective_warmup_updates
+        ]
+        persistent_training_bytes = parse_pair_vq_persistent_training_bytes(
+            process.stdout
+        )
+        stochastic_required = source.get(
+            "mfu_preflight_stochastic_weighted_variance_ratio_max"
+        )
+        certificate["stochastic_retraction"] = {
+            "event_count": len(stochastic_events),
+            "timed_event_count": len(timed_stochastic_events),
+            "maximum_timed_weighted_sampling_variance_ratio": max(
+                (
+                    float(row["weighted_sampling_variance_ratio"])
+                    for row in timed_stochastic_events
+                ),
+                default=None,
+            ),
+            "minimum_timed_expected_bias_recovery": min(
+                (
+                    float(row["minimum_expected_bias_recovery"])
+                    for row in timed_stochastic_events
+                ),
+                default=None,
+            ),
+            "timed_boundary_clipped_values": sum(
+                int(row["boundary_clipped_values"])
+                for row in timed_stochastic_events
+            ),
+            "persistent_training_bytes": persistent_training_bytes,
+        }
+        if stochastic_required is not None:
+            if len(timed_stochastic_events) < args.timed_updates:
+                raise RuntimeError(
+                    "stochastic-retraction gate did not observe every timed update"
+                )
+            maximum_variance = max(
+                float(row["weighted_sampling_variance_ratio"])
+                for row in timed_stochastic_events
+            )
+            if maximum_variance > float(stochastic_required):
+                raise RuntimeError(
+                    "stochastic-retraction variance gate rejected launch: "
+                    f"{maximum_variance:.6f} > {float(stochastic_required):.6f}"
+                )
+            minimum_bias = min(
+                float(row["minimum_expected_bias_recovery"])
+                for row in timed_stochastic_events
+            )
+            bias_required = float(
+                source["mfu_preflight_stochastic_expected_bias_recovery_min"]
+            )
+            if minimum_bias < bias_required:
+                raise RuntimeError(
+                    "stochastic-retraction bias gate rejected launch: "
+                    f"{minimum_bias:.12f} < {bias_required:.12f}"
+                )
+            clipping_max = int(
+                source["mfu_preflight_stochastic_boundary_clipped_values_max"]
+            )
+            clipped = sum(
+                int(row["boundary_clipped_values"])
+                for row in timed_stochastic_events
+            )
+            if clipped > clipping_max:
+                raise RuntimeError(
+                    "stochastic-retraction clipping gate rejected launch: "
+                    f"{clipped} > {clipping_max}"
+                )
+            expected_bytes = int(
+                source["mfu_preflight_pair_vq_persistent_training_bytes_exact"]
+            )
+            if persistent_training_bytes != [expected_bytes]:
+                raise RuntimeError(
+                    "pair-VQ persistent-byte gate rejected launch: "
+                    f"observed={persistent_training_bytes} expected={[expected_bytes]}"
                 )
         rows = parse_perf_rows(process.stdout)
         if len(rows) < args.timed_updates:
