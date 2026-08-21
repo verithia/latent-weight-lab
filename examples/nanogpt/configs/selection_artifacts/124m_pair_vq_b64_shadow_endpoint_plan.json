@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_pair_vq_shadow_endpoint_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_shadow_evaluation",
+  "question": "Is the accurately coded terminal pair-VQ feedback carry functionally useful when transiently added to the forward MLP weights, and which MLP side carries the effect?",
+  "theory": {
+    "native_state": "The trained forward uses compact W only.",
+    "shadow_state": "The optimizer accurately stores E approximately equal to the discarded projection residual, but ordinary forward evaluation does not use it.",
+    "causal_intervention": "Without refitting any code or parameter, evaluate W, W+E_fc, W+E_proj, and W+E on identical fixed validation windows.",
+    "scope": "Acquisition only. A transient W+E result is not a compact inference representation and cannot itself pass full-MLP replacement."
+  },
+  "identities": {
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4/ckpt.pt",
+      "sha256": "b6d8ad873df2a780b88a2e43f4f21ad85865a1c7c442776fc1dfed9f7f51ddaa"
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4/ckpt.meta.json",
+      "sha256": "d5203fffa4957b7d622231409100590d782078ac63fe3aa6e78e230906b9eda7"
+    },
+    "training_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_endpoint2.log",
+      "sha256": "22464eafcab452352e0bcd29088b03cf4939be909636637fde80552a560864e0"
+    },
+    "status": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/status/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_endpoint2.json",
+      "sha256": "753bc3185c80a96d1e0e5190516f42803acfbe3213c2336898a5c36dd3cd17fd"
+    },
+    "source_config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+      "sha256": "0632b80e767e309cbe3c0b17f3c583bc74bbffef3e747fe9719ed1d326597531"
+    },
+    "endpoint_plan": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_b64_converged_residual_lattice_0p5tpp_plan.json",
+      "sha256": "0959b80fb17df0e297fb100d03d2478d499dc7d6d27eaa4e7fc79b1fccc56013"
+    },
+    "parent_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+      "sha256": "0737e56c10401fa64b7c81e7635a6269d8cc3ac17a564a53a8f423d8edaef3ec"
+    },
+    "gate_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_b64_converged_residual_lattice_gate9_result.json",
+      "sha256": "cf850f649f49651677d1d17e2261f15ad311d418a311b6e97659f42fd56103a8"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "measurement": {
+    "data_dir": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+    "eval_batch_size": 16,
+    "eval_iters": 400,
+    "block_size": 1024,
+    "eval_seed": 20260715,
+    "variants": ["native", "c_fc_shadow", "c_proj_shadow", "full_shadow"],
+    "expected_runtime_minutes_max": 5,
+    "monitoring": "foreground poll; no watchdog"
+  },
+  "comparison": {
+    "parent_validation_ce": 5.361,
+    "terminal_native_log_ce": 5.519,
+    "terminal_native_minus_parent_ce": 0.158
+  },
+  "frozen_gates": {
+    "native_reproduction_absolute_tolerance": 0.0005,
+    "minimum_causal_shadow_ce_improvement": 0.02,
+    "maximum_full_shadow_parent_ce_gap": 0.05,
+    "all_losses_finite": true
+  },
+  "decision_policy": {
+    "shadow_sufficient": "The carry-realization mechanism is causal. Design forward-shadow training plus a terminal folding test; do not count the carry as inference compression before folding passes.",
+    "shadow_useful_but_insufficient": "Run a synchronized dense-shadow/projection replay to separate compact-gradient path drift from terminal projection capacity.",
+    "shadow_not_useful": "Reject forward carry realization as the fix and run the synchronized path replay.",
+    "automatic_training_run": false,
+    "automatic_scale_up": false
+  }
+}
