@@ -178,6 +178,33 @@ class InstalledQuantizedDenseMLP(nn.Module):
         return self.family.forward_layer(self.layer, values)
 
 
+def stack_optional_dense_gains(blocks: list[nn.Module]) -> tuple[Tensor, Tensor]:
+    """Materialize identity gains for dense MLPs that encode them as ``None``."""
+
+    pre_gain, output_log_gain = [], []
+    for block in blocks:
+        hidden, width = block.mlp.c_fc.weight.shape
+        pre = block.mlp.pregelu_gain
+        if pre is None:
+            pre = torch.ones(
+                hidden,
+                device=block.mlp.c_fc.weight.device,
+                dtype=block.mlp.c_fc.weight.dtype,
+            )
+        output = block.mlp.residual_output_log_gain
+        if output is None:
+            output = torch.zeros(
+                width,
+                device=block.mlp.c_fc.weight.device,
+                dtype=block.mlp.c_fc.weight.dtype,
+            )
+        else:
+            output = output * block.mlp.residual_output_gain_scale
+        pre_gain.append(pre)
+        output_log_gain.append(output)
+    return torch.stack(pre_gain), torch.stack(output_log_gain)
+
+
 @torch.no_grad()
 def quantize_teacher(
     teacher: nn.Module,
@@ -232,13 +259,8 @@ def quantize_teacher(
             )
         decoded_fc.append(layer_decoded["c_fc"])
         decoded_proj.append(layer_decoded["c_proj"])
-    pre_gain = torch.stack([block.mlp.pregelu_gain for block in teacher.transformer.h])
-    output_log_gain = torch.stack(
-        [
-            block.mlp.residual_output_log_gain
-            * block.mlp.residual_output_gain_scale
-            for block in teacher.transformer.h
-        ]
+    pre_gain, output_log_gain = stack_optional_dense_gains(
+        list(teacher.transformer.h)
     )
     family = QuantizedDenseMLPFamily(
         c_fc=torch.stack(decoded_fc),

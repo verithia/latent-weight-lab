@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import torch
 import torch.nn.functional as F
+from torch import nn
 
 from examples.nanogpt.analyze_layer_private_product_quantized_mlp import (
     QuantizedDenseMLPFamily,
     signed_spherical_product_quantize,
+    stack_optional_dense_gains,
 )
 
 
@@ -77,6 +81,25 @@ def test_quantized_family_forward_matches_explicit_dense_mlp() -> None:
     hidden = F.gelu(F.linear(values, c_fc[1]) * pre_gain[1])
     expected = F.linear(hidden, c_proj[1]) * output_log_gain[1].exp()
     torch.testing.assert_close(family.forward_layer(1, values), expected)
+
+
+def test_absent_dense_gains_materialize_identity_function() -> None:
+    c_fc = nn.Linear(4, 6, bias=False)
+    c_proj = nn.Linear(6, 4, bias=False)
+    blocks = [
+        SimpleNamespace(
+            mlp=SimpleNamespace(
+                c_fc=c_fc,
+                c_proj=c_proj,
+                pregelu_gain=None,
+                residual_output_log_gain=None,
+                residual_output_gain_scale=1.0,
+            )
+        )
+    ]
+    pre_gain, output_log_gain = stack_optional_dense_gains(blocks)
+    torch.testing.assert_close(pre_gain, torch.ones(1, 6))
+    torch.testing.assert_close(output_log_gain, torch.zeros(1, 4))
 
 
 def test_registered_full_model_byte_and_coordinate_accounting() -> None:
