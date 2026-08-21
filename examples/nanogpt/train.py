@@ -2232,7 +2232,7 @@ def parse_args() -> argparse.Namespace:
         "polar32x8",
         "conditional_polar32x8",
         "conditional_polar16x16",
-        "conditional_polar16x16_residual_cartesian4x4",
+        "conditional_polar16x16_rvq2",
         "rvq4x4",
     ):
         raise ValueError("unknown pair-VQ feedback codec")
@@ -2252,7 +2252,7 @@ def parse_args() -> argparse.Namespace:
             "polar32x8",
             "conditional_polar32x8",
             "conditional_polar16x16",
-            "conditional_polar16x16_residual_cartesian4x4",
+            "conditional_polar16x16_rvq2",
             "rvq4x4",
         )
         and not (
@@ -2267,7 +2267,7 @@ def parse_args() -> argparse.Namespace:
             "polar32x8",
             "conditional_polar32x8",
             "conditional_polar16x16",
-            "conditional_polar16x16_residual_cartesian4x4",
+            "conditional_polar16x16_rvq2",
             "rvq4x4",
         )
         and namespace.block_fht_mlp_pair_vq_feedback_output_group_size

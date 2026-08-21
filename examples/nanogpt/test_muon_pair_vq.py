@@ -11,11 +11,11 @@ from examples.nanogpt.muon_pair_vq import (
     MuonPairVQLinear,
     _conditional_polar_pair_diagnostics,
     _decode_conditional_polar_pair_codec,
-    _decode_conditional_polar_residual_cartesian_pair_codec,
+    _decode_residual_conditional_polar_pair_codec,
     _decode_polar_pair_codec,
     _decode_rvq_pair_codec,
     _fit_conditional_polar_pair_codec_,
-    _fit_conditional_polar_residual_cartesian_pair_codec_,
+    _fit_residual_conditional_polar_pair_codec_,
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
     _nearest_cartesian_codes,
@@ -398,7 +398,7 @@ def test_conditional_polar16x16_reallocates_bits_to_heavy_tail_radius() -> None:
     assert module.compact_feedback_bytes == module.element_count // 2 + 1032
 
 
-def test_conditional_polar16x16_residual_cartesian_closes_fine_error() -> None:
+def test_residual_conditional_polar16x16_closes_fine_error() -> None:
     torch.manual_seed(172)
     angle_indices = torch.randint(0, 16, (65536,))
     directions = torch.stack(
@@ -422,13 +422,13 @@ def test_conditional_polar16x16_residual_cartesian_closes_fine_error() -> None:
     )
     coarse_error = float((vectors - coarse).square().sum())
 
-    levels = torch.zeros(18, 16)
-    center = torch.zeros(2)
+    levels = torch.zeros(2, 16, 16)
+    center = torch.zeros(2, 2)
     codes = torch.zeros(2, vectors.shape[0], dtype=torch.uint8)
-    _fit_conditional_polar_residual_cartesian_pair_codec_(
+    _fit_residual_conditional_polar_pair_codec_(
         vectors, levels, center, codes
     )
-    decoded = _decode_conditional_polar_residual_cartesian_pair_codec(
+    decoded = _decode_residual_conditional_polar_pair_codec(
         levels, center, codes
     )
     residual_error = float((vectors - decoded).square().sum())
@@ -438,17 +438,17 @@ def test_conditional_polar16x16_residual_cartesian_closes_fine_error() -> None:
     module = make_module(
         stages=1,
         error_feedback=True,
-        feedback_codec="conditional_polar16x16_residual_cartesian4x4",
+        feedback_codec="conditional_polar16x16_rvq2",
     )
     optimizer = make_optimizer(module)
     module.weight.grad = 1e-3 * torch.randn_like(module.weight)
     optimizer.step()
     state = optimizer.state[module.weight]
-    assert state["feedback_levels"].shape == (18, 16)
-    assert state["feedback_center"].shape == (2,)
+    assert state["feedback_levels"].shape == (2, 16, 16)
+    assert state["feedback_center"].shape == (2, 2)
     assert state["feedback_codes"].shape == (2, module.element_count // 2)
     assert state["feedback_codes"].dtype == torch.uint8
-    assert module.compact_feedback_bytes == module.element_count + 1160
+    assert module.compact_feedback_bytes == module.element_count + 2064
     assert all(
         value.dtype == torch.uint8 or value.numel() != module.element_count
         for value in state.values()
@@ -456,13 +456,13 @@ def test_conditional_polar16x16_residual_cartesian_closes_fine_error() -> None:
     )
 
 
-def test_conditional_polar16x16_residual_cartesian_resume_is_exact() -> None:
+def test_residual_conditional_polar16x16_resume_is_exact() -> None:
     torch.manual_seed(174)
     module = make_module(
         stages=1,
         seed=181,
         error_feedback=True,
-        feedback_codec="conditional_polar16x16_residual_cartesian4x4",
+        feedback_codec="conditional_polar16x16_rvq2",
     )
     optimizer = make_optimizer(module)
     for _step in range(3):
@@ -475,7 +475,7 @@ def test_conditional_polar16x16_residual_cartesian_resume_is_exact() -> None:
         stages=1,
         seed=183,
         error_feedback=True,
-        feedback_codec="conditional_polar16x16_residual_cartesian4x4",
+        feedback_codec="conditional_polar16x16_rvq2",
     )
     restored.load_state_dict(model_state, strict=True)
     restored_optimizer = make_optimizer(restored)
