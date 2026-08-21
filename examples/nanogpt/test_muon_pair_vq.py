@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import copy
+from argparse import Namespace
 
 import torch
 
@@ -12,6 +13,7 @@ from examples.nanogpt.muon_pair_vq import (
     _nearest_codes_exact,
     _normal_cartesian_codebook,
 )
+from examples.nanogpt.train import pair_vq_model_kwargs
 
 
 def make_module(
@@ -293,3 +295,36 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
         value.numel() != mlp.c_proj.element_count
         for value in mlp.c_proj.state_dict().values()
     )
+
+
+def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
+    namespace = Namespace(
+        block_fht_mlp_pair_vq=True,
+        block_fht_mlp_pair_vq_seed=20261020,
+        block_fht_mlp_pair_vq_neighbor_candidates=16,
+        block_fht_mlp_pair_vq_code_refresh_interval=8,
+        block_fht_mlp_pair_vq_error_feedback=True,
+        block_fht_mlp_pair_vq_cproj_fast_residual=True,
+    )
+    kwargs = pair_vq_model_kwargs(namespace)
+    assert kwargs == {
+        "block_fht_mlp_pair_vq": True,
+        "block_fht_mlp_pair_vq_seed": 20261020,
+        "block_fht_mlp_pair_vq_neighbor_candidates": 16,
+        "block_fht_mlp_pair_vq_code_refresh_interval": 8,
+        "block_fht_mlp_pair_vq_error_feedback": True,
+        "block_fht_mlp_pair_vq_cproj_fast_residual": True,
+    }
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        bias=False,
+        block_fht=True,
+        block_fht_targets=(),
+        **kwargs,
+    )
+    model = GPT(config)
+    assert model.transformer.h[0].mlp.c_proj.fast_residual is True

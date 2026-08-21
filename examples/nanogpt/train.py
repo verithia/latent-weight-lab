@@ -2661,6 +2661,30 @@ def parse_args() -> argparse.Namespace:
     return namespace
 
 
+def pair_vq_model_kwargs(
+    namespace: argparse.Namespace,
+) -> dict[str, bool | int]:
+    """Keep every pair-VQ config field on one tested model boundary."""
+    return {
+        "block_fht_mlp_pair_vq": bool(namespace.block_fht_mlp_pair_vq),
+        "block_fht_mlp_pair_vq_seed": int(
+            namespace.block_fht_mlp_pair_vq_seed
+        ),
+        "block_fht_mlp_pair_vq_neighbor_candidates": int(
+            namespace.block_fht_mlp_pair_vq_neighbor_candidates
+        ),
+        "block_fht_mlp_pair_vq_code_refresh_interval": int(
+            namespace.block_fht_mlp_pair_vq_code_refresh_interval
+        ),
+        "block_fht_mlp_pair_vq_error_feedback": bool(
+            namespace.block_fht_mlp_pair_vq_error_feedback
+        ),
+        "block_fht_mlp_pair_vq_cproj_fast_residual": bool(
+            namespace.block_fht_mlp_pair_vq_cproj_fast_residual
+        ),
+    }
+
+
 def conditioned_output_gate_config_kwargs(
     args: argparse.Namespace,
 ) -> dict[str, object]:
@@ -2801,6 +2825,7 @@ def main() -> None:
                 separators=(",", ":"),
             )
         )
+    pair_vq_kwargs = pair_vq_model_kwargs(args)
     gpt_config = GPTConfig(
         block_size=args.block_size,
         vocab_size=args.vocab_size,
@@ -2946,17 +2971,7 @@ def main() -> None:
         block_fht_mlp_int8_lattice_error_feedback=(
             args.block_fht_mlp_int8_lattice_error_feedback
         ),
-        block_fht_mlp_pair_vq=args.block_fht_mlp_pair_vq,
-        block_fht_mlp_pair_vq_seed=args.block_fht_mlp_pair_vq_seed,
-        block_fht_mlp_pair_vq_neighbor_candidates=(
-            args.block_fht_mlp_pair_vq_neighbor_candidates
-        ),
-        block_fht_mlp_pair_vq_code_refresh_interval=(
-            args.block_fht_mlp_pair_vq_code_refresh_interval
-        ),
-        block_fht_mlp_pair_vq_error_feedback=(
-            args.block_fht_mlp_pair_vq_error_feedback
-        ),
+        **pair_vq_kwargs,
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
