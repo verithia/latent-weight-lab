@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_124m_layer_private_paired_kronecker_teacher_fit_result_v1",
+  "classification": "FAMILY_FAIL_AT_22X",
+  "identity": {
+    "repository_commit": "3874f5526746b96e9c29c12b222e1c0b35946276",
+    "entrypoint": "examples/nanogpt/analyze_layer_private_paired_kronecker_teacher_fit.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_layer_private_paired_kronecker_teacher_fit_plan.json",
+    "plan_sha256": "1fd7538d4169aaa2c70ac485a171d5acc178c983aba89dec0471ea6be785fb34",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_paired_kronecker_teacher_fit_20260821/result.json",
+      "sha256": "f1213f86e5de904bfdba0f5beaa78b9f1cb95e6429c0857f51ddc5161727772d"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_paired_kronecker_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "5d791aa71b3a36f09fa0e91b450346dce6d29f912df11b2b3508f24eb79670df",
+      "bytes": 15363431
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 48.57057595252991,
+    "maximum_cuda_memory_bytes": 10967624192,
+    "checkpoint_updates": 0,
+    "terminal_status": "clean",
+    "foreground_polled_under_five_minute_policy": true
+  },
+  "teacher": {
+    "fixed_validation_cross_entropy": 3.674412250518799,
+    "dense_mlp_parameters": 56623104
+  },
+  "rank_results": {
+    "16": {
+      "compact_coordinates": 1277952,
+      "compression_ratio": 44.30769230769231,
+      "parameter_saving_fraction": 0.9774305555555556,
+      "factor_expansion_flops_per_refresh": 1811939328,
+      "optimization_healthy": false,
+      "objective_reduction_fraction_min_mean_max": [
+        0.488195,
+        0.602862,
+        0.879435
+      ],
+      "weight_recovery": {
+        "c_fc_mean": 0.0396424,
+        "c_proj_mean": 0.0397107
+      },
+      "heldout_output_recovery": {
+        "mean": 0.4676892285545667,
+        "minimum": 0.19790929555892944,
+        "global": 0.48818776459678415,
+        "mean_cosine": 0.6793486699461937,
+        "maximum_relative_residual_rms": 0.895595133304596
+      },
+      "heldout_input_jvp_recovery": {
+        "mean": -0.05542656034231186,
+        "minimum": -0.13486933708190918,
+        "global": -0.04832252798443859,
+        "mean_cosine": 0.26888835492233437,
+        "maximum_relative_residual_rms": 1.0653024911880493
+      },
+      "fixed_validation_cross_entropy": 9.133171081542969,
+      "gap_to_dense": 5.45875883102417,
+      "passes": false
+    },
+    "32": {
+      "compact_coordinates": 2555904,
+      "compression_ratio": 22.153846153846153,
+      "parameter_saving_fraction": 0.9548611111111112,
+      "factor_expansion_flops_per_refresh": 3623878656,
+      "optimization_healthy": true,
+      "objective_reduction_fraction_min_mean_max": [
+        0.604761,
+        0.705724,
+        0.920789
+      ],
+      "weight_recovery": {
+        "c_fc_mean": 0.0755236,
+        "c_proj_mean": 0.0756491
+      },
+      "heldout_output_recovery": {
+        "mean": 0.5375606417655945,
+        "minimum": 0.25336790084838867,
+        "global": 0.5611795756016478,
+        "mean_cosine": 0.7324201216300329,
+        "maximum_relative_residual_rms": 0.8640787601470947
+      },
+      "heldout_input_jvp_recovery": {
+        "mean": 0.01944013436635335,
+        "minimum": -0.12117993831634521,
+        "global": 0.03563243721700238,
+        "mean_cosine": 0.3622745138903459,
+        "maximum_relative_residual_rms": 1.058857798576355
+      },
+      "fixed_validation_cross_entropy": 7.851231575012207,
+      "gap_to_dense": 4.176819324493408,
+      "passes": false
+    }
+  },
+  "decision": {
+    "rank32_optimization_healthy": true,
+    "output_gate_passed": false,
+    "input_jvp_gate_passed": false,
+    "fixed_cross_entropy_gate_passed": false,
+    "language_model_training_authorized": false,
+    "rank_or_hyperparameter_sweep_authorized": false,
+    "interpretation": "Even independent per-layer paired Kronecker state at 22.15x MLP compression cannot reproduce the dense teacher. Healthy rank-32 fitting recovers only 0.538 mean output energy, approximately zero mean input-JVP energy, and leaves +4.177 fixed-checkpoint CE. The failure is representational, not evidence for another Kronecker rank, layout, learning-rate, or seed sweep.",
+    "next_action": "Reject matrix-factorization-only replacement. Derive a family that adds layer-private nonlinear feature boundaries and residual-write atoms, then require the same fixed-teacher output, JVP, and CE gates before any language-model training."
+  }
+}
