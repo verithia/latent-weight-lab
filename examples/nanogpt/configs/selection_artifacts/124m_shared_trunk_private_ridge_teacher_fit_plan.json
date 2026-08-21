@@ -1,0 +1,129 @@
+{
+  "schema_version": "mai_shared_trunk_private_ridge_teacher_fit_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "Can the dense teacher's layer-private MLP functions be represented by one shared full-width ridge dictionary plus signed layer-specific atom selection, or does the endpoint require a small number of genuinely private nonlinear ridge atoms per layer?",
+  "causal_basis": {
+    "paired_factorial_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_mlp_exact_family_factorial_result.json",
+    "paired_factorial_finding": "Both one-sided substitutions fail and the pair has a -3.4708 CE compensatory interaction, so c_fc feature boundaries and c_proj residual writes must be treated as complete paired nonlinear atoms.",
+    "kronecker_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_private_paired_kronecker_teacher_fit_result.json",
+    "kronecker_result_sha256": "af5ccf5ac39d8a77f05089e3bba54d9d4422c972c94706214df027431a34c383",
+    "kronecker_finding": "A healthy layer-private paired Kronecker fit at 22.15x recovers only 0.5376 mean output energy, 0.0194 mean input-JVP energy, and leaves +4.1768 fixed CE. Matrix-factorization-only families are closed.",
+    "shared_trunk_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_dense_mlp_trunk_0p5tpp_result.json",
+    "shared_trunk_finding": "One learned shared full-rank trunk improves paired Monarch by 0.2412 CE but remains +0.2053 behind attention-only, proving reusable directions exist but one common function is insufficient.",
+    "gain_control": "Earlier c_proj endpoint attribution found generic gains alone null while hidden rotations were causal. Therefore the signed post-GELU gain is only a nested diagnostic of atom reuse; it is not independently promoted without passing output, JVP, and CE gates.",
+    "nonlinear_dictionary_control": "The prior sparse-MoE learned nonlinear dictionary tested a strict approximately 200x complete-expert budget without a learned shared dense trunk. This plan instead asks a relaxed dense-MLP boundary question at 5.95-11.79x and includes a strong learned shared function.",
+    "novel_mechanism": "The private branch adds complete nonlinear ridge atoms V_l GELU(U_l x+b_l). Unlike LoRA, Kronecker, Monarch, BlockFHT, or a post-residual FC, it changes both GELU activation hyperplanes and their coupled residual-write directions."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "shared_trunk_initialization_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_dense_mlp_trunk_0p5tpp/scientific/ckpt.pt",
+      "sha256": "72ff2c8d51f3f891aae2194d778e062135df36c2805cc23f88a64900d363b825"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "model_width": 768,
+    "shared_hidden_width": 3072,
+    "equation": "F_l(x) = D_out,l [ W_proj diag(q_l) GELU(diag(p_l) W_fc x) + V_l GELU(U_l x + b_l) ]",
+    "shared_state": "One learned W_fc and W_proj are shared by all layers. Every layer owns signed pre-GELU p_l, signed post-GELU q_l, and positive residual-output D_out,l coordinates.",
+    "private_state": "At private width m, every layer owns U_l in R^(m by 768), b_l in R^m, and V_l in R^(768 by m). Width zero omits the private arm.",
+    "nested_private_widths": [0, 128, 256],
+    "dense_mlp_parameters": 56623104,
+    "accounting": {
+      "0": {
+        "compact_parameters": 4801536,
+        "compression_ratio": 11.792706333973129,
+        "parameter_saving_fraction": 0.9152018229166666,
+        "extra_mlp_matmul_flops_per_token": 0,
+        "extra_fraction_of_dense_mlp_matmul_flops": 0.0
+      },
+      "128": {
+        "compact_parameters": 7162368,
+        "compression_ratio": 7.905640145828865,
+        "parameter_saving_fraction": 0.8735080295138888,
+        "extra_mlp_matmul_flops_per_token": 393216,
+        "extra_fraction_of_dense_mlp_matmul_flops": 0.041666666666666664
+      },
+      "256": {
+        "compact_parameters": 9523200,
+        "compression_ratio": 5.945806451612904,
+        "parameter_saving_fraction": 0.8318142361111112,
+        "extra_mlp_matmul_flops_per_token": 786432,
+        "extra_fraction_of_dense_mlp_matmul_flops": 0.08333333333333333
+      }
+    },
+    "inference_note": "The private arm runs directly as two small GEMMs; it requires no generated dense weight, dense temporal error buffer, or expansion kernel. The shared 3072-wide trunk is materialized once and reused by all layers."
+  },
+  "fit_protocol": {
+    "optimizer": "Adam over every counted family parameter",
+    "weight_decay": 0.0,
+    "learning_rate": 0.0003,
+    "steps_per_width": 600,
+    "row_batch_size_per_layer_per_bank": 128,
+    "layers_per_update": 4,
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260830,
+    "holdout_token_seed": 20260831,
+    "local_perturbation_relative_rms": 0.01,
+    "private_initialization_seed": 20260901,
+    "initialization": "Width zero starts from the sealed trained one-trunk checkpoint and adds identity signed post-GELU gains. Width 128 warm-starts the fitted width-zero state with Normal(0,0.02) U, zero b, and zero V. Width 256 preserves the fitted width-128 atoms and appends 128 atoms with the same deterministic zero-output initialization.",
+    "nesting_rule": "All widths are one monotone capacity path, not independent hyperparameter trials. No width, seed, learning-rate, optimizer, or restart is selected on heldout data.",
+    "objective": "Equal-layer/equal-bank normalized MSE on the dense teacher function at clean teacher/candidate state banks and symmetric 1-percent RMS input perturbations.",
+    "parameter_clamps": "Signed pre/post-GELU gains are clamped to [-4,4]; residual-output log gains are clamped to [-4,4]. Private U, V, and b are not clamped.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260902,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "fit and holdout objective by nested width",
+      "heldout output recovery by layer and state bank",
+      "heldout analytic input-JVP recovery by layer and state bank",
+      "fixed-checkpoint validation CE",
+      "parameter, direct-FLOP, peak-memory, and wall-time accounting"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "The stage is finite and either ends at normalized fit objective <=0.5 or reduces its initial objective by at least 25 percent. The width-256 family is rejected only if this health gate passes."
+  },
+  "decision_rule": {
+    "width0_pass": "The common learned ridge dictionary is sufficient once layers receive signed post-GELU atom coefficients. Implement and MFU-gate only this 11.79x family.",
+    "width128_pass": "Layer-private nonlinear atoms are required but 128 per layer suffice. Implement and MFU-gate only this 7.91x family.",
+    "width256_only_pass": "The endpoint boundary lies between 5.95x and 7.91x. Report the cost before one production verification; do not pretend this meets the original 200-500x claim.",
+    "width256_fail": "Reject one shared full-width trunk plus up to 256 private ridge atoms per layer. Do not sweep width, seed, optimizer, or LR; use the residual decomposition to derive a different sharing topology.",
+    "optimization_inconclusive": "Permit only offline optimizer-geometry repair of this exact oracle; do not infer representational failure or launch LM training."
+  },
+  "authorization": {
+    "allowed": "Implement and run one exact fixed-teacher nested-width oracle after tests and a measured runtime/VRAM preflight.",
+    "not_allowed": [
+      "language-model training",
+      "model-size scaling",
+      "width, seed, learning-rate, optimizer, activation, or regularizer sweeps",
+      "using heldout recovery to alter the nested path",
+      "claiming 200-500x trainable-parameter compression"
+    ],
+    "callback_policy": "Foreground-poll if the measured complete protocol is at most five minutes; otherwise launch one verified @Codex watchdog with terminal/failure callbacks and the standard action prompt."
+  }
+}
