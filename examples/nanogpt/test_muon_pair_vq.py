@@ -9,6 +9,8 @@ from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_pair_vq import (
     MuonPairVQ,
     MuonPairVQLinear,
+    _decode_rvq_pair_codec,
+    _fit_rvq_pair_codec_,
     _nearest_cartesian_codes,
     _nearest_codes_exact,
     _normal_cartesian_codebook,
@@ -295,6 +297,23 @@ def test_rvq_feedback_learns_joint_pair_atoms_at_same_code_rate() -> None:
     assert state["feedback_codes"].dtype == torch.uint8
     assert module.compact_feedback_bytes == module.element_count // 2 + 264
     assert all(value.numel() != module.element_count for value in state.values())
+
+
+def test_rvq_first_fit_uses_both_stage_assignments() -> None:
+    torch.manual_seed(171)
+    first = torch.randn(16384)
+    second = 0.8 * first + 0.3 * torch.randn_like(first)
+    vectors = torch.stack((first, second), dim=1)
+    codebooks = torch.zeros(2, 16, 2)
+    center = torch.zeros(2)
+    codes = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_rvq_pair_codec_(vectors, codebooks, center, codes)
+    decoded = _decode_rvq_pair_codec(codebooks, center, codes)
+    recovery = 1.0 - float((vectors - decoded).square().sum()) / float(
+        vectors.square().sum()
+    )
+    assert recovery > 0.98
+    assert int((codes % 16).unique().numel()) > 8
 
 
 def test_rvq_feedback_resume_is_bit_exact_for_next_step() -> None:

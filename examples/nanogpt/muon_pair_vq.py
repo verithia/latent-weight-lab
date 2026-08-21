@@ -395,14 +395,21 @@ def _fit_rvq_pair_codec_(
     old_codes = codes.clone()
     fitted_center = vectors.mean(dim=0)
     centered = vectors - fitted_center
-    if not bool(codebooks.abs().sum() > 0):
+    initialized = bool(codebooks.abs().sum() > 0)
+    if not initialized:
         _initialize_rvq_codebook_(centered, codebooks[0])
         first = _lloyd_vector_stage_(centered, codebooks[0], iterations=2)
         residual = centered - codebooks[0].index_select(0, first)
         _initialize_rvq_codebook_(residual, codebooks[1])
-        _lloyd_vector_stage_(residual, codebooks[1], iterations=2)
+        second = _lloyd_vector_stage_(residual, codebooks[1], iterations=2)
+    else:
+        # Preserve the previously decoded vectors when moving the explicit
+        # center to the current target mean.  Without this gauge transport,
+        # every fit sees an artificial global translation.
+        codebooks[0].add_(center - fitted_center)
+        first = codes.long() // 16
+        second = codes.long() % 16
 
-    second = codes.long() % 16
     first_target = centered - codebooks[1].index_select(0, second)
     first = _lloyd_vector_stage_(first_target, codebooks[0], iterations=1)
     second_target = centered - codebooks[0].index_select(0, first)
