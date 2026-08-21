@@ -328,6 +328,8 @@ def _fit_conditional_polar_pair_codec_(
     radial_levels: torch.Tensor,
     center: torch.Tensor,
     codes: torch.Tensor,
+    *,
+    lloyd_iterations: int = 3,
 ) -> int:
     """Fit a 256-entry angle-by-conditional-radius product dictionary."""
     if vectors.ndim != 2 or vectors.shape[1] != 2:
@@ -341,6 +343,8 @@ def _fit_conditional_polar_pair_codec_(
         raise ValueError("conditional polar center must have shape (2,)")
     if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
         raise ValueError("conditional polar pair codes have the wrong shape")
+    if lloyd_iterations <= 0:
+        raise ValueError("conditional polar Lloyd iterations must be positive")
 
     old_codes = codes.clone()
     angle_count, radius_count = radial_levels.shape
@@ -397,7 +401,7 @@ def _fit_conditional_polar_pair_codec_(
         rayleigh_levels = torch.sqrt(-torch.log1p(-probabilities))
         fitted = rms_by_angle[:, None] * rayleigh_levels[None, :]
 
-    for _iteration in range(3):
+    for _iteration in range(lloyd_iterations):
         midpoints = (fitted[:, :-1] + fitted[:, 1:]) * 0.5
         thresholds = midpoints.index_select(0, angle_indices)
         radius_indices = (
@@ -492,6 +496,9 @@ def _residual_conditional_polar_diagnostics(
     levels: torch.Tensor,
     centers: torch.Tensor,
     codes: torch.Tensor,
+    *,
+    include_decomposition: bool = False,
+    probe_lloyd_iterations: tuple[int, ...] = (),
 ) -> dict[str, float | int]:
     coarse = _decode_conditional_polar_pair_codec(
         levels[0], centers[0], codes[0]
@@ -504,7 +511,7 @@ def _residual_conditional_polar_diagnostics(
     target_energy = vectors.square().sum().clamp_min(1e-30)
     residual_target_energy = residual_target.square().sum().clamp_min(1e-30)
     final_error_energy = final_error.square().sum()
-    return {
+    result: dict[str, float | int] = {
         "feedback_stage1_codec_energy_recovery": float(
             1.0 - residual_target_energy / target_energy
         ),
@@ -516,6 +523,43 @@ def _residual_conditional_polar_diagnostics(
         "feedback_residual_target_energy": float(residual_target_energy),
         "feedback_residual_quantization_energy": float(final_error_energy),
     }
+    if include_decomposition:
+        details = _conditional_polar_pair_diagnostics(
+            residual_target,
+            levels[1],
+            centers[1],
+            codes[1],
+        )
+        for key, value in details.items():
+            result[key.replace("feedback_", "feedback_residual_", 1)] = value
+        result["feedback_residual_center_energy_ratio"] = float(
+            centers[1].square().sum()
+            * float(vectors.shape[0])
+            / residual_target_energy
+        )
+        for iterations in probe_lloyd_iterations:
+            if iterations <= 0:
+                raise ValueError("residual probe Lloyd iterations must be positive")
+            probe_levels = levels[1].clone()
+            probe_center = centers[1].clone()
+            probe_codes = codes[1].clone()
+            _fit_conditional_polar_pair_codec_(
+                residual_target,
+                probe_levels,
+                probe_center,
+                probe_codes,
+                lloyd_iterations=int(iterations),
+            )
+            probe_decoded = _decode_conditional_polar_pair_codec(
+                probe_levels,
+                probe_center,
+                probe_codes,
+            )
+            probe_error = (residual_target - probe_decoded).square().sum()
+            result[
+                f"feedback_residual_lloyd{int(iterations)}_codec_energy_recovery"
+            ] = float(1.0 - probe_error / residual_target_energy)
+    return result
 
 
 @torch.no_grad()
@@ -755,6 +799,8 @@ class MuonPairVQLinear(nn.Module):
         error_feedback: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
+        feedback_residual_probe_steps: tuple[int, ...] = (),
+        feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -767,6 +813,13 @@ class MuonPairVQLinear(nn.Module):
         self.error_feedback = bool(error_feedback)
         self.feedback_codec = str(feedback_codec)
         self.feedback_output_group_size = int(feedback_output_group_size)
+        self.feedback_residual_probe_steps = tuple(
+            int(step) for step in feedback_residual_probe_steps
+        )
+        self.feedback_residual_probe_lloyd_iterations = tuple(
+            int(iterations)
+            for iterations in feedback_residual_probe_lloyd_iterations
+        )
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
         if self.in_features <= 0 or self.out_features <= 0:
@@ -777,6 +830,22 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ stages must be one or two")
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
+        if any(step < 0 for step in self.feedback_residual_probe_steps):
+            raise ValueError("feedback residual probe steps must be nonnegative")
+        if any(
+            iterations <= 0
+            for iterations in self.feedback_residual_probe_lloyd_iterations
+        ):
+            raise ValueError(
+                "feedback residual probe Lloyd iterations must be positive"
+            )
+        if (
+            self.feedback_residual_probe_steps
+            or self.feedback_residual_probe_lloyd_iterations
+        ) and self.feedback_codec != "conditional_polar16x16_rvq2":
+            raise ValueError(
+                "feedback residual probes require conditional_polar16x16_rvq2"
+            )
         if self.feedback_codec not in (
             "cartesian4x4",
             "polar32x8",
@@ -1492,12 +1561,22 @@ class MuonPairVQ(torch.optim.Optimizer):
                         and module.feedback_codec
                         == "conditional_polar16x16_rvq2"
                     ):
+                        probe = (
+                            int(module.optimizer_step)
+                            in module.feedback_residual_probe_steps
+                        )
                         diagnostics.update(
                             _residual_conditional_polar_diagnostics(
                                 raw_feedback.reshape(-1, module.vector_length),
                                 state["feedback_levels"],
                                 state["feedback_center"],
                                 state["feedback_codes"],
+                                include_decomposition=probe,
+                                probe_lloyd_iterations=(
+                                    module.feedback_residual_probe_lloyd_iterations
+                                    if probe
+                                    else ()
+                                ),
                             )
                         )
                 self._diagnostics.append(diagnostics)

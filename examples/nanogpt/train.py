@@ -1349,6 +1349,18 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=False,
     )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-residual-probe-steps",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-residual-probe-lloyd-iterations",
+        nargs="+",
+        type=int,
+        default=[],
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -2227,6 +2239,35 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("pair-VQ c_proj fast residual requires MLP pair VQ")
     if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
         raise ValueError("pair-VQ feedback output group size must be nonnegative")
+    residual_probe_steps = tuple(
+        int(step)
+        for step in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_residual_probe_steps",
+            (),
+        )
+    )
+    residual_probe_iterations = tuple(
+        int(iterations)
+        for iterations in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations",
+            (),
+        )
+    )
+    if any(step < 0 for step in residual_probe_steps):
+        raise ValueError("pair-VQ residual probe steps must be nonnegative")
+    if any(iterations <= 0 for iterations in residual_probe_iterations):
+        raise ValueError("pair-VQ residual probe Lloyd iterations must be positive")
+    if (residual_probe_steps or residual_probe_iterations) and not (
+        namespace.block_fht_mlp_pair_vq
+        and namespace.block_fht_mlp_pair_vq_error_feedback
+        and namespace.block_fht_mlp_pair_vq_feedback_codec
+        == "conditional_polar16x16_rvq2"
+    ):
+        raise ValueError(
+            "pair-VQ residual probes require RVQ2 pair-coded error feedback"
+        )
     if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
         "cartesian4x4",
         "polar32x8",
@@ -2735,6 +2776,22 @@ def pair_vq_model_kwargs(
         ),
         "block_fht_mlp_pair_vq_feedback_output_group_size": int(
             namespace.block_fht_mlp_pair_vq_feedback_output_group_size
+        ),
+        "block_fht_mlp_pair_vq_feedback_residual_probe_steps": tuple(
+            int(step)
+            for step in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_residual_probe_steps",
+                (),
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations": tuple(
+            int(iterations)
+            for iterations in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations",
+                (),
+            )
         ),
     }
 

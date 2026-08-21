@@ -33,6 +33,8 @@ def make_module(
     error_feedback: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
+    feedback_residual_probe_steps: tuple[int, ...] = (),
+    feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
 ) -> MuonPairVQLinear:
     return MuonPairVQLinear(
         8,
@@ -46,6 +48,10 @@ def make_module(
         error_feedback=error_feedback,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
+        feedback_residual_probe_steps=feedback_residual_probe_steps,
+        feedback_residual_probe_lloyd_iterations=(
+            feedback_residual_probe_lloyd_iterations
+        ),
         neighbor_candidates=16,
         code_refresh_interval=8,
     )
@@ -55,6 +61,26 @@ def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
     return MuonPairVQ(
         [module], lr=0.01, momentum=0.5, weight_decay=0.1, ns_steps=1
     )
+
+
+def test_residual_conditional_polar_probe_reports_geometry_and_convergence() -> None:
+    module = make_module(
+        error_feedback=True,
+        feedback_codec="conditional_polar16x16_rvq2",
+        feedback_residual_probe_steps=(0,),
+        feedback_residual_probe_lloyd_iterations=(3, 6),
+    )
+    optimizer = make_optimizer(module)
+    torch.manual_seed(1701)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    assert 0.0 <= diagnostics["feedback_residual_polar_angular_error_fraction"] <= 1.0
+    assert 0.0 <= diagnostics["feedback_residual_polar_radial_error_fraction"] <= 1.0
+    assert diagnostics["feedback_residual_active_codes"] > 0
+    assert diagnostics["feedback_residual_lloyd3_codec_energy_recovery"] > 0.0
+    assert diagnostics["feedback_residual_lloyd6_codec_energy_recovery"] > 0.0
+    assert diagnostics["feedback_residual_center_energy_ratio"] >= 0.0
 
 
 def test_codec_state_excludes_transient_dense_weight() -> None:
@@ -753,6 +779,41 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
     )
 
 
+def test_gpt_routes_residual_probe_without_persistent_dense_state() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_mlp_pair_vq=True,
+            block_fht_mlp_pair_vq_error_feedback=True,
+            block_fht_mlp_pair_vq_feedback_codec=(
+                "conditional_polar16x16_rvq2"
+            ),
+            block_fht_mlp_pair_vq_feedback_residual_probe_steps=(0, 8),
+            block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations=(
+                3,
+                6,
+                12,
+            ),
+        )
+    )
+    for block in model.transformer.h:
+        for module in (block.mlp.c_fc, block.mlp.c_proj):
+            assert isinstance(module, MuonPairVQLinear)
+            assert module.feedback_residual_probe_steps == (0, 8)
+            assert module.feedback_residual_probe_lloyd_iterations == (3, 6, 12)
+            assert all(
+                value.numel() != module.element_count
+                for value in module.state_dict().values()
+            )
+
+
 def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
     namespace = Namespace(
         block_fht_mlp_pair_vq=True,
@@ -774,6 +835,8 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
         "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
+        "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),
+        "block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations": (),
     }
     config = GPTConfig(
         block_size=8,
