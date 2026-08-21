@@ -1,0 +1,63 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_0p5tpp_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does the compact full-MLP representation whose sustained update geometry now passes preserve the matched QK-only dense-MLP parent's 124M/0.5TPP loss curve?",
+  "prerequisite": {
+    "gate_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_gate160_result.json",
+    "gate_result_sha256": "513889ebe650946775887fe7b558bef6e165abcbf675e87cd9c51a39cf3ccdc3",
+    "gate_classification": "PASS_COMPACT_TEMPORAL_DIRECTION_GATE_AUTHORIZE_MATCHED_ENDPOINT"
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_0p5tpp_lr24e4.json",
+    "config_sha256": "4ce410037b1e443399af779361f5665d7792b4fe3df90f38eb109e09eba10b65",
+    "slow_weight_state": "two additive pair-VQ stages for c_fc and one for c_proj",
+    "fast_weight_state": "freely recoded Cartesian pair lattice on c_fc and c_proj",
+    "temporal_state": "one uint8 16-angle x 16-conditional-radius sigma-delta carry code per weight pair plus 1032 FP32 metadata bytes per matrix",
+    "attention_control": "only QK is mapped; V and attention output projection remain dense so this endpoint isolates complete MLP replacement",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "matched_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+    "run_role": "matched_parent",
+    "validation_ce": {"0": 10.9970, "60": 6.2180, "120": 5.7258, "180": 5.4642, "238": 5.3610},
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2"
+  },
+  "frozen_gates": {
+    "clean_exit_and_terminal_checkpoint": true,
+    "fixed_eval_protocol_and_indices_equal_to_parent": true,
+    "all_fixed_evaluations_finite": true,
+    "terminal_candidate_minus_parent_ce_max": 0.05,
+    "terminal_candidate_validation_ce_max": 5.4110,
+    "report_curve_gaps_at_steps": [60, 120, 180, 238],
+    "candidate_mfu_min_fraction": 0.20,
+    "candidate_optimizer_fraction_max": 0.30,
+    "larger_model_or_horizon_authorized_on_pass": false
+  },
+  "execution_gate": {
+    "host": "PRO6",
+    "gpu": 0,
+    "exact_config_mfu_minimum": 0.20,
+    "mfu_preflight_runtime": "foreground-polled; no watchdog",
+    "scientific_run_runtime": "one persistent @Codex watchdog with 20%, 50%, and terminal callbacks plus failure/stall handling and a 90-minute heartbeat reset by any delivered callback",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test"
+  },
+  "decision_policy": {
+    "pass": "Classify compact full-MLP closure at 124M/0.5TPP and analyze what remains before any full-attention recombination; do not automatically scale.",
+    "fail": "Compare the fixed loss and recovery trajectories to distinguish residual representation error from remaining temporal/objective error. No parameter, learning-rate, or model-size sweep is authorized.",
+    "automatic_rerun": false
+  },
+  "accounting": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99265920,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.563347,
+    "inference_flops": "unchanged materialized dense MLP",
+    "extra_dense_gemm_flops": 0
+  }
+}
