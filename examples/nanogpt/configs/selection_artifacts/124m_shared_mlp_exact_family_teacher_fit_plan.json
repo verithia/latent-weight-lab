@@ -2,7 +2,7 @@
   "schema_version": "mai_shared_mlp_exact_family_teacher_fit_plan_v1",
   "scientific_question": "Can the exact seven-trunk MLP family represent the dense 124M attention-only endpoint on its relevant residual-stream distribution, or is the calibrated endpoint/JVP deficit caused by representational under-capacity rather than the language-model optimization path?",
   "theory": {
-    "exact_layer_function": "F_l(x) = diag(r_l) W_proj,g GELU(diag(p_l) W_fc,g x), where g is the contiguous depth group, W_fc,g and W_proj,g are shared, and p_l and r_l are positive layer-private diagonal gains",
+    "exact_layer_function": "F_l(x) = diag(exp(r_l)) W_proj,g GELU(diag(p_l) W_fc,g x), where g is the contiguous depth group, W_fc,g and W_proj,g are shared, p_l is an unconstrained signed layer-private pre-GELU gain, and r_l is a layer-private residual-output log gain",
     "tested_partition": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
     "genuinely_constrained_groups": [[5, 6, 7], [8, 9, 10, 11]],
     "singleton_handling": "Layers 0-4 retain their exact dense-teacher MLPs because the seven-trunk topology does not constrain them.",
@@ -39,7 +39,7 @@
     "local_perturbation_relative_rms": 0.01,
     "local_perturbation_directions_per_sample": 1,
     "objective": "mean layer-normalized clean-output MSE plus the mean layer-normalized symmetric-perturbation output MSE",
-    "gain_parameterization": "positive exp(log_gain), clipped after each step to log_gain in [-4, 4]",
+    "gain_parameterization": "the pre-GELU gain uses the production direct signed parameter and is clipped after each step to [-4, 4]; the residual-output gain uses exp(log_gain) and its log coordinate is clipped to [-4, 4]",
     "restarts_per_group": "one from the trained compact group plus one from each dense teacher layer in that group",
     "restart_selection": "maximum held-out mean output explained target energy; input-JVP recovery breaks ties",
     "fit_scope": "only the two constrained groups; no attention, embedding, normalization, residual, singleton MLP, or LM-head parameter changes"
@@ -66,7 +66,7 @@
   },
   "classification": {
     "representational_pass": "All output, JVP, CE, and optimization-health gates pass. The exact seven-trunk topology has endpoint capacity; the remaining failure is LM optimization/path acquisition.",
-    "representational_fail": "Optimization is healthy but any output, JVP, or CE gate fails. Reject the exact seven-trunk positive-diagonal sharing topology as an endpoint representation.",
+    "representational_fail": "Optimization is healthy but any output, JVP, or CE gate fails. Reject the exact seven-trunk signed-pre-GELU/positive-output diagonal sharing topology as an endpoint representation.",
     "optimization_inconclusive": "The selected restart fails the 50 percent objective-reduction gate or becomes non-finite. Do not infer under-capacity; permit only optimizer-geometry diagnosis of this offline fit.",
     "mixed": "Report every gate and use the ordered classification above; do not hide a CE failure behind a function-space average."
   },
