@@ -106,9 +106,12 @@ class DensePairVQShadowObserver:
                 shadow.optimizer_step.zero_()
                 self._dense_modules[name] = dense
                 self._shadow_modules[name] = shadow
-        if len(self._shadow_modules) != 24:
+        expected_modules = 2 * len(blocks)
+        if len(self._shadow_modules) != expected_modules:
             raise ValueError(
-                f"expected 24 MLP shadow matrices, found {len(self._shadow_modules)}"
+                "expected "
+                f"{expected_modules} MLP shadow matrices, "
+                f"found {len(self._shadow_modules)}"
             )
 
     @property
