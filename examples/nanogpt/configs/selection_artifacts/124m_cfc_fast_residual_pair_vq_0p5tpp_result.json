@@ -1,0 +1,116 @@
+{
+  "schema_version": "mai_cfc_fast_residual_pair_vq_0p5tpp_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "FAIL_TERMINAL_LOSS_AND_SUSTAINED_DIRECTION_GATES",
+  "passed": false,
+  "decision": {
+    "larger_model_or_horizon_authorized": false,
+    "repeat_or_learning_rate_sweep_authorized": false,
+    "next_authorized_work": "Implement and gate a compact pair-coded sigma-delta carry that conserves discarded projected-Muon motion without a dense ambient residual.",
+    "reason": "The finite representation and step-zero tangent gates passed, but applied-update recovery collapsed throughout the matched endpoint run and terminal validation CE missed the frozen parent-relative ceiling by 0.1854 CE."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_plan.json",
+    "plan_sha256": "f2861b14f5b8af0cbbfeae9b00379f32b60aa41c401038ae108ad62e6c5fc8e1",
+    "capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_residual_pair_vq_mlp_result.json",
+    "capacity_result_sha256": "4ca271852036f33289ad3df9cf6507dba4b1a3e9a35af2c97dd5a03468f09c92",
+    "direction_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_gate40_result.json",
+    "direction_gate_result_sha256": "2d2dc2620b0ea8fede42056a5aa5b987b9112595f03d39f130d778d772843295",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "matched_parent": {
+    "run_id": "pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4_20260821T125942Z_2623492",
+    "execution_git_commit": "fac8b81bced49ef3c1f0a6be9f2c43f2db4ed5f1",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+    "config_sha256": "0b27fd338b03532427a646a555c7ef0ce2693c3327afb86a7cbeb80225c1a7db",
+    "status_sha256": "120cf5c3a472cd7cb944cc58e3f6257cd1720dabf7a414e3fac75786a1e30b88",
+    "log_sha256": "64e0267db8a07ceab23d09ed03e852ce225b3c663964cff37bc62ea1c07359e3",
+    "provenance_sha256": "0eb73a9a2c2ecead4efc49fd06d6c5778ec0d4226d4fb9aaef0648289aa077aa",
+    "started_at": "2026-08-21T20:59:44+08:00",
+    "finished_at": "2026-08-21T21:06:13+08:00",
+    "exit_code": 0,
+    "validation_ce": {
+      "0": 10.9970,
+      "60": 6.2180,
+      "120": 5.7258,
+      "180": 5.4642,
+      "238": 5.3610
+    }
+  },
+  "candidate": {
+    "run_id": "pro6_mai_v3_124m_qkonly_pairvq_mlp_fastresidual_0p5tpp_lr24e4_20260821T131018Z_2629615",
+    "execution_git_commit": "9e02111f81dc4434e097ea9c8edc612f429b5041",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fastresidual_0p5tpp_lr24e4.json",
+    "config_sha256": "dd635a6ccd23f529134a07a309933ac44770705964df69ea987c65341c8904ab",
+    "preflight_certificate_sha256": "d37c115bc40c03791b285e271d344f81fc9eecfb836251a74232c4ded5424f86",
+    "status_sha256": "db7481cdb1f067dcd217bd44ff085901ccda88067dd2453cd228a21fa108e78b",
+    "log_sha256": "4ae7b6c755ad0ad8082e3ddd529a6ccb89a1a61692d1e1f7300eb36702332ac7",
+    "provenance_sha256": "4da3da062a76acacd0666c67a9b85c4f1cbde67112a95697ce32963f17b76ffc",
+    "started_at": "2026-08-21T21:10:20+08:00",
+    "finished_at": "2026-08-21T21:17:05+08:00",
+    "exit_code": 0,
+    "validation_ce": {
+      "0": 10.9831,
+      "60": 6.4568,
+      "120": 5.8994,
+      "180": 5.6814,
+      "238": 5.5964
+    },
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fastresidual_0p5tpp_lr24e4/ckpt.pt",
+      "bytes": 645708968,
+      "sha256": "3c526307bb178ce53a925f3d05e90aab5113c8fad981e39f5d909c0750804721",
+      "next_iter": 238,
+      "metadata_sha256": "09bdedc2b8d32ca450fe8c66a7373534f584d227c54ddbc3fed13a0bdbb335f3"
+    }
+  },
+  "fixed_checkpoint_comparison": {
+    "terminal_candidate_minus_parent_ce": 0.2354,
+    "frozen_maximum_gap": 0.05,
+    "gate_excess_ce": 0.1854,
+    "terminal_perplexity_ratio": 1.2654,
+    "curve": [
+      {"step": 60, "candidate_minus_parent_ce": 0.2388, "perplexity_ratio": 1.2697},
+      {"step": 120, "candidate_minus_parent_ce": 0.1736, "perplexity_ratio": 1.1895},
+      {"step": 180, "candidate_minus_parent_ce": 0.2172, "perplexity_ratio": 1.2425},
+      {"step": 238, "candidate_minus_parent_ce": 0.2354, "perplexity_ratio": 1.2654}
+    ]
+  },
+  "projection_trajectory": {
+    "measurement": "Request-energy-weighted recovery at every logged slow-code refresh; fast residual fitting itself occurs every optimizer step.",
+    "rows": [
+      {"step": 0, "all_recovery": 0.860072, "c_fc_recovery": 0.975767, "c_proj_recovery": 0.183260, "fast_code_changes": 14124152},
+      {"step": 8, "all_recovery": 0.912368, "c_fc_recovery": 0.945791, "c_proj_recovery": 0.808181, "fast_code_changes": 9574087},
+      {"step": 40, "all_recovery": 0.664561, "c_fc_recovery": 0.679433, "c_proj_recovery": 0.603985, "fast_code_changes": 3155084},
+      {"step": 80, "all_recovery": 0.370313, "c_fc_recovery": 0.423950, "c_proj_recovery": 0.124845, "fast_code_changes": 2993757},
+      {"step": 120, "all_recovery": 0.140690, "c_fc_recovery": 0.162680, "c_proj_recovery": 0.046036, "fast_code_changes": 717220},
+      {"step": 160, "all_recovery": 0.111219, "c_fc_recovery": 0.118510, "c_proj_recovery": 0.080301, "fast_code_changes": 7726},
+      {"step": 184, "all_recovery": 0.076694, "c_fc_recovery": 0.082267, "c_proj_recovery": 0.053913, "fast_code_changes": 11},
+      {"step": 192, "all_recovery": 0.089458, "c_fc_recovery": 0.095197, "c_proj_recovery": 0.065829, "fast_code_changes": 0},
+      {"step": 232, "all_recovery": 0.119469, "c_fc_recovery": 0.124996, "c_proj_recovery": 0.096662, "fast_code_changes": 0}
+    ],
+    "late_window_steps_181_to_237": {
+      "mean_all_recovery": 0.0961845,
+      "minimum_all_recovery": 0.0766936,
+      "fast_code_changes_total": 11,
+      "logged_refreshes_with_nonzero_fast_changes": 1,
+      "logged_refreshes": 7
+    }
+  },
+  "systems": {
+    "candidate_tokens_per_second": 206121.66,
+    "candidate_mfu_fraction": 0.369861,
+    "candidate_optimizer_fraction": 0.055314,
+    "candidate_peak_mib": 31558.59,
+    "throughput_penalty_vs_parent_fraction": 0.04136,
+    "performance_gate_passed": true
+  },
+  "diagnosis": {
+    "finite_capacity": "passed previously at a fixed dense checkpoint",
+    "initial_direction": "passed at step zero and remained strong through the first several refreshes",
+    "sustained_direction": "failed as requested displacements shrank below the active pair-code cells; discarded motion was not carried into later steps",
+    "compact_momentum_boundary": "The result does not prove that codeword momentum is sufficient, but projection recovery is measured against the optimizer's own request and is already low enough to explain rejection.",
+    "blockfht_boundary": "The failure is inside the pair-VQ MLP optimizer with only QK mapped; it is not evidence that BlockFHT compute, MFU, or attention V caused this endpoint gap."
+  }
+}
