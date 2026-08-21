@@ -1,0 +1,63 @@
+{
+  "schema_version": "mai_pair_vq_fractional_lattice_0p5tpp_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does compact full-MLP training close the matched QK-only dense-MLP parent's 124M/0.5-TPP loss once discarded ambient Muon direction is carried in the production-admitted 7.53125-bit temporal state?",
+  "theory": {
+    "finite_state": "two pair-VQ stages plus a fast Cartesian stage on c_fc, and one pair-VQ plus fast Cartesian stage on c_proj, supply the materialized MLP weights",
+    "temporal_state": "B32 signed-FHT, q7 base codes, one q8 high bit on the highest-error 25% of blocks, packed selectors, and one q8 gain per block carry projection error across updates",
+    "causal_change": "The earlier matched endpoint failed after fast code changes froze and late projected-update recovery fell near 0.10. The new state preserves more than 0.99975 of live discarded-feedback energy without a dense residual tensor.",
+    "attention_control": "Only QK is mapped; V and attention output projection remain dense, so this endpoint isolates complete MLP replacement rather than claiming complete model replacement."
+  },
+  "prerequisites": {
+    "production_gate": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_gate9_result.json",
+    "production_gate_sha256": "8bd2947362bfe997775b322eefddc7ec7ff98db067c112c31bdf6bc3917ef6d6",
+    "matched_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+    "matched_parent_terminal_validation_ce": 5.3610,
+    "previous_compact_terminal_validation_ce": 5.5964
+  },
+  "run": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_0p5tpp_lr24e4.json",
+    "matched_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+    "reuse_parent": "The prior parent is immutable and uses the identical model/data/evaluation seeds and fixed evaluation indices, so it is not rerun."
+  },
+  "frozen_gates": {
+    "terminal_clean": true,
+    "fixed_eval_protocol_matches_parent": true,
+    "terminal_candidate_minus_parent_ce_max": 0.05,
+    "terminal_candidate_validation_ce_max": 5.4110,
+    "all_fixed_evaluations_finite": true,
+    "feedback_codec_weighted_recovery_min_every_logged_refresh": 0.99975,
+    "feedback_codec_every_matrix_recovery_min_every_logged_refresh": 0.999,
+    "current_step_conservation_weighted_min_every_logged_refresh": 0.99975,
+    "current_step_conservation_every_matrix_min_every_logged_refresh": 0.999,
+    "candidate_mfu_min_fraction": 0.20,
+    "candidate_optimizer_fraction_max": 0.30,
+    "larger_model_or_horizon_authorized_on_pass": false
+  },
+  "accounting": {
+    "mlp_elements": 56623104,
+    "dense_mlp_parameter_bytes_bf16": 113246208,
+    "compact_mlp_persistent_model_bytes": 70855872,
+    "model_state_reduction_x": 1.59826,
+    "dense_mlp_training_matrix_bytes_fp32_weight_plus_fp32_muon": 452984832,
+    "compact_mlp_persistent_training_matrix_bytes": 124296384,
+    "training_state_reduction_x": 3.64439,
+    "temporal_feedback_bits_per_weight": 7.53125,
+    "inference_flops": "unchanged materialized dense MLP"
+  },
+  "decision_policy": {
+    "pass": "Seal the endpoint and analyze the residual <=0.05 gap before deciding whether a longer 124M rung is warranted; do not automatically scale the model.",
+    "fail_loss_but_pass_direction": "The temporal-direction problem is closed but finite pair-VQ function capacity or optimization remains limiting; return to the compact weight chart rather than changing this feedback codec.",
+    "fail_direction": "Reject production temporal closure and diagnose the first refresh where the frozen carry gate breaks; do not loosen thresholds or sweep LR.",
+    "automatic_rerun": false
+  },
+  "monitoring": {
+    "expected_duration_minutes": 7,
+    "watchdog": "one persistent idempotent terminal/error-only watcher",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "terminal_action": "Verify terminal artifacts and fixed losses, seal hashes and gate outcomes in the active project note, then continue only with the causally authorized full-MLP successor.",
+    "error_action": "Inspect process, status, log, GPU, and storage; recover or requeue only if scientifically justified, record the remediation, and continue."
+  }
+}
