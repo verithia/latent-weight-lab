@@ -1,0 +1,81 @@
+{
+  "schema_version": "mai_pair_vq_blockmixed_source_probe9_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_terminal_rejection",
+  "classification": "NO_BLOCK_MIXED_PAIR_PRODUCT_WINNER",
+  "decision": "Close fixed orthogonal mixing around the same free pair-product quantizer. Derive a true higher-dimensional lattice or trellis at the compact-state budget; do not run a production carry, 238-step gate, endpoint, or scale-up.",
+  "provenance": {
+    "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_freevq256_rvq2_gate9_result.json",
+    "scientific_parent_sha256": "cfb402ef3530cb0d14b55871bdb69b20d239f1e286aeeb6f376a6bf88b42241d",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_blockmixed_source_probe9_plan.json",
+    "plan_sha256": "f0c8537569c7d9aec3d91828a5c097b62ed79f13be9c3c2a20eefd76f407285a",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_blockmixed_source_probe9.json",
+    "config_sha256": "ceee12cdb66545c006626c5c1018748daff4dda461a906536396ba026ac41706",
+    "implementation_commit": "cc90467628987e75b5099d067c5824f995e325be",
+    "preregistration_commit": "b683b08f2472e15166f7fe76575d2d34be2dee6a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_blockmixed_source_probe9_mfu.json",
+    "certificate_sha256": "de9c8f9820734d80e326c691beef1ffed92ae1eb4d301afea7520b3ae98f7c9b",
+    "certificate_bytes": 17362,
+    "log_sha256": "735eab6e2aceb64111bb074d1d5972d687b981eb601712b75dbd2ccd78c00b97",
+    "log_bytes": 170386,
+    "tokens_per_second": 171627.72875,
+    "mfu_fraction": 0.30690389925563455,
+    "iter_ms": 1643.4775,
+    "optimizer_ms": 442.82375,
+    "optimizer_fraction": 0.2694428519061706,
+    "peak_mib": 31630.25
+  },
+  "scientific_run": {
+    "clean_exit": true,
+    "optimizer_steps": 9,
+    "wall_seconds": 20.14,
+    "all_logged_losses_finite": true,
+    "diagnostic_records": 48,
+    "records_per_probe_step": 24,
+    "last_eval": "step 9: train loss 8.2859, val loss 8.3831",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_blockmixed_source_probe9_20260822T_exact1.log",
+    "log_sha256": "f785cec396ff2849cc1ea0460c02aa6a8e4b1ad69cb762264254cc210019e8a7",
+    "log_bytes": 170580
+  },
+  "weighted_results": {
+    "step_0": {
+      "B2": {"full": 0.9910278911, "residual": 0.8010207005, "full_min": 0.9882573485, "residual_min": 0.7746636868},
+      "B8": {"full": 0.9938760245, "residual": 0.8217129389, "full_min": 0.9914186597, "residual_min": 0.7964224219},
+      "B16": {"full": 0.9951055885, "residual": 0.8338040283, "full_min": 0.9925295115, "residual_min": 0.7989366055},
+      "B32": {"full": 0.9960053785, "residual": 0.8466010615, "full_min": 0.9934050441, "residual_min": 0.8092313409}
+    },
+    "step_8": {
+      "B2": {"full": 0.9942656896, "residual": 0.8151988888, "full_min": 0.9932852983, "residual_min": 0.8032618165},
+      "B8": {"full": 0.9974724450, "residual": 0.8689642565, "full_min": 0.9967873693, "residual_min": 0.8535878658},
+      "B16": {"full": 0.9983192972, "residual": 0.8934717355, "full_min": 0.9977930784, "residual_min": 0.8769433498},
+      "B32": {"full": 0.9988101644, "residual": 0.9129343923, "full_min": 0.9983844161, "residual_min": 0.8967885375}
+    }
+  },
+  "cross_candidate_validity": {
+    "all_stage_active_codes_min": 256,
+    "all_parseval_relative_error_max": 1.3599579062884004e-7,
+    "B32_stage2_entropy_min_step0": 6.140546798706055,
+    "B32_stage2_entropy_min_step8": 7.026976585388184
+  },
+  "frozen_gate_evaluation": {
+    "systems_mfu_at_least_0p20": true,
+    "clean_9_steps_and_48_records": true,
+    "all_losses_finite": true,
+    "parseval_error_at_most_1e_6": true,
+    "B8_all_candidate_gates": false,
+    "B16_all_candidate_gates": false,
+    "B32_all_candidate_gates": false,
+    "winner": null
+  },
+  "interpretation": {
+    "mixing_is_helpful": "Recovery improves monotonically from B2 through B32, showing that the live source has exploitable cross-weight correlation and/or sparse-tail structure.",
+    "pair_product_is_still_limiting": "Even B32 leaves 15.34% residual distortion at step 0 and 8.71% at step 8; occupancy is full, so the remaining floor is the pair-product cell shape rather than missing symbols.",
+    "next_family": "Use a genuine block lattice with explicit block gain and bit-packed coordinate codes, or a trellis, rather than another pair codebook or larger fixed FHT alone."
+  }
+}
