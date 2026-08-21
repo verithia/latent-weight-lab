@@ -2396,6 +2396,26 @@ def parse_args() -> argparse.Namespace:
         raise ValueError(
             "uniform stochastic fast levels require a nonzero FHT block size"
         )
+    if bool(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_stochastic_fast_block_local_levels",
+            False,
+        )
+    ) and not (
+        stochastic_fast_fht_block_size
+        and bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels",
+                False,
+            )
+        )
+    ):
+        raise ValueError(
+            "block-local stochastic levels require FHT-preconditioned "
+            "uniform stochastic levels"
+        )
     if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
         raise ValueError("pair-VQ feedback output group size must be nonnegative")
     residual_probe_steps = tuple(
@@ -3139,6 +3159,13 @@ def pair_vq_model_kwargs(
             getattr(
                 namespace,
                 "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels",
+                False,
+            )
+        ),
+        "block_fht_mlp_pair_vq_stochastic_fast_block_local_levels": bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_stochastic_fast_block_local_levels",
                 False,
             )
         ),
@@ -4471,6 +4498,15 @@ def main() -> None:
                                     )
                                     for row in stochastic_rows
                                 }
+                            ),
+                            "block_local_groups": sum(
+                                int(
+                                    row.get(
+                                        "stochastic_fast_block_local_groups",
+                                        0,
+                                    )
+                                )
+                                for row in stochastic_rows
                             ),
                         },
                         sort_keys=True,

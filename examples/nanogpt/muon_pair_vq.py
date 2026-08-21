@@ -216,6 +216,81 @@ def _fit_stochastic_cartesian_pair_codec_(
     }
 
 
+@torch.no_grad()
+def _fit_block_local_uniform_stochastic_cartesian_pair_codec_(
+    vectors: torch.Tensor,
+    bounds: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    pairs_per_group: int,
+    seed: int,
+) -> tuple[int, dict[str, float]]:
+    """Unbiased 16x16 coding with exact support bounds per FHT block."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("block-local Cartesian values must have shape (pairs, 2)")
+    if pairs_per_group <= 0 or vectors.shape[0] % pairs_per_group:
+        raise ValueError("pairs_per_group must divide the pair count")
+    group_count = vectors.shape[0] // pairs_per_group
+    if tuple(bounds.shape) != (group_count, 2, 2):
+        raise ValueError("block-local bounds must have shape (groups, 2, 2)")
+    if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
+        raise ValueError("block-local Cartesian codes have the wrong shape")
+
+    grouped = vectors.float().reshape(group_count, pairs_per_group, 2)
+    support_min = grouped.amin(dim=1)
+    support_max = grouped.amax(dim=1)
+    bounds[:, :, 0].copy_(support_min)
+    bounds[:, :, 1].copy_(support_max)
+    width = support_max - support_min
+    step = width / 15.0
+    normalized = torch.where(
+        width[:, None, :] > 0,
+        (grouped - support_min[:, None, :])
+        / width[:, None, :]
+        * 15.0,
+        torch.zeros_like(grouped),
+    ).clamp_(0.0, 15.0)
+    lower = normalized.floor().to(torch.long).clamp_(0, 15)
+    upper = (lower + 1).clamp_(0, 15)
+    probability = (normalized - lower.float()).clamp_(0.0, 1.0)
+
+    generator = torch.Generator(device=vectors.device)
+    generator.manual_seed(int(seed) % (2**63 - 1))
+    draw = torch.rand(
+        probability.shape,
+        generator=generator,
+        device=vectors.device,
+        dtype=torch.float32,
+    )
+    assignment = torch.where(draw < probability, upper, lower)
+    new_codes = (
+        assignment[:, :, 0] * 16 + assignment[:, :, 1]
+    ).reshape(-1).to(torch.uint8)
+    old_codes = codes.clone()
+    codes.copy_(new_codes)
+
+    low_value = support_min[:, None, :] + lower.float() * step[:, None, :]
+    expected = low_value + probability * step[:, None, :]
+    variance = probability * (1.0 - probability) * step[:, None, :].square()
+    expected_bias_energy = float((expected - grouped).square().sum())
+    target_energy = float(grouped.square().sum())
+    sampling_variance = float(variance.sum())
+    return int((new_codes != old_codes).sum()), {
+        "stochastic_fast_expected_bias_energy": expected_bias_energy,
+        "stochastic_fast_target_energy": target_energy,
+        "stochastic_fast_expected_bias_recovery": (
+            1.0 - expected_bias_energy / max(target_energy, 1e-30)
+        ),
+        "stochastic_fast_sampling_variance": sampling_variance,
+        "stochastic_fast_sampling_variance_ratio": (
+            sampling_variance / max(target_energy, 1e-30)
+        ),
+        "stochastic_fast_boundary_clipped_values": 0,
+        "stochastic_fast_uniform_levels": 1,
+        "stochastic_fast_block_local_groups": int(group_count),
+    }
+
+
 def _decode_grouped_cartesian_pair_codec(
     levels: torch.Tensor,
     codes: torch.Tensor,
@@ -2120,6 +2195,7 @@ class MuonPairVQLinear(nn.Module):
         stochastic_fast_retraction: bool = False,
         stochastic_fast_fht_block_size: int = 0,
         stochastic_fast_uniform_levels: bool = False,
+        stochastic_fast_block_local_levels: bool = False,
         error_feedback: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
@@ -2149,6 +2225,9 @@ class MuonPairVQLinear(nn.Module):
         )
         self.stochastic_fast_uniform_levels = bool(
             stochastic_fast_uniform_levels
+        )
+        self.stochastic_fast_block_local_levels = bool(
+            stochastic_fast_block_local_levels
         )
         self.base_seed = int(base_seed)
         self.error_feedback = bool(error_feedback)
@@ -2220,6 +2299,14 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError(
                 "uniform stochastic levels require FHT-preconditioned "
                 "stochastic fast retraction"
+            )
+        if self.stochastic_fast_block_local_levels and (
+            not self.stochastic_fast_uniform_levels
+            or not self.stochastic_fast_fht_block_size
+        ):
+            raise ValueError(
+                "block-local stochastic levels require FHT-preconditioned "
+                "uniform stochastic retraction"
             )
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
@@ -2441,6 +2528,21 @@ class MuonPairVQLinear(nn.Module):
             persistent=True,
         )
         self.register_buffer(
+            "fast_group_bounds",
+            (
+                torch.zeros(
+                    self.element_count // self.stochastic_fast_fht_block_size,
+                    2,
+                    2,
+                    dtype=torch.float32,
+                )
+                if self.fast_residual
+                and self.stochastic_fast_block_local_levels
+                else torch.empty(0, dtype=torch.float32)
+            ),
+            persistent=True,
+        )
+        self.register_buffer(
             "optimizer_step", torch.zeros((), dtype=torch.int64), persistent=True
         )
         decoded_weight = self.decode_weight().detach()
@@ -2461,6 +2563,8 @@ class MuonPairVQLinear(nn.Module):
             + self.codes.numel() * self.codes.element_size()
             + self.fast_levels.numel() * self.fast_levels.element_size()
             + self.fast_codes.numel() * self.fast_codes.element_size()
+            + self.fast_group_bounds.numel()
+            * self.fast_group_bounds.element_size()
             + self.optimizer_step.numel() * self.optimizer_step.element_size()
         )
 
@@ -2922,13 +3026,30 @@ class MuonPairVQLinear(nn.Module):
         if not self.fast_residual:
             return torch.zeros_like(self.decode_pairs(0))
         fast_codes = self.fast_codes.long()
-        encoded = torch.stack(
-            (
-                self.fast_levels[0].index_select(0, fast_codes // 16),
-                self.fast_levels[1].index_select(0, fast_codes % 16),
-            ),
-            dim=1,
-        )
+        if self.stochastic_fast_block_local_levels:
+            pairs_per_group = self.stochastic_fast_fht_block_size // 2
+            grouped_codes = fast_codes.reshape(-1, pairs_per_group)
+            low = self.fast_group_bounds[:, :, 0]
+            step = (
+                self.fast_group_bounds[:, :, 1] - low
+            ) / 15.0
+            encoded = torch.stack(
+                (
+                    low[:, 0, None]
+                    + (grouped_codes // 16).float() * step[:, 0, None],
+                    low[:, 1, None]
+                    + (grouped_codes % 16).float() * step[:, 1, None],
+                ),
+                dim=2,
+            ).reshape(-1, 2)
+        else:
+            encoded = torch.stack(
+                (
+                    self.fast_levels[0].index_select(0, fast_codes // 16),
+                    self.fast_levels[1].index_select(0, fast_codes % 16),
+                ),
+                dim=1,
+            )
         if not self.stochastic_fast_fht_block_size:
             return encoded
         return _inverse_signed_block_fht(
@@ -2995,17 +3116,31 @@ class MuonPairVQLinear(nn.Module):
                     block_size=self.stochastic_fast_fht_block_size,
                     seed=self.base_seed + 32452843,
                 ).reshape(-1, self.vector_length)
-            changes, diagnostics = _fit_stochastic_cartesian_pair_codec_(
-                codec_target,
-                self.fast_levels,
-                self.fast_codes,
-                seed=(
-                    self.base_seed
-                    + 104729 * int(self.optimizer_step)
-                    + 1000003
-                ),
-                uniform_levels=self.stochastic_fast_uniform_levels,
+            stochastic_seed = (
+                self.base_seed
+                + 104729 * int(self.optimizer_step)
+                + 1000003
             )
+            if self.stochastic_fast_block_local_levels:
+                changes, diagnostics = (
+                    _fit_block_local_uniform_stochastic_cartesian_pair_codec_(
+                        codec_target,
+                        self.fast_group_bounds,
+                        self.fast_codes,
+                        pairs_per_group=(
+                            self.stochastic_fast_fht_block_size // 2
+                        ),
+                        seed=stochastic_seed,
+                    )
+                )
+            else:
+                changes, diagnostics = _fit_stochastic_cartesian_pair_codec_(
+                    codec_target,
+                    self.fast_levels,
+                    self.fast_codes,
+                    seed=stochastic_seed,
+                    uniform_levels=self.stochastic_fast_uniform_levels,
+                )
             diagnostics["stochastic_fast_fht_block_size"] = (
                 self.stochastic_fast_fht_block_size
             )

@@ -25,6 +25,7 @@ from examples.nanogpt.muon_pair_vq import (
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
     _fit_stochastic_cartesian_pair_codec_,
+    _fit_block_local_uniform_stochastic_cartesian_pair_codec_,
     _fractional_lattice_feedback_layout,
     _fractional_residual_lattice_feedback_layout,
     _fractional_residual_lattice_source_decomposition,
@@ -45,6 +46,7 @@ def make_module(
     stochastic_fast_retraction: bool = False,
     stochastic_fast_fht_block_size: int = 0,
     stochastic_fast_uniform_levels: bool = False,
+    stochastic_fast_block_local_levels: bool = False,
     error_feedback: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
@@ -64,6 +66,7 @@ def make_module(
         stochastic_fast_retraction=stochastic_fast_retraction,
         stochastic_fast_fht_block_size=stochastic_fast_fht_block_size,
         stochastic_fast_uniform_levels=stochastic_fast_uniform_levels,
+        stochastic_fast_block_local_levels=stochastic_fast_block_local_levels,
         error_feedback=error_feedback,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
@@ -206,6 +209,79 @@ def test_uniform_stochastic_levels_are_bracketed_and_reduce_tail_variance() -> N
         uniform_levels[:, 1:] - uniform_levels[:, :-1],
         expected_steps[:, None].expand(-1, 15),
     )
+
+
+def test_block_local_uniform_stochastic_levels_reduce_global_tail_penalty() -> None:
+    torch.manual_seed(1931)
+    values = torch.randn(4096, 2)
+    values[0] = torch.tensor([-16.0, 15.0])
+    global_levels = torch.zeros(2, 16)
+    global_codes = torch.zeros(values.shape[0], dtype=torch.uint8)
+    local_codes = torch.zeros_like(global_codes)
+    local_bounds = torch.zeros(values.shape[0] // 128, 2, 2)
+    _, global_diagnostics = _fit_stochastic_cartesian_pair_codec_(
+        values,
+        global_levels,
+        global_codes,
+        seed=1933,
+        uniform_levels=True,
+    )
+    _, local_diagnostics = (
+        _fit_block_local_uniform_stochastic_cartesian_pair_codec_(
+            values,
+            local_bounds,
+            local_codes,
+            pairs_per_group=128,
+            seed=1933,
+        )
+    )
+    assert local_diagnostics["stochastic_fast_expected_bias_recovery"] > 0.999999
+    assert local_diagnostics["stochastic_fast_boundary_clipped_values"] == 0
+    assert local_diagnostics["stochastic_fast_block_local_groups"] == 32
+    assert (
+        local_diagnostics["stochastic_fast_sampling_variance_ratio"]
+        < 0.5 * global_diagnostics["stochastic_fast_sampling_variance_ratio"]
+    )
+    torch.testing.assert_close(local_bounds[:, :, 0], values.reshape(32, 128, 2).amin(dim=1))
+    torch.testing.assert_close(local_bounds[:, :, 1], values.reshape(32, 128, 2).amax(dim=1))
+
+
+def test_block_local_stochastic_fast_state_is_compact_and_resume_exact() -> None:
+    module = make_module(
+        fast_residual=True,
+        stochastic_fast_retraction=True,
+        stochastic_fast_fht_block_size=16,
+        stochastic_fast_uniform_levels=True,
+        stochastic_fast_block_local_levels=True,
+        error_feedback=True,
+    )
+    expected_bounds_bytes = (module.element_count // 16) * 4 * 4
+    assert module.fast_group_bounds.numel() * 4 == expected_bounds_bytes
+    optimizer = make_optimizer(module)
+    torch.manual_seed(1937)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = make_module(
+        fast_residual=True,
+        stochastic_fast_retraction=True,
+        stochastic_fast_fht_block_size=16,
+        stochastic_fast_uniform_levels=True,
+        stochastic_fast_block_local_levels=True,
+        error_feedback=True,
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    assert torch.equal(restored.fast_codes, module.fast_codes)
+    assert torch.equal(restored.fast_group_bounds, module.fast_group_bounds)
 
 
 def make_fractional_module(
