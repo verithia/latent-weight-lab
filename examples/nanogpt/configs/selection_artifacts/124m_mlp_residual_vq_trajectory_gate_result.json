@@ -1,0 +1,42 @@
+{
+  "schema_version": "mai_124m_mlp_residual_vq_trajectory_gate_sealed_summary_v1",
+  "classification": "REJECTED",
+  "passed": false,
+  "source_commit": "ddd3890d0",
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_mlp_residual_vq_trajectory_gate_20260821/result.json",
+    "sha256": "1279b00f5a578a449793ca1bfb0e27b3ca4e3f6ee4c9153bb3a5b43a80e0e0ec"
+  },
+  "preflight": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_mlp_residual_vq_trajectory_gate_20260821/preflight.json",
+    "sha256": "d868aeab0ef75c7b0e21f9ad9cfa165f956646ce949aee4945c28a3c495ce94a"
+  },
+  "plan_sha256": "069f7cf4ad754e3d74663cde070f2d2097c5d51d5b9e1cd5ec76b31362fd200f",
+  "trajectory_run_identity_sha256": "ffd148a14c4c6dff21ae4adc2ce648ac5a7395e66f0068f9835b54c9e57fa1db",
+  "candidate": {
+    "name": "shared_residual_vq_block_field",
+    "block_size": 1024,
+    "stages": 2,
+    "atoms_per_stage": 128,
+    "persistent_ambient_residual": false,
+    "persistent_ambient_momentum": false,
+    "stored_dense_basis": false
+  },
+  "accounting": {
+    "dense_paired_mlp_entries": 226492416,
+    "continuous_coordinates": 704512,
+    "persistent_model_bytes": 1796096,
+    "continuous_coordinate_compression": 321.48837209302326,
+    "persistent_bf16_state_compression": 252.20524515393387,
+    "decode_multiply_adds_per_materialization": 452984832
+  },
+  "heldout_metrics": {
+    "aggregate_weight_displacement_recovery": 0.019587695598602295,
+    "mean_local_chord_cosine": 0.018215938626478117,
+    "mean_local_chord_recovery": -0.6278098026911417,
+    "aggregate_output_change_recovery": 0.00261002779006958,
+    "aggregate_input_jvp_change_recovery": -0.001305699348449707,
+    "minimum_layer_output_change_recovery": -0.002123594284057617
+  },
+  "decision": "Do not train or sweep this 200x shared-RVQ budget. It is rate-distortion limited on the held-out high-rank MLP trajectory and preserves essentially none of the required function or derivative motion."
+}
