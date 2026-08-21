@@ -1,0 +1,60 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_uniform_retraction_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_exact_config_preflight_or_training",
+  "scientific_question": "Does replacing deterministic-MSE Lloyd intervals with minimax uniform intervals reduce the fixed-FHT unbiased retraction variance below the real-training launch ceiling without adding state?",
+  "causal_basis": {
+    "failed_fht_gate": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_retraction_gate_result.json",
+      "sha256": "98c966c413e44bfd8ff01f1583b3bab3c2b1e8fd1d728d7bcd39aa49b1d0bfc6",
+      "classification": "FAIL_FIXED_FHT_DOES_NOT_CONTROL_STOCHASTIC_VARIANCE",
+      "maximum_weighted_variance_ratio": 1.2368118674935062,
+      "minimum_expected_bias_recovery": 0.9999999999999877,
+      "finding": "FHT preserved unbiasedness and reduced the late raw ratio only modestly. The remaining order-one variance is driven by Lloyd bulk centroids combined with exact-extrema outer levels, which creates wide stochastic intervals."
+    }
+  },
+  "theory": {
+    "registered_levels": "For each of the two transformed scalar coordinate streams, use a_i=m+i(M-m)/15 for i=0,...,15, with m and M the observed transformed extrema.",
+    "unbiasedness": "Observed extrema remain exact support boundaries, so every finite request is bracketed and E[q(y_j)|y_j]=y_j with zero clipping.",
+    "variance_bound": "All intervals have Delta=(M-m)/15, hence Var[q(y_j)|y_j]<=Delta^2/4 and total variance is at most n(M-m)^2/900.",
+    "fht_scale_argument": "For signed normalized Hadamard coordinates, the extremum scale is expected to grow only as ||r|| sqrt(log n/n), giving a relative upper scale of order 8 log(n)/900. The real gate, not this asymptotic estimate, decides admission.",
+    "fixed_scope": "Retain B=256, 16 levels, fresh seeded draws, optimizer, LR, data, horizon, model width, code bytes, feedback codec, and fixed-eval identity. Only level placement changes."
+  },
+  "registered_candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_uniform_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "88ba2b035f9d6ce3b236f9034f8e3178af56eba050e67836f52897ece4b2b2ca",
+    "implementation_commit": "6a2189cdaef5864f973aea73db9050f500e23f52",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "updates_if_admitted": 238,
+    "comparison_parent_validation_ce": 5.3610
+  },
+  "implementation": {
+    "pair_vq_source_sha256": "2e8b3a4b52033b4cd26f1d25f395b3c0afadbc4450b2ab7a60929a6b66803857",
+    "model_source_sha256": "493070a509c8aea427c57f0756055f3824ed09d82319a91a6d6ce3737b5cf290",
+    "train_source_sha256": "20d2fe2f83c4b422f280d0d5130c443868f25762e54d04f637cacb13183a3af4",
+    "test_source_sha256": "6925cb931324c9e01a35058d1878460928861e6e6903cc2f02b06c3a67c60f61",
+    "remote_focused_tests": "60 passed",
+    "additional_persistent_bytes": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0
+  },
+  "frozen_preflight_gates": {
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "minimum_expected_bias_recovery": 0.999,
+    "maximum_weighted_sampling_variance_ratio_per_timed_update": 0.10,
+    "maximum_boundary_clipped_values": 0,
+    "persistent_training_bytes_exact": 157500864,
+    "all_losses_finite": true
+  },
+  "conditional_endpoint_gate": {
+    "maximum_terminal_validation_ce": 5.4110,
+    "maximum_terminal_candidate_minus_parent_ce": 0.05
+  },
+  "decision_rule": {
+    "preflight_pass": "Authorize exactly one 238-update smallest-rung endpoint with a terminal/error-only watchdog.",
+    "preflight_fail": "Seal and reject uniform interval placement; no endpoint, level-count sweep, clipping relaxation, LR tuning, or scale-up.",
+    "endpoint_fail": "Reject low-variance fresh stochastic retraction as sufficient and diagnose temporal correlation or functional-path mismatch before another representation.",
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}
