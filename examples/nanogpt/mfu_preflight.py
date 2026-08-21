@@ -53,6 +53,7 @@ def execution_provenance(config_path: Path, source: dict[str, Any]) -> dict[str,
         root / "examples/nanogpt/train.py",
         root / "examples/nanogpt/model.py",
         root / "examples/nanogpt/muon.py",
+        root / "examples/nanogpt/muon_pair_vq.py",
         root / "examples/nanogpt/muon_int8_lattice.py",
     )
     data_manifest = Path(source["data_dir"]) / "manifest.json"
