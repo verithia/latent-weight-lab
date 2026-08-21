@@ -102,7 +102,39 @@ class DensePairVQShadowObserver:
                             False,
                         )
                     ),
-                    error_feedback=False,
+                    stochastic_fast_fht_block_size=int(
+                        source.get(
+                            "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size",
+                            0,
+                        )
+                    ),
+                    stochastic_fast_uniform_levels=bool(
+                        source.get(
+                            "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels",
+                            False,
+                        )
+                    ),
+                    stochastic_fast_block_local_levels=bool(
+                        source.get(
+                            "block_fht_mlp_pair_vq_stochastic_fast_block_local_levels",
+                            False,
+                        )
+                    ),
+                    error_feedback=bool(
+                        source.get("block_fht_mlp_pair_vq_error_feedback", False)
+                    ),
+                    feedback_codec=str(
+                        source.get(
+                            "block_fht_mlp_pair_vq_feedback_codec",
+                            "cartesian4x4",
+                        )
+                    ),
+                    feedback_output_group_size=int(
+                        source.get(
+                            "block_fht_mlp_pair_vq_feedback_output_group_size",
+                            0,
+                        )
+                    ),
                     neighbor_candidates=int(
                         source["block_fht_mlp_pair_vq_neighbor_candidates"]
                     ),

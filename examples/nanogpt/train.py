@@ -19,6 +19,9 @@ import torch
 import torch.nn.functional as F
 
 from examples.nanogpt.dense_pair_vq_shadow import DensePairVQShadowObserver
+from examples.nanogpt.dense_pair_vq_functional_oracle import (
+    PairVQFunctionalGradientOracle,
+)
 from examples.nanogpt.model import (
     GPT,
     GPTConfig,
@@ -97,6 +100,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/csrc/task_edge_coloring.cpp",
         root / "examples/nanogpt/parameter_trajectory.py",
         root / "examples/nanogpt/dense_pair_vq_shadow.py",
+        root / "examples/nanogpt/dense_pair_vq_functional_oracle.py",
         root / "latent_weight_lab/block_fht.py",
     )
     return {
@@ -775,12 +779,36 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
                 "dense pair-VQ shadow replay is missing: "
                 + ", ".join(missing_shadow_fields)
             )
+        functional_fields = {
+            "pair_vq_dense_shadow_functional_plan": (
+                args.pair_vq_dense_shadow_functional_plan
+            ),
+            "pair_vq_dense_shadow_functional_plan_sha256": (
+                args.pair_vq_dense_shadow_functional_plan_sha256
+            ),
+            "pair_vq_dense_shadow_functional_result": (
+                args.pair_vq_dense_shadow_functional_result
+            ),
+        }
+        configured_functional_fields = [
+            key for key, value in functional_fields.items() if value
+        ]
+        if configured_functional_fields and len(configured_functional_fields) != len(
+            functional_fields
+        ):
+            raise ValueError(
+                "dense pair-VQ functional oracle requires all of: "
+                + ", ".join(functional_fields)
+            )
     elif any(
         value
         for value in (
             args.pair_vq_dense_shadow_source_config,
             args.pair_vq_dense_shadow_source_sha256,
             args.pair_vq_dense_shadow_result,
+            args.pair_vq_dense_shadow_functional_plan,
+            args.pair_vq_dense_shadow_functional_plan_sha256,
+            args.pair_vq_dense_shadow_functional_result,
         )
     ):
         raise ValueError(
@@ -1090,6 +1118,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pair-vq-dense-shadow-source-config", default=None)
     parser.add_argument("--pair-vq-dense-shadow-source-sha256", default=None)
     parser.add_argument("--pair-vq-dense-shadow-result", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-functional-plan", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-functional-plan-sha256", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-functional-result", default=None)
     parser.add_argument("--data-dir", required=False)
     parser.add_argument("--out-dir", required=False)
     parser.add_argument("--init-from", choices=["scratch", "resume"], default="scratch")
@@ -3871,6 +3902,7 @@ def main() -> None:
         restore_rng_state(checkpoint, device_type=device_type)
     raw_model = model
     pair_vq_dense_shadow = None
+    pair_vq_functional_oracle = None
     if args.pair_vq_dense_shadow_replay:
         pair_vq_dense_shadow = DensePairVQShadowObserver(
             raw_model,
@@ -3902,6 +3934,42 @@ def main() -> None:
             ),
             flush=True,
         )
+        if args.pair_vq_dense_shadow_functional_plan:
+            pair_vq_functional_oracle = PairVQFunctionalGradientOracle(
+                raw_model,
+                pair_vq_dense_shadow,
+                plan_path=Path(args.pair_vq_dense_shadow_functional_plan),
+                plan_sha256=str(
+                    args.pair_vq_dense_shadow_functional_plan_sha256
+                ),
+                result_path=Path(
+                    args.pair_vq_dense_shadow_functional_result
+                ),
+                data_dir=data_dir,
+                device=args.device,
+                dtype=ptdtype,
+            )
+            print(
+                "pair_vq_functional_oracle_init "
+                + json.dumps(
+                    {
+                        "plan": args.pair_vq_dense_shadow_functional_plan,
+                        "plan_sha256": (
+                            args.pair_vq_dense_shadow_functional_plan_sha256
+                        ),
+                        "result": args.pair_vq_dense_shadow_functional_result,
+                        "persistent_training_bytes": (
+                            pair_vq_functional_oracle.persistent_training_bytes
+                        ),
+                        "fit_and_heldout_indices_disjoint": (
+                            pair_vq_functional_oracle.indices_disjoint
+                        ),
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                flush=True,
+            )
     trajectory_execution_provenance = execution_provenance_from_environment(required=False)
     if args.compile:
         model = torch.compile(model)
@@ -4131,6 +4199,23 @@ def main() -> None:
                     ),
                     flush=True,
                 )
+                if pair_vq_functional_oracle is not None:
+                    functional_record = pair_vq_functional_oracle.probe(
+                        step=iter_num,
+                        run_identity_sha256=run_identity["config_sha256"],
+                        fixed_eval_indices_sha256=str(fixed_eval_digest),
+                        terminal=iter_num >= args.max_iters,
+                    )
+                    if functional_record is not None:
+                        print(
+                            "pair_vq_functional_oracle_probe "
+                            + json.dumps(
+                                functional_record,
+                                sort_keys=True,
+                                separators=(",", ":"),
+                            ),
+                            flush=True,
+                        )
             if losses["val"] < best_val_loss:
                 best_val_loss = losses["val"]
             if args.save_checkpoint:
@@ -4420,6 +4505,10 @@ def main() -> None:
             shadow_projection = pair_vq_dense_shadow.update(
                 optimizer_step=iter_num
             )
+            if pair_vq_functional_oracle is not None:
+                pair_vq_functional_oracle.last_residual_metrics = (
+                    pair_vq_functional_oracle.update_compact_residual()
+                )
             if shadow_projection["refresh_codes"]:
                 print(
                     "pair_vq_dense_shadow_projection "
