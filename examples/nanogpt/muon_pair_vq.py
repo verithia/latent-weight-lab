@@ -904,6 +904,257 @@ def _fit_scalar_codebook(
     return levels, codes
 
 
+def _pack_fixed_width_codes(codes: torch.Tensor, *, bits: int) -> torch.Tensor:
+    """Pack eight unsigned fixed-width codes into exactly ``bits`` bytes."""
+    if not 1 <= bits <= 7:
+        raise ValueError("packed code width must be in [1, 7]")
+    flat = codes.reshape(-1).long()
+    if bool((flat < 0).any()) or bool((flat >= (1 << bits)).any()):
+        raise ValueError("packed code exceeds the requested bit width")
+    padded_count = ((flat.numel() + 7) // 8) * 8
+    if padded_count != flat.numel():
+        flat = F.pad(flat, (0, padded_count - flat.numel()))
+    groups = flat.reshape(-1, 8)
+    code_shifts = bits * torch.arange(8, device=flat.device, dtype=torch.int64)
+    words = (groups << code_shifts).sum(dim=1)
+    byte_shifts = 8 * torch.arange(bits, device=flat.device, dtype=torch.int64)
+    return ((words[:, None] >> byte_shifts) & 255).to(torch.uint8).reshape(-1)
+
+
+def _unpack_fixed_width_codes(
+    packed: torch.Tensor,
+    *,
+    bits: int,
+    count: int,
+) -> torch.Tensor:
+    """Inverse of :func:`_pack_fixed_width_codes` for a known code count."""
+    if not 1 <= bits <= 7:
+        raise ValueError("packed code width must be in [1, 7]")
+    group_count = (int(count) + 7) // 8
+    if packed.numel() != group_count * bits:
+        raise ValueError("packed byte stream has the wrong length")
+    byte_groups = packed.reshape(group_count, bits).long()
+    byte_shifts = 8 * torch.arange(
+        bits, device=packed.device, dtype=torch.int64
+    )
+    words = (byte_groups << byte_shifts).sum(dim=1)
+    code_shifts = bits * torch.arange(
+        8, device=packed.device, dtype=torch.int64
+    )
+    codes = ((words[:, None] >> code_shifts) & ((1 << bits) - 1)).to(
+        torch.uint8
+    )
+    return codes.reshape(-1)[:count]
+
+
+def _signed_block_fht_signs(
+    block_size: int,
+    *,
+    seed: int,
+    device: torch.device,
+) -> torch.Tensor:
+    generator = torch.Generator(device="cpu").manual_seed(int(seed))
+    return (
+        torch.randint(
+            0,
+            2,
+            (block_size,),
+            generator=generator,
+            dtype=torch.int8,
+        )
+        .to(device=device, dtype=torch.float32)
+        .mul_(2.0)
+        .sub_(1.0)
+    )
+
+
+def _inverse_signed_block_fht(
+    transformed: torch.Tensor,
+    *,
+    seed: int,
+) -> torch.Tensor:
+    if transformed.ndim != 2:
+        raise ValueError("signed block-FHT inverse expects a block matrix")
+    block_size = transformed.shape[1]
+    if block_size < 2 or block_size & (block_size - 1):
+        raise ValueError("signed block-FHT inverse size must be a power of two")
+    if block_size == 2:
+        return transformed
+    signs = _signed_block_fht_signs(
+        block_size,
+        seed=seed,
+        device=transformed.device,
+    )
+    return normalized_fht_last_dim(transformed) * signs
+
+
+def _fractional_lattice_feedback_layout(element_count: int) -> dict[str, int]:
+    """Byte-exact B32/q7/q8/p=.25 production feedback layout."""
+    if element_count % 256:
+        raise ValueError(
+            "fractional lattice feedback requires an element count divisible by 256"
+        )
+    block_count = element_count // 32
+    selected_blocks = block_count // 4
+    gain_bytes = block_count
+    base_bytes = element_count * 7 // 8
+    selector_bytes = block_count // 8
+    refinement_bytes = selected_blocks * 4
+    return {
+        "block_count": block_count,
+        "selected_blocks": selected_blocks,
+        "gain_bytes": gain_bytes,
+        "base_bytes": base_bytes,
+        "selector_bytes": selector_bytes,
+        "refinement_bytes": refinement_bytes,
+        "total_bytes": (
+            gain_bytes + base_bytes + selector_bytes + refinement_bytes
+        ),
+    }
+
+
+def _fractional_lattice_feedback_segments(
+    packed: torch.Tensor,
+    *,
+    element_count: int,
+) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    layout = _fractional_lattice_feedback_layout(element_count)
+    if packed.ndim != 1 or packed.numel() != layout["total_bytes"]:
+        raise ValueError("fractional lattice feedback stream has the wrong shape")
+    gain_stop = layout["gain_bytes"]
+    base_stop = gain_stop + layout["base_bytes"]
+    selector_stop = base_stop + layout["selector_bytes"]
+    return (
+        packed[:gain_stop],
+        packed[gain_stop:base_stop],
+        packed[base_stop:selector_stop],
+        packed[selector_stop:],
+    )
+
+
+def _decode_fractional_lattice_feedback(
+    levels: torch.Tensor,
+    packed: torch.Tensor,
+    *,
+    element_count: int,
+    seed: int,
+) -> torch.Tensor:
+    """Decode the packed B32 q7/q8 temporal feedback into ambient pairs."""
+    if tuple(levels.shape) != (640,):
+        raise ValueError("fractional lattice levels must have shape (640,)")
+    layout = _fractional_lattice_feedback_layout(element_count)
+    gain_stream, base_stream, selector_stream, refinement_stream = (
+        _fractional_lattice_feedback_segments(
+            packed,
+            element_count=element_count,
+        )
+    )
+    gain_levels = levels[:256]
+    base_levels = levels[256:384]
+    refined_levels = levels[384:640]
+    decoded_gains = gain_levels.index_select(0, gain_stream.long()).exp()
+    coordinate_codes = _unpack_fixed_width_codes(
+        base_stream,
+        bits=7,
+        count=element_count,
+    ).reshape(layout["block_count"], 32)
+    selector = _unpack_fixed_width_codes(
+        selector_stream,
+        bits=1,
+        count=layout["block_count"],
+    ).bool()
+    selected_count = int(selector.sum())
+    if selected_count not in (0, layout["selected_blocks"]):
+        raise ValueError("fractional lattice selector has an invalid population")
+    decoded = base_levels.index_select(
+        0, coordinate_codes.long().reshape(-1)
+    ).reshape_as(coordinate_codes)
+    if selected_count:
+        high_bits = _unpack_fixed_width_codes(
+            refinement_stream,
+            bits=1,
+            count=layout["selected_blocks"] * 32,
+        ).reshape(layout["selected_blocks"], 32)
+        refined_codes = coordinate_codes[selector].long() + 128 * high_bits.long()
+        decoded[selector] = refined_levels.index_select(
+            0, refined_codes.reshape(-1)
+        ).reshape(layout["selected_blocks"], 32)
+    decoded.mul_(decoded_gains[:, None])
+    ambient = _inverse_signed_block_fht(decoded, seed=seed)
+    return ambient.reshape(-1, 2)
+
+
+@torch.no_grad()
+def _fit_fractional_lattice_feedback_(
+    vectors: torch.Tensor,
+    levels: torch.Tensor,
+    packed: torch.Tensor,
+    *,
+    seed: int,
+) -> int:
+    """Fit and pack the selected B32/q7/q8/p=.25 temporal feedback."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("fractional lattice feedback expects ambient pairs")
+    element_count = vectors.numel()
+    layout = _fractional_lattice_feedback_layout(element_count)
+    old_packed = packed.clone()
+    transformed = _signed_block_fht(vectors, block_size=32, seed=seed)
+    gains = transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
+    gain_levels, gain_codes = _fit_scalar_codebook(
+        gains.log(), level_count=256
+    )
+    decoded_gains = gain_levels.index_select(0, gain_codes).exp()
+    normalized = (transformed / decoded_gains[:, None]).reshape(-1)
+    base_levels, base_codes = _fit_scalar_codebook(normalized, level_count=128)
+    refined_levels, refined_codes = _fit_scalar_codebook(
+        normalized, level_count=256
+    )
+    base_error = (
+        transformed
+        - base_levels.index_select(0, base_codes).reshape_as(transformed)
+        * decoded_gains[:, None]
+    ).square().sum(dim=1)
+    refined_error = (
+        transformed
+        - refined_levels.index_select(0, refined_codes).reshape_as(transformed)
+        * decoded_gains[:, None]
+    ).square().sum(dim=1)
+    selected = torch.topk(
+        base_error - refined_error,
+        layout["selected_blocks"],
+        largest=True,
+        sorted=False,
+    ).indices
+    selector = torch.zeros(
+        layout["block_count"], device=vectors.device, dtype=torch.uint8
+    )
+    selector[selected] = 1
+    selected_mask = selector.bool()
+    stored_coordinates = base_codes.reshape(layout["block_count"], 32).clone()
+    selected_refined = refined_codes.reshape(layout["block_count"], 32)[
+        selected_mask
+    ]
+    stored_coordinates[selected_mask] = selected_refined & 127
+    levels[:256].copy_(gain_levels)
+    levels[256:384].copy_(base_levels)
+    levels[384:640].copy_(refined_levels)
+    gain_stream, base_stream, selector_stream, refinement_stream = (
+        _fractional_lattice_feedback_segments(
+            packed,
+            element_count=element_count,
+        )
+    )
+    gain_stream.copy_(gain_codes.to(torch.uint8))
+    base_stream.copy_(
+        _pack_fixed_width_codes(stored_coordinates, bits=7)
+    )
+    selector_stream.copy_(_pack_fixed_width_codes(selector, bits=1))
+    refinement_stream.copy_(
+        _pack_fixed_width_codes((selected_refined >> 7), bits=1)
+    )
+    return int((packed != old_packed).sum())
+
+
 @torch.no_grad()
 def _block_fht_gain_lattice_counterfactual(
     vectors: torch.Tensor,
@@ -1651,6 +1902,7 @@ class MuonPairVQLinear(nn.Module):
             "conditional_polar16x16_rvq2",
             "free_vq256_rvq2",
             "rvq4x4",
+            "fractional_lattice_q7q8_b32_p25",
         ):
             raise ValueError("unknown pair-VQ feedback codec")
         if (
@@ -1661,6 +1913,7 @@ class MuonPairVQLinear(nn.Module):
                 "conditional_polar16x16_rvq2",
                 "free_vq256_rvq2",
                 "rvq4x4",
+                "fractional_lattice_q7q8_b32_p25",
             )
             and self.feedback_output_group_size != 0
         ):
@@ -1764,6 +2017,13 @@ class MuonPairVQLinear(nn.Module):
             metadata_values = 2 * 256 * 2
         elif self.feedback_codec == "rvq4x4":
             metadata_values = 2 * 16 * 2 + 2
+        elif self.feedback_codec == "fractional_lattice_q7q8_b32_p25":
+            return (
+                _fractional_lattice_feedback_layout(self.element_count)[
+                    "total_bytes"
+                ]
+                + 640 * torch.tensor([], dtype=torch.float32).element_size()
+            )
         else:
             metadata_values = self.feedback_group_count * 2 * 16
         level_bytes = metadata_values * torch.tensor(
@@ -1810,6 +2070,8 @@ class MuonPairVQLinear(nn.Module):
             return (2, 256, 2)
         if self.feedback_codec == "rvq4x4":
             return (2, 16, 2)
+        if self.feedback_codec == "fractional_lattice_q7q8_b32_p25":
+            return (640,)
         if self.feedback_output_group_size == 0:
             return (2, 16)
         return (self.feedback_group_count, 2, 16)
@@ -1826,6 +2088,31 @@ class MuonPairVQLinear(nn.Module):
         ):
             return (2,)
         return None
+
+    @property
+    def feedback_code_shape(self) -> tuple[int, ...]:
+        if self.feedback_codec == "fractional_lattice_q7q8_b32_p25":
+            return (
+                _fractional_lattice_feedback_layout(self.element_count)[
+                    "total_bytes"
+                ],
+            )
+        pair_count = self.element_count // self.vector_length
+        if self.feedback_codec in (
+            "conditional_polar16x16_rvq2",
+            "free_vq256_rvq2",
+        ):
+            return (2, pair_count)
+        return (pair_count,)
+
+    @property
+    def feedback_fractional_lattice_seed(self) -> int:
+        return (
+            20261025
+            + 8192 * self.layer_id
+            + 131 * self.in_features
+            + 17 * self.out_features
+        )
 
     def decode_feedback(
         self,
@@ -1858,6 +2145,13 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("RVQ pair feedback requires a center")
             return _decode_rvq_pair_codec(levels, center, codes)
+        if self.feedback_codec == "fractional_lattice_q7q8_b32_p25":
+            return _decode_fractional_lattice_feedback(
+                levels,
+                codes,
+                element_count=self.element_count,
+                seed=self.feedback_fractional_lattice_seed,
+            )
         if self.feedback_output_group_size == 0:
             return _decode_cartesian_pair_codec(levels, codes)
         return _decode_grouped_cartesian_pair_codec(
@@ -1906,6 +2200,13 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("RVQ pair feedback requires a center")
             return _fit_rvq_pair_codec_(vectors, levels, center, codes)
+        if self.feedback_codec == "fractional_lattice_q7q8_b32_p25":
+            return _fit_fractional_lattice_feedback_(
+                vectors,
+                levels,
+                codes,
+                seed=self.feedback_fractional_lattice_seed,
+            )
         if self.feedback_output_group_size == 0:
             return _fit_cartesian_pair_codec_(vectors, levels, codes)
         return _fit_grouped_cartesian_pair_codec_(
@@ -1973,7 +2274,12 @@ class MuonPairVQLinear(nn.Module):
                                     "conditional_polar16x16_rvq2",
                                     "free_vq256_rvq2",
                                 )
-                                else "uint8_rvq4x4_code_per_weight_pair"
+                                else (
+                                    "packed_b32_q7_q8_p25_plus_q8_gain"
+                                    if self.feedback_codec
+                                    == "fractional_lattice_q7q8_b32_p25"
+                                    else "uint8_rvq4x4_code_per_weight_pair"
+                                )
                             )
                         )
                     )
@@ -1985,6 +2291,7 @@ class MuonPairVQLinear(nn.Module):
                         "conditional_polar16x16_rvq2",
                         "free_vq256_rvq2",
                         "rvq4x4",
+                        "fractional_lattice_q7q8_b32_p25",
                     )
                     else (
                         "uint8_cartesian_code_per_weight_pair_global_levels"
@@ -2280,7 +2587,6 @@ class MuonPairVQ(torch.optim.Optimizer):
                 requested = requested.add(update.float(), alpha=-lr)
                 current_request = requested - weight.float()
                 if module.error_feedback:
-                    pair_count = module.element_count // module.vector_length
                     if "feedback_levels" not in state:
                         state["feedback_levels"] = torch.zeros(
                             module.feedback_level_shape,
@@ -2288,17 +2594,8 @@ class MuonPairVQ(torch.optim.Optimizer):
                             dtype=torch.float32,
                         )
                     if "feedback_codes" not in state:
-                        feedback_code_shape = (
-                            (2, pair_count)
-                            if module.feedback_codec
-                            in (
-                                "conditional_polar16x16_rvq2",
-                                "free_vq256_rvq2",
-                            )
-                            else (pair_count,)
-                        )
                         state["feedback_codes"] = torch.zeros(
-                            feedback_code_shape,
+                            module.feedback_code_shape,
                             device=weight.device,
                             dtype=torch.uint8,
                         )

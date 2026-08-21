@@ -24,9 +24,12 @@ from examples.nanogpt.muon_pair_vq import (
     _fit_residual_conditional_polar_pair_codec_,
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
+    _fractional_lattice_feedback_layout,
     _nearest_cartesian_codes,
     _nearest_codes_exact,
     _normal_cartesian_codebook,
+    _pack_fixed_width_codes,
+    _unpack_fixed_width_codes,
 )
 from examples.nanogpt.train import pair_vq_model_kwargs
 
@@ -66,6 +69,24 @@ def make_module(
 def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
     return MuonPairVQ(
         [module], lr=0.01, momentum=0.5, weight_decay=0.1, ns_steps=1
+    )
+
+
+def make_fractional_module(*, seed: int = 1721) -> MuonPairVQLinear:
+    return MuonPairVQLinear(
+        16,
+        16,
+        bias=False,
+        stages=1,
+        base_seed=seed,
+        weight_std=0.02,
+        layer_id=2,
+        fast_residual=False,
+        error_feedback=True,
+        feedback_codec="fractional_lattice_q7q8_b32_p25",
+        feedback_output_group_size=0,
+        neighbor_candidates=16,
+        code_refresh_interval=8,
     )
 
 
@@ -179,6 +200,79 @@ def test_block_fht_fractional_lattice_rate_and_monotonic_recovery() -> None:
         base_coordinate_bits=7,
         refinement_fractions=(0.125, 0.5),
         seed=1708,
+    )
+
+
+def test_fixed_width_pack_roundtrip_is_bit_exact() -> None:
+    torch.manual_seed(1710)
+    for bits, count in ((1, 19), (7, 256)):
+        codes = torch.randint(0, 1 << bits, (count,), dtype=torch.uint8)
+        packed = _pack_fixed_width_codes(codes, bits=bits)
+        decoded = _unpack_fixed_width_codes(
+            packed,
+            bits=bits,
+            count=count,
+        )
+        assert torch.equal(decoded, codes)
+        assert packed.numel() == ((count + 7) // 8) * bits
+
+
+def test_fractional_lattice_feedback_uses_exact_packed_rate() -> None:
+    module = make_fractional_module()
+    optimizer = make_optimizer(module)
+    torch.manual_seed(1711)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    state = optimizer.state[module.weight]
+    layout = _fractional_lattice_feedback_layout(module.element_count)
+    assert layout["total_bytes"] == 241
+    assert 8.0 * layout["total_bytes"] / module.element_count == 7.53125
+    assert state["feedback_levels"].shape == (640,)
+    assert state["feedback_levels"].dtype == torch.float32
+    assert state["feedback_codes"].shape == (241,)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == 241 + 640 * 4
+    assert "feedback_center" not in state
+    assert diagnostics["feedback_codec_energy_recovery"] > 0.99
+    assert not any(
+        value.numel() == module.element_count
+        and value.dtype == torch.float32
+        for value in state.values()
+        if isinstance(value, torch.Tensor)
+    )
+
+
+def test_fractional_lattice_feedback_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(1712)
+    module = make_fractional_module(seed=1723)
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_fractional_module(seed=1725)
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(
+        restored_state["feedback_codes"], original_state["feedback_codes"]
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
     )
     assert diagnostics["parseval_relative_error"] < 1e-6
     assert diagnostics["base_active_codes"] == 128
