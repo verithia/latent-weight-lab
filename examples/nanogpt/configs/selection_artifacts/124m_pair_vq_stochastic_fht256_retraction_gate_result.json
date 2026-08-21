@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_retraction_gate_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_failed_preflight_no_endpoint_launched",
+  "classification": "FAIL_FIXED_FHT_DOES_NOT_CONTROL_STOCHASTIC_VARIANCE",
+  "identity": {
+    "execution_commit": "47ea44fa25c75addc64fa3546801a68d071cfd57",
+    "implementation_commit": "b1f58e9ee40f3317dce00f875cb852e99fdd355c",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "cb3ef2579476b6abbfe4c5ab94cfb7a9fb95f3cafba8f3ce0fb98f9563bd0dc5",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_retraction_plan.json",
+    "plan_sha256": "3e1acb16f3bdd44d6c3497383302699dd813547e4889561a07e4566c32d88a0d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_retraction_0p5tpp_lr24e4_mfu.json",
+    "certificate_sha256": "8fa28fc10ce3129dbed8e9674f1c9c9e1d456efbb089ac401b00f56a7ecc4128",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_retraction_0p5tpp_lr24e4_mfu.log",
+    "log_sha256": "86b03c7bb76f3f3978ba142d92c26b6c95a3514d986b7cadeaa4aed660133ee0"
+  },
+  "frozen_gate": {
+    "maximum_weighted_sampling_variance_ratio": 0.10,
+    "minimum_expected_bias_recovery": 0.999,
+    "maximum_boundary_clipped_values": 0,
+    "persistent_training_bytes_exact": 157500864,
+    "minimum_mfu_fraction": 0.20
+  },
+  "measurements": {
+    "weighted_sampling_variance_ratio_by_step": {
+      "0": 0.3683685591029504,
+      "1": 0.8853746897169977,
+      "2": 1.1594622057483488,
+      "3": 1.2368118674935062,
+      "4": 1.2226274908915145,
+      "5": 1.182338078479014,
+      "6": 1.107310974728459,
+      "7": 1.017912291965791,
+      "8": 0.7848068178684293
+    },
+    "maximum_timed_weighted_sampling_variance_ratio": 1.2368118674935062,
+    "minimum_timed_expected_bias_recovery": 0.9999999999999877,
+    "timed_boundary_clipped_values": 0,
+    "persistent_training_bytes": 157500864,
+    "all_logged_losses_finite": true,
+    "tokens_per_second_mean_last_8": 155015.4325,
+    "iteration_ms_mean_last_8": 1691.24875,
+    "optimizer_ms_mean_last_8": 490.935,
+    "peak_allocated_mib": 31659.68,
+    "empirical_bf16_gemm_peak_tflops": 418.00571538796186,
+    "derived_mfu_fraction": 0.2769677837033351,
+    "native_block_fht_extension_loaded": true
+  },
+  "comparison_to_raw_stochastic_preflight": {
+    "raw_step_0_weighted_variance_ratio": 0.363622,
+    "fht256_step_0_weighted_variance_ratio": 0.3683685591029504,
+    "raw_step_8_weighted_variance_ratio": 0.930522,
+    "fht256_step_8_weighted_variance_ratio": 0.7848068178684293,
+    "interpretation": "FHT256 gives only a modest late reduction and no initial reduction; intermediate transformed updates still reach order-one or larger variance. It cannot satisfy the required local stochastic transport accuracy."
+  },
+  "decision": {
+    "endpoint_launched": false,
+    "reason": "The maximum timed variance ratio is 12.368 times the frozen ceiling.",
+    "rejected_followups": [
+      "FHT block-size sweep",
+      "learning-rate sweep",
+      "bit-width sweep",
+      "another fresh-random stochastic endpoint",
+      "model-width or horizon scaling"
+    ],
+    "next_theory_constraint": "A successor must reduce temporal innovation noise, not merely rotate instantaneous residual energy."
+  }
+}
