@@ -9,7 +9,7 @@
   "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
   "mfu_preflight_required": true,
   "mfu_min_fraction": 0.20,
-  "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry1.json",
+  "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry2.json",
   "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
   "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
   "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160",

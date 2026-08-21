@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_sigma_delta_gate160_invalid_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "INVALID_CONFIG_TO_MODEL_PLUMBING",
+  "scientific_result": false,
+  "decision": {
+    "gate_pass_or_fail": null,
+    "endpoint_authorized": false,
+    "reason": "The registered c_proj fast-residual option was parsed and validated but omitted from GPTConfig construction, so the run executed the prior no-fast-c_proj model.",
+    "remediation": "Route all pair-VQ options through one tested pair_vq_model_kwargs boundary, issue a fresh exact-source MFU certificate, then replay the unchanged frozen gate once."
+  },
+  "identity": {
+    "execution_git_commit": "844bad1c394199ed98a42e3aa30a117609e3355b",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
+    "config_sha256": "c23f52b30058ab861e714f237b9a844a7fcf944eaf3e3a94010079019581a98f",
+    "preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry1.json",
+    "preflight_certificate_sha256": "51e9a38d3943093eab4e0304d11dd136bb7cc256f611d4554aed6db15f03c4e3",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_20260821.log",
+    "log_sha256": "8cea6b829254411ea9438e9c1daa7690affeed24e7df1d8477ef521594932a28",
+    "log_bytes": 405089,
+    "started_at": "2026-08-21T21:52:14+08:00",
+    "finished_at": "2026-08-21T21:55:48+08:00",
+    "optimizer_steps": 160,
+    "terminal_validation_ce_not_scientifically_interpretable": 5.5002
+  },
+  "detection_evidence": {
+    "logged_persistent_codec_bytes": 56698560,
+    "expected_persistent_codec_bytes_with_cproj_fast_chart": 70855872,
+    "cproj_fast_code_changes_at_steps_0_8_40_80_120_152": [0, 0, 0, 0, 0, 0],
+    "cfc_fast_code_changes_were_nonzero": true,
+    "interpretation": "The byte count and zero c_proj fast-code activity prove that the candidate option never reached the model. The similar loss and conservation trajectory are therefore expected replays of the scientific parent, not evidence against the repair."
+  },
+  "repair": {
+    "git_commit": "4b384c9",
+    "code_change": "All pair-VQ namespace fields now cross into GPTConfig via pair_vq_model_kwargs; a regression test constructs the model from that exact boundary and checks c_proj.fast_residual=true.",
+    "replay_policy": "Fresh preflight and one gate replay only; no hyperparameter or threshold change."
+  }
+}
