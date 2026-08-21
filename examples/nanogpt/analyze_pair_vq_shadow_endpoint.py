@@ -252,10 +252,12 @@ def install_variant(
         module = modules[name]
         assert isinstance(module, MuonPairVQLinear)
         module.weight.copy_(source)
+        is_c_fc = name == "c_fc" or name.endswith(".c_fc")
+        is_c_proj = name == "c_proj" or name.endswith(".c_proj")
         use = (
             variant == "full_shadow"
-            or (variant == "c_fc_shadow" and name.endswith(".c_fc"))
-            or (variant == "c_proj_shadow" and name.endswith(".c_proj"))
+            or (variant == "c_fc_shadow" and is_c_fc)
+            or (variant == "c_proj_shadow" and is_c_proj)
         )
         if use:
             module.weight.add_(feedback[name])
