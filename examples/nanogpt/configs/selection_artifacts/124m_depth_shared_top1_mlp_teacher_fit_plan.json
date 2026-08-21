@@ -1,0 +1,139 @@
+{
+  "schema_version": "mai_depth_shared_top1_mlp_teacher_fit_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_candidate_values",
+  "scientific_question": "Can four full-width complete MLP functions, shared across depth but selected separately for each token by a layer-aware top-1 router, reproduce the dense 124M teacher's MLP value and input-direction fields at 5TPP?",
+  "causal_basis": {
+    "four_trunk_control": "examples/nanogpt/configs/selection_artifacts/124m_shared_dense_mlp_trunk_groups4_2_2_4_4_5tpp_result.json",
+    "four_trunk_finding": "Four hard depth trunks finish at validation CE 3.8252, +0.1508 behind the matched attention-only model. The model is stable but one static function per depth group is insufficient.",
+    "seven_trunk_control": "examples/nanogpt/configs/selection_artifacts/124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp_result.json",
+    "seven_trunk_finding": "Seven hard trunks improve to CE 3.7442, +0.0698 behind attention-only, but retain only 1.712x MLP compression and miss the strict +0.05 temporal gate.",
+    "private_ridge_control": "examples/nanogpt/configs/selection_artifacts/124m_shared_trunk_private_ridge_teacher_fit_result.json",
+    "private_ridge_finding": "One shared 3072-wide field plus 256 private atoms per layer is healthy but recovers only 0.5059 mean output energy, -0.1220 mean JVP energy, and leaves +3.4904 fixed CE. A narrow additive correction does not supply the missing moving field.",
+    "derivative_weighting_correction": "The preceding private-ridge objective evaluated clean and plus/minus 1-percent perturbations in the same raw output loss. Consequently the derivative signal contributes at perturbation-scale squared and can be numerically dominated by endpoint value. This plan gives normalized central-difference direction loss equal weight to normalized clean-value loss.",
+    "novel_mechanism": "Every active token receives a complete 3072-wide GELU feature/write field. Four learned expert functions are stored globally, while a layer-specific linear router chooses one expert as a function of the current normalized residual state. This relaxes hard depth partitioning without adding a narrow residual branch or a dense temporal error buffer.",
+    "nonduplication": "Earlier conditional complete-atom and multi-atom oracles used four procedural BlockFHT-scale atoms at roughly 210-220x compression. This family uses four learned full-width dense experts at 2.99x MLP compression to test whether dynamic reuse of an unrestricted complete field can close the function gap."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "four_trunk_initialization_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/pro6_mai_v3_124m_shared_dense_mlp_trunk_groups4_2_2_4_4_5tpp/ckpt.pt",
+      "sha256": "29c3497bfacb94a6bb2ed9fda1a14897df94400611b7d5612641af0b7b9bfc95"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "model_width": 768,
+    "hidden_width": 3072,
+    "expert_count": 4,
+    "active_experts_per_token": 1,
+    "initial_layer_to_expert": [0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3],
+    "equation": "F_l(x) = D_out,l sum_e h_e(r_l(x)) W_proj,e GELU(p_l * W_fc,e x), with r_l(x)=A_l LayerNorm(x)+a_l and hard top-1 h in the deployed forward",
+    "routing_gradient": "The soft acquisition stages use softmax routing. The terminal stage and all measurements use hard top-1 forward routing with a straight-through softmax gradient during fitting.",
+    "expert_state": "Four learned bias-free full-width W_fc,e/W_proj,e pairs initialized exactly from the four unique trunks of the sealed {0-1}/{2-3}/{4-7}/{8-11} checkpoint.",
+    "layer_state": "Every layer owns one signed pre-GELU gain vector, one positive residual-output log-gain vector, and a four-way affine router. Router inputs are layer-normalized over the 768 channels.",
+    "dense_mlp_parameters": 56623104,
+    "compact_parameters": 18957360,
+    "compression_ratio": 2.9868665257187708,
+    "parameter_saving_fraction": 0.6652009752061632,
+    "deployed_router_flops_per_token_per_layer": 6144,
+    "dense_mlp_matmul_flops_per_token_per_layer": 9437184,
+    "deployed_extra_fraction_of_dense_mlp_matmul_flops": 0.0006510416666666666,
+    "inference_note": "A grouped dispatch evaluates only the selected expert, so deployed expert GEMM work equals one ordinary dense MLP plus the 0.0651-percent router term. Soft acquisition evaluates all four experts only inside this zero-LM-update ceiling experiment."
+  },
+  "fit_protocol": {
+    "optimizer": "Adam over the parameters enabled by each frozen stage",
+    "weight_decay": 0.0,
+    "learning_rate": 0.0003,
+    "gradient_clip_norm": 10.0,
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260910,
+    "holdout_token_seed": 20260911,
+    "local_perturbation_relative_rms": 0.01,
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "stages": [
+      {
+        "name": "soft_router_only",
+        "steps": 300,
+        "routing": "softmax",
+        "temperature_start": 1.0,
+        "temperature_end": 0.5,
+        "trainable": "router weights and biases only"
+      },
+      {
+        "name": "soft_joint",
+        "steps": 600,
+        "routing": "softmax",
+        "temperature_start": 0.5,
+        "temperature_end": 0.25,
+        "trainable": "experts, routers, layer pre-GELU gains, and layer residual-output gains"
+      },
+      {
+        "name": "hard_top1_joint",
+        "steps": 600,
+        "routing": "hard top-1 forward with straight-through softmax gradient",
+        "temperature_start": 0.25,
+        "temperature_end": 0.25,
+        "trainable": "experts, routers, layer pre-GELU gains, and layer residual-output gains"
+      }
+    ],
+    "initialization": "Expert matrices and layer gains come from the sealed four-trunk checkpoint. Router weights start at zero. Each router bias is +8 for its checkpoint-assigned expert and 0 for the other three, making the initial soft function numerically close to the exact hard four-trunk control without looking at teacher targets.",
+    "objective": "L = L_value + L_direction. L_value is equal-layer/equal-bank normalized MSE on clean dense-teacher MLP outputs. L_direction is separately normalized MSE between candidate and teacher central differences F(x+delta)-F(x-delta). Equal weighting prevents the one-percent perturbation from suppressing the direction term by approximately 1e-4.",
+    "best_state_rule": "Within each stage, preserve the state with the smallest fit objective only. Stages are a single deterministic warm-start path; no state is selected using holdout output, JVP, CE, occupancy, or wall time.",
+    "parameter_clamps": "Layer pre-GELU gains are clamped to [-4,4], residual-output log gains to [-4,4], and router logits are not clamped. Expert matrices are unconstrained.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "terminal_routing": "hard top-1 grouped dispatch",
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260912,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "fit and holdout value/direction objectives after each stage",
+      "heldout output and analytic input-JVP recovery by layer and state bank",
+      "hard top-1 expert occupancy by layer and state bank",
+      "fixed-checkpoint validation CE after router-only and terminal joint stages",
+      "parameter, deployed FLOP, peak-memory, and wall-time accounting"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "The terminal stage is finite and either ends at total normalized fit objective <=0.5 or reduces its initial total objective by at least 25 percent."
+  },
+  "decision_rule": {
+    "router_only_pass": "Dynamic allocation of the four already-trained fields is sufficient. Implement only the routed four-expert family and MFU-gate a 124M 0.5TPP run.",
+    "joint_pass": "Dynamic allocation plus co-adaptation of four full-width fields is sufficient. Implement only the routed four-expert family and MFU-gate a 124M 0.5TPP run.",
+    "healthy_fail": "Reject four full-width top-1 shared experts at 2.99x. Do not sweep expert count, router width, temperature, LR, optimizer, or seed. Use the residual decomposition to decide between a finer global atom pool and a locally generated full-width field.",
+    "optimization_inconclusive": "Permit only an offline optimizer-geometry repair of this exact oracle; do not infer representational failure or launch LM training."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update oracle after focused tests and a measured runtime/VRAM preflight.",
+    "not_allowed": [
+      "language-model training before a functional gate passes",
+      "model-size scaling",
+      "expert-count, temperature, router, learning-rate, optimizer, seed, activation, or regularizer sweeps",
+      "using holdout measurements to alter the staged path",
+      "claiming the paper's 200-500x trainable-parameter compression"
+    ],
+    "callback_policy": "Foreground-poll if the measured complete protocol is at most five minutes; otherwise launch one verified @Codex watchdog with terminal/failure callbacks and the standard action prompt."
+  }
+}
