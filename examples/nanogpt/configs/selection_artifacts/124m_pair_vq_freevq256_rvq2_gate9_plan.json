@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_pair_vq_freevq256_rvq2_gate9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Can two additive unconstrained Euclidean 256x2 codebooks remove the direction ceiling of the rejected conditional-polar two-byte carry while retaining one byte per weight of compact temporal state and acceptable training efficiency?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_rvq2_residual_source_probe_result.json",
+    "result_sha256": "11f004f98363cae46ef106beb87b74d39026b64a62d4c2064b4bee5fb069fdfe",
+    "classification": "REJECT_TWO_STAGE_CONDITIONAL_POLAR_FAMILY",
+    "observed_residual_stage_recovery_step0": 0.9798142937,
+    "observed_residual_stage_recovery_step8": 0.9804942155,
+    "observed_angle_count_per_stage": 16,
+    "observed_joint_code_entropy_bits_step8": 7.1502,
+    "reason": "The live residual distortion was distributed rather than a Lloyd, occupancy, angular-only, radial-only, center, or tail defect. All 256 conditional-polar states still occupy only 16 directions, so the successor must free the directions without increasing per-weight temporal bytes."
+  },
+  "representation": {
+    "formula": "feedback_pair_hat = codebook_stage1[code_stage1] + codebook_stage2[code_stage2]",
+    "codebooks": "two layer-private free 256x2 Euclidean FP32 tables per matrix",
+    "codes": "two uint8 codes per weight pair",
+    "persistent_temporal_state_bytes_per_weight": 1.0,
+    "metadata_bytes_per_matrix": 4096,
+    "metadata_increase_vs_conditional_polar_rvq2_bytes_per_matrix": 2032,
+    "metadata_increase_across_24_matrices_bytes": 48768,
+    "dense_master_weight": false,
+    "dense_momentum": false,
+    "ambient_error_residual": false,
+    "inference_state_change": "none",
+    "training_fit": "deterministic covariance-matched exact initialization; thereafter 2x2 covariance transport, local search over 16 nearest prior-code neighbors, and two scatter-mean centroid updates per stage",
+    "probe_only_counterfactual": "exact same-codebook residual-stage assignment at optimizer steps 0 and 8"
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_freevq256_rvq2_gate9.json",
+    "config_sha256": "e16d21feb110127c3dad7ed63adffc8096b4c1120f1434e6f060b6485971b4c5",
+    "implementation_commit": "5cf2bef74561b058642fea27cc8f5b183a3d7e21",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "selection_endpoint": false
+  },
+  "exact_schedule": {
+    "scientific_parent": "same 124M QK-only attention plus compact full-MLP parent",
+    "warmup_iters": 9,
+    "lr_decay_iters": 238,
+    "learning_rate": 0.0024,
+    "min_lr": 0.00024,
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "tokens_per_optimizer_step": 262144,
+    "reason": "Only the compact temporal representation may change in the causal gate."
+  },
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "required_matrices_per_step": 24,
+    "candidate_mfu_min_fraction": 0.20,
+    "candidate_optimizer_fraction_max": 0.30,
+    "stage_active_codes_min": 192,
+    "stage_code_entropy_bits_min": 6.5
+  },
+  "frozen_scientific_gates": {
+    "residual_stage_energy_weighted_recovery_min_each_probe": 0.985,
+    "residual_stage_every_matrix_recovery_min_each_probe": 0.98,
+    "full_feedback_energy_weighted_recovery_min_each_probe": 0.99975,
+    "exact_same_codebook_must_not_underperform_local": true,
+    "local_assignment_full_recovery_gap_max_each_probe": 0.00025,
+    "conserved_requested_step_energy_weighted_recovery_min_each_probe": 0.9999,
+    "conserved_requested_step_every_matrix_recovery_min_each_probe": 0.999
+  },
+  "aggregation": {
+    "residual_stage_recovery": "feedback-residual-target-energy weighted across all 24 matrices at each probe, with every-matrix minimum also enforced",
+    "full_feedback_recovery": "feedback-target-energy weighted across all 24 matrices at each probe",
+    "local_search_regret": "feedback-target-energy weighted exact-same-codebook full recovery minus local full recovery",
+    "conservation": "current-request-energy weighted across all 24 matrices at each probe, with every-matrix minimum also enforced",
+    "occupancy_and_entropy": "minimum over both stages, all matrices, and both probe steps"
+  },
+  "decision_policy": {
+    "all_gates_pass": "Authorize only a 238-update exact-schedule late-decay direction gate for this same representation. Do not authorize an LM endpoint, model-size scale-up, bit-rate sweep, or learning-rate sweep yet.",
+    "exact_codec_passes_but_local_search_regret_fails": "Keep the two-byte free-Euclidean representation and change only the local search topology or cadence, then repeat this 9-update gate.",
+    "free_exact_recovery_fails": "Reject two-dimensional two-stage free pair VQ and derive a higher-dimensional lattice, trellis, or product code at the same one-byte-per-weight state budget before any training endpoint.",
+    "performance_gate_fails": "Optimize the exact same candidate implementation until MFU and optimizer-overhead gates pass; do not run the scientific gate.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "exact-config foreground real-training preflight with at least 20% MFU and at most 30% optimizer time",
+    "scientific_run": "foreground-polled because nine updates are expected to finish within five minutes; attach a persistent @Codex watchdog immediately only if observed runtime exceeds five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
