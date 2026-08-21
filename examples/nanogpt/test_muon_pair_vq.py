@@ -1368,6 +1368,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
         "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),
+        "block_fht_mlp_pair_vq_feedback_residual_probe_layers": (),
         "block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations": (),
         "block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes": (),
         "block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes": (),
