@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "theory_preregistered_before_performance_preflight_or_execution",
+  "scientific_question": "Can the measured radial-heavy carry source clear the compact temporal-direction gate when the same eight-bit code reallocates one bit from angle to conditional radius?",
+  "causal_basis": {
+    "measurement_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_conditional_polar_distortion_probe16_result.json",
+    "measurement_result_sha256": "2d303dd1ce352f15a98f538037a519ef729bd53d228e79e5e4b154857e64bb3c",
+    "observation": "At real trajectory step 8, radial quantization contributes 0.037332 distortion and 92.45% of total codec error, while angular quantization contributes only 0.003050. All 256 codes are active and mean joint entropy is 7.808 bits.",
+    "mechanism": "Use 16 fixed angular sectors and 16 Lloyd-fitted radii per sector. The packed code remains radius_index*16+angle_index, exactly one uint8 per pair. Tail-aware geometric initialization spans 0.2*RMS through the observed per-sector maximum so three Lloyd passes can fit the measured heavy tail without violating the optimizer-time gate.",
+    "rate_distortion_projection": "Holding measured angular error fixed and quartering eight-bin radial error predicts total distortion approximately 0.012383 before accounting for the coarser angular grid. This is below the frozen 0.02 target and is the only measurement-authorized bit reallocation.",
+    "excluded_moves": [
+      "increase code bits",
+      "dense ambient carry or master weight",
+      "change the base pair-VQ weight chart",
+      "change attention, optimizer, learning rate, seeds, or data order",
+      "8-angle x 32-radius allocation because projected angular distortion alone is too large",
+      "larger model or horizon",
+      "endpoint before the gate passes"
+    ]
+  },
+  "candidate": {
+    "name": "pair_vq_cproj_fast_residual_plus_conditional_polar16x16_sigma_delta",
+    "single_change": "Reallocate the existing eight-bit conditional-polar carry from 32 angles x 8 radii to 16 angles x 16 radii.",
+    "decoder": "feedback = center + radius[angle, radial_code] * fixed_unit_direction[angle]",
+    "persistent_code": "one uint8 per weight pair, unchanged",
+    "metadata_per_matrix": "one FP32 16x16 radial table plus one FP32 two-vector center = 1032 bytes, unchanged from 32x8",
+    "assignment_cost": "one exact angular bin, 15 radial comparisons, one per-sector max reduction for initialization, and three vectorized Lloyd reductions",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false,
+    "inference_change": "none; temporal carry is discarded"
+  },
+  "accounting": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99265920,
+    "dense_bf16_matrix_bytes": 113246208,
+    "dense_fp32_weight_plus_fp32_muon_bytes": 452984832,
+    "inference_model_state_reduction_x": 1.5982614397858232,
+    "training_state_reduction_x": 4.563346937196573,
+    "extra_dense_gemm_flops": 0,
+    "extra_codec_work": "same 256 FP32 metadata values and same one-byte pair code as 32x8; seven additional radial comparisons plus a per-sector maximum reduction at each eight-step refresh; exact-host performance-gated"
+  },
+  "frozen_gate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_gate160.json",
+    "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_gate160_mfu.json",
+    "optimizer_steps": 160,
+    "feedback_codec_gate_steps": [8, 40, 80, 120, 152],
+    "aggregate_conserved_requested_step_energy_recovery_min": 0.95,
+    "every_matrix_conserved_requested_step_energy_recovery_min": 0.8,
+    "aggregate_feedback_codec_energy_recovery_min": 0.98,
+    "every_matrix_feedback_codec_energy_recovery_min": 0.95,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_cproj_fast_code_changes_min": 1,
+    "mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "expected_duration": "under five minutes on PRO6 and therefore foreground-polled; attach a persistent watchdog immediately if observed duration exceeds five minutes"
+  },
+  "decision_policy": {
+    "pass": "Authorize exactly one matched 124M/0.5TPP endpoint against the sealed QK-only dense-MLP parent. Do not scale up.",
+    "codec_fail": "Reject the frozen eight-bit polar family at this matrix-global factorization; use the logged angular/radial decomposition to choose a structurally different compact carry, not another blind bit split.",
+    "systems_fail": "Optimize only this representation's implementation, then repeat the same frozen gate.",
+    "endpoint_fail_after_gate_pass": "Keep the representation fixed and localize objective mismatch with fixed-checkpoint loss and functional probes."
+  }
+}
