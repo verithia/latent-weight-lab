@@ -1,0 +1,36 @@
+{
+  "schema_version": "mai_pair_vq_residual_codec_topology_probe_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "SELECT_RESIDUAL_CONDITIONAL_POLAR16X16",
+  "question": "Which second byte best encodes the residual left by a conditional-polar 16x16 coarse byte on the frozen heavy-tail pair source?",
+  "source": {
+    "seed": 172,
+    "pairs": 65536,
+    "angles": 16,
+    "radius_distribution": "exp(0.9 * Normal(0,1))",
+    "additive_coordinate_noise_std": 0.01
+  },
+  "measurement": {
+    "coarse_residual_energy": 1830.1912841796875,
+    "candidates": [
+      {"codec": "conditional_polar16x16", "residual_energy_recovery": 0.9925403434607866, "remaining_residual_energy": 13.65259838104248},
+      {"codec": "conditional_polar32x8", "residual_energy_recovery": 0.9344823645843137, "remaining_residual_energy": 119.90980529785156},
+      {"codec": "cartesian4x4", "residual_energy_recovery": 0.8933326778020062, "remaining_residual_energy": 195.2216033935547}
+    ]
+  },
+  "decision": {
+    "selected": "conditional_polar16x16",
+    "rejected": ["conditional_polar32x8", "cartesian4x4"],
+    "reason": "Only residual conditional-polar 16x16 clears the frozen 95-percent residual-recovery threshold; it also exceeds 99 percent. This is topology selection evidence, not a language-model endpoint result."
+  },
+  "implementation": {
+    "codec_name": "conditional_polar16x16_rvq2",
+    "git_commit": "53f17eb863548b1200742b452e9052ad543c7795",
+    "focused_tests": "24 passed",
+    "persistent_codes": "two uint8 codes per weight pair",
+    "metadata_bytes_per_matrix": 2064,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  }
+}

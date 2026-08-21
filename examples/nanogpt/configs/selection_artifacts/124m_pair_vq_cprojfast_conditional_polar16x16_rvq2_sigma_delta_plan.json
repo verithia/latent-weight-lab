@@ -1,0 +1,70 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar16x16_rvq2_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does a second compact residual byte preserve late current-step direction under the exact 124M/0.5TPP optimizer schedule that defeated the one-byte carry?",
+  "causal_chain": {
+    "failed_endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_0p5tpp_result.json",
+    "failed_endpoint_result_sha256": "52036668a36a487167229b9093c3f3e2e9340a02d3164beccb34670efd542b61",
+    "observed_failure": "At step 232 the one-byte codec recovered 0.994092 of accumulated-feedback energy but only conserved 0.472619 of current-request energy because accumulated feedback carried 89.27 times the current-request energy.",
+    "topology_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_residual_codec_topology_probe_result.json",
+    "topology_result_sha256": "a5e47e67e043561c81b3206adceb0ecc657cdd1383020a53cbf8316c345a6e05",
+    "selected_residual_recovery": 0.9925403434607866,
+    "predicted_step232_current_request_error_fraction": 0.003934
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_rvq2_sigmadelta_gate238.json",
+    "config_sha256": "9763e56fbf57eeb00672b71c3b736cde11b6803d370890fcd76d7720d80eb4e7",
+    "implementation_commit": "53f17eb863548b1200742b452e9052ad543c7795",
+    "slow_weight_state": "two additive pair-VQ stages for c_fc and one for c_proj",
+    "fast_weight_state": "freely recoded Cartesian pair lattice on c_fc and c_proj",
+    "temporal_state": "two additive uint8 conditional-polar16x16 codes per weight pair plus 2064 FP32 metadata bytes per matrix",
+    "attention_control": "only QK is mapped; V and attention output projection remain dense",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "exact_schedule_correction": {
+    "warmup_iters": 9,
+    "lr_decay_iters": 238,
+    "max_iters": 238,
+    "reason": "The prior 160-step gate used warmup=23 and decay=2373, so it did not test the fast late decay that exposed temporal-resolution failure. This gate exactly matches the failed endpoint schedule and extends through step 232."
+  },
+  "frozen_gates": {
+    "clean_exit_and_238_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "selected_refresh_steps": [0, 8, 40, 80, 120, 160, 200, 232],
+    "aggregate_current_step_conservation_min": 0.95,
+    "every_matrix_current_step_conservation_min": 0.80,
+    "aggregate_accumulated_feedback_recovery_min": 0.999,
+    "every_matrix_accumulated_feedback_recovery_min": 0.995,
+    "residual_stage_recovery_min": 0.98,
+    "residual_stage_active_codes_min": 128,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_cproj_fast_code_changes_min": 1,
+    "candidate_mfu_min_fraction": 0.20,
+    "candidate_optimizer_fraction_max": 0.30
+  },
+  "accounting": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 127602240,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 3.54998,
+    "incremental_training_bytes_vs_one_byte_carry": 28336320,
+    "inference_flops": "unchanged materialized dense MLP",
+    "extra_dense_gemm_flops": 0,
+    "extra_optimizer_work": "one additional matrix-global conditional-polar fit and decode per pair per update; exact wall overhead is gated rather than estimated"
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "exact_config_preflight": "foreground-polled and must pass MFU and optimizer-overhead gates before the scientific run",
+    "scientific_run": "persistent @Codex 20/50/100 plus failure/stall watchdog with a 90-minute heartbeat reset by delivered progress",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test"
+  },
+  "decision_policy": {
+    "pass": "Authorize exactly one matched 124M/0.5TPP endpoint with the same frozen parent and evaluation protocol. Do not scale model size or horizon.",
+    "fail": "Reject two-byte temporal closure and analyze the exact residual/current-request trajectory. Do not sweep bit rate, learning rate, or model size.",
+    "automatic_rerun": false
+  }
+}
