@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_shared_mlp_layer_gradient_conflict_sealed_result_v1",
+  "classification": "AUTHORIZE_NONUNIFORM_FOUR_TRUNKS",
+  "source_commit": "08dabc092b13adcc590877303d5012e65e6a4d96",
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_layer_gradient_conflict_20260821/result.json",
+    "sha256": "2e526e23a97cb05c185cc15a9b3dc0f83ce2556100760f4906eed24f7fc92fc8"
+  },
+  "checkpoint_sha256": "468f2f7c43264599d7880ceffe20166a4f8f1dfa4ce8b7d1ecffee4cf0eaea83",
+  "measurement": {
+    "optimizer_updates": 0,
+    "tokens": 32768,
+    "wall_seconds": 2.144038677215576,
+    "maximum_cuda_memory_bytes": 8934794752,
+    "mean_task_loss": 5.48688006401062
+  },
+  "equal_four_layer_groups": {
+    "combined_mean_recovery": 0.7269699698339477,
+    "combined_minimum_recovery": 0.41197644020691765,
+    "combined_per_group_recovery": [
+      0.41197644020691765,
+      0.8475941270307606,
+      0.9213393422641647
+    ]
+  },
+  "equal_three_layer_groups": {
+    "combined_mean_recovery": 0.6507785793346159,
+    "combined_minimum_recovery": 0.4807162402297205,
+    "decision": "reject because the boundaries cut across the measured four-layer middle and late phases"
+  },
+  "equal_two_layer_groups": {
+    "combined_mean_recovery": 0.9006793620644867,
+    "combined_minimum_recovery": 0.6064027425062157
+  },
+  "selected_partition": {
+    "boundaries": [2, 4, 8, 12],
+    "layers": [[0, 1], [2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+    "combined_mean_recovery": 0.8214581232148271,
+    "combined_minimum_recovery": 0.6064027425062157,
+    "combined_per_group_recovery": [
+      0.6064027425062157,
+      0.9104962810581675,
+      0.8475941270307606,
+      0.9213393422641647
+    ],
+    "c_fc_mean_recovery": 0.8072399110977313,
+    "c_fc_minimum_recovery": 0.5760010484104341,
+    "c_proj_mean_recovery": 0.8221668918981244,
+    "c_proj_minimum_recovery": 0.6078507796356578
+  },
+  "decision": "Split only the incoherent early four-layer phase into two pairs. Preserve four-layer sharing in the coherent middle and late phases. This selects four nonuniform trunks instead of an ungrounded uniform four- or six-trunk sweep."
+}
