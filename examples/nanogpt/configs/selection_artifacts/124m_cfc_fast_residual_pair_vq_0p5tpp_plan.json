@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_cfc_fast_residual_pair_vq_0p5tpp_plan_v1",
+  "recorded_at": "2026-08-21",
+  "question": "Does the compact full-MLP representation that passed both finite capacity and infinitesimal projected-Muon direction gates preserve the matched QK-only dense-MLP parent's 124M/0.5TPP loss?",
+  "theory": {
+    "slow_state_role": "two additive pair-VQ stages on c_fc and one on c_proj supply the finite endpoint/function class",
+    "fast_state_role": "one freely recoded Cartesian pair lattice on c_fc resolves small optimizer displacements without a dense residual buffer",
+    "capacity_inheritance": "zero fast levels make the new class a strict representational superset of the fixed-checkpoint capacity-qualified slow representation",
+    "attention_control": "only QK is mapped; V and attention output projection remain dense so this experiment isolates the MLP replacement"
+  },
+  "prerequisites": {
+    "capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_residual_pair_vq_mlp_result.json",
+    "fast_direction_and_performance_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_gate40_result.json",
+    "fast_direction_and_performance_result_sha256": "2d2dc2620b0ea8fede42056a5aa5b987b9112595f03d39f130d778d772843295"
+  },
+  "runs": [
+    {
+      "role": "matched_parent",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json"
+    },
+    {
+      "role": "compact_full_mlp_candidate",
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fastresidual_0p5tpp_lr24e4.json"
+    }
+  ],
+  "frozen_gates": {
+    "both_runs_terminal_clean": true,
+    "fixed_eval_protocol_equal": true,
+    "terminal_candidate_minus_parent_ce_max": 0.05,
+    "all_fixed_evaluations_finite": true,
+    "candidate_mfu_min_fraction": 0.20,
+    "candidate_optimizer_fraction_max": 0.30,
+    "larger_model_or_horizon_authorized_on_pass": false
+  },
+  "accounting": {
+    "dense_mlp_parameter_bytes_bf16": 113246208,
+    "compact_mlp_persistent_model_bytes": 56698560,
+    "model_state_reduction_x": 1.99734,
+    "dense_mlp_training_matrix_bytes_fp32_weight_plus_fp32_muon": 452984832,
+    "compact_mlp_persistent_training_matrix_bytes": 56772288,
+    "training_state_reduction_x": 7.97898,
+    "continuous_compact_coordinates": 18816,
+    "continuous_coordinate_reduction_x": 3009.31,
+    "inference_flops": "unchanged materialized dense MLP",
+    "optimizer_extra_work": "slow pair-VQ projection plus one global c_fc fast-residual recode per optimizer step"
+  },
+  "decision_policy": "Run the matched parent first, then the compact candidate. A candidate failure triggers analysis of the loss curve and projected-direction trajectory; it does not authorize a parameter or learning-rate sweep."
+}
