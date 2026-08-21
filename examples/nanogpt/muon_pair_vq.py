@@ -295,6 +295,124 @@ def _fit_polar_pair_codec_(
     return int((new_codes != old_codes).sum())
 
 
+@torch.no_grad()
+def _nearest_small_vector_codes(
+    vectors: torch.Tensor, codebook: torch.Tensor
+) -> torch.Tensor:
+    """Exact nearest assignment to a small learned two-vector codebook."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("RVQ pair values must have shape (pairs, 2)")
+    if codebook.ndim != 2 or codebook.shape[1] != 2:
+        raise ValueError("RVQ codebook must have shape (entries, 2)")
+    parts = []
+    code_energy = codebook.square().sum(dim=1)
+    for start in range(0, vectors.shape[0], 65536):
+        stop = min(start + 65536, vectors.shape[0])
+        values = vectors[start:stop]
+        distances = (
+            values.square().sum(dim=1, keepdim=True)
+            + code_energy[None, :]
+            - 2.0 * values @ codebook.T
+        )
+        parts.append(distances.argmin(dim=1))
+    return torch.cat(parts)
+
+
+@torch.no_grad()
+def _initialize_rvq_codebook_(
+    vectors: torch.Tensor, codebook: torch.Tensor
+) -> None:
+    """Initialize 16 joint atoms from a covariance-matched 4x4 PCA grid."""
+    if tuple(codebook.shape) != (16, 2):
+        raise ValueError("RVQ stage codebook must have shape (16, 2)")
+    covariance = vectors.T @ vectors / max(vectors.shape[0], 1)
+    eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
+    scales = eigenvalues.clamp_min(0.0).sqrt()
+    quantiles = torch.tensor(
+        [-1.15034938, -0.31863936, 0.31863936, 1.15034938],
+        device=vectors.device,
+        dtype=torch.float32,
+    )
+    first, second = torch.meshgrid(quantiles, quantiles, indexing="ij")
+    principal = torch.stack((first.reshape(-1), second.reshape(-1)), dim=1)
+    codebook.copy_((principal * scales) @ eigenvectors.T)
+
+
+@torch.no_grad()
+def _lloyd_vector_stage_(
+    vectors: torch.Tensor,
+    codebook: torch.Tensor,
+    *,
+    iterations: int,
+) -> torch.Tensor:
+    assignments = torch.zeros(
+        vectors.shape[0], device=vectors.device, dtype=torch.long
+    )
+    for _iteration in range(iterations):
+        assignments = _nearest_small_vector_codes(vectors, codebook)
+        sums = torch.zeros_like(codebook)
+        sums.index_add_(0, assignments, vectors)
+        counts = torch.bincount(assignments, minlength=codebook.shape[0])
+        live = counts > 0
+        codebook[live] = sums[live] / counts[live, None]
+    return assignments
+
+
+def _decode_rvq_pair_codec(
+    codebooks: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> torch.Tensor:
+    if tuple(codebooks.shape) != (2, 16, 2):
+        raise ValueError("RVQ codebooks must have shape (2, 16, 2)")
+    if tuple(center.shape) != (2,):
+        raise ValueError("RVQ center must have shape (2,)")
+    selected = codes.long()
+    return (
+        center
+        + codebooks[0].index_select(0, selected // 16)
+        + codebooks[1].index_select(0, selected % 16)
+    )
+
+
+@torch.no_grad()
+def _fit_rvq_pair_codec_(
+    vectors: torch.Tensor,
+    codebooks: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> int:
+    """Fit two learned four-bit 2D residual-vector stages."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("RVQ pair values must have shape (pairs, 2)")
+    if tuple(codebooks.shape) != (2, 16, 2):
+        raise ValueError("RVQ codebooks must have shape (2, 16, 2)")
+    if tuple(center.shape) != (2,):
+        raise ValueError("RVQ center must have shape (2,)")
+    if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
+        raise ValueError("RVQ pair codes have the wrong shape")
+
+    old_codes = codes.clone()
+    fitted_center = vectors.mean(dim=0)
+    centered = vectors - fitted_center
+    if not bool(codebooks.abs().sum() > 0):
+        _initialize_rvq_codebook_(centered, codebooks[0])
+        first = _lloyd_vector_stage_(centered, codebooks[0], iterations=2)
+        residual = centered - codebooks[0].index_select(0, first)
+        _initialize_rvq_codebook_(residual, codebooks[1])
+        _lloyd_vector_stage_(residual, codebooks[1], iterations=2)
+
+    second = codes.long() % 16
+    first_target = centered - codebooks[1].index_select(0, second)
+    first = _lloyd_vector_stage_(first_target, codebooks[0], iterations=1)
+    second_target = centered - codebooks[0].index_select(0, first)
+    second = _lloyd_vector_stage_(second_target, codebooks[1], iterations=1)
+    new_codes = (first * 16 + second).to(torch.uint8)
+    center.copy_(fitted_center)
+    codes.copy_(new_codes)
+    return int((new_codes != old_codes).sum())
+
+
 class MuonPairVQLinear(nn.Module):
     """Linear layer whose only persistent matrix state is pair VQ."""
 
@@ -337,13 +455,17 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ stages must be one or two")
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
-        if self.feedback_codec not in ("cartesian4x4", "polar32x8"):
+        if self.feedback_codec not in (
+            "cartesian4x4",
+            "polar32x8",
+            "rvq4x4",
+        ):
             raise ValueError("unknown pair-VQ feedback codec")
         if (
-            self.feedback_codec == "polar32x8"
+            self.feedback_codec in ("polar32x8", "rvq4x4")
             and self.feedback_output_group_size != 0
         ):
-            raise ValueError("polar pair feedback currently requires matrix-global levels")
+            raise ValueError("joint pair feedback currently requires matrix-global levels")
         if self.feedback_output_group_size and (
             self.out_features % self.feedback_output_group_size
             or self.in_features % self.vector_length
@@ -432,6 +554,8 @@ class MuonPairVQLinear(nn.Module):
         pair_codes = self.element_count // self.vector_length
         if self.feedback_codec == "polar32x8":
             metadata_values = 8 + 2
+        elif self.feedback_codec == "rvq4x4":
+            metadata_values = 2 * 16 * 2 + 2
         else:
             metadata_values = self.feedback_group_count * 2 * 16
         level_bytes = metadata_values * torch.tensor(
@@ -457,13 +581,15 @@ class MuonPairVQLinear(nn.Module):
     def feedback_level_shape(self) -> tuple[int, ...]:
         if self.feedback_codec == "polar32x8":
             return (8,)
+        if self.feedback_codec == "rvq4x4":
+            return (2, 16, 2)
         if self.feedback_output_group_size == 0:
             return (2, 16)
         return (self.feedback_group_count, 2, 16)
 
     @property
     def feedback_center_shape(self) -> tuple[int, ...] | None:
-        if self.feedback_codec == "polar32x8":
+        if self.feedback_codec in ("polar32x8", "rvq4x4"):
             return (2,)
         return None
 
@@ -477,6 +603,10 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("polar pair feedback requires a center")
             return _decode_polar_pair_codec(levels, center, codes)
+        if self.feedback_codec == "rvq4x4":
+            if center is None:
+                raise ValueError("RVQ pair feedback requires a center")
+            return _decode_rvq_pair_codec(levels, center, codes)
         if self.feedback_output_group_size == 0:
             return _decode_cartesian_pair_codec(levels, codes)
         return _decode_grouped_cartesian_pair_codec(
@@ -497,6 +627,10 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("polar pair feedback requires a center")
             return _fit_polar_pair_codec_(vectors, levels, center, codes)
+        if self.feedback_codec == "rvq4x4":
+            if center is None:
+                raise ValueError("RVQ pair feedback requires a center")
+            return _fit_rvq_pair_codec_(vectors, levels, center, codes)
         if self.feedback_output_group_size == 0:
             return _fit_cartesian_pair_codec_(vectors, levels, codes)
         return _fit_grouped_cartesian_pair_codec_(
@@ -537,8 +671,12 @@ class MuonPairVQLinear(nn.Module):
             "dense_ambient_error_buffer": "disabled",
             "compact_temporal_carry": (
                 (
-                    "uint8_polar32x8_code_per_weight_pair"
-                    if self.feedback_codec == "polar32x8"
+                    (
+                        "uint8_polar32x8_code_per_weight_pair"
+                        if self.feedback_codec == "polar32x8"
+                        else "uint8_rvq4x4_code_per_weight_pair"
+                    )
+                    if self.feedback_codec in ("polar32x8", "rvq4x4")
                     else (
                         "uint8_cartesian_code_per_weight_pair_global_levels"
                         if self.feedback_output_group_size == 0

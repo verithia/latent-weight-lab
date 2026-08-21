@@ -272,6 +272,78 @@ def test_polar_feedback_resume_is_bit_exact_for_next_step() -> None:
     )
 
 
+def test_rvq_feedback_learns_joint_pair_atoms_at_same_code_rate() -> None:
+    torch.manual_seed(167)
+    module = make_module(
+        stages=1,
+        error_feedback=True,
+        feedback_codec="rvq4x4",
+    )
+    optimizer = make_optimizer(module)
+    diagnostics = None
+    for _step in range(12):
+        base = torch.randn(module.out_features, module.in_features // 2, 1)
+        paired = torch.cat((base, 0.7 * base + 0.2 * torch.randn_like(base)), dim=2)
+        module.weight.grad = 1e-3 * paired.reshape_as(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()[0]
+    assert diagnostics is not None
+    assert diagnostics["feedback_codec_energy_recovery"] > 0.98
+    state = optimizer.state[module.weight]
+    assert state["feedback_levels"].shape == (2, 16, 2)
+    assert state["feedback_center"].shape == (2,)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == module.element_count // 2 + 264
+    assert all(value.numel() != module.element_count for value in state.values())
+
+
+def test_rvq_feedback_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(173)
+    module = make_module(
+        stages=1,
+        seed=179,
+        error_feedback=True,
+        feedback_codec="rvq4x4",
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(
+        stages=1,
+        seed=181,
+        error_feedback=True,
+        feedback_codec="rvq4x4",
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(restored_state["feedback_codes"], original_state["feedback_codes"])
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_center"],
+        original_state["feedback_center"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
 def test_model_and_optimizer_resume_are_bit_exact_for_next_step() -> None:
     torch.manual_seed(103)
     module = make_module(seed=107)

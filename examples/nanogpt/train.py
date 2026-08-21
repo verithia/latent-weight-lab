@@ -2230,6 +2230,7 @@ def parse_args() -> argparse.Namespace:
     if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
         "cartesian4x4",
         "polar32x8",
+        "rvq4x4",
     ):
         raise ValueError("unknown pair-VQ feedback codec")
     if (
@@ -2243,18 +2244,18 @@ def parse_args() -> argparse.Namespace:
             "grouped pair-VQ feedback requires pair VQ and error feedback"
         )
     if (
-        namespace.block_fht_mlp_pair_vq_feedback_codec == "polar32x8"
+        namespace.block_fht_mlp_pair_vq_feedback_codec in ("polar32x8", "rvq4x4")
         and not (
             namespace.block_fht_mlp_pair_vq
             and namespace.block_fht_mlp_pair_vq_error_feedback
         )
     ):
-        raise ValueError("polar pair feedback requires pair VQ and error feedback")
+        raise ValueError("joint pair feedback requires pair VQ and error feedback")
     if (
-        namespace.block_fht_mlp_pair_vq_feedback_codec == "polar32x8"
+        namespace.block_fht_mlp_pair_vq_feedback_codec in ("polar32x8", "rvq4x4")
         and namespace.block_fht_mlp_pair_vq_feedback_output_group_size
     ):
-        raise ValueError("polar pair feedback does not use output groups")
+        raise ValueError("joint pair feedback does not use output groups")
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
