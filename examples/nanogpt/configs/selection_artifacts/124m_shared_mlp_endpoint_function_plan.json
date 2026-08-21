@@ -1,0 +1,70 @@
+{
+  "schema_version": "mai_shared_mlp_endpoint_function_plan_v1",
+  "scientific_question": "The seven-trunk endpoint passes the local common-gradient gate but remains 0.0698 CE behind its attention-only dense-MLP control. Is the residual primarily an MLP endpoint-value mismatch, an input-Jacobian mismatch, or upstream/temporal compounding?",
+  "candidate": {
+    "run": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp",
+    "checkpoint_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp/scientific/ckpt.pt",
+    "checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "terminal_validation_cross_entropy": 3.7442
+  },
+  "teacher": {
+    "run": "y400_mai_v3_124m_fullattn_5tpp_top1_mult1p00_provisional",
+    "role": "matched full-attention control with dense layer-private MLPs",
+    "checkpoint_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+    "checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "terminal_validation_cross_entropy": 3.6744
+  },
+  "identity_checks": {
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "required_equal_core_config_fields": [
+      "n_layer",
+      "n_head",
+      "n_embd",
+      "block_size",
+      "vocab_size",
+      "bias"
+    ]
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "fitted_parameters": 0,
+    "split": "validation",
+    "seed": 20260821,
+    "batch_size": 4,
+    "batches": 2,
+    "sample_cap_per_layer_per_bank": 512,
+    "jvp_directions": 4,
+    "state_banks": [
+      "candidate MLP inputs collected from the candidate forward",
+      "teacher MLP inputs collected from the teacher forward"
+    ],
+    "comparison": "evaluate both MLPs on both input banks; teacher outputs and teacher input-JVPs are the targets"
+  },
+  "frozen_gate": {
+    "output_mean_explained_energy_minimum": 0.9,
+    "output_worst_layer_bank_explained_energy_minimum": 0.75,
+    "jvp_mean_explained_energy_minimum": 0.8,
+    "jvp_worst_layer_bank_explained_energy_minimum": 0.5,
+    "classification_order": [
+      "if the output gate fails: ENDPOINT_VALUE_MISMATCH",
+      "else if the input-JVP gate fails: INPUT_JACOBIAN_MISMATCH",
+      "else: UPSTREAM_OR_TEMPORAL_COMPOUNDING"
+    ]
+  },
+  "theory": {
+    "reason": "common-gradient recovery tests whether layers locally request compatible movement, not whether a shared trunk has reached the distinct layerwise functions accumulated by dense training",
+    "two_sided_reason": "testing both state banks separates a representation defect from a result that appears only because the two independently trained models visit different residual-stream states",
+    "jvp_reason": "matching outputs alone can hide a wrong GELU activation partition or wrong local derivative field"
+  },
+  "authorization": {
+    "allowed": "one zero-update endpoint/JVP oracle on the exact checkpoints above",
+    "not_allowed": [
+      "representation fitting inside the oracle",
+      "an eighth trunk or boundary sweep",
+      "new LM training",
+      "model-size scaling"
+    ],
+    "after_result": "update the theory note and design only the obstruction-specific compact representation; require a separate preregistration before any training"
+  }
+}
