@@ -23,8 +23,9 @@
   "frozen_protocol": {
     "parent": "exact 124M QK-only BlockFHT attention plus dense MLP parent, seed 1337, LR 0.0024, 238 updates",
     "compact_family": "production full-MLP Pair-VQ with forward-visible fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16 feedback",
-    "probe_steps": [0, 60, 120, 180, 238],
-    "primary_late_steps": [180, 238],
+    "optimizer_update_indices": [0, 59, 119, 179, 237],
+    "reported_post_update_state_steps": [1, 60, 120, 180, 238],
+    "primary_late_post_update_state_steps": [180, 238],
     "matrices": "all 24 c_fc and c_proj matrices",
     "gradient_source": "the exact dense-parent training gradient before its Muon update",
     "momentum_trackers": [

@@ -123,6 +123,12 @@ class DensePairVQShadowObserver:
                     error_feedback=bool(
                         source.get("block_fht_mlp_pair_vq_error_feedback", False)
                     ),
+                    forward_visible_feedback=bool(
+                        source.get(
+                            "block_fht_mlp_pair_vq_forward_visible_feedback",
+                            False,
+                        )
+                    ),
                     feedback_codec=str(
                         source.get(
                             "block_fht_mlp_pair_vq_feedback_codec",
