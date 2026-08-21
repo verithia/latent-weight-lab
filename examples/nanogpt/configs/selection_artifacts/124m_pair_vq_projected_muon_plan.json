@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_pair_vq_projected_muon_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_training_results",
+  "scientific_question": "Can compact code-conditioned momentum and local projected Muon train the capacity-qualified asymmetric pair-VQ full MLP without any persistent dense master, momentum, or error buffer and at at least 20% exact-config MFU?",
+  "causal_basis": {
+    "capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_residual_pair_vq_mlp_result.json",
+    "capacity_result_sha256": "4ca271852036f33289ad3df9cf6507dba4b1a3e9a35af2c97dd5a03468f09c92",
+    "capacity_finding": "Two-stage c_fc plus one-stage c_proj pair coding passes all fixed-checkpoint gates at +0.031719 CE, 2.6644x BF16 state compression, and 3072x continuous-coordinate compression.",
+    "remaining_problem": "The capacity oracle initializes codes from a trained teacher. A valid replacement must move codes and codebooks during training without persistent dense optimizer state.",
+    "representation_preserved": "c_fc has two additive layer-private 256-entry two-value codebooks and two uint8 code arrays; c_proj has one. Training uses FP32 codebooks for sub-BF16 temporal resolution, while inference may round them to BF16 after training."
+  },
+  "update_rule": {
+    "name": "compact_momentum_local_projected_muon",
+    "transient_weight_gradient": "A decoded FP32 matrix leaf and its FP32 gradient exist only for forward/backward and are discarded/rematerialized at optimizer.step().",
+    "compact_momentum": "For each layer, matrix side, stage, and codeword, average the current two-value pair gradients assigned to that code and update one FP32 EMA. Expand and average these code-conditioned EMAs transiently across stages before Muon orthogonalization.",
+    "muon_request": "T=(1-lr*weight_decay)*W-lr*Muon(G+momentum*expanded_compact_momentum), with no dense persistent momentum.",
+    "projection": "Coordinate Lloyd projection of T: subtract other stages; every step update live codewords to assigned requested-residual means; every eighth step reassign codes among the 16 nearest current codewords, then rematerialize W.",
+    "c_fc_stages": 2,
+    "c_proj_stages": 1,
+    "codebook_size": 256,
+    "vector_length": 2,
+    "code_refresh_interval": 8,
+    "neighbor_candidates": 16,
+    "muon_momentum": 0.95,
+    "muon_ns_steps": 5,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "ambient_error_buffer": false,
+    "ambient_optimizer_state": false,
+    "code_optimizer_state": "none; uint8 indices update by local projection",
+    "codebook_optimizer_state": "one FP32 two-value momentum vector per codeword and stage"
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "uint8_code_bytes": 42467328,
+    "fp32_codebook_bytes": 73728,
+    "optimizer_step_bytes": 192,
+    "persistent_model_matrix_state_bytes": 42541248,
+    "fp32_compact_momentum_bytes": 73728,
+    "persistent_training_matrix_state_bytes": 42614976,
+    "model_state_compression_vs_dense_bf16": 2.662033046139126,
+    "persistent_training_compression_vs_dense_fp32_weight_plus_muon_momentum": 10.629709893536019,
+    "transient_decoded_fp32_weight_bytes": 226492416,
+    "transient_dense_fp32_gradient_bytes": 226492416,
+    "cached_token_time_extra_flops": 0,
+    "refresh_work": "Three pair-code projections; local code assignment is amortized every eight optimizer steps."
+  },
+  "implementation_gates": {
+    "focused_tests": [
+      "persistent state contains only codes, codebooks, step counters, biases, and compact momentum",
+      "decoded weight and dense gradient are excluded from model and optimizer state_dict",
+      "one projected step reduces distance to its requested matrix and changes codes at refresh",
+      "two-stage coordinate projection is deterministic",
+      "checkpoint/resume is bit-exact for the next step",
+      "GPT routes both MLP matrices only to the projected-pair optimizer",
+      "registered byte accounting matches serialized tensor payloads"
+    ],
+    "real_124m_one_step": {
+      "minimum_aggregate_requested_step_energy_recovery": 0.2,
+      "minimum_every_matrix_requested_step_energy_recovery": 0.0,
+      "minimum_aggregate_requested_update_cosine": 0.1,
+      "finite_loss_and_state": true,
+      "nonzero_code_changes_on_refresh": true
+    },
+    "exact_config_performance": {
+      "foreground_poll": true,
+      "maximum_wall_minutes": 5,
+      "minimum_measured_optimizer_steps": 32,
+      "minimum_empirical_mfu": 0.2,
+      "maximum_projected_code_overhead_fraction": 0.3,
+      "report_tokens_per_second_peak_vram_and_persistent_state": true
+    }
+  },
+  "decision_rule": {
+    "implementation_or_one_step_failure": "Repair only mechanical defects. If the immutable rule fails a scientific one-step gate, reject it and return to temporal theory; do not tune refresh interval, neighbors, momentum, or learning rate.",
+    "performance_failure": "Optimize kernels/launch structure without changing the mathematical rule, then repeat the exact gate. Do not launch LM training below 20% MFU.",
+    "all_gates_pass": "Register exactly one 124M/0.5TPP full-attention plus full-MLP run with fixed LR 2.4e-3, exact provenance, no dense optimizer state, and a terminal/error-only @Codex watchdog.",
+    "smallest_rung_success": "Compare fixed validation CE to the exact dense/full-attention controls before any 5TPP or model-size transfer."
+  },
+  "authorization": {
+    "allowed": [
+      "implement the immutable projected pair-code module and optimizer",
+      "run focused tests and one real 124M projected-step diagnostic",
+      "run one exact-config performance gate under five minutes",
+      "launch one registered 124M/0.5TPP LM run only after all gates pass"
+    ],
+    "not_allowed": [
+      "dense persistent master, momentum, residual, or error feedback",
+      "refresh, neighbor, momentum, learning-rate, stage, bit, or codebook sweeps",
+      "5TPP or model-size scaling before the 0.5TPP fixed-comparison gate",
+      "claiming trainable-parameter compression from transient memory alone"
+    ]
+  }
+}

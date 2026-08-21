@@ -1,0 +1,40 @@
+{
+  "schema_version": "mai_cfc_residual_pair_vq_mlp_result_seal_v1",
+  "classification": "CFC_RESIDUAL_PAIR_VQ_MLP_PASS",
+  "repository_commit": "1885acb905540bfa602f653dbfd78bf64af449a1",
+  "plan_sha256": "c91b6104b343b180bd953c40dda70ca88357d4e22e5f3b609b00f56a0336c757",
+  "result_sha256": "9aa01e6335649adba7720387284fee6d8526c538e449f79c0738ce7b8956bc72",
+  "state_sha256": "86d3ac1cb5a68ac166c3d21963702bc0cec479b1e4302e54524c42028cbd4ebe",
+  "identities": {
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "first_stage_pair_vq_state_sha256": "6df9a5ce68639a311863eaa0dc65b10d902e2238e83097a53946a3ea9f35ac4c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "accounting": {
+    "persistent_matrix_state_bytes": 42504192,
+    "persistent_bf16_storage_compression": 2.6643538594969645,
+    "continuous_coordinates": 18432,
+    "continuous_coordinate_compression": 3072.0,
+    "residual_decode_additions_per_refresh": 28311552,
+    "cached_token_time_extra_flops": 0
+  },
+  "metrics": {
+    "aggregate_weight_energy_recovery": 0.9986291591119312,
+    "minimum_c_fc_weight_energy_recovery": 0.9996802520810009,
+    "minimum_c_proj_weight_energy_recovery": 0.9902328346838855,
+    "minimum_matrix_weight_energy_recovery": 0.9902328346838855,
+    "mean_output_recovery": 0.9928405582904816,
+    "minimum_output_recovery": 0.9903765916824341,
+    "mean_input_jvp_recovery": 0.9926562880476316,
+    "minimum_input_jvp_recovery": 0.9908063411712646,
+    "teacher_validation_cross_entropy": 3.674412250518799,
+    "candidate_validation_cross_entropy": 3.7061309814453125,
+    "fixed_validation_cross_entropy_gap": 0.03171873092651367,
+    "wall_seconds": 30.821075439453125,
+    "maximum_cuda_memory_bytes": 9978755584
+  },
+  "gate_summary": "Every frozen matrix, output, input-JVP, fixed-CE, storage, and continuous-coordinate gate passes. This authorizes one compact discrete-code temporal update design and an exact-config MFU preflight, not immediate scale-up.",
+  "remaining_problem": "Train uint8 pair codes and tiny codebooks causally without a persistent dense master, dense error buffer, or dense optimizer state."
+}
