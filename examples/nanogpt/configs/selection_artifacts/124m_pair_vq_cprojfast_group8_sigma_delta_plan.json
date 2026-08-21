@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_grouped_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "theory_preregistered_before_execution_or_results",
+  "scientific_question": "Does output-group-localizing the compact feedback levels remove the global carry codec distortion while preserving the already-passed c_fc/c_proj weight-chart conservation?",
+  "causal_basis": {
+    "rejected_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_sigma_delta_gate160_result.json",
+    "rejected_gate_result_sha256": "f4edd4d711882c8f05840b9ef4412d4b22e8733a5222bf6c3f6158de71ae78ef",
+    "observation": "The repaired charts passed every conservation and systems gate, but one global 16-level scalar alphabet per coordinate recovered only 0.9261 of carry energy at step 8 and 0.9751 at step 80. The failure is therefore in carry quantization locality, not in the weight charts.",
+    "mechanism": "c_fc and c_proj output rows are heteroskedastic. A global alphabet spends levels on incompatible row scales. Sharing levels over only eight adjacent output channels preserves one-byte-per-pair codes while adapting the scalar alphabet to local residual scale.",
+    "excluded_moves": [
+      "change either weight chart",
+      "increase carry code width",
+      "dense ambient error buffer",
+      "learning-rate sweep",
+      "longer horizon",
+      "larger model",
+      "endpoint training before this gate passes"
+    ]
+  },
+  "candidate": {
+    "name": "pair_vq_cproj_fast_residual_plus_group8_sigma_delta",
+    "single_change": "Replace each matrix-global pair of 16-level feedback alphabets with one pair per eight output channels.",
+    "weight_pair_code": "one uint8 Cartesian code per pair, unchanged",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false,
+    "inference_change": "none; feedback exists only during training"
+  },
+  "accounting": {
+    "output_group_size": 8,
+    "feedback_groups_across_12_cfc_and_12_cproj": 5760,
+    "grouped_feedback_level_bytes": 737280,
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99978432,
+    "dense_bf16_matrix_bytes": 113246208,
+    "dense_fp32_weight_plus_fp32_muon_bytes": 452984832,
+    "inference_model_state_reduction_x": 1.5982614397858232,
+    "training_state_reduction_x": 4.530826706327048,
+    "extra_dense_gemm_flops": 0,
+    "extra_codec_work": "vectorized group-local Lloyd fit and decode at each optimizer step; exact-host performance-gated"
+  },
+  "frozen_gate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160.json",
+    "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160_mfu.json",
+    "mfu_preflight_command": "CUDA_VISIBLE_DEVICES=0 python -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160.json --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160_mfu.json --log-output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160_mfu.log --min-fraction 0.20 --warmup-updates 2 --timed-updates 4",
+    "optimizer_steps": 160,
+    "feedback_codec_gate_steps": [8, 40, 80, 120, 152],
+    "aggregate_conserved_requested_step_energy_recovery_min": 0.95,
+    "every_matrix_conserved_requested_step_energy_recovery_min": 0.8,
+    "aggregate_feedback_codec_energy_recovery_min": 0.98,
+    "every_matrix_feedback_codec_energy_recovery_min": 0.95,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_cproj_fast_code_changes_min": 1,
+    "mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "expected_duration": "under five minutes on PRO6 and therefore foreground-polled; attach a persistent watchdog immediately if observed duration exceeds five minutes"
+  },
+  "decision_policy": {
+    "pass": "Authorize exactly one matched 124M/0.5TPP endpoint against the sealed QK-only dense-MLP parent. Do not scale up.",
+    "codec_fail": "Reject scalar alphabet locality as insufficient; next theory must change the carry codec family rather than tune group size.",
+    "systems_fail": "Optimize the vectorized codec without changing its mathematical representation, then repeat this gate.",
+    "endpoint_fail_after_gate_pass": "Keep weight and carry charts fixed and localize the remaining objective mismatch from fixed-checkpoint loss and functional probes."
+  }
+}
