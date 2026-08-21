@@ -2297,6 +2297,20 @@ def parse_args() -> argparse.Namespace:
             (),
         )
     )
+    axis_adaptation_probe_block_size = int(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size",
+            0,
+        )
+    )
+    axis_adaptation_probe_coordinate_bits = int(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits",
+            7,
+        )
+    )
     if any(step < 0 for step in residual_probe_steps):
         raise ValueError("pair-VQ residual probe steps must be nonnegative")
     if any(iterations <= 0 for iterations in residual_probe_iterations):
@@ -2352,6 +2366,28 @@ def parse_args() -> argparse.Namespace:
     ):
         raise ValueError(
             "pair-VQ lattice probes require free-VQ residual probe steps"
+        )
+    if axis_adaptation_probe_block_size < 0:
+        raise ValueError("pair-VQ axis-adaptation block size must be nonnegative")
+    if axis_adaptation_probe_block_size and (
+        axis_adaptation_probe_block_size < 2
+        or axis_adaptation_probe_block_size
+        & (axis_adaptation_probe_block_size - 1)
+    ):
+        raise ValueError(
+            "pair-VQ axis-adaptation block size must be a power of two"
+        )
+    if not 2 <= axis_adaptation_probe_coordinate_bits <= 8:
+        raise ValueError(
+            "pair-VQ axis-adaptation coordinate bits must be in [2, 8]"
+        )
+    if axis_adaptation_probe_block_size and not (
+        residual_probe_steps
+        and namespace.block_fht_mlp_pair_vq_feedback_codec
+        == "free_vq256_rvq2"
+    ):
+        raise ValueError(
+            "pair-VQ axis-adaptation probes require free-VQ residual probe steps"
         )
     if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
         "cartesian4x4",
@@ -2903,6 +2939,20 @@ def pair_vq_model_kwargs(
                 namespace,
                 "block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits",
                 (),
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size": int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size",
+                0,
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits": int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits",
+                7,
             )
         ),
     }

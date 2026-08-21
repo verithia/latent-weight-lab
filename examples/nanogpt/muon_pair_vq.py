@@ -963,6 +963,137 @@ def _block_fht_gain_lattice_counterfactual(
 
 
 @torch.no_grad()
+def _block_gain_axis_adaptation_counterfactual(
+    vectors: torch.Tensor,
+    *,
+    block_size: int,
+    coordinate_bits: int,
+    seed: int,
+) -> dict[str, float | int]:
+    """Separate axis-codebook waste from transform-gauge mismatch.
+
+    This is deliberately an acquisition oracle.  The dense KLT is never
+    registered as a production codec; it supplies a ceiling that can justify
+    (or reject) a later fast learned-butterfly approximation.
+    """
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("axis-adaptation probe values must have shape (pairs, 2)")
+    if block_size < 2 or block_size & (block_size - 1):
+        raise ValueError("axis-adaptation block size must be a power of two")
+    if vectors.numel() % block_size:
+        raise ValueError("axis-adaptation block size must divide the source")
+    if coordinate_bits < 2 or coordinate_bits > 8:
+        raise ValueError("axis-adaptation coordinate bits must be in [2, 8]")
+
+    source = vectors.reshape(-1, block_size).to(torch.float32)
+    source_energy = source.square().sum().clamp_min(1e-30)
+    level_count = 1 << coordinate_bits
+
+    def entropy_bits(codes: torch.Tensor, levels: int) -> float:
+        counts = torch.bincount(codes.reshape(-1), minlength=levels).to(
+            torch.float32
+        )
+        probabilities = counts[counts > 0] / counts.sum().clamp_min(1.0)
+        return float(-(probabilities * probabilities.log2()).sum())
+
+    def quantize(
+        transformed: torch.Tensor,
+        *,
+        axis_private: bool,
+    ) -> tuple[torch.Tensor, dict[str, float | int]]:
+        gains = transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
+        gain_levels, gain_codes = _fit_scalar_codebook(
+            gains.log(), level_count=256
+        )
+        decoded_gains = gain_levels.index_select(0, gain_codes).exp()
+        normalized = transformed / decoded_gains[:, None]
+        if axis_private:
+            decoded_axes: list[torch.Tensor] = []
+            active: list[int] = []
+            entropies: list[float] = []
+            for axis in range(block_size):
+                levels, codes = _fit_scalar_codebook(
+                    normalized[:, axis], level_count=level_count
+                )
+                decoded_axes.append(levels.index_select(0, codes))
+                active.append(int(codes.unique().numel()))
+                entropies.append(entropy_bits(codes, level_count))
+            decoded_normalized = torch.stack(decoded_axes, dim=1)
+            coordinate_active_min = min(active)
+            coordinate_entropy_min = min(entropies)
+        else:
+            coordinate_levels, coordinate_codes = _fit_scalar_codebook(
+                normalized.reshape(-1), level_count=level_count
+            )
+            decoded_normalized = coordinate_levels.index_select(
+                0, coordinate_codes
+            ).reshape_as(normalized)
+            coordinate_active_min = int(coordinate_codes.unique().numel())
+            coordinate_entropy_min = entropy_bits(
+                coordinate_codes, level_count
+            )
+        decoded = decoded_normalized * decoded_gains[:, None]
+        return decoded, {
+            "coordinate_active_codes_min": coordinate_active_min,
+            "coordinate_entropy_bits_min": coordinate_entropy_min,
+            "gain_active_codes": int(gain_codes.unique().numel()),
+            "gain_entropy_bits": entropy_bits(gain_codes, 256),
+        }
+
+    fht = _signed_block_fht(
+        vectors, block_size=block_size, seed=seed
+    )
+    center = source.mean(dim=0, keepdim=True)
+    centered = source - center
+    covariance = centered.T @ centered / max(centered.shape[0], 1)
+    _eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
+    klt = centered @ eigenvectors
+
+    output: dict[str, float | int] = {
+        "physical_bits_per_weight": float(
+            coordinate_bits + 8.0 / block_size
+        ),
+        "fht_parseval_relative_error": float(
+            (fht.square().sum() - source_energy).abs() / source_energy
+        ),
+        "klt_parseval_relative_error": float(
+            (klt.square().sum() - centered.square().sum()).abs()
+            / centered.square().sum().clamp_min(1e-30)
+        ),
+        "source_mean_energy_ratio": float(
+            center.square().sum() * source.shape[0] / source_energy
+        ),
+    }
+    for name, transformed, axis_private in (
+        ("fht_global", fht, False),
+        ("fht_axis", fht, True),
+        ("klt_global", klt, False),
+        ("klt_axis", klt, True),
+    ):
+        decoded, diagnostics = quantize(
+            transformed, axis_private=axis_private
+        )
+        error_energy = (transformed - decoded).square().sum()
+        output[f"{name}_full_recovery"] = float(
+            1.0 - error_energy / source_energy
+        )
+        for key, value in diagnostics.items():
+            output[f"{name}_{key}"] = value
+
+    fht_variance = fht.var(dim=0, unbiased=False)
+    klt_variance = klt.var(dim=0, unbiased=False)
+    output["fht_axis_variance_cv"] = float(
+        fht_variance.std(unbiased=False)
+        / fht_variance.mean().clamp_min(1e-30)
+    )
+    output["klt_axis_variance_cv"] = float(
+        klt_variance.std(unbiased=False)
+        / klt_variance.mean().clamp_min(1e-30)
+    )
+    return output
+
+
+@torch.no_grad()
 def _conditional_polar_pair_diagnostics(
     vectors: torch.Tensor,
     radial_levels: torch.Tensor,
@@ -1204,6 +1335,8 @@ class MuonPairVQLinear(nn.Module):
         feedback_transform_probe_block_sizes: tuple[int, ...] = (),
         feedback_lattice_probe_block_sizes: tuple[int, ...] = (),
         feedback_lattice_probe_coordinate_bits: tuple[int, ...] = (),
+        feedback_axis_adaptation_probe_block_size: int = 0,
+        feedback_axis_adaptation_probe_coordinate_bits: int = 7,
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -1231,6 +1364,12 @@ class MuonPairVQLinear(nn.Module):
         )
         self.feedback_lattice_probe_coordinate_bits = tuple(
             int(bits) for bits in feedback_lattice_probe_coordinate_bits
+        )
+        self.feedback_axis_adaptation_probe_block_size = int(
+            feedback_axis_adaptation_probe_block_size
+        )
+        self.feedback_axis_adaptation_probe_coordinate_bits = int(
+            feedback_axis_adaptation_probe_coordinate_bits
         )
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
@@ -1307,6 +1446,29 @@ class MuonPairVQLinear(nn.Module):
         ):
             raise ValueError(
                 "feedback lattice probes require free-VQ residual probe steps"
+            )
+        if self.feedback_axis_adaptation_probe_block_size < 0:
+            raise ValueError("feedback axis-adaptation block size must be nonnegative")
+        if self.feedback_axis_adaptation_probe_block_size and (
+            self.feedback_axis_adaptation_probe_block_size < 2
+            or self.feedback_axis_adaptation_probe_block_size
+            & (self.feedback_axis_adaptation_probe_block_size - 1)
+            or self.element_count
+            % self.feedback_axis_adaptation_probe_block_size
+        ):
+            raise ValueError(
+                "feedback axis-adaptation block size must be a power-of-two divisor"
+            )
+        if not 2 <= self.feedback_axis_adaptation_probe_coordinate_bits <= 8:
+            raise ValueError(
+                "feedback axis-adaptation coordinate bits must be in [2, 8]"
+            )
+        if self.feedback_axis_adaptation_probe_block_size and (
+            not self.feedback_residual_probe_steps
+            or self.feedback_codec != "free_vq256_rvq2"
+        ):
+            raise ValueError(
+                "feedback axis-adaptation probes require free-VQ residual probe steps"
             )
         if self.feedback_codec not in (
             "cartesian4x4",
@@ -2138,6 +2300,30 @@ class MuonPairVQ(torch.optim.Optimizer):
                                     )
                                     for key, value in counterfactual.items():
                                         diagnostics[prefix + key] = value
+                            if module.feedback_axis_adaptation_probe_block_size:
+                                counterfactual = (
+                                    _block_gain_axis_adaptation_counterfactual(
+                                        raw_feedback.reshape(
+                                            -1, module.vector_length
+                                        ),
+                                        block_size=(
+                                            module.feedback_axis_adaptation_probe_block_size
+                                        ),
+                                        coordinate_bits=(
+                                            module.feedback_axis_adaptation_probe_coordinate_bits
+                                        ),
+                                        seed=(
+                                            20261024
+                                            + 8192 * module.layer_id
+                                            + 131 * module.in_features
+                                            + 17 * module.out_features
+                                        ),
+                                    )
+                                )
+                                for key, value in counterfactual.items():
+                                    diagnostics[
+                                        "feedback_axis_adapt_" + key
+                                    ] = value
                 self._diagnostics.append(diagnostics)
         return loss
 

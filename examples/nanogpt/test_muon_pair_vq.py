@@ -9,6 +9,7 @@ from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_pair_vq import (
     MuonPairVQ,
     MuonPairVQLinear,
+    _block_gain_axis_adaptation_counterfactual,
     _block_fht_free_pair_vq_counterfactual,
     _block_fht_gain_lattice_counterfactual,
     _conditional_polar_pair_diagnostics,
@@ -146,6 +147,26 @@ def test_block_fht_gain_lattice_reports_physical_rate_and_recovery() -> None:
     # 128 even with a 256-level gain codebook.  Requiring a majority of those
     # blocks to remain distinct still catches a collapsed gain quantizer.
     assert diagnostics["gain_active_codes"] > 64
+
+
+def test_block_gain_axis_adaptation_reports_all_oracle_arms() -> None:
+    torch.manual_seed(1707)
+    base = torch.randn(1024, 8)
+    # Correlate the fixture axes so the KLT has a real gauge to diagnose.
+    source = base + 0.4 * base.roll(1, dims=1)
+    diagnostics = _block_gain_axis_adaptation_counterfactual(
+        source.reshape(-1, 2),
+        block_size=8,
+        coordinate_bits=6,
+        seed=1707,
+    )
+    assert diagnostics["physical_bits_per_weight"] == 7.0
+    assert diagnostics["fht_parseval_relative_error"] < 1e-6
+    assert diagnostics["klt_parseval_relative_error"] < 1e-6
+    for arm in ("fht_global", "fht_axis", "klt_global", "klt_axis"):
+        assert diagnostics[f"{arm}_full_recovery"] > 0.99
+        assert diagnostics[f"{arm}_coordinate_active_codes_min"] > 48
+        assert diagnostics[f"{arm}_gain_active_codes"] > 64
 
 
 def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> None:

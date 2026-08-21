@@ -200,6 +200,8 @@ class GPTConfig:
     block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits: tuple[int, ...] = ()
+    block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size: int = 0
+    block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits: int = 7
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2431,6 +2433,12 @@ class MLP(nn.Module):
                 feedback_lattice_probe_coordinate_bits=tuple(
                     config.block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits
                 ),
+                feedback_axis_adaptation_probe_block_size=int(
+                    config.block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size
+                ),
+                feedback_axis_adaptation_probe_coordinate_bits=int(
+                    config.block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits
+                ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
@@ -2692,6 +2700,12 @@ class MLP(nn.Module):
                 ),
                 feedback_lattice_probe_coordinate_bits=tuple(
                     config.block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits
+                ),
+                feedback_axis_adaptation_probe_block_size=int(
+                    config.block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size
+                ),
+                feedback_axis_adaptation_probe_coordinate_bits=int(
+                    config.block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits
                 ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
