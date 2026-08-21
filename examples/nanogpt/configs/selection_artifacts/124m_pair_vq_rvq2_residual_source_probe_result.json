@@ -1,0 +1,141 @@
+{
+  "schema_version": "mai_pair_vq_rvq2_residual_source_probe_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_TWO_STAGE_CONDITIONAL_POLAR_NO_FROZEN_CORRECTION_BRANCH",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_rvq2_residual_source_probe_plan.json",
+    "sha256": "48214e4641ff6f4d8d7e6ecb9dfa319fa60e79a11d208cce098753cb782110cc"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9.json",
+    "sha256": "33031901b4571da3c909db5650964a4e191991e1500ec1d46c68ef2bec2ee380"
+  },
+  "provenance": {
+    "git_commit": "4564ff805df425498073f130d6cbf4e970ccc398",
+    "implementation_commit": "c2082108a13d2f64278772eb09b1c1249fb7d692",
+    "entrypoint": "examples/nanogpt/train.py",
+    "host": "PRO6",
+    "gpu": 0,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "command": "CUDA_VISIBLE_DEVICES=0 LD_LIBRARY_PATH=/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu TORCH_EXTENSIONS_DIR=/mnt/ssd-data/orj/MappingNetworks/.cache/torch_extensions_sm120_exactfamily TORCH_CUDA_ARCH_LIST=12.0 PYTHONPATH=. /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9.json"
+  },
+  "run": {
+    "run_id": "pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9_20260821T164818Z",
+    "state": "finished",
+    "exit_code": 0,
+    "optimizer_steps": 9,
+    "wall_seconds": 17.537866830825806,
+    "status_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/status/pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9_20260821T164818Z.json",
+    "status_sha256": "c351fd271114771dd6792ae3110128ef758359c1ea3053d877fe99c392e7e35d",
+    "status_bytes": 721,
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9_20260821T164818Z.log",
+    "log_sha256": "4dd18efdbc2539adf21354ab7e777fceb40f59169463d19f4dff10ee8afd655c",
+    "log_bytes": 128158,
+    "watchdog": "not_attached_by_preregistered_sub_five_minute_policy"
+  },
+  "mfu_preflight": {
+    "passed": true,
+    "certificate_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_rvq2_residual_source_probe9_mfu.json",
+    "certificate_sha256": "9803fe86d773b4fb20ae0ad0f1bf044c9d264afc48b8e36692825a57315b9715",
+    "log_sha256": "97abff6b5b54a03a17ac3f529e6083019894406e8c1817ff09195e16ddfe5699",
+    "tokens_per_second": 182701.665,
+    "mfu_fraction": 0.32687134679805185,
+    "iter_ms": 1434.82,
+    "optimizer_ms": 234.365,
+    "optimizer_fraction": 0.163340347,
+    "peak_mib": 31631.53
+  },
+  "validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records": 48,
+    "diagnostic_records_expected": 48,
+    "matrices_per_step": [24, 24],
+    "decomposition_relative_error_max": 1.670782694418449e-7,
+    "decomposition_relative_error_gate": 0.00001,
+    "residual_active_codes_min": 254,
+    "residual_active_codes_gate": 128,
+    "mfu_gate_fraction": 0.20,
+    "passed": true
+  },
+  "energy_weighted_measurements": {
+    "step_0": {
+      "target_energy": 3.713141805139486e-7,
+      "recovery_lloyd3": 0.9798142936884776,
+      "recovery_lloyd6": 0.9799358694018814,
+      "recovery_lloyd12": 0.9800489151876628,
+      "gain_lloyd12_minus3": 0.00023462149918513492,
+      "angular_error_fraction": 0.6349107453747969,
+      "radial_error_fraction": 0.3650892619091334,
+      "top_radius_energy_fraction": 0.02214196464409711,
+      "center_energy_ratio": 3.2023200429269788e-6,
+      "center_error_share": 0.00015864295227059044,
+      "joint_code_entropy_bits": 6.979225450405306,
+      "angle_entropy_bits": 3.9992192034723706,
+      "conditional_radius_entropy_bits": 2.980006246932935
+    },
+    "step_8": {
+      "target_energy": 0.0003438110441038589,
+      "recovery_lloyd3": 0.9804942155006643,
+      "recovery_lloyd6": 0.9806522896778702,
+      "recovery_lloyd12": 0.9808105743856034,
+      "gain_lloyd12_minus3": 0.000316358884939339,
+      "angular_error_fraction": 0.6646740072749647,
+      "radial_error_fraction": 0.3353259970754634,
+      "top_radius_energy_fraction": 0.013542123697222169,
+      "center_energy_ratio": 5.533706986637469e-6,
+      "center_error_share": 0.0002836956896978885,
+      "joint_code_entropy_bits": 7.150219309340106,
+      "angle_entropy_bits": 3.999750122004983,
+      "conditional_radius_entropy_bits": 3.150469187335124
+    }
+  },
+  "matrix_extrema": {
+    "recovery_lloyd3_min": 0.979194700717926,
+    "recovery_lloyd12_min": 0.9793977737426758,
+    "angular_error_fraction_min": 0.6162369251251221,
+    "angular_error_fraction_max": 0.6740514039993286,
+    "top_radius_energy_fraction_max": 0.02766048163175583,
+    "center_energy_ratio_max": 0.000022556732801604085,
+    "projected_radius_max_to_rms_max": 42.00001525878906
+  },
+  "frozen_branch_outcomes": {
+    "lloyd_convergence_fix": {
+      "required_recovery_12_min": 0.9805,
+      "required_gain_12_minus_3_min": 0.0005,
+      "step_0_passed": false,
+      "step_8_passed": false,
+      "passed": false
+    },
+    "angular_allocation_fix": {
+      "required_angular_error_fraction_min": 0.70,
+      "step_0_passed": false,
+      "step_8_passed": false,
+      "passed": false
+    },
+    "radial_companding_fix": {
+      "required_radial_error_fraction_min": 0.70,
+      "alternative_top_radius_energy_fraction_min": 0.25,
+      "passed": false
+    },
+    "center_gauge_fix": {
+      "required_center_error_share_min": 0.25,
+      "passed": false
+    }
+  },
+  "interpretation": {
+    "lloyd_fit_is_not_the_missing_mechanism": "Twelve passes improve recovery by only 0.000235 at step 0 and 0.000316 at step 8; step 0 remains below even the old 0.98 floor and both gains miss the frozen materiality threshold.",
+    "error_is_mixed_not_single_axis": "Angular error is larger at 63.5-66.5%, but does not reach the 70% dominance threshold. Radial error remains 33.5-36.5%.",
+    "tail_and_center_are_not_causal": "Top-radius energy is 1.35-2.21% in aggregate and at most 2.77% per matrix; center energy explains under 0.03% of codec distortion.",
+    "occupancy_is_healthy": "All 16 angles and radii are active and at least 254 of 256 joint symbols are used; joint entropy is about 6.98-7.15 bits.",
+    "conclusion": "The remaining approximately 2% second-stage error is the distributed high-rate quantization floor of this 16x16 product code, not a fit, occupancy, tail, center, or single angular/radial allocation defect. Under the frozen policy, the two-stage conditional-polar family is closed."
+  },
+  "authorization": {
+    "matched_endpoint": false,
+    "bit_rate_sweep": false,
+    "learning_rate_sweep": false,
+    "model_scale_up": false,
+    "horizon_scale_up": false,
+    "next": "Derive and preregister a different compact temporal representation that changes the code family rather than tuning this one."
+  }
+}
