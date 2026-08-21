@@ -1,0 +1,133 @@
+{
+  "schema_version": "mai_seven_trunk_fullrank_two_sided_coordinates_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can unrestricted layer-private residual-input and residual-write coordinate maps around the two learned late-depth trunks reproduce the missing late-layer value and derivative fields while leaving the five already-working singleton layers exactly unchanged?",
+  "causal_basis": {
+    "two_bank_atomwise_result": "examples/nanogpt/configs/selection_artifacts/124m_two_bank_atomwise_recombination_result.json",
+    "two_bank_atomwise_result_sha256": "792b8b4248d243894cc76ca2c7d9ce782c51dbd26678ade83950c14246acff0d",
+    "two_bank_atomwise_finding": "Complete-neuron interpolation preserves the endpoint and optimizes healthily but achieves only 0.5103 output and 0.1613 input-JVP recovery; matched late-bank atoms have only 0.0966 mean semantic cosine. Scalar chords do not trace the required nonlinear chart.",
+    "private_residual_spectrum_result": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_private_residual_spectrum_result.json",
+    "private_residual_spectrum_result_sha256": "22a4c9dfac54ffb8506752171bd493518d338a02f33292951e14794619efac66",
+    "private_residual_spectrum_finding": "Rank-64 residual subspaces transfer but the actual task-gradient directions are data-dependent. The ceiling must test a distributed coordinate map rather than a fixed additive low-rank correction.",
+    "postbranch_result": "examples/nanogpt/configs/selection_artifacts/124m_postbranch_fc_oracle_result.json",
+    "postbranch_result_sha256": "9028fb71023ed27cc1fc90469a8cdfa4261b4c644a828ca843157486cb61b426",
+    "postbranch_finding": "An output-only post-branch FC recovered branch values but failed derivatives and catastrophically worsened composition. The input-side map is mandatory because it moves GELU activation boundaries.",
+    "representation_change": "For late layer l, replace the shared function V_g GELU(p_l * U_g x) by C_l V_g GELU(p_l * U_g A_l x), with unrestricted A_l and C_l in residual space. Keep layers 0-4 bitwise at their sealed seven-trunk endpoint during the repair fit.",
+    "why_a_ceiling": "Every low-rank, Monarch, Householder, butterfly, or BlockFHT residual-coordinate transport is a subset of unrestricted A_l and C_l. Failure closes that entire factorization direction; success permits spectrum-guided factorization rather than a blind structure sweep.",
+    "not_a_sweep": "There is one identity initialization, one maps-only stage, one joint late-bank stage, one seed, and no rank, factorization, regularizer, optimizer, or restart sweep."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "seven_trunk_initialization_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "frozen_singleton_layers": 5,
+    "late_layers": 7,
+    "late_trunks": 2,
+    "residual_width": 768,
+    "hidden_width": 3072,
+    "definition": "F_l(x)=C_l V_g(l) GELU(p_l elementwise-multiplied by U_g(l) A_l x), followed by the existing positive residual-output gain. A_l and C_l are unrestricted 768x768 maps only for layers 5-11.",
+    "initialization": "All A_l and C_l start at identity; all trunks and gains are copied from the sealed seven-trunk checkpoint. The initial function is exactly the checkpoint. Layers 0-4 and their gains remain frozen throughout the oracle.",
+    "compact_parameters": 41333760,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 1.3698996655518394,
+    "parameter_saving_fraction": 0.27001953125,
+    "persistent_coordinate_parameters": 8257536,
+    "deployment": "Fold A_l into U_g(l) and C_l into V_g(l) at refresh, then cache ordinary dense matrices. Cached token-time and inference GEMM FLOPs are unchanged.",
+    "conservative_reconstruction_flops_per_refresh": 50734301184,
+    "unfolded_online_extra_flops_per_late_layer_token": 2359296,
+    "unfolded_online_fraction_of_dense_mlp_linear_flops": 0.25,
+    "persistent_dense_optimizer_state": false,
+    "token_router": false
+  },
+  "fit_protocol": {
+    "objective": "Equal-weight sum of separately normalized clean-output error and central-difference direction error on dense-teacher and seven-trunk state banks. Layers 0-4 remain exact constants and contribute only immutable diagnostics.",
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260980,
+    "holdout_token_seed": 20260981,
+    "local_perturbation_relative_rms": 0.01,
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "gradient_clip_norm": 10.0,
+    "algorithm_seed": 20260982,
+    "stages": [
+      {
+        "name": "coefficients_only",
+        "semantic_name": "coordinate_maps_only",
+        "steps": 300,
+        "optimizer": "Adam",
+        "learning_rate": 0.001,
+        "weight_decay": 0.0,
+        "trainable": "the fourteen late-layer residual coordinate maps only"
+      },
+      {
+        "name": "joint_late_banks_maps",
+        "steps": 1200,
+        "optimizer": "Adam",
+        "learning_rate": 0.0003,
+        "weight_decay": 0.0,
+        "trainable": "two late trunk matrix pairs, fourteen coordinate maps, and late per-layer gains; singleton trunks and layers 0-4 gains stay frozen"
+      }
+    ],
+    "best_state_rule": "Within each stage preserve the state with the smallest discovery objective. The second stage warm-starts the first. Holdout values, fixed CE, wall time, and gate outcomes never select a state.",
+    "parameter_clamps": "Late pre-GELU gains are clamped to [-4,4] and late residual-output log gains to [-4,4]. Coordinate maps and late trunk matrices are unconstrained.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260983,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "exact endpoint reconstruction error",
+      "stagewise discovery and holdout value-direction objectives",
+      "held-out output and analytic input-JVP recovery by layer and state bank",
+      "singular-energy spectra of A_l-I and C_l-I for future factorization",
+      "fixed-checkpoint validation CE after the terminal stage",
+      "parameter, refresh-FLOP, online-FLOP, peak-memory, and wall-time accounting"
+    ]
+  },
+  "frozen_gates": {
+    "maximum_initial_endpoint_absolute_error": 0.00001,
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "Finite terminal execution and either terminal discovery objective at most 0.5 or at least 50-percent reduction from the joint-stage initial objective."
+  },
+  "decision_rule": {
+    "pass": "Use the measured A_l-I and C_l-I spectra to preregister one minimum-capacity factorization, then require that compact factorization to pass the same oracle before any LM training.",
+    "healthy_fail": "Reject the entire residual-coordinate factorization direction. Do not try low-rank, Monarch, Householder, butterfly, or BlockFHT approximations of A_l and C_l.",
+    "optimization_inconclusive": "Stop and report without a capacity conclusion or LM training."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update full-rank ceiling after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training from this ceiling",
+      "model-size scaling",
+      "rank, factorization, optimizer, learning-rate, stage-length, seed, gain, or regularizer sweeps",
+      "updating layers 0-4 during the repair fit",
+      "holdout-based state selection"
+    ],
+    "callback_policy": "Foreground-poll if measured complete runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}
