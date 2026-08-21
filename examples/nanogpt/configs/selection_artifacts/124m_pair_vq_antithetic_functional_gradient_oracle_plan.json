@@ -1,0 +1,91 @@
+{
+  "schema_version": "mai_124m_pair_vq_antithetic_functional_gradient_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Does making the compact projection residual forward-visible, with an exactly centered antithetic pair, remove the compact model's held-out functional-gradient bias along the synchronized dense path?",
+  "causal_basis": {
+    "dense_shadow_replay": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_dense_pairvq_shadow_replay_result.json",
+      "classification": "COMPACT_GRADIENT_PATH_DRIFT",
+      "terminal_shadow_minus_dense_validation_ce": 0.0038175582885742188,
+      "ordinary_compact_self_path_minus_dense_validation_ce": 0.15796,
+      "finding": "The production Pair-VQ family has sufficient endpoint capacity and follows a dense trajectory, but its own compact forward produces a different gradient trajectory."
+    },
+    "block_local_unbiased_endpoint": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_blocklocal_retraction_training_result.json",
+      "classification": "FAIL_LOW_VARIANCE_UNBIASED_RETRACTION_FUNCTIONAL_PATH",
+      "terminal_candidate_minus_parent_validation_ce": 0.1594,
+      "maximum_sampling_variance_ratio": 0.019898430041263664,
+      "minimum_expected_bias_recovery": 0.9999999999999518,
+      "finding": "Removing clipping and reducing instantaneous retraction variance below two percent does not move the approximately 0.158 CE compact-self-training floor."
+    }
+  },
+  "theory": {
+    "compact_state": "For each dense-path MLP matrix W, project into the production compact matrix C and encode the projection residual W-C with the already qualified B64/L16 compact feedback codec, producing R_hat. No dense master weight, dense momentum, or dense residual is candidate state.",
+    "forward_visible_center": "Define the compact virtual matrix V=C+R_hat. Compare gradients at C, at V, and under the exactly centered antithetic pair W_minus=C and W_plus=C+2*R_hat.",
+    "antithetic_identity": "The pair satisfies (W_minus+W_plus)/2=V exactly. For differentiable task-gradient field g, [g(V-R_hat)+g(V+R_hat)]/2 = g(V) + O(||R_hat||^2), so the leading odd perturbation term cancels without any stochastic expectation or persistent dense state.",
+    "attribution": "The one-pass V gradient tests whether forward-visible compact carry alone is sufficient. The paired gradient tests whether symmetric functional sampling supplies additional second-order correction. A paired win without a center win authorizes only a two-pass estimator; a center win authorizes the cheaper one-pass mechanism.",
+    "why_dense_path": "The synchronized dense path is scoring supervision only. It supplies the reference gradient and the requested residual that an online compact optimizer would have immediately after projection. Candidate gradients are generated solely from C and decoded compact R_hat.",
+    "loss_gap_link": "The failed endpoint must close 0.1094 of its 0.1594 CE gap to reach the fixed +0.05 gate, or 68.63 percent. The functional oracle therefore requires at least 70 percent closure of native compact gradient error on late held-out phases before a new endpoint can be authorized."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 2026082201,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024
+    },
+    "heldout_window": {
+      "split": "validation",
+      "seed": 2026082202,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024,
+      "must_be_disjoint_from_fit": true
+    },
+    "directions": "raw task gradients of all 24 MLP matrices; report same-window cosine, relative error, positive-line recovery, and fit-direction alignment with the disjoint held-out dense gradient",
+    "controls": [
+      "dense matrix at the synchronized parent state",
+      "native compact projection C",
+      "one-pass forward-visible compact center C+R_hat",
+      "two-pass antithetic average of gradients at C and C+2*R_hat"
+    ],
+    "trajectory_intervention": "none; all probe weights and gradients are temporary and the dense training RNG, weights, mode, and gradients are restored before the next update"
+  },
+  "frozen_gate": {
+    "all_metrics_finite": true,
+    "fit_and_heldout_indices_disjoint": true,
+    "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+    "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+    "minimum_late_heldout_gradient_error_closure_vs_native": 0.70,
+    "minimum_late_heldout_gradient_cosine": 0.95,
+    "minimum_late_fit_to_heldout_task_alignment_retention_vs_dense": 0.95,
+    "maximum_primary_matrix_regression_fraction": 0.25,
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "primary_candidate_selection": "Select the one-pass center if it passes. Select the paired estimator only if the center fails and the pair passes. Otherwise reject forward-visible compact residuals as sufficient."
+  },
+  "state_and_compute_contract": {
+    "persistent_candidate_state": "production Pair-VQ matrix state, compact code-conditioned momentum, and the existing B64/L16 compact feedback codec only",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_residual": false,
+    "one_pass_center_training_compute_multiplier": 1.0,
+    "paired_training_compute_multiplier": 2.0,
+    "inference_compute_multiplier": 1.0,
+    "oracle_dense_reference_is_scoring_only": true
+  },
+  "decision_rule": {
+    "preflight": "After implementation and focused tests, run one foreground exact-config systems preflight no longer than five minutes; fail closed below 20 percent MFU.",
+    "oracle_pass": "Authorize only one 238-update 124M endpoint for the selected mechanism, after a separate exact-config MFU gate. Do not authorize a scale-up or sweep.",
+    "oracle_fail": "Seal the functional-gradient rejection. Do not repeat Pair-VQ width, bit, FHT, block, LR, or horizon variants.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  },
+  "anticipated_executable_config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_antithetic_functional_gradient_oracle_0p5tpp_lr24e4.json"
+}
