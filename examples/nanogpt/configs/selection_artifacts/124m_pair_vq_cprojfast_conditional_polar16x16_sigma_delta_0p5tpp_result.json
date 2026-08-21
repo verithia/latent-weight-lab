@@ -1,0 +1,134 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_0p5tpp_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "FAIL_EXACT_ENDPOINT_TEMPORAL_RESOLUTION_GATE",
+  "passed": false,
+  "decision": {
+    "compact_full_mlp_closed_at_124m_0p5tpp": false,
+    "larger_model_or_horizon_authorized": false,
+    "learning_rate_or_capacity_sweep_authorized": false,
+    "next_authorized_work": "Implement one additional residual conditional-polar 16x16 byte per pair and test its current-step conservation under the exact 0.5TPP optimizer schedule before any endpoint or scale-up.",
+    "reason": "The rate-matched one-byte carry improves terminal validation CE by 0.0788 over the prior compact endpoint but remains 0.1566 CE behind the matched dense-MLP parent, exceeding the frozen 0.0500 ceiling by 0.1066. Its codec continues to reconstruct accumulated feedback at 0.9941 recovery, but accumulated-feedback quantization error consumes 52.74 percent of current-request energy at step 232."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_0p5tpp_plan.json",
+    "plan_sha256": "fe186845d4282a809e83ea3c8a79713caeb231734bb448f87c981b84b65e790c",
+    "gate_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_gate160_result.json",
+    "gate_result_sha256": "513889ebe650946775887fe7b558bef6e165abcbf675e87cd9c51a39cf3ccdc3",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_0p5tpp_lr24e4.json",
+    "config_sha256": "4ce410037b1e443399af779361f5665d7792b4fe3df90f38eb109e09eba10b65",
+    "execution_git_commit": "587bd21be1f8c3fc9d40e4472d5dc9f57ec331c5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8fd827281c03494249d9aa8e4b2f25a80726b16ec551e7c38ae1b69bb2764ad0",
+    "examples/nanogpt/train.py": "4fb7567b4233137f17a9d17eef42e3063840c73df7eebf5e7eda70cb386a3b09",
+    "examples/nanogpt/muon_pair_vq.py": "11f278b7bffbf3d2d9116573af6272babdcfae5144b7c0f19c0010e020cf06df"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_0p5tpp_lr24e4_20260821T154757Z_2711152",
+    "started_at": "2026-08-21T23:47:57+08:00",
+    "finished_at": "2026-08-21T23:55:06+08:00",
+    "wall_seconds": 429.244174,
+    "exit_code": 0,
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_0p5tpp_lr24e4_20260821T154757Z_2711152.log",
+    "log_bytes": 1218849,
+    "log_sha256": "b9e52c19fb6ba183f8cb57824a10a89fbc2365c9c72d6a4e2a601ce7723127f8",
+    "status_sha256": "6ef2f02d065055e4feb520248357963bcdf71db4ce551d8e82e35362c4b33399",
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_0p5tpp_lr24e4/ckpt.pt",
+      "bytes": 688224096,
+      "sha256": "df06dbc76b62a885c6251e8f32430773473f8c0ac73be6830b3ca3a4e954eeef",
+      "metadata_bytes": 16558,
+      "metadata_sha256": "33d2677f16f8253e647f2233e7c99ffc81207f8f3deb739f2240d049ecbccf38",
+      "next_iter": 238
+    }
+  },
+  "fixed_checkpoint_comparison": {
+    "matched_parent_validation_ce": {
+      "0": 10.9970,
+      "60": 6.2180,
+      "120": 5.7258,
+      "180": 5.4642,
+      "238": 5.3610
+    },
+    "candidate_validation_ce": {
+      "0": 10.9831,
+      "60": 6.2974,
+      "120": 5.8168,
+      "180": 5.6073,
+      "238": 5.5176
+    },
+    "candidate_minus_parent_ce": {
+      "60": 0.0794,
+      "120": 0.0910,
+      "180": 0.1431,
+      "238": 0.1566
+    },
+    "terminal_perplexity_ratio": 1.1696,
+    "frozen_maximum_gap": 0.0500,
+    "gate_excess_ce": 0.1066
+  },
+  "improvement_over_prior_compact_endpoint": {
+    "prior_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+    "validation_ce_reduction": {
+      "60": 0.1594,
+      "120": 0.0826,
+      "180": 0.0741,
+      "238": 0.0788
+    },
+    "prior_terminal_gap": 0.2354,
+    "new_terminal_gap": 0.1566,
+    "fraction_of_prior_gap_closed": 0.3347
+  },
+  "temporal_geometry": {
+    "rows": [
+      {"step": 0, "all": 0.999626, "c_fc": 0.999614, "c_proj": 0.999696, "feedback_codec": 0.984283, "requested_step": 0.976206, "fast_code_changes": 28262686},
+      {"step": 8, "all": 0.998364, "c_fc": 0.998199, "c_proj": 0.998885, "feedback_codec": 0.983840, "requested_step": 0.910787, "fast_code_changes": 21231115},
+      {"step": 40, "all": 0.980746, "c_fc": 0.982482, "c_proj": 0.972981, "feedback_codec": 0.983997, "requested_step": 0.493512, "fast_code_changes": 12569437},
+      {"step": 80, "all": 0.968522, "c_fc": 0.971942, "c_proj": 0.951061, "feedback_codec": 0.984183, "requested_step": 0.380558, "fast_code_changes": 11260695},
+      {"step": 120, "all": 0.942499, "c_fc": 0.947798, "c_proj": 0.917883, "feedback_codec": 0.984771, "requested_step": 0.249969, "fast_code_changes": 8284903},
+      {"step": 152, "all": 0.894202, "c_fc": 0.900831, "c_proj": 0.867291, "feedback_codec": 0.985785, "requested_step": 0.147287, "fast_code_changes": 5792851},
+      {"step": 160, "all": 0.873553, "c_fc": 0.880643, "c_proj": 0.845241, "feedback_codec": 0.986277, "requested_step": 0.126014, "fast_code_changes": 5139504},
+      {"step": 184, "all": 0.764224, "c_fc": 0.772487, "c_proj": 0.731650, "feedback_codec": 0.988675, "requested_step": 0.063857, "fast_code_changes": 3188965},
+      {"step": 200, "all": 0.657316, "c_fc": 0.664792, "c_proj": 0.628201, "feedback_codec": 0.990802, "requested_step": 0.037017, "fast_code_changes": 2222823},
+      {"step": 216, "all": 0.541801, "c_fc": 0.548039, "c_proj": 0.517750, "feedback_codec": 0.992853, "requested_step": 0.021230, "fast_code_changes": 1576659},
+      {"step": 232, "all": 0.472619, "c_fc": 0.478504, "c_proj": 0.449461, "feedback_codec": 0.994092, "requested_step": 0.014068, "fast_code_changes": 1249317}
+    ],
+    "step232_feedback_to_current_request_energy_ratio": 89.27,
+    "diagnosis": "The codebook remains active and accurately represents the accumulated error, but absolute residual distortion is large relative to the rapidly decaying current update. This is temporal-resolution failure, not codebook collapse, dense-direction capacity failure, BlockFHT compute failure, or attention-V failure."
+  },
+  "gate_scope_correction": {
+    "gate_schedule": {"warmup_iters": 23, "lr_decay_iters": 2373},
+    "endpoint_schedule": {"warmup_iters": 9, "lr_decay_iters": 238},
+    "conclusion": "The prior 160-step gate is a valid 5TPP-schedule geometry result but did not qualify the exact 0.5TPP temporal regime. Future temporal-representation gates must use the endpoint optimizer schedule through its late decay."
+  },
+  "performance": {
+    "mfu_certificate_sha256": "0d0ca0b0f7f13fa7eed4a4c15f221bbde0ff5d61e2457c3a708213c0d9015b8c",
+    "timed_samples": 21,
+    "tokens_per_second_mean": 189141.46,
+    "iteration_ms_mean": 1386.83,
+    "optimizer_ms_mean": 180.49,
+    "optimizer_fraction": 0.129607,
+    "mfu_fraction": 0.337956,
+    "peak_mib_mean": 31609.57,
+    "performance_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99265920,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.563347,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "monitoring": {
+    "initial_watcher_pid": 44731,
+    "initial_watcher_failure": "The local watcher exited before the 50-percent milestone because its launch was not durably detached.",
+    "terminal_recovery": "A foreground recovery invocation verified the finished status and delivered terminal ownership. Stale callbacks naming the already sealed matched parent and prior fast-residual endpoint were not used as evidence for this run."
+  }
+}
