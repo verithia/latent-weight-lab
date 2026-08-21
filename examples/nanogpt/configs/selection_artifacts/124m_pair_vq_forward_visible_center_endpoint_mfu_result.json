@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_124m_pair_vq_forward_visible_center_endpoint_mfu_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_EXACT_CONFIG_ENDPOINT_AUTHORIZED",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4.json",
+    "sha256": "3a7528c817dfc493887de6ff3319c2d1e001b24877dbb44a8e2b6b399cfe64a5"
+  },
+  "source_commit": "efe8c33d30856376237d4b917b1ed85da73c6a7b",
+  "implementation_commit": "5f70a04a577a5089dcdd10543ce957181958ea70",
+  "tests": {
+    "command": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -m pytest -q examples/nanogpt/test_mfu_preflight.py examples/nanogpt/test_muon_pair_vq.py",
+    "passed": 66,
+    "failed": 0
+  },
+  "certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4_mfu.json",
+    "sha256": "19278478fe1f261253f7af0bc10bc68696e338b4b4bb2c39ec1d80d2978ec73f",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_forward_visible_center_0p5tpp_lr24e4_mfu.log",
+    "log_sha256": "6c27d4837a83208773dae00cd77deeb66e26e4e99888b37361396b637c155dc4"
+  },
+  "measurement": {
+    "timed_updates": 8,
+    "finite_logged_losses": 13,
+    "all_logged_losses_finite": true,
+    "tokens_per_second": 158217.57875,
+    "iteration_milliseconds": 1657.01875,
+    "mfu_fraction": 0.283024954242076,
+    "minimum_mfu_fraction": 0.2,
+    "model_tflops": 118.16565686158462,
+    "peak_mib": 31659.5,
+    "optimizer_milliseconds": 456.17125,
+    "persistent_training_bytes": 157500864,
+    "persistent_training_bytes_exact_gate_passed": true,
+    "native_block_fht_extension": "latent_weight_lab_block_fht_ext_scaled_v10"
+  },
+  "authorization": {
+    "one_238_update_endpoint": true,
+    "automatic_rerun": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false,
+    "terminal_validation_ce_max": 5.411
+  }
+}
