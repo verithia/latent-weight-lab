@@ -597,6 +597,10 @@ class MuonPairVQ(torch.optim.Optimizer):
                             "current_request_energy": current_request_energy,
                             "feedback_target_energy": feedback_target_energy,
                             "feedback_energy": float(feedback_after.square().sum()),
+                            "feedback_to_weight_energy_ratio": float(
+                                feedback_after.square().sum()
+                                / weight.float().square().sum().clamp_min(1e-30)
+                            ),
                             "feedback_quantization_residual_energy": (
                                 conservation_error_energy
                             ),

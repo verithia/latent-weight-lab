@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_pair_vq_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "theory_preregistered_before_execution_or_results",
+  "scientific_question": "Can one Cartesian uint8 code per weight pair conserve the temporal Muon motion discarded by the capacity-qualified pair-VQ MLP, without a dense ambient residual?",
+  "causal_basis": {
+    "rejected_endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+    "rejected_endpoint_result_sha256": "0737e56c10401fa64b7c81e7635a6269d8cc3ac17a564a53a8f423d8edaef3ec",
+    "fixed_capacity": "The two-stage c_fc plus one-stage c_proj pair representation with a c_fc fast residual passed the frozen fixed-checkpoint output, JVP, and CE capacity gate.",
+    "temporal_failure": "Applied requested-step recovery fell from 0.9124 at step 8 to 0.1407 at step 120 and a 0.0962 mean over logged refreshes from steps 181 through 237. The terminal matched-parent CE gap was +0.2354.",
+    "excluded_explanations": [
+      "finite endpoint capacity",
+      "step-zero c_fc direction",
+      "MFU or optimizer runtime",
+      "attention V or attention c_proj because both remain dense in the comparison"
+    ],
+    "mechanism": "Deterministic projection erases the normal component of each sub-cell Muon displacement. A causal error-feedback state must retain that component until compact codes can realize it."
+  },
+  "candidate": {
+    "name": "pair_coded_sigma_delta_carry",
+    "weight_state": "unchanged capacity-qualified pair-VQ MLP: two slow c_fc stages plus one c_fc fast Cartesian residual; one slow c_proj stage",
+    "temporal_state": "one uint8 Cartesian code per pair and two learned 16-level FP32 vectors per MLP matrix",
+    "update_rule": "Decode E_t, project W_t + Delta_t + E_t into the weight codec, then encode the remaining projection error as E_{t+1}.",
+    "conservation_law": "W_{t+1} + E_{t+1} approximates W_t + E_t + Delta_t",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false,
+    "inference_temporal_state": "discarded",
+    "inference_weight_and_flops": "unchanged from the compact pair-VQ candidate"
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "persistent_inference_matrix_bytes": 56698560,
+    "compact_momentum_bytes": 73728,
+    "feedback_uint8_pair_codes": 28311552,
+    "feedback_fp32_level_bytes": 3072,
+    "feedback_total_bytes": 28314624,
+    "persistent_training_matrix_state_bytes": 85086912,
+    "dense_bf16_matrix_bytes": 113246208,
+    "dense_fp32_weight_plus_fp32_muon_bytes": 452984832,
+    "inference_model_state_reduction_x": 1.997338345100828,
+    "training_state_reduction_x": 5.3237897739196365,
+    "transient_dense_weight_and_gradient": "materialized only for forward, backward, and the current optimizer step"
+  },
+  "frozen_gate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_sigmadelta_gate160.json",
+    "optimizer_steps": 160,
+    "logged_refresh_steps": [0, 8, 40, 80, 120, 152],
+    "aggregate_conserved_requested_step_energy_recovery_min": 0.95,
+    "every_matrix_conserved_requested_step_energy_recovery_min": 0.8,
+    "aggregate_feedback_codec_energy_recovery_min": 0.98,
+    "every_matrix_feedback_codec_energy_recovery_min": 0.95,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_feedback_code_changes_min": 1,
+    "exact_resume_and_compact_dtype_tests": true,
+    "mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "expected_duration": "under five minutes on PRO6 and therefore foreground-polled; attach a persistent watchdog immediately if observed duration exceeds five minutes"
+  },
+  "decision_policy": {
+    "pass": "Authorize one matched 124M/0.5TPP endpoint comparison against the already sealed QK-only dense-MLP parent; no larger model or longer horizon.",
+    "conservation_fail": "Reject the pair-coded carry and do not tune learning rate, code refresh, or codebook size.",
+    "conservation_pass_endpoint_fail": "Keep the weight representation fixed and isolate compact codeword Muon momentum; do not return to another static weight-chart sweep."
+  }
+}
