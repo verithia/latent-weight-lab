@@ -45,6 +45,9 @@
   },
   "frozen_gate": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
+    "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry1.json",
+    "mfu_preflight_command": "CUDA_VISIBLE_DEVICES=0 python -m examples.nanogpt.mfu_preflight --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json --output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry1.json --log-output /mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160_mfu_retry1.log --min-fraction 0.20 --warmup-updates 2 --timed-updates 4",
+    "preflight_retry_note": "The first invocation was rejected before model construction because the immutable config omitted the required mfu_preflight_required and mfu_min_fraction declarations. No training update ran; retry1 binds the corrected config.",
     "optimizer_steps": 160,
     "logged_refresh_steps": [0, 8, 40, 80, 120, 152],
     "feedback_codec_gate_steps": [8, 40, 80, 120, 152],
