@@ -1,0 +1,81 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_retraction_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_exact_config_preflight_or_training",
+  "scientific_question": "Can a fixed signed orthogonal coordinate transform reduce stochastic Pair-VQ retraction variance enough to preserve its unbiased tangent without adding trainable or persistent state?",
+  "causal_basis": {
+    "rejected_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fast_retraction_result.json",
+      "sha256": "52264ef35f979610f9ecbdd9fbc0c7b93292f3635181b7226433e655f6e4ebfe",
+      "classification": "FAIL_UNBIASED_RETRACTION_VARIANCE_EXPLOSION",
+      "terminal_candidate_validation_ce": 11.1364,
+      "terminal_parent_validation_ce": 5.3610,
+      "terminal_gap_ce": 5.7754,
+      "minimum_expected_bias_recovery": 0.9999999999959481,
+      "boundary_clipped_values": 0,
+      "maximum_weighted_sampling_variance_ratio": 2.135641,
+      "terminal_mean_feedback_to_weight_energy_ratio": 0.932991,
+      "finding": "The raw-coordinate estimator is unbiased but sample-extrema support creates wide stochastic intervals. Quantization noise accumulates in temporal feedback until it approaches weight energy and destroys the forward model."
+    },
+    "matched_dense_parent": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+      "historical_validation_ce": 5.3610
+    }
+  },
+  "theory": {
+    "registered_coordinate_map": "For each fixed 256-value block r, form y=H_256 S r, where S is a fixed seed-derived Rademacher diagonal and H_256 is the normalized Walsh-Hadamard transform. Apply the existing unbiased stochastic Cartesian codec to y and decode r_hat=S H_256 q(y).",
+    "unbiasedness": "Since S H_256 H_256 S=I and expectation is linear, E[r_hat|r]=S H_256 E[q(y)|y]=S H_256 y=r whenever clipping is zero.",
+    "variance_hypothesis": "The fixed orthogonal mixing distributes rare residual-coordinate tail energy over 256 coordinates before global scalar-level fitting. This reduces the interval widths that enter Var[q(y_j)|y_j]=p_j(1-p_j)(a_(i+1)-a_i)^2 while preserving total target energy by Parseval's identity.",
+    "state_invariant": "Signs are regenerated from the registered module seed and the transform has no trainable tensor, stored basis, dense master, ambient residual, or added code byte. The forward weight remains materialized, so the training-only transform adds no steady-state inference FLOPs.",
+    "fixed_choice": "Block size 256 is selected once from the causal outlier-spreading hypothesis. There is no block-size, bit-width, learning-rate, model-width, or horizon sweep.",
+    "falsifier": "If any timed real-training update has request-energy-weighted sampling-variance ratio above 0.10, expected-bias recovery below 0.999, clipping above zero, changed compact bytes, or MFU below 0.20, the endpoint is forbidden."
+  },
+  "registered_candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "cb3ef2579476b6abbfe4c5ab94cfb7a9fb95f3cafba8f3ce0fb98f9563bd0dc5",
+    "implementation_commit": "b1f58e9ee40f3317dce00f875cb852e99fdd355c",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "updates": 238,
+    "comparison_parent_validation_ce": 5.3610
+  },
+  "implementation": {
+    "pair_vq_source_sha256": "0c681122064fe4e64627c1e51df3cadf7586de07fda29178c3715dfbe32bb231",
+    "model_source_sha256": "cead567e719115e107881eca9bf1be7ca13f7747285389248baf581dfa723135",
+    "train_source_sha256": "3adf433c02e8e934fee984d78384a2ca925ec05f5ef9ac280beb00f240405d8e",
+    "mfu_preflight_source_sha256": "f7cf3bd978074e862d8912d58b2afd0f498c361f6c3261302ddebbe4f2be32b9",
+    "pair_vq_test_source_sha256": "e4257b1758d0636d4373dc3592b7ccdd9d90b809c63a67df36c2433f9bf9cd99",
+    "mfu_test_source_sha256": "d627fdd1f8d5baf1bbbdfe4f6d754bda672c028c98cf822d71f6322898542ebf",
+    "remote_tests": {
+      "pair_vq": "46 passed",
+      "mfu_preflight": "13 passed"
+    }
+  },
+  "frozen_preflight_gates": {
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "minimum_stochastic_expected_bias_recovery": 0.999,
+    "maximum_request_energy_weighted_sampling_variance_ratio_per_timed_update": 0.10,
+    "maximum_boundary_clipped_values": 0,
+    "persistent_mlp_training_matrix_bytes_exact": 157500864,
+    "all_losses_finite": true
+  },
+  "conditional_endpoint_gates": {
+    "maximum_terminal_validation_ce": 5.4110,
+    "maximum_terminal_candidate_minus_parent_ce": 0.05,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  },
+  "decision_rule": {
+    "preflight_pass": "Only if every frozen preflight gate passes may the registered 238-update endpoint launch.",
+    "preflight_fail": "Seal the failed certificate and diagnose the variance geometry. Do not launch, tune, scale, or weaken the gate.",
+    "endpoint_pass": "The compact full-MLP smallest rung is closed and may proceed to one 5-TPP temporal validation before larger widths.",
+    "endpoint_fail": "Reject fixed signed FHT variance control as sufficient and return to theory using the measured preflight and trajectory decomposition."
+  },
+  "operations": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "Foreground-poll the exact real-training path. A preflight is not assigned a watchdog.",
+    "scientific_run": "If authorized and expected above five minutes, use one idempotent terminal/error-only @Codex watchdog.",
+    "storage": "No checkpoint. Retain immutable config, plan, certificate, preflight log, terminal log/status/provenance, result, and hashes only."
+  }
+}
