@@ -1,0 +1,95 @@
+{
+  "schema_version": "mai_pair_vq_fractional_source_decomposition_step0_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "ISOLATE_LLOYD_CONVERGENCE_AND_BLOCK_SCALE",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "a2c4e73180d225e6cfeb24ab1cd73c5cfdd03d45",
+    "implementation_commit": "6a066b5710eaa1199f3f640c5bf79a877d088aae",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_source_decomposition_step0.json",
+    "config_sha256": "e30a350b377a1d4c1bd3d829cd276be9993af743ed96be5ef6417b000b5c9abb",
+    "plan_sha256": "39ffacbd4cba1a7ac85880ed3d0a35249e908a670a21cade2b5d6a6357c405dc",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "optimizer_steps": 1,
+    "probe_step": 0,
+    "probe_layer": 7,
+    "probe_family": "mlp.c_fc",
+    "exit_code": 0
+  },
+  "source": {
+    "base_full_recovery": 0.9995838403701782,
+    "innovation_energy_ratio": 0.000416150433011353,
+    "live_q5_b32_lloyd4_full_recovery": 0.9997968886977381,
+    "replayed_q5_b32_lloyd4_full_recovery": 0.9997974038124084,
+    "replay_matches_live": true
+  },
+  "counterfactuals": {
+    "q5_b32_lloyd4_quantized_gain": {
+      "full_recovery": 0.9997974038124084,
+      "innovation_recovery": 0.5131230354309082,
+      "error_energy": 2.8447824651500753e-10
+    },
+    "q5_b32_lloyd16_quantized_gain": {
+      "full_recovery": 0.999954104423523,
+      "innovation_recovery": 0.8897793889045715,
+      "error_energy": 6.440099842297542e-11,
+      "error_reduction_vs_lloyd4": 4.4173
+    },
+    "q5_b32_lloyd16_exact_gain": {
+      "full_recovery": 0.9999940991401672,
+      "innovation_recovery": 0.9857771396636963,
+      "error_energy": 8.310300364522405e-12
+    },
+    "q5_b32_lloyd16_axis_private": {
+      "full_recovery": 0.9999541640281677,
+      "innovation_recovery": 0.8898100852966309,
+      "error_energy": 6.438306832112772e-11,
+      "error_reduction_vs_global": 1.00028
+    },
+    "q5_b16_lloyd16_quantized_gain": {
+      "full_recovery": 0.9999734163284302,
+      "innovation_recovery": 0.9361662268638611,
+      "error_energy": 3.729756781201132e-11
+    },
+    "q5_b64_lloyd16_quantized_gain": {
+      "full_recovery": 0.9999818801879883,
+      "innovation_recovery": 0.95645672082901,
+      "error_energy": 2.544198185461255e-11,
+      "error_reduction_vs_b32": 2.53129,
+      "passes_0p999975_full_source_floor": true
+    },
+    "q4_b64_lloyd16_quantized_gain": {
+      "full_recovery": 0.999975323677063,
+      "innovation_recovery": 0.9406672716140747,
+      "error_energy": 3.466761946957497e-11,
+      "passes_0p999975_full_source_floor": true,
+      "margin_to_floor": 3.23677063e-7
+    }
+  },
+  "diagnosis": {
+    "primary": "The four-round scalar Lloyd fit is under-converged on the highly non-Gaussian residual innovation; sixteen rounds reduce B32/q5 error by 4.417x.",
+    "secondary": "The B32 gain/block partition remains limiting after convergence. Exact gains give a much higher ceiling, while B64 reduces production quantized-gain error by another 2.531x.",
+    "rejected": "Per-FHT-axis scalar codebooks are not useful: their error differs from the global codebook by only 0.028 percent.",
+    "bit_hypothesis_reinterpreted": "The q4-to-q5 comparison looked flat because both codebooks were far from their fitted distortion optimum; coordinate rate was not the dominant variable at four rounds."
+  },
+  "systems": {
+    "production_fast_path_mfu_fraction": 0.3062815289,
+    "diagnostic_tokens_per_second": 130355.71,
+    "diagnostic_estimated_mfu_fraction": 0.233955,
+    "diagnostic_iter_ms": 2010.99,
+    "diagnostic_optimizer_ms": 752.48,
+    "diagnostic_peak_mib": 31215.83,
+    "diagnostic_under_five_minutes": true
+  },
+  "artifacts": {
+    "scientific_log_sha256": "c40e3a34d53833871cb09f7b2b4f58d7d1a25706f78acdc78f64e0aea0927e08"
+  },
+  "authorization": {
+    "loss_endpoint": false,
+    "longer_horizon": false,
+    "model_scale_up": false,
+    "next_live_gate": true,
+    "next_representation": "Keep c_proj on B32/q4/four-round residual coding. For c_fc only, use B64/q5 with sixteen-round Lloyd fitting for residual gains and coordinates. This is 12.65625 c_fc feedback bits/weight and 12.21875 aggregate MLP feedback bits/weight; it must pass a fresh nine-step live recovery, resume, storage, MFU, and optimizer-fraction gate before any loss endpoint."
+  }
+}
