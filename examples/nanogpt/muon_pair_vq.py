@@ -144,10 +144,22 @@ def _fit_stochastic_cartesian_pair_codec_(
     assignments = []
     expected_parts = []
     variance_parts = []
+    boundary_clipped_values = 0
     for coordinate in range(2):
         values = vectors[:, coordinate].float()
         ordered = levels[coordinate].sort().values
+        # Lloyd centroids sit strictly inside the observed range.  Leaving
+        # those centroids as the outer stochastic levels silently clips every
+        # tail request and defeats the promised unbiased local retraction.
+        # Reuse the two existing boundary entries as exact support endpoints;
+        # this changes no byte accounting and leaves the 14 interior Lloyd
+        # levels untouched.
+        ordered[0] = values.amin()
+        ordered[-1] = values.amax()
         levels[coordinate].copy_(ordered)
+        boundary_clipped_values += int(
+            ((values < ordered[0]) | (values > ordered[-1])).sum()
+        )
         upper = torch.searchsorted(ordered, values.contiguous()).clamp(0, 15)
         lower = (upper - 1).clamp(0, 15)
         below = values <= ordered[0]
@@ -189,6 +201,7 @@ def _fit_stochastic_cartesian_pair_codec_(
         "stochastic_fast_sampling_variance_ratio": (
             sampling_variance / max(target_energy, 1e-30)
         ),
+        "stochastic_fast_boundary_clipped_values": boundary_clipped_values,
     }
 
 

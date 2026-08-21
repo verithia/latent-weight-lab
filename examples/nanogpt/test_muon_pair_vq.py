@@ -81,6 +81,8 @@ def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
 
 def test_stochastic_cartesian_retraction_is_replay_exact_and_unbiased() -> None:
     values = torch.linspace(-0.9, 0.9, 8192).reshape(-1, 2)
+    values[0] = torch.tensor([-7.0, 11.0])
+    values[-1] = torch.tensor([13.0, -9.0])
     levels_a = torch.zeros(2, 16)
     levels_b = torch.zeros(2, 16)
     codes_a = torch.zeros(values.shape[0], dtype=torch.uint8)
@@ -96,7 +98,10 @@ def test_stochastic_cartesian_retraction_is_replay_exact_and_unbiased() -> None:
     assert torch.equal(codes_b, codes_a)
     torch.testing.assert_close(levels_b, levels_a, rtol=0.0, atol=0.0)
     assert diagnostics_b == diagnostics_a
-    assert diagnostics_a["stochastic_fast_expected_bias_recovery"] > 0.999
+    assert diagnostics_a["stochastic_fast_expected_bias_recovery"] > 0.999999
+    assert diagnostics_a["stochastic_fast_boundary_clipped_values"] == 0
+    torch.testing.assert_close(levels_a[:, 0], values.amin(dim=0))
+    torch.testing.assert_close(levels_a[:, -1], values.amax(dim=0))
 
 
 def test_stochastic_fast_retraction_resume_is_exact_without_rng_state() -> None:
