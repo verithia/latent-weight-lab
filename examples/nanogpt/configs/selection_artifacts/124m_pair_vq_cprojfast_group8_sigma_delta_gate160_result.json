@@ -1,0 +1,108 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_grouped_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_WEIGHT_CHART_CONSERVATION_REJECT_OUTPUT_GROUP_LOCAL_SCALAR_CARRY",
+  "passed": false,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "group_size_or_learning_rate_sweep_authorized": false,
+    "successful_component": "The repaired c_fc and c_proj charts again pass every causal conservation, carry-energy, and systems gate.",
+    "failed_component": "Output-group-local 4-bit-per-coordinate scalar alphabets do not materially improve carry-code recovery over the matrix-global alphabets.",
+    "next_authorized_work": "Keep the successful weight charts and one uint8 code per pair, but change the carry family from Cartesian scalar-product quantization to a direction-aware two-dimensional polar vector code. Validate its rate-distortion and systems behavior at 124M before any endpoint.",
+    "reason": "The almost identical global and group-local trajectories reject row-scale heterogeneity as the primary distortion source. The remaining defect is the separable scalar codec's mismatch to paired residual directions."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_group8_sigma_delta_plan.json",
+    "plan_sha256": "2d0cbd71f19c1e332d52438ccdde3fd365d5f04f1ed098785da84a17ceb33555",
+    "gate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160.json",
+    "gate_config_sha256": "36f87ebcb873b78528678d54b9b75de56a54b9dcbb7d0baf3f67725f3ffa17ff",
+    "execution_git_commit": "4855ee2f6acf779eb3d123630126322596712469",
+    "implementation_base_commit": "634af698fef200f20710e7b2adca4c5f9b68af75",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160_mfu.json",
+    "mfu_certificate_sha256": "eca73d5ac6629887a1b9d636f4fc72d9ffe8c98292b396efccf2727d8d160e31",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "613f83a8eb7b5c492cd549afd7e1568260fcce57aeb93fcb2ede7434b7cc27c7",
+    "examples/nanogpt/train.py": "299deb4131921938b8144d1a2ff55502a1a7a175ad472c4c95736fbb44fc6bbc",
+    "examples/nanogpt/muon_pair_vq.py": "b6ebfed0483d5f468538169d7e2a86d8223b7e09a2a4a2f9f7f03c20a0479c97"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_group8_sigmadelta_gate160_20260821.log",
+    "log_sha256": "3d97b5e1e522857bda4cd33ddfea8a32576d097639560325699573fed45c1af9",
+    "log_bytes": 408131,
+    "started_at": "2026-08-21T22:15:37+08:00",
+    "finished_at": "2026-08-21T22:19:10+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9790,
+    "step160_validation_ce_diagnostic_only": 5.5273,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "rows": [
+      {"step": 0, "all": 0.996521, "c_fc": 0.996610, "c_proj": 0.995996, "feedback_codec": 0.854306},
+      {"step": 8, "all": 0.993843, "c_fc": 0.993011, "c_proj": 0.996694, "feedback_codec": 0.928461},
+      {"step": 40, "all": 0.984665, "c_fc": 0.984514, "c_proj": 0.985149, "feedback_codec": 0.973198},
+      {"step": 80, "all": 0.976128, "c_fc": 0.977860, "c_proj": 0.968549, "feedback_codec": 0.974548},
+      {"step": 120, "all": 0.977815, "c_fc": 0.979126, "c_proj": 0.971992, "feedback_codec": 0.978503},
+      {"step": 152, "all": 0.977728, "c_fc": 0.978781, "c_proj": 0.973035, "feedback_codec": 0.980508}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.976128,
+      "aggregate_conserved_required": 0.95,
+      "every_matrix_conserved_min": 0.958729,
+      "every_matrix_conserved_required": 0.8,
+      "aggregate_feedback_codec_min_on_gated_steps": 0.928461,
+      "aggregate_feedback_codec_required": 0.98,
+      "every_matrix_feedback_codec_min_on_gated_steps": 0.913207,
+      "every_matrix_feedback_codec_required": 0.95,
+      "maximum_feedback_to_weight_energy_ratio": 0.0000971695,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "cproj_fast_code_changes_at_step152": 5320797,
+      "late_cproj_fast_code_changes_minimum": 1
+    }
+  },
+  "comparison_to_global_levels": {
+    "feedback_codec_delta_group8_minus_global": {
+      "step8": 0.002314,
+      "step40": 0.000236,
+      "step80": -0.000510,
+      "step120": -0.000289,
+      "step152": -0.000422
+    },
+    "interpretation": "Localizing scalar scale does not fix the early or middle distortion and is neutral-to-negative after step 40."
+  },
+  "performance": {
+    "timed_samples": 31,
+    "tokens_per_second_mean": 199523.63,
+    "iteration_ms_mean": 1313.99,
+    "optimizer_ms_mean": 109.51,
+    "optimizer_fraction": 0.083341,
+    "model_tflops": 149.0153,
+    "mfu_fraction": 0.356548,
+    "peak_mib_mean": 31608.05,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99978432,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.530826,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "diagnosis": {
+    "weight_chart": "Causally repaired and held fixed.",
+    "rejected_hypothesis": "The carry error is primarily caused by output-row scale populations competing for global scalar levels.",
+    "remaining_hypothesis": "The two coordinates of each discarded update pair carry coupled directional structure that separable 4-bit scalar alphabets do not encode efficiently.",
+    "minimal_repair": "Use the same uint8-per-pair budget as 32 angular bins times eight adaptive radial levels. This changes codec geometry, not bit rate, weight charts, optimizer, or inference state."
+  }
+}
