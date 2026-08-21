@@ -1,0 +1,97 @@
+{
+  "schema_version": "mai_pair_vq_conditional_polar_distortion_probe16_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "RADIAL_DISTORTION_DOMINATES_AUTHORIZE_16_ANGLE_16_RADIUS_GATE",
+  "passed": true,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "higher_bit_rate_authorized": false,
+    "next_gate_authorized": "one exact 124M 160-step gate using 16 angles and 16 direction-conditional radial levels at the unchanged one-byte-per-pair rate",
+    "reason": "Radial quantization contributes 92.45% of step-8 carry error, above the preregistered 70% threshold. All 256 symbols are occupied and joint entropy is 7.81 bits, so the failure is bit allocation rather than state collapse."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_conditional_polar_distortion_probe16_plan.json",
+    "plan_sha256": "797760040a59a9aa15918bdd21ef75d0e70cc1b20e865fcdc573b03eda6582ad",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_distortion_probe16.json",
+    "config_sha256": "7b2a932ed1c4dddfd06737ce36c77b4ec67580d2b16cca37ab9bb145e297124f",
+    "execution_git_commit": "b0c8f4dc37e7b94120d3b8d7fee2c070c226d258",
+    "implementation_commit": "d0ef9299f76013221fb1ec0efa8440b144b2657f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b",
+    "mfu_certificate_sha256": "334cfdbcf98821f5e87349e6a1a8c627780d6ccf588246398ac9feb45cfe59af",
+    "rejected_operator_preflight_sha256": "3218a8260c1c77bd6fb237beef58db4a40f143aae7f02d91132f691be7e0dd70"
+  },
+  "source_hashes": {
+    "examples/nanogpt/train.py": "94b339f974fbc116df7661dea23654adbae0bb387f81d2e0eee4f13e55846b5d",
+    "examples/nanogpt/muon_pair_vq.py": "e45147ff66b92d1cc32ec3514ee6c9aa92862d35fc03287b12282fdada20ade9"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; under one minute; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_distortion_probe16.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_distortion_probe16_20260821.log",
+    "log_sha256": "63306f0cb401fab008920e3eb6c396f678a76ac4cc101990ed4a172026592134",
+    "log_bytes": 93696,
+    "started_at": "2026-08-21T23:19:33+08:00",
+    "finished_at": "2026-08-21T23:19:58+08:00",
+    "optimizer_steps": 16,
+    "checkpoint": null
+  },
+  "measurements": {
+    "step0": {
+      "angular_error_fraction": 0.036941,
+      "radial_error_fraction": 0.963059,
+      "angular_distortion": 0.002790,
+      "radial_distortion": 0.072737,
+      "total_distortion": 0.075527,
+      "joint_entropy_bits_mean": 7.663957,
+      "joint_entropy_bits_range": [7.591281, 7.772782],
+      "active_codes_range": [256, 256],
+      "top_radius_pair_fraction_mean": 0.024346,
+      "top_radius_energy_fraction": 0.472950,
+      "max_radius_to_rms_range": [17.299908, 30.848455],
+      "radial_rms_by_angle_cv_range": [0.417624, 0.596197]
+    },
+    "step8": {
+      "angular_error_fraction": 0.075530,
+      "radial_error_fraction": 0.924470,
+      "angular_distortion": 0.003050,
+      "radial_distortion": 0.037332,
+      "total_distortion": 0.040383,
+      "joint_entropy_bits_mean": 7.808038,
+      "joint_entropy_bits_range": [7.770177, 7.867503],
+      "angle_entropy_bits_mean": 4.980225,
+      "conditional_radius_entropy_bits_mean": 2.827812,
+      "active_codes_range": [256, 256],
+      "top_radius_pair_fraction_mean": 0.044369,
+      "top_radius_energy_fraction": 0.404713,
+      "max_radius_to_rms_range": [8.971337, 18.770996],
+      "radial_rms_by_angle_cv_range": [0.266753, 0.344413],
+      "c_fc_radial_error_fraction": 0.924854,
+      "c_proj_radial_error_fraction": 0.921630
+    }
+  },
+  "theory": {
+    "high_rate_radial_prediction": "Doubling radial levels from 8 to 16 should reduce scalar radial distortion by approximately fourfold in the high-rate regime.",
+    "measured_projection": "Using the step-8 values gives approximately 0.00305 angular plus 0.03733/4 radial = 0.01238 total distortion before finite-sample and heavy-tail corrections.",
+    "rate_matched_candidate": "16 fixed angular sectors times 16 direction-conditional radii, packed as one uint8 per weight pair.",
+    "why_not_8x32": "The small-angle model for eight sectors alone is about 0.0514 relative distortion, already above the frozen 0.02 distortion budget."
+  },
+  "performance": {
+    "tokens_per_second_mean": 196866.98,
+    "iteration_ms_mean": 1331.58,
+    "optimizer_ms_mean": 130.80,
+    "optimizer_fraction": 0.098227,
+    "model_tflops": 147.031,
+    "mfu_fraction": 0.352435,
+    "peak_mib_mean": 31608.57,
+    "passed": true
+  },
+  "operator_error": {
+    "description": "The first preflight incorrectly requested registered diagnostic-I/O accounting even though this probe emits optimizer diagnostics rather than registered snapshots.",
+    "effect": "The preflight tool rejected the invocation after the scratch run. No scientific result was consumed and no training decision changed.",
+    "remediation": "Preserved the failed certificate and reran the same committed config without the inapplicable flag; the valid certificate passed."
+  }
+}
