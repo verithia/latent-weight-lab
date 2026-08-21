@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_seven_trunk_fullrank_two_sided_coordinates_seal_v1",
+  "classification": "OPTIMIZATION_INCONCLUSIVE",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repository_commit": "9b6ad202a0b5c0222cba864421dab8fc55a60e14",
+    "targeted_tests": "6 passed",
+    "preflight_wall_seconds": 7.17,
+    "exact_wall_seconds": 40.77,
+    "result_reported_wall_seconds": 38.55993127822876,
+    "maximum_cuda_memory_bytes": 10975705600,
+    "language_model_updates": 0
+  },
+  "hashes": {
+    "plan_sha256": "88729f38681b7ce010b34399cdf1c2671159b0128e229bed8fcad98659e9639e",
+    "raw_result_sha256": "52539e67e186a18094fef3b58aaa53ac2ede22ab0768480a91d4370508f32c6a",
+    "fitted_state_sha256": "a0b339ef9cfefde06ed163e463a32ac6c657ac8bff31fc9f40dd37e52e62b076"
+  },
+  "family": {
+    "compact_parameters": 41333760,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 1.3698996655518394,
+    "parameter_saving_fraction": 0.27001953125,
+    "coordinate_parameters": 8257536,
+    "cached_token_time_extra_flops": 0,
+    "initial_endpoint_maximum_absolute_error": 3.5762786865234375e-7
+  },
+  "optimization": {
+    "finite": true,
+    "maps_only_initial_total": 3.844715029001236,
+    "maps_only_final_total": 2.292555660009384,
+    "maps_only_reduction_fraction": 0.4037124617256913,
+    "joint_initial_total": 2.292555660009384,
+    "joint_final_total": 1.9716669470071793,
+    "joint_reduction_fraction": 0.13996986795116306,
+    "joint_holdout_total": 2.3771115839481354,
+    "healthy": false
+  },
+  "late_only_functional_measurement": {
+    "mean_output_recovery": 0.4712150011743818,
+    "minimum_output_recovery": 0.3089635372161865,
+    "mean_input_jvp_recovery": 0.13588453190667288,
+    "minimum_input_jvp_recovery": -0.027503013610839844,
+    "teacher_fixed_validation_cross_entropy": 3.674412250518799,
+    "candidate_fixed_validation_cross_entropy": 8.243685722351074,
+    "fixed_validation_cross_entropy_gap": 4.569273471832275
+  },
+  "coordinate_spectrum": {
+    "input_map_effective_rank_range": [296.783447265625, 399.58843994140625],
+    "output_map_effective_rank_range": [305.6377868652344, 365.1567687988281],
+    "input_map_rank64_energy_range": [0.33606892824172974, 0.44407233595848083],
+    "output_map_rank64_energy_range": [0.37100934982299805, 0.43793267011642456]
+  },
+  "decision": {
+    "language_model_training_authorized": false,
+    "optimizer_retry_authorized": false,
+    "coordinate_factorization_sweep_authorized": false,
+    "finding": "The registered optimizer did not cross its health gate, so this run alone cannot reject unrestricted residual-coordinate maps. Nevertheless, its late-only derivative recovery is poor and its learned maps are high-rank. The earlier, more expressive learned input/hidden/output tri-Monarch LM experiment already regressed the shared core, so another optimizer or factorization sweep is not causally justified.",
+    "next_action": "Move to a representation with genuinely layer-private feature/write content. Test small-block product quantization of every dense teacher MLP matrix as a storage/function ceiling; unlike the rejected 1024-value shared residual VQ, use per-layer/per-side 16-value blocks and 256 learned codewords with explicit per-block scale."
+  }
+}
