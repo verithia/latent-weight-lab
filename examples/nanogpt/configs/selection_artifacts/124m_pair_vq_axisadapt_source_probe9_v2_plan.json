@@ -1,0 +1,66 @@
+{
+  "schema_version": "mai_pair_vq_axisadapt_source_probe9_v2_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_repair_before_exact_config_preflight_or_execution",
+  "scientific_question_and_gates": {
+    "original_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_plan.json",
+    "original_plan_sha256": "7e4df6840de3fd4cf36aa431d0ea669b5e6ff55c3214add35772ee286853ec78",
+    "unchanged": true
+  },
+  "invalid_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_invalid_result.json",
+    "result_sha256": "a4eb23567b2c6101132d90f83f8d235c90230a3a9ecccd99cad8cc3e0a82ea49",
+    "classification": "INVALID_KLT_NUMERICAL_GEOMETRY",
+    "observed_klt_parseval_error_max": 0.00010114115139003843,
+    "frozen_parseval_error_max": 0.000001
+  },
+  "repair": {
+    "implementation_commit": "2edee7cba5b2c3ec1370acd21f25eabe2a21d9f4",
+    "changes": [
+      "disable TF32 during covariance, KLT forward, and KLT inverse matrix multiplications",
+      "QR-reorthogonalize the eigensystem before applying the KLT",
+      "score KLT quantization after inverse reconstruction in ambient source coordinates"
+    ],
+    "focused_test_result": "32 passed",
+    "scientific_configuration_changes": "none"
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_axisadapt_source_probe9_v2.json",
+    "config_sha256": "ccfdf109939f9985d3b67199eb391fd80cbbffc5dfd4918c0e9e8039561a668f",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "candidate_arms": ["fht_global", "fht_axis", "klt_global", "klt_axis"],
+    "persistent_candidate_change": false,
+    "selection_endpoint": false
+  },
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "records_per_probe_step": 24,
+    "fht_and_klt_parseval_relative_error_max": 0.000001,
+    "exact_config_mfu_min_fraction": 0.20
+  },
+  "frozen_candidate_gates": {
+    "full_feedback_energy_weighted_recovery_min_each_probe": 0.99975,
+    "full_feedback_every_matrix_recovery_min_each_probe": 0.999,
+    "coordinate_active_fraction_min_each_matrix": 0.75,
+    "coordinate_entropy_min_each_matrix": 6.0,
+    "gain_active_codes_min_each_matrix": 192,
+    "gain_entropy_bits_min_each_matrix": 6.5
+  },
+  "decision_tree": {
+    "fht_axis_passes": "Implement axis-private q7 levels and require production correctness, resume, direction, and MFU gates.",
+    "only_klt_arm_passes": "Fit and gate a fast learned butterfly approximation; dense KLT production is forbidden.",
+    "no_adapted_arm_passes": "Close scalar transform coding at 7.25 bits/weight and derive vector/trellis shaping with fractional-rate refinement.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
