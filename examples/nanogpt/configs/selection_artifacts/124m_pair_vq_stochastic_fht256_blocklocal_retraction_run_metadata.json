@@ -1,0 +1,104 @@
+{
+  "schema_version": "mai_run_metadata_v1",
+  "created_at": "2026-08-22",
+  "status": "running",
+  "repository": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "branch": "experiment/paired-monarch-training-20260819",
+    "git_commit": "a08599fc96dc484cc290c1c0ad60de3d1626431a",
+    "worktree_clean": true
+  },
+  "entrypoint": [
+    "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train"
+  ],
+  "command": [
+    "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277.config.json"
+  ],
+  "runtime_environment": {
+    "CUDA_VISIBLE_DEVICES": "0",
+    "LD_LIBRARY_PATH": "/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu",
+    "TORCH_EXTENSIONS_DIR": "/mnt/ssd-data/orj/MappingNetworks/.cache/torch_extensions_sm120_exactfamily",
+    "TORCH_CUDA_ARCH_LIST": "12.0",
+    "PYTHONPATH": "."
+  },
+  "config": {
+    "source_path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_blocklocal_retraction_0p5tpp_lr24e4.json",
+    "archive_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277.config.json",
+    "sha256": "c0d75015b43eb46c4bbbc3c54ef356f376b10456acb96e290621897bfb7361bc"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "identity": {
+    "implementation_commit": "4b9c35fae8058a510cf3393ea1e07a16b584842f",
+    "registration_commit": "deb58572d960ee3002e720a2f588c6372ad062a0",
+    "launch_commit": "a08599fc96dc484cc290c1c0ad60de3d1626431a",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "mfu_certificate_sha256": "318df89d42325655a434a3b195b3ad5059382c2d782b4aeac1fb7cfca6a2bd96",
+    "mfu_preflight_log_sha256": "bfd42409421329d9bcd00b7b2f3df452f2eed37912044fde857e6ed497516f36",
+    "provenance_sha256": "284e8685f4014d0794735b326039f967746d5d391f46c0dfb137b4eef706c85c"
+  },
+  "run": {
+    "name": "pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp",
+    "id": "pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277",
+    "host": "PRO6",
+    "gpu": 0,
+    "pid": 2891484,
+    "pgid": 2891484,
+    "started_at": "2026-08-22T05:38:54+08:00",
+    "working_directory": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
+    "output_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_blocklocal_retraction_0p5tpp_lr24e4",
+    "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277.log",
+    "status_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277.json",
+    "provenance_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277.json",
+    "archived_mfu_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277.mfu.json"
+  },
+  "protocol": {
+    "max_iters": 238,
+    "tokens_per_iter": 262144,
+    "scheduled_tokens": 62390272,
+    "parent_terminal_fixed_validation_ce": 5.361,
+    "terminal_fixed_validation_ce_pass_maximum": 5.411,
+    "minimum_mfu_fraction": 0.2,
+    "measured_mfu_fraction": 0.2912725094557803,
+    "persistent_mlp_training_state_bytes": 161039808,
+    "dense_fp32_weight_plus_muon_compression_ratio": 2.812875,
+    "maximum_preflight_sampling_variance_ratio": 0.019898046637346713,
+    "terminal_evaluation_required": true,
+    "larger_rung_authorized": false,
+    "automatic_rerun": false
+  },
+  "launch_health": {
+    "state": "running",
+    "initial_iteration": 0,
+    "initial_loss": 10.9848,
+    "gpu_memory_used_mib": 44403,
+    "gpu_memory_total_mib": 97887,
+    "gpu_utilization_percent": 100,
+    "gpu_power_watts": 402,
+    "gpu_temperature_celsius": 44,
+    "observed_stochastic_variance_ratio": "approximately 0.0198",
+    "boundary_clipped_values": 0
+  },
+  "watchdog": {
+    "mode": "terminal_or_error_only",
+    "local_pid": 75336,
+    "heartbeat_seconds": 0,
+    "poll_seconds": 60,
+    "receipt_path": "/Users/verithia/research/monitoring/pro6_pairvq_blocklocal/watch.receipt.json",
+    "state_path": "/Users/verithia/research/monitoring/pro6_pairvq_blocklocal/watch.state.json",
+    "log_path": "/Users/verithia/research/monitoring/pro6_pairvq_blocklocal/watch.log",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mentions_codex": true,
+    "verified_alive_after_launch": true
+  }
+}
