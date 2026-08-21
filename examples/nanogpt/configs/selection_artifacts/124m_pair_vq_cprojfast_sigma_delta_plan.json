@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "theory_preregistered_before_execution_or_results",
+  "scientific_question": "Does adding the missing fast residual chart specifically to pair-VQ c_proj raise its sigma-delta conservation to the already-repaired c_fc regime without giving up compact state or acceptable MFU?",
+  "causal_basis": {
+    "rejected_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_sigma_delta_gate160_result.json",
+    "rejected_gate_result_sha256": "19ab42cc97c56a3211edf47c989717c120b4c51ecf708a550baf4a15b57e50a4",
+    "observation": "At step 152, c_fc conserved 0.9746 of request energy while c_proj conserved only 0.6617. The implementation difference is exact: c_fc has two slow stages plus a fast residual, while c_proj has one slow stage and no fast residual.",
+    "mechanism": "The carry is stable and compact, but c_proj repeatedly rejects a coherent normal component. A side-local fast chart creates cell-scale motion in the deficient weight representation before the carry is quantized again.",
+    "excluded_moves": [
+      "learning-rate sweep",
+      "larger model",
+      "longer horizon",
+      "higher global carry bit width",
+      "new random basis",
+      "fixed endpoint oracle"
+    ]
+  },
+  "candidate": {
+    "name": "pair_vq_cproj_fast_residual_plus_sigma_delta",
+    "unchanged": [
+      "QK-only attention parent",
+      "c_fc two slow stages and fast residual",
+      "c_proj one slow stage",
+      "pair-coded temporal carry",
+      "Muon request",
+      "data, model, and evaluation seeds"
+    ],
+    "single_change": "Enable one additional 4-bit Cartesian residual code per c_proj weight, fitted every optimizer step.",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "accounting": {
+    "additional_cproj_fast_codes_and_levels_bytes": 14157312,
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99244224,
+    "dense_bf16_matrix_bytes": 113246208,
+    "dense_fp32_weight_plus_fp32_muon_bytes": 452984832,
+    "inference_model_state_reduction_x": 1.5982614397858232,
+    "training_state_reduction_x": 4.564344540595128,
+    "extra_dense_gemm_flops": 0,
+    "extra_codec_work": "one c_proj pair-code refit and decode per optimizer step; measured by the exact-host gate"
+  },
+  "frozen_gate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_sigmadelta_gate160.json",
+    "optimizer_steps": 160,
+    "logged_refresh_steps": [0, 8, 40, 80, 120, 152],
+    "feedback_codec_gate_steps": [8, 40, 80, 120, 152],
+    "aggregate_conserved_requested_step_energy_recovery_min": 0.95,
+    "every_matrix_conserved_requested_step_energy_recovery_min": 0.8,
+    "aggregate_feedback_codec_energy_recovery_min": 0.98,
+    "every_matrix_feedback_codec_energy_recovery_min": 0.95,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_cproj_fast_code_changes_min": 1,
+    "exact_resume_and_compact_dtype_tests": true,
+    "mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "expected_duration": "under five minutes on PRO6 and therefore foreground-polled; attach a persistent watchdog immediately if observed duration exceeds five minutes"
+  },
+  "decision_policy": {
+    "pass": "Authorize exactly one matched 124M/0.5TPP endpoint against the sealed QK-only dense-MLP parent. Do not scale up automatically.",
+    "cproj_conservation_fail": "Reject additive fast-chart symmetry; next theory work must change c_proj chart topology, not tune the optimizer schedule.",
+    "conservation_pass_endpoint_fail": "Keep both weight charts fixed and isolate compact Muon momentum against the same endpoint."
+  }
+}
