@@ -1,0 +1,59 @@
+{
+  "schema_version": "mai_124m_shared_dense_mlp_trunk_groups4_nonuniform_result_v1",
+  "classification": "ACCEPTED_124M_COMPACT_FULL_REPLACEMENT_SCREEN",
+  "passed": true,
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_groups4_2_2_4_4_0p5tpp",
+    "source_commit": "08dabc092b13adcc590877303d5012e65e6a4d96",
+    "started_at": "2026-08-21T11:51:50+08:00",
+    "finished_at": "2026-08-21T11:58:47+08:00",
+    "exit_code": 0,
+    "status_sha256": "9aeb69cfe7bbc6c37cbbf18f112b9d76add9ab6865455df886c9d8ba61a72e7c",
+    "log_sha256": "3c3eb8e56adfe2d25df53995b064225d588faff440f9a0200a317c55ed645ec0",
+    "provenance_sha256": "e86f38e4de72919f58493bdb2998c03a412558ac4417b966ce9ead5a2358fab0",
+    "archived_config_sha256": "f039d0af2c431c999cc4b7b6b478920647f8d04020afa37b3db79864debcc51c",
+    "resolved_config_sha256": "5dddf406b6baac04db7c848bbc6a7d0f784174b3cd3f43ce80991d74a5ec5df6",
+    "checkpoint_sha256": "3a117253582f41841a153d3bfe4cd22cbd3fa5015f2e4ade67706e08d32fd603",
+    "checkpoint_metadata_sha256": "a41e0157a84891ae0611089107bfee240a65f1e05da2b86190816c9491d9d9b5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "terminal": {
+    "step": 238,
+    "train_cross_entropy": 5.5689,
+    "validation_cross_entropy": 5.5717,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "comparisons": {
+    "dense_validation_cross_entropy": 5.489,
+    "gap_to_dense": 0.0827,
+    "attention_only_validation_cross_entropy": 5.4918,
+    "gap_to_attention_only": 0.0799,
+    "perplexity_ratio_to_attention_only": 1.083178,
+    "three_trunk_validation_cross_entropy": 5.6143,
+    "improvement_over_three_trunks": 0.0426,
+    "one_trunk_validation_cross_entropy": 5.6971,
+    "improvement_over_one_trunk": 0.1254,
+    "required_validation_cross_entropy_maximum": 5.5918,
+    "margin_inside_frozen_maximum": 0.0201
+  },
+  "accounting": {
+    "layer_partition": [[0, 1], [2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+    "dense_mlp_parameters": 56623104,
+    "learned_mlp_parameters": 18920448,
+    "mlp_parameter_compression_ratio": 2.9926936190940086,
+    "mlp_parameter_saving_fraction": 0.6658528645833333,
+    "actual_total_trainable_parameters": 58642656,
+    "materialized_dense_mlp_flops_unchanged": true,
+    "persistent_ambient_error_buffer": false,
+    "persistent_ambient_momentum_field": false,
+    "ambient_decoder": false
+  },
+  "performance_gate": {
+    "certificate_sha256": "5df660c31590357671d58fe641a819f4f9c403e94c6ee306ccb090ed6fa3a425",
+    "mfu_fraction": 0.361027,
+    "tokens_per_second": 200718.0,
+    "iteration_milliseconds": 1306.03,
+    "peak_allocated_mib": 33596.81
+  },
+  "decision": "The measured early-layer gradient conflict was causal: splitting only layers 0-3 into two trunks closes the 124M/0.5TPP MLP replacement screen to +0.0799 CE versus the matched attention-only control. This is the first compact full-attention plus compact-MLP candidate to pass the frozen +0.1 structural gate without a dense residual, temporal error buffer, or ambient decoder. It is not yet a final dense-equivalence claim; validate the same representation at 124M/5TPP before any model-size scaling."
+}
