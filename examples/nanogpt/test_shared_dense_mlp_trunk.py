@@ -46,6 +46,19 @@ def test_shared_dense_trunk_ties_only_full_rank_mlp_matrices() -> None:
     ]
 
 
+def test_shared_dense_trunk_supports_contiguous_depth_groups() -> None:
+    model = GPT(_tiny_config(n_layer=6, mlp_shared_dense_trunk_groups=3))
+    mlps = [block.mlp for block in model.transformer.h]
+
+    assert len({id(mlp.c_fc.weight) for mlp in mlps}) == 3
+    assert len({id(mlp.c_proj.weight) for mlp in mlps}) == 3
+    assert id(mlps[0].c_fc.weight) == id(mlps[1].c_fc.weight)
+    assert id(mlps[2].c_fc.weight) == id(mlps[3].c_fc.weight)
+    assert id(mlps[4].c_fc.weight) == id(mlps[5].c_fc.weight)
+    assert len({id(mlp.pregelu_gain) for mlp in mlps}) == 6
+    assert len({id(mlp.residual_output_log_gain) for mlp in mlps}) == 6
+
+
 def test_shared_dense_trunk_backward_aggregates_shared_and_private_gradients() -> None:
     torch.manual_seed(17)
     model = GPT(_tiny_config())
@@ -125,6 +138,10 @@ def test_shared_dense_trunk_rejects_generated_mlp_and_missing_private_charts() -
         (
             {"moe_num_experts": 2},
             "incompatible with MoE",
+        ),
+        (
+            {"n_layer": 3, "mlp_shared_dense_trunk_groups": 2},
+            "evenly divide n_layer",
         ),
     )
     for overrides, expected in invalid:

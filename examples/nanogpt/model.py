@@ -269,6 +269,7 @@ class GPTConfig:
     block_fht_mlp_residual_output_gain_scale: float = 1.0
     block_fht_mlp_residual_output_log_gain_init: float = 0.0
     mlp_shared_dense_trunk: bool = False
+    mlp_shared_dense_trunk_groups: int = 1
     mlp_shared_dense_tri_monarch_block_width: int = 0
     mlp_shared_dense_tri_monarch_coordinate_scale: float = 1.0
     mlp_shared_dense_tri_monarch_seed: int = 20260819
@@ -4787,11 +4788,12 @@ class GPT(nn.Module):
             self._tie_shared_dense_block_fht_residual()
 
     def _tie_shared_dense_mlp_trunk(self) -> None:
-        """Share one learned full-rank MLP pair across transformer layers.
+        """Share learned full-rank MLP pairs within contiguous depth groups.
 
         The layer-private pre-GELU and residual-output gains remain distinct.
         Tying after normal GPT initialization preserves the conventional
         c_proj residual scaling while avoiding unused per-layer dense weights.
+        One group preserves the original all-layer sharing experiment.
         """
 
         if self.config.moe_num_experts > 0:
@@ -4817,6 +4819,12 @@ class GPT(nn.Module):
         blocks = list(self.transformer.h)
         if not blocks:
             raise ValueError("shared dense MLP trunk requires at least one layer")
+        groups = int(self.config.mlp_shared_dense_trunk_groups)
+        if groups <= 0 or groups > len(blocks) or len(blocks) % groups:
+            raise ValueError(
+                "shared dense MLP trunk groups must be positive, no greater "
+                "than n_layer, and evenly divide n_layer"
+            )
         for block in blocks:
             if not isinstance(block.mlp, MLP):
                 raise ValueError("shared dense MLP trunk requires the dense MLP module")
@@ -4827,14 +4835,16 @@ class GPT(nn.Module):
                     "shared dense MLP trunk requires plain dense c_fc and c_proj"
                 )
 
-        root = blocks[0].mlp
-        for block in blocks[1:]:
-            block.mlp.c_fc.weight = root.c_fc.weight
-            block.mlp.c_proj.weight = root.c_proj.weight
-            if self.config.bias:
-                assert root.c_fc.bias is not None and root.c_proj.bias is not None
-                block.mlp.c_fc.bias = root.c_fc.bias
-                block.mlp.c_proj.bias = root.c_proj.bias
+        group_size = len(blocks) // groups
+        for start in range(0, len(blocks), group_size):
+            root = blocks[start].mlp
+            for block in blocks[start + 1 : start + group_size]:
+                block.mlp.c_fc.weight = root.c_fc.weight
+                block.mlp.c_proj.weight = root.c_proj.weight
+                if self.config.bias:
+                    assert root.c_fc.bias is not None and root.c_proj.bias is not None
+                    block.mlp.c_fc.bias = root.c_fc.bias
+                    block.mlp.c_proj.bias = root.c_proj.bias
 
     def _tie_shared_dense_block_fht_residual(self) -> None:
         """Tie the learned dense base while retaining private FHT residuals."""
