@@ -9,7 +9,11 @@ from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_pair_vq import (
     MuonPairVQ,
     MuonPairVQLinear,
+    _decode_conditional_polar_pair_codec,
+    _decode_polar_pair_codec,
     _decode_rvq_pair_codec,
+    _fit_conditional_polar_pair_codec_,
+    _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
     _nearest_cartesian_codes,
     _nearest_codes_exact,
@@ -272,6 +276,49 @@ def test_polar_feedback_resume_is_bit_exact_for_next_step() -> None:
         rtol=0.0,
         atol=0.0,
     )
+
+
+def test_conditional_polar_models_direction_dependent_radius() -> None:
+    torch.manual_seed(165)
+    angle_indices = torch.randint(0, 32, (32768,))
+    directions = torch.stack(
+        (
+            torch.cos(angle_indices.float() * (2.0 * torch.pi / 32.0)),
+            torch.sin(angle_indices.float() * (2.0 * torch.pi / 32.0)),
+        ),
+        dim=1,
+    )
+    scales = 1.0 + 0.75 * torch.cos(
+        angle_indices.float() * (4.0 * torch.pi / 32.0)
+    )
+    radii = scales * (1.0 + 0.08 * torch.randn_like(scales)).clamp_min(0.0)
+    vectors = radii[:, None] * directions
+
+    shared_levels = torch.zeros(8)
+    shared_center = torch.zeros(2)
+    shared_codes = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_polar_pair_codec_(
+        vectors, shared_levels, shared_center, shared_codes
+    )
+    shared = _decode_polar_pair_codec(shared_levels, shared_center, shared_codes)
+    shared_recovery = 1.0 - float((vectors - shared).square().sum()) / float(
+        vectors.square().sum()
+    )
+
+    conditional_levels = torch.zeros(32, 8)
+    conditional_center = torch.zeros(2)
+    conditional_codes = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_conditional_polar_pair_codec_(
+        vectors, conditional_levels, conditional_center, conditional_codes
+    )
+    conditional = _decode_conditional_polar_pair_codec(
+        conditional_levels, conditional_center, conditional_codes
+    )
+    conditional_recovery = 1.0 - float(
+        (vectors - conditional).square().sum()
+    ) / float(vectors.square().sum())
+    assert conditional_recovery > 0.99
+    assert conditional_recovery > shared_recovery + 0.01
 
 
 def test_rvq_feedback_learns_joint_pair_atoms_at_same_code_rate() -> None:

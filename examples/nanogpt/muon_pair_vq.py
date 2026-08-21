@@ -295,6 +295,91 @@ def _fit_polar_pair_codec_(
     return int((new_codes != old_codes).sum())
 
 
+def _decode_conditional_polar_pair_codec(
+    radial_levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> torch.Tensor:
+    if tuple(radial_levels.shape) != (32, 8):
+        raise ValueError("conditional polar radial levels must have shape (32, 8)")
+    if tuple(center.shape) != (2,):
+        raise ValueError("conditional polar center must have shape (2,)")
+    selected = codes.long()
+    angle_indices = selected % 32
+    radius_indices = selected // 32
+    radii = radial_levels[angle_indices, radius_indices]
+    directions = _polar_directions(device=codes.device).index_select(
+        0, angle_indices
+    )
+    return center + radii[:, None] * directions
+
+
+@torch.no_grad()
+def _fit_conditional_polar_pair_codec_(
+    vectors: torch.Tensor,
+    radial_levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> int:
+    """Fit 32 angular sectors with eight direction-conditional radii each."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("conditional polar pair values must have shape (pairs, 2)")
+    if tuple(radial_levels.shape) != (32, 8):
+        raise ValueError("conditional polar radial levels must have shape (32, 8)")
+    if tuple(center.shape) != (2,):
+        raise ValueError("conditional polar center must have shape (2,)")
+    if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
+        raise ValueError("conditional polar pair codes have the wrong shape")
+
+    old_codes = codes.clone()
+    fitted_center = vectors.mean(dim=0)
+    centered = vectors - fitted_center
+    angles = torch.atan2(centered[:, 1], centered[:, 0])
+    angle_indices = torch.remainder(
+        torch.round(angles * (32.0 / (2.0 * math.pi))).long(), 32
+    )
+    directions = _polar_directions(device=vectors.device).index_select(
+        0, angle_indices
+    )
+    projected_radii = (centered * directions).sum(dim=1).clamp_min_(0.0)
+    counts_by_angle = torch.bincount(angle_indices, minlength=32)
+    sum_squares = torch.zeros(32, device=vectors.device, dtype=torch.float32)
+    sum_squares.index_add_(0, angle_indices, projected_radii.square())
+    rms_by_angle = (
+        sum_squares / counts_by_angle.clamp_min(1).to(torch.float32)
+    ).sqrt()
+    probabilities = (
+        torch.arange(8, device=vectors.device, dtype=torch.float32) + 0.5
+    ) / 8.0
+    rayleigh_levels = torch.sqrt(-torch.log1p(-probabilities))
+    fitted = rms_by_angle[:, None] * rayleigh_levels[None, :]
+
+    for _iteration in range(3):
+        midpoints = (fitted[:, :-1] + fitted[:, 1:]) * 0.5
+        thresholds = midpoints.index_select(0, angle_indices)
+        radius_indices = (
+            projected_radii[:, None] > thresholds
+        ).sum(dim=1)
+        flat_indices = angle_indices * 8 + radius_indices
+        sums = torch.zeros(32 * 8, device=vectors.device, dtype=torch.float32)
+        sums.index_add_(0, flat_indices, projected_radii)
+        counts = torch.bincount(flat_indices, minlength=32 * 8)
+        sums = sums.reshape(32, 8)
+        counts = counts.reshape(32, 8)
+        live = counts > 0
+        fitted[live] = sums[live] / counts[live].to(torch.float32)
+        fitted = fitted.sort(dim=1).values
+
+    midpoints = (fitted[:, :-1] + fitted[:, 1:]) * 0.5
+    thresholds = midpoints.index_select(0, angle_indices)
+    radius_indices = (projected_radii[:, None] > thresholds).sum(dim=1)
+    new_codes = (radius_indices * 32 + angle_indices).to(torch.uint8)
+    center.copy_(fitted_center)
+    radial_levels.copy_(fitted)
+    codes.copy_(new_codes)
+    return int((new_codes != old_codes).sum())
+
+
 @torch.no_grad()
 def _nearest_small_vector_codes(
     vectors: torch.Tensor, codebook: torch.Tensor
@@ -465,11 +550,16 @@ class MuonPairVQLinear(nn.Module):
         if self.feedback_codec not in (
             "cartesian4x4",
             "polar32x8",
+            "conditional_polar32x8",
             "rvq4x4",
         ):
             raise ValueError("unknown pair-VQ feedback codec")
         if (
-            self.feedback_codec in ("polar32x8", "rvq4x4")
+            self.feedback_codec in (
+                "polar32x8",
+                "conditional_polar32x8",
+                "rvq4x4",
+            )
             and self.feedback_output_group_size != 0
         ):
             raise ValueError("joint pair feedback currently requires matrix-global levels")
@@ -561,6 +651,8 @@ class MuonPairVQLinear(nn.Module):
         pair_codes = self.element_count // self.vector_length
         if self.feedback_codec == "polar32x8":
             metadata_values = 8 + 2
+        elif self.feedback_codec == "conditional_polar32x8":
+            metadata_values = 32 * 8 + 2
         elif self.feedback_codec == "rvq4x4":
             metadata_values = 2 * 16 * 2 + 2
         else:
@@ -588,6 +680,8 @@ class MuonPairVQLinear(nn.Module):
     def feedback_level_shape(self) -> tuple[int, ...]:
         if self.feedback_codec == "polar32x8":
             return (8,)
+        if self.feedback_codec == "conditional_polar32x8":
+            return (32, 8)
         if self.feedback_codec == "rvq4x4":
             return (2, 16, 2)
         if self.feedback_output_group_size == 0:
@@ -596,7 +690,11 @@ class MuonPairVQLinear(nn.Module):
 
     @property
     def feedback_center_shape(self) -> tuple[int, ...] | None:
-        if self.feedback_codec in ("polar32x8", "rvq4x4"):
+        if self.feedback_codec in (
+            "polar32x8",
+            "conditional_polar32x8",
+            "rvq4x4",
+        ):
             return (2,)
         return None
 
@@ -610,6 +708,10 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("polar pair feedback requires a center")
             return _decode_polar_pair_codec(levels, center, codes)
+        if self.feedback_codec == "conditional_polar32x8":
+            if center is None:
+                raise ValueError("conditional polar pair feedback requires a center")
+            return _decode_conditional_polar_pair_codec(levels, center, codes)
         if self.feedback_codec == "rvq4x4":
             if center is None:
                 raise ValueError("RVQ pair feedback requires a center")
@@ -634,6 +736,12 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("polar pair feedback requires a center")
             return _fit_polar_pair_codec_(vectors, levels, center, codes)
+        if self.feedback_codec == "conditional_polar32x8":
+            if center is None:
+                raise ValueError("conditional polar pair feedback requires a center")
+            return _fit_conditional_polar_pair_codec_(
+                vectors, levels, center, codes
+            )
         if self.feedback_codec == "rvq4x4":
             if center is None:
                 raise ValueError("RVQ pair feedback requires a center")
@@ -681,9 +789,14 @@ class MuonPairVQLinear(nn.Module):
                     (
                         "uint8_polar32x8_code_per_weight_pair"
                         if self.feedback_codec == "polar32x8"
-                        else "uint8_rvq4x4_code_per_weight_pair"
+                        else (
+                            "uint8_conditional_polar32x8_code_per_weight_pair"
+                            if self.feedback_codec == "conditional_polar32x8"
+                            else "uint8_rvq4x4_code_per_weight_pair"
+                        )
                     )
-                    if self.feedback_codec in ("polar32x8", "rvq4x4")
+                    if self.feedback_codec
+                    in ("polar32x8", "conditional_polar32x8", "rvq4x4")
                     else (
                         "uint8_cartesian_code_per_weight_pair_global_levels"
                         if self.feedback_output_group_size == 0
