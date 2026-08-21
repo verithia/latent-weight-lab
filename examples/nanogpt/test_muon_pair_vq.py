@@ -25,6 +25,7 @@ from examples.nanogpt.muon_pair_vq import (
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
     _fractional_lattice_feedback_layout,
+    _fractional_residual_lattice_feedback_layout,
     _nearest_cartesian_codes,
     _nearest_codes_exact,
     _normal_cartesian_codebook,
@@ -72,7 +73,11 @@ def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
     )
 
 
-def make_fractional_module(*, seed: int = 1721) -> MuonPairVQLinear:
+def make_fractional_module(
+    *,
+    seed: int = 1721,
+    feedback_codec: str = "fractional_lattice_q7q8_b32_p25",
+) -> MuonPairVQLinear:
     return MuonPairVQLinear(
         16,
         16,
@@ -83,7 +88,7 @@ def make_fractional_module(*, seed: int = 1721) -> MuonPairVQLinear:
         layer_id=2,
         fast_residual=False,
         error_feedback=True,
-        feedback_codec="fractional_lattice_q7q8_b32_p25",
+        feedback_codec=feedback_codec,
         feedback_output_group_size=0,
         neighbor_candidates=16,
         code_refresh_interval=8,
@@ -265,6 +270,83 @@ def test_fractional_lattice_feedback_resume_is_bit_exact_for_next_step() -> None
     optimizer_state = copy.deepcopy(optimizer.state_dict())
 
     restored = make_fractional_module(seed=1725)
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(
+        restored_state["feedback_codes"], original_state["feedback_codes"]
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
+def test_fractional_residual_lattice_uses_exact_rate_and_improves_recovery() -> None:
+    base = make_fractional_module(seed=1727)
+    residual = make_fractional_module(
+        seed=1727,
+        feedback_codec="fractional_lattice_q7q8_b32_p25_rq4",
+    )
+    base_optimizer = make_optimizer(base)
+    residual_optimizer = make_optimizer(residual)
+    torch.manual_seed(1729)
+    gradient = torch.randn_like(base.weight)
+    base.weight.grad = gradient.clone()
+    residual.weight.grad = gradient.clone()
+    base_optimizer.step()
+    residual_optimizer.step()
+    base_diagnostics = base_optimizer.consume_diagnostics()[0]
+    residual_diagnostics = residual_optimizer.consume_diagnostics()[0]
+    state = residual_optimizer.state[residual.weight]
+    layout = _fractional_residual_lattice_feedback_layout(
+        residual.element_count
+    )
+    assert layout["total_bytes"] == 377
+    assert 8.0 * layout["total_bytes"] / residual.element_count == 11.78125
+    assert state["feedback_levels"].shape == (912,)
+    assert state["feedback_codes"].shape == (377,)
+    assert residual.compact_feedback_bytes == 377 + 912 * 4
+    assert (
+        residual_diagnostics["feedback_codec_energy_recovery"]
+        > base_diagnostics["feedback_codec_energy_recovery"]
+    )
+    assert residual_diagnostics["feedback_codec_energy_recovery"] > 0.9999
+    assert not any(
+        value.numel() == residual.element_count
+        and value.dtype == torch.float32
+        for value in state.values()
+        if isinstance(value, torch.Tensor)
+    )
+
+
+def test_fractional_residual_lattice_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(1731)
+    module = make_fractional_module(
+        seed=1733,
+        feedback_codec="fractional_lattice_q7q8_b32_p25_rq4",
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_fractional_module(
+        seed=1735,
+        feedback_codec="fractional_lattice_q7q8_b32_p25_rq4",
+    )
     restored.load_state_dict(model_state, strict=True)
     restored_optimizer = make_optimizer(restored)
     restored_optimizer.load_state_dict(optimizer_state)
