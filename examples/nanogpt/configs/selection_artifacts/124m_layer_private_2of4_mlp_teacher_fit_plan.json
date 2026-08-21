@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_layer_private_2of4_mlp_teacher_fit_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can layer-private 2:4 structured sparsity preserve the dense MLP's feature-boundary and residual-write fields while actually reducing stored learned state?",
+  "causal_basis": {
+    "layer_axis_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_axis_basis7_mlp_teacher_fit_result.json",
+    "layer_axis_result_sha256": "550f3d41f0fc70ef2b3193fe05c05e0061b8ad6e1c93e085bedcf81a9e00a9c4",
+    "finding": "Healthy seven-atom fitting used coefficient effective ranks 5.58 and 6.07 but recovered only 0.629 output and 0.295 input-JVP energy. Cross-layer sharing is the obstruction; the next family must retain independent ambient state per layer on both sides of GELU.",
+    "why_2of4": "Every c_fc row and c_proj row owns independent learned coordinates in every consecutive input group of four. This moves activation hyperplanes and residual writes directly instead of rotating a fixed/shared plane, while matching hardware semi-structured sparse kernels.",
+    "nested_factorial": "A dense-magnitude-selected support is an optimistic representability ceiling. A separately fitted deterministic fixed-random support is the deployable from-scratch discriminator. The second is not selected by the first and neither may change its mask after seeing fit or holdout outcomes.",
+    "not_a_sweep": "Sparsity is fixed at exactly 2:4, both masks use one frozen construction, both fits use one optimizer path and seed, and no density, grouping, mask, learning-rate, optimizer, restart, or regularizer sweep is permitted."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "residual_width": 768,
+    "hidden_width": 3072,
+    "support_rule": "Partition the input axis of every matrix row into consecutive groups of four and retain exactly two coordinates per group. Supports are fixed throughout a fit.",
+    "variants": [
+      {
+        "name": "magnitude_ceiling",
+        "support": "For every group independently, retain the two largest-absolute-value entries of the exact dense-teacher matrix. Ties select the lower coordinate.",
+        "role": "optimistic capacity ceiling; cannot by itself authorize LM training"
+      },
+      {
+        "name": "fixed_random",
+        "support": "For every group independently, select one of the six unordered coordinate pairs from a counter-based deterministic seed 20260934 plus layer/matrix identity.",
+        "role": "deployable from-scratch fixed-support discriminator"
+      }
+    ],
+    "trainable_values": 28311552,
+    "dense_mlp_values": 56623104,
+    "trainable_parameter_compression_ratio": 2.0,
+    "trainable_parameter_saving_fraction": 0.5,
+    "support_groups": 14155776,
+    "canonical_mask_bits": 42467328,
+    "canonical_mask_bytes": 5308416,
+    "bf16_value_bytes": 56623104,
+    "bf16_values_plus_canonical_mask_bytes": 61931520,
+    "dense_bf16_bytes": 113246208,
+    "inference_storage_compression_ratio": 1.8285714285714285,
+    "dense_expansion": false,
+    "target_kernel": "native 2:4 semi-structured sparse tensor-core GEMM; exact MFU must be certified before training",
+    "ideal_matrix_multiply_flop_fraction": 0.5
+  },
+  "fit_protocol": {
+    "objective": "Equal-weight separately normalized clean-output and central-difference direction errors on dense-teacher and seven-trunk state banks.",
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260930,
+    "holdout_token_seed": 20260931,
+    "local_perturbation_relative_rms": 0.01,
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "steps_per_variant": 800,
+    "optimizer": "Adam",
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "algorithm_seeds": {
+      "magnitude_ceiling": 20260932,
+      "fixed_random": 20260933
+    },
+    "initial_values": "For each frozen support, copy the dense teacher's selected entries. Omitted coordinates are identically zero and have no trainable storage.",
+    "best_state_rule": "Preserve the smallest discovery objective within each independent fit. Holdout and fixed-CE values never select states or masks.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260935,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "per-variant discovery and holdout value-direction objectives",
+      "held-out output and analytic input-JVP recovery by layer and state bank",
+      "fixed-checkpoint validation CE for both supports",
+      "packed-value and mask storage accounting",
+      "peak memory and wall time"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "Finite execution and either final discovery objective at most 0.5 or at least 50-percent reduction from that variant's initial objective."
+  },
+  "decision_rule": {
+    "magnitude_fail": "Reject 2:4 layer-private sparsity as insufficient even under an optimistic support; do not run a sparse LM or density sweep.",
+    "magnitude_pass_random_fail": "The family has capacity but fixed-random support does not. Stop before LM training and derive one compact support-acquisition mechanism; do not tune random masks.",
+    "fixed_random_pass": "Implement the exact fixed-random 2:4 family with a native sparse kernel, require at least 20-percent MFU, then launch only a 124M/0.5TPP verification.",
+    "optimization_inconclusive": "Stop and report without a capacity conclusion or LM training."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update nested teacher-fit factorial after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before the fixed-random functional and CE gates pass",
+      "model-size scaling",
+      "sparsity, mask, optimizer, learning-rate, seed, step-count, or restart sweeps",
+      "using holdout values to change a support or select a state"
+    ],
+    "callback_policy": "Foreground-poll if measured total runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}

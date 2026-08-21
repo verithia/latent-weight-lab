@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_layer_axis_basis7_mlp_teacher_fit_result_v1",
+  "classification": "LAYER_AXIS_BASIS7_FAMILY_FAIL",
+  "identity": {
+    "repository_commit": "2672c36a689cf94af1c9bf1187dea9bd91794cb7",
+    "entrypoint": "examples/nanogpt/analyze_layer_axis_basis7_mlp_teacher_fit.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_layer_axis_basis7_mlp_teacher_fit_plan.json",
+    "plan_sha256": "f5d5f0a700a632c25700f6977c404eda735c516bd0b683bde658a90053b6f5f6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "seven_trunk_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_axis_basis7_mlp_teacher_fit_20260821/result.json",
+      "sha256": "e03893b69531e262d302fb216eb2d242f7415bf2a6eed6c89ac7e29827729d77"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_axis_basis7_mlp_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "5dfdd213ff2e4116f68e62a09b9963d782d814a68f7da6cfbb78fba6845c694b"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 40.782835960388184,
+    "maximum_cuda_memory_bytes": 11039879680,
+    "language_model_updates": 0,
+    "focused_tests": "11 passed",
+    "preflight": {
+      "conservative_estimated_fit_seconds": 86.79853677749634,
+      "maximum_cuda_memory_bytes": 2718745600
+    }
+  },
+  "accounting": {
+    "compact_parameters": 33076392,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 1.7118887694885223,
+    "parameter_saving_fraction": 0.4158498975965712,
+    "cached_inference_token_flop_overhead": 0.0,
+    "conservative_reconstruction_flops_per_refresh": 792723456
+  },
+  "stages": {
+    "coefficients_only": {
+      "initial_fit_objective": 3.8353494703769684,
+      "final_fit_objective": 2.84470072388649,
+      "objective_reduction_fraction": 0.25829425822651564,
+      "holdout_objective": 2.834839314222336,
+      "output_recovery_mean_min_global": [-0.3917471890648206, -0.8754093647003174, -0.34711156914029173],
+      "input_jvp_recovery_mean_min_global": [-0.44296729067961377, -0.8437912464141846, -0.43843230045158643]
+    },
+    "joint_basis_coefficients": {
+      "initial_fit_objective": 2.84470072388649,
+      "final_fit_objective": 0.30820683017373085,
+      "final_value_objective": 0.14939019829034805,
+      "final_direction_objective": 0.15881663002073765,
+      "objective_reduction_fraction": 0.8916557978891178,
+      "holdout_objective": 1.0753883868455887,
+      "holdout_value_objective": 0.37098534777760506,
+      "holdout_direction_objective": 0.7044030129909515,
+      "output_recovery_mean_min_global": [0.629080094397068, 0.2784828543663025, 0.6598167577622724],
+      "input_jvp_recovery_mean_min_global": [0.2953917185465495, -0.11981689929962158, 0.33318464988569996],
+      "c_fc_coefficient_entropy_rank": 5.579483509063721,
+      "c_proj_coefficient_entropy_rank": 6.066945552825928,
+      "optimization_healthy": true,
+      "passes": false
+    }
+  },
+  "fixed_validation": {
+    "teacher_cross_entropy": 3.674412250518799,
+    "candidate_cross_entropy": 5.783336162567139,
+    "gap": 2.10892391204834
+  },
+  "decision": {
+    "representation_rejected": true,
+    "language_model_training_authorized": false,
+    "atom_count_or_optimizer_sweep_authorized": false,
+    "interpretation": "The continuous seven-atom family is numerically active and uses nearly the full registered layer-axis span: coefficient entropy ranks are 5.58 and 6.07. Healthy joint fitting removes 89.17 percent of the discovery objective. Yet holdout output and input-JVP recovery remain 0.6291 and 0.2954, and the fixed-CE gap is +2.1089. The obstruction is therefore missing layer-private ambient content, not one-hot depth assignment, token-router discontinuity, or coefficient collapse.",
+    "next_action": "Stop cross-layer matrix sharing. Test one nested layer-private 2:4 structured-sparse teacher-fit factorial: an optimistic magnitude-selected support establishes the capacity ceiling and a deterministic fixed-random support tests a deployable from-scratch family. Count masks and values, preserve independent c_fc/c_proj state per layer, and require the unchanged output/JVP/CE gates before LM training."
+  }
+}
