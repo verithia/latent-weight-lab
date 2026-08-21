@@ -1,0 +1,57 @@
+{
+  "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_run_metadata_v1",
+  "state": "running",
+  "host": "PRO6",
+  "gpu": 0,
+  "run_name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75",
+  "run_id": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75_20260821T003241Z_2255728",
+  "pgid": 2255857,
+  "launched_at": "2026-08-21T08:32:43+08:00",
+  "expected_duration_hours": 7.0,
+  "source_commit": "cb7c54c3d6b9de4d0acabb86b58c7b501b096241",
+  "config_sha256": "13e8626594deba2f5330e491e512dbbbad3de5947b0c6310a22f4600528ea86d",
+  "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+  "refreshed_mfu_certificate_sha256": "de9d1f8244770552755c01c3de38823a5228fdd9f0878b4d64304e91e266f424",
+  "provenance_sha256": "fe981e2c227ad3adf99d7b4adf0ab3df113d77913ce94d5df950c32efcb4694d",
+  "archived_config_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75_20260821T003241Z_2255728.config.json",
+  "provenance_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75_20260821T003241Z_2255728.json",
+  "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75_20260821T003241Z_2255728.log",
+  "status_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75_20260821T003241Z_2255728.json",
+  "literal_command": [
+    "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75_20260821T003241Z_2255728.config.json"
+  ],
+  "driver_compatibility": {
+    "loaded_driver": "595.71.05",
+    "library_path": "/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu",
+    "library_path_inherited_by_trainer": true,
+    "library_path_used_by_watchdog_gpu_probe": true
+  },
+  "scientific_gate": {
+    "matched_qk_only_terminal_validation_ce": 3.0645,
+    "maximum_delta_to_same_slot_qk_only_ce": 0.02,
+    "maximum_terminal_validation_ce": 3.0845,
+    "threshold_changed_after_launch": false
+  },
+  "watchdog": {
+    "label": "com.mappingnetworks.pro6.fullreplacement350m.5tpp.top2.20260821",
+    "state_path": "/Users/verithia/research/latent-weight-lab-midpoint/.watchdogs/cb7c54c3d6b9de4d0acabb86b58c7b501b096241/pro6_350m_fullreplacement_allfeedback_5tpp_top2.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "agent_mention": "@Codex",
+    "progress_milestones": [20, 50, 80, 100],
+    "heartbeat_minutes": 90,
+    "initial_probe": {
+      "alive": true,
+      "last_iter": 0,
+      "gpu_memory_mib": 70841,
+      "gpu_total_memory_mib": 97887,
+      "gpu_utilization_percent": 99,
+      "gpu_temperature_c": 49,
+      "errors": []
+    }
+  }
+}

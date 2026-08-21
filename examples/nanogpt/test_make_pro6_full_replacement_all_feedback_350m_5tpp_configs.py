@@ -11,6 +11,7 @@ from examples.nanogpt.make_pro6_full_replacement_all_feedback_350m_5tpp_configs 
     RUN_METADATA,
     TOP1_RESULT,
     TOP2_REFRESHED_MFU_RESULT,
+    TOP2_RUN_METADATA,
     PARENTS,
     PLAN,
     QK,
@@ -77,7 +78,7 @@ def test_plan_materializes_only_ranked_top_two_and_authorizes_top1_after_both_mf
     assert plan["performance_gate"]["foreground_polling"] is True
     assert plan["performance_gate"]["watchdog"] is False
     assert plan["performance_gate"]["both_configs_must_pass_before_first_launch"] is True
-    assert plan["status"] == "top1_passed_top2_exact_mfu_refreshed_authorized"
+    assert plan["status"] == "top2_running"
     assert plan["performance_gate"]["launch_authorized"] is True
     assert plan["performance_gate"]["top2_launch_authorized"] is True
     assert plan["performance_gate"]["mfu_result"] == {
@@ -95,6 +96,10 @@ def test_plan_materializes_only_ranked_top_two_and_authorizes_top1_after_both_mf
     assert plan["performance_gate"]["refreshed_top2_mfu_result"] == {
         "path": str(TOP2_REFRESHED_MFU_RESULT.relative_to(TOP2_REFRESHED_MFU_RESULT.parents[4])),
         "sha256": sha256(TOP2_REFRESHED_MFU_RESULT),
+    }
+    assert plan["top2_execution_state"] == {
+        "path": str(TOP2_RUN_METADATA.relative_to(TOP2_RUN_METADATA.parents[4])),
+        "sha256": sha256(TOP2_RUN_METADATA),
     }
     assert plan["immutable_ranking"]["sha256"] == sha256(RANKING)
     for slot in SELECTIONS:
@@ -139,3 +144,16 @@ def test_top2_refreshed_mfu_gate_matches_exact_config_and_driver_repair():
     assert result["preflight"]["mfu_fraction"] >= 0.20
     assert result["preflight"]["all_logged_losses_finite"] is True
     assert result["decision"]["top2_launch_authorized"] is True
+
+
+def test_top2_run_metadata_pins_clean_launch_and_watchdog():
+    metadata = load(TOP2_RUN_METADATA)
+    assert metadata["state"] == "running"
+    assert metadata["source_commit"] == "cb7c54c3d6b9de4d0acabb86b58c7b501b096241"
+    assert metadata["config_sha256"] == sha256(OUTPUTS["top2"])
+    assert metadata["refreshed_mfu_certificate_sha256"] == load(
+        TOP2_REFRESHED_MFU_RESULT
+    )["artifacts"]["certificate"]["sha256"]
+    assert metadata["watchdog"]["progress_milestones"] == [20, 50, 80, 100]
+    assert metadata["watchdog"]["initial_probe"]["alive"] is True
+    assert metadata["driver_compatibility"]["library_path_used_by_watchdog_gpu_probe"] is True

@@ -21,6 +21,7 @@ TOP1_RESULT = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top1_resul
 TOP2_REFRESHED_MFU_RESULT = (
     ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top2_refreshed_mfu_result.json"
 )
+TOP2_RUN_METADATA = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top2_run_metadata.json"
 SELECTIONS = {"top1": "mult1p00", "top2": "mult0p75"}
 PARENTS = {
     "top1": CONFIG_DIR / "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
@@ -203,11 +204,22 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             raise ValueError("registered top1 run metadata state disagrees with terminal evidence")
         if bool(run_metadata.get("top2_launch_authorized")) != top2_launch_authorized:
             raise ValueError("top1 run metadata top2 authorization disagrees with sealed gates")
+    top2_run_metadata: dict[str, Any] | None = None
+    if TOP2_RUN_METADATA.exists():
+        top2_run_metadata = load(TOP2_RUN_METADATA)
+        if not top2_launch_authorized:
+            raise ValueError("top2 run metadata exists before all launch gates pass")
+        if top2_run_metadata.get("config_sha256") != sha256(OUTPUTS["top2"]):
+            raise ValueError("top2 run metadata config hash mismatch")
+        if top2_run_metadata.get("state") != "running":
+            raise ValueError("registered top2 run metadata is not live")
     return {
         "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_plan_v1",
         "registered_at": "2026-08-21",
         "status": (
-            "top1_passed_top2_exact_mfu_refreshed_authorized"
+            "top2_running"
+            if top2_run_metadata is not None
+            else "top1_passed_top2_exact_mfu_refreshed_authorized"
             if top2_launch_authorized
             else "top1_running_top2_blocked"
             if run_metadata is not None
@@ -262,6 +274,14 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "top1_terminal_result": (
             {"path": str(TOP1_RESULT.relative_to(ROOT)), "sha256": sha256(TOP1_RESULT)}
             if top1_result is not None
+            else None
+        ),
+        "top2_execution_state": (
+            {
+                "path": str(TOP2_RUN_METADATA.relative_to(ROOT)),
+                "sha256": sha256(TOP2_RUN_METADATA),
+            }
+            if top2_run_metadata is not None
             else None
         ),
         "monitoring": {"expected_duration_hours_per_candidate": [7, 8], "progress_callbacks": [0.20, 0.50, 0.80, 1.00], "heartbeat_minutes": 90, "heartbeat_resets_on_progress": True, "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test", "agent_mention": "@Codex"},

@@ -98,9 +98,13 @@
     "No optimizer-state compression claim",
     "No inference-FLOP reduction claim"
   ],
-  "status": "top1_passed_top2_exact_mfu_refreshed_authorized",
+  "status": "top2_running",
   "top1_terminal_result": {
     "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top1_result.json",
     "sha256": "987ffcbd94508494a821552f907e0fab9717f801d62ea55dc06ffbb006105612"
+  },
+  "top2_execution_state": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top2_run_metadata.json",
+    "sha256": "9195508a952aca8c543eafba7102ab8efd2974a14768967beb420d79134e4ba7"
   }
 }
