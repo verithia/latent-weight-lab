@@ -3,6 +3,7 @@
   "config_sha256": "35484fe5ede3431ca852d8a2d48969ff2dc5832e2af0176719227adbf169220c",
   "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
   "expected_duration_hours": 7.0,
+  "finished_at": "2026-08-21T08:15:30+08:00",
   "gpu": 0,
   "host": "PRO6",
   "launched_at": "2026-08-21T01:27:04+08:00",
@@ -16,6 +17,10 @@
   ],
   "log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.log",
   "mfu_certificate_sha256": "c0b19f840b65dcc4d9d1e12300ad6d66e67687ad22d1587da1c6fb830f78bbfd",
+  "result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top1_result.json",
+    "sha256": "987ffcbd94508494a821552f907e0fab9717f801d62ea55dc06ffbb006105612"
+  },
   "pgid": 2029698,
   "provenance_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.json",
   "provenance_sha256": "5ec97b9315381b3b205edbed6da72e08509bf2cd27258464b3eb571b8a9a7278",
@@ -23,9 +28,20 @@
   "run_name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00",
   "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_run_metadata_v1",
   "source_commit": "c947db1b170b3d7a9031cc537899731ee73aaebd",
-  "state": "running",
+  "state": "finished",
   "status_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.json",
-  "top2_launch_authorized": false,
+  "terminal": {
+    "classification": "clean",
+    "exit_code": 0,
+    "next_iter": 6764,
+    "terminal_validation_ce": 3.027085065841675,
+    "frozen_gate_passed": true
+  },
+  "top2_launch_authorized": true,
+  "top2_refreshed_mfu_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top2_refreshed_mfu_result.json",
+    "sha256": "19707d39b1883eb30ab03bba954fe14fceeb7e1c14cd8cdf16d53de850b4ee46"
+  },
   "watchdog": {
     "agent_mention": "@Codex",
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",

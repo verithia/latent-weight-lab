@@ -28,7 +28,7 @@
   ],
   "execution_state": {
     "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top1_run_metadata.json",
-    "sha256": "694810ea0134913dabb440a8140507eee32afb2f0e07ad4100452f5c85269792"
+    "sha256": "309a0efeec9cac7d59c0fe1e691b85c45b5c9e62f79d5da916b64e2b803b69dd"
   },
   "frozen_gate": {
     "maximum_delta_to_same_slot_qk_only_ce": 0.02,
@@ -66,6 +66,11 @@
       "sha256": "00c4a12b8366eecab83e0eadee0f7e6ebc4664446fc2d2fa42d04e7852c864da"
     },
     "minimum_mfu_fraction": 0.2,
+    "refreshed_top2_mfu_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top2_refreshed_mfu_result.json",
+      "sha256": "19707d39b1883eb30ab03bba954fe14fceeb7e1c14cd8cdf16d53de850b4ee46"
+    },
+    "top2_launch_authorized": true,
     "watchdog": false
   },
   "registered_at": "2026-08-21",
@@ -93,5 +98,9 @@
     "No optimizer-state compression claim",
     "No inference-FLOP reduction claim"
   ],
-  "status": "top1_running_top2_blocked"
+  "status": "top1_passed_top2_exact_mfu_refreshed_authorized",
+  "top1_terminal_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_top1_result.json",
+    "sha256": "987ffcbd94508494a821552f907e0fab9717f801d62ea55dc06ffbb006105612"
+  }
 }

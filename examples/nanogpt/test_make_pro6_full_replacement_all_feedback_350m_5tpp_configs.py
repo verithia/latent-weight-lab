@@ -9,6 +9,8 @@ from examples.nanogpt.make_pro6_full_replacement_all_feedback_350m_5tpp_configs 
     OUTPUTS,
     MFU_RESULT,
     RUN_METADATA,
+    TOP1_RESULT,
+    TOP2_REFRESHED_MFU_RESULT,
     PARENTS,
     PLAN,
     QK,
@@ -75,8 +77,9 @@ def test_plan_materializes_only_ranked_top_two_and_authorizes_top1_after_both_mf
     assert plan["performance_gate"]["foreground_polling"] is True
     assert plan["performance_gate"]["watchdog"] is False
     assert plan["performance_gate"]["both_configs_must_pass_before_first_launch"] is True
-    assert plan["status"] == "top1_running_top2_blocked"
+    assert plan["status"] == "top1_passed_top2_exact_mfu_refreshed_authorized"
     assert plan["performance_gate"]["launch_authorized"] is True
+    assert plan["performance_gate"]["top2_launch_authorized"] is True
     assert plan["performance_gate"]["mfu_result"] == {
         "path": str(MFU_RESULT.relative_to(MFU_RESULT.parents[4])),
         "sha256": sha256(MFU_RESULT),
@@ -84,6 +87,14 @@ def test_plan_materializes_only_ranked_top_two_and_authorizes_top1_after_both_mf
     assert plan["execution_state"] == {
         "path": str(RUN_METADATA.relative_to(RUN_METADATA.parents[4])),
         "sha256": sha256(RUN_METADATA),
+    }
+    assert plan["top1_terminal_result"] == {
+        "path": str(TOP1_RESULT.relative_to(TOP1_RESULT.parents[4])),
+        "sha256": sha256(TOP1_RESULT),
+    }
+    assert plan["performance_gate"]["refreshed_top2_mfu_result"] == {
+        "path": str(TOP2_REFRESHED_MFU_RESULT.relative_to(TOP2_REFRESHED_MFU_RESULT.parents[4])),
+        "sha256": sha256(TOP2_REFRESHED_MFU_RESULT),
     }
     assert plan["immutable_ranking"]["sha256"] == sha256(RANKING)
     for slot in SELECTIONS:
@@ -106,11 +117,25 @@ def test_sealed_mfu_result_passes_both_exact_configs_and_only_authorizes_top1():
         assert gate["native_block_fht_extension_loaded"] is True
 
 
-def test_top1_run_metadata_pins_launch_and_keeps_top2_blocked():
+def test_top1_run_metadata_seals_result_and_authorizes_top2():
     metadata = load(RUN_METADATA)
-    assert metadata["state"] == "running"
+    assert metadata["state"] == "finished"
     assert metadata["config_sha256"] == sha256(OUTPUTS["top1"])
     assert metadata["source_commit"] == "c947db1b170b3d7a9031cc537899731ee73aaebd"
     assert metadata["watchdog"]["progress_milestones"] == [20, 50, 80, 100]
     assert metadata["watchdog"]["heartbeat_minutes"] == 90
-    assert metadata["top2_launch_authorized"] is False
+    assert metadata["terminal"]["frozen_gate_passed"] is True
+    assert metadata["result"]["sha256"] == sha256(TOP1_RESULT)
+    assert metadata["top2_refreshed_mfu_result"]["sha256"] == sha256(
+        TOP2_REFRESHED_MFU_RESULT
+    )
+    assert metadata["top2_launch_authorized"] is True
+
+
+def test_top2_refreshed_mfu_gate_matches_exact_config_and_driver_repair():
+    result = load(TOP2_REFRESHED_MFU_RESULT)
+    assert result["classification"] == "PASS_TOP2_EXACT_CONFIG_MFU_AFTER_DRIVER_COMPAT_REPAIR"
+    assert result["config"]["sha256"] == sha256(OUTPUTS["top2"])
+    assert result["preflight"]["mfu_fraction"] >= 0.20
+    assert result["preflight"]["all_logged_losses_finite"] is True
+    assert result["decision"]["top2_launch_authorized"] is True

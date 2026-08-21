@@ -17,6 +17,10 @@ RANKING = ARTIFACT_DIR / "350m_full_replacement_all_feedback_0p5tpp_ranking.json
 PLAN = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_plan.json"
 MFU_RESULT = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_mfu_result.json"
 RUN_METADATA = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top1_run_metadata.json"
+TOP1_RESULT = ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top1_result.json"
+TOP2_REFRESHED_MFU_RESULT = (
+    ARTIFACT_DIR / "350m_full_replacement_all_feedback_5tpp_top2_refreshed_mfu_result.json"
+)
 SELECTIONS = {"top1": "mult1p00", "top2": "mult0p75"}
 PARENTS = {
     "top1": CONFIG_DIR / "pro6_mai_v3_350m_qk_only_qk64_outputgain_5tpp_top1_mult1p00.json",
@@ -166,6 +170,27 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             if gate.get("all_logged_losses_finite") is not True:
                 raise ValueError(f"{slot} scratch loss was not finite")
     launch_authorized = mfu_result is not None
+    top1_result: dict[str, Any] | None = None
+    if TOP1_RESULT.exists():
+        top1_result = load(TOP1_RESULT)
+        if top1_result.get("classification") != "PASS_FULL_REPLACEMENT_SCALE_TRANSFER_350M_5TPP_TOP1":
+            raise ValueError("top1 terminal result is not a sealed pass")
+        if top1_result.get("run", {}).get("archived_config_sha256") != sha256(OUTPUTS["top1"]):
+            raise ValueError("top1 terminal result config hash mismatch")
+        if top1_result.get("frozen_gate", {}).get("passed") is not True:
+            raise ValueError("top1 terminal result did not pass the frozen gate")
+    refreshed_top2_mfu: dict[str, Any] | None = None
+    if TOP2_REFRESHED_MFU_RESULT.exists():
+        refreshed_top2_mfu = load(TOP2_REFRESHED_MFU_RESULT)
+        if top1_result is None:
+            raise ValueError("top2 MFU was refreshed before top1 terminal sealing")
+        if refreshed_top2_mfu.get("config", {}).get("sha256") != sha256(OUTPUTS["top2"]):
+            raise ValueError("refreshed top2 MFU config hash mismatch")
+        if refreshed_top2_mfu.get("preflight", {}).get("passed") is not True:
+            raise ValueError("refreshed top2 MFU gate did not pass")
+        if float(refreshed_top2_mfu.get("preflight", {}).get("mfu_fraction", 0.0)) < 0.20:
+            raise ValueError("refreshed top2 MFU is below 20%")
+    top2_launch_authorized = top1_result is not None and refreshed_top2_mfu is not None
     run_metadata: dict[str, Any] | None = None
     if RUN_METADATA.exists():
         run_metadata = load(RUN_METADATA)
@@ -173,13 +198,18 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             raise ValueError("top1 run metadata exists before both MFU gates pass")
         if run_metadata.get("config_sha256") != sha256(OUTPUTS["top1"]):
             raise ValueError("top1 run metadata config hash mismatch")
-        if run_metadata.get("state") != "running":
-            raise ValueError("registered top1 run metadata is not live")
+        expected_state = "finished" if top1_result is not None else "running"
+        if run_metadata.get("state") != expected_state:
+            raise ValueError("registered top1 run metadata state disagrees with terminal evidence")
+        if bool(run_metadata.get("top2_launch_authorized")) != top2_launch_authorized:
+            raise ValueError("top1 run metadata top2 authorization disagrees with sealed gates")
     return {
         "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_plan_v1",
         "registered_at": "2026-08-21",
         "status": (
-            "top1_running_top2_blocked"
+            "top1_passed_top2_exact_mfu_refreshed_authorized"
+            if top2_launch_authorized
+            else "top1_running_top2_blocked"
             if run_metadata is not None
             else "both_exact_config_mfu_passed_top1_authorized"
             if launch_authorized
@@ -208,9 +238,18 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
             "watchdog": False,
             "both_configs_must_pass_before_first_launch": True,
             "launch_authorized": launch_authorized,
+            "top2_launch_authorized": top2_launch_authorized,
             "mfu_result": (
                 {"path": str(MFU_RESULT.relative_to(ROOT)), "sha256": sha256(MFU_RESULT)}
                 if mfu_result is not None
+                else None
+            ),
+            "refreshed_top2_mfu_result": (
+                {
+                    "path": str(TOP2_REFRESHED_MFU_RESULT.relative_to(ROOT)),
+                    "sha256": sha256(TOP2_REFRESHED_MFU_RESULT),
+                }
+                if refreshed_top2_mfu is not None
                 else None
             ),
         },
@@ -218,6 +257,11 @@ def build_plan(configs: dict[str, dict[str, Any]]) -> dict[str, Any]:
         "execution_state": (
             {"path": str(RUN_METADATA.relative_to(ROOT)), "sha256": sha256(RUN_METADATA)}
             if run_metadata is not None
+            else None
+        ),
+        "top1_terminal_result": (
+            {"path": str(TOP1_RESULT.relative_to(ROOT)), "sha256": sha256(TOP1_RESULT)}
+            if top1_result is not None
             else None
         ),
         "monitoring": {"expected_duration_hours_per_candidate": [7, 8], "progress_callbacks": [0.20, 0.50, 0.80, 1.00], "heartbeat_minutes": 90, "heartbeat_resets_on_progress": True, "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test", "agent_mention": "@Codex"},

@@ -1,0 +1,57 @@
+{
+  "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_refreshed_mfu_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_TOP2_EXACT_CONFIG_MFU_AFTER_DRIVER_COMPAT_REPAIR",
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75.json",
+    "sha256": "13e8626594deba2f5330e491e512dbbbad3de5947b0c6310a22f4600528ea86d"
+  },
+  "environment_repair": {
+    "problem": "System libcuda/libnvidia-ml were upgraded to 595.84 while the loaded kernel driver remained 595.71.05.",
+    "loaded_kernel_driver": "595.71.05",
+    "compatibility_library_root": "/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu",
+    "compatibility_package": "/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/libnvidia-compute-595-server_595.71.05-0ubuntu0.24.04.1_amd64.deb",
+    "compatibility_package_sha256": "9b492f543255de6c081ba51c4c95d844f91e19830c6eeed676bce9b4d8579f35",
+    "compatibility_package_bytes": 85967750,
+    "cuda_bf16_smoke_passed": true,
+    "system_packages_modified_by_repair": false
+  },
+  "preflight": {
+    "source_commit": "c947db1b170b3d7a9031cc537899731ee73aaebd",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "native_block_fht_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "elapsed_seconds": 22.53345489501953,
+    "mfu_fraction": 0.37622853519339483,
+    "minimum_mfu_fraction": 0.20,
+    "tokens_per_second": 73659.32333333333,
+    "iter_ms": 3558.8733333333334,
+    "model_tflops": 156.83747720269824,
+    "empirical_bf16_gemm_peak_tflops": 416.8675752414107,
+    "peak_mib": 60149.08,
+    "passed": true
+  },
+  "artifacts": {
+    "certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75/performance_preflight.json",
+      "bytes": 17028,
+      "sha256": "de9d1f8244770552755c01c3de38823a5228fdd9f0878b4d64304e91e266f424"
+    },
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75/performance_preflight.log",
+      "bytes": 13565,
+      "sha256": "8bee7b9af321da06995bbbdae4ba35ee706cea2dc7c9a9818846642dbe965cff"
+    },
+    "preserved_previous_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top2_mult0p75/performance_preflight.pre_driver_repair.json",
+      "bytes": 17015,
+      "sha256": "cfaed553f7ee9872b84843393394dbf2cac1da42ccbf41aec03525311c2c7f36"
+    }
+  },
+  "decision": {
+    "top1_terminal_gate_passed": true,
+    "top2_exact_mfu_gate_refreshed": true,
+    "top2_launch_authorized": true,
+    "automatic_retry_authorized": false
+  }
+}

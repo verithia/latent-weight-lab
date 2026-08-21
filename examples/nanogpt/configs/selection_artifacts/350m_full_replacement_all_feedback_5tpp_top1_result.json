@@ -1,0 +1,162 @@
+{
+  "schema_version": "mai_350m_full_replacement_all_feedback_5tpp_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_FULL_REPLACEMENT_SCALE_TRANSFER_350M_5TPP_TOP1",
+  "preregistered_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_full_replacement_all_feedback_5tpp_plan.json",
+    "preterminal_sha256": "c6871af202a4c096d8f7addffeb68ecaa0d83a5e853390f54c10047e843dc653"
+  },
+  "frozen_comparator": {
+    "path": "examples/nanogpt/configs/selection_artifacts/350m_qk_only_functional_lwt_5tpp_top1_result.json",
+    "sha256": "2547be229b706c4e2678cc82fde01fed9183820bf56ca91f88b46b2fa720c641",
+    "terminal_validation_ce": 3.0304
+  },
+  "run": {
+    "name": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00",
+    "run_id": "pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600",
+    "host": "PRO6",
+    "gpu": 0,
+    "pgid": 2029698,
+    "source_commit": "c947db1b170b3d7a9031cc537899731ee73aaebd",
+    "entrypoint": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "-m",
+      "examples.nanogpt.train"
+    ],
+    "config": "examples/nanogpt/configs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00.json",
+    "archived_config_sha256": "35484fe5ede3431ca852d8a2d48969ff2dc5832e2af0176719227adbf169220c",
+    "resolved_checkpoint_config_sha256": "f2ed5d18994daa261a35bb6b4922191d198e4d7efb9bb8166e1e16b3ce80fe6f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "preflight_certificate_sha256": "c0b19f840b65dcc4d9d1e12300ad6d66e67687ad22d1587da1c6fb830f78bbfd",
+    "preflight_mfu_fraction": 0.376249,
+    "started_at": "2026-08-21T01:27:04+08:00",
+    "finished_at": "2026-08-21T08:15:30+08:00",
+    "wall_seconds": 24506,
+    "exit_code": 0,
+    "terminal_status": "clean",
+    "artifacts": {
+      "status": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.json",
+        "bytes": 976,
+        "sha256": "c12c6ec3b4b1b7294cb3e4251c03fe79417044f6490bcb0b645701c973027b06"
+      },
+      "log": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.log",
+        "bytes": 39153,
+        "sha256": "ea03ad5fe363d14e60d57c9edd8132677a3f351550f97b5c85352e492f613448"
+      },
+      "provenance": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.json",
+        "bytes": 2239,
+        "sha256": "5ec97b9315381b3b205edbed6da72e08509bf2cd27258464b3eb571b8a9a7278"
+      },
+      "archived_config": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.config.json",
+        "bytes": 13962,
+        "sha256": "35484fe5ede3431ca852d8a2d48969ff2dc5832e2af0176719227adbf169220c"
+      },
+      "mfu_certificate": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00_20260820T172703Z_2029600.mfu.json",
+        "bytes": 16995,
+        "sha256": "c0b19f840b65dcc4d9d1e12300ad6d66e67687ad22d1587da1c6fb830f78bbfd"
+      },
+      "checkpoint": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00/scientific/ckpt.pt",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/full_replacement_all_feedback_350m_5tpp_top1/ckpt.pt",
+        "bytes": 2514306088,
+        "sha256": "329833d6deb53cb2c493e0177d8d35a29e9c7e424d4433b9781b482a46183270"
+      },
+      "checkpoint_metadata": {
+        "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_350m_fullreplacement_all_int8_errorfeedback_5tpp_top1_mult1p00/scientific/ckpt.meta.json",
+        "path_kind": "symlink_to_verified_external_archive",
+        "archive_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/full_replacement_all_feedback_350m_5tpp_top1/ckpt.meta.json",
+        "bytes": 24810,
+        "sha256": "4c2386c7bf131f412d69525d2b87487b3db1cbd2e6bc922ddf4118a6013dddb0"
+      }
+    }
+  },
+  "fixed_evaluations": [
+    {"step": 0, "train_ce": 11.0580, "validation_ce": 11.0570},
+    {"step": 1691, "train_ce": 3.4788, "validation_ce": 3.4604},
+    {"step": 3382, "train_ce": 3.2516, "validation_ce": 3.2298},
+    {"step": 5073, "train_ce": 3.1166, "validation_ce": 3.0931},
+    {"step": 6764, "train_ce": 3.0506, "validation_ce": 3.027085065841675}
+  ],
+  "fixed_curve_comparison": {
+    "steps": [0, 1691, 3382, 5073, 6764],
+    "qk_only_validation_ce": [10.9822, 3.4649, 3.2333, 3.0969, 3.0304],
+    "candidate_validation_ce": [11.0570, 3.4604, 3.2298, 3.0931, 3.027085065841675],
+    "candidate_minus_qk_only_ce": [0.0748, -0.0045, -0.0035, -0.0038, -0.003314934158325],
+    "interpretation": "After the inherited step-zero offset, the complete replacement is better at every matched checkpoint and finishes 0.00331 CE ahead. Temporal int8 error feedback prevents an accumulating V/c_proj/MLP direction gap through 5TPP."
+  },
+  "frozen_gate": {
+    "qk_only_terminal_validation_ce": 3.0304,
+    "maximum_delta_to_same_slot_qk_only_ce": 0.02,
+    "maximum_terminal_validation_ce": 3.0504,
+    "candidate_exact_terminal_validation_ce": 3.027085065841675,
+    "delta_to_qk_only_ce": -0.003314934158325,
+    "margin_to_maximum_ce": -0.023314934158325,
+    "passed": true,
+    "threshold_changed_after_measurement": false
+  },
+  "fixed_checkpoint_audit": {
+    "schema_version": "nanogpt_exact_resume_v2",
+    "next_iter": 6764,
+    "best_validation_ce": 3.027085065841675,
+    "lattice_categories": {
+      "attention_v": {"matrices": 24, "elements": 25165824, "code_nonzero_fraction": 0.9876735607782999, "code_saturation_fraction": 0.00004680951436360677, "code_entropy_bits": 7.075034306674128, "scale_count": 6144, "scale_min": 0.00035691261291503906, "scale_mean": 0.0005124828700597087, "scale_max": 0.0007810592651367188},
+      "attention_cproj": {"matrices": 24, "elements": 25165824, "code_nonzero_fraction": 0.9832221269607544, "code_saturation_fraction": 1.5894571940104166e-7, "code_entropy_bits": 6.683056724626062, "scale_count": 6144, "scale_min": 0.00020384788513183594, "scale_mean": 0.00037466823899497587, "scale_max": 0.001094818115234375},
+      "mlp_cfc": {"matrices": 24, "elements": 100663296, "code_nonzero_fraction": 0.9870603879292806, "code_saturation_fraction": 0.000012238820393880209, "code_entropy_bits": 7.011511963513779, "scale_count": 24576, "scale_min": 0.00044655799865722656, "scale_mean": 0.0005747766311590871, "scale_max": 0.00208282470703125},
+      "mlp_cproj": {"matrices": 24, "elements": 100663296, "code_nonzero_fraction": 0.9855408072471619, "code_saturation_fraction": 4.3710072835286457e-7, "code_entropy_bits": 6.857259952053247, "scale_count": 24576, "scale_min": 0.0001723766326904297, "scale_mean": 0.00024398536576579014, "scale_max": 0.00241851806640625}
+    },
+    "compression_residuals": {
+      "count": 96,
+      "elements": 251658240,
+      "bytes": 503316480,
+      "dtype": "float16",
+      "all_finite": true,
+      "rms": 0.00012882738211458098,
+      "absolute_max": 0.001209259033203125,
+      "momentum_buffer_count": 96,
+      "scope": "attention V, attention c_proj, MLP c_fc, and MLP c_proj"
+    },
+    "health_interpretation": "All 96 intended int8 lattices, FP16 feedback residuals, and dense Muon momentum buffers are present. Codes remain high-entropy and unsaturated, excluding missing-state, saturation, and codec-collapse explanations."
+  },
+  "efficiency_scope": {
+    "combined_ambient_fp32_weight_bytes": 1006632960,
+    "combined_persistent_int8_codec_bytes": 251781120,
+    "combined_fp16_temporal_feedback_bytes": 503316480,
+    "persistent_codec_only_reduction": 3.998048399921895,
+    "codec_plus_feedback_reduction": 1.3331163547120404,
+    "qk_generated_weight_elements": 301989888,
+    "qk_latent_parameters": 503424,
+    "total_trainable_parameters_reported": 62599808,
+    "dense_fp32_muon_momentum_retained": true,
+    "dense_transient_weight_materialization_retained": true,
+    "additional_inference_flops_vs_dense": 0,
+    "materialized_inference_flops_reduced": false
+  },
+  "storage_reclamation": {
+    "archive_verified_before_source_reclaim": true,
+    "workspace_source_replaced_by_symlink": true,
+    "workspace_bytes_after_reclamation": 260715923054,
+    "workspace_cap_bytes": 274877906944,
+    "workspace_headroom_bytes": 14161983890
+  },
+  "driver_incident": {
+    "loaded_kernel_driver": "595.71.05",
+    "upgraded_system_userspace": "595.84",
+    "root_reboot_attempt": "blocked: sudo password required",
+    "non_root_repair": "workspace-local libcuda/libnvidia-ml 595.71.05 extracted from the official Ubuntu server package",
+    "compatibility_package_sha256": "9b492f543255de6c081ba51c4c95d844f91e19830c6eeed676bce9b4d8579f35",
+    "cuda_bf16_smoke_passed": true
+  },
+  "conclusion": {
+    "supported": "The all-feedback complete attention-and-MLP replacement transfers to 350M/5TPP at the preregistered top1 LR and slightly beats its immutable QK-only comparator at every post-initialization checkpoint.",
+    "not_claimed": "One deterministic top1 run is not multi-seed closure and does not establish optimizer-state compression, inference-FLOP reduction, or 690M transfer.",
+    "next_action": "Refresh the exact top2 MFU certificate under the repaired driver environment, then run the preregistered multiplier-0.75 top2 confirmation."
+  }
+}
