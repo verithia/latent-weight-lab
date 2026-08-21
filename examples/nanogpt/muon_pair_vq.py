@@ -1289,6 +1289,178 @@ def _fit_fractional_residual_lattice_feedback_(
 
 
 @torch.no_grad()
+def _fractional_residual_lattice_source_decomposition(
+    vectors: torch.Tensor,
+    *,
+    seed: int,
+    block_sizes: tuple[int, ...],
+    coordinate_bits: tuple[int, ...],
+    lloyd_iterations: tuple[int, ...],
+    axis_block_size: int = 0,
+    axis_coordinate_bits: int = 5,
+) -> dict[str, float | int]:
+    """Decompose residual-lattice error on one fixed q7/q8 innovation.
+
+    This is an acquisition oracle only. It never mutates the live codec or
+    registers dense state.
+    """
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("fractional source probe expects ambient pairs")
+    if not block_sizes or not coordinate_bits or not lloyd_iterations:
+        raise ValueError("fractional source probe requires blocks, bits, and iterations")
+    element_count = vectors.numel()
+    base_layout = _fractional_lattice_feedback_layout(element_count)
+    base_levels = torch.zeros(640, device=vectors.device, dtype=torch.float32)
+    base_packed = torch.zeros(
+        base_layout["total_bytes"], device=vectors.device, dtype=torch.uint8
+    )
+    _fit_fractional_lattice_feedback_(
+        vectors, base_levels, base_packed, seed=seed
+    )
+    base = _decode_fractional_lattice_feedback(
+        base_levels,
+        base_packed,
+        element_count=element_count,
+        seed=seed,
+    )
+    innovation = vectors - base
+    source_energy = vectors.square().sum().clamp_min(1e-30)
+    innovation_energy = innovation.square().sum().clamp_min(1e-30)
+
+    def entropy(codes: torch.Tensor, level_count: int) -> float:
+        counts = torch.bincount(codes.reshape(-1), minlength=level_count).float()
+        probabilities = counts[counts > 0] / counts.sum().clamp_min(1.0)
+        return float(-(probabilities * probabilities.log2()).sum())
+
+    def score(
+        transformed: torch.Tensor,
+        *,
+        bits: int,
+        iterations: int,
+        exact_gains: bool,
+        axis_private: bool,
+    ) -> dict[str, float | int]:
+        level_count = 1 << bits
+        actual_gains = transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
+        gain_active = transformed.shape[0]
+        gain_entropy = float("nan")
+        if exact_gains:
+            decoded_gains = actual_gains
+        else:
+            gain_levels, gain_codes = _fit_scalar_codebook(
+                actual_gains.log(), level_count=256, iterations=iterations
+            )
+            decoded_gains = gain_levels.index_select(0, gain_codes).exp()
+            gain_active = int(gain_codes.unique().numel())
+            gain_entropy = entropy(gain_codes, 256)
+        normalized = transformed / decoded_gains[:, None]
+        if axis_private:
+            decoded_columns: list[torch.Tensor] = []
+            active_counts: list[int] = []
+            entropies: list[float] = []
+            for axis in range(transformed.shape[1]):
+                levels, codes = _fit_scalar_codebook(
+                    normalized[:, axis],
+                    level_count=level_count,
+                    iterations=iterations,
+                )
+                decoded_columns.append(levels.index_select(0, codes))
+                active_counts.append(int(codes.unique().numel()))
+                entropies.append(entropy(codes, level_count))
+            decoded_normalized = torch.stack(decoded_columns, dim=1)
+            coordinate_active = min(active_counts)
+            coordinate_entropy = min(entropies)
+        else:
+            levels, codes = _fit_scalar_codebook(
+                normalized.reshape(-1),
+                level_count=level_count,
+                iterations=iterations,
+            )
+            decoded_normalized = levels.index_select(0, codes).reshape_as(
+                normalized
+            )
+            coordinate_active = int(codes.unique().numel())
+            coordinate_entropy = entropy(codes, level_count)
+        decoded = decoded_normalized * decoded_gains[:, None]
+        error_energy = (transformed - decoded).square().sum()
+        return {
+            "full_recovery": float(1.0 - error_energy / source_energy),
+            "innovation_recovery": float(1.0 - error_energy / innovation_energy),
+            "error_energy": float(error_energy),
+            "coordinate_active_codes_min": coordinate_active,
+            "coordinate_entropy_bits_min": coordinate_entropy,
+            "gain_active_codes": gain_active,
+            "gain_entropy_bits": gain_entropy,
+        }
+
+    output: dict[str, float | int] = {
+        "base_full_recovery": float(1.0 - innovation_energy / source_energy),
+        "innovation_energy_ratio": float(innovation_energy / source_energy),
+    }
+    transformed_by_block: dict[int, torch.Tensor] = {}
+    for block_size in block_sizes:
+        transformed = _signed_block_fht(
+            innovation, block_size=block_size, seed=seed
+        )
+        transformed_by_block[block_size] = transformed
+        output[f"b{block_size}_parseval_relative_error"] = float(
+            (transformed.square().sum() - innovation_energy).abs()
+            / innovation_energy
+        )
+        for bits in coordinate_bits:
+            for iterations in lloyd_iterations:
+                metrics = score(
+                    transformed,
+                    bits=bits,
+                    iterations=iterations,
+                    exact_gains=False,
+                    axis_private=False,
+                )
+                prefix = f"b{block_size}_q{bits}_lloyd{iterations}_quantgain_"
+                for key, value in metrics.items():
+                    output[prefix + key] = value
+
+    reference_block_size = 32 if 32 in transformed_by_block else block_sizes[0]
+    reference = transformed_by_block[reference_block_size]
+    for bits in coordinate_bits:
+        for iterations in lloyd_iterations:
+            metrics = score(
+                reference,
+                bits=bits,
+                iterations=iterations,
+                exact_gains=True,
+                axis_private=False,
+            )
+            prefix = (
+                f"b{reference_block_size}_q{bits}_lloyd{iterations}_exactgain_"
+            )
+            for key, value in metrics.items():
+                output[prefix + key] = value
+
+    if axis_block_size:
+        transformed = transformed_by_block.get(axis_block_size)
+        if transformed is None:
+            transformed = _signed_block_fht(
+                innovation, block_size=axis_block_size, seed=seed
+            )
+        iterations = max(lloyd_iterations)
+        metrics = score(
+            transformed,
+            bits=axis_coordinate_bits,
+            iterations=iterations,
+            exact_gains=False,
+            axis_private=True,
+        )
+        prefix = (
+            f"b{axis_block_size}_q{axis_coordinate_bits}_lloyd{iterations}_"
+            "quantgain_axis_"
+        )
+        for key, value in metrics.items():
+            output[prefix + key] = value
+    return output
+
+
+@torch.no_grad()
 def _block_fht_gain_lattice_counterfactual(
     vectors: torch.Tensor,
     *,
@@ -1844,6 +2016,7 @@ class MuonPairVQLinear(nn.Module):
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
         feedback_residual_probe_steps: tuple[int, ...] = (),
+        feedback_residual_probe_layers: tuple[int, ...] = (),
         feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
         feedback_transform_probe_block_sizes: tuple[int, ...] = (),
         feedback_lattice_probe_block_sizes: tuple[int, ...] = (),
@@ -1867,6 +2040,9 @@ class MuonPairVQLinear(nn.Module):
         self.feedback_output_group_size = int(feedback_output_group_size)
         self.feedback_residual_probe_steps = tuple(
             int(step) for step in feedback_residual_probe_steps
+        )
+        self.feedback_residual_probe_layers = tuple(
+            int(layer) for layer in feedback_residual_probe_layers
         )
         self.feedback_residual_probe_lloyd_iterations = tuple(
             int(iterations)
@@ -1909,6 +2085,10 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("feedback output group size must be nonnegative")
         if any(step < 0 for step in self.feedback_residual_probe_steps):
             raise ValueError("feedback residual probe steps must be nonnegative")
+        if any(layer < 0 for layer in self.feedback_residual_probe_layers):
+            raise ValueError("feedback residual probe layers must be nonnegative")
+        if self.feedback_residual_probe_layers and not self.feedback_residual_probe_steps:
+            raise ValueError("feedback residual probe layers require probe steps")
         if any(
             iterations <= 0
             for iterations in self.feedback_residual_probe_lloyd_iterations
@@ -1916,19 +2096,25 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError(
                 "feedback residual probe Lloyd iterations must be positive"
             )
+        fractional_residual_codecs = (
+            "fractional_lattice_q7q8_b32_p25_rq4",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+        )
         if self.feedback_residual_probe_steps and self.feedback_codec not in (
             "conditional_polar16x16_rvq2",
             "free_vq256_rvq2",
+            *fractional_residual_codecs,
         ):
             raise ValueError(
                 "feedback residual probes require a supported two-stage codec"
             )
         if (
             self.feedback_residual_probe_lloyd_iterations
-            and self.feedback_codec != "conditional_polar16x16_rvq2"
+            and self.feedback_codec
+            not in ("conditional_polar16x16_rvq2", *fractional_residual_codecs)
         ):
             raise ValueError(
-                "feedback residual Lloyd probes require conditional_polar16x16_rvq2"
+                "feedback residual Lloyd probes require a supported residual codec"
             )
         if any(
             block_size < 2
@@ -1968,7 +2154,8 @@ class MuonPairVQLinear(nn.Module):
             )
         if self.feedback_lattice_probe_block_sizes and (
             not self.feedback_residual_probe_steps
-            or self.feedback_codec != "free_vq256_rvq2"
+            or self.feedback_codec
+            not in ("free_vq256_rvq2", *fractional_residual_codecs)
         ):
             raise ValueError(
                 "feedback lattice probes require free-VQ residual probe steps"
@@ -1991,7 +2178,8 @@ class MuonPairVQLinear(nn.Module):
             )
         if self.feedback_axis_adaptation_probe_block_size and (
             not self.feedback_residual_probe_steps
-            or self.feedback_codec != "free_vq256_rvq2"
+            or self.feedback_codec
+            not in ("free_vq256_rvq2", *fractional_residual_codecs)
         ):
             raise ValueError(
                 "feedback axis-adaptation probes require free-VQ residual probe steps"
@@ -3041,6 +3229,42 @@ class MuonPairVQ(torch.optim.Optimizer):
                                     diagnostics[
                                         "feedback_fractional_" + key
                                     ] = value
+                    elif (
+                        refresh
+                        and module.feedback_codec
+                        in (
+                            "fractional_lattice_q7q8_b32_p25_rq4",
+                            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+                        )
+                        and int(diagnostics["optimizer_step"])
+                        in module.feedback_residual_probe_steps
+                        and (
+                            not module.feedback_residual_probe_layers
+                            or module.layer_id in module.feedback_residual_probe_layers
+                        )
+                        and module.out_features > module.in_features
+                    ):
+                        counterfactual = (
+                            _fractional_residual_lattice_source_decomposition(
+                                raw_feedback.reshape(-1, module.vector_length),
+                                seed=module.feedback_fractional_lattice_seed,
+                                block_sizes=module.feedback_lattice_probe_block_sizes,
+                                coordinate_bits=(
+                                    module.feedback_lattice_probe_coordinate_bits
+                                ),
+                                lloyd_iterations=(
+                                    module.feedback_residual_probe_lloyd_iterations
+                                ),
+                                axis_block_size=(
+                                    module.feedback_axis_adaptation_probe_block_size
+                                ),
+                                axis_coordinate_bits=(
+                                    module.feedback_axis_adaptation_probe_coordinate_bits
+                                ),
+                            )
+                        )
+                        for key, value in counterfactual.items():
+                            diagnostics["feedback_source_" + key] = value
                 self._diagnostics.append(diagnostics)
         return loss
 

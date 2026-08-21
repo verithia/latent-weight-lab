@@ -26,6 +26,7 @@ from examples.nanogpt.muon_pair_vq import (
     _fit_rvq_pair_codec_,
     _fractional_lattice_feedback_layout,
     _fractional_residual_lattice_feedback_layout,
+    _fractional_residual_lattice_source_decomposition,
     _nearest_cartesian_codes,
     _nearest_codes_exact,
     _normal_cartesian_codebook,
@@ -44,6 +45,7 @@ def make_module(
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
     feedback_residual_probe_steps: tuple[int, ...] = (),
+    feedback_residual_probe_layers: tuple[int, ...] = (),
     feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
 ) -> MuonPairVQLinear:
     return MuonPairVQLinear(
@@ -59,6 +61,7 @@ def make_module(
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
         feedback_residual_probe_steps=feedback_residual_probe_steps,
+        feedback_residual_probe_layers=feedback_residual_probe_layers,
         feedback_residual_probe_lloyd_iterations=(
             feedback_residual_probe_lloyd_iterations
         ),
@@ -487,6 +490,57 @@ def test_family_adaptive_residual_lattice_resume_is_bit_exact() -> None:
         original_state["feedback_levels"],
         rtol=0.0,
         atol=0.0,
+    )
+
+
+def test_fractional_residual_source_decomposition_reports_fixed_source_axes() -> None:
+    torch.manual_seed(1747)
+    values = torch.randn(256, 2)
+    diagnostics = _fractional_residual_lattice_source_decomposition(
+        values,
+        seed=1749,
+        block_sizes=(16, 32),
+        coordinate_bits=(4, 5),
+        lloyd_iterations=(2, 4),
+        axis_block_size=32,
+        axis_coordinate_bits=5,
+    )
+    assert 0.0 < diagnostics["innovation_energy_ratio"] < 1.0
+    assert diagnostics["b32_q5_lloyd4_quantgain_innovation_recovery"] > 0.0
+    assert diagnostics["b32_q5_lloyd4_exactgain_innovation_recovery"] > 0.0
+    assert diagnostics["b32_q5_lloyd4_quantgain_axis_innovation_recovery"] > 0.0
+
+
+def test_fractional_residual_source_probe_runs_only_on_selected_cfc_layer() -> None:
+    module = MuonPairVQLinear(
+        16,
+        32,
+        bias=False,
+        stages=1,
+        base_seed=1751,
+        weight_std=0.02,
+        layer_id=2,
+        error_feedback=True,
+        feedback_codec="fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+        feedback_residual_probe_steps=(0,),
+        feedback_residual_probe_layers=(2,),
+        feedback_residual_probe_lloyd_iterations=(2,),
+        feedback_lattice_probe_block_sizes=(16, 32),
+        feedback_lattice_probe_coordinate_bits=(4, 5),
+        feedback_axis_adaptation_probe_block_size=32,
+        feedback_axis_adaptation_probe_coordinate_bits=5,
+        neighbor_candidates=16,
+        code_refresh_interval=8,
+    )
+    optimizer = make_optimizer(module)
+    torch.manual_seed(1753)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    assert "feedback_source_innovation_energy_ratio" in diagnostics
+    assert (
+        "feedback_source_b32_q5_lloyd2_quantgain_axis_innovation_recovery"
+        in diagnostics
     )
 
 

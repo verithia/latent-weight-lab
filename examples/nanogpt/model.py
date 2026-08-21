@@ -196,6 +196,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_feedback_codec: str = "cartesian4x4"
     block_fht_mlp_pair_vq_feedback_output_group_size: int = 0
     block_fht_mlp_pair_vq_feedback_residual_probe_steps: tuple[int, ...] = ()
+    block_fht_mlp_pair_vq_feedback_residual_probe_layers: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes: tuple[int, ...] = ()
@@ -2424,6 +2425,9 @@ class MLP(nn.Module):
                 feedback_residual_probe_steps=tuple(
                     config.block_fht_mlp_pair_vq_feedback_residual_probe_steps
                 ),
+                feedback_residual_probe_layers=tuple(
+                    config.block_fht_mlp_pair_vq_feedback_residual_probe_layers
+                ),
                 feedback_residual_probe_lloyd_iterations=tuple(
                     config.block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations
                 ),
@@ -2700,6 +2704,9 @@ class MLP(nn.Module):
                 ),
                 feedback_residual_probe_steps=tuple(
                     config.block_fht_mlp_pair_vq_feedback_residual_probe_steps
+                ),
+                feedback_residual_probe_layers=tuple(
+                    config.block_fht_mlp_pair_vq_feedback_residual_probe_layers
                 ),
                 feedback_residual_probe_lloyd_iterations=tuple(
                     config.block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations

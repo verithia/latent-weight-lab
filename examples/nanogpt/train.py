@@ -2265,6 +2265,14 @@ def parse_args() -> argparse.Namespace:
             (),
         )
     )
+    residual_probe_layers = tuple(
+        int(layer)
+        for layer in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_residual_probe_layers",
+            (),
+        )
+    )
     residual_probe_iterations = tuple(
         int(iterations)
         for iterations in getattr(
@@ -2335,23 +2343,35 @@ def parse_args() -> argparse.Namespace:
     )
     if any(step < 0 for step in residual_probe_steps):
         raise ValueError("pair-VQ residual probe steps must be nonnegative")
+    if any(layer < 0 or layer >= namespace.n_layer for layer in residual_probe_layers):
+        raise ValueError("pair-VQ residual probe layers must name model layers")
+    if residual_probe_layers and not residual_probe_steps:
+        raise ValueError("pair-VQ residual probe layers require probe steps")
     if any(iterations <= 0 for iterations in residual_probe_iterations):
         raise ValueError("pair-VQ residual probe Lloyd iterations must be positive")
+    fractional_residual_codecs = (
+        "fractional_lattice_q7q8_b32_p25_rq4",
+        "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+    )
     if residual_probe_steps and not (
         namespace.block_fht_mlp_pair_vq
         and namespace.block_fht_mlp_pair_vq_error_feedback
         and namespace.block_fht_mlp_pair_vq_feedback_codec
-        in ("conditional_polar16x16_rvq2", "free_vq256_rvq2")
+        in (
+            "conditional_polar16x16_rvq2",
+            "free_vq256_rvq2",
+            *fractional_residual_codecs,
+        )
     ):
         raise ValueError(
             "pair-VQ residual probes require supported two-stage error feedback"
         )
     if residual_probe_iterations and (
         namespace.block_fht_mlp_pair_vq_feedback_codec
-        != "conditional_polar16x16_rvq2"
+        not in ("conditional_polar16x16_rvq2", *fractional_residual_codecs)
     ):
         raise ValueError(
-            "pair-VQ residual Lloyd probes require conditional-polar RVQ2"
+            "pair-VQ residual Lloyd probes require a supported residual codec"
         )
     if any(
         block_size < 2 or block_size & (block_size - 1)
@@ -2384,7 +2404,7 @@ def parse_args() -> argparse.Namespace:
     if lattice_probe_block_sizes and not (
         residual_probe_steps
         and namespace.block_fht_mlp_pair_vq_feedback_codec
-        == "free_vq256_rvq2"
+        in ("free_vq256_rvq2", *fractional_residual_codecs)
     ):
         raise ValueError(
             "pair-VQ lattice probes require free-VQ residual probe steps"
@@ -2406,7 +2426,7 @@ def parse_args() -> argparse.Namespace:
     if axis_adaptation_probe_block_size and not (
         residual_probe_steps
         and namespace.block_fht_mlp_pair_vq_feedback_codec
-        == "free_vq256_rvq2"
+        in ("free_vq256_rvq2", *fractional_residual_codecs)
     ):
         raise ValueError(
             "pair-VQ axis-adaptation probes require free-VQ residual probe steps"
@@ -2967,6 +2987,14 @@ def pair_vq_model_kwargs(
             for step in getattr(
                 namespace,
                 "block_fht_mlp_pair_vq_feedback_residual_probe_steps",
+                (),
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_residual_probe_layers": tuple(
+            int(layer)
+            for layer in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_residual_probe_layers",
                 (),
             )
         ),
