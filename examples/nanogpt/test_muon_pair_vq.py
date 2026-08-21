@@ -813,8 +813,6 @@ def test_fractional_residual_source_probe_runs_only_on_selected_cfc_layer() -> N
 def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> None:
     torch.manual_seed(1705)
     module = make_module(
-        in_features=32,
-        out_features=32,
         stages=1,
         error_feedback=True,
         feedback_codec="free_vq256_rvq2",
@@ -840,8 +838,6 @@ def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> Non
 def test_free_pair_vq_rvq2_resume_is_bit_exact_for_next_step() -> None:
     torch.manual_seed(1707)
     module = make_module(
-        in_features=32,
-        out_features=32,
         stages=1,
         seed=1709,
         error_feedback=True,
@@ -855,8 +851,6 @@ def test_free_pair_vq_rvq2_resume_is_bit_exact_for_next_step() -> None:
     optimizer_state = copy.deepcopy(optimizer.state_dict())
 
     restored = make_module(
-        in_features=32,
-        out_features=32,
         stages=1,
         seed=1711,
         error_feedback=True,
@@ -1017,6 +1011,8 @@ def test_pair_coded_feedback_resume_is_bit_exact_for_next_step() -> None:
 def test_forward_visible_feedback_materializes_compact_virtual_center() -> None:
     torch.manual_seed(20260822)
     module = make_module(
+        in_features=32,
+        out_features=32,
         stages=1,
         error_feedback=True,
         forward_visible_feedback=True,
@@ -1047,6 +1043,8 @@ def test_forward_visible_feedback_materializes_compact_virtual_center() -> None:
 def test_forward_visible_feedback_resume_reconstructs_virtual_weight_exactly() -> None:
     torch.manual_seed(20260823)
     module = make_module(
+        in_features=32,
+        out_features=32,
         stages=1,
         seed=20260824,
         error_feedback=True,
@@ -1061,6 +1059,8 @@ def test_forward_visible_feedback_resume_reconstructs_virtual_weight_exactly() -
     optimizer_state = copy.deepcopy(optimizer.state_dict())
 
     restored = make_module(
+        in_features=32,
+        out_features=32,
         stages=1,
         seed=20260825,
         error_feedback=True,
