@@ -1010,7 +1010,6 @@ def test_forward_visible_feedback_materializes_compact_virtual_center() -> None:
     torch.manual_seed(20260822)
     module = make_module(
         stages=1,
-        fast_residual=True,
         error_feedback=True,
         forward_visible_feedback=True,
     )
@@ -1023,6 +1022,7 @@ def test_forward_visible_feedback_materializes_compact_virtual_center() -> None:
     feedback = module.decode_feedback(
         state["feedback_levels"], state["feedback_codes"]
     ).reshape_as(module.weight)
+    assert torch.count_nonzero(feedback) > 0
     torch.testing.assert_close(
         module.weight, base + feedback, rtol=0.0, atol=0.0
     )
@@ -1041,7 +1041,6 @@ def test_forward_visible_feedback_resume_reconstructs_virtual_weight_exactly() -
     module = make_module(
         stages=1,
         seed=20260824,
-        fast_residual=True,
         error_feedback=True,
         forward_visible_feedback=True,
     )
@@ -1056,7 +1055,6 @@ def test_forward_visible_feedback_resume_reconstructs_virtual_weight_exactly() -
     restored = make_module(
         stages=1,
         seed=20260825,
-        fast_residual=True,
         error_feedback=True,
         forward_visible_feedback=True,
     )
