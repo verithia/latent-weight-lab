@@ -217,6 +217,84 @@ def _fit_grouped_cartesian_pair_codec_(
     return int((new_codes != old_codes).sum())
 
 
+def _polar_directions(*, device: torch.device) -> torch.Tensor:
+    angles = (
+        torch.arange(32, device=device, dtype=torch.float32)
+        * (2.0 * math.pi / 32.0)
+    )
+    return torch.stack((torch.cos(angles), torch.sin(angles)), dim=1)
+
+
+def _decode_polar_pair_codec(
+    radial_levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> torch.Tensor:
+    if tuple(radial_levels.shape) != (8,):
+        raise ValueError("polar radial levels must have shape (8,)")
+    if tuple(center.shape) != (2,):
+        raise ValueError("polar center must have shape (2,)")
+    selected = codes.long()
+    radii = radial_levels.index_select(0, selected // 32)
+    directions = _polar_directions(device=codes.device).index_select(
+        0, selected % 32
+    )
+    return center + radii[:, None] * directions
+
+
+@torch.no_grad()
+def _fit_polar_pair_codec_(
+    vectors: torch.Tensor,
+    radial_levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> int:
+    """Fit a direction-aware 32-angle x 8-radius pair dictionary."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("polar pair values must have shape (pairs, 2)")
+    if tuple(radial_levels.shape) != (8,):
+        raise ValueError("polar radial levels must have shape (8,)")
+    if tuple(center.shape) != (2,):
+        raise ValueError("polar center must have shape (2,)")
+    if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
+        raise ValueError("polar pair codes have the wrong shape")
+
+    old_codes = codes.clone()
+    fitted_center = vectors.mean(dim=0)
+    centered = vectors - fitted_center
+    angles = torch.atan2(centered[:, 1], centered[:, 0])
+    angle_indices = torch.remainder(
+        torch.round(angles * (32.0 / (2.0 * math.pi))).long(), 32
+    )
+    directions = _polar_directions(device=vectors.device).index_select(
+        0, angle_indices
+    )
+    projected_radii = (centered * directions).sum(dim=1).clamp_min_(0.0)
+    rms = projected_radii.square().mean().sqrt()
+    probabilities = (
+        torch.arange(8, device=vectors.device, dtype=torch.float32) + 0.5
+    ) / 8.0
+    rayleigh_levels = torch.sqrt(-torch.log1p(-probabilities))
+    fitted = rayleigh_levels * rms
+    for _iteration in range(3):
+        midpoints = (fitted[:-1] + fitted[1:]) * 0.5
+        radius_indices = torch.bucketize(projected_radii.contiguous(), midpoints)
+        sums = torch.zeros_like(fitted)
+        sums.index_add_(0, radius_indices, projected_radii)
+        counts = torch.bincount(radius_indices, minlength=8)
+        live = counts > 0
+        fitted[live] = sums[live] / counts[live]
+        fitted = fitted.sort().values
+    radius_indices = torch.bucketize(
+        projected_radii.contiguous(), (fitted[:-1] + fitted[1:]) * 0.5
+    )
+    new_codes = (radius_indices * 32 + angle_indices).to(torch.uint8)
+    center.copy_(fitted_center)
+    radial_levels.copy_(fitted)
+    codes.copy_(new_codes)
+    return int((new_codes != old_codes).sum())
+
+
 class MuonPairVQLinear(nn.Module):
     """Linear layer whose only persistent matrix state is pair VQ."""
 
@@ -235,6 +313,7 @@ class MuonPairVQLinear(nn.Module):
         layer_id: int,
         fast_residual: bool = False,
         error_feedback: bool = False,
+        feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
@@ -246,6 +325,7 @@ class MuonPairVQLinear(nn.Module):
         self.layer_id = int(layer_id)
         self.fast_residual = bool(fast_residual)
         self.error_feedback = bool(error_feedback)
+        self.feedback_codec = str(feedback_codec)
         self.feedback_output_group_size = int(feedback_output_group_size)
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
@@ -257,6 +337,13 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ stages must be one or two")
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
+        if self.feedback_codec not in ("cartesian4x4", "polar32x8"):
+            raise ValueError("unknown pair-VQ feedback codec")
+        if (
+            self.feedback_codec == "polar32x8"
+            and self.feedback_output_group_size != 0
+        ):
+            raise ValueError("polar pair feedback currently requires matrix-global levels")
         if self.feedback_output_group_size and (
             self.out_features % self.feedback_output_group_size
             or self.in_features % self.vector_length
@@ -343,12 +430,13 @@ class MuonPairVQLinear(nn.Module):
         if not self.error_feedback:
             return 0
         pair_codes = self.element_count // self.vector_length
-        level_bytes = (
-            self.feedback_group_count
-            * 2
-            * 16
-            * torch.tensor([], dtype=torch.float32).element_size()
-        )
+        if self.feedback_codec == "polar32x8":
+            metadata_values = 8 + 2
+        else:
+            metadata_values = self.feedback_group_count * 2 * 16
+        level_bytes = metadata_values * torch.tensor(
+            [], dtype=torch.float32
+        ).element_size()
         return pair_codes * torch.tensor([], dtype=torch.uint8).element_size() + level_bytes
 
     @property
@@ -367,11 +455,28 @@ class MuonPairVQLinear(nn.Module):
 
     @property
     def feedback_level_shape(self) -> tuple[int, ...]:
+        if self.feedback_codec == "polar32x8":
+            return (8,)
         if self.feedback_output_group_size == 0:
             return (2, 16)
         return (self.feedback_group_count, 2, 16)
 
-    def decode_feedback(self, levels: torch.Tensor, codes: torch.Tensor) -> torch.Tensor:
+    @property
+    def feedback_center_shape(self) -> tuple[int, ...] | None:
+        if self.feedback_codec == "polar32x8":
+            return (2,)
+        return None
+
+    def decode_feedback(
+        self,
+        levels: torch.Tensor,
+        codes: torch.Tensor,
+        center: torch.Tensor | None = None,
+    ) -> torch.Tensor:
+        if self.feedback_codec == "polar32x8":
+            if center is None:
+                raise ValueError("polar pair feedback requires a center")
+            return _decode_polar_pair_codec(levels, center, codes)
         if self.feedback_output_group_size == 0:
             return _decode_cartesian_pair_codec(levels, codes)
         return _decode_grouped_cartesian_pair_codec(
@@ -386,7 +491,12 @@ class MuonPairVQLinear(nn.Module):
         vectors: torch.Tensor,
         levels: torch.Tensor,
         codes: torch.Tensor,
+        center: torch.Tensor | None = None,
     ) -> int:
+        if self.feedback_codec == "polar32x8":
+            if center is None:
+                raise ValueError("polar pair feedback requires a center")
+            return _fit_polar_pair_codec_(vectors, levels, center, codes)
         if self.feedback_output_group_size == 0:
             return _fit_cartesian_pair_codec_(vectors, levels, codes)
         return _fit_grouped_cartesian_pair_codec_(
@@ -427,13 +537,18 @@ class MuonPairVQLinear(nn.Module):
             "dense_ambient_error_buffer": "disabled",
             "compact_temporal_carry": (
                 (
-                    "uint8_cartesian_code_per_weight_pair_global_levels"
-                    if self.feedback_output_group_size == 0
-                    else "uint8_cartesian_code_per_weight_pair_output_group_levels"
+                    "uint8_polar32x8_code_per_weight_pair"
+                    if self.feedback_codec == "polar32x8"
+                    else (
+                        "uint8_cartesian_code_per_weight_pair_global_levels"
+                        if self.feedback_output_group_size == 0
+                        else "uint8_cartesian_code_per_weight_pair_output_group_levels"
+                    )
                 )
                 if self.error_feedback
                 else "disabled"
             ),
+            "feedback_codec": self.feedback_codec,
             "feedback_output_group_size": self.feedback_output_group_size,
             "feedback_group_count": self.feedback_group_count,
         }
@@ -651,9 +766,9 @@ class MuonPairVQ(torch.optim.Optimizer):
     def load_state_dict(self, state_dict):
         result = super().load_state_dict(state_dict)
         for weight, state in self.state.items():
+            module = self.modules_by_id[id(weight)]
             momentum = state.get("compact_momentum")
             if momentum is not None:
-                module = self.modules_by_id[id(weight)]
                 state["compact_momentum"] = momentum.to(
                     device=weight.device,
                     dtype=module.codebooks.dtype,
@@ -661,6 +776,7 @@ class MuonPairVQ(torch.optim.Optimizer):
             if module.error_feedback:
                 levels = state.get("feedback_levels")
                 codes = state.get("feedback_codes")
+                center = state.get("feedback_center")
                 if levels is not None:
                     state["feedback_levels"] = levels.to(
                         device=weight.device, dtype=torch.float32
@@ -668,6 +784,10 @@ class MuonPairVQ(torch.optim.Optimizer):
                 if codes is not None:
                     state["feedback_codes"] = codes.to(
                         device=weight.device, dtype=torch.uint8
+                    )
+                if center is not None:
+                    state["feedback_center"] = center.to(
+                        device=weight.device, dtype=torch.float32
                     )
         return result
 
@@ -724,8 +844,19 @@ class MuonPairVQ(torch.optim.Optimizer):
                         state["feedback_codes"] = torch.zeros(
                             pair_count, device=weight.device, dtype=torch.uint8
                         )
+                    if (
+                        module.feedback_center_shape is not None
+                        and "feedback_center" not in state
+                    ):
+                        state["feedback_center"] = torch.zeros(
+                            module.feedback_center_shape,
+                            device=weight.device,
+                            dtype=torch.float32,
+                        )
                     feedback_before = module.decode_feedback(
-                        state["feedback_levels"], state["feedback_codes"]
+                        state["feedback_levels"],
+                        state["feedback_codes"],
+                        state.get("feedback_center"),
                     ).reshape_as(weight)
                     projection_target = requested + feedback_before
                 else:
@@ -744,9 +875,12 @@ class MuonPairVQ(torch.optim.Optimizer):
                         raw_feedback.reshape(-1, module.vector_length),
                         state["feedback_levels"],
                         state["feedback_codes"],
+                        state.get("feedback_center"),
                     )
                     feedback_after = module.decode_feedback(
-                        state["feedback_levels"], state["feedback_codes"]
+                        state["feedback_levels"],
+                        state["feedback_codes"],
+                        state.get("feedback_center"),
                     ).reshape_as(weight)
                     conservation_error = raw_feedback - feedback_after
                     current_request_energy = float(current_request.square().sum())

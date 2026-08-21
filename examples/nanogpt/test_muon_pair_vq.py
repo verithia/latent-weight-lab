@@ -22,6 +22,7 @@ def make_module(
     seed: int = 101,
     fast_residual: bool = False,
     error_feedback: bool = False,
+    feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
 ) -> MuonPairVQLinear:
     return MuonPairVQLinear(
@@ -34,6 +35,7 @@ def make_module(
         layer_id=3,
         fast_residual=fast_residual,
         error_feedback=error_feedback,
+        feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
         neighbor_candidates=16,
         code_refresh_interval=8,
@@ -200,6 +202,76 @@ def test_output_grouped_feedback_is_compact_and_conserves_motion() -> None:
     assert all(value.numel() != module.element_count for value in state.values())
 
 
+def test_polar_feedback_preserves_pair_direction_at_same_code_rate() -> None:
+    torch.manual_seed(149)
+    module = make_module(
+        stages=1,
+        error_feedback=True,
+        feedback_codec="polar32x8",
+    )
+    optimizer = make_optimizer(module)
+    diagnostics = None
+    for _step in range(12):
+        module.weight.grad = 1e-3 * torch.randn_like(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()[0]
+    assert diagnostics is not None
+    assert diagnostics["feedback_codec_energy_recovery"] > 0.98
+    state = optimizer.state[module.weight]
+    assert state["feedback_levels"].shape == (8,)
+    assert state["feedback_center"].shape == (2,)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == module.element_count // 2 + 40
+    assert all(value.numel() != module.element_count for value in state.values())
+
+
+def test_polar_feedback_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(151)
+    module = make_module(
+        stages=1,
+        seed=157,
+        error_feedback=True,
+        feedback_codec="polar32x8",
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(
+        stages=1,
+        seed=163,
+        error_feedback=True,
+        feedback_codec="polar32x8",
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(restored_state["feedback_codes"], original_state["feedback_codes"])
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_center"],
+        original_state["feedback_center"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
 def test_model_and_optimizer_resume_are_bit_exact_for_next_step() -> None:
     torch.manual_seed(103)
     module = make_module(seed=107)
@@ -318,6 +390,7 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
             block_fht_mlp_pair_vq=True,
             block_fht_mlp_pair_vq_error_feedback=True,
             block_fht_mlp_pair_vq_cproj_fast_residual=True,
+            block_fht_mlp_pair_vq_feedback_codec="cartesian4x4",
             block_fht_mlp_pair_vq_feedback_output_group_size=2,
         )
     )
@@ -345,7 +418,8 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         block_fht_mlp_pair_vq_code_refresh_interval=8,
         block_fht_mlp_pair_vq_error_feedback=True,
         block_fht_mlp_pair_vq_cproj_fast_residual=True,
-        block_fht_mlp_pair_vq_feedback_output_group_size=8,
+        block_fht_mlp_pair_vq_feedback_codec="polar32x8",
+        block_fht_mlp_pair_vq_feedback_output_group_size=0,
     )
     kwargs = pair_vq_model_kwargs(namespace)
     assert kwargs == {
@@ -355,7 +429,8 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_code_refresh_interval": 8,
         "block_fht_mlp_pair_vq_error_feedback": True,
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
-        "block_fht_mlp_pair_vq_feedback_output_group_size": 8,
+        "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
+        "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
     }
     config = GPTConfig(
         block_size=8,
@@ -370,3 +445,4 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
     )
     model = GPT(config)
     assert model.transformer.h[0].mlp.c_proj.fast_residual is True
+    assert model.transformer.h[0].mlp.c_proj.feedback_codec == "polar32x8"

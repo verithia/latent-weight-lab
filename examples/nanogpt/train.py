@@ -2227,6 +2227,11 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("pair-VQ c_proj fast residual requires MLP pair VQ")
     if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
         raise ValueError("pair-VQ feedback output group size must be nonnegative")
+    if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
+        "cartesian4x4",
+        "polar32x8",
+    ):
+        raise ValueError("unknown pair-VQ feedback codec")
     if (
         namespace.block_fht_mlp_pair_vq_feedback_output_group_size
         and not (
@@ -2237,6 +2242,19 @@ def parse_args() -> argparse.Namespace:
         raise ValueError(
             "grouped pair-VQ feedback requires pair VQ and error feedback"
         )
+    if (
+        namespace.block_fht_mlp_pair_vq_feedback_codec == "polar32x8"
+        and not (
+            namespace.block_fht_mlp_pair_vq
+            and namespace.block_fht_mlp_pair_vq_error_feedback
+        )
+    ):
+        raise ValueError("polar pair feedback requires pair VQ and error feedback")
+    if (
+        namespace.block_fht_mlp_pair_vq_feedback_codec == "polar32x8"
+        and namespace.block_fht_mlp_pair_vq_feedback_output_group_size
+    ):
+        raise ValueError("polar pair feedback does not use output groups")
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2693,6 +2711,9 @@ def pair_vq_model_kwargs(
         ),
         "block_fht_mlp_pair_vq_cproj_fast_residual": bool(
             namespace.block_fht_mlp_pair_vq_cproj_fast_residual
+        ),
+        "block_fht_mlp_pair_vq_feedback_codec": str(
+            namespace.block_fht_mlp_pair_vq_feedback_codec
         ),
         "block_fht_mlp_pair_vq_feedback_output_group_size": int(
             namespace.block_fht_mlp_pair_vq_feedback_output_group_size
