@@ -177,7 +177,7 @@ class DepthSharedTop1MLP(nn.Module):
                 hidden = F.gelu(hidden * self.pre_gain[layer])
                 flat_output[selected] = F.linear(
                     hidden, self.expert_proj[expert]
-                )
+                ).to(flat_output.dtype)
             output = flat_output.reshape(*values.shape[:-1], values.shape[-1])
         return output * self.output_log_gain[layer].exp()
 

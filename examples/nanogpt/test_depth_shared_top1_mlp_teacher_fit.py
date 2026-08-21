@@ -52,6 +52,15 @@ def test_hard_route_matches_selected_complete_expert() -> None:
         torch.testing.assert_close(module.forward_layer(layer, values), expected)
 
 
+def test_hard_dispatch_is_dtype_safe_under_autocast() -> None:
+    module = family()
+    values = torch.randn(5, 4)
+    with torch.no_grad(), torch.autocast("cpu", dtype=torch.bfloat16):
+        output = module.forward_layer(1, values)
+    assert output.dtype == torch.float32
+    assert torch.isfinite(output).all()
+
+
 def test_straight_through_forward_is_exactly_hard() -> None:
     logits = torch.tensor([[1.0, 3.0, 2.0]], requires_grad=True)
     hard = DepthSharedTop1MLP._route_weights(
