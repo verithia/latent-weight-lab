@@ -1,0 +1,86 @@
+{
+  "schema_version": "mai_pair_vq_axisadapt_source_probe9_v2_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_terminal_rejection",
+  "classification": "NO_SCALAR_AXIS_OR_KLT_ADAPTATION_WINNER",
+  "decision": "Close global and axis-private scalar transform coding at 7.25 bits/weight. Do not fit a learned butterfly: the covariance-optimal KLT is worse than the fixed FHT. Measure a block-adaptive fractional q7/q8 rate frontier before considering a true vector or trellis cell.",
+  "provenance": {
+    "invalid_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_invalid_result.json",
+    "invalid_parent_sha256": "a4eb23567b2c6101132d90f83f8d235c90230a3a9ecccd99cad8cc3e0a82ea49",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_v2_plan.json",
+    "plan_sha256": "d3635404108638c93cb06a404913c00fb7cc44c39e91678fe77450db7283373d",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_axisadapt_source_probe9_v2.json",
+    "config_sha256": "ccfdf109939f9985d3b67199eb391fd80cbbffc5dfd4918c0e9e8039561a668f",
+    "implementation_commit": "2edee7cba5b2c3ec1370acd21f25eabe2a21d9f4",
+    "preregistration_commit": "072c968e2f24c5926babeb238572137421b4b1ab",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "certificate_sha256": "c1382a1f063fcef3b0886b6c01bfe30ffd7c7bead35dccee777f39bd6cf069ed",
+    "log_sha256": "7b782db06750ac0a7b8a6e5671cbd7913d662bdbef5ffec97bd1c5799ab3f34e",
+    "tokens_per_second": 184505.635,
+    "mfu_fraction": 0.3296477892,
+    "iter_ms": 1420.79,
+    "optimizer_ms": 219.92,
+    "peak_mib": 31630.25
+  },
+  "scientific_run": {
+    "clean_exit": true,
+    "optimizer_steps": 9,
+    "wall_seconds": 19.78,
+    "all_logged_losses_finite": true,
+    "diagnostic_records": 48,
+    "records_per_probe_step": 24,
+    "last_eval": "step 9: train loss 8.2859, val loss 8.3831",
+    "log_sha256": "3c9e170bf0287b9803cd84cd08b60e4ddbc842adb6581a0c60bf96688de4b6c9",
+    "log_bytes": 164017
+  },
+  "weighted_results": {
+    "step_0": {
+      "fht_global": {"full": 0.9994895676, "full_min": 0.9990351200},
+      "fht_axis": {"full": 0.9994931188, "full_min": 0.9990466833},
+      "klt_global": {"full": 0.9964971147, "full_min": 0.9854789972},
+      "klt_axis": {"full": 0.9971489218, "full_min": 0.9878628254}
+    },
+    "step_8": {
+      "fht_global": {"full": 0.9995427500, "full_min": 0.9994543791},
+      "fht_axis": {"full": 0.9995445167, "full_min": 0.9994576573},
+      "klt_global": {"full": 0.9969388249, "full_min": 0.9877949953},
+      "klt_axis": {"full": 0.9974545666, "full_min": 0.9896028638}
+    }
+  },
+  "source_geometry": {
+    "fht_axis_variance_cv_step0": 0.0094635811,
+    "fht_axis_variance_cv_step8": 0.0068269780,
+    "klt_axis_variance_cv_step0": 0.0622212716,
+    "klt_axis_variance_cv_step8": 0.0482816354,
+    "fht_parseval_relative_error_max": 1.1491288632e-7,
+    "klt_parseval_relative_error_max": 2.4527858500e-7,
+    "coordinate_active_codes_min": 128,
+    "coordinate_entropy_bits_min": 6.7619686127,
+    "gain_active_codes_min": 251,
+    "gain_entropy_bits_min": 7.8559112549
+  },
+  "frozen_gate_evaluation": {
+    "systems_mfu_at_least_0p20": true,
+    "clean_9_steps_and_48_records": true,
+    "all_losses_finite": true,
+    "all_parseval_errors_at_most_1e_6": true,
+    "all_occupancy_and_entropy_gates": true,
+    "fht_axis_all_recovery_gates": false,
+    "klt_global_all_recovery_gates": false,
+    "klt_axis_all_recovery_gates": false,
+    "winner": null
+  },
+  "interpretation": {
+    "axis_private_gain_step0": 0.0000035512,
+    "axis_private_gain_step8": 0.0000017667,
+    "axis_heterogeneity": "negligible after signed FHT; per-axis scalar codebooks cannot close the gap",
+    "klt_result": "KLT concentration is harmful under shared block-gain normalization, so a learned covariance transform is not justified",
+    "remaining_cause": "the uniform q7 scalar-cell rate floor, not transform direction or codebook occupancy",
+    "next_family": "block-adaptive fractional q7/q8 scalar rate with an explicit one-bit block selector; if it cannot pass below 8 bits/weight, move to vector/trellis shaping"
+  }
+}
