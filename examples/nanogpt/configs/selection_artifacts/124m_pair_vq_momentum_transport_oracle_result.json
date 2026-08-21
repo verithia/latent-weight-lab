@@ -1,0 +1,104 @@
+{
+  "schema_version": "mai_124m_pair_vq_momentum_transport_oracle_seal_v1",
+  "classification": "INSTANTANEOUS_SUBSPACE_PRIMARY",
+  "scientific_decision": {
+    "authorized_next_action": "Theory and one same-replay, nonintervening representation oracle for a block-scaled 2-bit/4-bit ambient momentum tangent with temporal error feedback.",
+    "forbidden": [
+      "code-ID momentum transport as the primary repair",
+      "language-model endpoint training",
+      "horizon transfer",
+      "width scale-up",
+      "candidate sweep"
+    ],
+    "reason": "At both frozen late probes, current-chart projection error exceeds historical transport error and explains at least 70% of final post-polar squared error."
+  },
+  "identity": {
+    "source_commit": "78894ab6a09c6d27dc8ab5462840cb839f3fe236",
+    "plan_sha256": "d2a1e5ed88e20bfa1f0081c60a65d1cc22aa1129161b82f2b4dd988a1d19e7dc",
+    "config_sha256": "41f3eca5569e072baaf9b54f20607b596a33312c0405d9afd4f9855b6627733f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "c6a9f7c5890a84a1a4be6bf4411369e72a1bbd4c1508c9a70c1fbe3aac48ddc2"
+  },
+  "artifacts": {
+    "raw_result_sha256": "ca3c85e15b1ca8337eec9787571125e338b7d270ea56f0076403796323fffb53",
+    "dense_shadow_result_sha256": "abea0439ff4d2f7d0d618e37eabf2d52f6296ea49307f03de9cc8d8271be6bc7",
+    "status_sha256": "970e13bbb35062d4b5617e48c04e9adcf455cf41ad125afdd6803370719d2f43",
+    "log_sha256": "827321d1f9322f3c69a2e35e539e63b6e989828af0fb5ab239f0679788ff5e29",
+    "runtime_provenance_sha256": "ea03bd8480376c2edbf3e5b6edfa1012c3e03203bccf39cd61094d3a51f5f8e6",
+    "archived_config_sha256": "41f3eca5569e072baaf9b54f20607b596a33312c0405d9afd4f9855b6627733f",
+    "mfu_certificate_sha256": "33404c7dfcad30bc382421fe54ed6486cd77fe5a5402daf82dc7e31b23d142e4"
+  },
+  "terminal": {
+    "exit_code": 0,
+    "finished_at": "2026-08-22T07:52:47+08:00",
+    "dense_train_ce": 5.358230113983154,
+    "dense_validation_ce": 5.36044979095459,
+    "registered_dense_parent_validation_ce": 5.361,
+    "dense_parent_absolute_gap": 0.0005502090454101562,
+    "dense_replay_gate_maximum_gap": 0.002,
+    "shadow_validation_ce": 5.364488124847412,
+    "shadow_minus_dense_validation_ce": 0.004038333892822266
+  },
+  "frozen_gate": {
+    "ready": true,
+    "all_metrics_finite": true,
+    "minimum_late_instantaneous_subspace_fraction": 1.0197657429526146,
+    "minimum_late_historical_transport_fraction": 0.018767580758397857,
+    "maximum_late_decomposition_closure_relative_error": 1.1719846601658416e-16
+  },
+  "late_post_polar_metrics": {
+    "180": {
+      "all": {
+        "dense_to_chart_cosine": 0.4336384261013965,
+        "chart_to_compact_cosine": 0.9601964031928538,
+        "dense_to_compact_cosine": 0.44940676716492434,
+        "instantaneous_subspace_fraction": 1.045564809768978,
+        "historical_transport_fraction": 0.07446245465066084
+      },
+      "c_fc": {
+        "dense_to_chart_cosine": 0.4378571489674152,
+        "chart_to_compact_cosine": 0.9709149394739063,
+        "dense_to_compact_cosine": 0.454020719953142,
+        "instantaneous_subspace_fraction": 1.0489628768652137,
+        "historical_transport_fraction": 0.05509412872823826
+      },
+      "c_proj": {
+        "dense_to_chart_cosine": 0.41649772877073793,
+        "chart_to_compact_cosine": 0.9167937810158534,
+        "dense_to_compact_cosine": 0.4308575008579537,
+        "instantaneous_subspace_fraction": 1.0324593301191312,
+        "historical_transport_fraction": 0.14916115660068813
+      }
+    },
+    "238": {
+      "all": {
+        "dense_to_chart_cosine": 0.4088681284061308,
+        "chart_to_compact_cosine": 0.9893451793789859,
+        "dense_to_compact_cosine": 0.416977384290757,
+        "instantaneous_subspace_fraction": 1.0197657429526146,
+        "historical_transport_fraction": 0.018767580758397857
+      },
+      "c_fc": {
+        "dense_to_chart_cosine": 0.41240393799070807,
+        "chart_to_compact_cosine": 0.9926104747252927,
+        "dense_to_compact_cosine": 0.42112450184041816,
+        "instantaneous_subspace_fraction": 1.0220186790917074,
+        "historical_transport_fraction": 0.013137662148980291
+      },
+      "c_proj": {
+        "dense_to_chart_cosine": 0.3945515560855625,
+        "chart_to_compact_cosine": 0.9761559605017818,
+        "dense_to_compact_cosine": 0.4002704790995696,
+        "instantaneous_subspace_fraction": 1.011005409011972,
+        "historical_transport_fraction": 0.04065899890440701
+      }
+    }
+  },
+  "watcher": {
+    "policy": "terminal-or-error only",
+    "callback_count": 1,
+    "callback_delivered": true,
+    "terminal_process_alive": false
+  }
+}
