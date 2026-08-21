@@ -9,6 +9,7 @@ from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_pair_vq import (
     MuonPairVQ,
     MuonPairVQLinear,
+    _block_fht_free_pair_vq_counterfactual,
     _conditional_polar_pair_diagnostics,
     _decode_conditional_polar_pair_codec,
     _decode_free_pair_vq_rvq2,
@@ -110,6 +111,21 @@ def test_free_pair_vq_rvq2_closes_gaussian_residual_with_free_directions() -> No
     assert residual_recovery > 0.985
     assert int(codes[0].unique().numel()) > 200
     assert int(codes[1].unique().numel()) > 200
+
+
+def test_block_fht_free_pair_probe_preserves_energy_and_reports_capacity() -> None:
+    torch.manual_seed(1704)
+    vectors = torch.randn(4096, 2)
+    diagnostics = _block_fht_free_pair_vq_counterfactual(
+        vectors,
+        block_size=16,
+        seed=1704,
+    )
+    assert diagnostics["parseval_relative_error"] < 1e-6
+    assert diagnostics["full_recovery"] > 0.99
+    assert diagnostics["residual_recovery"] > 0.98
+    assert diagnostics["stage1_active_codes"] > 192
+    assert diagnostics["stage2_active_codes"] > 192
 
 
 def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> None:
@@ -937,6 +953,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
         "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),
         "block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations": (),
+        "block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes": (),
     }
     config = GPTConfig(
         block_size=8,

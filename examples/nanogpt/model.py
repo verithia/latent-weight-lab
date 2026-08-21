@@ -197,6 +197,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_feedback_output_group_size: int = 0
     block_fht_mlp_pair_vq_feedback_residual_probe_steps: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations: tuple[int, ...] = ()
+    block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2419,6 +2420,9 @@ class MLP(nn.Module):
                 feedback_residual_probe_lloyd_iterations=tuple(
                     config.block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations
                 ),
+                feedback_transform_probe_block_sizes=tuple(
+                    config.block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes
+                ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
@@ -2671,6 +2675,9 @@ class MLP(nn.Module):
                 ),
                 feedback_residual_probe_lloyd_iterations=tuple(
                     config.block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations
+                ),
+                feedback_transform_probe_block_sizes=tuple(
+                    config.block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes
                 ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates

@@ -15,6 +15,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
+from latent_weight_lab.block_fht import normalized_fht_last_dim
 from examples.nanogpt.muon import muon_update
 
 
@@ -777,6 +778,81 @@ def _free_pair_vq_rvq2_diagnostics(
 
 
 @torch.no_grad()
+def _block_fht_free_pair_vq_counterfactual(
+    vectors: torch.Tensor,
+    *,
+    block_size: int,
+    seed: int,
+) -> dict[str, float | int]:
+    """Probe exact free-pair coding after invertible signed block mixing."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("block-FHT pair probe values must have shape (pairs, 2)")
+    if block_size < 2 or block_size & (block_size - 1):
+        raise ValueError("block-FHT pair probe size must be a power of two")
+    flat = vectors.reshape(-1)
+    if flat.numel() % block_size:
+        raise ValueError("block-FHT pair probe size must divide the element count")
+    if block_size == 2:
+        transformed = vectors
+    else:
+        generator = torch.Generator(device="cpu").manual_seed(int(seed))
+        signs = (
+            torch.randint(
+                0,
+                2,
+                (block_size,),
+                generator=generator,
+                dtype=torch.int8,
+            )
+            .to(device=vectors.device, dtype=torch.float32)
+            .mul_(2.0)
+            .sub_(1.0)
+        )
+        transformed = normalized_fht_last_dim(
+            flat.reshape(-1, block_size) * signs
+        ).reshape(-1, 2)
+    codebooks = torch.zeros(
+        2, 256, 2, device=vectors.device, dtype=torch.float32
+    )
+    codes = torch.zeros(
+        2, transformed.shape[0], device=vectors.device, dtype=torch.uint8
+    )
+    _fit_free_pair_vq_rvq2_(
+        transformed,
+        codebooks,
+        codes,
+        neighbor_candidates=16,
+    )
+    diagnostics = _free_pair_vq_rvq2_diagnostics(
+        transformed,
+        codebooks,
+        codes,
+    )
+    source_energy = vectors.square().sum().clamp_min(1e-30)
+    transformed_energy = transformed.square().sum()
+    return {
+        "full_recovery": diagnostics["feedback_codec_energy_recovery"],
+        "residual_recovery": diagnostics[
+            "feedback_residual_codec_energy_recovery"
+        ],
+        "stage1_recovery": diagnostics[
+            "feedback_stage1_codec_energy_recovery"
+        ],
+        "stage1_active_codes": diagnostics["feedback_stage1_active_codes"],
+        "stage2_active_codes": diagnostics["feedback_residual_active_codes"],
+        "stage1_entropy_bits": diagnostics[
+            "feedback_stage1_code_entropy_bits"
+        ],
+        "stage2_entropy_bits": diagnostics[
+            "feedback_residual_code_entropy_bits"
+        ],
+        "parseval_relative_error": float(
+            (transformed_energy - source_energy).abs() / source_energy
+        ),
+    }
+
+
+@torch.no_grad()
 def _conditional_polar_pair_diagnostics(
     vectors: torch.Tensor,
     radial_levels: torch.Tensor,
@@ -1015,6 +1091,7 @@ class MuonPairVQLinear(nn.Module):
         feedback_output_group_size: int = 0,
         feedback_residual_probe_steps: tuple[int, ...] = (),
         feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
+        feedback_transform_probe_block_sizes: tuple[int, ...] = (),
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -1033,6 +1110,9 @@ class MuonPairVQLinear(nn.Module):
         self.feedback_residual_probe_lloyd_iterations = tuple(
             int(iterations)
             for iterations in feedback_residual_probe_lloyd_iterations
+        )
+        self.feedback_transform_probe_block_sizes = tuple(
+            int(block_size) for block_size in feedback_transform_probe_block_sizes
         )
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
@@ -1066,6 +1146,22 @@ class MuonPairVQLinear(nn.Module):
         ):
             raise ValueError(
                 "feedback residual Lloyd probes require conditional_polar16x16_rvq2"
+            )
+        if any(
+            block_size < 2
+            or block_size & (block_size - 1)
+            or self.element_count % block_size
+            for block_size in self.feedback_transform_probe_block_sizes
+        ):
+            raise ValueError(
+                "feedback transform probe sizes must be power-of-two divisors"
+            )
+        if self.feedback_transform_probe_block_sizes and (
+            not self.feedback_residual_probe_steps
+            or self.feedback_codec != "free_vq256_rvq2"
+        ):
+            raise ValueError(
+                "feedback transform probes require free-VQ residual probe steps"
             )
         if self.feedback_codec not in (
             "cartesian4x4",
@@ -1846,6 +1942,29 @@ class MuonPairVQ(torch.optim.Optimizer):
                                 include_exact_assignment=probe,
                             )
                         )
+                        if probe:
+                            for block_size in (
+                                module.feedback_transform_probe_block_sizes
+                            ):
+                                counterfactual = (
+                                    _block_fht_free_pair_vq_counterfactual(
+                                        raw_feedback.reshape(
+                                            -1, module.vector_length
+                                        ),
+                                        block_size=block_size,
+                                        seed=(
+                                            20261022
+                                            + 8192 * module.layer_id
+                                            + 131 * module.in_features
+                                            + 17 * module.out_features
+                                            + block_size
+                                        ),
+                                    )
+                                )
+                                for key, value in counterfactual.items():
+                                    diagnostics[
+                                        f"feedback_transform_b{block_size}_{key}"
+                                    ] = value
                 self._diagnostics.append(diagnostics)
         return loss
 
