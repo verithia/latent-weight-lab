@@ -291,5 +291,5 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
     assert mlp.c_proj.fast_levels.shape == (2, 16)
     assert all(
         value.numel() != mlp.c_proj.element_count
-        for value in model.state_dict().values()
+        for value in mlp.c_proj.state_dict().values()
     )
