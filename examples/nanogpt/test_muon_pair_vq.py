@@ -291,7 +291,7 @@ def test_conditional_polar_models_direction_dependent_radius() -> None:
     scales = 1.0 + 0.75 * torch.cos(
         angle_indices.float() * (4.0 * torch.pi / 32.0)
     )
-    radii = scales * (1.0 + 0.08 * torch.randn_like(scales)).clamp_min(0.0)
+    radii = scales * torch.exp(0.4 * torch.randn_like(scales))
     vectors = radii[:, None] * directions
 
     shared_levels = torch.zeros(8)
@@ -317,8 +317,26 @@ def test_conditional_polar_models_direction_dependent_radius() -> None:
     conditional_recovery = 1.0 - float(
         (vectors - conditional).square().sum()
     ) / float(vectors.square().sum())
-    assert conditional_recovery > 0.99
+    assert conditional_recovery > 0.985
     assert conditional_recovery > shared_recovery + 0.01
+
+
+def test_conditional_polar_feedback_state_is_compact() -> None:
+    torch.manual_seed(166)
+    module = make_module(
+        stages=1,
+        error_feedback=True,
+        feedback_codec="conditional_polar32x8",
+    )
+    optimizer = make_optimizer(module)
+    module.weight.grad = 1e-3 * torch.randn_like(module.weight)
+    optimizer.step()
+    state = optimizer.state[module.weight]
+    assert state["feedback_levels"].shape == (32, 8)
+    assert state["feedback_center"].shape == (2,)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == module.element_count // 2 + 1032
+    assert all(value.numel() != module.element_count for value in state.values())
 
 
 def test_rvq_feedback_learns_joint_pair_atoms_at_same_code_rate() -> None:
