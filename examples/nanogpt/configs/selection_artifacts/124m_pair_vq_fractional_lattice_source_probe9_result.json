@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_pair_vq_fractional_lattice_source_probe9_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_terminal_selection",
+  "classification": "FRACTIONAL_Q7_Q8_P0P25_SOURCE_CODEC_SELECTED",
+  "decision": "Implement only the B32 q7/q8 p=0.25 bit-packed temporal-feedback codec, then require a nine-update live direction/conservation gate, exact checkpoint-resume equivalence, and exact-config MFU >= 20% before any endpoint, horizon extension, or scale-up.",
+  "provenance": {
+    "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_v2_result.json",
+    "scientific_parent_sha256": "0d495b29b69b74dfc2f7b0b69852bcd7206b6024dc36728b1ae1ec4b475da2e4",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_source_probe9_plan.json",
+    "plan_sha256": "c8dcd8fee7431aace605101a834d237c5df0cef580ca613436dcf16222450698",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_source_probe9.json",
+    "config_sha256": "76fb95014da2d628566606cb27bf9f39aaa581bff5205200ec35141fc772e7c6",
+    "implementation_commit": "24b2ae1f435f1fe0b11b9c4a3c6abf75c68d5f49",
+    "preregistration_commit": "6c3c304bb14c8f702a6b8ed8d29a1cdd810378c7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_source_probe9_mfu.json",
+    "certificate_sha256": "7d0ef01051f89348351377921bd960638db4d99a9fa7544130345458ee0f32f4",
+    "log_sha256": "60aaf7ddcfa2273cdac745e94db7ce37ca168cb7716a3ef8277c4732fad8183b",
+    "tokens_per_second": 184745.4625,
+    "mfu_fraction": 0.3301898923,
+    "iter_ms": 1418.9475,
+    "optimizer_ms": 218.5475,
+    "peak_mib": 31630.63
+  },
+  "scientific_run": {
+    "clean_exit": true,
+    "optimizer_steps": 9,
+    "wall_seconds": 17.18,
+    "all_logged_losses_finite": true,
+    "diagnostic_records": 48,
+    "records_per_probe_step": 24,
+    "last_eval": "step 9: train loss 8.2859, val loss 8.3830",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_source_probe9_20260822T_exact1.log",
+    "log_sha256": "12d487982703affb5f8ddf93cf0605e1beaee93fe28a468b7c7317cc3ac0ebd9",
+    "log_bytes": 155816
+  },
+  "weighted_results": {
+    "step_0": {
+      "q7_base": {"bits_per_weight": 7.28125, "full": 0.9994924978},
+      "p0p125": {"bits_per_weight": 7.40625, "full": 0.9997175280, "full_min": 0.9995346069, "fraction_of_q7_to_q8_improvement": 0.68077},
+      "p0p25": {"bits_per_weight": 7.53125, "full": 0.9997584186, "full_min": 0.9995738864, "fraction_of_q7_to_q8_improvement": 0.81231},
+      "p0p5": {"bits_per_weight": 7.78125, "full": 0.9997959998, "full_min": 0.9996080399},
+      "p0p6875": {"bits_per_weight": 7.96875, "full": 0.9998087876, "full_min": 0.9996190071},
+      "uniform_q8": {"bits_per_weight": 8.28125, "full": 0.9998026809}
+    },
+    "step_8": {
+      "q7_base": {"bits_per_weight": 7.28125, "full": 0.9995450871},
+      "p0p125": {"bits_per_weight": 7.40625, "full": 0.9997305237, "full_min": 0.9996879101, "fraction_of_q7_to_q8_improvement": 0.57232},
+      "p0p25": {"bits_per_weight": 7.53125, "full": 0.9997851347, "full_min": 0.9997452497, "fraction_of_q7_to_q8_improvement": 0.74223},
+      "p0p5": {"bits_per_weight": 7.78125, "full": 0.9998384812},
+      "p0p6875": {"bits_per_weight": 7.96875, "full": 0.9998575451},
+      "uniform_q8": {"bits_per_weight": 8.28125, "full": 0.9998498616}
+    }
+  },
+  "cross_candidate_validity": {
+    "base_active_codes_min": 128,
+    "base_entropy_bits_min": 6.972,
+    "refined_active_codes_min": 256,
+    "refined_entropy_bits_min": 7.974,
+    "gain_active_codes_min": 252,
+    "gain_entropy_bits_min": 7.856,
+    "parseval_relative_error_max": 2.11e-7,
+    "selected_fractions_exact": true
+  },
+  "frozen_gate_evaluation": {
+    "systems_mfu_at_least_0p20": true,
+    "clean_9_steps_and_48_records": true,
+    "all_losses_finite": true,
+    "all_parseval_occupancy_entropy_and_fraction_gates": true,
+    "p0p125_weighted_recovery_at_least_0p99975_both_phases": false,
+    "p0p25_weighted_recovery_at_least_0p99975_both_phases": true,
+    "p0p25_every_matrix_recovery_at_least_0p999_both_phases": true,
+    "winner": "B32_q7q8_p0p25"
+  },
+  "selected_representation": {
+    "block_size": 32,
+    "base_coordinate_bits": 7,
+    "refinement_fraction": 0.25,
+    "refinement_bits_per_selected_coordinate": 1,
+    "selector_bits_per_block": 1,
+    "gain_bits_per_block": 8,
+    "physical_bits_per_weight": 7.53125,
+    "saving_vs_int8_fraction": 0.05859375,
+    "saving_vs_fp32_temporal_state_fraction": 0.7646484375,
+    "persistent_dense_master_or_residual": false,
+    "production_status": "selected for packed implementation; not yet authorized for endpoint training"
+  }
+}
