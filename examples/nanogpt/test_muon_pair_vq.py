@@ -808,9 +808,12 @@ def test_gpt_routes_residual_probe_without_persistent_dense_state() -> None:
             assert isinstance(module, MuonPairVQLinear)
             assert module.feedback_residual_probe_steps == (0, 8)
             assert module.feedback_residual_probe_lloyd_iterations == (3, 6, 12)
-            assert all(
-                value.numel() != module.element_count
-                for value in module.state_dict().values()
+            state = module.state_dict()
+            assert "weight" not in state
+            assert not any(
+                value.numel() == module.element_count
+                and value.dtype == torch.float32
+                for value in state.values()
             )
 
 

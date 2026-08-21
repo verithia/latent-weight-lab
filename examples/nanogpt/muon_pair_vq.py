@@ -1562,7 +1562,7 @@ class MuonPairVQ(torch.optim.Optimizer):
                         == "conditional_polar16x16_rvq2"
                     ):
                         probe = (
-                            int(module.optimizer_step)
+                            int(diagnostics["optimizer_step"])
                             in module.feedback_residual_probe_steps
                         )
                         diagnostics.update(
