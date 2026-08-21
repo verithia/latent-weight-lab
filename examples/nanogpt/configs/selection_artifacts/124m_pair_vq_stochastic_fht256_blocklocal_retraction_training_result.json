@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fht256_blocklocal_retraction_training_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "FAIL_LOW_VARIANCE_UNBIASED_RETRACTION_FUNCTIONAL_PATH",
+  "passed": false,
+  "decision": {
+    "smallest_rung_loss_gate_passed": false,
+    "unbiasedness_gate_passed": true,
+    "variance_gate_passed": true,
+    "storage_gate_passed": true,
+    "performance_gate_passed": true,
+    "larger_rung_authorized": false,
+    "learning_rate_bit_width_block_size_or_width_sweep_authorized": false,
+    "next_authorized_work": "Preregister and run only a compact functional-gradient oracle that tests whether a forward-visible compact virtual state with paired antithetic realization restores dense-path gradient direction. No language-model endpoint is authorized until that oracle passes a frozen held-out direction gate.",
+    "reason": "Block-local support reduced stochastic variance below two percent and retained exact conditional unbiasedness, but terminal validation CE remained at the same approximately +0.158 compact self-training floor seen with the fractional lattice and B64 shadow. Algebraic request conservation remained high while the realized fresh-step recovery decayed to slightly negative values, so the remaining defect is temporal functional-gradient path bias rather than instantaneous support variance or endpoint capacity."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_blocklocal_retraction_plan.json",
+    "plan_sha256": "30ea82db128c220ac5b23c0146462ecddd4cbe181f6124cc447cabcb91f020db",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fht256_blocklocal_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "c0d75015b43eb46c4bbbc3c54ef356f376b10456acb96e290621897bfb7361bc",
+    "run_metadata": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_blocklocal_retraction_run_metadata.json",
+    "run_metadata_preterminal_sha256": "42210aaf482fef5985b99b99142bc342f1d6b98bf25a03aeed681c4d97517594",
+    "implementation_commit": "4b9c35fae8058a510cf3393ea1e07a16b584842f",
+    "execution_git_commit": "a08599fc96dc484cc290c1c0ad60de3d1626431a",
+    "run_id": "pro6_mai_v3_124m_pairvq_stochastic_fht256_blocklocal_retraction_0p5tpp_20260821T213853Z_2891277",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "artifacts": {
+    "status_sha256": "3e57656e0ff5edfeab775c4d8c6a1dc6d09dbbcdf5706ccda770f013d4ce25ff",
+    "log_sha256": "7f7f3abaf80715c2a6ff9843e27ed47b26f9af5834634af8e55749914a616233",
+    "provenance_sha256": "284e8685f4014d0794735b326039f967746d5d391f46c0dfb137b4eef706c85c",
+    "archived_config_sha256": "c0d75015b43eb46c4bbbc3c54ef356f376b10456acb96e290621897bfb7361bc",
+    "mfu_preflight_certificate_sha256": "318df89d42325655a434a3b195b3ad5059382c2d782b4aeac1fb7cfca6a2bd96",
+    "mfu_preflight_log_sha256": "bfd42409421329d9bcd00b7b2f3df452f2eed37912044fde857e6ed497516f36",
+    "checkpoint_retained": false
+  },
+  "terminal_status": {
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "started_at": "2026-08-22T05:38:54+08:00",
+    "finished_at": "2026-08-22T05:47:00+08:00",
+    "elapsed_seconds": 486
+  },
+  "matched_parent": {
+    "terminal_validation_ce": 5.361,
+    "validation_ce": {
+      "0": 10.997,
+      "60": 6.218,
+      "120": 5.7258,
+      "180": 5.4642,
+      "238": 5.361
+    }
+  },
+  "fixed_evaluation": [
+    {"step": 0, "train_ce": 10.9826, "validation_ce": 10.9831, "parent_validation_ce": 10.997, "candidate_minus_parent_ce": -0.0139},
+    {"step": 60, "train_ce": 6.2781, "validation_ce": 6.2877, "parent_validation_ce": 6.218, "candidate_minus_parent_ce": 0.0697},
+    {"step": 120, "train_ce": 5.8113, "validation_ce": 5.8169, "parent_validation_ce": 5.7258, "candidate_minus_parent_ce": 0.0911},
+    {"step": 180, "train_ce": 5.608, "validation_ce": 5.6121, "parent_validation_ce": 5.4642, "candidate_minus_parent_ce": 0.1479},
+    {"step": 238, "train_ce": 5.5166, "validation_ce": 5.5204, "parent_validation_ce": 5.361, "candidate_minus_parent_ce": 0.1594}
+  ],
+  "frozen_gate_outcomes": {
+    "terminal_validation_ce": 5.5204,
+    "maximum_terminal_validation_ce": 5.411,
+    "terminal_gate_excess_ce": 0.1094,
+    "terminal_candidate_minus_parent_ce": 0.1594,
+    "terminal_perplexity_ratio": 1.1727,
+    "minimum_expected_bias_recovery": 0.9999999999999518,
+    "minimum_expected_bias_recovery_required": 0.999,
+    "minimum_weighted_sampling_variance_ratio": 0.018945291482143287,
+    "maximum_weighted_sampling_variance_ratio": 0.019898430041263664,
+    "maximum_weighted_sampling_variance_ratio_allowed": 0.1,
+    "terminal_weighted_sampling_variance_ratio": 0.01897442933473086,
+    "maximum_boundary_clipped_values": 0,
+    "all_losses_finite": true,
+    "persistent_mlp_training_state_bytes": 161039808,
+    "persistent_state_exact": true
+  },
+  "comparison_to_prior_compact_endpoints": {
+    "rejected_global_stochastic_terminal_ce": 11.1364,
+    "improvement_vs_global_stochastic_ce": 5.616,
+    "deterministic_fast_residual_terminal_ce": 5.5964,
+    "improvement_vs_deterministic_fast_residual_ce": 0.076,
+    "fractional_lattice_terminal_ce": 5.5178,
+    "candidate_minus_fractional_lattice_ce": 0.0026,
+    "b64_shadow_terminal_ce": 5.519,
+    "candidate_minus_b64_shadow_ce": 0.0014,
+    "interpretation": "Three substantially different compact temporal mechanisms converge to the same approximately 5.52 CE floor. Lowering stochastic variance prevents divergence but does not change the compact self-gradient trajectory."
+  },
+  "update_geometry": [
+    {"step": 0, "mean_requested_step_energy_recovery": 0.9828350932, "mean_requested_update_cosine": 0.9915282169, "aggregate_current_over_request": 1.0, "mean_conserved_requested_step_energy_recovery": 0.9999997519},
+    {"step": 56, "mean_requested_step_energy_recovery": 0.2553660580, "mean_requested_update_cosine": 0.7573446574, "aggregate_current_over_request": 0.2742368346, "mean_conserved_requested_step_energy_recovery": 0.9999513092},
+    {"step": 120, "mean_requested_step_energy_recovery": 0.0964756428, "mean_requested_update_cosine": 0.7248137708, "aggregate_current_over_request": 0.0960437636, "mean_conserved_requested_step_energy_recovery": 0.9998510082},
+    {"step": 176, "mean_requested_step_energy_recovery": 0.0188316040, "mean_requested_update_cosine": 0.7104529069, "aggregate_current_over_request": 0.0191791676, "mean_conserved_requested_step_energy_recovery": 0.9992843380},
+    {"step": 224, "mean_requested_step_energy_recovery": -0.0016836376, "mean_requested_update_cosine": 0.7068635970, "aggregate_current_over_request": 0.0034179594, "mean_conserved_requested_step_energy_recovery": 0.9960418024},
+    {"step": 232, "mean_requested_step_energy_recovery": -0.0023375705, "mean_requested_update_cosine": 0.7066076186, "aggregate_current_over_request": 0.0029594199, "mean_conserved_requested_step_energy_recovery": 0.9954753404}
+  ],
+  "systems": {
+    "median_tokens_per_second": 161500.2649,
+    "median_iteration_ms": 1623.18,
+    "peak_mib": 31664.12,
+    "preflight_mfu_fraction": 0.2912725095,
+    "minimum_mfu_fraction": 0.2,
+    "persistent_training_state_bytes": 161039808,
+    "training_compression_vs_dense_fp32_weight_plus_muon": 2.812875,
+    "model_compression_vs_dense_bf16": 1.522233,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "mechanistic_interpretation": {
+    "what_passed": "The exact block-local representation solved the registered support-range defect: every update remained conditionally unbiased, unclipped, low variance, compact, and performance-qualified.",
+    "what_failed": "Independent low-variance rounding still creates a temporally incoherent realized weight path. Error feedback conserves the accumulated request algebraically, but that accumulated request comes to dominate each shrinking scheduled Muon step; realized fresh-step recovery falls from 98.3 percent to slightly negative while cosine approaches the random two-vector floor near 0.707.",
+    "why_this_is_not_capacity": "The sealed dense-path shadow replay places the same compact family only 0.0038 CE behind its synchronized dense path, proving endpoint capacity and dense-path tracking at this rung. The approximately +0.159 self-training gap is generated by the compact model's own forward/gradient path.",
+    "why_this_is_not_blockfht_or_attention_v": "The run maps only QK and replaces the MLP through Pair-VQ. Its failure occurs inside the compact MLP update boundary and survives after the registered stochastic variance defect is removed.",
+    "next_constraint": "The compact temporal state must participate in the forward function or its gradient estimator, not merely preserve discarded updates in an optimizer-side shadow. The next test must measure held-out dense-path gradient direction before any new endpoint."
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schema_version": "mai_run_metadata_v1",
   "created_at": "2026-08-22",
-  "status": "running",
+  "status": "finished_scientific_gate_failed",
   "repository": {
     "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab",
     "branch": "experiment/paired-monarch-training-20260819",
@@ -99,6 +99,19 @@
     "log_path": "/Users/verithia/research/monitoring/pro6_pairvq_blocklocal/watch.log",
     "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
     "callback_mentions_codex": true,
-    "verified_alive_after_launch": true
+    "verified_alive_after_launch": true,
+    "terminal_callback_delivered": true
+  },
+  "terminal": {
+    "state": "finished",
+    "classification": "clean",
+    "exit_code": 0,
+    "finished_at": "2026-08-22T05:47:00+08:00",
+    "status_sha256": "3e57656e0ff5edfeab775c4d8c6a1dc6d09dbbcdf5706ccda770f013d4ce25ff",
+    "log_sha256": "7f7f3abaf80715c2a6ff9843e27ed47b26f9af5834634af8e55749914a616233",
+    "terminal_validation_ce": 5.5204,
+    "terminal_candidate_minus_parent_ce": 0.1594,
+    "loss_gate_passed": false,
+    "result_artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_stochastic_fht256_blocklocal_retraction_training_result.json"
   }
 }
