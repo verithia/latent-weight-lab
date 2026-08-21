@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_pair_vq_gainlattice_source_probe9_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_terminal_rejection",
+  "classification": "NO_INTEGER_RATE_SCALAR_TRANSFORM_LATTICE_WINNER",
+  "decision": "Close the global scalar-coordinate gain-lattice family at integer coordinate rates below int8. Diagnose axis heterogeneity and correlation with a per-axis and KLT oracle before selecting a higher-shaping-gain production codec. Do not run an endpoint, longer horizon, larger model, or learning-rate sweep.",
+  "provenance": {
+    "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_blockmixed_source_probe9_result.json",
+    "scientific_parent_sha256": "00715cb35be483e76e6c55843db5be665eeb5b2e03d201ae128932172fb8db9e",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_gainlattice_source_probe9_plan.json",
+    "plan_sha256": "9329c786c4a41194590628f460c78811e11ce585814b8b26db49c5a8d7f90a35",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_gainlattice_source_probe9.json",
+    "config_sha256": "58cd4ba71ce7a354a47e8b43a7a16d40c4607f57d9c045f51e2fe5827e04fdd9",
+    "implementation_commit": "242f9cd755a0ff63bca516c95dc33bbd1fb500f1",
+    "preregistration_commit": "d517ba275931ad50b20de8dca03e5e9e3df32388",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_gainlattice_source_probe9_mfu.json",
+    "certificate_sha256": "ddae599ba8c8737c5c98485657ef9cebf3de93d595bbe7ae57aafe7da7a5ff5c",
+    "log_sha256": "28c00b9fa46f8b6bfed9f5da19b2dc4a75d9b5684a1fb2dd822a8a15c1712d45",
+    "tokens_per_second": 184595.9275,
+    "mfu_fraction": 0.33029395785369975,
+    "iter_ms": 1420.0975,
+    "optimizer_ms": 219.42,
+    "optimizer_fraction": 0.154511918,
+    "peak_mib": 31630.25
+  },
+  "scientific_run": {
+    "clean_exit": true,
+    "optimizer_steps": 9,
+    "wall_seconds": 18.30,
+    "all_logged_losses_finite": true,
+    "diagnostic_records": 48,
+    "records_per_probe_step": 24,
+    "last_eval": "step 9: train loss 8.2859, val loss 8.3830",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_gainlattice_source_probe9_20260822T_exact1.log",
+    "log_sha256": "fe08986a77976c9e26330c04690742575b2755f1308cbc746e0a6106d395e823",
+    "log_bytes": 238752
+  },
+  "weighted_results": {
+    "step_0": {
+      "B64_q4": {"bits_per_weight": 4.125, "full": 0.9877506638, "full_min": 0.9866340756},
+      "B32_q4": {"bits_per_weight": 4.25, "full": 0.9889371337, "full_min": 0.9877325892},
+      "B64_q5": {"bits_per_weight": 5.125, "full": 0.9954639072, "full_min": 0.9947305918},
+      "B32_q5": {"bits_per_weight": 5.25, "full": 0.9960718059, "full_min": 0.9952598810},
+      "B64_q6": {"bits_per_weight": 6.125, "full": 0.9983020741, "full_min": 0.9978075624},
+      "B32_q6": {"bits_per_weight": 6.25, "full": 0.9986021990, "full_min": 0.9980612993},
+      "B64_q7": {"bits_per_weight": 7.125, "full": 0.9993517731, "full_min": 0.9990378022},
+      "B32_q7": {"bits_per_weight": 7.25, "full": 0.9994850220, "full_min": 0.9991321564}
+    },
+    "step_8": {
+      "B64_q4": {"bits_per_weight": 4.125, "full": 0.9874742070, "full_min": 0.9870516658},
+      "B32_q4": {"bits_per_weight": 4.25, "full": 0.9887164058, "full_min": 0.9881975055},
+      "B64_q5": {"bits_per_weight": 5.125, "full": 0.9954043072, "full_min": 0.9951651096},
+      "B32_q5": {"bits_per_weight": 5.25, "full": 0.9960560927, "full_min": 0.9957681298},
+      "B64_q6": {"bits_per_weight": 6.125, "full": 0.9983135113, "full_min": 0.9981637001},
+      "B32_q6": {"bits_per_weight": 6.25, "full": 0.9986494098, "full_min": 0.9984811544},
+      "B64_q7": {"bits_per_weight": 7.125, "full": 0.9993844906, "full_min": 0.9993022680},
+      "B32_q7": {"bits_per_weight": 7.25, "full": 0.9995466327, "full_min": 0.9994568825}
+    }
+  },
+  "cross_candidate_validity": {
+    "coordinate_occupancy_fraction_min": 1.0,
+    "coordinate_entropy_deficit_bits_max": 0.0380325317,
+    "gain_active_codes_min": 249,
+    "gain_entropy_bits_min": 7.8233156204,
+    "parseval_relative_error_max": 1.9834905629e-7
+  },
+  "frozen_gate_evaluation": {
+    "systems_mfu_at_least_0p20": true,
+    "clean_9_steps_and_48_records": true,
+    "all_losses_finite": true,
+    "parseval_error_at_most_1e_6": true,
+    "all_occupancy_and_entropy_gates": true,
+    "B32_q7_every_matrix_recovery_at_least_0p999": true,
+    "B32_q7_weighted_recovery_at_least_0p99975": false,
+    "all_other_candidate_recovery_gates": false,
+    "winner": null
+  },
+  "interpretation": {
+    "best_candidate": "B32_q7 at 7.25 bits/weight",
+    "best_step0_distortion": 0.0005149780,
+    "best_step8_distortion": 0.0004533673,
+    "distortion_multiple_over_gate_step0": 2.059912,
+    "distortion_multiple_over_gate_step8": 1.813469,
+    "occupancy_is_not_the_problem": "Every coordinate level is used, coordinate entropy is within 0.039 bits of nominal, and at least 249 of 256 gain levels are active.",
+    "block_size_result": "B32 beats B64 at every rate and phase, so reducing gain overhead with a larger block does not compensate for weaker local source matching.",
+    "next_question": "Can per-axis scalar adaptation or a covariance-optimal KLT recover the missing factor? If yes, approximate only the winning transform with a fast learned butterfly; if no, scalar cells are closed and a vector/trellis lattice with fractional-rate refinement is required."
+  }
+}
