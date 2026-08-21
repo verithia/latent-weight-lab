@@ -1,0 +1,70 @@
+{
+  "schema_version": "mai_pair_vq_b64_converged_residual_lattice_gate9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does the source-decomposition-authorized c_fc residual code (q5, B64, Lloyd-16) preserve the required direction fidelity through a live nine-step packed-state trajectory while retaining compact persistent state?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_source_decomposition_step0_result.json",
+    "result_sha256": "f574e14116a5f74d238dc695ba5fdfbe89905dc67e4757cfa1aebfab8274b84d",
+    "classification": "AUTHORIZE_B64_Q5_LLOYD16_LIVE_GATE",
+    "fixed_source_layer": 7,
+    "fixed_source_matrix": "mlp.c_fc",
+    "base_recovery": 0.99958384037,
+    "production_q5_b32_lloyd4_recovery": 0.99979688870,
+    "q5_b32_lloyd16_recovery": 0.99995410442,
+    "q5_b64_lloyd16_recovery": 0.99998188019,
+    "q4_b64_lloyd16_recovery": 0.99997532368,
+    "axis_private_gain_recovery": 0.99995416403,
+    "diagnosis": "The extra residual bit was hidden by under-converged fitting. Sixteen Lloyd iterations recover the intended advantage; B64 reduces remaining gain/block-partition error. Axis-private gains add no material recovery. q4/B64/L16 is too close to the floor to be robust, so q5 is retained."
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
+    "c_fc_physical_bits_per_weight": 12.65625,
+    "c_proj_physical_bits_per_weight": 11.78125,
+    "aggregate_physical_bits_per_weight": 12.21875,
+    "feedback_code_bytes": 86482944,
+    "feedback_level_bytes": 88320,
+    "compact_momentum_bytes": 73728,
+    "compact_model_bytes": 70855872,
+    "persistent_mlp_training_matrix_bytes": 157500864,
+    "dense_fp32_weight_plus_muon_bytes": 452984832,
+    "reduction_vs_dense_fp32_weight_plus_muon": 2.87608,
+    "persistent_dense_master_residual_or_momentum": false,
+    "inference_flops": "unchanged materialized dense MLP"
+  },
+  "implementation_gate": {
+    "focused_tests": "43 passed on PRO6",
+    "family_specific_block_size_and_lloyd_iterations": true,
+    "exact_rate_accounting": true,
+    "checkpoint_next_step_bit_exact": true,
+    "implementation_commit": "17980562b5e537e638e3e0000acf334b7beb50da"
+  },
+  "frozen_live_gates": {
+    "optimizer_steps": 9,
+    "refresh_steps": [0, 8],
+    "matrix_records_per_refresh": 24,
+    "feedback_codec_weighted_recovery_min": 0.999975,
+    "feedback_codec_every_matrix_recovery_min": 0.9999,
+    "conserved_requested_step_weighted_recovery_min": 0.999975,
+    "conserved_requested_step_every_matrix_recovery_min": 0.9999,
+    "all_logged_losses_finite": true,
+    "exact_config_mfu_min_fraction": 0.20,
+    "optimizer_fraction_max": 0.30,
+    "aggregate_physical_feedback_bits_per_weight_exact": 12.21875,
+    "persistent_mlp_training_matrix_bytes_exact": 157500864,
+    "dense_fp32_temporal_tensor_present": false
+  },
+  "selection_rule": {
+    "pass": "Seal the packed state and authorize one matched 124M 0.5-TPP endpoint only. Compare against the already sealed qk-only dense-MLP parent under identical data, seeds, schedule, and fixed evaluation indices.",
+    "fail_recovery": "Reject the codec at the first failing live step and inspect gain-code or temporal innovation drift. Do not loosen thresholds, sweep LR, or scale model/horizon.",
+    "fail_systems": "Optimize the implementation and repeat the same scientific configuration without changing the representation or recovery thresholds.",
+    "automatic_scale_up": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes",
+    "callbacks": "none for this sub-five-minute gate"
+  }
+}
