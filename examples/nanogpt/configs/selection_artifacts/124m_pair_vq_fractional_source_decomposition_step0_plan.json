@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_pair_vq_fractional_source_decomposition_step0_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_execution",
+  "question": "Why does increasing the c_fc residual lattice from q4 to q5 improve the exact failing source by only 4.6 percent instead of the predicted fourfold?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_family_adaptive_residual_lattice_gate9_result.json",
+    "result_sha256": "0ccba048f257130060b411012475aab447b22ad2b20cfd6c6eedc12ef5338ca6",
+    "classification": "REJECT_COORDINATE_BIT_HYPOTHESIS",
+    "failing_source": "optimizer step 0, layer7.mlp.c_fc",
+    "q4_worst_error_fraction": 0.0002202446405571,
+    "q5_worst_error_fraction": 0.0002101440121525
+  },
+  "fixed_source_acquisition": {
+    "optimizer_steps": 1,
+    "probe_step": 0,
+    "probe_layers": [7],
+    "probe_family": "mlp.c_fc only",
+    "base_codec": "production q7/q8 B32 p=0.25",
+    "residual_source": "raw feedback minus the freshly fitted and decoded production base",
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "counterfactuals": {
+    "block_sizes": [16, 32, 64],
+    "coordinate_bits": [4, 5],
+    "lloyd_iterations": [4, 16],
+    "gain_modes_at_b32": ["production 8-bit log-gain", "exact per-block gain"],
+    "axis_mode": "B32 q5, 16 Lloyd iterations, one scalar codebook per FHT axis"
+  },
+  "causal_readout": {
+    "gain_field": "Exact gains materially outperform production gains at matched coordinate settings.",
+    "lloyd_convergence": "Sixteen iterations materially outperform four at matched block, rate, and gain mode.",
+    "block_scale": "B16 or B64 materially outperforms B32 at matched rate and iterations.",
+    "axis_mixture": "Per-axis q5 materially outperforms global q5 at matched B32 rate and iterations.",
+    "scalar_lattice_rejected": "No tested decomposition reaches 0.9999 full-source recovery on the fixed failing matrix."
+  },
+  "authorization": {
+    "loss_endpoint": false,
+    "longer_horizon": false,
+    "model_scale_up": false,
+    "lr_sweep": false,
+    "next_representation": "Only the isolated mechanism that reaches the frozen 0.9999 every-matrix source floor may be implemented and subjected to a fresh nine-step live gate. If none reaches it, retire the scalar residual lattice and design a vector or sparse-outlier residual code."
+  },
+  "systems_policy": {
+    "production_fast_path_certificate_sha256": "c1b42ad625e01ce4c33ddf7878a40e8931699a3006fa1496900b0fbfd4583fc1",
+    "production_mfu_fraction": 0.3062815289,
+    "diagnostic_expected_under_seconds": 300,
+    "monitoring": "foreground poll; if observed beyond five minutes, stop polling and attach a persistent terminal/error watchdog"
+  }
+}
