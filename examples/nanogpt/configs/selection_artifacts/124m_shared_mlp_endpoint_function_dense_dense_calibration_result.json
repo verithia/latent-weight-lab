@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_shared_mlp_endpoint_function_dense_dense_calibration_result_v1",
+  "classification": "COMPACT_SPECIFIC_ENDPOINT_AND_JACOBIAN_RESTRICTION",
+  "classification_order": "endpoint value is primary because the preregistered decision checks output recovery before input-JVP recovery",
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_dense_dense_endpoint_function_calibration_20260821/result.json",
+    "sha256": "368360dd626f343aaa7ba31f0db34b4a612aaa44205e867c3f26fd01e9326a0a",
+    "source_commit": "40099548558a18ade3fc8c2e3f451a912db08dd8",
+    "wall_seconds": 3.1315,
+    "maximum_cuda_memory_bytes": 1703975936
+  },
+  "identities": {
+    "dense_control_checkpoint_sha256": "b05fc58d3f843e5d1780c8af2384b4125b9237c81389bd9390aa27418013f68e",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "compact_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_batch_sha256": "ecb8b27cb1f7f5b1caefc7ac5dd86288e6bc86f5e5318b96679e5e16066838b1"
+  },
+  "matched_validation_separations": {
+    "dense_control_minus_dense_teacher": 0.0745,
+    "compact_candidate_minus_dense_teacher": 0.0698
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "fitted_parameters": 0,
+    "state_banks": 2,
+    "samples_per_layer_per_bank": 512,
+    "jvp_directions": 4
+  },
+  "dense_dense_summaries": {
+    "aligned_state_input": {
+      "mean_explained_target_energy": 0.6089132726192474,
+      "minimum_explained_target_energy": 0.42313605546951294,
+      "global_explained_target_energy": 0.6053536250245987,
+      "mean_cosine": 0.8012137413024902
+    },
+    "mlp_output": {
+      "mean_explained_target_energy": 0.43297844131787616,
+      "minimum_explained_target_energy": 0.1124771237373352,
+      "global_explained_target_energy": 0.45348493303633153,
+      "mean_cosine": 0.6851018220186234
+    },
+    "mlp_input_jvp": {
+      "mean_explained_target_energy": 0.19449986517429352,
+      "minimum_explained_target_energy": -0.0461195707321167,
+      "global_explained_target_energy": 0.173259316258218,
+      "mean_cosine": 0.5433821765085062
+    }
+  },
+  "dense_dense_per_bank": {
+    "candidate_states": {
+      "output_mean": 0.45461153984069824,
+      "output_minimum": 0.24229460954666138,
+      "jvp_mean": 0.20540771385033926,
+      "jvp_minimum": -0.007920980453491211
+    },
+    "teacher_states": {
+      "output_mean": 0.41134534279505414,
+      "output_minimum": 0.1124771237373352,
+      "jvp_mean": 0.18359201649824777,
+      "jvp_minimum": -0.0461195707321167
+    }
+  },
+  "compact_summaries": {
+    "aligned_state_input_mean_explained_target_energy": -0.05873072644074758,
+    "mlp_output_mean_explained_target_energy": -0.8686944097280502,
+    "mlp_input_jvp_mean_explained_target_energy": -0.946985200047493
+  },
+  "preregistered_comparison": {
+    "material_recovery_margin": 0.1,
+    "dense_advantage_output": 1.3016728510459264,
+    "dense_advantage_input_jvp": 1.1414850652217865,
+    "dense_advantage_aligned_state_input": 0.667643999059995,
+    "endpoint_gate": "pass",
+    "jacobian_gate": "pass"
+  },
+  "interpretation": {
+    "resolved_confound": "Separately optimized dense endpoints do disagree internally, but their output and input-JVP recoveries are dramatically better than the matched-loss-gap compact endpoint.",
+    "primary_finding": "The seven-trunk representation has a compact-specific endpoint-value restriction relative to the dense control.",
+    "secondary_finding": "It also has a compact-specific input-Jacobian restriction; terminal common-gradient compatibility did not imply functional equivalence.",
+    "causal_limit": "This calibration does not yet distinguish representational under-capacity from failure of language-model optimization to find a representable shared endpoint.",
+    "next_authorized_work": "Preregister an offline teacher-forced representability fit of the exact seven-trunk family, restricted to the genuinely shared groups, with held-out output and JVP gates.",
+    "not_authorized": [
+      "an eighth trunk or boundary sweep",
+      "model-size scaling",
+      "new language-model training",
+      "a new compact mechanism before the exact-family representability ceiling is measured"
+    ]
+  }
+}
