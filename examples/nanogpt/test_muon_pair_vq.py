@@ -340,6 +340,62 @@ def test_conditional_polar_feedback_state_is_compact() -> None:
     assert all(value.numel() != module.element_count for value in state.values())
 
 
+def test_conditional_polar16x16_reallocates_bits_to_heavy_tail_radius() -> None:
+    torch.manual_seed(171)
+    angle_indices = torch.randint(0, 16, (65536,))
+    directions = torch.stack(
+        (
+            torch.cos(angle_indices.float() * (2.0 * torch.pi / 16.0)),
+            torch.sin(angle_indices.float() * (2.0 * torch.pi / 16.0)),
+        ),
+        dim=1,
+    )
+    radii = torch.exp(0.9 * torch.randn(angle_indices.shape[0]))
+    vectors = radii[:, None] * directions
+
+    levels32x8 = torch.zeros(32, 8)
+    center32x8 = torch.zeros(2)
+    codes32x8 = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_conditional_polar_pair_codec_(
+        vectors, levels32x8, center32x8, codes32x8
+    )
+    decoded32x8 = _decode_conditional_polar_pair_codec(
+        levels32x8, center32x8, codes32x8
+    )
+
+    levels16x16 = torch.zeros(16, 16)
+    center16x16 = torch.zeros(2)
+    codes16x16 = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_conditional_polar_pair_codec_(
+        vectors, levels16x16, center16x16, codes16x16
+    )
+    decoded16x16 = _decode_conditional_polar_pair_codec(
+        levels16x16, center16x16, codes16x16
+    )
+    recovery32x8 = 1.0 - float((vectors - decoded32x8).square().sum()) / float(
+        vectors.square().sum()
+    )
+    recovery16x16 = 1.0 - float((vectors - decoded16x16).square().sum()) / float(
+        vectors.square().sum()
+    )
+    assert recovery16x16 > 0.98
+    assert recovery16x16 > recovery32x8 + 0.02
+
+    module = make_module(
+        stages=1,
+        error_feedback=True,
+        feedback_codec="conditional_polar16x16",
+    )
+    optimizer = make_optimizer(module)
+    module.weight.grad = 1e-3 * torch.randn_like(module.weight)
+    optimizer.step()
+    state = optimizer.state[module.weight]
+    assert state["feedback_levels"].shape == (16, 16)
+    assert state["feedback_center"].shape == (2,)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == module.element_count // 2 + 1032
+
+
 def test_conditional_polar_diagnostics_form_an_orthogonal_decomposition() -> None:
     torch.manual_seed(168)
     vectors = torch.randn(32768, 2)
