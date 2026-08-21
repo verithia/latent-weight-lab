@@ -44,5 +44,6 @@
     "inference_flops": "unchanged materialized dense MLP",
     "optimizer_extra_work": "slow pair-VQ projection plus one global c_fc fast-residual recode per optimizer step"
   },
-  "decision_policy": "Run the matched parent first, then the compact candidate. A candidate failure triggers analysis of the loss curve and projected-direction trajectory; it does not authorize a parameter or learning-rate sweep."
+  "decision_policy": "Run the matched parent first, then the compact candidate. A candidate failure triggers analysis of the loss curve and projected-direction trajectory; it does not authorize a parameter or learning-rate sweep.",
+  "artifact_retention": "The dense parent is log-only. The compact candidate retains exactly one terminal checkpoint and no history so its slow codes, fast codes, level sets, compact momentum, and exact-resume metadata remain available for manifold and temporal-state analysis."
 }
