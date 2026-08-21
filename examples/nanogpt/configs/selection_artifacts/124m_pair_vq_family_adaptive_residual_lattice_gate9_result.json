@@ -1,0 +1,95 @@
+{
+  "schema_version": "mai_pair_vq_family_adaptive_residual_lattice_gate9_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_COORDINATE_BIT_HYPOTHESIS",
+  "scientific_question": "Does one extra residual coordinate bit only for c_fc close the measured early codec floor while c_proj remains on the already-passing q4 code?",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "f8a18a0025e8390d7ae5faf0eb10488959eb6f52",
+    "implementation_commit": "75497a45c70da0eabfbd09d89824bc223dd6ef52",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_family_adaptive_residual_lattice_gate9.json",
+    "config_sha256": "4796479c678935cb5890472a92ff338d75b1afcee1733fd8cafcae972df89a9d",
+    "resolved_config_sha256": "035a93deb2b70c9d1dda60bd4abc4d3718aaf57fbb6fe132a2100e849cfbbb28",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 9,
+    "terminal_val_loss": 8.382905960083008,
+    "exit_code": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "mfu_fraction": 0.3062815289,
+    "tokens_per_second": 170654.76,
+    "iter_ms": 1536.11,
+    "optimizer_ms": 336.5075,
+    "optimizer_fraction": 0.219061,
+    "peak_mib": 31663.06,
+    "minimum_mfu_fraction": 0.2,
+    "maximum_optimizer_fraction": 0.3,
+    "preflight_certificate_sha256": "c1b42ad625e01ce4c33ddf7878a40e8931699a3006fa1496900b0fbfd4583fc1",
+    "preflight_log_sha256": "4faf00084b16b6bdac8e08078431a064a804f0c4ca4b24de9cf93bfb5eae54cf"
+  },
+  "recovery_gate": {
+    "passed": false,
+    "thresholds": {
+      "feedback_codec_weighted_min": 0.999975,
+      "feedback_codec_every_matrix_min": 0.9999,
+      "current_step_weighted_min": 0.999975,
+      "current_step_every_matrix_min": 0.9999
+    },
+    "refreshes": [
+      {
+        "optimizer_step": 0,
+        "matrix_records": 24,
+        "feedback_codec_weighted_recovery": 0.9999283715013666,
+        "feedback_codec_worst_matrix_recovery": 0.9997898559878475,
+        "feedback_codec_worst_matrix": "layer7.mlp.c_fc",
+        "current_step_weighted_recovery": 0.9999982957294546,
+        "current_step_worst_matrix_recovery": 0.9999945217408286
+      },
+      {
+        "optimizer_step": 8,
+        "matrix_records": 24,
+        "feedback_codec_weighted_recovery": 0.9999884221490799,
+        "feedback_codec_worst_matrix_recovery": 0.9999784881506564,
+        "feedback_codec_worst_matrix": "layer0.mlp.c_fc",
+        "current_step_weighted_recovery": 0.999998811719974,
+        "current_step_worst_matrix_recovery": 0.9999965363325459
+      }
+    ],
+    "causal_comparison": {
+      "q4_step0_worst_error_fraction": 0.0002202446405571,
+      "q5_cfc_step0_worst_error_fraction": 0.0002101440121525,
+      "observed_error_reduction_factor": 1.048064,
+      "high_rate_predicted_error_reduction_factor": 4.0,
+      "interpretation": "One more residual coordinate bit improves the worst c_fc error by only about 4.6 percent, not fourfold. The global scalar high-rate model is falsified for this residual source; the dominant error must be decomposed before another codec or endpoint is authorized."
+    }
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+    "c_fc_physical_bits_per_weight": 12.78125,
+    "c_proj_physical_bits_per_weight": 11.78125,
+    "aggregate_physical_bits_per_weight": 12.28125,
+    "feedback_code_bytes": 86925312,
+    "feedback_level_bytes": 88320,
+    "compact_momentum_bytes": 73728,
+    "compact_model_bytes": 70855872,
+    "persistent_mlp_training_matrix_bytes": 157943232,
+    "reduction_vs_dense_fp32_weight_plus_muon": 2.868023,
+    "dense_fp32_temporal_tensor_present": false,
+    "checkpoint_replay_tested_bit_exact": true
+  },
+  "artifacts": {
+    "scientific_log_sha256": "68c11e1816d2be2f64a0e712a351557b63cc2e7d83696dfe1842fe8781898f4e",
+    "checkpoint_sha256": "918888f7f74c7fbc0b79b5882fbf4ea5cc9430c63026c49603353449353e94cc",
+    "checkpoint_bytes": 746896248,
+    "checkpoint_metadata_sha256": "0dcf2acf0b3b5bc124fca3af4e0eeaa40093cd30c5a39c60aed078636358cd10"
+  },
+  "authorization": {
+    "matched_0p5tpp_endpoint": false,
+    "model_scale_up": false,
+    "longer_horizon": false,
+    "lr_sweep": false,
+    "next_causal_change": "Run a one-refresh source decomposition on the exact failing c_fc residual. Separate block-gain quantization, global-versus-axis-conditioned scalar codebooks, FHT block size, and Lloyd convergence before changing the production representation."
+  }
+}
