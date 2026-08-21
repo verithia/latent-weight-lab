@@ -13,6 +13,7 @@ from examples.nanogpt.muon_int8_lattice import (
     MuonInt8Lattice,
     MuonInt8LatticeLinear,
 )
+from examples.nanogpt.muon_pair_vq import MuonPairVQ, MuonPairVQLinear
 from examples.nanogpt.muon_matched_givens import (
     MuonDirectedProduct,
     MuonDirectedProductLinear,
@@ -186,6 +187,10 @@ class GPTConfig:
     block_fht_mlp_int8_lattice_block_size: int = 4096
     block_fht_mlp_int8_lattice_seed: int = 314159
     block_fht_mlp_int8_lattice_error_feedback: bool = False
+    block_fht_mlp_pair_vq: bool = False
+    block_fht_mlp_pair_vq_seed: int = 20261020
+    block_fht_mlp_pair_vq_neighbor_candidates: int = 16
+    block_fht_mlp_pair_vq_code_refresh_interval: int = 8
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2325,6 +2330,7 @@ class MLP(nn.Module):
         mlp_int8_lattice_targets = set(
             config.block_fht_mlp_int8_lattice_targets
         )
+        pair_vq = bool(config.block_fht_mlp_pair_vq)
         unsupported_mlp_int8_targets = mlp_int8_lattice_targets - {
             "mlp.c_fc",
             "mlp.c_proj",
@@ -2346,6 +2352,18 @@ class MLP(nn.Module):
             config.block_fht_mlp_cfc_directed_product
         )
         int8_lattice_cfc = "mlp.c_fc" in mlp_int8_lattice_targets
+        if pair_vq and (
+            mlp_int8_lattice_targets
+            or functional_shear_cfc
+            or directed_product_cfc
+            or grouped_targets
+            or "mlp.c_fc" in config.block_fht_targets
+            or "mlp.c_proj" in config.block_fht_targets
+        ):
+            raise ValueError(
+                "MLP pair VQ is a complete c_fc/c_proj representation and "
+                "cannot be combined with another MLP representation"
+            )
         if int8_lattice_cfc and (
             functional_shear_cfc
             or directed_product_cfc
@@ -2367,7 +2385,26 @@ class MLP(nn.Module):
                 "functional-shear c_fc requires the materialized plain "
                 "c_fc path"
             )
-        if int8_lattice_cfc:
+        if pair_vq:
+            self.c_fc = MuonPairVQLinear(
+                config.n_embd,
+                4 * config.n_embd,
+                bias=config.bias,
+                stages=2,
+                base_seed=(
+                    int(config.block_fht_mlp_pair_vq_seed)
+                    + layer_id * 8192
+                ),
+                weight_std=0.02,
+                layer_id=layer_id,
+                neighbor_candidates=int(
+                    config.block_fht_mlp_pair_vq_neighbor_candidates
+                ),
+                code_refresh_interval=int(
+                    config.block_fht_mlp_pair_vq_code_refresh_interval
+                ),
+            )
+        elif int8_lattice_cfc:
             self.c_fc = MuonInt8LatticeLinear(
                 config.n_embd,
                 4 * config.n_embd,
@@ -2582,7 +2619,27 @@ class MLP(nn.Module):
                 "Muon-matched Givens c_proj requires mlp.c_proj in "
                 "block_fht_targets"
             )
-        if int8_lattice_cproj:
+        if pair_vq:
+            self.c_proj = MuonPairVQLinear(
+                4 * config.n_embd,
+                config.n_embd,
+                bias=config.bias,
+                stages=1,
+                base_seed=(
+                    int(config.block_fht_mlp_pair_vq_seed)
+                    + layer_id * 8192
+                    + 4096
+                ),
+                weight_std=0.02 / math.sqrt(2 * config.n_layer),
+                layer_id=layer_id,
+                neighbor_candidates=int(
+                    config.block_fht_mlp_pair_vq_neighbor_candidates
+                ),
+                code_refresh_interval=int(
+                    config.block_fht_mlp_pair_vq_code_refresh_interval
+                ),
+            )
+        elif int8_lattice_cproj:
             self.c_proj = MuonInt8LatticeLinear(
                 4 * config.n_embd,
                 config.n_embd,
@@ -5156,6 +5213,11 @@ class GPT(nn.Module):
         int8_lattice_modules = [
             module for _name, module in int8_lattice_named_modules
         ]
+        pair_vq_modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, MuonPairVQLinear)
+        ]
         functional_shear_pairs = [
             (block.mlp.c_fc, block.mlp.c_proj)
             for block in self.transformer.h
@@ -5170,6 +5232,7 @@ class GPT(nn.Module):
         if (
             muon_matched_givens_modules
             or int8_lattice_modules
+            or pair_vq_modules
             or functional_shear_pairs
             or directed_product_modules
         ) and optimizer != "muon":
@@ -5439,6 +5502,18 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
+            if pair_vq_modules:
+                optimizers.append(
+                    MuonPairVQ(
+                        pair_vq_modules,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
             if mlp_muon_matched_givens_modules:
                 optimizers.append(
                     MuonMatchedGivens(
@@ -5611,6 +5686,10 @@ class GPT(nn.Module):
             elif isinstance(module, MuonInt8LatticeLinear):
                 modules += 1
                 generated += module.in_features * module.out_features
+            elif isinstance(module, MuonPairVQLinear):
+                modules += 1
+                generated += module.in_features * module.out_features
+                latent += module.codebooks.numel()
             elif isinstance(module, MuonFunctionalShearLinear):
                 modules += 1
                 generated += module.in_features * module.out_features
@@ -5658,6 +5737,37 @@ class GPT(nn.Module):
 
     def mlp_int8_lattice_stats(self) -> dict[str, int | float]:
         return self._int8_lattice_stats(scope="mlp")
+
+    def mlp_pair_vq_stats(self) -> dict[str, int | float | str]:
+        modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, MuonPairVQLinear)
+        ]
+        elements = sum(module.element_count for module in modules)
+        codec_bytes = sum(module.persistent_codec_bytes for module in modules)
+        momentum_bytes = sum(module.compact_momentum_bytes for module in modules)
+        dense_bf16_bytes = 2 * elements
+        dense_fp32_weight_momentum_bytes = 8 * elements
+        persistent_training_bytes = codec_bytes + momentum_bytes
+        return {
+            "modules": len(modules),
+            "elements": elements,
+            "codec_bytes": codec_bytes,
+            "compact_momentum_bytes": momentum_bytes,
+            "persistent_training_bytes": persistent_training_bytes,
+            "model_compression_vs_dense_bf16": (
+                dense_bf16_bytes / codec_bytes if codec_bytes else 0.0
+            ),
+            "training_compression_vs_dense_fp32_weight_plus_momentum": (
+                dense_fp32_weight_momentum_bytes / persistent_training_bytes
+                if persistent_training_bytes
+                else 0.0
+            ),
+            "dense_master_weight": "disabled",
+            "dense_optimizer_momentum": "disabled",
+            "ambient_error_buffer": "disabled",
+        }
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:
         prepare_block_fht_weight_cache(self, dtype=dtype)
@@ -5708,6 +5818,7 @@ class GPT(nn.Module):
                 (
                     MuonMatchedGivensLinear,
                     MuonInt8LatticeLinear,
+                    MuonPairVQLinear,
                     MuonFunctionalShearLinear,
                     MuonDirectedProductLinear,
                 ),

@@ -90,6 +90,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/model.py",
         root / "examples/nanogpt/muon.py",
         root / "examples/nanogpt/muon_int8_lattice.py",
+        root / "examples/nanogpt/muon_pair_vq.py",
         root / "examples/nanogpt/muon_matched_givens.py",
         root / "examples/nanogpt/fast_task_matching.py",
         root / "examples/nanogpt/csrc/task_edge_coloring.cpp",
@@ -1323,6 +1324,26 @@ def parse_args() -> argparse.Namespace:
         action=argparse.BooleanOptionalAction,
         default=False,
     )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-seed",
+        type=int,
+        default=20261020,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-neighbor-candidates",
+        type=int,
+        default=16,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-code-refresh-interval",
+        type=int,
+        default=8,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -2162,6 +2183,33 @@ def parse_args() -> argparse.Namespace:
             raise ValueError(
                 "MLP c_proj int8 lattice conflicts with matched Givens"
             )
+    if namespace.block_fht_mlp_pair_vq:
+        if namespace.method != "block_fht":
+            raise ValueError("MLP pair VQ requires method=block_fht")
+        if namespace.optimizer != "muon":
+            raise ValueError("MLP pair VQ requires optimizer=muon")
+        if namespace.block_fht_mlp_pair_vq_neighbor_candidates <= 0 or (
+            namespace.block_fht_mlp_pair_vq_neighbor_candidates > 256
+        ):
+            raise ValueError("MLP pair VQ neighbor count must be in [1, 256]")
+        if namespace.block_fht_mlp_pair_vq_code_refresh_interval <= 0:
+            raise ValueError("MLP pair VQ refresh interval must be positive")
+        if mlp_int8_lattice_targets:
+            raise ValueError("MLP pair VQ conflicts with the MLP int8 lattice")
+        overlap = {"mlp.c_fc", "mlp.c_proj"} & set(
+            namespace.block_fht_targets
+        )
+        if overlap:
+            raise ValueError(
+                "remove MLP targets from BlockFHT targets for pair VQ: "
+                + ", ".join(sorted(overlap))
+            )
+        if (
+            namespace.block_fht_mlp_cfc_directed_product
+            or namespace.block_fht_mlp_cfc_functional_shear
+            or namespace.block_fht_mlp_cproj_muon_matched_givens
+        ):
+            raise ValueError("MLP pair VQ conflicts with another MLP chart")
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2883,6 +2931,14 @@ def main() -> None:
         block_fht_mlp_int8_lattice_error_feedback=(
             args.block_fht_mlp_int8_lattice_error_feedback
         ),
+        block_fht_mlp_pair_vq=args.block_fht_mlp_pair_vq,
+        block_fht_mlp_pair_vq_seed=args.block_fht_mlp_pair_vq_seed,
+        block_fht_mlp_pair_vq_neighbor_candidates=(
+            args.block_fht_mlp_pair_vq_neighbor_candidates
+        ),
+        block_fht_mlp_pair_vq_code_refresh_interval=(
+            args.block_fht_mlp_pair_vq_code_refresh_interval
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -3260,6 +3316,21 @@ def main() -> None:
                 f"{'dense_fp16' if args.block_fht_mlp_int8_lattice_error_feedback else 'disabled'} "
                 "optimizer_error_feedback_bytes="
                 f"{2 * mlp_lattice_stats['elements'] if args.block_fht_mlp_int8_lattice_error_feedback else 0:,}",
+                flush=True,
+            )
+        pair_vq_stats = raw_model.mlp_pair_vq_stats()
+        if pair_vq_stats["modules"]:
+            print(
+                "mlp_pair_vq: "
+                f"modules={pair_vq_stats['modules']} "
+                f"elements={pair_vq_stats['elements']:,} "
+                f"codec_bytes={pair_vq_stats['codec_bytes']:,} "
+                f"compact_momentum_bytes={pair_vq_stats['compact_momentum_bytes']:,} "
+                f"persistent_training_bytes={pair_vq_stats['persistent_training_bytes']:,} "
+                f"model_compression_vs_dense_bf16={pair_vq_stats['model_compression_vs_dense_bf16']:.6f} "
+                f"training_compression_vs_dense_fp32_weight_plus_momentum={pair_vq_stats['training_compression_vs_dense_fp32_weight_plus_momentum']:.6f} "
+                "dense_master_weight=disabled dense_optimizer_momentum=disabled "
+                "ambient_error_buffer=disabled",
                 flush=True,
             )
 
@@ -3687,7 +3758,10 @@ def main() -> None:
         if consume_givens_diagnostics is not None:
             givens_diagnostics = consume_givens_diagnostics()
             for row in givens_diagnostics:
-                if row.get("report_refresh", row.get("refresh")):
+                if row.get(
+                    "report_refresh",
+                    row.get("refresh", row.get("refresh_codes")),
+                ):
                     print(
                         "muon_matched_givens_refresh "
                         + json.dumps(

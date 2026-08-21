@@ -40,6 +40,20 @@ def _nearest_codes_exact(vectors: torch.Tensor, codebook: torch.Tensor) -> torch
     return torch.cat(parts)
 
 
+@torch.no_grad()
+def _nearest_cartesian_codes(
+    vectors: torch.Tensor, codebook: torch.Tensor
+) -> torch.Tensor:
+    """Exact nearest codes for the 16x16 Cartesian initialization grid."""
+    first_levels = codebook[::16, 0]
+    second_levels = codebook[:16, 1]
+    first_midpoints = (first_levels[:-1] + first_levels[1:]) * 0.5
+    second_midpoints = (second_levels[:-1] + second_levels[1:]) * 0.5
+    first = torch.bucketize(vectors[:, 0].contiguous(), first_midpoints)
+    second = torch.bucketize(vectors[:, 1].contiguous(), second_midpoints)
+    return (first * 16 + second).to(torch.uint8)
+
+
 class MuonPairVQLinear(nn.Module):
     """Linear layer whose only persistent matrix state is pair VQ."""
 
@@ -92,7 +106,7 @@ class MuonPairVQLinear(nn.Module):
         for _stage in range(self.stages):
             stage_std = max(float(residual.std()), torch.finfo(torch.float32).tiny)
             codebook = _normal_cartesian_codebook(stage_std, device=torch.device("cpu"))
-            stage_codes = _nearest_codes_exact(residual, codebook)
+            stage_codes = _nearest_cartesian_codes(residual, codebook)
             decoded = codebook.index_select(0, stage_codes.long())
             codebooks.append(codebook)
             codes.append(stage_codes)

@@ -4,7 +4,14 @@ import copy
 
 import torch
 
-from examples.nanogpt.muon_pair_vq import MuonPairVQ, MuonPairVQLinear
+from examples.nanogpt.model import GPT, GPTConfig
+from examples.nanogpt.muon_pair_vq import (
+    MuonPairVQ,
+    MuonPairVQLinear,
+    _nearest_cartesian_codes,
+    _nearest_codes_exact,
+    _normal_cartesian_codebook,
+)
 
 
 def make_module(*, stages: int = 2, seed: int = 101) -> MuonPairVQLinear:
@@ -97,3 +104,60 @@ def test_device_style_migration_preserves_weight_leaf() -> None:
     module._apply(lambda tensor: tensor.clone())
     assert module.weight.is_leaf and module.weight.requires_grad
     make_optimizer(module)
+
+
+def test_cartesian_initialization_is_exact_nearest_neighbor() -> None:
+    torch.manual_seed(113)
+    vectors = torch.randn(4096, 2) * 0.02
+    codebook = _normal_cartesian_codebook(0.02, device=torch.device("cpu"))
+    assert torch.equal(
+        _nearest_cartesian_codes(vectors, codebook),
+        _nearest_codes_exact(vectors, codebook),
+    )
+
+
+def test_gpt_routes_complete_mlp_and_optimizer_through_pair_vq() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_mlp_pair_vq=True,
+            block_fht_mlp_pair_vq_neighbor_candidates=16,
+            block_fht_mlp_pair_vq_code_refresh_interval=8,
+        )
+    )
+    mlp = model.transformer.h[0].mlp
+    assert isinstance(mlp.c_fc, MuonPairVQLinear)
+    assert isinstance(mlp.c_proj, MuonPairVQLinear)
+    assert mlp.c_fc.stages == 2
+    assert mlp.c_proj.stages == 1
+    stats = model.mlp_pair_vq_stats()
+    assert stats["modules"] == 2
+    assert stats["dense_master_weight"] == "disabled"
+    assert stats["dense_optimizer_momentum"] == "disabled"
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=1,
+    )
+    pair_optimizers = [
+        item for item in optimizer.optimizers if isinstance(item, MuonPairVQ)
+    ]
+    assert len(pair_optimizers) == 1
+    tokens = torch.randint(0, 32, (2, 8))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None and torch.isfinite(loss)
+    loss.backward()
+    optimizer.step()
+    assert int(mlp.c_fc.optimizer_step) == 1
+    assert int(mlp.c_proj.optimizer_step) == 1
