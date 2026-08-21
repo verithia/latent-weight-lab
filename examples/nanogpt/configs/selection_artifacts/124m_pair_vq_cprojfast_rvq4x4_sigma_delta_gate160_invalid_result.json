@@ -1,0 +1,46 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_rvq4x4_sigma_delta_invalid_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "INVALID_IMPLEMENTATION_DO_NOT_USE_AS_CODEC_EVIDENCE",
+  "scientific_result": false,
+  "reason": "The initial RVQ fit computed second-stage assignments and then discarded them, entering alternating fitting with every low nibble equal to zero. Later fits also moved the explicit center without transporting the codebook gauge. Both defects changed the intended representation's projection operator.",
+  "repair": {
+    "commit": "044d42211",
+    "changes": [
+      "retain both initialized stage assignments before alternating Lloyd fitting",
+      "transport stage-one atoms by old_center minus new_center before fitting",
+      "add a direct first-fit utilization and recovery regression test"
+    ],
+    "tests": "18/18 focused tests pass on PRO6",
+    "authorized_action": "Repeat the identical RVQ4x4 gate after a fresh exact-config MFU preflight."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_rvq4x4_sigma_delta_plan.json",
+    "plan_sha256": "823440575f5bcff0bcc1a9ff5e26474c64a11b30cfc35998035aaaab07084e17",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160.json",
+    "config_sha256": "12917c0a8e080371939df149ae3adbe73b26835ebdf6fad665b7733af0f7d567",
+    "execution_git_commit": "d17922a833672245c5bd44211db61996b87e1cb6",
+    "mfu_certificate_sha256": "94ff76361c3241098788335ee5383a6c5f5e288e75ee08b26400f676e1b57957",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_rvq4x4_sigmadelta_gate160_20260821.log",
+    "log_sha256": "843207f2376e135d1dc404ed9bcf218723fdecfe17e8a12ccce89e6d6776776d",
+    "log_bytes": 407788,
+    "started_at": "2026-08-21T22:45:27+08:00",
+    "finished_at": "2026-08-21T22:49:06+08:00",
+    "step160_validation_ce_diagnostic_only": 5.5283
+  },
+  "observed_but_invalid": {
+    "aggregate_feedback_codec_min": 0.894410,
+    "every_matrix_feedback_codec_min": 0.880859,
+    "aggregate_conservation_min": 0.905972,
+    "every_matrix_conservation_min": 0.848497,
+    "tokens_per_second": 194425.95,
+    "mfu_fraction": 0.34776,
+    "optimizer_fraction": 0.106631
+  }
+}
