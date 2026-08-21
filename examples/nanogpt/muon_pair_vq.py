@@ -369,8 +369,33 @@ def _fit_conditional_polar_pair_codec_(
         torch.arange(radius_count, device=vectors.device, dtype=torch.float32)
         + 0.5
     ) / float(radius_count)
-    rayleigh_levels = torch.sqrt(-torch.log1p(-probabilities))
-    fitted = rms_by_angle[:, None] * rayleigh_levels[None, :]
+    if radius_count >= 16:
+        # The measured optimizer carry is strongly heavy-tailed: a few percent
+        # of pairs can contain roughly forty percent of radial energy.  Seed
+        # the larger radial codebook across the observed log-radius range so
+        # Lloyd fitting does not need many expensive full-matrix passes merely
+        # to discover the tail.  Eight-bin historical codecs deliberately keep
+        # their old Rayleigh initialization for a controlled comparison.
+        max_by_angle = torch.zeros_like(rms_by_angle)
+        max_by_angle.scatter_reduce_(
+            0,
+            angle_indices,
+            projected_radii,
+            reduce="amax",
+            include_self=True,
+        )
+        lower = (0.2 * rms_by_angle).clamp_min(
+            torch.finfo(torch.float32).tiny
+        )
+        upper = torch.maximum(max_by_angle, lower)
+        fitted = torch.exp(
+            lower.log()[:, None]
+            + probabilities[None, :]
+            * (upper.log() - lower.log())[:, None]
+        )
+    else:
+        rayleigh_levels = torch.sqrt(-torch.log1p(-probabilities))
+        fitted = rms_by_angle[:, None] * rayleigh_levels[None, :]
 
     for _iteration in range(3):
         midpoints = (fitted[:, :-1] + fitted[:, 1:]) * 0.5
