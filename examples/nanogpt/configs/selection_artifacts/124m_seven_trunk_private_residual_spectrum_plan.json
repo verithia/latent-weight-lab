@@ -1,0 +1,74 @@
+{
+  "authorization": {
+    "allowed": "Implement, test, and run exactly this same-checkpoint zero-update spectral diagnostic.",
+    "next_if_fail": "Close layer-private rank-64 residuals around the seven-trunk core. Do not sweep rank or train a LoRA-like correction; derive a distributed nonlinear decoder whose degrees of freedom are not a low-rank ambient delta.",
+    "next_if_pass": "Preregister one paired c_fc/c_proj rank-64 private residual ceiling on the two shared groups, including held-out output, input-JVP, and fixed-CE gates, before any LM run.",
+    "not_allowed": [
+      "language-model training",
+      "rank, seed, batch, or threshold sweep",
+      "model-size scaling",
+      "reusing dense-teacher endpoint differences as the primary spectrum"
+    ]
+  },
+  "accounting": {
+    "cached_inference_extra_flops": 0,
+    "constrained_layers": 7,
+    "dense_mlp_parameters": 56623104,
+    "formula": "For rank r, every constrained layer stores c_fc factors of sizes 3072xr and 768xr plus c_proj factors of sizes 768xr and 3072xr.",
+    "rank32": {
+      "additional_private_parameters": 1720320,
+      "mlp_parameter_compression_ratio": 1.627268492,
+      "mlp_parameter_saving_fraction": 0.385478973
+    },
+    "rank64": {
+      "additional_private_parameters": 3440640,
+      "mlp_parameter_compression_ratio": 1.550613497,
+      "mlp_parameter_saving_fraction": 0.355093750
+    },
+    "seven_trunk_mlp_parameters": 33076224,
+    "token_time_note": "Factors are a storage/training representation and may be folded into cached dense c_fc/c_proj weights at refresh, so cached token-time MLP FLOPs remain dense-baseline FLOPs."
+  },
+  "frozen_gates": {
+    "cross_bank_residual_cosine_minimum_per_shared_group": 0.25,
+    "rank64_cross_bank_tangent_recovery_mean_minimum": 0.35,
+    "rank64_within_bank_recovery_mean_minimum": 0.50,
+    "rank128_reporting_only": true,
+    "require_all_values_finite": true,
+    "require_both_shared_groups": true
+  },
+  "identities": {
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "parent_selected_atom_result": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_selected_atom_unsharing_result.json",
+    "parent_selected_atom_result_sha256": "be6cfe1fbe87a6a5758953248742fb8a1b092e1f16b75d57fec59eb086f99ce2"
+  },
+  "measurement": {
+    "banks": [
+      {"micro_batch_size": 8, "micro_batches": 8, "seed": 20260960},
+      {"micro_batch_size": 8, "micro_batches": 8, "seed": 20260961}
+    ],
+    "definition": "At the exact seven-trunk checkpoint, clone the tied c_fc/c_proj matrices into layer-private parameters, freeze everything else, and collect each layer's task gradient. In each shared group subtract the within-group mean gradient. The resulting residual is the private ambient direction suppressed by sharing.",
+    "groups": [[5, 6, 7], [8, 9, 10, 11]],
+    "language_model_updates": 0,
+    "ranks": [8, 16, 32, 64, 128, 256],
+    "reported_metrics": [
+      "best rank-r residual-gradient energy within each bank",
+      "cross-bank residual cosine",
+      "cross-bank tangent-space energy transferred by the other bank's rank-r singular factors",
+      "left and right singular-subspace overlap"
+    ],
+    "split": "train",
+    "tokens_per_bank": 65536
+  },
+  "rationale": {
+    "causal_question": "Is the distributed late-layer direction missing from seven shared trunks actually low rank in ambient c_fc/c_proj task-gradient space?",
+    "why_not_endpoint_weight_svd": "The dense teacher and seven-trunk model were trained independently and have hidden-neuron permutation and scaling gauge freedom. Raw cross-checkpoint weight differences would confound useful residual rank with gauge mismatch.",
+    "why_this_follows_selected_atoms": "Selected complete-neuron unsharing failed and its selected supports overlapped by 0.58 to 0.61, proving the deficit is distributed across hidden indices. A low-rank distributed correction remains possible only if the same-checkpoint private task-gradient residual has concentrated singular energy that transfers across independent token banks.",
+    "why_rank64": "Rank 64 is the largest compact discriminator retained from prior local residual work: it adds 3.44M values across both matrix sides of the seven shared layers while preserving 35.51% MLP parameter saving. Prior rank-64 c_fc-only residuals on a different generated topology recovered only 15.70% matrix energy, so the gate requires substantially stronger evidence here."
+  },
+  "schema_version": "mai_seven_trunk_private_residual_spectrum_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_measurement"
+}

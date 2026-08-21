@@ -1,0 +1,83 @@
+{
+  "classification": "REPRESENTATIONAL_FAIL",
+  "decision": {
+    "finding": "Even an optimistic dense-teacher-selected support of 128 complete c_fc-row/c_proj-column atoms per shared layer generalizes poorly across held-out residual-state banks. The selected supports overlap heavily across layers, so the missing late-depth function is distributed across the common nonlinear frame rather than concentrated in a small set of exceptional neurons.",
+    "language_model_training_authorized": false,
+    "larger_width_or_support_sweep_authorized": false,
+    "next_action": "Do not increase the private-atom width or train this family. Reconcile the result with the existing continuous layer-axis, bilateral-frame, and post-branch-FC closures; the next representation must provide a distributed layer-private change of activation boundaries and residual writes while preserving a genuinely compact shared core."
+  },
+  "execution": {
+    "gpu": 0,
+    "host": "PRO6",
+    "language_model_updates": 0,
+    "maximum_cuda_memory_bytes": 11419544064,
+    "preflight": {
+      "maximum_cuda_memory_bytes": 2923287552,
+      "projected_wall_seconds": 47.0467
+    },
+    "targeted_tests": "10 passed",
+    "wall_seconds": 31.902128
+  },
+  "fixed_evaluation": {
+    "gap_to_dense_teacher": 0.9199695587158203,
+    "splice_validation_cross_entropy": 4.594381809234619,
+    "teacher_validation_cross_entropy": 3.674412250518799
+  },
+  "holdout": {
+    "aggregate_input_jvp_recovery_mean_min_global": [-0.0797756995, -0.3190268278, -0.0559658936],
+    "aggregate_output_recovery_mean_min_global": [0.5126466964, 0.3198388219, 0.5391035110],
+    "groups": [
+      {
+        "best_step": 800,
+        "final_fit_objective": 0.1335212309,
+        "holdout_input_jvp_recovery_mean_min_global": [-0.0544290642, -0.3190268278, -0.0237950973],
+        "holdout_objective": 0.4788740240,
+        "holdout_output_recovery_mean_min_global": [0.5211774011, 0.3198388219, 0.5523491393],
+        "initial_fit_objective": 2.1002931297,
+        "layers": [5, 6, 7],
+        "mean_pairwise_support_overlap": 0.609375,
+        "objective_reduction_fraction": 0.9364273353,
+        "support_sha256": "4742813f8da1002a53a4ec2d2b6162f3cb253ff636bd3fce3addea200fb72543"
+      },
+      {
+        "best_step": 800,
+        "final_fit_objective": 0.1532314010,
+        "holdout_input_jvp_recovery_mean_min_global": [-0.0987857, -0.2992004, -0.0769341],
+        "holdout_objective": 0.4939893,
+        "holdout_output_recovery_mean_min_global": [0.5062487, 0.3232359, 0.5318460],
+        "initial_fit_objective": 1.6938803,
+        "layers": [8, 9, 10, 11],
+        "mean_pairwise_support_overlap": 0.578125,
+        "objective_reduction_fraction": 0.9095382,
+        "support_sha256": "9c9ddb4b73160ab43d881ae0970401016fc659efb778869042e945e6d8b5e232"
+      }
+    ]
+  },
+  "identity": {
+    "candidate_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "entrypoint": "examples/nanogpt/analyze_seven_trunk_selected_atom_unsharing.py",
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_seven_trunk_selected_atom_unsharing_20260821/selected_atom_states.pt",
+      "sha256": "3da1d0a7e11d2df4f249b6c2ab1afe5ae289af237a377344217eb8a95398d7ba"
+    },
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_selected_atom_unsharing_plan.json",
+    "plan_sha256": "cccbe8b8737fe15bbdddc7bd777e1e689f5426af9dfe3fb617afe624ba97ec4b",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_seven_trunk_selected_atom_unsharing_20260821/result.json",
+      "sha256": "bb85643c1155cbb87964e4852805c9c796a145e0f654f709380514ec4ce6dcbf"
+    },
+    "repository_commit": "cd4dfffd244caf531d94275d0c8cfa4002b81041"
+  },
+  "parameter_accounting": {
+    "cached_inference_extra_flops": 0,
+    "dense_mlp_parameters": 56623104,
+    "mlp_parameter_compression_ratio": 1.6435131520,
+    "mlp_parameter_saving_fraction": 0.3915473090,
+    "private_atom_parameters": 1376256,
+    "total_compact_mlp_parameters": 34452480
+  },
+  "schema_version": "mai_seven_trunk_selected_atom_unsharing_seal_v1"
+}
