@@ -1,0 +1,104 @@
+{
+  "schema_version": "mai_pair_vq_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "FAIL_SIDE_SPECIFIC_CPROJ_CONSERVATION",
+  "passed": false,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "repeat_or_learning_rate_sweep_authorized": false,
+    "next_authorized_work": "Add the missing fast Cartesian residual chart to pair-VQ c_proj, retain the compact sigma-delta carry, and rerun only the 160-step conservation/performance gate.",
+    "reason": "The carry repaired c_fc conservation, but c_proj has only one slow stage and no fast residual chart. Its request-energy-weighted conserved recovery fell to 0.6617 at step 152, below the frozen 0.80 per-matrix and 0.95 aggregate gates."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_sigma_delta_plan.json",
+    "plan_sha256": "312b32075e367b038255dd5bbcd6438fb8d9d275338ad8ec5c4e04068c0e57f9",
+    "gate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_sigmadelta_gate160.json",
+    "gate_config_sha256": "a3ca61f1605dc29138f38e728171be97615c7cef5537d5a58c68e78496cc29d4",
+    "execution_git_commit": "6f358f6e2e3c7d3d31cb2247fdda561519423b2a",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/train.py": "4adc60f2d443c447bfafaa4b9f01369ca156cd9a62b7c58efce16445f327fad1",
+    "examples/nanogpt/model.py": "7f54bd4f7b2fdb5af09ee97eb2e55f93d27fcc870f2a65f51ddc9273c3d876eb",
+    "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+    "examples/nanogpt/muon_pair_vq.py": "9c027bde61e20e08d24d4d9b7942bfee15b2c2402ac7b2d8b77782ba7c9855c3",
+    "latent_weight_lab/block_fht.py": "e0b692156130d11d55a240d192e9dde2077a77d0cfc4412356c5ddab49e80f36"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_sigmadelta_gate160_20260821.log",
+    "log_sha256": "57ae7e60da3becbd5c350a7ff1f09de36f96b01879c0db82ffb03fb907485582",
+    "log_bytes": 405059,
+    "started_at": "2026-08-21T21:37:27+08:00",
+    "finished_at": "2026-08-21T21:41:01+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9790,
+    "step160_validation_ce": 5.5015,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "measurement": "Request-energy-weighted recovery. Each refresh emits c_fc then c_proj for every layer.",
+    "rows": [
+      {"step": 0, "all": 0.992706, "c_fc": 0.995087, "c_proj": 0.978773, "all_feedback_codec": 0.947916},
+      {"step": 8, "all": 0.988938, "c_fc": 0.993582, "c_proj": 0.973871, "all_feedback_codec": 0.981657},
+      {"step": 40, "all": 0.937910, "c_fc": 0.983520, "c_proj": 0.803255, "all_feedback_codec": 0.990125},
+      {"step": 80, "all": 0.927852, "c_fc": 0.975731, "c_proj": 0.720954, "all_feedback_codec": 0.990482},
+      {"step": 120, "all": 0.918358, "c_fc": 0.975404, "c_proj": 0.656001, "all_feedback_codec": 0.991218},
+      {"step": 152, "all": 0.916675, "c_fc": 0.974615, "c_proj": 0.661665, "all_feedback_codec": 0.991146}
+    ],
+    "frozen_gate_outcomes": {
+      "aggregate_conserved_requested_step_energy_recovery_min": 0.916675,
+      "aggregate_conserved_minimum_required": 0.95,
+      "every_matrix_conserved_requested_step_energy_recovery_min": 0.634757,
+      "every_matrix_conserved_minimum_required": 0.8,
+      "aggregate_feedback_codec_energy_recovery_min": 0.947916,
+      "aggregate_feedback_codec_minimum_required": 0.98,
+      "every_matrix_feedback_codec_energy_recovery_min": 0.786039,
+      "every_matrix_feedback_codec_minimum_required": 0.95,
+      "maximum_matrix_feedback_to_weight_energy_ratio": 0.002949,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "late_feedback_code_changes": 22966561,
+      "late_feedback_code_changes_minimum": 1
+    }
+  },
+  "performance": {
+    "timed_samples": 31,
+    "tokens_per_second_mean": 198727.01,
+    "iteration_ms_mean": 1319.26,
+    "optimizer_ms_mean": 114.50,
+    "optimizer_fraction": 0.086787,
+    "active_params_6n_estimate": 124475904,
+    "model_tflops": 148.4203,
+    "empirical_bf16_gemm_peak_tflops": 416.727944,
+    "mfu_fraction": 0.356156,
+    "peak_mib_median": 31592.73,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 56698560,
+    "persistent_training_matrix_state_bytes": 85086912,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.997338,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 5.323790,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "diagnosis": {
+    "c_fc": "The two-stage weight chart plus fast residual and compact carry sustains about 0.975 request-energy recovery through step 152.",
+    "c_proj": "The one-stage weight chart without a fast residual accumulates a much larger carry and falls to about 0.662 conserved recovery despite 0.992 feedback-code recovery.",
+    "mechanism": "A sub-percent relative quantization error in the accumulated c_proj carry is still large relative to the current scheduled Muon step. The problem is side-specific weight-chart tangent capacity, not global carry instability.",
+    "excluded_next_moves": [
+      "learning-rate sweep",
+      "longer horizon",
+      "larger model",
+      "global feedback-bit increase",
+      "another fixed endpoint oracle"
+    ]
+  }
+}
