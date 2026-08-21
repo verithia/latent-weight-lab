@@ -27,6 +27,8 @@ from examples.nanogpt.muon_pair_vq import MuonPairVQLinear
 
 PLAN_SCHEMA = "mai_124m_pair_vq_optimizer_transition_oracle_plan_v1"
 RESULT_SCHEMA = "mai_pair_vq_optimizer_transition_oracle_result_v1"
+TRANSPORT_PLAN_SCHEMA = "mai_124m_pair_vq_momentum_transport_oracle_plan_v1"
+TRANSPORT_RESULT_SCHEMA = "mai_pair_vq_momentum_transport_oracle_result_v1"
 
 
 def _all_finite(value: Any) -> bool:
@@ -90,6 +92,72 @@ def update_compact_momentum(
         compact_momentum[stage].mul_(float(momentum)).add_(means)
         expanded.add_(compact_momentum[stage].index_select(0, codes))
     return expanded.div_(module.stages).reshape_as(gradient)
+
+
+@torch.no_grad()
+def project_dense_momentum_to_current_codes(
+    module: MuonPairVQLinear,
+    dense_momentum: torch.Tensor,
+) -> torch.Tensor:
+    """Apply the exact current-code averaging/expansion operator ``P_t``.
+
+    Unlike :func:`update_compact_momentum`, this helper has no temporal state.
+    It projects the actual dense next-momentum through the codes visible before
+    the optimizer step, isolating instantaneous code-subspace loss from
+    historical compact-state transport.
+    """
+    momentum_pairs = dense_momentum.detach().float().reshape(-1, 2)
+    expanded = torch.zeros_like(momentum_pairs)
+    for stage in range(module.stages):
+        codes = module.codes[stage].long()
+        accum = torch.zeros_like(module.codebooks[stage])
+        accum.index_add_(0, codes, momentum_pairs)
+        counts = torch.bincount(codes, minlength=module.codebook_size)
+        live = counts > 0
+        means = torch.zeros_like(module.codebooks[stage])
+        means[live] = accum[live] / counts[live, None]
+        expanded.add_(means.index_select(0, codes))
+    return expanded.div_(module.stages).reshape_as(dense_momentum)
+
+
+def three_way_direction_metrics(
+    dense: torch.Tensor,
+    chart: torch.Tensor,
+    compact: torch.Tensor,
+) -> dict[str, Any]:
+    """Measure dense -> current chart -> historical compact decomposition."""
+    dense64 = dense.detach().double()
+    chart64 = chart.detach().double()
+    compact64 = compact.detach().double()
+    subspace = chart64 - dense64
+    transport = compact64 - chart64
+    final = compact64 - dense64
+    subspace_energy = float(subspace.square().sum())
+    transport_energy = float(transport.square().sum())
+    interaction = float(2.0 * (subspace * transport).sum())
+    final_energy = float(final.square().sum())
+    denominator = max(final_energy, 1e-30)
+    return {
+        "dense_to_chart": direction_metrics(dense, chart),
+        "chart_to_compact": direction_metrics(chart, compact),
+        "dense_to_compact": direction_metrics(dense, compact),
+        "decomposition": {
+            "instantaneous_subspace_error_energy": subspace_energy,
+            "historical_transport_error_energy": transport_energy,
+            "interaction_energy": interaction,
+            "final_compact_vs_dense_error_energy": final_energy,
+            "instantaneous_subspace_fraction": subspace_energy / denominator,
+            "historical_transport_fraction": transport_energy / denominator,
+            "interaction_fraction": interaction / denominator,
+            "decomposition_closure_relative_error": abs(
+                final_energy
+                - subspace_energy
+                - transport_energy
+                - interaction
+            )
+            / denominator,
+        },
+    }
 
 
 def _aggregate_direction(
@@ -533,6 +601,341 @@ class PairVQOptimizerTransitionOracle:
         }
         if not _all_finite(payload):
             raise RuntimeError("optimizer-transition payload contains non-finite values")
+        atomic_json(self.result_path, payload)
+
+    def finalize(
+        self,
+        *,
+        dense_terminal_losses: dict[str, float],
+        fixed_eval_indices_sha256: str,
+    ) -> dict[str, Any]:
+        self._write(
+            status="finished",
+            dense_terminal_losses=dense_terminal_losses,
+            fixed_eval_indices_sha256=fixed_eval_indices_sha256,
+        )
+        return {"status": "finished", "gate": self._gate()}
+
+
+class PairVQMomentumTransportOracle:
+    """Separate current-chart capacity from historical momentum transport.
+
+    The dense parent is the sole training trajectory. At every step the
+    observer's current codes define ``P_t``. The oracle evolves an independent
+    production-equivalent compact buffer and compares the following three
+    requests without modifying the model or optimizer:
+
+    ``G + mu * B_next`` (dense), ``G + mu * P_t B_next`` (current chart), and
+    ``G + mu * E_t compact_next`` (historical compact state).
+    """
+
+    def __init__(
+        self,
+        model,
+        observer: DensePairVQShadowObserver,
+        optimizer,
+        *,
+        plan_path: Path,
+        plan_sha256: str,
+        result_path: Path,
+    ) -> None:
+        if sha256_file(plan_path) != plan_sha256:
+            raise ValueError("momentum-transport plan identity mismatch")
+        self.plan_path = plan_path
+        self.plan_sha256 = plan_sha256
+        self.plan = json.loads(plan_path.read_text())
+        if self.plan.get("schema_version") != TRANSPORT_PLAN_SCHEMA:
+            raise ValueError("momentum-transport plan schema mismatch")
+        self.model = model
+        self.observer = observer
+        self.result_path = result_path
+        protocol = self.plan["frozen_protocol"]
+        self.update_indices = set(
+            int(step) for step in protocol["optimizer_update_indices"]
+        )
+        self.reported_steps = dict(
+            zip(
+                protocol["optimizer_update_indices"],
+                protocol["reported_post_update_state_steps"],
+                strict=True,
+            )
+        )
+        children = list(getattr(optimizer, "optimizers", [optimizer]))
+        self._dense_owner: dict[str, tuple[Any, dict[str, Any]]] = {}
+        for name, module in observer._dense_modules.items():
+            matches = []
+            for child in children:
+                for group in child.param_groups:
+                    if any(
+                        parameter is module.weight
+                        for parameter in group["params"]
+                    ):
+                        matches.append((child, group))
+            if len(matches) != 1:
+                raise ValueError(
+                    f"expected one dense optimizer owner for {name}, "
+                    f"found {len(matches)}"
+                )
+            self._dense_owner[name] = matches[0]
+        self._compact_momentum = {
+            name: torch.zeros_like(module.codebooks)
+            for name, module in observer._shadow_modules.items()
+        }
+        self.records: list[dict[str, Any]] = []
+        self._run_identity_sha256: str | None = None
+
+    @staticmethod
+    def _aggregate_three_way(
+        rows: list[dict[str, Any]], key: str
+    ) -> dict[str, Any]:
+        directions = {
+            direction: _aggregate_direction(
+                [row[key] for row in rows], direction
+            )
+            for direction in (
+                "dense_to_chart",
+                "chart_to_compact",
+                "dense_to_compact",
+            )
+        }
+        decomposition = {
+            field: sum(
+                float(row[key]["decomposition"][field]) for row in rows
+            )
+            for field in (
+                "instantaneous_subspace_error_energy",
+                "historical_transport_error_energy",
+                "interaction_energy",
+                "final_compact_vs_dense_error_energy",
+            )
+        }
+        denominator = max(
+            decomposition["final_compact_vs_dense_error_energy"], 1e-30
+        )
+        decomposition.update(
+            {
+                "instantaneous_subspace_fraction": (
+                    decomposition["instantaneous_subspace_error_energy"]
+                    / denominator
+                ),
+                "historical_transport_fraction": (
+                    decomposition["historical_transport_error_energy"]
+                    / denominator
+                ),
+                "interaction_fraction": (
+                    decomposition["interaction_energy"] / denominator
+                ),
+                "decomposition_closure_relative_error": abs(
+                    decomposition["final_compact_vs_dense_error_energy"]
+                    - decomposition["instantaneous_subspace_error_energy"]
+                    - decomposition["historical_transport_error_energy"]
+                    - decomposition["interaction_energy"]
+                )
+                / denominator,
+            }
+        )
+        return {**directions, "decomposition": decomposition}
+
+    def _aggregate(self, rows: list[dict[str, Any]]) -> dict[str, Any]:
+        payload: dict[str, Any] = {}
+        for label, selected in (
+            ("all", rows),
+            ("c_fc", [row for row in rows if row["side"] == "c_fc"]),
+            (
+                "c_proj",
+                [row for row in rows if row["side"] == "c_proj"],
+            ),
+        ):
+            payload[label] = {
+                "combined_prepolar": self._aggregate_three_way(
+                    selected, "combined_prepolar"
+                ),
+                "polar_update": self._aggregate_three_way(
+                    selected, "polar_update"
+                ),
+            }
+        return payload
+
+    @torch.no_grad()
+    def before_step(
+        self, *, optimizer_update_index: int, run_identity_sha256: str
+    ) -> dict[str, Any] | None:
+        self._run_identity_sha256 = run_identity_sha256
+        probe = int(optimizer_update_index) in self.update_indices
+        rows: list[dict[str, Any]] = []
+        for name in sorted(self.observer._dense_modules):
+            dense = self.observer._dense_modules[name]
+            shadow = self.observer._shadow_modules[name]
+            gradient = dense.weight.grad
+            if gradient is None or not torch.isfinite(gradient).all():
+                raise RuntimeError(
+                    f"missing or non-finite dense gradient for {name}"
+                )
+            gradient = gradient.detach().float()
+            owner, group = self._dense_owner[name]
+            momentum = float(group["momentum"])
+            ns_steps = int(group["ns_steps"])
+            dense_buffer = owner.state[dense.weight].get("momentum_buffer")
+            if dense_buffer is None:
+                dense_buffer = torch.zeros_like(dense.weight)
+            dense_next = dense_buffer.float() * momentum + gradient
+            chart_next = project_dense_momentum_to_current_codes(
+                shadow, dense_next
+            )
+            compact_next = update_compact_momentum(
+                shadow,
+                self._compact_momentum[name],
+                gradient,
+                momentum=momentum,
+            )
+            if not probe:
+                continue
+            dense_combined = gradient + momentum * dense_next
+            chart_combined = gradient + momentum * chart_next
+            compact_combined = gradient + momentum * compact_next
+            dense_update = muon_update(
+                dense_combined, steps=ns_steps
+            ).float()
+            chart_update = muon_update(
+                chart_combined, steps=ns_steps
+            ).float()
+            compact_update = muon_update(
+                compact_combined, steps=ns_steps
+            ).float()
+            rows.append(
+                {
+                    "module": name,
+                    "side": (
+                        "c_fc" if name.endswith(".c_fc") else "c_proj"
+                    ),
+                    "layer": int(name.split(".")[2]),
+                    "combined_prepolar": three_way_direction_metrics(
+                        dense_combined, chart_combined, compact_combined
+                    ),
+                    "polar_update": three_way_direction_metrics(
+                        dense_update, chart_update, compact_update
+                    ),
+                }
+            )
+        if not probe:
+            return None
+        record = {
+            "optimizer_update_index": int(optimizer_update_index),
+            "reported_post_update_state_step": int(
+                self.reported_steps[int(optimizer_update_index)]
+            ),
+            "aggregate": self._aggregate(rows),
+            "matrices": rows,
+        }
+        self.records.append(record)
+        self._write(status="running")
+        return {
+            "optimizer_update_index": int(optimizer_update_index),
+            "reported_post_update_state_step": record[
+                "reported_post_update_state_step"
+            ],
+            "aggregate": record["aggregate"]["all"],
+        }
+
+    def _gate(self) -> dict[str, Any]:
+        late_steps = set(
+            int(step)
+            for step in self.plan["frozen_protocol"][
+                "primary_late_post_update_state_steps"
+            ]
+        )
+        late = [
+            row
+            for row in self.records
+            if row["reported_post_update_state_step"] in late_steps
+        ]
+        if len(late) != len(late_steps):
+            return {"ready": False, "classification": None}
+        rows = [row["aggregate"]["all"]["polar_update"] for row in late]
+        subspace_fractions = [
+            float(
+                row["decomposition"]["instantaneous_subspace_fraction"]
+            )
+            for row in rows
+        ]
+        transport_fractions = [
+            float(row["decomposition"]["historical_transport_fraction"])
+            for row in rows
+        ]
+        subspace_exceeds_transport = [
+            float(
+                row["decomposition"][
+                    "instantaneous_subspace_error_energy"
+                ]
+            )
+            > float(
+                row["decomposition"]["historical_transport_error_energy"]
+            )
+            for row in rows
+        ]
+        transport_exceeds_subspace = [
+            not value for value in subspace_exceeds_transport
+        ]
+        # The immutable plan spells this out in both classification predicates.
+        threshold = 0.70
+        subspace_primary = all(
+            value >= threshold for value in subspace_fractions
+        ) and all(subspace_exceeds_transport)
+        transport_primary = all(
+            value >= threshold for value in transport_fractions
+        ) and all(transport_exceeds_subspace)
+        classification = "MIXED_OR_UNRESOLVED"
+        if subspace_primary:
+            classification = "INSTANTANEOUS_SUBSPACE_PRIMARY"
+        elif transport_primary:
+            classification = "HISTORICAL_TRANSPORT_PRIMARY"
+        return {
+            "ready": True,
+            "classification": classification,
+            "minimum_late_instantaneous_subspace_fraction": min(
+                subspace_fractions
+            ),
+            "minimum_late_historical_transport_fraction": min(
+                transport_fractions
+            ),
+            "instantaneous_subspace_exceeds_transport_at_every_late_probe": (
+                all(subspace_exceeds_transport)
+            ),
+            "historical_transport_exceeds_subspace_at_every_late_probe": (
+                all(transport_exceeds_subspace)
+            ),
+            "maximum_late_decomposition_closure_relative_error": max(
+                float(
+                    row["decomposition"][
+                        "decomposition_closure_relative_error"
+                    ]
+                )
+                for row in rows
+            ),
+            "all_metrics_finite": _all_finite(late),
+        }
+
+    def _write(
+        self,
+        *,
+        status: str,
+        dense_terminal_losses: dict[str, float] | None = None,
+        fixed_eval_indices_sha256: str | None = None,
+    ) -> None:
+        payload = {
+            "schema_version": TRANSPORT_RESULT_SCHEMA,
+            "status": status,
+            "plan": {"path": str(self.plan_path), "sha256": self.plan_sha256},
+            "run_identity_sha256": self._run_identity_sha256,
+            "fixed_eval_indices_sha256": fixed_eval_indices_sha256,
+            "dense_terminal_losses": dense_terminal_losses,
+            "records": self.records,
+            "gate": self._gate(),
+        }
+        if not _all_finite(payload):
+            raise RuntimeError(
+                "momentum-transport payload contains non-finite values"
+            )
         atomic_json(self.result_path, payload)
 
     def finalize(

@@ -23,6 +23,7 @@ from examples.nanogpt.dense_pair_vq_functional_oracle import (
     PairVQFunctionalGradientOracle,
 )
 from examples.nanogpt.dense_pair_vq_optimizer_transition import (
+    PairVQMomentumTransportOracle,
     PairVQOptimizerTransitionOracle,
 )
 from examples.nanogpt.model import (
@@ -825,10 +826,39 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
                 "dense pair-VQ optimizer-transition oracle requires all of: "
                 + ", ".join(transition_fields)
             )
-        if configured_functional_fields and configured_transition_fields:
+        transport_fields = {
+            "pair_vq_dense_shadow_transport_plan": (
+                args.pair_vq_dense_shadow_transport_plan
+            ),
+            "pair_vq_dense_shadow_transport_plan_sha256": (
+                args.pair_vq_dense_shadow_transport_plan_sha256
+            ),
+            "pair_vq_dense_shadow_transport_result": (
+                args.pair_vq_dense_shadow_transport_result
+            ),
+        }
+        configured_transport_fields = [
+            key for key, value in transport_fields.items() if value
+        ]
+        if configured_transport_fields and len(configured_transport_fields) != len(
+            transport_fields
+        ):
             raise ValueError(
-                "functional-gradient and optimizer-transition oracles are "
-                "mutually exclusive"
+                "dense pair-VQ momentum-transport oracle requires all of: "
+                + ", ".join(transport_fields)
+            )
+        configured_oracles = sum(
+            bool(fields)
+            for fields in (
+                configured_functional_fields,
+                configured_transition_fields,
+                configured_transport_fields,
+            )
+        )
+        if configured_oracles > 1:
+            raise ValueError(
+                "functional-gradient, optimizer-transition, and "
+                "momentum-transport oracles are mutually exclusive"
             )
     elif any(
         value
@@ -842,6 +872,9 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
             args.pair_vq_dense_shadow_transition_plan,
             args.pair_vq_dense_shadow_transition_plan_sha256,
             args.pair_vq_dense_shadow_transition_result,
+            args.pair_vq_dense_shadow_transport_plan,
+            args.pair_vq_dense_shadow_transport_plan_sha256,
+            args.pair_vq_dense_shadow_transport_result,
         )
     ):
         raise ValueError(
@@ -1157,6 +1190,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pair-vq-dense-shadow-transition-plan", default=None)
     parser.add_argument("--pair-vq-dense-shadow-transition-plan-sha256", default=None)
     parser.add_argument("--pair-vq-dense-shadow-transition-result", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-transport-plan", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-transport-plan-sha256", default=None)
+    parser.add_argument("--pair-vq-dense-shadow-transport-result", default=None)
     parser.add_argument("--data-dir", required=False)
     parser.add_argument("--out-dir", required=False)
     parser.add_argument("--init-from", choices=["scratch", "resume"], default="scratch")
@@ -3961,6 +3997,7 @@ def main() -> None:
     pair_vq_dense_shadow = None
     pair_vq_functional_oracle = None
     pair_vq_transition_oracle = None
+    pair_vq_transport_oracle = None
     if args.pair_vq_dense_shadow_replay:
         pair_vq_dense_shadow = DensePairVQShadowObserver(
             raw_model,
@@ -4050,6 +4087,35 @@ def main() -> None:
                         "result": args.pair_vq_dense_shadow_transition_result,
                         "optimizer_update_indices": sorted(
                             pair_vq_transition_oracle.update_indices
+                        ),
+                    },
+                    sort_keys=True,
+                    separators=(",", ":"),
+                ),
+                flush=True,
+            )
+        if args.pair_vq_dense_shadow_transport_plan:
+            pair_vq_transport_oracle = PairVQMomentumTransportOracle(
+                raw_model,
+                pair_vq_dense_shadow,
+                optimizer,
+                plan_path=Path(args.pair_vq_dense_shadow_transport_plan),
+                plan_sha256=str(
+                    args.pair_vq_dense_shadow_transport_plan_sha256
+                ),
+                result_path=Path(args.pair_vq_dense_shadow_transport_result),
+            )
+            print(
+                "pair_vq_momentum_transport_init "
+                + json.dumps(
+                    {
+                        "plan": args.pair_vq_dense_shadow_transport_plan,
+                        "plan_sha256": (
+                            args.pair_vq_dense_shadow_transport_plan_sha256
+                        ),
+                        "result": args.pair_vq_dense_shadow_transport_result,
+                        "optimizer_update_indices": sorted(
+                            pair_vq_transport_oracle.update_indices
                         ),
                     },
                     sort_keys=True,
@@ -4317,6 +4383,23 @@ def main() -> None:
                         "pair_vq_optimizer_transition_terminal "
                         + json.dumps(
                             transition_terminal,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        ),
+                        flush=True,
+                    )
+                if (
+                    pair_vq_transport_oracle is not None
+                    and iter_num >= args.max_iters
+                ):
+                    transport_terminal = pair_vq_transport_oracle.finalize(
+                        dense_terminal_losses=losses,
+                        fixed_eval_indices_sha256=str(fixed_eval_digest),
+                    )
+                    print(
+                        "pair_vq_momentum_transport_terminal "
+                        + json.dumps(
+                            transport_terminal,
                             sort_keys=True,
                             separators=(",", ":"),
                         ),
@@ -4615,6 +4698,21 @@ def main() -> None:
                     "pair_vq_optimizer_transition_probe "
                     + json.dumps(
                         transition_record,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
+        if pair_vq_transport_oracle is not None:
+            transport_record = pair_vq_transport_oracle.before_step(
+                optimizer_update_index=iter_num,
+                run_identity_sha256=run_identity["config_sha256"],
+            )
+            if transport_record is not None:
+                print(
+                    "pair_vq_momentum_transport_probe "
+                    + json.dumps(
+                        transport_record,
                         sort_keys=True,
                         separators=(",", ":"),
                     ),

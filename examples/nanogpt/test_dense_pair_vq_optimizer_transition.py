@@ -9,6 +9,8 @@ import torch
 from examples.nanogpt.dense_pair_vq_optimizer_transition import (
     PairVQOptimizerTransitionOracle,
     direction_metrics,
+    project_dense_momentum_to_current_codes,
+    three_way_direction_metrics,
     update_compact_momentum,
 )
 from examples.nanogpt.muon_pair_vq import MuonPairVQ, MuonPairVQLinear
@@ -79,6 +81,34 @@ def test_compact_momentum_transition_matches_production_optimizer_state() -> Non
     )
 
 
+def test_current_code_projection_is_stateless_code_conditioned_mean() -> None:
+    module = make_module()
+    module.codes[0].copy_(torch.tensor([0, 0, 1, 1, 2, 2, 3, 3]))
+    module.codes[1].copy_(torch.tensor([0, 1, 0, 1, 2, 3, 2, 3]))
+    dense = torch.arange(16, dtype=torch.float32).reshape(4, 4)
+    projected = project_dense_momentum_to_current_codes(module, dense)
+    pairs = dense.reshape(-1, 2)
+    expected = torch.zeros_like(pairs)
+    for stage in range(module.stages):
+        codes = module.codes[stage].long()
+        for code in codes.unique():
+            selected = codes == code
+            expected[selected] += pairs[selected].mean(dim=0)
+    expected.div_(module.stages)
+    torch.testing.assert_close(projected, expected.reshape_as(dense))
+
+
+def test_three_way_decomposition_has_exact_cross_term_closure() -> None:
+    dense = torch.tensor([[1.0, -2.0], [3.0, 4.0]])
+    chart = dense + torch.tensor([[0.25, 0.0], [-0.5, 0.75]])
+    compact = chart + torch.tensor([[-0.1, 0.4], [0.2, -0.3]])
+    metrics = three_way_direction_metrics(dense, chart, compact)
+    decomposition = metrics["decomposition"]
+    assert decomposition["decomposition_closure_relative_error"] < 1e-15
+    assert decomposition["instantaneous_subspace_error_energy"] > 0.0
+    assert decomposition["historical_transport_error_energy"] > 0.0
+
+
 def test_isolated_retraction_is_finite_and_forward_visible() -> None:
     module = make_module()
     start = module.weight.detach().float().clone()
@@ -110,4 +140,26 @@ def test_registered_optimizer_transition_plan_is_immutable_and_causal() -> None:
     assert plan["decision_rule"]["automatic_scale_up"] is False
     assert hashlib.sha256(path.read_bytes()).hexdigest() == (
         "d38a32c22c93e0dd7354cef356e2d3c7d67e473d0a2d270f4bd5b54f9b8d3931"
+    )
+
+
+def test_registered_momentum_transport_plan_is_immutable_and_causal() -> None:
+    root = Path(__file__).resolve().parents[2]
+    path = (
+        root
+        / "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_momentum_transport_oracle_plan.json"
+    )
+    plan = json.loads(path.read_text())
+    assert plan["schema_version"].endswith("_v1")
+    assert plan["frozen_protocol"]["optimizer_update_indices"] == [
+        0,
+        59,
+        119,
+        179,
+        237,
+    ]
+    assert plan["decision_rule"]["automatic_endpoint"] is False
+    assert plan["decision_rule"]["automatic_scale_up"] is False
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+        "d2a1e5ed88e20bfa1f0081c60a65d1cc22aa1129161b82f2b4dd988a1d19e7dc"
     )
