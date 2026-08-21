@@ -1,0 +1,128 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar16x16_rvq2_sigma_delta_gate238_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "FAIL_FROZEN_RESIDUAL_STAGE_FLOOR_PRIMARY_TEMPORAL_GATES_PASS",
+  "passed": false,
+  "decision": {
+    "matched_124m_0p5tpp_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "parameter_bit_rate_or_learning_rate_sweep_authorized": false,
+    "next_authorized_work": "Acquire the exact live residual source at optimizer steps 0 and 8 under this frozen schedule, then explain the 0.000185 aggregate residual-stage shortfall before selecting one byte-neutral residual-code correction.",
+    "reason": "The representation passes every primary temporal-conservation, accumulated-feedback, occupancy, storage, and systems gate, including 0.966596 aggregate requested-motion conservation at step 232. It formally fails the preregistered conjunctive decision because aggregate residual-stage recovery is 0.979815 at step 0 versus the frozen 0.980000 floor. That threshold is not waived post hoc."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_rvq2_sigma_delta_plan.json",
+    "plan_sha256": "8e1dc8feb4cf62afab0f00c03134fe719df99216a105a02b3442d8d721e85962",
+    "topology_probe": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_residual_codec_topology_probe_result.json",
+    "topology_probe_sha256": "a5e47e67e043561c81b3206adceb0ecc657cdd1383020a53cbf8316c345a6e05",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_rvq2_sigmadelta_gate238.json",
+    "config_sha256": "9763e56fbf57eeb00672b71c3b736cde11b6803d370890fcd76d7720d80eb4e7",
+    "execution_git_commit": "17efff961cedc498e27cc3bd9c0c622139c1cacc",
+    "implementation_commit": "53f17eb863548b1200742b452e9052ad543c7795",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8fd827281c03494249d9aa8e4b2f25a80726b16ec551e7c38ae1b69bb2764ad0",
+    "examples/nanogpt/train.py": "999e8e3dee0af403ecea7373f7b8a97602c76ba93b22414bad2de247364ec9bd",
+    "examples/nanogpt/muon_pair_vq.py": "adeb0fe8d6580c8880fafed34c26e10990a6a39d4a06a1e9e4dbe3b9c4f76d99"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "run_id": "pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_rvq2_sigmadelta_gate238_20260821T162124Z",
+    "process_group": 2728072,
+    "wall_seconds": 348.979911,
+    "exit_code": 0,
+    "optimizer_steps": 238,
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_rvq2_sigmadelta_gate238_20260821T162124Z.log",
+    "log_bytes": 829779,
+    "log_sha256": "544de37669bea4c87486362ff39ab51ef36c0903173f973b566538808f453f28",
+    "status_sha256": "14b6a2653f0cbff299f28d71fdaacfd86381f2b3cb175f88235d15ecb066c483",
+    "initial_validation_ce": 10.9790,
+    "step238_validation_ce_diagnostic_only": 5.4382,
+    "checkpoint": null
+  },
+  "temporal_geometry": {
+    "rows": [
+      {"step": 0, "all": 0.999992, "c_fc": 0.999992, "c_proj": 0.999994, "feedback_codec": 0.999683, "residual_stage": 0.979815, "matrix_min": 0.999991, "residual_active_codes_min": 254},
+      {"step": 8, "all": 0.999967, "c_fc": 0.999964, "c_proj": 0.999977, "feedback_codec": 0.999681, "residual_stage": 0.980480, "matrix_min": 0.999947, "residual_active_codes_min": 254},
+      {"step": 40, "all": 0.999579, "c_fc": 0.999629, "c_proj": 0.999354, "feedback_codec": 0.999678, "residual_stage": 0.981075, "matrix_min": 0.999306, "residual_active_codes_min": 255},
+      {"step": 80, "all": 0.999281, "c_fc": 0.999384, "c_proj": 0.998751, "feedback_codec": 0.999681, "residual_stage": 0.981258, "matrix_min": 0.998308, "residual_active_codes_min": 255},
+      {"step": 120, "all": 0.998617, "c_fc": 0.998806, "c_proj": 0.997738, "feedback_codec": 0.999685, "residual_stage": 0.981444, "matrix_min": 0.996910, "residual_active_codes_min": 254},
+      {"step": 160, "all": 0.996430, "c_fc": 0.996854, "c_proj": 0.994723, "feedback_codec": 0.999693, "residual_stage": 0.981705, "matrix_min": 0.993648, "residual_active_codes_min": 254},
+      {"step": 200, "all": 0.985459, "c_fc": 0.987015, "c_proj": 0.979432, "feedback_codec": 0.999711, "residual_stage": 0.982160, "matrix_min": 0.974914, "residual_active_codes_min": 253},
+      {"step": 232, "all": 0.966596, "c_fc": 0.969887, "c_proj": 0.953736, "feedback_codec": 0.999733, "residual_stage": 0.982815, "matrix_min": 0.941253, "residual_active_codes_min": 252}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.966596,
+      "aggregate_conserved_required": 0.95,
+      "aggregate_conserved_passed": true,
+      "every_matrix_conserved_min": 0.941253,
+      "every_matrix_conserved_required": 0.80,
+      "every_matrix_conserved_passed": true,
+      "aggregate_feedback_codec_min": 0.999678,
+      "aggregate_feedback_codec_required": 0.999,
+      "aggregate_feedback_codec_passed": true,
+      "every_matrix_feedback_codec_min": 0.999665,
+      "every_matrix_feedback_codec_required": 0.995,
+      "every_matrix_feedback_codec_passed": true,
+      "aggregate_residual_stage_min": 0.979815,
+      "every_matrix_residual_stage_min": 0.979211,
+      "residual_stage_required": 0.98,
+      "residual_stage_passed": false,
+      "residual_stage_shortfall": 0.000185,
+      "residual_active_codes_min": 252,
+      "residual_active_codes_required": 128,
+      "residual_active_codes_passed": true,
+      "maximum_feedback_to_weight_energy_ratio": 0.000299872,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "feedback_to_weight_passed": true,
+      "cproj_fast_code_changes_at_step232": 797185,
+      "late_cproj_fast_code_changes_minimum": 1,
+      "late_cproj_fast_code_changes_passed": true
+    },
+    "comparison_to_one_byte_at_step232": {
+      "one_byte_aggregate_conserved": 0.472619,
+      "two_byte_aggregate_conserved": 0.966596,
+      "absolute_improvement": 0.493977,
+      "remaining_current_request_error_fraction": 0.033404,
+      "one_byte_remaining_current_request_error_fraction": 0.527381,
+      "error_reduction_fraction": 0.936661,
+      "conclusion": "The second compact byte removes 93.67 percent of the one-byte late temporal-conservation error and resolves the main diagnosed direction mismatch."
+    }
+  },
+  "performance": {
+    "mfu_certificate_sha256": "33a1e577f1a365734f97c898b233f02dde0ea05a649145c63a3c74a1fc1b6157",
+    "preflight_tokens_per_second": 182598.94,
+    "preflight_mfu_fraction": 0.327409,
+    "preflight_optimizer_fraction": 0.163492,
+    "timed_samples": 47,
+    "tokens_per_second_mean": 181077.69,
+    "iteration_ms_mean": 1447.99,
+    "optimizer_ms_mean": 243.07,
+    "optimizer_fraction": 0.167866,
+    "model_tflops": 135.239,
+    "mfu_fraction": 0.324681,
+    "peak_mib_max": 31633.97,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 127602240,
+    "incremental_training_bytes_vs_one_byte_carry": 28336320,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 3.54998,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "monitoring": {
+    "watcher_pid": 56658,
+    "callbacks": [20, 50, 100],
+    "terminal_callback_delivered": true,
+    "watcher_exit_clean": true,
+    "gpu_terminal_state": "213 MiB used, 0 percent utilization"
+  }
+}
