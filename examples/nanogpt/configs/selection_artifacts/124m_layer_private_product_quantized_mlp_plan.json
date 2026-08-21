@@ -1,0 +1,104 @@
+{
+  "schema_version": "mai_layer_private_product_quantized_mlp_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can layer-private small-block product quantization preserve the dense teacher's complete MLP value and derivative fields at roughly 10x persistent BF16 matrix-state compression without any dense master weight, ambient residual, or optimizer state?",
+  "causal_basis": {
+    "fullrank_coordinate_result": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_fullrank_two_sided_coordinates_result.json",
+    "fullrank_coordinate_result_sha256": "e8737ca78ffa164791c7772c628082f8578e6f81f984d5c02f1a9515cb41d8c2",
+    "fullrank_coordinate_finding": "A shared-core coordinate ceiling remained optimization-inconclusive and its late derivative recovery was only 0.1359. Prior tri-transport LM evidence already rejects another shared-core orbit.",
+    "extreme_residual_vq_result": "examples/nanogpt/configs/selection_artifacts/124m_mlp_residual_vq_trajectory_gate_result.json",
+    "extreme_residual_vq_result_sha256": "1564493304741b1a4fedb55fe1b473875928204cdede419e54ab4b6cbec3002c",
+    "extreme_residual_vq_finding": "The 200x residual-VQ gate used 1024-value blocks and one codebook across layers, experts, and matrix sides; it recovered only 1.96% displacement energy. Spatially high-rank private content requires a much less aggressive, layer-private rate-distortion point.",
+    "representation_change": "Partition every dense teacher c_fc and c_proj independently into contiguous 16-value vectors. Give every layer and matrix side its own 256-direction signed spherical codebook, one uint8 code per vector, and one BF16 signed amplitude per vector.",
+    "why_high_freedom": "Each 16-value block makes an independent combinatorial direction choice and owns an independent amplitude. The decoded matrices are not restricted to a shared matrix orbit, low matrix rank, fixed orthogonal image, or shared layer dictionary.",
+    "not_a_sweep": "There is one block length, one codebook size, one deterministic spherical Lloyd protocol, one seed schedule, and no bit-width, block-size, codebook-size, scale, iteration, or restart sweep."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "quantizer": {
+    "block_length": 16,
+    "codebook_size": 256,
+    "codebook_scope": "independent for every layer and matrix side",
+    "code_dtype": "uint8",
+    "codebook_dtype": "bfloat16",
+    "amplitude_dtype": "bfloat16",
+    "direction_fit": "signed spherical Lloyd clustering; assignment maximizes absolute cosine and centroid updates sign-align assigned unit vectors",
+    "sample_vectors_per_matrix": 8192,
+    "lloyd_iterations": 8,
+    "assignment_chunk_vectors": 32768,
+    "algorithm_seed": 20260990,
+    "dense_master_weight": false,
+    "ambient_error_buffer": false,
+    "ambient_optimizer_state": false
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "dense_bf16_matrix_bytes": 113246208,
+    "block_count": 3538944,
+    "uint8_code_bytes": 3538944,
+    "bfloat16_amplitude_bytes": 7077888,
+    "bfloat16_codebook_bytes": 196608,
+    "persistent_matrix_state_bytes": 10813440,
+    "persistent_bf16_storage_compression": 10.472727272727273,
+    "continuous_coordinates": 3637248,
+    "continuous_coordinate_compression": 15.567567567567568,
+    "decode_multiplications_per_refresh": 56623104,
+    "cached_token_time_extra_flops": 0
+  },
+  "measurement": {
+    "state_bank_sample_cap_per_layer": 1024,
+    "state_bank_token_batch_size": 4,
+    "state_bank_batches": 4,
+    "state_bank_seed": 20260991,
+    "local_perturbation_relative_rms": 0.01,
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260992,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "per-layer/per-side and aggregate matrix energy recovery",
+      "held-out output and analytic input-JVP recovery on dense-teacher and compact-candidate state banks",
+      "fixed-checkpoint validation CE",
+      "compressed-state hash, exact byte accounting, decode cost, peak memory, and wall time"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_aggregate_matrix_energy_recovery": 0.95,
+    "minimum_every_matrix_energy_recovery": 0.9,
+    "minimum_mean_output_recovery": 0.98,
+    "minimum_worst_output_recovery": 0.95,
+    "minimum_mean_input_jvp_recovery": 0.95,
+    "minimum_worst_input_jvp_recovery": 0.9,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "minimum_persistent_bf16_storage_compression": 10.0,
+    "minimum_continuous_coordinate_compression": 15.0,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Preregister one discrete-code training rule with no dense master weight or ambient error buffer, implement exact byte accounting, and require at least 20% empirical MFU before one 124M/0.5TPP LM run.",
+    "fail": "Reject this exact product-quantization budget without sweeping block length, codebook size, bit width, iteration count, or seed. Use the failed metric to determine whether the next relaxation must spend bits on direction or amplitude.",
+    "infrastructure_failure": "Repair only the implementation defect and rerun the immutable plan without inspecting partial scientific metrics."
+  },
+  "authorization": {
+    "allowed": "Implement and run the zero-LM-update dense-teacher quantization ceiling after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before every gate passes",
+      "dense FP16/FP32 master weights, residuals, momentum, or error feedback",
+      "model-size scaling",
+      "bit-width, block-length, codebook-size, iteration, seed, or optimizer sweeps"
+    ],
+    "callback_policy": "Foreground-poll if measured complete runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}
