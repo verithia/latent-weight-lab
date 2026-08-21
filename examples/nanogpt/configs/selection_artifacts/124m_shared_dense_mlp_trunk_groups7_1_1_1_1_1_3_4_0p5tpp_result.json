@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_shared_dense_mlp_trunk_groups7_nonuniform_result_v1",
+  "classification": "ACCEPTED_124M_COMPACT_FULL_REPLACEMENT_SCREEN_PROMOTE_5TPP_ONLY",
+  "passed": true,
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_0p5tpp",
+    "source_commit": "6f6dc5ae4544f8c8966cc7752dd16a5c28d9761b",
+    "started_at": "2026-08-21T13:10:18+08:00",
+    "finished_at": "2026-08-21T13:17:16+08:00",
+    "exit_code": 0,
+    "status_sha256": "8eb7553b0599769c3b2065e04a6a5d2144fc1f976e82676381b9aa619e8617ce",
+    "log_sha256": "e07bfe11466b8e7572d90ec5dc595951ddee418ccdf25de31748b9f389cb7bdf",
+    "provenance_sha256": "b1875332da9efa1ec2f96cdbfcb7b8312164a1d27c3f7adfa50463eebd7fb79b",
+    "archived_config_sha256": "4dbbaeb0bab64a387c4c7da295895c8b12d6e520737d055ffefb32a7c020ea19",
+    "resolved_config_sha256": "1bb68d5b0798bde7f26692f95d9ffd50bb796115dd86bc4bab9d4d49a0df5373",
+    "checkpoint_sha256": "fd216ad03a9b76d4359e48658ad538d886b4bd5c72ed347b19c65e587c303214",
+    "checkpoint_metadata_sha256": "d3ad63cd6424b293c4d055cc73496288ec997faf8035718a20c9106e4268b0ed",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "terminal": {
+    "step": 238,
+    "train_cross_entropy": 5.5149,
+    "validation_cross_entropy": 5.518,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "validation_curve": [
+    {"step": 0, "train_cross_entropy": 10.9817, "validation_cross_entropy": 10.981},
+    {"step": 60, "train_cross_entropy": 6.2188, "validation_cross_entropy": 6.228},
+    {"step": 120, "train_cross_entropy": 5.8069, "validation_cross_entropy": 5.8121},
+    {"step": 180, "train_cross_entropy": 5.6048, "validation_cross_entropy": 5.6083},
+    {"step": 238, "train_cross_entropy": 5.5149, "validation_cross_entropy": 5.518}
+  ],
+  "comparisons": {
+    "dense_validation_cross_entropy": 5.489,
+    "gap_to_dense": 0.029,
+    "perplexity_ratio_to_dense": 1.029425,
+    "attention_only_validation_cross_entropy": 5.4918,
+    "gap_to_attention_only": 0.0262,
+    "perplexity_ratio_to_attention_only": 1.026546,
+    "four_trunk_validation_cross_entropy": 5.5717,
+    "improvement_over_four_trunks": 0.0537,
+    "required_validation_cross_entropy_maximum": 5.5417,
+    "margin_inside_frozen_maximum": 0.0237
+  },
+  "accounting": {
+    "layer_partition": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
+    "dense_mlp_parameters": 56623104,
+    "learned_mlp_parameters": 33076224,
+    "mlp_parameter_compression_ratio": 1.711897464474784,
+    "mlp_parameter_saving_fraction": 0.41585286458333337,
+    "actual_total_trainable_parameters": 72798432,
+    "materialized_dense_mlp_flops_unchanged": true,
+    "persistent_ambient_error_buffer": false,
+    "persistent_ambient_momentum_field": false,
+    "ambient_decoder": false
+  },
+  "performance_gate": {
+    "certificate_sha256": "34e5f0c93304312265a6bce0a4e41d4ddad95820e8dd40d00c7badab36d4d6b1",
+    "mfu_fraction": 0.3595280720536307,
+    "tokens_per_second": 200065.63,
+    "iteration_milliseconds": 1310.29,
+    "peak_allocated_mib": 33749.63
+  },
+  "decision": "The frozen late-horizon gradient criterion selected the correct higher-rank layer partition: seven trunks improve 0.0537 CE over four trunks and finish only 0.0262 CE behind the matched attention-only control at 0.5TPP. This passes every preregistered gate while retaining 1.712x MLP compression and no ambient temporal state. Authorize only the same 124M representation at 5TPP to test temporal durability; do not scale model size or add capacity."
+}
