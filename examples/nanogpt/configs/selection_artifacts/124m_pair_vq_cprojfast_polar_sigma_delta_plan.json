@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_polar_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "theory_preregistered_before_execution_or_results",
+  "scientific_question": "At the same one-byte-per-pair carry rate, does joint polar vector quantization encode the discarded Muon direction well enough to pass the frozen causal gate?",
+  "causal_basis": {
+    "rejected_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_group8_sigma_delta_gate160_result.json",
+    "rejected_gate_result_sha256": "647aa0cedd4a0641c19da5ad4cccae6429a301c12a27c89d15514957673667e2",
+    "observation": "Changing from matrix-global to output-group-local Cartesian levels changes carry recovery by at most 0.0023 and is neutral-to-negative after step 40. Scale locality is not causal.",
+    "mechanism": "The Cartesian codec allocates four independent bits to each coordinate. A polar vector codec instead allocates five bits to the pair direction and three bits to adaptive projected radius, directly preserving the coupled update direction at identical code rate.",
+    "distortion_prior": "For 32 uniform angle bins, the small-angle relative distortion is approximately (2*pi/32)^2/12 = 0.00321. Eight Lloyd-fitted projected-radius levels are expected to keep total pair distortion below the 0.02 frozen floor if paired direction is the missing geometry.",
+    "excluded_moves": [
+      "increase code bits",
+      "change weight charts",
+      "dense ambient carry",
+      "learning-rate or polar-bin sweep",
+      "larger model or horizon",
+      "endpoint before gate pass"
+    ]
+  },
+  "candidate": {
+    "name": "pair_vq_cproj_fast_residual_plus_polar32x8_sigma_delta",
+    "single_change": "Replace the separable 16x16 Cartesian carry decoder with a centered 32-angle x 8-radius vector decoder.",
+    "persistent_code": "one uint8 per weight pair, unchanged",
+    "metadata_per_matrix": "eight FP32 radii plus one FP32 two-vector center",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false,
+    "inference_change": "none; temporal carry is discarded"
+  },
+  "accounting": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99242112,
+    "dense_bf16_matrix_bytes": 113246208,
+    "dense_fp32_weight_plus_fp32_muon_bytes": 452984832,
+    "inference_model_state_reduction_x": 1.5982614397858232,
+    "training_state_reduction_x": 4.564441675727337,
+    "extra_dense_gemm_flops": 0,
+    "extra_codec_work": "one atan2, radius projection, three eight-bin Lloyd iterations, and decode per pair per optimizer step; exact-host performance-gated"
+  },
+  "frozen_gate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_polar_sigmadelta_gate160.json",
+    "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_polar_sigmadelta_gate160_mfu.json",
+    "optimizer_steps": 160,
+    "feedback_codec_gate_steps": [8, 40, 80, 120, 152],
+    "aggregate_conserved_requested_step_energy_recovery_min": 0.95,
+    "every_matrix_conserved_requested_step_energy_recovery_min": 0.8,
+    "aggregate_feedback_codec_energy_recovery_min": 0.98,
+    "every_matrix_feedback_codec_energy_recovery_min": 0.95,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_cproj_fast_code_changes_min": 1,
+    "mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "expected_duration": "under five minutes on PRO6 and therefore foreground-polled; attach a persistent watchdog immediately if observed duration exceeds five minutes"
+  },
+  "decision_policy": {
+    "pass": "Authorize exactly one matched 124M/0.5TPP endpoint against the sealed QK-only dense-MLP parent. Do not scale up.",
+    "codec_fail": "Reject two-dimensional paired polar coding at 8 bits per pair; perform rate-distortion theory before changing the bit budget.",
+    "systems_fail": "Optimize only the implementation of the same polar representation, then repeat the gate.",
+    "endpoint_fail_after_gate_pass": "Keep the complete representation fixed and localize objective mismatch from fixed-checkpoint loss and functional probes."
+  }
+}
