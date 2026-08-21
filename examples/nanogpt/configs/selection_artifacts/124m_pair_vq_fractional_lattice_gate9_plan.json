@@ -1,0 +1,53 @@
+{
+  "schema_version": "mai_pair_vq_fractional_lattice_gate9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does the selected 7.53125-bit packed temporal-feedback state preserve the oracle recovery under repeated live Muon updates, exact checkpoint replay, and the 20% MFU floor?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_source_probe9_result.json",
+    "result_sha256": "d8aa8b865bc60d8c178cea2d7554b9905c1b7fdd2a61e4b71155e8553a645b6f",
+    "classification": "FRACTIONAL_Q7_Q8_P0P25_SOURCE_CODEC_SELECTED"
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25",
+    "block_size": 32,
+    "base_coordinate_bits": 7,
+    "refinement_fraction": 0.25,
+    "selector_bits_per_block": 1,
+    "gain_bits_per_block": 8,
+    "physical_bits_per_weight": 7.53125,
+    "metadata_fp32_bytes_per_matrix": 2560,
+    "persistent_dense_master_residual_or_momentum": false
+  },
+  "implementation_gate": {
+    "focused_tests": "36 passed on PRO6",
+    "pack_unpack_bit_exact": true,
+    "checkpoint_next_step_bit_exact": true,
+    "actual_state_byte_accounting_tested": true,
+    "implementation_commit": "5acf6795f6fc7361eb27efb533e89d102c4d816c"
+  },
+  "frozen_live_gates": {
+    "optimizer_steps": 9,
+    "matrices_per_step": 24,
+    "feedback_codec_weighted_recovery_min": 0.99975,
+    "feedback_codec_every_matrix_recovery_min": 0.999,
+    "conserved_requested_step_weighted_recovery_min": 0.99975,
+    "conserved_requested_step_every_matrix_recovery_min": 0.999,
+    "all_logged_losses_finite": true,
+    "exact_config_mfu_min_fraction": 0.20,
+    "optimizer_fraction_max": 0.30
+  },
+  "selection_rule": {
+    "pass": "All implementation, recovery, conservation, finite-loss, MFU, and optimizer-fraction gates pass. This authorizes only a matched 124M 0.5-TPP endpoint against the same QK-only parent.",
+    "fail_recovery": "Reject the production codec despite the oracle and diagnose selector/codebook temporal drift; do not loosen the frozen recovery threshold.",
+    "fail_systems": "Optimize packing/FHT/top-k kernels and repeat this gate without changing the representation or scientific thresholds.",
+    "automatic_scale_up": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes",
+    "callbacks": "none for this sub-five-minute gate"
+  }
+}
