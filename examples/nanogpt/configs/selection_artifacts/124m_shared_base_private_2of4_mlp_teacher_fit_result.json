@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_shared_base_private_2of4_mlp_teacher_fit_seal_v1",
+  "classification": "SHARED_BASE_PRIVATE_TWO_OF_FOUR_CAPACITY_FAIL",
+  "identity": {
+    "repository_commit": "58da93a9f47d5550fe71dcd84b3df6b0b1bfffb1",
+    "entrypoint": "examples/nanogpt/analyze_shared_base_private_2of4_mlp_teacher_fit.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_shared_base_private_2of4_mlp_teacher_fit_plan.json",
+    "plan_sha256": "eef92ab447b881bfe0398ce9785bf42485010bd358bd5a311ed720312c06c5e0",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_base_private_2of4_mlp_teacher_fit_20260821/result.json",
+      "sha256": "42daab83caf3a9289866c14f8a07161afc19d5b9f2e82eb9cc96d44865c2f2c5"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_base_private_2of4_mlp_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "975352bb81464b45546ad34f487d07db7861da69903ecf8e9b8729ab76bbeb91"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 48.57933712005615,
+    "maximum_cuda_memory_bytes": 10669058560,
+    "language_model_updates": 0,
+    "targeted_tests": "10 passed",
+    "preflight": {
+      "projected_wall_seconds": 63.1176,
+      "maximum_cuda_memory_bytes": 2360235520
+    }
+  },
+  "teacher_fixed_validation_cross_entropy": 3.674412250518799,
+  "variants": {
+    "residual_magnitude_ceiling": {
+      "initial_fit_objective": 0.35294342786073685,
+      "final_fit_objective": 0.10658437106758356,
+      "objective_reduction_fraction": 0.6980128749992216,
+      "holdout_objective": 0.28563525527715683,
+      "output_recovery_mean_min_global": [0.8942747265100479, 0.808727502822876, 0.9026036132550117],
+      "input_jvp_recovery_mean_min_global": [0.8199059988061587, 0.7238021492958069, 0.8277535132207298],
+      "fixed_validation_cross_entropy": 4.387331962585449,
+      "gap_to_dense_teacher": 0.7129197120666504,
+      "optimization_healthy": true,
+      "passes": false
+    },
+    "fixed_random": {
+      "initial_fit_objective": 1.2861765176057816,
+      "final_fit_objective": 0.3079509139060974,
+      "objective_reduction_fraction": 0.7605687013479703,
+      "holdout_objective": 0.6563451215624809,
+      "output_recovery_mean_min_global": [0.7639646803339323, 0.5271114706993103, 0.780535721486328],
+      "input_jvp_recovery_mean_min_global": [0.5795693000157675, 0.3690145015716553, 0.5993981244007198],
+      "fixed_validation_cross_entropy": 5.37115478515625,
+      "gap_to_dense_teacher": 1.6967425346374512,
+      "optimization_healthy": true,
+      "passes": false
+    }
+  },
+  "decision": {
+    "language_model_training_authorized": false,
+    "density_or_mask_sweep_authorized": false,
+    "finding": "A shared unrestricted matrix pair makes the optimistic 2:4 residual locally cross the JVP gates and nearly cross the output-mean gate, but complete-model CE is worse than plain layer-private 2:4. The missing state is not recovered by independently allocating common dense coordinates and private sparse matrix entries.",
+    "next_action": "Return to the seven-trunk endpoint and spend private state on coupled complete neurons: select conflicting c_fc-row/c_proj-column atoms within only the two shared depth groups, freeze one width and require held-out output, JVP, and fixed-CE gates before any LM training."
+  }
+}

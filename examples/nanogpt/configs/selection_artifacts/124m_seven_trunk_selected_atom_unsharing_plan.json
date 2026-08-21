@@ -1,0 +1,109 @@
+{
+  "schema_version": "mai_seven_trunk_selected_atom_unsharing_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_candidate_measurement",
+  "scientific_question": "Can the seven-trunk MLP's +0.0698 late-horizon gap be closed by unsharing only the complete nonlinear neurons whose functional gradients conflict inside the two shared depth groups?",
+  "causal_basis": {
+    "seven_trunk_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp_result.json",
+    "seven_trunk_result_sha256": "65f62a9a44c1d68640adc80a2cb6c3eb7497b82cf0026ab79a4a05c44962a96c",
+    "seven_trunk_finding": "The strongest compact LM is +0.0262 CE behind attention-only at 0.5TPP and +0.0698 at 5TPP, missing the strict late-horizon +0.05 gate by only 0.0198 CE.",
+    "terminal_conflict_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_mlp_seven_trunk_terminal_conflict_result.json",
+    "terminal_conflict_result_sha256": "3c9b0ede6bdced928d3864b43bf925a12cc1778573ef764dce45352e96896c33",
+    "terminal_conflict_finding": "The trained seven-group partition passes common-gradient recovery, so another whole trunk or boundary sweep is not justified; the remaining defect is accumulated endpoint/function mismatch.",
+    "shared_sparse_result": "examples/nanogpt/configs/selection_artifacts/124m_shared_base_private_2of4_mlp_teacher_fit_result.json",
+    "shared_sparse_result_sha256": "1f2e16d3daf1471d31bce451fd9757cee2d8d876c54bf6750dd07d44dedaa8ea",
+    "shared_sparse_finding": "A common dense field plus private 2:4 coordinates reaches 0.8943 output and 0.8199 JVP recovery but leaves +0.7129 fixed CE, proving independent matrix coordinates break cross-layer nonlinear composition.",
+    "paired_atom_requirement": "For one hidden neuron, c_fc row u_j sets the GELU boundary and c_proj column v_j sets its residual-write direction. They are selected, copied, fit, stored, and materialized as one inseparable atom.",
+    "difference_from_rejected_private_ridge": "The earlier width-128/256 private-ridge arm appended random atoms to a single weak global trunk across all twelve layers. This plan starts from the near-performing seven-trunk endpoint, modifies only layers 5-11, and replaces selected existing atoms whose within-group functional gradient is layer private."
+  },
+  "identities": {
+    "candidate_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+      "terminal_validation_cross_entropy": 3.7442
+    },
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+      "terminal_validation_cross_entropy": 3.6744
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layer_partition": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
+    "constrained_layers": [5, 6, 7, 8, 9, 10, 11],
+    "private_atoms_per_constrained_layer": 128,
+    "hidden_width": 3072,
+    "model_width": 768,
+    "private_hidden_fraction": 0.041666666666666664,
+    "equation": "F_l(x)=sum_{j notin A_l} v_{g,j} GELU(p_{l,j} u_{g,j}^T x)+sum_{j in A_l} v_{l,j} GELU(p_{l,j} u_{l,j}^T x), followed by the existing layer-private residual output gain",
+    "replacement_semantics": "Each selected atom replaces both one shared c_fc row and its paired shared c_proj column for that layer. Initialization copies the shared atom exactly, so selection is function preserving before fitting.",
+    "dense_mlp_parameters": 56623104,
+    "seven_trunk_mlp_parameters": 33076224,
+    "additional_private_atom_parameters": 1376256,
+    "total_compact_mlp_parameters": 34452480,
+    "mlp_parameter_compression_ratio": 1.6435131520285333,
+    "mlp_parameter_saving_fraction": 0.3915473090277778,
+    "cached_inference_extra_flops": 0,
+    "materialization_note": "Shared and private atoms can be folded into ordinary per-layer dense matrices at refresh time. Cached token-time inference retains the dense MLP FLOPs and requires no ambient temporal error buffer."
+  },
+  "support_selection": {
+    "kind": "nondeployable functional-gradient conflict capacity ceiling",
+    "selection_token_seed": 20260950,
+    "selection_batches": 4,
+    "token_batch_size": 4,
+    "sample_cap_per_layer_per_bank": 1024,
+    "state_banks": ["dense_teacher", "seven_trunk_candidate"],
+    "objective": "Equal-weight sum of separately normalized clean-output error and symmetric local-perturbation direction error.",
+    "gradient_definition": "Temporarily untie full c_fc/c_proj matrices per layer at the exact seven-trunk endpoint, differentiate the selection objective once, subtract the within-group mean gradient, normalize c_fc-row and c_proj-column residual norms by their group RMS, then score each neuron by the Euclidean norm of the two normalized components.",
+    "support_rule": "For every constrained layer independently, take the deterministic top 128 neuron indices with stable index tie breaking. The support is frozen before fitting and its tensor digest is recorded.",
+    "causal_limit": "This support uses the dense teacher and is an optimistic capacity ceiling, not a deployable training algorithm. Passing authorizes a later causal online acquisition rule; failing closes this selected-atom width without LM training."
+  },
+  "fit_protocol": {
+    "optimizer": "Adam",
+    "weight_decay": 0.0,
+    "steps": 800,
+    "learning_rate": 0.0003,
+    "row_batch_size_per_layer_per_bank": 128,
+    "sample_cap_per_layer_per_bank": 2048,
+    "fit_token_seed": 20260951,
+    "holdout_token_seed": 20260952,
+    "fit_batches": 8,
+    "holdout_batches": 8,
+    "token_batch_size": 4,
+    "local_perturbation_relative_rms": 0.01,
+    "fit_scope": "Jointly fit each shared group matrix pair, its existing layer-private pre-GELU/output gains, and only the frozen paired private atom copies. Singleton layers, attention, embeddings, normalization, residual paths, and LM head remain exact dense-teacher values in the splice.",
+    "selection": "Restore the lowest full fit objective observed during the registered 800 steps. No support, width, LR, optimizer, step, seed, or threshold sweep."
+  },
+  "holdout_measurement": {
+    "state_banks": ["dense_teacher", "seven_trunk_candidate"],
+    "output_metric": "explained target energy against the corresponding dense-teacher layer MLP",
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260953,
+    "complete_model_splice": "Install the two fitted partially unshared groups into a dense-teacher clone, retain exact dense singleton MLPs, and evaluate deterministic CE.",
+    "fixed_eval_split": "validation",
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_layer_bank_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_layer_bank_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_health": "All values remain finite and the restored state reduces the normalized fit objective by at least 50 percent."
+  },
+  "authorization": {
+    "allowed": "Implement, test, preflight, and run exactly this zero-LM-update capacity oracle.",
+    "next_if_pass": "Derive a causal short-warmup gradient-conflict acquisition rule for the identical q=128 representation, MFU-gate it, and run 124M/0.5TPP before any 5TPP validation.",
+    "next_if_fail": "Reject selected complete-atom unsharing at q=128. Do not run a width sweep; use the per-layer residuals to determine whether the next family needs conditional routing or a different latent function.",
+    "not_allowed": [
+      "language-model training before every frozen gate passes",
+      "q=256 fallback or any width sweep",
+      "another trunk count or boundary sweep",
+      "model-size scaling"
+    ]
+  }
+}
