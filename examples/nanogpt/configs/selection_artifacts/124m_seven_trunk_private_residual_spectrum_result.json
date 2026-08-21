@@ -1,0 +1,61 @@
+{
+  "classification": "RANK64_PRIVATE_RESIDUAL_REJECTED",
+  "decision": {
+    "finding": "Rank-64 factors span a broad task-gradient tangent that transfers between token banks, but the actual private residual vectors are almost orthogonal across banks. This supports a reusable distributed subspace with data-dependent coefficients, not one stable static low-rank per-layer correction.",
+    "language_model_training_authorized": false,
+    "rank_or_factor_sweep_authorized": false,
+    "next_action": "Do not train a static rank-64/LoRA-like residual around the seven trunks. Test a same-budget distributed nonlinear field in which every late-layer GELU atom can choose or interpolate between learned complete atom banks; retain paired c_fc-row/c_proj-column semantics and require held-out output, JVP, and fixed-CE gates before LM training."
+  },
+  "execution": {
+    "gpu": 0,
+    "host": "PRO6",
+    "language_model_updates": 0,
+    "maximum_cuda_memory_bytes": 9295242752,
+    "targeted_tests": "9 passed",
+    "wall_seconds": 14.511743783950806
+  },
+  "gate_summary": {
+    "minimum_rank64_cross_bank_tangent_recovery": 0.4635019220319196,
+    "minimum_rank64_within_bank_recovery": 0.5381269446729057,
+    "minimum_shared_group_cross_bank_residual_cosine": 0.03632446980533261,
+    "passed": false,
+    "thresholds": {"cosine": 0.25, "transfer": 0.35, "within": 0.50}
+  },
+  "groups": {
+    "5_6_7": {
+      "bank_0_rank_recovery_32_64_128_256": [0.3991385125, 0.5381269447, 0.6934520155, 0.8453797382],
+      "bank_1_rank_recovery_32_64_128_256": [0.4030229661, 0.5411421069, 0.6949602266, 0.8461461235],
+      "cross_bank_residual_cosine": 0.0363244698,
+      "rank64_a_to_b_b_to_a_tangent_recovery": [0.4655524245, 0.4635019220],
+      "rank64_mean_left_right_subspace_overlap": [0.2192881095, 0.4593018691]
+    },
+    "8_9_10_11": {
+      "bank_0_rank_recovery_32_64_128_256": [0.4963467249, 0.6209582314, 0.7519580912, 0.8766583814],
+      "bank_1_rank_recovery_32_64_128_256": [0.5102912793, 0.6304114226, 0.7579105268, 0.8793629031],
+      "cross_bank_residual_cosine": 0.0486266817,
+      "rank64_a_to_b_b_to_a_tangent_recovery": [0.5632960568, 0.5501131367],
+      "rank64_mean_left_right_subspace_overlap": [0.2259848434, 0.4594822302]
+    }
+  },
+  "identity": {
+    "checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/analyze_seven_trunk_private_residual_spectrum.py",
+    "entrypoint_sha256": "38047bbd3fdbe2df2b5800780096cace463524960c27a03737de825fc8bc3387",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_seven_trunk_private_residual_spectrum_plan.json",
+    "plan_sha256": "9548ddfa44b01efb185f0ae8c65a4717ed42c1619c034dac46660221cbe7c1cd",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_seven_trunk_private_residual_spectrum_20260821/result.json",
+      "sha256": "fd081319870fdf5adb6cb55ce66f05f8b984118eeb16e52cba7eede29f604a56"
+    },
+    "repository_commit": "c95b7c0dd"
+  },
+  "parameter_accounting": {
+    "cached_inference_extra_flops": 0,
+    "rank64_additional_private_parameters": 3440640,
+    "rank64_mlp_parameter_compression_ratio": 1.5506014974,
+    "rank64_mlp_parameter_saving_fraction": 0.3550889757,
+    "rank64_total_mlp_parameters": 36516864
+  },
+  "schema_version": "mai_seven_trunk_private_residual_spectrum_seal_v1"
+}
