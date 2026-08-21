@@ -192,6 +192,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_neighbor_candidates: int = 16
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
     block_fht_mlp_pair_vq_error_feedback: bool = False
+    block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2637,7 +2638,9 @@ class MLP(nn.Module):
                 ),
                 weight_std=0.02 / math.sqrt(2 * config.n_layer),
                 layer_id=layer_id,
-                fast_residual=False,
+                fast_residual=bool(
+                    config.block_fht_mlp_pair_vq_cproj_fast_residual
+                ),
                 error_feedback=bool(
                     config.block_fht_mlp_pair_vq_error_feedback
                 ),

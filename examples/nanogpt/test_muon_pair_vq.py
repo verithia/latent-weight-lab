@@ -263,3 +263,33 @@ def test_gpt_routes_complete_mlp_and_optimizer_through_pair_vq() -> None:
     optimizer.step()
     assert int(mlp.c_fc.optimizer_step) == 1
     assert int(mlp.c_proj.optimizer_step) == 1
+
+
+def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_mlp_pair_vq=True,
+            block_fht_mlp_pair_vq_error_feedback=True,
+            block_fht_mlp_pair_vq_cproj_fast_residual=True,
+        )
+    )
+    mlp = model.transformer.h[0].mlp
+    assert isinstance(mlp.c_proj, MuonPairVQLinear)
+    assert mlp.c_proj.stages == 1
+    assert mlp.c_proj.fast_residual is True
+    assert mlp.c_proj.error_feedback is True
+    pair_count = mlp.c_proj.element_count // mlp.c_proj.vector_length
+    assert mlp.c_proj.fast_codes.numel() == pair_count
+    assert mlp.c_proj.fast_levels.shape == (2, 16)
+    assert all(
+        value.numel() != mlp.c_proj.element_count
+        for value in model.state_dict().values()
+    )

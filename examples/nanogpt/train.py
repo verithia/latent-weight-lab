@@ -2220,6 +2220,11 @@ def parse_args() -> argparse.Namespace:
         and not namespace.block_fht_mlp_pair_vq
     ):
         raise ValueError("pair-coded feedback requires MLP pair VQ")
+    if (
+        namespace.block_fht_mlp_pair_vq_cproj_fast_residual
+        and not namespace.block_fht_mlp_pair_vq
+    ):
+        raise ValueError("pair-VQ c_proj fast residual requires MLP pair VQ")
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
