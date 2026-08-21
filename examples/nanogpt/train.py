@@ -2386,6 +2386,16 @@ def parse_args() -> argparse.Namespace:
             "stochastic fast FHT block size must be zero or a power of two "
             "with stochastic fast retraction enabled"
         )
+    if bool(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels",
+            False,
+        )
+    ) and not stochastic_fast_fht_block_size:
+        raise ValueError(
+            "uniform stochastic fast levels require a nonzero FHT block size"
+        )
     if namespace.block_fht_mlp_pair_vq_feedback_output_group_size < 0:
         raise ValueError("pair-VQ feedback output group size must be nonnegative")
     residual_probe_steps = tuple(
@@ -3123,6 +3133,13 @@ def pair_vq_model_kwargs(
                 namespace,
                 "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size",
                 0,
+            )
+        ),
+        "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels": bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels",
+                False,
             )
         ),
         "block_fht_mlp_pair_vq_feedback_codec": str(

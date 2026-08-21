@@ -44,6 +44,7 @@ def make_module(
     fast_residual: bool = False,
     stochastic_fast_retraction: bool = False,
     stochastic_fast_fht_block_size: int = 0,
+    stochastic_fast_uniform_levels: bool = False,
     error_feedback: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
@@ -62,6 +63,7 @@ def make_module(
         fast_residual=fast_residual,
         stochastic_fast_retraction=stochastic_fast_retraction,
         stochastic_fast_fht_block_size=stochastic_fast_fht_block_size,
+        stochastic_fast_uniform_levels=stochastic_fast_uniform_levels,
         error_feedback=error_feedback,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
@@ -165,6 +167,44 @@ def test_stochastic_fast_fht_retraction_roundtrips_and_keeps_byte_accounting() -
     assert transformed.persistent_codec_bytes == before
     torch.testing.assert_close(
         transformed.decode_weight(), transformed.weight, rtol=0.0, atol=0.0
+    )
+
+
+def test_uniform_stochastic_levels_are_bracketed_and_reduce_tail_variance() -> None:
+    torch.manual_seed(1913)
+    values = torch.randn(32768, 2)
+    values[0] = torch.tensor([-8.0, 9.0])
+    values[1] = torch.tensor([7.0, -10.0])
+    lloyd_levels = torch.zeros(2, 16)
+    uniform_levels = torch.zeros(2, 16)
+    lloyd_codes = torch.zeros(values.shape[0], dtype=torch.uint8)
+    uniform_codes = torch.zeros_like(lloyd_codes)
+    _, lloyd = _fit_stochastic_cartesian_pair_codec_(
+        values, lloyd_levels, lloyd_codes, seed=1917
+    )
+    _, uniform = _fit_stochastic_cartesian_pair_codec_(
+        values,
+        uniform_levels,
+        uniform_codes,
+        seed=1917,
+        uniform_levels=True,
+    )
+    assert uniform["stochastic_fast_expected_bias_recovery"] > 0.999999
+    assert uniform["stochastic_fast_boundary_clipped_values"] == 0
+    assert uniform["stochastic_fast_uniform_levels"] == 1
+    assert (
+        uniform["stochastic_fast_sampling_variance_ratio"]
+        < lloyd["stochastic_fast_sampling_variance_ratio"]
+    )
+    expected_steps = (
+        values.amax(dim=0) - values.amin(dim=0)
+    ) / 15.0
+    torch.testing.assert_close(
+        uniform_levels[:, 1] - uniform_levels[:, 0], expected_steps
+    )
+    torch.testing.assert_close(
+        uniform_levels[:, 1:] - uniform_levels[:, :-1],
+        expected_steps[:, None].expand(-1, 15),
     )
 
 
@@ -1436,6 +1476,7 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
             block_fht_mlp_pair_vq_cproj_fast_residual=True,
             block_fht_mlp_pair_vq_stochastic_fast_retraction=True,
             block_fht_mlp_pair_vq_stochastic_fast_fht_block_size=8,
+            block_fht_mlp_pair_vq_stochastic_fast_uniform_levels=True,
             block_fht_mlp_pair_vq_feedback_codec="cartesian4x4",
             block_fht_mlp_pair_vq_feedback_output_group_size=2,
         )
@@ -1448,6 +1489,8 @@ def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
     assert mlp.c_fc.stochastic_fast_retraction is True
     assert mlp.c_proj.stochastic_fast_fht_block_size == 8
     assert mlp.c_fc.stochastic_fast_fht_block_size == 8
+    assert mlp.c_proj.stochastic_fast_uniform_levels is True
+    assert mlp.c_fc.stochastic_fast_uniform_levels is True
     assert mlp.c_proj.error_feedback is True
     assert mlp.c_proj.feedback_output_group_size == 2
     assert mlp.c_fc.feedback_output_group_size == 2
@@ -1508,6 +1551,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         block_fht_mlp_pair_vq_cproj_fast_residual=True,
         block_fht_mlp_pair_vq_stochastic_fast_retraction=False,
         block_fht_mlp_pair_vq_stochastic_fast_fht_block_size=0,
+        block_fht_mlp_pair_vq_stochastic_fast_uniform_levels=False,
         block_fht_mlp_pair_vq_feedback_codec="polar32x8",
         block_fht_mlp_pair_vq_feedback_output_group_size=0,
     )
@@ -1521,6 +1565,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
         "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
         "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": 0,
+        "block_fht_mlp_pair_vq_stochastic_fast_uniform_levels": False,
         "block_fht_mlp_pair_vq_feedback_codec": "polar32x8",
         "block_fht_mlp_pair_vq_feedback_output_group_size": 0,
         "block_fht_mlp_pair_vq_feedback_residual_probe_steps": (),

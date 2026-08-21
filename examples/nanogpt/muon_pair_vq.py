@@ -133,12 +133,14 @@ def _fit_stochastic_cartesian_pair_codec_(
     codes: torch.Tensor,
     *,
     seed: int,
+    uniform_levels: bool = False,
 ) -> tuple[int, dict[str, float]]:
     """Fit Cartesian levels, then round each coordinate without local bias."""
     if vectors.ndim != 2 or vectors.shape[1] != 2:
         raise ValueError("Cartesian pair values must have shape (pairs, 2)")
     old_codes = codes.clone()
-    _fit_cartesian_pair_codec_(vectors, levels, codes)
+    if not uniform_levels:
+        _fit_cartesian_pair_codec_(vectors, levels, codes)
     generator = torch.Generator(device=vectors.device)
     generator.manual_seed(int(seed) % (2**63 - 1))
     assignments = []
@@ -147,7 +149,15 @@ def _fit_stochastic_cartesian_pair_codec_(
     boundary_clipped_values = 0
     for coordinate in range(2):
         values = vectors[:, coordinate].float()
-        ordered = levels[coordinate].sort().values
+        if uniform_levels:
+            support_min = values.amin()
+            support_max = values.amax()
+            fractions = torch.arange(
+                16, device=values.device, dtype=torch.float32
+            ).div_(15.0)
+            ordered = support_min + fractions * (support_max - support_min)
+        else:
+            ordered = levels[coordinate].sort().values
         # Lloyd centroids sit strictly inside the observed range.  Leaving
         # those centroids as the outer stochastic levels silently clips every
         # tail request and defeats the promised unbiased local retraction.
@@ -202,6 +212,7 @@ def _fit_stochastic_cartesian_pair_codec_(
             sampling_variance / max(target_energy, 1e-30)
         ),
         "stochastic_fast_boundary_clipped_values": boundary_clipped_values,
+        "stochastic_fast_uniform_levels": int(uniform_levels),
     }
 
 
@@ -2108,6 +2119,7 @@ class MuonPairVQLinear(nn.Module):
         fast_residual: bool = False,
         stochastic_fast_retraction: bool = False,
         stochastic_fast_fht_block_size: int = 0,
+        stochastic_fast_uniform_levels: bool = False,
         error_feedback: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
@@ -2134,6 +2146,9 @@ class MuonPairVQLinear(nn.Module):
         self.stochastic_fast_retraction = bool(stochastic_fast_retraction)
         self.stochastic_fast_fht_block_size = int(
             stochastic_fast_fht_block_size
+        )
+        self.stochastic_fast_uniform_levels = bool(
+            stochastic_fast_uniform_levels
         )
         self.base_seed = int(base_seed)
         self.error_feedback = bool(error_feedback)
@@ -2197,6 +2212,14 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError(
                 "stochastic fast FHT block size requires stochastic retraction "
                 "and must be a power-of-two divisor of the element count"
+            )
+        if self.stochastic_fast_uniform_levels and (
+            not self.stochastic_fast_retraction
+            or not self.stochastic_fast_fht_block_size
+        ):
+            raise ValueError(
+                "uniform stochastic levels require FHT-preconditioned "
+                "stochastic fast retraction"
             )
         if self.feedback_output_group_size < 0:
             raise ValueError("feedback output group size must be nonnegative")
@@ -2981,6 +3004,7 @@ class MuonPairVQLinear(nn.Module):
                     + 104729 * int(self.optimizer_step)
                     + 1000003
                 ),
+                uniform_levels=self.stochastic_fast_uniform_levels,
             )
             diagnostics["stochastic_fast_fht_block_size"] = (
                 self.stochastic_fast_fht_block_size
