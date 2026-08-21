@@ -1,0 +1,116 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_polar_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_WEIGHT_CHART_CONSERVATION_FAIL_POLAR_8BIT_CARRY_RATE_DISTORTION",
+  "passed": false,
+  "decision": {
+    "matched_endpoint_authorized": false,
+    "larger_model_or_horizon_authorized": false,
+    "bit_budget_or_learning_rate_sweep_authorized": false,
+    "successful_component": "The rate-matched polar codec improves early and late carry recovery over Cartesian coding while both repaired weight charts and the systems gates pass.",
+    "failed_component": "The frozen step-8 carry-code gate remains below threshold: 0.951324 aggregate versus 0.98 required and 0.944030 on the worst matrix versus 0.95 required.",
+    "next_authorized_work": "Perform rate-distortion analysis at the same one-byte-per-pair budget, then test a distribution-adaptive two-stage 2D residual vector quantizer rather than increasing precision or scaling the model.",
+    "reason": "The Gaussian two-dimensional rate-distortion bound at eight bits is approximately 0.0039 relative MSE, far below the observed 0.0487. The byte rate is not yet the binding limit; the fixed angle/shared-radius product code is inefficient for the empirical residual distribution."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_polar_sigma_delta_plan.json",
+    "plan_sha256": "73188591cab7783fa209afb3cb6551a9b185b67929462bc7fe8c3894c0a5d41d",
+    "gate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_polar_sigmadelta_gate160.json",
+    "gate_config_sha256": "1ad3cc0c56f457f331059a99ff9ed4fa1b6da7adcea9b40f75c7aa36951c61d1",
+    "execution_git_commit": "a710ec14984fd69c0882a20fbefb76ec7e2ff0bc",
+    "implementation_base_commit": "fbf18234e03be1159f2021943945740ac674b3d7",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_polar_sigmadelta_gate160_mfu.json",
+    "mfu_certificate_sha256": "539ba8b3415c88c1758d06f90c87da3f2c8fd91ddf03952d93caadbe3695bcff",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8fd827281c03494249d9aa8e4b2f25a80726b16ec551e7c38ae1b69bb2764ad0",
+    "examples/nanogpt/train.py": "cc022e78f2865fc94dd9a8c077e8e4820fddd110f4114c7e332721105a7afdc2",
+    "examples/nanogpt/muon_pair_vq.py": "49d802db9e6226aa46c6d881489e744213eea4d907742e4788f32be718fb9f18"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_polar_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_polar_sigmadelta_gate160_20260821.log",
+    "log_sha256": "b2a2a4899bca6af133e896b9c28887c0c8afdbb6a165503ebc9e5aaccc1cabbc",
+    "log_bytes": 408214,
+    "started_at": "2026-08-21T22:27:38+08:00",
+    "finished_at": "2026-08-21T22:31:16+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9970,
+    "step160_validation_ce_diagnostic_only": 5.5305,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "rows": [
+      {"step": 0, "all": 0.997861, "c_fc": 0.997798, "c_proj": 0.998233, "feedback_codec": 0.910443},
+      {"step": 8, "all": 0.995713, "c_fc": 0.995151, "c_proj": 0.997640, "feedback_codec": 0.951324},
+      {"step": 40, "all": 0.989758, "c_fc": 0.989765, "c_proj": 0.989735, "feedback_codec": 0.983897},
+      {"step": 80, "all": 0.983428, "c_fc": 0.984796, "c_proj": 0.977617, "feedback_codec": 0.983676},
+      {"step": 120, "all": 0.982704, "c_fc": 0.983857, "c_proj": 0.977670, "feedback_codec": 0.985598},
+      {"step": 152, "all": 0.982281, "c_fc": 0.983208, "c_proj": 0.978206, "feedback_codec": 0.986381}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.982281,
+      "aggregate_conserved_required": 0.95,
+      "every_matrix_conserved_min": 0.971088,
+      "every_matrix_conserved_required": 0.8,
+      "aggregate_feedback_codec_min_on_gated_steps": 0.951324,
+      "aggregate_feedback_codec_required": 0.98,
+      "every_matrix_feedback_codec_min_on_gated_steps": 0.944030,
+      "every_matrix_feedback_codec_required": 0.95,
+      "maximum_feedback_to_weight_energy_ratio": 0.000112314,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "cproj_fast_code_changes_at_step152": 5239514,
+      "late_cproj_fast_code_changes_minimum": 1
+    }
+  },
+  "comparison_to_cartesian": {
+    "feedback_codec_delta_polar_minus_global_cartesian": {
+      "step8": 0.025177,
+      "step40": 0.010935,
+      "step80": 0.008618,
+      "step120": 0.006806,
+      "step152": 0.005451
+    },
+    "interpretation": "Joint direction allocation is causally useful, but the fixed angular/shared-radius factorization leaves excessive early distortion."
+  },
+  "rate_distortion": {
+    "observed_step8_relative_mse": 0.048676,
+    "idealized_two_dimensional_gaussian_eight_bit_relative_mse": 0.00390625,
+    "observed_to_ideal_ratio": 12.461,
+    "polar32_small_angle_component": 0.003213,
+    "inferred_remaining_component_if_additive": 0.045463,
+    "conclusion": "Eight bits per pair are theoretically sufficient; the next move is a learned joint vector codebook, not more bits."
+  },
+  "performance": {
+    "timed_samples": 28,
+    "tokens_per_second_mean": 195600.77,
+    "iteration_ms_mean": 1340.36,
+    "optimizer_ms_mean": 135.39,
+    "optimizer_fraction": 0.101008,
+    "model_tflops": 146.086,
+    "mfu_fraction": 0.34986,
+    "peak_mib_mean": 31608.94,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99242112,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.564442,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  },
+  "diagnosis": {
+    "weight_chart": "Causally repaired and held fixed.",
+    "rejected_hypothesis": "A fixed 32-angle by eight-shared-radius polar product code can meet the frozen carry gate at one byte per pair.",
+    "supported_hypothesis": "Residual-pair direction matters, but angle and magnitude are coupled and non-Gaussian enough that the fixed polar product partition wastes most of the available 256 states.",
+    "minimal_repair": "Use two learned four-bit 2D residual-vector stages. Their 16 plus 16 joint vector atoms yield 256 additive states, preserve one uint8 per pair, and require only 256 bytes of FP32 codebook metadata per matrix."
+  }
+}
