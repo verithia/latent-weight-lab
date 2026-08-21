@@ -1,0 +1,92 @@
+{
+  "schema_version": "mai_124m_pair_vq_stochastic_fast_retraction_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_exact_config_mfu_or_training",
+  "scientific_question": "Can an unbiased stochastic retraction through the existing fast Cartesian Pair-VQ codes repair compact-gradient path drift without adding a dense master weight, ambient residual, per-weight optimizer state, or inference FLOPs?",
+  "causal_basis": {
+    "dense_path_replay_result": {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_dense_pairvq_shadow_replay_result.json",
+      "sha256": "3aa6444f9c97aa5e971229936c646b22ad5edd5790c7ba95436294f3dba563b0",
+      "classification": "COMPACT_GRADIENT_PATH_DRIFT",
+      "dense_validation_ce": 5.360817909240723,
+      "projected_shadow_validation_ce": 5.364635467529297,
+      "projected_shadow_minus_dense_ce": 0.0038175582885742188,
+      "ordinary_compact_minus_dense_ce": 0.157960,
+      "absolute_weight_energy_recovery": 0.9993471138483508,
+      "instantaneous_requested_step_energy_recovery": 0.00011796712311495927,
+      "finding": "The production compact family tracks the exact dense trajectory inside the +0.05 CE gate and recovers 99.9347 percent of terminal weight energy, but its deterministic local projector recovers only 0.0118 percent of the final requested-step energy. Endpoint capacity and live tracking pass; the small-step tangent fails."
+    },
+    "matched_dense_parent": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+      "config_sha256": "0b27fd338b03532427a646a555c7ef0ce2693c3327afb86a7cbeb80225c1a7db",
+      "historical_validation_ce": 5.3610
+    }
+  },
+  "theory": {
+    "measured_defect": "Deterministic nearest-cell projection is piecewise constant in each fast-code coordinate. Its Jacobian is zero away from cell boundaries, so late Muon steps can change the desired ambient weight while leaving the decoded compact state unchanged.",
+    "registered_retraction": "For adjacent ordered levels a_i <= x <= a_(i+1), emit a_(i+1) with probability p=(x-a_i)/(a_(i+1)-a_i), otherwise emit a_i. Apply this independently to both coordinates of each existing uint8 fast pair code after the same learned-level update.",
+    "unbiasedness": "E[q(x) | x] = p*a_(i+1) + (1-p)*a_i = x for requests inside the learned level range. Clipped out-of-range requests retain the existing boundary behavior.",
+    "path_hypothesis": "The stochastic decoded step is noisy per update but has the requested local tangent in expectation. Error feedback and the existing fast residual integrate this zero-mean noise over time, which directly targets the observed gradient-path drift without changing representational capacity.",
+    "resume_identity": "Every module derives its draw seed from the registered Pair-VQ module seed and optimizer step. Same seed, state, and step reproduce exactly; no persistent RNG tensor is stored.",
+    "falsifier": "If the endpoint remains more than +0.05 CE behind the matched parent despite expected retraction bias recovery >=0.999, unbiased local transport alone is insufficient; the next theory must address stochastic variance or functional-gradient estimation, not add codebook bits or scale the model."
+  },
+  "registered_run": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fast_retraction_0p5tpp_lr24e4.json",
+    "config_sha256": "bbd8b082bcb3b6d6d4935e2e84bc0b3f23ee8349a34eaace3f36828ece90fc2f",
+    "implementation_commit": "0806e1115104bfa74e5fe09ecc02e879d1b17f52",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "updates": 238,
+    "evaluation_steps": [0, 60, 120, 180, 238],
+    "comparison_parent_validation_ce": 5.3610
+  },
+  "implementation": {
+    "pair_vq_source_sha256": "b896ea6a9ba789875b3c2652f3fd6714648424ac947fdfdf6dee9c1d09526c6a",
+    "model_source_sha256": "0bc53118cd360404773387398b00992d7c7971a0dc8e580a0120ce06c9f99717",
+    "train_source_sha256": "34129e0b509b233e0f294b1818cfc18fd39d030329ac311c7bb25df6c2661b49",
+    "test_source_sha256": "98467d887a8a010f11b4fac18e08582e2f80eb3fdfbbcceb54acb80b751f0789",
+    "mfu_preflight_source_sha256": "e16fb71ff369e303ed8124860a9d34c570f26b0bc025ffd01511b14fd4c091e7",
+    "required_tests_passed": 47,
+    "required_invariants": [
+      "same registered seed, optimizer step, levels, and requested vectors produce identical codes",
+      "empirical sampling mean converges to the requested sub-cell coordinate",
+      "stochastic mode is rejected unless the existing fast residual is active",
+      "byte accounting is identical to the deterministic compact endpoint",
+      "legacy deterministic Pair-VQ behavior is unchanged when the flag is false"
+    ]
+  },
+  "storage_and_compute": {
+    "persistent_mlp_training_matrix_bytes": 157500864,
+    "compression_vs_dense_fp32_weight_plus_muon_state": 2.87608,
+    "additional_persistent_bytes_vs_registered_compact_parent": 0,
+    "additional_inference_parameters": 0,
+    "additional_inference_flops": 0,
+    "training_overhead": "Two uniform random draws and interval interpolation per fast-code vector at each existing code refresh; no additional dense decode, optimizer tensor, or forward operator.",
+    "checkpoint_or_trajectory_tensors": false
+  },
+  "frozen_gates": {
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "all_losses_finite": true,
+    "maximum_terminal_validation_ce": 5.4110,
+    "maximum_terminal_candidate_minus_parent_ce": 0.05,
+    "minimum_stochastic_expected_bias_recovery": 0.999,
+    "persistent_matrix_bytes_must_equal": 157500864
+  },
+  "decision_rule": {
+    "pass": "If terminal fixed-window CE <=5.4110 and the expected-bias and storage gates pass, stochastic fast retraction closes the smallest-rung compact full-MLP endpoint and may be validated at 5 TPP before any larger width.",
+    "loss_fail_bias_pass": "Reject unbiasedness alone as sufficient. Quantify accumulated sampling variance and test one theory-selected variance-controlled compact estimator; do not sweep learning rates, bits, or model widths.",
+    "bias_fail": "Invalidate the implementation and repair the stochastic interval/clipping logic before interpreting CE.",
+    "mfu_fail": "Optimize the exact stochastic retraction implementation and repeat only the foreground MFU gate; scientific training remains forbidden.",
+    "no_automatic_scale_up": true,
+    "no_hyperparameter_sweep": true
+  },
+  "operations": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "Foreground-poll one standard exact-config real-training MFU gate with one warmup and eight timed updates; no watchdog or callback.",
+    "scientific_run": "Expected above five minutes and below two hours. Launch only after the gate passes, with one idempotent terminal/error-only @Codex watchdog and no progress or healthy-heartbeat callbacks.",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "terminal_action": "Verify terminal artifacts and fixed-checkpoint comparison, seal hashes and gate outcomes in the active project note, then continue only with the causally authorized compact full-MLP successor.",
+    "storage": "save_checkpoint=false; retain only config, plan, MFU certificate/log, training log/status/provenance, compact terminal result, and hashes."
+  }
+}
