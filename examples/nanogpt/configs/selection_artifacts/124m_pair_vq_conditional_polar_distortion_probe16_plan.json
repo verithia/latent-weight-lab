@@ -1,0 +1,34 @@
+{
+  "schema_version": "mai_pair_vq_conditional_polar_distortion_probe16_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "measurement_preregistered_before_execution_or_results",
+  "causal_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar_sigma_delta_gate160_result.json",
+  "causal_parent_sha256": "d72e822f2046a28ea99e0ad7bb00233708ad839da61cf669272931e8a1f680f7",
+  "question": "Within the failed 32-angle by eight-conditional-radius carry code, is the remaining early distortion dominated by angular quantization, radial quantization, or under-utilization of the 256 states?",
+  "method": {
+    "single_change": "Add nonpersistent measurement at refresh steps 0 and 8; keep model, data, seed, optimizer, and representation identical to the rejected gate.",
+    "orthogonal_decomposition": "centered target = projected radius times selected fixed direction + perpendicular residual; total squared codec error is angular error plus radial-level error.",
+    "state_usage": "Report joint, angular, and conditional-radius entropies, active symbols, top-radius occupancy/energy, angle-conditioned radial RMS variation, and maximum-radius-to-RMS ratio.",
+    "persistent_state_change": "none",
+    "training_decision_value": "measurement only; loss is not an endpoint comparison"
+  },
+  "decision_policy": {
+    "radial_dominated": "If radial error is at least 70% of codec error, authorize a rate-matched 16-angle by 16-conditional-radius codec; preserve one uint8 per pair.",
+    "angular_dominated": "If angular error is at least 70% of codec error, authorize a rate-matched 64-angle by four-conditional-radius codec.",
+    "mixed_well_occupied": "If neither component dominates and joint entropy is high, stop product-code bit reallocations and design a one-byte non-product quantizer from the measured source geometry.",
+    "under_occupied": "If joint entropy or active-state use is low, repair initialization or assignment before changing the representation family.",
+    "forbidden": [
+      "matched endpoint",
+      "larger model or horizon",
+      "higher bit rate",
+      "learning-rate sweep"
+    ]
+  },
+  "execution": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_distortion_probe16.json",
+    "expected_duration": "under one minute on PRO6; foreground-polled",
+    "exact_config_mfu_preflight_required": true,
+    "minimum_mfu_fraction": 0.20,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  }
+}
