@@ -183,7 +183,12 @@ class TwoBankAtomwiseMLP(nn.Module):
     def weights(self, layer: int) -> tuple[Tensor, Tensor]:
         layer = int(layer)
         if layer < 5:
-            return self.basis_fc[layer], self.basis_proj[layer]
+            # The coefficients-only optimizer may draw a minibatch containing
+            # only singleton layers.  Preserve an exact-zero graph edge so
+            # backward remains defined without giving those coefficients a
+            # spurious gradient or changing the singleton function.
+            zero = (self.alpha_fc.sum() + self.alpha_proj.sum()) * 0.0
+            return self.basis_fc[layer] + zero, self.basis_proj[layer] + zero
         offset = layer - 5
         a_fc = self.alpha_fc[offset][:, None]
         a_proj = self.alpha_proj[offset][None, :]

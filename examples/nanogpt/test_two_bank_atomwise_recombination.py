@@ -87,6 +87,17 @@ def test_coefficients_only_freezes_banks_and_gains() -> None:
     assert not module.pre_gain.requires_grad
 
 
+def test_coefficients_only_early_minibatch_has_zero_defined_gradient() -> None:
+    module = family()
+    module.set_trainable(coefficients_only=True)
+    loss = module.forward_layer(0, torch.randn(3, 4)).square().mean()
+    loss.backward()
+    assert module.alpha_fc.grad is not None
+    assert module.alpha_proj.grad is not None
+    assert torch.count_nonzero(module.alpha_fc.grad) == 0
+    assert torch.count_nonzero(module.alpha_proj.grad) == 0
+
+
 class FakeMLP(nn.Module):
     def __init__(self, width: int, hidden: int, seed: int) -> None:
         super().__init__()
