@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_pair_vq_axisadapt_source_probe9_invalid_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_invalid_acquisition",
+  "classification": "INVALID_KLT_NUMERICAL_GEOMETRY",
+  "decision": "Do not interpret or select either KLT arm. Repair reduced-precision transform geometry, preregister a v2 acquisition, and rerun the same frozen scientific question. The valid FHT-axis comparison may be retained as evidence that axis-private scalar levels are insufficient.",
+  "provenance": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_axisadapt_source_probe9_plan.json",
+    "plan_sha256": "7e4df6840de3fd4cf36aa431d0ea669b5e6ff55c3214add35772ee286853ec78",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_axisadapt_source_probe9.json",
+    "config_sha256": "d9431591e40bd0952cc2769df48e9495896baab844674d3f3ae11158242ad1e1",
+    "implementation_commit": "b9f1a37282685291d645fa6738ed0916f843c565",
+    "preregistration_commit": "d6f5fd0b9e90bd20ed27a757d4fc7e6fd1c9ece3",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "certificate_sha256": "dbc0effe4f31a2f0b86f1e4a6e56ccf97a5ed2211f17b463eb034774e16386e5",
+    "log_sha256": "bf349b28c5dd76f1c6c7995d73e7e32c78153fe86add5c0534a6d6ab7a9168d8",
+    "tokens_per_second": 184465.1525,
+    "mfu_fraction": 0.3326366805,
+    "iter_ms": 1421.1,
+    "peak_mib": 31630.25
+  },
+  "scientific_run": {
+    "clean_exit": true,
+    "optimizer_steps": 9,
+    "wall_seconds": 19.88,
+    "diagnostic_records": 48,
+    "log_sha256": "a46037ff60ed50b53ca559acbb780c67e09361de4f834b0e5216e1cd2e3fe3cf",
+    "log_bytes": 164533
+  },
+  "valid_fht_evidence": {
+    "step0_fht_global": 0.9994911900,
+    "step0_fht_axis": 0.9994945418,
+    "step0_axis_gain": 0.0000033518,
+    "step8_fht_global": 0.9995450106,
+    "step8_fht_axis": 0.9995467927,
+    "step8_axis_gain": 0.0000017821,
+    "fht_axis_variance_cv_step0": 0.0092505577,
+    "fht_axis_variance_cv_step8": 0.0064824890,
+    "axis_private_passes_recovery_gate": false
+  },
+  "invalidity": {
+    "frozen_parseval_relative_error_max": 0.000001,
+    "observed_klt_parseval_max_step0": 0.00008087785,
+    "observed_klt_parseval_max_step8": 0.00010114115,
+    "cause": "Large FP32 CUDA KLT multiplications used reduced-precision matmul; the oracle then scored transformed-space error as if the measured basis were exactly orthogonal.",
+    "repair": "Disable TF32 during covariance/transform operations, QR-reorthogonalize the eigensystem, and score KLT reconstructions after inverse mapping to ambient source coordinates."
+  }
+}

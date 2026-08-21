@@ -1045,9 +1045,18 @@ def _block_gain_axis_adaptation_counterfactual(
     )
     center = source.mean(dim=0, keepdim=True)
     centered = source - center
-    covariance = centered.T @ centered / max(centered.shape[0], 1)
-    _eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
-    klt = centered @ eigenvectors
+    # This is a geometry oracle, so TF32 roundoff must not masquerade as KLT
+    # distortion.  Re-orthogonalize the eigensystem and score decoded KLT
+    # vectors after mapping them back to the ambient source coordinates.
+    previous_allow_tf32 = torch.backends.cuda.matmul.allow_tf32
+    torch.backends.cuda.matmul.allow_tf32 = False
+    try:
+        covariance = centered.T @ centered / max(centered.shape[0], 1)
+        _eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
+        eigenvectors, _upper = torch.linalg.qr(eigenvectors)
+        klt = centered @ eigenvectors
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = previous_allow_tf32
 
     output: dict[str, float | int] = {
         "physical_bits_per_weight": float(
@@ -1073,7 +1082,16 @@ def _block_gain_axis_adaptation_counterfactual(
         decoded, diagnostics = quantize(
             transformed, axis_private=axis_private
         )
-        error_energy = (transformed - decoded).square().sum()
+        if name.startswith("klt"):
+            previous_allow_tf32 = torch.backends.cuda.matmul.allow_tf32
+            torch.backends.cuda.matmul.allow_tf32 = False
+            try:
+                reconstructed = decoded @ eigenvectors.T + center
+            finally:
+                torch.backends.cuda.matmul.allow_tf32 = previous_allow_tf32
+            error_energy = (source - reconstructed).square().sum()
+        else:
+            error_energy = (transformed - decoded).square().sum()
         output[f"{name}_full_recovery"] = float(
             1.0 - error_energy / source_energy
         )
