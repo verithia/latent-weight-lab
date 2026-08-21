@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_pair_vq_axisadapt_source_probe9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Is the remaining q7 transform-lattice distortion caused by sharing one scalar codebook across unequal axes, by fixed-FHT covariance-gauge mismatch, or by the scalar cell itself?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_gainlattice_source_probe9_result.json",
+    "result_sha256": "b47987175a8ea6a889cc15829a93e618cd8ed66a728a303d106941a0f4e9df94",
+    "classification": "NO_INTEGER_RATE_SCALAR_TRANSFORM_LATTICE_WINNER",
+    "best_candidate": "B32_q7",
+    "step0_recovery": 0.999485021998728,
+    "step8_recovery": 0.9995466326677831,
+    "required_step0_distortion_improvement": 2.059912,
+    "reason": "The best compact scalar lattice has healthy occupancy but approximately twice the permitted distortion. Pure vector-cell shaping has an asymptotic gain ceiling below that factor, so source-axis and transform-gauge waste must be measured first."
+  },
+  "theory": {
+    "scalar_cell_to_sphere_shaping_gain_ceiling": 1.423289,
+    "required_gain_exceeds_shaping_only_ceiling": true,
+    "block_size": 32,
+    "coordinate_bits": 7,
+    "physical_bits_per_weight": 7.25,
+    "parameter_saving_vs_int8_feedback": 0.09375,
+    "arms": {
+      "fht_global": "fresh exact reproduction control for the rejected B32_q7 global scalar codebook",
+      "fht_axis": "same signed FHT and rate, but one 128-level scalar codebook per transform axis",
+      "klt_global": "probe-only covariance KLT with one global scalar codebook",
+      "klt_axis": "probe-only covariance KLT with axis-private scalar codebooks"
+    },
+    "klt_definition": "center source blocks, eigendecompose C = E[(y-mean)(y-mean)^T] = U Lambda U^T, and quantize (y-mean)U",
+    "metadata_fp32_bytes_per_matrix": {
+      "fht_global": 1536,
+      "fht_axis": 17408,
+      "klt_global": 5760,
+      "klt_axis": 21632
+    },
+    "production_warning": "The dense KLT requires about 64 dense MACs per weight for forward plus inverse transforms. It is an oracle ceiling only and cannot be selected as the production transform."
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_axisadapt_source_probe9.json",
+    "config_sha256": "d9431591e40bd0952cc2769df48e9495896baab844674d3f3ae11158242ad1e1",
+    "implementation_commit": "b9f1a37282685291d645fa6738ed0916f843c565",
+    "focused_test_result": "32 passed",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "persistent_candidate_change": false,
+    "selection_endpoint": false
+  },
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "records_per_probe_step": 24,
+    "fht_global_weighted_reproduction_absolute_tolerance": 0.000002,
+    "fht_and_klt_parseval_relative_error_max": 0.000001,
+    "exact_config_mfu_min_fraction": 0.20
+  },
+  "frozen_candidate_gates": {
+    "full_feedback_energy_weighted_recovery_min_each_probe": 0.99975,
+    "full_feedback_every_matrix_recovery_min_each_probe": 0.999,
+    "coordinate_active_fraction_min_each_matrix": 0.75,
+    "coordinate_entropy_min_each_matrix": 6.0,
+    "gain_active_codes_min_each_matrix": 192,
+    "gain_entropy_bits_min_each_matrix": 6.5
+  },
+  "decision_tree": {
+    "fht_axis_passes": "Attribute the gap to axis heterogeneity. Implement axis-private levels with bit-packed q7 codes and require exact resume, MFU, and nine-update live direction gates.",
+    "only_klt_arm_passes": "Attribute the gap to transform-gauge mismatch. Fit a fast learned butterfly to the measured KLT and require a frozen basis-approximation/recovery oracle before production implementation.",
+    "no_adapted_arm_passes": "Close global and axis-private scalar transform cells at 7.25 bits/weight. Derive vector/trellis shaping with fractional-rate refinement; do not try more block sizes or integer-bit sweeps.",
+    "multiple_pass": "Prefer fht_axis over any KLT arm because it preserves the fixed fast transform. KLT arms rank only the need for a learned transform.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight including all four attribution arms",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes; attach a persistent @Codex watchdog immediately only if observed runtime exceeds five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
