@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar_sigma_delta_plan_v1",
+  "recorded_at": "2026-08-21",
+  "status": "theory_preregistered_before_execution_or_results",
+  "scientific_question": "Does the remaining one-byte polar carry error come from the false independence assumption between update angle and magnitude?",
+  "causal_basis": {
+    "rejected_gate_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_rvq4x4_sigma_delta_gate160_result.json",
+    "rejected_gate_result_sha256": "224407ec90237ec4db702b5e1c4230b8d54ea7f6c25e54439dd35062fac8f9d4",
+    "observation": "Shared polar coding is the strongest tested one-byte carry topology but misses its step-8 codec gate; learned additive RVQ is worse because greedy alternating assignment does not stably occupy its nominal 256 sums.",
+    "mechanism": "Retain exact 32-way angular assignment, but condition the eight learned radial levels on the selected angular sector. This models p(r|phi) directly instead of imposing one global radial marginal.",
+    "rate_distortion_authorization": "Observed shared-polar distortion remains far above the idealized eight-bit two-dimensional rate-distortion floor, so topology and conditional allocation should be tested before increasing bit rate.",
+    "excluded_moves": [
+      "increase code bits",
+      "change weight charts",
+      "dense ambient carry",
+      "learning-rate or codebook-size sweep",
+      "larger model or horizon",
+      "endpoint before gate pass"
+    ]
+  },
+  "candidate": {
+    "name": "pair_vq_cproj_fast_residual_plus_conditional_polar32x8_sigma_delta",
+    "single_change": "Replace one shared eight-level polar radius table with eight independently fitted radii in each of 32 angular sectors.",
+    "decoder": "feedback = center + radius[angle, radial_code] * fixed_unit_direction[angle]",
+    "persistent_code": "one uint8 per weight pair, unchanged",
+    "metadata_per_matrix": "one FP32 32x8 radial table plus one FP32 two-vector center = 1032 bytes",
+    "assignment_cost": "one exact angular bin and one exact eight-way conditional radial assignment, followed by vectorized per-sector Lloyd reductions",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false,
+    "inference_change": "none; temporal carry is discarded"
+  },
+  "accounting": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99265920,
+    "dense_bf16_matrix_bytes": 113246208,
+    "dense_fp32_weight_plus_fp32_muon_bytes": 452984832,
+    "inference_model_state_reduction_x": 1.5982614397858232,
+    "training_state_reduction_x": 4.563346937196573,
+    "extra_dense_gemm_flops": 0,
+    "extra_codec_work": "fixed-angle projection, eight comparisons, and 256-bin radial centroid reductions per matrix per optimizer step; exact-host performance-gated"
+  },
+  "frozen_gate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_sigmadelta_gate160.json",
+    "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar_sigmadelta_gate160_mfu.json",
+    "optimizer_steps": 160,
+    "feedback_codec_gate_steps": [8, 40, 80, 120, 152],
+    "aggregate_conserved_requested_step_energy_recovery_min": 0.95,
+    "every_matrix_conserved_requested_step_energy_recovery_min": 0.8,
+    "aggregate_feedback_codec_energy_recovery_min": 0.98,
+    "every_matrix_feedback_codec_energy_recovery_min": 0.95,
+    "feedback_to_weight_energy_ratio_max": 0.01,
+    "late_cproj_fast_code_changes_min": 1,
+    "mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "expected_duration": "under five minutes on PRO6 and therefore foreground-polled; attach a persistent watchdog immediately if observed duration exceeds five minutes"
+  },
+  "decision_policy": {
+    "pass": "Authorize exactly one matched 124M/0.5TPP endpoint against the sealed QK-only dense-MLP parent. Do not scale up.",
+    "codec_fail": "Reject direction-conditioned radial allocation and measure empirical carry entropy, angular occupancy, and per-sector radial variance before another representation change.",
+    "systems_fail": "Optimize only the implementation of the same conditional-polar representation, then repeat the gate.",
+    "endpoint_fail_after_gate_pass": "Keep the complete representation fixed and localize objective mismatch from fixed-checkpoint loss and functional probes."
+  }
+}
