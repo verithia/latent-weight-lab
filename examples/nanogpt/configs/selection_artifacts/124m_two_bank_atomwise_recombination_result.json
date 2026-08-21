@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_two_bank_atomwise_recombination_seal_v1",
+  "classification": "TWO_BANK_ATOMWISE_RECOMBINATION_FAIL",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "repository_commit": "e33bdf8530a5cb2583b8432b07deeed0e2f34c04",
+    "targeted_tests": "8 passed",
+    "preflight_wall_seconds": 7.71,
+    "exact_wall_seconds": 43.3,
+    "result_reported_wall_seconds": 41.10510492324829,
+    "maximum_cuda_memory_bytes": 10974381568,
+    "language_model_updates": 0
+  },
+  "hashes": {
+    "plan_sha256": "76cd8b653161d7b5d49490671070bc4fa92bf4e357efc1868b44f2d3e86e69c3",
+    "raw_result_sha256": "6ecf4b143c2c5ccc82cf0ec51733e9570009b564442e69b8818f8f1746b97802",
+    "fitted_state_sha256": "094ab6faf6ed13d23615c2ed2130257916287e386fed7a2c3511fb2cdad02909",
+    "pairing_permutation_sha256": "950b73cd92da8b631d744b4d25f787234a7d933845e62015cc53ef34c475036b"
+  },
+  "family": {
+    "compact_parameters": 33119232,
+    "dense_mlp_parameters": 56623104,
+    "compression_ratio": 1.7096744272330953,
+    "parameter_saving_fraction": 0.4150933159722222,
+    "cached_token_time_extra_flops": 0,
+    "initial_endpoint_maximum_absolute_error": 4.172325134277344e-7
+  },
+  "pairing": {
+    "matched_similarity_mean": 0.09660414606332779,
+    "matched_similarity_minimum": 0.006781174335628748,
+    "matched_similarity_maximum": 0.33681583404541016,
+    "identity_similarity_mean": 0.0011934216599911451,
+    "fixed_point_fraction": 0.0006510416860692203
+  },
+  "optimization": {
+    "finite": true,
+    "initial_fit_total": 3.337563306093216,
+    "final_fit_total": 0.5230750367045403,
+    "objective_reduction_fraction": 0.8432763699943641,
+    "holdout_total": 1.3290078341960907,
+    "healthy": true
+  },
+  "functional_measurement": {
+    "mean_output_recovery": 0.5103275974591573,
+    "minimum_output_recovery": 0.18862968683242798,
+    "global_output_recovery": 0.54194071389453,
+    "mean_input_jvp_recovery": 0.1612701714038849,
+    "minimum_input_jvp_recovery": -0.29055583477020264,
+    "global_input_jvp_recovery": 0.19907657874346574,
+    "teacher_fixed_validation_cross_entropy": 3.674412250518799,
+    "candidate_fixed_validation_cross_entropy": 6.9602251052856445,
+    "fixed_validation_cross_entropy_gap": 3.2858128547668457
+  },
+  "coefficient_behavior": {
+    "c_fc_mean_absolute_endpoint_displacement_range": [
+      0.11290176957845688,
+      0.1394951045513153
+    ],
+    "c_proj_mean_absolute_endpoint_displacement_range": [
+      0.11887582391500473,
+      0.14129233360290527
+    ],
+    "finding": "Both matrix sides moved every layer only about 0.11-0.14 from its endpoint and retained one dominant layer-axis singular mode. Scalar chords between weakly aligned complete atoms cannot supply the required local derivative field."
+  },
+  "decision": {
+    "language_model_training_authorized": false,
+    "bank_count_or_matching_sweep_authorized": false,
+    "finding": "The family preserves the seven-trunk endpoint exactly and optimizes healthily, yet it fails fresh-bank output, JVP, and fixed-CE gates. The especially poor JVP recovery shows that interpolating between two complete-neuron endpoints crosses the wrong GELU boundary geometry rather than tracing the required layer-private chart.",
+    "next_action": "Test the preregistered full-rank two-sided residual-coordinate ceiling around the same seven-trunk endpoint: a layer-private input map before c_fc and output map after c_proj for late layers. Keep early singleton layers exact. Only if that ceiling passes may its maps be factorized into a fast compact transport."
+  }
+}
