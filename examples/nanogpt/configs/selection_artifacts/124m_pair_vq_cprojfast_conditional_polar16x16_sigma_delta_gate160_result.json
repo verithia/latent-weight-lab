@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_gate160_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_COMPACT_TEMPORAL_DIRECTION_GATE_AUTHORIZE_MATCHED_ENDPOINT",
+  "passed": true,
+  "decision": {
+    "matched_124m_0p5tpp_endpoint_authorized": true,
+    "larger_model_or_horizon_authorized": false,
+    "parameter_or_learning_rate_sweep_authorized": false,
+    "reason": "The same-byte 16-angle x 16-radius carry clears every frozen geometry and systems gate. Only one matched endpoint against the sealed QK-only dense-MLP parent is now authorized."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cprojfast_conditional_polar16x16_sigma_delta_plan.json",
+    "plan_sha256": "a4610bb02aaea480984ab31ed29d8b773ee46e2c308a3c696048c5553bd78500",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_gate160.json",
+    "config_sha256": "a97484a5e8e11684b55579996b1df268164edac681a24ef91128c1988ddfdb96",
+    "execution_git_commit": "d4d770f3418c4557c70a0ac73431996a0b0fec95",
+    "implementation_commit": "ccef655c63a59ffa0d69433cf5b6ae958359e62d",
+    "mfu_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_gate160_mfu.json",
+    "mfu_certificate_sha256": "732fb5efc0caebb336d470c2bd8521e7c1fddb972106d35d7a4e725a46efad50",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/model.py": "8fd827281c03494249d9aa8e4b2f25a80726b16ec551e7c38ae1b69bb2764ad0",
+    "examples/nanogpt/train.py": "4fb7567b4233137f17a9d17eef42e3063840c73df7eebf5e7eda70cb386a3b09",
+    "examples/nanogpt/muon_pair_vq.py": "11f278b7bffbf3d2d9116573af6272babdcfae5144b7c0f19c0010e020cf06df"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_gate160.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_cprojfast_condpolar16x16_sigmadelta_gate160_20260821.log",
+    "log_sha256": "109ae481624d7def819a58af8eda95f86c9e1bc38889dde6a2e3fb547c0e8052",
+    "log_bytes": 825411,
+    "finished_at": "2026-08-21T23:40:50+08:00",
+    "optimizer_steps": 160,
+    "initial_validation_ce": 10.9790,
+    "step160_validation_ce_diagnostic_only": 5.5293,
+    "checkpoint": null
+  },
+  "conservation_trajectory": {
+    "rows": [
+      {"step": 0, "all": 0.999625, "c_fc": 0.999613, "c_proj": 0.999696, "feedback_codec": 0.984293},
+      {"step": 8, "all": 0.998006, "c_fc": 0.997685, "c_proj": 0.999043, "feedback_codec": 0.984363},
+      {"step": 40, "all": 0.986564, "c_fc": 0.987096, "c_proj": 0.984816, "feedback_codec": 0.984347},
+      {"step": 80, "all": 0.977712, "c_fc": 0.980208, "c_proj": 0.965108, "feedback_codec": 0.983880},
+      {"step": 120, "all": 0.974177, "c_fc": 0.976839, "c_proj": 0.961294, "feedback_codec": 0.983988},
+      {"step": 152, "all": 0.970388, "c_fc": 0.973273, "c_proj": 0.956630, "feedback_codec": 0.984018}
+    ],
+    "gate_outcomes": {
+      "aggregate_conserved_min": 0.970388,
+      "aggregate_conserved_required": 0.95,
+      "every_matrix_conserved_min": 0.943945,
+      "every_matrix_conserved_required": 0.8,
+      "aggregate_feedback_codec_min_on_gated_steps": 0.983880,
+      "aggregate_feedback_codec_required": 0.98,
+      "every_matrix_feedback_codec_min_on_gated_steps": 0.982823,
+      "every_matrix_feedback_codec_required": 0.95,
+      "maximum_feedback_to_weight_energy_ratio": 0.000214051,
+      "maximum_feedback_to_weight_energy_ratio_allowed": 0.01,
+      "cproj_fast_code_changes_at_step152": 5281655,
+      "late_cproj_fast_code_changes_minimum": 1
+    }
+  },
+  "comparison": {
+    "feedback_codec_delta_16x16_minus_32x8": {
+      "step8": 0.024823,
+      "step40": 0.000769,
+      "step80": 0.000572,
+      "step120": -0.001377,
+      "step152": -0.002253
+    },
+    "late_error_geometry": "After radial closure, angular error grows from 63.76% of codec distortion at step 8 to 75.46% at step 152. The codec remains above the frozen 0.98 recovery floor, so this is recorded for endpoint diagnosis rather than tuned here."
+  },
+  "performance": {
+    "timed_samples": 28,
+    "tokens_per_second_mean": 190739.48,
+    "iteration_ms_mean": 1374.71,
+    "optimizer_ms_mean": 170.15,
+    "optimizer_fraction": 0.123770,
+    "model_tflops": 142.455,
+    "mfu_fraction": 0.342158,
+    "peak_mib_mean": 31609.57,
+    "mfu_gate_passed": true,
+    "optimizer_fraction_gate_passed": true
+  },
+  "storage": {
+    "persistent_inference_matrix_bytes": 70855872,
+    "persistent_training_matrix_state_bytes": 99265920,
+    "inference_model_state_reduction_x_vs_dense_bf16": 1.598261,
+    "training_state_reduction_x_vs_dense_fp32_weight_plus_fp32_muon": 4.563347,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "dense_ambient_error_buffer": false
+  }
+}
