@@ -70,6 +70,7 @@ class MuonPairVQLinear(nn.Module):
         base_seed: int,
         weight_std: float,
         layer_id: int,
+        fast_residual: bool = False,
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -78,6 +79,7 @@ class MuonPairVQLinear(nn.Module):
         self.out_features = int(out_features)
         self.stages = int(stages)
         self.layer_id = int(layer_id)
+        self.fast_residual = bool(fast_residual)
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
         if self.in_features <= 0 or self.out_features <= 0:
@@ -113,6 +115,25 @@ class MuonPairVQLinear(nn.Module):
             residual = residual - decoded
         self.register_buffer("codebooks", torch.stack(codebooks), persistent=True)
         self.register_buffer("codes", torch.stack(codes), persistent=True)
+        pair_count = target_pairs.shape[0]
+        self.register_buffer(
+            "fast_levels",
+            (
+                torch.zeros(2, 16, dtype=torch.float32)
+                if self.fast_residual
+                else torch.empty(0, dtype=torch.float32)
+            ),
+            persistent=True,
+        )
+        self.register_buffer(
+            "fast_codes",
+            (
+                torch.zeros(pair_count, dtype=torch.uint8)
+                if self.fast_residual
+                else torch.empty(0, dtype=torch.uint8)
+            ),
+            persistent=True,
+        )
         self.register_buffer(
             "optimizer_step", torch.zeros((), dtype=torch.int64), persistent=True
         )
@@ -131,6 +152,8 @@ class MuonPairVQLinear(nn.Module):
         return (
             self.codebooks.numel() * self.codebooks.element_size()
             + self.codes.numel() * self.codes.element_size()
+            + self.fast_levels.numel() * self.fast_levels.element_size()
+            + self.fast_codes.numel() * self.fast_codes.element_size()
             + self.optimizer_step.numel() * self.optimizer_step.element_size()
         )
 
@@ -149,6 +172,7 @@ class MuonPairVQLinear(nn.Module):
         return {
             "elements": self.element_count,
             "stages": self.stages,
+            "fast_residual": self.fast_residual,
             "persistent_codec_bytes": self.persistent_codec_bytes,
             "compact_momentum_bytes": self.compact_momentum_bytes,
             "persistent_training_bytes": persistent_training,
@@ -175,7 +199,31 @@ class MuonPairVQLinear(nn.Module):
 
     def decode_weight(self) -> torch.Tensor:
         pairs = sum(self.decode_pairs(stage) for stage in range(self.stages))
+        if self.fast_residual:
+            fast_codes = self.fast_codes.long()
+            pairs = pairs + torch.stack(
+                (
+                    self.fast_levels[0].index_select(0, fast_codes // 16),
+                    self.fast_levels[1].index_select(0, fast_codes % 16),
+                ),
+                dim=1,
+            )
         return pairs.reshape(self.out_features, self.in_features).float()
+
+    def decode_slow_pairs(self) -> torch.Tensor:
+        return sum(self.decode_pairs(stage) for stage in range(self.stages))
+
+    def decode_fast_pairs(self) -> torch.Tensor:
+        if not self.fast_residual:
+            return torch.zeros_like(self.decode_pairs(0))
+        fast_codes = self.fast_codes.long()
+        return torch.stack(
+            (
+                self.fast_levels[0].index_select(0, fast_codes // 16),
+                self.fast_levels[1].index_select(0, fast_codes % 16),
+            ),
+            dim=1,
+        )
 
     @torch.no_grad()
     def rematerialize_weight_(self) -> None:
@@ -225,6 +273,52 @@ class MuonPairVQLinear(nn.Module):
         self.codebooks[stage, live] = accum[live] / counts[live, None]
 
     @torch.no_grad()
+    def _fit_fast_residual_(self, residual: torch.Tensor) -> int:
+        if not self.fast_residual:
+            return 0
+        old_codes = self.fast_codes.clone()
+        assignments = []
+        for coordinate in range(2):
+            values = residual[:, coordinate]
+            mean = values.mean()
+            std = values.std(unbiased=False)
+            old_levels = self.fast_levels[coordinate]
+            old_std = old_levels.std(unbiased=False)
+            if float(std) <= torch.finfo(torch.float32).tiny:
+                levels = torch.full_like(old_levels, mean)
+            elif float(old_std) > torch.finfo(torch.float32).tiny:
+                levels = (old_levels - old_levels.mean()) / old_std
+                levels = (levels * std + mean).sort().values
+            else:
+                probabilities = (
+                    torch.arange(16, device=values.device, dtype=torch.float32)
+                    + 0.5
+                ) / 16.0
+                levels = (
+                    math.sqrt(2.0)
+                    * torch.erfinv(2.0 * probabilities - 1.0)
+                    * std
+                    + mean
+                )
+            for _iteration in range(2):
+                midpoints = (levels[:-1] + levels[1:]) * 0.5
+                indices = torch.bucketize(values.contiguous(), midpoints)
+                sums = torch.zeros_like(levels)
+                sums.index_add_(0, indices, values)
+                counts = torch.bincount(indices, minlength=16)
+                live = counts > 0
+                levels[live] = sums[live] / counts[live]
+                levels = levels.sort().values
+            indices = torch.bucketize(
+                values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
+            )
+            self.fast_levels[coordinate].copy_(levels)
+            assignments.append(indices)
+        new_codes = (assignments[0] * 16 + assignments[1]).to(torch.uint8)
+        self.fast_codes.copy_(new_codes)
+        return int((new_codes != old_codes).sum())
+
+    @torch.no_grad()
     def project_requested_weight_(
         self,
         requested_weight: torch.Tensor,
@@ -236,12 +330,14 @@ class MuonPairVQLinear(nn.Module):
         old = self.weight.detach().float().clone()
         target_pairs = requested_weight.detach().float().reshape(-1, 2)
         code_changes = 0
+        fast_pairs = self.decode_fast_pairs()
         for stage in range(self.stages):
             other = sum(
                 self.decode_pairs(other_stage)
                 for other_stage in range(self.stages)
                 if other_stage != stage
             )
+            other = other + fast_pairs
             residual_target = target_pairs - other
             if refresh_codes:
                 code_changes += self._local_reassign_(
@@ -250,6 +346,12 @@ class MuonPairVQLinear(nn.Module):
             self._centroid_projection_(
                 stage=stage, requested_pairs=residual_target
             )
+        fast_code_changes = 0
+        if self.fast_residual:
+            fast_code_changes = self._fit_fast_residual_(
+                target_pairs - self.decode_slow_pairs()
+            )
+            code_changes += fast_code_changes
         self.rematerialize_weight_()
         requested_delta = requested_weight.float() - old
         achieved_delta = self.weight.float() - old
@@ -264,6 +366,7 @@ class MuonPairVQLinear(nn.Module):
         diagnostics: dict[str, float | int] = {
             "layer": self.layer_id,
             "stages": self.stages,
+            "fast_residual": int(self.fast_residual),
             "in_features": self.in_features,
             "out_features": self.out_features,
             "optimizer_step": int(self.optimizer_step),
@@ -273,6 +376,7 @@ class MuonPairVQLinear(nn.Module):
             - residual_energy / max(request_energy, 1e-30),
             "requested_update_cosine": cosine,
             "code_changes": code_changes,
+            "fast_code_changes": fast_code_changes,
             "refresh_codes": int(refresh_codes),
         }
         self._last_projection_diagnostics = diagnostics

@@ -14,7 +14,9 @@ from examples.nanogpt.muon_pair_vq import (
 )
 
 
-def make_module(*, stages: int = 2, seed: int = 101) -> MuonPairVQLinear:
+def make_module(
+    *, stages: int = 2, seed: int = 101, fast_residual: bool = False
+) -> MuonPairVQLinear:
     return MuonPairVQLinear(
         8,
         6,
@@ -23,6 +25,7 @@ def make_module(*, stages: int = 2, seed: int = 101) -> MuonPairVQLinear:
         base_seed=seed,
         weight_std=0.02,
         layer_id=3,
+        fast_residual=fast_residual,
         neighbor_candidates=16,
         code_refresh_interval=8,
     )
@@ -37,11 +40,29 @@ def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
 def test_codec_state_excludes_transient_dense_weight() -> None:
     module = make_module()
     state = module.state_dict()
-    assert set(state) == {"codebooks", "codes", "optimizer_step"}
+    assert set(state) == {
+        "codebooks",
+        "codes",
+        "fast_levels",
+        "fast_codes",
+        "optimizer_step",
+    }
     assert state["codebooks"].dtype == torch.float32
     assert state["codes"].dtype == torch.uint8
     assert "weight" not in state
     assert module.persistent_codec_bytes == 2 * 256 * 2 * 4 + 2 * 24 + 8
+
+
+def test_fast_residual_repairs_small_step_tangent() -> None:
+    torch.manual_seed(1019)
+    module = make_module(stages=2, fast_residual=True)
+    requested = module.weight + 1e-4 * torch.randn_like(module.weight)
+    diagnostics = module.project_requested_weight_(requested, refresh_codes=True)
+    assert diagnostics["requested_step_energy_recovery"] > 0.8
+    assert diagnostics["requested_update_cosine"] > 0.9
+    assert diagnostics["fast_code_changes"] > 0
+    assert module.fast_levels.shape == (2, 16)
+    assert module.fast_codes.numel() == module.element_count // 2
 
 
 def test_projection_moves_toward_request_and_refreshes_codes() -> None:
@@ -137,6 +158,8 @@ def test_gpt_routes_complete_mlp_and_optimizer_through_pair_vq() -> None:
     assert isinstance(mlp.c_proj, MuonPairVQLinear)
     assert mlp.c_fc.stages == 2
     assert mlp.c_proj.stages == 1
+    assert mlp.c_fc.fast_residual is True
+    assert mlp.c_proj.fast_residual is False
     stats = model.mlp_pair_vq_stats()
     assert stats["modules"] == 2
     assert stats["dense_master_weight"] == "disabled"

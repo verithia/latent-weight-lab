@@ -2397,6 +2397,7 @@ class MLP(nn.Module):
                 ),
                 weight_std=0.02,
                 layer_id=layer_id,
+                fast_residual=True,
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
@@ -2632,6 +2633,7 @@ class MLP(nn.Module):
                 ),
                 weight_std=0.02 / math.sqrt(2 * config.n_layer),
                 layer_id=layer_id,
+                fast_residual=False,
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
