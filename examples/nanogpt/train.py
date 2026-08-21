@@ -2259,14 +2259,21 @@ def parse_args() -> argparse.Namespace:
         raise ValueError("pair-VQ residual probe steps must be nonnegative")
     if any(iterations <= 0 for iterations in residual_probe_iterations):
         raise ValueError("pair-VQ residual probe Lloyd iterations must be positive")
-    if (residual_probe_steps or residual_probe_iterations) and not (
+    if residual_probe_steps and not (
         namespace.block_fht_mlp_pair_vq
         and namespace.block_fht_mlp_pair_vq_error_feedback
         and namespace.block_fht_mlp_pair_vq_feedback_codec
-        == "conditional_polar16x16_rvq2"
+        in ("conditional_polar16x16_rvq2", "free_vq256_rvq2")
     ):
         raise ValueError(
-            "pair-VQ residual probes require RVQ2 pair-coded error feedback"
+            "pair-VQ residual probes require supported two-stage error feedback"
+        )
+    if residual_probe_iterations and (
+        namespace.block_fht_mlp_pair_vq_feedback_codec
+        != "conditional_polar16x16_rvq2"
+    ):
+        raise ValueError(
+            "pair-VQ residual Lloyd probes require conditional-polar RVQ2"
         )
     if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
         "cartesian4x4",
@@ -2274,6 +2281,7 @@ def parse_args() -> argparse.Namespace:
         "conditional_polar32x8",
         "conditional_polar16x16",
         "conditional_polar16x16_rvq2",
+        "free_vq256_rvq2",
         "rvq4x4",
     ):
         raise ValueError("unknown pair-VQ feedback codec")
@@ -2294,6 +2302,7 @@ def parse_args() -> argparse.Namespace:
             "conditional_polar32x8",
             "conditional_polar16x16",
             "conditional_polar16x16_rvq2",
+            "free_vq256_rvq2",
             "rvq4x4",
         )
         and not (
@@ -2309,6 +2318,7 @@ def parse_args() -> argparse.Namespace:
             "conditional_polar32x8",
             "conditional_polar16x16",
             "conditional_polar16x16_rvq2",
+            "free_vq256_rvq2",
             "rvq4x4",
         )
         and namespace.block_fht_mlp_pair_vq_feedback_output_group_size

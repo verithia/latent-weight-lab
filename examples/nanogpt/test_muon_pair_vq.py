@@ -11,10 +11,12 @@ from examples.nanogpt.muon_pair_vq import (
     MuonPairVQLinear,
     _conditional_polar_pair_diagnostics,
     _decode_conditional_polar_pair_codec,
+    _decode_free_pair_vq_rvq2,
     _decode_residual_conditional_polar_pair_codec,
     _decode_polar_pair_codec,
     _decode_rvq_pair_codec,
     _fit_conditional_polar_pair_codec_,
+    _fit_free_pair_vq_rvq2_,
     _fit_residual_conditional_polar_pair_codec_,
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
@@ -81,6 +83,101 @@ def test_residual_conditional_polar_probe_reports_geometry_and_convergence() -> 
     assert diagnostics["feedback_residual_lloyd3_codec_energy_recovery"] > 0.0
     assert diagnostics["feedback_residual_lloyd6_codec_energy_recovery"] > 0.0
     assert diagnostics["feedback_residual_center_energy_ratio"] >= 0.0
+
+
+def test_free_pair_vq_rvq2_closes_gaussian_residual_with_free_directions() -> None:
+    torch.manual_seed(1703)
+    vectors = torch.randn(8192, 2)
+    codebooks = torch.zeros(2, 256, 2)
+    codes = torch.zeros(2, vectors.shape[0], dtype=torch.uint8)
+    _fit_free_pair_vq_rvq2_(
+        vectors,
+        codebooks,
+        codes,
+        neighbor_candidates=16,
+    )
+    decoded = _decode_free_pair_vq_rvq2(codebooks, codes)
+    recovery = 1.0 - float((vectors - decoded).square().sum()) / float(
+        vectors.square().sum()
+    )
+    coarse = codebooks[0].index_select(0, codes[0].long())
+    residual_target = vectors - coarse
+    residual = codebooks[1].index_select(0, codes[1].long())
+    residual_recovery = 1.0 - float(
+        (residual_target - residual).square().sum()
+    ) / float(residual_target.square().sum())
+    assert recovery > 0.999
+    assert residual_recovery > 0.985
+    assert int(codes[0].unique().numel()) > 200
+    assert int(codes[1].unique().numel()) > 200
+
+
+def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> None:
+    torch.manual_seed(1705)
+    module = make_module(
+        stages=1,
+        error_feedback=True,
+        feedback_codec="free_vq256_rvq2",
+        feedback_residual_probe_steps=(0,),
+    )
+    optimizer = make_optimizer(module)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    state = optimizer.state[module.weight]
+    assert state["feedback_levels"].shape == (2, 256, 2)
+    assert state["feedback_codes"].shape == (2, module.element_count // 2)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert "feedback_center" not in state
+    assert module.compact_feedback_bytes == module.element_count + 4096
+    assert diagnostics["feedback_residual_codec_energy_recovery"] > 0.98
+    assert diagnostics["feedback_exact_same_codebook_energy_recovery"] >= (
+        diagnostics["feedback_codec_energy_recovery"] - 1e-7
+    )
+    assert diagnostics["feedback_local_assignment_recovery_gap"] >= -1e-7
+
+
+def test_free_pair_vq_rvq2_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(1707)
+    module = make_module(
+        stages=1,
+        seed=1709,
+        error_feedback=True,
+        feedback_codec="free_vq256_rvq2",
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(
+        stages=1,
+        seed=1711,
+        error_feedback=True,
+        feedback_codec="free_vq256_rvq2",
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(
+        restored_state["feedback_codes"], original_state["feedback_codes"]
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
 
 
 def test_codec_state_excludes_transient_dense_weight() -> None:

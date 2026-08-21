@@ -562,6 +562,220 @@ def _residual_conditional_polar_diagnostics(
     return result
 
 
+def _decode_free_pair_vq_rvq2(
+    codebooks: torch.Tensor,
+    codes: torch.Tensor,
+) -> torch.Tensor:
+    """Decode two additive free 256-vector Euclidean pair codebooks."""
+    if tuple(codebooks.shape) != (2, 256, 2):
+        raise ValueError("free pair-RVQ codebooks must have shape (2, 256, 2)")
+    if codes.ndim != 2 or codes.shape[0] != 2:
+        raise ValueError("free pair-RVQ codes must have shape (2, pairs)")
+    return codebooks[0].index_select(0, codes[0].long()) + codebooks[
+        1
+    ].index_select(0, codes[1].long())
+
+
+@torch.no_grad()
+def _initialize_free_pair_codebook_(
+    vectors: torch.Tensor,
+    codebook: torch.Tensor,
+) -> None:
+    """Initialize a covariance-matched 256-point Gaussian spiral."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("free pair-VQ values must have shape (pairs, 2)")
+    if tuple(codebook.shape) != (256, 2):
+        raise ValueError("free pair-VQ codebook must have shape (256, 2)")
+    center = vectors.mean(dim=0)
+    centered = vectors - center
+    covariance = centered.T @ centered / max(vectors.shape[0], 1)
+    eigenvalues, eigenvectors = torch.linalg.eigh(covariance)
+    covariance_sqrt = (
+        eigenvectors
+        @ torch.diag(eigenvalues.clamp_min(1e-30).sqrt())
+        @ eigenvectors.T
+    )
+    indices = torch.arange(256, device=vectors.device, dtype=torch.float32)
+    probabilities = (indices + 0.5) / 256.0
+    # For a two-dimensional Gaussian, the high-rate optimum point density is
+    # proportional to sqrt(p), whose radial CDF is 1-exp(-r^2/4).
+    radii = torch.sqrt(-4.0 * torch.log1p(-probabilities))
+    golden_angle = math.pi * (3.0 - math.sqrt(5.0))
+    angles = indices * golden_angle
+    standard = torch.stack((radii * angles.cos(), radii * angles.sin()), dim=1)
+    codebook.copy_(center + standard @ covariance_sqrt.T)
+
+
+@torch.no_grad()
+def _transport_free_pair_codebook_(
+    target: torch.Tensor,
+    codebook: torch.Tensor,
+    codes: torch.Tensor,
+) -> None:
+    """Transport a warm codebook between target first and second moments."""
+    decoded = codebook.index_select(0, codes.long())
+    old_mean = decoded.mean(dim=0)
+    new_mean = target.mean(dim=0)
+    old_centered = decoded - old_mean
+    new_centered = target - new_mean
+    old_covariance = old_centered.T @ old_centered / max(decoded.shape[0], 1)
+    new_covariance = new_centered.T @ new_centered / max(target.shape[0], 1)
+    old_values, old_vectors = torch.linalg.eigh(old_covariance)
+    new_values, new_vectors = torch.linalg.eigh(new_covariance)
+    old_inverse_sqrt = (
+        old_vectors
+        @ torch.diag(old_values.clamp_min(1e-30).rsqrt())
+        @ old_vectors.T
+    )
+    new_sqrt = (
+        new_vectors
+        @ torch.diag(new_values.clamp_min(1e-30).sqrt())
+        @ new_vectors.T
+    )
+    codebook.copy_((codebook - old_mean) @ old_inverse_sqrt @ new_sqrt + new_mean)
+
+
+@torch.no_grad()
+def _free_pair_local_reassign(
+    vectors: torch.Tensor,
+    codebook: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    neighbor_candidates: int,
+) -> torch.Tensor:
+    if not 1 <= neighbor_candidates <= 256:
+        raise ValueError("free pair-VQ neighbor count must be in [1, 256]")
+    pairwise = torch.cdist(codebook, codebook).square()
+    neighbors = pairwise.topk(
+        neighbor_candidates, largest=False, dim=1
+    ).indices
+    parts = []
+    for start in range(0, vectors.shape[0], 65536):
+        stop = min(start + 65536, vectors.shape[0])
+        candidate_ids = neighbors.index_select(0, codes[start:stop].long())
+        candidates = codebook[candidate_ids]
+        distances = (vectors[start:stop, None, :] - candidates).square().sum(dim=2)
+        choices = distances.argmin(dim=1)
+        parts.append(candidate_ids.gather(1, choices[:, None]).squeeze(1))
+    return torch.cat(parts).to(torch.uint8)
+
+
+@torch.no_grad()
+def _free_pair_centroid_update_(
+    vectors: torch.Tensor,
+    codebook: torch.Tensor,
+    codes: torch.Tensor,
+) -> None:
+    assignments = codes.long()
+    sums = torch.zeros_like(codebook)
+    sums.index_add_(0, assignments, vectors)
+    counts = torch.bincount(assignments, minlength=256)
+    live = counts > 0
+    codebook[live] = sums[live] / counts[live, None]
+
+
+@torch.no_grad()
+def _fit_free_pair_vq_rvq2_(
+    vectors: torch.Tensor,
+    codebooks: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    neighbor_candidates: int,
+) -> int:
+    """Fit two free pair-code stages with exact initialization and local updates."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("free pair-RVQ values must have shape (pairs, 2)")
+    if tuple(codebooks.shape) != (2, 256, 2):
+        raise ValueError("free pair-RVQ codebooks must have shape (2, 256, 2)")
+    if codes.ndim != 2 or tuple(codes.shape) != (2, vectors.shape[0]):
+        raise ValueError("free pair-RVQ codes must have shape (2, pairs)")
+
+    old_codes = codes.clone()
+    residual = vectors
+    for stage in range(2):
+        codebook = codebooks[stage]
+        stage_codes = codes[stage]
+        initialized = bool(codebook.abs().sum() > 0)
+        if not initialized:
+            _initialize_free_pair_codebook_(residual, codebook)
+            for _iteration in range(3):
+                stage_codes.copy_(_nearest_codes_exact(residual, codebook))
+                _free_pair_centroid_update_(residual, codebook, stage_codes)
+        else:
+            _transport_free_pair_codebook_(residual, codebook, stage_codes)
+            for _iteration in range(2):
+                stage_codes.copy_(
+                    _free_pair_local_reassign(
+                        residual,
+                        codebook,
+                        stage_codes,
+                        neighbor_candidates=neighbor_candidates,
+                    )
+                )
+                _free_pair_centroid_update_(residual, codebook, stage_codes)
+        residual = residual - codebook.index_select(0, stage_codes.long())
+    return int((codes != old_codes).sum())
+
+
+@torch.no_grad()
+def _free_pair_vq_rvq2_diagnostics(
+    vectors: torch.Tensor,
+    codebooks: torch.Tensor,
+    codes: torch.Tensor,
+    *,
+    include_exact_assignment: bool = False,
+) -> dict[str, float | int]:
+    coarse = codebooks[0].index_select(0, codes[0].long())
+    residual_target = vectors - coarse
+    residual = codebooks[1].index_select(0, codes[1].long())
+    error = residual_target - residual
+    target_energy = vectors.square().sum().clamp_min(1e-30)
+    residual_target_energy = residual_target.square().sum().clamp_min(1e-30)
+    error_energy = error.square().sum()
+
+    def entropy_bits(assignments: torch.Tensor) -> float:
+        counts = torch.bincount(assignments.long(), minlength=256).to(torch.float32)
+        probabilities = counts[counts > 0] / counts.sum().clamp_min(1.0)
+        return float(-(probabilities * probabilities.log2()).sum())
+
+    result: dict[str, float | int] = {
+        "feedback_stage1_codec_energy_recovery": float(
+            1.0 - residual_target_energy / target_energy
+        ),
+        "feedback_residual_codec_energy_recovery": float(
+            1.0 - error_energy / residual_target_energy
+        ),
+        "feedback_codec_energy_recovery": float(1.0 - error_energy / target_energy),
+        "feedback_stage1_active_codes": int(codes[0].unique().numel()),
+        "feedback_residual_active_codes": int(codes[1].unique().numel()),
+        "feedback_stage1_code_entropy_bits": entropy_bits(codes[0]),
+        "feedback_residual_code_entropy_bits": entropy_bits(codes[1]),
+        "feedback_residual_target_energy": float(residual_target_energy),
+        "feedback_residual_quantization_energy": float(error_energy),
+    }
+    if include_exact_assignment:
+        exact_stage2_codes = _nearest_codes_exact(
+            residual_target, codebooks[1]
+        )
+        exact_residual = codebooks[1].index_select(
+            0, exact_stage2_codes.long()
+        )
+        exact_error_energy = (residual_target - exact_residual).square().sum()
+        exact_full_recovery = float(1.0 - exact_error_energy / target_energy)
+        result.update(
+            {
+                "feedback_exact_same_codebook_energy_recovery": exact_full_recovery,
+                "feedback_exact_same_codebook_residual_recovery": float(
+                    1.0 - exact_error_energy / residual_target_energy
+                ),
+                "feedback_local_assignment_recovery_gap": float(
+                    exact_full_recovery - result["feedback_codec_energy_recovery"]
+                ),
+            }
+        )
+    return result
+
+
 @torch.no_grad()
 def _conditional_polar_pair_diagnostics(
     vectors: torch.Tensor,
@@ -839,12 +1053,19 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError(
                 "feedback residual probe Lloyd iterations must be positive"
             )
-        if (
-            self.feedback_residual_probe_steps
-            or self.feedback_residual_probe_lloyd_iterations
-        ) and self.feedback_codec != "conditional_polar16x16_rvq2":
+        if self.feedback_residual_probe_steps and self.feedback_codec not in (
+            "conditional_polar16x16_rvq2",
+            "free_vq256_rvq2",
+        ):
             raise ValueError(
-                "feedback residual probes require conditional_polar16x16_rvq2"
+                "feedback residual probes require a supported two-stage codec"
+            )
+        if (
+            self.feedback_residual_probe_lloyd_iterations
+            and self.feedback_codec != "conditional_polar16x16_rvq2"
+        ):
+            raise ValueError(
+                "feedback residual Lloyd probes require conditional_polar16x16_rvq2"
             )
         if self.feedback_codec not in (
             "cartesian4x4",
@@ -852,6 +1073,7 @@ class MuonPairVQLinear(nn.Module):
             "conditional_polar32x8",
             "conditional_polar16x16",
             "conditional_polar16x16_rvq2",
+            "free_vq256_rvq2",
             "rvq4x4",
         ):
             raise ValueError("unknown pair-VQ feedback codec")
@@ -861,6 +1083,7 @@ class MuonPairVQLinear(nn.Module):
                 "conditional_polar32x8",
                 "conditional_polar16x16",
                 "conditional_polar16x16_rvq2",
+                "free_vq256_rvq2",
                 "rvq4x4",
             )
             and self.feedback_output_group_size != 0
@@ -961,6 +1184,8 @@ class MuonPairVQLinear(nn.Module):
             metadata_values = 256 + 2
         elif self.feedback_codec == "conditional_polar16x16_rvq2":
             metadata_values = 2 * (256 + 2)
+        elif self.feedback_codec == "free_vq256_rvq2":
+            metadata_values = 2 * 256 * 2
         elif self.feedback_codec == "rvq4x4":
             metadata_values = 2 * 16 * 2 + 2
         else:
@@ -969,7 +1194,10 @@ class MuonPairVQLinear(nn.Module):
             [], dtype=torch.float32
         ).element_size()
         code_stages = (
-            2 if self.feedback_codec == "conditional_polar16x16_rvq2" else 1
+            2
+            if self.feedback_codec
+            in ("conditional_polar16x16_rvq2", "free_vq256_rvq2")
+            else 1
         )
         return (
             code_stages
@@ -1002,6 +1230,8 @@ class MuonPairVQLinear(nn.Module):
             return (16, 16)
         if self.feedback_codec == "conditional_polar16x16_rvq2":
             return (2, 16, 16)
+        if self.feedback_codec == "free_vq256_rvq2":
+            return (2, 256, 2)
         if self.feedback_codec == "rvq4x4":
             return (2, 16, 2)
         if self.feedback_output_group_size == 0:
@@ -1046,6 +1276,8 @@ class MuonPairVQLinear(nn.Module):
             return _decode_residual_conditional_polar_pair_codec(
                 levels, center, codes
             )
+        if self.feedback_codec == "free_vq256_rvq2":
+            return _decode_free_pair_vq_rvq2(levels, codes)
         if self.feedback_codec == "rvq4x4":
             if center is None:
                 raise ValueError("RVQ pair feedback requires a center")
@@ -1086,6 +1318,13 @@ class MuonPairVQLinear(nn.Module):
                 )
             return _fit_residual_conditional_polar_pair_codec_(
                 vectors, levels, center, codes
+            )
+        if self.feedback_codec == "free_vq256_rvq2":
+            return _fit_free_pair_vq_rvq2_(
+                vectors,
+                levels,
+                codes,
+                neighbor_candidates=self.neighbor_candidates,
             )
         if self.feedback_codec == "rvq4x4":
             if center is None:
@@ -1146,10 +1385,18 @@ class MuonPairVQLinear(nn.Module):
                                 "conditional_polar16x16",
                             )
                             else (
-                                "two_uint8_residual_conditional_polar16x16_"
-                                "codes_per_weight_pair"
+                                (
+                                    "two_uint8_residual_conditional_polar16x16_"
+                                    "codes_per_weight_pair"
+                                    if self.feedback_codec
+                                    == "conditional_polar16x16_rvq2"
+                                    else "two_uint8_free_vq256_codes_per_weight_pair"
+                                )
                                 if self.feedback_codec
-                                == "conditional_polar16x16_rvq2"
+                                in (
+                                    "conditional_polar16x16_rvq2",
+                                    "free_vq256_rvq2",
+                                )
                                 else "uint8_rvq4x4_code_per_weight_pair"
                             )
                         )
@@ -1160,6 +1407,7 @@ class MuonPairVQLinear(nn.Module):
                         "conditional_polar32x8",
                         "conditional_polar16x16",
                         "conditional_polar16x16_rvq2",
+                        "free_vq256_rvq2",
                         "rvq4x4",
                     )
                     else (
@@ -1467,7 +1715,10 @@ class MuonPairVQ(torch.optim.Optimizer):
                         feedback_code_shape = (
                             (2, pair_count)
                             if module.feedback_codec
-                            == "conditional_polar16x16_rvq2"
+                            in (
+                                "conditional_polar16x16_rvq2",
+                                "free_vq256_rvq2",
+                            )
                             else (pair_count,)
                         )
                         state["feedback_codes"] = torch.zeros(
@@ -1577,6 +1828,22 @@ class MuonPairVQ(torch.optim.Optimizer):
                                     if probe
                                     else ()
                                 ),
+                            )
+                        )
+                    elif (
+                        refresh
+                        and module.feedback_codec == "free_vq256_rvq2"
+                    ):
+                        probe = (
+                            int(diagnostics["optimizer_step"])
+                            in module.feedback_residual_probe_steps
+                        )
+                        diagnostics.update(
+                            _free_pair_vq_rvq2_diagnostics(
+                                raw_feedback.reshape(-1, module.vector_length),
+                                state["feedback_levels"],
+                                state["feedback_codes"],
+                                include_exact_assignment=probe,
                             )
                         )
                 self._diagnostics.append(diagnostics)
