@@ -6,7 +6,7 @@
   "theory_plan_sha256": "d38a32c22c93e0dd7354cef356e2d3c7d67e473d0a2d270f4bd5b54f9b8d3931",
   "failed_endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_forward_visible_center_endpoint_result.json",
   "failed_endpoint_result_sha256": "036d270b55e25901e788057a396d87ae1326c2a14af26018a7e31c879f1947f6",
-  "implementation_commit": "pending",
+  "implementation_commit": "fe37f1b1763644259077d5af90508b3622774ef1",
   "entrypoint": "examples/nanogpt/train.py",
   "literal_command": "CUDA_VISIBLE_DEVICES=0 LD_LIBRARY_PATH=/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu TORCH_EXTENSIONS_DIR=/mnt/ssd-data/orj/MappingNetworks/.cache/torch_extensions_sm120_exactfamily TORCH_CUDA_ARCH_LIST=12.0 PYTHONPATH=. /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_optimizer_transition_oracle_0p5tpp_lr24e4.json",
   "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
