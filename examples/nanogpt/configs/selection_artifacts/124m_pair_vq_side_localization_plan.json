@@ -1,0 +1,56 @@
+{
+  "schema_version": "mai_pair_vq_side_localization_plan_v1",
+  "status": "causal_diagnostic_preregistered_before_result_values",
+  "scientific_question": "Is the +0.08074 fixed-CE gap of the four-bit pair-coded full MLP caused primarily by c_fc coding or by the residual-writing c_proj coding?",
+  "causal_basis": {
+    "pair_vq_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_private_pair_vq_mlp_result.json",
+    "pair_vq_result_sha256": "6b19333c1c54542288d2c32ddc9cdf2d609453d26b63c65a955ead904ab68830",
+    "finding": "The exact pair code passes output and input-JVP gates but leaves +0.08074 fixed CE. A second pair-code stage approximately squares residual distortion but must only be assigned to a causally dominant matrix side.",
+    "not_a_new_representation": "The diagnostic reuses the exact immutable codebooks and codes from the failed pair-VQ gate. It performs no fitting, optimization, code selection, or language-model update."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "pair_vq_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_pair_vq_mlp_20260821/pair_vq_state.pt",
+      "sha256": "6df9a5ce68639a311863eaa0dc65b10d902e2238e83097a53946a3ea9f35ac4c"
+    },
+    "pair_vq_raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_pair_vq_mlp_20260821/result.json",
+      "sha256": "b28c9b8166e7be030a9d9af5aea3e77ca6b5c8d1768ba00c0eb39da64fc6ef4a"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "measurement": {
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "variants": [
+      "dense teacher control",
+      "pair-coded c_fc with dense c_proj",
+      "dense c_fc with pair-coded c_proj",
+      "pair-coded c_fc and c_proj consistency replay"
+    ]
+  },
+  "frozen_decision_rule": {
+    "dominant_side": "A side is dominant only if its side-only CE gap is at least 1.5 times the other side-only gap and at least 60% of the measured both-side gap.",
+    "if_c_fc_dominates": "Preregister one two-stage residual pair code for c_fc only; leave c_proj at one stage.",
+    "if_c_proj_dominates": "Preregister one two-stage residual pair code for c_proj only; leave c_fc at one stage.",
+    "if_neither_dominates": "Reject asymmetric bit allocation. Do not guess a side or launch training; reconcile interaction terms before another representation.",
+    "consistency_gate": "The replayed both-side gap must agree with +0.08074283599853516 within 0.002 and the dense control must agree with 3.674412250518799 within 0.002."
+  },
+  "authorization": {
+    "allowed": "Implement and run only this zero-update side-localization diagnostic on PRO6.",
+    "not_allowed": [
+      "new fitting or quantization",
+      "language-model training",
+      "rate, bit-width, vector-length, seed, or optimizer sweeps",
+      "model-size scaling"
+    ],
+    "callback_policy": "Foreground-poll because the fixed-evaluation runtime is expected to remain below five minutes."
+  }
+}

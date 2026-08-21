@@ -1,0 +1,37 @@
+{
+  "schema_version": "mai_layer_private_pair_vq_mlp_result_seal_v1",
+  "classification": "LAYER_PRIVATE_PAIR_VQ_MLP_FAIL_NEAR_CE_GATE",
+  "repository_commit": "ba6c0fee2b64da3a2747f55666856b0047e0ccd9",
+  "plan_sha256": "cf78266f3d3aada192133b77982f548c6ce1ff7d3d90fb49a257d63143770feb",
+  "result_sha256": "b28c9b8166e7be030a9d9af5aea3e77ca6b5c8d1768ba00c0eb39da64fc6ef4a",
+  "state_sha256": "6df9a5ce68639a311863eaa0dc65b10d902e2238e83097a53946a3ea9f35ac4c",
+  "identities": {
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "persistent_matrix_state_bytes": 28336128,
+    "persistent_bf16_storage_compression": 3.9965307892454467,
+    "continuous_coordinates": 12288,
+    "continuous_coordinate_compression": 4608.0,
+    "cached_token_time_extra_flops": 0
+  },
+  "metrics": {
+    "aggregate_weight_energy_recovery": 0.9904945916394893,
+    "minimum_matrix_weight_energy_recovery": 0.9901085908962427,
+    "mean_output_recovery": 0.9838274990518888,
+    "minimum_output_recovery": 0.9782960414886475,
+    "mean_input_jvp_recovery": 0.9824270233511925,
+    "minimum_input_jvp_recovery": 0.9771906137466431,
+    "teacher_validation_cross_entropy": 3.674412250518799,
+    "candidate_validation_cross_entropy": 3.755155086517334,
+    "fixed_validation_cross_entropy_gap": 0.08074283599853516,
+    "wall_seconds": 30.936709880828857,
+    "maximum_cuda_memory_bytes": 9979673088
+  },
+  "gate_summary": "The functional output and input-JVP gates pass, but matrix energy misses the preregistered 0.995 aggregate threshold and fixed CE misses the +0.05 threshold. This exact four-bit family is not promoted to LM training.",
+  "next_discriminator": "Reuse the immutable decoded state to measure c_fc-only and c_proj-only fixed CE. Add residual code rate only to the causally dominant side; do not sweep rates or launch LM training."
+}
