@@ -1159,16 +1159,23 @@ def _fractional_residual_lattice_feedback_layout(
     element_count: int,
     *,
     coordinate_bits: int = 4,
+    block_size: int = 32,
 ) -> dict[str, int]:
     """Byte-exact q7/q8 base plus a block-scaled residual layout."""
     if coordinate_bits < 2 or coordinate_bits > 7:
         raise ValueError("residual lattice coordinate bits must be in [2, 7]")
+    if block_size < 2 or block_size & (block_size - 1):
+        raise ValueError("residual lattice block size must be a power of two")
+    if element_count % block_size:
+        raise ValueError("residual lattice block size must divide the source")
     base = _fractional_lattice_feedback_layout(element_count)
-    residual_gain_bytes = base["block_count"]
+    residual_block_count = element_count // block_size
+    residual_gain_bytes = residual_block_count
     residual_code_bytes = ((element_count + 7) // 8) * coordinate_bits
     return {
         "base_bytes": base["total_bytes"],
-        "block_count": base["block_count"],
+        "block_count": residual_block_count,
+        "block_size": block_size,
         "coordinate_bits": coordinate_bits,
         "residual_gain_bytes": residual_gain_bytes,
         "residual_code_bytes": residual_code_bytes,
@@ -1185,6 +1192,7 @@ def _decode_fractional_residual_lattice_feedback(
     element_count: int,
     seed: int,
     coordinate_bits: int = 4,
+    block_size: int = 32,
 ) -> torch.Tensor:
     """Decode a fractional base and additive innovation lattice."""
     level_count = 1 << coordinate_bits
@@ -1197,6 +1205,7 @@ def _decode_fractional_residual_lattice_feedback(
     layout = _fractional_residual_lattice_feedback_layout(
         element_count,
         coordinate_bits=coordinate_bits,
+        block_size=block_size,
     )
     if packed.ndim != 1 or packed.numel() != layout["total_bytes"]:
         raise ValueError("fractional residual lattice stream has the wrong shape")
@@ -1213,7 +1222,7 @@ def _decode_fractional_residual_lattice_feedback(
         packed[gain_stop:],
         bits=coordinate_bits,
         count=element_count,
-    ).reshape(layout["block_count"], 32)
+    ).reshape(layout["block_count"], block_size)
     decoded_gains = levels[640:896].index_select(0, gain_codes).exp()
     transformed = levels[896 : 896 + level_count].index_select(
         0, coordinate_codes.long().reshape(-1)
@@ -1231,6 +1240,8 @@ def _fit_fractional_residual_lattice_feedback_(
     *,
     seed: int,
     coordinate_bits: int = 4,
+    block_size: int = 32,
+    lloyd_iterations: int = 4,
 ) -> int:
     """Fit the q7/q8 base and a block-scaled quantization residual."""
     if vectors.ndim != 2 or vectors.shape[1] != 2:
@@ -1241,6 +1252,7 @@ def _fit_fractional_residual_lattice_feedback_(
     layout = _fractional_residual_lattice_feedback_layout(
         element_count,
         coordinate_bits=coordinate_bits,
+        block_size=block_size,
     )
     if tuple(levels.shape) != (expected_level_count,):
         raise ValueError(
@@ -1264,16 +1276,19 @@ def _fit_fractional_residual_lattice_feedback_(
         seed=seed,
     )
     innovation = vectors - base
-    transformed = _signed_block_fht(innovation, block_size=32, seed=seed)
+    transformed = _signed_block_fht(
+        innovation, block_size=block_size, seed=seed
+    )
     gains = transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
     gain_levels, gain_codes = _fit_scalar_codebook(
-        gains.log(), level_count=256
+        gains.log(), level_count=256, iterations=lloyd_iterations
     )
     decoded_gains = gain_levels.index_select(0, gain_codes).exp()
     normalized = (transformed / decoded_gains[:, None]).reshape(-1)
     coordinate_levels, coordinate_codes = _fit_scalar_codebook(
         normalized,
         level_count=level_count,
+        iterations=lloyd_iterations,
     )
     old_residual = packed[base_stop:].clone()
     levels[640:896].copy_(gain_levels)
@@ -2099,6 +2114,7 @@ class MuonPairVQLinear(nn.Module):
         fractional_residual_codecs = (
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         )
         if self.feedback_residual_probe_steps and self.feedback_codec not in (
             "conditional_polar16x16_rvq2",
@@ -2226,6 +2242,7 @@ class MuonPairVQLinear(nn.Module):
             "fractional_lattice_q7q8_b32_p25",
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         ):
             raise ValueError("unknown pair-VQ feedback codec")
         if (
@@ -2239,6 +2256,7 @@ class MuonPairVQLinear(nn.Module):
                 "fractional_lattice_q7q8_b32_p25",
                 "fractional_lattice_q7q8_b32_p25_rq4",
                 "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+                "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
             )
             and self.feedback_output_group_size != 0
         ):
@@ -2328,10 +2346,33 @@ class MuonPairVQLinear(nn.Module):
     def feedback_residual_lattice_coordinate_bits(self) -> int:
         if (
             self.feedback_codec
-            == "fractional_lattice_q7q8_b32_p25_rq4_cfcq5"
+            in (
+                "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+                "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
+            )
             and self.out_features > self.in_features
         ):
             return 5
+        return 4
+
+    @property
+    def feedback_residual_lattice_block_size(self) -> int:
+        if (
+            self.feedback_codec
+            == "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16"
+            and self.out_features > self.in_features
+        ):
+            return 64
+        return 32
+
+    @property
+    def feedback_residual_lattice_lloyd_iterations(self) -> int:
+        if (
+            self.feedback_codec
+            == "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16"
+            and self.out_features > self.in_features
+        ):
+            return 16
         return 4
 
     @property
@@ -2362,12 +2403,14 @@ class MuonPairVQLinear(nn.Module):
         elif self.feedback_codec in (
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         ):
             coordinate_bits = self.feedback_residual_lattice_coordinate_bits
             return (
                 _fractional_residual_lattice_feedback_layout(
                     self.element_count,
                     coordinate_bits=coordinate_bits,
+                    block_size=self.feedback_residual_lattice_block_size,
                 )[
                     "total_bytes"
                 ]
@@ -2425,6 +2468,7 @@ class MuonPairVQLinear(nn.Module):
         if self.feedback_codec in (
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         ):
             return (896 + (1 << self.feedback_residual_lattice_coordinate_bits),)
         if self.feedback_output_group_size == 0:
@@ -2455,11 +2499,13 @@ class MuonPairVQLinear(nn.Module):
         if self.feedback_codec in (
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         ):
             return (
                 _fractional_residual_lattice_feedback_layout(
                     self.element_count,
                     coordinate_bits=self.feedback_residual_lattice_coordinate_bits,
+                    block_size=self.feedback_residual_lattice_block_size,
                 )[
                     "total_bytes"
                 ],
@@ -2522,6 +2568,7 @@ class MuonPairVQLinear(nn.Module):
         if self.feedback_codec in (
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         ):
             return _decode_fractional_residual_lattice_feedback(
                 levels,
@@ -2529,6 +2576,7 @@ class MuonPairVQLinear(nn.Module):
                 element_count=self.element_count,
                 seed=self.feedback_fractional_lattice_seed,
                 coordinate_bits=self.feedback_residual_lattice_coordinate_bits,
+                block_size=self.feedback_residual_lattice_block_size,
             )
         if self.feedback_output_group_size == 0:
             return _decode_cartesian_pair_codec(levels, codes)
@@ -2588,6 +2636,7 @@ class MuonPairVQLinear(nn.Module):
         if self.feedback_codec in (
             "fractional_lattice_q7q8_b32_p25_rq4",
             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
         ):
             return _fit_fractional_residual_lattice_feedback_(
                 vectors,
@@ -2595,6 +2644,8 @@ class MuonPairVQLinear(nn.Module):
                 codes,
                 seed=self.feedback_fractional_lattice_seed,
                 coordinate_bits=self.feedback_residual_lattice_coordinate_bits,
+                block_size=self.feedback_residual_lattice_block_size,
+                lloyd_iterations=self.feedback_residual_lattice_lloyd_iterations,
             )
         if self.feedback_output_group_size == 0:
             return _fit_cartesian_pair_codec_(vectors, levels, codes)
@@ -2668,16 +2719,22 @@ class MuonPairVQLinear(nn.Module):
                                         (
                                             "packed_b32_q7_q8_p25_plus_"
                                             + (
-                                                "q5_residual"
-                                                if self.feedback_residual_lattice_coordinate_bits
-                                                == 5
-                                                else "q4_residual"
+                                                "q5_b64_lloyd16_residual"
+                                                if self.feedback_residual_lattice_block_size
+                                                == 64
+                                                else (
+                                                    "q5_residual"
+                                                    if self.feedback_residual_lattice_coordinate_bits
+                                                    == 5
+                                                    else "q4_residual"
+                                                )
                                             )
                                         )
                                         if self.feedback_codec
                                         in (
                                             "fractional_lattice_q7q8_b32_p25_rq4",
                                             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+                                            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
                                         )
                                         else "packed_b32_q7_q8_p25_plus_q8_gain"
                                     )
@@ -2700,6 +2757,7 @@ class MuonPairVQLinear(nn.Module):
                         "fractional_lattice_q7q8_b32_p25",
                         "fractional_lattice_q7q8_b32_p25_rq4",
                         "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+                        "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
                     )
                     else (
                         "uint8_cartesian_code_per_weight_pair_global_levels"
@@ -3235,6 +3293,7 @@ class MuonPairVQ(torch.optim.Optimizer):
                         in (
                             "fractional_lattice_q7q8_b32_p25_rq4",
                             "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+                            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
                         )
                         and int(diagnostics["optimizer_step"])
                         in module.feedback_residual_probe_steps
