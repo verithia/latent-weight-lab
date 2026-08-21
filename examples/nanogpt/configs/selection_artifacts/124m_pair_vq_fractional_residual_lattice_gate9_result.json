@@ -1,0 +1,92 @@
+{
+  "schema_version": "mai_pair_vq_fractional_residual_lattice_gate9_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_EARLY_CODEC_RECOVERY",
+  "scientific_question": "Does a packed block-scaled q4 residual stage clear the frozen live temporal-conservation gate at a compact physical rate?",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "f97815cb392c0c318855aa0a33dbcff15c0ef430",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_residual_lattice_gate9.json",
+    "config_sha256": "69259050e288c500020b659811c604ea685071993c3d68790ccf615621e8ff7a",
+    "resolved_config_sha256": "cfe4090c0171905b72e09e1731885f9c6e04d8f8461a094f5e064bbc32986451",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 9,
+    "terminal_val_loss": 8.382753372192383,
+    "exit_code": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "mfu_fraction": 0.30522881737005964,
+    "tokens_per_second": 169509.38,
+    "iter_ms": 1546.4975,
+    "optimizer_ms": 346.43,
+    "optimizer_fraction": 0.223944585754897,
+    "peak_mib": 31656.88,
+    "minimum_mfu_fraction": 0.2,
+    "maximum_optimizer_fraction": 0.3,
+    "preflight_certificate_sha256": "3835a4be1355f72570f2ac81025ac0dab44d554af9bdb461ef35ac9ad0285848",
+    "preflight_log_sha256": "89863deacaf359674a8e798097078b92a8de2c496ec91e440fe6ab582a52e5e5"
+  },
+  "recovery_gate": {
+    "passed": false,
+    "thresholds": {
+      "feedback_codec_weighted_min": 0.999975,
+      "feedback_codec_every_matrix_min": 0.9999,
+      "current_step_weighted_min": 0.999975,
+      "current_step_every_matrix_min": 0.9999
+    },
+    "refreshes": [
+      {
+        "optimizer_step": 0,
+        "matrix_records": 24,
+        "feedback_codec_weighted_recovery": 0.9999252453386818,
+        "feedback_codec_worst_matrix_recovery": 0.9997797553594429,
+        "feedback_codec_worst_matrix": "layer7.mlp.c_fc",
+        "current_step_weighted_recovery": 0.9999982212454968,
+        "current_step_worst_matrix_recovery": 0.9999942577284004
+      },
+      {
+        "optimizer_step": 8,
+        "matrix_records": 24,
+        "feedback_codec_weighted_recovery": 0.9999860012305631,
+        "feedback_codec_worst_matrix_recovery": 0.9999764582911793,
+        "feedback_codec_worst_matrix": "layer0.mlp.c_fc",
+        "current_step_weighted_recovery": 0.9999985632538473,
+        "current_step_worst_matrix_recovery": 0.9999962087145579
+      }
+    ],
+    "failure_localization": {
+      "family": "mlp.c_fc",
+      "c_proj_passed": true,
+      "coordinate_levels": "16 Lloyd-fitted scalar levels",
+      "gain_levels": "256 Lloyd-fitted log-RMS levels per matrix",
+      "interpretation": "The failure is residual coordinate rate, not a fixed uniform codebook or c_proj. Step 8 passes; the low-energy step-0 c_fc residuals violate both frozen codec floors."
+    }
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25_rq4",
+    "physical_bits_per_weight": 11.78125,
+    "feedback_code_bytes": 83386368,
+    "feedback_level_bytes": 87552,
+    "compact_momentum_bytes": 73728,
+    "compact_model_bytes": 70855872,
+    "persistent_mlp_training_matrix_bytes": 154403520,
+    "reduction_vs_dense_fp32_weight_plus_muon": 2.933773,
+    "dense_fp32_temporal_tensor_present": false,
+    "checkpoint_replay_tested_bit_exact": true
+  },
+  "artifacts": {
+    "scientific_log_sha256": "d8f714bdf86194d6c3f061a1544f6a2f8f337a3919ce1b59fb2207a1047797dd",
+    "checkpoint_sha256": "df49c449b21c3364220b3827c7a9f9684dcdcd14079182c1805d08cdfd9d08e2",
+    "checkpoint_bytes": 743356344,
+    "checkpoint_metadata_sha256": "0e12e7bda437590536014b56ae510fc659090d5c1cfa70c01b779e2d45607e2a"
+  },
+  "authorization": {
+    "matched_0p5tpp_endpoint": false,
+    "model_scale_up": false,
+    "longer_horizon": false,
+    "lr_sweep": false,
+    "next_causal_change": "Keep q4 for passing c_proj residuals and add one coordinate bit only to c_fc residuals. Under D proportional to 2^(-2R), q5 predicts a fourfold c_fc error reduction, taking the observed worst 2.202e-4 error below the 1e-4 matrix floor."
+  }
+}
