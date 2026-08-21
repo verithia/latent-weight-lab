@@ -1,0 +1,111 @@
+{
+  "schema_version": "mai_shared_mlp_seven_trunk_terminal_conflict_result_v1",
+  "classification": "PASSED_CURRENT_PARTITION_TANGENT_GATE_ENDPOINT_FUNCTIONAL_MISMATCH",
+  "passed_current_partition_gate": true,
+  "audit": {
+    "source_commit": "951ba4758e6c456b03e60d7b4748aa5252167f78",
+    "script": "examples/nanogpt/analyze_shared_mlp_layer_gradient_conflict.py",
+    "raw_result_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_seven_trunk_terminal_conflict_20260821/result.json",
+    "raw_result_sha256": "de991da9fe6573fc661e564eb180d32fddefa64c942c9c1f1bc2aae6540e097f",
+    "wall_seconds": 24.899566650390625,
+    "maximum_cuda_memory_bytes": 8934794752
+  },
+  "source_checkpoint": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp/scientific/ckpt.pt",
+    "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "model_config_sha256": "de47b58bffd242bdc0315ceb3a0df4d726df5039f95d0cd7615627279a2a37a4",
+    "next_iter": 2373,
+    "best_validation_cross_entropy": 3.7442376613616943
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "definition": "freeze the exact trained model, locally untie each layer c_fc and c_proj, and measure per-layer task gradients on a fixed effective training batch",
+    "split": "train",
+    "seed": 20260821,
+    "micro_batch_size": 8,
+    "micro_batches": 8,
+    "tokens": 65536,
+    "mean_cross_entropy": 3.737730860710144,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "frozen_gate": {
+    "common_update_energy_fraction": "norm(sum_l g_l)^2 / (number_of_layers * sum_l norm(g_l)^2)",
+    "minimum_group_recovery": 0.8,
+    "minimum_mean_recovery": 0.9
+  },
+  "current_partition": {
+    "boundaries": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      12
+    ],
+    "layers": [
+      [0],
+      [1],
+      [2],
+      [3],
+      [4],
+      [5, 6, 7],
+      [8, 9, 10, 11]
+    ],
+    "combined": {
+      "per_group": [
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        1.0,
+        0.8390712357671395,
+        0.8377730845551584
+      ],
+      "mean": 0.9538349029031854,
+      "minimum": 0.8377730845551584,
+      "passes": true
+    },
+    "c_fc": {
+      "mean": 0.950660825773724,
+      "minimum": 0.8222447130853843
+    },
+    "c_proj": {
+      "mean": 0.9543291105748827,
+      "minimum": 0.8399442992868604
+    }
+  },
+  "contiguous_partition_frontier": {
+    "smallest_passing_group_count": 7,
+    "selected_boundaries": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      12
+    ],
+    "eight_group_best_minimum": 0.8390712357067385,
+    "eight_group_best_mean": 0.9693806381087958
+  },
+  "terminal_training_context": {
+    "candidate_validation_cross_entropy": 3.7442,
+    "attention_only_validation_cross_entropy": 3.6744,
+    "gap_to_attention_only": 0.0698,
+    "strict_gate_ceiling": 3.7244,
+    "strict_gate_miss": 0.0198
+  },
+  "interpretation": {
+    "supported": "The exact trained seven-trunk endpoint retains adequate local common-update directions under the frozen thresholds, yet the model remains 0.0698 CE behind attention-only. Local tangent conflict is therefore insufficient to explain or close the residual gap.",
+    "remaining_obstruction": "endpoint or training-path functional mismatch: common gradient direction does not measure whether a shared trunk plus diagonal charts can realize the layer-specific function values accumulated over training",
+    "not_supported": "This audit does not justify an eighth trunk, a new boundary sweep, model-size scaling, or another training run. It also does not prove which compact nonlinear representation will repair the endpoint mismatch.",
+    "next_allowed_action": "derive and preregister an endpoint/function-matching oracle that measures layerwise MLP outputs and JVPs against the dense teacher before authorizing any new representation training"
+  },
+  "archive": {
+    "checkpoint_target": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+    "checkpoint_metadata_target": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.meta.json",
+    "original_paths_preserved_as_symlinks": true,
+    "checkpoint_metadata_sha256": "7c9a94e78e7646ce213b22754a64e3b2c7c321f221d1eea50ebcdc0fdb70632b"
+  }
+}
