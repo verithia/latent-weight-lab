@@ -32,8 +32,8 @@
   },
   "registered_run": {
     "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_stochastic_fast_retraction_0p5tpp_lr24e4.json",
-    "config_sha256": "bbd8b082bcb3b6d6d4935e2e84bc0b3f23ee8349a34eaace3f36828ece90fc2f",
-    "implementation_commit": "0806e1115104bfa74e5fe09ecc02e879d1b17f52",
+    "config_sha256": "d44be84520f770c426c2b5337f59189924dc5295457e3da917fd33137bbafe33",
+    "implementation_commit": "6d16e8c9d166bfc04654ba4f3eacbc1b3c64b3c5",
     "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
     "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
     "updates": 238,
@@ -41,10 +41,10 @@
     "comparison_parent_validation_ce": 5.3610
   },
   "implementation": {
-    "pair_vq_source_sha256": "b896ea6a9ba789875b3c2652f3fd6714648424ac947fdfdf6dee9c1d09526c6a",
+    "pair_vq_source_sha256": "d08cfc1a3ab7608f12bcc899db406ed6fa2e445ff2c28a08191fa460ea8287e7",
     "model_source_sha256": "0bc53118cd360404773387398b00992d7c7971a0dc8e580a0120ce06c9f99717",
     "train_source_sha256": "34129e0b509b233e0f294b1818cfc18fd39d030329ac311c7bb25df6c2661b49",
-    "test_source_sha256": "98467d887a8a010f11b4fac18e08582e2f80eb3fdfbbcceb54acb80b751f0789",
+    "test_source_sha256": "6c623968b3f0ee6097fca15937f4b92d1f4b4b97a590b16fffe5cc2ad91b38d4",
     "mfu_preflight_source_sha256": "e16fb71ff369e303ed8124860a9d34c570f26b0bc025ffd01511b14fd4c091e7",
     "required_tests_passed": 47,
     "required_invariants": [
