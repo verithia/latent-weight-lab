@@ -16,6 +16,7 @@ import os
 import tempfile
 import time
 from dataclasses import asdict
+from itertools import combinations
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -114,6 +115,99 @@ def boundary_group_recoveries(
     ]
 
 
+def gradient_gram(gradients: list[tuple[Tensor, ...]]) -> list[list[float]]:
+    """Materialize the small layer-axis Gram matrix once."""
+
+    return [[_dot(left, right) for right in gradients] for left in gradients]
+
+
+def boundary_group_recoveries_from_gram(
+    gram: list[list[float]], boundaries: tuple[int, ...]
+) -> list[float]:
+    layer_count = len(gram)
+    if any(len(row) != layer_count for row in gram):
+        raise ValueError("gradient Gram matrix must be square")
+    if (
+        not boundaries
+        or boundaries[-1] != layer_count
+        or any(value <= 0 or value > layer_count for value in boundaries)
+        or any(later <= earlier for earlier, later in zip(boundaries, boundaries[1:]))
+    ):
+        raise ValueError("boundaries must increase strictly and end at the layer count")
+    recoveries: list[float] = []
+    for start, stop in zip((0, *boundaries[:-1]), boundaries, strict=True):
+        group_size = stop - start
+        numerator = sum(
+            gram[left][right]
+            for left in range(start, stop)
+            for right in range(start, stop)
+        )
+        denominator = group_size * sum(gram[index][index] for index in range(start, stop))
+        recovery = numerator / denominator if denominator > 0.0 else 0.0
+        recoveries.append(min(1.0, max(0.0, recovery)))
+    return recoveries
+
+
+def contiguous_partition_frontier(
+    gram: list[list[float]],
+    *,
+    minimum_group_count: int,
+    maximum_group_count: int,
+    minimum_recovery: float,
+    minimum_mean_recovery: float,
+) -> dict[str, Any]:
+    """Enumerate layer-contiguous partitions without revisiting ambient tensors."""
+
+    layer_count = len(gram)
+    if not (1 <= minimum_group_count <= maximum_group_count <= layer_count):
+        raise ValueError("group-count range must lie within the layer count")
+    per_group_count: dict[str, Any] = {}
+    selected: dict[str, Any] | None = None
+    for group_count in range(minimum_group_count, maximum_group_count + 1):
+        candidates: list[dict[str, Any]] = []
+        passing = 0
+        for cuts in combinations(range(1, layer_count), group_count - 1):
+            boundaries = (*cuts, layer_count)
+            recoveries = boundary_group_recoveries_from_gram(gram, boundaries)
+            mean = sum(recoveries) / len(recoveries)
+            minimum = min(recoveries)
+            passes = minimum >= minimum_recovery and mean >= minimum_mean_recovery
+            passing += int(passes)
+            candidates.append(
+                {
+                    "boundaries": list(boundaries),
+                    "per_group": recoveries,
+                    "mean": mean,
+                    "minimum": minimum,
+                    "passes": passes,
+                }
+            )
+        candidates.sort(
+            key=lambda candidate: (
+                -candidate["minimum"],
+                -candidate["mean"],
+                candidate["boundaries"],
+            )
+        )
+        best = candidates[0]
+        per_group_count[str(group_count)] = {
+            "evaluated_partitions": len(candidates),
+            "passing_partitions": passing,
+            "best_by_minimum_then_mean": best,
+        }
+        if selected is None and best["passes"]:
+            selected = {"group_count": group_count, **best}
+    return {
+        "minimum_group_count": minimum_group_count,
+        "maximum_group_count": maximum_group_count,
+        "minimum_recovery_threshold": minimum_recovery,
+        "minimum_mean_recovery_threshold": minimum_mean_recovery,
+        "selection_rule": "smallest passing group count; within count maximize minimum then mean recovery",
+        "per_group_count": per_group_count,
+        "selected": selected,
+    }
+
+
 def untie_mlp_weights(model: GPT) -> list[MLP]:
     mlps: list[MLP] = []
     for block in model.transformer.h:
@@ -145,8 +239,8 @@ def main() -> None:
     started = time.time()
     checkpoint = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
     config = GPTConfig(**checkpoint["model_config"])
-    if not config.mlp_shared_dense_trunk or config.mlp_shared_dense_trunk_groups != 3:
-        raise ValueError("audit requires the terminal three-trunk checkpoint")
+    if not config.mlp_shared_dense_trunk:
+        raise ValueError("audit requires a shared-dense-trunk checkpoint")
     model = GPT(config)
     model.load_state_dict(checkpoint["model"])
     for parameter in model.parameters():
@@ -195,10 +289,16 @@ def main() -> None:
         c_proj.append((proj_gradient,))
         combined.append((fc_gradient, proj_gradient))
 
-    pairwise = [
-        [gradient_cosine(combined[i], combined[j]) for j in range(config.n_layer)]
-        for i in range(config.n_layer)
-    ]
+    combined_gram = gradient_gram(combined)
+    pairwise = []
+    for i in range(config.n_layer):
+        row: list[float] = []
+        for j in range(config.n_layer):
+            denominator = math.sqrt(
+                max(combined_gram[i][i] * combined_gram[j][j], 0.0)
+            )
+            row.append(combined_gram[i][j] / denominator if denominator > 0.0 else 0.0)
+        pairwise.append(row)
     partitions: dict[str, Any] = {}
     for group_count in (1, 2, 3, 4, 6, 12):
         entry: dict[str, Any] = {}
@@ -211,7 +311,14 @@ def main() -> None:
             }
         partitions[str(group_count)] = entry
 
-    measured_boundaries = (2, 4, 8, 12)
+    configured_boundaries = config.mlp_shared_dense_trunk_boundaries
+    if configured_boundaries is None:
+        group_size = config.n_layer // config.mlp_shared_dense_trunk_groups
+        measured_boundaries = tuple(
+            range(group_size, config.n_layer + 1, group_size)
+        )
+    else:
+        measured_boundaries = tuple(configured_boundaries)
     nonuniform: dict[str, Any] = {}
     for name, gradients in (("combined", combined), ("c_fc", c_fc), ("c_proj", c_proj)):
         values = boundary_group_recoveries(gradients, measured_boundaries)
@@ -249,10 +356,28 @@ def main() -> None:
         },
         "pairwise_combined_cosine": pairwise,
         "contiguous_partitions": partitions,
-        "measured_nonuniform_partition": {
+        "measured_current_partition": {
             "boundaries": list(measured_boundaries),
-            "layers": [[0, 1], [2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+            "layers": [
+                list(range(start, stop))
+                for start, stop in zip(
+                    (0, *measured_boundaries[:-1]), measured_boundaries, strict=True
+                )
+            ],
             "metrics": nonuniform,
+        },
+        "combined_contiguous_partition_frontier": contiguous_partition_frontier(
+            combined_gram,
+            minimum_group_count=2,
+            maximum_group_count=8,
+            minimum_recovery=0.8,
+            minimum_mean_recovery=0.9,
+        ),
+        "parameter_accounting": {
+            "dense_twelve_layer_mlp_parameters": 8 * config.n_embd * config.n_embd * config.n_layer,
+            "parameters_per_full_rank_trunk_pair": 8 * config.n_embd * config.n_embd,
+            "layer_private_diagonal_parameters": 5 * config.n_embd * config.n_layer,
+            "definition": "K paired dense trunks plus one 4d pre-GELU and one d residual-write gain per layer",
         },
         "wall_seconds": time.time() - started,
         "maximum_cuda_memory_bytes": torch.cuda.max_memory_allocated(),

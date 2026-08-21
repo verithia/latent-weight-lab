@@ -1,0 +1,49 @@
+{
+  "schema_version": "mai_shared_mlp_late_horizon_gradient_conflict_plan_v1",
+  "scientific_question": "Did the 5TPP failure arise because the four shared trunks impose destructive late-horizon layer-gradient cancellation, and what is the smallest contiguous partition that removes it?",
+  "source_checkpoint": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_dense_mlp_trunk_groups4_2_2_4_4_5tpp/scientific/ckpt.pt",
+    "sha256": "29c3497bfacb94a6bb2ed9fda1a14897df94400611b7d5612641af0b7b9bfc95",
+    "next_iter": 2373,
+    "terminal_validation_cross_entropy": 3.8252
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "split": "train",
+    "seed": 20260821,
+    "micro_batch_size": 8,
+    "micro_batches": 8,
+    "tokens": 65536,
+    "method": "freeze all parameters, locally untie each layer c_fc/c_proj from its shared trunk, and measure exact task gradients"
+  },
+  "candidate_space": {
+    "type": "all contiguous layer partitions",
+    "minimum_group_count": 2,
+    "maximum_group_count": 8,
+    "current_boundaries": [2, 4, 8, 12],
+    "current_layers": [[0, 1], [2, 3], [4, 5, 6, 7], [8, 9, 10, 11]]
+  },
+  "selection_rule": {
+    "minimum_combined_recovery_per_group": 0.8,
+    "minimum_mean_combined_recovery": 0.9,
+    "primary": "choose the smallest group count for which both thresholds pass",
+    "tie_break": "within that group count maximize minimum recovery, then mean recovery",
+    "failure": "if no partition through eight trunks passes, reject cross-layer dense-trunk sharing rather than launching a training sweep"
+  },
+  "parameter_accounting": {
+    "dense_twelve_layer_mlp_parameters": 56623104,
+    "parameters_per_full_rank_trunk_pair": 4718592,
+    "layer_private_diagonal_parameters": 46080,
+    "formula": "learned_mlp_parameters(K) = 4718592*K + 46080",
+    "five_trunk_mlp_parameters": 23639040,
+    "five_trunk_compression_ratio": 2.395326538058172,
+    "six_trunk_mlp_parameters": 28357632,
+    "six_trunk_compression_ratio": 1.9967466271193456
+  },
+  "authorization": {
+    "analysis": true,
+    "mfu_preflight": false,
+    "training": false,
+    "model_size_scaling": false
+  }
+}

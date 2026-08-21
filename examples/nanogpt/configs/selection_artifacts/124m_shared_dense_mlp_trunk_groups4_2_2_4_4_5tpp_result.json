@@ -1,0 +1,68 @@
+{
+  "schema_version": "mai_124m_shared_dense_mlp_trunk_groups4_nonuniform_5tpp_result_v1",
+  "classification": "REJECTED_TEMPORAL_HORIZON",
+  "passed": false,
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_groups4_2_2_4_4_5tpp",
+    "source_commit": "87f1c79692382a76ace1e9034b42ad559e6587a2",
+    "started_at": "2026-08-21T12:06:24+08:00",
+    "finished_at": "2026-08-21T13:00:01+08:00",
+    "exit_code": 0,
+    "status_sha256": "4059d8e87e7235ee8a383f41426d9314d0a737aef2971514bc1bfd93e4022278",
+    "log_sha256": "81deb6ed297826e138cf8dab3d90b25ff0db41adb915c00bfd84abe079f17901",
+    "provenance_sha256": "810cd62133ba3cd2dca3f0d3d83554d30ae070826b7bf8c08699e0bcde1c3eef",
+    "archived_config_sha256": "050dc11ca09d2f194a53f1bc0ff1ec21157fda96d487a9ad48fa056270444997",
+    "resolved_config_sha256": "152fa660a7b4822d179c59020d8d0c5ff36a35a38521ea72e9d380c0c327f841",
+    "checkpoint_sha256": "29c3497bfacb94a6bb2ed9fda1a14897df94400611b7d5612641af0b7b9bfc95",
+    "checkpoint_metadata_sha256": "fa3d6a77ec927250166a33f50ffe9029625e9341d4a4c9d9e95cebd010143c61",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "terminal": {
+    "step": 2373,
+    "train_cross_entropy": 3.8394,
+    "validation_cross_entropy": 3.8252,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "validation_curve": [
+      {"step": 0, "validation_cross_entropy": 10.9899},
+      {"step": 594, "validation_cross_entropy": 4.4887},
+      {"step": 1188, "validation_cross_entropy": 4.0284},
+      {"step": 1782, "validation_cross_entropy": 3.8811},
+      {"step": 2373, "validation_cross_entropy": 3.8252}
+    ]
+  },
+  "comparisons": {
+    "attention_only_validation_cross_entropy": 3.6744,
+    "gap_to_attention_only": 0.1508,
+    "perplexity_ratio_to_attention_only": 1.162764,
+    "dense_validation_cross_entropy": 3.5401,
+    "gap_to_dense": 0.2851,
+    "perplexity_ratio_to_dense": 1.329894,
+    "attention_only_gap_to_dense": 0.1343,
+    "mlp_temporal_pass_validation_ce_maximum": 3.7744,
+    "miss_to_mlp_temporal_ceiling": 0.0508,
+    "end_to_end_dense_plus_0p1_validation_ce_maximum": 3.6401,
+    "miss_to_end_to_end_ceiling": 0.1851,
+    "short_horizon_gap_to_attention_only": 0.0799,
+    "gap_growth_from_0p5tpp_to_5tpp": 0.0709
+  },
+  "accounting": {
+    "layer_partition": [[0, 1], [2, 3], [4, 5, 6, 7], [8, 9, 10, 11]],
+    "dense_mlp_parameters": 56623104,
+    "learned_mlp_parameters": 18920448,
+    "mlp_parameter_compression_ratio": 2.9926936190940086,
+    "mlp_parameter_saving_fraction": 0.6658528645833333,
+    "actual_total_trainable_parameters": 58642656,
+    "materialized_dense_mlp_flops_unchanged": true,
+    "persistent_ambient_error_buffer": false,
+    "persistent_ambient_momentum_field": false,
+    "ambient_decoder": false
+  },
+  "performance_gate": {
+    "certificate_sha256": "3de285681d167355c64bc6149e34ea0e377cc3a36969d4b8932bc328b6143036",
+    "mfu_fraction": 0.36061045900896527,
+    "tokens_per_second": 200626.79333333333,
+    "iteration_milliseconds": 1306.6266666666668,
+    "peak_allocated_mib": 33596.81
+  },
+  "decision": "Reject promotion or model-size scaling. The same four-trunk representation that passed at 0.5TPP accumulates an additional 0.0709 CE MLP penalty by 5TPP. Follow the preregistered failure action: at this exact terminal checkpoint locally untie the shared MLP weights, measure per-layer task-gradient conflict, and select a revised contiguous partition only if the late-horizon gradient evidence supports one."
+}

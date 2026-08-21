@@ -4,8 +4,11 @@ import torch
 
 from examples.nanogpt.analyze_shared_mlp_layer_gradient_conflict import (
     boundary_group_recoveries,
+    boundary_group_recoveries_from_gram,
     common_update_energy_fraction,
+    contiguous_partition_frontier,
     contiguous_group_recoveries,
+    gradient_gram,
     gradient_cosine,
 )
 
@@ -44,3 +47,35 @@ def test_boundary_partitions_support_unequal_groups() -> None:
         assert "layer count" in str(error)
     else:
         raise AssertionError("expected incomplete boundaries to fail")
+
+
+def test_gram_recoveries_match_direct_recoveries() -> None:
+    gradients = [
+        (torch.tensor([1.0, 0.0]),),
+        (torch.tensor([-0.5, 1.0]),),
+        (torch.tensor([0.0, 2.0]),),
+    ]
+    boundaries = (1, 3)
+    direct = boundary_group_recoveries(gradients, boundaries)
+    via_gram = boundary_group_recoveries_from_gram(
+        gradient_gram(gradients), boundaries
+    )
+    assert torch.allclose(torch.tensor(direct), torch.tensor(via_gram))
+
+
+def test_partition_frontier_selects_smallest_passing_count() -> None:
+    gradients = [
+        (torch.tensor([1.0, 0.0]),),
+        (torch.tensor([-1.0, 0.0]),),
+        (torch.tensor([0.0, 1.0]),),
+        (torch.tensor([0.0, 1.0]),),
+    ]
+    frontier = contiguous_partition_frontier(
+        gradient_gram(gradients),
+        minimum_group_count=2,
+        maximum_group_count=4,
+        minimum_recovery=0.8,
+        minimum_mean_recovery=0.9,
+    )
+    assert frontier["selected"]["group_count"] == 3
+    assert frontier["selected"]["boundaries"] == [1, 2, 4]
