@@ -11,9 +11,11 @@ from examples.nanogpt.muon_pair_vq import (
     MuonPairVQLinear,
     _conditional_polar_pair_diagnostics,
     _decode_conditional_polar_pair_codec,
+    _decode_conditional_polar_residual_cartesian_pair_codec,
     _decode_polar_pair_codec,
     _decode_rvq_pair_codec,
     _fit_conditional_polar_pair_codec_,
+    _fit_conditional_polar_residual_cartesian_pair_codec_,
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
     _nearest_cartesian_codes,
@@ -394,6 +396,113 @@ def test_conditional_polar16x16_reallocates_bits_to_heavy_tail_radius() -> None:
     assert state["feedback_center"].shape == (2,)
     assert state["feedback_codes"].dtype == torch.uint8
     assert module.compact_feedback_bytes == module.element_count // 2 + 1032
+
+
+def test_conditional_polar16x16_residual_cartesian_closes_fine_error() -> None:
+    torch.manual_seed(172)
+    angle_indices = torch.randint(0, 16, (65536,))
+    directions = torch.stack(
+        (
+            torch.cos(angle_indices.float() * (2.0 * torch.pi / 16.0)),
+            torch.sin(angle_indices.float() * (2.0 * torch.pi / 16.0)),
+        ),
+        dim=1,
+    )
+    radii = torch.exp(0.9 * torch.randn(angle_indices.shape[0]))
+    vectors = radii[:, None] * directions + 0.01 * torch.randn_like(directions)
+
+    coarse_levels = torch.zeros(16, 16)
+    coarse_center = torch.zeros(2)
+    coarse_codes = torch.zeros(vectors.shape[0], dtype=torch.uint8)
+    _fit_conditional_polar_pair_codec_(
+        vectors, coarse_levels, coarse_center, coarse_codes
+    )
+    coarse = _decode_conditional_polar_pair_codec(
+        coarse_levels, coarse_center, coarse_codes
+    )
+    coarse_error = float((vectors - coarse).square().sum())
+
+    levels = torch.zeros(18, 16)
+    center = torch.zeros(2)
+    codes = torch.zeros(2, vectors.shape[0], dtype=torch.uint8)
+    _fit_conditional_polar_residual_cartesian_pair_codec_(
+        vectors, levels, center, codes
+    )
+    decoded = _decode_conditional_polar_residual_cartesian_pair_codec(
+        levels, center, codes
+    )
+    residual_error = float((vectors - decoded).square().sum())
+    assert residual_error < 0.05 * coarse_error
+    assert 1.0 - residual_error / float(vectors.square().sum()) > 0.999
+
+    module = make_module(
+        stages=1,
+        error_feedback=True,
+        feedback_codec="conditional_polar16x16_residual_cartesian4x4",
+    )
+    optimizer = make_optimizer(module)
+    module.weight.grad = 1e-3 * torch.randn_like(module.weight)
+    optimizer.step()
+    state = optimizer.state[module.weight]
+    assert state["feedback_levels"].shape == (18, 16)
+    assert state["feedback_center"].shape == (2,)
+    assert state["feedback_codes"].shape == (2, module.element_count // 2)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == module.element_count + 1160
+    assert all(
+        value.dtype == torch.uint8 or value.numel() != module.element_count
+        for value in state.values()
+        if isinstance(value, torch.Tensor)
+    )
+
+
+def test_conditional_polar16x16_residual_cartesian_resume_is_exact() -> None:
+    torch.manual_seed(174)
+    module = make_module(
+        stages=1,
+        seed=181,
+        error_feedback=True,
+        feedback_codec="conditional_polar16x16_residual_cartesian4x4",
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(
+        stages=1,
+        seed=183,
+        error_feedback=True,
+        feedback_codec="conditional_polar16x16_residual_cartesian4x4",
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(
+        restored_state["feedback_codes"], original_state["feedback_codes"]
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_center"],
+        original_state["feedback_center"],
+        rtol=0.0,
+        atol=0.0,
+    )
 
 
 def test_conditional_polar_diagnostics_form_an_orthogonal_decomposition() -> None:

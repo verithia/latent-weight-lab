@@ -7,7 +7,7 @@
     "compact_full_mlp_closed_at_124m_0p5tpp": false,
     "larger_model_or_horizon_authorized": false,
     "learning_rate_or_capacity_sweep_authorized": false,
-    "next_authorized_work": "Implement one additional residual conditional-polar 16x16 byte per pair and test its current-step conservation under the exact 0.5TPP optimizer schedule before any endpoint or scale-up.",
+    "next_authorized_work": "Implement one additional residual Cartesian 4x4 byte per pair after the conditional-polar 16x16 coarse byte, then test current-step conservation under the exact 0.5TPP optimizer schedule before any endpoint or scale-up.",
     "reason": "The rate-matched one-byte carry improves terminal validation CE by 0.0788 over the prior compact endpoint but remains 0.1566 CE behind the matched dense-MLP parent, exceeding the frozen 0.0500 ceiling by 0.1066. Its codec continues to reconstruct accumulated feedback at 0.9941 recovery, but accumulated-feedback quantization error consumes 52.74 percent of current-request energy at step 232."
   },
   "identity": {

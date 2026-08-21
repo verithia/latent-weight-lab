@@ -423,6 +423,100 @@ def _fit_conditional_polar_pair_codec_(
     return int((new_codes != old_codes).sum())
 
 
+def _decode_conditional_polar_residual_cartesian_pair_codec(
+    levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> torch.Tensor:
+    """Decode one polar byte plus one Cartesian residual byte per pair."""
+    if tuple(levels.shape) != (18, 16):
+        raise ValueError(
+            "polar-residual-Cartesian levels must have shape (18, 16)"
+        )
+    if tuple(center.shape) != (2,):
+        raise ValueError("polar-residual-Cartesian center must have shape (2,)")
+    if codes.ndim != 2 or codes.shape[0] != 2:
+        raise ValueError(
+            "polar-residual-Cartesian codes must have shape (2, pairs)"
+        )
+    coarse = _decode_conditional_polar_pair_codec(
+        levels[:16], center, codes[0]
+    )
+    residual = _decode_cartesian_pair_codec(levels[16:], codes[1])
+    return coarse + residual
+
+
+@torch.no_grad()
+def _fit_conditional_polar_residual_cartesian_pair_codec_(
+    vectors: torch.Tensor,
+    levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> int:
+    """Fit a coarse 16x16 polar code and an exact residual scalar code.
+
+    The first byte handles the measured direction-conditioned, heavy-tailed
+    radial source.  The second byte quantizes the remaining near-zero error in
+    Cartesian coordinates, avoiding another unsupported angular-product
+    assumption.  Both stages remain matrix-global and require no dense
+    persistent residual.
+    """
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError(
+            "polar-residual-Cartesian values must have shape (pairs, 2)"
+        )
+    if tuple(levels.shape) != (18, 16):
+        raise ValueError(
+            "polar-residual-Cartesian levels must have shape (18, 16)"
+        )
+    if tuple(center.shape) != (2,):
+        raise ValueError("polar-residual-Cartesian center must have shape (2,)")
+    if codes.ndim != 2 or tuple(codes.shape) != (2, vectors.shape[0]):
+        raise ValueError(
+            "polar-residual-Cartesian codes must have shape (2, pairs)"
+        )
+    coarse_changes = _fit_conditional_polar_pair_codec_(
+        vectors, levels[:16], center, codes[0]
+    )
+    coarse = _decode_conditional_polar_pair_codec(
+        levels[:16], center, codes[0]
+    )
+    residual_changes = _fit_cartesian_pair_codec_(
+        vectors - coarse, levels[16:], codes[1]
+    )
+    return coarse_changes + residual_changes
+
+
+@torch.no_grad()
+def _conditional_polar_residual_cartesian_diagnostics(
+    vectors: torch.Tensor,
+    levels: torch.Tensor,
+    center: torch.Tensor,
+    codes: torch.Tensor,
+) -> dict[str, float | int]:
+    coarse = _decode_conditional_polar_pair_codec(
+        levels[:16], center, codes[0]
+    )
+    residual_target = vectors - coarse
+    residual = _decode_cartesian_pair_codec(levels[16:], codes[1])
+    final_error = residual_target - residual
+    target_energy = vectors.square().sum().clamp_min(1e-30)
+    residual_target_energy = residual_target.square().sum().clamp_min(1e-30)
+    final_error_energy = final_error.square().sum()
+    return {
+        "feedback_stage1_codec_energy_recovery": float(
+            1.0 - residual_target_energy / target_energy
+        ),
+        "feedback_residual_codec_energy_recovery": float(
+            1.0 - final_error_energy / residual_target_energy
+        ),
+        "feedback_stage1_active_codes": int(codes[0].unique().numel()),
+        "feedback_residual_active_codes": int(codes[1].unique().numel()),
+        "feedback_residual_target_energy": float(residual_target_energy),
+        "feedback_residual_quantization_energy": float(final_error_energy),
+    }
+
+
 @torch.no_grad()
 def _conditional_polar_pair_diagnostics(
     vectors: torch.Tensor,
@@ -687,6 +781,7 @@ class MuonPairVQLinear(nn.Module):
             "polar32x8",
             "conditional_polar32x8",
             "conditional_polar16x16",
+            "conditional_polar16x16_residual_cartesian4x4",
             "rvq4x4",
         ):
             raise ValueError("unknown pair-VQ feedback codec")
@@ -695,6 +790,7 @@ class MuonPairVQLinear(nn.Module):
                 "polar32x8",
                 "conditional_polar32x8",
                 "conditional_polar16x16",
+                "conditional_polar16x16_residual_cartesian4x4",
                 "rvq4x4",
             )
             and self.feedback_output_group_size != 0
@@ -793,6 +889,8 @@ class MuonPairVQLinear(nn.Module):
             "conditional_polar16x16",
         ):
             metadata_values = 256 + 2
+        elif self.feedback_codec == "conditional_polar16x16_residual_cartesian4x4":
+            metadata_values = 18 * 16 + 2
         elif self.feedback_codec == "rvq4x4":
             metadata_values = 2 * 16 * 2 + 2
         else:
@@ -800,7 +898,18 @@ class MuonPairVQLinear(nn.Module):
         level_bytes = metadata_values * torch.tensor(
             [], dtype=torch.float32
         ).element_size()
-        return pair_codes * torch.tensor([], dtype=torch.uint8).element_size() + level_bytes
+        code_stages = (
+            2
+            if self.feedback_codec
+            == "conditional_polar16x16_residual_cartesian4x4"
+            else 1
+        )
+        return (
+            code_stages
+            * pair_codes
+            * torch.tensor([], dtype=torch.uint8).element_size()
+            + level_bytes
+        )
 
     @property
     def feedback_group_count(self) -> int:
@@ -824,6 +933,11 @@ class MuonPairVQLinear(nn.Module):
             return (32, 8)
         if self.feedback_codec == "conditional_polar16x16":
             return (16, 16)
+        if (
+            self.feedback_codec
+            == "conditional_polar16x16_residual_cartesian4x4"
+        ):
+            return (18, 16)
         if self.feedback_codec == "rvq4x4":
             return (2, 16, 2)
         if self.feedback_output_group_size == 0:
@@ -836,6 +950,7 @@ class MuonPairVQLinear(nn.Module):
             "polar32x8",
             "conditional_polar32x8",
             "conditional_polar16x16",
+            "conditional_polar16x16_residual_cartesian4x4",
             "rvq4x4",
         ):
             return (2,)
@@ -858,6 +973,17 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("conditional polar pair feedback requires a center")
             return _decode_conditional_polar_pair_codec(levels, center, codes)
+        if (
+            self.feedback_codec
+            == "conditional_polar16x16_residual_cartesian4x4"
+        ):
+            if center is None:
+                raise ValueError(
+                    "polar-residual-Cartesian feedback requires a center"
+                )
+            return _decode_conditional_polar_residual_cartesian_pair_codec(
+                levels, center, codes
+            )
         if self.feedback_codec == "rvq4x4":
             if center is None:
                 raise ValueError("RVQ pair feedback requires a center")
@@ -889,6 +1015,14 @@ class MuonPairVQLinear(nn.Module):
             if center is None:
                 raise ValueError("conditional polar pair feedback requires a center")
             return _fit_conditional_polar_pair_codec_(
+                vectors, levels, center, codes
+            )
+        if self.feedback_codec == "conditional_polar16x16_residual_cartesian4x4":
+            if center is None:
+                raise ValueError(
+                    "polar-residual-Cartesian feedback requires a center"
+                )
+            return _fit_conditional_polar_residual_cartesian_pair_codec_(
                 vectors, levels, center, codes
             )
         if self.feedback_codec == "rvq4x4":
@@ -949,7 +1083,13 @@ class MuonPairVQLinear(nn.Module):
                                 "conditional_polar32x8",
                                 "conditional_polar16x16",
                             )
-                            else "uint8_rvq4x4_code_per_weight_pair"
+                            else (
+                                "two_uint8_conditional_polar16x16_plus_"
+                                "residual_cartesian4x4_codes_per_weight_pair"
+                                if self.feedback_codec
+                                == "conditional_polar16x16_residual_cartesian4x4"
+                                else "uint8_rvq4x4_code_per_weight_pair"
+                            )
                         )
                     )
                     if self.feedback_codec
@@ -957,6 +1097,7 @@ class MuonPairVQLinear(nn.Module):
                         "polar32x8",
                         "conditional_polar32x8",
                         "conditional_polar16x16",
+                        "conditional_polar16x16_residual_cartesian4x4",
                         "rvq4x4",
                     )
                     else (
@@ -1261,8 +1402,16 @@ class MuonPairVQ(torch.optim.Optimizer):
                             dtype=torch.float32,
                         )
                     if "feedback_codes" not in state:
+                        feedback_code_shape = (
+                            (2, pair_count)
+                            if module.feedback_codec
+                            == "conditional_polar16x16_residual_cartesian4x4"
+                            else (pair_count,)
+                        )
                         state["feedback_codes"] = torch.zeros(
-                            pair_count, device=weight.device, dtype=torch.uint8
+                            feedback_code_shape,
+                            device=weight.device,
+                            dtype=torch.uint8,
                         )
                     if (
                         module.feedback_center_shape is not None
@@ -1339,6 +1488,19 @@ class MuonPairVQ(torch.optim.Optimizer):
                     ):
                         diagnostics.update(
                             _conditional_polar_pair_diagnostics(
+                                raw_feedback.reshape(-1, module.vector_length),
+                                state["feedback_levels"],
+                                state["feedback_center"],
+                                state["feedback_codes"],
+                            )
+                        )
+                    elif (
+                        refresh
+                        and module.feedback_codec
+                        == "conditional_polar16x16_residual_cartesian4x4"
+                    ):
+                        diagnostics.update(
+                            _conditional_polar_residual_cartesian_diagnostics(
                                 raw_feedback.reshape(-1, module.vector_length),
                                 state["feedback_levels"],
                                 state["feedback_center"],
