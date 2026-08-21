@@ -1,0 +1,100 @@
+{
+  "schema_version": "mai_pair_vq_b64_converged_residual_lattice_gate9_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_LIVE_RECOVERY_STORAGE_RESUME_AND_SYSTEMS_GATE",
+  "scientific_question": "Does the source-decomposition-authorized c_fc residual code (q5, B64, Lloyd-16) preserve the required direction fidelity through a live nine-step packed-state trajectory while retaining compact persistent state?",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "49f9398146ce56bfaa549482192dce40fdf0b97d",
+    "implementation_commit": "17980562b5e537e638e3e0000acf334b7beb50da",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_gate9.json",
+    "config_sha256": "3c2209653aa8c234336191910f4d27fa65d71cf539bfa761723ceb0748817eb1",
+    "resolved_config_sha256": "f6594c08ad48b309d4997942aff221c6e6b3fc97efe5a2bbd8ad5c58b163d2b7",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "next_iter": 9,
+    "terminal_val_loss": 8.38274097442627,
+    "exit_code": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "mfu_fraction": 0.2899128922,
+    "tokens_per_second": 160883.95,
+    "iter_ms": 1629.4,
+    "optimizer_ms": 427.98,
+    "optimizer_fraction": 0.262660,
+    "peak_mib": 31659.06,
+    "scientific_median_tokens_per_second": 160990.29,
+    "scientific_median_iter_ms": 1628.32,
+    "scientific_mean_optimizer_fraction": 0.2656454,
+    "minimum_mfu_fraction": 0.20,
+    "maximum_optimizer_fraction": 0.30,
+    "preflight_certificate_sha256": "38e3c58c9e98eaf8b0d5f6ce09fcc46a809bea63e7e9521a574063be0e4018cd",
+    "preflight_log_sha256": "b4a167186455dc849f26fda3983e289f2d4412dbf76d3e819a584977bed9649c"
+  },
+  "recovery_gate": {
+    "passed": true,
+    "thresholds": {
+      "feedback_codec_weighted_min": 0.999975,
+      "feedback_codec_every_matrix_min": 0.9999,
+      "current_step_weighted_min": 0.999975,
+      "current_step_every_matrix_min": 0.9999
+    },
+    "refreshes": [
+      {
+        "optimizer_step": 0,
+        "matrix_records": 24,
+        "feedback_codec_weighted_recovery": 0.9999868912785022,
+        "feedback_codec_worst_matrix_recovery": 0.9999597124169332,
+        "feedback_codec_worst_matrix": "layer3.mlp.c_fc",
+        "current_step_weighted_recovery": 0.9999996880939622,
+        "current_step_worst_matrix_recovery": 0.9999990189179375,
+        "current_step_worst_matrix": "layer3.mlp.c_fc"
+      },
+      {
+        "optimizer_step": 8,
+        "matrix_records": 24,
+        "feedback_codec_weighted_recovery": 0.9999940611265462,
+        "feedback_codec_worst_matrix_recovery": 0.9999876247299004,
+        "feedback_codec_worst_matrix": "layer0.mlp.c_proj",
+        "current_step_weighted_recovery": 0.9999993903817506,
+        "current_step_worst_matrix_recovery": 0.9999982628268987,
+        "current_step_worst_matrix": "layer0.mlp.c_fc"
+      }
+    ],
+    "causal_comparison": {
+      "prior_q5_b32_lloyd4_step0_worst_recovery": 0.9997898559878475,
+      "new_q5_b64_lloyd16_step0_worst_recovery": 0.9999597124169332,
+      "worst_error_reduction_factor": 5.216099,
+      "interpretation": "The live trajectory confirms the fixed-source diagnosis: converging the residual codebook and matching the c_fc residual scale with B64 removes the early codec floor without per-axis codebooks or a dense temporal tensor."
+    }
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
+    "c_fc_physical_bits_per_weight": 12.65625,
+    "c_proj_physical_bits_per_weight": 11.78125,
+    "aggregate_physical_bits_per_weight": 12.21875,
+    "feedback_code_bytes": 86482944,
+    "feedback_level_bytes": 88320,
+    "packed_feedback_bytes_total": 86571264,
+    "compact_momentum_bytes": 73728,
+    "compact_model_bytes": 70855872,
+    "persistent_mlp_training_matrix_bytes": 157500864,
+    "reduction_vs_dense_fp32_weight_plus_muon": 2.876078,
+    "dense_fp32_temporal_tensor_present": false,
+    "checkpoint_replay_tested_bit_exact": true
+  },
+  "artifacts": {
+    "scientific_log_sha256": "e948d5ed6a7e89fb1b349c9228a09b3ec327e1029a20d38fb3bbb71d5378d975",
+    "checkpoint_sha256": "d9b529aa66288679ac9fc0d1d8af8f95bb098a0978c184598490acbf614fdd39",
+    "checkpoint_bytes": 746453944,
+    "checkpoint_metadata_sha256": "e2820a00f4aaa2cb375defee10892f928758c75751b9bcf38672656f58d0e1c0"
+  },
+  "authorization": {
+    "matched_0p5tpp_endpoint": true,
+    "model_scale_up": false,
+    "longer_horizon": false,
+    "lr_sweep": false,
+    "next_causal_change": "Run exactly one 124M 0.5-TPP endpoint against the sealed qk-only dense-MLP parent, preserving model/data/evaluation seeds, schedule, and fixed evaluation indices. Require the same recovery floors through the late horizon and a terminal validation-CE gap no greater than 0.05."
+  }
+}

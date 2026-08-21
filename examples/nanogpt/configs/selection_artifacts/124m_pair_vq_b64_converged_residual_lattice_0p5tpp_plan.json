@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_pair_vq_b64_converged_residual_lattice_0p5tpp_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does the live-qualified 12.21875-bit compact full-MLP temporal representation close the matched QK-only dense-MLP parent's 124M/0.5-TPP validation-loss gap?",
+  "theory": {
+    "finite_state": "Two pair-VQ stages plus the existing fast Cartesian residual stage materialize each MLP matrix.",
+    "temporal_state": "A q7/q8 B32 base residual code is augmented by a q5 B64 Lloyd-16 innovation code for c_fc and a q4 B32 Lloyd-4 innovation code for c_proj. This directly targets the measured late-horizon direction mismatch without a dense ambient residual.",
+    "causal_evidence": "The fixed-source decomposition attributed the prior floor to codebook under-convergence and block-scale mismatch. The live nine-step gate then passed weighted and every-matrix codec recovery, requested-step conservation, exact packed storage, bit-exact resume, MFU, and optimizer-share gates at both refreshes.",
+    "attention_control": "Only QK is mapped; V and attention output projection remain dense. The endpoint isolates complete MLP replacement and does not claim complete attention or complete model replacement."
+  },
+  "prerequisites": {
+    "production_gate": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_b64_converged_residual_lattice_gate9_result.json",
+    "production_gate_sha256": "cf850f649f49651677d1d17e2261f15ad311d418a311b6e97659f42fd56103a8",
+    "matched_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+    "matched_parent_terminal_validation_ce": 5.3610,
+    "previous_best_compact_terminal_validation_ce": 5.5178,
+    "previous_best_compact_gap_ce": 0.1568
+  },
+  "run": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "matched_parent_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+    "reuse_parent": "The sealed parent is immutable and uses identical model/data/evaluation seeds, schedule, and fixed evaluation indices, so it is not rerun."
+  },
+  "frozen_gates": {
+    "terminal_clean": true,
+    "fixed_eval_protocol_matches_parent": true,
+    "terminal_candidate_minus_parent_ce_max": 0.05,
+    "terminal_candidate_validation_ce_max": 5.4110,
+    "all_fixed_evaluations_finite": true,
+    "feedback_codec_weighted_recovery_min_every_logged_refresh": 0.999975,
+    "feedback_codec_every_matrix_recovery_min_every_logged_refresh": 0.9999,
+    "current_step_conservation_weighted_min_every_logged_refresh": 0.999975,
+    "current_step_conservation_every_matrix_min_every_logged_refresh": 0.9999,
+    "candidate_mfu_min_fraction": 0.20,
+    "candidate_optimizer_fraction_max": 0.30,
+    "larger_model_or_horizon_authorized_on_pass": false
+  },
+  "accounting": {
+    "mlp_elements": 56623104,
+    "dense_mlp_parameter_bytes_bf16": 113246208,
+    "compact_mlp_persistent_model_bytes": 70855872,
+    "model_state_reduction_x": 1.59826,
+    "dense_mlp_training_matrix_bytes_fp32_weight_plus_fp32_muon": 452984832,
+    "compact_mlp_persistent_training_matrix_bytes": 157500864,
+    "training_state_reduction_x": 2.876078,
+    "temporal_feedback_bits_per_weight": 12.21875,
+    "inference_flops": "unchanged materialized dense MLP"
+  },
+  "decision_policy": {
+    "pass": "Seal the endpoint, quantify the remaining <=0.05 CE gap and compute-equivalent penalty, then design the next full-attention completion step. Do not automatically scale model or horizon.",
+    "fail_loss_but_pass_direction": "Temporal direction matching is closed at this rate, so attribute the residual to finite pair-VQ function capacity or compact-coordinate optimization and return to the weight chart without changing LR or scaling.",
+    "fail_direction": "Reject temporal closure at the first failing refresh and decompose the late innovation source; do not loosen thresholds or sweep LR.",
+    "automatic_rerun": false
+  },
+  "monitoring": {
+    "expected_duration_minutes": 9,
+    "watchdog": "one persistent idempotent terminal/error-only watcher",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "terminal_action": "Verify terminal artifacts and fixed losses, seal hashes and gate outcomes in the active project note, then continue only with the causally authorized full-MLP successor.",
+    "error_action": "Inspect process, status, log, GPU, and storage; recover or requeue only if scientifically justified, record the remediation, and continue."
+  }
+}
