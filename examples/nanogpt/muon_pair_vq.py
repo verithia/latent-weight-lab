@@ -54,6 +54,77 @@ def _nearest_cartesian_codes(
     return (first * 16 + second).to(torch.uint8)
 
 
+def _decode_cartesian_pair_codec(
+    levels: torch.Tensor, codes: torch.Tensor
+) -> torch.Tensor:
+    if tuple(levels.shape) != (2, 16):
+        raise ValueError("Cartesian pair levels must have shape (2, 16)")
+    selected = codes.long()
+    return torch.stack(
+        (
+            levels[0].index_select(0, selected // 16),
+            levels[1].index_select(0, selected % 16),
+        ),
+        dim=1,
+    )
+
+
+@torch.no_grad()
+def _fit_cartesian_pair_codec_(
+    vectors: torch.Tensor,
+    levels: torch.Tensor,
+    codes: torch.Tensor,
+) -> int:
+    """Fit a 16x16 Cartesian pair dictionary without dense persistent state."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("Cartesian pair values must have shape (pairs, 2)")
+    if tuple(levels.shape) != (2, 16):
+        raise ValueError("Cartesian pair levels must have shape (2, 16)")
+    if codes.ndim != 1 or codes.numel() != vectors.shape[0]:
+        raise ValueError("Cartesian pair codes have the wrong shape")
+    old_codes = codes.clone()
+    assignments = []
+    for coordinate in range(2):
+        values = vectors[:, coordinate]
+        mean = values.mean()
+        std = values.std(unbiased=False)
+        old_levels = levels[coordinate]
+        old_std = old_levels.std(unbiased=False)
+        if float(std) <= torch.finfo(torch.float32).tiny:
+            fitted = torch.full_like(old_levels, mean)
+        elif float(old_std) > torch.finfo(torch.float32).tiny:
+            fitted = (old_levels - old_levels.mean()) / old_std
+            fitted = (fitted * std + mean).sort().values
+        else:
+            probabilities = (
+                torch.arange(16, device=values.device, dtype=torch.float32)
+                + 0.5
+            ) / 16.0
+            fitted = (
+                math.sqrt(2.0)
+                * torch.erfinv(2.0 * probabilities - 1.0)
+                * std
+                + mean
+            )
+        for _iteration in range(2):
+            midpoints = (fitted[:-1] + fitted[1:]) * 0.5
+            indices = torch.bucketize(values.contiguous(), midpoints)
+            sums = torch.zeros_like(fitted)
+            sums.index_add_(0, indices, values)
+            counts = torch.bincount(indices, minlength=16)
+            live = counts > 0
+            fitted[live] = sums[live] / counts[live]
+            fitted = fitted.sort().values
+        indices = torch.bucketize(
+            values.contiguous(), (fitted[:-1] + fitted[1:]) * 0.5
+        )
+        levels[coordinate].copy_(fitted)
+        assignments.append(indices)
+    new_codes = (assignments[0] * 16 + assignments[1]).to(torch.uint8)
+    codes.copy_(new_codes)
+    return int((new_codes != old_codes).sum())
+
+
 class MuonPairVQLinear(nn.Module):
     """Linear layer whose only persistent matrix state is pair VQ."""
 
@@ -71,6 +142,7 @@ class MuonPairVQLinear(nn.Module):
         weight_std: float,
         layer_id: int,
         fast_residual: bool = False,
+        error_feedback: bool = False,
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -80,6 +152,7 @@ class MuonPairVQLinear(nn.Module):
         self.stages = int(stages)
         self.layer_id = int(layer_id)
         self.fast_residual = bool(fast_residual)
+        self.error_feedback = bool(error_feedback)
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
         if self.in_features <= 0 or self.out_features <= 0:
@@ -162,19 +235,32 @@ class MuonPairVQLinear(nn.Module):
         return self.codebooks.numel() * torch.tensor([], dtype=torch.float32).element_size()
 
     @property
+    def compact_feedback_bytes(self) -> int:
+        if not self.error_feedback:
+            return 0
+        pair_codes = self.element_count // self.vector_length
+        level_bytes = 2 * 16 * torch.tensor([], dtype=torch.float32).element_size()
+        return pair_codes * torch.tensor([], dtype=torch.uint8).element_size() + level_bytes
+
+    @property
     def transient_weight_bytes(self) -> int:
         return self.weight.numel() * self.weight.element_size()
 
     def storage_accounting(self) -> dict[str, int | float | str]:
         dense_bf16 = self.element_count * 2
         dense_fp32_weight_and_momentum = self.element_count * 8
-        persistent_training = self.persistent_codec_bytes + self.compact_momentum_bytes
+        persistent_training = (
+            self.persistent_codec_bytes
+            + self.compact_momentum_bytes
+            + self.compact_feedback_bytes
+        )
         return {
             "elements": self.element_count,
             "stages": self.stages,
             "fast_residual": self.fast_residual,
             "persistent_codec_bytes": self.persistent_codec_bytes,
             "compact_momentum_bytes": self.compact_momentum_bytes,
+            "compact_feedback_bytes": self.compact_feedback_bytes,
             "persistent_training_bytes": persistent_training,
             "model_compression_vs_dense_bf16": dense_bf16 / self.persistent_codec_bytes,
             "training_compression_vs_dense_fp32_weight_plus_momentum": (
@@ -184,7 +270,12 @@ class MuonPairVQLinear(nn.Module):
             "transient_gradient_bytes": self.transient_weight_bytes,
             "dense_master_weight": "disabled",
             "dense_optimizer_momentum": "disabled",
-            "ambient_error_buffer": "disabled",
+            "dense_ambient_error_buffer": "disabled",
+            "compact_temporal_carry": (
+                "uint8_cartesian_code_per_weight_pair"
+                if self.error_feedback
+                else "disabled"
+            ),
         }
 
     def _apply(self, fn, recurse: bool = True):
@@ -276,47 +367,9 @@ class MuonPairVQLinear(nn.Module):
     def _fit_fast_residual_(self, residual: torch.Tensor) -> int:
         if not self.fast_residual:
             return 0
-        old_codes = self.fast_codes.clone()
-        assignments = []
-        for coordinate in range(2):
-            values = residual[:, coordinate]
-            mean = values.mean()
-            std = values.std(unbiased=False)
-            old_levels = self.fast_levels[coordinate]
-            old_std = old_levels.std(unbiased=False)
-            if float(std) <= torch.finfo(torch.float32).tiny:
-                levels = torch.full_like(old_levels, mean)
-            elif float(old_std) > torch.finfo(torch.float32).tiny:
-                levels = (old_levels - old_levels.mean()) / old_std
-                levels = (levels * std + mean).sort().values
-            else:
-                probabilities = (
-                    torch.arange(16, device=values.device, dtype=torch.float32)
-                    + 0.5
-                ) / 16.0
-                levels = (
-                    math.sqrt(2.0)
-                    * torch.erfinv(2.0 * probabilities - 1.0)
-                    * std
-                    + mean
-                )
-            for _iteration in range(2):
-                midpoints = (levels[:-1] + levels[1:]) * 0.5
-                indices = torch.bucketize(values.contiguous(), midpoints)
-                sums = torch.zeros_like(levels)
-                sums.index_add_(0, indices, values)
-                counts = torch.bincount(indices, minlength=16)
-                live = counts > 0
-                levels[live] = sums[live] / counts[live]
-                levels = levels.sort().values
-            indices = torch.bucketize(
-                values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
-            )
-            self.fast_levels[coordinate].copy_(levels)
-            assignments.append(indices)
-        new_codes = (assignments[0] * 16 + assignments[1]).to(torch.uint8)
-        self.fast_codes.copy_(new_codes)
-        return int((new_codes != old_codes).sum())
+        return _fit_cartesian_pair_codec_(
+            residual, self.fast_levels, self.fast_codes
+        )
 
     @torch.no_grad()
     def project_requested_weight_(
@@ -445,6 +498,17 @@ class MuonPairVQ(torch.optim.Optimizer):
                     device=weight.device,
                     dtype=module.codebooks.dtype,
                 )
+            if module.error_feedback:
+                levels = state.get("feedback_levels")
+                codes = state.get("feedback_codes")
+                if levels is not None:
+                    state["feedback_levels"] = levels.to(
+                        device=weight.device, dtype=torch.float32
+                    )
+                if codes is not None:
+                    state["feedback_codes"] = codes.to(
+                        device=weight.device, dtype=torch.uint8
+                    )
         return result
 
     @torch.no_grad()
@@ -487,14 +551,65 @@ class MuonPairVQ(torch.optim.Optimizer):
                 if weight_decay != 0.0:
                     requested = requested * (1.0 - lr * weight_decay)
                 requested = requested.add(update.float(), alpha=-lr)
+                current_request = requested - weight.float()
+                if module.error_feedback:
+                    pair_count = module.element_count // module.vector_length
+                    if "feedback_levels" not in state:
+                        state["feedback_levels"] = torch.zeros(
+                            2, 16, device=weight.device, dtype=torch.float32
+                        )
+                    if "feedback_codes" not in state:
+                        state["feedback_codes"] = torch.zeros(
+                            pair_count, device=weight.device, dtype=torch.uint8
+                        )
+                    feedback_before = _decode_cartesian_pair_codec(
+                        state["feedback_levels"], state["feedback_codes"]
+                    ).reshape_as(weight)
+                    projection_target = requested + feedback_before
+                else:
+                    feedback_before = None
+                    projection_target = requested
                 refresh = (
                     int(module.optimizer_step) % module.code_refresh_interval == 0
                 )
-                self._diagnostics.append(
-                    module.project_requested_weight_(
-                        requested, refresh_codes=refresh
-                    )
+                diagnostics = module.project_requested_weight_(
+                    projection_target, refresh_codes=refresh
                 )
+                diagnostics["error_feedback"] = int(module.error_feedback)
+                if module.error_feedback:
+                    raw_feedback = projection_target - weight.float()
+                    feedback_code_changes = _fit_cartesian_pair_codec_(
+                        raw_feedback.reshape(-1, module.vector_length),
+                        state["feedback_levels"],
+                        state["feedback_codes"],
+                    )
+                    feedback_after = _decode_cartesian_pair_codec(
+                        state["feedback_levels"], state["feedback_codes"]
+                    ).reshape_as(weight)
+                    conservation_error = raw_feedback - feedback_after
+                    current_request_energy = float(current_request.square().sum())
+                    feedback_target_energy = float(raw_feedback.square().sum())
+                    conservation_error_energy = float(
+                        conservation_error.square().sum()
+                    )
+                    diagnostics.update(
+                        {
+                            "current_request_energy": current_request_energy,
+                            "feedback_target_energy": feedback_target_energy,
+                            "feedback_energy": float(feedback_after.square().sum()),
+                            "feedback_quantization_residual_energy": (
+                                conservation_error_energy
+                            ),
+                            "feedback_codec_energy_recovery": 1.0
+                            - conservation_error_energy
+                            / max(feedback_target_energy, 1e-30),
+                            "conserved_requested_step_energy_recovery": 1.0
+                            - conservation_error_energy
+                            / max(current_request_energy, 1e-30),
+                            "feedback_code_changes": feedback_code_changes,
+                        }
+                    )
+                self._diagnostics.append(diagnostics)
         return loss
 
     def consume_diagnostics(self) -> list[dict[str, float | int]]:

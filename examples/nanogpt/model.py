@@ -191,6 +191,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_seed: int = 20261020
     block_fht_mlp_pair_vq_neighbor_candidates: int = 16
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
+    block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_cproj_muon_matched_givens: bool = False
     block_fht_mlp_cproj_muon_matched_givens_layers: tuple[int, ...] = ()
     block_fht_mlp_cproj_muon_matched_givens_stages: int = 32
@@ -2398,6 +2399,9 @@ class MLP(nn.Module):
                 weight_std=0.02,
                 layer_id=layer_id,
                 fast_residual=True,
+                error_feedback=bool(
+                    config.block_fht_mlp_pair_vq_error_feedback
+                ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
@@ -2634,6 +2638,9 @@ class MLP(nn.Module):
                 weight_std=0.02 / math.sqrt(2 * config.n_layer),
                 layer_id=layer_id,
                 fast_residual=False,
+                error_feedback=bool(
+                    config.block_fht_mlp_pair_vq_error_feedback
+                ),
                 neighbor_candidates=int(
                     config.block_fht_mlp_pair_vq_neighbor_candidates
                 ),
@@ -5749,14 +5756,16 @@ class GPT(nn.Module):
         elements = sum(module.element_count for module in modules)
         codec_bytes = sum(module.persistent_codec_bytes for module in modules)
         momentum_bytes = sum(module.compact_momentum_bytes for module in modules)
+        feedback_bytes = sum(module.compact_feedback_bytes for module in modules)
         dense_bf16_bytes = 2 * elements
         dense_fp32_weight_momentum_bytes = 8 * elements
-        persistent_training_bytes = codec_bytes + momentum_bytes
+        persistent_training_bytes = codec_bytes + momentum_bytes + feedback_bytes
         return {
             "modules": len(modules),
             "elements": elements,
             "codec_bytes": codec_bytes,
             "compact_momentum_bytes": momentum_bytes,
+            "compact_feedback_bytes": feedback_bytes,
             "persistent_training_bytes": persistent_training_bytes,
             "model_compression_vs_dense_bf16": (
                 dense_bf16_bytes / codec_bytes if codec_bytes else 0.0
@@ -5768,7 +5777,12 @@ class GPT(nn.Module):
             ),
             "dense_master_weight": "disabled",
             "dense_optimizer_momentum": "disabled",
-            "ambient_error_buffer": "disabled",
+            "dense_ambient_error_buffer": "disabled",
+            "compact_temporal_carry": (
+                "uint8_cartesian_code_per_weight_pair"
+                if feedback_bytes
+                else "disabled"
+            ),
         }
 
     def prepare_block_fht_cache(self, dtype: torch.dtype | None = None) -> None:

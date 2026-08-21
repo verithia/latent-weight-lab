@@ -15,7 +15,11 @@ from examples.nanogpt.muon_pair_vq import (
 
 
 def make_module(
-    *, stages: int = 2, seed: int = 101, fast_residual: bool = False
+    *,
+    stages: int = 2,
+    seed: int = 101,
+    fast_residual: bool = False,
+    error_feedback: bool = False,
 ) -> MuonPairVQLinear:
     return MuonPairVQLinear(
         8,
@@ -26,6 +30,7 @@ def make_module(
         weight_std=0.02,
         layer_id=3,
         fast_residual=fast_residual,
+        error_feedback=error_feedback,
         neighbor_candidates=16,
         code_refresh_interval=8,
     )
@@ -85,6 +90,75 @@ def test_optimizer_state_is_only_compact_code_momentum() -> None:
     assert set(state) == {"compact_momentum"}
     assert state["compact_momentum"].shape == module.codebooks.shape
     assert state["compact_momentum"].numel() == 2 * 256 * 2
+
+
+def test_pair_coded_feedback_conserves_discarded_motion_compactly() -> None:
+    torch.manual_seed(127)
+    module = make_module(stages=1, error_feedback=True)
+    optimizer = make_optimizer(module)
+    diagnostics = None
+    for _step in range(12):
+        module.weight.grad = 1e-3 * torch.randn_like(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()[0]
+    assert diagnostics is not None
+    assert diagnostics["error_feedback"] == 1
+    assert diagnostics["feedback_codec_energy_recovery"] > 0.95
+    assert diagnostics["conserved_requested_step_energy_recovery"] > 0.90
+    assert diagnostics["feedback_code_changes"] > 0
+    state = optimizer.state[module.weight]
+    assert set(state) == {
+        "compact_momentum",
+        "feedback_levels",
+        "feedback_codes",
+    }
+    assert state["feedback_levels"].shape == (2, 16)
+    assert state["feedback_levels"].dtype == torch.float32
+    assert state["feedback_codes"].shape == (module.element_count // 2,)
+    assert state["feedback_codes"].dtype == torch.uint8
+    assert module.compact_feedback_bytes == module.element_count // 2 + 128
+    assert all(value.numel() != module.element_count for value in state.values())
+
+
+def test_pair_coded_feedback_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(131)
+    module = make_module(stages=1, seed=137, error_feedback=True)
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(stages=1, seed=139, error_feedback=True)
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    restored_state = restored_optimizer.state[restored.weight]
+    assert restored_state["feedback_codes"].dtype == torch.uint8
+    assert restored_state["feedback_levels"].dtype == torch.float32
+
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    assert torch.equal(restored.codes, module.codes)
+    torch.testing.assert_close(
+        restored.codebooks, module.codebooks, rtol=0.0, atol=0.0
+    )
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(
+        restored_state["feedback_codes"], original_state["feedback_codes"]
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
 
 
 def test_model_and_optimizer_resume_are_bit_exact_for_next_step() -> None:
@@ -151,6 +225,7 @@ def test_gpt_routes_complete_mlp_and_optimizer_through_pair_vq() -> None:
             block_fht_mlp_pair_vq=True,
             block_fht_mlp_pair_vq_neighbor_candidates=16,
             block_fht_mlp_pair_vq_code_refresh_interval=8,
+            block_fht_mlp_pair_vq_error_feedback=True,
         )
     )
     mlp = model.transformer.h[0].mlp
@@ -160,10 +235,14 @@ def test_gpt_routes_complete_mlp_and_optimizer_through_pair_vq() -> None:
     assert mlp.c_proj.stages == 1
     assert mlp.c_fc.fast_residual is True
     assert mlp.c_proj.fast_residual is False
+    assert mlp.c_fc.error_feedback is True
+    assert mlp.c_proj.error_feedback is True
     stats = model.mlp_pair_vq_stats()
     assert stats["modules"] == 2
     assert stats["dense_master_weight"] == "disabled"
     assert stats["dense_optimizer_momentum"] == "disabled"
+    assert stats["dense_ambient_error_buffer"] == "disabled"
+    assert stats["compact_feedback_bytes"] > 0
     optimizer = model.configure_optimizers(
         weight_decay=0.1,
         learning_rate=0.001,

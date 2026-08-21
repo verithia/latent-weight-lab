@@ -1344,6 +1344,11 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=8,
     )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-error-feedback",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -2210,6 +2215,11 @@ def parse_args() -> argparse.Namespace:
             or namespace.block_fht_mlp_cproj_muon_matched_givens
         ):
             raise ValueError("MLP pair VQ conflicts with another MLP chart")
+    if (
+        namespace.block_fht_mlp_pair_vq_error_feedback
+        and not namespace.block_fht_mlp_pair_vq
+    ):
+        raise ValueError("pair-coded feedback requires MLP pair VQ")
     if namespace.block_fht_mlp_cproj_muon_matched_givens:
         if namespace.method != "block_fht":
             raise ValueError(
@@ -2939,6 +2949,9 @@ def main() -> None:
         block_fht_mlp_pair_vq_code_refresh_interval=(
             args.block_fht_mlp_pair_vq_code_refresh_interval
         ),
+        block_fht_mlp_pair_vq_error_feedback=(
+            args.block_fht_mlp_pair_vq_error_feedback
+        ),
         block_fht_ffn_pregelu_gain=args.block_fht_ffn_pregelu_gain,
         block_fht_ffn_pregelu_bias=args.block_fht_ffn_pregelu_bias,
         block_fht_ffn_pregelu_bias_init=args.block_fht_ffn_pregelu_bias_init,
@@ -3326,6 +3339,7 @@ def main() -> None:
                 f"elements={pair_vq_stats['elements']:,} "
                 f"codec_bytes={pair_vq_stats['codec_bytes']:,} "
                 f"compact_momentum_bytes={pair_vq_stats['compact_momentum_bytes']:,} "
+                f"compact_feedback_bytes={pair_vq_stats['compact_feedback_bytes']:,} "
                 f"persistent_training_bytes={pair_vq_stats['persistent_training_bytes']:,} "
                 f"model_compression_vs_dense_bf16={pair_vq_stats['model_compression_vs_dense_bf16']:.6f} "
                 f"training_compression_vs_dense_fp32_weight_plus_momentum={pair_vq_stats['training_compression_vs_dense_fp32_weight_plus_momentum']:.6f} "
