@@ -1,0 +1,49 @@
+{
+  "schema_version": "mai_124m_pair_vq_antithetic_functional_gradient_oracle_mfu_result_v1",
+  "recorded_at": "2026-08-22",
+  "status": "sealed_pass_oracle_replay_authorized",
+  "classification": "PASS_FUNCTIONAL_ORACLE_SYSTEMS_GATE",
+  "identity": {
+    "execution_commit": "d0c8dccbeaebfe2cad27de1134855b85cf8b8483",
+    "implementation_commit": "565651f9540e23a341a173785f4c8f8c10fd46ff",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_antithetic_functional_gradient_oracle_0p5tpp_lr24e4.json",
+    "config_sha256": "e51c0512b1dc2f1dd31627b6365b4a6bd8131bf08cf4d28297d472a5eed8bdd5",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_antithetic_functional_gradient_oracle_plan.json",
+    "plan_sha256": "c856d2d695a569673572004e457c275e632f6461e5e1682c4f224bc22e71ba4f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "artifacts": {
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_dense_pairvq_antithetic_functional_gradient_oracle_0p5tpp_lr24e4_mfu.json",
+    "certificate_sha256": "cef9c37b80671253482c01a463816d45919da2256329baee554c990a5db70f3a",
+    "preflight_log_sha256": "e0c09fce31d614a1f1dcc5ab7cb8a0a495bc3618b3346ee37d3e5d2313b5085f"
+  },
+  "measurements": {
+    "warmup_updates": 1,
+    "timed_updates": 8,
+    "elapsed_seconds": 22.3727126121521,
+    "tokens_per_second": 163520.0675,
+    "iteration_ms": 1603.2375,
+    "forward_backward_ms": 1185.55125,
+    "optimizer_ms": 402.78,
+    "peak_allocated_mib": 32105.68,
+    "empirical_bf16_gemm_peak_tflops": 418.11841617619456,
+    "model_tflops": 122.12584934522113,
+    "mfu_fraction": 0.2920843584506391,
+    "native_block_fht_extension_loaded": true,
+    "all_logged_losses_finite": true,
+    "fit_and_heldout_windows_constructed_disjointly": true
+  },
+  "frozen_gate": {
+    "minimum_mfu_fraction": 0.20,
+    "all_logged_losses_finite": true,
+    "native_block_fht_extension_required": true
+  },
+  "decision": {
+    "systems_gate_passed": true,
+    "authorized_run": "one nonintervening 238-update synchronized functional-gradient oracle replay",
+    "language_model_endpoint_authorized": false,
+    "automatic_scale_up": false,
+    "automatic_sweep": false,
+    "watchdog_policy": "one idempotent terminal/error-only @Codex invocation watchdog"
+  }
+}
