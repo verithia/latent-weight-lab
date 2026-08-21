@@ -7,6 +7,7 @@ import torch
 import torch.nn.functional as F
 
 from examples.nanogpt.analyze_shared_trunk_private_ridge_teacher_fit import (
+    InstalledRidgeMLP,
     SharedPrivateRidgeMLP,
     expand_private_width,
     passes,
@@ -64,6 +65,12 @@ def test_nested_expansion_is_function_preserving() -> None:
     torch.testing.assert_close(expanded(values), before)
     assert expanded.private_width == 5
     assert torch.count_nonzero(expanded.private_v) == 0
+
+
+def test_installed_view_preserves_plain_block_interface() -> None:
+    installed = InstalledRidgeMLP(family(2), 1)
+    assert installed.residual_conditioned_output_slope is None
+    assert installed.conditioned_output_gate_source == "residual"
 
 
 def test_registered_parameter_accounting() -> None:

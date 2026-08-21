@@ -176,6 +176,10 @@ class InstalledRidgeMLP(nn.Module):
         super().__init__()
         self.family = family
         self.layer = int(layer)
+        # ``Block.forward`` probes this optional gate on every dense MLP.
+        # The oracle family has no post-MLP gate, so expose the plain path.
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
 
     def forward(self, values: Tensor) -> Tensor:
         return self.family.forward_layer(self.layer, values)
