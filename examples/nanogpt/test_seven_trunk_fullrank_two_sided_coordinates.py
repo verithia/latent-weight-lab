@@ -66,9 +66,11 @@ def test_maps_only_and_joint_fit_keep_singletons_frozen() -> None:
     assert not module.singleton_fc.requires_grad
     assert not module.late_fc.requires_grad
     selected = module.set_trainable(coefficients_only=False)
-    assert module.input_maps in selected and module.output_maps in selected
-    assert module.late_fc in selected and module.late_proj in selected
-    assert module.late_pre_gain in selected
+    assert any(parameter is module.input_maps for parameter in selected)
+    assert any(parameter is module.output_maps for parameter in selected)
+    assert any(parameter is module.late_fc for parameter in selected)
+    assert any(parameter is module.late_proj for parameter in selected)
+    assert any(parameter is module.late_pre_gain for parameter in selected)
     assert not module.singleton_fc.requires_grad
     assert not module.singleton_pre_gain.requires_grad
 
