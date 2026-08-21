@@ -2311,6 +2311,28 @@ def parse_args() -> argparse.Namespace:
             7,
         )
     )
+    fractional_probe_block_size = int(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_fractional_probe_block_size",
+            0,
+        )
+    )
+    fractional_probe_base_coordinate_bits = int(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits",
+            7,
+        )
+    )
+    fractional_probe_refinement_fractions = tuple(
+        float(fraction)
+        for fraction in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions",
+            (),
+        )
+    )
     if any(step < 0 for step in residual_probe_steps):
         raise ValueError("pair-VQ residual probe steps must be nonnegative")
     if any(iterations <= 0 for iterations in residual_probe_iterations):
@@ -2388,6 +2410,36 @@ def parse_args() -> argparse.Namespace:
     ):
         raise ValueError(
             "pair-VQ axis-adaptation probes require free-VQ residual probe steps"
+        )
+    if fractional_probe_block_size < 0:
+        raise ValueError("pair-VQ fractional-probe block size must be nonnegative")
+    if fractional_probe_block_size and (
+        fractional_probe_block_size < 2
+        or fractional_probe_block_size & (fractional_probe_block_size - 1)
+    ):
+        raise ValueError(
+            "pair-VQ fractional-probe block size must be a power of two"
+        )
+    if not 2 <= fractional_probe_base_coordinate_bits < 8:
+        raise ValueError("pair-VQ fractional-probe base bits must be in [2, 7]")
+    if any(
+        fraction <= 0.0 or fraction >= 1.0
+        for fraction in fractional_probe_refinement_fractions
+    ):
+        raise ValueError("pair-VQ fractional-probe fractions must be in (0, 1)")
+    if bool(fractional_probe_block_size) != bool(
+        fractional_probe_refinement_fractions
+    ):
+        raise ValueError(
+            "pair-VQ fractional probes require a block size and fractions"
+        )
+    if fractional_probe_block_size and not (
+        residual_probe_steps
+        and namespace.block_fht_mlp_pair_vq_feedback_codec
+        == "free_vq256_rvq2"
+    ):
+        raise ValueError(
+            "pair-VQ fractional probes require free-VQ residual probe steps"
         )
     if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
         "cartesian4x4",
@@ -2953,6 +3005,28 @@ def pair_vq_model_kwargs(
                 namespace,
                 "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits",
                 7,
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_fractional_probe_block_size": int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_fractional_probe_block_size",
+                0,
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits": int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits",
+                7,
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions": tuple(
+            float(fraction)
+            for fraction in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions",
+                (),
             )
         ),
     }

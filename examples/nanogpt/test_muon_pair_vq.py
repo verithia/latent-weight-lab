@@ -11,6 +11,7 @@ from examples.nanogpt.muon_pair_vq import (
     MuonPairVQLinear,
     _block_gain_axis_adaptation_counterfactual,
     _block_fht_free_pair_vq_counterfactual,
+    _block_fht_fractional_lattice_counterfactual,
     _block_fht_gain_lattice_counterfactual,
     _conditional_polar_pair_diagnostics,
     _decode_conditional_polar_pair_codec,
@@ -167,6 +168,29 @@ def test_block_gain_axis_adaptation_reports_all_oracle_arms() -> None:
         assert diagnostics[f"{arm}_full_recovery"] > 0.99
         assert diagnostics[f"{arm}_coordinate_active_codes_min"] > 48
         assert diagnostics[f"{arm}_gain_active_codes"] > 64
+
+
+def test_block_fht_fractional_lattice_rate_and_monotonic_recovery() -> None:
+    torch.manual_seed(1708)
+    vectors = torch.randn(4096, 2)
+    diagnostics = _block_fht_fractional_lattice_counterfactual(
+        vectors,
+        block_size=32,
+        base_coordinate_bits=7,
+        refinement_fractions=(0.125, 0.5),
+        seed=1708,
+    )
+    assert diagnostics["parseval_relative_error"] < 1e-6
+    assert diagnostics["base_active_codes"] == 128
+    assert diagnostics["refined_active_codes"] > 192
+    assert diagnostics["p0p125_physical_bits_per_weight"] == 7.40625
+    assert diagnostics["p0p5_physical_bits_per_weight"] == 7.78125
+    assert (
+        diagnostics["base_full_recovery"]
+        < diagnostics["p0p125_full_recovery"]
+        < diagnostics["p0p5_full_recovery"]
+        < diagnostics["uniform_refined_full_recovery"]
+    )
 
 
 def test_free_pair_vq_rvq2_feedback_is_compact_and_reports_exact_regret() -> None:
@@ -999,6 +1023,9 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits": (),
         "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size": 0,
         "block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits": 7,
+        "block_fht_mlp_pair_vq_feedback_fractional_probe_block_size": 0,
+        "block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits": 7,
+        "block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions": (),
     }
     config = GPTConfig(
         block_size=8,

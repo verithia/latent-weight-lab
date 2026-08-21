@@ -1112,6 +1112,117 @@ def _block_gain_axis_adaptation_counterfactual(
 
 
 @torch.no_grad()
+def _block_fht_fractional_lattice_counterfactual(
+    vectors: torch.Tensor,
+    *,
+    block_size: int,
+    base_coordinate_bits: int,
+    refinement_fractions: tuple[float, ...],
+    seed: int,
+) -> dict[str, float | int]:
+    """Measure block-selected q_b/q_(b+1) variable-rate refinement."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("fractional-lattice values must have shape (pairs, 2)")
+    if block_size < 2 or block_size & (block_size - 1):
+        raise ValueError("fractional-lattice block size must be a power of two")
+    if vectors.numel() % block_size:
+        raise ValueError("fractional-lattice block size must divide the source")
+    if base_coordinate_bits < 2 or base_coordinate_bits >= 8:
+        raise ValueError("fractional-lattice base bits must be in [2, 7]")
+    if not refinement_fractions or any(
+        fraction <= 0.0 or fraction >= 1.0
+        for fraction in refinement_fractions
+    ):
+        raise ValueError("fractional-lattice fractions must be in (0, 1)")
+
+    transformed = _signed_block_fht(
+        vectors, block_size=block_size, seed=seed
+    )
+    source_energy = vectors.square().sum().clamp_min(1e-30)
+    gains = transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
+    gain_levels, gain_codes = _fit_scalar_codebook(
+        gains.log(), level_count=256
+    )
+    decoded_gains = gain_levels.index_select(0, gain_codes).exp()
+    normalized = (transformed / decoded_gains[:, None]).reshape(-1)
+
+    base_levels, base_codes = _fit_scalar_codebook(
+        normalized, level_count=1 << base_coordinate_bits
+    )
+    refined_levels, refined_codes = _fit_scalar_codebook(
+        normalized, level_count=1 << (base_coordinate_bits + 1)
+    )
+    base_decoded = base_levels.index_select(0, base_codes).reshape_as(
+        transformed
+    ) * decoded_gains[:, None]
+    refined_decoded = refined_levels.index_select(
+        0, refined_codes
+    ).reshape_as(transformed) * decoded_gains[:, None]
+    base_block_error = (transformed - base_decoded).square().sum(dim=1)
+    refined_block_error = (transformed - refined_decoded).square().sum(dim=1)
+    improvement = base_block_error - refined_block_error
+
+    def entropy_bits(codes: torch.Tensor, levels: int) -> float:
+        counts = torch.bincount(codes.reshape(-1), minlength=levels).to(
+            torch.float32
+        )
+        probabilities = counts[counts > 0] / counts.sum().clamp_min(1.0)
+        return float(-(probabilities * probabilities.log2()).sum())
+
+    output: dict[str, float | int] = {
+        "base_full_recovery": float(
+            1.0 - base_block_error.sum() / source_energy
+        ),
+        "uniform_refined_full_recovery": float(
+            1.0 - refined_block_error.sum() / source_energy
+        ),
+        "base_active_codes": int(base_codes.unique().numel()),
+        "refined_active_codes": int(refined_codes.unique().numel()),
+        "base_entropy_bits": entropy_bits(
+            base_codes, 1 << base_coordinate_bits
+        ),
+        "refined_entropy_bits": entropy_bits(
+            refined_codes, 1 << (base_coordinate_bits + 1)
+        ),
+        "gain_active_codes": int(gain_codes.unique().numel()),
+        "gain_entropy_bits": entropy_bits(gain_codes, 256),
+        "parseval_relative_error": float(
+            (transformed.square().sum() - source_energy).abs()
+            / source_energy
+        ),
+    }
+    for fraction in refinement_fractions:
+        selected_count = int(round(float(fraction) * transformed.shape[0]))
+        selected_count = min(max(selected_count, 1), transformed.shape[0] - 1)
+        selected = torch.topk(
+            improvement, selected_count, largest=True, sorted=False
+        ).indices
+        mask = torch.zeros(
+            transformed.shape[0], device=transformed.device, dtype=torch.bool
+        )
+        mask[selected] = True
+        decoded = torch.where(
+            mask[:, None], refined_decoded, base_decoded
+        )
+        actual_fraction = float(mask.to(torch.float32).mean())
+        token = str(float(fraction)).replace(".", "p")
+        output[f"p{token}_full_recovery"] = float(
+            1.0 - (transformed - decoded).square().sum() / source_energy
+        )
+        output[f"p{token}_selected_fraction"] = actual_fraction
+        output[f"p{token}_physical_bits_per_weight"] = float(
+            base_coordinate_bits
+            + actual_fraction
+            + (1.0 + 8.0) / block_size
+        )
+        output[f"p{token}_selected_improvement_fraction"] = float(
+            improvement.index_select(0, selected).sum()
+            / improvement.clamp_min(0.0).sum().clamp_min(1e-30)
+        )
+    return output
+
+
+@torch.no_grad()
 def _conditional_polar_pair_diagnostics(
     vectors: torch.Tensor,
     radial_levels: torch.Tensor,
@@ -1355,6 +1466,9 @@ class MuonPairVQLinear(nn.Module):
         feedback_lattice_probe_coordinate_bits: tuple[int, ...] = (),
         feedback_axis_adaptation_probe_block_size: int = 0,
         feedback_axis_adaptation_probe_coordinate_bits: int = 7,
+        feedback_fractional_probe_block_size: int = 0,
+        feedback_fractional_probe_base_coordinate_bits: int = 7,
+        feedback_fractional_probe_refinement_fractions: tuple[float, ...] = (),
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -1388,6 +1502,16 @@ class MuonPairVQLinear(nn.Module):
         )
         self.feedback_axis_adaptation_probe_coordinate_bits = int(
             feedback_axis_adaptation_probe_coordinate_bits
+        )
+        self.feedback_fractional_probe_block_size = int(
+            feedback_fractional_probe_block_size
+        )
+        self.feedback_fractional_probe_base_coordinate_bits = int(
+            feedback_fractional_probe_base_coordinate_bits
+        )
+        self.feedback_fractional_probe_refinement_fractions = tuple(
+            float(fraction)
+            for fraction in feedback_fractional_probe_refinement_fractions
         )
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
@@ -1487,6 +1611,37 @@ class MuonPairVQLinear(nn.Module):
         ):
             raise ValueError(
                 "feedback axis-adaptation probes require free-VQ residual probe steps"
+            )
+        if self.feedback_fractional_probe_block_size < 0:
+            raise ValueError("feedback fractional-probe block size must be nonnegative")
+        if self.feedback_fractional_probe_block_size and (
+            self.feedback_fractional_probe_block_size < 2
+            or self.feedback_fractional_probe_block_size
+            & (self.feedback_fractional_probe_block_size - 1)
+            or self.element_count % self.feedback_fractional_probe_block_size
+        ):
+            raise ValueError(
+                "feedback fractional-probe block size must be a power-of-two divisor"
+            )
+        if not 2 <= self.feedback_fractional_probe_base_coordinate_bits < 8:
+            raise ValueError("feedback fractional-probe base bits must be in [2, 7]")
+        if any(
+            fraction <= 0.0 or fraction >= 1.0
+            for fraction in self.feedback_fractional_probe_refinement_fractions
+        ):
+            raise ValueError("feedback fractional-probe fractions must be in (0, 1)")
+        if bool(self.feedback_fractional_probe_block_size) != bool(
+            self.feedback_fractional_probe_refinement_fractions
+        ):
+            raise ValueError(
+                "feedback fractional probes require a block size and fractions"
+            )
+        if self.feedback_fractional_probe_block_size and (
+            not self.feedback_residual_probe_steps
+            or self.feedback_codec != "free_vq256_rvq2"
+        ):
+            raise ValueError(
+                "feedback fractional probes require free-VQ residual probe steps"
             )
         if self.feedback_codec not in (
             "cartesian4x4",
@@ -2341,6 +2496,33 @@ class MuonPairVQ(torch.optim.Optimizer):
                                 for key, value in counterfactual.items():
                                     diagnostics[
                                         "feedback_axis_adapt_" + key
+                                    ] = value
+                            if module.feedback_fractional_probe_block_size:
+                                counterfactual = (
+                                    _block_fht_fractional_lattice_counterfactual(
+                                        raw_feedback.reshape(
+                                            -1, module.vector_length
+                                        ),
+                                        block_size=(
+                                            module.feedback_fractional_probe_block_size
+                                        ),
+                                        base_coordinate_bits=(
+                                            module.feedback_fractional_probe_base_coordinate_bits
+                                        ),
+                                        refinement_fractions=(
+                                            module.feedback_fractional_probe_refinement_fractions
+                                        ),
+                                        seed=(
+                                            20261025
+                                            + 8192 * module.layer_id
+                                            + 131 * module.in_features
+                                            + 17 * module.out_features
+                                        ),
+                                    )
+                                )
+                                for key, value in counterfactual.items():
+                                    diagnostics[
+                                        "feedback_fractional_" + key
                                     ] = value
                 self._diagnostics.append(diagnostics)
         return loss
