@@ -1,0 +1,181 @@
+{
+  "schema_version": "mai_pair_vq_fractional_lattice_0p5tpp_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_TERMINAL_LOSS_AND_LATE_TEMPORAL_CONSERVATION",
+  "passed": false,
+  "decision": {
+    "larger_model_or_horizon_authorized": false,
+    "learning_rate_sweep_authorized": false,
+    "next_authorized_work": "Add and exact-rate gate a low-rate residual/innovation stage for the fractional temporal codec, then repeat only the matched 124M 0.5-TPP endpoint after an exact-config MFU gate.",
+    "reason": "The new temporal state improves the prior compact endpoint by 0.0786 CE, but terminal validation remains 0.1568 CE above the immutable parent. As learning-rate-scaled requests shrink, the fixed absolute feedback quantization error grows from 5.7e-6 of current-step energy at step 0 to 3.04e-2 at step 232, directly falsifying the frozen late-step conservation gate."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_0p5tpp_plan.json",
+    "plan_sha256": "15594c4fb5ac38665ee3d6c16851036299ddbdf2f6071a8a5a23726828ece550",
+    "production_gate": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_lattice_gate9_result.json",
+    "production_gate_sha256": "8bd2947362bfe997775b322eefddc7ec7ff98db067c112c31bdf6bc3917ef6d6",
+    "matched_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_0p5tpp_result.json",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "execution_git_commit": "ad3213e86d833d065d02b5387d72a57e9508f1cb",
+    "host": "PRO6",
+    "gpu": 0
+  },
+  "matched_parent": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json",
+    "execution_git_commit": "fac8b81bced49ef3c1f0a6be9f2c43f2db4ed5f1",
+    "validation_ce": {
+      "0": 10.9970,
+      "60": 6.2180,
+      "120": 5.7258,
+      "180": 5.4642,
+      "238": 5.3610
+    }
+  },
+  "previous_compact_endpoint": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fastresidual_0p5tpp_lr24e4.json",
+    "terminal_validation_ce": 5.5964
+  },
+  "candidate": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_0p5tpp_lr24e4.json",
+    "config_file_sha256": "d2d37bbbe5b36678b2364134252b02c8ea26fd29d9e042f062a85c2aa9704222",
+    "resolved_config_sha256": "67920a646e35f973d2af0aea4d8b2e689820775acf57e6c3ffc5889f8fdefed1",
+    "status": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/status/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_0p5tpp_endpoint1.json",
+    "status_sha256": "92f7b7b9e9fdd525c00eb3a833ddf7236acecaae8979f414ec5280b8d27fb980",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_0p5tpp_endpoint1.log",
+    "log_sha256": "71811efb1435e7e4e76cdd55d6560922ae894a93f9f55a192cbb3cbc799f2933",
+    "log_bytes": 593076,
+    "started_at": "2026-08-22T02:22:05.345392+08:00",
+    "finished_at": "2026-08-22T02:29:30.722731+08:00",
+    "wall_seconds": 445.377339,
+    "exit_code": 0,
+    "validation_ce": {
+      "0": 10.9831,
+      "60": 6.2960,
+      "120": 5.8177,
+      "180": 5.6109,
+      "238": 5.5178
+    },
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_0p5tpp_lr24e4/ckpt.pt",
+      "bytes": 713248696,
+      "sha256": "bb83ca97ebe0b9c451e8381c09102817373a1460bde00230d2deea8caaf904e0",
+      "next_iter": 238,
+      "metadata_sha256": "3587266f46ca73b9a494c06d5c718dfc0db9a32d7428ca24621c2c0002126335"
+    }
+  },
+  "fixed_checkpoint_comparison": {
+    "terminal_candidate_minus_parent_ce": 0.1568,
+    "frozen_maximum_gap": 0.05,
+    "gate_excess_ce": 0.1068,
+    "terminal_perplexity_ratio": 1.169762,
+    "terminal_improvement_vs_previous_compact_ce": 0.0786,
+    "curve": [
+      {
+        "step": 60,
+        "candidate_minus_parent_ce": 0.0780,
+        "perplexity_ratio": 1.081123,
+        "improvement_vs_previous_compact_ce": 0.1608
+      },
+      {
+        "step": 120,
+        "candidate_minus_parent_ce": 0.0919,
+        "perplexity_ratio": 1.096255,
+        "improvement_vs_previous_compact_ce": 0.0817
+      },
+      {
+        "step": 180,
+        "candidate_minus_parent_ce": 0.1467,
+        "perplexity_ratio": 1.158007,
+        "improvement_vs_previous_compact_ce": 0.0705
+      },
+      {
+        "step": 238,
+        "candidate_minus_parent_ce": 0.1568,
+        "perplexity_ratio": 1.169762,
+        "improvement_vs_previous_compact_ce": 0.0786
+      }
+    ]
+  },
+  "temporal_direction": {
+    "diagnostic_records": 720,
+    "records_per_refresh": 24,
+    "first_feedback_codec_weighted_gate_failure_step": 56,
+    "first_current_step_weighted_gate_failure_step": 40,
+    "first_current_step_every_matrix_gate_failure_step": 64,
+    "minimum_feedback_codec_weighted_recovery": 0.9997279363,
+    "minimum_feedback_codec_weighted_recovery_step": 168,
+    "minimum_feedback_codec_every_matrix_recovery": 0.9994239133,
+    "minimum_feedback_codec_every_matrix_recovery_step": 16,
+    "minimum_current_step_weighted_conservation": 0.9696141064,
+    "minimum_current_step_weighted_conservation_step": 232,
+    "minimum_current_step_every_matrix_conservation": 0.9515517869,
+    "minimum_current_step_every_matrix_conservation_step": 232,
+    "selected_refreshes": {
+      "0": {
+        "feedback_codec_weighted_recovery": 0.9997585285,
+        "current_step_weighted_conservation": 0.9999942543
+      },
+      "40": {
+        "feedback_codec_weighted_recovery": 0.9997547215,
+        "current_step_weighted_conservation": 0.9996796047
+      },
+      "120": {
+        "feedback_codec_weighted_recovery": 0.9997335780,
+        "current_step_weighted_conservation": 0.9988384278
+      },
+      "176": {
+        "feedback_codec_weighted_recovery": 0.9997283406,
+        "current_step_weighted_conservation": 0.9941142429
+      },
+      "232": {
+        "feedback_codec_weighted_recovery": 0.9997486577,
+        "current_step_weighted_conservation": 0.9696141064
+      }
+    }
+  },
+  "systems": {
+    "preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_fractional_lattice_0p5tpp_lr24e4_mfu.json",
+    "preflight_certificate_sha256": "4a6f8561ef079e2ca7620a847dede7a5f7116a622c94445216ba36ca6363578f",
+    "preflight_log_sha256": "b94288bbd3cf58494be8a90253b02abb416123f021223d3adf4248f7ade6bd9d",
+    "preflight_mfu_fraction": 0.329051,
+    "median_scientific_tokens_per_second": 182072.01,
+    "median_iter_ms": 1439.78,
+    "median_optimizer_ms": 234.10,
+    "median_optimizer_fraction": 0.162593,
+    "peak_mib": 31634.08,
+    "performance_gate_passed": true
+  },
+  "checkpoint_storage_audit": {
+    "pair_vq_mlp_elements": 56623104,
+    "feedback_code_tensors": 24,
+    "feedback_code_dtype": "uint8",
+    "feedback_code_bytes": 53305344,
+    "feedback_level_tensors": 24,
+    "feedback_level_bytes": 61440,
+    "compact_momentum_tensors": 24,
+    "compact_momentum_bytes": 73728,
+    "physical_feedback_bits_per_weight": 7.53125,
+    "dense_fp32_feedback_tensor_present": false
+  },
+  "frozen_gate_evaluation": {
+    "terminal_clean": true,
+    "fixed_eval_protocol_matches_parent": true,
+    "all_fixed_evaluations_finite": true,
+    "terminal_candidate_minus_parent_ce_at_most_0p05": false,
+    "terminal_candidate_validation_ce_at_most_5p411": false,
+    "feedback_codec_weighted_recovery_at_least_0p99975_every_refresh": false,
+    "feedback_codec_every_matrix_recovery_at_least_0p999_every_refresh": true,
+    "current_step_conservation_weighted_at_least_0p99975_every_refresh": false,
+    "current_step_conservation_every_matrix_at_least_0p999_every_refresh": false,
+    "candidate_mfu_at_least_0p20": true,
+    "candidate_optimizer_fraction_at_most_0p30": true,
+    "passed": false
+  },
+  "diagnosis": {
+    "improvement": "The compact temporal state recovers 0.0786 CE over the previous no-carry compact endpoint and avoids its frozen-code collapse.",
+    "remaining_failure": "Absolute codec distortion remains nearly constant while scheduled optimizer steps shrink. Error feedback telescopes all older projection errors, but the newest codec residual is the current uncompensated weight error, so its relative effect grows sharply late in training.",
+    "weight_chart_boundary": "Because the temporal gate itself fails before the loss curve widens, this endpoint cannot attribute the remaining 0.1568 CE solely to finite pair-VQ function capacity.",
+    "information_rate_boundary": "Uniform precision would need about 3.46 additional bits/weight at the measured step-232 distortion ratio. The next representation must use a residual/innovation stage or temporally shaped code; another q7/q8 fraction or scale-up is not authorized."
+  }
+}
