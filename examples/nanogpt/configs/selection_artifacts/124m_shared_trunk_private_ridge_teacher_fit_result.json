@@ -1,0 +1,137 @@
+{
+  "schema_version": "mai_124m_shared_trunk_private_ridge_teacher_fit_result_v1",
+  "classification": "FAMILY_FAIL_AT_WIDTH256",
+  "identity": {
+    "repository_commit": "d0bb7ae7e2148170c5446370e463a1ba342ecdec",
+    "entrypoint": "examples/nanogpt/analyze_shared_trunk_private_ridge_teacher_fit.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_shared_trunk_private_ridge_teacher_fit_plan.json",
+    "plan_sha256": "5e2b6df1ac26542e2a66815edae724c349a5d178a0d4a60862266f030861d36b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "shared_trunk_initialization_checkpoint_sha256": "72ff2c8d51f3f891aae2194d778e062135df36c2805cc23f88a64900d363b825",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_trunk_private_ridge_teacher_fit_20260821/result.json",
+      "sha256": "11ba7bba2cb63f4f55fd7e8584b81cb5806b91221d63b0c9e15e380ff2626131"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_trunk_private_ridge_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "16c095a9487e712fe356faa50291c3c4618a09070e4dfefd5cbfb38850f1ca9c"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 71.76732063293457,
+    "maximum_cuda_memory_bytes": 10585798144,
+    "language_model_updates": 0,
+    "targeted_tests": "5 passed",
+    "preflight": {
+      "seconds_per_fit_step": 0.03004124164581299,
+      "estimated_fit_seconds": 54.07423496246338,
+      "maximum_cuda_memory_bytes": 2470846464
+    },
+    "recovery_note": "The first invocation completed fitting but failed before candidate CE because the splice wrapper lacked a probed optional Block interface attribute. No candidate result existed or was inspected. Commit d0bb7ae added the plain-block interface and the unchanged sealed protocol completed."
+  },
+  "teacher_fixed_validation_cross_entropy": 3.674412250518799,
+  "width_results": {
+    "0": {
+      "compact_parameters": 4801536,
+      "compression_ratio": 11.792706333973129,
+      "initial_fit_objective": 1.6086321920156479,
+      "final_fit_objective": 0.36655285581946373,
+      "objective_reduction_fraction": 0.7721338304437599,
+      "holdout_objective": 0.6015338823199272,
+      "output_recovery_mean_min_global": [
+        0.39864038676023483,
+        0.09851020574569702,
+        0.4232786105374998
+      ],
+      "input_jvp_recovery_mean_min_global": [
+        -0.14947396020094553,
+        -0.3079705238342285,
+        -0.13223103602726383
+      ],
+      "fixed_validation_cross_entropy": 7.857867240905762,
+      "gap_to_dense": 4.183454990386963,
+      "optimization_healthy": true,
+      "passes": false
+    },
+    "128": {
+      "compact_parameters": 7162368,
+      "compression_ratio": 7.905640145828865,
+      "initial_fit_objective": 0.36655285581946373,
+      "final_fit_objective": 0.21188172698020935,
+      "objective_reduction_fraction": 0.42196132531411434,
+      "holdout_objective": 0.5094635486602783,
+      "output_recovery_mean_min_global": [
+        0.49073554078737897,
+        0.15334129333496094,
+        0.5201465146615725
+      ],
+      "input_jvp_recovery_mean_min_global": [
+        -0.11937475701173146,
+        -0.36616218090057373,
+        -0.09273254122940511
+      ],
+      "fixed_validation_cross_entropy": 7.376353740692139,
+      "gap_to_dense": 3.70194149017334,
+      "optimization_healthy": true,
+      "passes": false
+    },
+    "256": {
+      "compact_parameters": 9523200,
+      "compression_ratio": 5.945806451612904,
+      "initial_fit_objective": 0.21188172698020935,
+      "final_fit_objective": 0.15188105776906013,
+      "objective_reduction_fraction": 0.28318000832961654,
+      "holdout_objective": 0.49435538053512573,
+      "output_recovery_mean_min_global": [
+        0.5058582747975985,
+        0.11656635999679565,
+        0.5381954803655293
+      ],
+      "input_jvp_recovery_mean_min_global": [
+        -0.12197182327508926,
+        -0.4608440399169922,
+        -0.08667795813086698
+      ],
+      "fixed_validation_cross_entropy": 7.164781093597412,
+      "gap_to_dense": 3.4903688430786133,
+      "optimization_healthy": true,
+      "passes": false
+    }
+  },
+  "depth_diagnosis": {
+    "width256_teacher_bank_output_recovery_layers_0_3": [
+      0.8656,
+      0.7731,
+      0.6888,
+      0.6471
+    ],
+    "width256_teacher_bank_output_recovery_layers_8_11": [
+      0.1166,
+      0.1293,
+      0.2171,
+      0.4503
+    ],
+    "width256_teacher_bank_jvp_recovery_layers_8_11": [
+      -0.4331,
+      -0.4608,
+      -0.4035,
+      -0.2747
+    ],
+    "interpretation": "Private ridge atoms improve early-layer values but fail increasingly with depth, especially on the dense-teacher state bank. More importantly, JVP recovery remains negative and worsens in late layers. The private branch memorizes sampled endpoint values without supplying the full-width moving normal/write field."
+  },
+  "decision": {
+    "optimization_healthy_at_width256": true,
+    "output_gate_passed": false,
+    "input_jvp_gate_passed": false,
+    "fixed_cross_entropy_gate_passed": false,
+    "language_model_training_authorized": false,
+    "width_or_optimizer_sweep_authorized": false,
+    "interpretation": "Signed selection of one shared ridge dictionary is insufficient, and allocating up to 256 complete private atoms per layer at 5.95x compression still cannot reproduce late-layer dense functions or their derivatives. The missing capacity is a full-width, state-conditional direction field rather than a small additive nonlinear correction.",
+    "next_action": "Do not enlarge the private width. Test whether a small pool of full-width complete MLP experts can be reused conditionally across depth, so every token receives a full-rank feature/write field while stored optimizer state scales with the shared expert pool rather than layer count."
+  }
+}
