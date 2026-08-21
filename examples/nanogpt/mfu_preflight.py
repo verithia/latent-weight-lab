@@ -193,6 +193,27 @@ def parse_pair_vq_persistent_training_bytes(text: str) -> list[int]:
     ]
 
 
+def validate_pair_vq_persistent_training_bytes(
+    config: dict[str, Any], observed: list[int]
+) -> dict[str, Any]:
+    """Enforce an exact compact-state contract independently of other gates."""
+    expected = config.get(
+        "mfu_preflight_pair_vq_persistent_training_bytes_exact",
+        config.get("persistent_training_bytes_exact"),
+    )
+    result = {
+        "observed": observed,
+        "expected": int(expected) if expected is not None else None,
+        "passed": expected is None or observed == [int(expected)],
+    }
+    if not result["passed"]:
+        raise RuntimeError(
+            "pair-VQ persistent-byte gate rejected launch: "
+            f"observed={observed} expected={[int(expected)]}"
+        )
+    return result
+
+
 def empirical_bf16_gemm_peak_tflops(size: int, warmups: int, trials: int) -> float:
     if not torch.cuda.is_available():
         raise RuntimeError("MFU preflight requires CUDA")
@@ -559,6 +580,11 @@ def main() -> None:
         persistent_training_bytes = parse_pair_vq_persistent_training_bytes(
             process.stdout
         )
+        certificate["pair_vq_persistent_training_state"] = (
+            validate_pair_vq_persistent_training_bytes(
+                source, persistent_training_bytes
+            )
+        )
         stochastic_required = source.get(
             "mfu_preflight_stochastic_weighted_variance_ratio_max"
         )
@@ -622,14 +648,6 @@ def main() -> None:
                 raise RuntimeError(
                     "stochastic-retraction clipping gate rejected launch: "
                     f"{clipped} > {clipping_max}"
-                )
-            expected_bytes = int(
-                source["mfu_preflight_pair_vq_persistent_training_bytes_exact"]
-            )
-            if persistent_training_bytes != [expected_bytes]:
-                raise RuntimeError(
-                    "pair-VQ persistent-byte gate rejected launch: "
-                    f"observed={persistent_training_bytes} expected={[expected_bytes]}"
                 )
         rows = parse_perf_rows(process.stdout)
         if len(rows) < args.timed_updates:

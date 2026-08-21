@@ -16,6 +16,7 @@ from examples.nanogpt.mfu_preflight import (
     parse_optimizer_probe_steps,
     parse_training_loss_values,
     task_frame_preflight_metadata,
+    validate_pair_vq_persistent_training_bytes,
     verify_native_block_fht_extension,
 )
 
@@ -181,6 +182,25 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertEqual(
             parse_pair_vq_persistent_training_bytes(text), [157500864]
         )
+
+    def test_pair_vq_persistent_byte_gate_is_independent(self) -> None:
+        config = {"persistent_training_bytes_exact": 157500864}
+        self.assertEqual(
+            validate_pair_vq_persistent_training_bytes(
+                config, [157500864]
+            ),
+            {
+                "observed": [157500864],
+                "expected": 157500864,
+                "passed": True,
+            },
+        )
+        with self.assertRaisesRegex(
+            RuntimeError, "persistent-byte gate rejected launch"
+        ):
+            validate_pair_vq_persistent_training_bytes(
+                config, [157500865]
+            )
 
     def test_snapshot_elapsed_parser(self) -> None:
         text = "\n".join(
