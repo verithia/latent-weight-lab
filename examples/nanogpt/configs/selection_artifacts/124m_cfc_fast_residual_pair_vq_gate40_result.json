@@ -1,0 +1,83 @@
+{
+  "schema_version": "mai_cfc_fast_residual_pair_vq_gate40_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "PASS_CAPACITY_INHERITANCE_TEMPORAL_DIRECTION_AND_PERFORMANCE",
+  "passed": true,
+  "decision": {
+    "smallest_rung_training_authorized": true,
+    "larger_rung_authorized": false,
+    "reason": "The fast c_fc residual preserves the capacity-qualified slow representation at zero and passes every preregistered real-124M temporal and systems gate. Exactly one 124M/0.5TPP loss test is authorized before any longer horizon or larger model."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_cfc_fast_residual_pair_vq_plan.json",
+    "plan_sha256": "c1cc247066c8c121ea7c2570bf22e61f33a7bd7c954c9ad1fb2c5ed3eff39ce5",
+    "gate_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_projected_muon_gate40.json",
+    "gate_config_sha256": "7db01d72706c4fed8a43b29e70600cf2fb84b0df707ebee763e3b0bf347b85f8",
+    "execution_git_commit": "e37283e3d1790fa93a79a692ca21190c81ef6aac",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/train.py": "25cbbb5c175435fac286841c2e49a7573989ca82d4040a411df5e801a49b7475",
+    "examples/nanogpt/model.py": "9ea499dc01e151e8b69c6ab67b82867cc0f197993c2009b8fe14947b6203b7ee",
+    "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+    "examples/nanogpt/muon_pair_vq.py": "336f58e52cbcd0fe126136a77420af771fa85cf522cfa7ba70b1333691c5638e",
+    "latent_weight_lab/block_fht.py": "e0b692156130d11d55a240d192e9dde2077a77d0cfc4412356c5ddab49e80f36"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; expected and observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_projected_muon_gate40.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_projected_muon_gate40_fastresidual_v2.log",
+    "log_sha256": "e03020da3cfd4b68be429af3a103a9b39b2efcb63696a6d62fffdf22177d262d",
+    "optimizer_steps": 40,
+    "initial_validation_ce": 10.979,
+    "step40_validation_ce": 7.1732,
+    "peak_mib": 31560.84
+  },
+  "step0_projection": {
+    "matrices": 24,
+    "aggregate_requested_energy_recovery": 0.8599456593571342,
+    "unweighted_recovery_mean": 0.58627328665294,
+    "recovery_min": 0.0860372211363637,
+    "update_cosine_mean": 0.713611948096398,
+    "update_cosine_min": 0.29332111301704517,
+    "code_changes": 14124149,
+    "fast_code_changes": 14124149,
+    "c_fc_aggregate_requested_energy_recovery": 0.9756628204681356,
+    "c_fc_recovery_mean": 0.9750687955110146,
+    "c_fc_recovery_min": 0.9736148830908133,
+    "c_fc_update_cosine_min": 0.9872682334156674,
+    "c_proj_aggregate_requested_energy_recovery": 0.18300565676316383,
+    "c_proj_recovery_mean": 0.19747777779486542,
+    "c_proj_recovery_min": 0.0860372211363637,
+    "c_proj_update_cosine_min": 0.29332111301704517
+  },
+  "performance": {
+    "timed_samples": 7,
+    "tokens_per_second": 207061.7842857143,
+    "iter_ms": 1266.0228571428572,
+    "optimizer_ms": 64.34142857142857,
+    "optimizer_fraction": 0.050821695839389044,
+    "active_params_6n_estimate": 124475904,
+    "model_tflops": 154.64521669690367,
+    "empirical_bf16_gemm_peak_tflops": 416.72794435283873,
+    "mfu_fraction": 0.371093944604702,
+    "minimum_mfu_fraction": 0.2,
+    "passed": true
+  },
+  "storage": {
+    "persistent_model_matrix_state_bytes": 56698560,
+    "persistent_training_matrix_state_bytes": 56772288,
+    "model_compression_vs_dense_bf16": 1.99734,
+    "training_compression_vs_dense_fp32_weight_plus_momentum": 7.97898,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "ambient_error_buffer": false
+  },
+  "capacity_inheritance": {
+    "source": "examples/nanogpt/configs/selection_artifacts/124m_cfc_residual_pair_vq_mlp_result.json",
+    "argument": "The added fast residual levels are exactly zero at initialization, so every capacity-qualified slow-code state remains represented bit-for-bit. The candidate is a strict representational superset and cannot regress the frozen zero-update capacity ceiling."
+  }
+}
