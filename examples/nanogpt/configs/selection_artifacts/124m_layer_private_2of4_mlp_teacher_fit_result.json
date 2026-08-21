@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_124m_layer_private_2of4_mlp_teacher_fit_result_v1",
+  "classification": "TWO_OF_FOUR_CAPACITY_FAIL",
+  "identity": {
+    "repository_commit": "6a9ce7c991697b0a745260d63ff8745ebbf0207e",
+    "entrypoint": "examples/nanogpt/analyze_layer_private_2of4_mlp_teacher_fit.py",
+    "plan_path": "examples/nanogpt/configs/selection_artifacts/124m_layer_private_2of4_mlp_teacher_fit_plan.json",
+    "plan_sha256": "7f867a4c12df9cdfe84dc39d7c3b2ecb149bfd210a34f482d4ae02414e747877",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "dense_teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "state_bank_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_2of4_mlp_teacher_fit_20260821/result.json",
+      "sha256": "55b83053b7c5a3d44fa6ede88184e65e573001ed547206d71c8d24faf1b51369"
+    },
+    "fitted_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_2of4_mlp_teacher_fit_20260821/fitted_states.pt",
+      "sha256": "8b86c89558cd4db7e36f774a218fcf5d6fb310ef7cb8645093c1a550a94a4deb"
+    }
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "wall_seconds": 48.00224566459656,
+    "maximum_cuda_memory_bytes": 10650184192,
+    "language_model_updates": 0,
+    "focused_tests": "10 passed",
+    "preflight": {
+      "conservative_estimated_total_fit_seconds": 63.11756134033203,
+      "maximum_cuda_memory_bytes": 2360235520
+    }
+  },
+  "accounting": {
+    "packed_trainable_values": 28311552,
+    "dense_mlp_values": 56623104,
+    "trainable_parameter_compression_ratio": 2.0,
+    "trainable_parameter_saving_fraction": 0.5,
+    "canonical_mask_bytes": 5308416,
+    "bf16_values_plus_mask_bytes": 61931520,
+    "dense_bf16_bytes": 113246208,
+    "inference_storage_compression_ratio": 1.8285714285714285,
+    "dense_expansion": false,
+    "ideal_sparse_matmul_flop_fraction": 0.5
+  },
+  "teacher_fixed_validation_cross_entropy": 3.674412250518799,
+  "variants": {
+    "magnitude_ceiling": {
+      "initial_fit_objective": 0.44951871037483215,
+      "final_fit_objective": 0.10718912538141012,
+      "objective_reduction_fraction": 0.7615469102675833,
+      "holdout_objective": 0.32304761186242104,
+      "output_recovery_mean_min_global": [0.8863222027818362, 0.798654317855835, 0.8930763363776546],
+      "input_jvp_recovery_mean_min_global": [0.790576713780562, 0.6658869981765747, 0.8018065434881804],
+      "fixed_validation_cross_entropy": 4.307480335235596,
+      "gap_to_dense_teacher": 0.6330680847167969,
+      "optimization_healthy": true,
+      "passes": false
+    },
+    "fixed_random": {
+      "initial_fit_objective": 1.4735250174999237,
+      "final_fit_objective": 0.22935638949275017,
+      "objective_reduction_fraction": 0.8443484930565408,
+      "holdout_objective": 0.7486884221434593,
+      "output_recovery_mean_min_global": [0.7364106873671213, 0.48769259452819824, 0.7559721328103786],
+      "input_jvp_recovery_mean_min_global": [0.5149915392200152, 0.1936490535736084, 0.5411773060808547],
+      "fixed_validation_cross_entropy": 5.3278889656066895,
+      "gap_to_dense_teacher": 1.6534767150878906,
+      "optimization_healthy": true,
+      "passes": false
+    }
+  },
+  "decision": {
+    "representation_rejected": true,
+    "language_model_training_authorized": false,
+    "density_mask_optimizer_or_seed_sweep_authorized": false,
+    "interpretation": "Even teacher-selected 2:4 support is below the complete-model capacity threshold: it narrowly misses the mean output and JVP gates but produces a decisive +0.6331 fixed-CE gap. Fixed-random support is substantially worse at +1.6535 CE. Layer-private ambient coordinates are useful, but a half-dense independent support omits globally coordinated content and support acquisition is a second obstruction.",
+    "next_action": "Test one shared unrestricted dense MLP base plus an independent layer-private 2:4 residual. This keeps the seven-trunk budget of 7/12 dense values while changing the allocation from cross-layer full-matrix atoms to a common global field plus direct private corrections in every layer. Use an optimistic residual-magnitude support and an independent fixed-random support; require the unchanged output, JVP, and CE gates before LM training."
+  }
+}

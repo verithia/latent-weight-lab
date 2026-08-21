@@ -1,0 +1,122 @@
+{
+  "schema_version": "mai_shared_base_private_2of4_mlp_teacher_fit_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Can one unrestricted depth-shared MLP base restore the globally coordinated field omitted by layer-private 2:4 matrices while the sparse residual supplies the private feature boundaries and residual writes that shared trunks lack?",
+  "causal_basis": {
+    "sparse_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_private_2of4_mlp_teacher_fit_result.json",
+    "sparse_result_sha256": "df07a33ddd947181bffadb1f56cf8a582ee4358e0d12f1240ad3d40df14f85f2",
+    "layer_axis_result": "examples/nanogpt/configs/selection_artifacts/124m_layer_axis_basis7_mlp_teacher_fit_result.json",
+    "layer_axis_result_sha256": "550f3d41f0fc70ef2b3193fe05c05e0061b8ad6e1c93e085bedcf81a9e00a9c4",
+    "finding": "Teacher-selected layer-private 2:4 matrices recover 0.8863 mean output and 0.7906 mean input-JVP energy but leave +0.6331 CE, showing useful private coordinates with missing coordinated content. Seven shared full-rank atoms reach +0.0698 LM CE at 5TPP but fail the dense-teacher endpoint because shared atoms omit layer-private ambient content. The new family holds total learned state fixed near the seven-trunk budget and reallocates it as one shared full-rank field plus a half-dense private residual in every layer.",
+    "not_a_sparsity_sweep": "The sparsity remains exactly 2:4. No density, mask, optimizer, learning-rate, seed, step-count, or restart sweep is permitted. The only changed variable is the addition of one learned common dense base to the already sealed private 2:4 family."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "family": {
+    "layers": 12,
+    "residual_width": 768,
+    "hidden_width": 3072,
+    "definition": "For matrix side m in {c_fc,c_proj}, W[m,l] = B[m] + S[m,l]. B[m] is one unrestricted learned matrix shared across all twelve layers. S[m,l] is layer private and has exactly two learned entries per consecutive group of four input coordinates in every row. Supports remain fixed within a fit.",
+    "initial_shared_base": "For each coordinate, use the arithmetic mean of the twelve dense-teacher matrices. After supports are frozen, replace each base coordinate by the mean teacher value across layers whose sparse residual omits that coordinate; if every layer retains it, use the all-layer mean.",
+    "initial_sparse_values": "On every retained coordinate, initialize S[m,l] to W_teacher[m,l] - B[m], so the initialized decomposition is the fixed-support least-squares weight approximation.",
+    "variants": [
+      {
+        "name": "residual_magnitude_ceiling",
+        "support": "Compute residuals from the all-layer teacher mean, then retain the two largest-absolute residual entries in every group of four, with stable lower-coordinate tie breaking.",
+        "role": "optimistic representability ceiling; cannot alone authorize LM training"
+      },
+      {
+        "name": "fixed_random",
+        "support": "For every group independently, select one of the six unordered coordinate pairs from deterministic seed 20260944 plus layer and matrix identity.",
+        "role": "deployable from-scratch discriminator"
+      }
+    ],
+    "shared_base_values": 4718592,
+    "private_sparse_values": 28311552,
+    "total_trainable_values": 33030144,
+    "dense_mlp_values": 56623104,
+    "trainable_parameter_compression_ratio": 1.7142857142857142,
+    "trainable_parameter_saving_fraction": 0.41666666666666663,
+    "canonical_mask_bytes": 5308416,
+    "bf16_value_bytes": 66060288,
+    "bf16_values_plus_canonical_mask_bytes": 71368704,
+    "dense_bf16_bytes": 113246208,
+    "inference_storage_compression_ratio": 1.5867768595041323,
+    "dense_expansion": "The shared base and sparse residual may be folded and cached into ordinary per-layer dense matrices after a parameter refresh; no learned dense per-layer state is stored.",
+    "cached_inference_token_flop_overhead": 0.0,
+    "conservative_refresh_additions": 56623104
+  },
+  "fit_protocol": {
+    "objective": "Equal-weight separately normalized clean-output and central-difference direction errors on dense-teacher and seven-trunk state banks.",
+    "sample_cap_per_layer_per_bank": 1024,
+    "token_batch_size": 4,
+    "fit_batches": 4,
+    "holdout_batches": 4,
+    "fit_token_seed": 20260940,
+    "holdout_token_seed": 20260941,
+    "local_perturbation_relative_rms": 0.01,
+    "row_batch_size_per_layer_per_bank": 96,
+    "layers_per_update": 3,
+    "steps_per_variant": 800,
+    "optimizer": "Adam",
+    "learning_rate": 0.0003,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "support_seed": 20260944,
+    "algorithm_seeds": {
+      "residual_magnitude_ceiling": 20260942,
+      "fixed_random": 20260943
+    },
+    "best_state_rule": "Preserve the smallest discovery objective within each independent fit. Holdout and fixed-CE values never select states or masks.",
+    "language_model_updates": 0
+  },
+  "measurement": {
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20260945,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024,
+    "report": [
+      "per-variant discovery and holdout value-direction objectives",
+      "held-out output and analytic input-JVP recovery by layer and state bank",
+      "fixed-checkpoint validation CE for both supports",
+      "shared-base and packed-residual storage accounting",
+      "peak memory and wall time"
+    ]
+  },
+  "frozen_gates": {
+    "minimum_mean_output_recovery": 0.9,
+    "minimum_worst_output_recovery": 0.75,
+    "minimum_mean_input_jvp_recovery": 0.8,
+    "minimum_worst_input_jvp_recovery": 0.5,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "optimization_healthy": "Finite execution and either final discovery objective at most 0.5 or at least 50-percent reduction from that variant's initial objective."
+  },
+  "decision_rule": {
+    "magnitude_fail": "Reject the shared-base plus private-2:4 family; do not run an LM, density sweep, or support-learning experiment.",
+    "magnitude_pass_random_fail": "The allocation has capacity but fixed support acquisition is the blocker. Stop before LM and derive exactly one compact support-acquisition mechanism; do not tune random masks.",
+    "fixed_random_pass": "Implement the exact fixed-random shared-base/private-2:4 family, require at least 20-percent MFU, then launch only a 124M/0.5TPP verification.",
+    "optimization_inconclusive": "Stop and report without a capacity conclusion or LM training."
+  },
+  "authorization": {
+    "allowed": "Implement and run this exact zero-LM-update nested teacher-fit factorial after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before the fixed-random function and CE gates pass",
+      "model-size scaling",
+      "sparsity, mask, optimizer, learning-rate, seed, step-count, or restart sweeps",
+      "using holdout values to change a support or select a state"
+    ],
+    "callback_policy": "Foreground-poll if measured total runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}
