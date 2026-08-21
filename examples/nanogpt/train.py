@@ -1397,7 +1397,27 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-cproj-fast-residual",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-codec",
+        default="cartesian4x4",
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-output-group-size",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-feedback-residual-probe-steps",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-residual-probe-layers",
         nargs="+",
         type=int,
         default=[],
@@ -1424,6 +1444,32 @@ def parse_args() -> argparse.Namespace:
         "--block-fht-mlp-pair-vq-feedback-lattice-probe-coordinate-bits",
         nargs="+",
         type=int,
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-axis-adaptation-probe-block-size",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-axis-adaptation-probe-coordinate-bits",
+        type=int,
+        default=7,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-fractional-probe-block-size",
+        type=int,
+        default=0,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-fractional-probe-base-coordinate-bits",
+        type=int,
+        default=7,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-fractional-probe-refinement-fractions",
+        nargs="+",
+        type=float,
         default=[],
     )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
