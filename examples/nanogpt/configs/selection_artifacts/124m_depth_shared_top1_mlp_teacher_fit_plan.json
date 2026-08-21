@@ -68,15 +68,15 @@
         "name": "soft_router_only",
         "steps": 300,
         "routing": "softmax",
-        "temperature_start": 1.0,
-        "temperature_end": 0.5,
+        "temperature_start": 4.0,
+        "temperature_end": 1.0,
         "trainable": "router weights and biases only"
       },
       {
         "name": "soft_joint",
         "steps": 600,
         "routing": "softmax",
-        "temperature_start": 0.5,
+        "temperature_start": 1.0,
         "temperature_end": 0.25,
         "trainable": "experts, routers, layer pre-GELU gains, and layer residual-output gains"
       },
