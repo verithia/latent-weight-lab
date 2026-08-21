@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_shared_mlp_endpoint_function_result_v1",
+  "classification": "ENDPOINT_VALUE_MISMATCH_REQUIRES_DENSE_DENSE_CALIBRATION",
+  "raw_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_mlp_endpoint_function_20260821/result.json",
+    "sha256": "9eff9fd25d2b5117107dcb41334ac9b066776caa18d476a242cc4f08d6345fa9",
+    "source_commit": "9beef3bce93029b75bd65408c03551eda8237f3e",
+    "wall_seconds": 25.58414649963379,
+    "maximum_cuda_memory_bytes": 1611885568
+  },
+  "attempt_history": [
+    {
+      "attempt": 1,
+      "scientific_result_created": false,
+      "failure": "operator forced TORCH_CUDA_ARCH_LIST=9.0 on compute capability 12.0, causing no kernel image for the BlockFHT extension",
+      "remediation": "use an isolated extension cache compiled for sm_120; all frozen scientific inputs remain unchanged"
+    },
+    {
+      "attempt": 2,
+      "scientific_result_created": true,
+      "exit_code": 0
+    }
+  ],
+  "identities": {
+    "candidate_checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "teacher_checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_batch_sha256": "ecb8b27cb1f7f5b1caefc7ac5dd86288e6bc86f5e5318b96679e5e16066838b1"
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "fitted_parameters": 0,
+    "state_banks": 2,
+    "samples_per_layer_per_bank": 512,
+    "jvp_directions": 4
+  },
+  "summaries": {
+    "aligned_state_input": {
+      "mean_explained_target_energy": -0.05873072644074758,
+      "minimum_explained_target_energy": -0.3755464553833008,
+      "mean_cosine": 0.4618271291255951
+    },
+    "mlp_output": {
+      "mean_explained_target_energy": -0.8686944097280502,
+      "minimum_explained_target_energy": -1.7279930114746094,
+      "global_explained_target_energy": -0.7813176876448953,
+      "mean_cosine": 0.18315062167433402
+    },
+    "mlp_input_jvp": {
+      "mean_explained_target_energy": -0.946985200047493,
+      "minimum_explained_target_energy": -1.704392910003662,
+      "global_explained_target_energy": -0.9296217530385948,
+      "mean_cosine": 0.14142980022976795
+    }
+  },
+  "per_bank": {
+    "candidate_states": {
+      "output_mean": -0.55588165918986,
+      "output_minimum": -0.757958173751831,
+      "jvp_mean": -0.7117302219072977,
+      "jvp_minimum": -0.9819762706756592
+    },
+    "teacher_states": {
+      "output_mean": -1.1815071602662404,
+      "output_minimum": -1.7279930114746094,
+      "jvp_mean": -1.1822401781876881,
+      "jvp_minimum": -1.704392910003662
+    }
+  },
+  "interpretation": {
+    "direct_result": "the seven-trunk MLP fails the frozen output gate on both state banks; its JVP recovery is also poor",
+    "causal_limit": "the candidate and teacher are separately optimized endpoints. Internal function non-identifiability or global trajectory drift can make dense endpoints disagree even when validation losses are close.",
+    "required_control": "run the identical oracle between the dense top-two and dense top-one full-attention 5TPP endpoints, whose validation gap of 0.0745 is matched to the compact candidate gap of 0.0698",
+    "authorization": "no compact representation training is authorized from the uncalibrated result"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "schema_version": "mai_shared_mlp_endpoint_function_dense_dense_calibration_plan_v1",
+  "scientific_question": "Is the negative endpoint/JVP recovery specific to seven-trunk compression, or is it the ordinary disagreement between independently optimized dense full-attention endpoints with a matched validation-loss separation?",
+  "primary_compact_result": {
+    "output_mean_recovery": -0.8686944097280502,
+    "jvp_mean_recovery": -0.946985200047493,
+    "validation_gap_to_teacher": 0.0698,
+    "raw_result_sha256": "9eff9fd25d2b5117107dcb41334ac9b066776caa18d476a242cc4f08d6345fa9"
+  },
+  "dense_control_candidate": {
+    "run": "y400_mai_v3_124m_fullattn_5tpp_top2_mult0p75_provisional",
+    "checkpoint_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top2_provisional/ckpt.pt",
+    "checkpoint_sha256": "b05fc58d3f843e5d1780c8af2384b4125b9237c81389bd9390aa27418013f68e",
+    "terminal_validation_cross_entropy": 3.7489
+  },
+  "dense_teacher": {
+    "run": "y400_mai_v3_124m_fullattn_5tpp_top1_mult1p00_provisional",
+    "checkpoint_path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+    "checkpoint_sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070",
+    "terminal_validation_cross_entropy": 3.6744
+  },
+  "measurement": {
+    "script": "examples/nanogpt/analyze_shared_mlp_endpoint_function.py",
+    "identical_to_primary_oracle": true,
+    "optimizer_updates": 0,
+    "fitted_parameters": 0,
+    "split": "validation",
+    "seed": 20260821,
+    "batch_size": 4,
+    "batches": 2,
+    "sample_cap_per_layer_per_bank": 512,
+    "jvp_directions": 4,
+    "required_fixed_batch_sha256": "ecb8b27cb1f7f5b1caefc7ac5dd86288e6bc86f5e5318b96679e5e16066838b1"
+  },
+  "frozen_comparison": {
+    "material_recovery_margin": 0.1,
+    "compact_specific_endpoint_restriction": "dense-dense output mean recovery exceeds compact output mean recovery by at least 0.10",
+    "compact_specific_jacobian_restriction": "output margin is below 0.10 but dense-dense JVP mean recovery exceeds compact JVP mean recovery by at least 0.10",
+    "cross_run_nonidentifiability": "both dense-dense recovery improvements are below 0.10",
+    "mixed": "report both margins explicitly if both exceed 0.10; endpoint remains the primary branch because classification is ordered output before JVP"
+  },
+  "authorization": {
+    "allowed": "one zero-update dense-dense calibration using the exact checkpoints and fixed batch above",
+    "not_allowed": [
+      "parameter fitting",
+      "new language-model training",
+      "capacity scaling",
+      "using the uncalibrated endpoint result as evidence for a new representation"
+    ]
+  }
+}
