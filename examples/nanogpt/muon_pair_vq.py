@@ -778,6 +778,37 @@ def _free_pair_vq_rvq2_diagnostics(
 
 
 @torch.no_grad()
+def _signed_block_fht(
+    vectors: torch.Tensor,
+    *,
+    block_size: int,
+    seed: int,
+) -> torch.Tensor:
+    """Return signed normalized-FHT blocks without persistent transform state."""
+    if block_size < 2 or block_size & (block_size - 1):
+        raise ValueError("block-FHT pair probe size must be a power of two")
+    flat = vectors.reshape(-1)
+    if flat.numel() % block_size:
+        raise ValueError("block-FHT pair probe size must divide the element count")
+    if block_size == 2:
+        return vectors.reshape(-1, block_size)
+    generator = torch.Generator(device="cpu").manual_seed(int(seed))
+    signs = (
+        torch.randint(
+            0,
+            2,
+            (block_size,),
+            generator=generator,
+            dtype=torch.int8,
+        )
+        .to(device=vectors.device, dtype=torch.float32)
+        .mul_(2.0)
+        .sub_(1.0)
+    )
+    return normalized_fht_last_dim(flat.reshape(-1, block_size) * signs)
+
+
+@torch.no_grad()
 def _block_fht_free_pair_vq_counterfactual(
     vectors: torch.Tensor,
     *,
@@ -787,30 +818,11 @@ def _block_fht_free_pair_vq_counterfactual(
     """Probe exact free-pair coding after invertible signed block mixing."""
     if vectors.ndim != 2 or vectors.shape[1] != 2:
         raise ValueError("block-FHT pair probe values must have shape (pairs, 2)")
-    if block_size < 2 or block_size & (block_size - 1):
-        raise ValueError("block-FHT pair probe size must be a power of two")
-    flat = vectors.reshape(-1)
-    if flat.numel() % block_size:
-        raise ValueError("block-FHT pair probe size must divide the element count")
-    if block_size == 2:
-        transformed = vectors
-    else:
-        generator = torch.Generator(device="cpu").manual_seed(int(seed))
-        signs = (
-            torch.randint(
-                0,
-                2,
-                (block_size,),
-                generator=generator,
-                dtype=torch.int8,
-            )
-            .to(device=vectors.device, dtype=torch.float32)
-            .mul_(2.0)
-            .sub_(1.0)
-        )
-        transformed = normalized_fht_last_dim(
-            flat.reshape(-1, block_size) * signs
-        ).reshape(-1, 2)
+    transformed = _signed_block_fht(
+        vectors,
+        block_size=block_size,
+        seed=seed,
+    ).reshape(-1, 2)
     codebooks = torch.zeros(
         2, 256, 2, device=vectors.device, dtype=torch.float32
     )
@@ -848,6 +860,104 @@ def _block_fht_free_pair_vq_counterfactual(
         ],
         "parseval_relative_error": float(
             (transformed_energy - source_energy).abs() / source_energy
+        ),
+    }
+
+
+@torch.no_grad()
+def _fit_scalar_codebook(
+    values: torch.Tensor,
+    *,
+    level_count: int,
+    iterations: int = 4,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    if values.ndim != 1 or values.numel() == 0:
+        raise ValueError("scalar-codebook values must be a nonempty vector")
+    if level_count < 2 or level_count > 256:
+        raise ValueError("scalar-codebook level count must be in [2, 256]")
+    mean = values.mean()
+    std = values.std(unbiased=False).clamp_min(torch.finfo(torch.float32).tiny)
+    probabilities = (
+        torch.arange(
+            level_count,
+            device=values.device,
+            dtype=torch.float32,
+        )
+        + 0.5
+    ) / level_count
+    levels = mean + std * math.sqrt(2.0) * torch.erfinv(
+        2.0 * probabilities - 1.0
+    )
+    for _iteration in range(iterations):
+        codes = torch.bucketize(
+            values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
+        )
+        sums = torch.zeros_like(levels)
+        sums.index_add_(0, codes, values)
+        counts = torch.bincount(codes, minlength=level_count)
+        live = counts > 0
+        levels[live] = sums[live] / counts[live]
+        levels = levels.sort().values
+    codes = torch.bucketize(
+        values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
+    )
+    return levels, codes
+
+
+@torch.no_grad()
+def _block_fht_gain_lattice_counterfactual(
+    vectors: torch.Tensor,
+    *,
+    block_size: int,
+    coordinate_bits: int,
+    seed: int,
+) -> dict[str, float | int]:
+    """Measure a block-gain plus bit-packed coordinate lattice oracle."""
+    if vectors.ndim != 2 or vectors.shape[1] != 2:
+        raise ValueError("block-lattice probe values must have shape (pairs, 2)")
+    if coordinate_bits < 2 or coordinate_bits > 8:
+        raise ValueError("block-lattice coordinate bits must be in [2, 8]")
+    transformed = _signed_block_fht(
+        vectors,
+        block_size=block_size,
+        seed=seed,
+    )
+    source_energy = vectors.square().sum().clamp_min(1e-30)
+    transformed_energy = transformed.square().sum()
+    gains = transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
+    gain_levels, gain_codes = _fit_scalar_codebook(
+        gains.log(),
+        level_count=256,
+    )
+    decoded_gains = gain_levels.index_select(0, gain_codes).exp()
+    normalized = (transformed / decoded_gains[:, None]).reshape(-1)
+    coordinate_levels, coordinate_codes = _fit_scalar_codebook(
+        normalized,
+        level_count=1 << coordinate_bits,
+    )
+    decoded = coordinate_levels.index_select(
+        0, coordinate_codes
+    ).reshape_as(transformed) * decoded_gains[:, None]
+    error_energy = (transformed - decoded).square().sum()
+
+    def entropy_bits(codes: torch.Tensor, level_count: int) -> float:
+        counts = torch.bincount(codes, minlength=level_count).to(torch.float32)
+        probabilities = counts[counts > 0] / counts.sum().clamp_min(1.0)
+        return float(-(probabilities * probabilities.log2()).sum())
+
+    return {
+        "full_recovery": float(1.0 - error_energy / source_energy),
+        "coordinate_active_codes": int(coordinate_codes.unique().numel()),
+        "coordinate_entropy_bits": entropy_bits(
+            coordinate_codes, 1 << coordinate_bits
+        ),
+        "gain_active_codes": int(gain_codes.unique().numel()),
+        "gain_entropy_bits": entropy_bits(gain_codes, 256),
+        "parseval_relative_error": float(
+            (transformed_energy - source_energy).abs() / source_energy
+        ),
+        "physical_bits_per_weight": float(
+            coordinate_bits + 8.0 / block_size
         ),
     }
 
@@ -1092,6 +1202,8 @@ class MuonPairVQLinear(nn.Module):
         feedback_residual_probe_steps: tuple[int, ...] = (),
         feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
         feedback_transform_probe_block_sizes: tuple[int, ...] = (),
+        feedback_lattice_probe_block_sizes: tuple[int, ...] = (),
+        feedback_lattice_probe_coordinate_bits: tuple[int, ...] = (),
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
     ) -> None:
@@ -1113,6 +1225,12 @@ class MuonPairVQLinear(nn.Module):
         )
         self.feedback_transform_probe_block_sizes = tuple(
             int(block_size) for block_size in feedback_transform_probe_block_sizes
+        )
+        self.feedback_lattice_probe_block_sizes = tuple(
+            int(block_size) for block_size in feedback_lattice_probe_block_sizes
+        )
+        self.feedback_lattice_probe_coordinate_bits = tuple(
+            int(bits) for bits in feedback_lattice_probe_coordinate_bits
         )
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
@@ -1162,6 +1280,33 @@ class MuonPairVQLinear(nn.Module):
         ):
             raise ValueError(
                 "feedback transform probes require free-VQ residual probe steps"
+            )
+        if any(
+            block_size < 2
+            or block_size & (block_size - 1)
+            or self.element_count % block_size
+            for block_size in self.feedback_lattice_probe_block_sizes
+        ):
+            raise ValueError(
+                "feedback lattice probe sizes must be power-of-two divisors"
+            )
+        if any(
+            bits < 2 or bits > 8
+            for bits in self.feedback_lattice_probe_coordinate_bits
+        ):
+            raise ValueError("feedback lattice probe bits must be in [2, 8]")
+        if bool(self.feedback_lattice_probe_block_sizes) != bool(
+            self.feedback_lattice_probe_coordinate_bits
+        ):
+            raise ValueError(
+                "feedback lattice probes require both block sizes and bit widths"
+            )
+        if self.feedback_lattice_probe_block_sizes and (
+            not self.feedback_residual_probe_steps
+            or self.feedback_codec != "free_vq256_rvq2"
+        ):
+            raise ValueError(
+                "feedback lattice probes require free-VQ residual probe steps"
             )
         if self.feedback_codec not in (
             "cartesian4x4",
@@ -1965,6 +2110,34 @@ class MuonPairVQ(torch.optim.Optimizer):
                                     diagnostics[
                                         f"feedback_transform_b{block_size}_{key}"
                                     ] = value
+                            for block_size in (
+                                module.feedback_lattice_probe_block_sizes
+                            ):
+                                for coordinate_bits in (
+                                    module.feedback_lattice_probe_coordinate_bits
+                                ):
+                                    counterfactual = (
+                                        _block_fht_gain_lattice_counterfactual(
+                                            raw_feedback.reshape(
+                                                -1, module.vector_length
+                                            ),
+                                            block_size=block_size,
+                                            coordinate_bits=coordinate_bits,
+                                            seed=(
+                                                20261023
+                                                + 8192 * module.layer_id
+                                                + 131 * module.in_features
+                                                + 17 * module.out_features
+                                                + block_size
+                                            ),
+                                        )
+                                    )
+                                    prefix = (
+                                        f"feedback_lattice_b{block_size}_"
+                                        f"q{coordinate_bits}_"
+                                    )
+                                    for key, value in counterfactual.items():
+                                        diagnostics[prefix + key] = value
                 self._diagnostics.append(diagnostics)
         return loss
 

@@ -1367,6 +1367,18 @@ def parse_args() -> argparse.Namespace:
         type=int,
         default=[],
     )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-lattice-probe-block-sizes",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-feedback-lattice-probe-coordinate-bits",
+        nargs="+",
+        type=int,
+        default=[],
+    )
     parser.add_argument("--block-fht-ffn-pregelu-gain", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias", action="store_true")
     parser.add_argument("--block-fht-ffn-pregelu-bias-init", type=float, default=0.0)
@@ -2269,6 +2281,22 @@ def parse_args() -> argparse.Namespace:
             (),
         )
     )
+    lattice_probe_block_sizes = tuple(
+        int(block_size)
+        for block_size in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes",
+            (),
+        )
+    )
+    lattice_probe_coordinate_bits = tuple(
+        int(bits)
+        for bits in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits",
+            (),
+        )
+    )
     if any(step < 0 for step in residual_probe_steps):
         raise ValueError("pair-VQ residual probe steps must be nonnegative")
     if any(iterations <= 0 for iterations in residual_probe_iterations):
@@ -2303,6 +2331,27 @@ def parse_args() -> argparse.Namespace:
     ):
         raise ValueError(
             "pair-VQ transform probes require free-VQ residual probe steps"
+        )
+    if any(
+        block_size < 2 or block_size & (block_size - 1)
+        for block_size in lattice_probe_block_sizes
+    ):
+        raise ValueError(
+            "pair-VQ lattice probe sizes must be powers of two at least two"
+        )
+    if any(bits < 2 or bits > 8 for bits in lattice_probe_coordinate_bits):
+        raise ValueError("pair-VQ lattice probe bits must be in [2, 8]")
+    if bool(lattice_probe_block_sizes) != bool(lattice_probe_coordinate_bits):
+        raise ValueError(
+            "pair-VQ lattice probes require both block sizes and bit widths"
+        )
+    if lattice_probe_block_sizes and not (
+        residual_probe_steps
+        and namespace.block_fht_mlp_pair_vq_feedback_codec
+        == "free_vq256_rvq2"
+    ):
+        raise ValueError(
+            "pair-VQ lattice probes require free-VQ residual probe steps"
         )
     if namespace.block_fht_mlp_pair_vq_feedback_codec not in (
         "cartesian4x4",
@@ -2837,6 +2886,22 @@ def pair_vq_model_kwargs(
             for block_size in getattr(
                 namespace,
                 "block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes",
+                (),
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes": tuple(
+            int(block_size)
+            for block_size in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes",
+                (),
+            )
+        ),
+        "block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits": tuple(
+            int(bits)
+            for bits in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits",
                 (),
             )
         ),
