@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_pair_vq_blockmixed_source_probe9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or execution",
+  "question": "Does invertible higher-dimensional signed-Hadamard mixing make the live compact full-MLP temporal source accurately codable by the same byte-rate pair-product quantizer?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_freevq256_rvq2_gate9_result.json",
+    "result_sha256": "cfb402ef3530cb0d14b55871bdb69b20d239f1e286aeeb6f376a6bf88b42241d",
+    "classification": "REJECT_FREE_2D_TWO_STAGE_PAIR_VQ",
+    "step0_exact_residual_recovery": 0.815611327480742,
+    "step8_exact_residual_recovery": 0.9629214561002344,
+    "reason": "Free pair directions did not solve the live source-coding problem, so the frozen successor is a higher-dimensional lattice, trellis, or product code rather than more pair centroids."
+  },
+  "theory": {
+    "transform": "u = H_B S_B e and e_hat = S_B H_B^T u_hat, where H_B is normalized Hadamard and S_B is a deterministic sign diagonal",
+    "support": "The transform is bijective and orthogonal, so it removes no ambient direction and preserves squared error exactly.",
+    "coding_effect": "Mixing spreads sparse/heavy-tailed coordinates and cross-weight correlations over B transformed coordinates before product quantization.",
+    "persistent_state": "unchanged; two uint8 codes per transformed pair, one byte per original weight, no stored transform, no dense master, no dense momentum, no ambient residual",
+    "metadata": "unchanged 4096 FP32 bytes per matrix",
+    "fit_plus_decode_extra_additions_per_weight": {
+      "B8": 6,
+      "B16": 8,
+      "B32": 10
+    },
+    "candidate_block_sizes": [2, 8, 16, 32],
+    "B2_role": "fresh exact-fit untransformed control",
+    "larger_block_role": "probe-only signed-Hadamard source-coding counterfactual"
+  },
+  "acquisition": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_blockmixed_source_probe9.json",
+    "config_sha256": "ceee12cdb66545c006626c5c1018748daff4dda461a906536396ba026ac41706",
+    "implementation_commit": "cc90467628987e75b5099d067c5824f995e325be",
+    "optimizer_steps": 9,
+    "probe_steps": [0, 8],
+    "matrices_per_step": 24,
+    "persistent_candidate_change": false,
+    "selection_endpoint": false
+  },
+  "frozen_validity_gates": {
+    "clean_exit_and_9_optimizer_steps": true,
+    "all_logged_losses_finite": true,
+    "diagnostic_records_expected": 48,
+    "records_per_probe_step": 24,
+    "parseval_relative_error_max": 0.000001,
+    "exact_config_mfu_min_fraction": 0.20
+  },
+  "frozen_candidate_gates": {
+    "residual_stage_energy_weighted_recovery_min_each_probe": 0.985,
+    "residual_stage_every_matrix_recovery_min_each_probe": 0.98,
+    "full_feedback_energy_weighted_recovery_min_each_probe": 0.99975,
+    "stage1_and_stage2_active_codes_min": 192,
+    "stage1_and_stage2_entropy_bits_min": 6.5
+  },
+  "aggregation": {
+    "residual_stage_recovery": "residual-target-energy weighted across all 24 matrices, separately by block size and probe step, plus minimum matrix recovery",
+    "full_feedback_recovery": "feedback-target-energy weighted across all 24 matrices, separately by block size and probe step",
+    "occupancy_entropy": "minimum over both stages, all matrices, and both probe steps for each block size",
+    "parseval": "maximum matrix relative energy error over both probe steps"
+  },
+  "selection_rule": {
+    "winner": "smallest block size greater than 2 that passes every candidate and validity gate at both steps",
+    "ties": "smallest block wins because it has the least transform work and shortest correlation span",
+    "B2": "control only; cannot be selected because the parent already rejected untransformed pair coding"
+  },
+  "decision_policy": {
+    "winner_exists": "Implement production carry only for the selected block size, then require focused tests and an exact-config MFU/optimizer-overhead gate followed by a nine-update local-recoding direction gate. No 238-step run or endpoint yet.",
+    "no_winner": "Close fixed orthogonal mixing around pair-product VQ and derive a true higher-dimensional lattice or trellis at the compact-state budget. Do not sweep LR, bit rate, model size, or horizon.",
+    "automatic_rerun": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight; diagnostic compute is included in measured optimizer time",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes; attach a persistent @Codex watchdog immediately only if observed runtime exceeds five minutes",
+    "callbacks": "none expected for a sub-five-minute diagnostic"
+  }
+}
