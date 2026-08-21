@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_pair_vq_projected_muon_gate40_result_v1",
+  "recorded_at": "2026-08-21",
+  "classification": "REJECTED_INITIAL_TANGENT_RESOLUTION_PERFORMANCE_PASS",
+  "passed": false,
+  "decision": {
+    "smallest_rung_training_authorized": false,
+    "larger_rung_authorized": false,
+    "reason": "The exact real-124M path is fast and later projected requests are well recovered, but the preregistered step-0 aggregate requested-energy recovery is only 0.07620 versus the frozen 0.20 minimum. The discrete pair codes do not cross their finite cells under the first warmup update."
+  },
+  "identity": {
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_projected_muon_plan.json",
+    "plan_sha256": "794b0301f7bad8962f7b284b6d4bc4d3a7e6dfc26fdd65c10463b2b17eac5e6f",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_projected_muon_gate40.json",
+    "config_sha256": "7db01d72706c4fed8a43b29e70600cf2fb84b0df707ebee763e3b0bf347b85f8",
+    "execution_git_commit": "e538ffc50fed53b758343c37ecca084d782cd7b8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "source_hashes": {
+    "examples/nanogpt/train.py": "25cbbb5c175435fac286841c2e49a7573989ca82d4040a411df5e801a49b7475",
+    "examples/nanogpt/model.py": "061af198a9a7a49cefac30b0765859e4f900989bfbceec9f28c55ce5b6b1f227",
+    "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+    "examples/nanogpt/muon_pair_vq.py": "81c9ebed23e041f076cf0e6a0a0ac4c95356690adc824e02d0b68d51c9fed8e3",
+    "latent_weight_lab/block_fht.py": "e0b692156130d11d55a240d192e9dde2077a77d0cfc4412356c5ddab49e80f36"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "mode": "foreground-polled; expected and observed under five minutes; no watchdog",
+    "literal_command": "CUDA_VISIBLE_DEVICES=0 python examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_projected_muon_gate40.json",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_projected_muon_gate40.log",
+    "log_sha256": "623be0673fd5c8d51f506caabf85eac5ea4d4cc56c00b3a8b0e3afc64019a0bc",
+    "optimizer_steps": 40,
+    "peak_mib": 31545.83
+  },
+  "step0_projection": {
+    "matrices": 24,
+    "aggregate_requested_energy_recovery": 0.0761977182641127,
+    "unweighted_recovery_mean": 0.1325825929470443,
+    "recovery_min": 0.011934226107008228,
+    "update_cosine_mean": 0.3471771367770064,
+    "update_cosine_min": 0.10927671210669035,
+    "code_changes": 0,
+    "c_fc_recovery_mean": 0.06768992570412295,
+    "c_fc_recovery_min": 0.011934226107008228,
+    "c_proj_recovery_mean": 0.19747526018996567,
+    "c_proj_recovery_min": 0.08603409794719874
+  },
+  "later_projection": {
+    "step8_aggregate_requested_energy_recovery": 0.7206994858015505,
+    "step8_recovery_min": 0.30297028485795285,
+    "step8_update_cosine_min": 0.5504445966625873,
+    "step16_aggregate_requested_energy_recovery": 0.7778141118434535,
+    "step24_aggregate_requested_energy_recovery": 0.854079610694551,
+    "interpretation": "Capacity and nonlinear cell mobility are present after finite drift; the rejected property is the initial infinitesimal tangent, especially c_fc."
+  },
+  "performance": {
+    "timed_samples": 7,
+    "tokens_per_second": 210844.82857142857,
+    "iter_ms": 1243.3028571428572,
+    "optimizer_ms": 41.87428571428571,
+    "optimizer_fraction": 0.03367987572272932,
+    "active_params_6n_estimate": 124475904,
+    "model_tflops": 157.4706038409216,
+    "empirical_bf16_gemm_peak_tflops": 416.72794435283873,
+    "mfu_fraction": 0.3778738766498295,
+    "minimum_mfu_fraction": 0.2,
+    "passed": true
+  },
+  "storage": {
+    "persistent_model_matrix_state_bytes": 42541248,
+    "persistent_training_matrix_state_bytes": 42614976,
+    "model_compression_vs_dense_bf16": 2.662033,
+    "training_compression_vs_dense_fp32_weight_plus_momentum": 10.62971,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "ambient_error_buffer": false
+  }
+}

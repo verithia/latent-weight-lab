@@ -1,0 +1,56 @@
+{
+  "schema_version": "mai_cfc_fast_residual_pair_vq_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_results",
+  "scientific_question": "Can one compact, freely recoded c_fc residual lattice repair the missing infinitesimal tangent while preserving the already-qualified slow pair-VQ capacity state?",
+  "causal_basis": {
+    "capacity_result": "examples/nanogpt/configs/selection_artifacts/124m_cfc_residual_pair_vq_mlp_result.json",
+    "temporal_rejection": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_projected_muon_gate40_result.json",
+    "observed_failure": "At step 0 no code changes occur and aggregate request recovery is 0.07620; c_fc mean is 0.06769 while c_proj mean is 0.19748. By step 8 aggregate recovery is 0.72070.",
+    "mechanism": "Finite Voronoi cells freeze ordinary uint8 indices under a small warmup step. The fixed-code tangent contains only codeword-centroid indicator directions. This is temporal resolution failure, not capacity failure."
+  },
+  "candidate": {
+    "name": "slow_capacity_plus_fast_cfc_residual_lattice",
+    "slow_c_fc": "retain the capacity-qualified two unrestricted 256x2 pair-code stages",
+    "slow_c_proj": "retain the capacity-qualified one unrestricted 256x2 pair-code stage",
+    "fast_c_fc": "add one uint8 code per c_fc pair; every optimizer step freely refit two sorted 16-level scalar codebooks and all pair codes to the residual after slow-stage coordinate projection",
+    "fast_c_proj": "none; c_proj already has positive step-0 recovery and comfortable cosine, so adding state there is not causally justified",
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "ambient_error_buffer": false,
+    "fast_residual_optimizer_momentum": false,
+    "token_time_extra_flops": 0,
+    "refresh_policy": "fast c_fc residual is globally recoded every step; slow codes retain the eight-step local refresh cadence"
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "dense_bf16_matrix_bytes": 113246208,
+    "slow_uint8_code_bytes": 42467328,
+    "fast_c_fc_uint8_code_bytes": 14155776,
+    "total_uint8_code_bytes": 56623104,
+    "slow_fp32_codebook_bytes": 73728,
+    "fast_fp32_level_bytes": 1536,
+    "optimizer_step_bytes": 192,
+    "persistent_model_training_dtype_bytes": 56698560,
+    "compact_momentum_bytes": 73728,
+    "persistent_training_matrix_state_bytes": 56772288,
+    "model_compression_vs_dense_bf16": 1.99734,
+    "training_compression_vs_dense_fp32_weight_plus_momentum": 7.97898,
+    "continuous_coordinates": 18816,
+    "continuous_coordinate_reduction": 3009.3061224489797,
+    "transient_dense_weight_bytes": 226492416,
+    "transient_dense_gradient_bytes": 226492416
+  },
+  "frozen_gates": {
+    "focused_unit_resume_state_tests": true,
+    "real_124m_step0_aggregate_requested_energy_recovery_min": 0.8,
+    "real_124m_step0_every_c_fc_requested_energy_recovery_min": 0.7,
+    "real_124m_step0_every_matrix_requested_energy_recovery_min": 0.0,
+    "real_124m_step0_every_matrix_requested_update_cosine_min": 0.1,
+    "exact_config_optimizer_steps_min": 32,
+    "exact_config_mfu_min_fraction": 0.2,
+    "exact_config_optimizer_fraction_max": 0.3,
+    "fixed_checkpoint_capacity_gate_must_not_regress": true,
+    "smallest_rung_training_only_after_all_gates": true,
+    "larger_rung_authorized": false
+  }
+}
