@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_pair_vq_family_adaptive_residual_lattice_gate9_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_exact_config_preflight_or_execution",
+  "question": "Does one extra residual coordinate bit only for c_fc close the measured early codec floor while c_proj remains on the already-passing q4 code?",
+  "causal_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fractional_residual_lattice_gate9_result.json",
+    "result_sha256": "c32f78210fc187fba0601fd51ad7a34f3f290558e2c751eac2db304795fb623e",
+    "classification": "REJECT_EARLY_CODEC_RECOVERY",
+    "step0_codec_weighted_recovery": 0.9999252453386818,
+    "step0_codec_worst_matrix_recovery": 0.9997797553594429,
+    "failure_family": "mlp.c_fc",
+    "c_proj_passed": true
+  },
+  "representation": {
+    "codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+    "c_fc_physical_bits_per_weight": 12.78125,
+    "c_proj_physical_bits_per_weight": 11.78125,
+    "aggregate_physical_bits_per_weight": 12.28125,
+    "feedback_code_bytes": 86925312,
+    "feedback_level_bytes": 88320,
+    "compact_momentum_bytes": 73728,
+    "compact_model_bytes": 70855872,
+    "persistent_mlp_training_matrix_bytes": 157943232,
+    "reduction_vs_dense_fp32_weight_plus_muon": 2.868023,
+    "temporal_state_saving_vs_fp32_fraction": 0.615821,
+    "persistent_dense_master_residual_or_momentum": false,
+    "inference_flops": "unchanged materialized dense MLP"
+  },
+  "rate_justification": {
+    "high_rate_model": "D is proportional to 2^(-2R)",
+    "observed_worst_cfc_error_fraction": 0.0002202446405571,
+    "q5_predicted_error_fraction": 0.000055061160139275,
+    "matrix_error_floor": 0.0001,
+    "reason_not_global_q5": "Every c_proj residual passed q4, and c_fc and c_proj have equal element counts; family allocation saves 0.5 aggregate bits/weight versus global q5."
+  },
+  "implementation_gate": {
+    "focused_tests": "40 passed on PRO6",
+    "family_specific_packed_byte_accounting": true,
+    "checkpoint_next_step_bit_exact": true,
+    "implementation_commit": "75497a45c70da0eabfbd09d89824bc223dd6ef52"
+  },
+  "frozen_live_gates": {
+    "optimizer_steps": 9,
+    "refresh_steps": [
+      0,
+      8
+    ],
+    "matrix_records_per_refresh": 24,
+    "feedback_codec_weighted_recovery_min": 0.999975,
+    "feedback_codec_every_matrix_recovery_min": 0.9999,
+    "conserved_requested_step_weighted_recovery_min": 0.999975,
+    "conserved_requested_step_every_matrix_recovery_min": 0.9999,
+    "all_logged_losses_finite": true,
+    "exact_config_mfu_min_fraction": 0.2,
+    "optimizer_fraction_max": 0.3,
+    "aggregate_physical_feedback_bits_per_weight_exact": 12.28125,
+    "dense_fp32_temporal_tensor_present": false
+  },
+  "selection_rule": {
+    "pass": "Seal the packed state and authorize only one matched 124M 0.5-TPP endpoint with identical late-horizon recovery floors. Do not scale model or horizon.",
+    "fail_recovery": "Reject the one-bit family allocation; measure the residual distortion mechanism and do not loosen thresholds or sweep LR.",
+    "fail_systems": "Optimize the implementation and repeat without changing the scientific thresholds.",
+    "automatic_scale_up": false
+  },
+  "execution_policy": {
+    "host": "PRO6",
+    "gpu": 0,
+    "preflight": "foreground exact-config real-training preflight",
+    "scientific_run": "foreground-polled because nine updates are expected under five minutes",
+    "callbacks": "none for this sub-five-minute gate"
+  }
+}
