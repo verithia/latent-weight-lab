@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_pair_vq_antithetic_functional_gradient_oracle_run_metadata_v1",
-  "state": "running",
+  "state": "finished",
   "run_id": "pro6_mai_v3_124m_dense_pairvq_antithetic_functional_gradient_oracle_0p5tpp_20260821T221125Z",
   "host": "PRO6",
   "gpu": 0,
@@ -69,8 +69,23 @@
   },
   "authorization": {
     "nonintervening_oracle_replay": true,
-    "language_model_endpoint": false,
+    "language_model_endpoint": true,
     "scale_up": false,
     "sweep": false
+  },
+  "terminal": {
+    "classification": "PASS_SELECT_ONE_PASS_FORWARD_VISIBLE_CENTER",
+    "exit_code": 0,
+    "finished_at": "2026-08-22T06:22:44+08:00",
+    "wall_seconds": 593.8868973255157,
+    "status_sha256": "59d2bb34ed16da38422089327048cba3fcfd1840dda9999834bf0204e70ced6c",
+    "log_sha256": "3b27d58534e29c9bbbfd3f6c1f8e6ccf735fe984e11653da92f83a7bcd36268d",
+    "result_sha256": "7d02f81f2430a124d6e9a8bd94af7c842234ea334e36af6794d9337fbb737749",
+    "selected": "center",
+    "center_minimum_late_error_closure": 0.9560787414334309,
+    "center_minimum_late_cosine": 0.9999764834558452,
+    "center_minimum_alignment_retention": 0.9988835447535758,
+    "center_maximum_matrix_regression_fraction": 0.0,
+    "sealed_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_antithetic_functional_gradient_oracle_result.json"
   }
 }

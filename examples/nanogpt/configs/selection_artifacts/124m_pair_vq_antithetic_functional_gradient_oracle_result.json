@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_pair_vq_antithetic_functional_gradient_oracle_sealed_result_v1",
+  "classification": "PASS_SELECT_ONE_PASS_FORWARD_VISIBLE_CENTER",
+  "source_result": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_dense_pairvq_antithetic_functional_gradient_oracle_0p5tpp_lr24e4/functional_gradient_oracle_result.json",
+    "sha256": "7d02f81f2430a124d6e9a8bd94af7c842234ea334e36af6794d9337fbb737749"
+  },
+  "source_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_antithetic_functional_gradient_oracle_plan.json",
+    "sha256": "c856d2d695a569673572004e457c275e632f6461e5e1682c4f224bc22e71ba4f"
+  },
+  "terminal_identity": {
+    "run_id": "pro6_mai_v3_124m_dense_pairvq_antithetic_functional_gradient_oracle_0p5tpp_20260821T221125Z",
+    "source_commit": "d388c084f868afd9e18118f59df96f2ca6c0df24",
+    "config_sha256": "e51c0512b1dc2f1dd31627b6365b4a6bd8131bf08cf4d28297d472a5eed8bdd5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "runtime_provenance_sha256": "db961d6af2a79929b7488162c949e56e209c62962af6125b4a64492a380bda59",
+    "status_sha256": "59d2bb34ed16da38422089327048cba3fcfd1840dda9999834bf0204e70ced6c",
+    "log_sha256": "3b27d58534e29c9bbbfd3f6c1f8e6ccf735fe984e11653da92f83a7bcd36268d",
+    "exit_code": 0,
+    "wall_seconds": 593.8868973255157,
+    "finished_at": "2026-08-22T06:22:44+08:00"
+  },
+  "protocol": {
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_and_heldout_indices_disjoint": true,
+    "persistent_pair_vq_training_bytes": 157500864,
+    "all_metrics_finite": true
+  },
+  "gate": {
+    "passed": true,
+    "selected": "center",
+    "center": {
+      "passed": true,
+      "minimum_late_heldout_gradient_error_closure_vs_native": 0.9560787414334309,
+      "minimum_late_heldout_gradient_cosine": 0.9999764834558452,
+      "minimum_late_fit_to_heldout_task_alignment_retention_vs_dense": 0.9988835447535758,
+      "maximum_primary_matrix_regression_fraction": 0.0,
+      "minimum_virtual_weight_energy_recovery_weighted": 0.999999994008999,
+      "minimum_virtual_weight_energy_recovery_every_matrix": 0.9999999012534363
+    },
+    "antithetic": {
+      "passed": true,
+      "minimum_late_heldout_gradient_error_closure_vs_native": 0.8955205188968787,
+      "minimum_late_heldout_gradient_cosine": 0.9998597104974805,
+      "minimum_late_fit_to_heldout_task_alignment_retention_vs_dense": 0.9791208308385483,
+      "maximum_primary_matrix_regression_fraction": 0.0,
+      "minimum_virtual_weight_energy_recovery_weighted": 0.999999994008999,
+      "minimum_virtual_weight_energy_recovery_every_matrix": 0.9999999012534363
+    }
+  },
+  "late_heldout_relative_error": {
+    "step_180": {
+      "native": 0.14267389427629198,
+      "center": 0.006266417001208364,
+      "antithetic": 0.014906494440948572
+    },
+    "step_238": {
+      "native": 0.1910050337847333,
+      "center": 0.0068594166830636,
+      "antithetic": 0.016791714870626317
+    }
+  },
+  "decision": {
+    "one_pass_forward_visible_center_endpoint_authorized": true,
+    "two_pass_antithetic_endpoint_authorized": false,
+    "automatic_scale_up": false,
+    "automatic_sweep": false,
+    "reason": "The center passes every frozen gate and is both more accurate and half the task-gradient compute of the antithetic estimator."
+  }
+}
