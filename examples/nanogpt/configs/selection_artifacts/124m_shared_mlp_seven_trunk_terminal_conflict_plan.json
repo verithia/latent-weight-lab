@@ -1,0 +1,36 @@
+{
+  "schema_version": "mai_shared_mlp_seven_trunk_terminal_conflict_plan_v1",
+  "scientific_question": "After the seven-trunk representation misses the strict 5TPP gate, do its two remaining shared groups still exhibit destructive same-checkpoint task-gradient cancellation, or has tangent alignment passed while endpoint/function matching remains insufficient?",
+  "source_checkpoint": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp/scientific/ckpt.pt",
+    "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "next_iter": 2373,
+    "terminal_validation_cross_entropy": 3.7442
+  },
+  "measurement": {
+    "optimizer_updates": 0,
+    "split": "train",
+    "seed": 20260821,
+    "micro_batch_size": 8,
+    "micro_batches": 8,
+    "tokens": 65536,
+    "method": "freeze all parameters, locally untie each layer c_fc/c_proj from its shared trunk, and measure exact same-checkpoint task gradients"
+  },
+  "current_partition": {
+    "boundaries": [1, 2, 3, 4, 5, 8, 12],
+    "layers": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
+    "minimum_combined_recovery_required": 0.8,
+    "mean_combined_recovery_required": 0.9
+  },
+  "interpretation_rule": {
+    "persistent_conflict": "if the current partition minimum is below 0.8 or mean is below 0.9, reject cross-layer dense-trunk sharing as geometrically nonstationary over training",
+    "endpoint_mismatch": "if both recovery thresholds pass while validation remains +0.0698 behind attention-only, conclude that tangent alignment is insufficient and the remaining defect is endpoint/functional mismatch rather than common-update cancellation",
+    "forbidden_inference": "the audit cannot authorize an eighth trunk, layer-private dense MLPs, model-size scaling, or a new training run"
+  },
+  "authorization": {
+    "zero_update_analysis": true,
+    "mfu_preflight": false,
+    "training": false,
+    "model_size_scaling": false
+  }
+}

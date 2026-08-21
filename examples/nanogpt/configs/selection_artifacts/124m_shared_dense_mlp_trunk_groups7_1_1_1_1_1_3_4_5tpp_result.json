@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_shared_dense_mlp_trunk_groups7_nonuniform_5tpp_result_v1",
+  "classification": "REJECTED_STRICT_TEMPORAL_DURABILITY_NEAR_MISS",
+  "passed": false,
+  "run": {
+    "name": "pro6_mai_v3_124m_fullattn_shared_dense_mlp_trunk_groups7_1_1_1_1_1_3_4_5tpp",
+    "source_commit": "a26c1af2e31b1c0a6168262f1b96d96d2204fc06",
+    "started_at": "2026-08-21T13:24:21+08:00",
+    "finished_at": "2026-08-21T14:18:06+08:00",
+    "exit_code": 0,
+    "status_sha256": "bc869f8f42f0f10cfc850821c89b7809842e51a1060379caa5da3da000d47488",
+    "log_sha256": "9699c6bbe96abefa0fb177c430216fcd2c30752b184323207e1e045e88b9b29d",
+    "provenance_sha256": "936909fec6a8a74c10b1cf6b0ba2135255a2784e35ab9cbe95063de54bdb2138",
+    "archived_config_sha256": "6fd017d396c3b885c242c2d0c58241986b98cada8766b968a97bb36d1af3869e",
+    "resolved_config_sha256": "302b1168f725668d131522c824545e8768ef4798e49aad67d9d6ebbe2b8871e5",
+    "checkpoint_sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f",
+    "checkpoint_metadata_sha256": "7c9a94e78e7646ce213b22754a64e3b2c7c321f221d1eea50ebcdc0fdb70632b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "terminal": {
+    "step": 2373,
+    "train_cross_entropy": 3.7593,
+    "validation_cross_entropy": 3.7442,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "validation_curve": [
+      {"step": 0, "validation_cross_entropy": 10.981},
+      {"step": 594, "validation_cross_entropy": 4.3716},
+      {"step": 1188, "validation_cross_entropy": 3.9467},
+      {"step": 1782, "validation_cross_entropy": 3.8016},
+      {"step": 2373, "validation_cross_entropy": 3.7442}
+    ]
+  },
+  "comparisons": {
+    "attention_only_validation_cross_entropy": 3.6744,
+    "gap_to_attention_only": 0.0698,
+    "perplexity_ratio_to_attention_only": 1.072294,
+    "dense_validation_cross_entropy": 3.5401,
+    "gap_to_dense": 0.2041,
+    "perplexity_ratio_to_dense": 1.226421,
+    "attention_only_gap_to_dense": 0.1343,
+    "four_trunk_validation_cross_entropy": 3.8252,
+    "improvement_over_four_trunks": 0.081,
+    "mlp_temporal_pass_validation_ce_maximum": 3.7244,
+    "miss_to_strict_mlp_temporal_ceiling": 0.0198,
+    "legacy_attention_plus_0p1_ceiling": 3.7744,
+    "margin_inside_legacy_0p1_ceiling": 0.0302,
+    "end_to_end_dense_plus_0p1_validation_ce_maximum": 3.6401,
+    "miss_to_end_to_end_ceiling": 0.1041,
+    "short_horizon_gap_to_attention_only": 0.0262,
+    "gap_growth_from_0p5tpp_to_5tpp": 0.0436
+  },
+  "accounting": {
+    "layer_partition": [[0], [1], [2], [3], [4], [5, 6, 7], [8, 9, 10, 11]],
+    "dense_mlp_parameters": 56623104,
+    "learned_mlp_parameters": 33076224,
+    "mlp_parameter_compression_ratio": 1.711897464474784,
+    "mlp_parameter_saving_fraction": 0.41585286458333337,
+    "actual_total_trainable_parameters": 72798432,
+    "materialized_dense_mlp_flops_unchanged": true,
+    "persistent_ambient_error_buffer": false,
+    "persistent_ambient_momentum_field": false,
+    "ambient_decoder": false
+  },
+  "performance_gate": {
+    "certificate_sha256": "42c4161179c45fe6a328e60a24736dfe332c33231bbcd1bd203e44d33134951b",
+    "mfu_fraction": 0.35937503607087284,
+    "tokens_per_second": 199973.7333333333,
+    "iteration_milliseconds": 1310.8933333333334,
+    "peak_allocated_mib": 33749.63
+  },
+  "decision": "Reject further trunk count, boundary, and model-size scaling. Seven trunks recover 0.0810 CE versus four trunks and satisfy the older +0.1 MLP criterion, but miss the preregistered +0.05 temporal-durability gate by 0.0198 CE while retaining only 1.712x MLP compression. Run only a zero-update same-checkpoint layer-gradient audit to distinguish persistent cross-layer cancellation from endpoint/functional mismatch; no new training structure is authorized by this result."
+}
