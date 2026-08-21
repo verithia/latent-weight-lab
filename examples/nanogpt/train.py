@@ -2451,6 +2451,7 @@ def parse_args() -> argparse.Namespace:
         "rvq4x4",
         "fractional_lattice_q7q8_b32_p25",
         "fractional_lattice_q7q8_b32_p25_rq4",
+        "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
     ):
         raise ValueError("unknown pair-VQ feedback codec")
     if (
@@ -2474,6 +2475,7 @@ def parse_args() -> argparse.Namespace:
             "rvq4x4",
             "fractional_lattice_q7q8_b32_p25",
             "fractional_lattice_q7q8_b32_p25_rq4",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
         )
         and not (
             namespace.block_fht_mlp_pair_vq
@@ -2492,6 +2494,7 @@ def parse_args() -> argparse.Namespace:
             "rvq4x4",
             "fractional_lattice_q7q8_b32_p25",
             "fractional_lattice_q7q8_b32_p25_rq4",
+            "fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
         )
         and namespace.block_fht_mlp_pair_vq_feedback_output_group_size
     ):

@@ -95,6 +95,28 @@ def make_fractional_module(
     )
 
 
+def make_adaptive_fractional_module(
+    *,
+    in_features: int,
+    out_features: int,
+    seed: int,
+) -> MuonPairVQLinear:
+    return MuonPairVQLinear(
+        in_features,
+        out_features,
+        bias=False,
+        stages=1,
+        base_seed=seed,
+        weight_std=0.02,
+        layer_id=2,
+        fast_residual=False,
+        error_feedback=True,
+        feedback_codec="fractional_lattice_q7q8_b32_p25_rq4_cfcq5",
+        neighbor_candidates=16,
+        code_refresh_interval=8,
+    )
+
+
 def test_residual_conditional_polar_probe_reports_geometry_and_convergence() -> None:
     module = make_module(
         error_feedback=True,
@@ -346,6 +368,105 @@ def test_fractional_residual_lattice_resume_is_bit_exact_for_next_step() -> None
     restored = make_fractional_module(
         seed=1735,
         feedback_codec="fractional_lattice_q7q8_b32_p25_rq4",
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    original_state = optimizer.state[module.weight]
+    restored_state = restored_optimizer.state[restored.weight]
+    assert torch.equal(
+        restored_state["feedback_codes"], original_state["feedback_codes"]
+    )
+    torch.testing.assert_close(
+        restored_state["feedback_levels"],
+        original_state["feedback_levels"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
+def test_family_adaptive_residual_lattice_uses_q5_only_for_cfc() -> None:
+    q4_cfc = MuonPairVQLinear(
+        16,
+        32,
+        bias=False,
+        stages=1,
+        base_seed=1737,
+        weight_std=0.02,
+        layer_id=2,
+        fast_residual=False,
+        error_feedback=True,
+        feedback_codec="fractional_lattice_q7q8_b32_p25_rq4",
+        neighbor_candidates=16,
+        code_refresh_interval=8,
+    )
+    adaptive_cfc = make_adaptive_fractional_module(
+        in_features=16,
+        out_features=32,
+        seed=1737,
+    )
+    adaptive_cproj = make_adaptive_fractional_module(
+        in_features=32,
+        out_features=16,
+        seed=1737,
+    )
+    q4_optimizer = make_optimizer(q4_cfc)
+    adaptive_optimizer = make_optimizer(adaptive_cfc)
+    torch.manual_seed(1739)
+    gradient = torch.randn_like(q4_cfc.weight)
+    q4_cfc.weight.grad = gradient.clone()
+    adaptive_cfc.weight.grad = gradient.clone()
+    q4_optimizer.step()
+    adaptive_optimizer.step()
+    q4_diagnostics = q4_optimizer.consume_diagnostics()[0]
+    adaptive_diagnostics = adaptive_optimizer.consume_diagnostics()[0]
+
+    cfc_layout = _fractional_residual_lattice_feedback_layout(
+        adaptive_cfc.element_count,
+        coordinate_bits=5,
+    )
+    cproj_layout = _fractional_residual_lattice_feedback_layout(
+        adaptive_cproj.element_count,
+        coordinate_bits=4,
+    )
+    assert cfc_layout["total_bytes"] == 818
+    assert cproj_layout["total_bytes"] == 754
+    assert 8.0 * cfc_layout["total_bytes"] / adaptive_cfc.element_count == 12.78125
+    assert 8.0 * cproj_layout["total_bytes"] / adaptive_cproj.element_count == 11.78125
+    assert adaptive_cfc.feedback_level_shape == (928,)
+    assert adaptive_cproj.feedback_level_shape == (912,)
+    assert adaptive_cfc.feedback_code_shape == (818,)
+    assert adaptive_cproj.feedback_code_shape == (754,)
+    assert (
+        adaptive_diagnostics["feedback_codec_energy_recovery"]
+        > q4_diagnostics["feedback_codec_energy_recovery"]
+    )
+    assert adaptive_diagnostics["feedback_codec_energy_recovery"] > 0.9999
+
+
+def test_family_adaptive_residual_lattice_resume_is_bit_exact() -> None:
+    torch.manual_seed(1741)
+    module = make_adaptive_fractional_module(
+        in_features=16,
+        out_features=32,
+        seed=1743,
+    )
+    optimizer = make_optimizer(module)
+    for _step in range(3):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+    restored = make_adaptive_fractional_module(
+        in_features=16,
+        out_features=32,
+        seed=1745,
     )
     restored.load_state_dict(model_state, strict=True)
     restored_optimizer = make_optimizer(restored)
