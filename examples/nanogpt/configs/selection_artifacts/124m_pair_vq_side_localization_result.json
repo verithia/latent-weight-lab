@@ -1,0 +1,29 @@
+{
+  "schema_version": "mai_pair_vq_side_localization_result_seal_v1",
+  "classification": "PAIR_VQ_SIDE_LOCALIZATION_NEITHER",
+  "repository_commit": "ae9acb91258ae7e59777acd114f25de904e4d69d",
+  "plan_sha256": "1724c0c221046d2a52be7e34418b05bef117bc467ef4398cdb1c5b2c4d09c870",
+  "result_sha256": "76ab8514364090d9a003a5dbf8819fb4dba1a39b8f8ce3f53fda9aa933366e34",
+  "validation_cross_entropy": {
+    "dense": 3.674412250518799,
+    "c_fc_only": 3.7204973697662354,
+    "c_proj_only": 3.704691171646118,
+    "both": 3.755155086517334
+  },
+  "validation_cross_entropy_gaps": {
+    "c_fc_only": 0.04608511924743652,
+    "c_proj_only": 0.030278921127319336,
+    "both": 0.08074283599853516,
+    "both_minus_side_gap_sum": 0.004378795623779297
+  },
+  "dominance": {
+    "c_fc_to_c_proj_gap_ratio": 1.522019858424082,
+    "dominant_side_under_frozen_rule": "neither",
+    "perfect_c_fc_repair_ce_ceiling": 3.704691171646118,
+    "perfect_c_proj_repair_ce_ceiling": 3.7204973697662354
+  },
+  "consistency_passed": true,
+  "wall_seconds": 60.46733832359314,
+  "maximum_cuda_memory_bytes": 9718197760,
+  "interpretation": "The positive interaction is only 0.00438 CE, so side errors are nearly additive. Neither side satisfies the preregistered dominance label, but perfect-repair ceilings causally select c_fc for one residual-code stage: exact c_proj-only coding is already +0.03028, whereas exact c_fc-only coding is +0.04609 and leaves little margin under the +0.05 gate."
+}

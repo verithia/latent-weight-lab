@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_cfc_residual_pair_vq_mlp_plan_v1",
+  "status": "theory_preregistered_before_implementation_or_result_values",
+  "scientific_question": "Does one second layer-private four-bit residual pair code on c_fc close the full-MLP fixed-CE gap while c_proj remains at one pair-code stage?",
+  "causal_basis": {
+    "side_localization_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_side_localization_result.json",
+    "side_localization_result_sha256": "3c346e780f57d4c7b7c2519276283b9705cc7a996052cc0faf0de607f577dd2e",
+    "finding": "Side gaps are nearly additive: c_fc-only coding is +0.046085 CE, c_proj-only coding is +0.030279, both is +0.080743, and interaction is +0.004379. Exact perfect c_fc repair leaves the safer +0.030279 ceiling.",
+    "representation_change": "Reuse the exact immutable first-stage pair codes. Fit one independent 256-entry Euclidean BF16 codebook to the remaining two-value c_fc residual in every layer and store one additional uint8 c_fc residual code per pair. c_proj remains unchanged at one stage.",
+    "not_a_sweep": "There is one causally selected side, one fixed residual stage, the existing pair length and code rate, one deterministic seed schedule, and no alternative side, bit, block, stage, sample, iteration, or optimizer trial."
+  },
+  "identities": {
+    "dense_teacher_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/attention_controls/y400_mai_v3_124m_fullattn_blockfht_5tpp_top1_provisional/ckpt.pt",
+      "sha256": "321ce567b2b4dc7f1fb35bb301d158ca4857dd15c832151cd1bdd889eadd1070"
+    },
+    "state_bank_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks-experiment-archive-20260821/shared_mlp_trunks/group7_1111134_5tpp/ckpt.pt",
+      "sha256": "5b501dcad0c561733170d82ff8a4deba26e44a7e56e9de38ca3f0a498aaa603f"
+    },
+    "first_stage_pair_vq_state": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_124m_layer_private_pair_vq_mlp_20260821/pair_vq_state.pt",
+      "sha256": "6df9a5ce68639a311863eaa0dc65b10d902e2238e83097a53946a3ea9f35ac4c"
+    },
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "residual_quantizer": {
+    "side": "c_fc",
+    "vector_length": 2,
+    "codebook_size": 256,
+    "codebook_scope": "independent for every layer c_fc residual",
+    "code_dtype": "uint8",
+    "codebook_dtype": "bfloat16",
+    "amplitude": "none; Euclidean residual codewords contain magnitude",
+    "sample_vectors_per_matrix": 65536,
+    "lloyd_iterations": 8,
+    "assignment_chunk_vectors": 32768,
+    "algorithm_seed": 20261010,
+    "dense_master_weight": false,
+    "ambient_error_buffer": false,
+    "ambient_optimizer_state": false
+  },
+  "accounting": {
+    "dense_mlp_weights": 56623104,
+    "dense_bf16_matrix_bytes": 113246208,
+    "uint8_code_bytes": 42467328,
+    "bfloat16_codebook_bytes": 36864,
+    "persistent_matrix_state_bytes": 42504192,
+    "persistent_bf16_storage_compression": 2.6643538594969645,
+    "continuous_coordinates": 18432,
+    "continuous_coordinate_compression": 3072.0,
+    "residual_decode_additions_per_refresh": 28311552,
+    "cached_token_time_extra_flops": 0
+  },
+  "measurement": {
+    "state_bank_sample_cap_per_layer": 1024,
+    "state_bank_token_batch_size": 4,
+    "state_bank_batches": 4,
+    "state_bank_seed": 20261011,
+    "local_perturbation_relative_rms": 0.01,
+    "input_jvp_directions": 4,
+    "input_jvp_seed": 20261012,
+    "fixed_eval_seed": 20260715,
+    "fixed_eval_batches": 400,
+    "fixed_eval_batch_size": 16,
+    "fixed_eval_block_size": 1024
+  },
+  "frozen_gates": {
+    "minimum_aggregate_matrix_energy_recovery": 0.995,
+    "minimum_every_matrix_energy_recovery": 0.99,
+    "minimum_mean_output_recovery": 0.99,
+    "minimum_worst_output_recovery": 0.98,
+    "minimum_mean_input_jvp_recovery": 0.98,
+    "minimum_worst_input_jvp_recovery": 0.95,
+    "maximum_fixed_validation_cross_entropy_gap": 0.05,
+    "minimum_persistent_bf16_storage_compression": 2.6,
+    "minimum_continuous_coordinate_compression": 3000.0,
+    "all_values_finite": true
+  },
+  "decision_rule": {
+    "pass": "Design exactly one discrete-code training rule with no dense master or ambient residual, account for its optimizer and assignment state, and require at least 20% exact-config MFU before a 124M/0.5TPP LM run.",
+    "fail": "Reject this asymmetric residual-code family. Use the matrix/function/CE discriminator to identify whether the remaining failure is c_proj fidelity or discrete-code temporal trainability; do not add another rate or stage by default.",
+    "infrastructure_failure": "Repair only the implementation defect and rerun the immutable plan without inspecting partial scientific metrics."
+  },
+  "authorization": {
+    "allowed": "Implement and run one zero-LM-update dense-teacher c_fc residual pair-VQ ceiling after focused tests and measured preflight.",
+    "not_allowed": [
+      "language-model training before every gate passes",
+      "dense FP16/FP32 master weights, residuals, momentum, or error feedback",
+      "alternative side, vector length, bit width, codebook size, stage count, seed, or optimizer trials",
+      "model-size scaling"
+    ],
+    "callback_policy": "Foreground-poll if measured complete runtime is at most five minutes; otherwise launch one verified terminal/failure @Codex watchdog."
+  }
+}
