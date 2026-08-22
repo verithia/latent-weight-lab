@@ -17,6 +17,7 @@ from typing import Any, Iterator
 import numpy as np
 import torch
 from torch import nn
+from torch.nn import functional as F
 
 from examples.nanogpt.muon import muon_update
 from examples.nanogpt.dense_pair_vq_shadow import (
@@ -31,10 +32,16 @@ POLAR_PLAN_SCHEMA = "mai_124m_pair_vq_same_momentum_polar_amplification_oracle_p
 REGULARIZED_POLAR_PLAN_SCHEMA = (
     "mai_124m_pair_vq_early_stopped_muon_polar_stability_oracle_plan_v1"
 )
+CODEC_STABILITY_PLAN_SCHEMA = (
+    "mai_124m_pair_vq_codec_neighbor_path_stability_oracle_plan_v1"
+)
 RESULT_SCHEMA = "mai_pair_vq_antithetic_functional_gradient_oracle_result_v1"
 POLAR_RESULT_SCHEMA = "mai_pair_vq_same_momentum_polar_amplification_oracle_result_v1"
 REGULARIZED_POLAR_RESULT_SCHEMA = (
     "mai_pair_vq_early_stopped_muon_polar_stability_oracle_result_v1"
+)
+CODEC_STABILITY_RESULT_SCHEMA = (
+    "mai_pair_vq_codec_neighbor_path_stability_oracle_result_v1"
 )
 
 
@@ -208,14 +215,22 @@ class PairVQFunctionalGradientOracle:
             PLAN_SCHEMA,
             POLAR_PLAN_SCHEMA,
             REGULARIZED_POLAR_PLAN_SCHEMA,
+            CODEC_STABILITY_PLAN_SCHEMA,
         }:
             raise ValueError("unexpected functional-oracle plan schema")
         self.polar_amplification_enabled = (
             plan.get("schema_version")
-            in {POLAR_PLAN_SCHEMA, REGULARIZED_POLAR_PLAN_SCHEMA}
+            in {
+                POLAR_PLAN_SCHEMA,
+                REGULARIZED_POLAR_PLAN_SCHEMA,
+                CODEC_STABILITY_PLAN_SCHEMA,
+            }
         )
         self.regularized_polar_enabled = (
             plan.get("schema_version") == REGULARIZED_POLAR_PLAN_SCHEMA
+        )
+        self.codec_stability_enabled = (
+            plan.get("schema_version") == CODEC_STABILITY_PLAN_SCHEMA
         )
         if self.polar_amplification_enabled and optimizer is None:
             raise ValueError(
@@ -239,6 +254,10 @@ class PairVQFunctionalGradientOracle:
             int(step) for step in frozen["primary_late_steps"]
         }
         self.records: list[dict[str, Any]] = []
+        self._active_probe_step = 0
+        self._isotropic_seed_base = int(
+            frozen.get("isotropic_seed_base", 0)
+        )
         self._dense_optimizer_owner: dict[str, tuple[Any, dict[str, Any]]] = {}
         if self.polar_amplification_enabled:
             children = list(getattr(optimizer, "optimizers", [optimizer]))
@@ -389,9 +408,45 @@ class PairVQFunctionalGradientOracle:
             "matrices": rows,
         }
 
+    def _isotropic_delta(
+        self, name: str, residual: torch.Tensor
+    ) -> torch.Tensor:
+        """Return a deterministic matched-energy Rademacher control."""
+        layer = int(name.split(".")[2])
+        side = 0 if name.endswith(".c_fc") else 1
+        seed = (
+            self._isotropic_seed_base
+            + 1000 * int(self._active_probe_step)
+            + 2 * layer
+            + side
+        )
+        generator = torch.Generator(device=residual.device)
+        generator.manual_seed(seed)
+        signs = torch.randint(
+            0,
+            2,
+            residual.shape,
+            generator=generator,
+            device=residual.device,
+            dtype=torch.int8,
+        ).float()
+        signs.mul_(2.0).sub_(1.0)
+        signs.mul_(
+            residual.float().norm()
+            / math.sqrt(max(int(residual.numel()), 1))
+        )
+        return signs
+
     @contextlib.contextmanager
     def _installed_variant(self, variant: str) -> Iterator[None]:
-        if variant not in {"dense", "native", "center", "plus"}:
+        if variant not in {
+            "dense",
+            "native",
+            "center",
+            "plus",
+            "isotropic_minus",
+            "isotropic_plus",
+        }:
             raise ValueError(f"unknown functional-oracle variant: {variant}")
         backups = {
             name: module.weight.detach().clone()
@@ -399,13 +454,21 @@ class PairVQFunctionalGradientOracle:
         }
         with torch.no_grad():
             if variant != "dense":
-                multiplier = {"native": 0.0, "center": 1.0, "plus": 2.0}[
-                    variant
-                ]
                 for name, dense in self.observer._dense_modules.items():
                     compact = self.observer._shadow_modules[name].weight
                     residual = self._decode_residual(name)
-                    dense.weight.copy_(compact + multiplier * residual)
+                    center = compact + residual
+                    if variant in {"native", "center", "plus"}:
+                        multiplier = {
+                            "native": 0.0,
+                            "center": 1.0,
+                            "plus": 2.0,
+                        }[variant]
+                        dense.weight.copy_(compact + multiplier * residual)
+                    else:
+                        delta = self._isotropic_delta(name, residual)
+                        sign = -1.0 if variant == "isotropic_minus" else 1.0
+                        dense.weight.copy_(center + sign * delta)
         try:
             yield
         finally:
@@ -445,6 +508,107 @@ class PairVQFunctionalGradientOracle:
                 gradients[name] = gradient.detach().float().cpu().clone()
         self.model.zero_grad(set_to_none=True)
         return gradients, losses
+
+    @torch.no_grad()
+    def _capture_logit_stability(self, *, split: str) -> dict[str, Any]:
+        """Measure center-to-neighbor last-token KL on one frozen window."""
+        neighbors = (
+            "native",
+            "plus",
+            "isotropic_minus",
+            "isotropic_plus",
+        )
+        totals = {variant: 0.0 for variant in neighbors}
+        batches = self._windows[split]
+        device_type = "cuda" if "cuda" in self.device else "cpu"
+        for tokens in batches:
+            inputs = tokens[:, :-1].contiguous().to(
+                self.device, non_blocking=False
+            )
+            amp = (
+                torch.amp.autocast(device_type=device_type, dtype=self.dtype)
+                if device_type == "cuda"
+                else contextlib.nullcontext()
+            )
+            with self._installed_variant("center"):
+                with amp:
+                    center_logits, _loss = self.model(inputs)
+                center_log_probs = F.log_softmax(
+                    center_logits[:, -1, :].float(), dim=-1
+                )
+                center_probs = center_log_probs.exp()
+            for variant in neighbors:
+                with self._installed_variant(variant):
+                    with amp:
+                        neighbor_logits, _loss = self.model(inputs)
+                    neighbor_log_probs = F.log_softmax(
+                        neighbor_logits[:, -1, :].float(), dim=-1
+                    )
+                divergence = F.kl_div(
+                    neighbor_log_probs,
+                    center_probs,
+                    reduction="batchmean",
+                )
+                if not torch.isfinite(divergence):
+                    raise RuntimeError("non-finite codec-neighbor logit KL")
+                totals[variant] += float(divergence)
+        means = {
+            variant: value / max(len(batches), 1)
+            for variant, value in totals.items()
+        }
+        actual = 0.5 * (means["native"] + means["plus"])
+        isotropic = 0.5 * (
+            means["isotropic_minus"] + means["isotropic_plus"]
+        )
+        return {
+            "center_to_neighbor_kl": means,
+            "actual_symmetric_mean": actual,
+            "isotropic_symmetric_mean": isotropic,
+            "actual_to_isotropic_ratio": actual / max(isotropic, 1e-30),
+        }
+
+    @torch.no_grad()
+    def _neighbor_energy_metrics(self) -> dict[str, Any]:
+        rows = []
+        for name in sorted(self.observer._dense_modules):
+            residual = self._decode_residual(name).float()
+            isotropic = self._isotropic_delta(name, residual)
+            actual_energy = float(residual.double().square().sum())
+            isotropic_energy = float(isotropic.double().square().sum())
+            mismatch = abs(isotropic_energy - actual_energy) / max(
+                actual_energy, 1e-30
+            )
+            rows.append(
+                {
+                    "module": name,
+                    "side": "c_fc" if name.endswith(".c_fc") else "c_proj",
+                    "actual_energy": actual_energy,
+                    "isotropic_energy": isotropic_energy,
+                    "relative_energy_mismatch": mismatch,
+                }
+            )
+        return {
+            "maximum_relative_energy_mismatch": max(
+                float(row["relative_energy_mismatch"]) for row in rows
+            ),
+            "matrices": rows,
+        }
+
+    @staticmethod
+    def _actual_worse_matrix_fraction(
+        actual: dict[str, Any], isotropic: dict[str, Any]
+    ) -> float:
+        actual_rows = {row["module"]: row for row in actual["matrices"]}
+        isotropic_rows = {
+            row["module"]: row for row in isotropic["matrices"]
+        }
+        if set(actual_rows) != set(isotropic_rows):
+            raise ValueError("codec-neighbor matrix inventories do not match")
+        return sum(
+            float(actual_rows[name]["relative_error"])
+            > float(isotropic_rows[name]["relative_error"])
+            for name in actual_rows
+        ) / max(len(actual_rows), 1)
 
     def _weight_center_metrics(self) -> dict[str, Any]:
         return self.last_residual_metrics
@@ -842,6 +1006,24 @@ class PairVQFunctionalGradientOracle:
         if not self.polar_amplification_enabled:
             return functional
         polar = self._summarize_polar_gate()
+        if self.codec_stability_enabled:
+            codec_stability = self._summarize_codec_stability_gate()
+            return {
+                "ready": bool(
+                    functional["ready"]
+                    and polar["ready"]
+                    and codec_stability["ready"]
+                ),
+                "passed": bool(
+                    functional["passed"]
+                    and polar["passed"]
+                    and codec_stability["passed"]
+                ),
+                "classification": codec_stability["classification"],
+                "functional": functional,
+                "polar": polar,
+                "codec_stability": codec_stability,
+            }
         if self.regularized_polar_enabled:
             regularized = self._summarize_regularized_polar_gate()
             return {
@@ -988,6 +1170,103 @@ class PairVQFunctionalGradientOracle:
             "candidates": outcomes,
         }
 
+    def _summarize_codec_stability_gate(self) -> dict[str, Any]:
+        late = [
+            row for row in self.records if row["step"] in self.primary_late_steps
+        ]
+        if len(late) != len(self.primary_late_steps):
+            return {
+                "ready": False,
+                "passed": False,
+                "classification": None,
+            }
+        thresholds = self.plan["frozen_gate"]
+        split_rows = [
+            row["codec_neighbor_stability"]["splits"][split]
+            for row in late
+            for split in ("fit", "heldout")
+        ]
+        retentions = []
+        for row in late:
+            fit = row["codec_neighbor_stability"]["splits"]["fit"][
+                "ratios"
+            ]
+            heldout = row["codec_neighbor_stability"]["splits"][
+                "heldout"
+            ]["ratios"]
+            for key in (
+                "logit_kl",
+                "gradient_error",
+                "postpolar_error",
+            ):
+                left = float(fit[key])
+                right = float(heldout[key])
+                retentions.append(
+                    min(left, right) / max(max(left, right), 1e-30)
+                )
+        measurements = {
+            "maximum_relative_neighbor_energy_mismatch": max(
+                float(
+                    row["codec_neighbor_stability"]["neighbor_energy"]
+                    ["maximum_relative_energy_mismatch"]
+                )
+                for row in late
+            ),
+            "minimum_late_actual_to_isotropic_logit_kl_ratio": min(
+                float(row["ratios"]["logit_kl"]) for row in split_rows
+            ),
+            "minimum_late_actual_to_isotropic_gradient_error_ratio": min(
+                float(row["ratios"]["gradient_error"])
+                for row in split_rows
+            ),
+            "minimum_late_actual_to_isotropic_postpolar_error_ratio": min(
+                float(row["ratios"]["postpolar_error"])
+                for row in split_rows
+            ),
+            "minimum_late_actual_worse_matrix_fraction": min(
+                float(row["actual_worse_matrix_fraction"])
+                for row in split_rows
+            ),
+            "minimum_fit_to_heldout_excess_ratio_retention": min(retentions),
+            "minimum_virtual_weight_energy_recovery_weighted": min(
+                float(
+                    row["virtual_weight"][
+                        "weighted_virtual_weight_energy_recovery"
+                    ]
+                )
+                for row in late
+            ),
+            "minimum_virtual_weight_energy_recovery_every_matrix": min(
+                float(
+                    row["virtual_weight"][
+                        "worst_matrix_virtual_weight_energy_recovery"
+                    ]
+                )
+                for row in late
+            ),
+        }
+        checks = {
+            key: (
+                value
+                <= float(thresholds[key])
+                if key == "maximum_relative_neighbor_energy_mismatch"
+                else value >= float(thresholds[key])
+            )
+            for key, value in measurements.items()
+        }
+        passed = all(checks.values()) and _all_finite(late)
+        return {
+            "ready": True,
+            "passed": passed,
+            "classification": (
+                "CODEC_NEIGHBOR_PATH_INSTABILITY_CONFIRMED"
+                if passed
+                else "CODEC_NEIGHBOR_STABILITY_NOT_PRIMARY"
+            ),
+            "measurements": measurements,
+            "checks": checks,
+        }
+
     def probe(
         self,
         *,
@@ -1006,6 +1285,7 @@ class PairVQFunctionalGradientOracle:
             else None
         )
         self.model.eval()
+        self._active_probe_step = int(step)
         cache_prepared = False
         try:
             if hasattr(self.model, "prepare_block_fht_cache"):
@@ -1016,7 +1296,12 @@ class PairVQFunctionalGradientOracle:
             for split in ("fit", "heldout"):
                 variants: dict[str, dict[str, torch.Tensor]] = {}
                 losses: dict[str, list[float]] = {}
-                for variant in ("dense", "native", "center", "plus"):
+                capture_variants = ["dense", "native", "center", "plus"]
+                if self.codec_stability_enabled:
+                    capture_variants.extend(
+                        ["isotropic_minus", "isotropic_plus"]
+                    )
+                for variant in capture_variants:
                     gradients, variant_losses = self._capture_gradients(
                         split=split, variant=variant
                     )
@@ -1025,6 +1310,11 @@ class PairVQFunctionalGradientOracle:
                 variants["antithetic"] = antithetic_average(
                     variants["native"], variants["plus"]
                 )
+                if self.codec_stability_enabled:
+                    variants["isotropic_antithetic"] = antithetic_average(
+                        variants["isotropic_minus"],
+                        variants["isotropic_plus"],
+                    )
                 captured[split] = variants
                 split_payload[split] = {
                     "losses": losses,
@@ -1053,6 +1343,66 @@ class PairVQFunctionalGradientOracle:
                 "splits": split_payload,
                 "cross_window": cross_window,
             }
+            if self.codec_stability_enabled:
+                codec_splits = {}
+                for split in ("fit", "heldout"):
+                    variants = captured[split]
+                    actual_gradient = gradient_comparison(
+                        variants["center"], variants["antithetic"]
+                    )
+                    isotropic_gradient = gradient_comparison(
+                        variants["center"],
+                        variants["isotropic_antithetic"],
+                    )
+                    actual_polar = self._same_momentum_polar_comparison(
+                        variants["center"], variants["antithetic"]
+                    )
+                    isotropic_polar = self._same_momentum_polar_comparison(
+                        variants["center"],
+                        variants["isotropic_antithetic"],
+                    )
+                    logit = self._capture_logit_stability(split=split)
+                    codec_splits[split] = {
+                        "logit": logit,
+                        "gradient": {
+                            "actual": actual_gradient,
+                            "isotropic": isotropic_gradient,
+                        },
+                        "same_momentum_polar": {
+                            "actual": actual_polar,
+                            "isotropic": isotropic_polar,
+                        },
+                        "ratios": {
+                            "logit_kl": logit["actual_to_isotropic_ratio"],
+                            "gradient_error": (
+                                actual_gradient["aggregate"]["relative_error"]
+                                / max(
+                                    isotropic_gradient["aggregate"][
+                                        "relative_error"
+                                    ],
+                                    1e-30,
+                                )
+                            ),
+                            "postpolar_error": (
+                                actual_polar["all"]["polar"]["relative_error"]
+                                / max(
+                                    isotropic_polar["all"]["polar"][
+                                        "relative_error"
+                                    ],
+                                    1e-30,
+                                )
+                            ),
+                        },
+                        "actual_worse_matrix_fraction": (
+                            self._actual_worse_matrix_fraction(
+                                actual_gradient, isotropic_gradient
+                            )
+                        ),
+                    }
+                record["codec_neighbor_stability"] = {
+                    "neighbor_energy": self._neighbor_energy_metrics(),
+                    "splits": codec_splits,
+                }
             if self.polar_amplification_enabled:
                 record["same_momentum_polar"] = (
                     self._same_momentum_polar_comparison(
@@ -1064,12 +1414,16 @@ class PairVQFunctionalGradientOracle:
             gate = self._combined_gate()
             payload = {
                 "schema_version": (
-                    REGULARIZED_POLAR_RESULT_SCHEMA
-                    if self.regularized_polar_enabled
+                    CODEC_STABILITY_RESULT_SCHEMA
+                    if self.codec_stability_enabled
                     else (
-                        POLAR_RESULT_SCHEMA
-                        if self.polar_amplification_enabled
-                        else RESULT_SCHEMA
+                        REGULARIZED_POLAR_RESULT_SCHEMA
+                        if self.regularized_polar_enabled
+                        else (
+                            POLAR_RESULT_SCHEMA
+                            if self.polar_amplification_enabled
+                            else RESULT_SCHEMA
+                        )
                     )
                 ),
                 "status": "finished" if terminal else "running",

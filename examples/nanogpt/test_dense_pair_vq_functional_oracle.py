@@ -116,6 +116,98 @@ def test_early_stopped_polar_plan_is_immutable_and_causal() -> None:
     )
 
 
+def test_codec_neighbor_stability_plan_is_immutable_and_nonintervening() -> None:
+    root = Path(__file__).resolve().parents[2]
+    path = (
+        root
+        / "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_codec_neighbor_path_stability_oracle_plan.json"
+    )
+    plan = json.loads(path.read_text())
+    assert plan["schema_version"].endswith("_v1")
+    assert plan["state_and_compute_contract"]["candidate_parameter_updates"] == 0
+    assert plan["decision_rule"]["automatic_training_endpoint"] is False
+    assert plan["decision_rule"]["automatic_scale_up"] is False
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+        "541459da108d4c1b01481077827bcd898f00b2af0358513a168a70f1debaf8bf"
+    )
+
+
+def test_codec_neighbor_isotropic_control_is_deterministic_and_energy_matched() -> None:
+    oracle = PairVQFunctionalGradientOracle.__new__(
+        PairVQFunctionalGradientOracle
+    )
+    oracle._isotropic_seed_base = 2026082300
+    oracle._active_probe_step = 180
+    residual = torch.linspace(-1.0, 1.0, 96).reshape(12, 8)
+    first = oracle._isotropic_delta("transformer.h.3.mlp.c_fc", residual)
+    second = oracle._isotropic_delta("transformer.h.3.mlp.c_fc", residual)
+    assert torch.equal(first, second)
+    torch.testing.assert_close(
+        first.square().sum(),
+        residual.square().sum(),
+        rtol=1e-6,
+        atol=1e-8,
+    )
+
+
+def test_codec_neighbor_stability_gate_requires_every_frozen_measurement() -> None:
+    oracle = PairVQFunctionalGradientOracle.__new__(
+        PairVQFunctionalGradientOracle
+    )
+    oracle.primary_late_steps = {180, 238}
+    oracle.plan = {
+        "frozen_gate": {
+            "maximum_relative_neighbor_energy_mismatch": 1e-6,
+            "minimum_late_actual_to_isotropic_logit_kl_ratio": 1.25,
+            "minimum_late_actual_to_isotropic_gradient_error_ratio": 1.25,
+            "minimum_late_actual_to_isotropic_postpolar_error_ratio": 1.25,
+            "minimum_late_actual_worse_matrix_fraction": 0.75,
+            "minimum_fit_to_heldout_excess_ratio_retention": 0.80,
+            "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+            "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+        }
+    }
+
+    def record(step: int, *, gradient_ratio: float = 1.5) -> dict:
+        fit = {
+            "ratios": {
+                "logit_kl": 1.5,
+                "gradient_error": gradient_ratio,
+                "postpolar_error": 1.5,
+            },
+            "actual_worse_matrix_fraction": 0.875,
+        }
+        heldout = {
+            "ratios": dict(fit["ratios"]),
+            "actual_worse_matrix_fraction": 0.875,
+        }
+        return {
+            "step": step,
+            "virtual_weight": {
+                "weighted_virtual_weight_energy_recovery": 0.99999,
+                "worst_matrix_virtual_weight_energy_recovery": 0.9999,
+            },
+            "codec_neighbor_stability": {
+                "neighbor_energy": {
+                    "maximum_relative_energy_mismatch": 1e-8
+                },
+                "splits": {"fit": fit, "heldout": heldout},
+            },
+        }
+
+    oracle.records = [record(180), record(238)]
+    passed = oracle._summarize_codec_stability_gate()
+    assert passed["passed"] is True
+    assert passed["classification"] == "CODEC_NEIGHBOR_PATH_INSTABILITY_CONFIRMED"
+
+    oracle.records = [record(180), record(238, gradient_ratio=1.1)]
+    rejected = oracle._summarize_codec_stability_gate()
+    assert rejected["passed"] is False
+    assert rejected["checks"][
+        "minimum_late_actual_to_isotropic_gradient_error_ratio"
+    ] is False
+
+
 def test_regularized_polar_gate_selects_deepest_passing_prefix() -> None:
     oracle = PairVQFunctionalGradientOracle.__new__(
         PairVQFunctionalGradientOracle
