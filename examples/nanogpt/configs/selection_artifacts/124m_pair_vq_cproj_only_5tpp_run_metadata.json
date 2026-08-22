@@ -1,0 +1,95 @@
+{
+  "schema_version": "mai_124m_pair_vq_cproj_only_5tpp_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4",
+  "run_id": "pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-22T16:53:44+08:00",
+  "process_group": 3236100,
+  "max_iters": 2373,
+  "git_commit": "ae847ec2a23dd14256d73aa6d37ba4670abd1888",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4.json",
+    "sha256": "9137b71fe781f8570bd4ab20b10ef1b47a90777cfa932ca926db9805f276612e",
+    "archive": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004.config.json"
+  },
+  "theory_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_mlp_factorial_5tpp_localization_plan.json",
+    "sha256": "3ecc0e0aa7eb8969478f2c787afd3cdf65235f8a509b9912b58d167b6e4e9e95"
+  },
+  "first_arm_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cfc_only_5tpp_result.json",
+    "sha256": "fd617907b14306c999ccc0bc8b9015eac674803a159d44d23ac1809f0992612c",
+    "classification": "PAIR_VQ_C_FC_MATERIAL_124M_5TPP",
+    "candidate_minus_parent_ce": 0.0698,
+    "may_change_this_arm": false
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "matched_reference": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+    "result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "terminal_validation_ce": 3.4858,
+    "single_family_negligible_gap_ce_max": 0.01
+  },
+  "qualification_dependency": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_qkonly_pair_vq_mlp_5tpp_localization_result.json",
+    "result_sha256": "6c60a6824dc268e336917cf6680e3eb19ac3053fb13394c81090c16ce7e7f770",
+    "classification": "MLP_MATERIAL_QKONLY_PAIR_VQ_124M_5TPP"
+  },
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004.mfu.json",
+    "source_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_mfu.json",
+    "sha256": "babfe748e60df30db508bad1a2c63f2f956474e5048a2c1f3c50d6eb93e84b20",
+    "mfu_fraction": 0.33896911508109073,
+    "tokens_per_second": 188686.35499999998,
+    "iteration_milliseconds": 1389.3675,
+    "peak_mib": 31730.18,
+    "optimizer_milliseconds": 188.07
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004.json",
+    "sha256": "bc64e187ee245d20507f327b53b06891d05fbfe100a2a2c38d5a82aaf38906bd"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004.json",
+  "initial_live_verification": {
+    "last_logged_training_iter": 20,
+    "last_train_loss": 7.4975,
+    "recent_tokens_per_second": 187792.99,
+    "process_alive": true,
+    "gpu_memory_mib": 44361,
+    "gpu_utilization_percent": 100,
+    "gpu_temperature_c": 50,
+    "pair_vq_modules": 12,
+    "pair_vq_elements": 28311552,
+    "persistent_training_bytes": 119619936,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "absent_c_fc_momentum_bytes": 0
+  },
+  "monitoring": {
+    "policy": "one persistent terminal/error-only watchdog; no healthy milestone or heartbeat callbacks",
+    "launchd_label": "com.mappingnetworks.pro6.qkonly.pairvq.cprojonly.5tpp",
+    "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_qkonly_pairvq_cprojonly_5tpp.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "terminal_action": "seal the compact-c_proj marginal, compute the frozen c_fc/c_proj interaction, reconcile it with manifold and optimizer evidence, then preregister exactly one repair"
+  },
+  "runtime_estimate": {
+    "update_only_minutes": 54.96,
+    "expected_total_minutes": "62-72",
+    "basis": "2373 updates at the exact-config 1.3893675 seconds per update, plus five fixed 400-batch evaluations and terminal checkpoint serialization"
+  },
+  "authorization": {
+    "automatic_rerun": false,
+    "automatic_20tpp_training": false,
+    "automatic_model_size_scale_up": false,
+    "automatic_representation_change": false,
+    "next_after_terminal_seal": "compute both marginal gaps and their non-additive interaction, reconcile the measured obstruction with existing diagnostics, and preregister exactly one structural repair"
+  }
+}
