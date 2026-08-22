@@ -14,6 +14,7 @@ from examples.nanogpt.dense_pair_vq_functional_oracle import (
     gradient_comparison,
     gradient_cross_cosine,
 )
+from examples.nanogpt.muon import muon_update
 
 
 def test_antithetic_average_is_exactly_centered() -> None:
@@ -130,6 +131,111 @@ def test_codec_neighbor_stability_plan_is_immutable_and_nonintervening() -> None
     assert hashlib.sha256(path.read_bytes()).hexdigest() == (
         "541459da108d4c1b01481077827bcd898f00b2af0358513a168a70f1debaf8bf"
     )
+
+
+def test_spectral_damping_plan_is_immutable_and_nonintervening() -> None:
+    root = Path(__file__).resolve().parents[2]
+    path = (
+        root
+        / "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_norm_preserving_spectral_damping_oracle_plan.json"
+    )
+    plan = json.loads(path.read_text())
+    assert plan["schema_version"].endswith("_v1")
+    assert plan["spectral_damping_frontier"] == {
+        "native_ns_steps": 5,
+        "relative_rms_ridge": [0.03125, 0.0625, 0.125, 0.25],
+        "one_global_rho_for_all_matrices": True,
+        "selection_rule": "select the smallest relative_rms_ridge value that passes every frozen gate at both primary late steps",
+    }
+    assert plan["state_and_compute_contract"]["candidate_parameter_updates"] == 0
+    assert plan["decision_rule"]["automatic_training_endpoint"] is False
+    assert plan["decision_rule"]["automatic_scale_up"] is False
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+        "f890f4b7c560c1662bb1a0e6defc54726efff3ed042ed251a2ca389649916abd"
+    )
+
+
+def test_spectral_damping_preserves_norm_and_attenuates_weak_modes() -> None:
+    request = torch.diag(torch.tensor([1.0, 0.2, 0.01], dtype=torch.float32))
+    candidate = PairVQFunctionalGradientOracle._norm_preserving_spectral_damping_frontier(
+        request,
+        relative_rms_ridges=(0.125,),
+        native_steps=5,
+    )["0.125"]
+    native = muon_update(request, steps=5).float()
+    torch.testing.assert_close(candidate.norm(), native.norm(), rtol=2e-6, atol=1e-7)
+    native_singular = torch.linalg.svdvals(native)
+    candidate_singular = torch.linalg.svdvals(candidate)
+    weak_to_strong_native = native_singular[-1] / native_singular[0]
+    weak_to_strong_candidate = candidate_singular[-1] / candidate_singular[0]
+    assert weak_to_strong_candidate < weak_to_strong_native
+
+
+def test_spectral_damping_gate_selects_smallest_fully_passing_ridge() -> None:
+    oracle = PairVQFunctionalGradientOracle.__new__(
+        PairVQFunctionalGradientOracle
+    )
+    oracle.primary_late_steps = {180, 238}
+    oracle.plan = {
+        "spectral_damping_frontier": {
+            "relative_rms_ridge": [0.03125, 0.0625, 0.125, 0.25]
+        },
+        "spectral_damping_gate": {
+            "minimum_late_relative_error_closure_vs_native": 0.20,
+            "maximum_late_relative_error_amplification": 3.0,
+            "maximum_late_candidate_polar_relative_error": 0.02,
+            "minimum_late_dense_native_cosine": 0.99,
+            "minimum_late_matrix_dense_native_cosine": 0.98,
+            "minimum_late_dense_native_norm_ratio": 0.9999,
+            "maximum_late_dense_native_norm_ratio": 1.0001,
+            "minimum_late_matrix_dense_task_alignment_retention": 0.98,
+            "maximum_late_matrix_regression_fraction": 0.25,
+            "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+            "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+        },
+    }
+
+    def candidate(*, passing: bool) -> dict[str, object]:
+        return {
+            "relative_error_closure_vs_native": 0.25 if passing else 0.10,
+            "relative_error_amplification": 2.5,
+            "candidate_polar": {"relative_error": 0.018},
+            "dense_native": {"cosine": 0.995},
+            "minimum_matrix_dense_native_cosine": 0.985,
+            "dense_native_norm_ratio": 1.0,
+            "minimum_matrix_dense_task_alignment_retention": 0.99,
+            "matrix_regression_fraction": 0.0,
+        }
+
+    oracle.records = [
+        {
+            "step": step,
+            "virtual_weight": {
+                "weighted_virtual_weight_energy_recovery": 0.99999,
+                "worst_matrix_virtual_weight_energy_recovery": 0.9999,
+            },
+            "same_momentum_polar": {
+                "spectral_damping": {
+                    "0.03125": {"all": candidate(passing=False)},
+                    "0.0625": {"all": candidate(passing=True)},
+                    "0.125": {"all": candidate(passing=True)},
+                    "0.25": {"all": candidate(passing=True)},
+                }
+            },
+        }
+        for step in (180, 238)
+    ]
+    gate = oracle._summarize_spectral_damping_gate()
+    assert gate["passed"] is True
+    assert gate["selected_relative_rms_ridge"] == 0.0625
+    assert gate["classification"] == (
+        "NORM_PRESERVING_SPECTRAL_DAMPING_CONFIRMED"
+    )
+
+    oracle.codec_stability_enabled = False
+    oracle.spectral_damping_enabled = True
+    combined = oracle._combined_gate()
+    assert combined["selected_relative_rms_ridge"] == 0.0625
 
 
 def test_codec_neighbor_isotropic_control_is_deterministic_and_energy_matched() -> None:

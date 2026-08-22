@@ -35,6 +35,9 @@ REGULARIZED_POLAR_PLAN_SCHEMA = (
 CODEC_STABILITY_PLAN_SCHEMA = (
     "mai_124m_pair_vq_codec_neighbor_path_stability_oracle_plan_v1"
 )
+SPECTRAL_DAMPING_PLAN_SCHEMA = (
+    "mai_124m_pair_vq_norm_preserving_spectral_damping_oracle_plan_v1"
+)
 RESULT_SCHEMA = "mai_pair_vq_antithetic_functional_gradient_oracle_result_v1"
 POLAR_RESULT_SCHEMA = "mai_pair_vq_same_momentum_polar_amplification_oracle_result_v1"
 REGULARIZED_POLAR_RESULT_SCHEMA = (
@@ -42,6 +45,9 @@ REGULARIZED_POLAR_RESULT_SCHEMA = (
 )
 CODEC_STABILITY_RESULT_SCHEMA = (
     "mai_pair_vq_codec_neighbor_path_stability_oracle_result_v1"
+)
+SPECTRAL_DAMPING_RESULT_SCHEMA = (
+    "mai_pair_vq_norm_preserving_spectral_damping_oracle_result_v1"
 )
 
 
@@ -216,6 +222,7 @@ class PairVQFunctionalGradientOracle:
             POLAR_PLAN_SCHEMA,
             REGULARIZED_POLAR_PLAN_SCHEMA,
             CODEC_STABILITY_PLAN_SCHEMA,
+            SPECTRAL_DAMPING_PLAN_SCHEMA,
         }:
             raise ValueError("unexpected functional-oracle plan schema")
         self.polar_amplification_enabled = (
@@ -224,6 +231,7 @@ class PairVQFunctionalGradientOracle:
                 POLAR_PLAN_SCHEMA,
                 REGULARIZED_POLAR_PLAN_SCHEMA,
                 CODEC_STABILITY_PLAN_SCHEMA,
+                SPECTRAL_DAMPING_PLAN_SCHEMA,
             }
         )
         self.regularized_polar_enabled = (
@@ -231,6 +239,9 @@ class PairVQFunctionalGradientOracle:
         )
         self.codec_stability_enabled = (
             plan.get("schema_version") == CODEC_STABILITY_PLAN_SCHEMA
+        )
+        self.spectral_damping_enabled = (
+            plan.get("schema_version") == SPECTRAL_DAMPING_PLAN_SCHEMA
         )
         if self.polar_amplification_enabled and optimizer is None:
             raise ValueError(
@@ -613,6 +624,202 @@ class PairVQFunctionalGradientOracle:
     def _weight_center_metrics(self) -> dict[str, Any]:
         return self.last_residual_metrics
 
+    @staticmethod
+    def _norm_preserving_spectral_damping_frontier(
+        request: torch.Tensor,
+        *,
+        relative_rms_ridges: tuple[float, ...],
+        native_steps: int,
+    ) -> dict[str, torch.Tensor]:
+        """Apply scale-free ridge damping to the native NS spectral response.
+
+        Exact SVD is intentionally confined to this nonintervening oracle. A
+        selected filter still requires a separate fast-approximation gate.
+        """
+        if native_steps != 5:
+            raise ValueError("spectral damping oracle requires native NS5")
+        if not relative_rms_ridges or any(
+            not math.isfinite(value) or value <= 0.0
+            for value in relative_rms_ridges
+        ):
+            raise ValueError("relative RMS ridge values must be positive")
+        original_shape = request.shape
+        matrix = request.float().reshape(request.shape[0], -1)
+        transposed = matrix.shape[0] > matrix.shape[1]
+        if transposed:
+            matrix = matrix.T
+        normalized = matrix / (matrix.norm() + 1e-7)
+        left, singular, right_t = torch.linalg.svd(
+            normalized, full_matrices=False
+        )
+        response = singular
+        a, b, c = 3.4445, -4.7750, 2.0315
+        for _ in range(native_steps):
+            response = a * response + b * response.pow(3) + c * response.pow(5)
+        rms = singular.square().mean().sqrt()
+        native = muon_update(request, steps=native_steps).float()
+        native_norm = native.norm()
+        candidates: dict[str, torch.Tensor] = {}
+        for ridge in relative_rms_ridges:
+            tau = float(ridge) * rms
+            damping = singular / (singular.square() + tau.square()).sqrt()
+            candidate = (left * (response * damping).unsqueeze(0)) @ right_t
+            if transposed:
+                candidate = candidate.T
+            candidate = candidate.reshape(original_shape)
+            candidate.mul_(native_norm / candidate.norm().clamp_min(1e-30))
+            candidates[f"{ridge:.8g}"] = candidate
+        return candidates
+
+    @torch.no_grad()
+    def _spectral_damping_comparison(
+        self,
+        reference: dict[str, torch.Tensor],
+        candidate: dict[str, torch.Tensor],
+        native_rows: list[dict[str, Any]],
+    ) -> dict[str, Any]:
+        frontier = self.plan["spectral_damping_frontier"]
+        ridges = tuple(float(value) for value in frontier["relative_rms_ridge"])
+        native_steps = int(frontier["native_ns_steps"])
+        if native_steps != 5 or ridges != (0.03125, 0.0625, 0.125, 0.25):
+            raise ValueError("spectral damping frontier changed")
+        native_by_name = {str(row["module"]): row for row in native_rows}
+        per_ridge: dict[str, list[dict[str, Any]]] = {
+            f"{ridge:.8g}": [] for ridge in ridges
+        }
+        for name in sorted(reference):
+            module = self.observer._dense_modules[name]
+            owner, group = self._dense_optimizer_owner[name]
+            momentum = float(group["momentum"])
+            state = owner.state[module.weight]
+            buffer = state.get("momentum_buffer")
+            if buffer is None:
+                buffer = torch.zeros_like(module.weight)
+            dense_gradient = reference[name].to(
+                device=module.weight.device, dtype=torch.float32
+            )
+            compact_gradient = candidate[name].to(
+                device=module.weight.device, dtype=torch.float32
+            )
+            dense_request = dense_gradient + momentum * (
+                buffer.float() * momentum + dense_gradient
+            )
+            compact_request = compact_gradient + momentum * (
+                buffer.float() * momentum + compact_gradient
+            )
+            native_dense = muon_update(dense_request, steps=native_steps).float()
+            native_task = _direction_metrics(dense_gradient, native_dense)
+            dense_frontier = self._norm_preserving_spectral_damping_frontier(
+                dense_request,
+                relative_rms_ridges=ridges,
+                native_steps=native_steps,
+            )
+            compact_frontier = self._norm_preserving_spectral_damping_frontier(
+                compact_request,
+                relative_rms_ridges=ridges,
+                native_steps=native_steps,
+            )
+            for key in per_ridge:
+                dense_update = dense_frontier[key]
+                compact_update = compact_frontier[key]
+                candidate_polar = _direction_metrics(dense_update, compact_update)
+                dense_native = _direction_metrics(native_dense, dense_update)
+                dense_task = _direction_metrics(dense_gradient, dense_update)
+                native_row = native_by_name[name]
+                per_ridge[key].append(
+                    {
+                        "module": name,
+                        "side": "c_fc" if name.endswith(".c_fc") else "c_proj",
+                        "candidate_polar": candidate_polar,
+                        "dense_native": dense_native,
+                        "dense_task": dense_task,
+                        "native_dense_task": native_task,
+                        "dense_task_alignment_retention": (
+                            dense_task["cosine"]
+                            / max(native_task["cosine"], 1e-30)
+                        ),
+                        "relative_error_closure_vs_native": (
+                            1.0
+                            - candidate_polar["relative_error"]
+                            / max(
+                                float(native_row["polar"]["relative_error"]),
+                                1e-30,
+                            )
+                        ),
+                    }
+                )
+            del dense_frontier, compact_frontier
+            del dense_gradient, compact_gradient, dense_request, compact_request
+            del native_dense
+
+        payload: dict[str, Any] = {}
+        for key, rows in per_ridge.items():
+            payload[key] = {}
+            for label, selected in (
+                ("all", rows),
+                ("c_fc", [row for row in rows if row["side"] == "c_fc"]),
+                ("c_proj", [row for row in rows if row["side"] == "c_proj"]),
+            ):
+                selected_names = {str(row["module"]) for row in selected}
+                selected_native = [
+                    row
+                    for row in native_rows
+                    if str(row["module"]) in selected_names
+                ]
+                candidate_polar = _aggregate_directions(
+                    selected, "candidate_polar"
+                )
+                dense_native = _aggregate_directions(selected, "dense_native")
+                dense_task = _aggregate_directions(selected, "dense_task")
+                matrix_closures = [
+                    float(row["relative_error_closure_vs_native"])
+                    for row in selected
+                ]
+                payload[key][label] = {
+                    "candidate_polar": candidate_polar,
+                    "dense_native": dense_native,
+                    "dense_native_norm_ratio": math.sqrt(
+                        dense_native["candidate_energy"]
+                        / max(dense_native["reference_energy"], 1e-30)
+                    ),
+                    "minimum_matrix_dense_native_cosine": min(
+                        float(row["dense_native"]["cosine"])
+                        for row in selected
+                    ),
+                    "dense_task": dense_task,
+                    "minimum_matrix_dense_task_alignment_retention": min(
+                        float(row["dense_task_alignment_retention"])
+                        for row in selected
+                    ),
+                    "relative_error_amplification": (
+                        candidate_polar["relative_error"]
+                        / max(
+                            _aggregate_directions(selected_native, "prepolar")[
+                                "relative_error"
+                            ],
+                            1e-30,
+                        )
+                    ),
+                    "relative_error_closure_vs_native": (
+                        1.0
+                        - candidate_polar["relative_error"]
+                        / max(
+                            _aggregate_directions(selected_native, "polar")[
+                                "relative_error"
+                            ],
+                            1e-30,
+                        )
+                    ),
+                    "minimum_matrix_relative_error_closure_vs_native": min(
+                        matrix_closures
+                    ),
+                    "matrix_regression_fraction": sum(
+                        closure < 0.0 for closure in matrix_closures
+                    )
+                    / max(len(matrix_closures), 1),
+                }
+        return payload
+
     @torch.no_grad()
     def _same_momentum_polar_comparison(
         self,
@@ -853,6 +1060,13 @@ class PairVQFunctionalGradientOracle:
                         )
                         / max(len(matrix_closures), 1),
                     }
+        if (
+            self.spectral_damping_enabled
+            and self._active_probe_step in self.primary_late_steps
+        ):
+            payload["spectral_damping"] = self._spectral_damping_comparison(
+                reference, candidate, rows
+            )
         return payload
 
     @staticmethod
@@ -1009,6 +1223,8 @@ class PairVQFunctionalGradientOracle:
         # schema error.
         if self.codec_stability_enabled:
             return self._summarize_codec_stability_gate()
+        if self.spectral_damping_enabled:
+            return self._summarize_spectral_damping_gate()
         functional = self._summarize_gate()
         if not self.polar_amplification_enabled:
             return functional
@@ -1256,6 +1472,110 @@ class PairVQFunctionalGradientOracle:
             "checks": checks,
         }
 
+    def _summarize_spectral_damping_gate(self) -> dict[str, Any]:
+        late = [
+            row for row in self.records if row["step"] in self.primary_late_steps
+        ]
+        if len(late) != len(self.primary_late_steps):
+            return {
+                "ready": False,
+                "passed": False,
+                "classification": None,
+                "selected_relative_rms_ridge": None,
+            }
+        thresholds = self.plan["spectral_damping_gate"]
+        ridges = tuple(
+            float(value)
+            for value in self.plan["spectral_damping_frontier"][
+                "relative_rms_ridge"
+            ]
+        )
+        outcomes: dict[str, Any] = {}
+        selected = None
+        for ridge in ridges:
+            key = f"{ridge:.8g}"
+            rows = [
+                record["same_momentum_polar"]["spectral_damping"][key]["all"]
+                for record in late
+            ]
+            measurements = {
+                "minimum_late_relative_error_closure_vs_native": min(
+                    float(row["relative_error_closure_vs_native"])
+                    for row in rows
+                ),
+                "maximum_late_relative_error_amplification": max(
+                    float(row["relative_error_amplification"]) for row in rows
+                ),
+                "maximum_late_candidate_polar_relative_error": max(
+                    float(row["candidate_polar"]["relative_error"])
+                    for row in rows
+                ),
+                "minimum_late_dense_native_cosine": min(
+                    float(row["dense_native"]["cosine"]) for row in rows
+                ),
+                "minimum_late_matrix_dense_native_cosine": min(
+                    float(row["minimum_matrix_dense_native_cosine"])
+                    for row in rows
+                ),
+                "minimum_late_dense_native_norm_ratio": min(
+                    float(row["dense_native_norm_ratio"]) for row in rows
+                ),
+                "maximum_late_dense_native_norm_ratio": max(
+                    float(row["dense_native_norm_ratio"]) for row in rows
+                ),
+                "minimum_late_matrix_dense_task_alignment_retention": min(
+                    float(row["minimum_matrix_dense_task_alignment_retention"])
+                    for row in rows
+                ),
+                "maximum_late_matrix_regression_fraction": max(
+                    float(row["matrix_regression_fraction"]) for row in rows
+                ),
+                "minimum_virtual_weight_energy_recovery_weighted": min(
+                    float(
+                        record["virtual_weight"][
+                            "weighted_virtual_weight_energy_recovery"
+                        ]
+                    )
+                    for record in late
+                ),
+                "minimum_virtual_weight_energy_recovery_every_matrix": min(
+                    float(
+                        record["virtual_weight"][
+                            "worst_matrix_virtual_weight_energy_recovery"
+                        ]
+                    )
+                    for record in late
+                ),
+            }
+            checks = {
+                key_name: (
+                    value <= float(thresholds[key_name])
+                    if key_name.startswith("maximum_")
+                    else value >= float(thresholds[key_name])
+                )
+                for key_name, value in measurements.items()
+            }
+            passed = all(checks.values()) and _all_finite(measurements)
+            outcomes[key] = {
+                "measurements": measurements,
+                "checks": checks,
+                "passed": passed,
+            }
+            if selected is None and passed:
+                selected = ridge
+        return {
+            "ready": True,
+            "passed": selected is not None,
+            "selected_relative_rms_ridge": selected,
+            "selection_rule": "smallest ridge passing every frozen gate",
+            "classification": (
+                "NORM_PRESERVING_SPECTRAL_DAMPING_CONFIRMED"
+                if selected is not None
+                else "NORM_PRESERVING_SPECTRAL_DAMPING_REJECTED"
+            ),
+            "candidates": outcomes,
+        }
+
     def probe(
         self,
         *,
@@ -1406,12 +1726,16 @@ class PairVQFunctionalGradientOracle:
                     CODEC_STABILITY_RESULT_SCHEMA
                     if self.codec_stability_enabled
                     else (
-                        REGULARIZED_POLAR_RESULT_SCHEMA
-                        if self.regularized_polar_enabled
+                        SPECTRAL_DAMPING_RESULT_SCHEMA
+                        if self.spectral_damping_enabled
                         else (
-                            POLAR_RESULT_SCHEMA
-                            if self.polar_amplification_enabled
-                            else RESULT_SCHEMA
+                            REGULARIZED_POLAR_RESULT_SCHEMA
+                            if self.regularized_polar_enabled
+                            else (
+                                POLAR_RESULT_SCHEMA
+                                if self.polar_amplification_enabled
+                                else RESULT_SCHEMA
+                            )
                         )
                     )
                 ),
