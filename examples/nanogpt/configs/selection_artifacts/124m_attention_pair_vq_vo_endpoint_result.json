@@ -1,0 +1,85 @@
+{
+  "schema_version": "mai_124m_attention_pair_vq_vo_endpoint_result_v1",
+  "recorded_at": "2026-08-22T04:30:51.414423+00:00",
+  "classification": "PASS_COMPACT_FULL_REPLACEMENT_124M_0P5TPP",
+  "passed": true,
+  "capacity": {
+    "codec_bytes": 88627584,
+    "compact_feedback_bytes": 107505408,
+    "maximum_momentum_bytes": 121446201,
+    "momentum_byte_ceiling": 123863040,
+    "pair_vq_elements": 70778880,
+    "pair_vq_modules": 48,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "persistent_training_bytes": 319996032
+  },
+  "checks": {
+    "all_fixed_eval_losses_finite": true,
+    "compute_equivalent_gate": true,
+    "config_matches_mfu": true,
+    "config_matches_provenance": true,
+    "dense_master_weight_absent": true,
+    "dense_momentum_absent": true,
+    "fixed_eval_indices_match_parent": true,
+    "fixed_eval_inventory": true,
+    "fixed_eval_protocol_match": true,
+    "forward_visible_feedback": true,
+    "manifest_matches_config": true,
+    "manifest_matches_provenance": true,
+    "mfu_certificate_matches_provenance": true,
+    "mfu_floor": true,
+    "mfu_passed": true,
+    "momentum_capacity": true,
+    "pair_vq_element_count": true,
+    "pair_vq_module_count": true,
+    "parent_matches_config": true,
+    "persistent_training_bytes_exact": true,
+    "raw_ambient_error_buffer_absent": true,
+    "run_name_matches": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "terminal_quality_gate": true
+  },
+  "decision": {
+    "authorize_124m_20tpp": false,
+    "authorize_identical_124m_5tpp_registration": true,
+    "authorize_model_size_scale_up": false,
+    "next_on_failure": "localize attention V versus output projection under the same Pair-VQ state; do not change the MLP or scale"
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.25112288374133734,
+    "preflight_tokens_per_second": 140151.78,
+    "scientific_mean_tokens_per_second": 138863.57260869566,
+    "scientific_median_tokens_per_second": 140269.79,
+    "scientific_perf_samples": 23
+  },
+  "provenance": {
+    "config_sha256": "16f72576e2200b770a642107af7fe584588e7f1792db37173df0aac7ba00a3d5",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "git_commit": "1c6b5c72f7539c09d1e361f9a2cf898c9834cfbe",
+    "mfu_certificate_sha256": "71bffab0f573f124bc23b1860185c70322426fcbe00b317706b7eb8406865bf6",
+    "parent_result_sha256": "6322a2ca86f2ce927464e6a0a71b060cfc1f58a5b08b644cbf1baf2ba9ac8036",
+    "plan_sha256": "a716205318d6ef696ec52f89ab48c0afb2cf838de9bdceb55ba43d33aed14d87",
+    "runtime_provenance_sha256": "5b482958d91313c368466042da0de32793731fa49eaadb47e186da417bf68cdb",
+    "scientific_log_sha256": "9cb0ff5cbfb9deb59b518e18594cf0eacef22e52aa94687bbe29b72d81c03ede",
+    "terminal_status_sha256": "f5ab38e00867835dbdfbd6271329e56bf1dd8fb8ccefd3acacbcf1f757dea089"
+  },
+  "terminal": {
+    "alpha_eff": 0.07,
+    "compute_equivalent_gate": 1.1,
+    "compute_equivalent_penalty": 1.026995493540682,
+    "fixed_validation_curve": [
+      {"step": 0, "validation_ce": 11.0182},
+      {"step": 60, "validation_ce": 6.2267},
+      {"step": 120, "validation_ce": 5.7371},
+      {"step": 180, "validation_ce": 5.4791},
+      {"step": 238, "validation_ce": 5.373}
+    ],
+    "gap_ce": 0.009999999999999787,
+    "matched_parent_validation_ce": 5.363,
+    "quality_gate_ce": 0.05,
+    "train_ce": 5.3702,
+    "validation_ce": 5.373
+  }
+}

@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_attention_pair_vq_vo_run_metadata_v1",
-  "status": "running",
+  "status": "finished_clean",
   "run_name": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4",
   "run_id": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_20260822T042023Z_3101840",
   "host": "PRO6",
@@ -65,7 +65,22 @@
   "authorization": {
     "scientific_endpoint": true,
     "model_size_scale_up": false,
-    "longer_horizon": false,
+    "longer_horizon": true,
     "next_after_pass": "register and performance-gate the identical 124M/5TPP candidate only"
+  },
+  "terminal": {
+    "finished_at": "2026-08-22T12:29:30+08:00",
+    "exit_code": 0,
+    "train_ce": 5.3702,
+    "validation_ce": 5.373,
+    "matched_parent_validation_ce": 5.363,
+    "gap_ce": 0.009999999999999787,
+    "compute_equivalent_penalty": 1.026995493540682,
+    "scientific_median_tokens_per_second": 140269.79,
+    "maximum_momentum_bytes": 121446201,
+    "terminal_status_sha256": "f5ab38e00867835dbdfbd6271329e56bf1dd8fb8ccefd3acacbcf1f757dea089",
+    "scientific_log_sha256": "9cb0ff5cbfb9deb59b518e18594cf0eacef22e52aa94687bbe29b72d81c03ede",
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_endpoint_result.json",
+    "classification": "PASS_COMPACT_FULL_REPLACEMENT_124M_0P5TPP"
   }
 }
