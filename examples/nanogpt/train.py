@@ -4605,22 +4605,20 @@ def main() -> None:
                         ),
                         flush=True,
                     )
-                if (
-                    pair_vq_minifloat_momentum_oracle is not None
-                    and iter_num >= args.max_iters
-                ):
-                    minifloat_terminal = (
-                        pair_vq_minifloat_momentum_oracle.finalize()
-                    )
-                    print(
-                        "pair_vq_minifloat_momentum_terminal "
-                        + json.dumps(
-                            minifloat_terminal,
-                            sort_keys=True,
-                            separators=(",", ":"),
-                        ),
-                        flush=True,
-                    )
+            if (
+                pair_vq_minifloat_momentum_oracle is not None
+                and iter_num >= args.max_iters
+            ):
+                minifloat_terminal = pair_vq_minifloat_momentum_oracle.finalize()
+                print(
+                    "pair_vq_minifloat_momentum_terminal "
+                    + json.dumps(
+                        minifloat_terminal,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
             if losses["val"] < best_val_loss:
                 best_val_loss = losses["val"]
             if args.save_checkpoint:

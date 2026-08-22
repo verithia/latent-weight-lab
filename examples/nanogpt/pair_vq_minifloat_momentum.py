@@ -173,7 +173,6 @@ class PairVQMinifloatMomentumOracle:
             int(value)
             for value in stage_protocol["early_futility_update_indices"]
         }
-        self.probe_only = False
         self.result_path = result_path
         self.records: list[dict[str, Any]] = []
         self._codec_seconds = {name: 0.0 for name in self.candidate_order}
@@ -195,6 +194,14 @@ class PairVQMinifloatMomentumOracle:
                         ),
                     )
                 self._states[candidate][name] = encoded
+
+    @property
+    def probe_only(self) -> bool:
+        """Stop once the preregistered nonintervening decision is complete."""
+        gate = self._gate()
+        return bool(gate.get("ready")) and not bool(
+            gate.get("terminal_replay_required", False)
+        )
 
     @staticmethod
     def _side(name: str) -> str:
