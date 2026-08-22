@@ -1,0 +1,125 @@
+{
+  "schema_version": "mai_pair_vq_minifloat_momentum_precision_frontier_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_UNIFORM_MANTISSA_TRUNCATION_FOR_PAIR_VQ_AMBIENT_MOMENTUM",
+  "passed": false,
+  "decision": {
+    "fp16_control_valid": true,
+    "compressed_candidate_selected": null,
+    "terminal_replay_required": false,
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false,
+    "next_authorized_work": "Keep the loss-closing Pair-VQ forward representation and FP16 owner fixed. Derive and audit only a polar-sensitivity-aware structured residual for optimizer history; do not run another uniform bit-width sweep or language-model endpoint until a nonintervening direction gate passes.",
+    "reason": "At update 8, E5M8 preserves the combined pre-polar direction at cosine 0.999998751 but falls to 0.998954599 after the Muon polar map, with worst-matrix cosine 0.997834569 and positive-line recovery 0.997910291. These miss the preregistered 0.9999/0.999/0.999 gates while the FP16 control is exactly 1.0 at both probes. Lower mantissa widths fail more strongly, so the preregistered early-futility rule rejects the entire uniform-mantissa family."
+  },
+  "identity": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "3aca9316ac32c4e99fb558be7764f1b8e6cd112a",
+    "implementation_commit": "af33807849a0224cf93077d4453f3cafd5b19fb6",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp.json",
+    "config_file_sha256": "b1fc268dc9c7cbaabb76ce24a3e0055f5a634e95e9f5cc4cb6acd2652a006980",
+    "resolved_config_sha256": "4b890df2a10c31cabf14e002d90124a0e72cfcede012297bb20adbfa3ee3e222",
+    "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_minifloat_momentum_precision_frontier_plan.json",
+    "theory_plan_sha256": "02cf2e611097abfdbb1752e0035ec34bd5bb4098cb2c5cd024cb8fd0dc3edfb3",
+    "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_endpoint_result.json",
+    "scientific_parent_sha256": "3ead477be76bc36820531818fe54c2932c6f581a2f32975e476f64b0e805d9d8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/train.py",
+    "exit_code": 0
+  },
+  "artifacts": {
+    "terminal_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp_retry1/minifloat_frontier.json",
+      "sha256": "8db2da283840aa3187ad921d6f33a6983ca028904984daf46a55239f74e6d754",
+      "bytes": 333696,
+      "status": "finished"
+    },
+    "scientific_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp_retry1.log",
+      "sha256": "ba6600eb2220437736f465d7108af694fe19274b22895747af59d0cba9caa3d2",
+      "bytes": 70065
+    },
+    "preflight_certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp_retry1_mfu.json",
+      "sha256": "791f01e8596238c52a27284247ab105dd6d8ef3e075c657449f582443cad4017"
+    },
+    "preflight_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp_retry1_mfu.log",
+      "sha256": "36bb207b82993352f4b0d1f21967fc2ea80477551088a9e399e12ea8a8ad5af9",
+      "bytes": 72196
+    },
+    "original_unsealed_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp/minifloat_frontier.json",
+      "sha256": "f2fa7d19785a8bdb15fc9a32db0e0d47c379e5a6add687c50405794c60821b6b",
+      "status": "running",
+      "scientific_gate": "EARLY_FUTILITY_FAIL"
+    },
+    "original_unsealed_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp.log",
+      "sha256": "e15fed2ad820cf16aa6b9df40f562d26866ff9dad7ca875bbdeaae28f951b270",
+      "bytes": 67239
+    }
+  },
+  "registered_gate": {
+    "classification": "EARLY_FUTILITY_FAIL",
+    "ready": true,
+    "terminal_replay_required": false,
+    "probe_optimizer_update_indices": [0, 8],
+    "requirements": {
+      "minimum_all_postpolar_cosine": 0.9999,
+      "minimum_every_matrix_postpolar_cosine": 0.999,
+      "minimum_all_postpolar_positive_line_energy_recovery": 0.999,
+      "minimum_all_prepolar_cosine": 0.9999
+    }
+  },
+  "fixed_gradient_comparison": {
+    "update_0": {
+      "e5m2": {"prepolar_cosine": 0.999527032397782, "postpolar_cosine": 0.4995454352377174, "worst_matrix_postpolar_cosine": 0.36576622248460966, "positive_line_recovery": 0.24954564186684047},
+      "e5m4": {"prepolar_cosine": 0.9999695902094238, "postpolar_cosine": 0.8644460540497761, "worst_matrix_postpolar_cosine": 0.7035869900821091, "positive_line_recovery": 0.7472669803622285},
+      "e5m6": {"prepolar_cosine": 0.9999980783124613, "postpolar_cosine": 0.989083818708307, "worst_matrix_postpolar_cosine": 0.9678066432018051, "positive_line_recovery": 0.978286800430607},
+      "e5m8": {"prepolar_cosine": 0.9999998659598366, "postpolar_cosine": 0.9992243379900689, "worst_matrix_postpolar_cosine": 0.9976382305025031, "positive_line_recovery": 0.9984492776316917},
+      "e5m10_fp16_control": {"prepolar_cosine": 1.0, "postpolar_cosine": 1.0, "worst_matrix_postpolar_cosine": 1.0, "positive_line_recovery": 1.0}
+    },
+    "update_8": {
+      "e5m2": {"prepolar_cosine": 0.9959124215843502, "postpolar_cosine": 0.4427553005934626, "worst_matrix_postpolar_cosine": 0.34399600651554324, "positive_line_recovery": 0.1960322562036073},
+      "e5m4": {"prepolar_cosine": 0.9997320985063362, "postpolar_cosine": 0.8363709747150242, "worst_matrix_postpolar_cosine": 0.7309322059933608, "positive_line_recovery": 0.6995164073457597},
+      "e5m6": {"prepolar_cosine": 0.9999829448407507, "postpolar_cosine": 0.9860351069715719, "worst_matrix_postpolar_cosine": 0.9717426877721533, "positive_line_recovery": 0.9722652321804393},
+      "e5m8": {"prepolar_cosine": 0.9999987509466345, "postpolar_cosine": 0.9989545993131299, "worst_matrix_postpolar_cosine": 0.9978345692310162, "positive_line_recovery": 0.997910291488856},
+      "e5m10_fp16_control": {"prepolar_cosine": 1.0, "postpolar_cosine": 1.0, "worst_matrix_postpolar_cosine": 1.0, "positive_line_recovery": 1.0}
+    }
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.2798158081170715,
+    "preflight_tokens_per_second": 156515.66625,
+    "preflight_iteration_milliseconds": 1676.8575,
+    "preflight_peak_mib": 32316.3,
+    "minimum_mfu_fraction": 0.20,
+    "performance_gate_passed": true,
+    "focused_remote_tests_passed": 82
+  },
+  "storage": {
+    "note": "The audit simulates every format in an FP16 tensor container, so its resident simulated_state_bytes are 113246208 for every candidate. The packed byte counts below are theoretical persistent representations, not the audit's temporary simulation allocation.",
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "e5m2": {"packed_momentum_bytes": 56623104, "total_compact_mlp_training_bytes": 214050240, "reduction_factor": 2.1162547259932993},
+    "e5m4": {"packed_momentum_bytes": 70778880, "total_compact_mlp_training_bytes": 228206016, "reduction_factor": 1.9849819910093869},
+    "e5m6": {"packed_momentum_bytes": 84934656, "total_compact_mlp_training_bytes": 242361792, "reduction_factor": 1.8690439126642535},
+    "e5m8": {"packed_momentum_bytes": 99090432, "total_compact_mlp_training_bytes": 256517568, "reduction_factor": 1.7659017880599897},
+    "e5m10_fp16_control": {"packed_momentum_bytes": 113246208, "total_compact_mlp_training_bytes": 270673344, "reduction_factor": 1.6735479944415952}
+  },
+  "repair_audit": {
+    "failure": "The first run wrote both registered probes and a ready early-futility gate but left status=running because minifloat finalization was incorrectly nested under the unrelated dense-shadow observer.",
+    "remediation": "Move minifloat terminal finalization outside the dense-shadow branch, commit and Git-sync the repair, pass 82 focused tests, rerun the exact config under a fresh output identity and fresh >=20% MFU certificate, and preserve the original unsealed artifact unchanged.",
+    "repair_changed_scientific_hypothesis_or_thresholds": false,
+    "repaired_retry_matches_original_conclusion": true,
+    "gpu_idle_after_completion": true
+  },
+  "interpretation": {
+    "prepolar_is_not_the_gate": "E5M8 has nearly perfect ordinary direction cosine before Muon, yet misses the post-polar gate. Optimizing Euclidean state reconstruction alone is therefore insufficient.",
+    "polar_conditioning_is_the_gate": "The polar map amplifies small errors in weak singular directions. Relative mantissa truncation is global and does not allocate precision according to this sensitivity.",
+    "family_rejected": "No compressed E5M candidate passes both early probes; the FP16 control passes exactly. The registered rule therefore stops before the 238-update replay.",
+    "remaining_problem": "Compress the loss-closing FP16 optimizer history with a structured correction targeted at polar-sensitive singular directions, while keeping the compact Pair-VQ forward representation unchanged."
+  }
+}
