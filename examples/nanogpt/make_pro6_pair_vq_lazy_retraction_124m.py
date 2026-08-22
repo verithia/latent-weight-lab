@@ -21,6 +21,10 @@ OUTPUT = ROOT / (
     "examples/nanogpt/configs/"
     "pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_0p5tpp_lr24e4.json"
 )
+MFU_RESULT = ROOT / (
+    "examples/nanogpt/configs/selection_artifacts/"
+    "124m_pair_vq_lazy_retraction_0p5tpp_mfu_result.json"
+)
 REMOTE_ROOT = "/mnt/ssd-data/orj/MappingNetworks"
 RUN_NAME = "pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_0p5tpp_lr24e4"
 REMOTE_OUTPUT = f"{REMOTE_ROOT}/outputs/pro6_mai_v3_pair_vq/{RUN_NAME}"

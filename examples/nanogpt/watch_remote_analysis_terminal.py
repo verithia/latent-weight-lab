@@ -127,6 +127,9 @@ def main() -> None:
     parser.add_argument("--state", required=True, type=Path)
     parser.add_argument("--run-label", required=True)
     parser.add_argument("--chat-id", required=True)
+    parser.add_argument("--terminal-action", default=TERMINAL_ACTION)
+    parser.add_argument("--error-action", default=ERROR_ACTION)
+    parser.add_argument("--live-action", default=LIVE_ACTION)
     parser.add_argument("--poll-seconds", type=float, default=60.0)
     parser.add_argument("--gpu", type=int, default=0)
     parser.add_argument(
@@ -179,12 +182,12 @@ def main() -> None:
                 if exit_code == 0 and sample.get("result_exists"):
                     message = (
                         f"[bot] @Codex {args.run_label} FINISHED: exit=0 "
-                        f"result_sha256={sample['result_sha256']}\n\n{TERMINAL_ACTION}"
+                        f"result_sha256={sample['result_sha256']}\n\n{args.terminal_action}"
                     )
                 else:
                     message = (
                         f"[bot] @Codex {args.run_label} ERROR: exit={exit_code}; "
-                        f"result_exists={sample.get('result_exists')}\n\n{ERROR_ACTION}"
+                        f"result_exists={sample.get('result_exists')}\n\n{args.error_action}"
                     )
                 if send(args.chat_id, message):
                     state["state"] = "finished"
@@ -194,7 +197,7 @@ def main() -> None:
             elif not sample.get("alive"):
                 state["missing_process_samples"] = int(state.get("missing_process_samples", 0)) + 1
                 if state["missing_process_samples"] >= 3:
-                    message = f"[bot] @Codex {args.run_label} ERROR: process group missing without terminal status.\n\n{ERROR_ACTION}"
+                    message = f"[bot] @Codex {args.run_label} ERROR: process group missing without terminal status.\n\n{args.error_action}"
                     if send(args.chat_id, message):
                         state["state"] = "failed"
                         atomic_json(args.state, state)
@@ -216,7 +219,7 @@ def main() -> None:
                         f"alive=true status={status.get('state', 'unknown')} "
                         f"elapsed={elapsed_hours:.1f}h "
                         f"gpu={sample.get('gpu_health') or 'unavailable'} "
-                        f"result_exists={sample.get('result_exists')}\n\n{LIVE_ACTION}"
+                        f"result_exists={sample.get('result_exists')}\n\n{args.live_action}"
                     )
                     if send(args.chat_id, message):
                         state["last_callback_at_unix"] = now
@@ -227,7 +230,7 @@ def main() -> None:
             state["last_error"] = repr(error)
             atomic_json(args.state, state)
             if state["consecutive_probe_errors"] >= 3:
-                message = f"[bot] @Codex {args.run_label} MONITOR ERROR: {error!r}\n\n{ERROR_ACTION}"
+                message = f"[bot] @Codex {args.run_label} MONITOR ERROR: {error!r}\n\n{args.error_action}"
                 if send(args.chat_id, message):
                     state["state"] = "monitor_failed"
                     atomic_json(args.state, state)

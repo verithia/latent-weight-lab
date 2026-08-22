@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import json
+
 from examples.nanogpt.make_pro6_pair_vq_lazy_retraction_124m import (
     ADAPTIVE_MOMENTUM_BYTES_MAX,
+    MFU_RESULT,
     OUTPUT,
     PLAN,
     build_config,
@@ -51,3 +54,13 @@ def test_lazy_retraction_endpoint_is_fail_closed() -> None:
     assert gate["automatic_scale_up"] is False
     assert gate["automatic_sweep"] is False
     assert OUTPUT.name in config["literal_command"]
+
+
+def test_lazy_retraction_exact_config_mfu_is_sealed() -> None:
+    result = json.loads(MFU_RESULT.read_text())
+    assert result["passed"] is True
+    assert result["config"]["sha256"] == sha256(OUTPUT)
+    assert result["preflight"]["timed_updates"] == 8
+    assert result["native_block_fht_extension"]["loaded"] is True
+    assert result["measurement"]["mfu_fraction"] >= 0.20
+    assert result["stability"]["all_logged_losses_finite"] is True
