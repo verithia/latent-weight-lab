@@ -7,6 +7,7 @@ optimizer until checkpoint, transition, and performance gates have passed.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import torch
 
@@ -149,6 +150,63 @@ class ReservedEscapeState:
             self.block_offsets,
         )
         return sum(tensor.numel() * tensor.element_size() for tensor in tensors)
+
+    def to_payload(self) -> dict[str, Any]:
+        return {
+            "low_bytes": self.low_bytes,
+            "packed_codes": self.packed_codes,
+            "exception_high_bytes": self.exception_high_bytes,
+            "tables": self.tables,
+            "block_offsets": self.block_offsets,
+            "n_elements": self.n_elements,
+            "block_words": self.block_words,
+            "dictionary_size": self.dictionary_size,
+            "block_local": self.block_local,
+        }
+
+    @classmethod
+    def from_payload(
+        cls, payload: dict[str, Any], *, device: torch.device
+    ) -> "ReservedEscapeState":
+        tensor_fields = {
+            "low_bytes": torch.uint8,
+            "packed_codes": torch.uint8,
+            "exception_high_bytes": torch.uint8,
+            "tables": torch.uint8,
+            "block_offsets": torch.int32,
+        }
+        converted = {}
+        for name, dtype in tensor_fields.items():
+            value = payload.get(name)
+            if not isinstance(value, torch.Tensor):
+                raise ValueError(f"reserved-escape payload is missing {name}")
+            converted[name] = value.to(device=device, dtype=dtype)
+        state = cls(
+            **converted,
+            n_elements=int(payload["n_elements"]),
+            block_words=int(payload["block_words"]),
+            dictionary_size=int(payload["dictionary_size"]),
+            block_local=bool(payload["block_local"]),
+        )
+        if state.n_elements <= 0 or state.n_elements % state.block_words:
+            raise ValueError("reserved-escape payload has an invalid element count")
+        if state.dictionary_size not in {16, 32}:
+            raise ValueError("reserved-escape payload has an invalid dictionary size")
+        if state.low_bytes.numel() != state.n_elements:
+            raise ValueError("reserved-escape payload low-byte length mismatch")
+        expected_codes = (state.n_elements * state.code_bits + 7) // 8
+        if state.packed_codes.numel() != expected_codes:
+            raise ValueError("reserved-escape payload code length mismatch")
+        expected_blocks = state.n_elements // state.block_words
+        if state.block_offsets.numel() != expected_blocks + 1:
+            raise ValueError("reserved-escape payload offset length mismatch")
+        expected_tables = expected_blocks if state.block_local else 1
+        if tuple(state.tables.shape) != (
+            expected_tables,
+            state.dictionary_size - 1,
+        ):
+            raise ValueError("reserved-escape payload table shape mismatch")
+        return state
 
 
 def _require_cuda() -> None:
@@ -307,4 +365,3 @@ def decode_reserved_escape(state: ReservedEscapeState) -> torch.Tensor:
     raw[0::2].copy_(state.low_bytes)
     raw[1::2].copy_(high)
     return raw.view(torch.float16)
-

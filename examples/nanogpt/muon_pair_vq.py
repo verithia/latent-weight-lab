@@ -17,6 +17,11 @@ from torch.nn import functional as F
 
 from latent_weight_lab.block_fht import normalized_fht_last_dim
 from examples.nanogpt.muon import muon_update
+from examples.nanogpt.pair_vq_fp16_reserved_escape_cuda import (
+    ReservedEscapeState,
+    decode_reserved_escape,
+    encode_reserved_escape,
+)
 
 
 def _normal_cartesian_codebook(std: float, *, device: torch.device) -> torch.Tensor:
@@ -2199,6 +2204,8 @@ class MuonPairVQLinear(nn.Module):
         error_feedback: bool = False,
         forward_visible_feedback: bool = False,
         fp16_ambient_momentum: bool = False,
+        fp16_reserved_escape_granularity: str = "",
+        reserved_escape_scope: str = "",
         fp16_ambient_reference_probe_steps: tuple[int, ...] = (),
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
@@ -2236,6 +2243,10 @@ class MuonPairVQLinear(nn.Module):
         self.error_feedback = bool(error_feedback)
         self.forward_visible_feedback = bool(forward_visible_feedback)
         self.fp16_ambient_momentum = bool(fp16_ambient_momentum)
+        self.fp16_reserved_escape_granularity = str(
+            fp16_reserved_escape_granularity
+        )
+        self.reserved_escape_scope = str(reserved_escape_scope)
         self.fp16_ambient_reference_probe_steps = tuple(
             int(step) for step in fp16_ambient_reference_probe_steps
         )
@@ -2291,6 +2302,19 @@ class MuonPairVQLinear(nn.Module):
         if self.fp16_ambient_reference_probe_steps and not self.fp16_ambient_momentum:
             raise ValueError(
                 "FP16 ambient reference probes require FP16 ambient momentum"
+            )
+        if self.fp16_reserved_escape_granularity not in {"", "scope", "block"}:
+            raise ValueError(
+                "FP16 reserved-escape granularity must be '', 'scope', or 'block'"
+            )
+        if self.fp16_reserved_escape_granularity and (
+            not self.fp16_ambient_momentum
+            or self.reserved_escape_scope not in {"c_fc", "c_proj"}
+            or self.element_count % 4096
+        ):
+            raise ValueError(
+                "FP16 reserved-escape momentum requires FP16 ambient momentum, "
+                "an explicit c_fc/c_proj scope, and a 4096-divisible matrix"
             )
         if any(step < 0 for step in self.fp16_ambient_reference_probe_steps):
             raise ValueError(
@@ -2594,6 +2618,8 @@ class MuonPairVQLinear(nn.Module):
     def ambient_momentum_bytes(self) -> int:
         if not self.fp16_ambient_momentum:
             return 0
+        if self.fp16_reserved_escape_granularity:
+            return math.ceil(self.element_count * 14 / 8)
         return (
             self.element_count
             * torch.tensor([], dtype=torch.float16).element_size()
@@ -2951,7 +2977,13 @@ class MuonPairVQLinear(nn.Module):
             "transient_gradient_bytes": self.transient_weight_bytes,
             "dense_master_weight": "disabled",
             "dense_optimizer_momentum": (
-                "fp16_ambient" if self.fp16_ambient_momentum else "disabled"
+                (
+                    "fp16_reserved_escape_capacity_ceiling"
+                    if self.fp16_reserved_escape_granularity
+                    else "fp16_ambient"
+                )
+                if self.fp16_ambient_momentum
+                else "disabled"
             ),
             "dense_ambient_error_buffer": "disabled",
             "forward_visible_feedback": self.forward_visible_feedback,
@@ -3318,7 +3350,27 @@ class MuonPairVQ(torch.optim.Optimizer):
         if len(momentum_modes) != 1:
             raise ValueError("MuonPairVQ modules must use one momentum mode")
         self.fp16_ambient_momentum = momentum_modes.pop()
+        reserved_escape_modes = {
+            module.fp16_reserved_escape_granularity for module in modules
+        }
+        if len(reserved_escape_modes) != 1:
+            raise ValueError(
+                "MuonPairVQ modules must use one reserved-escape momentum mode"
+            )
+        self.fp16_reserved_escape_granularity = reserved_escape_modes.pop()
+        if self.fp16_reserved_escape_granularity and not self.fp16_ambient_momentum:
+            raise ValueError("reserved-escape momentum requires FP16 ambient momentum")
         self.modules_by_id = {id(module.weight): module for module in modules}
+        self._reserved_escape_slices: dict[int, tuple[str, int, int]] = {}
+        self._reserved_escape_scope_elements = {"c_fc": 0, "c_proj": 0}
+        for module in modules:
+            if not self.fp16_reserved_escape_granularity:
+                continue
+            scope = module.reserved_escape_scope
+            start = self._reserved_escape_scope_elements[scope]
+            stop = start + module.element_count
+            self._reserved_escape_slices[id(module.weight)] = (scope, start, stop)
+            self._reserved_escape_scope_elements[scope] = stop
         self._diagnostics: list[dict[str, float | int]] = []
         self._fp32_ambient_references: dict[int, torch.Tensor] = {}
         defaults = {
@@ -3328,6 +3380,71 @@ class MuonPairVQ(torch.optim.Optimizer):
             "ns_steps": int(ns_steps),
         }
         super().__init__([{"params": [module.weight for module in modules]}], defaults)
+        self._reserved_escape_owner = self.param_groups[0]["params"][0]
+
+    @property
+    def reserved_escape_momentum_bytes(self) -> int:
+        if not self.fp16_reserved_escape_granularity:
+            return 0
+        payload = self.state[self._reserved_escape_owner].get(
+            "reserved_escape_momentum"
+        )
+        if payload is None:
+            return 0
+        total = 64 + len(self.modules_by_id) * 16
+        for scope_payload in payload.values():
+            state = ReservedEscapeState.from_payload(
+                scope_payload, device=self._reserved_escape_owner.device
+            )
+            total += state.persistent_tensor_bytes
+        return total
+
+    def _decode_reserved_escape_momentum(self) -> dict[str, torch.Tensor]:
+        payload = self.state[self._reserved_escape_owner].get(
+            "reserved_escape_momentum"
+        )
+        if payload is None:
+            return {
+                scope: torch.zeros(
+                    elements,
+                    device=self._reserved_escape_owner.device,
+                    dtype=torch.float16,
+                )
+                for scope, elements in self._reserved_escape_scope_elements.items()
+            }
+        decoded = {}
+        for scope, elements in self._reserved_escape_scope_elements.items():
+            state = ReservedEscapeState.from_payload(
+                payload[scope], device=self._reserved_escape_owner.device
+            )
+            if state.n_elements != elements:
+                raise ValueError(
+                    f"reserved-escape {scope} element count does not match model"
+                )
+            if state.block_local != (
+                self.fp16_reserved_escape_granularity == "block"
+            ):
+                raise ValueError(
+                    f"reserved-escape {scope} granularity does not match model"
+                )
+            decoded[scope] = decode_reserved_escape(state)
+        return decoded
+
+    def _store_reserved_escape_momentum(
+        self, decoded: dict[str, torch.Tensor]
+    ) -> None:
+        payload = {
+            scope: encode_reserved_escape(
+                values,
+                scope=scope,
+                granularity=self.fp16_reserved_escape_granularity,
+                block_words=4096,
+            ).to_payload()
+            for scope, values in decoded.items()
+        }
+        self.state[self._reserved_escape_owner][
+            "reserved_escape_momentum"
+        ] = payload
 
     def load_state_dict(self, state_dict):
         result = super().load_state_dict(state_dict)
@@ -3338,12 +3455,18 @@ class MuonPairVQ(torch.optim.Optimizer):
                     raise ValueError(
                         "FP16 ambient Pair-VQ resume contains compact momentum"
                     )
-                momentum = state.get("ambient_momentum")
-                if momentum is not None:
-                    state["ambient_momentum"] = momentum.to(
-                        device=weight.device,
-                        dtype=torch.float16,
-                    )
+                if self.fp16_reserved_escape_granularity:
+                    if "ambient_momentum" in state:
+                        raise ValueError(
+                            "reserved-escape resume contains raw ambient momentum"
+                        )
+                else:
+                    momentum = state.get("ambient_momentum")
+                    if momentum is not None:
+                        state["ambient_momentum"] = momentum.to(
+                            device=weight.device,
+                            dtype=torch.float16,
+                        )
             else:
                 if "ambient_momentum" in state:
                     raise ValueError(
@@ -3377,6 +3500,17 @@ class MuonPairVQ(torch.optim.Optimizer):
                         state["feedback_codes"],
                         state.get("feedback_center"),
                     )
+        if self.fp16_reserved_escape_granularity:
+            payload = self.state[self._reserved_escape_owner].get(
+                "reserved_escape_momentum"
+            )
+            if payload is not None:
+                if set(payload) != {"c_fc", "c_proj"}:
+                    raise ValueError("reserved-escape resume scope set mismatch")
+                for scope in ("c_fc", "c_proj"):
+                    ReservedEscapeState.from_payload(
+                        payload[scope], device=self._reserved_escape_owner.device
+                    )
         return result
 
     @torch.no_grad()
@@ -3386,6 +3520,11 @@ class MuonPairVQ(torch.optim.Optimizer):
             with torch.enable_grad():
                 loss = closure()
         self._diagnostics = []
+        decoded_reserved_momentum = (
+            self._decode_reserved_escape_momentum()
+            if self.fp16_reserved_escape_granularity
+            else None
+        )
         for group in self.param_groups:
             lr = float(group["lr"])
             momentum_coefficient = float(group["momentum"])
@@ -3421,11 +3560,17 @@ class MuonPairVQ(torch.optim.Optimizer):
                                 reference_momentum,
                                 alpha=momentum_coefficient,
                             )
-                    if "ambient_momentum" not in state:
-                        state["ambient_momentum"] = torch.zeros_like(
-                            weight, dtype=torch.float16
-                        )
-                    ambient_momentum = state["ambient_momentum"]
+                    if decoded_reserved_momentum is not None:
+                        scope, start, stop = self._reserved_escape_slices[id(weight)]
+                        ambient_momentum = decoded_reserved_momentum[scope][
+                            start:stop
+                        ].view_as(weight)
+                    else:
+                        if "ambient_momentum" not in state:
+                            state["ambient_momentum"] = torch.zeros_like(
+                                weight, dtype=torch.float16
+                            )
+                        ambient_momentum = state["ambient_momentum"]
                     next_momentum = ambient_momentum.float()
                     next_momentum.mul_(momentum_coefficient).add_(gradient_fp32)
                     ambient_momentum.copy_(next_momentum)
@@ -3858,6 +4003,24 @@ class MuonPairVQ(torch.optim.Optimizer):
                         for key, value in counterfactual.items():
                             diagnostics["feedback_source_" + key] = value
                 self._diagnostics.append(diagnostics)
+        if decoded_reserved_momentum is not None:
+            self._store_reserved_escape_momentum(decoded_reserved_momentum)
+            momentum_bytes = self.reserved_escape_momentum_bytes
+            for diagnostics in self._diagnostics:
+                diagnostics.update(
+                    {
+                        "reserved_escape_momentum": 1,
+                        "reserved_escape_granularity": (
+                            self.fp16_reserved_escape_granularity
+                        ),
+                        "reserved_escape_momentum_bytes": momentum_bytes,
+                        "raw_fp16_momentum_bytes": sum(
+                            self._reserved_escape_scope_elements.values()
+                        )
+                        * 2,
+                        "persistent_raw_ambient_momentum_tensors": 0,
+                    }
+                )
         return loss
 
     def consume_diagnostics(self) -> list[dict[str, float | int]]:

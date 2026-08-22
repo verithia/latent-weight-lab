@@ -194,6 +194,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_pair_vq_forward_visible_feedback: bool = False
     block_fht_mlp_pair_vq_fp16_ambient_momentum: bool = False
+    block_fht_mlp_pair_vq_fp16_reserved_escape_granularity: str = ""
     block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_retraction: bool = False
@@ -2441,6 +2442,10 @@ class MLP(nn.Module):
                 fp16_ambient_momentum=bool(
                     config.block_fht_mlp_pair_vq_fp16_ambient_momentum
                 ),
+                fp16_reserved_escape_granularity=str(
+                    config.block_fht_mlp_pair_vq_fp16_reserved_escape_granularity
+                ),
+                reserved_escape_scope="c_fc",
                 fp16_ambient_reference_probe_steps=tuple(
                     config.block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps
                 ),
@@ -2742,6 +2747,10 @@ class MLP(nn.Module):
                 fp16_ambient_momentum=bool(
                     config.block_fht_mlp_pair_vq_fp16_ambient_momentum
                 ),
+                fp16_reserved_escape_granularity=str(
+                    config.block_fht_mlp_pair_vq_fp16_reserved_escape_granularity
+                ),
+                reserved_escape_scope="c_proj",
                 fp16_ambient_reference_probe_steps=tuple(
                     config.block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps
                 ),
@@ -5929,7 +5938,16 @@ class GPT(nn.Module):
             ),
             "dense_master_weight": "disabled",
             "dense_optimizer_momentum": (
-                "fp16_ambient" if ambient_momentum_bytes else "disabled"
+                (
+                    "fp16_reserved_escape_capacity_ceiling"
+                    if any(
+                        module.fp16_reserved_escape_granularity
+                        for module in modules
+                    )
+                    else "fp16_ambient"
+                )
+                if ambient_momentum_bytes
+                else "disabled"
             ),
             "dense_ambient_error_buffer": "disabled",
             "forward_visible_feedback": any(

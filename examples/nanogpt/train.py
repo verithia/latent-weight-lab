@@ -108,6 +108,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/muon.py",
         root / "examples/nanogpt/muon_int8_lattice.py",
         root / "examples/nanogpt/muon_pair_vq.py",
+        root / "examples/nanogpt/pair_vq_fp16_reserved_escape_cuda.py",
         root / "examples/nanogpt/muon_matched_givens.py",
         root / "examples/nanogpt/fast_task_matching.py",
         root / "examples/nanogpt/csrc/task_edge_coloring.cpp",
@@ -2602,6 +2603,26 @@ def parse_args() -> argparse.Namespace:
         namespace, "block_fht_mlp_pair_vq_fp16_ambient_momentum", False
     ) and not namespace.block_fht_mlp_pair_vq:
         raise ValueError("FP16 ambient momentum requires MLP pair VQ")
+    reserved_escape_granularity = str(
+        getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_fp16_reserved_escape_granularity",
+            "",
+        )
+    )
+    if reserved_escape_granularity not in {"", "scope", "block"}:
+        raise ValueError(
+            "FP16 reserved-escape granularity must be '', 'scope', or 'block'"
+        )
+    if reserved_escape_granularity and not (
+        namespace.block_fht_mlp_pair_vq
+        and getattr(
+            namespace, "block_fht_mlp_pair_vq_fp16_ambient_momentum", False
+        )
+    ):
+        raise ValueError(
+            "FP16 reserved-escape momentum requires Pair-VQ FP16 ambient momentum"
+        )
     ambient_reference_probe_steps = tuple(
         int(step)
         for step in getattr(
@@ -3420,6 +3441,13 @@ def pair_vq_model_kwargs(
                 namespace,
                 "block_fht_mlp_pair_vq_fp16_ambient_momentum",
                 False,
+            )
+        ),
+        "block_fht_mlp_pair_vq_fp16_reserved_escape_granularity": str(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_fp16_reserved_escape_granularity",
+                "",
             )
         ),
         "block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps": tuple(
