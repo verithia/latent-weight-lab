@@ -36,7 +36,7 @@ from examples.nanogpt.muon_pair_vq import (
     _pack_fixed_width_codes,
     _unpack_fixed_width_codes,
 )
-from examples.nanogpt.train import pair_vq_model_kwargs
+from examples.nanogpt.train import make_checkpoint, pair_vq_model_kwargs
 
 
 def make_module(
@@ -59,6 +59,8 @@ def make_module(
     feedback_residual_probe_steps: tuple[int, ...] = (),
     feedback_residual_probe_layers: tuple[int, ...] = (),
     feedback_residual_probe_lloyd_iterations: tuple[int, ...] = (),
+    lazy_retraction_interval: int = 1,
+    lazy_retraction_forced_steps: tuple[int, ...] = (),
 ) -> MuonPairVQLinear:
     return MuonPairVQLinear(
         in_features,
@@ -86,6 +88,8 @@ def make_module(
         feedback_residual_probe_lloyd_iterations=(
             feedback_residual_probe_lloyd_iterations
         ),
+        lazy_retraction_interval=lazy_retraction_interval,
+        lazy_retraction_forced_steps=lazy_retraction_forced_steps,
         neighbor_candidates=16,
         code_refresh_interval=8,
     )
@@ -1167,6 +1171,122 @@ def test_forward_visible_feedback_resume_reconstructs_virtual_weight_exactly() -
     torch.testing.assert_close(
         restored.weight, module.weight, rtol=0.0, atol=0.0
     )
+
+
+def test_lazy_retraction_carries_ambient_updates_until_compact_boundary() -> None:
+    torch.manual_seed(20260826)
+    module = make_module(
+        in_features=32,
+        out_features=32,
+        stages=1,
+        error_feedback=True,
+        forward_visible_feedback=True,
+        fp16_ambient_momentum=True,
+        lazy_retraction_interval=8,
+    )
+    optimizer = make_optimizer(module)
+    initial_codes = module.codes.detach().clone()
+    initial_codebooks = module.codebooks.detach().clone()
+
+    for expected_step in range(1, 8):
+        before = module.weight.detach().clone()
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()[0]
+        assert diagnostics["lazy_retraction"] == 1
+        assert diagnostics["retracted"] == 0
+        assert diagnostics["compact_boundary"] == 0
+        assert diagnostics["requested_step_energy_recovery"] == 1.0
+        assert not torch.equal(module.weight, before)
+        assert torch.equal(module.codes, initial_codes)
+        torch.testing.assert_close(
+            module.codebooks, initial_codebooks, rtol=0.0, atol=0.0
+        )
+        assert int(module.optimizer_step) == expected_step
+        assert optimizer.compact_boundary_ready is False
+
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    diagnostics = optimizer.consume_diagnostics()[0]
+    assert diagnostics["retracted"] == 1
+    assert diagnostics["compact_boundary"] == 1
+    assert diagnostics["refresh_codes"] == 1
+    assert int(module.optimizer_step) == 8
+    assert optimizer.compact_boundary_ready is True
+    state = optimizer.state[module.weight]
+    compact_weight = module.decode_weight() + module.decode_feedback(
+        state["feedback_levels"], state["feedback_codes"]
+    ).reshape_as(module.weight)
+    torch.testing.assert_close(
+        module.weight, compact_weight, rtol=0.0, atol=0.0
+    )
+
+
+def test_lazy_retraction_forces_registered_boundary_and_resumes_exactly() -> None:
+    torch.manual_seed(20260827)
+    module = make_module(
+        in_features=32,
+        out_features=32,
+        stages=1,
+        seed=20260828,
+        error_feedback=True,
+        forward_visible_feedback=True,
+        fp16_ambient_momentum=True,
+        lazy_retraction_interval=8,
+        lazy_retraction_forced_steps=(3,),
+    )
+    optimizer = make_optimizer(module)
+    for expected_retracted in (0, 0, 1):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()[0]
+        assert diagnostics["retracted"] == expected_retracted
+    assert int(module.optimizer_step) == 3
+    assert optimizer.compact_boundary_ready is True
+    expected_weight = module.weight.detach().clone()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(
+        in_features=32,
+        out_features=32,
+        stages=1,
+        seed=20260829,
+        error_feedback=True,
+        forward_visible_feedback=True,
+        fp16_ambient_momentum=True,
+        lazy_retraction_interval=8,
+        lazy_retraction_forced_steps=(3,),
+    )
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    torch.testing.assert_close(
+        restored.weight, expected_weight, rtol=0.0, atol=0.0
+    )
+    assert restored_optimizer.compact_boundary_ready is True
+
+
+def test_checkpoint_rejects_unretracted_lazy_ambient_carry() -> None:
+    class UnretractedOptimizer:
+        compact_boundary_ready = False
+
+    try:
+        make_checkpoint(
+            raw_model=None,  # type: ignore[arg-type]
+            optimizer=UnretractedOptimizer(),  # type: ignore[arg-type]
+            scaler=None,  # type: ignore[arg-type]
+            gpt_config=GPTConfig(),
+            next_iter=1,
+            best_val_loss=1.0,
+            pending_train_data_generator_state=None,
+            run_identity={},
+            reason="test",
+        )
+    except RuntimeError as error:
+        assert "compact retraction boundary" in str(error)
+    else:
+        raise AssertionError("nonboundary checkpoint was not rejected")
 
 
 def test_legacy_error_feedback_forward_remains_base_projection() -> None:

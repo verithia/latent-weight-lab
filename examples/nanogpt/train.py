@@ -374,6 +374,14 @@ def make_checkpoint(
     run_identity: dict[str, Any],
     reason: str,
 ) -> dict[str, Any]:
+    compact_boundary_ready = getattr(
+        optimizer, "compact_boundary_ready", True
+    )
+    if not bool(compact_boundary_ready):
+        raise RuntimeError(
+            "Pair-VQ lazy ambient carry cannot be checkpointed away from a "
+            "registered compact retraction boundary"
+        )
     model_state = raw_model.state_dict()
     if any("_cached_weight" in name for name in model_state):
         raise RuntimeError("BlockFHT cache must not be serialized in an exact-resume checkpoint")
@@ -1633,6 +1641,17 @@ def parse_args() -> argparse.Namespace:
         default=8,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-lazy-retraction-interval",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--block-fht-mlp-pair-vq-lazy-retraction-forced-steps",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-error-feedback",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2596,6 +2615,51 @@ def parse_args() -> argparse.Namespace:
             raise ValueError("MLP pair VQ neighbor count must be in [1, 256]")
         if namespace.block_fht_mlp_pair_vq_code_refresh_interval <= 0:
             raise ValueError("MLP pair VQ refresh interval must be positive")
+        lazy_retraction_interval = int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_lazy_retraction_interval",
+                1,
+            )
+        )
+        lazy_retraction_forced_steps = tuple(
+            int(step)
+            for step in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_lazy_retraction_forced_steps",
+                (),
+            )
+        )
+        if lazy_retraction_interval <= 0:
+            raise ValueError("MLP pair VQ lazy retraction interval must be positive")
+        if tuple(sorted(set(lazy_retraction_forced_steps))) != (
+            lazy_retraction_forced_steps
+        ) or any(step <= 0 for step in lazy_retraction_forced_steps):
+            raise ValueError(
+                "MLP pair VQ forced retraction steps must be positive, sorted, and unique"
+            )
+        if lazy_retraction_interval > 1 and (
+            namespace.block_fht_mlp_pair_vq_code_refresh_interval
+            != lazy_retraction_interval
+            or not getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_forward_visible_feedback",
+                False,
+            )
+            or not getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_fp16_ambient_momentum",
+                False,
+            )
+        ):
+            raise ValueError(
+                "lazy Pair-VQ retraction requires matching code refresh, "
+                "forward-visible feedback, and FP16 ambient momentum"
+            )
+        if lazy_retraction_forced_steps and lazy_retraction_interval == 1:
+            raise ValueError(
+                "forced Pair-VQ retraction steps require a lazy interval"
+            )
         overlap = pair_vq_targets & mlp_int8_lattice_targets
         if overlap:
             raise ValueError(
@@ -3480,6 +3544,21 @@ def pair_vq_model_kwargs(
         ),
         "block_fht_mlp_pair_vq_code_refresh_interval": int(
             namespace.block_fht_mlp_pair_vq_code_refresh_interval
+        ),
+        "block_fht_mlp_pair_vq_lazy_retraction_interval": int(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_lazy_retraction_interval",
+                1,
+            )
+        ),
+        "block_fht_mlp_pair_vq_lazy_retraction_forced_steps": tuple(
+            int(step)
+            for step in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_lazy_retraction_forced_steps",
+                (),
+            )
         ),
         "block_fht_mlp_pair_vq_error_feedback": bool(
             namespace.block_fht_mlp_pair_vq_error_feedback
@@ -5499,6 +5578,7 @@ def main() -> None:
             args.save_checkpoint
             and not checkpoint_succeeded_this_iteration
             and time.monotonic() - last_checkpoint_success_monotonic >= args.checkpoint_wall_clock_seconds
+            and bool(getattr(optimizer, "compact_boundary_ready", True))
         ):
             save_exact_resume_checkpoint("wall_clock_safety", next_iter_value=iter_num + 1)
         iter_num += 1

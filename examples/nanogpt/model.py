@@ -45,6 +45,13 @@ class MultiOptimizer:
             groups.extend(optimizer.param_groups)
         return groups
 
+    @property
+    def compact_boundary_ready(self) -> bool:
+        return all(
+            bool(getattr(optimizer, "compact_boundary_ready", True))
+            for optimizer in self.optimizers
+        )
+
     def state_dict(self):
         return {"optimizers": [optimizer.state_dict() for optimizer in self.optimizers]}
 
@@ -197,6 +204,8 @@ class GPTConfig:
     block_fht_mlp_pair_vq_seed: int = 20261020
     block_fht_mlp_pair_vq_neighbor_candidates: int = 16
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
+    block_fht_mlp_pair_vq_lazy_retraction_interval: int = 1
+    block_fht_mlp_pair_vq_lazy_retraction_forced_steps: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_pair_vq_forward_visible_feedback: bool = False
     block_fht_mlp_pair_vq_fp16_ambient_momentum: bool = False
@@ -1484,6 +1493,12 @@ class CausalSelfAttention(nn.Module):
                     code_refresh_interval=int(
                         config.block_fht_mlp_pair_vq_code_refresh_interval
                     ),
+                    lazy_retraction_interval=int(
+                        config.block_fht_mlp_pair_vq_lazy_retraction_interval
+                    ),
+                    lazy_retraction_forced_steps=tuple(
+                        config.block_fht_mlp_pair_vq_lazy_retraction_forced_steps
+                    ),
                 )
             if (
                 target_name == "attn.c_attn.v"
@@ -2641,6 +2656,12 @@ class MLP(nn.Module):
                 code_refresh_interval=int(
                     config.block_fht_mlp_pair_vq_code_refresh_interval
                 ),
+                lazy_retraction_interval=int(
+                    config.block_fht_mlp_pair_vq_lazy_retraction_interval
+                ),
+                lazy_retraction_forced_steps=tuple(
+                    config.block_fht_mlp_pair_vq_lazy_retraction_forced_steps
+                ),
             )
         elif int8_lattice_cfc:
             self.c_fc = MuonInt8LatticeLinear(
@@ -2955,6 +2976,12 @@ class MLP(nn.Module):
                 ),
                 code_refresh_interval=int(
                     config.block_fht_mlp_pair_vq_code_refresh_interval
+                ),
+                lazy_retraction_interval=int(
+                    config.block_fht_mlp_pair_vq_lazy_retraction_interval
+                ),
+                lazy_retraction_forced_steps=tuple(
+                    config.block_fht_mlp_pair_vq_lazy_retraction_forced_steps
                 ),
             )
         elif int8_lattice_cproj:

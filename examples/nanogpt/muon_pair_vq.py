@@ -2222,6 +2222,8 @@ class MuonPairVQLinear(nn.Module):
         feedback_fractional_probe_refinement_fractions: tuple[float, ...] = (),
         neighbor_candidates: int = 16,
         code_refresh_interval: int = 8,
+        lazy_retraction_interval: int = 1,
+        lazy_retraction_forced_steps: tuple[int, ...] = (),
     ) -> None:
         super().__init__()
         self.in_features = int(in_features)
@@ -2289,6 +2291,10 @@ class MuonPairVQLinear(nn.Module):
         )
         self.neighbor_candidates = int(neighbor_candidates)
         self.code_refresh_interval = int(code_refresh_interval)
+        self.lazy_retraction_interval = int(lazy_retraction_interval)
+        self.lazy_retraction_forced_steps = tuple(
+            int(step) for step in lazy_retraction_forced_steps
+        )
         if self.in_features <= 0 or self.out_features <= 0:
             raise ValueError("pair-VQ dimensions must be positive")
         if self.in_features * self.out_features % self.vector_length:
@@ -2533,6 +2539,29 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("pair-VQ neighbor count is invalid")
         if self.code_refresh_interval <= 0:
             raise ValueError("pair-VQ refresh interval must be positive")
+        if self.lazy_retraction_interval <= 0:
+            raise ValueError("pair-VQ lazy retraction interval must be positive")
+        if any(step <= 0 for step in self.lazy_retraction_forced_steps):
+            raise ValueError("pair-VQ forced retraction steps must be positive")
+        if tuple(sorted(set(self.lazy_retraction_forced_steps))) != (
+            self.lazy_retraction_forced_steps
+        ):
+            raise ValueError(
+                "pair-VQ forced retraction steps must be sorted and unique"
+            )
+        if self.lazy_retraction_interval > 1 and (
+            not self.forward_visible_feedback
+            or not self.fp16_ambient_momentum
+            or self.code_refresh_interval != self.lazy_retraction_interval
+        ):
+            raise ValueError(
+                "lazy Pair-VQ retraction requires forward-visible feedback, "
+                "FP16 ambient momentum, and a matching code-refresh interval"
+            )
+        if self.lazy_retraction_forced_steps and self.lazy_retraction_interval == 1:
+            raise ValueError(
+                "forced Pair-VQ retraction steps require a lazy interval"
+            )
         if not math.isfinite(weight_std) or weight_std <= 0.0:
             raise ValueError("pair-VQ weight_std must be positive and finite")
 
@@ -2636,6 +2665,16 @@ class MuonPairVQLinear(nn.Module):
         if self.fp16_ambient_momentum:
             return self.ambient_momentum_bytes
         return self.compact_momentum_bytes
+
+    def is_compact_boundary(self) -> bool:
+        """Whether persistent codes/feedback reproduce the materialized weight."""
+        step = int(self.optimizer_step)
+        return (
+            self.lazy_retraction_interval == 1
+            or step == 0
+            or step % self.lazy_retraction_interval == 0
+            or step in self.lazy_retraction_forced_steps
+        )
 
     @property
     def feedback_residual_lattice_coordinate_bits(self) -> int:
@@ -3405,6 +3444,14 @@ class MuonPairVQ(torch.optim.Optimizer):
             total += state.persistent_tensor_bytes
         return total
 
+    @property
+    def compact_boundary_ready(self) -> bool:
+        """True only when every nonpersistent weight has a compact owner."""
+        return all(
+            module.is_compact_boundary()
+            for module in self.modules_by_id.values()
+        )
+
     def _decode_reserved_escape_momentum(self) -> dict[str, torch.Tensor]:
         payload = self.state[self._reserved_escape_owner].get(
             "reserved_escape_momentum"
@@ -3684,6 +3731,47 @@ class MuonPairVQ(torch.optim.Optimizer):
                     requested = requested * (1.0 - lr * weight_decay)
                 requested = requested.add(update.float(), alpha=-lr)
                 current_request = requested - weight.float()
+                next_optimizer_step = int(module.optimizer_step) + 1
+                retraction_due = (
+                    module.lazy_retraction_interval == 1
+                    or next_optimizer_step % module.lazy_retraction_interval == 0
+                    or next_optimizer_step
+                    in module.lazy_retraction_forced_steps
+                )
+                if not retraction_due:
+                    request_energy = float(current_request.square().sum())
+                    weight.copy_(requested.to(dtype=weight.dtype))
+                    module.optimizer_step.add_(1)
+                    diagnostics = {
+                        "layer": module.layer_id,
+                        "stages": module.stages,
+                        "fast_residual": int(module.fast_residual),
+                        "in_features": module.in_features,
+                        "out_features": module.out_features,
+                        "optimizer_step": next_optimizer_step - 1,
+                        "request_energy": request_energy,
+                        "projection_residual_energy": 0.0,
+                        "requested_step_energy_recovery": 1.0,
+                        "requested_update_cosine": 1.0,
+                        "code_changes": 0,
+                        "fast_code_changes": 0,
+                        "refresh_codes": 0,
+                        "error_feedback": int(module.error_feedback),
+                        "forward_visible_feedback": int(
+                            module.forward_visible_feedback
+                        ),
+                        "projection_target_includes_prior_feedback": 0,
+                        "lazy_retraction": 1,
+                        "retracted": 0,
+                        "compact_boundary": 0,
+                        "lazy_retraction_interval": (
+                            module.lazy_retraction_interval
+                        ),
+                    }
+                    if reference_metrics is not None:
+                        diagnostics.update(reference_metrics)
+                    self._diagnostics.append(diagnostics)
+                    continue
                 if module.error_feedback:
                     if "feedback_levels" not in state:
                         state["feedback_levels"] = torch.zeros(
@@ -3720,7 +3808,10 @@ class MuonPairVQ(torch.optim.Optimizer):
                     feedback_before = None
                     projection_target = requested
                 refresh = (
-                    int(module.optimizer_step) % module.code_refresh_interval == 0
+                    module.lazy_retraction_interval > 1
+                    or int(module.optimizer_step)
+                    % module.code_refresh_interval
+                    == 0
                 )
                 diagnostics = module.project_requested_weight_(
                     projection_target, refresh_codes=refresh
@@ -3733,6 +3824,14 @@ class MuonPairVQ(torch.optim.Optimizer):
                 )
                 diagnostics["projection_target_includes_prior_feedback"] = int(
                     module.error_feedback and not module.forward_visible_feedback
+                )
+                diagnostics["lazy_retraction"] = int(
+                    module.lazy_retraction_interval > 1
+                )
+                diagnostics["retracted"] = 1
+                diagnostics["compact_boundary"] = 1
+                diagnostics["lazy_retraction_interval"] = (
+                    module.lazy_retraction_interval
                 )
                 if module.error_feedback:
                     raw_feedback = projection_target - weight.float()
