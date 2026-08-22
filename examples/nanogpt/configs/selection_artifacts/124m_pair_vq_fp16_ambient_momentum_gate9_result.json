@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_pair_vq_fp16_ambient_momentum_gate9_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_DIRECTION_EXACT_FP16_AMBIENT_MOMENTUM_GATE",
+  "scientific_question": "Does full-support FP16 ambient momentum restore the dense Muon vector field while retaining the compact forward-visible Pair-VQ MLP representation?",
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "3022fd0542ebf8d680ab9cb8c949543b02365f66",
+    "implementation_commit": "a9a11a0a525a8b9e29ede728aab6189f3324ecae",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_gate9.json",
+    "config_sha256": "754019643573fed84efc2eee1fae85ff009104cd40f08414cc02606780449eba",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "optimizer_steps": 9,
+    "terminal_val_loss": 8.3675,
+    "exit_code": 0
+  },
+  "systems_gate": {
+    "passed": true,
+    "preflight_mfu_fraction": 0.2847077807125191,
+    "preflight_tokens_per_second": 159285.95625,
+    "preflight_iter_ms": 1646.07,
+    "preflight_peak_mib": 31990.68,
+    "native_extension": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "minimum_mfu_fraction": 0.20,
+    "timed_updates": 8,
+    "scientific_median_tokens_per_second": 160020.41,
+    "scientific_median_iter_ms": 1638.19,
+    "scientific_mean_optimizer_fraction": 0.27077126292557235,
+    "preflight_certificate_sha256": "7ffd4d44e0f79747d75198f82ff372964ffb9e63f269cc5d183d3fe27df87acd",
+    "preflight_log_sha256": "b5ae9451023ea612ebda9bf0b3de73d654f7ba0dc45d21a5390aa52b83313786",
+    "all_logged_losses_finite": true
+  },
+  "direction_gate": {
+    "passed": true,
+    "thresholds": {
+      "weighted_polar_cosine_min": 0.9999,
+      "every_matrix_polar_cosine_min": 0.999,
+      "weighted_positive_line_recovery_min": 0.999,
+      "feedback_codec_weighted_recovery_min": 0.999975,
+      "feedback_codec_every_matrix_recovery_min": 0.9999
+    },
+    "refreshes": [
+      {
+        "optimizer_step": 0,
+        "matrix_records": 24,
+        "weighted_polar_cosine": 0.9999567979851931,
+        "weighted_positive_line_recovery": 0.9999135978368004,
+        "worst_matrix_polar_cosine": 0.9998682308843285,
+        "worst_matrix_polar_layer": 11,
+        "weighted_feedback_energy_recovery": 0.9999834650687847,
+        "worst_matrix_feedback_energy_recovery": 0.9999389310428489,
+        "worst_matrix_feedback_layer": 3,
+        "worst_matrix_prepolar_cosine": 0.9999998830331199,
+        "all_finite": true
+      },
+      {
+        "optimizer_step": 8,
+        "matrix_records": 24,
+        "weighted_polar_cosine": 0.9999449052428752,
+        "weighted_positive_line_recovery": 0.9998898135211827,
+        "worst_matrix_polar_cosine": 0.9998862637075248,
+        "worst_matrix_polar_layer": 11,
+        "weighted_feedback_energy_recovery": 0.9999914151387232,
+        "worst_matrix_feedback_energy_recovery": 0.9999803290114759,
+        "worst_matrix_feedback_layer": 0,
+        "worst_matrix_prepolar_cosine": 0.9999999044500252,
+        "all_finite": true
+      }
+    ],
+    "interpretation": "The FP16 ambient buffer removes the compact-momentum polar failure: both early and refreshed optimizer transitions are effectively direction-exact relative to the nonpersistent FP32 reference. The remaining experiment is a loss test of the compact forward representation, not another optimizer-direction search."
+  },
+  "representation": {
+    "compact_inference_mlp_matrix_bytes": 70855872,
+    "feedback_code_bytes": 86482944,
+    "feedback_level_bytes": 88320,
+    "fp16_ambient_momentum_bytes": 113246208,
+    "compact_momentum_bytes": 0,
+    "persistent_mlp_training_matrix_bytes": 270673344,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "training_state_reduction_factor": 1.6735479944415952,
+    "inference_weight_storage_reduction_factor": 3.1965228795716465,
+    "dense_fp32_momentum_in_persistent_state": false,
+    "diagnostic_fp32_reference_persistent": false,
+    "additional_trainable_parameters": 0,
+    "materialized_inference_flops": "unchanged from the dense target MLP"
+  },
+  "artifacts": {
+    "scientific_log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_gate9/train.log",
+    "scientific_log_sha256": "4734570330e3ad18475d916ebf824c43d110a3f4fa8d12d10dcef719463141c4",
+    "scientific_log_bytes": 84507,
+    "checkpoint_written": false
+  },
+  "authorization": {
+    "matched_0p5tpp_endpoint": true,
+    "endpoint_max_iters": 238,
+    "endpoint_validation_ce_max": 5.411,
+    "endpoint_gap_to_dense_parent_ce_max": 0.05,
+    "model_scale_up": false,
+    "longer_horizon": false,
+    "lr_sweep": false,
+    "precision_sweep": false,
+    "next_causal_change": "Run exactly one 124M 238-update endpoint with the frozen QK-only attention parent, Pair-VQ forward representation, FP16 ambient momentum, schedule, seeds, dataset manifest, and fixed evaluation protocol. Disable the nonpersistent FP32 reference probe during the endpoint."
+  }
+}
