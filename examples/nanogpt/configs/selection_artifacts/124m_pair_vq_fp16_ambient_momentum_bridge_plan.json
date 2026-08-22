@@ -1,0 +1,120 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_ambient_momentum_bridge_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Does replacing only Pair-VQ's code-conditioned momentum with a full-support FP16 ambient momentum restore the dense Muon vector field and close the compact full-MLP endpoint gap?",
+  "causal_authorization": {
+    "immediate_parent": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_lowbit_momentum_tangent_oracle_result.json",
+      "result_sha256": "ee5d47c625b1794a663f3070ff7474eb0bb0970f6852500253abea35a94397aa",
+      "classification": "LOWBIT_AMBIENT_MOMENTUM_TANGENT_REJECTED",
+      "finding": "The best <=25%-of-FP32 low-bit momentum state has 0.993865 pre-polar cosine but only 0.833648 Muon-polar cosine at the frozen late gate."
+    },
+    "optimizer_localization": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_optimizer_transition_oracle_result.json",
+      "result_sha256": "73eaba400845f542a0bfd0366c29b9d0da9bed96dabf152bd243ee5120527cfd",
+      "classification": "COMPACT_MOMENTUM_POLAR_PRIMARY"
+    },
+    "chart_localization": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_momentum_transport_oracle_result.json",
+      "result_sha256": "7f969b7820d2743befb02431d939b8ff11ae2b940d62eb58e390808b984fbf14",
+      "classification": "INSTANTANEOUS_SUBSPACE_PRIMARY"
+    },
+    "prior_precision_control": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_temporal_state_hybrid_precision_result.json",
+      "result_sha256": "f6fabd14f604b6f5bd4423a601a57ac8400010066fd7eae295926d2af8552014",
+      "classification": "HYBRID_PRECISION_AMBIENT_STATE_PLAUSIBLE",
+      "fp16_momentum_polar_energy_recovery": 0.9999956172031941,
+      "fp16_momentum_minimum_layer_polar_cosine": 0.9999935309459342,
+      "bf16_same_byte_control_rejected": true
+    }
+  },
+  "theory": {
+    "polar_sensitivity": "For H=U Sigma V^T, the first-order polar perturbation weights singular-frame errors by inverse sums 1/(sigma_i+sigma_j). A codec can therefore have high Frobenius/pre-polar cosine while rotating the Muon polar factor badly.",
+    "deduction": "The low-bit family fails after the polar map, final Pair-VQ retraction is minor, and FP16 ambient momentum has already passed a stricter polar audit. The smallest causally supported relaxation is FP16 ambient momentum, not another bit/block/rank sweep.",
+    "scope": "This tests whether the compact forward representation works when supplied with the correct history-dependent ambient optimizer direction. It does not claim that FP16 momentum is the final desired compression ratio."
+  },
+  "frozen_mechanism": {
+    "forward_weight": "Retain the existing forward-visible Pair-VQ base plus fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16 feedback representation unchanged.",
+    "momentum_recurrence": "For every MLP matrix, decode the previous FP16 buffer to FP32, form B_next=mu*B_previous+G, persist B_next in FP16, and form H=G+mu*B_next in FP32.",
+    "muon_request": "Apply the existing production Newton-Schulz Muon polar map to H, then weight decay and learning rate exactly as the current Pair-VQ optimizer does.",
+    "retraction": "Project the requested virtual weight once into the unchanged Pair-VQ base and existing forward-visible feedback codec; do not add old feedback twice.",
+    "resume": "Persist the ambient momentum as FP16 and reconstruct the existing virtual Pair-VQ weight before the next forward pass.",
+    "forbidden_changes": [
+      "attention structure",
+      "Pair-VQ base/codebooks/codes",
+      "feedback codec, levels, blocks, or Lloyd iterations",
+      "learning rate, schedule, seed, data, horizon, or Muon Newton-Schulz steps",
+      "dense FP32 momentum",
+      "dense master weight",
+      "low-bit momentum residual tiers",
+      "rank, bit, block-size, or LR sweep"
+    ]
+  },
+  "state_and_compute_contract": {
+    "mlp_matrix_elements": 56623104,
+    "compact_model_bytes": 70855872,
+    "feedback_code_bytes": 86482944,
+    "feedback_level_bytes": 88320,
+    "fp16_ambient_momentum_bytes": 113246208,
+    "removed_compact_momentum_bytes": 73728,
+    "persistent_mlp_training_matrix_bytes": 270673344,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "training_state_fraction_of_dense": 0.5975329081217448,
+    "training_state_reduction_factor": 1.6735479944415952,
+    "persistent_inference_mlp_matrix_bytes": 70855872,
+    "dense_fp32_inference_mlp_matrix_bytes": 226492416,
+    "inference_weight_storage_reduction_factor": 3.1965228795716465,
+    "additional_trainable_parameters": 0,
+    "task_forward_backward_multiplier": 1.0,
+    "materialized_inference_flops": "unchanged from the dense target MLP"
+  },
+  "implementation_gate": {
+    "focused_tests": [
+      "all 24 Pair-VQ MLP optimizer states contain one FP16 ambient momentum buffer with the exact weight shape and no compact_momentum tensor",
+      "one-step requested Muon update matches an explicit FP16-buffer reference",
+      "the legacy compact-momentum path remains unchanged by default",
+      "forward-visible feedback is applied exactly once",
+      "checkpoint save/load preserves FP16 momentum and reconstructs the identical next virtual weight",
+      "persistent state accounting is exactly 270673344 bytes"
+    ],
+    "nine_update_live_gate": {
+      "refresh_updates": [0, 8],
+      "minimum_all_matrix_polar_cosine_vs_fp32_control": 0.9999,
+      "minimum_every_matrix_polar_cosine_vs_fp32_control": 0.999,
+      "minimum_all_matrix_positive_line_energy_recovery": 0.999,
+      "minimum_feedback_codec_weighted_recovery": 0.999975,
+      "minimum_feedback_codec_every_matrix_recovery": 0.9999,
+      "persistent_mlp_training_matrix_bytes_exact": 270673344,
+      "all_losses_finite": true
+    },
+    "exact_config_performance_gate": {
+      "minimum_mfu_fraction": 0.2,
+      "maximum_foreground_duration_minutes": 5,
+      "native_block_fht_extension_required": true,
+      "minimum_timed_updates": 8,
+      "all_losses_finite": true
+    }
+  },
+  "conditional_endpoint": {
+    "authorized_only_if_all_implementation_gates_pass": true,
+    "model": "124M QK-only BlockFHT attention parent plus full Pair-VQ MLP replacement",
+    "max_iters": 238,
+    "eval_steps": [0, 60, 120, 180, 238],
+    "learning_rate": 0.0024,
+    "dense_parent_validation_ce": 5.361,
+    "maximum_validation_ce": 5.411,
+    "maximum_gap_to_dense_parent_ce": 0.05,
+    "same_dataset_manifest_and_fixed_eval_required": true,
+    "watchdog": "terminal/error-only @Codex invocation; no milestones or heartbeat"
+  },
+  "decision_rule": {
+    "implementation_or_live_gate_failure": "Diagnose only the failed invariant; do not run an LM endpoint or relax the state/polar/MFU thresholds.",
+    "implementation_and_live_gate_pass": "Authorize exactly one 238-update endpoint with the frozen terminal gate.",
+    "endpoint_pass": "Seal loss closure for the FP16 ambient-momentum bridge, then return to geometry-aware momentum compression without changing the working weight representation.",
+    "endpoint_fail": "The current Pair-VQ forward representation is not self-consistent even under the correct ambient Muon field; stop this representation rather than sweeping precision or LR.",
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  }
+}
