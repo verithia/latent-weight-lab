@@ -74,6 +74,20 @@ class MfuPreflightTest(unittest.TestCase):
             "/scientific/lowbit.json",
         )
 
+    def test_preflight_redirects_minifloat_momentum_result_to_scratch(self) -> None:
+        source = {
+            "pair_vq_minifloat_momentum_result": "/scientific/minifloat.json",
+        }
+        probe = make_preflight_config(source, Path("/tmp/probe"), 2, 3)
+        self.assertEqual(
+            probe["pair_vq_minifloat_momentum_result"],
+            "/tmp/probe/pair_vq_minifloat_momentum_preflight.json",
+        )
+        self.assertEqual(
+            source["pair_vq_minifloat_momentum_result"],
+            "/scientific/minifloat.json",
+        )
+
     def test_diagnostic_io_can_be_preserved_for_strict_gate(self) -> None:
         source = {
             "registered_resume_determinism_required": True,

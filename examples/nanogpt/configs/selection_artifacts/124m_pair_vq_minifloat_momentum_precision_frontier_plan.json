@@ -1,7 +1,7 @@
 {
-  "schema_version": "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v1",
+  "schema_version": "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v2",
   "recorded_at": "2026-08-22",
-  "status": "theory_preregistered_before_implementation_or_execution",
+  "status": "protocol_amended_before_execution_to_preserve_strict_checkpoint_identity",
   "scientific_question": "What is the smallest exponent-preserving ambient-momentum format that retains the successful FP16 Pair-VQ Muon polar field at both early and terminal 124M states?",
   "causal_authorization": {
     "loss_closure_parent": {
@@ -68,18 +68,14 @@
     "momentum_elements": 56623104,
     "parameter_updates_by_candidates": 0,
     "candidate_checkpoint_writes": 0,
-    "stage_a_terminal_tangent": {
-      "source_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+    "stage_ab_deterministic_replay": {
+      "source_checkpoint_reference": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
       "source_checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
-      "source_next_iter": 238,
-      "method": "Exact-resume the model, optimizer, scaler, data/RNG, and next batch; execute forward/backward only. Compare one candidate recurrence and Muon request against the resident FP16 momentum without mutating model or optimizer state.",
-      "probe_update_indices": [238]
-    },
-    "stage_b_early_recurrence": {
-      "authorized_only_if_stage_a_has_a_passing_candidate": true,
-      "method": "Fresh exact-config nine-update replay. Track candidate histories noninterveningly beside the production FP16 owner from zero state and probe after optimizer update indices 0 and 8.",
-      "probe_update_indices": [0, 8],
-      "reported_post_update_state_steps": [1, 9]
+      "method": "Replay the exact successful 238-update FP16-owner config from its registered seed and data stream. Candidate histories remain nonintervening. Probe early updates 0 and 8 and terminal update 237 in one run; require the production-owner terminal fixed-eval CE to reproduce the sealed endpoint within 0.002. This avoids bypassing exact-resume source/config identity merely to attach an observer.",
+      "probe_update_indices": [0, 8, 237],
+      "reported_post_update_state_steps": [1, 9, 238],
+      "sealed_terminal_validation_ce": 5.368512153625488,
+      "maximum_replay_validation_ce_gap": 0.002
     },
     "measurements": [
       "momentum-state relative error, cosine, and positive-line energy recovery",
@@ -112,7 +108,7 @@
       "minimum_every_matrix_postpolar_cosine": 0.99999,
       "minimum_all_postpolar_positive_line_energy_recovery": 0.99999
     },
-    "selection": "Choose the smallest total-bit candidate that passes all Stage A and Stage B requirements. Resolve ties by the larger minimum every-matrix post-polar cosine.",
+    "selection": "Choose the smallest total-bit candidate that passes all early and terminal deterministic-replay requirements. Resolve ties by the larger minimum every-matrix post-polar cosine.",
     "if_pass": "Authorize only an implementation-quality packed-state prototype with exact recurrence/checkpoint tests and an exact-config >=20% MFU gate. No LM endpoint is automatically authorized.",
     "if_fail": "Reject mantissa-only truncation as the next compression family. Derive a singular-direction-aware correction or factored polar-history representation before any further LM endpoint.",
     "automatic_endpoint": false,
@@ -121,8 +117,8 @@
     "automatic_sweep": false
   },
   "execution_policy": {
-    "expected_duration_per_stage_minutes": "less_than_5",
-    "monitoring": "Foreground poll only; no persistent watchdog for these nonintervening diagnostics.",
+    "expected_duration_minutes": "greater_than_5",
+    "monitoring": "Attach one persistent terminal/error-only @Codex watchdog immediately after launch; this diagnostic has no scientifically actionable intermediate milestone.",
     "launch_precondition": "PRO6 nvidia-smi, CUDA allocation, and native extension must be healthy. Do not launch while the post-power-cycle NVIDIA driver/library mismatch persists."
   }
 }

@@ -29,6 +29,9 @@ from examples.nanogpt.dense_pair_vq_optimizer_transition import (
 from examples.nanogpt.dense_pair_vq_lowbit_momentum import (
     PairVQLowBitMomentumOracle,
 )
+from examples.nanogpt.pair_vq_minifloat_momentum import (
+    PairVQMinifloatMomentumOracle,
+)
 from examples.nanogpt.model import (
     GPT,
     GPTConfig,
@@ -109,6 +112,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/dense_pair_vq_shadow.py",
         root / "examples/nanogpt/dense_pair_vq_functional_oracle.py",
         root / "examples/nanogpt/dense_pair_vq_optimizer_transition.py",
+        root / "examples/nanogpt/pair_vq_minifloat_momentum.py",
         root / "latent_weight_lab/block_fht.py",
     )
     return {
@@ -908,6 +912,35 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
         raise ValueError(
             "dense pair-VQ shadow fields require pair_vq_dense_shadow_replay"
         )
+    minifloat_fields = {
+        "pair_vq_minifloat_momentum_plan": args.pair_vq_minifloat_momentum_plan,
+        "pair_vq_minifloat_momentum_plan_sha256": (
+            args.pair_vq_minifloat_momentum_plan_sha256
+        ),
+        "pair_vq_minifloat_momentum_result": (
+            args.pair_vq_minifloat_momentum_result
+        ),
+        "pair_vq_minifloat_momentum_stage": args.pair_vq_minifloat_momentum_stage,
+    }
+    configured_minifloat_fields = [
+        key for key, value in minifloat_fields.items() if value
+    ]
+    if configured_minifloat_fields and len(configured_minifloat_fields) != len(
+        minifloat_fields
+    ):
+        raise ValueError(
+            "Pair-VQ minifloat momentum audit requires all of: "
+            + ", ".join(minifloat_fields)
+        )
+    if configured_minifloat_fields:
+        if not args.block_fht_mlp_pair_vq:
+            raise ValueError("minifloat momentum audit requires Pair-VQ MLPs")
+        if not args.block_fht_mlp_pair_vq_fp16_ambient_momentum:
+            raise ValueError("minifloat momentum audit requires FP16 ambient momentum")
+        if args.compile:
+            raise ValueError("minifloat momentum audit requires compile=false")
+        if args.optimizer != "muon":
+            raise ValueError("minifloat momentum audit requires optimizer=muon")
     return None
 
 
@@ -1226,6 +1259,14 @@ def parse_args() -> argparse.Namespace:
         "--pair-vq-dense-shadow-lowbit-momentum-plan-sha256", default=None
     )
     parser.add_argument("--pair-vq-dense-shadow-lowbit-momentum-result", default=None)
+    parser.add_argument("--pair-vq-minifloat-momentum-plan", default=None)
+    parser.add_argument("--pair-vq-minifloat-momentum-plan-sha256", default=None)
+    parser.add_argument("--pair-vq-minifloat-momentum-result", default=None)
+    parser.add_argument(
+        "--pair-vq-minifloat-momentum-stage",
+        choices=["stage_ab_deterministic_replay"],
+        default=None,
+    )
     parser.add_argument("--data-dir", required=False)
     parser.add_argument("--out-dir", required=False)
     parser.add_argument("--init-from", choices=["scratch", "resume"], default="scratch")
@@ -4078,6 +4119,7 @@ def main() -> None:
     pair_vq_transition_oracle = None
     pair_vq_transport_oracle = None
     pair_vq_lowbit_momentum_oracle = None
+    pair_vq_minifloat_momentum_oracle = None
     if args.pair_vq_dense_shadow_replay:
         pair_vq_dense_shadow = DensePairVQShadowObserver(
             raw_model,
@@ -4234,6 +4276,33 @@ def main() -> None:
                 ),
                 flush=True,
             )
+    if args.pair_vq_minifloat_momentum_plan:
+        pair_vq_minifloat_momentum_oracle = PairVQMinifloatMomentumOracle(
+            raw_model,
+            optimizer,
+            plan_path=Path(args.pair_vq_minifloat_momentum_plan),
+            plan_sha256=str(args.pair_vq_minifloat_momentum_plan_sha256),
+            result_path=Path(args.pair_vq_minifloat_momentum_result),
+            stage=str(args.pair_vq_minifloat_momentum_stage),
+        )
+        print(
+            "pair_vq_minifloat_momentum_init "
+            + json.dumps(
+                {
+                    "plan": args.pair_vq_minifloat_momentum_plan,
+                    "plan_sha256": args.pair_vq_minifloat_momentum_plan_sha256,
+                    "result": args.pair_vq_minifloat_momentum_result,
+                    "stage": args.pair_vq_minifloat_momentum_stage,
+                    "optimizer_update_indices": sorted(
+                        pair_vq_minifloat_momentum_oracle.update_indices
+                    ),
+                    "probe_only": pair_vq_minifloat_momentum_oracle.probe_only,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
     trajectory_execution_provenance = execution_provenance_from_environment(required=False)
     if args.compile:
         model = torch.compile(model)
@@ -4531,6 +4600,22 @@ def main() -> None:
                         "pair_vq_lowbit_momentum_terminal "
                         + json.dumps(
                             lowbit_terminal,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        ),
+                        flush=True,
+                    )
+                if (
+                    pair_vq_minifloat_momentum_oracle is not None
+                    and iter_num >= args.max_iters
+                ):
+                    minifloat_terminal = (
+                        pair_vq_minifloat_momentum_oracle.finalize()
+                    )
+                    print(
+                        "pair_vq_minifloat_momentum_terminal "
+                        + json.dumps(
+                            minifloat_terminal,
                             sort_keys=True,
                             separators=(",", ":"),
                         ),
@@ -4864,6 +4949,36 @@ def main() -> None:
                     ),
                     flush=True,
                 )
+        if pair_vq_minifloat_momentum_oracle is not None:
+            minifloat_record = pair_vq_minifloat_momentum_oracle.before_step(
+                optimizer_update_index=iter_num,
+                run_identity_sha256=run_identity["config_sha256"],
+            )
+            if minifloat_record is not None:
+                print(
+                    "pair_vq_minifloat_momentum_probe "
+                    + json.dumps(
+                        minifloat_record,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
+                if pair_vq_minifloat_momentum_oracle.probe_only:
+                    minifloat_terminal = (
+                        pair_vq_minifloat_momentum_oracle.finalize()
+                    )
+                    print(
+                        "pair_vq_minifloat_momentum_terminal "
+                        + json.dumps(
+                            minifloat_terminal,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        ),
+                        flush=True,
+                    )
+                    train_prefetch.shutdown(wait=True)
+                    return
         scaler.step(optimizer)
         scaler.update()
         if pair_vq_dense_shadow is not None:
