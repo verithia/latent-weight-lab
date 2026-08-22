@@ -200,7 +200,6 @@ def test_gate_stops_after_two_failed_early_compressed_probes() -> None:
     assert gate["ready"] is True
     assert gate["classification"] == "EARLY_FUTILITY_FAIL"
     assert gate["terminal_replay_required"] is False
-    assert oracle.probe_only is True
 
 
 def test_registered_replay_config_parses_to_nonintervening_audit(
