@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_attention_pair_vq_vo_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4",
+  "run_id": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_20260822T042023Z_3101840",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-22T12:20:23+08:00",
+  "process_group": 3101978,
+  "max_iters": 238,
+  "git_commit": "1c6b5c72f7539c09d1e361f9a2cf898c9834cfbe",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4.json",
+    "sha256": "16f72576e2200b770a642107af7fe584588e7f1792db37173df0aac7ba00a3d5",
+    "archive": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_20260822T042023Z_3101840.config.json"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "matched_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_seed2_candidate_result.json",
+    "result_sha256": "6322a2ca86f2ce927464e6a0a71b060cfc1f58a5b08b644cbf1baf2ba9ac8036",
+    "terminal_validation_ce": 5.363
+  },
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_mfu.json",
+    "sha256": "71bffab0f573f124bc23b1860185c70322426fcbe00b317706b7eb8406865bf6",
+    "mfu_fraction": 0.25112288374133734,
+    "tokens_per_second": 140151.78,
+    "iteration_milliseconds": 1870.6,
+    "peak_mib": 31764.95,
+    "optimizer_milliseconds": 669.965
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_20260822T042023Z_3101840.json",
+    "sha256": "5b482958d91313c368466042da0de32793731fa49eaadb47e186da417bf68cdb"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_20260822T042023Z_3101840.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_20260822T042023Z_3101840.json",
+  "initial_live_verification": {
+    "last_logged_training_iter": 30,
+    "last_training_loss": 6.8836,
+    "process_alive": true,
+    "gpu_memory_mib": 44439,
+    "gpu_utilization_percent": 76,
+    "gpu_power_watts": 374.22,
+    "gpu_temperature_c": 39,
+    "tokens_per_second_recent": 140458.95,
+    "last_observed_capacity_step": 45,
+    "momentum_bytes": 112960984,
+    "momentum_byte_ceiling": 123863040,
+    "persistent_raw_ambient_momentum_tensors": 0
+  },
+  "monitoring": {
+    "policy": "one persistent terminal/error-only watchdog; no healthy milestone or heartbeat callback",
+    "launchd_label": "com.mappingnetworks.pro6.pairvq.vo.fullreplacement",
+    "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_pairvq_vo_fullreplacement.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "terminal_action": "verify and seal the candidate against the matched seed-2 compact-MLP parent; only a pass authorizes registration and an exact MFU gate for 124M/5TPP"
+  },
+  "authorization": {
+    "scientific_endpoint": true,
+    "model_size_scale_up": false,
+    "longer_horizon": false,
+    "next_after_pass": "register and performance-gate the identical 124M/5TPP candidate only"
+  }
+}
