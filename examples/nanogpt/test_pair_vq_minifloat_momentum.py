@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 import torch
@@ -11,6 +12,7 @@ from examples.nanogpt.pair_vq_minifloat_momentum import (
     advance_minifloat_momentum,
     round_fp16_mantissa,
 )
+from examples.nanogpt.train import parse_args
 
 
 def _bits(values: torch.Tensor) -> list[int]:
@@ -144,3 +146,24 @@ def test_gate_selects_smallest_passing_format() -> None:
     gate = oracle._gate()
     assert gate["classification"] == "PASS"
     assert gate["selected"] == "e5m4"
+
+
+def test_registered_replay_config_parses_to_nonintervening_audit(
+    monkeypatch,
+) -> None:
+    root = Path(__file__).resolve().parents[2]
+    config = root / (
+        "examples/nanogpt/configs/"
+        "pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp.json"
+    )
+    monkeypatch.setattr(sys, "argv", ["train.py", "--config", str(config)])
+    args = parse_args()
+    assert args.max_iters == 238
+    assert args.block_fht_mlp_pair_vq is True
+    assert args.block_fht_mlp_pair_vq_fp16_ambient_momentum is True
+    assert args.pair_vq_minifloat_momentum_stage == (
+        "stage_ab_deterministic_replay"
+    )
+    assert args.save_checkpoint is False
+    assert args.audit_gate["candidate_parameter_updates"] == 0
+    assert args.audit_gate["automatic_endpoint"] is False
