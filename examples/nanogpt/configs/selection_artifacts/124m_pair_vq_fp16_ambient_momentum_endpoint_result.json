@@ -1,0 +1,149 @@
+{
+  "schema_version": "mai_pair_vq_fp16_ambient_momentum_endpoint_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_COMPACT_FULL_MLP_LOSS_CLOSURE_WITH_FP16_AMBIENT_MOMENTUM",
+  "passed": true,
+  "decision": {
+    "compact_full_mlp_closed_at_124m_0p5tpp": true,
+    "single_seed_parity_point_estimate": true,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false,
+    "next_authorized_work": "Keep the working Pair-VQ forward representation fixed and run only a nonintervening, post-polar geometry gate for a nested custom-minifloat ambient-momentum precision frontier. No language-model endpoint is authorized until a compressed state preserves the FP16 reference polar field at the frozen early and terminal states.",
+    "reason": "Replacing only code-conditioned momentum with FP16 ambient momentum reduces terminal validation CE from the stable 5.518 compact floor to 5.368512, only 0.007512 above the exact 5.361 parent. The registered loss, compute-equivalence, state, evaluation-identity, and systems gates all pass."
+  },
+  "identity": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "f60e28ea3ef5644573f3734932b7d8efceb6ac03",
+    "implementation_commit": "a9a11a0a525a8b9e29ede728aab6189f3324ecae",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4.json",
+    "config_file_sha256": "c266b00e2b048765dc544be924acf2742fe50444562871aa2f9ce753ec83936f",
+    "resolved_config_sha256": "aed446fb0f9f2e5b781a243f766ad0eebb88fd3401b16a45338d42971252c1a8",
+    "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_bridge_plan.json",
+    "theory_plan_sha256": "a1f53ee83719ce6983ccd57e48afed4ac6e016a69e9a14466f031c2eb59ee55c",
+    "direction_gate": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_gate9_result.json",
+    "direction_gate_sha256": "a91c28a4b058ce49007192489151db99e2e95ae3c89feb24a92a07289255eb23",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "started_at_unix": 1787360841.6189148,
+    "finished_at_unix": 1787361336.626649,
+    "wall_seconds": 495.0077340602875,
+    "exit_code": 0
+  },
+  "artifacts": {
+    "checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+      "sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+      "bytes": 859634784,
+      "next_iter": 238
+    },
+    "checkpoint_metadata": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.meta.json",
+      "sha256": "e78455ff58b7d1cfe602088af54346a16f90ac91cc1f826de414c9dcffbe3662",
+      "bytes": 19476,
+      "schema": "nanogpt_exact_resume_v2"
+    },
+    "scientific_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4_endpoint1.log",
+      "sha256": "3c0e7672f6bad79d531742cc4eb3a21841e95b898531b38eb79cb7cc7581aa07",
+      "bytes": 756323
+    },
+    "status_sha256": "c7a27723c6fa30aa6e24ba84bc008dd88478261bfb2eb474e38c7e931994e081",
+    "launcher_receipt_sha256": "dc307010c353a4b7d662257a64d7b6b1cc114ef293fdffed2ae198fe9ccef9af",
+    "preflight_certificate_sha256": "e41dd8e6aed81e8cd354c9849741bc2a4718d9d04cd6a6b063f2f2905869610c",
+    "compute_equivalence": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/compute_equivalence.json",
+      "sha256": "75a756c1688d984124b3a16c5e7f4cb2cefcd601cba293c2831b18d1accaa9bc"
+    }
+  },
+  "fixed_checkpoint_comparison": {
+    "matched_parent_validation_ce": {"0": 10.997, "60": 6.218, "120": 5.7258, "180": 5.4642, "238": 5.361},
+    "candidate_validation_ce": {"0": 10.9831, "60": 6.234, "120": 5.7391, "180": 5.4766, "238": 5.368512153625488},
+    "candidate_minus_parent_ce": {"60": 0.016, "120": 0.0133, "180": 0.0124, "238": 0.007512153625488281},
+    "terminal_perplexity_ratio": 1.0075404334851905,
+    "registered_maximum_gap": 0.05,
+    "registered_maximum_validation_ce": 5.411,
+    "terminal_gate_margin_ce": 0.04248784637451175,
+    "loss_gate_passed": true,
+    "all_fixed_eval_steps_finite": true
+  },
+  "compute_equivalence": {
+    "method": "fixed-model piecewise interpolation in log cumulative compute",
+    "candidate_terminal_compute": 238.0,
+    "dense_match_compute": 233.21754884745607,
+    "terminal_candidate_over_dense_compute": 1.0205063948925732,
+    "common_loss_candidate_over_dense_compute_median": 1.0205228962233308,
+    "common_loss_candidate_over_dense_compute_min": 1.0189313004467548,
+    "common_loss_candidate_over_dense_compute_max": 1.0322728783305057,
+    "project_parity_gap_ce_max": 0.01,
+    "project_parity_compute_penalty_max": 1.10,
+    "project_parity_point_estimate_passed": true,
+    "uncertainty_note": "This is a matched single-seed point estimate; paired seeds remain required for a final uncertainty-qualified parity claim."
+  },
+  "causal_comparison": {
+    "previous_forward_visible_endpoint_validation_ce": 5.5178093910217285,
+    "new_endpoint_validation_ce": 5.368512153625488,
+    "validation_ce_improvement": 0.14929723739624023,
+    "previous_gap_to_parent_ce": 0.1568093910217283,
+    "remaining_gap_to_parent_ce": 0.007512153625488281,
+    "fraction_of_previous_gap_closed": 0.9520937384584773,
+    "interpretation": "The compact forward representation was not the primary 0.157-CE obstruction. The dominant defect was the code-conditioned momentum after Muon's polar map; restoring full-support FP16 optimizer history nearly closes the loss curve without changing Pair-VQ weights, feedback, attention, schedule, or learning rate."
+  },
+  "transition_diagnostics": {
+    "matrix_rows": 720,
+    "refresh_steps": 30,
+    "weighted_feedback_codec_recovery_minimum_refresh": 0.9999841196294269,
+    "minimum_matrix_feedback_codec_recovery": 0.9999543768546831,
+    "minimum_requested_update_cosine": 0.9894723004215124,
+    "minimum_matrix_current_step_energy_conservation": 0.9786638157052069,
+    "nonpersistent_fp32_reference_logged": false,
+    "interpretation": "The feedback codec remains above its frozen recovery floors. Late per-matrix Euclidean current-step conservation is imperfect but is not a loss blocker once the ambient Muon history is correct, so that earlier metric was a conservative diagnostic rather than a necessary parity condition."
+  },
+  "checkpoint_state_audit": {
+    "mlp_ambient_momentum_tensors": 24,
+    "mlp_ambient_momentum_elements": 56623104,
+    "mlp_ambient_momentum_dtype": "torch.float16",
+    "mlp_ambient_momentum_shapes": [[768, 3072], [3072, 768]],
+    "compact_mlp_momentum_tensors": 0,
+    "feedback_code_tensors": 24,
+    "feedback_code_elements": 86482944,
+    "feedback_code_dtype": "torch.uint8",
+    "feedback_level_tensors": 24,
+    "feedback_level_elements": 22080,
+    "diagnostic_fp32_reference_persisted": false,
+    "best_validation_ce": 5.368512153625488,
+    "next_iter": 238
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.28578715336711086,
+    "preflight_tokens_per_second": 159502.65375,
+    "run_tokens_per_second_median": 159115.44,
+    "run_iteration_milliseconds_median": 1647.51,
+    "optimizer_fraction_mean": 0.27350787952309397,
+    "gpu_peak_mib": 31775.31,
+    "native_extension_required_and_loaded": true,
+    "performance_gate_passed": true
+  },
+  "storage": {
+    "compact_inference_mlp_matrix_bytes": 70855872,
+    "feedback_code_bytes": 86482944,
+    "feedback_level_bytes": 88320,
+    "fp16_ambient_momentum_bytes": 113246208,
+    "persistent_mlp_training_matrix_bytes": 270673344,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "training_state_reduction_factor": 1.6735479944415952,
+    "inference_weight_storage_reduction_factor": 3.1965228795716465,
+    "additional_trainable_parameters": 0,
+    "materialized_inference_flops": "unchanged from the dense target MLP"
+  },
+  "monitoring": {
+    "remote_pgid": 3003996,
+    "local_watchdog_pid": 51090,
+    "terminal_callback_delivered": true,
+    "terminal_callback_checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "missing_process_samples": 0,
+    "consecutive_probe_errors": 0,
+    "gpu_idle_after_completion": true
+  }
+}
