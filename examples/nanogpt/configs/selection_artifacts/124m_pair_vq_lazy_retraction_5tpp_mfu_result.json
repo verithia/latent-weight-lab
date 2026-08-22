@@ -1,0 +1,148 @@
+{
+  "calibration": {
+    "bf16_gemm_size": 8192,
+    "bf16_gemm_trials": 8,
+    "bf16_gemm_warmups": 4,
+    "empirical_bf16_gemm_peak_tflops": 417.3183490633328
+  },
+  "config": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_5tpp_lr24e4.json",
+    "sha256": "282d35fdc7145e31bc940ad5ec760a103d6fd678c9d34c74907e94d60b8b6639"
+  },
+  "elapsed_seconds": 15.61436653137207,
+  "feedback_cap": {
+    "active_layer_updates": 0,
+    "event_count": 0,
+    "maximum_pre_cap_nominal_steps": 0.0,
+    "timed_event_count": 0
+  },
+  "finished_at_unix": 1787403576.1136034,
+  "hardware": {
+    "cuda_visible_devices": "0",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition"
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "base_timed_iter_ms": 1291.81125,
+    "diagnostic_io": {
+      "included": false,
+      "optimizer_probe_count": 0,
+      "optimizer_probe_io_included_in_iter_ms": false,
+      "optimizer_probe_steps": [],
+      "snapshot_count": 0,
+      "snapshot_seconds": 0
+    },
+    "iter_ms": 1291.81125,
+    "mfu_fraction": 0.36833851198389617,
+    "model_tflops": 153.71441971756417,
+    "peak_mib": 31753.25,
+    "timing_breakdown_ms": {
+      "data_ms": 0.585,
+      "eval_ms": 0.0,
+      "flush_ms": 7.8549999999999995,
+      "fwbw_ms": 1185.8225,
+      "grad_ms": 2.0625,
+      "opt_ms": 90.7675,
+      "other_ms": 0.9475,
+      "prepare_ms": 3.76625
+    },
+    "tokens_per_second": 205815.49625
+  },
+  "native_block_fht_extension": {
+    "loaded": true,
+    "module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "required": true
+  },
+  "pair_vq_persistent_training_state": {
+    "expected": null,
+    "observed": [
+      256517568
+    ],
+    "passed": true
+  },
+  "passed": true,
+  "policy": {
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "mfu_preflight_required": true,
+    "minimum_fraction": 0.2
+  },
+  "preflight": {
+    "feedback_cap_activity_required": false,
+    "include_diagnostic_io": false,
+    "requested_warmup_updates": 1,
+    "scientific_atlas_start_steps": [],
+    "scientific_feedback_cap_nominal_steps": null,
+    "scientific_task_frame_start_iter": 0,
+    "scratch_atlas_start_steps": [],
+    "scratch_feedback_cap_nominal_steps": null,
+    "scratch_task_frame_start_iter": 0,
+    "timed_atlas_stage": null,
+    "timed_task_frame_active": false,
+    "timed_updates": 8,
+    "warmup_updates": 1
+  },
+  "preflight_log_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_5tpp_lr24e4_mfu.log",
+  "preflight_log_sha256": "4db98b713664f6f4d7e8eabbcb68f470bd29c64572aa76361691b5766b9c0d56",
+  "preflight_log_tail": "j_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":2,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":3.7200508813839406e-05,\"base_requested_step_energy_recovery\":0.5229656338881816,\"code_changes\":1178349,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999971907668069,\"current_request_energy\":7.798286969773471e-05,\"error_feedback\":1,\"fast_code_changes\":1178349,\"fast_residual\":1,\"feedback_code_changes\":3466519,\"feedback_codec_energy_recovery\":0.9999941110465145,\"feedback_energy\":3.719531014212407e-05,\"feedback_quantization_residual_energy\":2.190720660433243e-10,\"feedback_target_energy\":3.7200508813839406e-05,\"feedback_to_weight_energy_ratio\":1.0576757176750107e-06,\"forward_visible_feedback\":1,\"in_features\":3072,\"layer\":8,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":768,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":2.190720660433243e-10,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":7.798286969773471e-05,\"requested_step_energy_recovery\":0.9999971907668069,\"requested_update_cosine\":0.9999985538532301,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":1,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":0.0002726757084019482,\"base_requested_step_energy_recovery\":0.4331161312327214,\"code_changes\":1179005,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999929157403087,\"current_request_energy\":0.00048100805724970996,\"error_feedback\":1,\"fast_code_changes\":1176622,\"fast_residual\":1,\"feedback_code_changes\":3722534,\"feedback_codec_energy_recovery\":0.9999875031552641,\"feedback_energy\":0.000272608594968915,\"feedback_quantization_residual_energy\":3.4075859911553152e-09,\"feedback_target_energy\":0.0002726757084019482,\"feedback_to_weight_energy_ratio\":3.0625594149569224e-07,\"forward_visible_feedback\":1,\"in_features\":768,\"layer\":9,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":3072,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":3.4075859911553152e-09,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":0.00048100805724970996,\"requested_step_energy_recovery\":0.9999929157403087,\"requested_update_cosine\":0.9999964000415784,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":2,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":3.293017653049901e-05,\"base_requested_step_energy_recovery\":0.5214461562439432,\"code_changes\":1178263,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.999997158528958,\"current_request_energy\":6.881185254314914e-05,\"error_feedback\":1,\"fast_code_changes\":1178263,\"fast_residual\":1,\"feedback_code_changes\":3466781,\"feedback_codec_energy_recovery\":0.9999940623796484,\"feedback_energy\":3.292573819635436e-05,\"feedback_quantization_residual_energy\":1.9552688634849602e-10,\"feedback_target_energy\":3.293017653049901e-05,\"feedback_to_weight_energy_ratio\":9.370169209432788e-07,\"forward_visible_feedback\":1,\"in_features\":3072,\"layer\":9,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":768,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":1.9552688634849602e-10,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":6.881185254314914e-05,\"requested_step_energy_recovery\":0.999997158528958,\"requested_update_cosine\":0.9999985725891691,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":1,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":0.0002608218346722424,\"base_requested_step_energy_recovery\":0.41953320255546667,\"code_changes\":1178630,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999722127533657,\"current_request_energy\":0.0004493311862461269,\"error_feedback\":1,\"fast_code_changes\":1176578,\"fast_residual\":1,\"feedback_code_changes\":3722805,\"feedback_codec_energy_recovery\":0.9999521294813818,\"feedback_energy\":0.0002606871712487191,\"feedback_quantization_residual_energy\":1.2485676492701714e-08,\"feedback_target_energy\":0.0002608218346722424,\"feedback_to_weight_energy_ratio\":2.929013191987906e-07,\"forward_visible_feedback\":1,\"in_features\":768,\"layer\":10,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":3072,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":1.2485676492701714e-08,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":0.0004493311862461269,\"requested_step_energy_recovery\":0.9999722127533657,\"requested_update_cosine\":0.9999861065081865,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":2,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":3.0822076951153576e-05,\"base_requested_step_energy_recovery\":0.5239223149481048,\"code_changes\":1178384,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999973341337407,\"current_request_energy\":6.474169640569016e-05,\"error_feedback\":1,\"fast_code_changes\":1178384,\"fast_residual\":1,\"feedback_code_changes\":3466478,\"feedback_codec_energy_recovery\":0.9999944003545157,\"feedback_energy\":3.081795875914395e-05,\"feedback_quantization_residual_energy\":1.725927040174824e-10,\"feedback_target_energy\":3.0822076951153576e-05,\"feedback_to_weight_energy_ratio\":8.762926881900057e-07,\"forward_visible_feedback\":1,\"in_features\":3072,\"layer\":10,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":768,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":1.725927040174824e-10,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":6.474169640569016e-05,\"requested_step_energy_recovery\":0.9999973341337407,\"requested_update_cosine\":0.9999987638121159,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":1,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":0.00025775391259230673,\"base_requested_step_energy_recovery\":0.4059972144163011,\"code_changes\":1178638,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999745883591009,\"current_request_energy\":0.0004339271108619869,\"error_feedback\":1,\"fast_code_changes\":1176632,\"fast_residual\":1,\"feedback_code_changes\":3722567,\"feedback_codec_energy_recovery\":0.9999572196603858,\"feedback_energy\":0.00025765167083591223,\"feedback_quantization_residual_energy\":1.1026799917601693e-08,\"feedback_target_energy\":0.00025775391259230673,\"feedback_to_weight_energy_ratio\":2.893334851705731e-07,\"forward_visible_feedback\":1,\"in_features\":768,\"layer\":11,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":3072,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":1.1026799917601693e-08,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":0.0004339271108619869,\"requested_step_energy_recovery\":0.9999745883591009,\"requested_update_cosine\":0.9999872564708846,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":2,\"virtual_weight_matches_compact_state\":1}\nmuon_matched_givens_refresh {\"base_projection_residual_energy\":2.6536363293416798e-05,\"base_requested_step_energy_recovery\":0.5365431058637851,\"code_changes\":1178260,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999972865029595,\"current_request_energy\":5.725745722884312e-05,\"error_feedback\":1,\"fast_code_changes\":1178260,\"fast_residual\":1,\"feedback_code_changes\":3466610,\"feedback_codec_energy_recovery\":0.9999941450929422,\"feedback_energy\":2.65326707449276e-05,\"feedback_quantization_residual_energy\":1.5536794073511828e-10,\"feedback_target_energy\":2.6536363293416798e-05,\"feedback_to_weight_energy_ratio\":7.542543016825221e-07,\"forward_visible_feedback\":1,\"in_features\":3072,\"layer\":11,\"lazy_retraction\":1,\"lazy_retraction_interval\":8,\"optimizer_step\":7,\"out_features\":768,\"persistent_raw_ambient_momentum_tensors\":0,\"projection_residual_energy\":1.5536794073511828e-10,\"projection_target_includes_prior_feedback\":0,\"raw_fp16_momentum_bytes\":113246208,\"refresh_codes\":1,\"request_energy\":5.725745722884312e-05,\"requested_step_energy_recovery\":0.9999972865029595,\"requested_update_cosine\":0.9999986657638261,\"reserved_escape_c_fc_bytes\":46759248,\"reserved_escape_c_fc_dictionary_size\":32,\"reserved_escape_c_fc_exceptions\":511052,\"reserved_escape_c_proj_bytes\":49935854,\"reserved_escape_c_proj_dictionary_size\":32,\"reserved_escape_c_proj_exceptions\":3687658,\"reserved_escape_granularity\":\"adaptive_block\",\"reserved_escape_momentum\":1,\"reserved_escape_momentum_bytes\":96695550,\"retracted\":1,\"stages\":1,\"virtual_weight_matches_compact_state\":1}\nperf iter=7 tokens_per_s=149418.72 iter_ms=1754.43 prepare_ms=3.37 fwbw_ms=1186.14 train_compute_ms=1186.14 flush_ms=7.55 grad_ms=1.92 opt_ms=554.27 data_ms=0.46 other_ms=0.70 eval_ms=0.00 peak_mib=31667.10 moe_capacity_ratio=0.0000 moe_max_tokens=0\niter 7: loss 10.1099, time 1754.75ms\npair_vq_reserved_escape {\"c_fc_bytes\":46891066,\"c_fc_dictionary_size\":32,\"c_fc_exceptions\":642870,\"c_proj_bytes\":50008875,\"c_proj_dictionary_size\":64,\"c_proj_exceptions\":551,\"granularity\":\"adaptive_block\",\"momentum_bytes\":96900389,\"step\":8}\nperf iter=8 tokens_per_s=213733.25 iter_ms=1226.50 prepare_ms=3.65 fwbw_ms=1185.80 train_compute_ms=1185.80 flush_ms=7.96 grad_ms=2.03 opt_ms=25.69 data_ms=0.54 other_ms=0.83 eval_ms=0.00 peak_mib=31753.25 moe_capacity_ratio=0.0000 moe_max_tokens=0\niter 8: loss 9.8820, time 1226.98ms\nstep 9: train loss 9.6688, val loss 9.6408\n",
+  "provenance": {
+    "config": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_5tpp_lr24e4.json",
+      "sha256": "282d35fdc7145e31bc940ad5ec760a103d6fd678c9d34c74907e94d60b8b6639"
+    },
+    "dataset_manifest": {
+      "path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "git_commit": "a4357b3e725059b5cb94c89159848794eb8ac7cb",
+    "literal_command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/mfu_preflight.py",
+      "--config",
+      "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_5tpp_lr24e4.json",
+      "--output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_5tpp_lr24e4_mfu.json",
+      "--log-output",
+      "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_5tpp_lr24e4_mfu.log",
+      "--min-fraction",
+      "0.20",
+      "--warmup-updates",
+      "1",
+      "--timed-updates",
+      "8"
+    ],
+    "source_sha256": {
+      "examples/nanogpt/mfu_preflight.py": "ddbd7c50ebcdb74ea32cb918ad151eddc7b833b6c07ef91926bc2098e07a5cf0",
+      "examples/nanogpt/model.py": "c3425c903ee9ca79ac0c87d106ff03f6689c5e7379b822669d0b485a966cd2be",
+      "examples/nanogpt/muon.py": "4702dbee85408ab43112acf8c11c9f3e09fecdaf46345c1012a765c516ef44a1",
+      "examples/nanogpt/muon_int8_lattice.py": "fa15ee2167caba9da74021c20aaecd54b93cfedd5e17423badcb8f8506392fb6",
+      "examples/nanogpt/muon_pair_vq.py": "6e72fa700073ab90afb558cccb2558290ff174265b3b98601c5647255c6283b9",
+      "examples/nanogpt/train.py": "e61f58de2aae140123b0c92e8f151c264b91586730338ec8577c8adc62c68e1a"
+    }
+  },
+  "schema_version": "nanogpt_mfu_preflight_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 13,
+    "logged_loss_values": 13
+  },
+  "stochastic_retraction": {
+    "event_count": 0,
+    "maximum_timed_weighted_sampling_variance_ratio": null,
+    "minimum_timed_expected_bias_recovery": null,
+    "persistent_training_bytes": [
+      256517568
+    ],
+    "timed_boundary_clipped_values": 0,
+    "timed_event_count": 0
+  },
+  "train_command": [
+    "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/tmp/mfu-preflight-7jdhzx_k/config.json"
+  ],
+  "train_exit_code": 0
+}
