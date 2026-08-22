@@ -207,6 +207,18 @@ def test_codec_neighbor_stability_gate_requires_every_frozen_measurement() -> No
         "minimum_late_actual_to_isotropic_gradient_error_ratio"
     ] is False
 
+    # The codec plan replaces the legacy functional/polar threshold schemas.
+    # The terminal combined path must therefore evaluate it directly.
+    oracle.codec_stability_enabled = True
+    oracle.polar_amplification_enabled = True
+    oracle.regularized_polar_enabled = False
+    oracle.records = [record(180), record(238)]
+    combined = oracle._combined_gate()
+    assert combined["passed"] is True
+    assert combined["classification"] == (
+        "CODEC_NEIGHBOR_PATH_INSTABILITY_CONFIRMED"
+    )
+
 
 def test_regularized_polar_gate_selects_deepest_passing_prefix() -> None:
     oracle = PairVQFunctionalGradientOracle.__new__(

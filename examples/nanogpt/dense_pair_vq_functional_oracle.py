@@ -1002,28 +1002,17 @@ class PairVQFunctionalGradientOracle:
         }
 
     def _combined_gate(self) -> dict[str, Any]:
+        # The codec-neighbor plan deliberately replaces the legacy functional
+        # and polar gates with one self-contained discriminator. Its frozen
+        # gate contains neither legacy threshold family, so evaluating those
+        # summaries at the terminal probe is both scientifically wrong and a
+        # schema error.
+        if self.codec_stability_enabled:
+            return self._summarize_codec_stability_gate()
         functional = self._summarize_gate()
         if not self.polar_amplification_enabled:
             return functional
         polar = self._summarize_polar_gate()
-        if self.codec_stability_enabled:
-            codec_stability = self._summarize_codec_stability_gate()
-            return {
-                "ready": bool(
-                    functional["ready"]
-                    and polar["ready"]
-                    and codec_stability["ready"]
-                ),
-                "passed": bool(
-                    functional["passed"]
-                    and polar["passed"]
-                    and codec_stability["passed"]
-                ),
-                "classification": codec_stability["classification"],
-                "functional": functional,
-                "polar": polar,
-                "codec_stability": codec_stability,
-            }
         if self.regularized_polar_enabled:
             regularized = self._summarize_regularized_polar_gate()
             return {
