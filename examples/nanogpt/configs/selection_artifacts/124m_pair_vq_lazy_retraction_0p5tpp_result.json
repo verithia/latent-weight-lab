@@ -1,0 +1,185 @@
+{
+  "checks": {
+    "adaptive_momentum_within_ceiling": true,
+    "all_boundary_weights_match_compact_state": true,
+    "all_expected_retraction_boundaries": true,
+    "all_fixed_losses_finite": true,
+    "checkpoint_and_log_terminal_agree": true,
+    "checkpoint_best_val_finite": true,
+    "checkpoint_matches_status": true,
+    "checkpoint_metadata_matches_status": true,
+    "checkpoint_next_iter": true,
+    "compact_checkpoint_has_no_dense_mlp_tensor": true,
+    "config_matches_preflight": true,
+    "config_matches_status": true,
+    "fixed_eval_inventory": true,
+    "log_matches_status": true,
+    "manifest_matches_config": true,
+    "manifest_matches_status": true,
+    "no_persistent_raw_ambient_momentum": true,
+    "plan_matches_config": true,
+    "preflight_mfu_floor": true,
+    "preflight_passed": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "twenty_four_mlp_matrices_per_boundary": true
+  },
+  "classification": "PASS_LAZY_RETRACTION_124M_0P5TPP",
+  "compact_boundary": {
+    "boundary_matrix_records": 768,
+    "checkpoint_is_compact_boundary": true,
+    "lazy_retraction_interval": 8,
+    "minimum_conserved_requested_step_energy_recovery": 0.9795670128093406,
+    "minimum_feedback_codec_energy_recovery": 0.9998586090729991,
+    "minimum_requested_update_cosine": 0.9899279661497955,
+    "normalized_boundaries": [
+      8,
+      16,
+      24,
+      32,
+      40,
+      48,
+      56,
+      60,
+      64,
+      72,
+      80,
+      88,
+      96,
+      104,
+      112,
+      120,
+      128,
+      136,
+      144,
+      152,
+      160,
+      168,
+      176,
+      180,
+      184,
+      192,
+      200,
+      208,
+      216,
+      224,
+      232,
+      238
+    ],
+    "persisted_dense_mlp_tensors": []
+  },
+  "decision": {
+    "authorize_20tpp": false,
+    "authorize_identical_124m_5tpp_preregistration": true,
+    "authorize_interval_sweep": false,
+    "authorize_model_size_scale_up": false,
+    "automatic_rerun": false
+  },
+  "passed": true,
+  "performance": {
+    "elapsed_seconds": 409.40186524391174,
+    "preflight_mfu_fraction": 0.36769470973152363,
+    "preflight_tokens_per_second": 205744.9775,
+    "scientific_mean_tokens_per_second": 213085.0308695652,
+    "scientific_median_iteration_ms": 1228.7,
+    "scientific_median_tokens_per_second": 213351.36,
+    "scientific_peak_memory_mib": 32001.91,
+    "scientific_perf_samples": 23
+  },
+  "persistent_state": {
+    "adaptive_momentum_byte_ceiling": 99090432,
+    "final_adaptive_momentum_bytes": 93179938,
+    "maximum_adaptive_momentum_bytes": 96858339,
+    "new_persistent_matrix_state": false,
+    "persistent_raw_ambient_momentum_tensors": 0
+  },
+  "provenance": {
+    "checkpoint_metadata_sha256": "d1885934b2e92e2643fe9f23635f0a3bc109cad75f0d63a2f6bd2f7f42d6ab2e",
+    "checkpoint_sha256": "5684ea0564e1de0528a1450b95c3dc90d034811b8a564f6e738e18908889d9df",
+    "config_sha256": "8f9bdf17f4b333a0a814f94eb3b8fa53c9b72b26d1590790234654faaae4c6ff",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/train.py",
+    "git_commit": "1cc37e67578f9e0cfa657b6652ab41d8ab63cbe0",
+    "literal_command": [
+      "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python",
+      "-u",
+      "examples/nanogpt/train.py",
+      "--config",
+      "/mnt/ssd-data/orj/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_0p5tpp_lr24e4.json"
+    ],
+    "mfu_certificate_sha256": "e66baa444f4e68d9e9377ecc27d6ed7db5c2e2b6f7df8d1dc5092068d4a1f69e",
+    "plan_sha256": "6851afa334ba62a40f89b71819ae69d2b39336d11d5ab05c1e4237c28b16fdaa",
+    "scientific_log_sha256": "1352359ca29c8dd3c0327f4c78333691ee9304c443959f5ff230c7ece37ec6ad",
+    "terminal_status_sha256": "e76d9dd0142ef727dc87a61751a273548c8e4f09595bc4521a0d67dbb8117a3d"
+  },
+  "recorded_at": "2026-08-22T12:56:02.031408+00:00",
+  "schema_version": "mai_pair_vq_lazy_retraction_endpoint_result_v1",
+  "terminal": {
+    "candidate_minus_parent_validation_ce": 0.008017124176025625,
+    "candidate_validation_ce_max": 5.411,
+    "fixed_model_compute_equivalent_penalty": 1.021888344978236,
+    "fixed_model_curve_analysis": {
+      "common_loss_ratio": {
+        "loss_high": 6.218,
+        "loss_low": 5.369,
+        "max_candidate_over_dense_compute": 1.0336637876444625,
+        "median_candidate_over_dense_compute": 1.0203520801502814,
+        "min_candidate_over_dense_compute": 1.0186417744551388,
+        "samples": 101
+      },
+      "dense_local_fits": [
+        {
+          "alpha_eff_total_loss": 0.06891939578066522,
+          "loss_slope_per_log_compute": 0.36947688078014623,
+          "window": 2
+        },
+        {
+          "alpha_eff_total_loss": 0.10087915436543725,
+          "loss_slope_per_log_compute": 0.5408131465531091,
+          "window": 3
+        },
+        {
+          "alpha_eff_total_loss": 0.11870945968793317,
+          "loss_slope_per_log_compute": 0.6364014133870097,
+          "window": 4
+        }
+      ],
+      "dense_terminal_validation_ce": 5.361,
+      "schema_version": "fixed_model_compute_equivalence_v1",
+      "terminal_dense_penalty": {
+        "candidate_over_dense_compute": 1.021888344978236,
+        "candidate_terminal_compute": 238.0,
+        "candidate_terminal_validation_ce": 5.369,
+        "dense_match_compute": 232.90215723623785,
+        "method": "interpolation"
+      }
+    },
+    "fixed_validation_curve": [
+      {
+        "step": 0,
+        "validation_ce": 10.9831
+      },
+      {
+        "step": 60,
+        "validation_ce": 6.2332
+      },
+      {
+        "step": 120,
+        "validation_ce": 5.7389
+      },
+      {
+        "step": 180,
+        "validation_ce": 5.4771
+      },
+      {
+        "step": 238,
+        "validation_ce": 5.369
+      }
+    ],
+    "matched_parent_validation_ce": 5.361,
+    "train_ce": 5.3663,
+    "validation_ce_exact": 5.369017124176025,
+    "validation_ce_logged": 5.369
+  },
+  "valid": true
+}
