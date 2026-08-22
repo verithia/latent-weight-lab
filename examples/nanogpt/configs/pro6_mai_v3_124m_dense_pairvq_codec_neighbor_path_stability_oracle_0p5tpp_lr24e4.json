@@ -4,7 +4,7 @@
   "scientific_parent": "examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_early_stopped_muon_polar_stability_oracle_0p5tpp_lr24e4.json",
   "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_codec_neighbor_path_stability_oracle_plan.json",
   "theory_plan_sha256": "541459da108d4c1b01481077827bcd898f00b2af0358513a168a70f1debaf8bf",
-  "implementation_commit": "5efbeb91eda283deea818fd51d371100efbaa382",
+  "implementation_commit": "32961e6f1ad775d8125887366b5a47864628986c",
   "entrypoint": "examples/nanogpt/train.py",
   "literal_command": "CUDA_VISIBLE_DEVICES=0 LD_LIBRARY_PATH=/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu TORCH_EXTENSIONS_DIR=/mnt/ssd-data/orj/MappingNetworks/.cache/torch_extensions_sm120_exactfamily TORCH_CUDA_ARCH_LIST=12.0 PYTHONPATH=. /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_dense_pairvq_codec_neighbor_path_stability_oracle_0p5tpp_lr24e4.json",
   "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
