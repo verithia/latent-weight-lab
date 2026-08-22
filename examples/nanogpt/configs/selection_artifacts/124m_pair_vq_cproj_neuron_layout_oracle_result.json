@@ -1,0 +1,664 @@
+{
+  "action_banks": {
+    "0": {
+      "action_error_closure": -0.0027699196791517444,
+      "layers": {
+        "0": {
+          "action_error_closure": -0.4120210826938482,
+          "neuron_major": {
+            "candidate_energy": 2508.591064453125,
+            "cosine": 0.999999951339567,
+            "energy_recovery": 0.9999999911807751,
+            "error_energy": 2.212386971223168e-05,
+            "target_energy": 2508.595703125
+          },
+          "row_major": {
+            "candidate_energy": 2508.583984375,
+            "cosine": 1.0000000000027278,
+            "energy_recovery": 0.9999999937541832,
+            "error_energy": 1.5668229025322944e-05,
+            "target_energy": 2508.595703125
+          }
+        },
+        "1": {
+          "action_error_closure": -3.734345977188103,
+          "neuron_major": {
+            "candidate_energy": 940.6302490234375,
+            "cosine": 0.9999999675591257,
+            "energy_recovery": 0.9999999390437511,
+            "error_energy": 5.7337012549396604e-05,
+            "target_energy": 940.6256713867188
+          },
+          "row_major": {
+            "candidate_energy": 940.6276245117188,
+            "cosine": 1.000000064888299,
+            "energy_recovery": 0.9999999871246738,
+            "error_energy": 1.2110862371628173e-05,
+            "target_energy": 940.6256713867188
+          }
+        },
+        "10": {
+          "action_error_closure": -0.6054886010389897,
+          "neuron_major": {
+            "candidate_energy": 2746.94384765625,
+            "cosine": 0.999914270653311,
+            "energy_recovery": 0.9998278239604574,
+            "error_energy": 0.47389084100723267,
+            "target_energy": 2752.3623046875
+          },
+          "row_major": {
+            "candidate_energy": 2748.064208984375,
+            "cosine": 0.9999465541271648,
+            "energy_recovery": 0.9998927578561249,
+            "error_energy": 0.29516923427581787,
+            "target_energy": 2752.3623046875
+          }
+        },
+        "11": {
+          "action_error_closure": 0.9190082019906258,
+          "neuron_major": {
+            "candidate_energy": 5160.0849609375,
+            "cosine": 0.9999984134819503,
+            "energy_recovery": 0.9999968113302125,
+            "error_energy": 0.016460679471492767,
+            "target_energy": 5162.240234375
+          },
+          "row_major": {
+            "candidate_energy": 5152.8984375,
+            "cosine": 0.9999806234797322,
+            "energy_recovery": 0.9999606297197255,
+            "error_energy": 0.203238844871521,
+            "target_energy": 5162.240234375
+          }
+        },
+        "2": {
+          "action_error_closure": 0.30669361214849,
+          "neuron_major": {
+            "candidate_energy": 1097.7470703125,
+            "cosine": 1.0000000556005348,
+            "energy_recovery": 0.9999999823558788,
+            "error_energy": 1.93687628780026e-05,
+            "target_energy": 1097.7459716796875
+          },
+          "row_major": {
+            "candidate_energy": 1097.7470703125,
+            "cosine": 1.0000000556005348,
+            "energy_recovery": 0.9999999745507593,
+            "error_energy": 2.793680141621735e-05,
+            "target_energy": 1097.7459716796875
+          }
+        },
+        "3": {
+          "action_error_closure": -0.3868291626202731,
+          "neuron_major": {
+            "candidate_energy": 1427.302490234375,
+            "cosine": 0.9999999572387258,
+            "energy_recovery": 0.9999999794237918,
+            "error_energy": 2.9368566174525768e-05,
+            "target_energy": 1427.3070068359375
+          },
+          "row_major": {
+            "candidate_energy": 1427.310791015625,
+            "cosine": 1.0000000427632803,
+            "energy_recovery": 0.9999999851631269,
+            "error_energy": 2.1176772861508653e-05,
+            "target_energy": 1427.3070068359375
+          }
+        },
+        "4": {
+          "action_error_closure": -34.00361053929457,
+          "neuron_major": {
+            "candidate_energy": 1502.667236328125,
+            "cosine": 0.9999997157104935,
+            "energy_recovery": 0.9999993980635241,
+            "error_energy": 0.0009045249898917973,
+            "target_energy": 1502.6917724609375
+          },
+          "row_major": {
+            "candidate_energy": 1502.693115234375,
+            "cosine": 0.9999999593829021,
+            "energy_recovery": 0.9999999828035889,
+            "error_energy": 2.5840905436780304e-05,
+            "target_energy": 1502.6917724609375
+          }
+        },
+        "5": {
+          "action_error_closure": -0.12881061103653857,
+          "neuron_major": {
+            "candidate_energy": 1475.490234375,
+            "cosine": 0.9999999586340115,
+            "energy_recovery": 0.9999999787326433,
+            "error_energy": 3.137979001621716e-05,
+            "target_energy": 1475.4908447265625
+          },
+          "row_major": {
+            "candidate_energy": 1475.4969482421875,
+            "cosine": 1.000000000002139,
+            "energy_recovery": 0.9999999811594997,
+            "error_energy": 2.7798985684057698e-05,
+            "target_energy": 1475.4908447265625
+          }
+        },
+        "6": {
+          "action_error_closure": 0.06759015978857019,
+          "neuron_major": {
+            "candidate_energy": 1555.5543212890625,
+            "cosine": 1.0000000392369288,
+            "energy_recovery": 0.9999999774088066,
+            "error_energy": 3.514182026265189e-05,
+            "target_energy": 1555.553955078125
+          },
+          "row_major": {
+            "candidate_energy": 1555.5560302734375,
+            "cosine": 0.9999999607633221,
+            "energy_recovery": 0.9999999757711765,
+            "error_energy": 3.768924216274172e-05,
+            "target_energy": 1555.553955078125
+          }
+        },
+        "7": {
+          "action_error_closure": -55.05952590583952,
+          "neuron_major": {
+            "candidate_energy": 1600.680419921875,
+            "cosine": 0.9999993900601893,
+            "energy_recovery": 0.9999988148638742,
+            "error_energy": 0.0018970881355926394,
+            "target_energy": 1600.734375
+          },
+          "row_major": {
+            "candidate_energy": 1600.7344970703125,
+            "cosine": 0.9999999618705303,
+            "energy_recovery": 0.9999999788593267,
+            "error_energy": 3.3840602554846555e-05,
+            "target_energy": 1600.734375
+          }
+        },
+        "8": {
+          "action_error_closure": -13.17173183745582,
+          "neuron_major": {
+            "candidate_energy": 1801.56005859375,
+            "cosine": 0.99999972897195,
+            "energy_recovery": 0.999999650970312,
+            "error_energy": 0.0006288013537414372,
+            "target_energy": 1801.56982421875
+          },
+          "row_major": {
+            "candidate_energy": 1801.570556640625,
+            "cosine": 0.9999999322422873,
+            "energy_recovery": 0.999999975371416,
+            "error_energy": 4.437011375557631e-05,
+            "target_energy": 1801.56982421875
+          }
+        },
+        "9": {
+          "action_error_closure": -96.55210003830646,
+          "neuron_major": {
+            "candidate_energy": 2299.473388671875,
+            "cosine": 0.9999986729422334,
+            "energy_recovery": 0.999997337710121,
+            "error_energy": 0.006122020073235035,
+            "target_energy": 2299.53173828125
+          },
+          "row_major": {
+            "candidate_energy": 2299.536865234375,
+            "cosine": 0.999999946915824,
+            "energy_recovery": 0.999999972709046,
+            "error_energy": 6.275641499087214e-05,
+            "target_energy": 2299.53173828125
+          }
+        }
+      }
+    },
+    "271": {
+      "action_error_closure": -0.03293436111963599,
+      "layers": {
+        "0": {
+          "action_error_closure": -0.3806188619005988,
+          "neuron_major": {
+            "candidate_energy": 2437.8466796875,
+            "cosine": 1.0000000500735067,
+            "energy_recovery": 0.9999999913063332,
+            "error_energy": 2.1193871361901984e-05,
+            "target_energy": 2437.851806640625
+          },
+          "row_major": {
+            "candidate_energy": 2437.84521484375,
+            "cosine": 1.0000000500738826,
+            "energy_recovery": 0.9999999937030652,
+            "error_energy": 1.535099363536574e-05,
+            "target_energy": 2437.851806640625
+          }
+        },
+        "1": {
+          "action_error_closure": -3.6628624078349343,
+          "neuron_major": {
+            "candidate_energy": 958.1414794921875,
+            "cosine": 0.9999999363007319,
+            "energy_recovery": 0.9999999406242721,
+            "error_energy": 5.6890094128903e-05,
+            "target_energy": 958.13720703125
+          },
+          "row_major": {
+            "candidate_energy": 958.140869140625,
+            "cosine": 1.000000000001826,
+            "energy_recovery": 0.9999999872662492,
+            "error_energy": 1.220068043039646e-05,
+            "target_energy": 958.13720703125
+          }
+        },
+        "10": {
+          "action_error_closure": -0.534693585272972,
+          "neuron_major": {
+            "candidate_energy": 2819.843017578125,
+            "cosine": 0.999941230306435,
+            "energy_recovery": 0.9998821215864291,
+            "error_energy": 0.3327723443508148,
+            "target_energy": 2823.013427734375
+          },
+          "row_major": {
+            "candidate_energy": 2820.23193359375,
+            "cosine": 0.9999616611463907,
+            "energy_recovery": 0.9999231909126993,
+            "error_energy": 0.21683308482170105,
+            "target_energy": 2823.013427734375
+          }
+        },
+        "11": {
+          "action_error_closure": 0.9086344402707116,
+          "neuron_major": {
+            "candidate_energy": 4840.62890625,
+            "cosine": 0.9999986481180381,
+            "energy_recovery": 0.9999972521239513,
+            "error_energy": 0.013305152766406536,
+            "target_energy": 4841.97705078125
+          },
+          "row_major": {
+            "candidate_energy": 4835.60791015625,
+            "cosine": 0.99998518101652,
+            "energy_recovery": 0.999969924377885,
+            "error_energy": 0.14562547206878662,
+            "target_energy": 4841.97705078125
+          }
+        },
+        "2": {
+          "action_error_closure": 0.31633126891251406,
+          "neuron_major": {
+            "candidate_energy": 1131.3896484375,
+            "cosine": 1.0000000539475398,
+            "energy_recovery": 0.9999999828812299,
+            "error_energy": 1.9368038920219988e-05,
+            "target_energy": 1131.3919677734375
+          },
+          "row_major": {
+            "candidate_energy": 1131.38916015625,
+            "cosine": 1.0000000539477958,
+            "energy_recovery": 0.9999999749604315,
+            "error_energy": 2.832956670317799e-05,
+            "target_energy": 1131.3919677734375
+          }
+        },
+        "3": {
+          "action_error_closure": -0.3500264007510321,
+          "neuron_major": {
+            "candidate_energy": 1380.803955078125,
+            "cosine": 0.9999999115951415,
+            "energy_recovery": 0.9999999795821799,
+            "error_energy": 2.8193051548441872e-05,
+            "target_energy": 1380.80615234375
+          },
+          "row_major": {
+            "candidate_energy": 1380.8094482421875,
+            "cosine": 0.9999999557982125,
+            "energy_recovery": 0.9999999848759846,
+            "error_energy": 2.0883333490928635e-05,
+            "target_energy": 1380.80615234375
+          }
+        },
+        "4": {
+          "action_error_closure": -51.57941567896712,
+          "neuron_major": {
+            "candidate_energy": 1492.8253173828125,
+            "cosine": 0.9999995502923636,
+            "energy_recovery": 0.9999990823171779,
+            "error_energy": 0.0013699617702513933,
+            "target_energy": 1492.848876953125
+          },
+          "row_major": {
+            "candidate_energy": 1492.855224609375,
+            "cosine": 1.00000000000226,
+            "energy_recovery": 0.9999999825467284,
+            "error_energy": 2.605509689601604e-05,
+            "target_energy": 1492.848876953125
+          }
+        },
+        "5": {
+          "action_error_closure": -0.1728104532456589,
+          "neuron_major": {
+            "candidate_energy": 1485.36083984375,
+            "cosine": 1.0000000000001654,
+            "energy_recovery": 0.9999999783712176,
+            "error_energy": 3.212658339180052e-05,
+            "target_energy": 1485.362548828125
+          },
+          "row_major": {
+            "candidate_energy": 1485.3646240234375,
+            "cosine": 0.9999999589091894,
+            "energy_recovery": 0.9999999815581603,
+            "error_energy": 2.7392818083171733e-05,
+            "target_energy": 1485.362548828125
+          }
+        },
+        "6": {
+          "action_error_closure": 0.06844926054735567,
+          "neuron_major": {
+            "candidate_energy": 1631.4998779296875,
+            "cosine": 1.000000037411576,
+            "energy_recovery": 0.9999999787713278,
+            "error_energy": 3.4634475014172494e-05,
+            "target_energy": 1631.4951171875
+          },
+          "row_major": {
+            "candidate_energy": 1631.49365234375,
+            "cosine": 1.0000000000001008,
+            "energy_recovery": 0.9999999772114698,
+            "error_energy": 3.717937579494901e-05,
+            "target_energy": 1631.4951171875
+          }
+        },
+        "7": {
+          "action_error_closure": -35.61502328594989,
+          "neuron_major": {
+            "candidate_energy": 1661.06787109375,
+            "cosine": 0.9999996325961639,
+            "energy_recovery": 0.9999992279475882,
+            "error_energy": 0.0012824538862332702,
+            "target_energy": 1661.096923828125
+          },
+          "row_major": {
+            "candidate_energy": 1661.101806640625,
+            "cosine": 1.00000000000108,
+            "energy_recovery": 0.9999999789143269,
+            "error_energy": 3.502534673316404e-05,
+            "target_energy": 1661.096923828125
+          }
+        },
+        "8": {
+          "action_error_closure": -3.3054862911459617,
+          "neuron_major": {
+            "candidate_energy": 1900.26171875,
+            "cosine": 0.999999935761388,
+            "energy_recovery": 0.9999998920771784,
+            "error_energy": 0.00020508142188191414,
+            "target_energy": 1900.260009765625
+          },
+          "row_major": {
+            "candidate_energy": 1900.259765625,
+            "cosine": 1.000000000000002,
+            "energy_recovery": 0.9999999749336511,
+            "error_energy": 4.763258039020002e-05,
+            "target_energy": 1900.260009765625
+          }
+        },
+        "9": {
+          "action_error_closure": -447.56747244266495,
+          "neuron_major": {
+            "candidate_energy": 2313.081298828125,
+            "cosine": 0.9999944649239991,
+            "energy_recovery": 0.9999889410344314,
+            "error_energy": 0.025585699826478958,
+            "target_energy": 2313.57080078125
+          },
+          "row_major": {
+            "candidate_energy": 2313.579345703125,
+            "cosine": 0.9999999472390722,
+            "energy_recovery": 0.9999999753460377,
+            "error_energy": 5.703868737327866e-05,
+            "target_energy": 2313.57080078125
+          }
+        }
+      }
+    }
+  },
+  "authorization": {
+    "implement_transpose_aware_cproj_codec": false,
+    "larger_rung": false,
+    "next": "Reject storage-order mismatch as the binding obstruction and return to a joint same-path functional transition design; do not vary pairing width, FHT seed, or thresholds.",
+    "run_exact_config_mfu_gate": false,
+    "run_language_model_training": false,
+    "sweep": false
+  },
+  "classification": "CPROJ_NEURON_MAJOR_LAYOUT_REJECTED",
+  "codec": {
+    "base_seed": 20261021,
+    "code_refresh_interval": 8,
+    "feedback_block_size": 32,
+    "feedback_coordinate_bits": 4,
+    "feedback_lloyd_iterations": 4,
+    "feedback_seed_base": 20261025,
+    "neighbor_candidates": 16,
+    "projection_sweeps": 4,
+    "weight_std": 0.004082482904638631
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "gates": {
+    "equal_state_bytes": true,
+    "every_bank_action": false,
+    "every_layer_action": false,
+    "finite": true,
+    "fixed_ce_improves": false,
+    "fixed_gap_closure": true
+  },
+  "identities": {
+    "data_dir": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_parent_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4/ckpt.pt",
+      "sha256": "13b1dd1ad120f23578a7dce376a2b259e34cd5590982aa2c2ba85a68c033a5a3"
+    },
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "maximum_cuda_memory_bytes": 10138193408,
+  "minimum_bank_action_error_closure": -0.03293436111963599,
+  "minimum_layer_action_error_closure": -447.56747244266495,
+  "passed": false,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cproj_neuron_layout_oracle_plan.json",
+    "sha256": "68af351d3a14d6d1f34f6878887502803d92a0cb41260dbc9b50a58d0aeccccb"
+  },
+  "repository_commit": "909738ee5c4311071309f50cf5ff076f7ed2dce2",
+  "schema_version": "mai_124m_pair_vq_cproj_neuron_layout_oracle_result_v1",
+  "state": [
+    {
+      "layer": 0,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999999403953552
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 1,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999998807907104
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 2,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999999403953552
+      }
+    },
+    {
+      "layer": 3,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999999403953552
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 4,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999997615814209
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 5,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 6,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 7,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999996423721313
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 8,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999998807907104
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 9,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999992847442627
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 1.0
+      }
+    },
+    {
+      "layer": 10,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999867081642151
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999915957450867
+      }
+    },
+    {
+      "layer": 11,
+      "neuron_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999992251396179
+      },
+      "row_major": {
+        "codec_bytes": 2361480,
+        "feedback_bytes": 3478080,
+        "persistent_model_bytes": 5839560,
+        "weight_energy_recovery": 0.9999942183494568
+      }
+    }
+  ],
+  "thresholds": {
+    "minimum_every_bank_action_error_closure": 0.1,
+    "minimum_every_layer_action_error_closure": -0.05,
+    "minimum_fixed_ce_gap_closure": 0.1,
+    "minimum_fixed_ce_improvement": 0.002
+  },
+  "validation_cross_entropy": {
+    "dense": 3.4507057666778564,
+    "neuron_major": 3.450713872909546,
+    "row_major": 3.450735092163086
+  },
+  "wall_seconds": 8.769473791122437
+}
