@@ -385,7 +385,7 @@ def run_audit(checkpoint_path: Path, checkpoint_sha256: str, plan_path: Path) ->
         },
         "systems": {
             "peak_host_rss_kib": int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss),
-            "gpu_used": false,
+            "gpu_used": False,
         },
         "decision": {
             "automatic_endpoint": false,

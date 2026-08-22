@@ -1,3 +1,5 @@
+import inspect
+
 import numpy as np
 import pytest
 
@@ -6,8 +8,14 @@ from examples.nanogpt.analyze_pair_vq_fp16_momentum_entropy import (
     conditional_lower_mantissa_entropy,
     entropy_from_counts,
     prefix_entropy,
+    run_audit,
     word_counts,
 )
+
+
+def test_result_boolean_literal_is_python() -> None:
+    source = inspect.getsource(run_audit)
+    assert '"gpu_used": False' in source
 
 
 def test_entropy_known_distributions() -> None:
