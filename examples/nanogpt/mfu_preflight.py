@@ -329,6 +329,11 @@ def make_preflight_config(
         config["pair_vq_minifloat_momentum_result"] = str(
             temporary_out / "pair_vq_minifloat_momentum_preflight.json"
         )
+    if config.get("pair_vq_polar_lowrank_momentum_result"):
+        config["pair_vq_polar_lowrank_momentum_result"] = str(
+            temporary_out / "pair_vq_polar_lowrank_momentum_preflight.json"
+        )
+        config["pair_vq_polar_lowrank_momentum_stop_on_gate"] = False
     if atlas_start_steps:
         config["block_fht_attn_cayley_atlas_start_steps"] = list(
             range(len(atlas_start_steps))

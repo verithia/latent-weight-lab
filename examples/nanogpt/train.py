@@ -32,6 +32,9 @@ from examples.nanogpt.dense_pair_vq_lowbit_momentum import (
 from examples.nanogpt.pair_vq_minifloat_momentum import (
     PairVQMinifloatMomentumOracle,
 )
+from examples.nanogpt.pair_vq_polar_lowrank_momentum import (
+    PairVQPolarLowRankMomentumOracle,
+)
 from examples.nanogpt.model import (
     GPT,
     GPTConfig,
@@ -113,6 +116,7 @@ def source_hashes() -> dict[str, str]:
         root / "examples/nanogpt/dense_pair_vq_functional_oracle.py",
         root / "examples/nanogpt/dense_pair_vq_optimizer_transition.py",
         root / "examples/nanogpt/pair_vq_minifloat_momentum.py",
+        root / "examples/nanogpt/pair_vq_polar_lowrank_momentum.py",
         root / "latent_weight_lab/block_fht.py",
     )
     return {
@@ -941,6 +945,40 @@ def validate_launch_config(config: dict, args: argparse.Namespace) -> dict[str, 
             raise ValueError("minifloat momentum audit requires compile=false")
         if args.optimizer != "muon":
             raise ValueError("minifloat momentum audit requires optimizer=muon")
+    polar_lowrank_fields = {
+        "pair_vq_polar_lowrank_momentum_plan": (
+            args.pair_vq_polar_lowrank_momentum_plan
+        ),
+        "pair_vq_polar_lowrank_momentum_plan_sha256": (
+            args.pair_vq_polar_lowrank_momentum_plan_sha256
+        ),
+        "pair_vq_polar_lowrank_momentum_result": (
+            args.pair_vq_polar_lowrank_momentum_result
+        ),
+    }
+    configured_polar_lowrank_fields = [
+        key for key, value in polar_lowrank_fields.items() if value
+    ]
+    if configured_polar_lowrank_fields and len(
+        configured_polar_lowrank_fields
+    ) != len(polar_lowrank_fields):
+        raise ValueError(
+            "Pair-VQ polar low-rank momentum audit requires all of: "
+            + ", ".join(polar_lowrank_fields)
+        )
+    if configured_polar_lowrank_fields:
+        if configured_minifloat_fields:
+            raise ValueError(
+                "minifloat and polar low-rank momentum audits are mutually exclusive"
+            )
+        if not args.block_fht_mlp_pair_vq:
+            raise ValueError("polar low-rank audit requires Pair-VQ MLPs")
+        if not args.block_fht_mlp_pair_vq_fp16_ambient_momentum:
+            raise ValueError("polar low-rank audit requires FP16 ambient momentum")
+        if args.compile:
+            raise ValueError("polar low-rank audit requires compile=false")
+        if args.optimizer != "muon":
+            raise ValueError("polar low-rank audit requires optimizer=muon")
     return None
 
 
@@ -1266,6 +1304,16 @@ def parse_args() -> argparse.Namespace:
         "--pair-vq-minifloat-momentum-stage",
         choices=["stage_ab_deterministic_replay"],
         default=None,
+    )
+    parser.add_argument("--pair-vq-polar-lowrank-momentum-plan", default=None)
+    parser.add_argument(
+        "--pair-vq-polar-lowrank-momentum-plan-sha256", default=None
+    )
+    parser.add_argument("--pair-vq-polar-lowrank-momentum-result", default=None)
+    parser.add_argument(
+        "--pair-vq-polar-lowrank-momentum-stop-on-gate",
+        action=argparse.BooleanOptionalAction,
+        default=True,
     )
     parser.add_argument("--data-dir", required=False)
     parser.add_argument("--out-dir", required=False)
@@ -4120,6 +4168,7 @@ def main() -> None:
     pair_vq_transport_oracle = None
     pair_vq_lowbit_momentum_oracle = None
     pair_vq_minifloat_momentum_oracle = None
+    pair_vq_polar_lowrank_momentum_oracle = None
     if args.pair_vq_dense_shadow_replay:
         pair_vq_dense_shadow = DensePairVQShadowObserver(
             raw_model,
@@ -4297,6 +4346,42 @@ def main() -> None:
                         pair_vq_minifloat_momentum_oracle.update_indices
                     ),
                     "probe_only": pair_vq_minifloat_momentum_oracle.probe_only,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
+    if args.pair_vq_polar_lowrank_momentum_plan:
+        pair_vq_polar_lowrank_momentum_oracle = (
+            PairVQPolarLowRankMomentumOracle(
+                raw_model,
+                optimizer,
+                plan_path=Path(args.pair_vq_polar_lowrank_momentum_plan),
+                plan_sha256=str(
+                    args.pair_vq_polar_lowrank_momentum_plan_sha256
+                ),
+                result_path=Path(args.pair_vq_polar_lowrank_momentum_result),
+                stop_on_gate=bool(
+                    args.pair_vq_polar_lowrank_momentum_stop_on_gate
+                ),
+            )
+        )
+        print(
+            "pair_vq_polar_lowrank_momentum_init "
+            + json.dumps(
+                {
+                    "plan": args.pair_vq_polar_lowrank_momentum_plan,
+                    "plan_sha256": (
+                        args.pair_vq_polar_lowrank_momentum_plan_sha256
+                    ),
+                    "result": args.pair_vq_polar_lowrank_momentum_result,
+                    "optimizer_update_indices": sorted(
+                        pair_vq_polar_lowrank_momentum_oracle.update_indices
+                    ),
+                    "stop_on_gate": bool(
+                        args.pair_vq_polar_lowrank_momentum_stop_on_gate
+                    ),
                 },
                 sort_keys=True,
                 separators=(",", ":"),
@@ -4614,6 +4699,22 @@ def main() -> None:
                     "pair_vq_minifloat_momentum_terminal "
                     + json.dumps(
                         minifloat_terminal,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
+            if (
+                pair_vq_polar_lowrank_momentum_oracle is not None
+                and iter_num >= args.max_iters
+            ):
+                polar_lowrank_terminal = (
+                    pair_vq_polar_lowrank_momentum_oracle.finalize()
+                )
+                print(
+                    "pair_vq_polar_lowrank_momentum_terminal "
+                    + json.dumps(
+                        polar_lowrank_terminal,
                         sort_keys=True,
                         separators=(",", ":"),
                     ),
@@ -4970,6 +5071,38 @@ def main() -> None:
                         "pair_vq_minifloat_momentum_terminal "
                         + json.dumps(
                             minifloat_terminal,
+                            sort_keys=True,
+                            separators=(",", ":"),
+                        ),
+                        flush=True,
+                    )
+                    train_prefetch.shutdown(wait=True)
+                    return
+        if pair_vq_polar_lowrank_momentum_oracle is not None:
+            polar_lowrank_record = (
+                pair_vq_polar_lowrank_momentum_oracle.before_step(
+                    optimizer_update_index=iter_num,
+                    run_identity_sha256=run_identity["config_sha256"],
+                )
+            )
+            if polar_lowrank_record is not None:
+                print(
+                    "pair_vq_polar_lowrank_momentum_probe "
+                    + json.dumps(
+                        polar_lowrank_record,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
+                if pair_vq_polar_lowrank_momentum_oracle.probe_only:
+                    polar_lowrank_terminal = (
+                        pair_vq_polar_lowrank_momentum_oracle.finalize()
+                    )
+                    print(
+                        "pair_vq_polar_lowrank_momentum_terminal "
+                        + json.dumps(
+                            polar_lowrank_terminal,
                             sort_keys=True,
                             separators=(",", ":"),
                         ),
