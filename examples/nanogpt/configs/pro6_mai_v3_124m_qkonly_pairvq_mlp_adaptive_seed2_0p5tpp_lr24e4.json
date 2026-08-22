@@ -13,7 +13,6 @@
   "mfu_preflight_min_timed_updates": 8,
   "mfu_preflight_certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_adaptive_seed2_0p5tpp_lr24e4_mfu.json",
   "persistent_momentum_bytes_max": 99090432,
-  "persistent_training_bytes_max": 254212524,
   "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
   "data_dir": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b",
   "out_dir": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_adaptive_seed2_0p5tpp_lr24e4",

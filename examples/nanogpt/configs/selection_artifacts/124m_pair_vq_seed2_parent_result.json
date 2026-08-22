@@ -1,0 +1,47 @@
+{
+  "schema_version": "mai_124m_pair_vq_seed2_parent_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_MATCHED_SEED2_PARENT",
+  "run_name": "pro6_mai_v3_124m_qkonly_densemlp_parent_seed2_0p5tpp_lr24e4",
+  "terminal": {
+    "exit_code": 0,
+    "train_ce": 5.3582,
+    "validation_ce": 5.3602,
+    "all_fixed_eval_losses_finite": true,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "fixed_validation_curve": [
+    {"step": 0, "validation_ce": 10.9572},
+    {"step": 60, "validation_ce": 6.2295},
+    {"step": 120, "validation_ce": 5.7310},
+    {"step": 180, "validation_ce": 5.4659},
+    {"step": 238, "validation_ce": 5.3602}
+  ],
+  "performance": {
+    "preflight_tokens_per_second": 215209.3125,
+    "preflight_mfu_fraction": 0.3849328534621714,
+    "scientific_median_tokens_per_second": 214001.01,
+    "scientific_mean_tokens_per_second": 214059.87130434782,
+    "peak_mib": 31721.68
+  },
+  "provenance": {
+    "git_commit": "9431a7abc9242e5c275b95b8344dd6ffa2d0d7f1",
+    "config_sha256": "ed967dbcf27637791bde93af9c74e405950817244236a63a847e0f20e4b809e8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_certificate_sha256": "b7bc7bde429e07653a24d85357af67b92166b309ac6f12bf9f0c96676913c7a7",
+    "runtime_provenance_sha256": "b5db0bf3677b639001773eb7f37beab1f59473487182ecbbcac4850a6ceae075",
+    "scientific_log_sha256": "50c8a1bd6d6d878290bb9184808132a96e1607d371636ad0c192aac09114f987",
+    "terminal_status_sha256": "a27512bc1171097ab8fc896b5f6802fcd9eca9d755a940140d0d52e2a72fe3bc"
+  },
+  "checkpoint_comparison": {
+    "checkpoint": null,
+    "reason": "the preregistered no-checkpoint policy preserves PRO6 cap headroom",
+    "comparison_boundary": "same fixed evaluation indices, schedule, seeds, source, and archived config"
+  },
+  "decision": {
+    "parent_gate_passed": true,
+    "candidate_exact_config_mfu_gate_required_next": true,
+    "candidate_before_parent_terminal": false,
+    "scale_up_authorized": false
+  }
+}

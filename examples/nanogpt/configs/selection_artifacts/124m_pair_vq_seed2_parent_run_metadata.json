@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_pair_vq_seed2_parent_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_qkonly_densemlp_parent_seed2_0p5tpp_lr24e4",
   "host": "PRO6",
   "gpu": 0,
@@ -43,6 +43,29 @@
     "gpu_power_watts": 586.17,
     "gpu_temperature_c": 56,
     "tokens_per_second_recent": 214061.07
+  },
+  "terminal_verification": {
+    "finished_at": "2026-08-22T11:41:13+08:00",
+    "exit_code": 0,
+    "classification": "clean",
+    "wall_seconds": 389,
+    "terminal_train_ce": 5.3582,
+    "terminal_validation_ce": 5.3602,
+    "fixed_validation_curve": [
+      {"step": 0, "validation_ce": 10.9572},
+      {"step": 60, "validation_ce": 6.2295},
+      {"step": 120, "validation_ce": 5.7310},
+      {"step": 180, "validation_ce": 5.4659},
+      {"step": 238, "validation_ce": 5.3602}
+    ],
+    "all_fixed_eval_losses_finite": true,
+    "performance_samples": 23,
+    "median_tokens_per_second": 214001.01,
+    "mean_tokens_per_second": 214059.87130434782,
+    "log_sha256": "50c8a1bd6d6d878290bb9184808132a96e1607d371636ad0c192aac09114f987",
+    "status_sha256": "a27512bc1171097ab8fc896b5f6802fcd9eca9d755a940140d0d52e2a72fe3bc",
+    "checkpoint": null,
+    "checkpoint_policy": "disabled by preregistration to preserve PRO6 project-cap headroom"
   },
   "monitoring": {
     "policy": "one persistent terminal/error-only watchdog; no healthy milestone or heartbeat callback",
