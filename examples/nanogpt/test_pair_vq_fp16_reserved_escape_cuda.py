@@ -11,6 +11,7 @@ from examples.nanogpt.pair_vq_fp16_reserved_escape_cuda import (
     encode_reserved_escape,
 )
 from examples.nanogpt.muon_pair_vq import MuonPairVQ, MuonPairVQLinear
+from examples.nanogpt.muon import muon_update
 
 
 pytestmark = pytest.mark.skipif(
@@ -109,15 +110,18 @@ def test_reserved_escape_optimizer_transition_and_resume_are_bit_exact(
         compact.load_state_dict(raw.state_dict(), strict=True)
 
     for _ in range(3):
+        gradients = []
         for raw, compact in zip(raw_modules, compact_modules, strict=True):
             gradient = torch.randn_like(raw.weight)
+            gradients.append(gradient)
             raw.weight.grad = gradient.clone()
             compact.weight.grad = gradient.clone()
         raw_optimizer.step()
         compact_optimizer.step()
         decoded = compact_optimizer._decode_reserved_escape_momentum()
-        for raw, compact in zip(raw_modules, compact_modules, strict=True):
-            torch.testing.assert_close(compact.weight, raw.weight, rtol=0.0, atol=0.0)
+        for raw, compact, gradient in zip(
+            raw_modules, compact_modules, gradients, strict=True
+        ):
             scope, start, stop = compact_optimizer._reserved_escape_slices[
                 id(compact.weight)
             ]
@@ -125,6 +129,23 @@ def test_reserved_escape_optimizer_transition_and_resume_are_bit_exact(
             assert torch.equal(
                 decoded[scope][start:stop].view_as(compact.weight).view(torch.uint8),
                 raw_momentum.view(torch.uint8),
+            )
+            raw_request = gradient.float().add(
+                raw_momentum.float(), alpha=0.95
+            )
+            compact_momentum = decoded[scope][start:stop].view_as(compact.weight)
+            compact_request = gradient.float().add(
+                compact_momentum.float(), alpha=0.95
+            )
+            assert torch.equal(
+                compact_request.view(torch.uint8), raw_request.view(torch.uint8)
+            )
+            assert torch.equal(
+                muon_update(compact_request.clone(), steps=1).view(torch.uint8),
+                muon_update(raw_request.clone(), steps=1).view(torch.uint8),
+            )
+            assert torch.equal(
+                compact.codes, raw.codes
             )
         assert not any(
             "ambient_momentum" in state
@@ -144,9 +165,7 @@ def test_reserved_escape_optimizer_transition_and_resume_are_bit_exact(
     compact_optimizer.step()
     restored_optimizer.step()
     for compact, restored in zip(compact_modules, restored_modules, strict=True):
-        torch.testing.assert_close(
-            restored.weight, compact.weight, rtol=0.0, atol=0.0
-        )
+        assert torch.equal(restored.codes, compact.codes)
     compact_payload = compact_optimizer.state[
         compact_optimizer._reserved_escape_owner
     ]["reserved_escape_momentum"]

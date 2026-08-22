@@ -1,0 +1,38 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_reserved_escape_identity_gate_amendment_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_integrated_gate_execution",
+  "parent_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_cuda_plan.json",
+  "parent_plan_sha256": "662531ad638b6bc12a4d9a20d0d9d158999309ace37b145b0b8f65e74e98efc4",
+  "trigger": {
+    "observation": "Two independently executed raw-FP16 MuonPairVQ controls initialized identically and fed bit-identical gradients retain bit-identical FP16 momentum and identical discrete Pair-VQ codes, but their final materialized weights are not bit-identical.",
+    "c_fc_max_abs_weight_difference": 0.0001827329397201538,
+    "c_proj_max_abs_weight_difference": 0.00007735937833786011,
+    "momentum_bit_exact": true,
+    "discrete_codes_exact": true,
+    "cause": "MuonPairVQLinear._centroid_projection_ uses CUDA index_add_; atomic accumulation order changes last-bit FP32 centroids between otherwise identical sequential executions.",
+    "codec_causality": "The same control showed the reserved-escape decoded momentum was bit-identical to raw FP16. The discrepancy appears only after the pre-existing centroid projection and therefore is not codec distortion."
+  },
+  "amended_identity_gate": {
+    "must_be_bit_exact": [
+      "decoded FP16 momentum words at every step",
+      "persisted packed state after re-encoding",
+      "pre-polar requested-gradient words",
+      "Muon polar-update words when evaluated once per identical request",
+      "packed state after save/load and the next transition",
+      "discrete Pair-VQ and feedback codes"
+    ],
+    "centroid_projection_nuisance_control": "For final codebooks, materialized weights, and loss, run a matched raw/raw control with identical initial state and gradients. Raw-vs-codec deviation may not exceed the simultaneous raw-vs-raw deviation envelope; codes must remain identical.",
+    "forbidden_shortcut": "Do not retain raw FP16 momentum, change the centroid algorithm, relax packed-state exactness, or add a loss endpoint merely to mask the baseline nondeterminism."
+  },
+  "unchanged_gates": {
+    "maximum_momentum_bytes": 99090432,
+    "standalone_encode_plus_decode_seconds": 0.25,
+    "minimum_exact_config_mfu": 0.20,
+    "no_hidden_dense_persistent_momentum": true,
+    "automatic_loss_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  }
+}
