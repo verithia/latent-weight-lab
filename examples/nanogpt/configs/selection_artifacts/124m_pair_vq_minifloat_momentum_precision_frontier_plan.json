@@ -1,0 +1,128 @@
+{
+  "schema_version": "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "What is the smallest exponent-preserving ambient-momentum format that retains the successful FP16 Pair-VQ Muon polar field at both early and terminal 124M states?",
+  "causal_authorization": {
+    "loss_closure_parent": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_endpoint_result.json",
+      "result_sha256": "3ead477be76bc36820531818fe54c2932c6f581a2f32975e476f64b0e805d9d8",
+      "classification": "PASS_COMPACT_FULL_MLP_LOSS_CLOSURE_WITH_FP16_AMBIENT_MOMENTUM",
+      "exact_validation_ce": 5.368512153625488,
+      "dense_parent_validation_ce": 5.361,
+      "gap_ce": 0.007512153625488281,
+      "compute_equivalent_penalty": 1.0205063948925732
+    },
+    "low_bit_rejection": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_lowbit_momentum_tangent_oracle_result.json",
+      "classification": "LOWBIT_AMBIENT_MOMENTUM_TANGENT_REJECTED",
+      "best_prepolar_cosine": 0.9938647613194159,
+      "best_postpolar_cosine": 0.8336482994896941,
+      "finding": "Uniform block int4 plus a ternary residual preserves ordinary vector cosine but catastrophically rotates the nonlinear Muon polar factor. Another bit or block-size sweep in that family is forbidden."
+    },
+    "precision_control": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_full_mlp_temporal_state_hybrid_precision_result.json",
+      "classification": "HYBRID_PRECISION_AMBIENT_STATE_PLAUSIBLE",
+      "fp16_polar_energy_recovery": 0.9999956172031941,
+      "fp16_minimum_layer_polar_cosine": 0.9999935309459342,
+      "bf16_same_byte_control_rejected": true
+    }
+  },
+  "theory": {
+    "mechanism": "Muon uses a polar-like map. For H=U Sigma V^T, first-order singular-frame perturbations contain denominators sigma_i+sigma_j. Coarse absolute quantization disproportionately corrupts small singular directions even when Frobenius cosine is high.",
+    "deduction": "FP16 succeeds while same-byte BF16 and uniform int4 fail. The discriminating property is not merely byte count; it is FP16's five-bit exponent field plus progressively finer relative mantissa resolution. The next nested family must therefore preserve FP16 exponent/range exactly and truncate only significand bits.",
+    "nested_test_value": "E5M2, E5M4, E5M6, E5M8, and the E5M10 FP16 control form one nested hypothesis test. A single audit identifies whether polar fidelity has a precision threshold without changing coordinate topology, block scales, or the working forward representation.",
+    "non_claims": [
+      "Passing this audit does not establish language-model loss parity.",
+      "The simulated formats are not a claim of immediate hardware acceleration.",
+      "The audit does not authorize changing Pair-VQ weights, attention, learning rate, horizon, or model width."
+    ]
+  },
+  "frozen_representation": {
+    "forward_weight": "Keep the successful Pair-VQ base and fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16 feedback representation bit-identical.",
+    "attention": "Keep the successful QK-only BlockFHT attention parent bit-identical.",
+    "optimizer_request": "For each MLP matrix, decode the candidate history, form B_next=round_candidate(mu*B_previous+G), form H=G+mu*decode(B_next), and apply the exact production Newton-Schulz Muon map.",
+    "reference": "Use the successful production FP16 recurrence as the reference, including FP16 rounding after every momentum update. No FP32 hidden residual or master momentum is permitted in a candidate.",
+    "forbidden_changes": [
+      "Pair-VQ codebooks, codes, feedback codec, levels, blocks, or Lloyd iterations",
+      "learning rate, schedule, seed, data order, horizon, or Muon Newton-Schulz steps",
+      "blockwise scales, stochastic rounding, error feedback, dense residuals, or rank correction",
+      "language-model endpoint, width scale-up, horizon transfer, or parameter sweep"
+    ]
+  },
+  "formats": {
+    "encoding": "Use the IEEE FP16 sign and five-bit exponent exactly. For a finite FP16 value, round its ten stored fraction bits to the registered retained mantissa width using deterministic round-to-nearest, ties-to-even, with carry into the unchanged FP16 exponent field. Preserve signed zero, subnormal semantics, saturation, and finite values; reject any non-finite input or output.",
+    "packing": "The audit may simulate with uint16 storage, but selection and byte accounting use an explicit tightly packed sign+exponent+mantissa bitstream with no per-block scale or padding except final-byte padding.",
+    "candidate_order": ["e5m2", "e5m4", "e5m6", "e5m8", "e5m10_fp16_control"],
+    "candidates": {
+      "e5m2": {"total_bits": 8, "mantissa_bits": 2},
+      "e5m4": {"total_bits": 10, "mantissa_bits": 4},
+      "e5m6": {"total_bits": 12, "mantissa_bits": 6},
+      "e5m8": {"total_bits": 14, "mantissa_bits": 8},
+      "e5m10_fp16_control": {"total_bits": 16, "mantissa_bits": 10}
+    },
+    "nestedness_invariant": "Every coarser decoded value must equal applying its own deterministic mask/rounding rule directly to the same FP16 source; no candidate-specific calibration is allowed."
+  },
+  "frozen_protocol": {
+    "matrix_scope": ["transformer.h.*.mlp.c_fc", "transformer.h.*.mlp.c_proj"],
+    "momentum_elements": 56623104,
+    "parameter_updates_by_candidates": 0,
+    "candidate_checkpoint_writes": 0,
+    "stage_a_terminal_tangent": {
+      "source_checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+      "source_checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+      "source_next_iter": 238,
+      "method": "Exact-resume the model, optimizer, scaler, data/RNG, and next batch; execute forward/backward only. Compare one candidate recurrence and Muon request against the resident FP16 momentum without mutating model or optimizer state.",
+      "probe_update_indices": [238]
+    },
+    "stage_b_early_recurrence": {
+      "authorized_only_if_stage_a_has_a_passing_candidate": true,
+      "method": "Fresh exact-config nine-update replay. Track candidate histories noninterveningly beside the production FP16 owner from zero state and probe after optimizer update indices 0 and 8.",
+      "probe_update_indices": [0, 8],
+      "reported_post_update_state_steps": [1, 9]
+    },
+    "measurements": [
+      "momentum-state relative error, cosine, and positive-line energy recovery",
+      "combined pre-polar request relative error, cosine, and positive-line energy recovery",
+      "post-polar Muon update relative error, cosine, and positive-line energy recovery",
+      "all/c_fc/c_proj energy-weighted aggregates and every-matrix minima",
+      "finite-value, signed-zero, subnormal, saturation, and nested-rounding invariants",
+      "simulated bytes, theoretical packed bytes, and encode/decode wall time"
+    ]
+  },
+  "theoretical_persistent_storage": {
+    "common_compact_forward_and_feedback_bytes": 157427136,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "e5m2": {"momentum_bytes": 56623104, "total_training_bytes": 214050240, "training_reduction_factor": 2.1162547259932993, "fraction_of_fp16_momentum_bytes": 0.5},
+    "e5m4": {"momentum_bytes": 70778880, "total_training_bytes": 228206016, "training_reduction_factor": 1.9849819910093869, "fraction_of_fp16_momentum_bytes": 0.625},
+    "e5m6": {"momentum_bytes": 84934656, "total_training_bytes": 242361792, "training_reduction_factor": 1.8690439126642535, "fraction_of_fp16_momentum_bytes": 0.75},
+    "e5m8": {"momentum_bytes": 99090432, "total_training_bytes": 256517568, "training_reduction_factor": 1.7659017880599897, "fraction_of_fp16_momentum_bytes": 0.875},
+    "e5m10_fp16_control": {"momentum_bytes": 113246208, "total_training_bytes": 270673344, "training_reduction_factor": 1.6735479944415952, "fraction_of_fp16_momentum_bytes": 1.0}
+  },
+  "decision_gate": {
+    "requirements_at_every_registered_probe": {
+      "minimum_all_postpolar_cosine": 0.9999,
+      "minimum_every_matrix_postpolar_cosine": 0.999,
+      "minimum_all_postpolar_positive_line_energy_recovery": 0.999,
+      "minimum_all_prepolar_cosine": 0.9999,
+      "all_metrics_finite": true
+    },
+    "fp16_control_requirements": {
+      "minimum_all_postpolar_cosine": 0.999999,
+      "minimum_every_matrix_postpolar_cosine": 0.99999,
+      "minimum_all_postpolar_positive_line_energy_recovery": 0.99999
+    },
+    "selection": "Choose the smallest total-bit candidate that passes all Stage A and Stage B requirements. Resolve ties by the larger minimum every-matrix post-polar cosine.",
+    "if_pass": "Authorize only an implementation-quality packed-state prototype with exact recurrence/checkpoint tests and an exact-config >=20% MFU gate. No LM endpoint is automatically authorized.",
+    "if_fail": "Reject mantissa-only truncation as the next compression family. Derive a singular-direction-aware correction or factored polar-history representation before any further LM endpoint.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  },
+  "execution_policy": {
+    "expected_duration_per_stage_minutes": "less_than_5",
+    "monitoring": "Foreground poll only; no persistent watchdog for these nonintervening diagnostics.",
+    "launch_precondition": "PRO6 nvidia-smi, CUDA allocation, and native extension must be healthy. Do not launch while the post-power-cycle NVIDIA driver/library mismatch persists."
+  }
+}
