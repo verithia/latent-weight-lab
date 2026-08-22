@@ -1,0 +1,87 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_momentum_lossless_entropy_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_unexecuted",
+  "scientific_question": "Does the exact FP16 ambient Muon history that closes the compact full-MLP loss contain enough spatial and bit-plane redundancy for a bit-exact compact representation, without changing any polar direction?",
+  "causal_authorization": {
+    "loss_closure": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_endpoint_result.json",
+      "result_sha256": "3ead477be76bc36820531818fe54c2932c6f581a2f32975e476f64b0e805d9d8",
+      "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+      "validation_ce": 5.368512153625488,
+      "dense_parent_validation_ce": 5.361
+    },
+    "uniform_lossy_rejection": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_minifloat_momentum_precision_frontier_result.json",
+      "result_sha256": "ee081b20b8d3b629631c9428b68cd648e21c5d99daa5b4dc452f43a47ae8de1c"
+    },
+    "low_rank_lossy_rejection": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_polar_sensitive_lowrank_momentum_result.json",
+      "result_sha256": "a74e4a81be9c0fed13fb0624c6d8f93db54872e0ffe1c867fab014814cee02dc",
+      "classification": "REJECT_USEFUL_RANK_POLAR_SENSITIVE_LOW_RANK_MOMENTUM_CORRECTION",
+      "finding": "Rank 32 captures only about 16.1% median post-polar error energy and remains below every registered direction threshold."
+    }
+  },
+  "theory": {
+    "invariance": "A bit-exact decoder returns the same FP16 tensor, so the production FP32 decode, Muon recurrence, Newton-Schulz polar map, Pair-VQ retraction, and validation loss path are unchanged.",
+    "entropy_bound": "For N FP16 words, any lossless code requires at least the empirical conditional entropy of those words under its registered context model. Beating packed E5M8 requires fewer than 14 exact bits per coordinate before metadata.",
+    "why_now": "The two lossy families fail because a tiny broadly full-rank error is amplified by the polar map. Exact coding is the remaining representation class that can reduce persistent bytes without reopening the direction problem.",
+    "non_claims": [
+      "A CPU codec passing the size gate does not establish a production optimizer or acceptable MFU.",
+      "A terminal-checkpoint entropy result does not establish identical entropy throughout training.",
+      "This audit does not authorize another language-model endpoint, scale-up, horizon transfer, or precision sweep."
+    ]
+  },
+  "frozen_source": {
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "expected_tensor_count": 24,
+    "expected_elements": 56623104,
+    "expected_raw_bytes": 113246208,
+    "expected_dtype": "torch.float16",
+    "expected_scopes": ["transformer.h.*.mlp.c_fc", "transformer.h.*.mlp.c_proj"],
+    "mutation_forbidden": true
+  },
+  "registered_measurements": {
+    "word_statistics": [
+      "exact uint16 value entropy globally, per matrix, per c_fc/c_proj scope, and per fixed 4096-word block",
+      "sign, exponent, and each mantissa bit-plane marginal entropy",
+      "lower-mantissa conditional entropy given matrix, sign, exponent, and upper mantissa prefixes of 2, 4, 6, and 8 bits",
+      "adjacent-coordinate XOR and row-delta word entropy"
+    ],
+    "exact_codecs": {
+      "raw_zlib1": "Per-matrix zlib level 1 over native little-endian uint16 bytes.",
+      "byte_shuffle_zlib1": "Per-matrix split low and high bytes, concatenate, then zlib level 1.",
+      "xor_byte_shuffle_zlib1": "Per row, XOR each uint16 word with its left neighbor, byte-shuffle, then zlib level 1.",
+      "bitplane_zlib1": "Transpose each 4096-word block into 16 packed bit-planes, concatenate, then zlib level 1."
+    },
+    "correctness": "Every codec must decode every matrix to byte-identical uint16 words; report SHA-256 before and after.",
+    "systems": "Report compressed payload plus metadata bytes, compression ratio, encode and decode wall time, effective GB/s, peak host RSS, and transient decoded FP16 bytes. No GPU allocation is required for this offline audit."
+  },
+  "decision_gate": {
+    "information_pass": "At least one registered exact representation, including metadata, uses at most 99090432 bytes (14.0 bits/coordinate), matching or beating packed E5M8 while preserving all FP16 bits.",
+    "practical_stage_a_pass": "At least one registered exact codec passes byte identity and the information pass, and decodes at at least 1.0 GB/s on PRO6 CPU.",
+    "if_pass": "Authorize only a GPU-native or overlapped exact-codec prototype, exact checkpoint/resume tests, and an exact-config >=20% MFU preflight. Do not authorize a language-model loss endpoint because bit identity makes another loss run scientifically redundant.",
+    "if_fail": "Reject exact spatial entropy coding as a meaningful improvement over E5M8. Retain FP16 ambient momentum as the measured optimizer-history floor and next analyze temporal/shared generative structure rather than another coordinate codec.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  },
+  "storage_reference": {
+    "common_compact_forward_and_feedback_bytes": 157427136,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "working_fp16_momentum_bytes": 113246208,
+    "working_total_training_bytes": 270673344,
+    "working_training_reduction_factor": 1.6735479944415952,
+    "e5m8_target_momentum_bytes": 99090432,
+    "e5m8_target_total_training_bytes": 256517568,
+    "e5m8_target_training_reduction_factor": 1.7659017880599897
+  },
+  "execution_policy": {
+    "implementation_before_execution": "Commit this plan, implement a read-only standalone audit with focused exact-roundtrip tests, Git-sync to PRO6, and verify the sealed checkpoint hash before reading tensor data.",
+    "monitoring": "This offline audit is expected below five minutes and is foreground-polled. If it exceeds five minutes, stop foreground polling and attach one terminal/error-only @Codex watchdog.",
+    "resource_policy": "Use CPU and host RAM only; do not occupy GPU0 and do not write a new checkpoint.",
+    "result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_momentum_lossless_entropy.json"
+  }
+}

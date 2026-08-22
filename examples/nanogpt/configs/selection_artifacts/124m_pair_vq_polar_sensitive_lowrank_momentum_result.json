@@ -1,0 +1,142 @@
+{
+  "schema_version": "mai_pair_vq_polar_sensitive_lowrank_momentum_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_USEFUL_RANK_POLAR_SENSITIVE_LOW_RANK_MOMENTUM_CORRECTION",
+  "passed": false,
+  "decision": {
+    "selected_candidate": null,
+    "stage_b_e5m6_evaluated": false,
+    "candidate_parameter_updates": 0,
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false,
+    "next_authorized_work": "Keep the loss-closing Pair-VQ forward representation and FP16 ambient-momentum owner fixed. Measure the bit-level entropy and exact lossless compressibility of the sealed FP16 optimizer history before designing another lossy representation.",
+    "reason": "At update 0, the best rank-32 polar-gradient correction improves weighted post-polar cosine only from 0.999224482 to 0.999289478, with worst-matrix cosine 0.997821786 and positive-line recovery 0.998579461. It misses all post-polar gates despite 3.624 GFLOP/update of factor expansion and a storage reduction of only 1.726x."
+  },
+  "identity": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "da1966493c2c4e99fb558be7764f1b8e6cd112a",
+    "implementation_commit": "9829d6494354dbca5b7254eea6eb869ab9106c40",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_pairvq_polar_lowrank_momentum_capacity_0p5tpp.json",
+    "config_file_sha256": "c2f54eb9ce569b8073b324a21c6ca54922458381ffa01746d7a964b9bd8cbe1c",
+    "resolved_run_identity_sha256": "c9c7697e3ea0a9060fc279d72189b413ddf868d1def619e6c083f3e650e10023",
+    "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_polar_sensitive_lowrank_momentum_plan.json",
+    "theory_plan_sha256": "dad88a1a08daf04ae618f9b365c7a73317b38ef64b6610ca0675d9e50b3160c6",
+    "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_minifloat_momentum_precision_frontier_result.json",
+    "scientific_parent_sha256": "ee081b20b8d3b629631c9428b68cd648e21c5d99daa5b4dc452f43a47ae8de1c",
+    "loss_closure_parent_sha256": "3ead477be76bc36820531818fe54c2932c6f581a2f32975e476f64b0e805d9d8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/train.py",
+    "exit_code": 0
+  },
+  "artifacts": {
+    "terminal_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_pairvq_polar_lowrank_momentum_capacity_0p5tpp/polar_lowrank_capacity.json",
+      "sha256": "114cc38f25af862118ac3e32ab810e1419a3fe8d68e02b7dcfd20381f6ccbe12",
+      "bytes": 509419,
+      "status": "finished"
+    },
+    "scientific_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/logs/pro6_mai_v3_124m_pairvq_polar_lowrank_momentum_capacity_0p5tpp.log",
+      "sha256": "aa4c46b731dfad75710e2d372a4426be4486d834b469613969360063c7d9a15c",
+      "bytes": 14817
+    },
+    "preflight_certificate_sha256": "45ebbf866e427ec58d6c3f506bf72fbb603edeea6de8272721651e7bd083ff23",
+    "preflight_log_sha256": "a07d9e636452571407271b289e13cb2c45df34eb551b0647eca7a0ffc1f43fa5"
+  },
+  "registered_gate": {
+    "classification": "EARLY_LOW_RANK_CAPACITY_FAIL",
+    "ready": true,
+    "probe_optimizer_update_indices_completed": [0],
+    "probe_optimizer_update_indices_skipped_by_registered_futility": [8],
+    "minimum_all_postpolar_cosine": 0.9999,
+    "minimum_every_matrix_postpolar_cosine": 0.999,
+    "minimum_positive_line_recovery": 0.999,
+    "fp16_control_passed_exactly": true
+  },
+  "fixed_request_comparison_update_0": {
+    "e5m8_rank0": {
+      "state_cosine": 0.999999435484355,
+      "prepolar_cosine": 0.9999998660159857,
+      "postpolar_cosine": 0.9992244820542387,
+      "worst_matrix_postpolar_cosine": 0.9976384361619779,
+      "positive_line_recovery": 0.9984495655365616
+    },
+    "residual_svd": {
+      "rank4_postpolar_cosine": 0.9992330651214751,
+      "rank8_postpolar_cosine": 0.9992411864322667,
+      "rank16_postpolar_cosine": 0.9992566438403696,
+      "rank32_postpolar_cosine": 0.9992847611213319,
+      "rank32_worst_matrix_postpolar_cosine": 0.9978131383131676,
+      "rank32_positive_line_recovery": 0.9985700338093174
+    },
+    "polar_gradient": {
+      "rank4_postpolar_cosine": 0.999233793449158,
+      "rank8_postpolar_cosine": 0.9992425857238313,
+      "rank16_postpolar_cosine": 0.9992592004702218,
+      "rank32_state_cosine": 0.9999995418142728,
+      "rank32_prepolar_cosine": 0.9999998912526177,
+      "rank32_postpolar_cosine": 0.999289477924081,
+      "rank32_worst_matrix_postpolar_cosine": 0.9978217855037049,
+      "rank32_positive_line_recovery": 0.9985794606897823
+    },
+    "fp16_full_residual_control": {
+      "state_cosine": 1.0,
+      "prepolar_cosine": 1.0,
+      "postpolar_cosine": 1.0,
+      "worst_matrix_postpolar_cosine": 1.0,
+      "positive_line_recovery": 1.0
+    }
+  },
+  "component_localization_rank32_polar_gradient": {
+    "c_fc": {
+      "state_cosine": 0.9999953781009961,
+      "prepolar_cosine": 0.9999989030135525,
+      "postpolar_cosine": 0.9991989175212542,
+      "worst_matrix_postpolar_cosine": 0.9978217855037049,
+      "positive_line_recovery": 0.9983984767756461
+    },
+    "c_proj": {
+      "state_cosine": 0.999999646138825,
+      "prepolar_cosine": 0.9999999160133776,
+      "postpolar_cosine": 0.9998955176426358,
+      "worst_matrix_postpolar_cosine": 0.9997848307926559,
+      "positive_line_recovery": 0.9997910462018346
+    }
+  },
+  "postpolar_error_spectrum": {
+    "rank4_captured_energy_fraction_min_max": [0.01067642708832729, 0.05713953454025935],
+    "rank8_captured_energy_fraction_min_max": [0.02097064078439292, 0.09618913384722116],
+    "rank16_captured_energy_fraction_min_max": [0.04074336080204433, 0.1628573130422621],
+    "rank32_captured_energy_fraction_min_median_max": [0.07734762028088267, 0.160644, 0.2679872800464549]
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.2626305648381039,
+    "preflight_tokens_per_second": 146553.30375,
+    "preflight_iteration_milliseconds": 2074.39625,
+    "preflight_peak_mib": 31775.31,
+    "performance_gate_passed": true,
+    "focused_remote_tests_passed": 88,
+    "scientific_probe_seconds": 3.59821703,
+    "total_fit_seconds": 3.023155369912274,
+    "scientific_peak_mib": 4360.45
+  },
+  "storage_and_compute": {
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "common_compact_forward_and_feedback_bytes": 157427136,
+    "e5m8_rank32_total_training_bytes": 262415808,
+    "e5m8_rank32_training_reduction_factor": 1.7262101527054345,
+    "e5m8_rank32_transient_expand_flops_per_update": 3623878656,
+    "working_fp16_total_training_bytes": 270673344,
+    "working_fp16_training_reduction_factor": 1.6735479944415952,
+    "additional_bytes_saved_vs_working_fp16": 8257536
+  },
+  "interpretation": {
+    "ordinary_state_fit_is_not_sufficient": "The best state and pre-polar cosines exceed 0.9999995 and 0.99999989, yet post-polar cosine is only 0.9992895.",
+    "polar_sensitive_low_rank_is_not_sufficient": "The exact post-polar-gradient basis is only marginally better than residual SVD; rank 32 does not span the broadly full-rank error field.",
+    "component_finding": "c_fc remains the dominant optimizer-history direction problem; c_proj is much closer but still misses the every-matrix and positive-line gates.",
+    "remaining_problem": "Before another lossy representation, measure whether the exact FP16 bit pattern has enough conditional-entropy redundancy for a bit-exact compact codec."
+  }
+}
