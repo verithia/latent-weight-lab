@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_reserved_escape_adaptive_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_implementation",
+  "parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_integrated_gate_result.json",
+  "causal_question": "Can exact online selection of the smallest registered high-byte table width keep the working FP16 ambient momentum below 14 bits per coordinate throughout the warmup transition without losing the already-passing MFU or transition identity?",
+  "observed_boundary": {
+    "scope_probe8_bytes": 103853140,
+    "block_probe8_bytes": 99727593,
+    "ceiling_bytes": 99090432,
+    "block_excess_bytes": 637161,
+    "block_mfu_fraction": 0.286326,
+    "block_minimum_prepolar_cosine": 0.9999999044653114
+  },
+  "theory": {
+    "invariant": "Every low byte is literal; every high byte is either a fixed-width table index or an exact escaped literal. Therefore choosing the table width changes storage only, never the decoded FP16 word.",
+    "candidate_cost": "For n words, r regions, dictionary size K, and E_K exceptions, variable bytes are ceil(n*log2(K)/8) + r*(K-1) + E_K. Low bytes and offsets are common and cancel in the selection.",
+    "why_adaptation_is_required": "The fixed 4-bit c_fc and 5-bit c_proj widths were selected on the terminal checkpoint. The integrated gate shows a 6.535 MB increase in block-coded exceptions by update 8, so endpoint entropy is not a uniform-in-time model of optimizer history.",
+    "why_this_is_not_a_model_guess": "The decoded momentum field, Pair-VQ weights, feedback codec, attention mapping, optimizer, data order, schedule, and loss are unchanged. Only a lossless container parameter is selected from a preregistered finite set."
+  },
+  "frozen_candidate": {
+    "granularity": "adaptive_block",
+    "block_words": 4096,
+    "c_fc_dictionary_sizes": [8, 16, 32],
+    "c_proj_dictionary_sizes": [16, 32, 64],
+    "selection": "independently minimize exact persistent bytes for each scope after its block histograms are known; ties choose the smaller dictionary",
+    "special_values": "all binary16 words including signed zero, subnormal, infinity, and NaN payloads remain bit exact",
+    "persistent_dense_shadow": false,
+    "cpu_codec": false,
+    "timed_host_tensor_transfer": false
+  },
+  "required_tests": {
+    "random_and_special_word_roundtrip": true,
+    "all_registered_dictionary_sizes_exercised": true,
+    "adaptive_choice_matches_bruteforce_minimum": true,
+    "three_step_raw_fp16_transition_identity": true,
+    "packed_state_resume_identity": true,
+    "no_per_matrix_raw_ambient_state": true
+  },
+  "exact_config_gate": {
+    "updates": 9,
+    "capacity_observation": "record total and per-scope packed bytes after every update",
+    "maximum_persistent_momentum_bytes": 99090432,
+    "minimum_mfu_fraction": 0.2,
+    "minimum_timed_updates": 7,
+    "reference_probe_steps": [0, 8],
+    "reference_matrix_records_per_probe": 24,
+    "decoded_momentum_bit_exact": true,
+    "prepolar_request_bit_exact": true,
+    "packed_resume_transition_bit_exact": true,
+    "all_losses_finite": true
+  },
+  "decision_rule": {
+    "pass": "All identity tests pass, every one of nine updates is at or below 99,090,432 bytes, median MFU is at least 20%, and no hidden raw state exists.",
+    "failure": "Reject the high-byte-table family as the persistent FP16 owner if adaptive widths still exceed the ceiling or break exact transition/resume identity.",
+    "after_pass": "Because decoding is bit exact, do not rerun the 238-update loss endpoint. Seal the retained 5.368512 CE and 0.007512 gap with the measured adaptive state and systems numbers; then run a second seed of the already-working full-MLP structure rather than scale model size.",
+    "forbidden": [
+      "language-model endpoint before this gate passes",
+      "model-size scale-up",
+      "horizon transfer",
+      "loss or architecture changes",
+      "using a raw FP16 shadow as persistent state"
+    ]
+  }
+}

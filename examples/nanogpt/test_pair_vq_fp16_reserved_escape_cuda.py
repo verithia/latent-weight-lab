@@ -24,7 +24,7 @@ def _fp16_from_words(words: np.ndarray) -> torch.Tensor:
 
 
 @pytest.mark.parametrize("scope", ["c_fc", "c_proj"])
-@pytest.mark.parametrize("granularity", ["scope", "block"])
+@pytest.mark.parametrize("granularity", ["scope", "block", "adaptive_block"])
 def test_reserved_escape_cuda_random_words_are_bit_exact(
     scope: str, granularity: str
 ) -> None:
@@ -66,6 +66,40 @@ def test_reserved_escape_cuda_preserves_special_payloads(scope: str) -> None:
     assert torch.equal(recovered.view(torch.uint8), source.view(torch.uint8))
 
 
+@pytest.mark.parametrize("scope", ["c_fc", "c_proj"])
+def test_adaptive_reserved_escape_selects_exact_minimum(scope: str) -> None:
+    rng = np.random.default_rng(20260823)
+    source = _fp16_from_words(
+        rng.integers(0, 65536, size=16384, dtype=np.uint16)
+    )
+    state = encode_reserved_escape(
+        source,
+        scope=scope,
+        granularity="adaptive_block",
+        block_words=4096,
+    )
+    candidates = (8, 16, 32) if scope == "c_fc" else (16, 32, 64)
+    high = source.view(torch.uint8)[1::2].reshape(-1, 4096).long()
+    counts = torch.stack(
+        [torch.bincount(block, minlength=256) for block in high], dim=0
+    )
+    costs = {}
+    for dictionary_size in candidates:
+        retained = torch.topk(
+            counts, k=dictionary_size - 1, dim=1, sorted=False
+        ).values.sum()
+        exceptions = source.numel() - int(retained)
+        code_bits = dictionary_size.bit_length() - 1
+        costs[dictionary_size] = (
+            (source.numel() * code_bits + 7) // 8
+            + counts.shape[0] * (dictionary_size - 1)
+            + exceptions
+        )
+    assert state.dictionary_size == min(costs, key=costs.get)
+    recovered = decode_reserved_escape(state)
+    assert torch.equal(recovered.view(torch.uint8), source.view(torch.uint8))
+
+
 def test_reserved_escape_cuda_rejects_nonregistered_shapes() -> None:
     source = torch.zeros(4095, device="cuda", dtype=torch.float16)
     with pytest.raises(ValueError, match="complete decode blocks"):
@@ -99,7 +133,7 @@ def _make_optimizer_pair(
     return modules, optimizer
 
 
-@pytest.mark.parametrize("granularity", ["scope", "block"])
+@pytest.mark.parametrize("granularity", ["scope", "block", "adaptive_block"])
 def test_reserved_escape_optimizer_transition_and_resume_are_bit_exact(
     granularity: str,
 ) -> None:

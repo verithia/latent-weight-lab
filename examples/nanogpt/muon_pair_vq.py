@@ -2303,9 +2303,15 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError(
                 "FP16 ambient reference probes require FP16 ambient momentum"
             )
-        if self.fp16_reserved_escape_granularity not in {"", "scope", "block"}:
+        if self.fp16_reserved_escape_granularity not in {
+            "",
+            "scope",
+            "block",
+            "adaptive_block",
+        }:
             raise ValueError(
-                "FP16 reserved-escape granularity must be '', 'scope', or 'block'"
+                "FP16 reserved-escape granularity must be '', 'scope', "
+                "'block', or 'adaptive_block'"
             )
         if self.fp16_reserved_escape_granularity and (
             not self.fp16_ambient_momentum
@@ -3422,7 +3428,8 @@ class MuonPairVQ(torch.optim.Optimizer):
                     f"reserved-escape {scope} element count does not match model"
                 )
             if state.block_local != (
-                self.fp16_reserved_escape_granularity == "block"
+                self.fp16_reserved_escape_granularity
+                in {"block", "adaptive_block"}
             ):
                 raise ValueError(
                     f"reserved-escape {scope} granularity does not match model"
@@ -3433,18 +3440,27 @@ class MuonPairVQ(torch.optim.Optimizer):
     def _store_reserved_escape_momentum(
         self, decoded: dict[str, torch.Tensor]
     ) -> None:
-        payload = {
+        encoded = {
             scope: encode_reserved_escape(
                 values,
                 scope=scope,
                 granularity=self.fp16_reserved_escape_granularity,
                 block_words=4096,
-            ).to_payload()
+            )
             for scope, values in decoded.items()
         }
+        payload = {scope: state.to_payload() for scope, state in encoded.items()}
         self.state[self._reserved_escape_owner][
             "reserved_escape_momentum"
         ] = payload
+        self._reserved_escape_summary = {
+            scope: {
+                "dictionary_size": state.dictionary_size,
+                "bytes": state.persistent_tensor_bytes,
+                "exceptions": state.exception_high_bytes.numel(),
+            }
+            for scope, state in encoded.items()
+        }
 
     def load_state_dict(self, state_dict):
         result = super().load_state_dict(state_dict)
@@ -4006,6 +4022,7 @@ class MuonPairVQ(torch.optim.Optimizer):
         if decoded_reserved_momentum is not None:
             self._store_reserved_escape_momentum(decoded_reserved_momentum)
             momentum_bytes = self.reserved_escape_momentum_bytes
+            summary = self._reserved_escape_summary
             for diagnostics in self._diagnostics:
                 diagnostics.update(
                     {
@@ -4019,6 +4036,20 @@ class MuonPairVQ(torch.optim.Optimizer):
                         )
                         * 2,
                         "persistent_raw_ambient_momentum_tensors": 0,
+                        "reserved_escape_c_fc_dictionary_size": summary[
+                            "c_fc"
+                        ]["dictionary_size"],
+                        "reserved_escape_c_fc_bytes": summary["c_fc"]["bytes"],
+                        "reserved_escape_c_fc_exceptions": summary["c_fc"][
+                            "exceptions"
+                        ],
+                        "reserved_escape_c_proj_dictionary_size": summary[
+                            "c_proj"
+                        ]["dictionary_size"],
+                        "reserved_escape_c_proj_bytes": summary["c_proj"]["bytes"],
+                        "reserved_escape_c_proj_exceptions": summary["c_proj"][
+                            "exceptions"
+                        ],
                     }
                 )
         return loss

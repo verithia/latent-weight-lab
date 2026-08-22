@@ -1,0 +1,90 @@
+{
+  "schema_version": "mai_pair_vq_fp16_reserved_escape_integrated_gate_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_FIXED_WIDTH_INTEGRATED_CAPACITY_PASS_IDENTITY_AND_SPEED",
+  "passed": false,
+  "decision": {
+    "scope_selected": false,
+    "block_selected": false,
+    "loss_endpoint_authorized": false,
+    "scale_up_authorized": false,
+    "next_authorized_work": "Keep the bit-exact low-byte plus reserved-escape representation and 4096-word locality fixed. Add only per-scope online selection of the byte-minimizing registered dictionary width, then repeat the nine-update identity, capacity, resume, and MFU gate.",
+    "reason": "Both integrated layouts preserve the FP16 optimizer field and exceed 20% MFU, but scope-wide coding reaches 103,853,140 bytes and block-local coding reaches 99,727,593 bytes at update 8. The latter misses the preregistered 99,090,432-byte ceiling by 637,161 bytes, so neither can own a loss endpoint."
+  },
+  "identity": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "9b193d1d43e38bf5d4952dce3f1d35236b668dce",
+    "implementation_commit": "d1290682e",
+    "identity_gate_amendment_sha256": "502bcb03d729ebfa7b3ceff77a1bd625f0f9ec477e72599ace60d1579971d8e6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b"
+  },
+  "registered_limits": {
+    "updates": 9,
+    "matrix_records_per_reference_probe": 24,
+    "persistent_momentum_bytes_max": 99090432,
+    "minimum_mfu_fraction": 0.2,
+    "raw_fp16_momentum_bytes": 113246208,
+    "persistent_raw_ambient_momentum_tensors": 0
+  },
+  "scope_control": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_reserved_escape_scope_gate9.json",
+    "config_sha256": "bc723d79a54a052244ea9c2fe6c6c20c1c963ad167077fc81ea78a15c4997f7f",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_reserved_escape_scope_gate9/launcher.log",
+    "log_sha256": "6f159bb5042b50b5e063b3b7f787ea44dc7c1cdc5dd62f426620705674a1481e",
+    "exit_code": 0,
+    "reference_records": 48,
+    "probe0_momentum_bytes": 89237885,
+    "probe8_momentum_bytes": 103853140,
+    "probe8_excess_bytes": 4762708,
+    "probe8_bits_per_coordinate": 14.6729,
+    "minimum_reference_prepolar_cosine": 0.9999998830335908,
+    "minimum_requested_update_cosine": 0.9999964693171304,
+    "minimum_conserved_step_energy_recovery": 0.999992884717715,
+    "median_tokens_per_second": 159558.39,
+    "mfu_fraction": 0.285887,
+    "peak_mib": 31976.16,
+    "terminal_validation_ce": 8.3675,
+    "capacity_passed": false,
+    "identity_passed": true,
+    "speed_passed": true
+  },
+  "block_primary": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_reserved_escape_block_gate9.json",
+    "config_sha256": "d8e77facfd3589f6af02aa95682b36625696481e886a9c1fdf69744d1d526287",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_reserved_escape_block_gate9/launcher.log",
+    "log_sha256": "0bd3025f68594a8c6f773539756eb0a45b0463a6f4f9d6101490f5bb2afa6791",
+    "exit_code": 0,
+    "reference_records": 48,
+    "probe0_momentum_bytes": 89053713,
+    "probe8_momentum_bytes": 99727593,
+    "probe8_excess_bytes": 637161,
+    "probe8_bits_per_coordinate": 14.09,
+    "minimum_reference_prepolar_cosine": 0.9999998830332704,
+    "minimum_requested_update_cosine": 0.9999956771451428,
+    "minimum_conserved_step_energy_recovery": 0.9999913830879239,
+    "median_tokens_per_second": 159803.12,
+    "mfu_fraction": 0.286326,
+    "peak_mib": 31971.41,
+    "terminal_validation_ce": 8.3676,
+    "capacity_passed": false,
+    "identity_passed": true,
+    "speed_passed": true
+  },
+  "implementation_verification": {
+    "focused_tests_passed": 69,
+    "decoded_momentum_words_bit_exact": true,
+    "packed_resume_transition_bit_exact": true,
+    "prepolar_request_bit_exact": true,
+    "single_evaluation_polar_output_bit_exact": true,
+    "raw_raw_atomic_nondeterminism_amendment_applied": true,
+    "hidden_raw_ambient_momentum_tensors": 0
+  },
+  "interpretation": {
+    "loss": "The two nine-update loss traces agree to displayed precision and the codec remains exact; capacity alone rejects them.",
+    "systems": "Encode/decode adds roughly 430-510 ms to a 1.63-1.70 s update while preserving about 28.6% MFU, comfortably above the project floor.",
+    "failure_localization": "The high-byte distribution broadens during warmup. A fixed c_fc=16/c_proj=32 dictionary pair that passed on the terminal checkpoint is not a uniform-in-time capacity certificate.",
+    "nonconclusion": "This does not reopen the model-geometry problem and does not invalidate the FP16 ambient-momentum loss closure. It rejects only the fixed-width persistent container."
+  }
+}

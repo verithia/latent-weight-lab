@@ -190,7 +190,7 @@ class ReservedEscapeState:
         )
         if state.n_elements <= 0 or state.n_elements % state.block_words:
             raise ValueError("reserved-escape payload has an invalid element count")
-        if state.dictionary_size not in {16, 32}:
+        if state.dictionary_size not in {8, 16, 32, 64}:
             raise ValueError("reserved-escape payload has an invalid dictionary size")
         if state.low_bytes.numel() != state.n_elements:
             raise ValueError("reserved-escape payload low-byte length mismatch")
@@ -228,12 +228,48 @@ def _validate_input(values: torch.Tensor, *, block_words: int) -> torch.Tensor:
     return flat
 
 
-def _dictionary_size(scope: str) -> int:
+def _dictionary_sizes(scope: str, *, granularity: str) -> tuple[int, ...]:
     if scope == "c_fc":
-        return 16
+        return (8, 16, 32) if granularity == "adaptive_block" else (16,)
     if scope == "c_proj":
-        return 32
+        return (16, 32, 64) if granularity == "adaptive_block" else (32,)
     raise ValueError(f"unknown MLP scope {scope!r}")
+
+
+def _select_dictionary_size(
+    counts: torch.Tensor,
+    *,
+    n_elements: int,
+    candidates: tuple[int, ...],
+) -> int:
+    """Choose the candidate with minimum exact variable bytes.
+
+    Low literal bytes and block offsets are common to all candidates, so the
+    comparison includes only packed indices, dictionaries, and escaped high
+    bytes. Candidate order is ascending and torch.argmin therefore breaks
+    exact ties toward the smaller dictionary.
+    """
+
+    if len(candidates) == 1:
+        return candidates[0]
+    regions = counts.shape[0]
+    costs = []
+    for dictionary_size in candidates:
+        retained = torch.topk(
+            counts,
+            k=dictionary_size - 1,
+            dim=1,
+            largest=True,
+            sorted=False,
+        ).values.sum(dtype=torch.int64)
+        exceptions = n_elements - retained
+        code_bits = dictionary_size.bit_length() - 1
+        fixed = (
+            (n_elements * code_bits + 7) // 8
+            + regions * (dictionary_size - 1)
+        )
+        costs.append(exceptions + fixed)
+    return candidates[int(torch.argmin(torch.stack(costs)).item())]
 
 
 @torch.no_grad()
@@ -247,10 +283,10 @@ def encode_reserved_escape(
     """Encode FP16 words without changing any bit, entirely on the GPU."""
 
     flat = _validate_input(values, block_words=block_words)
-    if granularity not in {"scope", "block"}:
-        raise ValueError("granularity must be 'scope' or 'block'")
-    dictionary_size = _dictionary_size(scope)
-    code_bits = dictionary_size.bit_length() - 1
+    if granularity not in {"scope", "block", "adaptive_block"}:
+        raise ValueError(
+            "granularity must be 'scope', 'block', or 'adaptive_block'"
+        )
     n_elements = flat.numel()
     n_blocks = n_elements // block_words
     raw = flat.view(torch.uint8)
@@ -266,11 +302,18 @@ def encode_reserved_escape(
         block_words=block_words,
         TILE=256,
     )
+    block_local = granularity in {"block", "adaptive_block"}
     counts = (
         block_counts
-        if granularity == "block"
+        if block_local
         else block_counts.sum(dim=0, dtype=torch.int32, keepdim=True)
     )
+    dictionary_size = _select_dictionary_size(
+        counts,
+        n_elements=n_elements,
+        candidates=_dictionary_sizes(scope, granularity=granularity),
+    )
+    code_bits = dictionary_size.bit_length() - 1
     symbols = torch.arange(256, device=flat.device, dtype=torch.int64)
     scores = counts.to(torch.int64) * 512 + (255 - symbols)
     top = torch.topk(
@@ -310,7 +353,7 @@ def encode_reserved_escape(
         block_words=block_words,
         code_bits=code_bits,
         dictionary_size=dictionary_size,
-        block_local=granularity == "block",
+        block_local=block_local,
         GROUP_TILE=256,
     )
     high = raw[1::2]
@@ -333,7 +376,7 @@ def encode_reserved_escape(
         n_elements=n_elements,
         block_words=block_words,
         dictionary_size=dictionary_size,
-        block_local=granularity == "block",
+        block_local=block_local,
     )
 
 

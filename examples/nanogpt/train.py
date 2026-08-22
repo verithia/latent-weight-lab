@@ -2610,9 +2610,15 @@ def parse_args() -> argparse.Namespace:
             "",
         )
     )
-    if reserved_escape_granularity not in {"", "scope", "block"}:
+    if reserved_escape_granularity not in {
+        "",
+        "scope",
+        "block",
+        "adaptive_block",
+    }:
         raise ValueError(
-            "FP16 reserved-escape granularity must be '', 'scope', or 'block'"
+            "FP16 reserved-escape granularity must be '', 'scope', 'block', "
+            "or 'adaptive_block'"
         )
     if reserved_escape_granularity and not (
         namespace.block_fht_mlp_pair_vq
@@ -5175,6 +5181,42 @@ def main() -> None:
         )
         if consume_givens_diagnostics is not None:
             givens_diagnostics = consume_givens_diagnostics()
+            reserved_escape_rows = [
+                row
+                for row in givens_diagnostics
+                if row.get("reserved_escape_momentum", False)
+            ]
+            if reserved_escape_rows:
+                row = reserved_escape_rows[0]
+                print(
+                    "pair_vq_reserved_escape "
+                    + json.dumps(
+                        {
+                            "step": iter_num,
+                            "granularity": row["reserved_escape_granularity"],
+                            "momentum_bytes": row[
+                                "reserved_escape_momentum_bytes"
+                            ],
+                            "c_fc_dictionary_size": row[
+                                "reserved_escape_c_fc_dictionary_size"
+                            ],
+                            "c_fc_bytes": row["reserved_escape_c_fc_bytes"],
+                            "c_fc_exceptions": row[
+                                "reserved_escape_c_fc_exceptions"
+                            ],
+                            "c_proj_dictionary_size": row[
+                                "reserved_escape_c_proj_dictionary_size"
+                            ],
+                            "c_proj_bytes": row["reserved_escape_c_proj_bytes"],
+                            "c_proj_exceptions": row[
+                                "reserved_escape_c_proj_exceptions"
+                            ],
+                        },
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ),
+                    flush=True,
+                )
             stochastic_rows = [
                 row
                 for row in givens_diagnostics
