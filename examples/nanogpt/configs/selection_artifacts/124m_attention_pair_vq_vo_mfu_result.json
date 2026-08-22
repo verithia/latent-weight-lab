@@ -1,0 +1,77 @@
+{
+  "schema_version": "mai_124m_attention_pair_vq_vo_mfu_result_v1",
+  "status": "passed",
+  "candidate": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4",
+  "scientific_scope": "124M/0.5TPP compact full replacement only; no model-size or horizon transfer is implied",
+  "theory_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_plan.json",
+    "sha256": "a716205318d6ef696ec52f89ab48c0afb2cf838de9bdceb55ba43d33aed14d87"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "git_commit": "c442112e05b7b6482bd362cbf7b3b29c94133b3a",
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "config": {
+      "path": "examples/nanogpt/configs/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4.json",
+      "sha256": "16f72576e2200b770a642107af7fe584588e7f1792db37173df0aac7ba00a3d5"
+    },
+    "dataset_manifest": {
+      "path": "/home/pro6000-9980x/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "certificate": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_mfu.json",
+      "sha256": "71bffab0f573f124bc23b1860185c70322426fcbe00b317706b7eb8406865bf6"
+    },
+    "log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_seed2_0p5tpp_lr24e4_mfu.log",
+      "sha256": "20615d0da5ab48946a304cf7eaf3730e62a569ae041b8dc884e0a3fd91bda694"
+    }
+  },
+  "performance": {
+    "tokens_per_second": 140151.78,
+    "iteration_milliseconds": 1870.6,
+    "model_tflops": 104.67311707625471,
+    "mfu_fraction": 0.25112288374133734,
+    "minimum_mfu_fraction": 0.2,
+    "peak_mib": 31764.95,
+    "optimizer_milliseconds": 669.965,
+    "tokens_per_second_ratio_vs_qualified_seed2_mlp_candidate_preflight": 0.880719184958318,
+    "throughput_degradation_fraction_vs_qualified_seed2_mlp_candidate_preflight": 0.11928081504168198,
+    "passed": true
+  },
+  "compact_state": {
+    "pair_vq_modules": 48,
+    "required_pair_vq_modules": 48,
+    "attention_pair_vq_modules": 24,
+    "required_attention_pair_vq_modules": 24,
+    "pair_vq_elements": 70778880,
+    "codec_bytes": 88627584,
+    "optimizer_momentum_bytes": 123863040,
+    "optimizer_momentum_byte_ceiling": 123863040,
+    "compact_feedback_bytes": 107505408,
+    "persistent_training_bytes": 319996032,
+    "persistent_training_bytes_exact_gate": 319996032,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "dense_master_weight": false,
+    "forward_visible_feedback": true,
+    "inference_matrix_storage_reduction_vs_dense_bf16": 1.5972201160306931,
+    "training_state_reduction_vs_dense_fp32_weight_plus_momentum": 1.7694939417248774,
+    "passed": true
+  },
+  "stability": {
+    "logged_loss_values": 13,
+    "finite_loss_values": 13,
+    "all_logged_losses_finite": true,
+    "passed": true
+  },
+  "authorization": {
+    "launch_124m_0p5tpp_scientific_endpoint": true,
+    "launch_124m_5tpp": false,
+    "launch_124m_20tpp": false,
+    "scale_model_size": false,
+    "automatic_sweep": false,
+    "next_on_scientific_pass": "register and performance-gate the identical 124M/5TPP candidate only"
+  }
+}
