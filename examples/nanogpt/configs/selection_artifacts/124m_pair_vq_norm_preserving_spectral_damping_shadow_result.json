@@ -1,0 +1,3118 @@
+{
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "persistent_pair_vq_matrix_bytes": 70855872,
+  "projection_refresh_history": [
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.7490469953159755,
+        "worst_matrix_requested_step_energy_recovery": 0.5225633227097524
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.7582701387906052,
+        "worst_matrix_requested_step_energy_recovery": 0.7542069529407183
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.5271162124278044,
+        "worst_matrix_requested_step_energy_recovery": 0.5225633227097524
+      },
+      "code_changes": 30668734,
+      "optimizer_step": 0,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.7288041326039791,
+        "worst_matrix_requested_step_energy_recovery": 0.4372702833293288
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.744285996157716,
+        "worst_matrix_requested_step_energy_recovery": 0.7404427870565862
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.4440521160440897,
+        "worst_matrix_requested_step_energy_recovery": 0.4372702833293288
+      },
+      "code_changes": 22185281,
+      "optimizer_step": 8,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.5677905446605198,
+        "worst_matrix_requested_step_energy_recovery": 0.4475209403149897
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.5769545330303176,
+        "worst_matrix_requested_step_energy_recovery": 0.5451526184554158
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.4945943076682311,
+        "worst_matrix_requested_step_energy_recovery": 0.4475209403149897
+      },
+      "code_changes": 16173545,
+      "optimizer_step": 16,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.5011283601892293,
+        "worst_matrix_requested_step_energy_recovery": 0.4279599769481567
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.49997159368349564,
+        "worst_matrix_requested_step_energy_recovery": 0.4279599769481567
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.5087136669180455,
+        "worst_matrix_requested_step_energy_recovery": 0.44823747277631254
+      },
+      "code_changes": 14055977,
+      "optimizer_step": 24,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.47157862776169734,
+        "worst_matrix_requested_step_energy_recovery": 0.38346426877846274
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.46417380880883663,
+        "worst_matrix_requested_step_energy_recovery": 0.38346426877846274
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.5195506585609853,
+        "worst_matrix_requested_step_energy_recovery": 0.4682730019395638
+      },
+      "code_changes": 13453168,
+      "optimizer_step": 32,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.4629620456915795,
+        "worst_matrix_requested_step_energy_recovery": 0.3808996580006958
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.4533417060870111,
+        "worst_matrix_requested_step_energy_recovery": 0.3808996580006958
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.527319689890827,
+        "worst_matrix_requested_step_energy_recovery": 0.48956278601893455
+      },
+      "code_changes": 13296921,
+      "optimizer_step": 40,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.45393181566539353,
+        "worst_matrix_requested_step_energy_recovery": 0.3875042780831667
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.44367175940469805,
+        "worst_matrix_requested_step_energy_recovery": 0.3875042780831667
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.5235658132511005,
+        "worst_matrix_requested_step_energy_recovery": 0.5074892453608357
+      },
+      "code_changes": 13065843,
+      "optimizer_step": 48,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.44231335239515357,
+        "worst_matrix_requested_step_energy_recovery": 0.38966720635335117
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.43112793338046174,
+        "worst_matrix_requested_step_energy_recovery": 0.38966720635335117
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.5173595642191783,
+        "worst_matrix_requested_step_energy_recovery": 0.5110248244508462
+      },
+      "code_changes": 12813566,
+      "optimizer_step": 56,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.45517353232794366,
+        "worst_matrix_requested_step_energy_recovery": 0.41461338908860623
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.4440525229969745,
+        "worst_matrix_requested_step_energy_recovery": 0.41461338908860623
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.5284024003010461,
+        "worst_matrix_requested_step_energy_recovery": 0.5202311456833824
+      },
+      "code_changes": 13003239,
+      "optimizer_step": 64,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.4391730377498364,
+        "worst_matrix_requested_step_energy_recovery": 0.40583062094164224
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.4283975962954091,
+        "worst_matrix_requested_step_energy_recovery": 0.40583062094164224
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.509522438912158,
+        "worst_matrix_requested_step_energy_recovery": 0.4963900218247894
+      },
+      "code_changes": 12519722,
+      "optimizer_step": 72,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.4215030413209905,
+        "worst_matrix_requested_step_energy_recovery": 0.38895000295139537
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.4113237849800174,
+        "worst_matrix_requested_step_energy_recovery": 0.38895000295139537
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.4876221764153874,
+        "worst_matrix_requested_step_energy_recovery": 0.4738925430148858
+      },
+      "code_changes": 12002608,
+      "optimizer_step": 80,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.39536044402194226,
+        "worst_matrix_requested_step_energy_recovery": 0.3570186606286039
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.38574059060100174,
+        "worst_matrix_requested_step_energy_recovery": 0.3570186606286039
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.4576252579508081,
+        "worst_matrix_requested_step_energy_recovery": 0.4437358214947349
+      },
+      "code_changes": 11333329,
+      "optimizer_step": 88,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.3724395333924112,
+        "worst_matrix_requested_step_energy_recovery": 0.33271281635734906
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.3634006281999228,
+        "worst_matrix_requested_step_energy_recovery": 0.33271281635734906
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.4306981605620591,
+        "worst_matrix_requested_step_energy_recovery": 0.4183385488978961
+      },
+      "code_changes": 10733674,
+      "optimizer_step": 96,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.3393067931860405,
+        "worst_matrix_requested_step_energy_recovery": 0.30045829239798016
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.3309840994166412,
+        "worst_matrix_requested_step_energy_recovery": 0.30045829239798016
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.3929713911111873,
+        "worst_matrix_requested_step_energy_recovery": 0.3792877021533094
+      },
+      "code_changes": 9946786,
+      "optimizer_step": 104,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.3098443218735766,
+        "worst_matrix_requested_step_energy_recovery": 0.27009414865394354
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.3024035120084949,
+        "worst_matrix_requested_step_energy_recovery": 0.27009414865394354
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.3578990054261908,
+        "worst_matrix_requested_step_energy_recovery": 0.3476568745146962
+      },
+      "code_changes": 9242770,
+      "optimizer_step": 112,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.2831028714213455,
+        "worst_matrix_requested_step_energy_recovery": 0.2441440782954566
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.2764500552064335,
+        "worst_matrix_requested_step_energy_recovery": 0.2441440782954566
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.3261488789104625,
+        "worst_matrix_requested_step_energy_recovery": 0.3160674811471307
+      },
+      "code_changes": 8601167,
+      "optimizer_step": 120,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.2563925448560761,
+        "worst_matrix_requested_step_energy_recovery": 0.22173602466980324
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.2502437566950009,
+        "worst_matrix_requested_step_energy_recovery": 0.22173602466980324
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.29614054558506997,
+        "worst_matrix_requested_step_energy_recovery": 0.2871714337928477
+      },
+      "code_changes": 7980332,
+      "optimizer_step": 128,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.2246476177382577,
+        "worst_matrix_requested_step_energy_recovery": 0.1952855503641635
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.21975965535828268,
+        "worst_matrix_requested_step_energy_recovery": 0.1952855503641635
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.256496216100494,
+        "worst_matrix_requested_step_energy_recovery": 0.25208417288361784
+      },
+      "code_changes": 7238769,
+      "optimizer_step": 136,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.20071902399136132,
+        "worst_matrix_requested_step_energy_recovery": 0.1783751977530602
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.19615060686622232,
+        "worst_matrix_requested_step_energy_recovery": 0.1783751977530602
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.23042446448880427,
+        "worst_matrix_requested_step_energy_recovery": 0.22584009727875154
+      },
+      "code_changes": 6688855,
+      "optimizer_step": 144,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.16976591213133063,
+        "worst_matrix_requested_step_energy_recovery": 0.15048375763523936
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.16602587713484918,
+        "worst_matrix_requested_step_energy_recovery": 0.15048375763523936
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.1941826274165236,
+        "worst_matrix_requested_step_energy_recovery": 0.19077293093547887
+      },
+      "code_changes": 5977527,
+      "optimizer_step": 152,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.142505055543517,
+        "worst_matrix_requested_step_energy_recovery": 0.1258126063618954
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.13931577548184637,
+        "worst_matrix_requested_step_energy_recovery": 0.1258126063618954
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.16335600385243465,
+        "worst_matrix_requested_step_energy_recovery": 0.1592655643180917
+      },
+      "code_changes": 5339389,
+      "optimizer_step": 160,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.11612139040814906,
+        "worst_matrix_requested_step_energy_recovery": 0.10246067656166069
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.11331888426199821,
+        "worst_matrix_requested_step_energy_recovery": 0.10246067656166069
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.13444873076338537,
+        "worst_matrix_requested_step_energy_recovery": 0.1306486240096314
+      },
+      "code_changes": 4702064,
+      "optimizer_step": 168,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.09298223992641674,
+        "worst_matrix_requested_step_energy_recovery": 0.08119588668191435
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.09062572504913924,
+        "worst_matrix_requested_step_energy_recovery": 0.08119588668191435
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.1084062197746749,
+        "worst_matrix_requested_step_energy_recovery": 0.1052018877409977
+      },
+      "code_changes": 4109032,
+      "optimizer_step": 176,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.07543924876045771,
+        "worst_matrix_requested_step_energy_recovery": 0.06644165929950718
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.07343636082827942,
+        "worst_matrix_requested_step_energy_recovery": 0.06644165929950718
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.0885561758526151,
+        "worst_matrix_requested_step_energy_recovery": 0.08555448155108714
+      },
+      "code_changes": 3616697,
+      "optimizer_step": 184,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.060148850430264966,
+        "worst_matrix_requested_step_energy_recovery": 0.05307986721988811
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.05851435789676951,
+        "worst_matrix_requested_step_energy_recovery": 0.05307986721988811
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.0708601149903374,
+        "worst_matrix_requested_step_energy_recovery": 0.06814626165558124
+      },
+      "code_changes": 3156698,
+      "optimizer_step": 192,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.04721680110568993,
+        "worst_matrix_requested_step_energy_recovery": 0.041372965937744866
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.04587053594711343,
+        "worst_matrix_requested_step_energy_recovery": 0.041372965937744866
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.05604223610386594,
+        "worst_matrix_requested_step_energy_recovery": 0.054107264955317924
+      },
+      "code_changes": 2733091,
+      "optimizer_step": 200,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.037685415081080365,
+        "worst_matrix_requested_step_energy_recovery": 0.032970515202639494
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.03660430224965583,
+        "worst_matrix_requested_step_energy_recovery": 0.032970515202639494
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.04477336076264837,
+        "worst_matrix_requested_step_energy_recovery": 0.04297114677262526
+      },
+      "code_changes": 2381753,
+      "optimizer_step": 208,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.03032614872363104,
+        "worst_matrix_requested_step_energy_recovery": 0.02680258387088763
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.02941392094163786,
+        "worst_matrix_requested_step_energy_recovery": 0.02680258387088763
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.03630492982394684,
+        "worst_matrix_requested_step_energy_recovery": 0.0351662787012057
+      },
+      "code_changes": 2084789,
+      "optimizer_step": 216,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.02539071381031588,
+        "worst_matrix_requested_step_energy_recovery": 0.02228235787611821
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.024601066007616135,
+        "worst_matrix_requested_step_energy_recovery": 0.02228235787611821
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.030563784963177243,
+        "worst_matrix_requested_step_energy_recovery": 0.02912275951979937
+      },
+      "code_changes": 1869850,
+      "optimizer_step": 224,
+      "refresh_codes": true
+    },
+    {
+      "aggregate": {
+        "request_weighted_energy_recovery": 0.022407475335101124,
+        "worst_matrix_requested_step_energy_recovery": 0.019828737228834714
+      },
+      "c_fc": {
+        "request_weighted_energy_recovery": 0.02169298489776028,
+        "worst_matrix_requested_step_energy_recovery": 0.019828737228834714
+      },
+      "c_proj": {
+        "request_weighted_energy_recovery": 0.02708506862603932,
+        "worst_matrix_requested_step_energy_recovery": 0.026072904017783727
+      },
+      "code_changes": 1724884,
+      "optimizer_step": 232,
+      "refresh_codes": true
+    }
+  ],
+  "records": [
+    {
+      "dense_losses": {
+        "train": 10.995710372924805,
+        "val": 10.997031211853027
+      },
+      "last_projection_update": null,
+      "projection": {
+        "aggregate": {
+          "weighted_energy_recovery": 0.9826839360255576,
+          "worst_matrix_energy_recovery": 0.9826226783644825
+        },
+        "c_fc": {
+          "weighted_energy_recovery": 0.9826821544704126,
+          "worst_matrix_energy_recovery": 0.9826226783644825
+        },
+        "c_proj": {
+          "weighted_energy_recovery": 0.9827266945432376,
+          "worst_matrix_energy_recovery": 0.9826536555810595
+        },
+        "matrices": [
+          {
+            "module": "transformer.h.0.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.39897918701172,
+            "squared_target_norm": 944.7128295898438,
+            "weight_energy_recovery": 0.9826413078415253
+          },
+          {
+            "module": "transformer.h.0.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6773812174797058,
+            "squared_target_norm": 39.289676666259766,
+            "weight_energy_recovery": 0.9827593079160815
+          },
+          {
+            "module": "transformer.h.1.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.389841079711914,
+            "squared_target_norm": 944.167236328125,
+            "weight_energy_recovery": 0.9826409554906267
+          },
+          {
+            "module": "transformer.h.1.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6774003505706787,
+            "squared_target_norm": 39.34598922729492,
+            "weight_energy_recovery": 0.9827834967712349
+          },
+          {
+            "module": "transformer.h.2.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.243011474609375,
+            "squared_target_norm": 943.1556396484375,
+            "weight_energy_recovery": 0.9827780158525438
+          },
+          {
+            "module": "transformer.h.2.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6814697980880737,
+            "squared_target_norm": 39.286075592041016,
+            "weight_energy_recovery": 0.9826536555810595
+          },
+          {
+            "module": "transformer.h.3.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.405017852783203,
+            "squared_target_norm": 944.0475463867188,
+            "weight_energy_recovery": 0.9826226783644825
+          },
+          {
+            "module": "transformer.h.3.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.679146409034729,
+            "squared_target_norm": 39.33686447143555,
+            "weight_energy_recovery": 0.9827351158217531
+          },
+          {
+            "module": "transformer.h.4.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.322917938232422,
+            "squared_target_norm": 941.5384521484375,
+            "weight_energy_recovery": 0.9826635673763656
+          },
+          {
+            "module": "transformer.h.4.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6782718896865845,
+            "squared_target_norm": 39.299461364746094,
+            "weight_energy_recovery": 0.9827409367423281
+          },
+          {
+            "module": "transformer.h.5.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.311458587646484,
+            "squared_target_norm": 943.505126953125,
+            "weight_energy_recovery": 0.9827118495473137
+          },
+          {
+            "module": "transformer.h.5.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.678784966468811,
+            "squared_target_norm": 39.37155532836914,
+            "weight_energy_recovery": 0.9827595084621991
+          },
+          {
+            "module": "transformer.h.6.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.356746673583984,
+            "squared_target_norm": 944.3939819335938,
+            "weight_energy_recovery": 0.9826801663431882
+          },
+          {
+            "module": "transformer.h.6.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6816354990005493,
+            "squared_target_norm": 39.305503845214844,
+            "weight_energy_recovery": 0.9826580139594487
+          },
+          {
+            "module": "transformer.h.7.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.362384796142578,
+            "squared_target_norm": 943.7315063476562,
+            "weight_energy_recovery": 0.9826620339724942
+          },
+          {
+            "module": "transformer.h.7.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6788525581359863,
+            "squared_target_norm": 39.30732727050781,
+            "weight_energy_recovery": 0.9827296179802759
+          },
+          {
+            "module": "transformer.h.8.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.38191032409668,
+            "squared_target_norm": 943.2730712890625,
+            "weight_energy_recovery": 0.9826329078792535
+          },
+          {
+            "module": "transformer.h.8.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6769615411758423,
+            "squared_target_norm": 39.29621887207031,
+            "weight_energy_recovery": 0.982772858035535
+          },
+          {
+            "module": "transformer.h.9.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.284934997558594,
+            "squared_target_norm": 942.7701416015625,
+            "weight_energy_recovery": 0.98272650534955
+          },
+          {
+            "module": "transformer.h.9.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6787611246109009,
+            "squared_target_norm": 39.30616760253906,
+            "weight_energy_recovery": 0.9827314346319773
+          },
+          {
+            "module": "transformer.h.10.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.309371948242188,
+            "squared_target_norm": 943.84521484375,
+            "weight_energy_recovery": 0.9827202896282712
+          },
+          {
+            "module": "transformer.h.10.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6806541681289673,
+            "squared_target_norm": 39.31169891357422,
+            "weight_energy_recovery": 0.9826857096757541
+          },
+          {
+            "module": "transformer.h.11.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 16.313194274902344,
+            "squared_target_norm": 943.2705078125,
+            "weight_energy_recovery": 0.9827057094017139
+          },
+          {
+            "module": "transformer.h.11.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.6794307231903076,
+            "squared_target_norm": 39.297420501708984,
+            "weight_energy_recovery": 0.982710551621047
+          }
+        ]
+      },
+      "shadow_losses": {
+        "train": 10.990177154541016,
+        "val": 10.991436958312988
+      },
+      "shadow_minus_dense_validation_ce": -0.0055942535400390625,
+      "step": 0
+    },
+    {
+      "dense_losses": {
+        "train": 6.210639476776123,
+        "val": 6.220264911651611
+      },
+      "last_projection_update": {
+        "aggregate": {
+          "request_weighted_energy_recovery": 0.005612125625106601,
+          "worst_matrix_requested_step_energy_recovery": 0.003338148036581834
+        },
+        "c_fc": {
+          "request_weighted_energy_recovery": 0.0044719322963432395,
+          "worst_matrix_requested_step_energy_recovery": 0.003338148036581834
+        },
+        "c_proj": {
+          "request_weighted_energy_recovery": 0.013945722310519715,
+          "worst_matrix_requested_step_energy_recovery": 0.01114464333758114
+        },
+        "code_changes": 816512,
+        "matrices": [
+          {
+            "code_changes": 19219,
+            "fast_code_changes": 19219,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.6038961410522461,
+            "refresh_codes": 0,
+            "request_energy": 0.6069480180740356,
+            "requested_step_energy_recovery": 0.005028234594906089,
+            "requested_update_cosine": 0.15175442960815377,
+            "stages": 2
+          },
+          {
+            "code_changes": 59923,
+            "fast_code_changes": 59923,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.08209550380706787,
+            "refresh_codes": 0,
+            "request_energy": 0.08350250124931335,
+            "requested_step_energy_recovery": 0.01684976403335048,
+            "requested_update_cosine": 0.2404480316757258,
+            "stages": 1
+          },
+          {
+            "code_changes": 19718,
+            "fast_code_changes": 19718,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.6088747382164001,
+            "refresh_codes": 0,
+            "request_energy": 0.6122833490371704,
+            "requested_step_energy_recovery": 0.005567048044227252,
+            "requested_update_cosine": 0.1582627782262944,
+            "stages": 2
+          },
+          {
+            "code_changes": 56246,
+            "fast_code_changes": 56246,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.08022284507751465,
+            "refresh_codes": 0,
+            "request_energy": 0.081519216299057,
+            "requested_step_energy_recovery": 0.015902645785829894,
+            "requested_update_cosine": 0.23698094099346953,
+            "stages": 1
+          },
+          {
+            "code_changes": 18055,
+            "fast_code_changes": 18055,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5959469079971313,
+            "refresh_codes": 0,
+            "request_energy": 0.5990616083145142,
+            "requested_step_energy_recovery": 0.005199298826954024,
+            "requested_update_cosine": 0.15385912582059494,
+            "stages": 2
+          },
+          {
+            "code_changes": 55241,
+            "fast_code_changes": 55241,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07984861731529236,
+            "refresh_codes": 0,
+            "request_energy": 0.0811043530702591,
+            "requested_step_energy_recovery": 0.015482963705769515,
+            "requested_update_cosine": 0.23540264465314345,
+            "stages": 1
+          },
+          {
+            "code_changes": 17586,
+            "fast_code_changes": 17586,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5964210629463196,
+            "refresh_codes": 0,
+            "request_energy": 0.5994579792022705,
+            "requested_step_energy_recovery": 0.005066103649153719,
+            "requested_update_cosine": 0.15309041473205026,
+            "stages": 2
+          },
+          {
+            "code_changes": 54394,
+            "fast_code_changes": 54394,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.079897940158844,
+            "refresh_codes": 0,
+            "request_energy": 0.0811222568154335,
+            "requested_step_energy_recovery": 0.015092241077254931,
+            "requested_update_cosine": 0.233199601233107,
+            "stages": 1
+          },
+          {
+            "code_changes": 16002,
+            "fast_code_changes": 16002,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.582901120185852,
+            "refresh_codes": 0,
+            "request_energy": 0.5856918096542358,
+            "requested_step_energy_recovery": 0.004764774617612044,
+            "requested_update_cosine": 0.14877541830126834,
+            "stages": 2
+          },
+          {
+            "code_changes": 53891,
+            "fast_code_changes": 53891,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07978332042694092,
+            "refresh_codes": 0,
+            "request_energy": 0.08096002042293549,
+            "requested_step_energy_recovery": 0.014534334228764823,
+            "requested_update_cosine": 0.2322509346866452,
+            "stages": 1
+          },
+          {
+            "code_changes": 15467,
+            "fast_code_changes": 15467,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5757307410240173,
+            "refresh_codes": 0,
+            "request_energy": 0.5783858299255371,
+            "requested_step_energy_recovery": 0.004590515127007144,
+            "requested_update_cosine": 0.1469254118390263,
+            "stages": 2
+          },
+          {
+            "code_changes": 51884,
+            "fast_code_changes": 51884,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07864055037498474,
+            "refresh_codes": 0,
+            "request_energy": 0.07974505424499512,
+            "requested_step_energy_recovery": 0.01385043725241053,
+            "requested_update_cosine": 0.22905152983229077,
+            "stages": 1
+          },
+          {
+            "code_changes": 15274,
+            "fast_code_changes": 15274,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5785634517669678,
+            "refresh_codes": 0,
+            "request_energy": 0.581146240234375,
+            "requested_step_energy_recovery": 0.004444300399096823,
+            "requested_update_cosine": 0.14487446313516297,
+            "stages": 2
+          },
+          {
+            "code_changes": 53037,
+            "fast_code_changes": 53037,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07902829349040985,
+            "refresh_codes": 0,
+            "request_energy": 0.08012097328901291,
+            "requested_step_energy_recovery": 0.01363787475049183,
+            "requested_update_cosine": 0.22968178981813975,
+            "stages": 1
+          },
+          {
+            "code_changes": 14448,
+            "fast_code_changes": 14448,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5743587017059326,
+            "refresh_codes": 0,
+            "request_energy": 0.5767040252685547,
+            "requested_step_energy_recovery": 0.004066771619167908,
+            "requested_update_cosine": 0.1421569159818216,
+            "stages": 2
+          },
+          {
+            "code_changes": 51640,
+            "fast_code_changes": 51640,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07864831387996674,
+            "refresh_codes": 0,
+            "request_energy": 0.07970456033945084,
+            "requested_step_energy_recovery": 0.013252020398653364,
+            "requested_update_cosine": 0.22727970668844702,
+            "stages": 1
+          },
+          {
+            "code_changes": 13795,
+            "fast_code_changes": 13795,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5605945587158203,
+            "refresh_codes": 0,
+            "request_energy": 0.5628623962402344,
+            "requested_step_energy_recovery": 0.004029115356724122,
+            "requested_update_cosine": 0.14120192284529726,
+            "stages": 2
+          },
+          {
+            "code_changes": 49728,
+            "fast_code_changes": 49728,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07614096999168396,
+            "refresh_codes": 0,
+            "request_energy": 0.07712366431951523,
+            "requested_step_energy_recovery": 0.01274180028272609,
+            "requested_update_cosine": 0.2262808110561102,
+            "stages": 1
+          },
+          {
+            "code_changes": 13000,
+            "fast_code_changes": 13000,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5525413751602173,
+            "refresh_codes": 0,
+            "request_energy": 0.5545992851257324,
+            "requested_step_energy_recovery": 0.0037106249876405206,
+            "requested_update_cosine": 0.13622117677097215,
+            "stages": 2
+          },
+          {
+            "code_changes": 50244,
+            "fast_code_changes": 50244,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07602062821388245,
+            "refresh_codes": 0,
+            "request_energy": 0.07697796821594238,
+            "requested_step_energy_recovery": 0.01243654547200257,
+            "requested_update_cosine": 0.22627936547807587,
+            "stages": 1
+          },
+          {
+            "code_changes": 12700,
+            "fast_code_changes": 12700,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5499932765960693,
+            "refresh_codes": 0,
+            "request_energy": 0.5519599914550781,
+            "requested_step_energy_recovery": 0.0035631474915855943,
+            "requested_update_cosine": 0.1349807659649341,
+            "stages": 2
+          },
+          {
+            "code_changes": 47471,
+            "fast_code_changes": 47471,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.0746246874332428,
+            "refresh_codes": 0,
+            "request_energy": 0.07551427185535431,
+            "requested_step_energy_recovery": 0.011780348273972452,
+            "requested_update_cosine": 0.22508125066889365,
+            "stages": 1
+          },
+          {
+            "code_changes": 12108,
+            "fast_code_changes": 12108,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_fc",
+            "optimizer_step": 59,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5427245497703552,
+            "refresh_codes": 0,
+            "request_energy": 0.5445423126220703,
+            "requested_step_energy_recovery": 0.003338148036581834,
+            "requested_update_cosine": 0.1329632933912163,
+            "stages": 2
+          },
+          {
+            "code_changes": 45441,
+            "fast_code_changes": 45441,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_proj",
+            "optimizer_step": 59,
+            "out_features": 768,
+            "projection_residual_energy": 0.07317011058330536,
+            "refresh_codes": 0,
+            "request_energy": 0.07399475574493408,
+            "requested_step_energy_recovery": 0.01114464333758114,
+            "requested_update_cosine": 0.22243847936373728,
+            "stages": 1
+          }
+        ],
+        "optimizer_step": 59,
+        "refresh_codes": false
+      },
+      "projection": {
+        "aggregate": {
+          "weighted_energy_recovery": 0.9993172931729243,
+          "worst_matrix_energy_recovery": 0.9978991679440045
+        },
+        "c_fc": {
+          "weighted_energy_recovery": 0.9993728137551974,
+          "worst_matrix_energy_recovery": 0.9993329439169094
+        },
+        "c_proj": {
+          "weighted_energy_recovery": 0.9980312570000822,
+          "worst_matrix_energy_recovery": 0.9978991679440045
+        },
+        "matrices": [
+          {
+            "module": "transformer.h.0.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.6038961410522461,
+            "squared_target_norm": 908.4737548828125,
+            "weight_energy_recovery": 0.9993352629750651
+          },
+          {
+            "module": "transformer.h.0.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08209550380706787,
+            "squared_target_norm": 39.077613830566406,
+            "weight_energy_recovery": 0.9978991679440045
+          },
+          {
+            "module": "transformer.h.1.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.6088747382164001,
+            "squared_target_norm": 912.7789306640625,
+            "weight_energy_recovery": 0.9993329439169094
+          },
+          {
+            "module": "transformer.h.1.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08022284507751465,
+            "squared_target_norm": 39.34247589111328,
+            "weight_energy_recovery": 0.9979609101038901
+          },
+          {
+            "module": "transformer.h.2.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5959469079971313,
+            "squared_target_norm": 914.533447265625,
+            "weight_energy_recovery": 0.999348359636513
+          },
+          {
+            "module": "transformer.h.2.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07984861731529236,
+            "squared_target_norm": 39.59473419189453,
+            "weight_energy_recovery": 0.9979833526112764
+          },
+          {
+            "module": "transformer.h.3.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5964210629463196,
+            "squared_target_norm": 917.5940551757812,
+            "weight_energy_recovery": 0.9993500164265645
+          },
+          {
+            "module": "transformer.h.3.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.079897940158844,
+            "squared_target_norm": 39.86504364013672,
+            "weight_energy_recovery": 0.9979957894720978
+          },
+          {
+            "module": "transformer.h.4.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.582901120185852,
+            "squared_target_norm": 918.7116088867188,
+            "weight_energy_recovery": 0.9993655232887585
+          },
+          {
+            "module": "transformer.h.4.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07978332042694092,
+            "squared_target_norm": 39.953224182128906,
+            "weight_energy_recovery": 0.9980030818022785
+          },
+          {
+            "module": "transformer.h.5.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5757307410240173,
+            "squared_target_norm": 921.95458984375,
+            "weight_energy_recovery": 0.99937553243146
+          },
+          {
+            "module": "transformer.h.5.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07864055037498474,
+            "squared_target_norm": 40.034297943115234,
+            "weight_energy_recovery": 0.998035670552117
+          },
+          {
+            "module": "transformer.h.6.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5785634517669678,
+            "squared_target_norm": 922.1939697265625,
+            "weight_energy_recovery": 0.9993726228204046
+          },
+          {
+            "module": "transformer.h.6.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07902829349040985,
+            "squared_target_norm": 39.93464660644531,
+            "weight_energy_recovery": 0.9980210594006445
+          },
+          {
+            "module": "transformer.h.7.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5743587017059326,
+            "squared_target_norm": 924.6873779296875,
+            "weight_energy_recovery": 0.9993788617478571
+          },
+          {
+            "module": "transformer.h.7.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07864831387996674,
+            "squared_target_norm": 39.927764892578125,
+            "weight_energy_recovery": 0.9980302349983385
+          },
+          {
+            "module": "transformer.h.8.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5605945587158203,
+            "squared_target_norm": 923.5686645507812,
+            "weight_energy_recovery": 0.9993930125823525
+          },
+          {
+            "module": "transformer.h.8.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07614096999168396,
+            "squared_target_norm": 39.83641815185547,
+            "weight_energy_recovery": 0.9980886592338338
+          },
+          {
+            "module": "transformer.h.9.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5525413751602173,
+            "squared_target_norm": 923.1968994140625,
+            "weight_energy_recovery": 0.9994014913010313
+          },
+          {
+            "module": "transformer.h.9.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07602062821388245,
+            "squared_target_norm": 39.750572204589844,
+            "weight_energy_recovery": 0.9980875588954389
+          },
+          {
+            "module": "transformer.h.10.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5499932765960693,
+            "squared_target_norm": 924.2101440429688,
+            "weight_energy_recovery": 0.999404904522915
+          },
+          {
+            "module": "transformer.h.10.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.0746246874332428,
+            "squared_target_norm": 39.66450881958008,
+            "weight_energy_recovery": 0.9981186030117584
+          },
+          {
+            "module": "transformer.h.11.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5427245497703552,
+            "squared_target_norm": 925.5621948242188,
+            "weight_energy_recovery": 0.9994136271416386
+          },
+          {
+            "module": "transformer.h.11.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07317011058330536,
+            "squared_target_norm": 39.526695251464844,
+            "weight_energy_recovery": 0.9981488432028581
+          }
+        ]
+      },
+      "shadow_losses": {
+        "train": 6.211000442504883,
+        "val": 6.220434188842773
+      },
+      "shadow_minus_dense_validation_ce": 0.00016927719116210938,
+      "step": 60
+    },
+    {
+      "dense_losses": {
+        "train": 5.7302703857421875,
+        "val": 5.734866142272949
+      },
+      "last_projection_update": {
+        "aggregate": {
+          "request_weighted_energy_recovery": 0.0027125754998531537,
+          "worst_matrix_requested_step_energy_recovery": 0.0019297637871861228
+        },
+        "c_fc": {
+          "request_weighted_energy_recovery": 0.0020775517660232,
+          "worst_matrix_requested_step_energy_recovery": 0.0019297637871861228
+        },
+        "c_proj": {
+          "request_weighted_energy_recovery": 0.00684864136339014,
+          "worst_matrix_requested_step_energy_recovery": 0.006729888306930776
+        },
+        "code_changes": 755429,
+        "matrices": [
+          {
+            "code_changes": 14105,
+            "fast_code_changes": 14105,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.675243616104126,
+            "refresh_codes": 0,
+            "request_energy": 0.6765491962432861,
+            "requested_step_energy_recovery": 0.0019297637871861228,
+            "requested_update_cosine": 0.11941786552783593,
+            "stages": 2
+          },
+          {
+            "code_changes": 47370,
+            "fast_code_changes": 47370,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10331334918737411,
+            "refresh_codes": 0,
+            "request_energy": 0.10403531044721603,
+            "requested_step_energy_recovery": 0.006939579040408761,
+            "requested_update_cosine": 0.1985425494218295,
+            "stages": 1
+          },
+          {
+            "code_changes": 16092,
+            "fast_code_changes": 16092,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7099747061729431,
+            "refresh_codes": 0,
+            "request_energy": 0.7115092873573303,
+            "requested_step_energy_recovery": 0.0021567971236002847,
+            "requested_update_cosine": 0.12830173452108398,
+            "stages": 2
+          },
+          {
+            "code_changes": 46850,
+            "fast_code_changes": 46850,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.1055762767791748,
+            "refresh_codes": 0,
+            "request_energy": 0.10629346966743469,
+            "requested_step_energy_recovery": 0.006747290219275004,
+            "requested_update_cosine": 0.1997960661928253,
+            "stages": 1
+          },
+          {
+            "code_changes": 16037,
+            "fast_code_changes": 16037,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7140470147132874,
+            "refresh_codes": 0,
+            "request_energy": 0.7156522274017334,
+            "requested_step_energy_recovery": 0.0022430066266599935,
+            "requested_update_cosine": 0.129298066535563,
+            "stages": 2
+          },
+          {
+            "code_changes": 47051,
+            "fast_code_changes": 47051,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10749255120754242,
+            "refresh_codes": 0,
+            "request_energy": 0.1082315668463707,
+            "requested_step_energy_recovery": 0.006828097017917867,
+            "requested_update_cosine": 0.1982979470912725,
+            "stages": 1
+          },
+          {
+            "code_changes": 16024,
+            "fast_code_changes": 16024,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.721420407295227,
+            "refresh_codes": 0,
+            "request_energy": 0.7229991555213928,
+            "requested_step_energy_recovery": 0.0021836100555708837,
+            "requested_update_cosine": 0.1300456344262811,
+            "stages": 2
+          },
+          {
+            "code_changes": 46624,
+            "fast_code_changes": 46624,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10855643451213837,
+            "refresh_codes": 0,
+            "request_energy": 0.10930362343788147,
+            "requested_step_energy_recovery": 0.006835902619163781,
+            "requested_update_cosine": 0.1967716060540826,
+            "stages": 1
+          },
+          {
+            "code_changes": 15491,
+            "fast_code_changes": 15491,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7158169150352478,
+            "refresh_codes": 0,
+            "request_energy": 0.717399001121521,
+            "requested_step_energy_recovery": 0.0022053084598666617,
+            "requested_update_cosine": 0.1288357617259871,
+            "stages": 2
+          },
+          {
+            "code_changes": 46929,
+            "fast_code_changes": 46929,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10929079353809357,
+            "refresh_codes": 0,
+            "request_energy": 0.11003129184246063,
+            "requested_step_energy_recovery": 0.006729888306930776,
+            "requested_update_cosine": 0.19705760717801918,
+            "stages": 1
+          },
+          {
+            "code_changes": 15314,
+            "fast_code_changes": 15314,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7137990593910217,
+            "refresh_codes": 0,
+            "request_energy": 0.7153108716011047,
+            "requested_step_energy_recovery": 0.002113503750752588,
+            "requested_update_cosine": 0.12888124898095485,
+            "stages": 2
+          },
+          {
+            "code_changes": 47031,
+            "fast_code_changes": 47031,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10896077007055283,
+            "refresh_codes": 0,
+            "request_energy": 0.10970357060432434,
+            "requested_step_energy_recovery": 0.006770978644356274,
+            "requested_update_cosine": 0.19765772503883208,
+            "stages": 1
+          },
+          {
+            "code_changes": 15649,
+            "fast_code_changes": 15649,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7131369709968567,
+            "refresh_codes": 0,
+            "request_energy": 0.7146583795547485,
+            "requested_step_energy_recovery": 0.0021288612873184842,
+            "requested_update_cosine": 0.1298508912966077,
+            "stages": 2
+          },
+          {
+            "code_changes": 48068,
+            "fast_code_changes": 48068,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.1094825342297554,
+            "refresh_codes": 0,
+            "request_energy": 0.11023232340812683,
+            "requested_step_energy_recovery": 0.006801899435571079,
+            "requested_update_cosine": 0.1976209961305329,
+            "stages": 1
+          },
+          {
+            "code_changes": 15327,
+            "fast_code_changes": 15327,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7168467044830322,
+            "refresh_codes": 0,
+            "request_energy": 0.7182997465133667,
+            "requested_step_energy_recovery": 0.002022890913421005,
+            "requested_update_cosine": 0.1291284861301335,
+            "stages": 2
+          },
+          {
+            "code_changes": 48219,
+            "fast_code_changes": 48219,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10991765558719635,
+            "refresh_codes": 0,
+            "request_energy": 0.11067801713943481,
+            "requested_step_energy_recovery": 0.006870032296300899,
+            "requested_update_cosine": 0.19936712228384587,
+            "stages": 1
+          },
+          {
+            "code_changes": 14724,
+            "fast_code_changes": 14724,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.7065991163253784,
+            "refresh_codes": 0,
+            "request_energy": 0.7079987525939941,
+            "requested_step_energy_recovery": 0.0019768908680808384,
+            "requested_update_cosine": 0.12856756378854745,
+            "stages": 2
+          },
+          {
+            "code_changes": 48476,
+            "fast_code_changes": 48476,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10853815078735352,
+            "refresh_codes": 0,
+            "request_energy": 0.1092994213104248,
+            "requested_step_energy_recovery": 0.006965000490800177,
+            "requested_update_cosine": 0.20025046305719904,
+            "stages": 1
+          },
+          {
+            "code_changes": 14560,
+            "fast_code_changes": 14560,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.6998448371887207,
+            "refresh_codes": 0,
+            "request_energy": 0.7012386918067932,
+            "requested_step_energy_recovery": 0.001987703522863482,
+            "requested_update_cosine": 0.1277624895213477,
+            "stages": 2
+          },
+          {
+            "code_changes": 48829,
+            "fast_code_changes": 48829,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10886800289154053,
+            "refresh_codes": 0,
+            "request_energy": 0.10963894426822662,
+            "requested_step_energy_recovery": 0.007031638090202907,
+            "requested_update_cosine": 0.19924881318341855,
+            "stages": 1
+          },
+          {
+            "code_changes": 14617,
+            "fast_code_changes": 14617,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.6992323398590088,
+            "refresh_codes": 0,
+            "request_energy": 0.700619101524353,
+            "requested_step_energy_recovery": 0.001979337506395451,
+            "requested_update_cosine": 0.1279226837113272,
+            "stages": 2
+          },
+          {
+            "code_changes": 48386,
+            "fast_code_changes": 48386,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10823539644479752,
+            "refresh_codes": 0,
+            "request_energy": 0.1089819073677063,
+            "requested_step_energy_recovery": 0.006849861054367912,
+            "requested_update_cosine": 0.199815111979131,
+            "stages": 1
+          },
+          {
+            "code_changes": 14600,
+            "fast_code_changes": 14600,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_fc",
+            "optimizer_step": 119,
+            "out_features": 3072,
+            "projection_residual_energy": 0.6935434341430664,
+            "refresh_codes": 0,
+            "request_energy": 0.694923996925354,
+            "requested_step_energy_recovery": 0.0019866385221920524,
+            "requested_update_cosine": 0.12955926595453296,
+            "stages": 2
+          },
+          {
+            "code_changes": 49056,
+            "fast_code_changes": 49056,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_proj",
+            "optimizer_step": 119,
+            "out_features": 768,
+            "projection_residual_energy": 0.10742992162704468,
+            "refresh_codes": 0,
+            "request_energy": 0.10816710442304611,
+            "requested_step_energy_recovery": 0.006815221688086237,
+            "requested_update_cosine": 0.199995677867399,
+            "stages": 1
+          }
+        ],
+        "optimizer_step": 119,
+        "refresh_codes": false
+      },
+      "projection": {
+        "aggregate": {
+          "weighted_energy_recovery": 0.9991456077292922,
+          "worst_matrix_energy_recovery": 0.9974510837879379
+        },
+        "c_fc": {
+          "weighted_energy_recovery": 0.9992241919208817,
+          "worst_matrix_energy_recovery": 0.9992046181597072
+        },
+        "c_proj": {
+          "weighted_energy_recovery": 0.9974653290227593,
+          "worst_matrix_energy_recovery": 0.9974510837879379
+        },
+        "matrices": [
+          {
+            "module": "transformer.h.0.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.675243616104126,
+            "squared_target_norm": 885.759765625,
+            "weight_energy_recovery": 0.999237667319843
+          },
+          {
+            "module": "transformer.h.0.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10331334918737411,
+            "squared_target_norm": 40.583919525146484,
+            "weight_energy_recovery": 0.9974543279605274
+          },
+          {
+            "module": "transformer.h.1.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7099747061729431,
+            "squared_target_norm": 893.4780883789062,
+            "weight_energy_recovery": 0.999205380954041
+          },
+          {
+            "module": "transformer.h.1.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.1055762767791748,
+            "squared_target_norm": 41.68095397949219,
+            "weight_energy_recovery": 0.9974670378986258
+          },
+          {
+            "module": "transformer.h.2.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7140470147132874,
+            "squared_target_norm": 900.601318359375,
+            "weight_energy_recovery": 0.9992071441600662
+          },
+          {
+            "module": "transformer.h.2.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10749255120754242,
+            "squared_target_norm": 42.41706848144531,
+            "weight_energy_recovery": 0.9974658184769519
+          },
+          {
+            "module": "transformer.h.3.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.721420407295227,
+            "squared_target_norm": 907.0114135742188,
+            "weight_energy_recovery": 0.9992046181597072
+          },
+          {
+            "module": "transformer.h.3.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10855643451213837,
+            "squared_target_norm": 42.94744110107422,
+            "weight_energy_recovery": 0.9974723421994652
+          },
+          {
+            "module": "transformer.h.4.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7158169150352478,
+            "squared_target_norm": 910.632568359375,
+            "weight_energy_recovery": 0.9992139344232714
+          },
+          {
+            "module": "transformer.h.4.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10929079353809357,
+            "squared_target_norm": 43.113197326660156,
+            "weight_energy_recovery": 0.9974650269449974
+          },
+          {
+            "module": "transformer.h.5.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7137990593910217,
+            "squared_target_norm": 915.4186401367188,
+            "weight_energy_recovery": 0.9992202484982342
+          },
+          {
+            "module": "transformer.h.5.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10896077007055283,
+            "squared_target_norm": 43.23027038574219,
+            "weight_energy_recovery": 0.9974795260566659
+          },
+          {
+            "module": "transformer.h.6.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7131369709968567,
+            "squared_target_norm": 916.16748046875,
+            "weight_energy_recovery": 0.9992216085091429
+          },
+          {
+            "module": "transformer.h.6.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.1094825342297554,
+            "squared_target_norm": 43.136009216308594,
+            "weight_energy_recovery": 0.9974619225046817
+          },
+          {
+            "module": "transformer.h.7.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7168467044830322,
+            "squared_target_norm": 919.886962890625,
+            "weight_energy_recovery": 0.9992207230525038
+          },
+          {
+            "module": "transformer.h.7.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10991765558719635,
+            "squared_target_norm": 43.123291015625,
+            "weight_energy_recovery": 0.9974510837879379
+          },
+          {
+            "module": "transformer.h.8.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.7065991163253784,
+            "squared_target_norm": 919.0944213867188,
+            "weight_energy_recovery": 0.9992312007342409
+          },
+          {
+            "module": "transformer.h.8.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10853815078735352,
+            "squared_target_norm": 42.943145751953125,
+            "weight_energy_recovery": 0.9974725151386373
+          },
+          {
+            "module": "transformer.h.9.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.6998448371887207,
+            "squared_target_norm": 919.2040405273438,
+            "weight_energy_recovery": 0.9992386403819687
+          },
+          {
+            "module": "transformer.h.9.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10886800289154053,
+            "squared_target_norm": 42.83074951171875,
+            "weight_energy_recovery": 0.9974581812335142
+          },
+          {
+            "module": "transformer.h.10.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.6992323398590088,
+            "squared_target_norm": 920.4976806640625,
+            "weight_energy_recovery": 0.9992403757722077
+          },
+          {
+            "module": "transformer.h.10.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10823539644479752,
+            "squared_target_norm": 42.6923828125,
+            "weight_energy_recovery": 0.9974647609406072
+          },
+          {
+            "module": "transformer.h.11.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.6935434341430664,
+            "squared_target_norm": 922.1481323242188,
+            "weight_energy_recovery": 0.9992479045287496
+          },
+          {
+            "module": "transformer.h.11.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.10742992162704468,
+            "squared_target_norm": 42.47712326049805,
+            "weight_energy_recovery": 0.9974708757707481
+          }
+        ]
+      },
+      "shadow_losses": {
+        "train": 5.731480121612549,
+        "val": 5.736180305480957
+      },
+      "shadow_minus_dense_validation_ce": 0.0013141632080078125,
+      "step": 120
+    },
+    {
+      "dense_losses": {
+        "train": 5.48789119720459,
+        "val": 5.49107551574707
+      },
+      "last_projection_update": {
+        "aggregate": {
+          "request_weighted_energy_recovery": 0.0005347717657768758,
+          "worst_matrix_requested_step_energy_recovery": 0.0003681687465866279
+        },
+        "c_fc": {
+          "request_weighted_energy_recovery": 0.0004179046822918586,
+          "worst_matrix_requested_step_energy_recovery": 0.0003681687465866279
+        },
+        "c_proj": {
+          "request_weighted_energy_recovery": 0.0013091509715783545,
+          "worst_matrix_requested_step_energy_recovery": 0.001239517487457209
+        },
+        "code_changes": 268176,
+        "matrices": [
+          {
+            "code_changes": 5274,
+            "fast_code_changes": 5274,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5316289663314819,
+            "refresh_codes": 0,
+            "request_energy": 0.5318247675895691,
+            "requested_step_energy_recovery": 0.0003681687465866279,
+            "requested_update_cosine": 0.06776630562868599,
+            "stages": 2
+          },
+          {
+            "code_changes": 17647,
+            "fast_code_changes": 17647,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.07586213946342468,
+            "refresh_codes": 0,
+            "request_energy": 0.07595694065093994,
+            "requested_step_energy_recovery": 0.0012480911777492665,
+            "requested_update_cosine": 0.11586070839688649,
+            "stages": 1
+          },
+          {
+            "code_changes": 5865,
+            "fast_code_changes": 5865,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5485554337501526,
+            "refresh_codes": 0,
+            "request_energy": 0.5487990379333496,
+            "requested_step_energy_recovery": 0.0004438859516123772,
+            "requested_update_cosine": 0.07184852666419428,
+            "stages": 2
+          },
+          {
+            "code_changes": 16748,
+            "fast_code_changes": 16748,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.0800475999712944,
+            "refresh_codes": 0,
+            "request_energy": 0.08015282452106476,
+            "requested_step_energy_recovery": 0.0013127990236040388,
+            "requested_update_cosine": 0.11374985274134403,
+            "stages": 1
+          },
+          {
+            "code_changes": 5612,
+            "fast_code_changes": 5612,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5504712462425232,
+            "refresh_codes": 0,
+            "request_energy": 0.5506985783576965,
+            "requested_step_energy_recovery": 0.00041280679505528717,
+            "requested_update_cosine": 0.07168518252161082,
+            "stages": 2
+          },
+          {
+            "code_changes": 16883,
+            "fast_code_changes": 16883,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08276478201150894,
+            "refresh_codes": 0,
+            "request_energy": 0.08287130296230316,
+            "requested_step_energy_recovery": 0.0012853780136976578,
+            "requested_update_cosine": 0.1138686706426165,
+            "stages": 1
+          },
+          {
+            "code_changes": 5646,
+            "fast_code_changes": 5646,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5574964284896851,
+            "refresh_codes": 0,
+            "request_energy": 0.5577224493026733,
+            "requested_step_energy_recovery": 0.00040525679622704924,
+            "requested_update_cosine": 0.07186245848947724,
+            "stages": 2
+          },
+          {
+            "code_changes": 17007,
+            "fast_code_changes": 17007,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08398109674453735,
+            "refresh_codes": 0,
+            "request_energy": 0.08408641815185547,
+            "requested_step_energy_recovery": 0.0012525376824579215,
+            "requested_update_cosine": 0.1125515803631238,
+            "stages": 1
+          },
+          {
+            "code_changes": 5376,
+            "fast_code_changes": 5376,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5530185699462891,
+            "refresh_codes": 0,
+            "request_energy": 0.5532461404800415,
+            "requested_step_energy_recovery": 0.00041133686636296574,
+            "requested_update_cosine": 0.07086663683871457,
+            "stages": 2
+          },
+          {
+            "code_changes": 17413,
+            "fast_code_changes": 17413,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08524677157402039,
+            "refresh_codes": 0,
+            "request_energy": 0.08536360412836075,
+            "requested_step_energy_recovery": 0.0013686459883380797,
+            "requested_update_cosine": 0.11437826754575892,
+            "stages": 1
+          },
+          {
+            "code_changes": 5324,
+            "fast_code_changes": 5324,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5513027906417847,
+            "refresh_codes": 0,
+            "request_energy": 0.5515342950820923,
+            "requested_step_energy_recovery": 0.00041974622860607713,
+            "requested_update_cosine": 0.0709458003429633,
+            "stages": 2
+          },
+          {
+            "code_changes": 17015,
+            "fast_code_changes": 17015,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.0843309834599495,
+            "refresh_codes": 0,
+            "request_energy": 0.0844491645693779,
+            "requested_step_energy_recovery": 0.001399434914851283,
+            "requested_update_cosine": 0.11301119773639538,
+            "stages": 1
+          },
+          {
+            "code_changes": 5273,
+            "fast_code_changes": 5273,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5534489154815674,
+            "refresh_codes": 0,
+            "request_energy": 0.5536837577819824,
+            "requested_step_energy_recovery": 0.0004241451859736678,
+            "requested_update_cosine": 0.070479368509953,
+            "stages": 2
+          },
+          {
+            "code_changes": 17472,
+            "fast_code_changes": 17472,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08473921567201614,
+            "refresh_codes": 0,
+            "request_energy": 0.08485659956932068,
+            "requested_step_energy_recovery": 0.0013833207776449141,
+            "requested_update_cosine": 0.11356567690098492,
+            "stages": 1
+          },
+          {
+            "code_changes": 5424,
+            "fast_code_changes": 5424,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5582389831542969,
+            "refresh_codes": 0,
+            "request_energy": 0.5584689974784851,
+            "requested_step_energy_recovery": 0.00041186587836883337,
+            "requested_update_cosine": 0.07292321526016972,
+            "stages": 2
+          },
+          {
+            "code_changes": 17277,
+            "fast_code_changes": 17277,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08493678271770477,
+            "refresh_codes": 0,
+            "request_energy": 0.08505195379257202,
+            "requested_step_energy_recovery": 0.0013541261515065406,
+            "requested_update_cosine": 0.11232676617828607,
+            "stages": 1
+          },
+          {
+            "code_changes": 5064,
+            "fast_code_changes": 5064,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5498367547988892,
+            "refresh_codes": 0,
+            "request_energy": 0.5500681400299072,
+            "requested_step_energy_recovery": 0.00042064830550903043,
+            "requested_update_cosine": 0.07103652527396666,
+            "stages": 2
+          },
+          {
+            "code_changes": 16947,
+            "fast_code_changes": 16947,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08328945189714432,
+            "refresh_codes": 0,
+            "request_energy": 0.08339811861515045,
+            "requested_step_energy_recovery": 0.001302987643013731,
+            "requested_update_cosine": 0.11244513618867918,
+            "stages": 1
+          },
+          {
+            "code_changes": 4946,
+            "fast_code_changes": 4946,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5461708307266235,
+            "refresh_codes": 0,
+            "request_energy": 0.5464109182357788,
+            "requested_step_energy_recovery": 0.0004393900289006991,
+            "requested_update_cosine": 0.07013681987873417,
+            "stages": 2
+          },
+          {
+            "code_changes": 17179,
+            "fast_code_changes": 17179,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08409621566534042,
+            "refresh_codes": 0,
+            "request_energy": 0.08420435339212418,
+            "requested_step_energy_recovery": 0.001284229644044399,
+            "requested_update_cosine": 0.11217926474563258,
+            "stages": 1
+          },
+          {
+            "code_changes": 5052,
+            "fast_code_changes": 5052,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5482621192932129,
+            "refresh_codes": 0,
+            "request_energy": 0.548499584197998,
+            "requested_step_energy_recovery": 0.00043293543263556167,
+            "requested_update_cosine": 0.07043254748678811,
+            "stages": 2
+          },
+          {
+            "code_changes": 16452,
+            "fast_code_changes": 16452,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.08269554376602173,
+            "refresh_codes": 0,
+            "request_energy": 0.08280053734779358,
+            "requested_step_energy_recovery": 0.0012680301980509956,
+            "requested_update_cosine": 0.11048071881323428,
+            "stages": 1
+          },
+          {
+            "code_changes": 4803,
+            "fast_code_changes": 4803,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_fc",
+            "optimizer_step": 179,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5449002981185913,
+            "refresh_codes": 0,
+            "request_energy": 0.5451312065124512,
+            "requested_step_energy_recovery": 0.00042358315044399575,
+            "requested_update_cosine": 0.06975990640528644,
+            "stages": 2
+          },
+          {
+            "code_changes": 16477,
+            "fast_code_changes": 16477,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_proj",
+            "optimizer_step": 179,
+            "out_features": 768,
+            "projection_residual_energy": 0.0821688249707222,
+            "refresh_codes": 0,
+            "request_energy": 0.0822708010673523,
+            "requested_step_energy_recovery": 0.001239517487457209,
+            "requested_update_cosine": 0.11028972665143708,
+            "stages": 1
+          }
+        ],
+        "optimizer_step": 179,
+        "refresh_codes": false
+      },
+      "projection": {
+        "aggregate": {
+          "weighted_energy_recovery": 0.9993345556958486,
+          "worst_matrix_energy_recovery": 0.9980833733346536
+        },
+        "c_fc": {
+          "weighted_energy_recovery": 0.9993938295875745,
+          "worst_matrix_energy_recovery": 0.9993800242618098
+        },
+        "c_proj": {
+          "weighted_energy_recovery": 0.9981067829431627,
+          "worst_matrix_energy_recovery": 0.9980833733346536
+        },
+        "matrices": [
+          {
+            "module": "transformer.h.0.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5316289663314819,
+            "squared_target_norm": 868.785400390625,
+            "weight_energy_recovery": 0.9993880779233946
+          },
+          {
+            "module": "transformer.h.0.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07586213946342468,
+            "squared_target_norm": 40.13928985595703,
+            "weight_energy_recovery": 0.9981100278620857
+          },
+          {
+            "module": "transformer.h.1.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5485554337501526,
+            "squared_target_norm": 884.8014526367188,
+            "weight_energy_recovery": 0.9993800242618098
+          },
+          {
+            "module": "transformer.h.1.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.0800475999712944,
+            "squared_target_norm": 42.48350524902344,
+            "weight_energy_recovery": 0.9981157957776299
+          },
+          {
+            "module": "transformer.h.2.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5504712462425232,
+            "squared_target_norm": 895.43017578125,
+            "weight_energy_recovery": 0.9993852438066851
+          },
+          {
+            "module": "transformer.h.2.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08276478201150894,
+            "squared_target_norm": 43.623817443847656,
+            "weight_energy_recovery": 0.9981027615907745
+          },
+          {
+            "module": "transformer.h.3.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5574964284896851,
+            "squared_target_norm": 903.06494140625,
+            "weight_energy_recovery": 0.999382661863031
+          },
+          {
+            "module": "transformer.h.3.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08398109674453735,
+            "squared_target_norm": 44.25592041015625,
+            "weight_energy_recovery": 0.9981023759992739
+          },
+          {
+            "module": "transformer.h.4.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5530185699462891,
+            "squared_target_norm": 907.5161743164062,
+            "weight_energy_recovery": 0.9993906240069353
+          },
+          {
+            "module": "transformer.h.4.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08524677157402039,
+            "squared_target_norm": 44.47750473022461,
+            "weight_energy_recovery": 0.9980833733346536
+          },
+          {
+            "module": "transformer.h.5.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5513027906417847,
+            "squared_target_norm": 912.5304565429688,
+            "weight_energy_recovery": 0.9993958527228446
+          },
+          {
+            "module": "transformer.h.5.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.0843309834599495,
+            "squared_target_norm": 44.61297607421875,
+            "weight_energy_recovery": 0.9981097207386556
+          },
+          {
+            "module": "transformer.h.6.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5534489154815674,
+            "squared_target_norm": 913.5755004882812,
+            "weight_energy_recovery": 0.9993941946613216
+          },
+          {
+            "module": "transformer.h.6.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08473921567201614,
+            "squared_target_norm": 44.533042907714844,
+            "weight_energy_recovery": 0.9980971608913494
+          },
+          {
+            "module": "transformer.h.7.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5582389831542969,
+            "squared_target_norm": 917.5439453125,
+            "weight_energy_recovery": 0.9993915942816622
+          },
+          {
+            "module": "transformer.h.7.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08493678271770477,
+            "squared_target_norm": 44.51773452758789,
+            "weight_energy_recovery": 0.9980920686189665
+          },
+          {
+            "module": "transformer.h.8.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5498367547988892,
+            "squared_target_norm": 916.8944091796875,
+            "weight_energy_recovery": 0.9994003270722407
+          },
+          {
+            "module": "transformer.h.8.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08328945189714432,
+            "squared_target_norm": 44.32316207885742,
+            "weight_energy_recovery": 0.9981208594335178
+          },
+          {
+            "module": "transformer.h.9.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5461708307266235,
+            "squared_target_norm": 917.2507934570312,
+            "weight_energy_recovery": 0.9994045567094381
+          },
+          {
+            "module": "transformer.h.9.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08409621566534042,
+            "squared_target_norm": 44.22316360473633,
+            "weight_energy_recovery": 0.9980983672625281
+          },
+          {
+            "module": "transformer.h.10.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5482621192932129,
+            "squared_target_norm": 918.7664184570312,
+            "weight_energy_recovery": 0.9994032627790054
+          },
+          {
+            "module": "transformer.h.10.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08269554376602173,
+            "squared_target_norm": 44.072601318359375,
+            "weight_energy_recovery": 0.9981236518541606
+          },
+          {
+            "module": "transformer.h.11.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5449002981185913,
+            "squared_target_norm": 920.8663330078125,
+            "weight_energy_recovery": 0.9994082742754437
+          },
+          {
+            "module": "transformer.h.11.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.0821688249707222,
+            "squared_target_norm": 43.85372543334961,
+            "weight_energy_recovery": 0.9981262977282146
+          }
+        ]
+      },
+      "shadow_losses": {
+        "train": 5.4905548095703125,
+        "val": 5.493697643280029
+      },
+      "shadow_minus_dense_validation_ce": 0.0026221275329589844,
+      "step": 180
+    },
+    {
+      "dense_losses": {
+        "train": 5.389284133911133,
+        "val": 5.391960620880127
+      },
+      "last_projection_update": {
+        "aggregate": {
+          "request_weighted_energy_recovery": 0.00011804474066590132,
+          "worst_matrix_requested_step_energy_recovery": 7.578104478278558e-05
+        },
+        "c_fc": {
+          "request_weighted_energy_recovery": 9.5774207835575e-05,
+          "worst_matrix_requested_step_energy_recovery": 7.578104478278558e-05
+        },
+        "c_proj": {
+          "request_weighted_energy_recovery": 0.00026407910756387487,
+          "worst_matrix_requested_step_energy_recovery": 0.00021000194266929118
+        },
+        "code_changes": 114525,
+        "matrices": [
+          {
+            "code_changes": 2344,
+            "fast_code_changes": 2344,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5158365964889526,
+            "refresh_codes": 0,
+            "request_energy": 0.5158810019493103,
+            "requested_step_energy_recovery": 8.60769444694931e-05,
+            "requested_update_cosine": 0.04335315940174463,
+            "stages": 2
+          },
+          {
+            "code_changes": 7442,
+            "fast_code_changes": 7442,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 0,
+            "module": "transformer.h.0.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.07385098934173584,
+            "refresh_codes": 0,
+            "request_energy": 0.07386650145053864,
+            "requested_step_energy_recovery": 0.00021000194266929118,
+            "requested_update_cosine": 0.07206690345386853,
+            "stages": 1
+          },
+          {
+            "code_changes": 2494,
+            "fast_code_changes": 2494,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5329325199127197,
+            "refresh_codes": 0,
+            "request_energy": 0.5329807996749878,
+            "requested_step_energy_recovery": 9.058443061649157e-05,
+            "requested_update_cosine": 0.04501575045581027,
+            "stages": 2
+          },
+          {
+            "code_changes": 6920,
+            "fast_code_changes": 6920,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 1,
+            "module": "transformer.h.1.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.07878707349300385,
+            "refresh_codes": 0,
+            "request_energy": 0.07880423218011856,
+            "requested_step_energy_recovery": 0.0002177381422294733,
+            "requested_update_cosine": 0.07100271906336626,
+            "stages": 1
+          },
+          {
+            "code_changes": 2336,
+            "fast_code_changes": 2336,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.536378026008606,
+            "refresh_codes": 0,
+            "request_energy": 0.5364186763763428,
+            "requested_step_energy_recovery": 7.578104478278558e-05,
+            "requested_update_cosine": 0.04411462564791072,
+            "stages": 2
+          },
+          {
+            "code_changes": 7136,
+            "fast_code_changes": 7136,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 2,
+            "module": "transformer.h.2.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.08156318962574005,
+            "refresh_codes": 0,
+            "request_energy": 0.08158496022224426,
+            "requested_step_energy_recovery": 0.0002668457083867537,
+            "requested_update_cosine": 0.07087526726891898,
+            "stages": 1
+          },
+          {
+            "code_changes": 2457,
+            "fast_code_changes": 2457,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5429824590682983,
+            "refresh_codes": 0,
+            "request_energy": 0.5430318117141724,
+            "requested_step_energy_recovery": 9.088352617547812e-05,
+            "requested_update_cosine": 0.04471317285530665,
+            "stages": 2
+          },
+          {
+            "code_changes": 7293,
+            "fast_code_changes": 7293,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 3,
+            "module": "transformer.h.3.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.0830707848072052,
+            "refresh_codes": 0,
+            "request_energy": 0.08309056609869003,
+            "requested_step_energy_recovery": 0.0002380690421742715,
+            "requested_update_cosine": 0.07108150689606063,
+            "stages": 1
+          },
+          {
+            "code_changes": 2387,
+            "fast_code_changes": 2387,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5410146713256836,
+            "refresh_codes": 0,
+            "request_energy": 0.5410751700401306,
+            "requested_step_energy_recovery": 0.00011181203240673288,
+            "requested_update_cosine": 0.044915684974538135,
+            "stages": 2
+          },
+          {
+            "code_changes": 7199,
+            "fast_code_changes": 7199,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 4,
+            "module": "transformer.h.4.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.08439850807189941,
+            "refresh_codes": 0,
+            "request_energy": 0.08442296087741852,
+            "requested_step_energy_recovery": 0.0002896463860656562,
+            "requested_update_cosine": 0.0707417778590042,
+            "stages": 1
+          },
+          {
+            "code_changes": 2389,
+            "fast_code_changes": 2389,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5383566617965698,
+            "refresh_codes": 0,
+            "request_energy": 0.5384069085121155,
+            "requested_step_energy_recovery": 9.332479719570408e-05,
+            "requested_update_cosine": 0.04529509870807439,
+            "stages": 2
+          },
+          {
+            "code_changes": 7160,
+            "fast_code_changes": 7160,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 5,
+            "module": "transformer.h.5.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.083322674036026,
+            "refresh_codes": 0,
+            "request_energy": 0.08334601670503616,
+            "requested_step_energy_recovery": 0.0002800694014301053,
+            "requested_update_cosine": 0.07123765849172292,
+            "stages": 1
+          },
+          {
+            "code_changes": 2270,
+            "fast_code_changes": 2270,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5419163703918457,
+            "refresh_codes": 0,
+            "request_energy": 0.5419619083404541,
+            "requested_step_energy_recovery": 8.402426057552148e-05,
+            "requested_update_cosine": 0.04458001826431138,
+            "stages": 2
+          },
+          {
+            "code_changes": 7458,
+            "fast_code_changes": 7458,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 6,
+            "module": "transformer.h.6.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.083749920129776,
+            "refresh_codes": 0,
+            "request_energy": 0.0837746411561966,
+            "requested_step_energy_recovery": 0.000295089612792232,
+            "requested_update_cosine": 0.07180286183350117,
+            "stages": 1
+          },
+          {
+            "code_changes": 2366,
+            "fast_code_changes": 2366,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.545778751373291,
+            "refresh_codes": 0,
+            "request_energy": 0.5458327531814575,
+            "requested_step_energy_recovery": 9.893471553645838e-05,
+            "requested_update_cosine": 0.04530988611503498,
+            "stages": 2
+          },
+          {
+            "code_changes": 7415,
+            "fast_code_changes": 7415,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 7,
+            "module": "transformer.h.7.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.08392950892448425,
+            "refresh_codes": 0,
+            "request_energy": 0.08395659178495407,
+            "requested_step_energy_recovery": 0.0003225817043548407,
+            "requested_update_cosine": 0.07133991790596676,
+            "stages": 1
+          },
+          {
+            "code_changes": 2231,
+            "fast_code_changes": 2231,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5391210913658142,
+            "refresh_codes": 0,
+            "request_energy": 0.5391761660575867,
+            "requested_step_energy_recovery": 0.00010214600577607147,
+            "requested_update_cosine": 0.044566439064239544,
+            "stages": 2
+          },
+          {
+            "code_changes": 7202,
+            "fast_code_changes": 7202,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 8,
+            "module": "transformer.h.8.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.08250643312931061,
+            "refresh_codes": 0,
+            "request_energy": 0.08252741396427155,
+            "requested_step_energy_recovery": 0.00025422867327484777,
+            "requested_update_cosine": 0.07039529206390314,
+            "stages": 1
+          },
+          {
+            "code_changes": 2214,
+            "fast_code_changes": 2214,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5347158312797546,
+            "refresh_codes": 0,
+            "request_energy": 0.5347644090652466,
+            "requested_step_energy_recovery": 9.0839600894288e-05,
+            "requested_update_cosine": 0.04481451068937199,
+            "stages": 2
+          },
+          {
+            "code_changes": 7282,
+            "fast_code_changes": 7282,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 9,
+            "module": "transformer.h.9.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.0833025574684143,
+            "refresh_codes": 0,
+            "request_energy": 0.08332475274801254,
+            "requested_step_energy_recovery": 0.00026637078258551217,
+            "requested_update_cosine": 0.0702269640406165,
+            "stages": 1
+          },
+          {
+            "code_changes": 2254,
+            "fast_code_changes": 2254,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5370997190475464,
+            "refresh_codes": 0,
+            "request_energy": 0.5371692180633545,
+            "requested_step_energy_recovery": 0.00012938011611807188,
+            "requested_update_cosine": 0.045529129144612095,
+            "stages": 2
+          },
+          {
+            "code_changes": 7090,
+            "fast_code_changes": 7090,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 10,
+            "module": "transformer.h.10.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.08202020823955536,
+            "refresh_codes": 0,
+            "request_energy": 0.08204089105129242,
+            "requested_step_energy_recovery": 0.0002521036945360988,
+            "requested_update_cosine": 0.07012747075986901,
+            "stages": 1
+          },
+          {
+            "code_changes": 2110,
+            "fast_code_changes": 2110,
+            "fast_residual": 1,
+            "in_features": 768,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_fc",
+            "optimizer_step": 237,
+            "out_features": 3072,
+            "projection_residual_energy": 0.5345260500907898,
+            "refresh_codes": 0,
+            "request_energy": 0.5345768332481384,
+            "requested_step_energy_recovery": 9.499692876713262e-05,
+            "requested_update_cosine": 0.044041609554959726,
+            "stages": 2
+          },
+          {
+            "code_changes": 7076,
+            "fast_code_changes": 7076,
+            "fast_residual": 1,
+            "in_features": 3072,
+            "layer": 11,
+            "module": "transformer.h.11.mlp.c_proj",
+            "optimizer_step": 237,
+            "out_features": 768,
+            "projection_residual_energy": 0.08154615759849548,
+            "refresh_codes": 0,
+            "request_energy": 0.08156788349151611,
+            "requested_step_energy_recovery": 0.0002663535216392843,
+            "requested_update_cosine": 0.07052829509527933,
+            "stages": 1
+          }
+        ],
+        "optimizer_step": 237,
+        "refresh_codes": false
+      },
+      "projection": {
+        "aggregate": {
+          "weighted_energy_recovery": 0.9993480530655726,
+          "worst_matrix_energy_recovery": 0.9981158459171766
+        },
+        "c_fc": {
+          "weighted_energy_recovery": 0.9994067972193873,
+          "worst_matrix_energy_recovery": 0.999396184125254
+        },
+        "c_proj": {
+          "weighted_energy_recovery": 0.9981401112690327,
+          "worst_matrix_energy_recovery": 0.9981158459171766
+        },
+        "matrices": [
+          {
+            "module": "transformer.h.0.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5158365964889526,
+            "squared_target_norm": 862.4571533203125,
+            "weight_energy_recovery": 0.9994018988717259
+          },
+          {
+            "module": "transformer.h.0.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07385098934173584,
+            "squared_target_norm": 39.899940490722656,
+            "weight_energy_recovery": 0.9981490952509339
+          },
+          {
+            "module": "transformer.h.1.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5329325199127197,
+            "squared_target_norm": 882.607666015625,
+            "weight_energy_recovery": 0.999396184125254
+          },
+          {
+            "module": "transformer.h.1.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.07878707349300385,
+            "squared_target_norm": 42.672943115234375,
+            "weight_energy_recovery": 0.9981536995636733
+          },
+          {
+            "module": "transformer.h.2.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.536378026008606,
+            "squared_target_norm": 893.9284057617188,
+            "weight_energy_recovery": 0.9993999765277046
+          },
+          {
+            "module": "transformer.h.2.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08156318962574005,
+            "squared_target_norm": 43.90996551513672,
+            "weight_energy_recovery": 0.9981424902372646
+          },
+          {
+            "module": "transformer.h.3.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5429824590682983,
+            "squared_target_norm": 901.7996826171875,
+            "weight_energy_recovery": 0.9993978901639303
+          },
+          {
+            "module": "transformer.h.3.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.0830707848072052,
+            "squared_target_norm": 44.56765365600586,
+            "weight_energy_recovery": 0.9981360745295594
+          },
+          {
+            "module": "transformer.h.4.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5410146713256836,
+            "squared_target_norm": 906.356689453125,
+            "weight_energy_recovery": 0.99940308856588
+          },
+          {
+            "module": "transformer.h.4.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08439850807189941,
+            "squared_target_norm": 44.793846130371094,
+            "weight_energy_recovery": 0.9981158459171766
+          },
+          {
+            "module": "transformer.h.5.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5383566617965698,
+            "squared_target_norm": 911.397705078125,
+            "weight_energy_recovery": 0.9994093065422516
+          },
+          {
+            "module": "transformer.h.5.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.083322674036026,
+            "squared_target_norm": 44.91814422607422,
+            "weight_energy_recovery": 0.9981450107640988
+          },
+          {
+            "module": "transformer.h.6.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5419163703918457,
+            "squared_target_norm": 912.5993041992188,
+            "weight_energy_recovery": 0.9994061836691106
+          },
+          {
+            "module": "transformer.h.6.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.083749920129776,
+            "squared_target_norm": 44.842742919921875,
+            "weight_energy_recovery": 0.9981323640197627
+          },
+          {
+            "module": "transformer.h.7.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.545778751373291,
+            "squared_target_norm": 916.5092163085938,
+            "weight_energy_recovery": 0.9994045027134899
+          },
+          {
+            "module": "transformer.h.7.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08392950892448425,
+            "squared_target_norm": 44.814186096191406,
+            "weight_energy_recovery": 0.9981271665015998
+          },
+          {
+            "module": "transformer.h.8.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5391210913658142,
+            "squared_target_norm": 915.8709716796875,
+            "weight_energy_recovery": 0.9994113569399661
+          },
+          {
+            "module": "transformer.h.8.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08250643312931061,
+            "squared_target_norm": 44.61371612548828,
+            "weight_energy_recovery": 0.9981506487175998
+          },
+          {
+            "module": "transformer.h.9.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5347158312797546,
+            "squared_target_norm": 916.2286376953125,
+            "weight_energy_recovery": 0.9994163947629657
+          },
+          {
+            "module": "transformer.h.9.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.0833025574684143,
+            "squared_target_norm": 44.503173828125,
+            "weight_energy_recovery": 0.9981281659193536
+          },
+          {
+            "module": "transformer.h.10.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5370997190475464,
+            "squared_target_norm": 917.744873046875,
+            "weight_energy_recovery": 0.9994147614061145
+          },
+          {
+            "module": "transformer.h.10.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08202020823955536,
+            "squared_target_norm": 44.348472595214844,
+            "weight_energy_recovery": 0.9981505516776601
+          },
+          {
+            "module": "transformer.h.11.mlp.c_fc",
+            "side": "c_fc",
+            "squared_error": 0.5345260500907898,
+            "squared_target_norm": 919.9315185546875,
+            "weight_energy_recovery": 0.999418950172584
+          },
+          {
+            "module": "transformer.h.11.mlp.c_proj",
+            "side": "c_proj",
+            "squared_error": 0.08154615759849548,
+            "squared_target_norm": 44.129600524902344,
+            "weight_energy_recovery": 0.9981521211017426
+          }
+        ]
+      },
+      "shadow_losses": {
+        "train": 5.392761707305908,
+        "val": 5.395421028137207
+      },
+      "shadow_minus_dense_validation_ce": 0.003460407257080078,
+      "step": 238
+    }
+  ],
+  "run_identity_sha256": "8a730caf09ca41818a6b03ce47e055e8c3eafb876d9aa564f0d691093802689c",
+  "schema_version": "mai_dense_pair_vq_shadow_replay_v1",
+  "source_config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "sha256": "0632b80e767e309cbe3c0b17f3c583bc74bbffef3e747fe9719ed1d326597531"
+  },
+  "status": "finished"
+}
