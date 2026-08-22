@@ -1,0 +1,80 @@
+{
+  "schema_version": "mai_pair_vq_fp16_reserved_escape_cuda_benchmark_sealed_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_BIT_EXACT_RESERVED_ESCAPE_STANDALONE_GPU_GATE",
+  "passed": true,
+  "identity": {
+    "host": "PRO6",
+    "source_commit": "49381fb6de9b737ccd9aea3f4a3e37a2d9826032",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_cuda_plan.json",
+    "plan_sha256": "662531ad638b6bc12a4d9a20d0d9d158999309ace37b145b0b8f65e74e98efc4",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "source_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+    "focused_cuda_tests": 6,
+    "focused_total_tests": 10,
+    "exit_code": 0
+  },
+  "artifacts": {
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_reserved_escape_cuda_benchmark.json",
+      "sha256": "c4656966d92c518031b62b6738f81e4d00010438f02b40dcea2005ba82b84a18",
+      "bytes": 4089,
+      "status": "finished"
+    }
+  },
+  "environment": {
+    "torch": "2.7.0+cu128",
+    "cuda": "12.8",
+    "triton": "3.3.0",
+    "device": "NVIDIA RTX PRO 6000 Blackwell Workstation Edition",
+    "peak_allocated_bytes": 799394304,
+    "gpu_health_after_gate": "213/97887 MiB, 0% utilization, 25 C using the project-pinned NVML library"
+  },
+  "gate": {
+    "maximum_momentum_bytes": 99090432,
+    "maximum_encode_plus_decode_seconds": 0.25,
+    "checkpoint_and_special_value_exactness_required": true,
+    "passing_candidates": [
+      "scope_kfc16_kproj32_b4096",
+      "block_kfc16_kproj32_b4096"
+    ]
+  },
+  "candidates": [
+    {
+      "name": "scope_kfc16_kproj32_b4096",
+      "logical_registered_bytes": 94405173,
+      "bits_per_coordinate": 13.338042789035374,
+      "median_encode_seconds": 0.00108896005153656,
+      "median_decode_seconds": 0.0006880319714546204,
+      "median_encode_plus_decode_seconds": 0.0017769920229911804,
+      "raw_throughput_gb_per_second": 63.729159464303386,
+      "exact_roundtrip": true,
+      "decoded_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0"
+    },
+    {
+      "name": "block_kfc16_kproj32_b4096",
+      "logical_registered_bytes": 93192518,
+      "bits_per_coordinate": 13.166712725604022,
+      "median_encode_seconds": 0.0012930560111999512,
+      "median_decode_seconds": 0.0007057279944419861,
+      "median_encode_plus_decode_seconds": 0.0019987840056419374,
+      "raw_throughput_gb_per_second": 56.65755163156281,
+      "exact_roundtrip": true,
+      "decoded_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0"
+    }
+  ],
+  "interpretation": {
+    "scope_speed_advantage_fraction": 0.12481315604187038,
+    "scope_storage_penalty_fraction": 0.013012364361696838,
+    "measurement_scope": "GPU-event medians after two warmups and five timed trials over encode and decode of all 24 MLP momentum matrices; timed work includes GPU histogram, table selection, packing, exception compaction, unpacking, and reconstruction.",
+    "not_yet_proved": "These standalone timings do not prove optimizer transition identity, checkpoint resume identity, absence of a hidden live dense state, or >=20% end-to-end MFU.",
+    "loss_implication": "A passing integrated bit-exact codec adds zero CE gap by construction; no additional language-model endpoint is authorized."
+  },
+  "decision": {
+    "next_authorized_work": "Use the same registered codec implementation to gate both scope and block layouts through one-step, nine-step, exact-resume, no-hidden-dense-state, and exact-config >=20% MFU tests. Select by the preregistered rule; do not run a loss endpoint.",
+    "automatic_loss_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  }
+}
