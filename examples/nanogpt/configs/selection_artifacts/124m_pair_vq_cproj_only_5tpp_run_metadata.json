@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_pair_vq_cproj_only_5tpp_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4",
   "run_id": "pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_20260822T085342Z_3236004",
   "host": "PRO6",
@@ -91,5 +91,25 @@
     "automatic_model_size_scale_up": false,
     "automatic_representation_change": false,
     "next_after_terminal_seal": "compute both marginal gaps and their non-additive interaction, reconcile the measured obstruction with existing diagnostics, and preregister exactly one structural repair"
+  },
+  "terminal": {
+    "finished_at": "2026-08-22T17:50:50+08:00",
+    "exit_code": 0,
+    "train_ce": 3.5702,
+    "validation_ce": 3.5519,
+    "matched_parent_validation_ce": 3.4858,
+    "candidate_minus_parent_ce": 0.0661,
+    "classification": "PAIR_VQ_C_PROJ_MATERIAL_124M_5TPP",
+    "dense_compute_equivalent_penalty": 1.347230284908597,
+    "common_loss_median_compute_ratio": 1.188805720426276,
+    "scientific_median_tokens_per_second": 187603.035,
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cproj_only_5tpp_result.json",
+    "result_sha256": "6eea36b8120b38db7d67f882e9a4feca868a0dd445b94f0d915f3f157f31ecd8",
+    "scientific_log_sha256": "50e7d31248b8f041b3cd0ea04c4470f8818805946a90784513a7a294341e1ad9",
+    "terminal_status_sha256": "6d40590e0773c56877b21b534b27751d00965fb5de1a12111891f71cfa79e7b2",
+    "checkpoint_sha256": "b3fa8b1e49f6884358ce2ecea314a0516177ee8bb1171481d08ce4b3e80deeba",
+    "maximum_momentum_bytes": 50012567,
+    "momentum_byte_ceiling": 56623104,
+    "watchdog_retired_after_callback": true
   }
 }
