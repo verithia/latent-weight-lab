@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 
 from examples.nanogpt.dense_pair_vq_lowbit_momentum import (
+    PairVQLowBitMomentumOracle,
     advance_lowbit_momentum,
     decode_blocks,
     encode_blocks,
@@ -111,3 +112,53 @@ def test_registered_lowbit_momentum_plan_is_immutable_and_nonintervening() -> No
     assert hashlib.sha256(path.read_bytes()).hexdigest() == (
         "514b02946955ca3d1f5db0e2df38253fb237830e5f42811150d47658a51fcca7"
     )
+
+
+def test_terminal_gate_maps_maximum_storage_threshold_to_measured_fraction() -> None:
+    oracle = PairVQLowBitMomentumOracle.__new__(PairVQLowBitMomentumOracle)
+    oracle.candidate_order = ["candidate"]
+    oracle.plan = {
+        "frozen_protocol": {"primary_late_post_update_state_steps": [180, 238]},
+        "decision_gate": {
+            "late_probe_requirements_for_one_candidate": {
+                "minimum_all_polar_cosine": 0.99,
+                "minimum_all_polar_positive_line_energy_recovery": 0.98,
+                "minimum_side_polar_cosine": 0.985,
+                "minimum_worst_matrix_polar_cosine": 0.95,
+                "minimum_all_prepolar_cosine": 0.99,
+                "maximum_fraction_of_dense_fp32_momentum_bytes": 0.25,
+                "all_metrics_finite": True,
+            }
+        },
+        "theoretical_persistent_storage": {
+            "candidate": {"fraction_of_dense_fp32": 0.20, "total_bytes": 20}
+        },
+    }
+    metric = {
+        "cosine": 0.995,
+        "positive_line_energy_recovery": 0.99,
+        "worst_matrix_cosine": 0.97,
+    }
+    oracle.records = [
+        {
+            "reported_post_update_state_step": step,
+            "aggregate": {
+                "candidate": {
+                    "all": {
+                        "polar_update": metric,
+                        "combined_prepolar": {"cosine": 0.995},
+                    },
+                    "c_fc": {"polar_update": metric},
+                    "c_proj": {"polar_update": metric},
+                }
+            },
+        }
+        for step in (180, 238)
+    ]
+
+    gate = oracle._gate()
+
+    assert gate["classification"] == "PASS"
+    assert gate["selected"] == "candidate"
+    checks = gate["candidates"]["candidate"]["checks"]
+    assert checks["maximum_fraction_of_dense_fp32_momentum_bytes"] is True

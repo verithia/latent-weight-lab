@@ -456,14 +456,22 @@ class PairVQLowBitMomentumOracle:
                 ),
             }
             checks = {
-                field: (
-                    summary[field] <= float(threshold)
-                    if field == "fraction_of_dense_fp32_momentum_bytes"
-                    else summary[field] >= float(threshold)
-                )
+                field: summary[field] >= float(threshold)
                 for field, threshold in thresholds.items()
-                if field != "all_metrics_finite"
+                if field
+                not in (
+                    "all_metrics_finite",
+                    "maximum_fraction_of_dense_fp32_momentum_bytes",
+                )
             }
+            checks["maximum_fraction_of_dense_fp32_momentum_bytes"] = (
+                summary["fraction_of_dense_fp32_momentum_bytes"]
+                <= float(
+                    thresholds[
+                        "maximum_fraction_of_dense_fp32_momentum_bytes"
+                    ]
+                )
+            )
             checks["all_metrics_finite"] = _all_finite(summary)
             passed = all(checks.values())
             decisions[candidate] = {
