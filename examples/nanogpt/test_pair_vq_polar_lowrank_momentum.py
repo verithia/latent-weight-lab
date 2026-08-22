@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import sys
 from pathlib import Path
 
 import torch
@@ -13,6 +14,7 @@ from examples.nanogpt.pair_vq_polar_lowrank_momentum import (
     fit_lowrank_core,
     polar_sensitivity,
 )
+from examples.nanogpt.train import parse_args
 
 
 def test_registered_plan_identity_and_scope() -> None:
@@ -153,3 +155,20 @@ def test_gate_selects_smallest_common_passing_candidate() -> None:
     assert gate["classification"] == "PASS"
     assert gate["selected"] == "e5m8_polar_gradient_r4"
     assert oracle.probe_only is True
+
+
+def test_registered_config_parses_to_nonintervening_oracle(monkeypatch) -> None:
+    root = Path(__file__).resolve().parents[2]
+    config = root / (
+        "examples/nanogpt/configs/"
+        "pro6_mai_v3_124m_pairvq_polar_lowrank_momentum_capacity_0p5tpp.json"
+    )
+    monkeypatch.setattr(sys, "argv", ["train.py", "--config", str(config)])
+    args = parse_args()
+    assert args.max_iters == 9
+    assert args.block_fht_mlp_pair_vq is True
+    assert args.block_fht_mlp_pair_vq_fp16_ambient_momentum is True
+    assert args.pair_vq_polar_lowrank_momentum_stop_on_gate is True
+    assert args.save_checkpoint is False
+    assert args.audit_gate["candidate_parameter_updates"] == 0
+    assert args.audit_gate["automatic_endpoint"] is False
