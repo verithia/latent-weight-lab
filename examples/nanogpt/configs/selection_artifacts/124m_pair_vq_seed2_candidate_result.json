@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_pair_vq_seed2_candidate_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_MATCHED_SEED2_COMPACT_FULL_MLP",
+  "run_name": "pro6_mai_v3_124m_qkonly_pairvq_mlp_adaptive_seed2_0p5tpp_lr24e4",
+  "terminal": {
+    "exit_code": 0,
+    "train_ce": 5.3602,
+    "validation_ce": 5.363,
+    "matched_parent_validation_ce": 5.3602,
+    "gap_ce": 0.0028,
+    "compute_equivalent_penalty": 1.007490321276494,
+    "compute_equivalence_method": "local 124M/0.5TPP alpha_eff=0.0700 from the last-three-evaluation dense slope",
+    "all_fixed_eval_losses_finite": true,
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "fixed_validation_curve": [
+    {"step": 0, "validation_ce": 10.9626},
+    {"step": 60, "validation_ce": 6.2378},
+    {"step": 120, "validation_ce": 5.734},
+    {"step": 180, "validation_ce": 5.4693},
+    {"step": 238, "validation_ce": 5.363}
+  ],
+  "performance": {
+    "preflight_tokens_per_second": 159133.33375,
+    "preflight_mfu_fraction": 0.28509967415979665,
+    "scientific_median_tokens_per_second": 158664.2,
+    "scientific_mean_tokens_per_second": 157556.6756521739,
+    "scientific_mfu_fraction_estimate": 0.28425918476571105,
+    "matched_parent_median_tokens_per_second": 214001.01,
+    "candidate_to_parent_throughput_ratio": 0.7414179961113267,
+    "peak_mib": 31752.99
+  },
+  "capacity": {
+    "compact_inference_mlp_matrix_bytes": 70855872,
+    "compact_feedback_bytes": 86571264,
+    "maximum_momentum_bytes": 96823451,
+    "momentum_byte_ceiling": 99090432,
+    "momentum_headroom_bytes": 2266981,
+    "persistent_mlp_training_matrix_bytes": 254250587,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "training_state_reduction_factor": 1.7816471432571364,
+    "inference_weight_storage_reduction_factor": 3.1965228795716465,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "additional_trainable_parameters": 0,
+    "materialized_inference_flops": "unchanged from the dense target MLP"
+  },
+  "provenance": {
+    "git_commit": "6886e6caa9cb4545d53fd3805ef63c37f6d6ad4d",
+    "config_sha256": "0782a6f62144253f9a11481c13600e11309e534ccf8d2bed72553ef5919cd8f8",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_certificate_sha256": "cdf7f83638a01e7131d9511eac807b3b0ca1fc081b41761ee84f499a40864891",
+    "runtime_provenance_sha256": "a3a1a63f1892e05cca9461e7467fdb3823d706351f2a1f8d7a2378c447aa75a8",
+    "scientific_log_sha256": "9e237da6c37bc3847695862111f70b863fbb2dc0466be86665abfe87fc7c70cb",
+    "terminal_status_sha256": "1a428ffe411cb1f0ddd175280f13ec4fc4d827b444eebfd9c9d9dee54379edff"
+  },
+  "checkpoint_comparison": {
+    "checkpoint": null,
+    "reason": "the preregistered no-checkpoint policy preserves PRO6 cap headroom",
+    "comparison_boundary": "same fixed evaluation indices, schedule, source, data manifest, and matched seed-2 parent"
+  },
+  "decision": {
+    "quality_gate_passed": true,
+    "compute_equivalent_gate_passed": true,
+    "mfu_gate_passed": true,
+    "momentum_capacity_gate_passed": true,
+    "raw_state_gate_passed": true,
+    "model_size_scale_up_authorized": false,
+    "next_authorized_work": "design and validate the compact paired representation for attention V and output projection at 124M/0.5TPP"
+  }
+}

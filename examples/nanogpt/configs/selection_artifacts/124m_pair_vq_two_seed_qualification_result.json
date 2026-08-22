@@ -1,0 +1,62 @@
+{
+  "schema_version": "mai_124m_pair_vq_two_seed_qualification_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_TWO_SEED_COMPACT_FULL_MLP_QUALIFICATION",
+  "preregistered_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_seed2_qualification_plan.json",
+  "seed_results": [
+    {
+      "seed": 1337,
+      "parent_validation_ce": 5.361,
+      "candidate_validation_ce": 5.368512153625488,
+      "gap_ce": 0.007512153625488516,
+      "compute_equivalent_penalty": 1.0205063948925732,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_adaptive_gate_result.json"
+    },
+    {
+      "seed": 1338,
+      "parent_validation_ce": 5.3602,
+      "candidate_validation_ce": 5.363,
+      "gap_ce": 0.0028,
+      "compute_equivalent_penalty": 1.007490321276494,
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_seed2_candidate_result.json"
+    }
+  ],
+  "paired_summary": {
+    "mean_parent_validation_ce": 5.3606,
+    "mean_candidate_validation_ce": 5.365756076812744,
+    "mean_gap_ce": 0.005156076812744548,
+    "mean_gap_gate_ce": 0.05,
+    "compute_equivalent_penalty_from_mean_gap": 1.0138355077485028,
+    "compute_equivalent_gate": 1.1,
+    "maximum_seed_gap_ce": 0.007512153625488516,
+    "minimum_seed_gap_ce": 0.0028,
+    "both_fixed_eval_protocols_match": true,
+    "all_fixed_eval_losses_finite": true
+  },
+  "systems_summary": {
+    "minimum_candidate_preflight_mfu_fraction": 0.28509967415979665,
+    "minimum_mfu_gate": 0.2,
+    "maximum_observed_momentum_bytes": 96823451,
+    "momentum_byte_ceiling": 99090432,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "persistent_mlp_training_state_reduction_factor_seed2": 1.7816471432571364,
+    "inference_mlp_weight_storage_reduction_factor": 3.1965228795716465,
+    "materialized_inference_flops": "unchanged from dense MLP"
+  },
+  "gate_outcome": {
+    "candidate_minus_parent_terminal_validation_ce_passed": true,
+    "candidate_over_parent_compute_equivalent_passed": true,
+    "all_fixed_eval_losses_finite_passed": true,
+    "same_eval_indices_passed": true,
+    "candidate_maximum_momentum_bytes_passed": true,
+    "minimum_mfu_fraction_each_passed": true,
+    "persistent_raw_ambient_momentum_tensors_passed": true,
+    "overall_passed": true
+  },
+  "decision": {
+    "compact_full_mlp_closed_at_124m_0p5tpp": true,
+    "larger_model_scale_up_authorized": false,
+    "longer_horizon_authorized": false,
+    "next_authorized_work": "return to the remaining full-attention V/output-projection compact-direction problem at the smallest ladder"
+  }
+}

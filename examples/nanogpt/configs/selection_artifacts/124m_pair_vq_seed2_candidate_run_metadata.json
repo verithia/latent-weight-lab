@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_pair_vq_seed2_candidate_run_metadata_v1",
-  "status": "running",
+  "status": "finished_clean",
   "run_name": "pro6_mai_v3_124m_qkonly_pairvq_mlp_adaptive_seed2_0p5tpp_lr24e4",
   "host": "PRO6",
   "gpu": 0,
@@ -66,5 +66,23 @@
     "model_size_scale_up": false,
     "longer_horizon": false,
     "next_after_pass": "return to the 124M full-attention V/c_proj compact-direction problem"
+  },
+  "terminal": {
+    "finished_at": "2026-08-22T11:55:11+08:00",
+    "exit_code": 0,
+    "classification": "clean",
+    "train_ce": 5.3602,
+    "validation_ce": 5.363,
+    "matched_parent_validation_ce": 5.3602,
+    "candidate_minus_parent_validation_ce": 0.0028,
+    "all_fixed_eval_losses_finite": true,
+    "scientific_median_tokens_per_second": 158664.2,
+    "scientific_mean_tokens_per_second": 157556.6756521739,
+    "scientific_mfu_fraction_estimate": 0.28425918476571105,
+    "maximum_momentum_bytes": 96823451,
+    "momentum_byte_ceiling": 99090432,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "scientific_log_sha256": "9e237da6c37bc3847695862111f70b863fbb2dc0466be86665abfe87fc7c70cb",
+    "terminal_status_sha256": "1a428ffe411cb1f0ddd175280f13ec4fc4d827b444eebfd9c9d9dee54379edff"
   }
 }
