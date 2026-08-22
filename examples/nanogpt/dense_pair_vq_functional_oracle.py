@@ -18,6 +18,7 @@ import numpy as np
 import torch
 from torch import nn
 
+from examples.nanogpt.muon import muon_update
 from examples.nanogpt.dense_pair_vq_shadow import (
     DensePairVQShadowObserver,
     atomic_json,
@@ -26,7 +27,9 @@ from examples.nanogpt.dense_pair_vq_shadow import (
 
 
 PLAN_SCHEMA = "mai_124m_pair_vq_antithetic_functional_gradient_oracle_plan_v1"
+POLAR_PLAN_SCHEMA = "mai_124m_pair_vq_same_momentum_polar_amplification_oracle_plan_v1"
 RESULT_SCHEMA = "mai_pair_vq_antithetic_functional_gradient_oracle_result_v1"
+POLAR_RESULT_SCHEMA = "mai_pair_vq_same_momentum_polar_amplification_oracle_result_v1"
 
 
 def _all_finite(value: Any) -> bool:
@@ -131,6 +134,51 @@ def antithetic_average(
     return {name: (minus[name] + plus[name]) * 0.5 for name in minus}
 
 
+def _direction_metrics(
+    reference: torch.Tensor, candidate: torch.Tensor
+) -> dict[str, float]:
+    reference64 = reference.detach().double()
+    candidate64 = candidate.detach().double()
+    reference_energy = float(reference64.square().sum())
+    candidate_energy = float(candidate64.square().sum())
+    error_energy = float((candidate64 - reference64).square().sum())
+    inner = float((reference64 * candidate64).sum())
+    return {
+        "reference_energy": reference_energy,
+        "candidate_energy": candidate_energy,
+        "error_energy": error_energy,
+        "inner": inner,
+        "relative_error": math.sqrt(
+            error_energy / max(reference_energy, 1e-30)
+        ),
+        "cosine": inner
+        / max(math.sqrt(reference_energy * candidate_energy), 1e-30),
+    }
+
+
+def _aggregate_directions(
+    rows: list[dict[str, Any]], key: str
+) -> dict[str, float]:
+    reference_energy = sum(float(row[key]["reference_energy"]) for row in rows)
+    candidate_energy = sum(float(row[key]["candidate_energy"]) for row in rows)
+    error_energy = sum(float(row[key]["error_energy"]) for row in rows)
+    inner = sum(float(row[key]["inner"]) for row in rows)
+    return {
+        "reference_energy": reference_energy,
+        "candidate_energy": candidate_energy,
+        "error_energy": error_energy,
+        "relative_error": math.sqrt(
+            error_energy / max(reference_energy, 1e-30)
+        ),
+        "cosine": inner
+        / max(math.sqrt(reference_energy * candidate_energy), 1e-30),
+        "worst_matrix_relative_error": max(
+            float(row[key]["relative_error"]) for row in rows
+        ),
+        "worst_matrix_cosine": min(float(row[key]["cosine"]) for row in rows),
+    }
+
+
 class PairVQFunctionalGradientOracle:
     """Score compact functional gradients without changing dense training."""
 
@@ -139,6 +187,7 @@ class PairVQFunctionalGradientOracle:
         model: nn.Module,
         observer: DensePairVQShadowObserver,
         *,
+        optimizer: Any | None = None,
         plan_path: Path,
         plan_sha256: str,
         result_path: Path,
@@ -149,8 +198,15 @@ class PairVQFunctionalGradientOracle:
         if sha256_file(plan_path) != plan_sha256:
             raise ValueError("functional-oracle plan identity mismatch")
         plan = json.loads(plan_path.read_text())
-        if plan.get("schema_version") != PLAN_SCHEMA:
+        if plan.get("schema_version") not in {PLAN_SCHEMA, POLAR_PLAN_SCHEMA}:
             raise ValueError("unexpected functional-oracle plan schema")
+        self.polar_amplification_enabled = (
+            plan.get("schema_version") == POLAR_PLAN_SCHEMA
+        )
+        if self.polar_amplification_enabled and optimizer is None:
+            raise ValueError(
+                "same-momentum polar amplification requires the dense optimizer"
+            )
         frozen = plan["frozen_protocol"]
         if str(observer.source_config_path) != str(
             frozen["compact_source_config"]
@@ -169,6 +225,24 @@ class PairVQFunctionalGradientOracle:
             int(step) for step in frozen["primary_late_steps"]
         }
         self.records: list[dict[str, Any]] = []
+        self._dense_optimizer_owner: dict[str, tuple[Any, dict[str, Any]]] = {}
+        if self.polar_amplification_enabled:
+            children = list(getattr(optimizer, "optimizers", [optimizer]))
+            for name, module in observer._dense_modules.items():
+                matches = []
+                for child in children:
+                    for group in child.param_groups:
+                        if any(
+                            parameter is module.weight
+                            for parameter in group["params"]
+                        ):
+                            matches.append((child, group))
+                if len(matches) != 1:
+                    raise ValueError(
+                        f"expected one dense optimizer owner for {name}, "
+                        f"found {len(matches)}"
+                    )
+                self._dense_optimizer_owner[name] = matches[0]
         self._feedback_state: dict[str, dict[str, torch.Tensor]] = {}
         for name, module in observer._shadow_modules.items():
             if not module.error_feedback:
@@ -361,6 +435,84 @@ class PairVQFunctionalGradientOracle:
     def _weight_center_metrics(self) -> dict[str, Any]:
         return self.last_residual_metrics
 
+    @torch.no_grad()
+    def _same_momentum_polar_comparison(
+        self,
+        reference: dict[str, torch.Tensor],
+        candidate: dict[str, torch.Tensor],
+    ) -> dict[str, Any]:
+        """Compare dense/compact gradients under one identical momentum history.
+
+        Both branches start from the live dense Muon buffer.  Only the task
+        gradient differs, so any extra error after ``muon_update`` is caused by
+        polar normalization of the compact functional-gradient perturbation,
+        not compact momentum transport or retraction.
+        """
+        if set(reference) != set(candidate):
+            raise ValueError("polar comparison gradient maps do not match")
+        rows = []
+        for name in sorted(reference):
+            module = self.observer._dense_modules[name]
+            owner, group = self._dense_optimizer_owner[name]
+            momentum = float(group["momentum"])
+            ns_steps = int(group["ns_steps"])
+            state = owner.state[module.weight]
+            buffer = state.get("momentum_buffer")
+            if buffer is None:
+                buffer = torch.zeros_like(module.weight)
+            dense_gradient = reference[name].to(
+                device=module.weight.device, dtype=torch.float32
+            )
+            compact_gradient = candidate[name].to(
+                device=module.weight.device, dtype=torch.float32
+            )
+            dense_next = buffer.float() * momentum + dense_gradient
+            compact_next = buffer.float() * momentum + compact_gradient
+            dense_request = dense_gradient + momentum * dense_next
+            compact_request = compact_gradient + momentum * compact_next
+            dense_update = muon_update(dense_request, steps=ns_steps).float()
+            compact_update = muon_update(compact_request, steps=ns_steps).float()
+            prepolar = _direction_metrics(dense_request, compact_request)
+            polar = _direction_metrics(dense_update, compact_update)
+            rows.append(
+                {
+                    "module": name,
+                    "side": "c_fc" if name.endswith(".c_fc") else "c_proj",
+                    "layer": int(name.split(".")[2]),
+                    "prepolar": prepolar,
+                    "polar": polar,
+                    "relative_error_amplification": (
+                        polar["relative_error"]
+                        / max(prepolar["relative_error"], 1e-30)
+                    ),
+                }
+            )
+            del dense_gradient, compact_gradient
+            del dense_next, compact_next, dense_request, compact_request
+            del dense_update, compact_update
+
+        payload: dict[str, Any] = {"matrices": rows}
+        for label, selected in (
+            ("all", rows),
+            ("c_fc", [row for row in rows if row["side"] == "c_fc"]),
+            ("c_proj", [row for row in rows if row["side"] == "c_proj"]),
+        ):
+            prepolar = _aggregate_directions(selected, "prepolar")
+            polar = _aggregate_directions(selected, "polar")
+            payload[label] = {
+                "prepolar": prepolar,
+                "polar": polar,
+                "relative_error_amplification": (
+                    polar["relative_error"]
+                    / max(prepolar["relative_error"], 1e-30)
+                ),
+                "maximum_matrix_relative_error_amplification": max(
+                    float(row["relative_error_amplification"])
+                    for row in selected
+                ),
+            }
+        return payload
+
     @staticmethod
     def _matrix_regression_fraction(
         native: dict[str, Any], candidate: dict[str, Any]
@@ -454,6 +606,72 @@ class PairVQFunctionalGradientOracle:
             "passed": bool(selected) and _all_finite(self.records),
         }
 
+    def _summarize_polar_gate(self) -> dict[str, Any]:
+        late = [row for row in self.records if row["step"] in self.primary_late_steps]
+        if len(late) != len(self.primary_late_steps):
+            return {"ready": False, "passed": False, "classification": None}
+        threshold = self.plan["polar_gate"]
+        all_rows = [row["same_momentum_polar"]["all"] for row in late]
+        outcomes = {
+            "minimum_late_prepolar_cosine": min(
+                float(row["prepolar"]["cosine"]) for row in all_rows
+            ),
+            "maximum_late_polar_cosine": max(
+                float(row["polar"]["cosine"]) for row in all_rows
+            ),
+            "minimum_late_polar_relative_error": min(
+                float(row["polar"]["relative_error"]) for row in all_rows
+            ),
+            "minimum_late_relative_error_amplification": min(
+                float(row["relative_error_amplification"]) for row in all_rows
+            ),
+        }
+        checks = {
+            "minimum_late_prepolar_cosine": (
+                outcomes["minimum_late_prepolar_cosine"]
+                >= float(threshold["minimum_late_prepolar_cosine"])
+            ),
+            "maximum_late_polar_cosine": (
+                outcomes["maximum_late_polar_cosine"]
+                <= float(threshold["maximum_late_polar_cosine"])
+            ),
+            "minimum_late_polar_relative_error": (
+                outcomes["minimum_late_polar_relative_error"]
+                >= float(threshold["minimum_late_polar_relative_error"])
+            ),
+            "minimum_late_relative_error_amplification": (
+                outcomes["minimum_late_relative_error_amplification"]
+                >= float(
+                    threshold["minimum_late_relative_error_amplification"]
+                )
+            ),
+        }
+        passed = all(checks.values()) and _all_finite(late)
+        return {
+            "ready": True,
+            "passed": passed,
+            "classification": (
+                "MUON_POLAR_AMPLIFIES_CODEC_GRADIENT_ERROR"
+                if passed
+                else "MUON_POLAR_NOT_PRIMARY"
+            ),
+            "measurements": outcomes,
+            "checks": checks,
+        }
+
+    def _combined_gate(self) -> dict[str, Any]:
+        functional = self._summarize_gate()
+        if not self.polar_amplification_enabled:
+            return functional
+        polar = self._summarize_polar_gate()
+        return {
+            "ready": bool(functional["ready"] and polar["ready"]),
+            "passed": bool(functional["passed"] and polar["passed"]),
+            "classification": polar["classification"],
+            "functional": functional,
+            "polar": polar,
+        }
+
     def probe(
         self,
         *,
@@ -519,10 +737,21 @@ class PairVQFunctionalGradientOracle:
                 "splits": split_payload,
                 "cross_window": cross_window,
             }
+            if self.polar_amplification_enabled:
+                record["same_momentum_polar"] = (
+                    self._same_momentum_polar_comparison(
+                        captured["heldout"]["dense"],
+                        captured["heldout"]["center"],
+                    )
+                )
             self.records.append(record)
-            gate = self._summarize_gate()
+            gate = self._combined_gate()
             payload = {
-                "schema_version": RESULT_SCHEMA,
+                "schema_version": (
+                    POLAR_RESULT_SCHEMA
+                    if self.polar_amplification_enabled
+                    else RESULT_SCHEMA
+                ),
                 "status": "finished" if terminal else "running",
                 "plan": {"path": str(self.plan_path), "sha256": self.plan_sha256},
                 "source_config": {

@@ -1,0 +1,96 @@
+{
+  "schema_version": "mai_124m_pair_vq_same_momentum_polar_amplification_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Does Muon polar normalization amplify the tiny forward-visible Pair-VQ functional-gradient error under an identical dense momentum history enough to explain the compact self-path drift?",
+  "causal_basis": {
+    "factorial": {
+      "c_fc_only_gap_ce": 0.0698,
+      "c_proj_only_gap_ce": 0.0661,
+      "full_compact_mlp_gap_ce": 0.0683,
+      "interaction_ce": -0.0676,
+      "finding": "Either compact side moves self-training to the same worse basin; the defect is coupled and dynamic rather than two independent static capacity errors."
+    },
+    "frozen_layout_oracle": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cproj_neuron_layout_oracle_result.json",
+      "sha256": "e79ebdcec31a7004b4fc89b88ef212f9c1f814c9af7daa13be4a52f5423b0e7c",
+      "classification": "CPROJ_NEURON_MAJOR_LAYOUT_REJECTED",
+      "finding": "A same-byte neuron-major c_proj layout neither improves fixed CE nor held-out residual action, so static coordinate layout is not binding."
+    },
+    "functional_gradient": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_antithetic_functional_gradient_oracle_result.json",
+      "classification": "PASS_SELECT_ONE_PASS_FORWARD_VISIBLE_CENTER",
+      "minimum_late_gradient_cosine": 0.9999764834558452,
+      "finding": "The teacher-forced one-step compact task gradient is almost identical to dense before the optimizer map."
+    },
+    "optimizer_transition": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_optimizer_transition_oracle_result.json",
+      "classification": "COMPACT_MOMENTUM_POLAR_PRIMARY",
+      "finding": "An older compact-momentum chart showed large post-polar error, but it confounded momentum transport with polar sensitivity and predates the selected lossless reserved-escape FP16 momentum."
+    }
+  },
+  "theory": {
+    "same_history_control": "At each frozen dense-path probe, both branches start from the identical live dense Muon momentum buffer M_t. Only the held-out task gradient differs: g_dense versus g_center from the forward-visible compact center.",
+    "nesterov_requests": "M_next_dense = mu M_t + g_dense; R_dense = g_dense + mu M_next_dense. M_next_center and R_center use the same equations and same M_t with g_center.",
+    "polar_test": "Compare R_dense to R_center before normalization, then compare muon_update(R_dense) to muon_update(R_center) after the identical five-step Newton-Schulz polar map.",
+    "attribution": "Because momentum history, learning rate, weight decay, dense trajectory, batches, and compact representation are held fixed, excess post-polar error is attributable only to amplification of the compact functional-gradient perturbation by Muon normalization.",
+    "decision_consequence": "A pass authorizes one zero-update regularized-polar discriminator. It does not authorize training. A failure rejects polar amplification as primary and redirects theory to recurrent codec-neighbor path stability; it does not authorize a coefficient sweep."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 2026082201,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024
+    },
+    "heldout_window": {
+      "split": "validation",
+      "seed": 2026082202,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024,
+      "must_be_disjoint_from_fit": true
+    },
+    "functional_variants": ["dense", "native", "forward_visible_center", "antithetic_control"],
+    "polar_variants": ["dense", "forward_visible_center"],
+    "momentum_history": "identical live dense buffer for both polar variants",
+    "trajectory_intervention": "none"
+  },
+  "frozen_gate": {
+    "all_metrics_finite": true,
+    "fit_and_heldout_indices_disjoint": true,
+    "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+    "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+    "minimum_late_heldout_gradient_error_closure_vs_native": 0.70,
+    "minimum_late_heldout_gradient_cosine": 0.95,
+    "minimum_late_fit_to_heldout_task_alignment_retention_vs_dense": 0.95,
+    "maximum_primary_matrix_regression_fraction": 0.25,
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "primary_candidate_selection": "The forward-visible center must retain the already sealed functional-gradient pass before polar attribution is interpreted."
+  },
+  "polar_gate": {
+    "minimum_late_prepolar_cosine": 0.999,
+    "maximum_late_polar_cosine": 0.9998,
+    "minimum_late_polar_relative_error": 0.02,
+    "minimum_late_relative_error_amplification": 2.0
+  },
+  "state_and_compute_contract": {
+    "candidate_persistent_state": "none; nonintervening dense replay analysis only",
+    "dense_master_weight_in_candidate": false,
+    "dense_momentum_in_candidate": false,
+    "oracle_dense_momentum_is_scoring_only": true,
+    "inference_change": false
+  },
+  "decision_rule": {
+    "oracle_pass": "Seal MUON_POLAR_AMPLIFIES_CODEC_GRADIENT_ERROR and preregister one zero-update regularized-polar discriminator. Do not launch an LM endpoint.",
+    "oracle_fail": "Seal MUON_POLAR_NOT_PRIMARY and reject compact-specific polar repair. Return to a recurrent codec-neighbor stability discriminator derived from the Mapping Loss stability term.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}

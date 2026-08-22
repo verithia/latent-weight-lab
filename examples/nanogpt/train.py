@@ -4287,6 +4287,7 @@ def main() -> None:
             pair_vq_functional_oracle = PairVQFunctionalGradientOracle(
                 raw_model,
                 pair_vq_dense_shadow,
+                optimizer=optimizer,
                 plan_path=Path(args.pair_vq_dense_shadow_functional_plan),
                 plan_sha256=str(
                     args.pair_vq_dense_shadow_functional_plan_sha256
