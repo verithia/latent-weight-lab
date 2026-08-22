@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_pair_vq_cfc_only_5tpp_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_qkonly_pairvq_cfconly_5tpp_lr24e4",
   "run_id": "pro6_mai_v3_124m_qkonly_pairvq_cfconly_5tpp_lr24e4_20260822T074849Z_3204418",
   "host": "PRO6",
@@ -81,6 +81,26 @@
     "update_only_minutes": 58.49,
     "expected_total_minutes": "65-75",
     "basis": "2373 updates at the exact-config 1.47886625 seconds per update, plus five fixed 400-batch evaluations and terminal checkpoint serialization"
+  },
+  "terminal": {
+    "finished_at": "2026-08-22T16:49:28+08:00",
+    "exit_code": 0,
+    "train_ce": 3.573,
+    "validation_ce": 3.5556,
+    "matched_parent_validation_ce": 3.4858,
+    "candidate_minus_parent_ce": 0.0698,
+    "classification": "PAIR_VQ_C_FC_MATERIAL_124M_5TPP",
+    "dense_compute_equivalent_penalty": 1.3611068848595538,
+    "common_loss_median_compute_ratio": 1.1966040238057924,
+    "scientific_median_tokens_per_second": 176701.46999999997,
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cfc_only_5tpp_result.json",
+    "result_sha256": "fd617907b14306c999ccc0bc8b9015eac674803a159d44d23ac1809f0992612c",
+    "scientific_log_sha256": "91e5ce9d8d0a72897af7cda369837e64e52470250dfe1940143552fbb72166d0",
+    "terminal_status_sha256": "01328b4bccc36dfaa75c2f61be101f9d2accbbb37c8965aa43b74d91a9997c18",
+    "checkpoint_sha256": "210a8f552afacaef26c258bdaf92fb2f5a9cf08541d5b9a5c42812c6a3603242",
+    "maximum_momentum_bytes": 47726083,
+    "momentum_byte_ceiling": 56623104,
+    "watchdog_retired_after_callback": true
   },
   "authorization": {
     "automatic_rerun": false,

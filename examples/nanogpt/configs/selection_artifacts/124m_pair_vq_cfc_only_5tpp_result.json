@@ -1,0 +1,148 @@
+{
+  "capacity": {
+    "codec_bytes": 42518112,
+    "compact_feedback_bytes": 44834304,
+    "maximum_momentum_bytes": 47726083,
+    "momentum_byte_ceiling": 56623104,
+    "pair_vq_elements": 28311552,
+    "pair_vq_modules": 12,
+    "persistent_training_bytes": 136897632
+  },
+  "checks": {
+    "absent_scope_has_zero_momentum": true,
+    "all_fixed_eval_losses_finite": true,
+    "attention_pair_vq_disabled": true,
+    "common_loss_ratio_available": true,
+    "config_matches_mfu": true,
+    "config_matches_provenance": true,
+    "curve_analysis_available": true,
+    "dense_control_is_unmodified": true,
+    "dense_control_target_matches": true,
+    "dense_master_weight_absent": true,
+    "dense_momentum_absent": true,
+    "fixed_eval_indices_match_reference": true,
+    "fixed_eval_inventory": true,
+    "fixed_eval_protocol_match": true,
+    "forward_visible_feedback": true,
+    "manifest_matches_config": true,
+    "manifest_matches_provenance": true,
+    "mfu_certificate_matches_provenance": true,
+    "mfu_floor": true,
+    "mfu_passed": true,
+    "momentum_capacity": true,
+    "pair_vq_element_count": true,
+    "pair_vq_module_count": true,
+    "persistent_state_matches_mfu": true,
+    "persistent_training_bytes_exact": true,
+    "plan_matches_config": true,
+    "qualification_is_material_mlp": true,
+    "qualification_matches_config": true,
+    "raw_ambient_error_buffer_absent": true,
+    "reference_matches_config": true,
+    "run_name_matches": true,
+    "single_pair_vq_target": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "terminal_ce_finite": true
+  },
+  "classification": "PAIR_VQ_C_FC_MATERIAL_124M_5TPP",
+  "curve_analysis": {
+    "common_loss_ratio": {
+      "loss_high": 4.0173,
+      "loss_low": 3.5556,
+      "max_candidate_over_dense_compute": 1.3611068848595536,
+      "median_candidate_over_dense_compute": 1.1966040238057924,
+      "min_candidate_over_dense_compute": 1.1559426226115,
+      "samples": 101
+    },
+    "dense_local_fits": [
+      {
+        "alpha_eff_total_loss": 0.06199931517716803,
+        "loss_slope_per_log_compute": 0.2161172128445723,
+        "window": 2
+      },
+      {
+        "alpha_eff_total_loss": 0.08751401746124546,
+        "loss_slope_per_log_compute": 0.3050563620664094,
+        "window": 3
+      },
+      {
+        "alpha_eff_total_loss": 0.1124292052127982,
+        "loss_slope_per_log_compute": 0.39190572353077197,
+        "window": 4
+      }
+    ],
+    "dense_terminal_validation_ce": 3.4858,
+    "schema_version": "fixed_model_compute_equivalence_v1",
+    "terminal_dense_penalty": {
+      "candidate_over_dense_compute": 1.3611068848595538,
+      "candidate_terminal_compute": 2373.0,
+      "candidate_terminal_validation_ce": 3.5556,
+      "dense_match_compute": 1743.433984793089,
+      "method": "interpolation"
+    }
+  },
+  "curve_analysis_error": null,
+  "decision": {
+    "authorize_20tpp": false,
+    "authorize_model_size_scale_up": false,
+    "authorize_representation_change": false,
+    "automatic_rerun": false,
+    "single_family_negligible": false,
+    "wait_for_other_preregistered_arm": true
+  },
+  "dense_control_target": "mlp.c_proj",
+  "performance": {
+    "preflight_mfu_fraction": 0.3171475960630368,
+    "preflight_tokens_per_second": 177267.045,
+    "scientific_mean_tokens_per_second": 175454.8849166667,
+    "scientific_median_tokens_per_second": 176701.46999999997,
+    "scientific_perf_samples": 240
+  },
+  "provenance": {
+    "config_sha256": "96fc9d117a3687cc865baf0f07284f2215c2bc794727923519f7bc197c0839f6",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "git_commit": "0483c33c51faf06ed938a159353e800079bd3f17",
+    "mfu_certificate_sha256": "6a0c45bb4c7630650b9ace873a7102d4ee25874ca12c6c91bcfb294c41e9ad9c",
+    "plan_sha256": "3ecc0e0aa7eb8969478f2c787afd3cdf65235f8a509b9912b58d167b6e4e9e95",
+    "qualification_result_sha256": "6c60a6824dc268e336917cf6680e3eb19ac3053fb13394c81090c16ce7e7f770",
+    "reference_result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "runtime_provenance_sha256": "a3fa1c8ae651167f5daf4c5c35a198dc78b67e830e72adbfe7f5656b3ae56753",
+    "scientific_log_sha256": "91e5ce9d8d0a72897af7cda369837e64e52470250dfe1940143552fbb72166d0",
+    "terminal_status_sha256": "01328b4bccc36dfaa75c2f61be101f9d2accbbb37c8965aa43b74d91a9997c18"
+  },
+  "recorded_at": "2026-08-22T08:51:51.720533+00:00",
+  "schema_version": "mai_124m_pair_vq_single_mlp_family_5tpp_result_v1",
+  "target": "mlp.c_fc",
+  "terminal": {
+    "candidate_minus_parent_ce": 0.0698000000000003,
+    "dense_mlp_parent_validation_ce": 3.4858,
+    "fixed_validation_curve": [
+      {
+        "step": 0,
+        "validation_ce": 11.0626
+      },
+      {
+        "step": 594,
+        "validation_ce": 4.1174
+      },
+      {
+        "step": 1188,
+        "validation_ce": 3.7615
+      },
+      {
+        "step": 1782,
+        "validation_ce": 3.6158
+      },
+      {
+        "step": 2373,
+        "validation_ce": 3.5556
+      }
+    ],
+    "single_family_negligible_gap_ce_max": 0.01,
+    "train_ce": 3.573,
+    "validation_ce": 3.5556
+  },
+  "valid": true
+}
