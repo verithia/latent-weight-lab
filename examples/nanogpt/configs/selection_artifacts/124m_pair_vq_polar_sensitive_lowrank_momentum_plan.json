@@ -1,0 +1,142 @@
+{
+  "schema_version": "mai_124m_pair_vq_polar_sensitive_lowrank_momentum_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_unexecuted",
+  "scientific_question": "Can a small FP16 low-rank correction, selected in a polar-sensitive basis, repair the Muon direction lost by a packed E5M8 or E5M6 ambient-momentum state while retaining a meaningful training-state reduction?",
+  "causal_authorization": {
+    "loss_closure_parent": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_endpoint_result.json",
+      "result_sha256": "3ead477be76bc36820531818fe54c2932c6f581a2f32975e476f64b0e805d9d8",
+      "classification": "PASS_COMPACT_FULL_MLP_LOSS_CLOSURE_WITH_FP16_AMBIENT_MOMENTUM",
+      "validation_ce": 5.368512153625488,
+      "dense_parent_validation_ce": 5.361
+    },
+    "uniform_minifloat_rejection": {
+      "result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_minifloat_momentum_precision_frontier_result.json",
+      "result_sha256": "ee081b20b8d3b629631c9428b68cd648e21c5d99daa5b4dc452f43a47ae8de1c",
+      "classification": "REJECT_UNIFORM_MANTISSA_TRUNCATION_FOR_PAIR_VQ_AMBIENT_MOMENTUM",
+      "e5m8_update8_prepolar_cosine": 0.9999987509466345,
+      "e5m8_update8_postpolar_cosine": 0.9989545993131299,
+      "e5m8_update8_worst_matrix_postpolar_cosine": 0.9978345692310162,
+      "finding": "Uniform E5M8 is almost exact in ordinary pre-polar cosine but misses after Muon's nonlinear polar map. Another uniform precision or block-size sweep is forbidden."
+    }
+  },
+  "theory": {
+    "polar_differential": "For H=U Sigma V^T, in-frame polar perturbations contain factors 1/(sigma_i+sigma_j), while orthogonal-complement perturbations contain sigma_i^{-1}. Quantization error in weak singular directions can therefore dominate post-polar error even when Frobenius reconstruction is nearly exact.",
+    "representation": "Persist a tightly packed E5M-b base state plus a rank-r FP16 correction A B^T. Materialize the corrected state only transiently for the ordinary production Muon update.",
+    "capacity_objective": "At a frozen optimizer request, compare a residual-SVD basis with a basis selected by the exact gradient of post-polar directional error. In each fixed basis, fit only a small r by r core against the exact Newton-Schulz output, then absorb that core into A for persistent byte accounting.",
+    "why_capacity_first": "A fixed-state passing result establishes only that the required direction lies in a compact structured correction. It does not establish a causal rule for updating A and B through time. A language-model endpoint before that causal rule would confound representation capacity with optimizer dynamics.",
+    "non_claims": [
+      "This oracle does not update model parameters through any candidate path.",
+      "It does not claim that per-step core fitting is a production optimizer.",
+      "It does not authorize a loss endpoint, scale-up, horizon transfer, learning-rate sweep, or attention change."
+    ]
+  },
+  "frozen_representation": {
+    "forward_weight": "Keep the successful Pair-VQ base, forward-visible fractional-lattice feedback, and c_proj fast residual bit-identical.",
+    "attention": "Keep QK-only BlockFHT attention and dense V/c_proj exactly as in the successful parent.",
+    "owner": "The production optimizer remains the exact FP16 ambient-momentum Pair-VQ Muon owner. All candidates are detached nonintervening sidecars.",
+    "optimizer_request": "For reference momentum B and current gradient G, form H_ref=G+mu*B. For a candidate B_hat, form H_hat=G+mu*B_hat and apply the same five-step Newton-Schulz Muon map.",
+    "forbidden_changes": [
+      "Pair-VQ codebooks, codes, feedback codec, gains, levels, or refresh schedule",
+      "attention target scope, model width, data order, seeds, optimizer, learning rate, or schedule",
+      "hidden dense momentum, FP32 residual, candidate parameter update, or candidate checkpoint",
+      "candidate-specific rank, optimizer iterations, thresholds, or post-hoc basis choice"
+    ]
+  },
+  "frozen_protocol": {
+    "matrix_scope": ["transformer.h.*.mlp.c_fc", "transformer.h.*.mlp.c_proj"],
+    "momentum_elements": 56623104,
+    "probe_optimizer_update_indices": [0, 8],
+    "reported_post_update_state_steps": [1, 9],
+    "candidate_parameter_updates": 0,
+    "candidate_checkpoint_writes": 0,
+    "owner_replay": "Replay the exact nine-update registered parent seed/data/config from scratch. At each probe, advance the FP16 reference recurrence and score candidates against the same detached gradient before the owner step.",
+    "base_formats": {
+      "stage_a": ["e5m8"],
+      "stage_b_if_stage_a_passes_locally": ["e5m6"],
+      "encoding": "Use the already tested deterministic FP16-exponent round-to-nearest-even implementation. No scale, dense residual, stochastic rounding, or error feedback is allowed."
+    },
+    "ranks": [4, 8, 16, 32],
+    "basis_families": {
+      "residual_svd": "Compute a deterministic randomized rank-32 SVD of R=B_ref-Q(B_ref); use its leading U_r and V_r.",
+      "polar_gradient": "At zero correction, differentiate one minus cosine between the exact reference Muon update and candidate Muon update with respect to the candidate momentum state. Compute a deterministic randomized rank-32 SVD of the negative gradient and use its leading U_r and V_r."
+    },
+    "randomized_svd": {
+      "q": 40,
+      "niter": 2,
+      "seed_formula": "20261120 + 1000*optimizer_update_index + 100*layer + 10*side + basis_index",
+      "rng_isolation": "Use torch.random.fork_rng so the owner training/data RNG streams are unchanged."
+    },
+    "core_fit": {
+      "form": "B_hat=Q(B_ref)+U_r K V_r^T; after fitting, store A=U_r K and B=V_r so no separate persistent core is counted.",
+      "initialization": "K_0=U_r^T (B_ref-Q(B_ref)) V_r.",
+      "optimizer": "deterministic torch LBFGS with strong-Wolfe line search",
+      "maximum_iterations": 12,
+      "history_size": 10,
+      "tolerance_grad": 1e-09,
+      "tolerance_change": 1e-12,
+      "objective": "relative squared error of the exact production Muon update plus 0.01 times relative squared momentum-state reconstruction error",
+      "no_cross_matrix_sharing": true
+    },
+    "controls": {
+      "rank_zero": "The corresponding E5M base without a correction.",
+      "full_residual": "B_hat=B_ref; must reproduce every reference direction metric to at least 0.99999999.",
+      "objective_monotonicity": "For a fitted candidate, final objective must not exceed its initialized objective by more than 1e-10."
+    },
+    "measurements": [
+      "momentum-state, combined pre-polar, and post-polar relative error, cosine, positive-line recovery, and every-matrix minima",
+      "per-matrix singular spectrum of the uncorrected post-polar error and cumulative rank-4/8/16/32 energy fractions",
+      "initialized and fitted objective, LBFGS closure count, fit wall time, and maximum allocated memory",
+      "packed base bytes, FP16 factor bytes, total persistent MLP training bytes, dense-state reduction factor, and transient expansion FLOPs"
+    ]
+  },
+  "staging_and_futility": {
+    "stage_a": "Evaluate E5M8 for both basis families and all registered ranks. If no E5M8 candidate passes a probe, do not evaluate E5M6 at that probe.",
+    "stage_b": "Evaluate E5M6 at a probe only when at least one E5M8 candidate passes every direction threshold at that same probe.",
+    "family_early_rejection": "If the FP16/full-residual control passes and no E5M8 rank at most 32 passes update 0, reject the useful-rank low-rank correction family without update 8.",
+    "final_selection": "Among candidates that pass both registered probes, choose minimum total persistent bytes; break ties by higher minimum every-matrix post-polar cosine."
+  },
+  "decision_gate": {
+    "requirements_at_every_registered_probe": {
+      "minimum_all_postpolar_cosine": 0.9999,
+      "minimum_every_matrix_postpolar_cosine": 0.999,
+      "minimum_all_postpolar_positive_line_energy_recovery": 0.999,
+      "minimum_all_prepolar_cosine": 0.9999,
+      "minimum_all_momentum_state_cosine": 0.9999,
+      "all_metrics_finite": true,
+      "objective_monotonic": true
+    },
+    "if_pass": "Authorize only derivation of a causal factor recurrence, exact encode/decode/checkpoint tests, and a production-path >=20% MFU preflight. Do not authorize a language-model loss endpoint.",
+    "if_fail": "Reject useful-rank additive low-rank history correction. Retain FP16 ambient momentum as the working training-state floor and return to a factored polar-history representation rather than another coordinate quantizer.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  },
+  "theoretical_persistent_storage": {
+    "common_compact_forward_and_feedback_bytes": 157427136,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "fp16_factor_bytes_per_rank_across_24_matrices": 184320,
+    "e5m8": {
+      "base_momentum_bytes": 99090432,
+      "rank4": {"factor_bytes": 737280, "total_training_bytes": 257254848, "training_reduction_factor": 1.7608407986153871, "transient_expand_flops_per_update": 452984832},
+      "rank8": {"factor_bytes": 1474560, "total_training_bytes": 257992128, "training_reduction_factor": 1.7558087353735072, "transient_expand_flops_per_update": 905969664},
+      "rank16": {"factor_bytes": 2949120, "total_training_bytes": 259466688, "training_reduction_factor": 1.7458304011650236, "transient_expand_flops_per_update": 1811939328},
+      "rank32": {"factor_bytes": 5898240, "total_training_bytes": 262415808, "training_reduction_factor": 1.7262101527054345, "transient_expand_flops_per_update": 3623878656}
+    },
+    "e5m6": {
+      "base_momentum_bytes": 84934656,
+      "rank4": {"factor_bytes": 737280, "total_training_bytes": 243099072, "training_reduction_factor": 1.8633754060566714, "transient_expand_flops_per_update": 452984832},
+      "rank8": {"factor_bytes": 1474560, "total_training_bytes": 243836352, "training_reduction_factor": 1.8577411788050373, "transient_expand_flops_per_update": 905969664},
+      "rank16": {"factor_bytes": 2949120, "total_training_bytes": 245310912, "training_reduction_factor": 1.8465743260536245, "transient_expand_flops_per_update": 1811939328},
+      "rank32": {"factor_bytes": 5898240, "total_training_bytes": 248260032, "training_reduction_factor": 1.8246385789557942, "transient_expand_flops_per_update": 3623878656}
+    }
+  },
+  "execution_policy": {
+    "implementation_before_execution": "Add focused mathematical/unit tests, exact source/config/plan hashing, detached RNG tests, and scratch-result redirection before any remote scientific run.",
+    "performance_gate": "Run the exact nine-update observer config through the project MFU preflight, charging both registered probe computations to elapsed time. Require aggregate MFU >=0.20 and at least eight timed owner updates before launch.",
+    "monitoring": "The MFU test is foreground-polled. If the gated scientific oracle is expected or observed to exceed five minutes, attach one persistent terminal/error-only @Codex watchdog; do not emit intermediate progress milestones for an intended one-to-two-hour diagnostic.",
+    "gpu_and_driver": "Use PRO6 GPU0 only when exclusive and pin the matching 595.71.05 compatibility library path."
+  }
+}
