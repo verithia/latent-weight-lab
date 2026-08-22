@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_pair_vq_cproj_neuron_layout_oracle_plan_v1",
+  "hypothesis": "The production Pair-VQ layout is neuron-major for c_fc but residual-coordinate-major for c_proj. Encoding c_proj transpose-first should align pair codes and local FHT feedback blocks with complete GELU neuron atoms, reducing held-out residual-write error without adding state.",
+  "causal_results": [
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cfc_only_5tpp_result.json",
+      "sha256": "fd617907b14306c999ccc0bc8b9015eac674803a159d44d23ac1809f0992612c"
+    },
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_cproj_only_5tpp_result.json",
+      "sha256": "6eea36b8120b38db7d67f882e9a4feca868a0dd445b94f0d915f3f157f31ecd8"
+    },
+    {
+      "path": "examples/nanogpt/configs/selection_artifacts/124m_qkonly_pair_vq_mlp_5tpp_localization_result.json",
+      "sha256": "6c60a6824dc268e336917cf6680e3eb19ac3053fb13394c81090c16ce7e7f770"
+    }
+  ],
+  "identities": {
+    "dense_parent_checkpoint": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_attention_partial_controls/pro6_mai_v3_124m_qk_only_qk64_outputgain_5tpp_lr24e4/ckpt.pt",
+      "sha256": "13b1dd1ad120f23578a7dce376a2b259e34cd5590982aa2c2ba85a68c033a5a3"
+    },
+    "data_dir": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "codec": {
+    "base_seed": 20261021,
+    "weight_std": 0.004082482904638631,
+    "neighbor_candidates": 16,
+    "code_refresh_interval": 8,
+    "projection_sweeps": 4,
+    "feedback_seed_base": 20261025,
+    "feedback_coordinate_bits": 4,
+    "feedback_block_size": 32,
+    "feedback_lloyd_iterations": 4
+  },
+  "measurement": {
+    "batch_size": 16,
+    "block_size": 1024,
+    "registered_fixed_eval_batches": 400,
+    "scored_fixed_eval_batches": 16,
+    "fixed_eval_seed": 20260720,
+    "activation_bank_indices": [0, 271],
+    "activation_sample_cap": 256,
+    "parameter_updates": 0
+  },
+  "thresholds": {
+    "minimum_every_bank_action_error_closure": 0.10,
+    "minimum_every_layer_action_error_closure": -0.05,
+    "minimum_fixed_ce_improvement": 0.002,
+    "minimum_fixed_ce_gap_closure": 0.10
+  },
+  "authorization_on_pass": {
+    "implement_transpose_aware_cproj_codec": true,
+    "run_exact_config_mfu_gate": true,
+    "run_124m_0p5tpp_endpoint_after_mfu_pass": true,
+    "run_5tpp": false,
+    "run_20tpp": false,
+    "larger_rung": false,
+    "sweep": false
+  },
+  "authorization_on_fail": {
+    "implement_transpose_aware_cproj_codec": false,
+    "run_exact_config_mfu_gate": false,
+    "run_language_model_training": false,
+    "larger_rung": false,
+    "sweep": false,
+    "next": "Reject storage-order mismatch as the binding obstruction and return to a joint same-path functional transition design; do not vary pairing width, FHT seed, or thresholds."
+  }
+}
