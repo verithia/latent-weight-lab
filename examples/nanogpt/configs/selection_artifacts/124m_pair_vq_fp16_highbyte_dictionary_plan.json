@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_highbyte_dictionary_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_unexecuted",
+  "scientific_question": "Can the measured high-byte redundancy of the loss-closing FP16 ambient Muon state be represented by a fixed-width dictionary plus exact exceptions, small enough to beat E5M8 and structured for parallel GPU decode?",
+  "causal_authorization": {
+    "entropy_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_momentum_lossless_entropy_result.json",
+    "entropy_result_sha256": "a23ba8be1202258db9577cf260eb2f52450d575f428117e5d95bf9c542575e11",
+    "classification": "PASS_INFORMATION_BOUND_REJECT_REGISTERED_CPU_SPATIAL_CODECS",
+    "all_word_entropy_bits": 12.963507333511135,
+    "low_byte_finding": "The lower eight bits retain 7.99545 conditional bits, so they must remain literal; the compressible object is the high byte.",
+    "systems_finding": "Variable-length CPU zlib is too slow, so the next candidate must use fixed-width indices, an exception bitmap, and block-local random access."
+  },
+  "theory": {
+    "word_split": "For each exact FP16 word w, store low=w&255 verbatim and encode high=w>>8.",
+    "dictionary": "For each registered region, store the K most frequent high-byte values. Every coordinate stores a fixed k=log2(K)-bit table index and a one-bit exception flag. Exceptions additionally store the literal high byte.",
+    "exactness": "The decoder reconstructs high from table[index] when flag=0 and from the literal exception stream when flag=1, then returns (high<<8)|low. Every source uint16 word must round-trip exactly.",
+    "byte_model": "N low-byte bytes + ceil(N*k/8) index bytes + ceil(N/8) exception-bitmap bytes + E literal bytes + dictionary bytes + 32-bit block exception offsets + container metadata.",
+    "parallel_decode": "One GPU block owns one coordinate block. Ballot/popcount over the exception bitmap gives each escaped lane its literal rank; all other lanes use a constant/shared-memory table lookup. There is no serial entropy decoder.",
+    "non_claims": [
+      "This terminal-state capacity audit does not establish codebook stability through training.",
+      "It does not establish GPU encode/decode speed or >=20% MFU.",
+      "It does not authorize a loss endpoint because any bit-exact implementation is loss-identical by construction."
+    ]
+  },
+  "frozen_source": {
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+    "tensor_count": 24,
+    "elements": 56623104,
+    "raw_bytes": 113246208,
+    "mutation_forbidden": true
+  },
+  "frozen_candidates": {
+    "dictionary_sizes": [4, 8, 16],
+    "index_bits": {"4": 2, "8": 3, "16": 4},
+    "decode_block_words": [256, 1024, 4096],
+    "dictionary_granularities": {
+      "global": "One K-byte high-byte table for all 24 matrices.",
+      "scope": "One table for c_fc and one for c_proj.",
+      "matrix": "One table for each of the 24 matrices.",
+      "block": "One table per decode block, selected from that block only."
+    },
+    "tie_breaking": "Within a region, equal-count symbols are ordered by ascending uint8 value.",
+    "padding": "Each matrix starts every packed stream on a byte boundary; no cross-matrix bit carry is allowed.",
+    "metadata": "Count all dictionaries, 32-bit exception offsets per decode block plus terminal offset, 16 bytes per matrix descriptor, and a 64-byte container header."
+  },
+  "measurements": [
+    "dictionary coverage and escape fraction globally, per scope, per matrix, and per decode block",
+    "exact bytes for low literals, indices, exception bitmap, exception literals, dictionaries, block offsets, and metadata",
+    "bits per coordinate, total MLP-training bytes, and reduction versus dense FP32 weight plus momentum",
+    "byte-exact source/decoded SHA-256 for every registered candidate",
+    "scalar reference encode/decode wall time as a correctness diagnostic only, not a GPU performance claim"
+  ],
+  "decision_gate": {
+    "maximum_momentum_bytes": 99090432,
+    "maximum_bits_per_coordinate": 14.0,
+    "exact_roundtrip_required": true,
+    "primary_selection": "Minimum total exact bytes among passing candidates; ties choose larger decode blocks, then coarser dictionary granularity, then smaller K.",
+    "performance_control": "Among passing candidates within 2% of the primary byte size, select the candidate with largest decode block, then coarsest dictionary granularity, then smallest K.",
+    "if_pass": "Authorize implementation only of the primary and, if distinct, performance-control CUDA codec. Require exact randomized/special-word/checkpoint/resume tests and an exact-config encode-plus-decode preflight at >=20% MFU. No loss endpoint is authorized.",
+    "if_fail": "Reject fixed-width high-byte dictionaries. Retain FP16 ambient momentum as the measured floor and move to a temporal/shared learned predictor only after a new preregistered information audit.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  },
+  "execution_policy": {
+    "implementation_before_execution": "Commit this plan, add a standalone read-only capacity audit with exact codec tests, Git-sync to PRO6, and verify the checkpoint and parent-result hashes.",
+    "monitoring": "Expected below five minutes and foreground-polled. If it exceeds five minutes, stop foreground polling and attach one terminal/error-only @Codex watchdog.",
+    "resource_policy": "CPU and host RAM only; do not occupy GPU0 or write checkpoints.",
+    "result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_highbyte_dictionary_capacity.json"
+  }
+}

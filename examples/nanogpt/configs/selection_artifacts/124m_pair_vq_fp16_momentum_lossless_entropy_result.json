@@ -1,0 +1,123 @@
+{
+  "schema_version": "mai_pair_vq_fp16_momentum_lossless_entropy_sealed_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_INFORMATION_BOUND_REJECT_REGISTERED_CPU_SPATIAL_CODECS",
+  "passed": false,
+  "decision": {
+    "information_bound_passed": true,
+    "registered_practical_codec_passed": false,
+    "selected_production_codec": null,
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false,
+    "next_authorized_work": "Derive and audit only a fixed-width, block-local high-byte dictionary plus exception representation. It must preserve every FP16 word, exploit the measured near-random low byte and compressible high byte, and expose a parallel GPU decode path before any exact-config MFU prototype.",
+    "reason": "The exact word entropy is 12.9635 bits and bit-plane zlib reaches 13.0365 bits, proving the state is exactly compressible below the 14-bit E5M8 size. However, its 0.146 GB/s CPU decode misses the frozen 1.0 GB/s gate by 6.84x; the faster byte-shuffle codec also reaches only 0.540 GB/s."
+  },
+  "identity": {
+    "host": "PRO6",
+    "source_commit": "9becc248b64b552926ae09894cafe438f747f374",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_momentum_lossless_entropy_plan.json",
+    "plan_sha256": "6ff23ffeca6f986206271b1a97e5bc2ff0ebb07705642ba5c992111bf6502721",
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "checkpoint_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+    "tensor_count": 24,
+    "elements": 56623104,
+    "raw_bytes": 113246208,
+    "exit_code": 0
+  },
+  "artifacts": {
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_momentum_lossless_entropy.json",
+      "sha256": "1f7c96e4ae7c4e978a344093c47226b01fe4b8ae8b71458b61ea9142d8789dd6",
+      "bytes": 48611,
+      "status": "finished",
+      "classification": "REJECT_BIT_EXACT_FP16_MOMENTUM_SPATIAL_CODEC_STAGE_A"
+    }
+  },
+  "entropy": {
+    "all_word_entropy_bits": 12.963507333511135,
+    "all_ideal_zero_order_bytes": 91754253,
+    "all_sum_marginal_bit_entropies": 12.996174116265538,
+    "c_fc_word_entropy_bits": 12.132742291657532,
+    "c_proj_word_entropy_bits": 13.284981943794367,
+    "flat_adjacent_xor_word_entropy_bits": 13.177279353525023,
+    "row_xor_word_entropy_bits": 13.177132168223658,
+    "conditional_lower_mantissa_entropy_given_upper_prefix": {
+      "upper_2_bits": 7.995447210837249,
+      "upper_4_bits": 5.999063020852549,
+      "upper_6_bits": 3.9993022552562074,
+      "upper_8_bits": 1.9993798063057753
+    },
+    "interpretation": "The low mantissa bits are essentially incompressible after conditioning on the high word. Almost all redundancy is in sign, exponent, and upper-mantissa patterns; adjacent-coordinate XOR makes entropy worse. A useful exact codec should store the low byte raw and encode only the high byte with shared local dictionaries."
+  },
+  "exact_codec_results": {
+    "bitplane_zlib1": {
+      "total_bytes": 92271028,
+      "bits_per_coordinate": 13.036519933629918,
+      "compression_ratio_vs_raw": 1.2273214079721753,
+      "encode_seconds": 1.6763198199914768,
+      "decode_seconds": 0.7748795439256355,
+      "encode_gb_per_second": 0.06755644516603986,
+      "decode_gb_per_second": 0.14614685455016754,
+      "exact_roundtrip": true
+    },
+    "byte_shuffle_zlib1": {
+      "total_bytes": 92702697,
+      "bits_per_coordinate": 13.097508324517143,
+      "compression_ratio_vs_raw": 1.2216064005128136,
+      "encode_gb_per_second": 0.07901317513965446,
+      "decode_gb_per_second": 0.5398269717969745,
+      "exact_roundtrip": true
+    },
+    "raw_zlib1": {
+      "total_bytes": 100376404,
+      "bits_per_coordinate": 14.181688661928531,
+      "compression_ratio_vs_raw": 1.1282154319853896,
+      "decode_gb_per_second": 0.36417366720599836,
+      "exact_roundtrip": true
+    },
+    "xor_byte_shuffle_zlib1": {
+      "total_bytes": 94245167,
+      "bits_per_coordinate": 13.315436327898944,
+      "compression_ratio_vs_raw": 1.2016128954389778,
+      "decode_gb_per_second": 0.3843064282083935,
+      "exact_roundtrip": true
+    }
+  },
+  "registered_gate": {
+    "maximum_momentum_bytes": 99090432,
+    "maximum_bits_per_coordinate": 14.0,
+    "minimum_decode_gb_per_second": 1.0,
+    "best_size_codec": "bitplane_zlib1",
+    "best_size_bytes": 92271028,
+    "best_size_bits_per_coordinate": 13.036519933629918,
+    "best_size_decode_gb_per_second": 0.14614685455016754,
+    "size_gate_passed": true,
+    "decode_gate_passed": false,
+    "passing_codecs": []
+  },
+  "storage": {
+    "common_compact_forward_and_feedback_bytes": 157427136,
+    "best_exact_total_training_bytes": 249698164,
+    "best_exact_training_reduction_factor": 1.814129606495625,
+    "working_fp16_training_reduction_factor": 1.6735479944415952,
+    "transient_decoded_fp16_bytes": 113246208,
+    "peak_host_rss_kib": 1343676
+  },
+  "repair_audit": {
+    "attempt_1": "No result was written: Python result assembly used lowercase false for gpu_used.",
+    "attempt_1_repair_commit": "dbdb5b511",
+    "attempt_2": "No result was written: four remaining lowercase false values were present in the decision block.",
+    "attempt_2_repair_commit": "9becc248b",
+    "repair_changed_scientific_source_protocol_or_thresholds": false,
+    "focused_tests_after_repair": 11,
+    "terminal_attempt_exit_code": 0
+  },
+  "interpretation": {
+    "exact_compression_exists": "The FP16 momentum field is not a 16-bit-per-coordinate information source at the terminal checkpoint; an exact code below the 14-bit E5M8 target exists.",
+    "registered_implementation_is_not_production": "The registered CPU codecs are too slow and require a transient 113 MB FP16 materialization. Their size result is evidence for a representation, not authorization to put zlib in the optimizer.",
+    "next_representation_constraint": "Because the lower byte is almost random and the high byte carries the redundancy, use a fixed-width high-byte dictionary with an exception bitmap/literal stream. This admits parallel table lookup and block-local escape ranking on GPU while preserving every FP16 word."
+  }
+}
