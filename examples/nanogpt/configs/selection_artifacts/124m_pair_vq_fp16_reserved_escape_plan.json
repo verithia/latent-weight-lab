@@ -1,0 +1,68 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_reserved_escape_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_unexecuted",
+  "scientific_question": "Can a scope-adaptive fixed-width high-byte code with one reserved literal escape remove the bitmap overhead and produce a bit-exact FP16 Muon state below 14 bits/coordinate?",
+  "causal_authorization": {
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_highbyte_dictionary_result.json",
+    "parent_result_sha256": "71e18a81b4a66734a127fcd6dccf3fe6cf6a609a8b6d07566cdd18f4cb14d165",
+    "classification": "REJECT_FIXED_WIDTH_HIGHBYTE_DICTIONARY_WITH_EXPLICIT_EXCEPTION_BITMAP",
+    "best_parent_bits_per_coordinate": 14.918287206579137,
+    "explicit_bitmap_bits_per_coordinate": 1.0,
+    "c_fc_k16_escape_fraction": 0.07977273729112414,
+    "c_proj_k16_escape_fraction": 0.39001422458224827
+  },
+  "theory": {
+    "representation": "Store the low byte verbatim. For scope s use K_s=2^k_s codes: K_s-1 codes identify common high-byte values and the last code means that the exact literal high byte follows in the block-local exception stream.",
+    "cost": "For scope s, the coordinate cost is 8+k_s+8*p_escape,s bits, plus K_s-1 dictionary bytes and 32-bit exception offsets per block. There is no exception bitmap.",
+    "scope_adaptation": "The measured c_fc high byte is substantially lower entropy and has far fewer K=16 exceptions than c_proj. Independent k_fc and k_proj avoid paying a wide index for every c_fc coordinate.",
+    "parallel_decode": "A lane reads one fixed-width code. Common values are direct table lookups. Escape lanes use block-local ballot/popcount to locate their literal byte. No serial entropy state or prefix-code walk is required.",
+    "non_claims": [
+      "This terminal-state audit does not establish dictionary stability through optimizer updates.",
+      "Reference CPU timings do not establish CUDA performance.",
+      "A capacity pass authorizes only an exact codec prototype and MFU gate, never a language-model loss replay."
+    ]
+  },
+  "frozen_source": {
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+    "elements": 56623104,
+    "raw_bytes": 113246208,
+    "mutation_forbidden": true
+  },
+  "frozen_candidates": {
+    "c_fc_dictionary_sizes_including_escape": [8, 16, 32],
+    "c_proj_dictionary_sizes_including_escape": [16, 32, 64],
+    "decode_block_words": [256, 1024, 4096],
+    "dictionary_granularities": ["scope", "matrix", "block"],
+    "common_entries": "K-1; code K-1 is always the literal escape.",
+    "tie_breaking": "Equal-count common high bytes are ordered by ascending uint8 value.",
+    "packing": "Low bytes, fixed-width codes, exception literals, dictionaries, block offsets, descriptors, and header are all counted; each matrix stream is byte-aligned."
+  },
+  "measurements": [
+    "exact bytes and bits/coordinate for every frozen (K_fc,K_proj,B,granularity) tuple",
+    "c_fc and c_proj escape fractions and all byte components",
+    "bit-exact source and decoded word-stream SHA-256",
+    "reference encode/decode wall time as a correctness diagnostic"
+  ],
+  "decision_gate": {
+    "maximum_momentum_bytes": 99090432,
+    "maximum_bits_per_coordinate": 14.0,
+    "exact_roundtrip_required": true,
+    "primary_selection": "Minimum bytes; ties choose larger B, then coarser granularity, then smaller K_fc+K_proj.",
+    "performance_control": "Among passes within 2% of primary bytes, choose largest B, then coarsest granularity, then smallest K_fc+K_proj.",
+    "if_pass": "Implement only primary and distinct performance-control CUDA paths; require randomized/special/checkpoint/resume bit-exact tests and exact-config encode-plus-decode MFU >=20%. Do not run a loss endpoint.",
+    "if_fail": "Reject fixed-width table codecs and preregister a block-independent finite-state entropy or shared temporal predictor audit; do not broaden table sizes post hoc.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  },
+  "execution_policy": {
+    "implementation_before_execution": "Commit this plan, add a read-only exact capacity audit with focused tests, Git-sync, and verify frozen source hashes.",
+    "monitoring": "Expected below five minutes and foreground-polled; attach a terminal/error-only @Codex watchdog only if observed above five minutes.",
+    "resource_policy": "CPU/host RAM only; GPU0 remains free.",
+    "result": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_reserved_escape_capacity.json"
+  }
+}

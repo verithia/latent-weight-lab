@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_pair_vq_fp16_highbyte_dictionary_capacity_sealed_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "REJECT_FIXED_WIDTH_HIGHBYTE_DICTIONARY_WITH_EXPLICIT_EXCEPTION_BITMAP",
+  "passed": false,
+  "decision": {
+    "selected_candidate": null,
+    "passing_candidates": 0,
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false,
+    "next_authorized_work": "Audit only a scope-adaptive reserved-escape codec: remove the one-bit exception bitmap by reserving one fixed-width table code for a following literal high byte, and choose table width separately for c_fc and c_proj.",
+    "reason": "The best block-local K=16 candidate uses 14.9183 bits/coordinate, above the 14-bit gate. Its explicit bitmap alone costs one bit/coordinate; its uniform 4-bit index overpays c_fc while c_proj still has a 39.00% escape rate."
+  },
+  "identity": {
+    "host": "PRO6",
+    "source_commit": "c69189b204d661fe190460bb5fc63af39f5e7770",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_highbyte_dictionary_plan.json",
+    "plan_sha256": "c672db2cbde96df4fdfaa30e557e43cbfe7fa6a78f7f526b25f4a15654a0fd7a",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "source_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+    "registered_candidates": 36,
+    "exit_code": 0
+  },
+  "artifacts": {
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_highbyte_dictionary_capacity.json",
+      "sha256": "0166ec84ebf55303a139a29cdc80f457529b5d36abf2ced50b097b76bda28ae3",
+      "bytes": 43842,
+      "status": "finished"
+    }
+  },
+  "best_candidate": {
+    "name": "block_k16_b4096",
+    "total_bytes": 105589966,
+    "bits_per_coordinate": 14.918287206579137,
+    "escape_fraction": 0.2348934809366862,
+    "c_fc_escape_fraction": 0.07977273729112414,
+    "c_proj_escape_fraction": 0.39001422458224827,
+    "components": {
+      "low_literal_bytes": 56623104,
+      "index_bytes": 28311552,
+      "exception_bitmap_bytes": 7077888,
+      "exception_literal_bytes": 13300398,
+      "dictionary_bytes": 221184,
+      "block_offset_bytes": 55392,
+      "container_metadata_bytes": 448
+    },
+    "exact_roundtrip": true
+  },
+  "best_by_granularity": {
+    "global": {"name": "global_k16_b4096", "bits_per_coordinate": 15.452493738245082, "escape_fraction": 0.3055752648247613},
+    "scope": {"name": "scope_k16_b4096", "bits_per_coordinate": 15.227639940049913, "escape_fraction": 0.2774682574801975},
+    "matrix": {"name": "matrix_k16_b4096", "bits_per_coordinate": 14.97764559145327, "escape_fraction": 0.24621274736192492},
+    "block": {"name": "block_k16_b4096", "bits_per_coordinate": 14.918287206579137, "escape_fraction": 0.2348934809366862}
+  },
+  "interpretation": {
+    "entropy_is_not_refuted": "The prior bit-plane code remains at 13.0365 exact bits, so this failure is the overhead of this parallel format, not an information lower bound.",
+    "bitmap_is_decisive": "Removing the explicit exception bitmap would save exactly 7,077,888 bytes, taking the best measured layout close to 13.918 bits before accounting for a reserved escape symbol.",
+    "scope_asymmetry_is_decisive": "c_fc has only 7.98% escapes at K=16 while c_proj has 39.00%; a uniform index width is structurally inefficient.",
+    "next_constraint": "Reserve one fixed-width code for literals and choose K independently for c_fc and c_proj. This preserves parallel table decode and exact FP16 words without a separate bitmap."
+  }
+}
