@@ -194,6 +194,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_pair_vq_forward_visible_feedback: bool = False
     block_fht_mlp_pair_vq_fp16_ambient_momentum: bool = False
+    block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_retraction: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_fht_block_size: int = 0
@@ -2440,6 +2441,9 @@ class MLP(nn.Module):
                 fp16_ambient_momentum=bool(
                     config.block_fht_mlp_pair_vq_fp16_ambient_momentum
                 ),
+                fp16_ambient_reference_probe_steps=tuple(
+                    config.block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps
+                ),
                 feedback_codec=str(
                     config.block_fht_mlp_pair_vq_feedback_codec
                 ),
@@ -2737,6 +2741,9 @@ class MLP(nn.Module):
                 ),
                 fp16_ambient_momentum=bool(
                     config.block_fht_mlp_pair_vq_fp16_ambient_momentum
+                ),
+                fp16_ambient_reference_probe_steps=tuple(
+                    config.block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps
                 ),
                 feedback_codec=str(
                     config.block_fht_mlp_pair_vq_feedback_codec

@@ -53,6 +53,7 @@ def make_module(
     error_feedback: bool = False,
     forward_visible_feedback: bool = False,
     fp16_ambient_momentum: bool = False,
+    fp16_ambient_reference_probe_steps: tuple[int, ...] = (),
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
     feedback_residual_probe_steps: tuple[int, ...] = (),
@@ -75,6 +76,9 @@ def make_module(
         error_feedback=error_feedback,
         forward_visible_feedback=forward_visible_feedback,
         fp16_ambient_momentum=fp16_ambient_momentum,
+        fp16_ambient_reference_probe_steps=(
+            fp16_ambient_reference_probe_steps
+        ),
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
         feedback_residual_probe_steps=feedback_residual_probe_steps,
@@ -986,6 +990,30 @@ def test_fp16_ambient_momentum_feeds_persisted_state_to_muon(
     )
 
 
+def test_fp16_ambient_reference_probe_is_nonpersistent_and_reports_polar() -> None:
+    torch.manual_seed(20260825)
+    module = make_module(
+        fp16_ambient_momentum=True,
+        fp16_ambient_reference_probe_steps=(0, 1),
+    )
+    optimizer = make_optimizer(module)
+    for expected_step in (0, 1):
+        module.weight.grad = torch.randn_like(module.weight)
+        optimizer.step()
+        diagnostics = optimizer.consume_diagnostics()
+        assert len(diagnostics) == 1
+        row = diagnostics[0]
+        assert row["optimizer_step"] == expected_step
+        assert row["ambient_reference_polar_cosine"] > 0.999
+        assert row["ambient_reference_positive_line_recovery"] > 0.998
+        assert row["ambient_reference_prepolar_cosine"] > 0.999
+    state = optimizer.state[module.weight]
+    assert set(state) == {"ambient_momentum"}
+    serialized_state = optimizer.state_dict()["state"]
+    assert len(serialized_state) == 1
+    assert set(next(iter(serialized_state.values()))) == {"ambient_momentum"}
+
+
 def test_pair_coded_feedback_conserves_discarded_motion_compactly() -> None:
     torch.manual_seed(127)
     module = make_module(stages=1, error_feedback=True)
@@ -1820,6 +1848,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_error_feedback": True,
         "block_fht_mlp_pair_vq_forward_visible_feedback": True,
         "block_fht_mlp_pair_vq_fp16_ambient_momentum": False,
+        "block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps": (),
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
         "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
         "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": 0,

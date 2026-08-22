@@ -2199,6 +2199,7 @@ class MuonPairVQLinear(nn.Module):
         error_feedback: bool = False,
         forward_visible_feedback: bool = False,
         fp16_ambient_momentum: bool = False,
+        fp16_ambient_reference_probe_steps: tuple[int, ...] = (),
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
         feedback_residual_probe_steps: tuple[int, ...] = (),
@@ -2235,6 +2236,9 @@ class MuonPairVQLinear(nn.Module):
         self.error_feedback = bool(error_feedback)
         self.forward_visible_feedback = bool(forward_visible_feedback)
         self.fp16_ambient_momentum = bool(fp16_ambient_momentum)
+        self.fp16_ambient_reference_probe_steps = tuple(
+            int(step) for step in fp16_ambient_reference_probe_steps
+        )
         self.feedback_codec = str(feedback_codec)
         self.feedback_output_group_size = int(feedback_output_group_size)
         self.feedback_residual_probe_steps = tuple(
@@ -2284,6 +2288,14 @@ class MuonPairVQLinear(nn.Module):
             raise ValueError("stochastic fast retraction requires a fast residual")
         if self.forward_visible_feedback and not self.error_feedback:
             raise ValueError("forward-visible feedback requires error feedback")
+        if self.fp16_ambient_reference_probe_steps and not self.fp16_ambient_momentum:
+            raise ValueError(
+                "FP16 ambient reference probes require FP16 ambient momentum"
+            )
+        if any(step < 0 for step in self.fp16_ambient_reference_probe_steps):
+            raise ValueError(
+                "FP16 ambient reference probe steps must be nonnegative"
+            )
         if self.stochastic_fast_fht_block_size < 0:
             raise ValueError("stochastic fast FHT block size must be nonnegative")
         if self.stochastic_fast_fht_block_size and (
@@ -3308,6 +3320,7 @@ class MuonPairVQ(torch.optim.Optimizer):
         self.fp16_ambient_momentum = momentum_modes.pop()
         self.modules_by_id = {id(module.weight): module for module in modules}
         self._diagnostics: list[dict[str, float | int]] = []
+        self._fp32_ambient_references: dict[int, torch.Tensor] = {}
         defaults = {
             "lr": float(lr),
             "momentum": float(momentum),
@@ -3384,17 +3397,40 @@ class MuonPairVQ(torch.optim.Optimizer):
                     continue
                 module = self.modules_by_id[id(weight)]
                 state: dict[str, Any] = self.state[weight]
+                reference_requested_gradient = None
                 if module.fp16_ambient_momentum:
+                    gradient_fp32 = gradient.float()
+                    if module.fp16_ambient_reference_probe_steps:
+                        reference_momentum = self._fp32_ambient_references.get(
+                            id(weight)
+                        )
+                        if reference_momentum is None:
+                            reference_momentum = torch.zeros_like(
+                                weight, dtype=torch.float32
+                            )
+                            self._fp32_ambient_references[id(weight)] = (
+                                reference_momentum
+                            )
+                        reference_momentum.mul_(momentum_coefficient).add_(
+                            gradient_fp32
+                        )
+                        if int(module.optimizer_step) in (
+                            module.fp16_ambient_reference_probe_steps
+                        ):
+                            reference_requested_gradient = gradient_fp32.add(
+                                reference_momentum,
+                                alpha=momentum_coefficient,
+                            )
                     if "ambient_momentum" not in state:
                         state["ambient_momentum"] = torch.zeros_like(
                             weight, dtype=torch.float16
                         )
                     ambient_momentum = state["ambient_momentum"]
                     next_momentum = ambient_momentum.float()
-                    next_momentum.mul_(momentum_coefficient).add_(gradient.float())
+                    next_momentum.mul_(momentum_coefficient).add_(gradient_fp32)
                     ambient_momentum.copy_(next_momentum)
                     persisted_momentum = ambient_momentum.float()
-                    requested_gradient = gradient.float().add(
+                    requested_gradient = gradient_fp32.add(
                         persisted_momentum, alpha=momentum_coefficient
                     )
                 else:
@@ -3426,6 +3462,62 @@ class MuonPairVQ(torch.optim.Optimizer):
                         momentum_coefficient * expanded.reshape_as(gradient)
                     )
                 update = muon_update(requested_gradient, steps=ns_steps)
+                reference_metrics = None
+                if reference_requested_gradient is not None:
+                    reference_update = muon_update(
+                        reference_requested_gradient, steps=ns_steps
+                    )
+                    reference_flat = reference_update.double().reshape(-1)
+                    candidate_flat = update.double().reshape(-1)
+                    target_energy = float(reference_flat.square().sum())
+                    candidate_energy = float(candidate_flat.square().sum())
+                    dot = float((reference_flat * candidate_flat).sum())
+                    squared_error = float(
+                        (reference_flat - candidate_flat).square().sum()
+                    )
+                    denominator = max(
+                        math.sqrt(
+                            max(target_energy, 0.0)
+                            * max(candidate_energy, 0.0)
+                        ),
+                        1e-30,
+                    )
+                    prepolar_flat = requested_gradient.double().reshape(-1)
+                    reference_prepolar_flat = (
+                        reference_requested_gradient.double().reshape(-1)
+                    )
+                    prepolar_target_energy = float(
+                        reference_prepolar_flat.square().sum()
+                    )
+                    prepolar_candidate_energy = float(
+                        prepolar_flat.square().sum()
+                    )
+                    prepolar_dot = float(
+                        (reference_prepolar_flat * prepolar_flat).sum()
+                    )
+                    reference_metrics = {
+                        "ambient_reference_polar_target_energy": target_energy,
+                        "ambient_reference_polar_candidate_energy": (
+                            candidate_energy
+                        ),
+                        "ambient_reference_polar_dot": dot,
+                        "ambient_reference_polar_squared_error": squared_error,
+                        "ambient_reference_polar_cosine": dot / denominator,
+                        "ambient_reference_positive_line_recovery": (
+                            max(dot, 0.0) ** 2
+                            / max(target_energy * candidate_energy, 1e-30)
+                        ),
+                        "ambient_reference_prepolar_cosine": (
+                            prepolar_dot
+                            / max(
+                                math.sqrt(
+                                    prepolar_target_energy
+                                    * prepolar_candidate_energy
+                                ),
+                                1e-30,
+                            )
+                        ),
+                    }
                 requested = weight.float()
                 if weight_decay != 0.0:
                     requested = requested * (1.0 - lr * weight_decay)
@@ -3472,6 +3564,8 @@ class MuonPairVQ(torch.optim.Optimizer):
                 diagnostics = module.project_requested_weight_(
                     projection_target, refresh_codes=refresh
                 )
+                if reference_metrics is not None:
+                    diagnostics.update(reference_metrics)
                 diagnostics["error_feedback"] = int(module.error_feedback)
                 diagnostics["forward_visible_feedback"] = int(
                     module.forward_visible_feedback

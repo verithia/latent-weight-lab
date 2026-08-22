@@ -1543,6 +1543,12 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-fp16-ambient-reference-probe-steps",
+        nargs="+",
+        type=int,
+        default=[],
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-cproj-fast-residual",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2507,6 +2513,22 @@ def parse_args() -> argparse.Namespace:
         namespace, "block_fht_mlp_pair_vq_fp16_ambient_momentum", False
     ) and not namespace.block_fht_mlp_pair_vq:
         raise ValueError("FP16 ambient momentum requires MLP pair VQ")
+    ambient_reference_probe_steps = tuple(
+        int(step)
+        for step in getattr(
+            namespace,
+            "block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps",
+            (),
+        )
+    )
+    if ambient_reference_probe_steps and not getattr(
+        namespace, "block_fht_mlp_pair_vq_fp16_ambient_momentum", False
+    ):
+        raise ValueError(
+            "FP32 ambient reference probes require FP16 Pair-VQ momentum"
+        )
+    if any(step < 0 for step in ambient_reference_probe_steps):
+        raise ValueError("ambient reference probe steps must be nonnegative")
     if (
         namespace.block_fht_mlp_pair_vq_cproj_fast_residual
         and not namespace.block_fht_mlp_pair_vq
@@ -3309,6 +3331,14 @@ def pair_vq_model_kwargs(
                 namespace,
                 "block_fht_mlp_pair_vq_fp16_ambient_momentum",
                 False,
+            )
+        ),
+        "block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps": tuple(
+            int(step)
+            for step in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps",
+                (),
             )
         ),
         "block_fht_mlp_pair_vq_cproj_fast_residual": bool(
