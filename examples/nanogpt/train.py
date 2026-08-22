@@ -1603,6 +1603,11 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-targets",
+        nargs="+",
+        default=["mlp.c_fc", "mlp.c_proj"],
+    )
+    parser.add_argument(
         "--block-fht-attn-pair-vq",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2569,6 +2574,18 @@ def parse_args() -> argparse.Namespace:
                 "MLP c_proj int8 lattice conflicts with matched Givens"
             )
     if namespace.block_fht_mlp_pair_vq:
+        pair_vq_targets = set(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_targets",
+                ("mlp.c_fc", "mlp.c_proj"),
+            )
+        )
+        supported_pair_vq_targets = {"mlp.c_fc", "mlp.c_proj"}
+        if not pair_vq_targets:
+            raise ValueError("MLP pair VQ requires at least one target")
+        if not pair_vq_targets.issubset(supported_pair_vq_targets):
+            raise ValueError("unsupported MLP pair-VQ target")
         if namespace.method != "block_fht":
             raise ValueError("MLP pair VQ requires method=block_fht")
         if namespace.optimizer != "muon":
@@ -2579,22 +2596,30 @@ def parse_args() -> argparse.Namespace:
             raise ValueError("MLP pair VQ neighbor count must be in [1, 256]")
         if namespace.block_fht_mlp_pair_vq_code_refresh_interval <= 0:
             raise ValueError("MLP pair VQ refresh interval must be positive")
-        if mlp_int8_lattice_targets:
-            raise ValueError("MLP pair VQ conflicts with the MLP int8 lattice")
-        overlap = {"mlp.c_fc", "mlp.c_proj"} & set(
-            namespace.block_fht_targets
-        )
+        overlap = pair_vq_targets & mlp_int8_lattice_targets
+        if overlap:
+            raise ValueError(
+                "MLP pair VQ conflicts with the MLP int8 lattice for: "
+                + ", ".join(sorted(overlap))
+            )
+        overlap = pair_vq_targets & set(namespace.block_fht_targets)
         if overlap:
             raise ValueError(
                 "remove MLP targets from BlockFHT targets for pair VQ: "
                 + ", ".join(sorted(overlap))
             )
-        if (
+        if "mlp.c_fc" in pair_vq_targets and (
             namespace.block_fht_mlp_cfc_directed_product
             or namespace.block_fht_mlp_cfc_functional_shear
-            or namespace.block_fht_mlp_cproj_muon_matched_givens
         ):
-            raise ValueError("MLP pair VQ conflicts with another MLP chart")
+            raise ValueError("MLP c_fc pair VQ conflicts with another c_fc chart")
+        if (
+            "mlp.c_proj" in pair_vq_targets
+            and namespace.block_fht_mlp_cproj_muon_matched_givens
+        ):
+            raise ValueError(
+                "MLP c_proj pair VQ conflicts with another c_proj chart"
+            )
     if (
         namespace.block_fht_mlp_pair_vq_error_feedback
         and not namespace.block_fht_mlp_pair_vq
@@ -3439,6 +3464,14 @@ def pair_vq_model_kwargs(
             getattr(namespace, "block_fht_attn_pair_vq_seed", 20261121)
         ),
         "block_fht_mlp_pair_vq": bool(namespace.block_fht_mlp_pair_vq),
+        "block_fht_mlp_pair_vq_targets": tuple(
+            str(target)
+            for target in getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_targets",
+                ("mlp.c_fc", "mlp.c_proj"),
+            )
+        ),
         "block_fht_mlp_pair_vq_seed": int(
             namespace.block_fht_mlp_pair_vq_seed
         ),

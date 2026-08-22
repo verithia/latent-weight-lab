@@ -1743,6 +1743,47 @@ def test_gpt_routes_complete_mlp_and_optimizer_through_pair_vq() -> None:
     assert int(mlp.c_proj.optimizer_step) == 1
 
 
+def test_gpt_routes_pair_vq_to_one_mlp_matrix_family() -> None:
+    for target in ("mlp.c_fc", "mlp.c_proj"):
+        model = GPT(
+            GPTConfig(
+                block_size=8,
+                vocab_size=32,
+                n_layer=1,
+                n_head=2,
+                n_embd=8,
+                bias=False,
+                block_fht=True,
+                block_fht_targets=(),
+                block_fht_mlp_pair_vq=True,
+                block_fht_mlp_pair_vq_targets=(target,),
+                block_fht_mlp_pair_vq_error_feedback=True,
+            )
+        )
+        mlp = model.transformer.h[0].mlp
+        selected = mlp.c_fc if target == "mlp.c_fc" else mlp.c_proj
+        control = mlp.c_proj if target == "mlp.c_fc" else mlp.c_fc
+        assert isinstance(selected, MuonPairVQLinear)
+        assert isinstance(control, torch.nn.Linear)
+        stats = model.mlp_pair_vq_stats()
+        assert stats["modules"] == 1
+        optimizer = model.configure_optimizers(
+            weight_decay=0.1,
+            learning_rate=0.001,
+            betas=(0.9, 0.95),
+            device_type="cpu",
+            optimizer="muon",
+            muon_momentum=0.95,
+            muon_ns_steps=1,
+        )
+        pair_optimizer = next(
+            item
+            for item in optimizer.optimizers
+            if isinstance(item, MuonPairVQ)
+        )
+        assert len(pair_optimizer.param_groups[0]["params"]) == 1
+
+
 def test_gpt_routes_optional_fast_residual_through_cproj() -> None:
     model = GPT(
         GPTConfig(
@@ -1844,6 +1885,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_attn_pair_vq": False,
         "block_fht_attn_pair_vq_seed": 20261121,
         "block_fht_mlp_pair_vq": True,
+        "block_fht_mlp_pair_vq_targets": ("mlp.c_fc", "mlp.c_proj"),
         "block_fht_mlp_pair_vq_seed": 20261020,
         "block_fht_mlp_pair_vq_neighbor_candidates": 16,
         "block_fht_mlp_pair_vq_code_refresh_interval": 8,

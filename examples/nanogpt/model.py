@@ -190,6 +190,10 @@ class GPTConfig:
     block_fht_mlp_int8_lattice_seed: int = 314159
     block_fht_mlp_int8_lattice_error_feedback: bool = False
     block_fht_mlp_pair_vq: bool = False
+    block_fht_mlp_pair_vq_targets: tuple[str, ...] = (
+        "mlp.c_fc",
+        "mlp.c_proj",
+    )
     block_fht_mlp_pair_vq_seed: int = 20261020
     block_fht_mlp_pair_vq_neighbor_candidates: int = 16
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
@@ -2486,6 +2490,18 @@ class MLP(nn.Module):
             config.block_fht_mlp_int8_lattice_targets
         )
         pair_vq = bool(config.block_fht_mlp_pair_vq)
+        pair_vq_targets = set(config.block_fht_mlp_pair_vq_targets)
+        unsupported_pair_vq_targets = pair_vq_targets - {
+            "mlp.c_fc",
+            "mlp.c_proj",
+        }
+        if unsupported_pair_vq_targets:
+            raise ValueError(
+                "unsupported MLP pair-VQ targets: "
+                + ", ".join(sorted(unsupported_pair_vq_targets))
+            )
+        pair_vq_cfc = pair_vq and "mlp.c_fc" in pair_vq_targets
+        pair_vq_cproj = pair_vq and "mlp.c_proj" in pair_vq_targets
         unsupported_mlp_int8_targets = mlp_int8_lattice_targets - {
             "mlp.c_fc",
             "mlp.c_proj",
@@ -2507,17 +2523,16 @@ class MLP(nn.Module):
             config.block_fht_mlp_cfc_directed_product
         )
         int8_lattice_cfc = "mlp.c_fc" in mlp_int8_lattice_targets
-        if pair_vq and (
-            mlp_int8_lattice_targets
+        if pair_vq_cfc and (
+            "mlp.c_fc" in mlp_int8_lattice_targets
             or functional_shear_cfc
             or directed_product_cfc
             or grouped_targets
             or "mlp.c_fc" in config.block_fht_targets
-            or "mlp.c_proj" in config.block_fht_targets
         ):
             raise ValueError(
-                "MLP pair VQ is a complete c_fc/c_proj representation and "
-                "cannot be combined with another MLP representation"
+                "MLP c_fc pair VQ cannot be combined with another c_fc "
+                "representation"
             )
         if int8_lattice_cfc and (
             functional_shear_cfc
@@ -2540,7 +2555,7 @@ class MLP(nn.Module):
                 "functional-shear c_fc requires the materialized plain "
                 "c_fc path"
             )
-        if pair_vq:
+        if pair_vq_cfc:
             self.c_fc = MuonPairVQLinear(
                 config.n_embd,
                 4 * config.n_embd,
@@ -2797,6 +2812,16 @@ class MLP(nn.Module):
             config.block_fht_mlp_cproj_muon_matched_givens
         )
         int8_lattice_cproj = "mlp.c_proj" in mlp_int8_lattice_targets
+        if pair_vq_cproj and (
+            int8_lattice_cproj
+            or muon_matched_cproj_enabled
+            or structured_proj_count
+            or "mlp.c_proj" in config.block_fht_targets
+        ):
+            raise ValueError(
+                "MLP c_proj pair VQ cannot be combined with another c_proj "
+                "representation"
+            )
         if int8_lattice_cproj and (
             muon_matched_cproj_enabled
             or structured_proj_count
@@ -2842,7 +2867,7 @@ class MLP(nn.Module):
                 "Muon-matched Givens c_proj requires mlp.c_proj in "
                 "block_fht_targets"
             )
-        if pair_vq:
+        if pair_vq_cproj:
             self.c_proj = MuonPairVQLinear(
                 4 * config.n_embd,
                 config.n_embd,

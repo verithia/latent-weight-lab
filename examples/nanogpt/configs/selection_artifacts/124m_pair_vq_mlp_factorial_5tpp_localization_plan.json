@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_pair_vq_mlp_factorial_5tpp_localization_plan_v1",
+  "recorded_at": "2026-08-22T15:32:00+08:00",
+  "question": "Which compact Pair-VQ MLP matrix family, c_fc or c_proj, causes the material 124M/5TPP loss gap under the matched QK-only attention parent?",
+  "causal_authorization": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_qkonly_pair_vq_mlp_5tpp_localization_result.json",
+    "result_sha256": "6c60a6824dc268e336917cf6680e3eb19ac3053fb13394c81090c16ce7e7f770",
+    "classification": "MLP_MATERIAL_QKONLY_PAIR_VQ_124M_5TPP",
+    "compact_full_mlp_validation_ce": 3.5541,
+    "dense_mlp_parent_validation_ce": 3.4858,
+    "compact_full_mlp_gap_ce": 0.0683,
+    "authorized_branch": "localize c_fc versus c_proj at the same 124M/5TPP horizon"
+  },
+  "matched_parent": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+    "result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "source_commit": "91ae829a4216d91cdfeb73769a25586f72b4cd09",
+    "terminal_validation_ce": 3.4858,
+    "fixed_validation_curve": [
+      {"step": 594, "validation_ce": 4.0173},
+      {"step": 1188, "validation_ce": 3.6941},
+      {"step": 1782, "validation_ce": 3.5477},
+      {"step": 2373, "validation_ce": 3.4858}
+    ],
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "frozen_design": {
+    "design": "two matched single-family intervention arms preregistered before either result is observed",
+    "arm_order": ["compact_c_fc_dense_c_proj", "dense_c_fc_compact_c_proj"],
+    "compact_c_fc_dense_c_proj": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_cfconly_5tpp_lr24e4.json",
+      "pair_vq_targets": ["mlp.c_fc"],
+      "dense_control_target": "mlp.c_proj"
+    },
+    "dense_c_fc_compact_c_proj": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4.json",
+      "pair_vq_targets": ["mlp.c_proj"],
+      "dense_control_target": "mlp.c_fc"
+    },
+    "both_arms_launch_authorized_before_results": true,
+    "first_arm_result_must_not_change_second_arm": true,
+    "parallel_training": false
+  },
+  "held_fixed": {
+    "method": "block_fht",
+    "block_fht_targets": ["attn.c_attn.qk_headwise"],
+    "attention_v_and_output": "dense",
+    "max_iters": 2373,
+    "eval_steps": [0, 594, 1188, 1782, 2373],
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "eval_protocol_id": "mai_ladder_fixed_eval_indices_v2",
+    "optimizer": "muon",
+    "learning_rate": 0.0024,
+    "muon_momentum": 0.95,
+    "muon_ns_steps": 5,
+    "pair_vq_seed": 20261021,
+    "pair_vq_feedback_codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
+    "pair_vq_error_feedback": true,
+    "pair_vq_forward_visible_feedback": true,
+    "pair_vq_fp16_reserved_escape_granularity": "adaptive_block"
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction_each_arm": 0.2,
+    "minimum_timed_updates_each_arm": 8,
+    "exact_config_required": true,
+    "native_block_fht_extension_required": true,
+    "all_logged_losses_finite": true,
+    "persistent_state_inventory_required": true,
+    "no_dense_master_for_selected_family": true,
+    "no_dense_optimizer_momentum_for_selected_family": true,
+    "no_raw_ambient_error_buffer": true
+  },
+  "scientific_readout": {
+    "per_arm_gap": "candidate terminal validation CE minus matched dense-MLP parent terminal validation CE",
+    "per_arm_negligible_gap_ce_max": 0.01,
+    "interaction_formula": "0.0683 - compact_c_fc_gap - compact_c_proj_gap",
+    "fixed_curve_compute_equivalence_required": true,
+    "common_loss_horizontal_ratio_required": true,
+    "terminal_only_comparison_insufficient": true,
+    "decision_table": {
+      "c_fc_negligible_c_proj_material": "c_proj is the localized primary bottleneck",
+      "c_fc_material_c_proj_negligible": "c_fc is the localized primary bottleneck",
+      "both_material": "both families contribute; quantify interaction before changing representation",
+      "both_negligible_full_mlp_material": "the failure is a c_fc/c_proj co-adaptation interaction"
+    }
+  },
+  "authorization": {
+    "automatic_20tpp": false,
+    "automatic_attention_v_or_output_experiment": false,
+    "automatic_model_size_scale_up": false,
+    "automatic_representation_change": false,
+    "automatic_sweep": false,
+    "next_action_after_both_sealed": "reconcile the two marginal gaps and interaction with the recorded Pair-VQ manifold/optimizer diagnostics, then preregister exactly one structural repair"
+  }
+}

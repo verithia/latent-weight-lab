@@ -3368,12 +3368,12 @@ class MuonPairVQ(torch.optim.Optimizer):
             raise ValueError("reserved-escape momentum requires FP16 ambient momentum")
         self.modules_by_id = {id(module.weight): module for module in modules}
         self._reserved_escape_slices: dict[int, tuple[str, int, int]] = {}
-        self._reserved_escape_scope_elements = {"c_fc": 0, "c_proj": 0}
+        self._reserved_escape_scope_elements: dict[str, int] = {}
         for module in modules:
             if not self.fp16_reserved_escape_granularity:
                 continue
             scope = module.reserved_escape_scope
-            start = self._reserved_escape_scope_elements[scope]
+            start = self._reserved_escape_scope_elements.get(scope, 0)
             stop = start + module.element_count
             self._reserved_escape_slices[id(module.weight)] = (scope, start, stop)
             self._reserved_escape_scope_elements[scope] = stop
@@ -3521,9 +3521,9 @@ class MuonPairVQ(torch.optim.Optimizer):
                 "reserved_escape_momentum"
             )
             if payload is not None:
-                if set(payload) != {"c_fc", "c_proj"}:
+                if set(payload) != set(self._reserved_escape_scope_elements):
                     raise ValueError("reserved-escape resume scope set mismatch")
-                for scope in ("c_fc", "c_proj"):
+                for scope in self._reserved_escape_scope_elements:
                     ReservedEscapeState.from_payload(
                         payload[scope], device=self._reserved_escape_owner.device
                     )
@@ -4023,6 +4023,13 @@ class MuonPairVQ(torch.optim.Optimizer):
             self._store_reserved_escape_momentum(decoded_reserved_momentum)
             momentum_bytes = self.reserved_escape_momentum_bytes
             summary = self._reserved_escape_summary
+            empty_scope = {
+                "dictionary_size": 0,
+                "bytes": 0,
+                "exceptions": 0,
+            }
+            c_fc_summary = summary.get("c_fc", empty_scope)
+            c_proj_summary = summary.get("c_proj", empty_scope)
             for diagnostics in self._diagnostics:
                 diagnostics.update(
                     {
@@ -4036,18 +4043,18 @@ class MuonPairVQ(torch.optim.Optimizer):
                         )
                         * 2,
                         "persistent_raw_ambient_momentum_tensors": 0,
-                        "reserved_escape_c_fc_dictionary_size": summary[
-                            "c_fc"
-                        ]["dictionary_size"],
-                        "reserved_escape_c_fc_bytes": summary["c_fc"]["bytes"],
-                        "reserved_escape_c_fc_exceptions": summary["c_fc"][
+                        "reserved_escape_c_fc_dictionary_size": c_fc_summary[
+                            "dictionary_size"
+                        ],
+                        "reserved_escape_c_fc_bytes": c_fc_summary["bytes"],
+                        "reserved_escape_c_fc_exceptions": c_fc_summary[
                             "exceptions"
                         ],
-                        "reserved_escape_c_proj_dictionary_size": summary[
-                            "c_proj"
-                        ]["dictionary_size"],
-                        "reserved_escape_c_proj_bytes": summary["c_proj"]["bytes"],
-                        "reserved_escape_c_proj_exceptions": summary["c_proj"][
+                        "reserved_escape_c_proj_dictionary_size": c_proj_summary[
+                            "dictionary_size"
+                        ],
+                        "reserved_escape_c_proj_bytes": c_proj_summary["bytes"],
+                        "reserved_escape_c_proj_exceptions": c_proj_summary[
                             "exceptions"
                         ],
                     }

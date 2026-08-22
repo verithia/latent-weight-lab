@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_qkonly_pair_vq_mlp_5tpp_localization_run_metadata_v1",
-  "status": "running",
+  "status": "finished",
   "run_name": "pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4",
   "run_id": "pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327",
   "host": "PRO6",
@@ -74,8 +74,26 @@
     "expected_total_minutes": "72-82",
     "basis": "2373 updates at the exact-config 1.6493825 seconds per update, plus five fixed 400-batch evaluations and terminal checkpoint serialization"
   },
+  "terminal": {
+    "finished_at": "2026-08-22T15:23:31+08:00",
+    "exit_code": 0,
+    "train_ce": 3.5716,
+    "validation_ce": 3.5541,
+    "matched_parent_validation_ce": 3.4858,
+    "candidate_minus_parent_ce": 0.0683,
+    "classification": "MLP_MATERIAL_QKONLY_PAIR_VQ_124M_5TPP",
+    "dense_compute_equivalent_penalty": 1.3554640920282814,
+    "scientific_median_tokens_per_second": 158661.03999999998,
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_qkonly_pair_vq_mlp_5tpp_localization_result.json",
+    "result_sha256": "6c60a6824dc268e336917cf6680e3eb19ac3053fb13394c81090c16ce7e7f770",
+    "scientific_log_sha256": "194ad83c6d59073572e7c2d08ed004c5a76aafe72a78cd8dd478733ce18edf0c",
+    "terminal_status_sha256": "7538d21450596c5011914841ed11d6ab33acd2ba27cad938fa8f5828fc67650d",
+    "checkpoint_sha256": "be9f35f3a6d5f071866d9cd05a590c3e214e3c42516f832e7639f17d1b8b2940",
+    "checkpoint_metadata_sha256": "ec1ef84bc3ad0c5f6ea4630208c9ae4c7a2f351f9eb322f61e09bbcbd0b7bd70"
+  },
   "authorization": {
-    "scientific_124m_5tpp_localization": true,
+    "scientific_124m_5tpp_localization": false,
+    "cfc_vs_cproj_124m_5tpp_localization": true,
     "automatic_rerun": false,
     "automatic_124m_20tpp_training": false,
     "automatic_model_size_scale_up": false
