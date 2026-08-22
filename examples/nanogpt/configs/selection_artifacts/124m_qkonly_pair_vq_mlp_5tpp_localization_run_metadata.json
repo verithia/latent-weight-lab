@@ -1,0 +1,83 @@
+{
+  "schema_version": "mai_124m_qkonly_pair_vq_mlp_5tpp_localization_run_metadata_v1",
+  "status": "running",
+  "run_name": "pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4",
+  "run_id": "pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327",
+  "host": "PRO6",
+  "gpu": 0,
+  "started_at": "2026-08-22T14:16:15+08:00",
+  "process_group": 3159423,
+  "max_iters": 2373,
+  "git_commit": "4070d129f7ec6fd22e19b0f51f6f093ad806d5c7",
+  "entrypoint": "/mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u -m examples.nanogpt.train",
+  "config": {
+    "source": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4.json",
+    "sha256": "f901a6472086bb1d00ccb5f04b2f87bf0bfa46fb99f232951cfc68daabdbac08",
+    "archive": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327.config.json"
+  },
+  "theory_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_qkonly_pair_vq_mlp_5tpp_localization_plan.json",
+    "sha256": "becdc1b91dd61bd8a35bdb32397dca5f96f5e97fa622b02803a1ccd635948de6"
+  },
+  "dataset_manifest": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+  "matched_reference": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+    "result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "terminal_validation_ce": 3.4858,
+    "mlp_negligible_gap_ce_max": 0.01
+  },
+  "failure_dependency": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_5tpp_result.json",
+    "result_sha256": "e5eba0390e36979a20d5ecf82e9e65591083276c4fa6a7df17bfcd910c89790a"
+  },
+  "mfu_certificate": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327.mfu.json",
+    "source_path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_mfu.json",
+    "sha256": "82d8dd37c471782e0ae82172ee63e8e94e45eea2ad7031fa678d28720c4ae6c5",
+    "mfu_fraction": 0.28433711888635027,
+    "tokens_per_second": 158954.23375,
+    "iteration_milliseconds": 1649.3825,
+    "peak_mib": 31753.63,
+    "optimizer_milliseconds": 448.8675
+  },
+  "runtime_provenance": {
+    "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/provenance/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327.json",
+    "sha256": "3b23d0ee4122826f36ab30919180cb8b60b222354e2dc88da0344e04d6aa9375"
+  },
+  "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/logs/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327.log",
+  "status_sidecar": "/mnt/ssd-data/orj/MappingNetworks/outputs/y400_ladder_runs/status/pro6_mai_v3_124m_qkonly_pairvq_mlp_5tpp_localization_lr24e4_20260822T061613Z_3159327.json",
+  "initial_live_verification": {
+    "last_logged_training_iter": 20,
+    "process_alive": true,
+    "gpu_memory_mib": 44401,
+    "gpu_utilization_percent": 100,
+    "gpu_temperature_c": 47,
+    "pair_vq_modules": 24,
+    "pair_vq_elements": 56623104,
+    "persistent_training_bytes": 256517568,
+    "persistent_raw_ambient_momentum_tensors": 0
+  },
+  "monitoring": {
+    "policy": "one persistent terminal/error-only watchdog; no healthy milestone or heartbeat callbacks",
+    "launchd_label": "com.mappingnetworks.pro6.qkonly.pairvq.mlp.5tpp.localization",
+    "watchdog_state": "/Users/verithia/research/watch_state/pro6_124m_qkonly_pairvq_mlp_5tpp_localization.json",
+    "callback_endpoint": "http://127.0.0.1:8766/send-opencode-test",
+    "callback_mention": "@Codex",
+    "terminal_action": "seal the fixed curve and classify whether the compact MLP contribution is negligible before authorizing V-only or output-only attribution"
+  },
+  "runtime_estimate": {
+    "update_only_minutes": 65.23,
+    "expected_total_minutes": "72-82",
+    "basis": "2373 updates at the exact-config 1.6493825 seconds per update, plus five fixed 400-batch evaluations and terminal checkpoint serialization"
+  },
+  "authorization": {
+    "scientific_124m_5tpp_localization": true,
+    "automatic_rerun": false,
+    "automatic_124m_20tpp_training": false,
+    "automatic_model_size_scale_up": false
+  }
+}
