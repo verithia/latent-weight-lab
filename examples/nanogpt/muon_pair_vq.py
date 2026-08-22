@@ -2198,6 +2198,7 @@ class MuonPairVQLinear(nn.Module):
         stochastic_fast_block_local_levels: bool = False,
         error_feedback: bool = False,
         forward_visible_feedback: bool = False,
+        fp16_ambient_momentum: bool = False,
         feedback_codec: str = "cartesian4x4",
         feedback_output_group_size: int = 0,
         feedback_residual_probe_steps: tuple[int, ...] = (),
@@ -2233,6 +2234,7 @@ class MuonPairVQLinear(nn.Module):
         self.base_seed = int(base_seed)
         self.error_feedback = bool(error_feedback)
         self.forward_visible_feedback = bool(forward_visible_feedback)
+        self.fp16_ambient_momentum = bool(fp16_ambient_momentum)
         self.feedback_codec = str(feedback_codec)
         self.feedback_output_group_size = int(feedback_output_group_size)
         self.feedback_residual_probe_steps = tuple(
@@ -2577,6 +2579,21 @@ class MuonPairVQLinear(nn.Module):
         return self.codebooks.numel() * torch.tensor([], dtype=torch.float32).element_size()
 
     @property
+    def ambient_momentum_bytes(self) -> int:
+        if not self.fp16_ambient_momentum:
+            return 0
+        return (
+            self.element_count
+            * torch.tensor([], dtype=torch.float16).element_size()
+        )
+
+    @property
+    def optimizer_momentum_bytes(self) -> int:
+        if self.fp16_ambient_momentum:
+            return self.ambient_momentum_bytes
+        return self.compact_momentum_bytes
+
+    @property
     def feedback_residual_lattice_coordinate_bits(self) -> int:
         if (
             self.feedback_codec
@@ -2899,7 +2916,7 @@ class MuonPairVQLinear(nn.Module):
         dense_fp32_weight_and_momentum = self.element_count * 8
         persistent_training = (
             self.persistent_codec_bytes
-            + self.compact_momentum_bytes
+            + self.optimizer_momentum_bytes
             + self.compact_feedback_bytes
         )
         return {
@@ -2907,7 +2924,11 @@ class MuonPairVQLinear(nn.Module):
             "stages": self.stages,
             "fast_residual": self.fast_residual,
             "persistent_codec_bytes": self.persistent_codec_bytes,
-            "compact_momentum_bytes": self.compact_momentum_bytes,
+            "compact_momentum_bytes": (
+                0 if self.fp16_ambient_momentum else self.compact_momentum_bytes
+            ),
+            "ambient_momentum_bytes": self.ambient_momentum_bytes,
+            "optimizer_momentum_bytes": self.optimizer_momentum_bytes,
             "compact_feedback_bytes": self.compact_feedback_bytes,
             "persistent_training_bytes": persistent_training,
             "model_compression_vs_dense_bf16": dense_bf16 / self.persistent_codec_bytes,
@@ -2917,7 +2938,9 @@ class MuonPairVQLinear(nn.Module):
             "transient_materialized_weight_bytes": self.transient_weight_bytes,
             "transient_gradient_bytes": self.transient_weight_bytes,
             "dense_master_weight": "disabled",
-            "dense_optimizer_momentum": "disabled",
+            "dense_optimizer_momentum": (
+                "fp16_ambient" if self.fp16_ambient_momentum else "disabled"
+            ),
             "dense_ambient_error_buffer": "disabled",
             "forward_visible_feedback": self.forward_visible_feedback,
             "compact_temporal_carry": (
@@ -3264,7 +3287,7 @@ class MuonPairVQLinear(nn.Module):
 
 
 class MuonPairVQ(torch.optim.Optimizer):
-    """Muon request with compact code-conditioned momentum and projection."""
+    """Muon request with Pair-VQ projection and selected momentum coordinates."""
 
     def __init__(
         self,
@@ -3279,6 +3302,10 @@ class MuonPairVQ(torch.optim.Optimizer):
             raise ValueError("MuonPairVQ requires at least one module")
         for module in modules:
             module.weight.requires_grad_(True)
+        momentum_modes = {module.fp16_ambient_momentum for module in modules}
+        if len(momentum_modes) != 1:
+            raise ValueError("MuonPairVQ modules must use one momentum mode")
+        self.fp16_ambient_momentum = momentum_modes.pop()
         self.modules_by_id = {id(module.weight): module for module in modules}
         self._diagnostics: list[dict[str, float | int]] = []
         defaults = {
@@ -3293,12 +3320,28 @@ class MuonPairVQ(torch.optim.Optimizer):
         result = super().load_state_dict(state_dict)
         for weight, state in self.state.items():
             module = self.modules_by_id[id(weight)]
-            momentum = state.get("compact_momentum")
-            if momentum is not None:
-                state["compact_momentum"] = momentum.to(
-                    device=weight.device,
-                    dtype=module.codebooks.dtype,
-                )
+            if module.fp16_ambient_momentum:
+                if "compact_momentum" in state:
+                    raise ValueError(
+                        "FP16 ambient Pair-VQ resume contains compact momentum"
+                    )
+                momentum = state.get("ambient_momentum")
+                if momentum is not None:
+                    state["ambient_momentum"] = momentum.to(
+                        device=weight.device,
+                        dtype=torch.float16,
+                    )
+            else:
+                if "ambient_momentum" in state:
+                    raise ValueError(
+                        "compact Pair-VQ resume contains ambient momentum"
+                    )
+                momentum = state.get("compact_momentum")
+                if momentum is not None:
+                    state["compact_momentum"] = momentum.to(
+                        device=weight.device,
+                        dtype=module.codebooks.dtype,
+                    )
             if module.error_feedback:
                 levels = state.get("feedback_levels")
                 codes = state.get("feedback_codes")
@@ -3341,23 +3384,47 @@ class MuonPairVQ(torch.optim.Optimizer):
                     continue
                 module = self.modules_by_id[id(weight)]
                 state: dict[str, Any] = self.state[weight]
-                if "compact_momentum" not in state:
-                    state["compact_momentum"] = torch.zeros_like(module.codebooks)
-                compact_momentum = state["compact_momentum"]
-                gradient_pairs = gradient.float().reshape(-1, 2)
-                expanded = torch.zeros_like(gradient_pairs)
-                for stage in range(module.stages):
-                    codes = module.codes[stage].long()
-                    accum = torch.zeros_like(module.codebooks[stage])
-                    accum.index_add_(0, codes, gradient_pairs)
-                    counts = torch.bincount(codes, minlength=module.codebook_size)
-                    live = counts > 0
-                    means = torch.zeros_like(module.codebooks[stage])
-                    means[live] = accum[live] / counts[live, None]
-                    compact_momentum[stage].mul_(momentum_coefficient).add_(means)
-                    expanded.add_(compact_momentum[stage].index_select(0, codes))
-                expanded.div_(module.stages)
-                requested_gradient = gradient.float() + momentum_coefficient * expanded.reshape_as(gradient)
+                if module.fp16_ambient_momentum:
+                    if "ambient_momentum" not in state:
+                        state["ambient_momentum"] = torch.zeros_like(
+                            weight, dtype=torch.float16
+                        )
+                    ambient_momentum = state["ambient_momentum"]
+                    next_momentum = ambient_momentum.float()
+                    next_momentum.mul_(momentum_coefficient).add_(gradient.float())
+                    ambient_momentum.copy_(next_momentum)
+                    persisted_momentum = ambient_momentum.float()
+                    requested_gradient = gradient.float().add(
+                        persisted_momentum, alpha=momentum_coefficient
+                    )
+                else:
+                    if "compact_momentum" not in state:
+                        state["compact_momentum"] = torch.zeros_like(
+                            module.codebooks
+                        )
+                    compact_momentum = state["compact_momentum"]
+                    gradient_pairs = gradient.float().reshape(-1, 2)
+                    expanded = torch.zeros_like(gradient_pairs)
+                    for stage in range(module.stages):
+                        codes = module.codes[stage].long()
+                        accum = torch.zeros_like(module.codebooks[stage])
+                        accum.index_add_(0, codes, gradient_pairs)
+                        counts = torch.bincount(
+                            codes, minlength=module.codebook_size
+                        )
+                        live = counts > 0
+                        means = torch.zeros_like(module.codebooks[stage])
+                        means[live] = accum[live] / counts[live, None]
+                        compact_momentum[stage].mul_(
+                            momentum_coefficient
+                        ).add_(means)
+                        expanded.add_(
+                            compact_momentum[stage].index_select(0, codes)
+                        )
+                    expanded.div_(module.stages)
+                    requested_gradient = gradient.float() + (
+                        momentum_coefficient * expanded.reshape_as(gradient)
+                    )
                 update = muon_update(requested_gradient, steps=ns_steps)
                 requested = weight.float()
                 if weight_decay != 0.0:

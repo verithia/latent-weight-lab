@@ -5,6 +5,7 @@ from argparse import Namespace
 
 import torch
 
+import examples.nanogpt.muon_pair_vq as muon_pair_vq_module
 from examples.nanogpt.model import GPT, GPTConfig
 from examples.nanogpt.muon_pair_vq import (
     MuonPairVQ,
@@ -51,6 +52,7 @@ def make_module(
     stochastic_fast_block_local_levels: bool = False,
     error_feedback: bool = False,
     forward_visible_feedback: bool = False,
+    fp16_ambient_momentum: bool = False,
     feedback_codec: str = "cartesian4x4",
     feedback_output_group_size: int = 0,
     feedback_residual_probe_steps: tuple[int, ...] = (),
@@ -72,6 +74,7 @@ def make_module(
         stochastic_fast_block_local_levels=stochastic_fast_block_local_levels,
         error_feedback=error_feedback,
         forward_visible_feedback=forward_visible_feedback,
+        fp16_ambient_momentum=fp16_ambient_momentum,
         feedback_codec=feedback_codec,
         feedback_output_group_size=feedback_output_group_size,
         feedback_residual_probe_steps=feedback_residual_probe_steps,
@@ -929,6 +932,60 @@ def test_optimizer_state_is_only_compact_code_momentum() -> None:
     assert state["compact_momentum"].numel() == 2 * 256 * 2
 
 
+def test_fp16_ambient_momentum_uses_persisted_rounded_recurrence() -> None:
+    torch.manual_seed(20260822)
+    module = make_module(fp16_ambient_momentum=True)
+    optimizer = make_optimizer(module)
+    first_gradient = torch.randn_like(module.weight)
+    module.weight.grad = first_gradient.clone()
+    optimizer.step()
+    state = optimizer.state[module.weight]
+    assert set(state) == {"ambient_momentum"}
+    assert state["ambient_momentum"].dtype == torch.float16
+    assert state["ambient_momentum"].shape == module.weight.shape
+    expected_first = first_gradient.to(torch.float16)
+    torch.testing.assert_close(
+        state["ambient_momentum"], expected_first, rtol=0.0, atol=0.0
+    )
+
+    second_gradient = torch.randn_like(module.weight)
+    expected_second = (
+        0.5 * expected_first.float() + second_gradient.float()
+    ).to(torch.float16)
+    module.weight.grad = second_gradient.clone()
+    optimizer.step()
+    torch.testing.assert_close(
+        state["ambient_momentum"], expected_second, rtol=0.0, atol=0.0
+    )
+    assert "compact_momentum" not in state
+    assert module.optimizer_momentum_bytes == module.element_count * 2
+
+
+def test_fp16_ambient_momentum_feeds_persisted_state_to_muon(
+    monkeypatch,
+) -> None:
+    torch.manual_seed(20260824)
+    module = make_module(fp16_ambient_momentum=True)
+    optimizer = make_optimizer(module)
+    observed: list[torch.Tensor] = []
+
+    def capture_muon(requested_gradient: torch.Tensor, *, steps: int):
+        assert steps == 1
+        observed.append(requested_gradient.clone())
+        return torch.zeros_like(requested_gradient)
+
+    monkeypatch.setattr(muon_pair_vq_module, "muon_update", capture_muon)
+    gradient = torch.randn_like(module.weight)
+    expected_momentum = gradient.to(torch.float16)
+    expected_request = gradient.float() + 0.5 * expected_momentum.float()
+    module.weight.grad = gradient.clone()
+    optimizer.step()
+    assert len(observed) == 1
+    torch.testing.assert_close(
+        observed[0], expected_request, rtol=0.0, atol=0.0
+    )
+
+
 def test_pair_coded_feedback_conserves_discarded_motion_compactly() -> None:
     torch.manual_seed(127)
     module = make_module(stages=1, error_feedback=True)
@@ -1560,6 +1617,33 @@ def test_model_and_optimizer_resume_are_bit_exact_for_next_step() -> None:
     )
 
 
+def test_fp16_ambient_momentum_resume_is_bit_exact_for_next_step() -> None:
+    torch.manual_seed(20260823)
+    module = make_module(seed=20260824, fp16_ambient_momentum=True)
+    optimizer = make_optimizer(module)
+    module.weight.grad = torch.randn_like(module.weight)
+    optimizer.step()
+    model_state = copy.deepcopy(module.state_dict())
+    optimizer_state = copy.deepcopy(optimizer.state_dict())
+
+    restored = make_module(seed=20260825, fp16_ambient_momentum=True)
+    restored.load_state_dict(model_state, strict=True)
+    restored_optimizer = make_optimizer(restored)
+    restored_optimizer.load_state_dict(optimizer_state)
+    gradient = torch.randn_like(module.weight)
+    module.weight.grad = gradient.clone()
+    restored.weight.grad = gradient.clone()
+    optimizer.step()
+    restored_optimizer.step()
+    torch.testing.assert_close(restored.weight, module.weight, rtol=0.0, atol=0.0)
+    torch.testing.assert_close(
+        restored_optimizer.state[restored.weight]["ambient_momentum"],
+        optimizer.state[module.weight]["ambient_momentum"],
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
 def test_device_style_migration_preserves_weight_leaf() -> None:
     module = make_module()
     module._apply(lambda tensor: tensor.clone())
@@ -1735,6 +1819,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_code_refresh_interval": 8,
         "block_fht_mlp_pair_vq_error_feedback": True,
         "block_fht_mlp_pair_vq_forward_visible_feedback": True,
+        "block_fht_mlp_pair_vq_fp16_ambient_momentum": False,
         "block_fht_mlp_pair_vq_cproj_fast_residual": True,
         "block_fht_mlp_pair_vq_stochastic_fast_retraction": False,
         "block_fht_mlp_pair_vq_stochastic_fast_fht_block_size": 0,
@@ -1754,6 +1839,66 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits": 7,
         "block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions": (),
     }
+
+
+def test_gpt_routes_fp16_ambient_pair_vq_momentum_and_accounts_state() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_mlp_pair_vq=True,
+            block_fht_mlp_pair_vq_error_feedback=True,
+            block_fht_mlp_pair_vq_forward_visible_feedback=True,
+            block_fht_mlp_pair_vq_fp16_ambient_momentum=True,
+        )
+    )
+    mlp = model.transformer.h[0].mlp
+    modules = (mlp.c_fc, mlp.c_proj)
+    assert all(
+        isinstance(module, MuonPairVQLinear)
+        and module.fp16_ambient_momentum
+        for module in modules
+    )
+    stats = model.mlp_pair_vq_stats()
+    elements = sum(module.element_count for module in modules)
+    assert stats["compact_momentum_bytes"] == 0
+    assert stats["ambient_momentum_bytes"] == 2 * elements
+    assert stats["optimizer_momentum_bytes"] == 2 * elements
+    assert stats["persistent_training_bytes"] == (
+        stats["codec_bytes"]
+        + stats["ambient_momentum_bytes"]
+        + stats["compact_feedback_bytes"]
+    )
+    assert stats["dense_optimizer_momentum"] == "fp16_ambient"
+
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=1,
+    )
+    tokens = torch.randint(0, 32, (2, 8))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None and torch.isfinite(loss)
+    loss.backward()
+    optimizer.step()
+    pair_optimizer = next(
+        item for item in optimizer.optimizers if isinstance(item, MuonPairVQ)
+    )
+    assert len(pair_optimizer.state) == 2
+    for state in pair_optimizer.state.values():
+        assert "ambient_momentum" in state
+        assert state["ambient_momentum"].dtype == torch.float16
+        assert "compact_momentum" not in state
     config = GPTConfig(
         block_size=8,
         vocab_size=32,

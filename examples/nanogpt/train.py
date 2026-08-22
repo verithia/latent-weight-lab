@@ -1538,6 +1538,11 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-mlp-pair-vq-fp16-ambient-momentum",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-cproj-fast-residual",
         action=argparse.BooleanOptionalAction,
         default=False,
@@ -2498,6 +2503,10 @@ def parse_args() -> argparse.Namespace:
         raise ValueError(
             "forward-visible pair-VQ feedback requires pair VQ and error feedback"
         )
+    if getattr(
+        namespace, "block_fht_mlp_pair_vq_fp16_ambient_momentum", False
+    ) and not namespace.block_fht_mlp_pair_vq:
+        raise ValueError("FP16 ambient momentum requires MLP pair VQ")
     if (
         namespace.block_fht_mlp_pair_vq_cproj_fast_residual
         and not namespace.block_fht_mlp_pair_vq
@@ -3292,6 +3301,13 @@ def pair_vq_model_kwargs(
             getattr(
                 namespace,
                 "block_fht_mlp_pair_vq_forward_visible_feedback",
+                False,
+            )
+        ),
+        "block_fht_mlp_pair_vq_fp16_ambient_momentum": bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_fp16_ambient_momentum",
                 False,
             )
         ),
@@ -4254,11 +4270,14 @@ def main() -> None:
                 f"elements={pair_vq_stats['elements']:,} "
                 f"codec_bytes={pair_vq_stats['codec_bytes']:,} "
                 f"compact_momentum_bytes={pair_vq_stats['compact_momentum_bytes']:,} "
+                f"ambient_momentum_bytes={pair_vq_stats['ambient_momentum_bytes']:,} "
+                f"optimizer_momentum_bytes={pair_vq_stats['optimizer_momentum_bytes']:,} "
                 f"compact_feedback_bytes={pair_vq_stats['compact_feedback_bytes']:,} "
                 f"persistent_training_bytes={pair_vq_stats['persistent_training_bytes']:,} "
                 f"model_compression_vs_dense_bf16={pair_vq_stats['model_compression_vs_dense_bf16']:.6f} "
                 f"training_compression_vs_dense_fp32_weight_plus_momentum={pair_vq_stats['training_compression_vs_dense_fp32_weight_plus_momentum']:.6f} "
-                "dense_master_weight=disabled dense_optimizer_momentum=disabled "
+                "dense_master_weight=disabled dense_optimizer_momentum="
+                f"{pair_vq_stats['dense_optimizer_momentum']} "
                 "ambient_error_buffer=disabled "
                 "forward_visible_feedback="
                 f"{int(pair_vq_stats['forward_visible_feedback'])}",

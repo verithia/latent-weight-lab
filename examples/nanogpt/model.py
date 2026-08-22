@@ -193,6 +193,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_code_refresh_interval: int = 8
     block_fht_mlp_pair_vq_error_feedback: bool = False
     block_fht_mlp_pair_vq_forward_visible_feedback: bool = False
+    block_fht_mlp_pair_vq_fp16_ambient_momentum: bool = False
     block_fht_mlp_pair_vq_cproj_fast_residual: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_retraction: bool = False
     block_fht_mlp_pair_vq_stochastic_fast_fht_block_size: int = 0
@@ -2436,6 +2437,9 @@ class MLP(nn.Module):
                 forward_visible_feedback=bool(
                     config.block_fht_mlp_pair_vq_forward_visible_feedback
                 ),
+                fp16_ambient_momentum=bool(
+                    config.block_fht_mlp_pair_vq_fp16_ambient_momentum
+                ),
                 feedback_codec=str(
                     config.block_fht_mlp_pair_vq_feedback_codec
                 ),
@@ -2730,6 +2734,9 @@ class MLP(nn.Module):
                 ),
                 forward_visible_feedback=bool(
                     config.block_fht_mlp_pair_vq_forward_visible_feedback
+                ),
+                fp16_ambient_momentum=bool(
+                    config.block_fht_mlp_pair_vq_fp16_ambient_momentum
                 ),
                 feedback_codec=str(
                     config.block_fht_mlp_pair_vq_feedback_codec
@@ -5884,7 +5891,14 @@ class GPT(nn.Module):
         ]
         elements = sum(module.element_count for module in modules)
         codec_bytes = sum(module.persistent_codec_bytes for module in modules)
-        momentum_bytes = sum(module.compact_momentum_bytes for module in modules)
+        compact_momentum_bytes = sum(
+            0 if module.fp16_ambient_momentum else module.compact_momentum_bytes
+            for module in modules
+        )
+        ambient_momentum_bytes = sum(
+            module.ambient_momentum_bytes for module in modules
+        )
+        momentum_bytes = compact_momentum_bytes + ambient_momentum_bytes
         feedback_bytes = sum(module.compact_feedback_bytes for module in modules)
         dense_bf16_bytes = 2 * elements
         dense_fp32_weight_momentum_bytes = 8 * elements
@@ -5893,7 +5907,9 @@ class GPT(nn.Module):
             "modules": len(modules),
             "elements": elements,
             "codec_bytes": codec_bytes,
-            "compact_momentum_bytes": momentum_bytes,
+            "compact_momentum_bytes": compact_momentum_bytes,
+            "ambient_momentum_bytes": ambient_momentum_bytes,
+            "optimizer_momentum_bytes": momentum_bytes,
             "compact_feedback_bytes": feedback_bytes,
             "persistent_training_bytes": persistent_training_bytes,
             "model_compression_vs_dense_bf16": (
@@ -5905,7 +5921,9 @@ class GPT(nn.Module):
                 else 0.0
             ),
             "dense_master_weight": "disabled",
-            "dense_optimizer_momentum": "disabled",
+            "dense_optimizer_momentum": (
+                "fp16_ambient" if ambient_momentum_bytes else "disabled"
+            ),
             "dense_ambient_error_buffer": "disabled",
             "forward_visible_feedback": any(
                 module.forward_visible_feedback for module in modules
