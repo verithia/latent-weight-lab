@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_124m_pair_vq_codec_neighbor_path_stability_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Are actual Pair-VQ residual neighbors more functionally and optimizer-path unstable than deterministic isotropic perturbations with exactly matched per-matrix energy?",
+  "causal_basis": {
+    "early_stopped_polar_result": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_early_stopped_muon_polar_stability_oracle_result.json",
+      "sha256": "84b6f75d51fa79082a34c944503a1e35accc3bbb6ab501319d05879fdb9e0ec2",
+      "classification": "EARLY_STOPPED_MUON_POLAR_REGULARIZATION_REJECTED",
+      "finding": "Every strict Newton-Schulz prefix reduced error amplification only by materially changing native Muon direction and norm."
+    },
+    "same_momentum_polar_result": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_same_momentum_polar_amplification_oracle_result.json",
+      "sha256": "b45eefe78877bc0122ff10028a729aef72f959c285c78f0cde46760703cd04cc",
+      "classification": "MUON_POLAR_AMPLIFIES_CODEC_GRADIENT_ERROR",
+      "minimum_late_amplification": 3.982174218678504
+    }
+  },
+  "theory": {
+    "paper_connection": "Instantiate Mapping Loss stability on the measured codec-neighbor distribution instead of generic latent Gaussian noise.",
+    "actual_neighbor": "The production forward-visible center is bracketed by the symmetric Pair-VQ residual direction: native=base and plus=base+2*residual.",
+    "control": "For each matrix and phase, use a deterministic Rademacher direction scaled to exactly the same Frobenius energy as the Pair-VQ residual; evaluate symmetric center plus/minus controls.",
+    "interpretation": "Excess actual-neighbor sensitivity identifies a representation-induced path-stability defect. Equal or lower sensitivity rejects codec-neighbor stability as the causal repair.",
+    "nonintervention": "The dense replay remains the only training path; every neighbor is installed only inside RNG-restored evaluation/probe scopes."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {"split": "validation", "seed": 2026082201, "batches": 2, "batch_size": 4, "block_size": 1024},
+    "heldout_window": {"split": "validation", "seed": 2026082202, "batches": 2, "batch_size": 4, "block_size": 1024, "must_be_disjoint_from_fit": true},
+    "logit_metric": "last-token forward KL from center to each symmetric neighbor, averaged over signs and batches",
+    "functional_metric": "relative error of the symmetric-neighbor average gradient against the center gradient",
+    "optimizer_metric": "same dense Muon momentum, native five-step polar map, center gradient versus symmetric-neighbor average gradient",
+    "isotropic_seed_base": 2026082300,
+    "trajectory_intervention": "none"
+  },
+  "frozen_gate": {
+    "all_metrics_finite": true,
+    "fit_and_heldout_indices_disjoint": true,
+    "maximum_relative_neighbor_energy_mismatch": 1e-06,
+    "minimum_late_actual_to_isotropic_logit_kl_ratio": 1.25,
+    "minimum_late_actual_to_isotropic_gradient_error_ratio": 1.25,
+    "minimum_late_actual_to_isotropic_postpolar_error_ratio": 1.25,
+    "minimum_late_actual_worse_matrix_fraction": 0.75,
+    "minimum_fit_to_heldout_excess_ratio_retention": 0.80,
+    "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+    "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+    "minimum_exact_config_mfu_fraction": 0.20
+  },
+  "state_and_compute_contract": {
+    "candidate_parameter_updates": 0,
+    "persistent_candidate_state": "none",
+    "dense_master_weight_in_candidate": false,
+    "inference_change": false,
+    "expected_runtime": "above five minutes; terminal/error-only watchdog required"
+  },
+  "decision_rule": {
+    "oracle_pass": "Authorize only one zero-update codec-neighbor stability-gradient alignment oracle. Training remains forbidden until that gradient aligns with the dense-minus-compact vector-field discrepancy on held-out phases.",
+    "oracle_fail": "Reject codec-neighbor Mapping Loss stability as the primary repair and return to a norm-preserving spectrally damped polar discriminator.",
+    "automatic_training_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}
