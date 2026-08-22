@@ -89,11 +89,11 @@ def test_registered_plan_is_immutable_and_nonintervening() -> None:
         "124m_pair_vq_minifloat_momentum_precision_frontier_plan.json"
     )
     plan = json.loads(path.read_text())
-    assert plan["schema_version"].endswith("_v2")
+    assert plan["schema_version"].endswith("_v3")
     assert plan["frozen_protocol"]["parameter_updates_by_candidates"] == 0
     assert plan["decision_gate"]["automatic_endpoint"] is False
     assert hashlib.sha256(path.read_bytes()).hexdigest() == (
-        "35f49aadaf4adb59981c858e370385f681eaf11800bf97796026054895a4d7eb"
+        "02cf2e611097abfdbb1752e0035ec34bd5bb4098cb2c5cd024cb8fd0dc3edfb3"
     )
 
 
@@ -103,6 +103,7 @@ def test_gate_selects_smallest_passing_format() -> None:
     )
     oracle.stage = "stage_ab_deterministic_replay"
     oracle.update_indices = {238}
+    oracle.futility_indices = {0, 8}
     oracle.candidate_order = ["e5m2", "e5m4", "e5m10_fp16_control"]
     oracle.candidates = {
         "e5m2": {"total_bits": 8},
@@ -148,6 +149,59 @@ def test_gate_selects_smallest_passing_format() -> None:
     assert gate["selected"] == "e5m4"
 
 
+def test_gate_stops_after_two_failed_early_compressed_probes() -> None:
+    oracle = PairVQMinifloatMomentumOracle.__new__(
+        PairVQMinifloatMomentumOracle
+    )
+    oracle.stage = "stage_ab_deterministic_replay"
+    oracle.update_indices = {0, 8, 237}
+    oracle.futility_indices = {0, 8}
+    oracle.candidate_order = ["e5m8", "e5m10_fp16_control"]
+    oracle.candidates = {
+        "e5m8": {"total_bits": 14},
+        "e5m10_fp16_control": {"total_bits": 16},
+    }
+    oracle.plan = {
+        "decision_gate": {
+            "requirements_at_every_registered_probe": {
+                "minimum_all_postpolar_cosine": 0.9999,
+                "minimum_every_matrix_postpolar_cosine": 0.999,
+                "minimum_all_postpolar_positive_line_energy_recovery": 0.999,
+                "minimum_all_prepolar_cosine": 0.9999,
+                "all_metrics_finite": True,
+            },
+            "fp16_control_requirements": {
+                "minimum_all_postpolar_cosine": 0.999999,
+                "minimum_every_matrix_postpolar_cosine": 0.99999,
+                "minimum_all_postpolar_positive_line_energy_recovery": 0.99999,
+            },
+        }
+    }
+
+    def aggregate(cosine: float) -> dict[str, object]:
+        polar = {
+            "cosine": cosine,
+            "worst_matrix_cosine": cosine,
+            "positive_line_energy_recovery": cosine * cosine,
+        }
+        return {"all": {"polar_update": polar, "combined_prepolar": polar}}
+
+    oracle.records = [
+        {
+            "optimizer_update_index": step,
+            "aggregate": {
+                "e5m8": aggregate(0.9992),
+                "e5m10_fp16_control": aggregate(1.0),
+            },
+        }
+        for step in (0, 8)
+    ]
+    gate = oracle._gate()
+    assert gate["ready"] is True
+    assert gate["classification"] == "EARLY_FUTILITY_FAIL"
+    assert gate["terminal_replay_required"] is False
+
+
 def test_registered_replay_config_parses_to_nonintervening_audit(
     monkeypatch,
 ) -> None:
@@ -158,7 +212,7 @@ def test_registered_replay_config_parses_to_nonintervening_audit(
     )
     monkeypatch.setattr(sys, "argv", ["train.py", "--config", str(config)])
     args = parse_args()
-    assert args.max_iters == 238
+    assert args.max_iters == 9
     assert args.block_fht_mlp_pair_vq is True
     assert args.block_fht_mlp_pair_vq_fp16_ambient_momentum is True
     assert args.pair_vq_minifloat_momentum_stage == (

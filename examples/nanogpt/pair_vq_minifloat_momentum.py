@@ -25,7 +25,7 @@ from examples.nanogpt.muon import muon_update
 from examples.nanogpt.muon_pair_vq import MuonPairVQ, MuonPairVQLinear
 
 
-PLAN_SCHEMA = "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v2"
+PLAN_SCHEMA = "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v3"
 RESULT_SCHEMA = "mai_pair_vq_minifloat_momentum_precision_frontier_result_v1"
 VALID_STAGES = {"stage_ab_deterministic_replay"}
 
@@ -169,6 +169,10 @@ class PairVQMinifloatMomentumOracle:
         self.update_indices = {
             int(value) for value in stage_protocol["probe_update_indices"]
         }
+        self.futility_indices = {
+            int(value)
+            for value in stage_protocol["early_futility_update_indices"]
+        }
         self.probe_only = False
         self.result_path = result_path
         self.records: list[dict[str, Any]] = []
@@ -307,7 +311,8 @@ class PairVQMinifloatMomentumOracle:
     def _gate(self) -> dict[str, Any]:
         expected = self.update_indices
         observed = {int(row["optimizer_update_index"]) for row in self.records}
-        if observed != expected:
+        partial_futility = observed == self.futility_indices
+        if observed != expected and not partial_futility:
             return {
                 "ready": False,
                 "stage": self.stage,
@@ -376,6 +381,45 @@ class PairVQMinifloatMomentumOracle:
                     ),
                 ),
             )
+        if partial_futility:
+            compressed_passing = [
+                candidate
+                for candidate in passing
+                if candidate != "e5m10_fp16_control"
+            ]
+            control_passed = "e5m10_fp16_control" in passing
+            if control_passed and not compressed_passing:
+                return {
+                    "ready": True,
+                    "stage": self.stage,
+                    "classification": "EARLY_FUTILITY_FAIL",
+                    "selected": None,
+                    "candidates": decisions,
+                    "terminal_replay_required": False,
+                    "automatic_endpoint": False,
+                }
+            return {
+                "ready": False,
+                "stage": self.stage,
+                "classification": (
+                    "CONTINUE_TO_TERMINAL_REQUIRED"
+                    if compressed_passing
+                    else "INVALID_FP16_CONTROL"
+                ),
+                "selected": (
+                    min(
+                        compressed_passing,
+                        key=lambda candidate: int(
+                            self.candidates[candidate]["total_bits"]
+                        ),
+                    )
+                    if compressed_passing
+                    else None
+                ),
+                "candidates": decisions,
+                "terminal_replay_required": bool(compressed_passing),
+                "automatic_endpoint": False,
+            }
         return {
             "ready": True,
             "stage": self.stage,

@@ -1,7 +1,7 @@
 {
-  "schema_version": "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v2",
+  "schema_version": "mai_124m_pair_vq_minifloat_momentum_precision_frontier_plan_v3",
   "recorded_at": "2026-08-22",
-  "status": "protocol_amended_before_execution_to_preserve_strict_checkpoint_identity",
+  "status": "pilot_informed_early_futility_rule_registered_before_scientific_execution",
   "scientific_question": "What is the smallest exponent-preserving ambient-momentum format that retains the successful FP16 Pair-VQ Muon polar field at both early and terminal 124M states?",
   "causal_authorization": {
     "loss_closure_parent": {
@@ -26,6 +26,13 @@
       "fp16_polar_energy_recovery": 0.9999956172031941,
       "fp16_minimum_layer_polar_cosine": 0.9999935309459342,
       "bf16_same_byte_control_rejected": true
+    },
+    "non_scientific_performance_pilot": {
+      "certificate_sha256": "5b97a2cadc6078350abc50903a63caa1b7a8d5aad50b741f07f45c7bcdad5336",
+      "log_sha256": "d7d97ce55fcc92e6640fd0749d5c217a3a99fc788f57731bb615196982307255",
+      "mfu_fraction": 0.2818132333360597,
+      "tokens_per_second": 156417.33125,
+      "role": "The preflight is not scientific evidence. Its step-1/step-9 observer outputs motivated, but do not satisfy, the confirmatory early-futility rule below."
     }
   },
   "theory": {
@@ -74,6 +81,8 @@
       "method": "Replay the exact successful 238-update FP16-owner config from its registered seed and data stream. Candidate histories remain nonintervening. Probe early updates 0 and 8 and terminal update 237 in one run; require the production-owner terminal fixed-eval CE to reproduce the sealed endpoint within 0.002. This avoids bypassing exact-resume source/config identity merely to attach an observer.",
       "probe_update_indices": [0, 8, 237],
       "reported_post_update_state_steps": [1, 9, 238],
+      "early_futility_update_indices": [0, 8],
+      "early_futility_rule": "After an independently launched registered nine-update replay, stop the family if the FP16 control passes and no compressed candidate passes every frozen direction threshold at both early probes. Continue to terminal update 237 only if at least one compressed candidate passes both early probes.",
       "sealed_terminal_validation_ce": 5.368512153625488,
       "maximum_replay_validation_ce_gap": 0.002
     },
@@ -109,6 +118,7 @@
       "minimum_all_postpolar_positive_line_energy_recovery": 0.99999
     },
     "selection": "Choose the smallest total-bit candidate that passes all early and terminal deterministic-replay requirements. Resolve ties by the larger minimum every-matrix post-polar cosine.",
+    "early_futility": "If the registered step-1/step-9 gate has a passing FP16 control and zero passing compressed candidates, classify the mantissa-only family as rejected without a terminal replay. This is valid because every-probe success is a necessary condition of the frozen terminal selection rule.",
     "if_pass": "Authorize only an implementation-quality packed-state prototype with exact recurrence/checkpoint tests and an exact-config >=20% MFU gate. No LM endpoint is automatically authorized.",
     "if_fail": "Reject mantissa-only truncation as the next compression family. Derive a singular-direction-aware correction or factored polar-history representation before any further LM endpoint.",
     "automatic_endpoint": false,
