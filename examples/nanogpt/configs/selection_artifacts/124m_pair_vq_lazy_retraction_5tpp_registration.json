@@ -1,0 +1,52 @@
+{
+  "causal_comparator": {
+    "only_intended_mechanism_change": "Pair-VQ retraction cadence changes from every optimizer step to every eight optimizer steps plus fixed evaluation boundaries",
+    "per_step_dense_parent_gap_ce": 0.06830000000000025,
+    "per_step_result": "examples/nanogpt/configs/selection_artifacts/124m_qkonly_pair_vq_mlp_5tpp_localization_result.json",
+    "per_step_result_sha256": "6c60a6824dc268e336917cf6680e3eb19ac3053fb13394c81090c16ce7e7f770",
+    "per_step_terminal_validation_ce": 3.5541
+  },
+  "decision_policy": {
+    "automatic_20tpp": false,
+    "automatic_rerun": false,
+    "automatic_scale_up": false,
+    "automatic_sweep": false,
+    "on_failure": "reject eight-step lazy retraction as sufficient; do not sweep interval, bit width, seed, learning rate, horizon, or model size",
+    "on_pass": "authorize a separately preregistered 124M composition with compact attention V/output only"
+  },
+  "frozen_test": {
+    "eval_steps": [
+      0,
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "fixed_model_compute_equivalent_penalty_maximum": 1.1,
+    "forced_compact_boundaries": [
+      594,
+      1188,
+      1782,
+      2373
+    ],
+    "horizon_updates": 2373,
+    "lazy_retraction_interval": 8,
+    "matched_dense_mlp_parent_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+    "matched_dense_mlp_parent_result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "matched_dense_mlp_parent_validation_ce": 3.4858,
+    "minimum_exact_config_mfu_fraction": 0.2,
+    "model": "124M QK-only attention plus full Pair-VQ MLP",
+    "terminal_validation_ce_maximum": 3.4958
+  },
+  "hypothesis": "The 0.0683 CE late-horizon full-MLP gap is caused primarily by per-step compact-chart retraction perturbing native Muon requests; carrying the ambient request for the already-frozen eight-step code-refresh interval should close the 5TPP gap while checkpoints remain compact.",
+  "qualification": {
+    "short_fixed_model_compute_penalty": 1.021888344978236,
+    "short_parent_gap_ce": 0.008017124176025625,
+    "short_passed": true,
+    "short_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_lazy_retraction_0p5tpp_result.json",
+    "short_result_sha256": "e02505b3d3106899cbb21daaa6500af65aa40653bb9505d9389a4cda30b32935",
+    "short_terminal_validation_ce": 5.369017124176025
+  },
+  "registered_at": "2026-08-22",
+  "schema_version": "mai_pair_vq_lazy_retraction_124m_5tpp_registration_v1"
+}
