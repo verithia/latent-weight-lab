@@ -1,0 +1,89 @@
+{
+  "schema_version": "mai_124m_attention_pair_vq_vo_5tpp_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_config_and_performance_measurement",
+  "authorization_basis": {
+    "endpoint_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_endpoint_result.json",
+    "endpoint_result_sha256": "3eb689af60bb2fc8eba8fa2093e8e8a0e765b1cad312a55a17e1297fb7d908d8",
+    "endpoint_classification": "PASS_COMPACT_FULL_REPLACEMENT_124M_0P5TPP",
+    "authorization": "register the identical 124M representation at 5TPP only"
+  },
+  "causal_question": "Does the compact direction-complete Pair-VQ representation for attention V/output and the full MLP retain dense parity after ten times the token horizon?",
+  "matched_reference": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_dense_5tpp_replay_result.json",
+    "result_sha256": "b08a1856e0318e89ba8fdc2ada0931723976f201ce66a35a093d0f0165ddb2e5",
+    "source_commit": "d733b73c3177060172d2d74bfd0f0a50fc108986",
+    "terminal_validation_ce": 3.5402,
+    "fixed_validation_curve": [
+      {"step": 594, "validation_ce": 4.1742},
+      {"step": 1188, "validation_ce": 3.7631},
+      {"step": 1782, "validation_ce": 3.6039},
+      {"step": 2373, "validation_ce": 3.5402}
+    ],
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747"
+  },
+  "frozen_candidate": {
+    "model_size": "124M",
+    "tokens_per_parameter": 5.0,
+    "updates": 2373,
+    "eval_interval": 594,
+    "warmup_iters": 23,
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "qk_representation": "headwise BlockFHT with output gain",
+    "attention_v_and_output_representation": "Pair-VQ with forward-visible compact feedback and adaptive FP16 ambient momentum",
+    "mlp_representation": "two-seed-qualified complete Pair-VQ full MLP",
+    "candidate_change_from_0p5tpp": "horizon, warmup, evaluation interval, and the reference-matched model/train-data seeds only; representation and optimizer hyperparameters remain identical",
+    "fresh_from_scratch": true,
+    "resume_from_checkpoint": false
+  },
+  "representation_invariants": {
+    "pair_vq_modules": 48,
+    "attention_pair_vq_modules": 24,
+    "pair_vq_elements": 70778880,
+    "persistent_training_bytes_exact": 319996032,
+    "momentum_byte_ceiling": 123863040,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "dense_master_weight_absent": true,
+    "dense_optimizer_momentum_absent": true,
+    "materialized_inference_flops": "unchanged from dense target matrices"
+  },
+  "performance_gate": {
+    "exact_scientific_config_required": true,
+    "foreground_polling_required": true,
+    "minimum_timed_updates": 8,
+    "minimum_mfu_fraction": 0.2,
+    "all_logged_losses_finite": true,
+    "native_blockfht_extension_required": true,
+    "persistent_training_bytes_exact": 319996032
+  },
+  "scientific_gates": {
+    "terminal_validation_ce_max": 3.5502,
+    "candidate_minus_dense_terminal_validation_ce_max": 0.01,
+    "candidate_over_dense_token_equivalent_penalty_max": 1.1,
+    "dense_curve_inversion_required": true,
+    "common_loss_horizontal_ratio_required": true,
+    "all_fixed_eval_losses_finite": true,
+    "same_fixed_eval_protocol_required": true,
+    "candidate_parity_claim_requires_an_additional_seed": true
+  },
+  "monitoring": {
+    "expected_runtime": "one to two hours",
+    "policy": "one terminal/error-only persistent @Codex watchdog; no healthy progress milestones or heartbeats",
+    "stall_minutes": 20,
+    "terminal_action": "seal the fixed curve and compact-state invariants; a pass authorizes only registration and an exact-config MFU gate for 124M/20TPP"
+  },
+  "decision_boundary": {
+    "on_pass": "authorize preregistration and exact-config MFU measurement for the identical 124M/20TPP structure; do not scale model size",
+    "on_failure": "localize attention V versus attention output under the same Pair-VQ full-MLP parent; do not alter the MLP or scale",
+    "automatic_rerun": false,
+    "automatic_20tpp_training": false,
+    "automatic_model_size_scale_up": false
+  }
+}
