@@ -1,0 +1,125 @@
+{
+  "schema_version": "mai_124m_pair_vq_lowbit_momentum_tangent_oracle_seal_v1",
+  "classification": "LOWBIT_AMBIENT_MOMENTUM_TANGENT_REJECTED",
+  "scientific_decision": {
+    "authorized_next_action": "Reconcile the rejection with the already sealed FP16 ambient-momentum evidence, then register only a Pair-VQ-weight plus FP16-ambient-momentum production prototype, exact-state tests, and an exact-config performance gate before deciding on one 124M endpoint.",
+    "forbidden": [
+      "another ternary/int4 bit or block-size sweep",
+      "promotion of any low-bit candidate to an LM endpoint",
+      "horizon transfer",
+      "width scale-up"
+    ],
+    "reason": "Every low-bit arm fails the frozen late Muon-polar direction gate even when ordinary pre-polar cosine is high; the best arm is spectrally distorted by the nonlinear polar map."
+  },
+  "identity": {
+    "source_commit": "7c2de9604c2d0d40db6c18f9846081eeb9c649ed",
+    "plan_sha256": "514b02946955ca3d1f5db0e2df38253fb237830e5f42811150d47658a51fcca7",
+    "config_sha256": "63288faf3ad5d1da13ca0c9664e40b2943e81918345e12beeb57caf6035183b4",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "run_identity_sha256": "b89322ed59ce3222cc3e08381d8d798e56df5b11656340e6f2f575b5885c8035"
+  },
+  "artifacts": {
+    "raw_result_sha256": "218baa46e009a530ea39a3fd3f389066e20cc552b6ca845bf93f3c2fbdc7f7ef",
+    "dense_shadow_result_sha256": "8e581c68d110f56042c44863323f7e1db67badd3df5dffe29d9555a161773827",
+    "status_sha256": "5d7ce67213416f78d6ccc7df7b6957bd60846a933fe9b9a496bcbd431187bd10",
+    "log_sha256": "4f53d91147412c4d9cc71ee35cc1e57cab2f81cb27563e765ed6e8795e2dd30e",
+    "runtime_provenance_sha256": "53b426150979fea8075f03d97517dfb53fce88403a5eb1b770cc64215d44f23d",
+    "archived_config_sha256": "63288faf3ad5d1da13ca0c9664e40b2943e81918345e12beeb57caf6035183b4",
+    "mfu_certificate_sha256": "f62b4b5ec50cde129713b1b0d14c32c4f9daad564724348736568de37bc67561"
+  },
+  "terminal": {
+    "exit_code": 0,
+    "finished_at": "2026-08-22T08:37:56+08:00",
+    "dense_train_ce": 5.358734607696533,
+    "dense_validation_ce": 5.360918045043945,
+    "registered_dense_parent_validation_ce": 5.361,
+    "dense_parent_absolute_gap": 0.00008195495605467573,
+    "dense_replay_gate_maximum_gap": 0.002,
+    "shadow_validation_ce": 5.364660739898682,
+    "shadow_minus_dense_validation_ce": 0.003742694854736328
+  },
+  "frozen_gate": {
+    "ready": true,
+    "classification": "FAIL",
+    "selected": null,
+    "automatic_endpoint": false,
+    "all_metrics_finite": true
+  },
+  "candidate_minimum_late_metrics": {
+    "int4_plus_ternary2_residual": {
+      "passed": false,
+      "all_polar_cosine": 0.8336482994896941,
+      "all_polar_positive_line_energy_recovery": 0.6949694872420586,
+      "side_polar_cosine": 0.8332793660267828,
+      "worst_matrix_polar_cosine": 0.7405078239140799,
+      "all_prepolar_cosine": 0.9938647613194159,
+      "fraction_of_dense_fp32_momentum_bytes": 0.203125
+    },
+    "int4_single": {
+      "passed": false,
+      "all_polar_cosine": 0.588387324590546,
+      "all_polar_positive_line_energy_recovery": 0.3461996437388205,
+      "side_polar_cosine": 0.58814357673224,
+      "worst_matrix_polar_cosine": 0.49314539188075845,
+      "all_prepolar_cosine": 0.9453541835450388,
+      "fraction_of_dense_fp32_momentum_bytes": 0.1328125
+    },
+    "ternary2_plus_ternary2_residual": {
+      "passed": false,
+      "all_polar_cosine": 0.5048843356010244,
+      "all_polar_positive_line_energy_recovery": 0.25490819233528794,
+      "side_polar_cosine": 0.5046350528355975,
+      "worst_matrix_polar_cosine": 0.43602230126919417,
+      "all_prepolar_cosine": 0.8741748168457399,
+      "fraction_of_dense_fp32_momentum_bytes": 0.140625
+    },
+    "ternary2_single": {
+      "passed": false,
+      "all_polar_cosine": 0.31500992283223345,
+      "all_polar_positive_line_energy_recovery": 0.09923125148276968,
+      "side_polar_cosine": 0.30605679647186707,
+      "worst_matrix_polar_cosine": 0.2482245004082939,
+      "all_prepolar_cosine": 0.7056640941218704,
+      "fraction_of_dense_fp32_momentum_bytes": 0.0703125
+    }
+  },
+  "best_candidate_late_metrics": {
+    "180": {
+      "all_polar_cosine": 0.8511301793967907,
+      "all_polar_positive_line_energy_recovery": 0.7244225822800132,
+      "c_fc_polar_cosine": 0.8501538130635253,
+      "c_proj_polar_cosine": 0.8552113454352301,
+      "worst_matrix_polar_cosine": 0.7756709806471395,
+      "all_prepolar_cosine": 0.995319452201801
+    },
+    "238": {
+      "all_polar_cosine": 0.8336482994896941,
+      "all_polar_positive_line_energy_recovery": 0.6949694872420586,
+      "c_fc_polar_cosine": 0.8332793660267828,
+      "c_proj_polar_cosine": 0.8352652501229731,
+      "worst_matrix_polar_cosine": 0.7405078239140799,
+      "all_prepolar_cosine": 0.9938647613194159
+    }
+  },
+  "performance": {
+    "preflight_mfu_fraction": 0.3635746346032296,
+    "preflight_tokens_per_second": 203064.63666666663,
+    "run_tokens_per_second_mean": 200385.66260869565,
+    "run_tokens_per_second_median": 201774.93,
+    "peak_mib": 32356.65
+  },
+  "failed_attempt_recovery": {
+    "attempt_one_failure": "Terminal gate field-name mismatch after state-238 metrics were computed but before they were written or terminal evaluation was sealed.",
+    "partial_result_sha256": "9fe152b29dcc9356422f1a706a6f56c5359cd2ed47ffdb7174b9b63fec197f76",
+    "repair_commit": "deebe5d243cf10712690e61c35eb28a222603827",
+    "repair_tests_passed": 30,
+    "partial_result_not_used_for_terminal_classification": true
+  },
+  "watcher": {
+    "policy": "terminal-or-error only",
+    "callback_count": 1,
+    "callback_delivered": true,
+    "terminal_process_alive": false
+  }
+}
