@@ -1,0 +1,136 @@
+{
+  "schema_version": "mai_124m_pair_vq_lowbit_momentum_tangent_oracle_plan_v1",
+  "status": "preregistered_before_implementation",
+  "causal_parent": {
+    "classification": "INSTANTANEOUS_SUBSPACE_PRIMARY",
+    "result_seal_path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_momentum_transport_oracle_result.json",
+    "result_seal_sha256": "7f969b7820d2743befb02431d939b8ff11ae2b940d62eb58e390808b984fbf14",
+    "raw_result_sha256": "ca3c85e15b1ca8337eec9787571125e338b7d270ea56f0076403796323fffb53",
+    "finding": "The current Pair-VQ assignment chart, not code-identity history transport, destroys the dense Muon polar direction at both frozen late probes."
+  },
+  "hypothesis": {
+    "claim": "A full-support low-bit ambient momentum state can retain the dense Muon polar field while the model weight remains Pair-VQ compact.",
+    "mechanism": "Decode the previous compact momentum, apply the exact causal momentum recurrence with the current dense gradient, quantize the new momentum blockwise, and carry the decoded state into the next update. A second low-bit residual tier is forward-visible and temporally persistent, so it refines the state without a dense error buffer.",
+    "non_claims": [
+      "This is not weight quantization.",
+      "This does not demonstrate language-model loss closure.",
+      "This does not authorize a larger model or longer horizon."
+    ]
+  },
+  "frozen_protocol": {
+    "training_path": "The matched dense parent is the only path that updates model parameters. Every compact arm is nonintervening.",
+    "optimizer_update_indices": [0, 59, 119, 179, 237],
+    "reported_post_update_state_steps": [1, 60, 120, 180, 238],
+    "primary_late_post_update_state_steps": [180, 238],
+    "matrix_scope": ["transformer.h.*.mlp.c_fc", "transformer.h.*.mlp.c_proj"],
+    "momentum_elements": 56623104,
+    "dense_reference_state_dtype": "float32",
+    "block_size": 64,
+    "scale_dtype": "float16",
+    "candidate_order": [
+      "ternary2_single",
+      "int4_single",
+      "ternary2_plus_ternary2_residual",
+      "int4_plus_ternary2_residual"
+    ],
+    "candidates": {
+      "ternary2_single": {
+        "primary_codec": "ternary2",
+        "residual_codec": null,
+        "ternary_threshold_rms": 0.5
+      },
+      "int4_single": {
+        "primary_codec": "symmetric_int4",
+        "residual_codec": null
+      },
+      "ternary2_plus_ternary2_residual": {
+        "primary_codec": "ternary2",
+        "residual_codec": "ternary2",
+        "ternary_threshold_rms": 0.5
+      },
+      "int4_plus_ternary2_residual": {
+        "primary_codec": "symmetric_int4",
+        "residual_codec": "ternary2",
+        "ternary_threshold_rms": 0.5
+      }
+    },
+    "quantization": {
+      "ternary2": "Per 64-value block, codes are {-1,0,+1}; active entries satisfy |x| >= 0.5*RMS and the least-squares active mean-absolute magnitude is rounded to FP16.",
+      "symmetric_int4": "Per 64-value block, one FP16 scale is absmax/7 and codes are round(x/scale) clipped to [-7,7].",
+      "residual_tier": "Quantize target minus decoded primary with its own codes and FP16 block scale; decoded primary plus decoded residual is the forward-visible state used now and carried to the next recurrence.",
+      "padding": "Zero-pad only the last block for coding and exclude padding from all metrics and storage counts.",
+      "deterministic": true
+    },
+    "state_recurrence": {
+      "dense": "B_next = momentum * B_previous + gradient",
+      "compact": "U_next = momentum * decode(compact_previous) + gradient; compact_next = encode(U_next)",
+      "combined_request": "H = gradient + momentum * momentum_state",
+      "polar_map": "Use the exact production Newton-Schulz Muon update and the owning dense optimizer group's ns_steps."
+    },
+    "measurements": [
+      "momentum-state energy recovery, relative error, and cosine",
+      "combined pre-polar request recovery, relative error, and cosine",
+      "post-polar Muon update recovery, relative error, and cosine",
+      "all/c_fc/c_proj aggregates and every-matrix minima",
+      "actual simulated bytes and theoretical packed persistent bytes",
+      "per-step encode/decode wall time"
+    ],
+    "parameter_updates_by_candidates": 0,
+    "candidate_checkpoint_writes": 0
+  },
+  "theoretical_persistent_storage": {
+    "dense_fp32_momentum_bytes": 226492416,
+    "blocks": 884736,
+    "fp16_scale_bytes_per_tier": 1769472,
+    "ternary2_single": {
+      "packed_code_bytes": 14155776,
+      "total_bytes": 15925248,
+      "fraction_of_dense_fp32": 0.0703125,
+      "reduction_factor": 14.222222222222221
+    },
+    "int4_single": {
+      "packed_code_bytes": 28311552,
+      "total_bytes": 30081024,
+      "fraction_of_dense_fp32": 0.1328125,
+      "reduction_factor": 7.529411764705882
+    },
+    "ternary2_plus_ternary2_residual": {
+      "packed_code_bytes": 28311552,
+      "total_bytes": 31850496,
+      "fraction_of_dense_fp32": 0.140625,
+      "reduction_factor": 7.111111111111111
+    },
+    "int4_plus_ternary2_residual": {
+      "packed_code_bytes": 42467328,
+      "total_bytes": 46006272,
+      "fraction_of_dense_fp32": 0.203125,
+      "reduction_factor": 4.923076923076923
+    }
+  },
+  "decision_gate": {
+    "late_probe_requirements_for_one_candidate": {
+      "minimum_all_polar_cosine": 0.99,
+      "minimum_all_polar_positive_line_energy_recovery": 0.98,
+      "minimum_side_polar_cosine": 0.985,
+      "minimum_worst_matrix_polar_cosine": 0.95,
+      "minimum_all_prepolar_cosine": 0.99,
+      "maximum_fraction_of_dense_fp32_momentum_bytes": 0.25,
+      "all_metrics_finite": true
+    },
+    "selection": "Among passing candidates, choose minimum theoretical packed bytes, then maximum minimum late all-polar cosine. Controls that fail remain diagnostic only.",
+    "if_pass": "Authorize theory and an implementation-quality packed-code optimizer-state prototype with unit tests and an exact-config >=20% MFU gate. Do not yet authorize an LM endpoint.",
+    "if_fail": "Reject this codec family and derive a different full-support compact tangent representation before any LM endpoint.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false
+  },
+  "replay_identity": {
+    "source_commit_before_implementation": "5fb25bf",
+    "source_config_sha256": "41f3eca5569e072baaf9b54f20607b596a33312c0405d9afd4f9855b6627733f",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "registered_dense_parent_validation_ce": 5.361,
+    "maximum_dense_replay_validation_ce_gap": 0.002
+  }
+}
