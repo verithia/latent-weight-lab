@@ -1,0 +1,114 @@
+{
+  "schema_version": "mai_pair_vq_fp16_reserved_escape_capacity_sealed_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_BIT_EXACT_SCOPE_ADAPTIVE_RESERVED_ESCAPE_CAPACITY",
+  "passed": true,
+  "decision": {
+    "capacity_gate_passed": true,
+    "registered_candidates": 81,
+    "passing_candidates": 46,
+    "selected_primary": "block_kfc16_kproj32_b4096",
+    "selected_performance_control": "scope_kfc16_kproj32_b4096",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "automatic_sweep": false,
+    "next_authorized_work": "Implement only the selected block-local primary and scope-wide performance control as bit-exact GPU codec prototypes. Require randomized, special-value, checkpoint, one-step, and exact-resume identity tests plus an exact-config encode-plus-decode MFU gate of at least 20%. Do not run another loss endpoint.",
+    "reason": "Using one reserved literal code removes the one-bit exception bitmap, while independent 4-bit c_fc and 5-bit c_proj indices match the measured entropy asymmetry. The primary reaches 13.1667 bits/coordinate and the coarser control 13.3381 bits/coordinate; both decode to the frozen FP16 word-stream SHA-256 exactly."
+  },
+  "identity": {
+    "host": "PRO6",
+    "source_commit": "dd1655f8014579380a8663b29a986a867ad3e20e",
+    "plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_plan.json",
+    "plan_sha256": "7bc23674fafe100b712c555c13057e14271be517fce8a6a35f17aa58d7fd8660",
+    "checkpoint": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_ambient_momentum_0p5tpp_lr24e4/ckpt.pt",
+    "checkpoint_sha256": "ed3b5367fbde1c21aacff9973cbec70327b26b4640d02c30a7dbc1014be03655",
+    "source_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+    "elements": 56623104,
+    "raw_fp16_momentum_bytes": 113246208,
+    "exit_code": 0
+  },
+  "artifacts": {
+    "raw_result": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/audits/pro6_mai_v3_124m_pairvq_fp16_reserved_escape_capacity.json",
+      "sha256": "eef7748207fec6690573a411ca6b7f482fe8c543b85c6432ea3979935b819259",
+      "bytes": 89027,
+      "status": "finished",
+      "classification": "PASS_BIT_EXACT_RESERVED_ESCAPE_CAPACITY"
+    }
+  },
+  "primary": {
+    "name": "block_kfc16_kproj32_b4096",
+    "granularity": "block",
+    "block_words": 4096,
+    "k_fc": 16,
+    "k_proj": 32,
+    "total_bytes": 93192606,
+    "bits_per_coordinate": 13.166725158691406,
+    "headroom_below_14_bit_gate_bytes": 5897826,
+    "saved_bytes_vs_fp16": 20053602,
+    "c_fc_escape_fraction": 0.09406831529405382,
+    "c_proj_escape_fraction": 0.059410165857385705,
+    "components": {
+      "low_literal_bytes": 56623104,
+      "index_bytes": 31850496,
+      "exception_literal_bytes": 4345214,
+      "dictionary_bytes": 317952,
+      "block_offset_bytes": 55392,
+      "container_metadata_bytes": 448
+    },
+    "reference_encode_seconds": 0.3167670549592003,
+    "reference_decode_seconds": 0.30212999403011054,
+    "exact_roundtrip": true,
+    "decoded_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0"
+  },
+  "performance_control": {
+    "name": "scope_kfc16_kproj32_b4096",
+    "granularity": "scope",
+    "block_words": 4096,
+    "k_fc": 16,
+    "k_proj": 32,
+    "total_bytes": 94405261,
+    "bits_per_coordinate": 13.338055222122758,
+    "headroom_below_14_bit_gate_bytes": 4685171,
+    "saved_bytes_vs_fp16": 18840947,
+    "c_fc_escape_fraction": 0.10301233220983434,
+    "c_proj_escape_fraction": 0.10452750877097801,
+    "components": {
+      "low_literal_bytes": 56623104,
+      "index_bytes": 31850496,
+      "exception_literal_bytes": 5875775,
+      "dictionary_bytes": 46,
+      "block_offset_bytes": 55392,
+      "container_metadata_bytes": 448
+    },
+    "reference_encode_seconds": 0.24097886704839766,
+    "reference_decode_seconds": 0.32676780608017,
+    "exact_roundtrip": true,
+    "decoded_word_stream_sha256": "407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0"
+  },
+  "storage": {
+    "common_compact_forward_and_feedback_bytes": 157427136,
+    "primary_total_training_bytes": 250619742,
+    "primary_training_reduction_factor": 1.8074586957319587,
+    "control_total_training_bytes": 251832397,
+    "control_training_reduction_factor": 1.798755193518648,
+    "working_fp16_training_reduction_factor": 1.6735479944415952,
+    "inference_reduction_factor_unchanged": 3.197
+  },
+  "loss_implication": {
+    "codec_additional_cross_entropy_gap": 0.0,
+    "reason": "Every FP16 momentum word is reconstructed bit-exactly before Muon consumes it; the optimizer input and therefore the numerical training trajectory are unchanged if the implementation identity tests pass.",
+    "retained_endpoint_validation_cross_entropy": 5.368512153625488,
+    "matched_parent_validation_cross_entropy": 5.361,
+    "retained_gap": 0.007512153625488281,
+    "retained_compute_equivalent_penalty": 1.020506,
+    "single_seed_caveat": true
+  },
+  "interpretation": {
+    "information_result": "The working FP16 ambient Muon history is exactly representable below 14 bits/coordinate without a serial entropy stream.",
+    "why_primary_is_smaller": "Block-local high-byte tables reduce c_proj escape literals enough to offset their dictionary overhead.",
+    "why_control_is_required": "The scope-wide table is only 1.30% larger than the primary and removes per-block histogram/table construction; it is the causal performance control for whether local adaptation is worth its runtime cost.",
+    "remaining_unknown": "The capacity audit does not establish GPU encode/decode cost, transient materialization, table-construction cost, or exact optimizer-state resume behavior."
+  }
+}

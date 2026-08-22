@@ -1,0 +1,72 @@
+{
+  "schema_version": "mai_124m_pair_vq_fp16_reserved_escape_cuda_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_unexecuted",
+  "scientific_question": "Can the two capacity-passing reserved-escape layouts preserve the loss-closing FP16 Muon history bit-exactly with at least 20% exact-config MFU?",
+  "causal_authorization": {
+    "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_result.json",
+    "parent_result_sha256": "d341bf7bf88f09b4c137caf408df09d0490fbbff6baa7dd41c626a534ac076c8",
+    "parent_classification": "PASS_BIT_EXACT_SCOPE_ADAPTIVE_RESERVED_ESCAPE_CAPACITY",
+    "primary": "block_kfc16_kproj32_b4096",
+    "performance_control": "scope_kfc16_kproj32_b4096",
+    "automatic_loss_endpoint": false
+  },
+  "implementation_contract": {
+    "source_dtype": "IEEE binary16 bit pattern",
+    "common_low_byte": "stored verbatim",
+    "c_fc_index_bits": 4,
+    "c_proj_index_bits": 5,
+    "reserved_escape": "the all-ones fixed-width code means that the exact high byte is read from the block exception stream",
+    "primary_dictionary": "K-1 most frequent high bytes per 4096-word block, with count ties broken by ascending uint8",
+    "control_dictionary": "K-1 most frequent high bytes per c_fc/c_proj scope, with count ties broken by ascending uint8",
+    "state_ownership": "The checkpoint and live optimizer state persist only packed low bytes, packed codes, dictionaries, exception literals, offsets, and descriptors; a second dense FP16 or FP32 momentum owner is forbidden.",
+    "causality": "At each update the encoded state is decoded exactly, updated in FP16 with the already sealed owner recurrence, and the new exact FP16 word field is encoded with tables derived only from that current field.",
+    "transient_policy": "A transient decoded/new FP16 field is allowed only during the optimizer update and must be released before the next forward pass. Peak allocated memory is measured.",
+    "loss_endpoint": "forbidden because a bit-exact state transition makes it scientifically redundant"
+  },
+  "phases": [
+    {
+      "name": "standalone_checkpoint_codec",
+      "candidates": ["scope_kfc16_kproj32_b4096", "block_kfc16_kproj32_b4096"],
+      "requirements": [
+        "random binary16 words and all special values round-trip bit-exactly",
+        "the frozen checkpoint reconstructs word-stream SHA-256 407c142e7e4098d3c3972d6b3b772fa7f913e0a057eec84181821ab07b1ea3e0",
+        "observed persistent momentum bytes remain at or below 99090432",
+        "encode plus decode wall time for all 24 MLP matrices is at most 250 ms on PRO6 GPU0 after warmup",
+        "no CPU entropy codec or host transfer occurs in the timed region"
+      ]
+    },
+    {
+      "name": "optimizer_identity_and_resume",
+      "entry_gate": "standalone candidate passes every phase-one requirement",
+      "requirements": [
+        "one-step parameters, momentum words, polar requests, and loss equal the FP16 ambient owner bit-for-bit",
+        "save/load produces identical packed state and identical next-step result",
+        "nine consecutive optimizer updates preserve exact identity",
+        "there is no hidden dense persistent momentum owner"
+      ]
+    },
+    {
+      "name": "exact_config_mfu_gate",
+      "entry_gate": "optimizer identity and resume pass",
+      "configuration": "the sealed 124M Pair-VQ FP16-ambient endpoint configuration with only the state representation changed",
+      "requirements": [
+        "at least 20% measured MFU",
+        "at least 9 timed training updates after warmup",
+        "report tokens/s, iteration time, optimizer fraction, GPU utilization, peak allocation, exact persistent bytes, and transient decoded bytes"
+      ]
+    }
+  ],
+  "selection_rule": {
+    "if_both_pass": "Choose the higher-MFU implementation; choose the smaller block-local primary only if MFU differs by less than one absolute point.",
+    "if_only_one_passes": "Select the passing candidate.",
+    "if_neither_passes": "Reject the registered GPU table-code family and retain the sealed FP16 ambient-momentum owner as the measured training-state floor.",
+    "post_selection": "Seal implementation and systems results. Do not run a language-model loss endpoint, horizon transfer, scale-up, or sweep."
+  },
+  "execution_policy": {
+    "code_transfer": "commit locally and pull the exact Git commit on PRO6; ad-hoc source copying is forbidden",
+    "performance_monitoring": "foreground-poll standalone and nine-step gates expected below five minutes; if any phase exceeds five minutes, attach a terminal/error-only @Codex watchdog immediately",
+    "resource": "PRO6 GPU0 only after a pinned-driver NVML health check and idle-card verification",
+    "minimum_mfu": 0.20
+  }
+}
