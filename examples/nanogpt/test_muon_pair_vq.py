@@ -1839,6 +1839,20 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits": 7,
         "block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions": (),
     }
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=1,
+        n_head=2,
+        n_embd=8,
+        bias=False,
+        block_fht=True,
+        block_fht_targets=(),
+        **kwargs,
+    )
+    model = GPT(config)
+    assert model.transformer.h[0].mlp.c_proj.fast_residual is True
+    assert model.transformer.h[0].mlp.c_proj.feedback_codec == "polar32x8"
 
 
 def test_gpt_routes_fp16_ambient_pair_vq_momentum_and_accounts_state() -> None:
@@ -1899,17 +1913,3 @@ def test_gpt_routes_fp16_ambient_pair_vq_momentum_and_accounts_state() -> None:
         assert "ambient_momentum" in state
         assert state["ambient_momentum"].dtype == torch.float16
         assert "compact_momentum" not in state
-    config = GPTConfig(
-        block_size=8,
-        vocab_size=32,
-        n_layer=1,
-        n_head=2,
-        n_embd=8,
-        bias=False,
-        block_fht=True,
-        block_fht_targets=(),
-        **kwargs,
-    )
-    model = GPT(config)
-    assert model.transformer.h[0].mlp.c_proj.fast_residual is True
-    assert model.transformer.h[0].mlp.c_proj.feedback_codec == "polar32x8"
