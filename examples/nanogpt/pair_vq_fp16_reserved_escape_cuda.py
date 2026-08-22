@@ -1,0 +1,310 @@
+"""Bit-exact GPU reserved-escape storage for Pair-VQ FP16 momentum.
+
+This module is deliberately a standalone codec first.  It does not change the
+optimizer until checkpoint, transition, and performance gates have passed.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+import torch
+
+try:
+    import triton
+    import triton.language as tl
+except ImportError:  # pragma: no cover - exercised only on CPU-only installs
+    triton = None
+    tl = None
+
+
+if triton is not None:
+
+    @triton.jit
+    def _byte_histogram_kernel(
+        raw_ptr,
+        counts_ptr,
+        n_elements,
+        block_words: tl.constexpr,
+        TILE: tl.constexpr,
+    ):
+        offsets = tl.program_id(0) * TILE + tl.arange(0, TILE)
+        valid = offsets < n_elements
+        high = tl.load(raw_ptr + 2 * offsets + 1, mask=valid, other=0).to(tl.int32)
+        regions = offsets // block_words
+        tl.atomic_add(counts_ptr + regions * 256 + high, 1, mask=valid)
+
+    @triton.jit
+    def _pack_codes_kernel(
+        raw_ptr,
+        inverse_ptr,
+        packed_ptr,
+        escape_mask_ptr,
+        n_elements,
+        block_words: tl.constexpr,
+        code_bits: tl.constexpr,
+        dictionary_size: tl.constexpr,
+        block_local: tl.constexpr,
+        GROUP_TILE: tl.constexpr,
+    ):
+        groups = tl.program_id(0) * GROUP_TILE + tl.arange(0, GROUP_TILE)
+        packed = tl.zeros((GROUP_TILE,), dtype=tl.uint64)
+        escape_code: tl.constexpr = dictionary_size - 1
+        for lane in range(8):
+            words = groups * 8 + lane
+            valid = words < n_elements
+            high = tl.load(raw_ptr + 2 * words + 1, mask=valid, other=0).to(tl.int32)
+            regions = words // block_words if block_local else 0
+            codes = tl.load(
+                inverse_ptr + regions * 256 + high,
+                mask=valid,
+                other=escape_code,
+            ).to(tl.uint64)
+            packed |= codes << (lane * code_bits)
+            tl.store(
+                escape_mask_ptr + words,
+                (codes == escape_code).to(tl.uint8),
+                mask=valid,
+            )
+        packed_bytes = (n_elements * code_bits + 7) // 8
+        for byte_index in range(code_bits):
+            output_offsets = groups * code_bits + byte_index
+            tl.store(
+                packed_ptr + output_offsets,
+                ((packed >> (8 * byte_index)) & 255).to(tl.uint8),
+                mask=output_offsets < packed_bytes,
+            )
+
+    @triton.jit
+    def _unpack_codes_kernel(
+        packed_ptr,
+        tables_ptr,
+        high_ptr,
+        escape_mask_ptr,
+        n_elements,
+        block_words: tl.constexpr,
+        code_bits: tl.constexpr,
+        dictionary_size: tl.constexpr,
+        block_local: tl.constexpr,
+        GROUP_TILE: tl.constexpr,
+    ):
+        groups = tl.program_id(0) * GROUP_TILE + tl.arange(0, GROUP_TILE)
+        packed_bytes = (n_elements * code_bits + 7) // 8
+        packed = tl.zeros((GROUP_TILE,), dtype=tl.uint64)
+        for byte_index in range(code_bits):
+            input_offsets = groups * code_bits + byte_index
+            byte = tl.load(
+                packed_ptr + input_offsets,
+                mask=input_offsets < packed_bytes,
+                other=0,
+            ).to(tl.uint64)
+            packed |= byte << (8 * byte_index)
+        escape_code: tl.constexpr = dictionary_size - 1
+        code_mask: tl.constexpr = dictionary_size - 1
+        for lane in range(8):
+            words = groups * 8 + lane
+            valid = words < n_elements
+            codes = ((packed >> (lane * code_bits)) & code_mask).to(tl.int32)
+            escaped = codes == escape_code
+            regions = words // block_words if block_local else 0
+            safe_codes = tl.where(escaped, 0, codes)
+            high = tl.load(
+                tables_ptr + regions * (dictionary_size - 1) + safe_codes,
+                mask=valid,
+                other=0,
+            )
+            tl.store(high_ptr + words, high, mask=valid)
+            tl.store(
+                escape_mask_ptr + words,
+                escaped.to(tl.uint8),
+                mask=valid,
+            )
+
+
+@dataclass
+class ReservedEscapeState:
+    """Persistent tensors for one c_fc or c_proj scope."""
+
+    low_bytes: torch.Tensor
+    packed_codes: torch.Tensor
+    exception_high_bytes: torch.Tensor
+    tables: torch.Tensor
+    block_offsets: torch.Tensor
+    n_elements: int
+    block_words: int
+    dictionary_size: int
+    block_local: bool
+
+    @property
+    def code_bits(self) -> int:
+        return self.dictionary_size.bit_length() - 1
+
+    @property
+    def persistent_tensor_bytes(self) -> int:
+        tensors = (
+            self.low_bytes,
+            self.packed_codes,
+            self.exception_high_bytes,
+            self.tables,
+            self.block_offsets,
+        )
+        return sum(tensor.numel() * tensor.element_size() for tensor in tensors)
+
+
+def _require_cuda() -> None:
+    if triton is None:
+        raise RuntimeError("Triton is required for the GPU reserved-escape codec")
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required for the GPU reserved-escape codec")
+
+
+def _validate_input(values: torch.Tensor, *, block_words: int) -> torch.Tensor:
+    _require_cuda()
+    if values.device.type != "cuda" or values.dtype != torch.float16:
+        raise ValueError("values must be a CUDA float16 tensor")
+    flat = values.detach().contiguous().reshape(-1)
+    if flat.numel() == 0 or flat.numel() % block_words:
+        raise ValueError("the registered codec requires complete decode blocks")
+    if block_words % 256:
+        raise ValueError("block_words must be divisible by 256")
+    return flat
+
+
+def _dictionary_size(scope: str) -> int:
+    if scope == "c_fc":
+        return 16
+    if scope == "c_proj":
+        return 32
+    raise ValueError(f"unknown MLP scope {scope!r}")
+
+
+@torch.no_grad()
+def encode_reserved_escape(
+    values: torch.Tensor,
+    *,
+    scope: str,
+    granularity: str,
+    block_words: int = 4096,
+) -> ReservedEscapeState:
+    """Encode FP16 words without changing any bit, entirely on the GPU."""
+
+    flat = _validate_input(values, block_words=block_words)
+    if granularity not in {"scope", "block"}:
+        raise ValueError("granularity must be 'scope' or 'block'")
+    dictionary_size = _dictionary_size(scope)
+    code_bits = dictionary_size.bit_length() - 1
+    n_elements = flat.numel()
+    n_blocks = n_elements // block_words
+    raw = flat.view(torch.uint8)
+
+    block_counts = torch.zeros(
+        (n_blocks, 256), device=flat.device, dtype=torch.int32
+    )
+    histogram_grid = (triton.cdiv(n_elements, 256),)
+    _byte_histogram_kernel[histogram_grid](
+        raw,
+        block_counts,
+        n_elements,
+        block_words=block_words,
+        TILE=256,
+    )
+    counts = (
+        block_counts
+        if granularity == "block"
+        else block_counts.sum(dim=0, dtype=torch.int32, keepdim=True)
+    )
+    symbols = torch.arange(256, device=flat.device, dtype=torch.int64)
+    scores = counts.to(torch.int64) * 512 + (255 - symbols)
+    top = torch.topk(
+        scores,
+        k=dictionary_size - 1,
+        dim=1,
+        largest=True,
+        sorted=True,
+    ).indices
+    tables = top.to(torch.uint8).contiguous()
+    inverse = torch.full(
+        (tables.shape[0], 256),
+        dictionary_size - 1,
+        device=flat.device,
+        dtype=torch.uint8,
+    )
+    code_values = torch.arange(
+        dictionary_size - 1, device=flat.device, dtype=torch.uint8
+    ).expand_as(tables)
+    inverse.scatter_(1, top, code_values)
+
+    low_bytes = raw[0::2].contiguous()
+    packed_codes = torch.empty(
+        (n_elements * code_bits + 7) // 8,
+        device=flat.device,
+        dtype=torch.uint8,
+    )
+    escape_mask = torch.empty(n_elements, device=flat.device, dtype=torch.uint8)
+    group_count = triton.cdiv(n_elements, 8)
+    pack_grid = (triton.cdiv(group_count, 256),)
+    _pack_codes_kernel[pack_grid](
+        raw,
+        inverse,
+        packed_codes,
+        escape_mask,
+        n_elements,
+        block_words=block_words,
+        code_bits=code_bits,
+        dictionary_size=dictionary_size,
+        block_local=granularity == "block",
+        GROUP_TILE=256,
+    )
+    high = raw[1::2]
+    escaped = escape_mask.bool()
+    exception_high_bytes = high[escaped].contiguous()
+    exception_counts = escape_mask.reshape(n_blocks, block_words).sum(
+        dim=1, dtype=torch.int32
+    )
+    block_offsets = torch.empty(
+        n_blocks + 1, device=flat.device, dtype=torch.int32
+    )
+    block_offsets[0] = 0
+    torch.cumsum(exception_counts, dim=0, dtype=torch.int32, out=block_offsets[1:])
+    return ReservedEscapeState(
+        low_bytes=low_bytes,
+        packed_codes=packed_codes,
+        exception_high_bytes=exception_high_bytes,
+        tables=tables,
+        block_offsets=block_offsets,
+        n_elements=n_elements,
+        block_words=block_words,
+        dictionary_size=dictionary_size,
+        block_local=granularity == "block",
+    )
+
+
+@torch.no_grad()
+def decode_reserved_escape(state: ReservedEscapeState) -> torch.Tensor:
+    """Decode one scope into a flat FP16 tensor with identical word bits."""
+
+    _require_cuda()
+    n_elements = state.n_elements
+    high = torch.empty(n_elements, device=state.low_bytes.device, dtype=torch.uint8)
+    escape_mask = torch.empty_like(high)
+    group_count = triton.cdiv(n_elements, 8)
+    unpack_grid = (triton.cdiv(group_count, 256),)
+    _unpack_codes_kernel[unpack_grid](
+        state.packed_codes,
+        state.tables,
+        high,
+        escape_mask,
+        n_elements,
+        block_words=state.block_words,
+        code_bits=state.code_bits,
+        dictionary_size=state.dictionary_size,
+        block_local=state.block_local,
+        GROUP_TILE=256,
+    )
+    escaped = escape_mask.bool()
+    high[escaped] = state.exception_high_bytes
+    raw = torch.empty(n_elements * 2, device=high.device, dtype=torch.uint8)
+    raw[0::2].copy_(state.low_bytes)
+    raw[1::2].copy_(high)
+    return raw.view(torch.float16)
+
