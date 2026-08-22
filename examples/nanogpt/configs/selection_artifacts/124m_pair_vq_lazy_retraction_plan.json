@@ -1,0 +1,76 @@
+{
+  "schema": "mai_pair_vq_lazy_retraction_plan_v1",
+  "registered_at": "2026-08-22",
+  "question": "Can the existing nonpersistent materialized MLP weight carry native ambient Muon motion between the already-defined Pair-VQ code-refresh boundaries, reducing polar-amplified chart perturbations without adding persistent matrix state?",
+  "causal_evidence": {
+    "pair_vq_5tpp_full_mlp_gap_ce": 0.0683,
+    "same_momentum_polar_error_amplification_minimum_late": 3.98217,
+    "codec_neighbor_stability_classification": "CODEC_NEIGHBOR_STABILITY_NOT_PRIMARY",
+    "spectral_damping_classification": "NORM_PRESERVING_SPECTRAL_DAMPING_REJECTED",
+    "spectral_damping_result_sha256": "efd877c310b5973f61a017a57d961cd6109b53905cb3479a3b425b9335ea1997",
+    "key_boundary": "Changing the polar map either leaves the compact error unresolved or changes native Muon too much; the next intervention must reduce how often the compact chart perturbs the native request field."
+  },
+  "candidate": {
+    "name": "eight-step ambient carry with compact-boundary retraction",
+    "retraction_interval_optimizer_steps": 8,
+    "why_eight": "Eight is the existing frozen Pair-VQ code-refresh interval; this introduces no new searched time scale.",
+    "forced_compact_boundary_steps_5tpp": [594, 1188, 1782, 2373],
+    "free_step": "Apply the accepted FP16-momentum five-step Muon update directly to the already-materialized nonpersistent weight and do not refit Pair-VQ codes, codebooks, or feedback.",
+    "boundary_step": "Project the current ambient request into the existing Pair-VQ base, refit the existing compact forward-visible feedback, and refresh code identities.",
+    "checkpoint_rule": "A registered checkpoint, fixed evaluation, or terminal result may be written only immediately after a compact-boundary retraction.",
+    "optimizer_change": "none between boundaries; native five-step Muon, momentum, LR schedule, and weight decay are unchanged",
+    "new_persistent_matrix_state": false,
+    "new_inference_state": false,
+    "new_forward_or_backward_flops": 0,
+    "expected_projection_flops": "lower than per-step Pair-VQ because projection is performed approximately once per eight optimizer steps plus fixed evaluation boundaries"
+  },
+  "honest_scope": {
+    "strict_mapping_network_training": false,
+    "reason": "Between retractions the existing nonpersistent materialized target weight is an ambient trainable carry. The method preserves compact checkpoint and inference state and adds no VRAM matrix, but it is projected ambient optimization rather than generation from compact coordinates on every forward pass.",
+    "required_reporting": [
+      "compact checkpoint and inference bytes",
+      "materialized ambient training bytes",
+      "projection frequency",
+      "tokens_per_second",
+      "MFU",
+      "validation CE gap",
+      "fixed-model compute-equivalent penalty"
+    ]
+  },
+  "implementation_gate": {
+    "required_tests": [
+      "steps 1-7 preserve native requested weight exactly and leave compact codes/feedback unchanged",
+      "step 8 retracts and refreshes codes",
+      "forced evaluation boundary retracts regardless of modulo phase",
+      "checkpoint construction rejects a nonboundary state",
+      "boundary save and resume reconstruct the exact materialized compact weight and optimizer state",
+      "legacy interval-1 behavior is unchanged"
+    ],
+    "exact_config_mfu_minimum": 0.2,
+    "finite_timed_updates_required": 8,
+    "hidden_dense_master_or_optimizer_state_allowed": false
+  },
+  "scientific_sequence": {
+    "first": {
+      "model": "124M QK-only attention plus full Pair-VQ MLP",
+      "horizon": "0.5TPP / 238 updates",
+      "terminal_validation_ce_maximum": 5.411,
+      "purpose": "implementation and short-horizon non-regression, not causal closure"
+    },
+    "second_if_first_passes": {
+      "model": "same 124M QK-only attention plus full Pair-VQ MLP",
+      "horizon": "5TPP / 2373 updates",
+      "matched_dense_mlp_parent_validation_ce": 3.4858,
+      "terminal_validation_ce_maximum": 3.4958,
+      "fixed_model_compute_equivalent_penalty_maximum": 1.1,
+      "purpose": "test the observed late-horizon path-instability failure directly"
+    }
+  },
+  "failure_rules": [
+    "If the exact state/checkpoint boundary cannot be enforced without serializing ambient carry, reject the method before training.",
+    "If exact-config MFU is below 20%, optimize or reject before training.",
+    "If the 0.5TPP non-regression gate fails, do not run 5TPP.",
+    "If 5TPP fails, reject retraction frequency as sufficient; do not sweep interval, bit width, BlockFHT seed, learning rate, model size, or horizon."
+  ],
+  "success_scope": "A 5TPP pass authorizes composition with compact attention V/output at 124M only after a separate exact-config gate; it does not authorize a larger model."
+}
