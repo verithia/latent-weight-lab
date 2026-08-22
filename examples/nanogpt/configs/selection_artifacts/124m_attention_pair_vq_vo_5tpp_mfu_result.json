@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_attention_pair_vq_vo_5tpp_mfu_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_EXACT_CONFIG_MFU_GATE",
+  "passed": true,
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_5tpp_plan.json",
+    "sha256": "e2f3bf339e59960b67c57fde2450c5f80714985bbf878089c07f6113e82eb28c"
+  },
+  "config": {
+    "path": "examples/nanogpt/configs/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_5tpp_lr24e4.json",
+    "sha256": "26407d674e4a326822ffa83ad1a0f5a25c78b649423b58e53a7d6568b0c7a209"
+  },
+  "execution": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "58e1debf073dacae9d2f07beaeaab3c6795a5728",
+    "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_5tpp_lr24e4_mfu.json",
+    "certificate_sha256": "bf7d21e8dca1cee1c33134cfcb333c570d91434e5e40bb5b73d4932cf17c7696",
+    "log": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_5tpp_lr24e4_mfu.log",
+    "log_sha256": "c803672813ab27b81cfe3af802194d43b8e4ac8cd491f960fa1cee999335f4da",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "measurement": {
+    "requested_warmup_updates": 1,
+    "timed_updates": 8,
+    "tokens_per_second": 140131.38875,
+    "iteration_milliseconds": 1870.965,
+    "model_tflops": 104.6578877605901,
+    "empirical_bf16_gemm_peak_tflops": 417.0349584796697,
+    "mfu_fraction": 0.2509571095481487,
+    "peak_mib": 31765.42,
+    "timing_breakdown_ms": {
+      "forward_backward": 1185.355,
+      "optimizer": 670.48375,
+      "other": 15.12625
+    }
+  },
+  "checks": {
+    "minimum_mfu_fraction": 0.2,
+    "mfu_passed": true,
+    "native_blockfht_extension_loaded": true,
+    "all_13_logged_losses_finite": true,
+    "persistent_training_bytes_expected": 319996032,
+    "persistent_training_bytes_observed": 319996032,
+    "persistent_training_bytes_passed": true
+  },
+  "authorization": {
+    "one_fresh_124m_5tpp_scientific_run": true,
+    "automatic_rerun": false,
+    "automatic_20tpp_training": false,
+    "automatic_model_size_scale_up": false
+  }
+}
