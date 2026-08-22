@@ -1841,6 +1841,8 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
     )
     kwargs = pair_vq_model_kwargs(namespace)
     assert kwargs == {
+        "block_fht_attn_pair_vq": False,
+        "block_fht_attn_pair_vq_seed": 20261121,
         "block_fht_mlp_pair_vq": True,
         "block_fht_mlp_pair_vq_seed": 20261020,
         "block_fht_mlp_pair_vq_neighbor_candidates": 16,
@@ -1883,6 +1885,86 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
     model = GPT(config)
     assert model.transformer.h[0].mlp.c_proj.fast_residual is True
     assert model.transformer.h[0].mlp.c_proj.feedback_codec == "polar32x8"
+
+
+def test_gpt_routes_attention_value_and_output_through_pair_vq() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=("attn.c_attn.qk_headwise",),
+            block_fht_output_gain_targets=("attn.c_attn.qk_headwise",),
+            block_fht_attn_pair_vq=True,
+            block_fht_attn_pair_vq_seed=20261121,
+            block_fht_mlp_pair_vq=True,
+            block_fht_mlp_pair_vq_error_feedback=True,
+            block_fht_mlp_pair_vq_forward_visible_feedback=True,
+            block_fht_mlp_pair_vq_fp16_ambient_momentum=True,
+            block_fht_mlp_pair_vq_cproj_fast_residual=True,
+        )
+    )
+    block = model.transformer.h[0]
+    modules = (
+        block.attn.c_attn_v,
+        block.attn.c_proj,
+        block.mlp.c_fc,
+        block.mlp.c_proj,
+    )
+    assert all(isinstance(module, MuonPairVQLinear) for module in modules)
+    assert block.attn.c_attn_v.stages == 2
+    assert block.attn.c_proj.stages == 1
+    assert block.attn.c_attn_v.fast_residual is True
+    assert block.attn.c_proj.fast_residual is True
+    assert block.attn.c_attn_v.reserved_escape_scope == "c_fc"
+    assert block.attn.c_proj.reserved_escape_scope == "c_proj"
+    assert all("weight" not in module.state_dict() for module in modules)
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=1,
+    )
+    pair_optimizers = [
+        item for item in optimizer.optimizers if isinstance(item, MuonPairVQ)
+    ]
+    assert len(pair_optimizers) == 1
+    assert len(pair_optimizers[0].param_groups[0]["params"]) == 4
+    tokens = torch.randint(0, 32, (2, 8))
+    _logits, loss = model(tokens, tokens)
+    assert loss is not None and torch.isfinite(loss)
+    loss.backward()
+    optimizer.step()
+    assert all(int(module.optimizer_step) == 1 for module in modules)
+
+
+def test_attention_pair_vq_rejects_competing_v_or_output_representation() -> None:
+    for target in ("attn.c_attn.v", "attn.c_proj"):
+        try:
+            GPT(
+                GPTConfig(
+                    block_size=8,
+                    vocab_size=32,
+                    n_layer=1,
+                    n_head=2,
+                    n_embd=8,
+                    bias=False,
+                    block_fht=True,
+                    block_fht_targets=("attn.c_attn.qk_headwise", target),
+                    block_fht_attn_pair_vq=True,
+                )
+            )
+        except ValueError as exc:
+            assert "Pair-VQ" in str(exc)
+        else:
+            raise AssertionError(f"expected conflict rejection for {target}")
 
 
 def test_gpt_routes_fp16_ambient_pair_vq_momentum_and_accounts_state() -> None:

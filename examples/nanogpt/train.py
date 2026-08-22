@@ -1603,6 +1603,16 @@ def parse_args() -> argparse.Namespace:
         default=False,
     )
     parser.add_argument(
+        "--block-fht-attn-pair-vq",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+    )
+    parser.add_argument(
+        "--block-fht-attn-pair-vq-seed",
+        type=int,
+        default=20261121,
+    )
+    parser.add_argument(
         "--block-fht-mlp-pair-vq-seed",
         type=int,
         default=20261020,
@@ -3422,6 +3432,12 @@ def pair_vq_model_kwargs(
 ) -> dict[str, bool | int]:
     """Keep every pair-VQ config field on one tested model boundary."""
     return {
+        "block_fht_attn_pair_vq": bool(
+            getattr(namespace, "block_fht_attn_pair_vq", False)
+        ),
+        "block_fht_attn_pair_vq_seed": int(
+            getattr(namespace, "block_fht_attn_pair_vq_seed", 20261121)
+        ),
         "block_fht_mlp_pair_vq": bool(namespace.block_fht_mlp_pair_vq),
         "block_fht_mlp_pair_vq_seed": int(
             namespace.block_fht_mlp_pair_vq_seed

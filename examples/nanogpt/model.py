@@ -183,6 +183,8 @@ class GPTConfig:
     block_fht_attn_v_int8_lattice_block_size: int = 4096
     block_fht_attn_v_int8_lattice_seed: int = 161804
     block_fht_attn_v_int8_lattice_error_feedback: bool = False
+    block_fht_attn_pair_vq: bool = False
+    block_fht_attn_pair_vq_seed: int = 20261121
     block_fht_mlp_int8_lattice_targets: tuple[str, ...] = ()
     block_fht_mlp_int8_lattice_block_size: int = 4096
     block_fht_mlp_int8_lattice_seed: int = 314159
@@ -1342,6 +1344,40 @@ class CausalSelfAttention(nn.Module):
                     "attn.c_attn.v from BlockFHT targets"
                 )
 
+        attention_pair_vq = bool(config.block_fht_attn_pair_vq)
+        if attention_pair_vq:
+            if structured == 0:
+                raise ValueError(
+                    "attention Pair-VQ requires a split or structured QKV family"
+                )
+            if (
+                config.block_fht_attn_v_int8_lattice
+                or config.block_fht_attn_cproj_int8_lattice
+            ):
+                raise ValueError(
+                    "attention Pair-VQ cannot be combined with attention int8 lattices"
+                )
+            conflicting_targets = {
+                "attn.c_attn.v",
+                "attn.c_proj",
+            } & set(config.block_fht_targets)
+            if conflicting_targets:
+                raise ValueError(
+                    "attention Pair-VQ is the complete V/output-projection "
+                    "representation; remove: "
+                    + ", ".join(sorted(conflicting_targets))
+                )
+            conflicting_muon_targets = {
+                "attn.c_attn.v",
+                "attn.c_proj",
+            } & attention_muon_targets
+            if conflicting_muon_targets:
+                raise ValueError(
+                    "attention Pair-VQ cannot be combined with attention "
+                    "Muon-matched Givens for: "
+                    + ", ".join(sorted(conflicting_muon_targets))
+                )
+
         def attention_linear(
             in_features: int,
             out_features: int,
@@ -1349,6 +1385,102 @@ class CausalSelfAttention(nn.Module):
             target_name: str,
             seed_offset: int,
         ) -> nn.Module:
+            if attention_pair_vq and target_name in {
+                "attn.c_attn.v",
+                "attn.c_proj",
+            }:
+                is_value = target_name == "attn.c_attn.v"
+                return MuonPairVQLinear(
+                    in_features,
+                    out_features,
+                    bias=bias,
+                    stages=2 if is_value else 1,
+                    base_seed=(
+                        int(config.block_fht_attn_pair_vq_seed)
+                        + layer_id * 8192
+                        + (0 if is_value else 4096)
+                    ),
+                    weight_std=(
+                        0.02
+                        if is_value
+                        else 0.02 / math.sqrt(2 * config.n_layer)
+                    ),
+                    layer_id=layer_id,
+                    fast_residual=True,
+                    stochastic_fast_retraction=bool(
+                        config.block_fht_mlp_pair_vq_stochastic_fast_retraction
+                    ),
+                    stochastic_fast_fht_block_size=int(
+                        config.block_fht_mlp_pair_vq_stochastic_fast_fht_block_size
+                    ),
+                    stochastic_fast_uniform_levels=bool(
+                        config.block_fht_mlp_pair_vq_stochastic_fast_uniform_levels
+                    ),
+                    stochastic_fast_block_local_levels=bool(
+                        config.block_fht_mlp_pair_vq_stochastic_fast_block_local_levels
+                    ),
+                    error_feedback=bool(
+                        config.block_fht_mlp_pair_vq_error_feedback
+                    ),
+                    forward_visible_feedback=bool(
+                        config.block_fht_mlp_pair_vq_forward_visible_feedback
+                    ),
+                    fp16_ambient_momentum=bool(
+                        config.block_fht_mlp_pair_vq_fp16_ambient_momentum
+                    ),
+                    fp16_reserved_escape_granularity=str(
+                        config.block_fht_mlp_pair_vq_fp16_reserved_escape_granularity
+                    ),
+                    reserved_escape_scope="c_fc" if is_value else "c_proj",
+                    fp16_ambient_reference_probe_steps=tuple(
+                        config.block_fht_mlp_pair_vq_fp16_ambient_reference_probe_steps
+                    ),
+                    feedback_codec=str(
+                        config.block_fht_mlp_pair_vq_feedback_codec
+                    ),
+                    feedback_output_group_size=int(
+                        config.block_fht_mlp_pair_vq_feedback_output_group_size
+                    ),
+                    feedback_residual_probe_steps=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_residual_probe_steps
+                    ),
+                    feedback_residual_probe_layers=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_residual_probe_layers
+                    ),
+                    feedback_residual_probe_lloyd_iterations=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_residual_probe_lloyd_iterations
+                    ),
+                    feedback_transform_probe_block_sizes=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_transform_probe_block_sizes
+                    ),
+                    feedback_lattice_probe_block_sizes=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_lattice_probe_block_sizes
+                    ),
+                    feedback_lattice_probe_coordinate_bits=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_lattice_probe_coordinate_bits
+                    ),
+                    feedback_axis_adaptation_probe_block_size=int(
+                        config.block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_block_size
+                    ),
+                    feedback_axis_adaptation_probe_coordinate_bits=int(
+                        config.block_fht_mlp_pair_vq_feedback_axis_adaptation_probe_coordinate_bits
+                    ),
+                    feedback_fractional_probe_block_size=int(
+                        config.block_fht_mlp_pair_vq_feedback_fractional_probe_block_size
+                    ),
+                    feedback_fractional_probe_base_coordinate_bits=int(
+                        config.block_fht_mlp_pair_vq_feedback_fractional_probe_base_coordinate_bits
+                    ),
+                    feedback_fractional_probe_refinement_fractions=tuple(
+                        config.block_fht_mlp_pair_vq_feedback_fractional_probe_refinement_fractions
+                    ),
+                    neighbor_candidates=int(
+                        config.block_fht_mlp_pair_vq_neighbor_candidates
+                    ),
+                    code_refresh_interval=int(
+                        config.block_fht_mlp_pair_vq_code_refresh_interval
+                    ),
+                )
             if (
                 target_name == "attn.c_attn.v"
                 and config.block_fht_attn_v_int8_lattice

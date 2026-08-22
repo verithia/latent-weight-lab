@@ -1,0 +1,67 @@
+{
+  "schema_version": "mai_124m_attention_pair_vq_vo_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_implementation",
+  "scientific_parent": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_two_seed_qualification_result.json",
+  "causal_question": "Can the direction-complete compact Pair-VQ representation that closed the full MLP also replace attention V and output projection without reopening the matched compact-parent loss gap?",
+  "theory": {
+    "functional_object": "For head h, the value-to-residual write depends on W_O[:, I_h] W_V[I_h, :] after attention mixing, not on either matrix in isolation.",
+    "gauge": "W_V,h -> G_h W_V,h and W_O,h -> W_O,h G_h^{-1} leave the head-local linear value/output composition unchanged for invertible G_h.",
+    "prior_failure": "Fixed BlockFHT charts missed useful ambient directions; direct int8 retraction discarded sub-quantum Muon motion and drifted late.",
+    "prior_success": "Full-dimensional int8 plus FP16 temporal error feedback closed V/output-projection quality, proving that support plus trajectory memory is sufficient but not compact enough. Pair-VQ plus forward-visible feedback and exact compact FP16 momentum then closed the full MLP across two matched seeds.",
+    "candidate_mechanism": "Use Pair-VQ as the only persistent matrix state for attention V and output projection, with the same forward-visible compact feedback and exact adaptive reserved-escape FP16 ambient momentum used by the qualified MLP. Q/K remains the accepted headwise BlockFHT mapper.",
+    "why_this_is_not_another_fixed_basis": "Pair-VQ codes and codebooks are refreshed from the requested ambient Muon trajectory and therefore do not restrict the weight to a fixed pseudo-random linear span. The exact compact momentum preserves temporal direction rather than reconstructing it from a fixed chart.",
+    "scope_limit": "The 0.5TPP rung can reject initialization or short-horizon incompatibility but cannot close attention because the historical full-attention gap grew only at longer horizons. A pass authorizes 124M/5TPP, then 20TPP; it never authorizes model-size scale-up."
+  },
+  "frozen_configuration": {
+    "model_size": "124M",
+    "tokens_per_parameter": 0.5,
+    "updates": 238,
+    "learning_rate": 0.0024,
+    "model_seed": 1338,
+    "train_data_seed": 20260716,
+    "eval_seed": 20260715,
+    "block_fht_seed": 1001,
+    "pair_vq_seed": 20261021,
+    "qk_representation": "headwise BlockFHT with output gain",
+    "mlp_representation": "qualified complete Pair-VQ full MLP",
+    "candidate_change_only": "replace dense attention V and dense attention output projection with Pair-VQ",
+    "fixed_eval_protocol": "mai_ladder_fixed_eval_indices_v2"
+  },
+  "representation": {
+    "attention_v_stages": 2,
+    "attention_output_projection_stages": 1,
+    "fast_residual": true,
+    "forward_visible_feedback": true,
+    "feedback_codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
+    "fp16_ambient_momentum": true,
+    "momentum_container": "adaptive_block_reserved_escape",
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "attention_v_plus_output_projection_elements": 14155776,
+    "all_pair_vq_matrix_elements": 70778880,
+    "maximum_momentum_bytes": 123863040,
+    "maximum_momentum_bits_per_coordinate": 14.0,
+    "materialized_inference_flops": "unchanged from the dense target attention and MLP"
+  },
+  "implementation_gates": {
+    "focused_cpu_tests": true,
+    "focused_cuda_tests": true,
+    "v_and_output_projection_are_pair_vq_modules_in_every_layer": 24,
+    "no_attention_v_or_output_projection_dense_parameter": true,
+    "all_pair_vq_modules_owned_by_exactly_one_pair_vq_optimizer": true,
+    "packed_transition_and_resume_identity": true,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "maximum_momentum_bytes": 123863040,
+    "minimum_exact_config_mfu_fraction": 0.2
+  },
+  "scientific_gates": {
+    "candidate_minus_matched_compact_parent_terminal_validation_ce_max": 0.05,
+    "candidate_over_parent_compute_equivalent_max": 1.1,
+    "all_fixed_eval_losses_finite": true,
+    "same_fixed_eval_indices_required": true,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "next_on_pass": "run the same 124M representation at 5TPP before any 20TPP or size transfer",
+    "next_on_failure": "localize attention V versus output projection under the same Pair-VQ state; do not change the MLP or scale"
+  }
+}
