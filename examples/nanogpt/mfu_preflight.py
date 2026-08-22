@@ -321,6 +321,10 @@ def make_preflight_config(
             config["pair_vq_dense_shadow_functional_result"] = str(
                 temporary_out / "pair_vq_functional_oracle_preflight.json"
             )
+        if config.get("pair_vq_dense_shadow_lowbit_momentum_result"):
+            config["pair_vq_dense_shadow_lowbit_momentum_result"] = str(
+                temporary_out / "pair_vq_lowbit_momentum_preflight.json"
+            )
     if atlas_start_steps:
         config["block_fht_attn_cayley_atlas_start_steps"] = list(
             range(len(atlas_start_steps))

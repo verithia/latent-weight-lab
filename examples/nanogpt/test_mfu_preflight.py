@@ -52,6 +52,28 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertEqual(source["mai_ladder_policy_version"], "mai_ladder_selection_v2")
         self.assertFalse(source["launch_ready"])
 
+    def test_preflight_redirects_lowbit_momentum_result_to_scratch(self) -> None:
+        source = {
+            "pair_vq_dense_shadow_replay": True,
+            "pair_vq_dense_shadow_result": "/scientific/shadow.json",
+            "pair_vq_dense_shadow_lowbit_momentum_result": (
+                "/scientific/lowbit.json"
+            ),
+        }
+        probe = make_preflight_config(source, Path("/tmp/probe"), 2, 3)
+        self.assertEqual(
+            probe["pair_vq_dense_shadow_result"],
+            "/tmp/probe/pair_vq_dense_shadow_preflight.json",
+        )
+        self.assertEqual(
+            probe["pair_vq_dense_shadow_lowbit_momentum_result"],
+            "/tmp/probe/pair_vq_lowbit_momentum_preflight.json",
+        )
+        self.assertEqual(
+            source["pair_vq_dense_shadow_lowbit_momentum_result"],
+            "/scientific/lowbit.json",
+        )
+
     def test_diagnostic_io_can_be_preserved_for_strict_gate(self) -> None:
         source = {
             "registered_resume_determinism_required": True,
