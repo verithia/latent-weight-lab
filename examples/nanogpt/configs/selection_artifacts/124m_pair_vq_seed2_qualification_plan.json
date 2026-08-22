@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_pair_vq_seed2_qualification_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "preregistered_before_launch",
+  "parent_result": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_adaptive_gate_result.json",
+  "causal_question": "Does the seed-1 near-parity of the compact full-MLP Pair-VQ representation replicate under a second matched initialization and data-order seed while retaining the exact adaptive compact optimizer state?",
+  "frozen_pair": {
+    "model_seed": 1338,
+    "train_data_seed": 20260716,
+    "eval_seed": 20260715,
+    "block_fht_seed": 1001,
+    "candidate_pair_vq_seed": 20261021,
+    "fixed_eval_protocol": "mai_ladder_fixed_eval_indices_v2",
+    "tokens_per_parameter": 0.5,
+    "updates": 238,
+    "learning_rate": 0.0024,
+    "parent": "QK-only mapped attention with dense MLP",
+    "candidate": "same QK-only mapped attention with complete Pair-VQ MLP, forward-visible compact feedback, c_proj fast residual, FP16 ambient Muon history, and adaptive block-local exact momentum coding"
+  },
+  "gates": {
+    "candidate_minus_parent_terminal_validation_ce_max": 0.05,
+    "candidate_over_parent_compute_equivalent_max": 1.1,
+    "all_fixed_eval_losses_finite": true,
+    "same_eval_indices_required": true,
+    "candidate_maximum_momentum_bytes": 99090432,
+    "minimum_mfu_fraction_each": 0.2,
+    "persistent_raw_ambient_momentum_tensors": 0
+  },
+  "systems": {
+    "checkpoint_policy": "no checkpoints for this paired statistical qualification because transition/resume and state identity are already sealed and PRO6 has less than 1.4 GB project-cap headroom",
+    "required_artifacts": [
+      "literal config and command",
+      "source commit",
+      "dataset manifest",
+      "fixed eval identity",
+      "scientific log hash",
+      "terminal fixed-eval losses",
+      "tokens per second and MFU",
+      "adaptive capacity trace for candidate"
+    ],
+    "monitoring": "Each run exceeds five minutes and requires a verified persistent terminal/error-only @Codex watchdog. The parent runs first; the candidate is launched only after parent terminal verification."
+  },
+  "decision_rule": {
+    "pass": "The seed-2 candidate is no more than 0.05 CE above its matched parent, compute-equivalent penalty is no more than 1.10x, all state and systems gates pass, and the paired mean remains below 0.05 CE.",
+    "fail": "Do not scale. Localize whether the failure is initialization variance, compact forward representation, or adaptive-state capacity using the fixed checkpoints in the two logs.",
+    "after_pass": "Seal an uncertainty-qualified two-seed 124M compact full-MLP result. Return to the full-attention V/c_proj problem before any model-size scale-up.",
+    "forbidden": [
+      "running the parent and candidate with different data order or eval indices",
+      "changing the MLP representation or optimizer between the pair",
+      "model-size scale-up before the paired result",
+      "using PRO6 checkpoints that breach the 256 GiB project cap"
+    ]
+  }
+}

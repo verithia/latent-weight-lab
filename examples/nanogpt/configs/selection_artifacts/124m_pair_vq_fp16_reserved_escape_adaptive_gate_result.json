@@ -1,0 +1,107 @@
+{
+  "schema_version": "mai_pair_vq_fp16_reserved_escape_adaptive_gate_result_v1",
+  "recorded_at": "2026-08-22",
+  "classification": "PASS_EXACT_ADAPTIVE_FP16_MOMENTUM_STATE_GATE",
+  "passed": true,
+  "decision": {
+    "compact_state_selected": true,
+    "loss_endpoint_rerun_required": false,
+    "seed1_loss_closure_retained": true,
+    "automatic_scale_up": false,
+    "automatic_horizon_transfer": false,
+    "next_authorized_work": "Run one matched seed-2 124M 0.5TPP parent/candidate pair. The parent keeps dense MLP weights and the candidate uses the already-closed Pair-VQ full-MLP representation with this exact adaptive momentum container. Require exact-config MFU gates and a terminal/error-only watchdog for each run.",
+    "reason": "All nine online capacity records remain below 14 bits per coordinate, exact transition/resume tests pass, and median MFU is 28.55%. Since the container decodes every FP16 word exactly, rerunning seed 1 would reproduce the already-sealed FP16 ambient-momentum trajectory modulo the registered downstream CUDA atomic nuisance."
+  },
+  "identity": {
+    "host": "PRO6",
+    "gpu": 0,
+    "source_commit": "187b90174",
+    "implementation_commit": "a454f1a",
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_reserved_escape_adaptive_gate9.json",
+    "config_sha256": "c69a6b863f059f43775def0b658288a409361383e9ad3735a8a5fa201e9b205e",
+    "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_reserved_escape_adaptive_plan.json",
+    "theory_plan_sha256": "6a7cea64786654a25b93a88be6b5fd86c767d216db2a46570e3051f40b695323",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "be965531176ca377b39e1cba1919d835764db0238379633362e83da305a23f0b",
+    "exit_code": 0
+  },
+  "artifacts": {
+    "scientific_log": {
+      "path": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/pro6_mai_v3_124m_qkonly_pairvq_mlp_fp16_reserved_escape_adaptive_gate9/launcher.log",
+      "sha256": "80beb4c8853104b3bf5c48558540468981afcb3318cffa5a249853c275506345",
+      "bytes": 108086
+    }
+  },
+  "capacity": {
+    "elements": 56623104,
+    "raw_fp16_momentum_bytes": 113246208,
+    "maximum_allowed_bytes": 99090432,
+    "maximum_observed_bytes": 96785388,
+    "maximum_observed_step": 8,
+    "headroom_bytes": 2305044,
+    "maximum_bits_per_coordinate": 13.6743,
+    "momentum_reduction_factor": 1.17008,
+    "raw_bytes_saved": 16460820,
+    "all_nine_updates_passed": true,
+    "records": [
+      {"step": 0, "bytes": 86612223, "c_fc_k": 8, "c_proj_k": 32},
+      {"step": 1, "bytes": 90287832, "c_fc_k": 8, "c_proj_k": 32},
+      {"step": 2, "bytes": 92413472, "c_fc_k": 16, "c_proj_k": 32},
+      {"step": 3, "bytes": 94270992, "c_fc_k": 16, "c_proj_k": 32},
+      {"step": 4, "bytes": 95361249, "c_fc_k": 32, "c_proj_k": 32},
+      {"step": 5, "bytes": 95861874, "c_fc_k": 32, "c_proj_k": 32},
+      {"step": 6, "bytes": 96282603, "c_fc_k": 32, "c_proj_k": 32},
+      {"step": 7, "bytes": 96631903, "c_fc_k": 32, "c_proj_k": 32},
+      {"step": 8, "bytes": 96785388, "c_fc_k": 32, "c_proj_k": 64}
+    ],
+    "terminal_scope_detail": {
+      "c_fc_bytes": 46776226,
+      "c_fc_exceptions": 528030,
+      "c_proj_bytes": 50008714,
+      "c_proj_exceptions": 390,
+      "container_metadata_bytes": 448
+    }
+  },
+  "identity_gate": {
+    "focused_cuda_tests_passed": 71,
+    "reference_matrix_records": 48,
+    "probe_steps": [0, 8],
+    "minimum_reference_prepolar_cosine": 0.999999883033672,
+    "minimum_requested_update_cosine": 0.9999963254045863,
+    "minimum_conserved_step_energy_recovery": 0.9999926150204395,
+    "decoded_momentum_words_bit_exact": true,
+    "prepolar_request_bit_exact": true,
+    "single_evaluation_polar_output_bit_exact": true,
+    "packed_resume_transition_bit_exact": true,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "all_losses_finite": true
+  },
+  "performance": {
+    "median_tokens_per_second": 159331.43,
+    "mfu_fraction": 0.28548,
+    "median_optimizer_fraction": 0.274335,
+    "peak_mib": 31967.8,
+    "minimum_mfu_fraction": 0.2,
+    "performance_gate_passed": true,
+    "native_extension_required_and_loaded": true
+  },
+  "storage": {
+    "compact_inference_mlp_matrix_bytes": 70855872,
+    "compact_feedback_bytes": 86571264,
+    "adaptive_momentum_bytes_at_gate_maximum": 96785388,
+    "persistent_mlp_training_matrix_bytes": 254212524,
+    "dense_fp32_weight_plus_fp32_momentum_bytes": 452984832,
+    "training_state_reduction_factor": 1.78191,
+    "inference_weight_storage_reduction_factor": 3.1965228795716465,
+    "additional_trainable_parameters": 0,
+    "materialized_inference_flops": "unchanged from the dense target MLP"
+  },
+  "retained_loss_result": {
+    "source": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_fp16_ambient_momentum_endpoint_result.json",
+    "candidate_validation_ce": 5.368512153625488,
+    "matched_parent_validation_ce": 5.361,
+    "gap_ce": 0.007512153625488281,
+    "compute_equivalent_penalty": 1.0205063948925732,
+    "reason": "The selected container is a bit-exact representation of the same FP16 ambient momentum consumed by the sealed endpoint."
+  }
+}
