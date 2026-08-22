@@ -2,6 +2,7 @@ from examples.nanogpt.fixed_model_compute_equivalence import EvalPoint
 from examples.nanogpt.seal_attention_pair_vq_vo_5tpp import (
     candidate_points,
     dense_points,
+    fixed_eval_indices_sha256,
 )
 
 
@@ -27,3 +28,12 @@ def test_dense_result_and_candidate_log_points() -> None:
     assert candidate_points(losses, [0, 594, 1188, 1782, 2373])[-1] == EvalPoint(
         2373.0, 3.5499
     )
+
+
+def test_fixed_eval_digest_is_read_from_bound_plan_reference() -> None:
+    plan = {
+        "matched_reference": {
+            "fixed_eval_indices_sha256": "5ca31b",
+        }
+    }
+    assert fixed_eval_indices_sha256(plan) == "5ca31b"

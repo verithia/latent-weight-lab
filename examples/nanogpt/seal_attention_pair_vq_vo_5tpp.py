@@ -34,6 +34,17 @@ def dense_points(result: dict[str, Any]) -> list[EvalPoint]:
     ]
 
 
+def fixed_eval_indices_sha256(plan: dict[str, Any]) -> str:
+    """Return the preregistered fixed-evaluation inventory binding.
+
+    The sealed dense reference predates this result schema and therefore does
+    not carry the digest in its ``run`` object.  The 5TPP plan binds that exact
+    reference and records the digest alongside it.
+    """
+
+    return str(plan["matched_reference"]["fixed_eval_indices_sha256"])
+
+
 def candidate_points(
     losses: dict[int, dict[str, float]], steps: list[int]
 ) -> list[EvalPoint]:
@@ -107,7 +118,7 @@ def main() -> None:
     if len(rng_rows) != 1:
         raise ValueError(f"expected one rng_eval_metadata row, observed {len(rng_rows)}")
     rng = rng_rows[0]
-    dense_fixed_digest = dense["run"]["fixed_eval_indices_sha256"]
+    dense_fixed_digest = fixed_eval_indices_sha256(plan)
     checks["fixed_eval_indices_match_dense"] = (
         rng["fixed_eval_indices_sha256"] == dense_fixed_digest
     )
