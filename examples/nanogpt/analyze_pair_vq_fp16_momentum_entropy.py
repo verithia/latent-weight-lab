@@ -388,10 +388,10 @@ def run_audit(checkpoint_path: Path, checkpoint_sha256: str, plan_path: Path) ->
             "gpu_used": False,
         },
         "decision": {
-            "automatic_endpoint": false,
-            "automatic_scale_up": false,
-            "automatic_horizon_transfer": false,
-            "automatic_sweep": false,
+            "automatic_endpoint": False,
+            "automatic_scale_up": False,
+            "automatic_horizon_transfer": False,
+            "automatic_sweep": False,
             "next_authorized_work": (
                 "Implement only a GPU-native or overlapped exact codec and require exact checkpoint/resume plus >=20% MFU."
                 if passing

@@ -16,6 +16,9 @@ from examples.nanogpt.analyze_pair_vq_fp16_momentum_entropy import (
 def test_result_boolean_literal_is_python() -> None:
     source = inspect.getsource(run_audit)
     assert '"gpu_used": False' in source
+    assert " false" not in source
+    assert " true" not in source
+    assert " null" not in source
 
 
 def test_entropy_known_distributions() -> None:
