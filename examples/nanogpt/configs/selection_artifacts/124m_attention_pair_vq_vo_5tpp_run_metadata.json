@@ -1,11 +1,12 @@
 {
   "schema_version": "mai_124m_attention_pair_vq_vo_5tpp_run_metadata_v1",
-  "status": "running",
+  "status": "finished_scientific_rejection",
   "run_name": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_5tpp_lr24e4",
   "run_id": "pro6_mai_v3_124m_compact_fullreplacement_pairvq_vo_5tpp_lr24e4_20260822T044154Z_3113706",
   "host": "PRO6",
   "gpu": 0,
   "started_at": "2026-08-22T12:41:56+08:00",
+  "finished_at": "2026-08-22T13:57:57+08:00",
   "process_group": 3113948,
   "max_iters": 2373,
   "git_commit": "bfe6fe494a51e22bb1c968823eec9ea505db025c",
@@ -77,5 +78,23 @@
     "automatic_rerun": false,
     "automatic_124m_20tpp_training": false,
     "automatic_model_size_scale_up": false
+  },
+  "terminal_seal": {
+    "classification": "REJECT_COMPACT_FULL_REPLACEMENT_124M_5TPP",
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_5tpp_result.json",
+    "result_sha256": "e5eba0390e36979a20d5ecf82e9e65591083276c4fa6a7df17bfcd910c89790a",
+    "status_sha256": "4da26b44abb2581c53904484c75d913af4ae6d9afaf6df6f2cd9f3593521ce97",
+    "log_sha256": "f1d6d863cd0e86b1b0b083adc4013cb35ebae5fc5e6c19b8b5dcb75538f2b4c9",
+    "checkpoint_sha256": "1a207010bc61b5975d4f269d7833c4cbc3551a28d5cbcdefef39f31d224e1b4d",
+    "checkpoint_meta_sha256": "3d7105f778a44895589dbfc6acf373d56eed17aa25333fc27b02679702f2a809",
+    "terminal_validation_ce": 3.5565,
+    "dense_validation_ce": 3.5402,
+    "gap_ce": 0.0163,
+    "candidate_over_dense_token_equivalent_penalty": 1.0760434049956906,
+    "failed_checks": [
+      "terminal_quality_gate"
+    ],
+    "authorize_124m_20tpp": false,
+    "authorize_model_size_scale_up": false
   }
 }

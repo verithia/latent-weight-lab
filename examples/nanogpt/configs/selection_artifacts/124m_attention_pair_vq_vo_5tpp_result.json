@@ -1,0 +1,143 @@
+{
+  "capacity": {
+    "codec_bytes": 88627584,
+    "compact_feedback_bytes": 107505408,
+    "maximum_momentum_bytes": 122567859,
+    "momentum_byte_ceiling": 123863040,
+    "pair_vq_elements": 70778880,
+    "pair_vq_modules": 48,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "persistent_training_bytes": 319996032
+  },
+  "checks": {
+    "all_fixed_eval_losses_finite": true,
+    "common_loss_ratio_available": true,
+    "config_matches_mfu": true,
+    "config_matches_provenance": true,
+    "dense_curve_compute_gate": true,
+    "dense_master_weight_absent": true,
+    "dense_momentum_absent": true,
+    "dense_reference_matches_config": true,
+    "fixed_eval_indices_match_dense": true,
+    "fixed_eval_inventory": true,
+    "fixed_eval_protocol_match": true,
+    "forward_visible_feedback": true,
+    "manifest_matches_config": true,
+    "manifest_matches_provenance": true,
+    "mfu_certificate_matches_provenance": true,
+    "mfu_floor": true,
+    "mfu_passed": true,
+    "momentum_capacity": true,
+    "pair_vq_element_count": true,
+    "pair_vq_module_count": true,
+    "persistent_state_matches_mfu": true,
+    "persistent_training_bytes_exact": true,
+    "plan_matches_config": true,
+    "qualification_matches_config": true,
+    "qualification_passed": true,
+    "raw_ambient_error_buffer_absent": true,
+    "run_name_matches": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "terminal_quality_gate": false
+  },
+  "classification": "REJECT_COMPACT_FULL_REPLACEMENT_124M_5TPP",
+  "curve_analysis": {
+    "common_loss_ratio": {
+      "loss_high": 4.1075,
+      "loss_low": 3.5565,
+      "max_candidate_over_dense_compute": 1.0760434049956904,
+      "median_candidate_over_dense_compute": 0.974782403336614,
+      "min_candidate_over_dense_compute": 0.8936317636735324,
+      "samples": 101
+    },
+    "dense_local_fits": [
+      {
+        "alpha_eff_total_loss": 0.06282179533406797,
+        "loss_slope_per_log_compute": 0.2224017198416674,
+        "window": 2
+      },
+      {
+        "alpha_eff_total_loss": 0.09232667728360594,
+        "loss_slope_per_log_compute": 0.32685490291942176,
+        "window": 3
+      },
+      {
+        "alpha_eff_total_loss": 0.13218140383647758,
+        "loss_slope_per_log_compute": 0.4679486058618979,
+        "window": 4
+      }
+    ],
+    "dense_terminal_validation_ce": 3.5402,
+    "schema_version": "fixed_model_compute_equivalence_v1",
+    "terminal_dense_penalty": {
+      "candidate_over_dense_compute": 1.0760434049956906,
+      "candidate_terminal_compute": 2373.0,
+      "candidate_terminal_validation_ce": 3.5565,
+      "dense_match_compute": 2205.3013744454884,
+      "method": "interpolation"
+    }
+  },
+  "curve_analysis_error": null,
+  "decision": {
+    "authorize_124m_20tpp_preregistration_and_mfu_measurement": false,
+    "authorize_124m_20tpp_training": false,
+    "authorize_model_size_scale_up": false,
+    "automatic_rerun": false,
+    "next_on_failure": "localize attention V versus attention output under the same Pair-VQ full-MLP parent; do not alter the MLP or scale"
+  },
+  "passed": false,
+  "performance": {
+    "preflight_mfu_fraction": 0.2509571095481487,
+    "preflight_tokens_per_second": 140131.38875,
+    "scientific_mean_tokens_per_second": 138792.834625,
+    "scientific_median_tokens_per_second": 140036.96,
+    "scientific_perf_samples": 240
+  },
+  "provenance": {
+    "config_sha256": "26407d674e4a326822ffa83ad1a0f5a25c78b649423b58e53a7d6568b0c7a209",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "dense_result_sha256": "b08a1856e0318e89ba8fdc2ada0931723976f201ce66a35a093d0f0165ddb2e5",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "git_commit": "bfe6fe494a51e22bb1c968823eec9ea505db025c",
+    "mfu_certificate_sha256": "bf7d21e8dca1cee1c33134cfcb333c570d91434e5e40bb5b73d4932cf17c7696",
+    "plan_sha256": "e2f3bf339e59960b67c57fde2450c5f80714985bbf878089c07f6113e82eb28c",
+    "qualification_result_sha256": "3eb689af60bb2fc8eba8fa2093e8e8a0e765b1cad312a55a17e1297fb7d908d8",
+    "runtime_provenance_sha256": "9f45b610857ddcd37c1e6eb38002b02fec135fe733c9f1737fd931d0842f2dd3",
+    "scientific_log_sha256": "f1d6d863cd0e86b1b0b083adc4013cb35ebae5fc5e6c19b8b5dcb75538f2b4c9",
+    "terminal_status_sha256": "4da26b44abb2581c53904484c75d913af4ae6d9afaf6df6f2cd9f3593521ce97"
+  },
+  "recorded_at": "2026-08-22T06:02:21.557454+00:00",
+  "schema_version": "mai_124m_attention_pair_vq_vo_5tpp_result_v1",
+  "terminal": {
+    "dense_validation_ce": 3.5402,
+    "fixed_validation_curve": [
+      {
+        "step": 0,
+        "validation_ce": 10.9885
+      },
+      {
+        "step": 594,
+        "validation_ce": 4.1075
+      },
+      {
+        "step": 1188,
+        "validation_ce": 3.7612
+      },
+      {
+        "step": 1782,
+        "validation_ce": 3.616
+      },
+      {
+        "step": 2373,
+        "validation_ce": 3.5565
+      }
+    ],
+    "gap_ce": 0.016300000000000203,
+    "terminal_validation_ce_max": 3.5502,
+    "token_equivalent_penalty": 1.0760434049956906,
+    "token_equivalent_penalty_max": 1.1,
+    "train_ce": 3.5741,
+    "validation_ce": 3.5565
+  }
+}

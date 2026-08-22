@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_qkonly_pair_vq_mlp_5tpp_localization_plan_v1",
+  "recorded_at": "2026-08-22T14:12:00+08:00",
+  "question": "How much of the rejected compact full-replacement 5TPP gap is caused by the compact full MLP when attention V and output remain dense?",
+  "causal_authorization": {
+    "failed_full_replacement_result": "examples/nanogpt/configs/selection_artifacts/124m_attention_pair_vq_vo_5tpp_result.json",
+    "failed_full_replacement_result_sha256": "e5eba0390e36979a20d5ecf82e9e65591083276c4fa6a7df17bfcd910c89790a",
+    "classification": "REJECT_COMPACT_FULL_REPLACEMENT_124M_5TPP",
+    "terminal_validation_ce": 3.5565,
+    "dense_validation_ce": 3.5402,
+    "gap_ce": 0.0163,
+    "failed_check": "terminal_quality_gate",
+    "compute_gate_passed": true,
+    "candidate_over_dense_token_equivalent_penalty": 1.0760434049956906,
+    "frozen_failure_branch": "localize attention V versus attention output under the same Pair-VQ full-MLP parent; do not alter the MLP or scale"
+  },
+  "matched_qk_only_dense_mlp_control": {
+    "result": "examples/nanogpt/configs/selection_artifacts/124m_attention_qk_only_partial_control_result.json",
+    "result_sha256": "8e959c86fc44299c1a4aef0c3dc70ac1c4aa0e6220b84c823fb310b0b6d12585",
+    "source_commit": "91ae829a4216d91cdfeb73769a25586f72b4cd09",
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "fixed_validation_curve": [
+      {"step": 594, "validation_ce": 4.0173},
+      {"step": 1188, "validation_ce": 3.6941},
+      {"step": 1782, "validation_ce": 3.5477},
+      {"step": 2373, "validation_ce": 3.4858}
+    ],
+    "terminal_validation_ce": 3.4858
+  },
+  "single_intervention": {
+    "held_dense": [
+      "attention V projection",
+      "attention output projection"
+    ],
+    "held_compact": [
+      "headwise Q/K BlockFHT with output gain",
+      "all MLP c_fc and c_proj matrices using the qualified Pair-VQ codec"
+    ],
+    "changed_from_rejected_full_replacement": [
+      "disable Pair-VQ for attention V and attention output only"
+    ],
+    "unchanged": [
+      "model and data seeds",
+      "dataset and fixed evaluation inventory",
+      "2373-update 5TPP schedule",
+      "Muon and AdamW settings",
+      "Pair-VQ MLP codec, feedback, momentum capacity, and seeds",
+      "Q/K BlockFHT structure"
+    ]
+  },
+  "representation_invariants": {
+    "pair_vq_modules": 24,
+    "pair_vq_elements": 56623104,
+    "persistent_training_bytes_exact": 256517568,
+    "momentum_byte_ceiling": 99090432,
+    "persistent_raw_ambient_momentum_tensors": 0,
+    "dense_master_weight_absent": true,
+    "dense_optimizer_momentum_absent": true,
+    "materialized_inference_flops": "unchanged for the target MLP matrices"
+  },
+  "performance_gate": {
+    "method": "foreground exact-config real optimizer updates through examples.nanogpt.mfu_preflight",
+    "warmup_updates": 1,
+    "minimum_timed_updates": 8,
+    "minimum_mfu_fraction": 0.20,
+    "require_native_block_fht_extension": true,
+    "require_all_logged_losses_finite": true,
+    "require_persistent_training_bytes_exact": 256517568,
+    "must_pass_before_training": true
+  },
+  "scientific_readout": {
+    "primary": "candidate minus matched QK-only dense-MLP terminal validation CE",
+    "curve_required": true,
+    "compute_equivalence_required": true,
+    "mlp_negligible_gap_ce_max": 0.01,
+    "interpretation": {
+      "candidate_minus_qk_le_0p01": "compact MLP is not the material source of the rejected full-replacement gap; proceed to V-only and output-only attribution under this parent",
+      "candidate_minus_qk_gt_0p01": "compact MLP remains a material late-horizon source; repair MLP before attributing V versus output"
+    }
+  },
+  "decision_boundary": {
+    "automatic_rerun": false,
+    "authorize_20tpp": false,
+    "authorize_model_size_scale_up": false,
+    "on_mlp_negligible": "preregister V-only and output-only 5TPP arms under this exact compact-MLP parent",
+    "on_mlp_material": "stop V/O promotion and localize c_fc versus c_proj at the same 5TPP horizon",
+    "forbidden": [
+      "changing the MLP codec during this attribution",
+      "interpreting a 0.5TPP result as a 5TPP control",
+      "launching 20TPP or a larger model from this diagnostic"
+    ]
+  },
+  "monitoring": {
+    "expected_duration": "75-90 minutes",
+    "policy": "one terminal/error-only persistent watchdog; no healthy milestone or heartbeat callbacks",
+    "terminal_action": "seal the fixed curve and classify MLP contribution before authorizing a V-only or output-only arm",
+    "failure_action": "diagnose, recover only if scientifically valid, and preserve this immutable attribution plan"
+  }
+}
