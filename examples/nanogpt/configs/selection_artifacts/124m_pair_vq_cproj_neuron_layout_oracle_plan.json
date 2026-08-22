@@ -40,7 +40,7 @@
     "block_size": 1024,
     "registered_fixed_eval_batches": 400,
     "scored_fixed_eval_batches": 16,
-    "fixed_eval_seed": 20260720,
+    "fixed_eval_seed": 20260715,
     "activation_bank_indices": [0, 271],
     "activation_sample_cap": 256,
     "parameter_updates": 0
