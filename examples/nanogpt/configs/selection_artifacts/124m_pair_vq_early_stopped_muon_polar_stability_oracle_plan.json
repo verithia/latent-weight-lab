@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_pair_vq_early_stopped_muon_polar_stability_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Can implicit spectral regularization from early-stopping Muon's Newton-Schulz polar iteration reduce Pair-VQ gradient-error amplification while preserving the dense Muon direction, first-order task alignment, and update norm?",
+  "causal_basis": {
+    "same_momentum_polar_oracle": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_same_momentum_polar_amplification_oracle_result.json",
+      "sha256": "b45eefe78877bc0122ff10028a729aef72f959c285c78f0cde46760703cd04cc",
+      "classification": "MUON_POLAR_AMPLIFIES_CODEC_GRADIENT_ERROR",
+      "late_prepolar_cosine_min": 0.9999777171609324,
+      "late_polar_cosine_max": 0.9996458742356146,
+      "late_polar_relative_error_min": 0.026613145759011938,
+      "late_relative_error_amplification_min": 3.982174218678504,
+      "finding": "Under identical dense momentum, tiny compact functional-gradient error is amplified roughly fourfold by the deployed five-step polar map at both late probes."
+    },
+    "factorial": {
+      "c_fc_only_gap_ce": 0.0698,
+      "c_proj_only_gap_ce": 0.0661,
+      "full_compact_mlp_gap_ce": 0.0683,
+      "interaction_ce": -0.0676,
+      "finding": "Both MLP sides share one dynamic optimizer-path obstruction, so a joint optimizer-map repair is more causal than another matrix-specific basis."
+    }
+  },
+  "theory": {
+    "spectral_mechanism": "For a normalized request with singular value s, each Newton-Schulz iteration applies the same odd polynomial that moves s toward one. Repeated iteration increasingly whitens small singular modes; those modes have the highest angular sensitivity to a small codec-induced request perturbation.",
+    "regularizer": "Stopping before the fifth iteration is an implicit spectral regularizer: dominant singular directions retain the Muon geometry while weak, perturbation-sensitive directions are not fully promoted to unit gain.",
+    "frontier_not_coefficient_sweep": "The only candidates are the four strict prefixes of the deployed five-step map. They share the same momentum, requests, coefficients, scaling rule, and dense replay. The selection rule chooses the deepest prefix passing every frozen gate, hence the closest stable map to the current optimizer.",
+    "attribution": "The replay trajectory is not modified. Every candidate is scored on the same dense and compact-center requests already used by the causal polar-amplification oracle.",
+    "systems_consequence": "A selected prefix requires no persistent state and fewer matrix multiplications than the current five-step Muon map; it cannot increase optimizer FLOPs or VRAM."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 2026082201,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024
+    },
+    "heldout_window": {
+      "split": "validation",
+      "seed": 2026082202,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024,
+      "must_be_disjoint_from_fit": true
+    },
+    "functional_variants": ["dense", "native", "forward_visible_center", "antithetic_control"],
+    "polar_variants": ["dense", "forward_visible_center"],
+    "momentum_history": "identical live dense buffer for every branch",
+    "trajectory_intervention": "none"
+  },
+  "regularized_polar_frontier": {
+    "native_ns_steps": 5,
+    "candidate_ns_steps": [1, 2, 3, 4],
+    "selection_rule": "select the largest candidate_ns_steps value that passes every frozen gate at both primary late steps"
+  },
+  "frozen_gate": {
+    "all_metrics_finite": true,
+    "fit_and_heldout_indices_disjoint": true,
+    "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+    "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+    "minimum_late_heldout_gradient_error_closure_vs_native": 0.70,
+    "minimum_late_heldout_gradient_cosine": 0.95,
+    "minimum_late_fit_to_heldout_task_alignment_retention_vs_dense": 0.95,
+    "maximum_primary_matrix_regression_fraction": 0.25,
+    "minimum_exact_config_mfu_fraction": 0.20,
+    "primary_candidate_selection": "The forward-visible center must retain the sealed functional-gradient pass before optimizer stabilization is interpreted."
+  },
+  "polar_gate": {
+    "minimum_late_prepolar_cosine": 0.999,
+    "maximum_late_polar_cosine": 0.9998,
+    "minimum_late_polar_relative_error": 0.02,
+    "minimum_late_relative_error_amplification": 2.0
+  },
+  "regularized_polar_gate": {
+    "minimum_late_relative_error_closure_vs_native": 0.20,
+    "maximum_late_relative_error_amplification": 3.0,
+    "maximum_late_candidate_polar_relative_error": 0.02,
+    "minimum_late_dense_native_cosine": 0.99,
+    "minimum_late_dense_native_norm_ratio": 0.90,
+    "maximum_late_dense_native_norm_ratio": 1.05,
+    "minimum_late_matrix_dense_task_alignment_retention": 0.98,
+    "maximum_late_matrix_regression_fraction": 0.25
+  },
+  "state_and_compute_contract": {
+    "candidate_persistent_state": "none; nonintervening dense replay analysis only",
+    "dense_master_weight_in_candidate": false,
+    "dense_momentum_in_candidate": false,
+    "oracle_dense_momentum_is_scoring_only": true,
+    "inference_change": false,
+    "production_optimizer_cost_if_selected": "strictly fewer Newton-Schulz matrix multiplications than native five-step Muon"
+  },
+  "decision_rule": {
+    "oracle_pass": "Seal the deepest passing early-stopped Newton-Schulz prefix and authorize exactly one matched 124M 0.5TPP full-MLP endpoint using that prefix after an exact-config MFU gate.",
+    "oracle_fail": "Reject early-stopped polar regularization and return to a codec-neighbor path-stability discriminator derived from the Mapping Loss stability term.",
+    "automatic_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}

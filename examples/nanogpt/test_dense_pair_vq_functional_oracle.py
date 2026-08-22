@@ -7,6 +7,7 @@ from pathlib import Path
 import torch
 
 from examples.nanogpt.dense_pair_vq_functional_oracle import (
+    PairVQFunctionalGradientOracle,
     _aggregate_directions,
     _direction_metrics,
     antithetic_average,
@@ -93,3 +94,73 @@ def test_same_momentum_polar_plan_is_immutable_and_nonintervening() -> None:
     assert hashlib.sha256(path.read_bytes()).hexdigest() == (
         "d77f7536ec1ce10c5f966a4e17325ea04d8081db286b11b567c35c19d6ca046f"
     )
+
+
+def test_early_stopped_polar_plan_is_immutable_and_causal() -> None:
+    root = Path(__file__).resolve().parents[2]
+    path = (
+        root
+        / "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_early_stopped_muon_polar_stability_oracle_plan.json"
+    )
+    plan = json.loads(path.read_text())
+    assert plan["schema_version"].endswith("_v1")
+    assert plan["regularized_polar_frontier"] == {
+        "native_ns_steps": 5,
+        "candidate_ns_steps": [1, 2, 3, 4],
+        "selection_rule": "select the largest candidate_ns_steps value that passes every frozen gate at both primary late steps",
+    }
+    assert plan["decision_rule"]["automatic_endpoint"] is False
+    assert plan["decision_rule"]["automatic_scale_up"] is False
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+        "6a722065917c0bbd3a5852b913e883ec5e89b0925916409d0e5b9a31544a19a9"
+    )
+
+
+def test_regularized_polar_gate_selects_deepest_passing_prefix() -> None:
+    oracle = PairVQFunctionalGradientOracle.__new__(
+        PairVQFunctionalGradientOracle
+    )
+    oracle.primary_late_steps = {180, 238}
+    oracle.plan = {
+        "regularized_polar_frontier": {"candidate_ns_steps": [1, 2, 3, 4]},
+        "regularized_polar_gate": {
+            "minimum_late_relative_error_closure_vs_native": 0.20,
+            "maximum_late_relative_error_amplification": 3.0,
+            "maximum_late_candidate_polar_relative_error": 0.02,
+            "minimum_late_dense_native_cosine": 0.99,
+            "minimum_late_dense_native_norm_ratio": 0.90,
+            "maximum_late_dense_native_norm_ratio": 1.05,
+            "minimum_late_matrix_dense_task_alignment_retention": 0.98,
+            "maximum_late_matrix_regression_fraction": 0.25,
+        },
+    }
+
+    def candidate(*, passing: bool) -> dict[str, object]:
+        return {
+            "relative_error_closure_vs_native": 0.30 if passing else 0.10,
+            "relative_error_amplification": 2.5 if passing else 3.5,
+            "candidate_polar": {"relative_error": 0.018 if passing else 0.024},
+            "dense_native": {"cosine": 0.995 if passing else 0.98},
+            "dense_native_norm_ratio": 0.97,
+            "minimum_matrix_dense_task_alignment_retention": 0.99,
+            "matrix_regression_fraction": 0.0,
+        }
+
+    oracle.records = [
+        {
+            "step": step,
+            "same_momentum_polar": {
+                "regularized_polar": {
+                    "1": {"all": candidate(passing=True)},
+                    "2": {"all": candidate(passing=True)},
+                    "3": {"all": candidate(passing=True)},
+                    "4": {"all": candidate(passing=False)},
+                }
+            },
+        }
+        for step in (180, 238)
+    ]
+    gate = oracle._summarize_regularized_polar_gate()
+    assert gate["passed"] is True
+    assert gate["selected_ns_steps"] == 3
+    assert gate["classification"] == "EARLY_STOPPED_MUON_NS3_STABILIZES_PAIR_VQ"

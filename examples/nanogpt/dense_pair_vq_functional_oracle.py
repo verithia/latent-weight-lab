@@ -28,8 +28,14 @@ from examples.nanogpt.dense_pair_vq_shadow import (
 
 PLAN_SCHEMA = "mai_124m_pair_vq_antithetic_functional_gradient_oracle_plan_v1"
 POLAR_PLAN_SCHEMA = "mai_124m_pair_vq_same_momentum_polar_amplification_oracle_plan_v1"
+REGULARIZED_POLAR_PLAN_SCHEMA = (
+    "mai_124m_pair_vq_early_stopped_muon_polar_stability_oracle_plan_v1"
+)
 RESULT_SCHEMA = "mai_pair_vq_antithetic_functional_gradient_oracle_result_v1"
 POLAR_RESULT_SCHEMA = "mai_pair_vq_same_momentum_polar_amplification_oracle_result_v1"
+REGULARIZED_POLAR_RESULT_SCHEMA = (
+    "mai_pair_vq_early_stopped_muon_polar_stability_oracle_result_v1"
+)
 
 
 def _all_finite(value: Any) -> bool:
@@ -198,10 +204,18 @@ class PairVQFunctionalGradientOracle:
         if sha256_file(plan_path) != plan_sha256:
             raise ValueError("functional-oracle plan identity mismatch")
         plan = json.loads(plan_path.read_text())
-        if plan.get("schema_version") not in {PLAN_SCHEMA, POLAR_PLAN_SCHEMA}:
+        if plan.get("schema_version") not in {
+            PLAN_SCHEMA,
+            POLAR_PLAN_SCHEMA,
+            REGULARIZED_POLAR_PLAN_SCHEMA,
+        }:
             raise ValueError("unexpected functional-oracle plan schema")
         self.polar_amplification_enabled = (
-            plan.get("schema_version") == POLAR_PLAN_SCHEMA
+            plan.get("schema_version")
+            in {POLAR_PLAN_SCHEMA, REGULARIZED_POLAR_PLAN_SCHEMA}
+        )
+        self.regularized_polar_enabled = (
+            plan.get("schema_version") == REGULARIZED_POLAR_PLAN_SCHEMA
         )
         if self.polar_amplification_enabled and optimizer is None:
             raise ValueError(
@@ -511,6 +525,170 @@ class PairVQFunctionalGradientOracle:
                     for row in selected
                 ),
             }
+        if self.regularized_polar_enabled:
+            candidate_steps = tuple(
+                int(value)
+                for value in self.plan["regularized_polar_frontier"][
+                    "candidate_ns_steps"
+                ]
+            )
+            native_steps = int(
+                self.plan["regularized_polar_frontier"]["native_ns_steps"]
+            )
+            if native_steps != 5 or candidate_steps != (1, 2, 3, 4):
+                raise ValueError("regularized-polar frontier changed")
+            for row in rows:
+                name = str(row["module"])
+                module = self.observer._dense_modules[name]
+                owner, group = self._dense_optimizer_owner[name]
+                momentum = float(group["momentum"])
+                state = owner.state[module.weight]
+                buffer = state.get("momentum_buffer")
+                if buffer is None:
+                    buffer = torch.zeros_like(module.weight)
+                dense_gradient = reference[name].to(
+                    device=module.weight.device, dtype=torch.float32
+                )
+                compact_gradient = candidate[name].to(
+                    device=module.weight.device, dtype=torch.float32
+                )
+                dense_request = dense_gradient + momentum * (
+                    buffer.float() * momentum + dense_gradient
+                )
+                compact_request = compact_gradient + momentum * (
+                    buffer.float() * momentum + compact_gradient
+                )
+                native_dense = muon_update(
+                    dense_request, steps=native_steps
+                ).float()
+                native_task = _direction_metrics(dense_gradient, native_dense)
+                regularized = {}
+                for steps in candidate_steps:
+                    dense_update = muon_update(dense_request, steps=steps).float()
+                    compact_update = muon_update(
+                        compact_request, steps=steps
+                    ).float()
+                    candidate_polar = _direction_metrics(
+                        dense_update, compact_update
+                    )
+                    dense_native = _direction_metrics(native_dense, dense_update)
+                    dense_task = _direction_metrics(dense_gradient, dense_update)
+                    regularized[str(steps)] = {
+                        "candidate_polar": candidate_polar,
+                        "dense_native": dense_native,
+                        "dense_task": dense_task,
+                        "native_dense_task_cosine": native_task["cosine"],
+                        "dense_task_alignment_retention": (
+                            dense_task["cosine"]
+                            / max(native_task["cosine"], 1e-30)
+                        ),
+                        "relative_error_amplification": (
+                            candidate_polar["relative_error"]
+                            / max(row["prepolar"]["relative_error"], 1e-30)
+                        ),
+                        "relative_error_closure_vs_native": (
+                            1.0
+                            - candidate_polar["relative_error"]
+                            / max(row["polar"]["relative_error"], 1e-30)
+                        ),
+                    }
+                    del dense_update, compact_update
+                row["regularized_polar"] = regularized
+                del dense_gradient, compact_gradient
+                del dense_request, compact_request, native_dense
+
+            payload["regularized_polar"] = {}
+            for steps in candidate_steps:
+                key = str(steps)
+                payload["regularized_polar"][key] = {}
+                for label, selected in (
+                    ("all", rows),
+                    ("c_fc", [row for row in rows if row["side"] == "c_fc"]),
+                    (
+                        "c_proj",
+                        [row for row in rows if row["side"] == "c_proj"],
+                    ),
+                ):
+                    candidate_rows = [
+                        {
+                            "candidate_polar": row["regularized_polar"][key][
+                                "candidate_polar"
+                            ],
+                            "dense_native": row["regularized_polar"][key][
+                                "dense_native"
+                            ],
+                            "dense_task": row["regularized_polar"][key][
+                                "dense_task"
+                            ],
+                            "native_dense_task": {
+                                **row["regularized_polar"][key]["dense_task"],
+                                "cosine": row["regularized_polar"][key][
+                                    "native_dense_task_cosine"
+                                ],
+                            },
+                        }
+                        for row in selected
+                    ]
+                    candidate_polar = _aggregate_directions(
+                        candidate_rows, "candidate_polar"
+                    )
+                    dense_native = _aggregate_directions(
+                        candidate_rows, "dense_native"
+                    )
+                    dense_task = _aggregate_directions(
+                        candidate_rows, "dense_task"
+                    )
+                    matrix_closures = [
+                        float(
+                            row["regularized_polar"][key][
+                                "relative_error_closure_vs_native"
+                            ]
+                        )
+                        for row in selected
+                    ]
+                    payload["regularized_polar"][key][label] = {
+                        "candidate_polar": candidate_polar,
+                        "dense_native": dense_native,
+                        "dense_native_norm_ratio": math.sqrt(
+                            dense_native["candidate_energy"]
+                            / max(dense_native["reference_energy"], 1e-30)
+                        ),
+                        "dense_task": dense_task,
+                        "minimum_matrix_dense_task_alignment_retention": min(
+                            float(
+                                row["regularized_polar"][key][
+                                    "dense_task_alignment_retention"
+                                ]
+                            )
+                            for row in selected
+                        ),
+                        "relative_error_amplification": (
+                            candidate_polar["relative_error"]
+                            / max(
+                                _aggregate_directions(selected, "prepolar")[
+                                    "relative_error"
+                                ],
+                                1e-30,
+                            )
+                        ),
+                        "relative_error_closure_vs_native": (
+                            1.0
+                            - candidate_polar["relative_error"]
+                            / max(
+                                _aggregate_directions(selected, "polar")[
+                                    "relative_error"
+                                ],
+                                1e-30,
+                            )
+                        ),
+                        "minimum_matrix_relative_error_closure_vs_native": min(
+                            matrix_closures
+                        ),
+                        "matrix_regression_fraction": sum(
+                            closure < 0.0 for closure in matrix_closures
+                        )
+                        / max(len(matrix_closures), 1),
+                    }
         return payload
 
     @staticmethod
@@ -664,12 +842,150 @@ class PairVQFunctionalGradientOracle:
         if not self.polar_amplification_enabled:
             return functional
         polar = self._summarize_polar_gate()
+        if self.regularized_polar_enabled:
+            regularized = self._summarize_regularized_polar_gate()
+            return {
+                "ready": bool(
+                    functional["ready"]
+                    and polar["ready"]
+                    and regularized["ready"]
+                ),
+                "passed": bool(
+                    functional["passed"]
+                    and polar["passed"]
+                    and regularized["passed"]
+                ),
+                "classification": regularized["classification"],
+                "functional": functional,
+                "polar": polar,
+                "regularized_polar": regularized,
+            }
         return {
             "ready": bool(functional["ready"] and polar["ready"]),
             "passed": bool(functional["passed"] and polar["passed"]),
             "classification": polar["classification"],
             "functional": functional,
             "polar": polar,
+        }
+
+    def _summarize_regularized_polar_gate(self) -> dict[str, Any]:
+        late = [row for row in self.records if row["step"] in self.primary_late_steps]
+        if len(late) != len(self.primary_late_steps):
+            return {"ready": False, "passed": False, "classification": None}
+        thresholds = self.plan["regularized_polar_gate"]
+        candidates = tuple(
+            int(value)
+            for value in self.plan["regularized_polar_frontier"][
+                "candidate_ns_steps"
+            ]
+        )
+        outcomes: dict[str, Any] = {}
+        selected = None
+        for steps in candidates:
+            rows = [
+                record["same_momentum_polar"]["regularized_polar"][str(steps)][
+                    "all"
+                ]
+                for record in late
+            ]
+            measurements = {
+                "minimum_late_relative_error_closure_vs_native": min(
+                    float(row["relative_error_closure_vs_native"]) for row in rows
+                ),
+                "maximum_late_relative_error_amplification": max(
+                    float(row["relative_error_amplification"]) for row in rows
+                ),
+                "maximum_late_candidate_polar_relative_error": max(
+                    float(row["candidate_polar"]["relative_error"]) for row in rows
+                ),
+                "minimum_late_dense_native_cosine": min(
+                    float(row["dense_native"]["cosine"]) for row in rows
+                ),
+                "minimum_late_dense_native_norm_ratio": min(
+                    float(row["dense_native_norm_ratio"]) for row in rows
+                ),
+                "maximum_late_dense_native_norm_ratio": max(
+                    float(row["dense_native_norm_ratio"]) for row in rows
+                ),
+                "minimum_late_matrix_dense_task_alignment_retention": min(
+                    float(row["minimum_matrix_dense_task_alignment_retention"])
+                    for row in rows
+                ),
+                "maximum_late_matrix_regression_fraction": max(
+                    float(row["matrix_regression_fraction"]) for row in rows
+                ),
+            }
+            checks = {
+                "minimum_late_relative_error_closure_vs_native": (
+                    measurements["minimum_late_relative_error_closure_vs_native"]
+                    >= float(
+                        thresholds[
+                            "minimum_late_relative_error_closure_vs_native"
+                        ]
+                    )
+                ),
+                "maximum_late_relative_error_amplification": (
+                    measurements["maximum_late_relative_error_amplification"]
+                    <= float(
+                        thresholds["maximum_late_relative_error_amplification"]
+                    )
+                ),
+                "maximum_late_candidate_polar_relative_error": (
+                    measurements["maximum_late_candidate_polar_relative_error"]
+                    <= float(
+                        thresholds[
+                            "maximum_late_candidate_polar_relative_error"
+                        ]
+                    )
+                ),
+                "minimum_late_dense_native_cosine": (
+                    measurements["minimum_late_dense_native_cosine"]
+                    >= float(thresholds["minimum_late_dense_native_cosine"])
+                ),
+                "minimum_late_dense_native_norm_ratio": (
+                    measurements["minimum_late_dense_native_norm_ratio"]
+                    >= float(thresholds["minimum_late_dense_native_norm_ratio"])
+                ),
+                "maximum_late_dense_native_norm_ratio": (
+                    measurements["maximum_late_dense_native_norm_ratio"]
+                    <= float(thresholds["maximum_late_dense_native_norm_ratio"])
+                ),
+                "minimum_late_matrix_dense_task_alignment_retention": (
+                    measurements[
+                        "minimum_late_matrix_dense_task_alignment_retention"
+                    ]
+                    >= float(
+                        thresholds[
+                            "minimum_late_matrix_dense_task_alignment_retention"
+                        ]
+                    )
+                ),
+                "maximum_late_matrix_regression_fraction": (
+                    measurements["maximum_late_matrix_regression_fraction"]
+                    <= float(
+                        thresholds["maximum_late_matrix_regression_fraction"]
+                    )
+                ),
+            }
+            passed = all(checks.values()) and _all_finite(measurements)
+            outcomes[str(steps)] = {
+                "measurements": measurements,
+                "checks": checks,
+                "passed": passed,
+            }
+            if passed:
+                selected = steps
+        return {
+            "ready": True,
+            "passed": selected is not None,
+            "selected_ns_steps": selected,
+            "selection_rule": "largest candidate depth passing every frozen gate",
+            "classification": (
+                f"EARLY_STOPPED_MUON_NS{selected}_STABILIZES_PAIR_VQ"
+                if selected is not None
+                else "EARLY_STOPPED_MUON_POLAR_REGULARIZATION_REJECTED"
+            ),
+            "candidates": outcomes,
         }
 
     def probe(
@@ -748,9 +1064,13 @@ class PairVQFunctionalGradientOracle:
             gate = self._combined_gate()
             payload = {
                 "schema_version": (
-                    POLAR_RESULT_SCHEMA
-                    if self.polar_amplification_enabled
-                    else RESULT_SCHEMA
+                    REGULARIZED_POLAR_RESULT_SCHEMA
+                    if self.regularized_polar_enabled
+                    else (
+                        POLAR_RESULT_SCHEMA
+                        if self.polar_amplification_enabled
+                        else RESULT_SCHEMA
+                    )
                 ),
                 "status": "finished" if terminal else "running",
                 "plan": {"path": str(self.plan_path), "sha256": self.plan_sha256},
