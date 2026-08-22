@@ -5,7 +5,7 @@
   "scientific_parent_sha256": "3ead477be76bc36820531818fe54c2932c6f581a2f32975e476f64b0e805d9d8",
   "theory_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_minifloat_momentum_precision_frontier_plan.json",
   "theory_plan_sha256": "02cf2e611097abfdbb1752e0035ec34bd5bb4098cb2c5cd024cb8fd0dc3edfb3",
-  "implementation_commit": "347aed2cb1da4e4170cff3455bdb1aa6ff2d99ca",
+  "implementation_commit": "af33807849a0224cf93077d4453f3cafd5b19fb6",
   "entrypoint": "examples/nanogpt/train.py",
   "literal_command": "CUDA_VISIBLE_DEVICES=0 LD_LIBRARY_PATH=/mnt/ssd-data/orj/MappingNetworks/.compat/nvidia-595.71.05/root/usr/lib/x86_64-linux-gnu TORCH_EXTENSIONS_DIR=/mnt/ssd-data/orj/MappingNetworks/.cache/torch_extensions_sm120_exactfamily TORCH_CUDA_ARCH_LIST=12.0 PYTHONPATH=. /mnt/ssd-data/orj/MappingNetworks/.venv/bin/python -u examples/nanogpt/train.py --config examples/nanogpt/configs/pro6_mai_v3_124m_pairvq_minifloat_momentum_frontier_0p5tpp.json",
   "mfu_preflight_required": true,
