@@ -1,0 +1,71 @@
+{
+  "schema_version": "mai_124m_pair_vq_mlp_factorial_5tpp_mfu_result_v1",
+  "status": "passed",
+  "source_commit": "57c8f3cd056df3c53ea6e008269098f002dee867",
+  "theory_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_mlp_factorial_5tpp_localization_plan.json",
+    "sha256": "3ecc0e0aa7eb8969478f2c787afd3cdf65235f8a509b9912b58d167b6e4e9e95"
+  },
+  "policy": {
+    "minimum_mfu_fraction": 0.2,
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "execution_order": [
+      "compact_c_fc_dense_c_proj",
+      "dense_c_fc_compact_c_proj"
+    ],
+    "first_endpoint_may_change_second_launch": false
+  },
+  "arms": {
+    "compact_c_fc_dense_c_proj": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_cfconly_5tpp_lr24e4.json",
+      "config_sha256": "96fc9d117a3687cc865baf0f07284f2215c2bc794727923519f7bc197c0839f6",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_cfconly_5tpp_lr24e4_mfu.json",
+      "certificate_sha256": "6a0c45bb4c7630650b9ace873a7102d4ee25874ca12c6c91bcfb294c41e9ad9c",
+      "preflight_log_sha256": "473c11f659c475cbc9a50180c54402ba8afd50e4b2743b99769b8d8f9fa432e5",
+      "passed": true,
+      "mfu_fraction": 0.3171475960630368,
+      "tokens_per_second": 177267.045,
+      "iteration_milliseconds": 1478.86625,
+      "model_tflops": 132.3928540547021,
+      "optimizer_milliseconds": 278.29375,
+      "peak_mib": 31743.7,
+      "native_block_fht_extension_loaded": true,
+      "finite_loss_values": "13/13",
+      "pair_vq_modules": 12,
+      "pair_vq_elements": 28311552,
+      "persistent_training_bytes": 136897632,
+      "dense_weight_plus_momentum_compression_ratio": 1.6545,
+      "estimated_update_only_minutes": 58.49,
+      "estimated_total_minutes": "65-75"
+    },
+    "dense_c_fc_compact_c_proj": {
+      "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4.json",
+      "config_sha256": "9137b71fe781f8570bd4ab20b10ef1b47a90777cfa932ca926db9805f276612e",
+      "certificate": "/mnt/ssd-data/orj/MappingNetworks/outputs/pro6_mai_v3_pair_vq/preflights/pro6_mai_v3_124m_qkonly_pairvq_cprojonly_5tpp_lr24e4_mfu.json",
+      "certificate_sha256": "babfe748e60df30db508bad1a2c63f2f956474e5048a2c1f3c50d6eb93e84b20",
+      "preflight_log_sha256": "84f46294daa0d5c6666afff0e0dfdaad1cb4d03606f1d15ea7147bafcfa5bc33",
+      "passed": true,
+      "mfu_fraction": 0.33896911508109073,
+      "tokens_per_second": 188686.35499999998,
+      "iteration_milliseconds": 1389.3675,
+      "model_tflops": 140.9214276665395,
+      "optimizer_milliseconds": 188.07,
+      "peak_mib": 31730.18,
+      "native_block_fht_extension_loaded": true,
+      "finite_loss_values": "13/13",
+      "pair_vq_modules": 12,
+      "pair_vq_elements": 28311552,
+      "persistent_training_bytes": 119619936,
+      "dense_weight_plus_momentum_compression_ratio": 1.8934,
+      "estimated_update_only_minutes": 54.96,
+      "estimated_total_minutes": "62-72"
+    }
+  },
+  "authorization": {
+    "launch_first_arm": true,
+    "launch_second_arm_after_first_terminal_seal": true,
+    "parallel_scientific_training": false,
+    "automatic_20tpp_training": false,
+    "automatic_model_size_scale_up": false
+  }
+}
