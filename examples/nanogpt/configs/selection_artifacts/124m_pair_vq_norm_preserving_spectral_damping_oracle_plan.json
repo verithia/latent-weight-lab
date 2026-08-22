@@ -1,0 +1,98 @@
+{
+  "schema_version": "mai_124m_pair_vq_norm_preserving_spectral_damping_oracle_plan_v1",
+  "recorded_at": "2026-08-22",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Can scale-invariant ridge damping of weak singular modes reduce Pair-VQ error amplification while preserving the native five-step Muon direction, exact update norm, and first-order task alignment?",
+  "causal_basis": {
+    "codec_neighbor_stability_result": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_codec_neighbor_path_stability_oracle_result.json",
+      "sha256": "ebefb94bcfe9982d97be56df8dd29daf26fc9a7d90fa5c7e44763dc16dce137e",
+      "classification": "CODEC_NEIGHBOR_STABILITY_NOT_PRIMARY",
+      "minimum_actual_to_isotropic_logit_kl_ratio": 1.5416267361259675,
+      "minimum_actual_to_isotropic_gradient_error_ratio": 1.2393990769350016,
+      "minimum_actual_to_isotropic_postpolar_error_ratio": 1.0844470351624451,
+      "finding": "Pair-VQ residual directions are systematically worse than matched-energy isotropic controls, but the excess gradient and post-polar sensitivity does not clear the preregistered 1.25x joint gate; a codec-neighbor Mapping Loss is not the primary repair."
+    },
+    "same_momentum_polar_result": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_same_momentum_polar_amplification_oracle_result.json",
+      "sha256": "b45eefe78877bc0122ff10028a729aef72f959c285c78f0cde46760703cd04cc",
+      "classification": "MUON_POLAR_AMPLIFIES_CODEC_GRADIENT_ERROR",
+      "minimum_late_amplification": 3.982174218678504
+    },
+    "early_stopped_polar_result": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_early_stopped_muon_polar_stability_oracle_result.json",
+      "sha256": "84b6f75d51fa79082a34c944503a1e35accc3bbb6ab501319d05879fdb9e0ec2",
+      "classification": "EARLY_STOPPED_MUON_POLAR_REGULARIZATION_REJECTED",
+      "finding": "Strict Newton-Schulz prefixes reduced amplification only by materially changing native Muon direction and norm."
+    }
+  },
+  "theory": {
+    "native_spectral_response": "For X/||X||_F = U diag(s) V^T, the deployed five-step Newton-Schulz map has singular response p5(s).",
+    "ridge_filter": "For one global dimensionless rho, multiply the native response by d_rho(s)=s/sqrt(s^2+rho^2*mean(s^2)); this selectively attenuates weak, angularly unstable modes without replacing the accepted five-step polynomial.",
+    "exact_norm_restoration": "After filtering, multiply the candidate by ||Muon5(X)||_F/||candidate||_F. The candidate update norm therefore equals native Muon by construction; only direction can change.",
+    "frontier_rationale": "The four binary-spaced rho values probe a single scale-free ridge family. Select the smallest passing rho, hence the least change to native Muon that stabilizes the compact request.",
+    "attribution": "Dense and compact-center requests start from the same live dense momentum. The replay trajectory is never modified.",
+    "systems_scope": "Exact SVD is an oracle-only existence test. A pass does not authorize SVD in training; it authorizes only a separate zero-update fast polynomial or rational approximation gate."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [0, 60, 120, 180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 2026082201,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024
+    },
+    "heldout_window": {
+      "split": "validation",
+      "seed": 2026082202,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024,
+      "must_be_disjoint_from_fit": true
+    },
+    "momentum_history": "identical live dense Muon buffer for dense and compact-center branches",
+    "trajectory_intervention": "none",
+    "spectral_scoring_steps": [180, 238]
+  },
+  "spectral_damping_frontier": {
+    "native_ns_steps": 5,
+    "relative_rms_ridge": [0.03125, 0.0625, 0.125, 0.25],
+    "one_global_rho_for_all_matrices": true,
+    "selection_rule": "select the smallest relative_rms_ridge value that passes every frozen gate at both primary late steps"
+  },
+  "spectral_damping_gate": {
+    "minimum_late_relative_error_closure_vs_native": 0.20,
+    "maximum_late_relative_error_amplification": 3.0,
+    "maximum_late_candidate_polar_relative_error": 0.02,
+    "minimum_late_dense_native_cosine": 0.99,
+    "minimum_late_matrix_dense_native_cosine": 0.98,
+    "minimum_late_dense_native_norm_ratio": 0.9999,
+    "maximum_late_dense_native_norm_ratio": 1.0001,
+    "minimum_late_matrix_dense_task_alignment_retention": 0.98,
+    "maximum_late_matrix_regression_fraction": 0.25,
+    "minimum_virtual_weight_energy_recovery_weighted": 0.9999,
+    "minimum_virtual_weight_energy_recovery_every_matrix": 0.999,
+    "minimum_exact_config_mfu_fraction": 0.20
+  },
+  "state_and_compute_contract": {
+    "candidate_parameter_updates": 0,
+    "persistent_candidate_state": "none",
+    "dense_master_weight_in_candidate": false,
+    "dense_momentum_in_candidate": false,
+    "oracle_dense_momentum_is_scoring_only": true,
+    "inference_change": false,
+    "exact_svd_allowed_in_production": false,
+    "expected_runtime": "above five minutes; terminal/error-only watchdog required"
+  },
+  "decision_rule": {
+    "oracle_pass": "Seal the smallest passing ridge and authorize only one zero-update fast polynomial or rational approximation discriminator with the same gates. Do not launch an LM endpoint.",
+    "oracle_fail": "Reject norm-preserving spectral damping under the native-direction constraint; return to representation of the Muon momentum/request field rather than another forward-weight codec coefficient sweep.",
+    "automatic_training_endpoint": false,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  }
+}
