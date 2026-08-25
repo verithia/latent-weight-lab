@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import argparse
+import fcntl
+import hashlib
 import json
 import os
 import subprocess
@@ -13,6 +15,7 @@ from typing import Any
 
 
 CALLBACK_URL = "http://127.0.0.1:8766/send-opencode-test"
+TERMINAL_STATES = {"finished", "failed", "monitor_failed"}
 TERMINAL_ACTION = (
     "Action required: verify the terminal audit and exact artifacts against the "
     "active project note; seal hashes and gate outcomes, update durable notes, "
@@ -36,6 +39,62 @@ def atomic_json(path: Path, payload: dict[str, Any]) -> None:
     temporary = path.with_suffix(path.suffix + ".part")
     temporary.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n")
     os.replace(temporary, path)
+
+
+def load_json(path: Path) -> dict[str, Any] | None:
+    try:
+        payload = json.loads(path.read_text())
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return None
+    return payload if isinstance(payload, dict) else None
+
+
+def watch_identity(
+    host: str,
+    pgid: int,
+    status: str,
+    result: str,
+) -> str:
+    canonical = json.dumps(
+        {
+            "host": host,
+            "pgid": pgid,
+            "result": result,
+            "status": status,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def watcher_ledger_paths(identity: str) -> tuple[Path, Path]:
+    root = Path.home() / ".local" / "state" / "mapping_networks_watchdog"
+    return root / f"{identity}.lock", root / f"{identity}.terminal.json"
+
+
+def acquire_exclusive_lock(path: Path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle = path.open("a+")
+    try:
+        fcntl.flock(handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        handle.close()
+        return None
+    return handle
+
+
+def callback_already_delivered(
+    state: dict[str, Any] | None,
+    terminal_signature: list[Any] | None = None,
+) -> bool:
+    if not state or not state.get("callback_delivered_at_unix"):
+        return False
+    if state.get("state") not in TERMINAL_STATES:
+        return False
+    if terminal_signature is None:
+        return True
+    return list(state.get("terminal_signature") or []) == terminal_signature
 
 
 def send(chat_id: str, text: str) -> bool:
@@ -144,6 +203,13 @@ def main() -> None:
         help="Send live heartbeats at this interval; zero preserves terminal-only mode.",
     )
     args = parser.parse_args()
+    identity = watch_identity(args.host, args.pgid, args.status, args.result)
+    lock_path, terminal_receipt_path = watcher_ledger_paths(identity)
+    lock_handle = acquire_exclusive_lock(lock_path)
+    if lock_handle is None:
+        print(f"watcher already active for identity={identity}", flush=True)
+        return
+
     state: dict[str, Any] = {
         "schema_version": "remote_analysis_watch_v2",
         "run_label": args.run_label,
@@ -154,11 +220,19 @@ def main() -> None:
         "started_at_unix": time.time(),
     }
     if args.state.exists():
-        previous = json.loads(args.state.read_text())
+        previous = load_json(args.state)
+        if previous is None:
+            raise ValueError("watch state is not valid JSON")
         if previous.get("pgid") != args.pgid:
             raise ValueError("watch state PGID identity mismatch")
         state.update(previous)
+    receipt = load_json(terminal_receipt_path)
+    if callback_already_delivered(receipt) or callback_already_delivered(state):
+        print(f"terminal callback already delivered for identity={identity}", flush=True)
+        return
     state["schema_version"] = "remote_analysis_watch_v2"
+    state["watch_identity"] = identity
+    state["terminal_receipt_path"] = str(terminal_receipt_path)
     atomic_json(args.state, state)
 
     while True:
@@ -178,7 +252,24 @@ def main() -> None:
             terminal = status.get("state") in {"finished", "failed"}
             if terminal:
                 exit_code = status.get("exit_code")
-                state["terminal_signature"] = [status.get("state"), exit_code, sample.get("result_sha256")]
+                terminal_signature = [
+                    status.get("state"),
+                    exit_code,
+                    sample.get("result_sha256"),
+                ]
+                state["terminal_signature"] = terminal_signature
+                receipt = load_json(terminal_receipt_path)
+                if callback_already_delivered(receipt, terminal_signature):
+                    state.update(
+                        {
+                            "state": receipt["state"],
+                            "callback_delivered_at_unix": receipt[
+                                "callback_delivered_at_unix"
+                            ],
+                        }
+                    )
+                    atomic_json(args.state, state)
+                    return
                 if exit_code == 0 and sample.get("result_exists"):
                     message = (
                         f"[bot] @Codex {args.run_label} FINISHED: exit=0 "
@@ -192,6 +283,19 @@ def main() -> None:
                 if send(args.chat_id, message):
                     state["state"] = "finished"
                     state["callback_delivered_at_unix"] = time.time()
+                    atomic_json(
+                        terminal_receipt_path,
+                        {
+                            "schema_version": "remote_analysis_terminal_receipt_v1",
+                            "watch_identity": identity,
+                            "run_label": args.run_label,
+                            "state": state["state"],
+                            "terminal_signature": terminal_signature,
+                            "callback_delivered_at_unix": state[
+                                "callback_delivered_at_unix"
+                            ],
+                        },
+                    )
                     atomic_json(args.state, state)
                     return
             elif not sample.get("alive"):
@@ -200,6 +304,7 @@ def main() -> None:
                     message = f"[bot] @Codex {args.run_label} ERROR: process group missing without terminal status.\n\n{args.error_action}"
                     if send(args.chat_id, message):
                         state["state"] = "failed"
+                        state["callback_delivered_at_unix"] = time.time()
                         atomic_json(args.state, state)
                         return
             else:
@@ -233,6 +338,7 @@ def main() -> None:
                 message = f"[bot] @Codex {args.run_label} MONITOR ERROR: {error!r}\n\n{args.error_action}"
                 if send(args.chat_id, message):
                     state["state"] = "monitor_failed"
+                    state["callback_delivered_at_unix"] = time.time()
                     atomic_json(args.state, state)
                     return
         time.sleep(args.poll_seconds)
