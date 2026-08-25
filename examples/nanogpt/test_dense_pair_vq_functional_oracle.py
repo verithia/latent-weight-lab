@@ -97,6 +97,25 @@ def test_same_momentum_polar_plan_is_immutable_and_nonintervening() -> None:
     )
 
 
+def test_full_rank_tangent_atlas_plan_is_fail_closed_and_nonintervening() -> None:
+    root = Path(__file__).resolve().parents[2]
+    path = (
+        root
+        / "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_full_rank_tangent_atlas_oracle_plan.json"
+    )
+    plan = json.loads(path.read_text())
+    assert plan["schema_version"].endswith("_v1")
+    assert plan["frozen_protocol"]["probe_steps"] == [180, 238]
+    assert plan["frozen_protocol"]["model_updates_from_oracle"] == 0
+    assert plan["atlas"]["candidate_atoms"] == [1, 2]
+    assert plan["atlas_gate"]["postpolar_cosine"] == 0.9999
+    assert plan["decision_rule"]["automatic_language_model_training"] is False
+    assert plan["decision_rule"]["automatic_scale_up"] is False
+    assert hashlib.sha256(path.read_bytes()).hexdigest() == (
+        "f83a040e585a9f6e2c16ae0af8f703d561d0c79754048bfafea8fc8f721f9aeb"
+    )
+
+
 def test_early_stopped_polar_plan_is_immutable_and_causal() -> None:
     root = Path(__file__).resolve().parents[2]
     path = (

@@ -1,0 +1,103 @@
+{
+  "schema_version": "mai_124m_pair_vq_full_rank_tangent_atlas_oracle_plan_v1",
+  "recorded_at": "2026-08-25",
+  "status": "theory_preregistered_before_implementation_test_or_measurement",
+  "scientific_question": "Can a compact continuous full-rank local atlas around the accepted Pair-VQ value chart represent the exact post-Muon MLP request and its held-out functional action?",
+  "causal_basis": {
+    "teacher_forced_value_chart": "The sealed Pair-VQ shadow follows the exact dense replay within +0.00382 CE, so value capacity on an externally supplied path is not the primary defect.",
+    "late_tangent_failure": "The live discrete Pair-VQ chart recovers only about 0.0118 percent of late requested-update energy.",
+    "polar_sensitivity": "Forward-visible center gradients reach about 0.99998 cosine before Muon, but the five-step polar map amplifies their error about fourfold.",
+    "closed_families": "Low-rank, scalar damping, static BlockFHT, larger codebooks, and retraction-cadence variants did not close the causal 5TPP gap.",
+    "authorization": "Only a zero-update same-replay representability ceiling is authorized; no language-model candidate, scale-up, or hyperparameter sweep is authorized."
+  },
+  "theory": {
+    "value_model": "For each 768x768 panel, W = Q(c) + sum_s B_L,s(alpha_s) diag(d_s) B_R,s(beta_s)^T.",
+    "full_rank_property": "Every atom is generically full rank when its diagonal is nonzero; compactness comes from structured singular frames, not a low matrix rank.",
+    "connectivity": "Each B is a product of ten deterministic disjoint-Givens matchings at exact width 768. Connectivity is frozen by matrix identity, panel, side, atom, and seed; only angles and diagonals are fitted.",
+    "coordinate_count": "One atom uses 2*(10*384)+768 = 8448 continuous coordinates per 768x768 panel, exactly 69.81818x fewer values than an ambient panel. Two atoms use 16896, exactly 34.90909x fewer.",
+    "request_projection": "At the fitted value state phi, project the exact same-momentum post-polar dense Muon request U into J_phi by ridge least squares using matrix-free JVP, VJP, and conjugate gradient.",
+    "functional_metric": "Held-out c_fc action is GELU'(c_fc(x))*d_cfc(x) followed by the live dense c_proj; held-out c_proj action is d_cproj(GELU(c_fc(x))).",
+    "interpretation": "This is an expressivity ceiling. A pass licenses production implementation and systems gates only; a failure rejects this exact one/two-atom fixed-connectivity atlas."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 2026082201,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024
+    },
+    "heldout_window": {
+      "split": "validation",
+      "seed": 2026082202,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024,
+      "must_be_disjoint_from_fit": true
+    },
+    "dense_gradient_variant": "heldout exact dense path",
+    "muon_history": "identical live dense momentum buffer and native five-step Newton-Schulz polar map",
+    "weight_base": "live Pair-VQ materialized weight without the ambient FP16 feedback carry",
+    "model_updates_from_oracle": 0
+  },
+  "atlas": {
+    "width": 768,
+    "stages": 10,
+    "candidate_atoms": [1, 2],
+    "selection_rule": "Evaluate S=1 first. Evaluate S=2 only when S=1 fails a frozen local gate. Select the smallest S passing every gate at both late probes.",
+    "fit_steps": 80,
+    "fit_learning_rate": 0.03,
+    "fit_weight_decay": 0.0,
+    "fit_gradient_clip": 10.0,
+    "cg_iterations": 32,
+    "cg_tolerance": 1e-5,
+    "cg_ridge": 1e-6,
+    "functional_sample_rows_per_layer": 64,
+    "seed": 2026082501
+  },
+  "atlas_gate": {
+    "postpolar_cosine": 0.9999,
+    "minimum_matrix_postpolar_cosine": 0.999,
+    "minimum_matrix_positive_line_recovery": 0.999,
+    "minimum_matrix_value_cosine": 0.99,
+    "functional_jvp_cosine": 0.99,
+    "minimum_matrix_functional_jvp_cosine": 0.99,
+    "minimum_matrix_task_line_retention": 0.98
+  },
+  "state_and_compute_contract": {
+    "candidate_persistent_dense_master": false,
+    "candidate_persistent_dense_residual": false,
+    "candidate_persistent_dense_momentum": false,
+    "oracle_dense_weight_gradient_and_momentum": "scoring only",
+    "materialized_dense_weight": "transient and already required by GEMM",
+    "candidate_checkpoint_state": "Pair-VQ values plus atlas angles, diagonals, and compact optimizer state",
+    "inference_gemm_shape": "unchanged after one structured materialization",
+    "required_future_report": [
+      "compact parameter bytes",
+      "compact optimizer bytes",
+      "structured materialization FLOPs and wall time",
+      "peak VRAM",
+      "token throughput and empirical MFU",
+      "fixed-checkpoint CE and compute-equivalent penalty"
+    ]
+  },
+  "decision_rule": {
+    "S1_pass": "Seal the one-atom representability pass and authorize implementation, exact state/resume tests, and one exact-config MFU gate only.",
+    "S1_fail_S2_pass": "Seal the two-atom capacity-ceiling pass and authorize implementation, exact state/resume tests, and one exact-config MFU gate only.",
+    "S2_fail": "Reject this fixed-connectivity full-rank atlas without stage, seed, atom-count, LR, model-size, or horizon sweeps. Return to the preregistered conditional theory tree.",
+    "automatic_language_model_training": false,
+    "automatic_scale_up": false,
+    "automatic_hyperparameter_sweep": false
+  },
+  "operations": {
+    "expected_duration": "more than five minutes because two late probes fit and project every MLP panel",
+    "watchdog": "one idempotent terminal/error-only watchdog; no progress milestones or heartbeat for an expected one-to-two-hour oracle",
+    "callback": "Terminal success asks @Codex to verify hashes and gates, seal notes, and continue only with the causally authorized successor. Failure asks @Codex to diagnose and repair only if the frozen experiment remains valid.",
+    "host": "PRO6",
+    "gpu": 0
+  }
+}

@@ -25,6 +25,11 @@ from examples.nanogpt.dense_pair_vq_shadow import (
     atomic_json,
     sha256_file,
 )
+from examples.nanogpt.pair_vq_tangent_atlas import (
+    AtlasProtocol,
+    direction_metrics as atlas_direction_metrics,
+    evaluate_matrix as evaluate_atlas_matrix,
+)
 
 
 PLAN_SCHEMA = "mai_124m_pair_vq_antithetic_functional_gradient_oracle_plan_v1"
@@ -38,6 +43,9 @@ CODEC_STABILITY_PLAN_SCHEMA = (
 SPECTRAL_DAMPING_PLAN_SCHEMA = (
     "mai_124m_pair_vq_norm_preserving_spectral_damping_oracle_plan_v1"
 )
+TANGENT_ATLAS_PLAN_SCHEMA = (
+    "mai_124m_pair_vq_full_rank_tangent_atlas_oracle_plan_v1"
+)
 RESULT_SCHEMA = "mai_pair_vq_antithetic_functional_gradient_oracle_result_v1"
 POLAR_RESULT_SCHEMA = "mai_pair_vq_same_momentum_polar_amplification_oracle_result_v1"
 REGULARIZED_POLAR_RESULT_SCHEMA = (
@@ -48,6 +56,9 @@ CODEC_STABILITY_RESULT_SCHEMA = (
 )
 SPECTRAL_DAMPING_RESULT_SCHEMA = (
     "mai_pair_vq_norm_preserving_spectral_damping_oracle_result_v1"
+)
+TANGENT_ATLAS_RESULT_SCHEMA = (
+    "mai_pair_vq_full_rank_tangent_atlas_oracle_result_v1"
 )
 
 
@@ -223,6 +234,7 @@ class PairVQFunctionalGradientOracle:
             REGULARIZED_POLAR_PLAN_SCHEMA,
             CODEC_STABILITY_PLAN_SCHEMA,
             SPECTRAL_DAMPING_PLAN_SCHEMA,
+            TANGENT_ATLAS_PLAN_SCHEMA,
         }:
             raise ValueError("unexpected functional-oracle plan schema")
         self.polar_amplification_enabled = (
@@ -243,9 +255,12 @@ class PairVQFunctionalGradientOracle:
         self.spectral_damping_enabled = (
             plan.get("schema_version") == SPECTRAL_DAMPING_PLAN_SCHEMA
         )
-        if self.polar_amplification_enabled and optimizer is None:
+        self.tangent_atlas_enabled = (
+            plan.get("schema_version") == TANGENT_ATLAS_PLAN_SCHEMA
+        )
+        if (self.polar_amplification_enabled or self.tangent_atlas_enabled) and optimizer is None:
             raise ValueError(
-                "same-momentum polar amplification requires the dense optimizer"
+                "same-momentum request analysis requires the dense optimizer"
             )
         frozen = plan["frozen_protocol"]
         if str(observer.source_config_path) != str(
@@ -270,7 +285,7 @@ class PairVQFunctionalGradientOracle:
             frozen.get("isotropic_seed_base", 0)
         )
         self._dense_optimizer_owner: dict[str, tuple[Any, dict[str, Any]]] = {}
-        if self.polar_amplification_enabled:
+        if self.polar_amplification_enabled or self.tangent_atlas_enabled:
             children = list(getattr(optimizer, "optimizers", [optimizer]))
             for name, module in observer._dense_modules.items():
                 matches = []
@@ -327,6 +342,24 @@ class PairVQFunctionalGradientOracle:
             raise ValueError("functional-oracle fit and held-out windows overlap")
         self.indices_disjoint = True
         self.last_residual_metrics = self.update_compact_residual()
+
+        self._atlas_protocols: dict[str, AtlasProtocol] = {}
+        if self.tangent_atlas_enabled:
+            atlas = plan["atlas"]
+            for atoms in (1, 2):
+                self._atlas_protocols[f"S{atoms}"] = AtlasProtocol(
+                    width=int(atlas["width"]),
+                    stages=int(atlas["stages"]),
+                    atoms=atoms,
+                    fit_steps=int(atlas["fit_steps"]),
+                    fit_learning_rate=float(atlas["fit_learning_rate"]),
+                    fit_weight_decay=float(atlas["fit_weight_decay"]),
+                    fit_gradient_clip=float(atlas["fit_gradient_clip"]),
+                    cg_iterations=int(atlas["cg_iterations"]),
+                    cg_tolerance=float(atlas["cg_tolerance"]),
+                    cg_ridge=float(atlas["cg_ridge"]),
+                    seed=int(atlas["seed"]),
+                )
 
     @staticmethod
     def _make_window(
@@ -1069,6 +1102,250 @@ class PairVQFunctionalGradientOracle:
             )
         return payload
 
+    @torch.no_grad()
+    def _same_momentum_dense_updates(
+        self, reference: dict[str, torch.Tensor]
+    ) -> dict[str, torch.Tensor]:
+        """Return the exact post-polar dense request used by the control."""
+        updates: dict[str, torch.Tensor] = {}
+        for name in sorted(reference):
+            module = self.observer._dense_modules[name]
+            owner, group = self._dense_optimizer_owner[name]
+            momentum = float(group["momentum"])
+            ns_steps = int(group["ns_steps"])
+            buffer = owner.state[module.weight].get("momentum_buffer")
+            if buffer is None:
+                buffer = torch.zeros_like(module.weight)
+            gradient = reference[name].to(
+                device=module.weight.device, dtype=torch.float32
+            )
+            next_buffer = buffer.float() * momentum + gradient
+            request = gradient + momentum * next_buffer
+            updates[name] = muon_update(request, steps=ns_steps).float().cpu()
+        return updates
+
+    @torch.no_grad()
+    def _capture_mlp_functional_samples(
+        self, *, split: str
+    ) -> dict[str, dict[str, torch.Tensor]]:
+        """Capture a frozen small activation metric for MLP update JVPs."""
+        limit = int(self.plan["atlas"]["functional_sample_rows_per_layer"])
+        samples: dict[str, dict[str, torch.Tensor]] = {}
+        handles = []
+
+        def pre_hook(name: str):
+            def capture(_module: nn.Module, values: tuple[torch.Tensor, ...]) -> None:
+                flat = values[0].detach().reshape(-1, values[0].shape[-1])
+                samples.setdefault(name, {})["input"] = flat[:limit].float().cpu()
+            return capture
+
+        def output_hook(name: str):
+            def capture(
+                _module: nn.Module,
+                _values: tuple[torch.Tensor, ...],
+                output: torch.Tensor,
+            ) -> None:
+                flat = output.detach().reshape(-1, output.shape[-1])
+                samples.setdefault(name, {})["output"] = flat[:limit].float().cpu()
+            return capture
+
+        for name, module in self.observer._dense_modules.items():
+            handles.append(module.register_forward_pre_hook(pre_hook(name)))
+            if name.endswith(".c_fc"):
+                handles.append(module.register_forward_hook(output_hook(name)))
+        try:
+            tokens = self._windows[split][0].to(self.device, non_blocking=False)
+            inputs = tokens[:, :-1].contiguous()
+            targets = tokens[:, 1:].contiguous()
+            device_type = "cuda" if "cuda" in self.device else "cpu"
+            amp = (
+                torch.amp.autocast(device_type=device_type, dtype=self.dtype)
+                if device_type == "cuda"
+                else contextlib.nullcontext()
+            )
+            with amp:
+                self.model(inputs, targets)
+        finally:
+            for handle in handles:
+                handle.remove()
+        return samples
+
+    @staticmethod
+    def _gelu_derivative(values: torch.Tensor) -> torch.Tensor:
+        return 0.5 * (1.0 + torch.erf(values / math.sqrt(2.0))) + (
+            values * torch.exp(-0.5 * values.square()) / math.sqrt(2.0 * math.pi)
+        )
+
+    def _functional_update_metrics(
+        self,
+        *,
+        name: str,
+        reference: torch.Tensor,
+        candidate: torch.Tensor,
+        samples: dict[str, dict[str, torch.Tensor]],
+    ) -> dict[str, float]:
+        values = samples[name]
+        inputs = values["input"].float()
+        if name.endswith(".c_fc"):
+            preactivation = values["output"].float()
+            multiplier = self._gelu_derivative(preactivation)
+            reference_hidden = (inputs @ reference.float().T) * multiplier
+            candidate_hidden = (inputs @ candidate.float().T) * multiplier
+            projection_name = name[: -len("c_fc")] + "c_proj"
+            projection = self.observer._dense_modules[
+                projection_name
+            ].weight.detach().float().cpu()
+            reference_action = reference_hidden @ projection.T
+            candidate_action = candidate_hidden @ projection.T
+        else:
+            reference_action = inputs @ reference.float().T
+            candidate_action = inputs @ candidate.float().T
+        return atlas_direction_metrics(reference_action, candidate_action)
+
+    def _evaluate_tangent_atlas(
+        self,
+        *,
+        dense_updates: dict[str, torch.Tensor],
+        dense_gradients: dict[str, torch.Tensor],
+    ) -> dict[str, Any]:
+        samples = self._capture_mlp_functional_samples(split="heldout")
+        thresholds = self.plan["atlas_gate"]
+        candidates: dict[str, Any] = {}
+        for label in ("S1", "S2"):
+            protocol = self._atlas_protocols[label]
+            rows = []
+            for name in sorted(dense_updates):
+                dense = self.observer._dense_modules[name].weight.detach().float()
+                compact = self.observer._shadow_modules[name].weight.detach().float()
+                requested = dense_updates[name]
+                projected, details = evaluate_atlas_matrix(
+                    identity=name,
+                    dense_weight=dense,
+                    compact_weight=compact,
+                    requested_update=requested,
+                    protocol=protocol,
+                    device=self.device,
+                )
+                tangent = atlas_direction_metrics(requested, projected)
+                functional = self._functional_update_metrics(
+                    name=name,
+                    reference=requested,
+                    candidate=projected,
+                    samples=samples,
+                )
+                gradient = dense_gradients[name].double()
+                dense_line = float((gradient * requested.double()).sum())
+                candidate_line = float((gradient * projected.double()).sum())
+                rows.append(
+                    {
+                        "module": name,
+                        "side": "c_fc" if name.endswith(".c_fc") else "c_proj",
+                        "value": details["value"],
+                        "tangent": tangent,
+                        "functional": functional,
+                        "task_line_retention": candidate_line
+                        / max(abs(dense_line), 1e-30)
+                        * (1.0 if dense_line >= 0.0 else -1.0),
+                        "coordinates": details["coordinates"],
+                        "ambient": details["ambient"],
+                        "compression_vs_dense_values": details[
+                            "compression_vs_dense_values"
+                        ],
+                        "panels": details["panels"],
+                    }
+                )
+            tangent_aggregate = self._aggregate_atlas_rows(rows, "tangent")
+            functional_aggregate = self._aggregate_atlas_rows(rows, "functional")
+            measurements = {
+                "postpolar_cosine": tangent_aggregate["cosine"],
+                "minimum_matrix_postpolar_cosine": min(
+                    float(row["tangent"]["cosine"]) for row in rows
+                ),
+                "minimum_matrix_positive_line_recovery": min(
+                    float(row["tangent"]["positive_line_recovery"]) for row in rows
+                ),
+                "minimum_matrix_value_cosine": min(
+                    float(row["value"]["cosine"]) for row in rows
+                ),
+                "functional_jvp_cosine": functional_aggregate["cosine"],
+                "minimum_matrix_functional_jvp_cosine": min(
+                    float(row["functional"]["cosine"]) for row in rows
+                ),
+                "minimum_matrix_task_line_retention": min(
+                    float(row["task_line_retention"]) for row in rows
+                ),
+            }
+            checks = {
+                key: value >= float(thresholds[key])
+                for key, value in measurements.items()
+            }
+            candidates[label] = {
+                "protocol": {
+                    "atoms": protocol.atoms,
+                    "stages": protocol.stages,
+                    "coordinates_per_panel": protocol.coordinates_per_panel,
+                },
+                "measurements": measurements,
+                "checks": checks,
+                "passed": all(checks.values()) and _all_finite(measurements),
+                "tangent": tangent_aggregate,
+                "functional": functional_aggregate,
+                "matrices": rows,
+            }
+            if label == "S1" and candidates[label]["passed"]:
+                break
+        return {"candidates": candidates}
+
+    @staticmethod
+    def _aggregate_atlas_rows(
+        rows: list[dict[str, Any]], key: str
+    ) -> dict[str, float]:
+        reference = sum(float(row[key]["reference_energy"]) for row in rows)
+        candidate = sum(float(row[key]["candidate_energy"]) for row in rows)
+        error = sum(float(row[key]["error_energy"]) for row in rows)
+        inner = sum(
+            float(row[key]["cosine"])
+            * math.sqrt(
+                float(row[key]["reference_energy"])
+                * float(row[key]["candidate_energy"])
+            )
+            for row in rows
+        )
+        cosine = inner / max(math.sqrt(reference * candidate), 1e-30)
+        return {
+            "reference_energy": reference,
+            "candidate_energy": candidate,
+            "error_energy": error,
+            "relative_error": math.sqrt(error / max(reference, 1e-30)),
+            "cosine": cosine,
+            "positive_line_recovery": max(cosine, 0.0) ** 2,
+        }
+
+    def _summarize_tangent_atlas_gate(self) -> dict[str, Any]:
+        late = [row for row in self.records if row["step"] in self.primary_late_steps]
+        if len(late) != len(self.primary_late_steps):
+            return {"ready": False, "passed": False}
+        for label in ("S1", "S2"):
+            if any(label not in row["tangent_atlas"]["candidates"] for row in late):
+                continue
+            passed = all(
+                bool(row["tangent_atlas"]["candidates"][label]["passed"])
+                for row in late
+            )
+            if passed:
+                return {
+                    "ready": True,
+                    "passed": True,
+                    "selected": label,
+                    "classification": "FULL_RANK_TANGENT_ATLAS_PASSES",
+                }
+        return {
+            "ready": True,
+            "passed": False,
+            "selected": None,
+            "classification": "FULL_RANK_TANGENT_ATLAS_REJECTED",
+        }
+
     @staticmethod
     def _matrix_regression_fraction(
         native: dict[str, Any], candidate: dict[str, Any]
@@ -1652,6 +1929,14 @@ class PairVQFunctionalGradientOracle:
                 "splits": split_payload,
                 "cross_window": cross_window,
             }
+            if self.tangent_atlas_enabled:
+                dense_updates = self._same_momentum_dense_updates(
+                    captured["heldout"]["dense"]
+                )
+                record["tangent_atlas"] = self._evaluate_tangent_atlas(
+                    dense_updates=dense_updates,
+                    dense_gradients=captured["heldout"]["dense"],
+                )
             if self.codec_stability_enabled:
                 codec_splits = {}
                 for split in ("fit", "heldout"):
@@ -1720,13 +2005,19 @@ class PairVQFunctionalGradientOracle:
                     )
                 )
             self.records.append(record)
-            gate = self._combined_gate()
+            gate = (
+                self._summarize_tangent_atlas_gate()
+                if self.tangent_atlas_enabled
+                else self._combined_gate()
+            )
             payload = {
                 "schema_version": (
                     CODEC_STABILITY_RESULT_SCHEMA
                     if self.codec_stability_enabled
                     else (
-                        SPECTRAL_DAMPING_RESULT_SCHEMA
+                    TANGENT_ATLAS_RESULT_SCHEMA
+                    if self.tangent_atlas_enabled
+                    else SPECTRAL_DAMPING_RESULT_SCHEMA
                         if self.spectral_damping_enabled
                         else (
                             REGULARIZED_POLAR_RESULT_SCHEMA
