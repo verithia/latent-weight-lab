@@ -1,0 +1,40 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_chunked_batched_lloyd_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "correctness_pass_systems_rejected",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_chunked_batched_lloyd_plan.json",
+    "sha256": "35096758a996c2fbd6c2c9266bf6bf2faebd869e19227f86f9c70e40783392e4"
+  },
+  "implementation_commit": "8ce67f17707e27d704de8ac0e75d8a02659fb697",
+  "remote_artifact": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/chunked_batched_lloyd_oracle/result.json",
+    "sha256": "3966bcad1761f9a1da4e903ec384a2007150726f9bb9fe44c509d86fda3a2716"
+  },
+  "correctness": {
+    "fixed_level_counts_exact_all_roles": true,
+    "maximum_centroid_abs": 0.00007677078247070312,
+    "maximum_code_mismatch_fraction": 0.00007885473745840568,
+    "passed": true
+  },
+  "performance": {
+    "total_serial_ms": 341.7622006187836,
+    "total_selected_ms": 180.41809819017848,
+    "aggregate_speedup": 1.894278922386891,
+    "projected_optimizer_ms": 518.2596475713949,
+    "maximum_projected_optimizer_ms": 495.0,
+    "shortfall_ms": 23.259647571394914,
+    "peak_allocated_mib": 1953.1962890625,
+    "passed": false
+  },
+  "selected_groups": {
+    "cfc_residual_coordinates": 12,
+    "cproj_residual_coordinates": 12,
+    "base_coordinates": 24,
+    "refined_coordinates": 12,
+    "base_gains": 24,
+    "cfc_residual_gains": 12,
+    "cproj_residual_gains": 12
+  },
+  "decision": "Chunking is numerically admissible and slightly faster than full batching, but still cannot clear the frozen projected optimizer gate. Do not integrate it. Test CUDA-graph replay of the validated grouped reference path under explicit copy and retained-scratch accounting."
+}

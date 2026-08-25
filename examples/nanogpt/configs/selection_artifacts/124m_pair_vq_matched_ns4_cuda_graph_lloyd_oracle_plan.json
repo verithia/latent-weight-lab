@@ -1,0 +1,43 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_cuda_graph_lloyd_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_capture_probe_or_measurement",
+  "question": "Can CUDA-graph replay remove enough Python/dispatcher launch overhead from the already validated grouped reference Lloyd path to clear the exact compact optimizer gate?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_chunked_batched_lloyd_result.json",
+    "sha256": "60bd0593fc635f390380fc561eab7e9b9049034dd8490149e563dfc9604e4b2f"
+  },
+  "frozen_intervention": [
+    "Retain the validated torch.searchsorted, offset-index_add, bincount, static torch.where centroid update, sorting, and final assignment exactly.",
+    "Use the sealed selected group sizes: 12,12,24,12,24,12,12 in production-role order.",
+    "Capture one static-shape CUDA graph per distinct production role/group shape and replay it for each contiguous group.",
+    "Timed replay must include copying each live group into its static input and copying all returned levels and codes into durable output buffers whenever a role has more than one group.",
+    "Do not change codec capacity, Lloyd iterations, initialization, cadence, Muon field, persistent training state, batch shape, or schedule.",
+    "This phase is a standalone no-training oracle only."
+  ],
+  "capture_gate": {
+    "all_seven_production_roles_capture_and_replay": true,
+    "no_unsafe_capture_relaxation_or_dynamic_shape_fallback": true
+  },
+  "correctness_gate": {
+    "fixed_level_counts_exact_for_every_role": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "maximum_retained_graph_scratch_mib": 8192.0,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 5
+  },
+  "decision_rule": {
+    "capture_fail": "Reject CUDA-graph replay and seal the exact unsupported operation; do not replace it with a different algorithm under this plan.",
+    "correctness_fail": "Reject without optimizer integration or MFU measurement.",
+    "scratch_or_projected_time_fail": "Reject without optimizer integration; derive a different exact execution mechanism.",
+    "all_gates_pass": "Preregister a two-phase optimizer integration with exact state, independent numerical replay, retained-memory, and >=20% MFU gates; do not automatically train.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}
