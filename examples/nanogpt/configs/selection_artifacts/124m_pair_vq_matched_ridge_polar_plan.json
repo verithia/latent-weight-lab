@@ -1,0 +1,94 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ridge_polar_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Does replacing native Muon's rank-sensitive polar map with the same ridge-smoothed polar map for both dense and compact MLPs preserve dense-model quality while closing the compact full-MLP loss gap?",
+  "causal_basis": {
+    "same_momentum_polar_amplification": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_same_momentum_polar_amplification_oracle_result.json",
+      "sha256": "b45eefe78877bc0122ff10028a729aef72f959c285c78f0cde46760703cd04cc",
+      "finding": "Pair-VQ and dense requested gradients are nearly identical before Muon, but native NS5 amplifies their small difference by at least 3.982x late in training."
+    },
+    "spectral_damping_oracle": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_norm_preserving_spectral_damping_oracle_result.json",
+      "sha256": "efd877c310b5973f61a017a57d961cd6109b53905cb3479a3b425b9335ea1997",
+      "selected_evidence_rho": 0.25,
+      "maximum_late_relative_error_amplification": 2.6869534207843637,
+      "maximum_late_candidate_polar_relative_error": 0.01653656401333762,
+      "minimum_late_relative_error_closure_vs_native": 0.37842106730779645,
+      "reason_for_prior_rejection": "The candidate changed native Muon's dense direction (minimum cosine 0.90013). That is not a valid rejection criterion when dense and compact controls both use the same alternative optimizer geometry."
+    },
+    "compact_endpoint": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_lazy_retraction_5tpp_result.json",
+      "dense_parent_validation_ce": 3.4858,
+      "compact_validation_ce": 3.5549567,
+      "gap": 0.0691567,
+      "finding": "Changing retraction cadence improved systems performance but did not close the quality gap, so the next intervention must target the optimizer vector field rather than another codec coefficient."
+    },
+    "representation_closure": "Fixed affine history, moving linear atlases, structured low-state charts, depth-shared trunks, and Pair-VQ value refinements all failed to represent the rotating self-path update field closely enough."
+  },
+  "theory": {
+    "rank_sensitivity": "The polar map U(X)=X(X^T X)^{-1/2} is non-Lipschitz at rank loss; small compact perturbations in weak singular modes can rotate U(X) by much more than they rotate X.",
+    "matched_optimizer_principle": "The compact model should not be judged against native Muon after changing only its optimizer. Both the dense control and compact candidate must follow one identical smoothed vector field.",
+    "fast_operator": "After transposing X so m<=n and normalizing its Frobenius norm, set tau=rho/sqrt(m), form X_aug=[X,tau*I_m], apply the deployed five Newton-Schulz steps to X_aug, retain the original n columns, and restore Frobenius norm sqrt(m) before the existing rectangular Muon scale. The ridge makes every augmented singular value at least tau and bounds angular sensitivity near weak modes.",
+    "persistent_state": "The identity block is ephemeral. The operator adds no learned parameter, dense master weight, or persistent optimizer tensor.",
+    "optimizer_flops": "For the 4:1 GPT MLP matrices, augmenting width 4m to 5m increases the width-dependent portion of each polar step by 25% and the complete polar kernel by approximately 22.2%; exact end-to-end throughput is measured rather than inferred."
+  },
+  "frozen_candidate": {
+    "muon_mlp_polar_ridge": 0.25,
+    "muon_ns_steps": 5,
+    "scope": [
+      "dense MLP c_fc and c_proj matrices",
+      "Pair-VQ MLP c_fc and c_proj requested gradients"
+    ],
+    "excluded_scope": [
+      "attention matrices",
+      "embeddings",
+      "vectors and AdamW groups"
+    ],
+    "sweep": false
+  },
+  "gated_protocol": {
+    "stage_1_operator_gate": {
+      "ridge_zero_exactly_preserves_native_code_path": true,
+      "finite_nonnegative_validation": true,
+      "ill_conditioned_perturbation_amplification_max": 3.0,
+      "restored_frobenius_norm_relative_error_max": 1e-5
+    },
+    "stage_2_system_gate": {
+      "machine": "Y400 GPU0",
+      "native_dense_and_ridge_dense_exact_config_preflights": true,
+      "minimum_mfu_fraction": 0.2,
+      "ridge_dense_throughput_ratio_vs_native_min": 0.9
+    },
+    "stage_3_dense_quality_gate": {
+      "model": "124M QK-only mapped attention plus dense MLP",
+      "tokens_per_parameter": 0.5,
+      "fixed_eval_protocol": "mai_ladder_fixed_eval_indices_v2",
+      "sealed_native_parent_validation_ce": 5.361,
+      "ridge_dense_validation_ce_max": 5.371,
+      "all_fixed_evaluations_finite": true
+    },
+    "stage_4_compact_gap_gate": {
+      "authorization": "run only after every dense gate passes",
+      "model": "same 124M QK-only parent with full Pair-VQ MLP replacement",
+      "tokens_per_parameter": 0.5,
+      "candidate_minus_matched_ridge_dense_validation_ce_max": 0.01,
+      "absolute_validation_ce_max": 5.381,
+      "minimum_persistent_mlp_state_compression": 2.8,
+      "fixed_model_compute_penalty_max": 1.1
+    }
+  },
+  "decision_rule": {
+    "operator_or_system_fail": "Reject this fast smoothed-polar implementation without a rho sweep.",
+    "dense_fail": "Reject matched ridge-polar optimization; do not run the compact endpoint.",
+    "compact_fail": "Reject optimizer smoothing as sufficient to close the compact full-MLP gap; return to compact-native nonlinear parameterization.",
+    "compact_pass": "Replicate at 5TPP seed 1 before composing compact attention V/output; no model-size scale-up is authorized by this screen.",
+    "automatic_sweep": false,
+    "automatic_model_scale_up": false
+  },
+  "monitoring": {
+    "performance_gates": "foreground poll only when expected below five minutes",
+    "training": "persistent terminal/error-only watchdog; no progress callback for runs expected within one to two hours"
+  }
+}

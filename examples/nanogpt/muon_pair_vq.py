@@ -3386,9 +3386,12 @@ class MuonPairVQ(torch.optim.Optimizer):
         momentum: float,
         weight_decay: float,
         ns_steps: int,
+        polar_ridge: float = 0.0,
     ) -> None:
         if not modules:
             raise ValueError("MuonPairVQ requires at least one module")
+        if not math.isfinite(float(polar_ridge)) or float(polar_ridge) < 0.0:
+            raise ValueError("Pair-VQ polar ridge must be finite and non-negative")
         for module in modules:
             module.weight.requires_grad_(True)
         momentum_modes = {module.fp16_ambient_momentum for module in modules}
@@ -3423,6 +3426,7 @@ class MuonPairVQ(torch.optim.Optimizer):
             "momentum": float(momentum),
             "weight_decay": float(weight_decay),
             "ns_steps": int(ns_steps),
+            "polar_ridge": float(polar_ridge),
         }
         super().__init__([{"params": [module.weight for module in modules]}], defaults)
         self._reserved_escape_owner = self.param_groups[0]["params"][0]
@@ -3593,6 +3597,7 @@ class MuonPairVQ(torch.optim.Optimizer):
             momentum_coefficient = float(group["momentum"])
             weight_decay = float(group["weight_decay"])
             ns_steps = int(group["ns_steps"])
+            polar_ridge = float(group["polar_ridge"])
             for weight in group["params"]:
                 gradient = weight.grad
                 if gradient is None:
@@ -3669,11 +3674,17 @@ class MuonPairVQ(torch.optim.Optimizer):
                     requested_gradient = gradient.float() + (
                         momentum_coefficient * expanded.reshape_as(gradient)
                     )
-                update = muon_update(requested_gradient, steps=ns_steps)
+                update = muon_update(
+                    requested_gradient,
+                    steps=ns_steps,
+                    polar_ridge=polar_ridge,
+                )
                 reference_metrics = None
                 if reference_requested_gradient is not None:
                     reference_update = muon_update(
-                        reference_requested_gradient, steps=ns_steps
+                        reference_requested_gradient,
+                        steps=ns_steps,
+                        polar_ridge=polar_ridge,
                     )
                     reference_flat = reference_update.double().reshape(-1)
                     candidate_flat = update.double().reshape(-1)
