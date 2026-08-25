@@ -14,6 +14,7 @@ ARTIFACTS = CONFIGS / "selection_artifacts"
 BASE_DENSE = CONFIGS / "pro6_mai_v3_124m_qkonly_densemlp_parent_0p5tpp_lr24e4.json"
 BASE_COMPACT = CONFIGS / "pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_0p5tpp_lr24e4.json"
 PLAN = ARTIFACTS / "124m_pair_vq_matched_ns4_mlp_plan.json"
+DENSE_RESULT = ARTIFACTS / "124m_pair_vq_matched_ns4_dense_result.json"
 REMOTE_ROOT = "/root/userdata/MappingNetworks"
 REMOTE_REPO = f"{REMOTE_ROOT}/latent-weight-lab"
 REMOTE_OUTPUT = f"{REMOTE_ROOT}/outputs/y400_mai_v3_matched_ns4_mlp"
@@ -121,17 +122,21 @@ def compact() -> dict[str, object]:
     config.update(
         {
             "schema_version": "mai_y400_124m_pairvq_matched_ns4_mlp_0p5tpp_v1",
-            "experiment_role": "launch-blocked compact full-MLP matched-NS4 gap test",
+            "experiment_role": "dense-authorized compact full-MLP matched-NS4 gap test",
             "scientific_parent": str(PLAN.relative_to(ROOT)),
             "scientific_parent_sha256": sha256(PLAN),
-            "launch_ready": False,
-            "launch_block_reason": "requires sealed matched-NS4 dense CE and throughput pass",
+            "authorization_result": str(DENSE_RESULT.relative_to(ROOT)),
+            "authorization_result_sha256": sha256(DENSE_RESULT),
+            "launch_ready": True,
+            "launch_block_reason": None,
             "muon_mlp_ns_steps": 4,
             "muon_mlp_lr_scale": 1.225,
             "muon_mlp_polar_ridge": 0.0,
             "endpoint_gate": {
                 "matched_dense_config": f"examples/nanogpt/configs/{DENSE_NAME}.json",
-                "matched_dense_result_required": True,
+                "matched_dense_result": str(DENSE_RESULT.relative_to(ROOT)),
+                "matched_dense_result_sha256": sha256(DENSE_RESULT),
+                "matched_dense_terminal_validation_ce": 5.3663,
                 "candidate_minus_matched_dense_validation_ce_max": 0.01,
                 "terminal_candidate_validation_ce_max": 5.381,
                 "persistent_momentum_bytes_max": 99090432,
