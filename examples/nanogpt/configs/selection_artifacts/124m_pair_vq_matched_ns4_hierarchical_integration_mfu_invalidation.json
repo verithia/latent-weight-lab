@@ -1,0 +1,31 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_integration_mfu_invalidation_v1",
+  "recorded_at": "2026-08-26T03:15:21+08:00",
+  "status": "invalid_measurement",
+  "invalid_certificate": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_mfu_result.json",
+    "sha256": "1cb992225ccc8f327a71ca5646ce0f20e71e6277860a124db654801af5c0af3e"
+  },
+  "observed_measurement": {
+    "mfu_percent": 17.933227761664655,
+    "optimizer_ms": 639.1925,
+    "peak_allocated_mib": 31707.43,
+    "persistent_pair_vq_training_bytes": 157500864
+  },
+  "invalidation_reason": "The scratch training log instantiated GPTConfig with block_fht_mlp_pair_vq_hierarchical_feedback_fit=False even though the immutable source JSON set it to true. train.py accepted arbitrary JSON keys into the argparse namespace but pair_vq_model_kwargs omitted this field, silently restoring the default false value at the GPTConfig boundary. The timing therefore measured the old serial fitter and cannot accept or reject the hierarchical integration.",
+  "evidence": {
+    "remote_log": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/preflights/y400_mai_v3_124m_pairvq_hierarchical_integration.log",
+    "remote_log_observation": "block_fht_mlp_pair_vq_hierarchical_feedback_fit': False",
+    "certificate_git_commit": "1613efbaf8cca59d99643facbe4bcd132bbc764b"
+  },
+  "repair": {
+    "git_commit": "df977c0771da0217b35584f757fb5d62208b5a3c",
+    "change": "Propagate block_fht_mlp_pair_vq_hierarchical_feedback_fit through pair_vq_model_kwargs into GPTConfig and assert the boundary in test_muon_pair_vq.py.",
+    "focused_tests": {
+      "pair_vq_training_boundary": "1 passed",
+      "mfu_preflight_suite": "16 passed"
+    }
+  },
+  "next_action": "Run a fresh exact-source preflight and require the scratch log to show hierarchical_feedback_fit=True before applying the frozen state, optimizer, memory, or MFU gates.",
+  "scientific_training_authorized": false
+}

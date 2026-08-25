@@ -1,0 +1,149 @@
+{
+  "calibration": {
+    "bf16_gemm_size": 8192,
+    "bf16_gemm_trials": 8,
+    "bf16_gemm_warmups": 4,
+    "empirical_bf16_gemm_peak_tflops": 769.9419034683452
+  },
+  "config": {
+    "path": "/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "sha256": "670cc783e303a777575325cfe6557e321aca3aa43423a94c4c1ea6e8a3e0aaac"
+  },
+  "elapsed_seconds": 20.52945351600647,
+  "error": "MFU gate rejected launch: measured 17.93% < required 20.00%",
+  "feedback_cap": {
+    "active_layer_updates": 0,
+    "event_count": 0,
+    "maximum_pre_cap_nominal_steps": 0.0,
+    "timed_event_count": 0
+  },
+  "finished_at_unix": 1787685071.050528,
+  "hardware": {
+    "cuda_visible_devices": "0",
+    "device": "NVIDIA H100 80GB HBM3"
+  },
+  "measurement": {
+    "active_params_6n_estimate": 124475904,
+    "base_timed_iter_ms": 1420.48,
+    "diagnostic_io": {
+      "included": false,
+      "optimizer_probe_count": 0,
+      "optimizer_probe_io_included_in_iter_ms": false,
+      "optimizer_probe_steps": [],
+      "snapshot_count": 0,
+      "snapshot_seconds": 0
+    },
+    "iter_ms": 1420.48,
+    "mfu_fraction": 0.17933227761664655,
+    "model_tflops": 138.07543518147457,
+    "peak_mib": 31707.43,
+    "timing_breakdown_ms": {
+      "data_ms": 1.4000000000000001,
+      "eval_ms": 0.0,
+      "flush_ms": 15.23375,
+      "fwbw_ms": 739.5762500000001,
+      "grad_ms": 15.702499999999999,
+      "opt_ms": 639.1925,
+      "other_ms": 2.045,
+      "prepare_ms": 7.3325
+    },
+    "tokens_per_second": 184875.72125
+  },
+  "native_block_fht_extension": {
+    "loaded": true,
+    "module": "latent_weight_lab_block_fht_ext_scaled_v10",
+    "required": true
+  },
+  "pair_vq_persistent_training_state": {
+    "expected": 157500864,
+    "observed": [
+      157500864
+    ],
+    "passed": true
+  },
+  "passed": false,
+  "policy": {
+    "denominator": "empirical_bf16_tensorcore_gemm_peak",
+    "mfu_preflight_required": true,
+    "minimum_fraction": 0.2
+  },
+  "preflight": {
+    "feedback_cap_activity_required": false,
+    "include_diagnostic_io": false,
+    "requested_warmup_updates": 2,
+    "scientific_atlas_start_steps": [],
+    "scientific_feedback_cap_nominal_steps": null,
+    "scientific_task_frame_start_iter": 0,
+    "scratch_atlas_start_steps": [],
+    "scratch_feedback_cap_nominal_steps": null,
+    "scratch_task_frame_start_iter": 0,
+    "timed_atlas_stage": null,
+    "timed_task_frame_active": false,
+    "timed_updates": 8,
+    "warmup_updates": 2
+  },
+  "preflight_log_path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/preflights/y400_mai_v3_124m_pairvq_hierarchical_integration.log",
+  "preflight_log_sha256": "ecc018671579d1586c88d6688b63e7c1e3904c1f81b7c1908e17315f47478b2c",
+  "preflight_log_tail": "ergy_recovery\":0.999999547402455,\"current_request_energy\":0.0039488524198532104,\"error_feedback\":1,\"fast_code_changes\":825386,\"fast_residual\":1,\"feedback_code_changes\":3710300,\"feedback_codec_energy_recovery\":0.9999978337352522,\"feedback_energy\":0.0008249726961366832,\"feedback_quantization_residual_energy\":1.7872409108221632e-09,\"feedback_target_energy\":0.0008250334649346769,\"feedback_to_weight_energy_ratio\":9.299924386141356e-07,\"forward_visible_feedback\":0,\"in_features\":768,\"layer\":6,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":3072,\"projection_residual_energy\":0.0008250334649346769,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0050628213211894035,\"requested_step_energy_recovery\":0.8370407698407866,\"requested_update_cosine\":0.9154332699428112,\"retracted\":1,\"stages\":2}\nmuon_matched_givens_refresh {\"code_changes\":830043,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999989372161325,\"current_request_energy\":0.0015558612067252398,\"error_feedback\":1,\"fast_code_changes\":830039,\"fast_residual\":1,\"feedback_code_changes\":3450838,\"feedback_codec_energy_recovery\":0.9999924185265764,\"feedback_energy\":0.00021805916912853718,\"feedback_quantization_residual_energy\":1.6535441904608206e-09,\"feedback_target_energy\":0.00021810327598359436,\"feedback_to_weight_energy_ratio\":6.243051302590175e-06,\"forward_visible_feedback\":0,\"in_features\":3072,\"layer\":6,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":768,\"projection_residual_energy\":0.00021810327598359436,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0018204033840447664,\"requested_step_energy_recovery\":0.8801895899034261,\"requested_update_cosine\":0.9382671235417632,\"retracted\":1,\"stages\":1}\nmuon_matched_givens_refresh {\"code_changes\":811954,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999995028916787,\"current_request_energy\":0.003445853479206562,\"error_feedback\":1,\"fast_code_changes\":810194,\"fast_residual\":1,\"feedback_code_changes\":3710181,\"feedback_codec_energy_recovery\":0.999997711757728,\"feedback_energy\":0.0007485392852686346,\"feedback_quantization_residual_energy\":1.7129624385603393e-09,\"feedback_target_energy\":0.0007485931273549795,\"feedback_to_weight_energy_ratio\":8.428287401329726e-07,\"forward_visible_feedback\":0,\"in_features\":768,\"layer\":7,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":3072,\"projection_residual_energy\":0.0007485931273549795,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.004439699463546276,\"requested_step_energy_recovery\":0.8313865311150972,\"requested_update_cosine\":0.9123746646744081,\"retracted\":1,\"stages\":2}\nmuon_matched_givens_refresh {\"code_changes\":813402,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999990457668239,\"current_request_energy\":0.0014160384889692068,\"error_feedback\":1,\"fast_code_changes\":813399,\"fast_residual\":1,\"feedback_code_changes\":3450516,\"feedback_codec_energy_recovery\":0.999993080042352,\"feedback_energy\":0.0001952323509613052,\"feedback_quantization_residual_energy\":1.3512309049446003e-09,\"feedback_target_energy\":0.00019526577671058476,\"feedback_to_weight_energy_ratio\":5.5740915740898345e-06,\"forward_visible_feedback\":0,\"in_features\":3072,\"layer\":7,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":768,\"projection_residual_energy\":0.00019526577671058476,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0016518582124263048,\"requested_step_energy_recovery\":0.8817902316060336,\"requested_update_cosine\":0.9391178551522459,\"retracted\":1,\"stages\":1}\nmuon_matched_givens_refresh {\"code_changes\":795871,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999995234698151,\"current_request_energy\":0.002986650448292494,\"error_feedback\":1,\"fast_code_changes\":791133,\"fast_residual\":1,\"feedback_code_changes\":3709613,\"feedback_codec_energy_recovery\":0.9999977995716126,\"feedback_energy\":0.0006467477651312947,\"feedback_quantization_residual_energy\":1.4232290901361466e-09,\"feedback_target_energy\":0.0006467963685281575,\"feedback_to_weight_energy_ratio\":7.277065492417023e-07,\"forward_visible_feedback\":0,\"in_features\":768,\"layer\":8,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":3072,\"projection_residual_energy\":0.0006467963685281575,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0038328939117491245,\"requested_step_energy_recovery\":0.831251168589481,\"requested_update_cosine\":0.9121972575339791,\"retracted\":1,\"stages\":2}\nmuon_matched_givens_refresh {\"code_changes\":792025,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999989948544713,\"current_request_energy\":0.0011700897011905909,\"error_feedback\":1,\"fast_code_changes\":792025,\"fast_residual\":1,\"feedback_code_changes\":3450044,\"feedback_codec_energy_recovery\":0.9999930559028984,\"feedback_energy\":0.00016933775623328984,\"feedback_quantization_residual_energy\":1.1761104312668635e-09,\"feedback_target_energy\":0.00016936837346293032,\"feedback_to_weight_energy_ratio\":4.827173142984975e-06,\"forward_visible_feedback\":0,\"in_features\":3072,\"layer\":8,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":768,\"projection_residual_energy\":0.00016936837346293032,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0013753371313214302,\"requested_step_energy_recovery\":0.8768531950415674,\"requested_update_cosine\":0.9364861712055956,\"retracted\":1,\"stages\":1}\nmuon_matched_givens_refresh {\"code_changes\":777937,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999995518019106,\"current_request_energy\":0.002805958967655897,\"error_feedback\":1,\"fast_code_changes\":776546,\"fast_residual\":1,\"feedback_code_changes\":3709264,\"feedback_codec_energy_recovery\":0.999997938983829,\"feedback_energy\":0.0006101536564528942,\"feedback_quantization_residual_energy\":1.2576254482254967e-09,\"feedback_target_energy\":0.0006101967883296311,\"feedback_to_weight_energy_ratio\":6.869352660032746e-07,\"forward_visible_feedback\":0,\"in_features\":768,\"layer\":9,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":3072,\"projection_residual_energy\":0.0006101967883296311,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.003594367764890194,\"requested_step_energy_recovery\":0.8302352935918141,\"requested_update_cosine\":0.9116290773571025,\"retracted\":1,\"stages\":2}\nmuon_matched_givens_refresh {\"code_changes\":781518,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999990548122721,\"current_request_energy\":0.0011558025144040585,\"error_feedback\":1,\"fast_code_changes\":781518,\"fast_residual\":1,\"feedback_code_changes\":3449568,\"feedback_codec_energy_recovery\":0.9999931503674533,\"feedback_energy\":0.0001594615023350343,\"feedback_quantization_residual_energy\":1.0924503524023521e-09,\"feedback_target_energy\":0.00015949035878293216,\"feedback_to_weight_energy_ratio\":4.5506562855734956e-06,\"forward_visible_feedback\":0,\"in_features\":3072,\"layer\":9,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":768,\"projection_residual_energy\":0.00015949035878293216,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0013491157442331314,\"requested_step_energy_recovery\":0.8817815599108658,\"requested_update_cosine\":0.9390967276486336,\"retracted\":1,\"stages\":1}\nmuon_matched_givens_refresh {\"code_changes\":758136,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999995205228006,\"current_request_energy\":0.002404100028797984,\"error_feedback\":1,\"fast_code_changes\":757304,\"fast_residual\":1,\"feedback_code_changes\":3708740,\"feedback_codec_energy_recovery\":0.9999979480240775,\"feedback_energy\":0.0005617197602987289,\"feedback_quantization_residual_energy\":1.1527111487552588e-09,\"feedback_target_energy\":0.0005617566639557481,\"feedback_to_weight_energy_ratio\":6.32060903171805e-07,\"forward_visible_feedback\":0,\"in_features\":768,\"layer\":10,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":3072,\"projection_residual_energy\":0.0005617566639557481,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0031175846233963966,\"requested_step_energy_recovery\":0.8198102916790267,\"requested_update_cosine\":0.9058886208353379,\"retracted\":1,\"stages\":2}\nmuon_matched_givens_refresh {\"code_changes\":765057,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.999998949153268,\"current_request_energy\":0.0010246988385915756,\"error_feedback\":1,\"fast_code_changes\":765057,\"fast_residual\":1,\"feedback_code_changes\":3449360,\"feedback_codec_energy_recovery\":0.9999926704355381,\"feedback_energy\":0.0001468838017899543,\"feedback_quantization_residual_energy\":1.0768014258033531e-09,\"feedback_target_energy\":0.0001469120616093278,\"feedback_to_weight_energy_ratio\":4.18538411395275e-06,\"forward_visible_feedback\":0,\"in_features\":3072,\"layer\":10,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":768,\"projection_residual_energy\":0.0001469120616093278,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0012029858771711588,\"requested_step_energy_recovery\":0.8778771518458771,\"requested_update_cosine\":0.9370180693723956,\"retracted\":1,\"stages\":1}\nmuon_matched_givens_refresh {\"code_changes\":738459,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999994919092411,\"current_request_energy\":0.002274526283144951,\"error_feedback\":1,\"fast_code_changes\":737715,\"fast_residual\":1,\"feedback_code_changes\":3708419,\"feedback_codec_energy_recovery\":0.9999978258219905,\"feedback_energy\":0.000531504163518548,\"feedback_quantization_residual_energy\":1.1556657852906937e-09,\"feedback_target_energy\":0.0005315414746291935,\"feedback_to_weight_energy_ratio\":5.990447107251384e-07,\"forward_visible_feedback\":0,\"in_features\":768,\"layer\":11,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":3072,\"projection_residual_energy\":0.0005315414746291935,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0029451209120452404,\"requested_step_energy_recovery\":0.8195179449321609,\"requested_update_cosine\":0.905731730200959,\"retracted\":1,\"stages\":2}\nmuon_matched_givens_refresh {\"code_changes\":741699,\"compact_boundary\":1,\"conserved_requested_step_energy_recovery\":0.9999989982839478,\"current_request_energy\":0.0009092233958654106,\"error_feedback\":1,\"fast_code_changes\":741699,\"fast_residual\":1,\"feedback_code_changes\":3448618,\"feedback_codec_energy_recovery\":0.9999934142465459,\"feedback_energy\":0.00013827125076204538,\"feedback_quantization_residual_energy\":9.10783670704518e-10,\"feedback_target_energy\":0.00013829604722559452,\"feedback_to_weight_energy_ratio\":3.945034677599324e-06,\"forward_visible_feedback\":0,\"in_features\":3072,\"layer\":11,\"lazy_retraction\":0,\"lazy_retraction_interval\":1,\"optimizer_step\":8,\"out_features\":768,\"projection_residual_energy\":0.00013829604722559452,\"projection_target_includes_prior_feedback\":1,\"refresh_codes\":1,\"request_energy\":0.0010765527840703726,\"requested_step_energy_recovery\":0.8715380710802617,\"requested_update_cosine\":0.9336191664389119,\"retracted\":1,\"stages\":1}\nperf iter=8 tokens_per_s=165415.83 iter_ms=1584.76 prepare_ms=8.14 fwbw_ms=738.91 train_compute_ms=738.91 flush_ms=15.12 grad_ms=104.67 opt_ms=714.48 data_ms=1.41 other_ms=2.04 eval_ms=0.00 peak_mib=31707.43 moe_capacity_ratio=0.0000 moe_max_tokens=0\niter 8: loss 8.6261, time 1585.58ms\nperf iter=9 tokens_per_s=188484.38 iter_ms=1390.80 prepare_ms=6.97 fwbw_ms=739.63 train_compute_ms=739.63 flush_ms=14.79 grad_ms=2.82 opt_ms=623.49 data_ms=1.31 other_ms=1.79 eval_ms=0.00 peak_mib=31707.43 moe_capacity_ratio=0.0000 moe_max_tokens=0\niter 9: loss 8.2988, time 1391.49ms\nstep 10: train loss 8.0460, val loss 7.9625\n",
+  "provenance": {
+    "config": {
+      "path": "/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+      "sha256": "670cc783e303a777575325cfe6557e321aca3aa43423a94c4c1ea6e8a3e0aaac"
+    },
+    "dataset_manifest": {
+      "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+      "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+    },
+    "entrypoint": "examples.nanogpt.mfu_preflight",
+    "git_commit": "1613efbaf8cca59d99643facbe4bcd132bbc764b",
+    "literal_command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/mfu_preflight.py",
+      "--config",
+      "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+      "--output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/preflights/y400_mai_v3_124m_pairvq_hierarchical_integration.json",
+      "--log-output",
+      "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/preflights/y400_mai_v3_124m_pairvq_hierarchical_integration.log",
+      "--min-fraction",
+      "0.20",
+      "--warmup-updates",
+      "2",
+      "--timed-updates",
+      "8"
+    ],
+    "source_sha256": {
+      "examples/nanogpt/mfu_preflight.py": "ddbd7c50ebcdb74ea32cb918ad151eddc7b833b6c07ef91926bc2098e07a5cf0",
+      "examples/nanogpt/model.py": "91fdf61ff754113a136fa56bca079ff464e633d12412034953f650b7acc1472e",
+      "examples/nanogpt/muon.py": "21cbf6783dcf32a017d60cbd494518bda0ebe0f7bdd1da8a53c3301b59b7210e",
+      "examples/nanogpt/muon_int8_lattice.py": "fa15ee2167caba9da74021c20aaecd54b93cfedd5e17423badcb8f8506392fb6",
+      "examples/nanogpt/muon_pair_vq.py": "d5d04e726df689fd26eedfed7f05b67f7bd5f0e0a5c57f76038caa3704cede48",
+      "examples/nanogpt/train.py": "cb15c8976f1872f31fcc0db48dbe3974a00017d52f4cf6779f74eb615cd5b780"
+    }
+  },
+  "schema_version": "nanogpt_mfu_preflight_v1",
+  "stability": {
+    "all_logged_losses_finite": true,
+    "finite_loss_values": 14,
+    "logged_loss_values": 14
+  },
+  "stochastic_retraction": {
+    "event_count": 0,
+    "maximum_timed_weighted_sampling_variance_ratio": null,
+    "minimum_timed_expected_bias_recovery": null,
+    "persistent_training_bytes": [
+      157500864
+    ],
+    "timed_boundary_clipped_values": 0,
+    "timed_event_count": 0
+  },
+  "train_command": [
+    "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+    "-u",
+    "-m",
+    "examples.nanogpt.train",
+    "--config",
+    "/tmp/mfu-preflight-ipbbh192/config.json"
+  ],
+  "train_exit_code": 0
+}
