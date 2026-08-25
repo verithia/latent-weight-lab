@@ -1,0 +1,43 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_histogram_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_implementation_or_measurement",
+  "question": "Can block-private shared-memory histograms remove global atomic contention and clear the exact compact optimizer gate?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_fp32_graph_count_oracle_result.json",
+    "sha256": "1fd8482ab0e7da6ecc15a0928b89928281042d1687c244fae85faaaab9ec78d5"
+  },
+  "diagnostic_basis": [
+    "Direct global-atomic fusion projected 579.81 ms and exposed contention.",
+    "Graph-safe separate atomics projected 616.73 ms (int64 counts) and 608.81 ms (exact FP32 counts).",
+    "The validated reference chunk path projects 518.26 ms and needs only 23.26 ms additional savings."
+  ],
+  "frozen_intervention": [
+    "For the four coordinate roles only, assign 65,536 values per CUDA block, accumulate FP32 sums and uint32 counts into one block-private shared-memory table, and write one partial BxTxK table.",
+    "Reduce partial tables in increasing tile order into FP32 sums and int64 counts, then retain the reference static centroid update, sort, and final torch.searchsorted assignment.",
+    "Use the already selected group size 12 for refined coordinates and full production groups for the other coordinate roles.",
+    "Keep the three gain roles on the already validated reference grouped path; do not select per-result hybrids.",
+    "Compile without fast-math. Do not change initialization, level count, iteration count, codec, cadence, Muon field, persistent state, batch, or schedule.",
+    "Standalone no-training oracle only; do not edit MuonPairVQ."
+  ],
+  "correctness_gate": {
+    "fixed_level_counts_exact_for_every_coordinate_role": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "maximum_peak_oracle_scratch_mib": 4096.0,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 3
+  },
+  "decision_rule": {
+    "compile_or_correctness_fail": "Reject and revert oracle-only native sources before optimizer integration.",
+    "scratch_or_projected_time_fail": "Reject and revert oracle-only native sources before optimizer integration.",
+    "all_gates_pass": "Preregister a two-phase optimizer integration with exact state, independent replay, memory, and >=20% MFU gates; do not automatically train.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}
