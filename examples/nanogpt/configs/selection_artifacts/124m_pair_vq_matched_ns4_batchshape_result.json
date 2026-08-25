@@ -1,0 +1,61 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_batchshape_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "rejected_before_scientific_training",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_batchshape_plan.json",
+    "sha256": "bc64e6fb4ef178bd6c371ff8dc33b4bb8ccad859b7fe3e9ca9f0daf947a341ef"
+  },
+  "source_preflight_rejection": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_b64_preflight_rejection.json",
+    "sha256": "70147df93eccc837397de65e8d5c1aa24c460fbf3d5bac533e85c0ca20a5e5f3"
+  },
+  "implementation_commit": "9334384349a14e00a075a381b6c7f902d0b7bffb",
+  "ordered_preflights": [
+    {
+      "order": 1,
+      "batch_size": 64,
+      "gradient_accumulation_steps": 4,
+      "config_sha256": "1975964cc2efdb06378d0cecea0c10fcc90ff9fc50df14e045e1e4e81230087e",
+      "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/batchshape_preflights/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_b64g4_perfonly.json",
+      "certificate_sha256": "8eca9e2830324421d8537180ddebbd012aafa5ba274dcf3466af37ed17a8813b",
+      "log_sha256": "db914a6dbfa8f4149455dab4a8c28075e7f754a4fd1f2e1569fb6e0ca897f971",
+      "passed": false,
+      "mfu_fraction": 0.16562017442445662,
+      "tokens_per_second": 171568.95500000002,
+      "iter_ms": 1528.71375,
+      "forward_backward_ms": 725.7574999999999,
+      "optimizer_ms": 767.0350000000001,
+      "peak_mib": 61689.05,
+      "persistent_training_bytes": 157500864,
+      "persistent_state_gate_passed": true,
+      "all_logged_losses_finite": true,
+      "failure": "MFU 16.56% is below the frozen 20% floor."
+    },
+    {
+      "order": 2,
+      "batch_size": 128,
+      "gradient_accumulation_steps": 2,
+      "config_sha256": "ed3963275e2b6d7e6ac0a5baf63013bea6aec19a3d86a4121eef6f5ee3bad37d",
+      "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/batchshape_preflights/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_b128g2_perfonly.json",
+      "certificate_sha256": "336c626cbbf6b02a624a8222f21dae5664fa3887081e61f577f337f528fd6d40",
+      "log_sha256": "638756751ff34583a2e7975a104f91aac95e03572414c8448b042aba4f044257",
+      "passed": false,
+      "persistent_training_bytes": 157500864,
+      "persistent_state_reported_before_failure": true,
+      "failure": "CUDA OOM on the first training forward: 69.96 GiB already in use and a further 24.56 GiB allocation was requested."
+    }
+  ],
+  "conclusion": {
+    "batch_partition_closed": true,
+    "scientific_training_launched": false,
+    "representation_rejected": false,
+    "optimizer_dominates_at_largest_feasible_partition": true,
+    "optimizer_ms_at_64x4": 767.0350000000001,
+    "required_iter_ms_for_20pct_at_same_empirical_peak_approx": 1266.09,
+    "required_speedup_vs_64x4_approx": 1.2074,
+    "next_action": "Profile and optimize the mathematically identical per-step B64/L16 Pair-VQ retraction and feedback fit; do not alter the codec, state contract, lazy cadence, optimizer field, or loss.",
+    "automatic_quality_run": false,
+    "automatic_scale_up": false
+  }
+}

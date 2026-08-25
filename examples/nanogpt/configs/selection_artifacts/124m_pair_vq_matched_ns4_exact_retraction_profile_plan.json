@@ -1,0 +1,45 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_exact_retraction_profile_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_profiler_execution",
+  "question": "Which CUDA operators dominate the exact per-step B64/L16 Pair-VQ optimizer/retraction after global-batch reshaping failed to clear the MFU gate?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_batchshape_result.json",
+    "sha256": "e5f6243e59c38b803e4dd5c491fe107c9433ce779237dbc9943d1a147db395ba"
+  },
+  "profiled_config": {
+    "path": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "sha256": "c6a8beb46502aba3696fd68b90cd04d7f355ca25dd67325823c2cb9a43e1c52f",
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "persistent_training_bytes_exact": 157500864
+  },
+  "protocol": {
+    "tool": "NVIDIA Nsight Systems",
+    "trace": [
+      "cuda",
+      "nvtx",
+      "osrt"
+    ],
+    "sample": "none",
+    "profile_process_tree": true,
+    "preflight_warmup_updates": 2,
+    "preflight_timed_updates": 8,
+    "expected_duration_under_five_minutes": true,
+    "watchdog_required": false,
+    "reports": [
+      "cuda_gpu_kern_sum",
+      "cuda_api_sum",
+      "nvtx_sum"
+    ]
+  },
+  "invariants": {
+    "scratch_updates_only": true,
+    "scientific_checkpoint_written": false,
+    "codec_change": false,
+    "optimizer_change": false,
+    "state_change": false,
+    "loss_selection": false
+  },
+  "decision_rule": "Optimize only a mathematically equivalent implementation of the largest measured retraction/feedback operators, with fixed-tensor bitwise or tolerance-locked equivalence tests before repeating MFU. If profiler overhead or missing child capture invalidates attribution, add explicit default-off CUDA-event instrumentation; do not infer a codec change from an invalid trace."
+}
