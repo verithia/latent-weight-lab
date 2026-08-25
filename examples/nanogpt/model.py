@@ -5490,6 +5490,8 @@ class GPT(nn.Module):
         muon_momentum: float = 0.95,
         muon_ns_steps: int = 5,
         muon_mlp_polar_ridge: float = 0.0,
+        muon_mlp_ns_steps: int = 0,
+        muon_mlp_lr_scale: float = 1.0,
         muon_adamw_lr_scale: float = 1.0,
         muon_split_attention_qkv_rows: bool = False,
         block_fht_attn_cayley_lr_scale: float = 1.0,
@@ -5503,6 +5505,18 @@ class GPT(nn.Module):
             or float(muon_mlp_polar_ridge) < 0.0
         ):
             raise ValueError("MLP Muon polar ridge must be finite and non-negative")
+        if int(muon_mlp_ns_steps) < 0:
+            raise ValueError("MLP Muon NS steps must be non-negative")
+        if (
+            not math.isfinite(float(muon_mlp_lr_scale))
+            or float(muon_mlp_lr_scale) <= 0.0
+        ):
+            raise ValueError("MLP Muon LR scale must be finite and positive")
+        resolved_mlp_ns_steps = (
+            int(muon_ns_steps)
+            if int(muon_mlp_ns_steps) == 0
+            else int(muon_mlp_ns_steps)
+        )
         split_qkv_named: list[tuple[str, nn.Parameter]] = []
         if muon_split_attention_qkv_rows:
             if optimizer != "muon":
@@ -5662,7 +5676,12 @@ class GPT(nn.Module):
             product_factor_ids = {
                 id(param) for param in product_factors
             }
-            mlp_ridge_matrix_named = (
+            use_special_mlp_muon = (
+                float(muon_mlp_polar_ridge) > 0.0
+                or resolved_mlp_ns_steps != int(muon_ns_steps)
+                or float(muon_mlp_lr_scale) != 1.0
+            )
+            mlp_special_matrix_named = (
                 [
                     (name, param)
                     for name, param in params.items()
@@ -5672,11 +5691,11 @@ class GPT(nn.Module):
                         or name.endswith(".mlp.c_proj.weight")
                     )
                 ]
-                if float(muon_mlp_polar_ridge) > 0.0
+                if use_special_mlp_muon
                 else []
             )
-            mlp_ridge_matrix_ids = {
-                id(param) for _name, param in mlp_ridge_matrix_named
+            mlp_special_matrix_ids = {
+                id(param) for _name, param in mlp_special_matrix_named
             }
             matrix = [
                 param
@@ -5688,7 +5707,7 @@ class GPT(nn.Module):
                 and id(param) not in product_factor_ids
                 and id(param) not in attention_cayley_matrix_ids
                 and id(param) not in moe_router_ids
-                and id(param) not in mlp_ridge_matrix_ids
+                and id(param) not in mlp_special_matrix_ids
             ]
             other = [
                 param
@@ -5766,19 +5785,19 @@ class GPT(nn.Module):
                 )
                 for group in optimizers[-1].param_groups:
                     group["lr_scale"] = 1.0
-            if mlp_ridge_matrix_named:
+            if mlp_special_matrix_named:
                 optimizers.append(
                     Muon(
-                        [param for _name, param in mlp_ridge_matrix_named],
+                        [param for _name, param in mlp_special_matrix_named],
                         lr=learning_rate,
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
-                        ns_steps=muon_ns_steps,
+                        ns_steps=resolved_mlp_ns_steps,
                         polar_ridge=float(muon_mlp_polar_ridge),
                     )
                 )
                 for group in optimizers[-1].param_groups:
-                    group["lr_scale"] = 1.0
+                    group["lr_scale"] = float(muon_mlp_lr_scale)
             if attention_cayley_muon_matrix_named:
                 cayley_muon_groups = [
                     {
@@ -5890,12 +5909,12 @@ class GPT(nn.Module):
                         lr=learning_rate,
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
-                        ns_steps=muon_ns_steps,
+                        ns_steps=resolved_mlp_ns_steps,
                         polar_ridge=float(muon_mlp_polar_ridge),
                     )
                 )
                 for group in optimizers[-1].param_groups:
-                    group["lr_scale"] = 1.0
+                    group["lr_scale"] = float(muon_mlp_lr_scale)
             if mlp_muon_matched_givens_modules:
                 optimizers.append(
                     MuonMatchedGivens(
@@ -6025,7 +6044,9 @@ class GPT(nn.Module):
                 f"mlp_pregelu_chart_tensors={len(pregelu_chart_other)} "
                 f"momentum={muon_momentum} ns_steps={muon_ns_steps} "
                 f"mlp_polar_ridge={float(muon_mlp_polar_ridge)} "
-                f"mlp_ridge_matrix_tensors={len(mlp_ridge_matrix_named)} "
+                f"mlp_ns_steps={resolved_mlp_ns_steps} "
+                f"mlp_muon_lr_scale={float(muon_mlp_lr_scale)} "
+                f"mlp_special_matrix_tensors={len(mlp_special_matrix_named)} "
                 f"adamw_lr_scale={float(muon_adamw_lr_scale)} "
                 f"mlp_chart_lr_scale={float(block_fht_mlp_chart_lr_scale)} "
                 f"mlp_pregelu_chart_lr_scale="

@@ -1414,6 +1414,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--muon-momentum", type=float, default=0.95)
     parser.add_argument("--muon-ns-steps", type=int, default=5)
     parser.add_argument("--muon-mlp-polar-ridge", type=float, default=0.0)
+    parser.add_argument("--muon-mlp-ns-steps", type=int, default=0)
+    parser.add_argument("--muon-mlp-lr-scale", type=float, default=1.0)
     parser.add_argument("--muon-adamw-lr-scale", type=float, default=1.0)
     parser.add_argument(
         "--muon-split-attention-qkv-rows",
@@ -2307,6 +2309,13 @@ def parse_args() -> argparse.Namespace:
         or float(namespace.muon_mlp_polar_ridge) < 0.0
     ):
         raise ValueError("--muon-mlp-polar-ridge must be finite and non-negative")
+    if int(namespace.muon_mlp_ns_steps) < 0:
+        raise ValueError("--muon-mlp-ns-steps must be non-negative")
+    if (
+        not math.isfinite(float(namespace.muon_mlp_lr_scale))
+        or float(namespace.muon_mlp_lr_scale) <= 0.0
+    ):
+        raise ValueError("--muon-mlp-lr-scale must be finite and positive")
     if namespace.moe_num_experts < 0:
         raise ValueError("--moe-num-experts must be non-negative")
     if namespace.moe_num_experts > 0 and not (
@@ -4315,6 +4324,8 @@ def main() -> None:
         muon_momentum=args.muon_momentum,
         muon_ns_steps=args.muon_ns_steps,
         muon_mlp_polar_ridge=args.muon_mlp_polar_ridge,
+        muon_mlp_ns_steps=args.muon_mlp_ns_steps,
+        muon_mlp_lr_scale=args.muon_mlp_lr_scale,
         muon_adamw_lr_scale=args.muon_adamw_lr_scale,
         muon_split_attention_qkv_rows=args.muon_split_attention_qkv_rows,
         block_fht_attn_cayley_lr_scale=args.block_fht_attn_cayley_lr_scale,

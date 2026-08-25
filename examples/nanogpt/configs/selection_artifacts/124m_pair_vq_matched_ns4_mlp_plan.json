@@ -1,0 +1,73 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_mlp_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "theory_preregistered_before_implementation_or_execution",
+  "scientific_question": "Does training both dense and compact MLPs with the same less rank-sensitive four-step Muon field preserve dense quality and close the compact full-MLP gap?",
+  "causal_basis": {
+    "fast_ridge_rejection": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ridge_polar_result.json",
+      "classification": "FAST_AUGMENTED_RIDGE_POLAR_REJECTED",
+      "finding": "The fast and exact augmented-ridge polar maps both missed the frozen synthetic stability gate, so no language-model run was launched."
+    },
+    "real_trajectory_early_stop_frontier": {
+      "artifact": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_early_stopped_muon_polar_stability_oracle_result.json",
+      "sha256": "84b6f75d51fa79082a34c944503a1e35accc3bbb6ab501319d05879fdb9e0ec2",
+      "ns4": {
+        "maximum_late_relative_error_amplification": 2.8865283706364897,
+        "maximum_late_candidate_polar_relative_error": 0.016978576154847613,
+        "minimum_late_relative_error_closure_vs_native": 0.36243584815766305,
+        "minimum_late_matrix_dense_task_alignment_retention": 1.0087211078389247,
+        "minimum_late_dense_native_norm_ratio": 0.814468482902324,
+        "maximum_late_dense_native_norm_ratio": 0.8176920125288657,
+        "minimum_late_dense_native_cosine": 0.8730877875868261
+      },
+      "old_rejection_was_not_causal_for_matched_training": "NS4 was rejected because it changed NS5 direction and norm. The present test intentionally gives dense and compact models the identical NS4 field, so dense quality—not NS5 cosine—is the valid gate."
+    }
+  },
+  "frozen_candidate": {
+    "attention_muon_ns_steps": 5,
+    "mlp_muon_ns_steps": 4,
+    "mlp_muon_lr_scale": 1.225,
+    "lr_scale_derivation": "The reciprocal of the midpoint of the sealed late NS4/NS5 norm-ratio interval [0.8144685,0.8176920] is 1.22537; 1.225 is frozen without a sweep.",
+    "scope": [
+      "dense MLP c_fc and c_proj",
+      "Pair-VQ MLP c_fc and c_proj"
+    ],
+    "sweep": false,
+    "persistent_extra_state_bytes": 0
+  },
+  "gated_protocol": {
+    "stage_1_implementation": {
+      "zero_override_preserves_existing_optimizer_partition": true,
+      "dense_and_pair_vq_scope_tests": true,
+      "attention_remains_ns5": true
+    },
+    "stage_2_system": {
+      "machine": "Y400 GPU0",
+      "minimum_mfu_fraction": 0.2,
+      "throughput_ratio_vs_native_dense_min": 1.0
+    },
+    "stage_3_dense_quality": {
+      "model": "124M QK-only mapped attention plus dense MLP",
+      "tokens_per_parameter": 0.5,
+      "sealed_native_parent_validation_ce": 5.361,
+      "matched_ns4_dense_validation_ce_max": 5.371,
+      "fixed_eval_protocol": "mai_ladder_fixed_eval_indices_v2"
+    },
+    "stage_4_compact_gap": {
+      "authorization": "only after all dense gates pass",
+      "candidate_minus_matched_ns4_dense_validation_ce_max": 0.01,
+      "absolute_validation_ce_max": 5.381,
+      "minimum_persistent_mlp_state_compression": 2.8,
+      "fixed_model_compute_penalty_max": 1.1
+    }
+  },
+  "decision_rule": {
+    "dense_fail": "Reject matched NS4 MLP optimization and do not run compact.",
+    "compact_fail": "Reject polar-depth smoothing as sufficient and return to an explicitly non-polar compact-native optimizer.",
+    "compact_pass": "Run one 124M 5TPP matched dense/compact confirmation; do not scale model size yet.",
+    "automatic_sweep": false,
+    "automatic_model_scale_up": false
+  },
+  "monitoring": "Performance gates may be foreground-polled under five minutes; training uses a terminal/error-only watchdog."
+}

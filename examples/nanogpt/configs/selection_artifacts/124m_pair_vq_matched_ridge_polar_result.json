@@ -1,0 +1,45 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ridge_polar_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "sealed_rejected_before_training",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ridge_polar_plan.json",
+    "sha256": "218823fa8dee946d196d2efcd6dc37a8924272cca83841ef797baa6ccf7a669a"
+  },
+  "implementation_commit": "6193f1b",
+  "operator_tests": {
+    "pytest": "6 passed",
+    "ridge_zero_native_path_exact": true,
+    "scope_routing_exact": true,
+    "restored_norm_gate": true,
+    "invalid_value_gate": true
+  },
+  "stability_gate": {
+    "protocol": "seeded ill-conditioned matrices with log-spaced singular values 1 to 1e-5 and a 1e-4 relative isotropic perturbation on Y400 GPU0",
+    "maximum_allowed_amplification": 3.0,
+    "records": [
+      {
+        "shape": [8, 32],
+        "native_amplification": 168.57957566695777,
+        "fast_ridge_ns5_amplification": 7.155721425272056,
+        "exact_augmented_polar_amplification": 6.93657922744751
+      },
+      {
+        "shape": [32, 128],
+        "native_amplification": 82.50762258996538,
+        "fast_ridge_ns5_amplification": 6.016099128130096,
+        "exact_augmented_polar_amplification": 6.6534600257873535
+      },
+      {
+        "shape": [64, 256],
+        "native_amplification": 62.5500178885911,
+        "fast_ridge_ns5_amplification": 8.065885004376248,
+        "exact_augmented_polar_amplification": 6.654520511627197
+      }
+    ],
+    "passed": false
+  },
+  "classification": "FAST_AUGMENTED_RIDGE_POLAR_REJECTED",
+  "conclusion": "The augmentation strongly reduces extreme rank-sensitive amplification but does not meet the frozen 3x stability gate. Increasing Newton-Schulz depth does not repair it; exact augmented polar has the same residual sensitivity. No LM loss run is authorized for this operator and no ridge sweep was performed.",
+  "next_authorized_direction": "Matched four-step MLP Muon, selected from the sealed real-trajectory early-stop frontier because it already meets the real-request amplification and compact-error gates while reducing compute."
+}

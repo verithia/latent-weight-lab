@@ -78,6 +78,44 @@ def test_dense_mlp_matrices_are_the_only_dense_ridge_group() -> None:
     assert actual == expected
 
 
+def test_dense_mlp_ns4_uses_a_separate_scaled_group() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=1,
+            n_embd=8,
+        )
+    )
+    optimizer = model.configure_optimizers(
+        weight_decay=0.1,
+        learning_rate=0.001,
+        betas=(0.9, 0.95),
+        device_type="cpu",
+        optimizer="muon",
+        muon_momentum=0.95,
+        muon_ns_steps=5,
+        muon_mlp_ns_steps=4,
+        muon_mlp_lr_scale=1.225,
+    )
+    special = [
+        item
+        for item in optimizer.optimizers
+        if isinstance(item, Muon)
+        and int(item.param_groups[0]["ns_steps"]) == 4
+    ]
+    assert len(special) == 1
+    assert special[0].param_groups[0]["lr_scale"] == 1.225
+    native = [
+        item
+        for item in optimizer.optimizers
+        if isinstance(item, Muon)
+        and int(item.param_groups[0]["ns_steps"]) == 5
+    ]
+    assert len(native) == 1
+
+
 def test_pair_vq_optimizer_receives_the_same_mlp_ridge() -> None:
     model = GPT(
         GPTConfig(
@@ -101,6 +139,8 @@ def test_pair_vq_optimizer_receives_the_same_mlp_ridge() -> None:
         optimizer="muon",
         muon_momentum=0.95,
         muon_ns_steps=5,
+        muon_mlp_ns_steps=4,
+        muon_mlp_lr_scale=1.225,
         muon_mlp_polar_ridge=0.25,
     )
     pair_optimizers = [
@@ -108,3 +148,5 @@ def test_pair_vq_optimizer_receives_the_same_mlp_ridge() -> None:
     ]
     assert len(pair_optimizers) == 1
     assert pair_optimizers[0].param_groups[0]["polar_ridge"] == 0.25
+    assert pair_optimizers[0].param_groups[0]["ns_steps"] == 4
+    assert pair_optimizers[0].param_groups[0]["lr_scale"] == 1.225
