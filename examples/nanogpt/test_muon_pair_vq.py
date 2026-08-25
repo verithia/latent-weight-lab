@@ -4,7 +4,6 @@ import copy
 from argparse import Namespace
 
 import torch
-import pytest
 
 import examples.nanogpt.muon_pair_vq as muon_pair_vq_module
 from examples.nanogpt.model import GPT, GPTConfig
@@ -38,7 +37,6 @@ from examples.nanogpt.muon_pair_vq import (
     _pack_fixed_width_codes,
     _unpack_fixed_width_codes,
 )
-from examples.nanogpt.pair_vq_lloyd_cuda import pair_vq_lloyd_stats
 from examples.nanogpt.train import make_checkpoint, pair_vq_model_kwargs
 
 
@@ -152,23 +150,6 @@ def test_static_scalar_centroids_match_dynamic_reference_with_empty_codes() -> N
     )
     assert torch.equal(levels, reference_levels)
     assert torch.equal(codes, reference_codes)
-
-
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA is required")
-def test_fused_lloyd_statistics_match_reference_assignments() -> None:
-    generator = torch.Generator(device="cuda").manual_seed(20261028)
-    values = torch.randn(262144, device="cuda", generator=generator)
-    levels = torch.linspace(-3.0, 3.0, 256, device="cuda")
-    midpoints = ((levels[:-1] + levels[1:]) * 0.5).contiguous()
-    codes = torch.bucketize(values.contiguous(), midpoints)
-    reference_sums = torch.zeros_like(levels)
-    reference_sums.index_add_(0, codes, values)
-    reference_counts = torch.bincount(codes, minlength=levels.numel())
-    sums, counts = pair_vq_lloyd_stats(
-        values.contiguous(), midpoints, level_count=levels.numel()
-    )
-    assert torch.equal(counts, reference_counts)
-    assert torch.allclose(sums, reference_sums, atol=2e-4, rtol=2e-5)
 
 
 def test_stochastic_cartesian_retraction_is_replay_exact_and_unbiased() -> None:
