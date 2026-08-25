@@ -1,0 +1,31 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_hybrid_oracle_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "all_oracle_gates_passed",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_hybrid_oracle_plan.json",
+    "sha256": "f840fc35e7fb5f5d3a9286a3dff27a310fa4c6a4898c21eff3735578fbea2118"
+  },
+  "implementation_commit": "0a68ff955bd59b8d054b1e5b19847f25bc455188",
+  "remote_artifact": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/hierarchical_hybrid_oracle/result.json",
+    "sha256": "b67152026d9ea145a109cf67c622a56e08dfd69196549344bb39d05435775795"
+  },
+  "correctness": {
+    "fixed_level_counts_exact_all_roles": true,
+    "maximum_centroid_abs": 0.00008368492126464844,
+    "maximum_code_mismatch_fraction": 0.00007753018979673032,
+    "passed": true
+  },
+  "performance": {
+    "total_serial_ms": 378.290745,
+    "total_candidate_ms": 50.035876,
+    "aggregate_speedup": 7.560390211155497,
+    "projected_optimizer_ms": 351.34888048181926,
+    "maximum_projected_optimizer_ms": 495.0,
+    "peak_allocated_mib": 2403.23828125,
+    "maximum_peak_oracle_scratch_mib": 4096.0,
+    "passed": true
+  },
+  "decision": "The fixed role hybrid passes the standalone oracle. This authorizes only a separately gated optimizer integration with exact persistent state, independent replay, peak-memory, optimizer-time, and MFU checks. It does not authorize scientific training."
+}

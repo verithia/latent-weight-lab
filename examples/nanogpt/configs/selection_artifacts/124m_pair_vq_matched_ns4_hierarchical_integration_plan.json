@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_integration_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_optimizer_integration",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_hybrid_oracle_result.json",
+    "sha256": "18f6d3a0ab1daf9967112d24302fd75026af8c06f7f1243a498d33e4e82e5275"
+  },
+  "scope": "Integrate the passing fixed-role feedback fitter into the exact B64/L16 compact 124M matched-NS4 source behind an explicit default-off flag.",
+  "frozen_role_allocation": {
+    "hierarchical_histogram": [
+      "cfc_residual_coordinates",
+      "cproj_residual_coordinates",
+      "base_coordinates"
+    ],
+    "validated_reference_batch": [
+      "refined_coordinates",
+      "base_gains",
+      "cfc_residual_gains",
+      "cproj_residual_gains"
+    ]
+  },
+  "implementation_constraints": [
+    "Add no persistent tensor, dense master weight, raw ambient momentum, or codec metadata.",
+    "Defer only the B64/L16 fractional-residual feedback fits until all 24 MLP modules have produced raw feedback; keep Muon requests, weight projection, feedback conservation, diagnostics, and optimizer-step order semantically unchanged.",
+    "Run base gain, base coordinate, refined coordinate, residual gain, and residual coordinate phases across the frozen module groups, then write the same existing level and packed-code state tensors in place.",
+    "Keep the old per-module path available when the explicit flag is false.",
+    "Do not change codec capacity, level initialization, iterations, top-k selector rule, FHT seeds, Muon field, LR, batch, or schedule."
+  ],
+  "independent_replay_gate": {
+    "deterministic_tensors": "The same 24 production shapes and seeds used by the sealed oracle, extended through packing and decoding.",
+    "persistent_state_shapes_and_dtypes_exact": true,
+    "fixed_level_counts_exact": true,
+    "maximum_scalar_centroid_absolute_difference": 0.00015,
+    "maximum_scalar_code_mismatch_fraction": 0.0001,
+    "all_packed_streams_valid_and_decodable": true,
+    "all_outputs_finite": true
+  },
+  "exact_preflight_gate": {
+    "persistent_pair_vq_training_bytes_exact": 157500864,
+    "minimum_mfu_percent": 20.0,
+    "maximum_optimizer_ms": 495.0,
+    "reference_peak_allocated_mib": 31707.43,
+    "maximum_peak_allocated_mib": 35803.43,
+    "minimum_training_state_compression": 2.8
+  },
+  "decision_rule": {
+    "implementation_test_or_replay_fail": "Reject/revert integration; do not run MFU or training.",
+    "state_or_memory_or_mfu_or_optimizer_fail": "Reject integration for the exact endpoint; do not train.",
+    "all_gates_pass": "Seal the integration and preregister the original 0.5TPP matched-NS4 compact quality endpoint with CE <=5.3763, absolute CE <=5.3810, compression >=2.8x, and fixed-model compute penalty <=1.10. Do not automatically launch training.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}
