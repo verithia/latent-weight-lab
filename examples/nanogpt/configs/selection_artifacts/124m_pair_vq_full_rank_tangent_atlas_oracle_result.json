@@ -1,0 +1,315 @@
+{
+  "artifacts": {
+    "config": "71d0612de1bba07ad97e68fa20ba4e30c4148f66ce87f2cbb87e6510b6e53e38",
+    "dataset_manifest": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_certificate": "92117236d8889cb4db2e14a150d1c0fb5220c9b72aa5604746ce8478028f75aa",
+    "plan": "f83a040e585a9f6e2c16ae0af8f703d561d0c79754048bfafea8fc8f721f9aeb",
+    "provenance": "4917c8a9ba24d7097d9e3ce1daee55c19245f10ebeb47855f988a46a938e136a",
+    "raw_result": "88c82f790f311a293722422dec717669c4f7c738946aec06504a0a20a8014672",
+    "status": "53459d5453e00ddc7f57dd39e07fdc093d340f7d8ef37722697e4a47c1a2f92c",
+    "training_log": "84913b90fc840989cb06b41ac3cfd393874b108f561837a468ef064053587659"
+  },
+  "checks": {
+    "candidate_inventory": true,
+    "candidate_pass_flags_recomputed": true,
+    "config_functional_plan_hash": true,
+    "config_plan_hash": true,
+    "fit_and_heldout_disjoint": true,
+    "manifest_matches_config": true,
+    "matrix_inventory": true,
+    "metric_checks_recomputed": true,
+    "mfu_config_hash": true,
+    "mfu_floor": true,
+    "mfu_passed": true,
+    "no_traceback": true,
+    "plan_schema": true,
+    "probe_inventory": true,
+    "protocol_inventory": true,
+    "provenance_config_hash": true,
+    "provenance_manifest_hash": true,
+    "provenance_mfu_hash": true,
+    "raw_finished": true,
+    "raw_schema": true,
+    "result_plan_hash": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "status_provenance_hash": true,
+    "terminal_classification": true,
+    "terminal_gate_pass": true,
+    "terminal_gate_ready": true,
+    "terminal_gate_selection": true,
+    "zero_model_updates": true
+  },
+  "classification": "FULL_RANK_TANGENT_ATLAS_REJECTED",
+  "gate": {
+    "S1_passed_all_late_probes": false,
+    "S2_passed_all_late_probes": false,
+    "selected": null,
+    "thresholds": {
+      "functional_jvp_cosine": 0.99,
+      "minimum_matrix_functional_jvp_cosine": 0.99,
+      "minimum_matrix_positive_line_recovery": 0.999,
+      "minimum_matrix_postpolar_cosine": 0.999,
+      "minimum_matrix_task_line_retention": 0.98,
+      "minimum_matrix_value_cosine": 0.99,
+      "postpolar_cosine": 0.9999
+    }
+  },
+  "identity": {
+    "config_sha256": "71d0612de1bba07ad97e68fa20ba4e30c4148f66ce87f2cbb87e6510b6e53e38",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "git_commit": "491c368117adb082d8abae8678573158bc79177e",
+    "plan_sha256": "f83a040e585a9f6e2c16ae0af8f703d561d0c79754048bfafea8fc8f721f9aeb",
+    "run_identity_sha256": "40307061cec5439a90b53934ba102a5ad68a54f181e6b1f7b1ba2932d2d35376"
+  },
+  "interpretation": {
+    "functional": "Held-out MLP JVP and task-line gates fail for both c_fc and c_proj at both late probes.",
+    "next_action": "Reject this exact atlas without a sweep; measure the minimum paired-hidden-neuron dense escape fraction before any endpoint training.",
+    "tangent": "The fitted local tangent behaves like a generic compact subspace and is grossly misaligned with the same-momentum dense Muon request.",
+    "value": "Both candidates pass only the value-cosine gate; the Pair-VQ plus feedback value chart remains accurate."
+  },
+  "passed": false,
+  "performance": {
+    "mfu_fraction": 0.29368834935713245,
+    "peak_memory_mib": 32105.87,
+    "tokens_per_second": 163350.155,
+    "wall_seconds": 925.0
+  },
+  "recorded_at": "2026-08-25T05:01:03.281143+00:00",
+  "records": [
+    {
+      "candidates": {
+        "S1": {
+          "aggregate_functional_jvp": {
+            "candidate_to_reference_energy": 0.0017729756245850926,
+            "cosine": 0.20528224505764722,
+            "positive_line_recovery": 0.04214080013590793
+          },
+          "aggregate_tangent": {
+            "candidate_to_reference_energy": 0.009355657430418765,
+            "cosine": 0.11668687760782201,
+            "positive_line_recovery": 0.013615827405862833
+          },
+          "c_fc": {
+            "maximum_functional_jvp_cosine": 0.2737645502322525,
+            "maximum_tangent_cosine": 0.1194831717749868,
+            "minimum_functional_jvp_cosine": 0.17852682487954988,
+            "minimum_tangent_cosine": 0.11817576635205175,
+            "minimum_task_line_retention": 0.01194783819754191,
+            "minimum_value_cosine": 0.999695384914314
+          },
+          "c_proj": {
+            "maximum_functional_jvp_cosine": 0.2189313538393471,
+            "maximum_tangent_cosine": 0.11349827688443904,
+            "minimum_functional_jvp_cosine": 0.17037791712402578,
+            "minimum_tangent_cosine": 0.11229101242777335,
+            "minimum_task_line_retention": 0.007385022844728278,
+            "minimum_value_cosine": 0.999058470497234
+          },
+          "checks": {
+            "functional_jvp_cosine": false,
+            "minimum_matrix_functional_jvp_cosine": false,
+            "minimum_matrix_positive_line_recovery": false,
+            "minimum_matrix_postpolar_cosine": false,
+            "minimum_matrix_task_line_retention": false,
+            "minimum_matrix_value_cosine": true,
+            "postpolar_cosine": false
+          },
+          "measurements": {
+            "functional_jvp_cosine": 0.20528224505764722,
+            "minimum_matrix_functional_jvp_cosine": 0.17037791712402578,
+            "minimum_matrix_positive_line_recovery": 0.01260927147205435,
+            "minimum_matrix_postpolar_cosine": 0.11229101242777335,
+            "minimum_matrix_task_line_retention": 0.007385022844728278,
+            "minimum_matrix_value_cosine": 0.999058470497234,
+            "postpolar_cosine": 0.11668687760782201
+          },
+          "passed": false,
+          "protocol": {
+            "atoms": 1,
+            "coordinates_per_panel": 8448,
+            "stages": 10
+          }
+        },
+        "S2": {
+          "aggregate_functional_jvp": {
+            "candidate_to_reference_energy": 0.001541700147757527,
+            "cosine": 0.14738957311471312,
+            "positive_line_recovery": 0.021723686262937365
+          },
+          "aggregate_tangent": {
+            "candidate_to_reference_energy": 0.011046879555087947,
+            "cosine": 0.1463019353934162,
+            "positive_line_recovery": 0.021404256299859332
+          },
+          "c_fc": {
+            "maximum_functional_jvp_cosine": 0.38578095853248745,
+            "maximum_tangent_cosine": 0.16352916762446865,
+            "minimum_functional_jvp_cosine": 0.2417000240065885,
+            "minimum_tangent_cosine": 0.1603770907148828,
+            "minimum_task_line_retention": 0.01805149425466605,
+            "minimum_value_cosine": 0.999692874844638
+          },
+          "c_proj": {
+            "maximum_functional_jvp_cosine": 0.1324040944537247,
+            "maximum_tangent_cosine": 0.06376583154239004,
+            "minimum_functional_jvp_cosine": 0.08425709276365502,
+            "minimum_tangent_cosine": 0.05479189679997814,
+            "minimum_task_line_retention": 0.002878504933054501,
+            "minimum_value_cosine": 0.9990498649137572
+          },
+          "checks": {
+            "functional_jvp_cosine": false,
+            "minimum_matrix_functional_jvp_cosine": false,
+            "minimum_matrix_positive_line_recovery": false,
+            "minimum_matrix_postpolar_cosine": false,
+            "minimum_matrix_task_line_retention": false,
+            "minimum_matrix_value_cosine": true,
+            "postpolar_cosine": false
+          },
+          "measurements": {
+            "functional_jvp_cosine": 0.14738957311471312,
+            "minimum_matrix_functional_jvp_cosine": 0.08425709276365502,
+            "minimum_matrix_positive_line_recovery": 0.0030021519549394545,
+            "minimum_matrix_postpolar_cosine": 0.05479189679997814,
+            "minimum_matrix_task_line_retention": 0.002878504933054501,
+            "minimum_matrix_value_cosine": 0.9990498649137572,
+            "postpolar_cosine": 0.1463019353934162
+          },
+          "passed": false,
+          "protocol": {
+            "atoms": 2,
+            "coordinates_per_panel": 16896,
+            "stages": 10
+          }
+        }
+      },
+      "step": 180,
+      "virtual_weight_energy_recovery": {
+        "weighted": 0.9999999938840285,
+        "worst_matrix": 0.9999998847550418
+      }
+    },
+    {
+      "candidates": {
+        "S1": {
+          "aggregate_functional_jvp": {
+            "candidate_to_reference_energy": 0.0017965805340592438,
+            "cosine": 0.20671532188975203,
+            "positive_line_recovery": 0.042731224303983795
+          },
+          "aggregate_tangent": {
+            "candidate_to_reference_energy": 0.009206243964548905,
+            "cosine": 0.1166034058134065,
+            "positive_line_recovery": 0.01359635424728596
+          },
+          "c_fc": {
+            "maximum_functional_jvp_cosine": 0.27458531727002766,
+            "maximum_tangent_cosine": 0.11954175014926367,
+            "minimum_functional_jvp_cosine": 0.17009198919627433,
+            "minimum_tangent_cosine": 0.11817751106604371,
+            "minimum_task_line_retention": 0.011801630849111467,
+            "minimum_value_cosine": 0.999702824596593
+          },
+          "c_proj": {
+            "maximum_functional_jvp_cosine": 0.23522641794753668,
+            "maximum_tangent_cosine": 0.11403520780716683,
+            "minimum_functional_jvp_cosine": 0.16775629740120035,
+            "minimum_tangent_cosine": 0.11150091017769119,
+            "minimum_task_line_retention": 0.00740314977263969,
+            "minimum_value_cosine": 0.9990749522548282
+          },
+          "checks": {
+            "functional_jvp_cosine": false,
+            "minimum_matrix_functional_jvp_cosine": false,
+            "minimum_matrix_positive_line_recovery": false,
+            "minimum_matrix_postpolar_cosine": false,
+            "minimum_matrix_task_line_retention": false,
+            "minimum_matrix_value_cosine": true,
+            "postpolar_cosine": false
+          },
+          "measurements": {
+            "functional_jvp_cosine": 0.20671532188975203,
+            "minimum_matrix_functional_jvp_cosine": 0.16775629740120035,
+            "minimum_matrix_positive_line_recovery": 0.01243245297045356,
+            "minimum_matrix_postpolar_cosine": 0.11150091017769119,
+            "minimum_matrix_task_line_retention": 0.00740314977263969,
+            "minimum_matrix_value_cosine": 0.9990749522548282,
+            "postpolar_cosine": 0.1166034058134065
+          },
+          "passed": false,
+          "protocol": {
+            "atoms": 1,
+            "coordinates_per_panel": 8448,
+            "stages": 10
+          }
+        },
+        "S2": {
+          "aggregate_functional_jvp": {
+            "candidate_to_reference_energy": 0.0015272709462041468,
+            "cosine": 0.14237142279073406,
+            "positive_line_recovery": 0.02026962202745795
+          },
+          "aggregate_tangent": {
+            "candidate_to_reference_energy": 0.010841264136036536,
+            "cosine": 0.14515474931983743,
+            "positive_line_recovery": 0.021069901250104845
+          },
+          "c_fc": {
+            "maximum_functional_jvp_cosine": 0.3796676277304966,
+            "maximum_tangent_cosine": 0.16307764584453696,
+            "minimum_functional_jvp_cosine": 0.24837459804441842,
+            "minimum_tangent_cosine": 0.1556852214709949,
+            "minimum_task_line_retention": 0.017239851422265823,
+            "minimum_value_cosine": 0.9997001219484835
+          },
+          "c_proj": {
+            "maximum_functional_jvp_cosine": 0.14119187979613285,
+            "maximum_tangent_cosine": 0.057367186944195604,
+            "minimum_functional_jvp_cosine": 0.04438252296265349,
+            "minimum_tangent_cosine": 0.05439978686131267,
+            "minimum_task_line_retention": 0.0029236307654645823,
+            "minimum_value_cosine": 0.9990666768767492
+          },
+          "checks": {
+            "functional_jvp_cosine": false,
+            "minimum_matrix_functional_jvp_cosine": false,
+            "minimum_matrix_positive_line_recovery": false,
+            "minimum_matrix_postpolar_cosine": false,
+            "minimum_matrix_task_line_retention": false,
+            "minimum_matrix_value_cosine": true,
+            "postpolar_cosine": false
+          },
+          "measurements": {
+            "functional_jvp_cosine": 0.14237142279073406,
+            "minimum_matrix_functional_jvp_cosine": 0.04438252296265349,
+            "minimum_matrix_positive_line_recovery": 0.002959336810556247,
+            "minimum_matrix_postpolar_cosine": 0.05439978686131267,
+            "minimum_matrix_task_line_retention": 0.0029236307654645823,
+            "minimum_matrix_value_cosine": 0.9990666768767492,
+            "postpolar_cosine": 0.14515474931983743
+          },
+          "passed": false,
+          "protocol": {
+            "atoms": 2,
+            "coordinates_per_panel": 16896,
+            "stages": 10
+          }
+        }
+      },
+      "step": 238,
+      "virtual_weight_energy_recovery": {
+        "weighted": 0.9999999938540419,
+        "worst_matrix": 0.9999998992633612
+      }
+    }
+  ],
+  "schema_version": "mai_pair_vq_full_rank_tangent_atlas_oracle_sealed_result_v1",
+  "state": {
+    "S1_compression_vs_dense_values": 69.81818181818181,
+    "S2_compression_vs_dense_values": 34.90909090909091,
+    "persistent_pair_vq_training_bytes": 157500864
+  },
+  "valid": true
+}
