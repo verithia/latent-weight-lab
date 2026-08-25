@@ -1,0 +1,161 @@
+{
+  "automatic_training": false,
+  "candidate_code_changes": [
+    3724411,
+    3466713,
+    3724429,
+    3466766,
+    3724345,
+    3466791,
+    3724311,
+    3466746,
+    3724381,
+    3466771,
+    3724367,
+    3466811,
+    3724345,
+    3466880,
+    3724413,
+    3466672,
+    3724403,
+    3466673,
+    3724402,
+    3466840,
+    3724246,
+    3466828,
+    3724428,
+    3466716
+  ],
+  "decoded_outputs_finite": true,
+  "device": "NVIDIA H100 80GB HBM3",
+  "end_to_end_performance": {
+    "candidate_ms": 112.93878173828125,
+    "candidate_phase_profile_ms": {
+      "base_coordinate_fit": 3.013184070587158,
+      "base_decode_and_residual_transform": 24.230112075805664,
+      "base_gain_fit": 1.482591986656189,
+      "base_select_and_pack": 18.965120315551758,
+      "base_transform_and_gain": 13.570591926574707,
+      "cfc_residual_fit_and_pack": 10.728960037231445,
+      "clone_old_packed": 0.18745599687099457,
+      "code_change_reduce": 1.1256959438323975,
+      "cproj_residual_fit_and_pack": 5.518527984619141,
+      "refined_coordinate_fit": 33.82659149169922,
+      "total": 112.64883182942867
+    },
+    "saving_ms": 597.0817260742188,
+    "serial_ms": 710.0205078125,
+    "speedup": 6.286773213632377
+  },
+  "end_to_end_role_drift": {
+    "base_coordinates": {
+      "centroid_max_abs": 8.273124694824219e-05,
+      "code_mismatch_fraction": 0.00011046727498372395,
+      "code_mismatches": 6255
+    },
+    "base_gains": {
+      "centroid_max_abs": 9.1552734375e-05,
+      "code_mismatch_fraction": 0.0013478597005208333,
+      "code_mismatches": 2385
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 0.0013804435729980469,
+      "code_mismatch_fraction": 0.0006657353153935185,
+      "code_mismatches": 18848
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 0.006805419921875,
+      "code_mismatch_fraction": 0.028435601128472224,
+      "code_mismatches": 12579
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 0.0005466938018798828,
+      "code_mismatch_fraction": 0.00015357688621238426,
+      "code_mismatches": 4348
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 0.0026197433471679688,
+      "code_mismatch_fraction": 0.012222855179398149,
+      "code_mismatches": 10814
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 0.0002472400665283203,
+      "code_mismatch_fraction": 0.00019401974148220487,
+      "code_mismatches": 10986
+    }
+  },
+  "gate_passed": true,
+  "maximum_decoded_absolute_vs_serial": 5.739857442677021e-05,
+  "maximum_decoded_relative_l2_vs_serial": 0.00030754669569432735,
+  "packed_streams_valid": true,
+  "persistent_state_shapes_and_dtypes_exact": true,
+  "recorded_at": "2026-08-26",
+  "roles": {
+    "base_coordinates": {
+      "centroid_max_abs": 3.933906555175781e-05,
+      "code_mismatch_fraction": 7.387443825050636e-05,
+      "code_mismatches": 4183
+    },
+    "base_gains": {
+      "centroid_max_abs": 7.641315460205078e-05,
+      "code_mismatch_fraction": 5.651403356481481e-07,
+      "code_mismatches": 1
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 9.441375732421875e-05,
+      "code_mismatch_fraction": 7.565816243489583e-05,
+      "code_mismatches": 2142
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 1.9073486328125e-06,
+      "code_mismatch_fraction": 0.0,
+      "code_mismatches": 0
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 6.306171417236328e-05,
+      "code_mismatch_fraction": 2.0345052083333332e-05,
+      "code_mismatches": 576
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 6.61611557006836e-05,
+      "code_mismatch_fraction": 2.3735894097222223e-05,
+      "code_mismatches": 21
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 6.151199340820312e-05,
+      "code_mismatch_fraction": 9.07756664134838e-05,
+      "code_mismatches": 5140
+    }
+  },
+  "scalar_correctness_passed": true,
+  "schema_version": "mai_124m_pair_vq_hierarchical_integration_replay_v1",
+  "selectors_valid": true,
+  "serial_code_changes": [
+    3724413,
+    3466711,
+    3724426,
+    3466770,
+    3724344,
+    3466791,
+    3724312,
+    3466746,
+    3724378,
+    3466772,
+    3724363,
+    3466810,
+    3724349,
+    3466880,
+    3724411,
+    3466670,
+    3724403,
+    3466675,
+    3724400,
+    3466840,
+    3724237,
+    3466827,
+    3724430,
+    3466717
+  ],
+  "source_commit": "f8fcde4ab5cceeea747d81f304d10a8156d292c3",
+  "source_sha256": "bb6ee0533cf1afd13b4e959d35dafdb12297e89caf86b41bbbcb725592616177"
+}

@@ -1,0 +1,26 @@
+{
+  "schema_version": "mai_124m_pair_vq_hierarchical_optimizer_boundary_invalidation_v1",
+  "recorded_at": "2026-08-26",
+  "status": "invalid_measurement_and_decision",
+  "superseded_certificate": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_mfu_retry1_result.json",
+    "sha256": "a32612eba0f9748bb6051b1ef6f6bb8c736ffad9b46b668215f2f1a06a6eb227"
+  },
+  "superseded_decision": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_result.json",
+    "sha256": "79a4d153bd1703acdb1d0e1fe2c9f56dc27f80ca74c0e6520f8400bea4b39396"
+  },
+  "root_cause": "The JSON flag reached GPTConfig, but GPT.configure_optimizers omitted hierarchical_feedback_fit from the actual MuonPairVQ constructor. An earlier edit mistakenly supplied it to a generic Muon branch that is inactive when every MLP matrix is Pair-VQ. Thus the model_config log showed true while the optimizer still used its default false value.",
+  "repair": {
+    "git_commit": "3a443a36ebd25d9fa239ce0367c2e61a7b25bcfe",
+    "changes": [
+      "Remove the invalid keyword from the generic Muon branch.",
+      "Pass the flag to the MuonPairVQ constructor.",
+      "Add a mocked constructor-level regression test.",
+      "Emit pair_vq_optimizer_config at startup so the exact log proves the active optimizer flag."
+    ],
+    "focused_tests": "3 passed"
+  },
+  "next_gate": "Repeat the exact H100 preflight and require both model_config true and pair_vq_optimizer_config hierarchical_feedback_fit=[true] before applying any state or performance threshold.",
+  "scientific_training_authorized": false
+}

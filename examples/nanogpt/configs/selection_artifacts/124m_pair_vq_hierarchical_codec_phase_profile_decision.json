@@ -1,0 +1,36 @@
+{
+  "schema_version": "mai_124m_pair_vq_hierarchical_codec_phase_profile_decision_v1",
+  "recorded_at": "2026-08-26",
+  "status": "warm_profile_complete",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_codec_phase_profile_plan.json",
+    "sha256": "96dd671b49629f3c2170d368b441cb196cab559c453df03168a84ea48e144189"
+  },
+  "result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_codec_phase_profile_result.json",
+    "sha256": "a0e8ca68310b7d8d4ad54111d3a1099959de2309c9e8704bd05f07123b3ab341",
+    "replay_correctness_passed": true
+  },
+  "end_to_end": {
+    "serial_ms": 710.0205078125,
+    "integrated_ms": 112.93878173828125,
+    "saving_ms": 597.0817260742188,
+    "speedup": 6.286773213632377
+  },
+  "integrated_phase_ms": {
+    "refined_coordinate_fit": 33.82659149169922,
+    "base_decode_and_residual_transform": 24.230112075805664,
+    "base_select_and_pack": 18.965120315551758,
+    "base_transform_and_gain": 13.570591926574707,
+    "cfc_residual_fit_and_pack": 10.728960037231445,
+    "cproj_residual_fit_and_pack": 5.518527984619141,
+    "base_coordinate_fit": 3.013184070587158,
+    "base_gain_fit": 1.482591986656189,
+    "code_change_reduce": 1.1256959438323975,
+    "clone_old_packed": 0.18745599687099457,
+    "total": 112.64883182942867
+  },
+  "interpretation": "Once one-time extension loading is excluded, the complete integrated codec is fast enough that the previous 643 ms optimizer result cannot represent the active integration. The just-discovered MuonPairVQ constructor omission explains the contradiction. Do not optimize the 33.83 ms refined-coordinate phase until the repaired real optimizer is measured.",
+  "next_action": "Run the exact repaired optimizer preflight and require explicit optimizer-flag proof. Apply the frozen state, peak, optimizer, and MFU gates only to that result.",
+  "scientific_training_authorized": false
+}
