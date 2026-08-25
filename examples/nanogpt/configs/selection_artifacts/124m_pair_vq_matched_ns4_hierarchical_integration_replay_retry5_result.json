@@ -1,0 +1,142 @@
+{
+  "automatic_training": false,
+  "candidate_code_changes": [
+    3724412,
+    3466714,
+    3724427,
+    3466765,
+    3724346,
+    3466792,
+    3724312,
+    3466746,
+    3724384,
+    3466767,
+    3724365,
+    3466813,
+    3724353,
+    3466879,
+    3724416,
+    3466674,
+    3724402,
+    3466676,
+    3724407,
+    3466838,
+    3724241,
+    3466829,
+    3724428,
+    3466713
+  ],
+  "decoded_outputs_finite": true,
+  "device": "NVIDIA H100 80GB HBM3",
+  "end_to_end_role_drift": {
+    "base_coordinates": {
+      "centroid_max_abs": 6.151199340820312e-05,
+      "code_mismatch_fraction": 0.00010824203491210938,
+      "code_mismatches": 6129
+    },
+    "base_gains": {
+      "centroid_max_abs": 0.00019884109497070312,
+      "code_mismatch_fraction": 0.001415676540798611,
+      "code_mismatches": 2505
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 0.002379894256591797,
+      "code_mismatch_fraction": 0.0006060070461697049,
+      "code_mismatches": 17157
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 0.0048999786376953125,
+      "code_mismatch_fraction": 0.029988606770833332,
+      "code_mismatches": 13266
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 0.0006906986236572266,
+      "code_mismatch_fraction": 0.0001468658447265625,
+      "code_mismatches": 4158
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 0.0018787384033203125,
+      "code_mismatch_fraction": 0.012413872612847222,
+      "code_mismatches": 10983
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 0.00024008750915527344,
+      "code_mismatch_fraction": 0.0001922889992042824,
+      "code_mismatches": 10888
+    }
+  },
+  "gate_passed": true,
+  "maximum_decoded_absolute_vs_serial": 4.886300303041935e-05,
+  "maximum_decoded_relative_l2_vs_serial": 0.0002860527310986072,
+  "packed_streams_valid": true,
+  "persistent_state_shapes_and_dtypes_exact": true,
+  "recorded_at": "2026-08-26",
+  "roles": {
+    "base_coordinates": {
+      "centroid_max_abs": 4.124641418457031e-05,
+      "code_mismatch_fraction": 7.124300356264468e-05,
+      "code_mismatches": 4034
+    },
+    "base_gains": {
+      "centroid_max_abs": 1.9848346710205078e-05,
+      "code_mismatch_fraction": 1.1302806712962962e-06,
+      "code_mismatches": 2
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 7.87973403930664e-05,
+      "code_mismatch_fraction": 7.092511212384259e-05,
+      "code_mismatches": 2008
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 1.6689300537109375e-06,
+      "code_mismatch_fraction": 0.0,
+      "code_mismatches": 0
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 5.7220458984375e-05,
+      "code_mismatch_fraction": 2.045101589626736e-05,
+      "code_mismatches": 579
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 6.663799285888672e-05,
+      "code_mismatch_fraction": 1.808449074074074e-05,
+      "code_mismatches": 16
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 6.127357482910156e-05,
+      "code_mismatch_fraction": 9.388393825954861e-05,
+      "code_mismatches": 5316
+    }
+  },
+  "scalar_correctness_passed": true,
+  "schema_version": "mai_124m_pair_vq_hierarchical_integration_replay_v1",
+  "selectors_valid": true,
+  "serial_code_changes": [
+    3724412,
+    3466714,
+    3724424,
+    3466767,
+    3724342,
+    3466792,
+    3724310,
+    3466749,
+    3724385,
+    3466770,
+    3724364,
+    3466813,
+    3724349,
+    3466877,
+    3724417,
+    3466673,
+    3724400,
+    3466673,
+    3724404,
+    3466840,
+    3724236,
+    3466828,
+    3724433,
+    3466716
+  ],
+  "source_commit": "bec8b2eaf91b999521fd3ae347423a1ad4978174",
+  "source_sha256": "d08422faba8e90a2d33f01372bdf315ef2f89d77428965179c3ecf392f88048f"
+}
