@@ -124,6 +124,10 @@ def main() -> None:
             }
         )
 
+    torch.cuda.synchronize()
+    serial_start = torch.cuda.Event(enable_timing=True)
+    serial_end = torch.cuda.Event(enable_timing=True)
+    serial_start.record()
     serial_changes = []
     for entry in serial_entries:
         serial_changes.append(
@@ -137,7 +141,19 @@ def main() -> None:
                 lloyd_iterations=entry["lloyd_iterations"],
             )
         )
-    candidate_changes = _fit_fractional_residual_lattice_feedback_batch_(entries)
+    serial_end.record()
+    serial_end.synchronize()
+    serial_ms = float(serial_start.elapsed_time(serial_end))
+
+    candidate_start = torch.cuda.Event(enable_timing=True)
+    candidate_end = torch.cuda.Event(enable_timing=True)
+    candidate_start.record()
+    candidate_changes = _fit_fractional_residual_lattice_feedback_batch_(
+        entries
+    )
+    candidate_end.record()
+    candidate_end.synchronize()
+    candidate_ms = float(candidate_start.elapsed_time(candidate_end))
 
     role_values: dict[str, list[torch.Tensor]] = {
         "base_gains": [],
@@ -355,6 +371,12 @@ def main() -> None:
         "maximum_decoded_absolute_vs_serial": maximum_decoded_absolute,
         "serial_code_changes": serial_changes,
         "candidate_code_changes": candidate_changes,
+        "end_to_end_performance": {
+            "serial_ms": serial_ms,
+            "candidate_ms": candidate_ms,
+            "saving_ms": serial_ms - candidate_ms,
+            "speedup": serial_ms / max(candidate_ms, 1e-12),
+        },
         "gate_passed": bool(
             scalar_correctness
             and shapes_and_dtypes_exact

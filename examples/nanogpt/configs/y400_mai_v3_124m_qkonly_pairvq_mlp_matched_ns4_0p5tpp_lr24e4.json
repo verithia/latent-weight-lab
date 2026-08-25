@@ -83,7 +83,7 @@
   "gradient_accumulation_steps": 8,
   "hierarchical_integration_plan": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_plan.json",
   "implementation_commit": "df977c0",
-  "launch_block_reason": "pending exact hierarchical-integration MFU preflight",
+  "launch_block_reason": "hierarchical integration rejected: valid exact preflight measured 18.0264% MFU and 643.146 ms optimizer time",
   "launch_ready": false,
   "learning_rate": 0.0024,
   "literal_command": "CUDA_VISIBLE_DEVICES=0 TORCH_EXTENSIONS_DIR=/root/userdata/MappingNetworks/.cache/torch_extensions_sm90 TORCH_CUDA_ARCH_LIST=9.0 PYTHONPATH=. /root/userdata/MappingNetworks/.venv-gpt2/bin/python -u -m examples.nanogpt.train --config examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",

@@ -1,0 +1,25 @@
+{
+  "schema_version": "mai_124m_pair_vq_hierarchical_end_to_end_profile_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_diagnostic",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_result.json"
+  },
+  "question": "Why did a 328 ms standalone scalar-Lloyd saving reduce the valid complete optimizer by only about 36 ms?",
+  "protocol": {
+    "device": "one idle Y400 H100",
+    "training_updates": 0,
+    "expected_duration_under_five_minutes": true,
+    "source": "the same 24 production shapes, seeds, codec layouts, and independent raw-feedback tensors used by verify_pair_vq_hierarchical_integration.py",
+    "reference": "24 complete serial _fit_fractional_residual_lattice_feedback_ calls, including transforms, selectors, packing, residual construction, and code-change reductions",
+    "candidate": "one complete _fit_fractional_residual_lattice_feedback_batch_ call over the same 24 roles",
+    "timing": "CUDA events around the complete reference and candidate boundaries with synchronization before reading elapsed time",
+    "correctness": "retain every already-passing retry5 packed-stream, dtype, selector, finite-output, centroid, and code-mismatch gate"
+  },
+  "decision_rule": {
+    "candidate_end_to_end_saving_at_least_150_ms": "The remaining optimizer stages dominate; add default-off CUDA-event optimizer-phase attribution before changing the codec.",
+    "candidate_end_to_end_saving_below_150_ms": "The omitted codec preparation/packing work invalidated the scalar-only projection; profile the complete candidate codec phases and optimize only its largest exact component.",
+    "correctness_failure": "Reject the diagnostic result and make no implementation change.",
+    "automatic_training": false
+  }
+}

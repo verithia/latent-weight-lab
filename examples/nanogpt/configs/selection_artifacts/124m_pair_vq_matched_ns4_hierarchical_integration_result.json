@@ -1,0 +1,47 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_integration_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "rejected_before_training",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_plan.json",
+    "sha256": "b573bae700a13b1d9530285f389fd91736696a64f9f3584fa987ff9bbda816a8"
+  },
+  "implementation": {
+    "git_commit": "df977c0771da0217b35584f757fb5d62208b5a3c",
+    "scratch_log_proved_hierarchical_fit_active": true
+  },
+  "independent_replay": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_replay_retry5_result.json",
+    "sha256": "c56289716184b86e100579b80439e1339b84eb1c901b6c445c0333b2dcb84f87",
+    "passed": true,
+    "maximum_scalar_centroid_absolute_difference": 0.0000787973403930664,
+    "maximum_scalar_code_mismatch_fraction": 0.00009388393825954861,
+    "maximum_independent_stress_decoded_relative_l2": 0.0002860527310986072
+  },
+  "exact_preflight": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_mfu_retry1_result.json",
+    "sha256": "a32612eba0f9748bb6051b1ef6f6bb8c736ffad9b46b668215f2f1a06a6eb227",
+    "git_commit": "33ccb56",
+    "persistent_pair_vq_training_bytes": 157500864,
+    "training_state_compression": 2.876078,
+    "mfu_percent": 18.026441754490965,
+    "optimizer_ms": 643.14625,
+    "iteration_ms": 1411.1887500000003,
+    "tokens_per_second": 185851.61375000002,
+    "forward_backward_ms": 738.6337500000001,
+    "peak_allocated_mib": 31707.43,
+    "all_logged_losses_finite": true
+  },
+  "frozen_gate_outcomes": {
+    "persistent_state_exact": true,
+    "minimum_training_state_compression_2p8": true,
+    "maximum_peak_allocated_mib_35803p43": true,
+    "maximum_optimizer_ms_495": false,
+    "minimum_mfu_percent_20": false
+  },
+  "conclusion": "The fitter is numerically admissible and preserves the exact compact state, but the standalone scalar-Lloyd projection did not predict complete optimizer runtime. The valid integrated path saved only about 36 ms relative to the 679.60 ms static-centroid optimizer, not the projected 328 ms. Full codec preparation, transforms, packing/decoding, projection, Muon, and diagnostics must be measured end to end before another systems change.",
+  "decision": "Reject this integration for the exact endpoint and do not train. Authorize only a no-training end-to-end 24-module codec timing decomposition, followed by one causally identified implementation change if the decomposition supports it.",
+  "scientific_training_authorized": false,
+  "automatic_sweep": false,
+  "automatic_scale_up": false
+}
