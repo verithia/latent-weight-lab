@@ -1,0 +1,55 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_b64_preflight_rejection_v1",
+  "recorded_at": "2026-08-26",
+  "status": "rejected_before_scientific_training",
+  "scientific_config": {
+    "path": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "sha256": "c6a8beb46502aba3696fd68b90cd04d7f355ca25dd67325823c2cb9a43e1c52f"
+  },
+  "remote_preflight": {
+    "certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/preflights/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "certificate_sha256": "2b4e046db6de089aedb2db138f815adccca1e389e54db1623e49022d64387bbd",
+    "log": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/preflights/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.log",
+    "log_sha256": "3c6b4292d89e806ac9b9ef2f81977070bb1f972dce16e845c30c06ec91383395",
+    "git_commit": "b21f678f530426c7f94f0896092fbb588b20d8d8",
+    "device": "NVIDIA H100 80GB HBM3"
+  },
+  "state_gate": {
+    "expected_persistent_training_bytes": 157500864,
+    "observed_persistent_training_bytes": 157500864,
+    "passed": true,
+    "dense_fp32_weight_plus_muon_bytes": 452984832,
+    "training_state_reduction_x": 2.876078
+  },
+  "performance_gate": {
+    "minimum_mfu_fraction": 0.2,
+    "observed_mfu_fraction": 0.16426706208396635,
+    "passed": false,
+    "tokens_per_second": 170342.24375000002,
+    "iter_ms": 1541.8912500000001,
+    "model_tflops": 127.22102868101763,
+    "peak_mib": 31707.43,
+    "timing_breakdown_ms": {
+      "forward_backward": 737.93125,
+      "optimizer": 768.6424999999999,
+      "flush": 17.59875,
+      "prepare": 8.65,
+      "gradient": 3.34375,
+      "data": 2.51875,
+      "other": 3.2050000000000005
+    }
+  },
+  "stability": {
+    "all_logged_losses_finite": true,
+    "native_block_fht_extension_loaded": true
+  },
+  "decision": {
+    "scientific_training_launched": false,
+    "representation_rejected": false,
+    "reason": "The exact B64/L16 persistent-state contract passed, but exact-config H100 MFU was below the preregistered floor.",
+    "next_action": "Optimize only execution shape or mathematically equivalent implementation; repeat the fail-closed state and MFU gates before any loss run.",
+    "automatic_codec_sweep": false,
+    "automatic_quality_run": false,
+    "automatic_scale_up": false
+  }
+}

@@ -1,0 +1,75 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_batchshape_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_batchshape_preflights",
+  "scientific_question": "Can the exact B64/L16 compact representation clear the frozen H100 MFU floor by changing only the microbatch/accumulation partition of the same 256-sequence global batch?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_compact_source_correction_plan.json",
+    "sha256": "fed2aa6f404a44eb286861d874888eb98c75853456c4ccba50aeedf3c51314a7"
+  },
+  "failed_exact_source_preflight": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_b64_preflight_rejection.json",
+    "sha256": "70147df93eccc837397de65e8d5c1aa24c460fbf3d5bac533e85c0ca20a5e5f3",
+    "mfu_fraction": 0.16426706208396635,
+    "persistent_training_bytes": 157500864
+  },
+  "frozen_scientific_state": {
+    "model": "MAI-v3 124M",
+    "tokens_per_update": 262144,
+    "global_batch_sequences": 256,
+    "sequence_length": 1024,
+    "data_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "compact_codec": "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16",
+    "compact_persistent_training_bytes_exact": 157500864,
+    "attention_muon_ns_steps": 5,
+    "mlp_muon_ns_steps": 4,
+    "mlp_muon_lr_scale": 1.225,
+    "mlp_muon_polar_ridge": 0.0,
+    "learning_rate": 0.0024,
+    "compile": false,
+    "codec_change": false,
+    "lazy_retraction_change": false,
+    "loss_selection": false
+  },
+  "ordered_system_preflights": [
+    {
+      "order": 1,
+      "batch_size": 64,
+      "gradient_accumulation_steps": 4,
+      "run_only_if": "always"
+    },
+    {
+      "order": 2,
+      "batch_size": 128,
+      "gradient_accumulation_steps": 2,
+      "run_only_if": "64x4 fails the MFU, state, stability, or memory gate"
+    }
+  ],
+  "preflight_gates": {
+    "minimum_mfu_fraction": 0.2,
+    "persistent_training_bytes_exact": 157500864,
+    "all_logged_losses_finite": true,
+    "native_block_fht_extension_required": true,
+    "peak_memory_mib_max": 70000,
+    "warmup_updates": 2,
+    "timed_updates": 8
+  },
+  "selection_rule": "Select the first ordered batch partition that passes every systems gate; do not select by loss or by maximum throughput.",
+  "paired_quality_rule": {
+    "required_after_system_pass": true,
+    "dense_and_compact_use_same_selected_batch_partition": true,
+    "dense_terminal_validation_ce_max": 5.371,
+    "compact_minus_same_partition_dense_validation_ce_max": 0.01,
+    "compact_terminal_validation_ce_max": 5.381,
+    "fixed_model_compute_penalty_max": 1.1,
+    "compact_checkpoint_required": true
+  },
+  "decision_rule": {
+    "64x4_pass": "Do not run 128x2. Register and run a same-partition dense NS4 quality control before the compact endpoint.",
+    "64x4_fail_128x2_pass": "Register and run a same-partition dense NS4 quality control before the compact endpoint.",
+    "both_fail": "Do not train. Profile and optimize the mathematically identical B64/L16 retraction implementation; do not enable lazy retraction, FP16 ambient carry, or another codec.",
+    "automatic_scale_up": false,
+    "automatic_codec_sweep": false,
+    "automatic_horizon_transfer": false
+  }
+}
