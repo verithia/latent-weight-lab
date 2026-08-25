@@ -28,7 +28,6 @@ COORDINATE_ROLES = {
     "cfc_residual_coordinates",
     "cproj_residual_coordinates",
     "base_coordinates",
-    "refined_coordinates",
 }
 SELECTED_GROUPS = {
     "cfc_residual_coordinates": 12,
@@ -238,7 +237,7 @@ def main() -> None:
     )
     peak_mib = torch.cuda.max_memory_allocated() / 2**20
     result = {
-        "schema_version": "mai_124m_pair_vq_hierarchical_histogram_result_v1",
+        "schema_version": "mai_124m_pair_vq_hierarchical_hybrid_result_v1",
         "recorded_at": "2026-08-26",
         "source_commit": commit,
         "source_sha256": {
@@ -247,6 +246,7 @@ def main() -> None:
         },
         "device": torch.cuda.get_device_name(),
         "tile_values": 65536,
+        "hierarchical_roles": sorted(COORDINATE_ROLES),
         "repetitions": args.repetitions,
         "roles": role_results,
         "total_serial_seconds": total_serial,
