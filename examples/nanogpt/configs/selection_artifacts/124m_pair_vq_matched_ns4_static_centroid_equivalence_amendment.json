@@ -1,0 +1,56 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_static_centroid_equivalence_amendment_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_repair_before_performance_measurement",
+  "original_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_static_centroid_plan.json",
+    "sha256": "c472527ee69335789138003bd153bcf1dd0c3a98c905532e567b3f2417e72cfd"
+  },
+  "invalid_gate": {
+    "gate": "Independent end-to-end CUDA replays must be bitwise identical.",
+    "reason": "The reference implementation uses CUDA index_add_ for centroid sums. Two executions of the unchanged reference on the same saved values are not bitwise identical, so independent-replay bitwise equality cannot distinguish an implementation change from source nondeterminism.",
+    "observed_before_opening_the_performance_result": true
+  },
+  "frozen_replacement_gate": {
+    "same_intermediate_tensors": "Given identical levels, sums, counts, and live masks, the original dynamic assignment and the static torch.where assignment must be bitwise identical, including empty centroids.",
+    "source_replay_envelope": "For each saved production-shape case, old-versus-static centroid maximum absolute error and code mismatch count must each be no greater than 2.0 times the paired old-versus-old replay value.",
+    "focused_unit_tests_pass": true,
+    "full_compact_persistent_training_bytes_exact": 157500864,
+    "minimum_mfu_fraction": 0.2,
+    "all_logged_losses_finite": true
+  },
+  "source_replay_observations": [
+    {
+      "value_count": 2359296,
+      "level_count": 256,
+      "iterations": 16,
+      "old_old_levels_max_abs": 0.00006604194641113281,
+      "old_old_code_mismatches": 352,
+      "old_static_levels_max_abs": 0.00006723403930664062,
+      "old_static_code_mismatches": 384
+    },
+    {
+      "value_count": 2359296,
+      "level_count": 32,
+      "iterations": 16,
+      "old_old_levels_max_abs": 0.000024497509002685547,
+      "old_old_code_mismatches": 30,
+      "old_static_levels_max_abs": 0.000026464462280273438,
+      "old_static_code_mismatches": 21
+    },
+    {
+      "value_count": 589824,
+      "level_count": 256,
+      "iterations": 4,
+      "old_old_levels_max_abs": 0.0000209808349609375,
+      "old_old_code_mismatches": 26,
+      "old_static_levels_max_abs": 0.00001990795135498047,
+      "old_static_code_mismatches": 29
+    }
+  ],
+  "decision_rule": {
+    "equivalence_fail": "Reject the static-centroid rewrite and do not open the MFU gate.",
+    "equivalence_pass_mfu_fail": "Do not train; seal the systems result and proceed only to a separately preregistered fused or batched exact-retraction implementation.",
+    "equivalence_pass_mfu_pass": "Only then authorize the existing compact quality endpoint; do not change codec, cadence, optimizer, or training schedule."
+  }
+}
