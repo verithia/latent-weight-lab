@@ -1,0 +1,212 @@
+{
+  "checks": {
+    "all_fixed_losses_finite": true,
+    "ambient_momentum_absent": true,
+    "certificate_matches_integration": true,
+    "certificate_matches_launch": true,
+    "certificate_source_matches_integration": true,
+    "checkpoint_and_log_terminal_agree": true,
+    "checkpoint_best_val_finite": true,
+    "checkpoint_fixed_eval_digest_matches_parent": true,
+    "checkpoint_identity_matches_metadata": true,
+    "checkpoint_matches_status": true,
+    "checkpoint_metadata_schema": true,
+    "checkpoint_next_iter": true,
+    "checkpoint_resolved_config_matches_metadata": true,
+    "checkpoint_schema": true,
+    "compact_checkpoint_has_no_dense_mlp_tensor": true,
+    "config_matches_launch": true,
+    "config_matches_status": true,
+    "dense_master_weight_absent": true,
+    "dense_optimizer_momentum_absent": true,
+    "fixed_eval_inventory": true,
+    "integration_governance_only_lineage": true,
+    "integration_preregistered_current_config": true,
+    "log_matches_status": true,
+    "manifest_matches_checkpoint": true,
+    "manifest_matches_config": true,
+    "manifest_matches_status": true,
+    "metadata_matches_status": true,
+    "metadata_next_iter": true,
+    "model_hierarchical_fit_enabled": true,
+    "native_block_fht_loaded": true,
+    "native_block_fht_required": true,
+    "optimizer_hierarchical_fit_proved": true,
+    "pair_vq_element_count": true,
+    "pair_vq_module_count": true,
+    "parent_matches_config": true,
+    "parent_matches_endpoint_gate": true,
+    "persistent_compression_gate": true,
+    "persistent_training_bytes_exact": true,
+    "preflight_all_frozen_gates_passed": true,
+    "preflight_memory_ceiling": true,
+    "preflight_mfu_floor": true,
+    "preflight_optimizer_ceiling": true,
+    "preflight_passed": true,
+    "preflight_state_exact": true,
+    "raw_ambient_error_buffer_absent": true,
+    "status_commit_matches_launch": true,
+    "status_exit_zero": true,
+    "status_finished": true
+  },
+  "classification": "REJECT_MATCHED_NS4_PAIR_VQ_124M_0P5TPP",
+  "compact_state": {
+    "checkpoint_file_bytes": 746464608,
+    "codec_bytes": 70855872,
+    "compact_feedback_bytes": 86571264,
+    "compact_momentum_bytes": 73728,
+    "compression": 2.8760783940842383,
+    "dense_fp32_weight_plus_muon_bytes": 452984832,
+    "exact_compact_checkpoint_identity": true,
+    "pair_vq_elements": 56623104,
+    "pair_vq_modules": 24,
+    "persisted_dense_mlp_tensors": [],
+    "persistent_training_bytes": 157500864
+  },
+  "decision": {
+    "authorize_5tpp": false,
+    "authorize_model_size_scale_up": false,
+    "authorize_sweep": false,
+    "automatic_rerun": false,
+    "next_action": "Reject the matched-NS4 hierarchical Pair-VQ endpoint and return to theory; no sweep or scale-up."
+  },
+  "passed": false,
+  "performance": {
+    "elapsed_seconds": 336.9346570968628,
+    "preflight_mfu_fraction": 0.23323880185915244,
+    "preflight_optimizer_ms": 311.42249999999996,
+    "preflight_tokens_per_second": 240669.42875000002,
+    "scientific_mean_tokens_per_second": 241583.70173913043,
+    "scientific_median_iteration_ms": 1062.62,
+    "scientific_median_optimizer_ms": 289.68,
+    "scientific_median_tokens_per_second": 246694.92,
+    "scientific_peak_memory_mib": 31709.0,
+    "scientific_perf_samples": 23
+  },
+  "provenance": {
+    "checkpoint_metadata_sha256": "1f6d644e41d3308eaf85b5981781b476b41692db0ecc53c8ab55fb77c5e73096",
+    "checkpoint_sha256": "7a65dd23564888396619ba82d46e5fd5a907e8e2254493b2cca9064c266b7030",
+    "config_sha256": "5da4704f76d54196a0159b64f6906826874036725d505fc97b8927bf737ba241",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "entrypoint": "examples/nanogpt/train.py",
+    "git_commit": "394485cabce5a3b350664b82a9e956d8021da1d8",
+    "integration_result_sha256": "a6bf43d48f234380a7f26486d9bcff0e822c77f7709ea6e5ab4f81baf184ad73",
+    "launch_receipt_sha256": "befc445a2c77500b3681678e64aa16b4c20cf2d2fdfb89ae24274412b3822c60",
+    "literal_command": [
+      "/root/userdata/MappingNetworks/.venv-gpt2/bin/python",
+      "-u",
+      "examples/nanogpt/train.py",
+      "--config",
+      "/root/userdata/MappingNetworks/latent-weight-lab/examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json"
+    ],
+    "mfu_certificate_sha256": "281b260c5c2664963600cb8f0007911f6ace1ae576771227cd93ba6d14d1c12a",
+    "mfu_certificate_source_config_sha256": "0a375f53e0b6b66775b047a02626433150937ebc364a44c6f17810292c7af6e9",
+    "parent_result_sha256": "3cd8594b8b8eaa05dab60ee0a61c5f2c93968754392cf0ea1da5ef2208249a8c",
+    "scientific_log_sha256": "6878bcc42eb208562e7544561dc6e7516e2094961b5890f280536ad791315a35",
+    "terminal_status_sha256": "9fd394c3b1b67f97b3b87b51c4a3952ed795cb1fe5ca34aebc16f65f3e80e480"
+  },
+  "quality_checks": {
+    "candidate_absolute_ce": false,
+    "candidate_minus_parent_ce": false,
+    "fixed_model_compute_penalty": false
+  },
+  "recorded_at": "2026-08-25T19:49:15.049308+00:00",
+  "schema_version": "mai_124m_pair_vq_matched_ns4_quality_result_v1",
+  "terminal": {
+    "candidate_minus_parent_validation_ce": 0.20711194152832046,
+    "candidate_minus_parent_validation_ce_max": 0.01,
+    "candidate_validation_ce_max": 5.381,
+    "fixed_model_compute_equivalent_penalty": 1.5464797953461615,
+    "fixed_model_compute_penalty_max": 1.1,
+    "fixed_model_curve_analysis": {
+      "common_loss_ratio": {
+        "loss_high": 6.2279,
+        "loss_low": 5.5734,
+        "max_candidate_over_dense_compute": 1.546479795346162,
+        "median_candidate_over_dense_compute": 1.194229047226389,
+        "min_candidate_over_dense_compute": 1.1669508183646078,
+        "samples": 101
+      },
+      "dense_local_fits": [
+        {
+          "alpha_eff_total_loss": 0.06998550672651258,
+          "loss_slope_per_log_compute": 0.3755632247464844,
+          "window": 2
+        },
+        {
+          "alpha_eff_total_loss": 0.10203714042973819,
+          "loss_slope_per_log_compute": 0.547561906688104,
+          "window": 3
+        },
+        {
+          "alpha_eff_total_loss": 0.1192133928815331,
+          "loss_slope_per_log_compute": 0.6397348302201711,
+          "window": 4
+        }
+      ],
+      "dense_terminal_validation_ce": 5.3663,
+      "schema_version": "fixed_model_compute_equivalence_v1",
+      "terminal_dense_penalty": {
+        "candidate_over_dense_compute": 1.5464797953461615,
+        "candidate_terminal_compute": 238.0,
+        "candidate_terminal_validation_ce": 5.5734,
+        "dense_match_compute": 153.89790459352653,
+        "method": "interpolation"
+      }
+    },
+    "fixed_validation_curve": [
+      {
+        "step": 0,
+        "train_ce": 10.9826,
+        "validation_ce": 10.9831
+      },
+      {
+        "step": 60,
+        "train_ce": 6.3231,
+        "validation_ce": 6.3323
+      },
+      {
+        "step": 120,
+        "train_ce": 5.8577,
+        "validation_ce": 5.8636
+      },
+      {
+        "step": 180,
+        "train_ce": 5.6603,
+        "validation_ce": 5.6648
+      },
+      {
+        "step": 238,
+        "train_ce": 5.5694,
+        "validation_ce": 5.5734
+      }
+    ],
+    "matched_dense_fixed_validation_curve": [
+      {
+        "step": 0,
+        "validation_ce": 10.997
+      },
+      {
+        "step": 60,
+        "validation_ce": 6.2279
+      },
+      {
+        "step": 120,
+        "validation_ce": 5.7357
+      },
+      {
+        "step": 180,
+        "validation_ce": 5.4712
+      },
+      {
+        "step": 238,
+        "validation_ce": 5.3663
+      }
+    ],
+    "matched_dense_parent_validation_ce": 5.3663,
+    "train_ce": 5.5694,
+    "validation_ce_exact": 5.57341194152832,
+    "validation_ce_logged": 5.5734
+  },
+  "valid": true
+}
