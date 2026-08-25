@@ -1,0 +1,41 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_exact_retraction_profile_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "profile_complete",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_exact_retraction_profile_plan.json",
+    "sha256": "9fe74d8b65bdcf02eeb456434c2c0da016a6c976a108530f90badf99b7a5af60"
+  },
+  "source_commit": "91a765b",
+  "artifacts": {
+    "nsys_report": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/profiles/exact_b64_l16_ns4_profile.nsys-rep",
+      "sha256": "71c16f9332c46d888507995fff0636f69dd4dc20ef99e8ee8de85589f8330430"
+    },
+    "preflight_certificate_sha256": "7ec859ed272160a10ed4d1c58572a256291a384b89a0d61bf7a89242edbfef7a",
+    "preflight_log_sha256": "91d949c3a60fedecead9aedfbb52248b2e30943faaf8f3706cea88a6d643f099",
+    "cuda_api_summary_sha256": "16d773b827e73aa4ee17cf7628ca88d6cc1578cffd4cc86a235a5c8cc1ab2754",
+    "cuda_kernel_summary_sha256": "483c34254b119722259b964d935ac4eb9ad987a55b9b20dbc0772adb953a1cb9",
+    "nvtx_summary_sha256": "05c008dba7677bfbeb14ba8c943ca129c12f40b744c6cc249909bd1d54267de3"
+  },
+  "attribution": {
+    "cuda_kernel_launches": 529495,
+    "cuda_async_memcopies": 93739,
+    "cuda_device_synchronizations": 424,
+    "large_index_add_reduce_instances": 8640,
+    "large_index_add_reduce_gpu_time_fraction": 0.224,
+    "device_select_nvtx_instances": 29952,
+    "device_select_nvtx_time_fraction": 0.603,
+    "device_reduce_sum_nvtx_instances": 29952,
+    "device_reduce_sum_nvtx_time_fraction": 0.341,
+    "searchsorted_kernel_instances": 10320,
+    "searchsorted_gpu_time_fraction": 0.01
+  },
+  "code_mapping": {
+    "dominant_index_add": "Repeated Lloyd centroid sums in _fit_scalar_codebook plus Pair-VQ compact momentum and projection centroids.",
+    "device_select_and_reduce": "Dynamic boolean live-code indexing used to write only nonempty centroids.",
+    "launch_count": "Twenty-four matrices execute their scalar codebook fits and diagnostics serially each optimizer step."
+  },
+  "measurement_caveat": "Nsight overhead raised measured optimizer time to 1006.83 ms and MFU fell to 14.15%; those values are not a replacement MFU gate. Only operator attribution is used.",
+  "decision": "First remove dynamic-shape live-centroid selection with a mathematically equivalent static-shape update and verify exact seeded codec outputs. Do not change codec capacity, cadence, state, or optimizer mathematics."
+}

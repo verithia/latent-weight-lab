@@ -1,0 +1,64 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_static_centroid_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_reference_acquisition_or_implementation",
+  "question": "Can static-shape centroid updates remove dynamic selection overhead while reproducing the exact B64/L16 Pair-VQ transition?",
+  "profile_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_exact_retraction_profile_result.json",
+    "sha256": "a7b4d310f74d4388aab3f9e38ba20b18c9992f3132a3f1e61d5645ef3b0749e7"
+  },
+  "compile_feasibility_probe": {
+    "completed_before_this_implementation_plan": true,
+    "source_commit": "91a765b",
+    "case": "2359296 FP32 values, 256 levels, 16 Lloyd iterations",
+    "result": "torch.compile fullgraph failed before execution with BackendCompilerFailed: AssertionError duplicate template name",
+    "decision": "Do not rely on whole-function Inductor compilation for this intervention."
+  },
+  "frozen_changes": [
+    "Replace levels[live] centroid writes in _fit_scalar_codebook with torch.where(counts > 0, sums / counts.clamp_min(1), previous_levels).",
+    "Apply the same static-shape nonempty-centroid identity to the 16-level Cartesian residual fitter.",
+    "Apply the same identity to MuonPairVQLinear slow-codebook centroid projection.",
+    "Replace compact-momentum live-code assignment with accum / counts.clamp_min(1), which is identical because dead-code accumulators are zero."
+  ],
+  "equivalence_gates": {
+    "reference_source_commit": "91a765b",
+    "seeded_production_shape_scalar_codebook_cases": [
+      {
+        "value_count": 2359296,
+        "level_count": 256,
+        "iterations": 16
+      },
+      {
+        "value_count": 2359296,
+        "level_count": 32,
+        "iterations": 16
+      },
+      {
+        "value_count": 589824,
+        "level_count": 256,
+        "iterations": 4
+      }
+    ],
+    "levels_bitwise_equal": true,
+    "codes_bitwise_equal": true,
+    "focused_unit_tests_pass": true,
+    "full_compact_persistent_training_bytes_exact": 157500864
+  },
+  "performance_gate": {
+    "config_sha256": "c6a8beb46502aba3696fd68b90cd04d7f355ca25dd67325823c2cb9a43e1c52f",
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "minimum_mfu_fraction": 0.2,
+    "all_logged_losses_finite": true,
+    "warmup_updates": 2,
+    "timed_updates": 8
+  },
+  "decision_rule": {
+    "equivalence_fail": "Reject the optimization and retain the reference implementation.",
+    "equivalence_pass_mfu_pass": "Register a same-implementation dense control only if needed, then run the compact scientific endpoint under the existing loss gates.",
+    "equivalence_pass_mfu_fail": "Do not train; proceed to an explicitly preregistered batched or fused Lloyd reduction that preserves the same codec transition.",
+    "automatic_quality_run": false,
+    "automatic_codec_change": false,
+    "automatic_scale_up": false
+  }
+}
