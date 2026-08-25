@@ -1,0 +1,46 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_fused_lloyd_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "correctness_rejected_before_mfu",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_fused_lloyd_plan.json",
+    "sha256": "625263f414059bf3cf0976d793690d0efd49115f2bb21b1028d965bdfe454d82"
+  },
+  "implementation_commit": "44856d0",
+  "focused_cuda_tests": "4 passed, 61 deselected",
+  "production_shape_replay": [
+    {
+      "value_count": 2359296,
+      "level_count": 256,
+      "iterations": 16,
+      "old_fused_levels_max_abs": 0.00010418891906738281,
+      "old_fused_code_mismatches": 410,
+      "levels_max_abs_limit": 0.00013208389282226562,
+      "code_mismatch_limit": 704,
+      "passed": true
+    },
+    {
+      "value_count": 2359296,
+      "level_count": 32,
+      "iterations": 16,
+      "old_fused_levels_max_abs": 0.000043451786041259766,
+      "old_fused_code_mismatches": 109,
+      "levels_max_abs_limit": 0.000048995018005371094,
+      "code_mismatch_limit": 60,
+      "passed": false
+    },
+    {
+      "value_count": 589824,
+      "level_count": 256,
+      "iterations": 4,
+      "old_fused_levels_max_abs": 0.000024080276489257812,
+      "old_fused_code_mismatches": 43,
+      "levels_max_abs_limit": 0.000041961669921875,
+      "code_mismatch_limit": 52,
+      "passed": true
+    }
+  ],
+  "mfu_gate_opened": false,
+  "scientific_training_authorized": false,
+  "decision": "Reject the native all-level fused-statistics path under its frozen correctness rule. The 32-level, 16-iteration c_fc residual codebook is sensitive to a different atomic summation order. Proceed only to a preregistered two-phase layer-batched implementation that retains PyTorch reference reductions."
+}

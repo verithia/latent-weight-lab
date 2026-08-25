@@ -1,0 +1,65 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_batched_lloyd_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_oracle_implementation_or_measurement",
+  "question": "Can reference PyTorch Lloyd reductions be phase-batched across the 12 equal-shape layers strongly enough to close the remaining exact B64/L16 systems gap?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_fused_lloyd_result.json",
+    "sha256": "cb7535e40b8f855c7d05b92d3954b131624e75e0623487848dfb974a3a963286"
+  },
+  "mathematical_identity": "For layer b and code k, flattening assignments as b*K+k makes one index_add and one bincount compute exactly the same independent per-layer sufficient statistics as 12 serial calls; no observation can contribute to another layer's centroid.",
+  "production_shapes": [
+    {
+      "role": "c_fc residual coordinates",
+      "layers": 12,
+      "values_per_layer": 2359296,
+      "levels": 32,
+      "iterations": 16
+    },
+    {
+      "role": "c_proj residual coordinates",
+      "layers": 12,
+      "values_per_layer": 2359296,
+      "levels": 16,
+      "iterations": 4
+    },
+    {
+      "role": "base and refined coordinates",
+      "layers": 24,
+      "values_per_layer": 2359296,
+      "levels": 128,
+      "iterations": 4
+    },
+    {
+      "role": "refined coordinates",
+      "layers": 24,
+      "values_per_layer": 2359296,
+      "levels": 256,
+      "iterations": 4
+    }
+  ],
+  "frozen_oracle": [
+    "Generate deterministic finite production-shape FP32 rows from the sealed source tensor without training.",
+    "Compare 12 or 24 serial reference fits with a batched torch.searchsorted plus offset-index_add/bincount fit.",
+    "Measure synchronized CUDA time after one warmup and three timed repetitions.",
+    "Record peak allocated memory and final centroid/code differences."
+  ],
+  "correctness_gate": {
+    "counts_exact_for_every_layer_and_code": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "estimated_optimizer_ms_after_batching_max": 495.0,
+    "rationale": "At the current calibration, the exact model needs about 1269.23 ms/update; with 740.05 ms forward/backward and non-optimizer overhead unchanged, optimizer/retraction must fall from 679.60 ms to roughly 495 ms or below.",
+    "automatic_optimizer_refactor": false
+  },
+  "decision_rule": {
+    "correctness_fail": "Reject phase batching.",
+    "correctness_pass_but_projected_optimizer_above_495ms": "Reject before optimizer refactor; derive a persistent-kernel or cadence-neutral alternative.",
+    "correctness_and_projected_speed_pass": "Preregister and implement a two-phase optimizer refactor, then repeat exact state/equivalence/MFU gates before any quality run.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}
