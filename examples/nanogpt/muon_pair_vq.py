@@ -3674,18 +3674,27 @@ class MuonPairVQ(torch.optim.Optimizer):
                     requested_gradient = gradient.float() + (
                         momentum_coefficient * expanded.reshape_as(gradient)
                     )
-                update = muon_update(
-                    requested_gradient,
-                    steps=ns_steps,
-                    polar_ridge=polar_ridge,
-                )
-                reference_metrics = None
-                if reference_requested_gradient is not None:
-                    reference_update = muon_update(
-                        reference_requested_gradient,
+                if polar_ridge == 0.0:
+                    update = muon_update(requested_gradient, steps=ns_steps)
+                else:
+                    update = muon_update(
+                        requested_gradient,
                         steps=ns_steps,
                         polar_ridge=polar_ridge,
                     )
+                reference_metrics = None
+                if reference_requested_gradient is not None:
+                    if polar_ridge == 0.0:
+                        reference_update = muon_update(
+                            reference_requested_gradient,
+                            steps=ns_steps,
+                        )
+                    else:
+                        reference_update = muon_update(
+                            reference_requested_gradient,
+                            steps=ns_steps,
+                            polar_ridge=polar_ridge,
+                        )
                     reference_flat = reference_update.double().reshape(-1)
                     candidate_flat = update.double().reshape(-1)
                     target_energy = float(reference_flat.square().sum())
