@@ -17,6 +17,7 @@ from torch.nn import functional as F
 
 from latent_weight_lab.block_fht import normalized_fht_last_dim
 from examples.nanogpt.muon import muon_update
+from examples.nanogpt.pair_vq_lloyd_cuda import pair_vq_lloyd_stats
 from examples.nanogpt.pair_vq_fp16_reserved_escape_cuda import (
     ReservedEscapeState,
     decode_reserved_escape,
@@ -1060,12 +1061,11 @@ def _fit_scalar_codebook(
         2.0 * probabilities - 1.0
     )
     for _iteration in range(iterations):
-        codes = torch.bucketize(
-            values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
+        sums, counts = pair_vq_lloyd_stats(
+            values.contiguous(),
+            ((levels[:-1] + levels[1:]) * 0.5).contiguous(),
+            level_count=level_count,
         )
-        sums = torch.zeros_like(levels)
-        sums.index_add_(0, codes, values)
-        counts = torch.bincount(codes, minlength=level_count)
         live = counts > 0
         candidate = sums / counts.clamp_min(1).to(dtype=sums.dtype)
         levels = torch.where(live, candidate, levels)
