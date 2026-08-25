@@ -1,0 +1,161 @@
+{
+  "automatic_training": false,
+  "candidate_code_changes": [
+    3724412,
+    3466714,
+    3724429,
+    3466762,
+    3724348,
+    3466792,
+    3724309,
+    3466745,
+    3724379,
+    3466767,
+    3724369,
+    3466814,
+    3724354,
+    3466878,
+    3724413,
+    3466671,
+    3724405,
+    3466676,
+    3724398,
+    3466839,
+    3724245,
+    3466824,
+    3724425,
+    3466715
+  ],
+  "decoded_outputs_finite": true,
+  "device": "NVIDIA H100 80GB HBM3",
+  "end_to_end_performance": {
+    "candidate_ms": 521.346923828125,
+    "candidate_phase_profile_ms": {
+      "base_coordinate_fit": 411.780029296875,
+      "base_decode_and_residual_transform": 23.454879760742188,
+      "base_gain_fit": 1.518847942352295,
+      "base_select_and_pack": 19.147647857666016,
+      "base_transform_and_gain": 13.680288314819336,
+      "cfc_residual_fit_and_pack": 10.761856079101562,
+      "clone_old_packed": 0.18940800428390503,
+      "code_change_reduce": 1.1608959436416626,
+      "cproj_residual_fit_and_pack": 5.558527946472168,
+      "refined_coordinate_fit": 33.85417556762695,
+      "total": 521.1065567135811
+    },
+    "saving_ms": 176.312255859375,
+    "serial_ms": 697.6591796875,
+    "speedup": 1.3381860481016299
+  },
+  "end_to_end_role_drift": {
+    "base_coordinates": {
+      "centroid_max_abs": 7.987022399902344e-05,
+      "code_mismatch_fraction": 0.00010716473614728009,
+      "code_mismatches": 6068
+    },
+    "base_gains": {
+      "centroid_max_abs": 0.00019693374633789062,
+      "code_mismatch_fraction": 0.001395896629050926,
+      "code_mismatches": 2470
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 0.0015010833740234375,
+      "code_mismatch_fraction": 0.0006884115713614005,
+      "code_mismatches": 19490
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 0.011322021484375,
+      "code_mismatch_fraction": 0.027644404658564815,
+      "code_mismatches": 12229
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 0.00067138671875,
+      "code_mismatch_fraction": 0.00013376165319372107,
+      "code_mismatches": 3787
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 0.0022516250610351562,
+      "code_mismatch_fraction": 0.011839690031828705,
+      "code_mismatches": 10475
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 0.00011372566223144531,
+      "code_mismatch_fraction": 0.00019163555569118925,
+      "code_mismatches": 10851
+    }
+  },
+  "gate_passed": true,
+  "maximum_decoded_absolute_vs_serial": 4.91337850689888e-05,
+  "maximum_decoded_relative_l2_vs_serial": 0.00028450184618122876,
+  "packed_streams_valid": true,
+  "persistent_state_shapes_and_dtypes_exact": true,
+  "recorded_at": "2026-08-26",
+  "roles": {
+    "base_coordinates": {
+      "centroid_max_abs": 4.029273986816406e-05,
+      "code_mismatch_fraction": 7.385677761501736e-05,
+      "code_mismatches": 4182
+    },
+    "base_gains": {
+      "centroid_max_abs": 2.6226043701171875e-06,
+      "code_mismatch_fraction": 0.0,
+      "code_mismatches": 0
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 8.416175842285156e-05,
+      "code_mismatch_fraction": 7.265585440176505e-05,
+      "code_mismatches": 2057
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 1.9073486328125e-06,
+      "code_mismatch_fraction": 0.0,
+      "code_mismatches": 0
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 6.377696990966797e-05,
+      "code_mismatch_fraction": 1.9850554289641202e-05,
+      "code_mismatches": 562
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 3.504753112792969e-05,
+      "code_mismatch_fraction": 1.6954210069444445e-05,
+      "code_mismatches": 15
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 6.008148193359375e-05,
+      "code_mismatch_fraction": 9.074034514250579e-05,
+      "code_mismatches": 5138
+    }
+  },
+  "scalar_correctness_passed": true,
+  "schema_version": "mai_124m_pair_vq_hierarchical_integration_replay_v1",
+  "selectors_valid": true,
+  "serial_code_changes": [
+    3724418,
+    3466713,
+    3724426,
+    3466765,
+    3724345,
+    3466792,
+    3724310,
+    3466745,
+    3724378,
+    3466774,
+    3724368,
+    3466813,
+    3724352,
+    3466879,
+    3724421,
+    3466673,
+    3724404,
+    3466673,
+    3724399,
+    3466839,
+    3724239,
+    3466826,
+    3724430,
+    3466708
+  ],
+  "source_commit": "5995093d1f5535cd50670bbdd182dd265907faa0",
+  "source_sha256": "11e9db64f7913b237120c5fe3b31ac13e32f6ad36feb5d0e9c4c0685bb915bc8"
+}

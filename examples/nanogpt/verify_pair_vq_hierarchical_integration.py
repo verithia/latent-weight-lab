@@ -25,6 +25,9 @@ from examples.nanogpt.muon_pair_vq import (
     _unpack_fixed_width_codes,
 )
 from examples.nanogpt.benchmark_pair_vq_batched_lloyd import ROLES
+from examples.nanogpt.pair_vq_hierarchical_lloyd_cuda import (
+    hierarchical_lloyd_stats,
+)
 
 
 def assigned_codes(values: torch.Tensor, levels: torch.Tensor) -> torch.Tensor:
@@ -124,6 +127,19 @@ def main() -> None:
             }
         )
 
+    # Keep one-time extension loading/JIT work outside the CUDA-event region,
+    # matching the exact MFU protocol whose timed updates follow warmups.
+    hierarchical_lloyd_stats(
+        torch.zeros((1, 65_536), device="cuda", dtype=torch.float32),
+        torch.linspace(
+            -1.0,
+            1.0,
+            15,
+            device="cuda",
+            dtype=torch.float32,
+        ).reshape(1, 15),
+        level_count=16,
+    )
     torch.cuda.synchronize()
     serial_start = torch.cuda.Event(enable_timing=True)
     serial_end = torch.cuda.Event(enable_timing=True)

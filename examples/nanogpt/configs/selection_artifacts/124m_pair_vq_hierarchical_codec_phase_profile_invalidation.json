@@ -1,0 +1,20 @@
+{
+  "schema_version": "mai_124m_pair_vq_hierarchical_codec_phase_profile_invalidation_v1",
+  "recorded_at": "2026-08-26",
+  "status": "invalid_measurement",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_codec_phase_profile_plan.json",
+    "sha256": "96dd671b49629f3c2170d368b441cb196cab559c453df03168a84ea48e144189"
+  },
+  "invalid_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_codec_phase_profile_invalid_result.json",
+    "sha256": "073dacb6e836db3ca7b5f3ede6642f60e74a26d1c28cfd1a725d58458bc2c746"
+  },
+  "observed": {
+    "candidate_total_ms": 521.1065567135811,
+    "base_coordinate_fit_ms": 411.780029296875
+  },
+  "invalidation_reason": "The first hierarchical stats call occurred inside the base-coordinate timing interval in a fresh process. That interval therefore included one-time CUDA extension load/JIT latency, whereas the exact MFU gate times only updates after two warmups.",
+  "repair": "Call the unchanged hierarchical_lloyd_stats extension once on a small CUDA tensor and synchronize before either end-to-end timing boundary. Preserve all production tensors, phases, and correctness gates.",
+  "scientific_training_authorized": false
+}
