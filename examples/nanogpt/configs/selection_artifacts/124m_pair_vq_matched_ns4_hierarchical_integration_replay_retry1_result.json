@@ -1,0 +1,105 @@
+{
+  "automatic_training": false,
+  "candidate_code_changes": [
+    3724405,
+    3466714,
+    3724428,
+    3466768,
+    3724343,
+    3466792,
+    3724316,
+    3466746,
+    3724385,
+    3466773,
+    3724361,
+    3466813,
+    3724346,
+    3466878,
+    3724413,
+    3466669,
+    3724404,
+    3466672,
+    3724402,
+    3466840,
+    3724244,
+    3466825,
+    3724428,
+    3466709
+  ],
+  "decoded_outputs_finite": true,
+  "device": "NVIDIA H100 80GB HBM3",
+  "gate_passed": false,
+  "maximum_decoded_absolute_vs_serial": 4.27491613663733e-05,
+  "maximum_decoded_relative_l2_vs_serial": 0.00031017340370453894,
+  "packed_streams_valid": true,
+  "persistent_state_shapes_and_dtypes_exact": true,
+  "recorded_at": "2026-08-26",
+  "roles": {
+    "base_coordinates": {
+      "centroid_max_abs": 0.0001456737518310547,
+      "code_mismatch_fraction": 0.00010161929660373264,
+      "code_mismatches": 5754
+    },
+    "base_gains": {
+      "centroid_max_abs": 0.00019979476928710938,
+      "code_mismatch_fraction": 0.001384028682002315,
+      "code_mismatches": 2449
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 0.0016093254089355469,
+      "code_mismatch_fraction": 0.0008230209350585938,
+      "code_mismatches": 23301
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 0.0039424896240234375,
+      "code_mismatch_fraction": 0.028618706597222224,
+      "code_mismatches": 12660
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 0.0009174346923828125,
+      "code_mismatch_fraction": 0.00017233248110170717,
+      "code_mismatches": 4879
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 0.0017118453979492188,
+      "code_mismatch_fraction": 0.014083297164351851,
+      "code_mismatches": 12460
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 0.00017905235290527344,
+      "code_mismatch_fraction": 0.00018216945506908274,
+      "code_mismatches": 10315
+    }
+  },
+  "scalar_correctness_passed": false,
+  "schema_version": "mai_124m_pair_vq_hierarchical_integration_replay_v1",
+  "selectors_valid": true,
+  "serial_code_changes": [
+    3724414,
+    3466714,
+    3724427,
+    3466766,
+    3724342,
+    3466791,
+    3724314,
+    3466742,
+    3724376,
+    3466773,
+    3724362,
+    3466809,
+    3724351,
+    3466882,
+    3724419,
+    3466673,
+    3724401,
+    3466673,
+    3724398,
+    3466839,
+    3724235,
+    3466826,
+    3724430,
+    3466713
+  ],
+  "source_commit": "a534c929ef2a805993e6b1a8a1fd84ab2e5e11ab",
+  "source_sha256": "685eb01ee943d42fc85f644acd6d7198e64afea9654a4d7586dbbb6d6c658e13"
+}
