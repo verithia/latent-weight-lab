@@ -16,6 +16,7 @@ from examples.nanogpt.muon_pair_vq import (
     _decode_fractional_residual_lattice_feedback,
     _fit_fractional_residual_lattice_feedback_,
     _fit_fractional_residual_lattice_feedback_batch_,
+    _fit_scalar_codebook,
     _fit_scalar_codebooks_batched,
     _fractional_lattice_feedback_layout,
     _fractional_lattice_feedback_segments,
@@ -23,6 +24,7 @@ from examples.nanogpt.muon_pair_vq import (
     _signed_block_fht,
     _unpack_fixed_width_codes,
 )
+from examples.nanogpt.benchmark_pair_vq_batched_lloyd import ROLES
 
 
 def assigned_codes(values: torch.Tensor, levels: torch.Tensor) -> torch.Tensor:
@@ -283,36 +285,54 @@ def main() -> None:
         )
         for role in role_values
     }
-    direct_candidate_levels: dict[str, list[torch.Tensor]] = {}
-    serial_exact_roles = {
-        "base_gains",
-        "refined_coordinates",
-        "cfc_residual_gains",
-        "cproj_residual_gains",
+    roles: dict[str, dict[str, float | int]] = {}
+    coordinate_roles = {
+        "base_coordinates",
+        "cfc_residual_coordinates",
+        "cproj_residual_coordinates",
     }
-    for role, values in role_values.items():
-        if role in serial_exact_roles:
-            direct_candidate_levels[role] = role_serial_levels[role]
-        else:
-            source_matrix = torch.stack(values)
-            level_count = role_serial_levels[role][0].numel()
-            iterations = 16 if role == "cfc_residual_coordinates" else 4
-            fitted, _codes = _fit_scalar_codebooks_batched(
-                source_matrix,
+    group_sizes = {
+        "base_coordinates": 24,
+        "cfc_residual_coordinates": 12,
+        "cproj_residual_coordinates": 12,
+        "refined_coordinates": 12,
+        "base_gains": 24,
+        "cfc_residual_gains": 12,
+        "cproj_residual_gains": 12,
+    }
+    for role_index, (role, batch, count, level_count, iterations) in enumerate(
+        ROLES
+    ):
+        generator = torch.Generator(device="cuda").manual_seed(
+            20261029 + role_index
+        )
+        base = torch.randn(count, device="cuda", generator=generator)
+        offsets = torch.linspace(
+            -0.02, 0.02, batch, device="cuda", dtype=torch.float32
+        )
+        values = (base[None, :] + offsets[:, None]).contiguous()
+        serial_outputs = [
+            _fit_scalar_codebook(
+                row, level_count=level_count, iterations=iterations
+            )
+            for row in values
+        ]
+        serial_levels = [output[0] for output in serial_outputs]
+        candidate_outputs = [
+            _fit_scalar_codebooks_batched(
+                values[start : start + group_sizes[role]].contiguous(),
                 level_count=level_count,
                 iterations=iterations,
-                hierarchical=role != "base_coordinates",
-                fp64_accumulation=role == "cfc_residual_coordinates",
+                hierarchical=role in coordinate_roles,
             )
-            direct_candidate_levels[role] = list(fitted)
-    roles = {
-        role: role_difference(
-            role_values[role],
-            role_serial_levels[role],
-            direct_candidate_levels[role],
+            for start in range(0, batch, group_sizes[role])
+        ]
+        candidate_levels = list(
+            torch.cat([output[0] for output in candidate_outputs], dim=0)
         )
-        for role in role_values
-    }
+        roles[role] = role_difference(
+            list(values), serial_levels, candidate_levels
+        )
     scalar_correctness = all(
         result["centroid_max_abs"] <= 0.00015
         and result["code_mismatch_fraction"] <= 0.0001
