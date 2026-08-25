@@ -207,6 +207,7 @@ class GPTConfig:
     block_fht_mlp_pair_vq_lazy_retraction_interval: int = 1
     block_fht_mlp_pair_vq_lazy_retraction_forced_steps: tuple[int, ...] = ()
     block_fht_mlp_pair_vq_error_feedback: bool = False
+    block_fht_mlp_pair_vq_hierarchical_feedback_fit: bool = False
     block_fht_mlp_pair_vq_forward_visible_feedback: bool = False
     block_fht_mlp_pair_vq_fp16_ambient_momentum: bool = False
     block_fht_mlp_pair_vq_fp16_reserved_escape_granularity: str = ""
@@ -5794,6 +5795,9 @@ class GPT(nn.Module):
                         weight_decay=weight_decay,
                         ns_steps=resolved_mlp_ns_steps,
                         polar_ridge=float(muon_mlp_polar_ridge),
+                        hierarchical_feedback_fit=bool(
+                            self.config.block_fht_mlp_pair_vq_hierarchical_feedback_fit
+                        ),
                     )
                 )
                 for group in optimizers[-1].param_groups:

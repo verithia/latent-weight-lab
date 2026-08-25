@@ -22,6 +22,9 @@ from examples.nanogpt.pair_vq_fp16_reserved_escape_cuda import (
     decode_reserved_escape,
     encode_reserved_escape,
 )
+from examples.nanogpt.pair_vq_hierarchical_lloyd_cuda import (
+    hierarchical_lloyd_stats,
+)
 
 
 def _normal_cartesian_codebook(std: float, *, device: torch.device) -> torch.Tensor:
@@ -1074,6 +1077,277 @@ def _fit_scalar_codebook(
         values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
     )
     return levels, codes
+
+
+@torch.no_grad()
+def _fit_scalar_codebooks_batched(
+    values: torch.Tensor,
+    *,
+    level_count: int,
+    iterations: int,
+    hierarchical: bool,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Fit independent scalar codebooks with one reduction per phase.
+
+    This is the production counterpart of the sealed B64/L16 fitter oracle.
+    The hierarchical path uses block-private CUDA histograms; the reference
+    path preserves PyTorch's flattened, offset-index reduction.
+    """
+    if values.ndim != 2 or values.dtype != torch.float32:
+        raise ValueError("batched scalar-codebook values must be an FP32 matrix")
+    if values.shape[0] <= 0 or values.shape[1] <= 0:
+        raise ValueError("batched scalar-codebook values must be nonempty")
+    if level_count < 2 or level_count > 256:
+        raise ValueError("scalar-codebook level count must be in [2, 256]")
+    batch = values.shape[0]
+    mean = values.mean(dim=1)
+    std = values.std(dim=1, unbiased=False).clamp_min(
+        torch.finfo(torch.float32).tiny
+    )
+    probabilities = (
+        torch.arange(level_count, device=values.device, dtype=torch.float32)
+        + 0.5
+    ) / level_count
+    levels = mean[:, None] + std[:, None] * math.sqrt(2.0) * torch.erfinv(
+        2.0 * probabilities[None, :] - 1.0
+    )
+    offsets = (
+        torch.arange(batch, device=values.device, dtype=torch.int64)
+        * level_count
+    )
+    flat_values = values.reshape(-1)
+    for _iteration in range(iterations):
+        midpoints = ((levels[:, :-1] + levels[:, 1:]) * 0.5).contiguous()
+        if hierarchical:
+            sums, counts = hierarchical_lloyd_stats(
+                values.contiguous(), midpoints, level_count=level_count
+            )
+        else:
+            codes = torch.searchsorted(midpoints, values.contiguous())
+            codes.add_(offsets[:, None])
+            flat_codes = codes.reshape(-1)
+            sums = torch.zeros(
+                batch * level_count,
+                device=values.device,
+                dtype=torch.float32,
+            )
+            sums.index_add_(0, flat_codes, flat_values)
+            counts = torch.bincount(
+                flat_codes, minlength=batch * level_count
+            )
+            sums = sums.reshape(batch, level_count)
+            counts = counts.reshape(batch, level_count)
+        live = counts > 0
+        candidate = sums / counts.clamp_min(1).to(dtype=sums.dtype)
+        levels = torch.where(live, candidate, levels).sort(dim=1).values
+    midpoints = ((levels[:, :-1] + levels[:, 1:]) * 0.5).contiguous()
+    codes = torch.searchsorted(midpoints, values.contiguous())
+    return levels, codes
+
+
+@torch.no_grad()
+def _fit_fractional_residual_lattice_feedback_batch_(
+    entries: list[dict[str, Any]],
+) -> list[int]:
+    """Fit the exact 24-module B64/L16 feedback state in frozen phases.
+
+    Persistent tensors and the byte-exact codec are unchanged.  Only the
+    execution schedule differs from the serial fitter: equal production roles
+    are stacked, fitted, and then packed back into their existing tensors.
+    """
+    if len(entries) != 24:
+        raise ValueError("hierarchical B64/L16 fitting requires 24 modules")
+    element_counts = {int(entry["vectors"].numel()) for entry in entries}
+    devices = {entry["vectors"].device for entry in entries}
+    if element_counts != {2_359_296} or len(devices) != 1:
+        raise ValueError(
+            "hierarchical B64/L16 fitting requires 24 equal production tensors"
+        )
+    cfc_indices = [
+        index for index, entry in enumerate(entries)
+        if int(entry["coordinate_bits"]) == 5
+        and int(entry["block_size"]) == 64
+        and int(entry["lloyd_iterations"]) == 16
+    ]
+    cproj_indices = [
+        index for index, entry in enumerate(entries)
+        if int(entry["coordinate_bits"]) == 4
+        and int(entry["block_size"]) == 32
+        and int(entry["lloyd_iterations"]) == 4
+    ]
+    if len(cfc_indices) != 12 or len(cproj_indices) != 12:
+        raise ValueError("hierarchical B64/L16 fitting requires 12 c_fc and 12 c_proj")
+    old_packed = [entry["packed"].clone() for entry in entries]
+
+    base_transformed = torch.stack(
+        [
+            _signed_block_fht(
+                entry["vectors"], block_size=32, seed=int(entry["seed"])
+            )
+            for entry in entries
+        ]
+    )
+    base_gains = base_transformed.square().mean(dim=2).sqrt().clamp_min(1e-30)
+    gain_levels, gain_codes = _fit_scalar_codebooks_batched(
+        base_gains.log(), level_count=256, iterations=4, hierarchical=False
+    )
+    decoded_gains = torch.gather(gain_levels, 1, gain_codes).exp()
+    normalized = (
+        base_transformed / decoded_gains[:, :, None]
+    ).reshape(len(entries), -1)
+    base_levels, base_codes = _fit_scalar_codebooks_batched(
+        normalized, level_count=128, iterations=4, hierarchical=True
+    )
+    refined_outputs = [
+        _fit_scalar_codebooks_batched(
+            normalized[start : start + 12].contiguous(),
+            level_count=256,
+            iterations=4,
+            hierarchical=False,
+        )
+        for start in (0, 12)
+    ]
+    refined_levels = torch.cat([output[0] for output in refined_outputs], dim=0)
+    refined_codes = torch.cat([output[1] for output in refined_outputs], dim=0)
+
+    for index, entry in enumerate(entries):
+        vectors = entry["vectors"]
+        levels = entry["levels"]
+        packed = entry["packed"]
+        element_count = vectors.numel()
+        layout = _fractional_lattice_feedback_layout(element_count)
+        transformed = base_transformed[index]
+        layer_decoded_gains = decoded_gains[index]
+        layer_base_codes = base_codes[index]
+        layer_refined_codes = refined_codes[index]
+        base_error = (
+            transformed
+            - base_levels[index].index_select(0, layer_base_codes).reshape_as(
+                transformed
+            ) * layer_decoded_gains[:, None]
+        ).square().sum(dim=1)
+        refined_error = (
+            transformed
+            - refined_levels[index].index_select(
+                0, layer_refined_codes
+            ).reshape_as(transformed) * layer_decoded_gains[:, None]
+        ).square().sum(dim=1)
+        selected = torch.topk(
+            base_error - refined_error,
+            layout["selected_blocks"],
+            largest=True,
+            sorted=False,
+        ).indices
+        selector = torch.zeros(
+            layout["block_count"], device=vectors.device, dtype=torch.uint8
+        )
+        selector[selected] = 1
+        selected_mask = selector.bool()
+        stored_coordinates = layer_base_codes.reshape(
+            layout["block_count"], 32
+        ).clone()
+        selected_refined = layer_refined_codes.reshape(
+            layout["block_count"], 32
+        )[selected_mask]
+        stored_coordinates[selected_mask] = selected_refined & 127
+        levels[:256].copy_(gain_levels[index])
+        levels[256:384].copy_(base_levels[index])
+        levels[384:640].copy_(refined_levels[index])
+        base_stop = _fractional_residual_lattice_feedback_layout(
+            element_count,
+            coordinate_bits=int(entry["coordinate_bits"]),
+            block_size=int(entry["block_size"]),
+        )["base_bytes"]
+        gain_stream, base_stream, selector_stream, refinement_stream = (
+            _fractional_lattice_feedback_segments(
+                packed[:base_stop], element_count=element_count
+            )
+        )
+        gain_stream.copy_(gain_codes[index].to(torch.uint8))
+        base_stream.copy_(_pack_fixed_width_codes(stored_coordinates, bits=7))
+        selector_stream.copy_(_pack_fixed_width_codes(selector, bits=1))
+        refinement_stream.copy_(
+            _pack_fixed_width_codes(selected_refined >> 7, bits=1)
+        )
+
+    residual_transformed: dict[int, torch.Tensor] = {}
+    for index, entry in enumerate(entries):
+        vectors = entry["vectors"]
+        element_count = vectors.numel()
+        layout = _fractional_residual_lattice_feedback_layout(
+            element_count,
+            coordinate_bits=int(entry["coordinate_bits"]),
+            block_size=int(entry["block_size"]),
+        )
+        base = _decode_fractional_lattice_feedback(
+            entry["levels"][:640],
+            entry["packed"][: layout["base_bytes"]],
+            element_count=element_count,
+            seed=int(entry["seed"]),
+        )
+        residual_transformed[index] = _signed_block_fht(
+            vectors - base,
+            block_size=int(entry["block_size"]),
+            seed=int(entry["seed"]),
+        )
+
+    for role_indices in (cfc_indices, cproj_indices):
+        first = entries[role_indices[0]]
+        coordinate_bits = int(first["coordinate_bits"])
+        iterations = int(first["lloyd_iterations"])
+        transformed = torch.stack(
+            [residual_transformed[index] for index in role_indices]
+        )
+        gains = transformed.square().mean(dim=2).sqrt().clamp_min(1e-30)
+        residual_gain_levels, residual_gain_codes = (
+            _fit_scalar_codebooks_batched(
+                gains.log(),
+                level_count=256,
+                iterations=iterations,
+                hierarchical=False,
+            )
+        )
+        residual_decoded_gains = torch.gather(
+            residual_gain_levels, 1, residual_gain_codes
+        ).exp()
+        residual_normalized = (
+            transformed / residual_decoded_gains[:, :, None]
+        ).reshape(len(role_indices), -1)
+        residual_coordinate_levels, residual_coordinate_codes = (
+            _fit_scalar_codebooks_batched(
+                residual_normalized,
+                level_count=1 << coordinate_bits,
+                iterations=iterations,
+                hierarchical=True,
+            )
+        )
+        for row, index in enumerate(role_indices):
+            entry = entries[index]
+            levels = entry["levels"]
+            packed = entry["packed"]
+            layout = _fractional_residual_lattice_feedback_layout(
+                entry["vectors"].numel(),
+                coordinate_bits=coordinate_bits,
+                block_size=int(entry["block_size"]),
+            )
+            base_stop = layout["base_bytes"]
+            gain_stop = base_stop + layout["residual_gain_bytes"]
+            levels[640:896].copy_(residual_gain_levels[row])
+            levels[896 : 896 + (1 << coordinate_bits)].copy_(
+                residual_coordinate_levels[row]
+            )
+            packed[base_stop:gain_stop].copy_(
+                residual_gain_codes[row].to(torch.uint8)
+            )
+            packed[gain_stop:].copy_(
+                _pack_fixed_width_codes(
+                    residual_coordinate_codes[row], bits=coordinate_bits
+                )
+            )
+    return [
+        int((entry["packed"] != before).sum())
+        for entry, before in zip(entries, old_packed, strict=True)
+    ]
 
 
 def _pack_fixed_width_codes(codes: torch.Tensor, *, bits: int) -> torch.Tensor:
@@ -3392,6 +3666,7 @@ class MuonPairVQ(torch.optim.Optimizer):
         weight_decay: float,
         ns_steps: int,
         polar_ridge: float = 0.0,
+        hierarchical_feedback_fit: bool = False,
     ) -> None:
         if not modules:
             raise ValueError("MuonPairVQ requires at least one module")
@@ -3411,8 +3686,43 @@ class MuonPairVQ(torch.optim.Optimizer):
                 "MuonPairVQ modules must use one reserved-escape momentum mode"
             )
         self.fp16_reserved_escape_granularity = reserved_escape_modes.pop()
+        self.hierarchical_feedback_fit = bool(hierarchical_feedback_fit)
         if self.fp16_reserved_escape_granularity and not self.fp16_ambient_momentum:
             raise ValueError("reserved-escape momentum requires FP16 ambient momentum")
+        if self.hierarchical_feedback_fit:
+            exact_codec = "fractional_lattice_q7q8_b32_p25_rq4_cfcq5b64l16"
+            c_fc_count = sum(
+                module.out_features > module.in_features for module in modules
+            )
+            c_proj_count = sum(
+                module.out_features < module.in_features for module in modules
+            )
+            incompatible = [
+                module
+                for module in modules
+                if (
+                    not module.error_feedback
+                    or module.feedback_codec != exact_codec
+                    or module.forward_visible_feedback
+                    or module.fp16_ambient_momentum
+                    or module.lazy_retraction_interval != 1
+                    or module.feedback_residual_probe_steps
+                    or module.feedback_transform_probe_block_sizes
+                    or module.feedback_lattice_probe_block_sizes
+                    or module.feedback_axis_adaptation_probe_block_size
+                    or module.feedback_fractional_probe_block_size
+                )
+            ]
+            if (
+                len(modules) != 24
+                or c_fc_count != 12
+                or c_proj_count != 12
+                or incompatible
+            ):
+                raise ValueError(
+                    "hierarchical feedback fitting is authorized only for the "
+                    "24-module, probe-free B64/L16 compact MLP endpoint"
+                )
         self.modules_by_id = {id(module.weight): module for module in modules}
         self._reserved_escape_slices: dict[int, tuple[str, int, int]] = {}
         self._reserved_escape_scope_elements: dict[str, int] = {}
@@ -3592,6 +3902,7 @@ class MuonPairVQ(torch.optim.Optimizer):
             with torch.enable_grad():
                 loss = closure()
         self._diagnostics = []
+        deferred_feedback: list[dict[str, Any]] = []
         decoded_reserved_momentum = (
             self._decode_reserved_escape_momentum()
             if self.fp16_reserved_escape_granularity
@@ -3860,6 +4171,35 @@ class MuonPairVQ(torch.optim.Optimizer):
                 )
                 if module.error_feedback:
                     raw_feedback = projection_target - weight.float()
+                    if self.hierarchical_feedback_fit:
+                        deferred_feedback.append(
+                            {
+                                "module": module,
+                                "weight": weight,
+                                "state": state,
+                                "raw_feedback": raw_feedback,
+                                "current_request_energy": float(
+                                    current_request.square().sum()
+                                ),
+                                "diagnostics": diagnostics,
+                                "vectors": raw_feedback.reshape(
+                                    -1, module.vector_length
+                                ),
+                                "levels": state["feedback_levels"],
+                                "packed": state["feedback_codes"],
+                                "seed": module.feedback_fractional_lattice_seed,
+                                "coordinate_bits": (
+                                    module.feedback_residual_lattice_coordinate_bits
+                                ),
+                                "block_size": (
+                                    module.feedback_residual_lattice_block_size
+                                ),
+                                "lloyd_iterations": (
+                                    module.feedback_residual_lattice_lloyd_iterations
+                                ),
+                            }
+                        )
+                        continue
                     feedback_code_changes = module.fit_feedback_(
                         raw_feedback.reshape(-1, module.vector_length),
                         state["feedback_levels"],
@@ -4142,6 +4482,52 @@ class MuonPairVQ(torch.optim.Optimizer):
                         )
                         for key, value in counterfactual.items():
                             diagnostics["feedback_source_" + key] = value
+                self._diagnostics.append(diagnostics)
+        if deferred_feedback:
+            feedback_changes = _fit_fractional_residual_lattice_feedback_batch_(
+                deferred_feedback
+            )
+            for context, feedback_code_changes in zip(
+                deferred_feedback, feedback_changes, strict=True
+            ):
+                module = context["module"]
+                weight = context["weight"]
+                state = context["state"]
+                raw_feedback = context["raw_feedback"]
+                diagnostics = context["diagnostics"]
+                feedback_after = module.decode_feedback(
+                    state["feedback_levels"],
+                    state["feedback_codes"],
+                    state.get("feedback_center"),
+                ).reshape_as(weight)
+                conservation_error = raw_feedback - feedback_after
+                feedback_target_energy = float(raw_feedback.square().sum())
+                conservation_error_energy = float(
+                    conservation_error.square().sum()
+                )
+                current_request_energy = float(context["current_request_energy"])
+                diagnostics.update(
+                    {
+                        "current_request_energy": current_request_energy,
+                        "feedback_target_energy": feedback_target_energy,
+                        "feedback_energy": float(feedback_after.square().sum()),
+                        "feedback_to_weight_energy_ratio": float(
+                            feedback_after.square().sum()
+                            / weight.float().square().sum().clamp_min(1e-30)
+                        ),
+                        "feedback_quantization_residual_energy": (
+                            conservation_error_energy
+                        ),
+                        "feedback_codec_energy_recovery": 1.0
+                        - conservation_error_energy
+                        / max(feedback_target_energy, 1e-30),
+                        "conserved_requested_step_energy_recovery": 1.0
+                        - conservation_error_energy
+                        / max(current_request_energy, 1e-30),
+                        "feedback_code_changes": feedback_code_changes,
+                        "hierarchical_feedback_fit": 1,
+                    }
+                )
                 self._diagnostics.append(diagnostics)
         if decoded_reserved_momentum is not None:
             self._store_reserved_escape_momentum(decoded_reserved_momentum)
