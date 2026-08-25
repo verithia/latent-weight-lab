@@ -1188,27 +1188,29 @@ def _fit_fractional_residual_lattice_feedback_batch_(
         ]
     )
     base_gains = base_transformed.square().mean(dim=2).sqrt().clamp_min(1e-30)
-    gain_levels, gain_codes = _fit_scalar_codebooks_batched(
-        base_gains.log(), level_count=256, iterations=4, hierarchical=False
-    )
+    gain_outputs = [
+        _fit_scalar_codebook(row, level_count=256, iterations=4)
+        for row in base_gains.log()
+    ]
+    gain_levels = torch.stack([output[0] for output in gain_outputs])
+    gain_codes = torch.stack([output[1] for output in gain_outputs])
     decoded_gains = torch.gather(gain_levels, 1, gain_codes).exp()
     normalized = (
         base_transformed / decoded_gains[:, :, None]
     ).reshape(len(entries), -1)
     base_levels, base_codes = _fit_scalar_codebooks_batched(
-        normalized, level_count=128, iterations=4, hierarchical=True
+        normalized, level_count=128, iterations=4, hierarchical=False
     )
     refined_outputs = [
-        _fit_scalar_codebooks_batched(
-            normalized[start : start + 12].contiguous(),
+        _fit_scalar_codebook(
+            row,
             level_count=256,
             iterations=4,
-            hierarchical=False,
         )
-        for start in (0, 12)
+        for row in normalized
     ]
-    refined_levels = torch.cat([output[0] for output in refined_outputs], dim=0)
-    refined_codes = torch.cat([output[1] for output in refined_outputs], dim=0)
+    refined_levels = torch.stack([output[0] for output in refined_outputs])
+    refined_codes = torch.stack([output[1] for output in refined_outputs])
 
     for index, entry in enumerate(entries):
         vectors = entry["vectors"]
@@ -1299,13 +1301,19 @@ def _fit_fractional_residual_lattice_feedback_batch_(
             [residual_transformed[index] for index in role_indices]
         )
         gains = transformed.square().mean(dim=2).sqrt().clamp_min(1e-30)
-        residual_gain_levels, residual_gain_codes = (
-            _fit_scalar_codebooks_batched(
-                gains.log(),
+        residual_gain_outputs = [
+            _fit_scalar_codebook(
+                row,
                 level_count=256,
                 iterations=iterations,
-                hierarchical=False,
             )
+            for row in gains.log()
+        ]
+        residual_gain_levels = torch.stack(
+            [output[0] for output in residual_gain_outputs]
+        )
+        residual_gain_codes = torch.stack(
+            [output[1] for output in residual_gain_outputs]
         )
         residual_decoded_gains = torch.gather(
             residual_gain_levels, 1, residual_gain_codes

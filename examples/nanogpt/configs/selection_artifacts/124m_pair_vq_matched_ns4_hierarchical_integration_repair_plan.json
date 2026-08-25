@@ -1,0 +1,47 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_integration_repair_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_after_independent_replay_failure_before_repair",
+  "failed_replay": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_replay_result.json",
+    "sha256": "1bc0b66853267e6cf4f076755c9b08a8d81bc244a3cc97a077ec1a935a2a8d6b",
+    "decoded_relative_l2_vs_serial": 0.00030988725484348834,
+    "packing_and_decode_valid": true,
+    "scalar_tolerance_passed": false
+  },
+  "diagnosis": "The frozen all-role batched schedule is byte-valid but independent production-shaped sources amplify reduction-order differences through gain and refinement phases. Those phases are small enough to restore serial fitting without losing the projected optimizer gate.",
+  "fixed_repair": {
+    "serial_exact_roles": [
+      "base_gains",
+      "refined_coordinates",
+      "cfc_residual_gains",
+      "cproj_residual_gains"
+    ],
+    "validated_reference_batch_roles": [
+      "base_coordinates"
+    ],
+    "hierarchical_histogram_roles": [
+      "cfc_residual_coordinates",
+      "cproj_residual_coordinates"
+    ],
+    "reason": "Make all upstream scale/refinement choices serial-exact; retain acceleration only on the three large coordinate phases. Reference batching for base coordinates is required by the 495 ms systems budget."
+  },
+  "projected_systems_budget": {
+    "estimated_optimizer_ms": 474.0,
+    "maximum_optimizer_ms": 495.0,
+    "estimate_source": "sealed per-role hierarchical and batched oracle timings"
+  },
+  "unchanged_gates": {
+    "maximum_scalar_centroid_absolute_difference": 0.00015,
+    "maximum_scalar_code_mismatch_fraction": 0.0001,
+    "persistent_pair_vq_training_bytes_exact": 157500864,
+    "minimum_mfu_percent": 20.0,
+    "maximum_peak_allocated_mib": 35803.43,
+    "minimum_training_state_compression": 2.8
+  },
+  "decision_rule": {
+    "replay_fail": "Reject the integration; do not run MFU or training.",
+    "replay_pass": "Run the exact state, memory, optimizer-time, and MFU preflight only; do not automatically train.",
+    "automatic_training": false
+  }
+}
