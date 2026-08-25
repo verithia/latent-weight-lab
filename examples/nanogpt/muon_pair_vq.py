@@ -1186,22 +1186,24 @@ def _fit_fractional_residual_lattice_feedback_batch_(
         for entry in entries
     ]
     base_transformed = torch.stack(base_transformed_parts)
-    base_gains = torch.stack(
-        [
-            transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
-            for transformed in base_transformed_parts
-        ]
-    )
+    base_gain_parts = [
+        transformed.square().mean(dim=1).sqrt().clamp_min(1e-30)
+        for transformed in base_transformed_parts
+    ]
     gain_outputs = [
-        _fit_scalar_codebook(row, level_count=256, iterations=4)
-        for row in base_gains.log()
+        _fit_scalar_codebook(gains.log(), level_count=256, iterations=4)
+        for gains in base_gain_parts
     ]
     gain_levels = torch.stack([output[0] for output in gain_outputs])
     gain_codes = torch.stack([output[1] for output in gain_outputs])
-    decoded_gains = torch.gather(gain_levels, 1, gain_codes).exp()
+    decoded_gain_parts = [
+        levels.index_select(0, codes).exp()
+        for levels, codes in zip(gain_levels, gain_codes, strict=True)
+    ]
+    decoded_gains = torch.stack(decoded_gain_parts)
     normalized = torch.stack(
         [
-            (transformed / decoded_gains[index, :, None]).reshape(-1)
+            (transformed / decoded_gain_parts[index][:, None]).reshape(-1)
             for index, transformed in enumerate(base_transformed_parts)
         ]
     )
@@ -1308,19 +1310,17 @@ def _fit_fractional_residual_lattice_feedback_batch_(
             residual_transformed[index] for index in role_indices
         ]
         transformed = torch.stack(transformed_parts)
-        gains = torch.stack(
-            [
-                layer.square().mean(dim=1).sqrt().clamp_min(1e-30)
-                for layer in transformed_parts
-            ]
-        )
+        gain_parts = [
+            layer.square().mean(dim=1).sqrt().clamp_min(1e-30)
+            for layer in transformed_parts
+        ]
         residual_gain_outputs = [
             _fit_scalar_codebook(
-                row,
+                layer_gains.log(),
                 level_count=256,
                 iterations=iterations,
             )
-            for row in gains.log()
+            for layer_gains in gain_parts
         ]
         residual_gain_levels = torch.stack(
             [output[0] for output in residual_gain_outputs]
@@ -1328,13 +1328,16 @@ def _fit_fractional_residual_lattice_feedback_batch_(
         residual_gain_codes = torch.stack(
             [output[1] for output in residual_gain_outputs]
         )
-        residual_decoded_gains = torch.gather(
-            residual_gain_levels, 1, residual_gain_codes
-        ).exp()
+        residual_decoded_gain_parts = [
+            levels.index_select(0, codes).exp()
+            for levels, codes in zip(
+                residual_gain_levels, residual_gain_codes, strict=True
+            )
+        ]
         residual_normalized = torch.stack(
             [
                 (
-                    layer / residual_decoded_gains[row, :, None]
+                    layer / residual_decoded_gain_parts[row][:, None]
                 ).reshape(-1)
                 for row, layer in enumerate(transformed_parts)
             ]

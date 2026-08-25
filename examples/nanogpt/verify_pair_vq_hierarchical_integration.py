@@ -16,6 +16,8 @@ from examples.nanogpt.muon_pair_vq import (
     _decode_fractional_residual_lattice_feedback,
     _fit_fractional_residual_lattice_feedback_,
     _fit_fractional_residual_lattice_feedback_batch_,
+    _fit_scalar_codebook,
+    _fit_scalar_codebooks_batched,
     _fractional_lattice_feedback_layout,
     _fractional_lattice_feedback_segments,
     _fractional_residual_lattice_feedback_layout,
@@ -274,11 +276,48 @@ def main() -> None:
             candidate["packed"].numel() == layout["total_bytes"]
         )
 
-    roles = {
+    end_to_end_roles = {
         role: role_difference(
             role_values[role],
             role_serial_levels[role],
             role_candidate_levels[role],
+        )
+        for role in role_values
+    }
+    direct_candidate_levels: dict[str, list[torch.Tensor]] = {}
+    serial_exact_roles = {
+        "base_gains",
+        "refined_coordinates",
+        "cfc_residual_gains",
+        "cproj_residual_gains",
+    }
+    for role, values in role_values.items():
+        if role in serial_exact_roles:
+            outputs = [
+                _fit_scalar_codebook(
+                    source,
+                    level_count=role_serial_levels[role][index].numel(),
+                    iterations=(16 if role == "cfc_residual_gains" else 4),
+                )
+                for index, source in enumerate(values)
+            ]
+            direct_candidate_levels[role] = [output[0] for output in outputs]
+        else:
+            source_matrix = torch.stack(values)
+            level_count = role_serial_levels[role][0].numel()
+            iterations = 16 if role == "cfc_residual_coordinates" else 4
+            fitted, _codes = _fit_scalar_codebooks_batched(
+                source_matrix,
+                level_count=level_count,
+                iterations=iterations,
+                hierarchical=role != "base_coordinates",
+            )
+            direct_candidate_levels[role] = list(fitted)
+    roles = {
+        role: role_difference(
+            role_values[role],
+            role_serial_levels[role],
+            direct_candidate_levels[role],
         )
         for role in role_values
     }
@@ -294,6 +333,7 @@ def main() -> None:
         "source_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
         "device": torch.cuda.get_device_name(),
         "roles": roles,
+        "end_to_end_role_drift": end_to_end_roles,
         "scalar_correctness_passed": scalar_correctness,
         "persistent_state_shapes_and_dtypes_exact": shapes_and_dtypes_exact,
         "selectors_valid": selectors_valid,
