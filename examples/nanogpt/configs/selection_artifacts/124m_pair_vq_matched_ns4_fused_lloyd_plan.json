@@ -1,0 +1,48 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_fused_lloyd_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_implementation_or_measurement",
+  "question": "Can a native fused assignment-and-centroid-statistics kernel make the exact B64/L16 Pair-VQ transition exceed 20% MFU without changing its state or scientific algorithm?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_static_centroid_result.json",
+    "sha256": "4f6512655beb262fbad282c410018b0a9360203b1adadb5323e2c04d2044d064"
+  },
+  "profile_evidence": {
+    "cuda_kernel_launches": 529495,
+    "large_index_add_reduce_gpu_time_fraction": 0.224,
+    "searchsorted_gpu_time_fraction": 0.01,
+    "scalar_lloyd_iterations_per_optimizer_update": 480,
+    "current_optimizer_ms": 679.60375,
+    "required_total_iter_ms_at_current_calibration_for_20pct_mfu": 1269.2348145747446
+  },
+  "frozen_intervention": [
+    "Add one CUDA kernel that accepts FP32 values and precomputed FP32 midpoints, performs the same lower-bound assignment, and atomically accumulates FP32 sums plus integer counts.",
+    "Use the fused kernel only for CUDA FP32 scalar-codebook Lloyd statistics; retain the existing PyTorch implementation as CPU/fallback reference.",
+    "Keep the final torch.bucketize assignment, centroid initialization, number of Lloyd iterations, sorting, codec layout, retraction cadence, optimizer, and all persistent tensors unchanged.",
+    "Compile without fast-math so midpoint and comparison semantics are not deliberately relaxed."
+  ],
+  "correctness_gates": {
+    "focused_cpu_and_cuda_tests_pass": true,
+    "fused_counts_equal_reference_exactly": true,
+    "same_fixed_sums_centroid_update_bitwise_equal": true,
+    "production_shape_old_fused_replay_within_twice_old_old_cuda_nondeterminism": true,
+    "all_outputs_finite": true,
+    "persistent_training_bytes_exact": 157500864
+  },
+  "performance_gate": {
+    "config_sha256": "c6a8beb46502aba3696fd68b90cd04d7f355ca25dd67325823c2cb9a43e1c52f",
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "warmup_updates": 2,
+    "timed_updates": 8,
+    "minimum_mfu_fraction": 0.2,
+    "all_logged_losses_finite": true
+  },
+  "decision_rule": {
+    "correctness_fail": "Reject the native path and do not open the MFU gate.",
+    "correctness_pass_mfu_fail": "Do not train; seal the result and require a separate two-phase batched-module retraction plan before further systems work.",
+    "correctness_pass_mfu_pass": "Authorize only the already registered 124M compact quality endpoint, with no codec or schedule changes.",
+    "automatic_scale_up": false,
+    "automatic_sweep": false
+  }
+}

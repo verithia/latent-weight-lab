@@ -1,0 +1,55 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_static_centroid_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "equivalence_pass_performance_rejected",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_static_centroid_plan.json",
+    "sha256": "c472527ee69335789138003bd153bcf1dd0c3a98c905532e567b3f2417e72cfd"
+  },
+  "equivalence_amendment": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_static_centroid_equivalence_amendment.json",
+    "sha256": "0381f742f1bf7e6e9e2f8343717440d75f5b478b9537474d2c4b4b4010e80db3"
+  },
+  "implementation": {
+    "commit": "bf78ad7ef6bde8eeac476b056e7301b411a71e4d",
+    "muon_pair_vq_sha256": "cf926e2f9097873917fd4e1c8b843b0663962ffed69125fd91711db17668fcb5",
+    "focused_cuda_tests": "3 passed, 61 deselected",
+    "same_intermediate_update_bitwise_equal": true,
+    "source_replay_envelope_passed": true
+  },
+  "artifacts": {
+    "reference_outputs": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/profiles/static_centroid_reference/source_outputs.pt",
+      "sha256": "fae23732bb2f5faff0958a0178b0460b22a27c74cc1cef9a5218c533140df371"
+    },
+    "preflight_certificate": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/static_centroid_preflight/certificate.json",
+      "sha256": "a66bb62ebedb171d2f048c053b705891a4c34a7d51b75035444c651abc4c006e"
+    },
+    "preflight_log": {
+      "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/static_centroid_preflight/preflight.log",
+      "sha256": "aa33adc5c76bc123a581676158ed03a5f56c088cbd825b915347f12dc52716b0"
+    }
+  },
+  "exact_config": {
+    "sha256": "c6a8beb46502aba3696fd68b90cd04d7f355ca25dd67325823c2cb9a43e1c52f",
+    "batch_size": 32,
+    "gradient_accumulation_steps": 8,
+    "persistent_training_bytes_expected": 157500864,
+    "persistent_training_bytes_observed": 157500864,
+    "all_logged_losses_finite": true
+  },
+  "performance": {
+    "mfu_fraction": 0.17472169388845463,
+    "minimum_mfu_fraction": 0.2,
+    "tokens_per_second": 180432.50625,
+    "iter_ms": 1453.43,
+    "fwbw_ms": 740.05375,
+    "optimizer_ms": 679.60375,
+    "peak_mib": 31707.43,
+    "reference_optimizer_ms": 768.6425,
+    "optimizer_time_reduction_fraction": 0.11583635532773652,
+    "passed": false
+  },
+  "decision": "The static update is mathematically equivalent and reduces optimizer time, but it misses the frozen 20% MFU floor. No scientific update is authorized. Continue only with a separately preregistered fused exact Lloyd-statistics implementation."
+}
