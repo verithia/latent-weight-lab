@@ -1,0 +1,50 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_hybrid_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_hybrid_measurement",
+  "question": "Does the causally localized hybrid retain hierarchical speed while restoring the refined-coordinate numerical envelope?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_histogram_oracle_result.json",
+    "sha256": "b3a67aa3757f31c9095ea28a5271931e53911a409caccd5aa69ff2aaa1b991d0"
+  },
+  "frozen_role_allocation": {
+    "hierarchical_histogram": [
+      "cfc_residual_coordinates",
+      "cproj_residual_coordinates",
+      "base_coordinates"
+    ],
+    "validated_reference_batch": [
+      "refined_coordinates",
+      "base_gains",
+      "cfc_residual_gains",
+      "cproj_residual_gains"
+    ]
+  },
+  "causal_rationale": "The all-coordinate oracle passed three coordinate roles and failed only refined K256 code mismatch. The reference group-12 refined path already passed the identical frozen envelope. This plan changes that role alone and does not select among new measurements.",
+  "frozen_intervention": [
+    "Keep the 65,536-value hierarchical kernel unchanged for its three passing coordinate roles.",
+    "Restore refined coordinates exactly to the sealed group-12 reference torch.searchsorted/index_add/bincount path.",
+    "Keep all gain roles on their sealed reference group sizes.",
+    "No tile, role, codec, cadence, optimizer, state, batch, or schedule sweep.",
+    "Standalone no-training oracle only."
+  ],
+  "correctness_gate": {
+    "fixed_level_counts_exact_for_every_role": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "maximum_peak_oracle_scratch_mib": 4096.0,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 3
+  },
+  "decision_rule": {
+    "any_gate_fail": "Reject without optimizer integration or training.",
+    "all_gates_pass": "Preregister and implement the two-phase optimizer refactor, then require exact 157,500,864-byte state, independent fixed-tensor replay, <=4096 MiB added peak, and >=20% MFU before any quality run.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}

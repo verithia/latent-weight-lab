@@ -1,0 +1,34 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_histogram_oracle_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "systems_pass_correctness_rejected",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_histogram_oracle_plan.json",
+    "sha256": "9e04b985934bafa8829401056613ec460863be76ee01fef2fc66ae5e77cf8921"
+  },
+  "implementation_commit": "839a41a8469a322025762749630dc28827500968",
+  "remote_artifact": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/hierarchical_histogram_oracle/result.json",
+    "sha256": "66b08e92faf72f8356dc5b7aaaabc097fadeab758727d69c3f40735787401bf2"
+  },
+  "correctness": {
+    "fixed_level_counts_exact_all_roles": true,
+    "maximum_centroid_abs": 0.00007772445678710938,
+    "maximum_code_mismatch_fraction": 0.0001034030207881221,
+    "failed_role": "refined_coordinates",
+    "failed_role_code_mismatches": 5855,
+    "passed": false
+  },
+  "performance": {
+    "total_serial_ms": 393.274772,
+    "total_candidate_ms": 20.510728,
+    "aggregate_speedup": 19.17410078137127,
+    "projected_optimizer_ms": 306.8397064900398,
+    "maximum_projected_optimizer_ms": 495.0,
+    "peak_allocated_mib": 2403.23828125,
+    "maximum_peak_oracle_scratch_mib": 4096.0,
+    "passed": true
+  },
+  "diagnosis": "Block-private histograms eliminate the performance bottleneck. Only the refined-coordinate K256 role crosses the frozen code-mismatch fraction, by 0.000003403; its centroid error still passes. The other three coordinate roles pass and run 21.9x to 28.1x faster than serial.",
+  "decision": "Reject the all-coordinate hierarchical allocation without relaxing correctness. Under a new preregistration, retain refined coordinates on the previously validated reference grouped path and use hierarchical histograms only for c_fc residual, c_proj residual, and base coordinates."
+}
