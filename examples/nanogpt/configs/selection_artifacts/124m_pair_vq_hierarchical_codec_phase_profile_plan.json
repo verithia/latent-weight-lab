@@ -1,0 +1,29 @@
+{
+  "schema_version": "mai_124m_pair_vq_hierarchical_codec_phase_profile_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_diagnostic",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_end_to_end_profile_decision.json"
+  },
+  "protocol": {
+    "training_updates": 0,
+    "device": "one idle Y400 H100",
+    "source_and_correctness": "unchanged retry6 verifier sources and frozen replay gates",
+    "timing": "CUDA events recorded on the default stream and synchronized once at the final boundary",
+    "phases": [
+      "clone_old_packed",
+      "base_transform_and_gain",
+      "base_gain_fit",
+      "base_coordinate_fit",
+      "refined_coordinate_fit",
+      "base_select_and_pack",
+      "base_decode_and_residual_transform",
+      "cfc_residual_fit_and_pack",
+      "cproj_residual_fit_and_pack",
+      "code_change_reduce"
+    ],
+    "expected_duration_under_five_minutes": true
+  },
+  "decision_rule": "Rank phases by measured milliseconds and optimize only the largest phase with an exact-state, default-off implementation. Do not change codec capacity, quantization, optimizer field, cadence, or loss. If replay correctness no longer passes, discard the profile.",
+  "scientific_training_authorized": false
+}

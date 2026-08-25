@@ -1,0 +1,148 @@
+{
+  "automatic_training": false,
+  "candidate_code_changes": [
+    3724414,
+    3466714,
+    3724431,
+    3466770,
+    3724346,
+    3466791,
+    3724309,
+    3466742,
+    3724379,
+    3466766,
+    3724365,
+    3466811,
+    3724346,
+    3466879,
+    3724412,
+    3466669,
+    3724402,
+    3466675,
+    3724399,
+    3466838,
+    3724244,
+    3466823,
+    3724434,
+    3466710
+  ],
+  "decoded_outputs_finite": true,
+  "device": "NVIDIA H100 80GB HBM3",
+  "end_to_end_performance": {
+    "candidate_ms": 552.8365478515625,
+    "saving_ms": 177.06683349609375,
+    "serial_ms": 729.9033813476562,
+    "speedup": 1.3202878575669648
+  },
+  "end_to_end_role_drift": {
+    "base_coordinates": {
+      "centroid_max_abs": 0.00011873245239257812,
+      "code_mismatch_fraction": 0.00010965488575122974,
+      "code_mismatches": 6209
+    },
+    "base_gains": {
+      "centroid_max_abs": 0.0001983642578125,
+      "code_mismatch_fraction": 0.001362553349247685,
+      "code_mismatches": 2411
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 0.001934051513671875,
+      "code_mismatch_fraction": 0.000763186702021846,
+      "code_mismatches": 21607
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 0.002552032470703125,
+      "code_mismatch_fraction": 0.030429416232638888,
+      "code_mismatches": 13461
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 0.0005125999450683594,
+      "code_mismatch_fraction": 0.00016502097800925926,
+      "code_mismatches": 4672
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 0.0022640228271484375,
+      "code_mismatch_fraction": 0.012103045428240741,
+      "code_mismatches": 10708
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 0.00018405914306640625,
+      "code_mismatch_fraction": 0.0001876795733416522,
+      "code_mismatches": 10627
+    }
+  },
+  "gate_passed": true,
+  "maximum_decoded_absolute_vs_serial": 4.630570765584707e-05,
+  "maximum_decoded_relative_l2_vs_serial": 0.00028756470419466496,
+  "packed_streams_valid": true,
+  "persistent_state_shapes_and_dtypes_exact": true,
+  "recorded_at": "2026-08-26",
+  "roles": {
+    "base_coordinates": {
+      "centroid_max_abs": 4.100799560546875e-05,
+      "code_mismatch_fraction": 7.263819376627605e-05,
+      "code_mismatches": 4113
+    },
+    "base_gains": {
+      "centroid_max_abs": 2.2351741790771484e-05,
+      "code_mismatch_fraction": 5.651403356481481e-07,
+      "code_mismatches": 1
+    },
+    "cfc_residual_coordinates": {
+      "centroid_max_abs": 8.106231689453125e-05,
+      "code_mismatch_fraction": 7.177282262731481e-05,
+      "code_mismatches": 2032
+    },
+    "cfc_residual_gains": {
+      "centroid_max_abs": 1.6689300537109375e-06,
+      "code_mismatch_fraction": 0.0,
+      "code_mismatches": 0
+    },
+    "cproj_residual_coordinates": {
+      "centroid_max_abs": 5.745887756347656e-05,
+      "code_mismatch_fraction": 1.960330539279514e-05,
+      "code_mismatches": 555
+    },
+    "cproj_residual_gains": {
+      "centroid_max_abs": 6.580352783203125e-05,
+      "code_mismatch_fraction": 1.4693648726851851e-05,
+      "code_mismatches": 13
+    },
+    "refined_coordinates": {
+      "centroid_max_abs": 6.318092346191406e-05,
+      "code_mismatch_fraction": 9.137612802010995e-05,
+      "code_mismatches": 5174
+    }
+  },
+  "scalar_correctness_passed": true,
+  "schema_version": "mai_124m_pair_vq_hierarchical_integration_replay_v1",
+  "selectors_valid": true,
+  "serial_code_changes": [
+    3724418,
+    3466709,
+    3724424,
+    3466761,
+    3724349,
+    3466794,
+    3724311,
+    3466747,
+    3724382,
+    3466767,
+    3724360,
+    3466811,
+    3724345,
+    3466877,
+    3724413,
+    3466672,
+    3724406,
+    3466675,
+    3724398,
+    3466837,
+    3724240,
+    3466825,
+    3724430,
+    3466715
+  ],
+  "source_commit": "dc857427672b2dd8eeaf966770b464cb5cca512c",
+  "source_sha256": "e8d4f7955321b66bafe03261d06dc269176174abbaa99fa51addd8eec0bda187"
+}

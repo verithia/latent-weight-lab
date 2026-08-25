@@ -147,9 +147,11 @@ def main() -> None:
 
     candidate_start = torch.cuda.Event(enable_timing=True)
     candidate_end = torch.cuda.Event(enable_timing=True)
+    candidate_phase_profile_ms: dict[str, float] = {}
     candidate_start.record()
     candidate_changes = _fit_fractional_residual_lattice_feedback_batch_(
-        entries
+        entries,
+        phase_profile_ms=candidate_phase_profile_ms,
     )
     candidate_end.record()
     candidate_end.synchronize()
@@ -376,6 +378,7 @@ def main() -> None:
             "candidate_ms": candidate_ms,
             "saving_ms": serial_ms - candidate_ms,
             "speedup": serial_ms / max(candidate_ms, 1e-12),
+            "candidate_phase_profile_ms": candidate_phase_profile_ms,
         },
         "gate_passed": bool(
             scalar_correctness

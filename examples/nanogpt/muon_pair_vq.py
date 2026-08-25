@@ -1155,6 +1155,8 @@ def _fit_scalar_codebooks_batched(
 @torch.no_grad()
 def _fit_fractional_residual_lattice_feedback_batch_(
     entries: list[dict[str, Any]],
+    *,
+    phase_profile_ms: dict[str, float] | None = None,
 ) -> list[int]:
     """Fit the exact 24-module B64/L16 feedback state in frozen phases.
 
@@ -1184,7 +1186,22 @@ def _fit_fractional_residual_lattice_feedback_batch_(
     ]
     if len(cfc_indices) != 12 or len(cproj_indices) != 12:
         raise ValueError("hierarchical B64/L16 fitting requires 12 c_fc and 12 c_proj")
+
+    profile_events: list[tuple[str, torch.cuda.Event]] = []
+    if phase_profile_ms is not None:
+        if not entries[0]["vectors"].is_cuda:
+            raise ValueError("hierarchical phase profiling requires CUDA tensors")
+
+        def mark_profile_phase(name: str) -> None:
+            event = torch.cuda.Event(enable_timing=True)
+            event.record()
+            profile_events.append((name, event))
+
+        mark_profile_phase("start")
+
     old_packed = [entry["packed"].clone() for entry in entries]
+    if phase_profile_ms is not None:
+        mark_profile_phase("clone_old_packed")
 
     base_transformed_parts = [
         _signed_block_fht(
@@ -1194,9 +1211,13 @@ def _fit_fractional_residual_lattice_feedback_batch_(
     ]
     base_transformed = torch.stack(base_transformed_parts)
     base_gains = base_transformed.square().mean(dim=2).sqrt().clamp_min(1e-30)
+    if phase_profile_ms is not None:
+        mark_profile_phase("base_transform_and_gain")
     gain_levels, gain_codes = _fit_scalar_codebooks_batched(
         base_gains.log(), level_count=256, iterations=4, hierarchical=False
     )
+    if phase_profile_ms is not None:
+        mark_profile_phase("base_gain_fit")
     decoded_gains = torch.gather(gain_levels, 1, gain_codes).exp()
     normalized = (
         base_transformed / decoded_gains[:, :, None]
@@ -1204,6 +1225,8 @@ def _fit_fractional_residual_lattice_feedback_batch_(
     base_levels, base_codes = _fit_scalar_codebooks_batched(
         normalized, level_count=128, iterations=4, hierarchical=True
     )
+    if phase_profile_ms is not None:
+        mark_profile_phase("base_coordinate_fit")
     refined_outputs = [
         _fit_scalar_codebooks_batched(
             normalized[start : start + 12].contiguous(),
@@ -1215,6 +1238,8 @@ def _fit_fractional_residual_lattice_feedback_batch_(
     ]
     refined_levels = torch.cat([output[0] for output in refined_outputs], dim=0)
     refined_codes = torch.cat([output[1] for output in refined_outputs], dim=0)
+    if phase_profile_ms is not None:
+        mark_profile_phase("refined_coordinate_fit")
 
     for index, entry in enumerate(entries):
         vectors = entry["vectors"]
@@ -1275,6 +1300,8 @@ def _fit_fractional_residual_lattice_feedback_batch_(
         refinement_stream.copy_(
             _pack_fixed_width_codes(selected_refined >> 7, bits=1)
         )
+    if phase_profile_ms is not None:
+        mark_profile_phase("base_select_and_pack")
 
     residual_transformed: dict[int, torch.Tensor] = {}
     for index, entry in enumerate(entries):
@@ -1296,6 +1323,8 @@ def _fit_fractional_residual_lattice_feedback_batch_(
             block_size=int(entry["block_size"]),
             seed=int(entry["seed"]),
         )
+    if phase_profile_ms is not None:
+        mark_profile_phase("base_decode_and_residual_transform")
 
     for role_indices in (cfc_indices, cproj_indices):
         first = entries[role_indices[0]]
@@ -1350,10 +1379,29 @@ def _fit_fractional_residual_lattice_feedback_batch_(
                     residual_coordinate_codes[row], bits=coordinate_bits
                 )
             )
-    return [
+        if phase_profile_ms is not None:
+            mark_profile_phase(
+                "cfc_residual_fit_and_pack"
+                if coordinate_bits == 5
+                else "cproj_residual_fit_and_pack"
+            )
+    changes = [
         int((entry["packed"] != before).sum())
         for entry, before in zip(entries, old_packed, strict=True)
     ]
+    if phase_profile_ms is not None:
+        mark_profile_phase("code_change_reduce")
+        profile_events[-1][1].synchronize()
+        phase_profile_ms.update(
+            {
+                name: float(previous.elapsed_time(current))
+                for (_previous_name, previous), (name, current) in zip(
+                    profile_events[:-1], profile_events[1:], strict=True
+                )
+            }
+        )
+        phase_profile_ms["total"] = sum(phase_profile_ms.values())
+    return changes
 
 
 def _pack_fixed_width_codes(codes: torch.Tensor, *, bits: int) -> torch.Tensor:

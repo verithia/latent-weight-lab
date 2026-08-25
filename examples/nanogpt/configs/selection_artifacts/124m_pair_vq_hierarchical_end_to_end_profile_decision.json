@@ -1,0 +1,24 @@
+{
+  "schema_version": "mai_124m_pair_vq_hierarchical_end_to_end_profile_decision_v1",
+  "recorded_at": "2026-08-26",
+  "status": "complete_codec_is_dominant",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_end_to_end_profile_plan.json",
+    "sha256": "0a40e61083ab77bcea54da828d28433da29daec8e32c90fb5e299f39450c843c"
+  },
+  "raw_result": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_hierarchical_end_to_end_profile_result.json",
+    "sha256": "0d7efbaffefdeae95a79189fee31176324319f2cf21a9e026000a0e91dec3941"
+  },
+  "measurement": {
+    "complete_serial_codec_ms": 729.9033813476562,
+    "complete_integrated_codec_ms": 552.8365478515625,
+    "saving_ms": 177.06683349609375,
+    "speedup": 1.3202878575669648,
+    "valid_exact_optimizer_ms": 643.14625,
+    "maximum_optimizer_ms": 495.0
+  },
+  "interpretation": "The hierarchical scalar-Lloyd kernels are fast, but the complete integrated codec remains 552.84 ms. It accounts for most of the 643.15 ms optimizer and by itself exceeds the whole-optimizer gate. The omitted transforms, stacking, selection, packing/decoding, and code-change reductions—not a hidden Muon phase—must be localized before another implementation change.",
+  "next_action": "Add CUDA-event boundaries to the existing zero-training verifier for each complete integrated-codec phase, rerun the same correctness gates, and optimize only the largest measured exact phase.",
+  "scientific_training_authorized": false
+}
