@@ -30,6 +30,10 @@ from examples.nanogpt.pair_vq_tangent_atlas import (
     direction_metrics as atlas_direction_metrics,
     evaluate_matrix as evaluate_atlas_matrix,
 )
+from examples.nanogpt.pair_vq_paired_neuron_dense_escape import (
+    evaluate_layer as evaluate_dense_escape_layer,
+    summarize_fraction as summarize_dense_escape_fraction,
+)
 
 
 PLAN_SCHEMA = "mai_124m_pair_vq_antithetic_functional_gradient_oracle_plan_v1"
@@ -46,6 +50,9 @@ SPECTRAL_DAMPING_PLAN_SCHEMA = (
 TANGENT_ATLAS_PLAN_SCHEMA = (
     "mai_124m_pair_vq_full_rank_tangent_atlas_oracle_plan_v1"
 )
+DENSE_ESCAPE_PLAN_SCHEMA = (
+    "mai_124m_pair_vq_paired_neuron_dense_escape_oracle_plan_v1"
+)
 RESULT_SCHEMA = "mai_pair_vq_antithetic_functional_gradient_oracle_result_v1"
 POLAR_RESULT_SCHEMA = "mai_pair_vq_same_momentum_polar_amplification_oracle_result_v1"
 REGULARIZED_POLAR_RESULT_SCHEMA = (
@@ -59,6 +66,9 @@ SPECTRAL_DAMPING_RESULT_SCHEMA = (
 )
 TANGENT_ATLAS_RESULT_SCHEMA = (
     "mai_pair_vq_full_rank_tangent_atlas_oracle_result_v1"
+)
+DENSE_ESCAPE_RESULT_SCHEMA = (
+    "mai_pair_vq_paired_neuron_dense_escape_oracle_result_v1"
 )
 
 
@@ -235,6 +245,7 @@ class PairVQFunctionalGradientOracle:
             CODEC_STABILITY_PLAN_SCHEMA,
             SPECTRAL_DAMPING_PLAN_SCHEMA,
             TANGENT_ATLAS_PLAN_SCHEMA,
+            DENSE_ESCAPE_PLAN_SCHEMA,
         }:
             raise ValueError("unexpected functional-oracle plan schema")
         self.polar_amplification_enabled = (
@@ -258,7 +269,14 @@ class PairVQFunctionalGradientOracle:
         self.tangent_atlas_enabled = (
             plan.get("schema_version") == TANGENT_ATLAS_PLAN_SCHEMA
         )
-        if (self.polar_amplification_enabled or self.tangent_atlas_enabled) and optimizer is None:
+        self.dense_escape_enabled = (
+            plan.get("schema_version") == DENSE_ESCAPE_PLAN_SCHEMA
+        )
+        if (
+            self.polar_amplification_enabled
+            or self.tangent_atlas_enabled
+            or self.dense_escape_enabled
+        ) and optimizer is None:
             raise ValueError(
                 "same-momentum request analysis requires the dense optimizer"
             )
@@ -285,7 +303,11 @@ class PairVQFunctionalGradientOracle:
             frozen.get("isotropic_seed_base", 0)
         )
         self._dense_optimizer_owner: dict[str, tuple[Any, dict[str, Any]]] = {}
-        if self.polar_amplification_enabled or self.tangent_atlas_enabled:
+        if (
+            self.polar_amplification_enabled
+            or self.tangent_atlas_enabled
+            or self.dense_escape_enabled
+        ):
             children = list(getattr(optimizer, "optimizers", [optimizer]))
             for name, module in observer._dense_modules.items():
                 matches = []
@@ -1129,7 +1151,12 @@ class PairVQFunctionalGradientOracle:
         self, *, split: str
     ) -> dict[str, dict[str, torch.Tensor]]:
         """Capture a frozen small activation metric for MLP update JVPs."""
-        limit = int(self.plan["atlas"]["functional_sample_rows_per_layer"])
+        protocol = (
+            self.plan["dense_escape"]
+            if self.dense_escape_enabled
+            else self.plan["atlas"]
+        )
+        limit = int(protocol["functional_sample_rows_per_layer"])
         samples: dict[str, dict[str, torch.Tensor]] = {}
         handles = []
 
@@ -1344,6 +1371,175 @@ class PairVQFunctionalGradientOracle:
             "passed": False,
             "selected": None,
             "classification": "FULL_RANK_TANGENT_ATLAS_REJECTED",
+        }
+
+    def _evaluate_dense_escape(
+        self,
+        *,
+        dense_updates: dict[str, torch.Tensor],
+        dense_gradients: dict[str, torch.Tensor],
+    ) -> dict[str, Any]:
+        protocol = self.plan["dense_escape"]
+        fractions = tuple(float(value) for value in protocol["fractions"])
+        maximum_actionable = float(protocol["maximum_actionable_dense_fraction"])
+        fit_samples = self._capture_mlp_functional_samples(split="fit")
+        heldout_samples = self._capture_mlp_functional_samples(split="heldout")
+        layer_rows = []
+        for c_fc_name in sorted(
+            name for name in dense_updates if name.endswith(".c_fc")
+        ):
+            c_proj_name = c_fc_name[: -len("c_fc")] + "c_proj"
+            if c_proj_name not in dense_updates:
+                raise ValueError(f"missing paired c_proj for {c_fc_name}")
+            layer_rows.append(
+                evaluate_dense_escape_layer(
+                    identity=c_fc_name[: -len(".mlp.c_fc")],
+                    fit={
+                        "input": fit_samples[c_fc_name]["input"],
+                        "preactivation": fit_samples[c_fc_name]["output"],
+                        "hidden": fit_samples[c_proj_name]["input"],
+                    },
+                    heldout={
+                        "input": heldout_samples[c_fc_name]["input"],
+                        "preactivation": heldout_samples[c_fc_name]["output"],
+                        "hidden": heldout_samples[c_proj_name]["input"],
+                    },
+                    c_fc_update=dense_updates[c_fc_name],
+                    c_proj_update=dense_updates[c_proj_name],
+                    c_fc_gradient=dense_gradients[c_fc_name],
+                    c_proj_gradient=dense_gradients[c_proj_name],
+                    c_proj_weight=self.observer._dense_modules[
+                        c_proj_name
+                    ].weight.detach(),
+                    fractions=fractions,
+                    maximum_actionable_fraction=maximum_actionable,
+                    device=self.device,
+                )
+            )
+        if not layer_rows:
+            raise ValueError("dense-escape oracle found no complete MLP layers")
+        n_embd = int(
+            self.observer._dense_modules[
+                sorted(name for name in dense_updates if name.endswith(".c_proj"))[0]
+            ].weight.shape[0]
+        )
+        thresholds = self.plan["functional_gate"]
+        candidates = {}
+        for fraction in fractions:
+            row = summarize_dense_escape_fraction(
+                layer_rows=layer_rows, fraction=fraction, n_embd=n_embd
+            )
+            measurements = {
+                "aggregate_heldout_functional_cosine": float(
+                    row["functional"]["cosine"]
+                ),
+                "minimum_layer_heldout_functional_cosine": float(
+                    row["minimum_layer_functional_cosine"]
+                ),
+                "aggregate_heldout_positive_line_recovery": float(
+                    row["functional"]["positive_line_recovery"]
+                ),
+                "aggregate_task_line_retention": float(
+                    row["task_line_retention"]
+                ),
+                "minimum_layer_task_line_retention": float(
+                    row["minimum_layer_task_line_retention"]
+                ),
+            }
+            checks = {
+                key: value >= float(thresholds[key])
+                for key, value in measurements.items()
+            }
+            row["measurements"] = measurements
+            row["checks"] = checks
+            row["passed"] = all(checks.values()) and _all_finite(measurements)
+            candidates[str(fraction)] = row
+        full = candidates[str(fractions[-1])]
+        full_sanity = (
+            float(full["functional"]["cosine"])
+            >= float(thresholds["full_fraction_sanity_cosine"])
+            and float(full["minimum_layer_functional_cosine"])
+            >= float(thresholds["full_fraction_sanity_cosine"])
+        )
+        return {
+            "selection": {
+                "maximum_actionable_fraction": maximum_actionable,
+                "layers": [
+                    {
+                        "identity": row["identity"],
+                        "hidden_width": row["hidden_width"],
+                        "fit_positive_contribution_fraction": row[
+                            "fit_positive_contribution_fraction"
+                        ],
+                        "order_sha256": row["order_sha256"],
+                        "actionable_selected_indices": row[
+                            "actionable_selected_indices"
+                        ],
+                    }
+                    for row in layer_rows
+                ],
+            },
+            "full_fraction_sanity_passed": full_sanity,
+            "candidates": candidates,
+        }
+
+    def _summarize_dense_escape_gate(self) -> dict[str, Any]:
+        late = [row for row in self.records if row["step"] in self.primary_late_steps]
+        if len(late) != len(self.primary_late_steps):
+            return {"ready": False, "passed": False, "classification": None}
+        if not all(
+            bool(row["dense_escape"]["full_fraction_sanity_passed"])
+            for row in late
+        ):
+            return {
+                "ready": True,
+                "passed": False,
+                "selected_fraction": None,
+                "classification": "PAIRED_NEURON_DENSE_ESCAPE_ORACLE_INVALID",
+            }
+        fractions = tuple(
+            float(value) for value in self.plan["dense_escape"]["fractions"]
+        )
+        selected = None
+        for fraction in fractions:
+            if all(
+                bool(row["dense_escape"]["candidates"][str(fraction)]["passed"])
+                for row in late
+            ):
+                selected = fraction
+                break
+        maximum = float(
+            self.plan["dense_escape"]["maximum_actionable_dense_fraction"]
+        )
+        overlaps = []
+        first_layers = {
+            row["identity"]: set(row["actionable_selected_indices"])
+            for row in late[0]["dense_escape"]["selection"]["layers"]
+        }
+        second_layers = {
+            row["identity"]: set(row["actionable_selected_indices"])
+            for row in late[1]["dense_escape"]["selection"]["layers"]
+        }
+        for name in sorted(first_layers):
+            union = first_layers[name] | second_layers[name]
+            overlaps.append(
+                len(first_layers[name] & second_layers[name]) / max(len(union), 1)
+            )
+        actionable = selected is not None and selected <= maximum
+        classification = (
+            "PAIRED_NEURON_DENSE_ESCAPE_ACTIONABLE"
+            if actionable
+            else "PAIRED_NEURON_DENSE_ESCAPE_DIFFUSE_UNHELPFUL"
+        )
+        return {
+            "ready": True,
+            "passed": actionable,
+            "selected_fraction": selected,
+            "maximum_actionable_fraction": maximum,
+            "minimum_actionable_selection_jaccard_across_late_steps": min(overlaps),
+            "mean_actionable_selection_jaccard_across_late_steps": sum(overlaps)
+            / max(len(overlaps), 1),
+            "classification": classification,
         }
 
     @staticmethod
@@ -1937,6 +2133,14 @@ class PairVQFunctionalGradientOracle:
                     dense_updates=dense_updates,
                     dense_gradients=captured["heldout"]["dense"],
                 )
+            if self.dense_escape_enabled:
+                dense_updates = self._same_momentum_dense_updates(
+                    captured["fit"]["dense"]
+                )
+                record["dense_escape"] = self._evaluate_dense_escape(
+                    dense_updates=dense_updates,
+                    dense_gradients=captured["heldout"]["dense"],
+                )
             if self.codec_stability_enabled:
                 codec_splits = {}
                 for split in ("fit", "heldout"):
@@ -2006,30 +2210,30 @@ class PairVQFunctionalGradientOracle:
                 )
             self.records.append(record)
             gate = (
-                self._summarize_tangent_atlas_gate()
-                if self.tangent_atlas_enabled
-                else self._combined_gate()
-            )
-            payload = {
-                "schema_version": (
-                    CODEC_STABILITY_RESULT_SCHEMA
-                    if self.codec_stability_enabled
-                    else (
-                    TANGENT_ATLAS_RESULT_SCHEMA
+                self._summarize_dense_escape_gate()
+                if self.dense_escape_enabled
+                else (
+                    self._summarize_tangent_atlas_gate()
                     if self.tangent_atlas_enabled
-                    else SPECTRAL_DAMPING_RESULT_SCHEMA
-                        if self.spectral_damping_enabled
-                        else (
-                            REGULARIZED_POLAR_RESULT_SCHEMA
-                            if self.regularized_polar_enabled
-                            else (
-                                POLAR_RESULT_SCHEMA
-                                if self.polar_amplification_enabled
-                                else RESULT_SCHEMA
-                            )
-                        )
-                    )
-                ),
+                    else self._combined_gate()
+                )
+            )
+            if self.codec_stability_enabled:
+                result_schema = CODEC_STABILITY_RESULT_SCHEMA
+            elif self.dense_escape_enabled:
+                result_schema = DENSE_ESCAPE_RESULT_SCHEMA
+            elif self.tangent_atlas_enabled:
+                result_schema = TANGENT_ATLAS_RESULT_SCHEMA
+            elif self.spectral_damping_enabled:
+                result_schema = SPECTRAL_DAMPING_RESULT_SCHEMA
+            elif self.regularized_polar_enabled:
+                result_schema = REGULARIZED_POLAR_RESULT_SCHEMA
+            elif self.polar_amplification_enabled:
+                result_schema = POLAR_RESULT_SCHEMA
+            else:
+                result_schema = RESULT_SCHEMA
+            payload = {
+                "schema_version": result_schema,
                 "status": "finished" if terminal else "running",
                 "plan": {"path": str(self.plan_path), "sha256": self.plan_sha256},
                 "source_config": {

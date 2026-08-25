@@ -1,0 +1,105 @@
+{
+  "schema_version": "mai_124m_pair_vq_paired_neuron_dense_escape_oracle_plan_v1",
+  "recorded_at": "2026-08-25",
+  "status": "theory_preregistered_before_implementation_test_or_measurement",
+  "scientific_question": "Is the dense MLP request concentrated in a small, stable set of complete GELU neurons, or is the required functional direction diffuse across most c_fc-row/c_proj-column pairs?",
+  "causal_basis": {
+    "tangent_atlas_result_sha256": "88c82f790f311a293722422dec717669c4f7c738946aec06504a0a20a8014672",
+    "tangent_atlas_classification": "FULL_RANK_TANGENT_ATLAS_REJECTED",
+    "tangent_atlas_finding": "A learned full-rank value atlas retained every matrix above 0.999 value cosine but recovered only 0.1166-0.1463 aggregate post-Muon tangent cosine and 0.1424-0.2067 held-out functional-JVP cosine.",
+    "factorial_finding": "At 5TPP, compact c_fc-only and c_proj-only gaps were +0.0698 and +0.0661 CE, while compacting both was +0.0683 CE; the -0.0676 interaction requires treating each incoming row and outgoing column as one co-adapted neuron.",
+    "authorization": "The rejected-atlas decision tree authorizes only a zero-update same-replay minimum dense-escape ceiling. No endpoint, fraction sweep, attention composition, or scale-up is authorized by this plan."
+  },
+  "theory": {
+    "complete_atom": "For hidden neuron j, deltaY_j = GELU'(s_j)*(X delta_w_fc,j^T)*w_proj,:,j^T + GELU(s_j)*delta_w_proj,:,j^T.",
+    "why_paired": "GELU is not homogeneous and c_fc/c_proj errors interact strongly, so an incoming row or outgoing column alone is not a gauge-complete functional unit.",
+    "fit_score": "Within every layer, rank complete neurons by their exact additive inner product <deltaY_j, deltaY_full> on the frozen fit activation bank. This maximizes positive-line contribution at each fixed count without fitting a learned decoder.",
+    "heldout_test": "Apply the fit-bank order unchanged to a disjoint held-out activation bank and measure exact cumulative functional action, ambient request, and task-gradient line retention.",
+    "compact_core_treatment": "The Pair-VQ core remains the value carrier. Its measured late requested-update energy is about 0.0118 percent, so the ceiling conservatively attributes tangent recovery only to the selected dense pairs.",
+    "interpretation": "This is a sparsity/localization ceiling. It can authorize one honest hybrid endpoint, never a full-replacement claim."
+  },
+  "frozen_protocol": {
+    "training_parent": "exact 124M QK-only dense-MLP synchronized replay, seed 1337, 238 updates, LR 0.0024, fixed data and schedule",
+    "compact_source_config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "probe_steps": [180, 238],
+    "primary_late_steps": [180, 238],
+    "fit_window": {
+      "split": "validation",
+      "seed": 2026082201,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024
+    },
+    "heldout_window": {
+      "split": "validation",
+      "seed": 2026082202,
+      "batches": 2,
+      "batch_size": 4,
+      "block_size": 1024,
+      "must_be_disjoint_from_fit": true
+    },
+    "dense_gradient_variant": "fit-window exact dense path; held-out gradients are used only for task-line scoring",
+    "muon_history": "identical live dense momentum buffer and native five-step Newton-Schulz polar map",
+    "model_updates_from_oracle": 0
+  },
+  "dense_escape": {
+    "unit": "complete hidden neuron: one c_fc row plus the matched c_proj column",
+    "same_fraction_in_every_layer": true,
+    "fractions": [0.015625, 0.03125, 0.0625, 0.125, 0.25, 0.5, 1.0],
+    "exact_counts_at_hidden_width_3072": [48, 96, 192, 384, 768, 1536, 3072],
+    "functional_sample_rows_per_layer": 64,
+    "selection_split": "fit",
+    "evaluation_split": "heldout",
+    "selection_tie_break": "ascending hidden-neuron index",
+    "maximum_actionable_dense_fraction": 0.25,
+    "persistent_byte_accounting": {
+      "weight_bytes_per_selected_value": 2,
+      "conservative_optimizer_bytes_per_selected_value": 4,
+      "selected_values_per_neuron_per_layer": "2*n_embd",
+      "compact_core_reported_separately": true
+    }
+  },
+  "functional_gate": {
+    "aggregate_heldout_functional_cosine": 0.99,
+    "minimum_layer_heldout_functional_cosine": 0.98,
+    "aggregate_heldout_positive_line_recovery": 0.98,
+    "aggregate_task_line_retention": 0.98,
+    "minimum_layer_task_line_retention": 0.95,
+    "full_fraction_sanity_cosine": 0.999999
+  },
+  "decision_rule": {
+    "selection": "Choose the smallest fraction passing every functional gate at both late probes.",
+    "actionable_pass": "If the selected fraction is at most 0.25, seal the hybrid ceiling and authorize exactly one matched 124M/5TPP endpoint at that fraction after implementation, state/resume, and MFU gates.",
+    "diffuse_rejection": "If only fractions above 0.25 pass, classify the direction as diffuse and reject this dense-escape hybrid as economically unhelpful.",
+    "invalid_oracle": "If the full fraction fails the sanity gate, classify the oracle invalid and repair measurement code without drawing a scientific conclusion.",
+    "future_endpoint_ce_gate": "A future endpoint must be at most 0.01 CE above its exact QK-only dense-MLP parent or the hybrid is rejected.",
+    "automatic_language_model_training": false,
+    "automatic_fraction_sweep": false,
+    "automatic_attention_composition": false,
+    "automatic_scale_up": false
+  },
+  "state_and_compute_contract": {
+    "candidate_dense_master_outside_selected_pairs": false,
+    "candidate_dense_residual_outside_selected_pairs": false,
+    "candidate_dense_momentum_outside_selected_pairs": false,
+    "oracle_dense_weights_gradients_and_momentum": "scoring only",
+    "candidate_checkpoint_if_later_authorized": "Pair-VQ core plus selected paired dense weights and their exact optimizer state",
+    "inference_shape": "unchanged dense GEMMs after materialization",
+    "required_report": [
+      "minimum passing dense fraction",
+      "selected dense values and bytes",
+      "total persistent state including Pair-VQ core",
+      "held-out functional and task-line recovery at every fraction",
+      "selection overlap between steps",
+      "exact-config MFU and token throughput",
+      "fixed-checkpoint CE and compute-equivalent penalty for any later endpoint"
+    ]
+  },
+  "operations": {
+    "expected_duration": "more than five minutes because the exact synchronized replay reaches two late probes",
+    "watchdog": "one idempotent terminal/error-only watchdog; no progress milestones or heartbeat for an expected one-to-two-hour oracle",
+    "callback": "Terminal success asks @Codex to verify hashes and gates, seal notes, and continue only with the selected causal branch. Failure asks @Codex to diagnose and repair only if the frozen oracle remains valid.",
+    "host": "PRO6",
+    "gpu": 0
+  }
+}
