@@ -4342,6 +4342,23 @@ def main() -> None:
         block_fht_mlp_chart_lr_scale=args.block_fht_mlp_chart_lr_scale,
         block_fht_mlp_pregelu_chart_lr_scale=args.block_fht_mlp_pregelu_chart_lr_scale,
     )
+    pair_vq_optimizer_flags = [
+        bool(item.hierarchical_feedback_fit)
+        for item in getattr(optimizer, "optimizers", ())
+        if hasattr(item, "hierarchical_feedback_fit")
+    ]
+    if pair_vq_optimizer_flags:
+        print(
+            "pair_vq_optimizer_config "
+            + json.dumps(
+                {
+                    "hierarchical_feedback_fit": pair_vq_optimizer_flags,
+                },
+                sort_keys=True,
+                separators=(",", ":"),
+            ),
+            flush=True,
+        )
     if args.init_from == "resume":
         optimizer.load_state_dict(checkpoint["optimizer"])
     scaler = torch.amp.GradScaler("cuda", enabled=args.dtype == "float16")

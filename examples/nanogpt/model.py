@@ -5795,9 +5795,6 @@ class GPT(nn.Module):
                         weight_decay=weight_decay,
                         ns_steps=resolved_mlp_ns_steps,
                         polar_ridge=float(muon_mlp_polar_ridge),
-                        hierarchical_feedback_fit=bool(
-                            self.config.block_fht_mlp_pair_vq_hierarchical_feedback_fit
-                        ),
                     )
                 )
                 for group in optimizers[-1].param_groups:
@@ -5915,6 +5912,9 @@ class GPT(nn.Module):
                         weight_decay=weight_decay,
                         ns_steps=resolved_mlp_ns_steps,
                         polar_ridge=float(muon_mlp_polar_ridge),
+                        hierarchical_feedback_fit=bool(
+                            self.config.block_fht_mlp_pair_vq_hierarchical_feedback_fit
+                        ),
                     )
                 )
                 for group in optimizers[-1].param_groups:

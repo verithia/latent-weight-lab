@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 from argparse import Namespace
+from unittest.mock import patch
 
 import torch
 
@@ -2103,6 +2104,43 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
     assert model.transformer.h[0].mlp.c_proj.fast_residual is True
     assert model.transformer.h[0].mlp.c_proj.feedback_codec == "polar32x8"
     assert model.config.block_fht_mlp_pair_vq_hierarchical_feedback_fit is True
+
+
+def test_pair_vq_optimizer_boundary_forwards_hierarchical_feedback_fit() -> None:
+    model = GPT(
+        GPTConfig(
+            block_size=8,
+            vocab_size=32,
+            n_layer=1,
+            n_head=2,
+            n_embd=8,
+            bias=False,
+            block_fht=True,
+            block_fht_targets=(),
+            block_fht_mlp_pair_vq=True,
+            block_fht_mlp_pair_vq_error_feedback=True,
+            block_fht_mlp_pair_vq_hierarchical_feedback_fit=True,
+        )
+    )
+    fake_optimizer = type(
+        "FakePairVQOptimizer",
+        (),
+        {"param_groups": [{"params": []}]},
+    )()
+    with patch(
+        "examples.nanogpt.model.MuonPairVQ",
+        return_value=fake_optimizer,
+    ) as constructor:
+        model.configure_optimizers(
+            weight_decay=0.1,
+            learning_rate=0.001,
+            betas=(0.9, 0.95),
+            device_type="cpu",
+            optimizer="muon",
+            muon_momentum=0.95,
+            muon_ns_steps=1,
+        )
+    assert constructor.call_args.kwargs["hierarchical_feedback_fit"] is True
 
 
 def test_gpt_routes_attention_value_and_output_through_pair_vq() -> None:
