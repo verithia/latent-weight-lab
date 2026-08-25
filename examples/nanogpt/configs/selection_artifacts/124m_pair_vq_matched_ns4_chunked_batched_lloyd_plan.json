@@ -1,0 +1,37 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_chunked_batched_lloyd_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_oracle_implementation_or_measurement",
+  "question": "Can smaller groups of disjoint reference PyTorch reductions avoid the full-batch memory/reduction cliff and save the remaining 26.06 ms?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_fused_batched_lloyd_oracle_result.json",
+    "sha256": "a0baf7190988bfc111542c10b73c81d9896dcdec147603a2a16009f013070c85"
+  },
+  "frozen_intervention": "Use the already validated torch.searchsorted plus offset-index_add/bincount implementation unchanged, processing contiguous layer groups sequentially and concatenating their outputs.",
+  "ordered_group_bracket": {
+    "12_layer_roles": [12, 6, 4],
+    "24_layer_roles": [24, 12, 8, 6],
+    "selection": "Choose the fastest correctness-passing group independently per frozen production role. This is systems-only selection; no loss or training signal is observed."
+  },
+  "production_roles": "Exactly the seven roles and deterministic tensors from the sealed layer-batching oracle.",
+  "correctness_gate": {
+    "fixed_level_counts_exact": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "minimum_additional_savings_vs_full_batch_ms": 26.058101165642294,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 3
+  },
+  "decision_rule": {
+    "correctness_fail": "Reject the failing group for that role.",
+    "best_projected_optimizer_above_495ms": "Reject chunked batching before optimizer integration.",
+    "best_projected_optimizer_at_most_495ms": "Preregister a two-phase optimizer refactor with the selected group table, exact state gate, numerical replay gate, and >=20% MFU gate; do not automatically train.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}

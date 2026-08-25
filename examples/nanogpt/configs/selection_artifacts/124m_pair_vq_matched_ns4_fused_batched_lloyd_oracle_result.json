@@ -1,0 +1,32 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_fused_batched_lloyd_oracle_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "correctness_and_systems_rejected",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_fused_batched_lloyd_oracle_plan.json",
+    "sha256": "a15d054289b4c7d45e05ad19b01735f338f417c6a711a78685c5bf4bd9c9adf4"
+  },
+  "implementation_commit": "a7762244a299fa6564ac0bbddad86b924820011b",
+  "remote_artifact": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/fused_batched_lloyd_oracle/result.json",
+    "sha256": "636dd61cce394367c701f565b30f809df84154a5560f0c15e4d7989ae9f39a9a"
+  },
+  "correctness": {
+    "fixed_level_counts_exact_all_roles": true,
+    "maximum_centroid_abs": 0.00017178058624267578,
+    "maximum_code_mismatch_fraction": 0.0001220703125,
+    "centroid_limit": 0.00015,
+    "code_mismatch_fraction_limit": 0.0001,
+    "passed": false
+  },
+  "performance": {
+    "total_serial_ms": 375.40356752773124,
+    "total_fused_ms": 275.6071637074153,
+    "aggregate_speedup": 1.3620965524911388,
+    "projected_optimizer_ms": 579.807346179684,
+    "maximum_projected_optimizer_ms": 495.0,
+    "passed": false
+  },
+  "diagnosis": "Direct atomics contend heavily across the large coordinate fits. The 32-level c_fc phase is slower fused than serial, and the refined-coordinate phase crosses the frozen numerical envelope.",
+  "decision": "Reject without optimizer integration or MFU. Remove the oracle-only native source after sealing. Continue with a preregistered chunked reference-batching bracket."
+}
