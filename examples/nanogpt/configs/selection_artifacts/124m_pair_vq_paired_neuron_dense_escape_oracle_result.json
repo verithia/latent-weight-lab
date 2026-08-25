@@ -1,0 +1,307 @@
+{
+  "artifacts": {
+    "config": "931d81895e6c34ff6c52fa369dd48e28ea3d94f96374070160cdfc7bfc42141d",
+    "dataset_manifest": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "mfu_certificate": "a48b75afbb5e5d9399584c78f3afd09e6c3f5f04c4fa36d7c8f6f43cf0d336fe",
+    "plan": "cef3603cac2a38f70646a3bbfe0aa74816c0f51ecbc12d424ec9c20a4f39a448",
+    "provenance": "b37bc8e319335f773e80da427c11990e83a58a2a13060681b06cb8abe49d4925",
+    "raw_result": "4a6cb620bca516893a9267d27c6ef80159de84c08fe8666bcc583414326d4e31",
+    "status": "27f49e30e6ecc9d5e8a93c6f4b5eb1dbd72005ad481d906c35007e50d4c6a9f8",
+    "training_log": "c7d7793d2dfdae7e41f39b344ebfae278aa995ec9c1e44a2ca60347145d26f66"
+  },
+  "checks": {
+    "candidate_flags_recomputed": true,
+    "config_functional_plan_hash": true,
+    "config_plan_hash": true,
+    "fit_and_heldout_disjoint": true,
+    "full_fraction_sanity": true,
+    "gate_classification": true,
+    "gate_maximum_fraction": true,
+    "gate_pass": true,
+    "gate_ready": true,
+    "gate_selected_fraction": true,
+    "manifest_matches_config": true,
+    "mfu_config_hash": true,
+    "mfu_floor": true,
+    "mfu_passed": true,
+    "no_traceback": true,
+    "plan_schema": true,
+    "probe_and_fraction_inventory": true,
+    "provenance_config_hash": true,
+    "provenance_manifest_hash": true,
+    "provenance_mfu_hash": true,
+    "raw_finished": true,
+    "raw_plan_hash": true,
+    "raw_schema": true,
+    "raw_source_hash": true,
+    "selection_overlap_recomputed": true,
+    "status_exit_zero": true,
+    "status_finished": true,
+    "status_provenance_hash": true,
+    "zero_model_updates": true
+  },
+  "classification": "PAIRED_NEURON_DENSE_ESCAPE_DIFFUSE_UNHELPFUL",
+  "gate": {
+    "maximum_actionable_fraction": 0.25,
+    "selected_fraction": 1.0,
+    "selection_jaccard": {
+      "mean": 0.7714769520010635,
+      "minimum": 0.739524348810872
+    },
+    "thresholds": {
+      "aggregate_heldout_functional_cosine": 0.99,
+      "aggregate_heldout_positive_line_recovery": 0.98,
+      "aggregate_task_line_retention": 0.98,
+      "full_fraction_sanity_cosine": 0.999999,
+      "minimum_layer_heldout_functional_cosine": 0.98,
+      "minimum_layer_task_line_retention": 0.95
+    }
+  },
+  "identity": {
+    "config_sha256": "931d81895e6c34ff6c52fa369dd48e28ea3d94f96374070160cdfc7bfc42141d",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "fixed_eval_indices_sha256": "5ca31b59768e43de808ad5e206ed152a4a0a3515ad68d29a0b2338c4db140747",
+    "git_commit": "a6e9a0283ee8f8ef98060ddf80072a5205dcbf2d",
+    "plan_sha256": "cef3603cac2a38f70646a3bbfe0aa74816c0f51ecbc12d424ec9c20a4f39a448",
+    "run_identity_sha256": "12d87fcac58050753efc9ef1c72da9f469dc5c976ed370c5ae09c9c45c9401ce"
+  },
+  "interpretation": {
+    "direction": "The useful c_fc-row/c_proj-column functional request is diffuse across the hidden inventory; neither a quarter nor one half of complete neurons meets the registered functional or task-line gates.",
+    "next_action": "Reject the paired-neuron dense-escape hybrid without an endpoint or fraction sweep. No further full-MLP GPU experiment is authorized until the compression or target-architecture constraint is explicitly changed.",
+    "value": "Pair-VQ plus feedback retains the dense replay value essentially exactly."
+  },
+  "passed": false,
+  "performance": {
+    "mfu_fraction": 0.29299916447936214,
+    "peak_memory_mib": 32104.93,
+    "tokens_per_second": 163159.144,
+    "wall_seconds": 584.0
+  },
+  "recorded_at": "2026-08-25T05:36:58.637466+00:00",
+  "records": [
+    {
+      "fractions": {
+        "0.015625": {
+          "count_per_layer": 48,
+          "fraction": 0.015625,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.4206737942340131,
+            "aggregate_heldout_positive_line_recovery": 0.17696644115524077,
+            "aggregate_task_line_retention": 0.030586744140270856,
+            "minimum_layer_heldout_functional_cosine": 0.32430708196775104,
+            "minimum_layer_task_line_retention": 0.0099071433925641
+          },
+          "passed": false,
+          "selected_values": 884736,
+          "selected_weight_plus_optimizer_bytes": 5308416
+        },
+        "0.03125": {
+          "count_per_layer": 96,
+          "fraction": 0.03125,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.5177509796299052,
+            "aggregate_heldout_positive_line_recovery": 0.26806607690772655,
+            "aggregate_task_line_retention": 0.06487727614454909,
+            "minimum_layer_heldout_functional_cosine": 0.4205670444074108,
+            "minimum_layer_task_line_retention": 0.026463551605060445
+          },
+          "passed": false,
+          "selected_values": 1769472,
+          "selected_weight_plus_optimizer_bytes": 10616832
+        },
+        "0.0625": {
+          "count_per_layer": 192,
+          "fraction": 0.0625,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.6218856566066459,
+            "aggregate_heldout_positive_line_recovery": 0.38674176989307907,
+            "aggregate_task_line_retention": 0.12830868497175335,
+            "minimum_layer_heldout_functional_cosine": 0.5306901350700878,
+            "minimum_layer_task_line_retention": 0.06339636373900821
+          },
+          "passed": false,
+          "selected_values": 3538944,
+          "selected_weight_plus_optimizer_bytes": 21233664
+        },
+        "0.125": {
+          "count_per_layer": 384,
+          "fraction": 0.125,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.7288650226424336,
+            "aggregate_heldout_positive_line_recovery": 0.5312442212315552,
+            "aggregate_task_line_retention": 0.23058015873286514,
+            "minimum_layer_heldout_functional_cosine": 0.6564699759388637,
+            "minimum_layer_task_line_retention": 0.16694124895840168
+          },
+          "passed": false,
+          "selected_values": 7077888,
+          "selected_weight_plus_optimizer_bytes": 42467328
+        },
+        "0.25": {
+          "count_per_layer": 768,
+          "fraction": 0.25,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.8354517023508058,
+            "aggregate_heldout_positive_line_recovery": 0.6979795469608594,
+            "aggregate_task_line_retention": 0.40841173346671517,
+            "minimum_layer_heldout_functional_cosine": 0.7833023853045309,
+            "minimum_layer_task_line_retention": 0.28088300504772074
+          },
+          "passed": false,
+          "selected_values": 14155776,
+          "selected_weight_plus_optimizer_bytes": 84934656
+        },
+        "0.5": {
+          "count_per_layer": 1536,
+          "fraction": 0.5,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.9350268702409426,
+            "aggregate_heldout_positive_line_recovery": 0.8742752480725724,
+            "aggregate_task_line_retention": 0.6866636620128833,
+            "minimum_layer_heldout_functional_cosine": 0.9082124192210606,
+            "minimum_layer_task_line_retention": 0.5275650704742764
+          },
+          "passed": false,
+          "selected_values": 28311552,
+          "selected_weight_plus_optimizer_bytes": 169869312
+        },
+        "1.0": {
+          "count_per_layer": 3072,
+          "fraction": 1.0,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.999999999999979,
+            "aggregate_heldout_positive_line_recovery": 0.999999999999958,
+            "aggregate_task_line_retention": 1.0000000000000002,
+            "minimum_layer_heldout_functional_cosine": 0.9999999999999751,
+            "minimum_layer_task_line_retention": 0.9999999999999999
+          },
+          "passed": true,
+          "selected_values": 56623104,
+          "selected_weight_plus_optimizer_bytes": 339738624
+        }
+      },
+      "step": 180,
+      "virtual_weight_energy_recovery": {
+        "weighted": 0.9999999940074038,
+        "worst_matrix": 0.9999999092229693
+      }
+    },
+    {
+      "fractions": {
+        "0.015625": {
+          "count_per_layer": 48,
+          "fraction": 0.015625,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.4264239543401505,
+            "aggregate_heldout_positive_line_recovery": 0.18183738883509076,
+            "aggregate_task_line_retention": 0.017031050262168997,
+            "minimum_layer_heldout_functional_cosine": 0.26454292745183666,
+            "minimum_layer_task_line_retention": -0.00822608142034526
+          },
+          "passed": false,
+          "selected_values": 884736,
+          "selected_weight_plus_optimizer_bytes": 5308416
+        },
+        "0.03125": {
+          "count_per_layer": 96,
+          "fraction": 0.03125,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.5197146020670252,
+            "aggregate_heldout_positive_line_recovery": 0.2701032676016864,
+            "aggregate_task_line_retention": 0.04652701502331266,
+            "minimum_layer_heldout_functional_cosine": 0.35931147270785385,
+            "minimum_layer_task_line_retention": -0.0056924517341747395
+          },
+          "passed": false,
+          "selected_values": 1769472,
+          "selected_weight_plus_optimizer_bytes": 10616832
+        },
+        "0.0625": {
+          "count_per_layer": 192,
+          "fraction": 0.0625,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.623161250803272,
+            "aggregate_heldout_positive_line_recovery": 0.3883299445026985,
+            "aggregate_task_line_retention": 0.10250604685534304,
+            "minimum_layer_heldout_functional_cosine": 0.4920006550042824,
+            "minimum_layer_task_line_retention": 0.06439741027880265
+          },
+          "passed": false,
+          "selected_values": 3538944,
+          "selected_weight_plus_optimizer_bytes": 21233664
+        },
+        "0.125": {
+          "count_per_layer": 384,
+          "fraction": 0.125,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.727397416436059,
+            "aggregate_heldout_positive_line_recovery": 0.5291070014378535,
+            "aggregate_task_line_retention": 0.20565804587642478,
+            "minimum_layer_heldout_functional_cosine": 0.6296444886051926,
+            "minimum_layer_task_line_retention": 0.16030947434340947
+          },
+          "passed": false,
+          "selected_values": 7077888,
+          "selected_weight_plus_optimizer_bytes": 42467328
+        },
+        "0.25": {
+          "count_per_layer": 768,
+          "fraction": 0.25,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.8328061558598309,
+            "aggregate_heldout_positive_line_recovery": 0.6935660932380289,
+            "aggregate_task_line_retention": 0.36602954830172474,
+            "minimum_layer_heldout_functional_cosine": 0.7652392371178891,
+            "minimum_layer_task_line_retention": 0.2940055570685575
+          },
+          "passed": false,
+          "selected_values": 14155776,
+          "selected_weight_plus_optimizer_bytes": 84934656
+        },
+        "0.5": {
+          "count_per_layer": 1536,
+          "fraction": 0.5,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.9334270455167961,
+            "aggregate_heldout_positive_line_recovery": 0.871286049302215,
+            "aggregate_task_line_retention": 0.6233679608869327,
+            "minimum_layer_heldout_functional_cosine": 0.9020243648798371,
+            "minimum_layer_task_line_retention": 0.5361707668277447
+          },
+          "passed": false,
+          "selected_values": 28311552,
+          "selected_weight_plus_optimizer_bytes": 169869312
+        },
+        "1.0": {
+          "count_per_layer": 3072,
+          "fraction": 1.0,
+          "measurements": {
+            "aggregate_heldout_functional_cosine": 0.9999999999999789,
+            "aggregate_heldout_positive_line_recovery": 0.9999999999999578,
+            "aggregate_task_line_retention": 0.9999999999999999,
+            "minimum_layer_heldout_functional_cosine": 0.9999999999999764,
+            "minimum_layer_task_line_retention": 0.9999999999999998
+          },
+          "passed": true,
+          "selected_values": 56623104,
+          "selected_weight_plus_optimizer_bytes": 339738624
+        }
+      },
+      "step": 238,
+      "virtual_weight_energy_recovery": {
+        "weighted": 0.99999999403415,
+        "worst_matrix": 0.999999873910159
+      }
+    }
+  ],
+  "schema_version": "mai_pair_vq_paired_neuron_dense_escape_oracle_sealed_result_v1",
+  "state": {
+    "actionable_quarter_compression_vs_dense": 1.401356632889438,
+    "actionable_quarter_total_bytes": 242435520,
+    "dense_mlp_weight_plus_optimizer_bytes": 339738624,
+    "persistent_pair_vq_training_bytes": 157500864,
+    "selected_compression_vs_dense": 0.6832494848035883,
+    "selected_total_bytes": 497239488
+  },
+  "valid": true
+}
