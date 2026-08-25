@@ -1,0 +1,39 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_batched_lloyd_oracle_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "correctness_pass_systems_rejected",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_batched_lloyd_oracle_plan.json",
+    "sha256": "35096758a996c2fbd6c2c9266bf6bf2faebd869e19227f86f9c70e40783392e4"
+  },
+  "implementation_commit": "74efeb51d06513d4a9b315db41e275098a483246",
+  "remote_artifact": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/batched_lloyd_oracle/result.json",
+    "sha256": "3324c381a88840121ee5a4a5f02a3dc26203219637b5de3cd0624ef4b955d67c"
+  },
+  "correctness": {
+    "fixed_level_counts_exact_all_roles": true,
+    "maximum_centroid_abs": 0.00007641315460205078,
+    "maximum_code_mismatch_fraction": 0.00008097401371708622,
+    "passed": true
+  },
+  "performance": {
+    "total_serial_ms": 363.7073195228974,
+    "total_batched_ms": 205.16167068853974,
+    "aggregate_speedup": 1.7727839625319155,
+    "projected_optimizer_ms": 521.0581011656423,
+    "maximum_projected_optimizer_ms": 495.0,
+    "peak_allocated_mib": 1971.14404296875,
+    "passed": false
+  },
+  "notable_role_speedups": {
+    "cfc_residual_coordinates": 1.5787465509365688,
+    "cproj_residual_coordinates": 1.4209795105915195,
+    "base_coordinates": 2.329329687842576,
+    "refined_coordinates": 1.1953656852466878,
+    "base_gains": 12.727546029065602,
+    "cfc_residual_gains": 9.788310579946206,
+    "cproj_residual_gains": 8.916214592833938
+  },
+  "decision": "Layer batching is numerically admissible but insufficient alone. Do not refactor the optimizer. Benchmark a batched fused assignment/statistics kernel under the same frozen tolerance before any training-code change."
+}

@@ -1,0 +1,38 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_fused_batched_lloyd_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_oracle_implementation_or_measurement",
+  "question": "Does one batched CUDA assignment/sum/count kernel provide the additional >=26.06 ms needed beyond admissible layer batching?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_batched_lloyd_oracle_result.json",
+    "sha256": "245f975cfbe317532576ba5f4f3804eaee3d0da9a90c99c0c0f4531a05fa1f00"
+  },
+  "distinction_from_rejected_single_codebook_kernel": "This oracle is a new layer-batched phase: one launch covers B independent codebooks with disjoint B*K bins. Its correctness threshold is the already preregistered layer-batching envelope, not a post-result relaxation of the rejected single-codebook gate.",
+  "frozen_intervention": [
+    "For FP32 values shaped BxN and FP32 midpoints shaped Bx(K-1), perform the same lower-bound assignment and atomically accumulate into disjoint BxK FP32 sums and int64 counts.",
+    "Do not materialize intermediate codes; retain torch.searchsorted for the final stored assignment.",
+    "Compile without fast-math and do not change initialization, centroid update, sorting, iteration count, codec, cadence, optimizer, or persistent state.",
+    "Implement only a standalone no-training oracle; do not integrate it into MuonPairVQ in this phase."
+  ],
+  "production_roles": "Exactly the seven shapes in 124m_pair_vq_matched_ns4_batched_lloyd_oracle_plan.json.",
+  "correctness_gate": {
+    "fixed_level_counts_exact_for_every_role": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "minimum_savings_beyond_batched_reference_ms": 26.058101165642294,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 3
+  },
+  "decision_rule": {
+    "correctness_fail": "Reject without optimizer integration or MFU measurement.",
+    "correctness_pass_systems_fail": "Reject without optimizer integration; derive a different representation-independent execution method.",
+    "correctness_and_systems_pass": "Preregister the two-phase optimizer refactor, including exact state/equivalence/MFU gates; do not automatically train.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}
