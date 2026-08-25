@@ -10,6 +10,7 @@ import subprocess
 import time
 import traceback
 from dataclasses import dataclass
+from functools import partial
 from pathlib import Path
 from typing import Any, Callable
 
@@ -39,6 +40,7 @@ def graphsafe_batched_fit_scalar_codebooks(
     *,
     level_count: int,
     iterations: int,
+    count_dtype: torch.dtype = torch.int64,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Reference batched Lloyd fit with graph-safe exact integer counts."""
     if values.ndim != 2 or values.dtype != torch.float32:
@@ -70,9 +72,11 @@ def graphsafe_batched_fit_scalar_codebooks(
         )
         sums.index_add_(0, flat_codes, flat_values)
         counts = torch.zeros(
-            batch * level_count, device=values.device, dtype=torch.int64
+            batch * level_count, device=values.device, dtype=count_dtype
         )
-        counts.index_add_(0, flat_codes, torch.ones_like(flat_codes))
+        counts.index_add_(
+            0, flat_codes, torch.ones_like(flat_codes, dtype=count_dtype)
+        )
         sums = sums.reshape(batch, level_count)
         counts = counts.reshape(batch, level_count)
         live = counts > 0
@@ -83,7 +87,12 @@ def graphsafe_batched_fit_scalar_codebooks(
     return levels, codes
 
 
-def graphsafe_count_identity(values: torch.Tensor, *, level_count: int) -> bool:
+def graphsafe_count_identity(
+    values: torch.Tensor,
+    *,
+    level_count: int,
+    count_dtype: torch.dtype,
+) -> bool:
     """Prove bincount and int64 index_add agree for fixed assignments."""
     batch = values.shape[0]
     levels = torch.linspace(
@@ -99,8 +108,11 @@ def graphsafe_count_identity(values: torch.Tensor, *, level_count: int) -> bool:
     reference = torch.bincount(
         flat_codes, minlength=batch * level_count
     )
-    candidate = torch.zeros_like(reference)
-    candidate.index_add_(0, flat_codes, torch.ones_like(flat_codes))
+    reference = reference.to(dtype=count_dtype)
+    candidate = torch.zeros_like(reference, dtype=count_dtype)
+    candidate.index_add_(
+        0, flat_codes, torch.ones_like(flat_codes, dtype=count_dtype)
+    )
     return bool(torch.equal(reference, candidate))
 
 
@@ -192,6 +204,7 @@ def main() -> None:
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--repetitions", type=int, default=5)
     parser.add_argument("--graphsafe-counts", action="store_true")
+    parser.add_argument("--fp32-counts", action="store_true")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA-graph Lloyd oracle requires CUDA")
@@ -205,17 +218,28 @@ def main() -> None:
         text=True,
         stdout=subprocess.PIPE,
     ).stdout.strip()
-    fit_function = (
-        graphsafe_batched_fit_scalar_codebooks
-        if args.graphsafe_counts
-        else batched_fit_scalar_codebooks
-    )
+    if args.graphsafe_counts and args.fp32_counts:
+        parser.error("choose at most one graph-safe count dtype")
+    if args.fp32_counts:
+        fit_function = partial(
+            graphsafe_batched_fit_scalar_codebooks,
+            count_dtype=torch.float32,
+        )
+        schema_version = "mai_124m_pair_vq_fp32_graph_count_oracle_result_v1"
+        count_mode = "fp32_index_add"
+        count_dtype = torch.float32
+    elif args.graphsafe_counts:
+        fit_function = graphsafe_batched_fit_scalar_codebooks
+        schema_version = "mai_124m_pair_vq_graphsafe_count_oracle_result_v1"
+        count_mode = "int64_index_add"
+        count_dtype = torch.int64
+    else:
+        fit_function = batched_fit_scalar_codebooks
+        schema_version = "mai_124m_pair_vq_cuda_graph_lloyd_result_v1"
+        count_mode = "bincount"
+        count_dtype = None
     base_result: dict[str, Any] = {
-        "schema_version": (
-            "mai_124m_pair_vq_graphsafe_count_oracle_result_v1"
-            if args.graphsafe_counts
-            else "mai_124m_pair_vq_cuda_graph_lloyd_result_v1"
-        ),
+        "schema_version": schema_version,
         "recorded_at": "2026-08-26",
         "source_commit": commit,
         "source": {
@@ -225,7 +249,7 @@ def main() -> None:
         "device": torch.cuda.get_device_name(),
         "repetitions": args.repetitions,
         "selected_groups": SELECTED_GROUPS,
-        "count_mode": "int64_index_add" if args.graphsafe_counts else "bincount",
+        "count_mode": count_mode,
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -277,8 +301,12 @@ def main() -> None:
         values = (base[None, :] + row_offsets[:, None]).contiguous()
         counts_exact = fixed_level_count_identity(values, level_count=levels)
         count_primitive_exact = (
-            graphsafe_count_identity(values, level_count=levels)
-            if args.graphsafe_counts
+            graphsafe_count_identity(
+                values,
+                level_count=levels,
+                count_dtype=count_dtype,
+            )
+            if count_dtype is not None
             else None
         )
         serial_levels, serial_codes = serial_fit_scalar_codebooks(

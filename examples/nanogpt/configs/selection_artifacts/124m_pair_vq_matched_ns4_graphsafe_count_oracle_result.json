@@ -1,0 +1,34 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_graphsafe_count_oracle_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "correctness_pass_systems_rejected",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_graphsafe_count_oracle_plan.json",
+    "sha256": "fa01fa9a1acf1dfa7abbc7bbb0cf1f733a8c652e1aa5f4acd838ef458e486596"
+  },
+  "implementation_commit": "1ccaf57713012544a2e28b5b4a7f78f6ff4d9886",
+  "remote_artifact": {
+    "path": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/graphsafe_count_oracle/result.json",
+    "sha256": "b68a383052fb3943f8bbb8d9fc0961163210641ca03d0e494f3066d1a2b6c322"
+  },
+  "correctness": {
+    "count_primitive_exact_all_roles": true,
+    "fixed_level_counts_exact_all_roles": true,
+    "maximum_centroid_abs": 0.00006961822509765625,
+    "maximum_code_mismatch_fraction": 0.00008872703269675926,
+    "passed": true
+  },
+  "performance": {
+    "total_serial_ms": 375.503302,
+    "total_graph_ms": 312.624742,
+    "aggregate_speedup": 1.2011311067302815,
+    "projected_optimizer_ms": 616.7251896320283,
+    "maximum_projected_optimizer_ms": 495.0,
+    "retained_scratch_mib": 2076.0,
+    "maximum_retained_scratch_mib": 8192.0,
+    "peak_allocated_mib": 3608.60546875,
+    "passed": false
+  },
+  "diagnosis": "CUDA capture is feasible after the exact count substitution, but int64 count atomics dominate the large coordinate roles: c_fc 159.55 vs 136.68 ms serial and c_proj 49.99 vs 40.39 ms serial. Graph launch savings help the small gain roles but cannot offset that cost.",
+  "decision": "Reject before optimizer integration. Test FP32 unit counts under a new plan because all per-bin counts are <=2,359,296 < 2^24 and therefore exactly representable before the already-required FP32 division."
+}

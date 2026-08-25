@@ -1,0 +1,42 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_fp32_graph_count_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_implementation_or_measurement",
+  "question": "Can exactly represented FP32 unit counts remove the int64 atomic penalty while preserving graph capture and the compact optimizer gate?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_graphsafe_count_oracle_result.json",
+    "sha256": "b75f37254062ea305d5af120526fc91e50184d641416385dbbfac060f93db5e0"
+  },
+  "exactness_argument": [
+    "Every layer contains at most 2,359,296 scalar assignments, below 2^24.",
+    "Starting from zero, every addition of FP32 one yields an exactly represented integer throughout this range, independent of atomic order.",
+    "The reference immediately casts int64 counts to FP32 before division; therefore the candidate supplies the identical FP32 divisor for every fixed assignment."
+  ],
+  "frozen_intervention": [
+    "Change only the graph-safe count accumulator and unit source from int64 to FP32.",
+    "Retain reference torch.searchsorted, separate FP32 sum index_add, static torch.where centroid update, sorting, final assignment, and selected group sizes 12,12,24,12,24,12,12.",
+    "Capture and retain all seven role graphs in a shared graph pool; timed replay includes input and durable output copies.",
+    "Standalone no-training oracle only; do not edit MuonPairVQ."
+  ],
+  "correctness_gate": {
+    "fp32_counts_bitwise_equal_to_reference_counts_after_fp32_cast": true,
+    "fixed_level_counts_exact_for_every_role": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "maximum_retained_graph_scratch_mib": 8192.0,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 5
+  },
+  "decision_rule": {
+    "capture_or_correctness_fail": "Reject before optimizer integration.",
+    "scratch_or_projected_time_fail": "Reject before optimizer integration.",
+    "all_gates_pass": "Preregister a two-phase optimizer integration with exact state, independent replay, memory, and >=20% MFU gates; do not automatically train.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}
