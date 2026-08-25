@@ -3578,6 +3578,13 @@ def pair_vq_model_kwargs(
         "block_fht_mlp_pair_vq_error_feedback": bool(
             namespace.block_fht_mlp_pair_vq_error_feedback
         ),
+        "block_fht_mlp_pair_vq_hierarchical_feedback_fit": bool(
+            getattr(
+                namespace,
+                "block_fht_mlp_pair_vq_hierarchical_feedback_fit",
+                False,
+            )
+        ),
         "block_fht_mlp_pair_vq_forward_visible_feedback": bool(
             getattr(
                 namespace,

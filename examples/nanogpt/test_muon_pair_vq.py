@@ -2043,6 +2043,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         block_fht_mlp_pair_vq_neighbor_candidates=16,
         block_fht_mlp_pair_vq_code_refresh_interval=8,
         block_fht_mlp_pair_vq_error_feedback=True,
+        block_fht_mlp_pair_vq_hierarchical_feedback_fit=True,
         block_fht_mlp_pair_vq_forward_visible_feedback=True,
         block_fht_mlp_pair_vq_cproj_fast_residual=True,
         block_fht_mlp_pair_vq_stochastic_fast_retraction=False,
@@ -2061,6 +2062,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
         "block_fht_mlp_pair_vq_neighbor_candidates": 16,
         "block_fht_mlp_pair_vq_code_refresh_interval": 8,
         "block_fht_mlp_pair_vq_error_feedback": True,
+        "block_fht_mlp_pair_vq_hierarchical_feedback_fit": True,
         "block_fht_mlp_pair_vq_forward_visible_feedback": True,
         "block_fht_mlp_pair_vq_fp16_ambient_momentum": False,
         "block_fht_mlp_pair_vq_fp16_reserved_escape_granularity": "",
@@ -2100,6 +2102,7 @@ def test_pair_vq_training_boundary_forwards_cproj_fast_residual() -> None:
     model = GPT(config)
     assert model.transformer.h[0].mlp.c_proj.fast_residual is True
     assert model.transformer.h[0].mlp.c_proj.feedback_codec == "polar32x8"
+    assert model.config.block_fht_mlp_pair_vq_hierarchical_feedback_fit is True
 
 
 def test_gpt_routes_attention_value_and_output_through_pair_vq() -> None:
