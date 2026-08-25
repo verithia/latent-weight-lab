@@ -1,0 +1,56 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_hierarchical_integration_passed_result_v1",
+  "recorded_at": "2026-08-26",
+  "status": "all_integration_gates_passed_endpoint_preregistered_not_launched",
+  "plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_plan.json",
+    "sha256": "b573bae700a13b1d9530285f389fd91736696a64f9f3584fa987ff9bbda816a8"
+  },
+  "implementation": {
+    "optimizer_boundary_commit": "3a443a36ebd25d9fa239ce0367c2e61a7b25bcfe",
+    "preflight_commit": "b7fd107bc0e85620543ec882ec2ea9237365b883",
+    "model_config_flag_proved_true": true,
+    "pair_vq_optimizer_flag_proved_true": true
+  },
+  "independent_replay": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_replay_retry5_result.json",
+    "sha256": "c56289716184b86e100579b80439e1339b84eb1c901b6c445c0333b2dcb84f87",
+    "passed": true
+  },
+  "exact_preflight": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_mfu_retry2_result.json",
+    "sha256": "281b260c5c2664963600cb8f0007911f6ace1ae576771227cd93ba6d14d1c12a",
+    "source_config_sha256": "0a375f53e0b6b66775b047a02626433150937ebc364a44c6f17810292c7af6e9",
+    "persistent_pair_vq_training_bytes": 157500864,
+    "training_state_compression": 2.876078,
+    "mfu_percent": 23.323880185915244,
+    "optimizer_ms": 311.42249999999996,
+    "iteration_ms": 1093.0149999999999,
+    "tokens_per_second": 240669.42875000002,
+    "forward_backward_ms": 740.0,
+    "peak_allocated_mib": 31706.87,
+    "all_logged_losses_finite": true
+  },
+  "frozen_gate_outcomes": {
+    "persistent_state_exact": true,
+    "minimum_training_state_compression_2p8": true,
+    "maximum_peak_allocated_mib_35803p43": true,
+    "maximum_optimizer_ms_495": true,
+    "minimum_mfu_percent_20": true
+  },
+  "preregistered_endpoint": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "config_sha256": "5da4704f76d54196a0159b64f6906826874036725d505fc97b8927bf737ba241",
+    "governance_only_changes_after_preflight": [
+      "launch_ready=false -> true",
+      "launch_block_reason cleared",
+      "mfu_preflight_certificate points to retry2"
+    ],
+    "scientific_runtime_fields_unchanged_after_preflight": true,
+    "launched": false
+  },
+  "decision": "All integration gates pass. The original 0.5TPP matched-NS4 compact quality endpoint is preregistered and launch-ready, but is not automatically launched under the frozen integration decision rule.",
+  "automatic_training": false,
+  "automatic_scale_up": false,
+  "automatic_sweep": false
+}
