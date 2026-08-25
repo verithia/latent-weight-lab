@@ -1,0 +1,28 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_fp64_hierarchical_cfc_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_kernel_change",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_replay_retry3_result.json",
+    "sha256": "0890a9773adf638539fef97c112b90d3de3c5963ead7537823f28938b4a55fc2"
+  },
+  "diagnosis": "On same-source production tensors, reference-batched base coordinates and FP32 hierarchical c_proj coordinates pass. The sole changed fitter outside tolerance is the 16-iteration c_fc residual-coordinate phase: centroid max 2.02178955078125e-4 with code mismatch 8.501829924406829e-5. Re-running unchanged serial reductions is nondeterministic and is not a changed-path comparison.",
+  "single_change": "Accumulate c_fc hierarchical histogram sums in FP64 within each tile and across tiles, then cast the final sums to FP32 before the unchanged Lloyd update. Counts, assignments, initialization, iterations, packing, and all other roles remain unchanged.",
+  "rationale": "The remaining c_fc discrepancy is centroid drift from 16 rounds of differently ordered FP32 atomic sums, not assignment disagreement or insufficient codec capacity. Higher-precision accumulation targets that cause without adding persistent state.",
+  "frozen_gates": {
+    "fixed_level_counts_exact": true,
+    "maximum_scalar_centroid_absolute_difference": 0.00015,
+    "maximum_scalar_code_mismatch_fraction": 0.0001,
+    "all_packed_streams_valid_and_decodable": true,
+    "all_outputs_finite": true,
+    "persistent_pair_vq_training_bytes_exact": 157500864,
+    "minimum_mfu_percent": 20.0,
+    "maximum_optimizer_ms": 495.0,
+    "maximum_peak_allocated_mib": 35803.43
+  },
+  "decision_rule": {
+    "same_source_replay_fail": "Reject FP64 accumulation and do not run MFU or training.",
+    "same_source_replay_pass": "Run independent packed-state replay, then exact state/MFU preflight; do not automatically train.",
+    "automatic_training": false
+  }
+}

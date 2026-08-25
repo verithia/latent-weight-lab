@@ -24,6 +24,7 @@ from examples.nanogpt.pair_vq_fp16_reserved_escape_cuda import (
 )
 from examples.nanogpt.pair_vq_hierarchical_lloyd_cuda import (
     hierarchical_lloyd_stats,
+    hierarchical_lloyd_stats_fp64,
 )
 
 
@@ -1086,6 +1087,7 @@ def _fit_scalar_codebooks_batched(
     level_count: int,
     iterations: int,
     hierarchical: bool,
+    fp64_accumulation: bool = False,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Fit independent scalar codebooks with one reduction per phase.
 
@@ -1119,7 +1121,12 @@ def _fit_scalar_codebooks_batched(
     for _iteration in range(iterations):
         midpoints = ((levels[:, :-1] + levels[:, 1:]) * 0.5).contiguous()
         if hierarchical:
-            sums, counts = hierarchical_lloyd_stats(
+            statistics = (
+                hierarchical_lloyd_stats_fp64
+                if fp64_accumulation
+                else hierarchical_lloyd_stats
+            )
+            sums, counts = statistics(
                 values.contiguous(), midpoints, level_count=level_count
             )
         else:
@@ -1348,6 +1355,7 @@ def _fit_fractional_residual_lattice_feedback_batch_(
                 level_count=1 << coordinate_bits,
                 iterations=iterations,
                 hierarchical=True,
+                fp64_accumulation=coordinate_bits == 5,
             )
         )
         for row, index in enumerate(role_indices):

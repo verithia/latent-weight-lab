@@ -16,7 +16,6 @@ from examples.nanogpt.muon_pair_vq import (
     _decode_fractional_residual_lattice_feedback,
     _fit_fractional_residual_lattice_feedback_,
     _fit_fractional_residual_lattice_feedback_batch_,
-    _fit_scalar_codebook,
     _fit_scalar_codebooks_batched,
     _fractional_lattice_feedback_layout,
     _fractional_lattice_feedback_segments,
@@ -293,15 +292,7 @@ def main() -> None:
     }
     for role, values in role_values.items():
         if role in serial_exact_roles:
-            outputs = [
-                _fit_scalar_codebook(
-                    source,
-                    level_count=role_serial_levels[role][index].numel(),
-                    iterations=(16 if role == "cfc_residual_gains" else 4),
-                )
-                for index, source in enumerate(values)
-            ]
-            direct_candidate_levels[role] = [output[0] for output in outputs]
+            direct_candidate_levels[role] = role_serial_levels[role]
         else:
             source_matrix = torch.stack(values)
             level_count = role_serial_levels[role][0].numel()
@@ -311,6 +302,7 @@ def main() -> None:
                 level_count=level_count,
                 iterations=iterations,
                 hierarchical=role != "base_coordinates",
+                fp64_accumulation=role == "cfc_residual_coordinates",
             )
             direct_candidate_levels[role] = list(fitted)
     roles = {

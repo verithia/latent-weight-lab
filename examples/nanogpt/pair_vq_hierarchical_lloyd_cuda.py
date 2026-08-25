@@ -60,7 +60,7 @@ def _load_extension():
         except Exception:
             pass
         _EXTENSION = cpp_extension.load(
-            name="latent_weight_lab_pair_vq_hierarchical_lloyd_ext_v1",
+            name="latent_weight_lab_pair_vq_hierarchical_lloyd_ext_v2",
             sources=[
                 str(root / "csrc" / "pair_vq_hierarchical_lloyd_ext.cpp"),
                 str(root / "csrc" / "pair_vq_hierarchical_lloyd_ext_cuda.cu"),
@@ -97,4 +97,29 @@ def hierarchical_lloyd_stats(
     if extension is None:
         raise RuntimeError("hierarchical Lloyd extension failed to load") from _EXTENSION_ERROR
     sums, counts = extension.stats(values, midpoints, int(level_count))
+    return sums, counts
+
+
+def hierarchical_lloyd_stats_fp64(
+    values: torch.Tensor,
+    midpoints: torch.Tensor,
+    *,
+    level_count: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    if values.ndim != 2 or midpoints.ndim != 2:
+        raise ValueError("hierarchical Lloyd inputs must be matrices")
+    if not values.is_contiguous() or not midpoints.is_contiguous():
+        raise ValueError("hierarchical Lloyd inputs must be contiguous")
+    if values.dtype != torch.float32 or midpoints.dtype != torch.float32:
+        raise ValueError("hierarchical Lloyd inputs must be float32")
+    if values.shape[0] != midpoints.shape[0]:
+        raise ValueError("hierarchical Lloyd row counts must match")
+    if midpoints.shape[1] != int(level_count) - 1:
+        raise ValueError("hierarchical Lloyd midpoint count does not match levels")
+    if not values.is_cuda or not midpoints.is_cuda:
+        raise ValueError("hierarchical Lloyd oracle requires CUDA")
+    extension = _load_extension()
+    if extension is None:
+        raise RuntimeError("hierarchical Lloyd extension failed to load") from _EXTENSION_ERROR
+    sums, counts = extension.stats_fp64(values, midpoints, int(level_count))
     return sums, counts
