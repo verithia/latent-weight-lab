@@ -1,0 +1,55 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_compact_source_correction_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_corrected_preflight_or_training",
+  "scientific_question": "Does the matched four-step MLP Muon field close the loss gap for the exact compact B64/L16 representation on which polar amplification was measured?",
+  "root_plan": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_mlp_plan.json",
+    "sha256": "0fff43f68bfddf4eb1403abb00047aa4fbaaef5a2eb115eb78b8e7044baad6d2"
+  },
+  "dense_authorization": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_dense_result.json",
+    "sha256": "3cd8594b8b8eaa05dab60ee0a61c5f2c93968754392cf0ea1da5ef2208249a8c",
+    "terminal_validation_ce": 5.3663
+  },
+  "rejected_preflight": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_compact_preflight_rejection.json",
+    "reason": "The inherited lazy/FP16-carry representation had only 1.76590x total persistent-state reduction and was not the source used by the polar oracle."
+  },
+  "frozen_compact_source": {
+    "config": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "config_sha256": "0632b80e767e309cbe3c0b17f3c583bc74bbffef3e747fe9719ed1d326597531",
+    "same_momentum_oracle": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_same_momentum_polar_amplification_oracle_result.json",
+    "same_momentum_oracle_source_matches": true,
+    "persistent_training_bytes_exact": 157500864,
+    "dense_fp32_weight_plus_muon_bytes": 452984832,
+    "training_state_reduction_x": 2.876078,
+    "dense_master_weight": false,
+    "dense_optimizer_momentum": false,
+    "raw_ambient_temporal_tensor": false
+  },
+  "only_intervention": {
+    "attention_muon_ns_steps": 5,
+    "mlp_muon_ns_steps": 4,
+    "mlp_muon_lr_scale": 1.225,
+    "mlp_muon_polar_ridge": 0.0,
+    "codec_change": false,
+    "learning_rate_sweep": false
+  },
+  "gates": {
+    "preflight_mfu_fraction_min": 0.2,
+    "preflight_persistent_training_bytes_exact": 157500864,
+    "candidate_minus_matched_dense_validation_ce_max": 0.01,
+    "terminal_candidate_validation_ce_max": 5.381,
+    "fixed_model_compute_penalty_max": 1.1,
+    "compact_checkpoint_required": true,
+    "all_fixed_evaluations_finite": true
+  },
+  "decision_rule": {
+    "preflight_fail": "Do not train; reject or optimize implementation without changing the representation.",
+    "endpoint_pass": "Authorize one 124M/5TPP matched dense/compact confirmation only.",
+    "endpoint_fail": "Reject matched polar-depth smoothing as sufficient for compact B64/L16 MLP replacement and return to a non-polar compact-native transition rule.",
+    "automatic_sweep": false,
+    "automatic_scale_up": false
+  }
+}

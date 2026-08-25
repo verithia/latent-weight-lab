@@ -35,5 +35,12 @@ def test_compact_gate_is_authorized_by_the_sealed_dense_result() -> None:
     )
     assert len(config["authorization_result_sha256"]) == 64
     assert config["endpoint_gate"]["matched_dense_terminal_validation_ce"] == 5.3663
+    assert config["block_fht_mlp_pair_vq_fp16_ambient_momentum"] is False
+    assert config["persistent_training_bytes_exact"] == 157500864
+    assert (
+        config["mfu_preflight_pair_vq_persistent_training_bytes_exact"]
+        == 157500864
+    )
+    assert config["endpoint_gate"]["dense_fp32_weight_plus_muon_bytes"] == 452984832
     assert config["endpoint_gate"]["candidate_minus_matched_dense_validation_ce_max"] == 0.01
     assert config["endpoint_gate"]["terminal_candidate_validation_ce_max"] == 5.381

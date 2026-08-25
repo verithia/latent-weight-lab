@@ -1,0 +1,42 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_compact_preflight_rejection_v1",
+  "recorded_at": "2026-08-26",
+  "classification": "REJECT_WRONG_COMPACT_SOURCE_STATE_CONTRACT",
+  "status": "sealed_before_scientific_training",
+  "rejected_config": {
+    "path": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "sha256": "6d3633c6b4a056d1cb7522f521c9933d770788513d29a595f8954722f130f84c",
+    "inherited_source": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_lazyretract8_0p5tpp_lr24e4.json"
+  },
+  "execution": {
+    "host": "Y400",
+    "gpu": 1,
+    "repository_commit": "a2b4c6d080cf9eca0e5d5ddcc6b69002103002d5",
+    "preflight_sha256": "2ffeb2dd95ea40acbe4f161b32630dd69e2af08252c7b02545b6e456cbe41ee3",
+    "preflight_log_sha256": "b31c57a9124cbb4b9b86b4f9f35ab9cc5578289916fecd180f8bbc0f43f4afc1",
+    "mfu_fraction": 0.27510604242187775,
+    "tokens_per_second": 285908.4125,
+    "peak_mib": 31797.34
+  },
+  "state_gate": {
+    "dense_fp32_weight_plus_muon_bytes": 452984832,
+    "observed_persistent_training_bytes": 256517568,
+    "observed_training_state_reduction_x": 1.7659017880599897,
+    "minimum_training_state_reduction_x": 2.8,
+    "passed": false,
+    "contract_bug": "The config constrained only the 99,090,432-byte adaptive momentum container. It did not set the exact total persistent-training-state key consumed by the MFU preflight, so the certificate reported expected=null."
+  },
+  "causal_source_mismatch": {
+    "polar_oracle_source": "examples/nanogpt/configs/pro6_mai_v3_124m_qkonly_pairvq_mlp_b64_converged_residual_lattice_0p5tpp_lr24e4.json",
+    "polar_oracle_source_sha256": "0632b80e767e309cbe3c0b17f3c583bc74bbffef3e747fe9719ed1d326597531",
+    "polar_oracle_persistent_training_bytes": 157500864,
+    "polar_oracle_training_state_reduction_x": 2.876078,
+    "finding": "The unrun compact config changed both optimizer state and storage from the representation used to establish polar amplification. It was not a valid causal test of the preregistered hypothesis."
+  },
+  "decision": {
+    "scientific_training_authorized": false,
+    "rerun_same_config": false,
+    "codec_sweep": false,
+    "corrective_action": "Restore the exact B64/L16 compact source used by the sealed same-momentum polar oracle, add an exact 157,500,864-byte preflight assertion, and rerun the systems gate before any scientific update."
+  }
+}
