@@ -119,7 +119,8 @@ def _fit_cartesian_pair_codec_(
             sums.index_add_(0, indices, values)
             counts = torch.bincount(indices, minlength=16)
             live = counts > 0
-            fitted[live] = sums[live] / counts[live]
+            candidate = sums / counts.clamp_min(1).to(dtype=sums.dtype)
+            fitted = torch.where(live, candidate, fitted)
             fitted = fitted.sort().values
         indices = torch.bucketize(
             values.contiguous(), (fitted[:-1] + fitted[1:]) * 0.5
@@ -1066,7 +1067,8 @@ def _fit_scalar_codebook(
         sums.index_add_(0, codes, values)
         counts = torch.bincount(codes, minlength=level_count)
         live = counts > 0
-        levels[live] = sums[live] / counts[live]
+        candidate = sums / counts.clamp_min(1).to(dtype=sums.dtype)
+        levels = torch.where(live, candidate, levels)
         levels = levels.sort().values
     codes = torch.bucketize(
         values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
@@ -3234,7 +3236,10 @@ class MuonPairVQLinear(nn.Module):
         accum.index_add_(0, codes, requested_pairs)
         counts = torch.bincount(codes, minlength=self.codebook_size)
         live = counts > 0
-        self.codebooks[stage, live] = accum[live] / counts[live, None]
+        candidate = accum / counts.clamp_min(1).to(dtype=accum.dtype)[:, None]
+        self.codebooks[stage].copy_(
+            torch.where(live[:, None], candidate, self.codebooks[stage])
+        )
 
     @torch.no_grad()
     def _fit_fast_residual_(self, residual: torch.Tensor) -> int:
@@ -3661,9 +3666,9 @@ class MuonPairVQ(torch.optim.Optimizer):
                         counts = torch.bincount(
                             codes, minlength=module.codebook_size
                         )
-                        live = counts > 0
-                        means = torch.zeros_like(module.codebooks[stage])
-                        means[live] = accum[live] / counts[live, None]
+                        means = accum / counts.clamp_min(1).to(
+                            dtype=accum.dtype
+                        )[:, None]
                         compact_momentum[stage].mul_(
                             momentum_coefficient
                         ).add_(means)

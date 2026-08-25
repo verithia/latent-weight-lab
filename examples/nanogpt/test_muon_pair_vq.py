@@ -25,6 +25,7 @@ from examples.nanogpt.muon_pair_vq import (
     _fit_residual_conditional_polar_pair_codec_,
     _fit_polar_pair_codec_,
     _fit_rvq_pair_codec_,
+    _fit_scalar_codebook,
     _fit_stochastic_cartesian_pair_codec_,
     _fit_block_local_uniform_stochastic_cartesian_pair_codec_,
     _fractional_lattice_feedback_layout,
@@ -99,6 +100,56 @@ def make_optimizer(module: MuonPairVQLinear) -> MuonPairVQ:
     return MuonPairVQ(
         [module], lr=0.01, momentum=0.5, weight_decay=0.1, ns_steps=1
     )
+
+
+def _reference_dynamic_fit_scalar_codebook(
+    values: torch.Tensor,
+    *,
+    level_count: int,
+    iterations: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    mean = values.mean()
+    std = values.std(unbiased=False).clamp_min(torch.finfo(torch.float32).tiny)
+    probabilities = (
+        torch.arange(level_count, device=values.device, dtype=torch.float32) + 0.5
+    ) / level_count
+    levels = mean + std * (2.0**0.5) * torch.erfinv(2.0 * probabilities - 1.0)
+    for _iteration in range(iterations):
+        codes = torch.bucketize(
+            values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
+        )
+        sums = torch.zeros_like(levels)
+        sums.index_add_(0, codes, values)
+        counts = torch.bincount(codes, minlength=level_count)
+        live = counts > 0
+        levels[live] = sums[live] / counts[live]
+        levels = levels.sort().values
+    codes = torch.bucketize(
+        values.contiguous(), (levels[:-1] + levels[1:]) * 0.5
+    )
+    return levels, codes
+
+
+def test_static_scalar_centroids_match_dynamic_reference_with_empty_codes() -> None:
+    values = torch.cat(
+        (
+            torch.full((2048,), -1.25),
+            torch.linspace(-0.01, 0.01, 4096),
+            torch.full((2048,), 2.5),
+        )
+    )
+    reference_levels, reference_codes = _reference_dynamic_fit_scalar_codebook(
+        values,
+        level_count=256,
+        iterations=4,
+    )
+    levels, codes = _fit_scalar_codebook(
+        values,
+        level_count=256,
+        iterations=4,
+    )
+    assert torch.equal(levels, reference_levels)
+    assert torch.equal(codes, reference_codes)
 
 
 def test_stochastic_cartesian_retraction_is_replay_exact_and_unbiased() -> None:
