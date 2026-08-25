@@ -56,6 +56,20 @@ def integer(values: dict[str, str], key: str) -> int:
     return int(values[key].replace(",", ""))
 
 
+def json_equivalent(left: Any, right: Any) -> bool:
+    """Compare checkpoint objects with their JSON-sidecar representation.
+
+    PyTorch preserves tuples while JSON necessarily rehydrates them as lists.
+    The sidecar was emitted from the same checkpoint identity, so comparison
+    must use the canonical JSON domain rather than Python container types.
+    """
+
+    encode = lambda value: json.dumps(
+        value, sort_keys=True, separators=(",", ":"), allow_nan=False
+    )
+    return encode(left) == encode(right)
+
+
 def checkpoint_dense_mlp_tensors(checkpoint: dict[str, Any]) -> list[dict[str, Any]]:
     """Find persisted 768x3072/3072x768 matrices anywhere in the checkpoint."""
 
@@ -205,8 +219,8 @@ def main() -> None:
         "checkpoint_schema": checkpoint.get("schema_version") == "nanogpt_exact_resume_v2",
         "checkpoint_next_iter": int(checkpoint.get("next_iter", -1)) == int(config["max_iters"]),
         "metadata_next_iter": int(metadata.get("next_iter", -1)) == int(config["max_iters"]),
-        "checkpoint_identity_matches_metadata": checkpoint_identity == metadata_identity,
-        "checkpoint_resolved_config_matches_metadata": checkpoint_identity.get("resolved_config") == metadata_identity.get("resolved_config"),
+        "checkpoint_identity_matches_metadata": json_equivalent(checkpoint_identity, metadata_identity),
+        "checkpoint_resolved_config_matches_metadata": json_equivalent(checkpoint_identity.get("resolved_config"), metadata_identity.get("resolved_config")),
         "checkpoint_fixed_eval_digest_matches_parent": checkpoint_identity["evaluation"]["fixed_eval_indices_sha256"] == parent["implementation"]["fixed_eval_indices_sha256"],
         "fixed_eval_inventory": sorted(fixed_losses) == required_steps,
         "all_fixed_losses_finite": len(fixed_values) == 2 * len(required_steps) and all(math.isfinite(value) for value in fixed_values),
