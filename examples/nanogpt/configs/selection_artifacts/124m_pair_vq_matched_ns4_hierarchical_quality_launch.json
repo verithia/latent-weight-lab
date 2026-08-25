@@ -1,0 +1,76 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_quality_launch_v1",
+  "state_at_receipt": "running",
+  "host": "Y400",
+  "gpu": 0,
+  "run_id": "y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4_20260825T193404Z_664465",
+  "started_at_unix": 1787686444.4492533,
+  "started_at_utc": "2026-08-25T19:34:04Z",
+  "git_commit": "394485cabce5a3b350664b82a9e956d8021da1d8",
+  "config": {
+    "path": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4.json",
+    "sha256": "5da4704f76d54196a0159b64f6906826874036725d505fc97b8927bf737ba241"
+  },
+  "dataset_manifest": {
+    "path": "/root/userdata/MappingNetworks/data/finewebedu_20b/manifest.json",
+    "sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b"
+  },
+  "mfu_preflight": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_hierarchical_integration_mfu_retry2_result.json",
+    "sha256": "281b260c5c2664963600cb8f0007911f6ace1ae576771227cd93ba6d14d1c12a",
+    "mfu_percent": 23.3238801859,
+    "tokens_per_second": 240669.42875,
+    "optimizer_ms": 311.4225,
+    "peak_mib": 31706.87,
+    "persistent_training_bytes_exact": 157500864,
+    "compression_vs_dense_fp32_weight_plus_muon": 2.876078
+  },
+  "remote": {
+    "process_group_id": 664479,
+    "supervisor_pid": 664479,
+    "child_pid": 664481,
+    "status": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/status/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4_20260825T193404Z_664465.json",
+    "log": "/root/userdata/MappingNetworks/outputs/y400_ladder_runs/logs/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4_20260825T193404Z_664465.log",
+    "scientific_out_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4/scientific",
+    "terminal_checkpoint": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_matched_ns4_mlp/y400_mai_v3_124m_qkonly_pairvq_mlp_matched_ns4_0p5tpp_lr24e4/scientific/ckpt.pt"
+  },
+  "watchdog": {
+    "label": "com.mappingnetworks.y400.matchedns4pairvq.20260826",
+    "pid_at_verification": 74974,
+    "state": ".watchdogs/y400_124m_matched_ns4_pairvq_664479.state.json",
+    "watch_identity": "a3d5e13c8fdc68f158a93257d8b4eb33c85b822310adfb77f1ddc62c0868a3c7",
+    "poll_seconds": 60,
+    "heartbeat_minutes": 0,
+    "callbacks": [
+      "terminal_success",
+      "actionable_failure"
+    ]
+  },
+  "first_verified_live_sample": {
+    "fixed_eval_step": 60,
+    "train_validation_ce": [
+      6.3231,
+      6.3323
+    ],
+    "tokens_per_second_window": [
+      232006.09,
+      247339.18
+    ],
+    "peak_mib": 31708.0,
+    "native_block_fht_loaded": true,
+    "model_hierarchical_feedback_fit": true,
+    "optimizer_hierarchical_feedback_fit": true,
+    "process_group_alive": true,
+    "gpu_healthy": true
+  },
+  "endpoint_gate": {
+    "matched_dense_terminal_validation_ce": 5.3663,
+    "terminal_candidate_validation_ce_max": 5.381,
+    "candidate_minus_matched_dense_validation_ce_max": 0.01,
+    "fixed_model_compute_penalty_max": 1.1,
+    "compact_checkpoint_required": true,
+    "automatic_rerun": false,
+    "automatic_sweep": false,
+    "automatic_scale_up": false
+  }
+}
