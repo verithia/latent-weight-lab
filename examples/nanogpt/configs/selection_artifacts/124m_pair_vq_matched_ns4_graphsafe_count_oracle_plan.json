@@ -1,0 +1,39 @@
+{
+  "schema_version": "mai_124m_pair_vq_matched_ns4_graphsafe_count_oracle_plan_v1",
+  "recorded_at": "2026-08-26",
+  "status": "preregistered_before_implementation_or_measurement",
+  "question": "Does replacing unsupported torch.bincount by exact int64 index_add counts enable CUDA-graph replay and clear the compact optimizer gate?",
+  "causal_parent": {
+    "path": "examples/nanogpt/configs/selection_artifacts/124m_pair_vq_matched_ns4_cuda_graph_lloyd_oracle_result.json",
+    "sha256": "54d5a375d65a177bf912a8b108b00ce5c0ab77e3cc19482dc1458935eadf5836"
+  },
+  "algebraic_identity": "For every flattened assignment q, bincount(q, minlength=M) equals zeros(M,int64).index_add_(0,q,ones_like(q,int64)); integer addition is exact and production counts are far below int64 overflow.",
+  "frozen_intervention": [
+    "Change only the per-iteration count primitive from torch.bincount to int64 index_add of ones.",
+    "Retain reference torch.searchsorted, FP32 sum index_add, static torch.where centroid update, sorting, final assignment, and sealed group sizes 12,12,24,12,24,12,12.",
+    "Capture and retain the same seven role graphs in a shared graph pool.",
+    "Timed replay includes live-to-static input copies and durable levels/codes output copies.",
+    "Standalone no-training oracle only; do not edit MuonPairVQ."
+  ],
+  "correctness_gate": {
+    "graphsafe_counts_equal_bincount_bitwise_on_fixed_assignments": true,
+    "fixed_level_counts_exact_for_every_role": true,
+    "all_outputs_finite": true,
+    "maximum_code_mismatch_fraction": 0.0001,
+    "maximum_centroid_absolute_difference": 0.00015
+  },
+  "systems_gate": {
+    "baseline_optimizer_ms": 679.60375,
+    "maximum_projected_optimizer_ms": 495.0,
+    "maximum_retained_graph_scratch_mib": 8192.0,
+    "warmup_repetitions": 1,
+    "timed_repetitions": 5
+  },
+  "decision_rule": {
+    "capture_or_correctness_fail": "Reject before optimizer integration.",
+    "scratch_or_projected_time_fail": "Reject before optimizer integration.",
+    "all_gates_pass": "Preregister a two-phase optimizer integration with exact state, independent replay, memory, and >=20% MFU gates; do not automatically train.",
+    "automatic_training": false,
+    "automatic_scale_up": false
+  }
+}

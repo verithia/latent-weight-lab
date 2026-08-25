@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import subprocess
 import time
 import traceback
@@ -33,6 +34,76 @@ SELECTED_GROUPS = {
 }
 
 
+def graphsafe_batched_fit_scalar_codebooks(
+    values: torch.Tensor,
+    *,
+    level_count: int,
+    iterations: int,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Reference batched Lloyd fit with graph-safe exact integer counts."""
+    if values.ndim != 2 or values.dtype != torch.float32:
+        raise ValueError("batched Lloyd values must be an FP32 matrix")
+    batch = values.shape[0]
+    mean = values.mean(dim=1)
+    std = values.std(dim=1, unbiased=False).clamp_min(
+        torch.finfo(torch.float32).tiny
+    )
+    probabilities = (
+        torch.arange(level_count, device=values.device, dtype=torch.float32)
+        + 0.5
+    ) / level_count
+    levels = mean[:, None] + std[:, None] * math.sqrt(2.0) * torch.erfinv(
+        2.0 * probabilities[None, :] - 1.0
+    )
+    offsets = (
+        torch.arange(batch, device=values.device, dtype=torch.int64)
+        * level_count
+    )
+    flat_values = values.reshape(-1)
+    for _iteration in range(iterations):
+        midpoints = ((levels[:, :-1] + levels[:, 1:]) * 0.5).contiguous()
+        codes = torch.searchsorted(midpoints, values.contiguous())
+        codes.add_(offsets[:, None])
+        flat_codes = codes.reshape(-1)
+        sums = torch.zeros(
+            batch * level_count, device=values.device, dtype=torch.float32
+        )
+        sums.index_add_(0, flat_codes, flat_values)
+        counts = torch.zeros(
+            batch * level_count, device=values.device, dtype=torch.int64
+        )
+        counts.index_add_(0, flat_codes, torch.ones_like(flat_codes))
+        sums = sums.reshape(batch, level_count)
+        counts = counts.reshape(batch, level_count)
+        live = counts > 0
+        candidate = sums / counts.clamp_min(1).to(dtype=sums.dtype)
+        levels = torch.where(live, candidate, levels).sort(dim=1).values
+    midpoints = ((levels[:, :-1] + levels[:, 1:]) * 0.5).contiguous()
+    codes = torch.searchsorted(midpoints, values.contiguous())
+    return levels, codes
+
+
+def graphsafe_count_identity(values: torch.Tensor, *, level_count: int) -> bool:
+    """Prove bincount and int64 index_add agree for fixed assignments."""
+    batch = values.shape[0]
+    levels = torch.linspace(
+        -3.0, 3.0, level_count, device=values.device, dtype=torch.float32
+    ).expand(batch, -1)
+    midpoints = ((levels[:, :-1] + levels[:, 1:]) * 0.5).contiguous()
+    codes = torch.searchsorted(midpoints, values.contiguous())
+    offsets = (
+        torch.arange(batch, device=values.device, dtype=torch.int64)
+        * level_count
+    )
+    flat_codes = (codes + offsets[:, None]).reshape(-1)
+    reference = torch.bincount(
+        flat_codes, minlength=batch * level_count
+    )
+    candidate = torch.zeros_like(reference)
+    candidate.index_add_(0, flat_codes, torch.ones_like(flat_codes))
+    return bool(torch.equal(reference, candidate))
+
+
 @dataclass
 class GraphRunner:
     static_input: torch.Tensor
@@ -48,6 +119,7 @@ def capture_runner(
     level_count: int,
     iterations: int,
     pool: tuple[int, int],
+    fit_function: Callable[..., tuple[torch.Tensor, torch.Tensor]],
 ) -> GraphRunner:
     static_input = torch.zeros(
         group_size, count, device="cuda", dtype=torch.float32
@@ -55,7 +127,7 @@ def capture_runner(
     warmup_stream = torch.cuda.Stream()
     warmup_stream.wait_stream(torch.cuda.current_stream())
     with torch.cuda.stream(warmup_stream):
-        batched_fit_scalar_codebooks(
+        fit_function(
             static_input,
             level_count=level_count,
             iterations=iterations,
@@ -64,7 +136,7 @@ def capture_runner(
     torch.cuda.synchronize()
     graph = torch.cuda.CUDAGraph()
     with torch.cuda.graph(graph, pool=pool):
-        static_levels, static_codes = batched_fit_scalar_codebooks(
+        static_levels, static_codes = fit_function(
             static_input,
             level_count=level_count,
             iterations=iterations,
@@ -119,6 +191,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--repetitions", type=int, default=5)
+    parser.add_argument("--graphsafe-counts", action="store_true")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         raise RuntimeError("CUDA-graph Lloyd oracle requires CUDA")
@@ -132,8 +205,17 @@ def main() -> None:
         text=True,
         stdout=subprocess.PIPE,
     ).stdout.strip()
+    fit_function = (
+        graphsafe_batched_fit_scalar_codebooks
+        if args.graphsafe_counts
+        else batched_fit_scalar_codebooks
+    )
     base_result: dict[str, Any] = {
-        "schema_version": "mai_124m_pair_vq_cuda_graph_lloyd_result_v1",
+        "schema_version": (
+            "mai_124m_pair_vq_graphsafe_count_oracle_result_v1"
+            if args.graphsafe_counts
+            else "mai_124m_pair_vq_cuda_graph_lloyd_result_v1"
+        ),
         "recorded_at": "2026-08-26",
         "source_commit": commit,
         "source": {
@@ -143,6 +225,7 @@ def main() -> None:
         "device": torch.cuda.get_device_name(),
         "repetitions": args.repetitions,
         "selected_groups": SELECTED_GROUPS,
+        "count_mode": "int64_index_add" if args.graphsafe_counts else "bincount",
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
 
@@ -161,6 +244,7 @@ def main() -> None:
                 level_count=levels,
                 iterations=iterations,
                 pool=shared_pool,
+                fit_function=fit_function,
             )
         torch.cuda.synchronize()
         retained_allocated = torch.cuda.memory_allocated() - allocated_before
@@ -192,6 +276,11 @@ def main() -> None:
         )
         values = (base[None, :] + row_offsets[:, None]).contiguous()
         counts_exact = fixed_level_count_identity(values, level_count=levels)
+        count_primitive_exact = (
+            graphsafe_count_identity(values, level_count=levels)
+            if args.graphsafe_counts
+            else None
+        )
         serial_levels, serial_codes = serial_fit_scalar_codebooks(
             values, level_count=levels, iterations=iterations
         )
@@ -224,6 +313,7 @@ def main() -> None:
                 "level_count": levels,
                 "iterations": iterations,
                 "fixed_level_counts_exact": counts_exact,
+                "count_primitive_exact": count_primitive_exact,
                 "outputs_finite": outputs_finite,
                 "centroid_max_abs": centroid_max_abs,
                 "code_mismatches": code_mismatches,
@@ -243,6 +333,7 @@ def main() -> None:
     )
     correctness_passed = all(
         row["fixed_level_counts_exact"]
+        and (row["count_primitive_exact"] is not False)
         and row["outputs_finite"]
         and row["centroid_max_abs"] <= 0.00015
         and row["code_mismatch_fraction"] <= 0.0001
