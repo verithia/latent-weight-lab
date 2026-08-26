@@ -151,7 +151,7 @@ def analyze_parameter(
             "minimum_basis_capture": float(bilateral_captures.min()),
             "maximum_basis_capture": float(bilateral_captures.max()),
             "total_stored_scalar_fraction_for_all_basis_vectors": (
-                bilateral_coordinates / size
+                available * bilateral_coordinates / size
             ),
         }
     )
