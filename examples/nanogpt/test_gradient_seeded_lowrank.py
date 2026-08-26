@@ -98,3 +98,43 @@ def test_gpt_uses_compact_factors_and_routes_them_to_adamw() -> None:
     }
     assert factor_ids
     assert factor_ids.issubset(adamw_ids)
+
+
+def test_gradient_seeded_checkpoint_reconstructs_procedural_seed_exactly() -> None:
+    config = GPTConfig(
+        block_size=8,
+        vocab_size=32,
+        n_layer=2,
+        n_head=4,
+        n_embd=16,
+        compact_mlp_gradient_seeded_rank=2,
+    )
+    torch.manual_seed(20260826)
+    source = GPT(config)
+    tokens = torch.arange(16).reshape(2, 8) % config.vocab_size
+    assert source.enable_compact_mlp_gradient_bootstrap() == 4
+    _, loss = source(tokens, tokens)
+    assert loss is not None
+    loss.backward()
+    source.finish_compact_mlp_gradient_bootstrap()
+    source.zero_grad(set_to_none=True)
+    with torch.no_grad():
+        for name, parameter in source.named_parameters():
+            if "gradient_seeded_left" in name:
+                parameter.normal_(mean=0.0, std=0.01)
+    source.eval()
+    expected, _ = source(tokens)
+    checkpoint = {
+        key: value.detach().clone() for key, value in source.state_dict().items()
+    }
+
+    torch.manual_seed(20260826)
+    restored = GPT(config)
+    restored.load_state_dict(checkpoint)
+    restored.eval()
+    actual, _ = restored(tokens)
+
+    torch.testing.assert_close(actual, expected, atol=0.0, rtol=0.0)
+    for name, module in restored.named_modules():
+        if isinstance(module, GradientSeededLowRankLinear):
+            assert f"{name}.weight" not in checkpoint
