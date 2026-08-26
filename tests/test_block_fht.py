@@ -245,6 +245,30 @@ def test_product_fht_closed_form_jvp_matches_autograd():
     torch.testing.assert_close(actual, reference, atol=1e-6, rtol=1e-5)
 
 
+def test_product_fht_explicit_coordinate_jvp_retains_anchor_gradient():
+    torch.manual_seed(21)
+    layer = ProductFHTLinear(
+        8,
+        4,
+        factors=3,
+        seed=108,
+        weight_std=0.04,
+    )
+    diagonal_direction = torch.randn_like(layer.product_log_diagonals)
+    output_direction = torch.randn_like(layer.product_output_log_gain)
+    action = layer._weight_jvp_at_factors(
+        layer.product_log_diagonals,
+        layer.product_output_log_gain,
+        diagonal_direction,
+        output_direction,
+    )
+    action.square().mean().backward()
+    assert layer.product_log_diagonals.grad is not None
+    assert torch.isfinite(layer.product_log_diagonals.grad).all()
+    assert layer.product_output_log_gain.grad is not None
+    assert torch.isfinite(layer.product_output_log_gain.grad).all()
+
+
 def test_product_fht_reuses_normalization_between_refreshes():
     torch.manual_seed(23)
     layer = ProductFHTLinear(

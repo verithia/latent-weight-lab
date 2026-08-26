@@ -1272,8 +1272,36 @@ class ProductFHTLinear(nn.Module):
         output_log_gain_direction: torch.Tensor,
     ) -> torch.Tensor:
         """Apply the exact product-chart Jacobian without double backward."""
-        log_diagonals = self.product_log_diagonals.detach()
-        output_log_gain = self.product_output_log_gain.detach()
+        return self._weight_jvp_at_factors(
+            self.product_log_diagonals.detach(),
+            self.product_output_log_gain.detach(),
+            log_diagonal_direction,
+            output_log_gain_direction,
+        )
+
+    def _weight_jvp_at_factors(
+        self,
+        log_diagonals: torch.Tensor,
+        output_log_gain: torch.Tensor,
+        log_diagonal_direction: torch.Tensor,
+        output_log_gain_direction: torch.Tensor,
+    ) -> torch.Tensor:
+        """Apply the exact JVP at explicit factor coordinates.
+
+        The production pullback uses detached live coordinates through
+        :meth:`_weight_jvp_from_factors`.  Offline tangent-orientation oracles
+        need the same closed-form product rule while retaining derivatives
+        with respect to the anchor coordinates, so the explicit-coordinate
+        implementation lives here rather than using a costly double backward.
+        """
+        if log_diagonals.shape != self.product_log_diagonals.shape:
+            raise ValueError("product-FHT log-diagonal shape mismatch")
+        if output_log_gain.shape != self.product_output_log_gain.shape:
+            raise ValueError("product-FHT output-gain shape mismatch")
+        if log_diagonal_direction.shape != log_diagonals.shape:
+            raise ValueError("product-FHT log-diagonal direction mismatch")
+        if output_log_gain_direction.shape != output_log_gain.shape:
+            raise ValueError("product-FHT output-gain direction mismatch")
         dtype = log_diagonals.dtype
         device = log_diagonals.device
         matrix = torch.eye(
