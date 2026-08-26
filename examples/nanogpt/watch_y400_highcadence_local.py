@@ -179,11 +179,11 @@ def action_prompt(kind: str) -> str:
         )
     if kind == "success":
         return (
-            "Action required: verify terminal checkpoint, paired-state and exact "
-            "optimizer-probe inventories, config/provenance hashes, fixed validation "
+            "Action required: verify terminal checkpoint, registered scientific "
+            "probe inventory and fields, config/provenance hashes, fixed validation "
             "CE, GPU/performance data, and storage accounting; seal the active note, "
-            "run the frozen gradient/Muon span analysis, then fit only the causally "
-            "authorized held-out transform families. Do not merely acknowledge."
+            "run the frozen preregistered analysis, then continue only along the "
+            "causally authorized compact-MLP branch. Do not merely acknowledge."
         )
     return (
         "Action required: inspect remote status, log, GPU, output inventory, and "
@@ -212,7 +212,7 @@ def main() -> None:
     args = parser.parse_args()
     if args.self_test:
         assert "Action required:" in action_prompt("progress")
-        assert "optimizer-probe inventories" in action_prompt("success")
+        assert "scientific probe inventory" in action_prompt("success")
         print("self-test passed")
         return
     if args.pgid < 1 or args.max_iters < 1 or args.interval < 15:
