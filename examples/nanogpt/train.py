@@ -2189,6 +2189,7 @@ def main() -> None:
                 model_config=gpt_config,
                 run_identity=run_identity,
                 execution_provenance=trajectory_execution_provenance,
+                fields=args.optimizer_probe_fields,
             )
             print(
                 f"optimizer probe step={iter_num} path={probe_path}",

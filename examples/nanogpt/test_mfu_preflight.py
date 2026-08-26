@@ -45,6 +45,33 @@ class MfuPreflightTest(unittest.TestCase):
         self.assertEqual(probe["optimizer_probe_steps"], [0, 15, 30])
         self.assertEqual(probe["perf_warmup_iters"], 0)
 
+    def test_optimizer_probe_only_diagnostic_io_needs_no_snapshots(self) -> None:
+        source = {
+            "registered_resume_determinism_required": True,
+            "save_checkpoint": True,
+            "checkpoint_history": False,
+            "lr_decay_iters": 100,
+            "trajectory_snapshot_interval": 0,
+            "optimizer_probe_steps": [0, 2, 5],
+            "optimizer_probe_fields": [
+                "weight_before_step",
+                "gradient_after_clip",
+            ],
+        }
+        probe = make_preflight_config(
+            source,
+            Path("/tmp/probe"),
+            1,
+            4,
+            include_diagnostic_io=True,
+        )
+        self.assertEqual(probe["trajectory_snapshot_interval"], 0)
+        self.assertEqual(probe["optimizer_probe_steps"], [0, 2, 5])
+        self.assertEqual(
+            probe["optimizer_probe_fields"],
+            ["weight_before_step", "gradient_after_clip"],
+        )
+
     def test_snapshot_elapsed_parser(self) -> None:
         text = "\n".join(
             [

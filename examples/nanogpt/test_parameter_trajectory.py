@@ -234,6 +234,44 @@ class ParameterTrajectoryTest(unittest.TestCase):
             )
             self.assertFalse(list(path.parent.glob("*.part")))
 
+    def test_optimizer_probe_can_store_weight_and_gradient_only(self) -> None:
+        model = TinyModel()
+        parameter = model.transformer.h[0].mlp.c_proj.weight
+        optimizer = Muon(
+            [parameter],
+            lr=0.02,
+            momentum=0.9,
+            weight_decay=0.1,
+            ns_steps=3,
+        )
+        parameter.grad = torch.full_like(parameter, 0.25)
+        with tempfile.TemporaryDirectory() as raw:
+            path = write_optimizer_probe(
+                model=model,
+                optimizer=optimizer,
+                out_dir=Path(raw),
+                step=0,
+                targets=["mlp.c_proj"],
+                dtype="float16",
+                layers=[0],
+                model_config=config_as_dataclass(),
+                run_identity={"config_sha256": "a" * 64},
+                execution_provenance=None,
+                fields=["weight_before_step", "gradient_after_clip"],
+            )
+            payload = torch.load(path, map_location="cpu", weights_only=False)
+            self.assertEqual(
+                payload["fields"],
+                ["weight_before_step", "gradient_after_clip"],
+            )
+            stored = payload["parameters"][
+                "transformer.h.0.mlp.c_proj.weight"
+            ]
+            self.assertEqual(
+                set(stored), {"weight_before_step", "gradient_after_clip"}
+            )
+            self.assertEqual(stored["weight_before_step"].dtype, torch.float16)
+
     def test_validation_rejects_bad_optimizer_probe(self) -> None:
         base = dict(
             trajectory_snapshot_interval=0,
@@ -243,6 +281,7 @@ class ParameterTrajectoryTest(unittest.TestCase):
             optimizer_probe_targets=["mlp.c_proj"],
             optimizer_probe_layers=[0],
             optimizer_probe_dtype="float32",
+            optimizer_probe_fields=None,
         )
         with self.assertRaisesRegex(ValueError, "sorted unique"):
             validate_arguments(

@@ -17,6 +17,14 @@ import torch
 
 SCHEMA_VERSION = "nanogpt_parameter_trajectory_v1"
 OPTIMIZER_PROBE_SCHEMA_VERSION = "nanogpt_optimizer_probe_v1"
+OPTIMIZER_PROBE_FIELDS = (
+    "weight_before_step",
+    "gradient_after_clip",
+    "momentum_buffer_before_step",
+    "combined_momentum_update",
+    "polar_update",
+    "applied_direction_per_lr",
+)
 DTYPES = {
     "float32": torch.float32,
     "bfloat16": torch.bfloat16,
@@ -200,6 +208,7 @@ def write_optimizer_probe(
     model_config: Any,
     run_identity: dict[str, Any],
     execution_provenance: dict[str, Any] | None,
+    fields: list[str] | None = None,
 ) -> Path:
     """Atomically capture pre-step gradients and exact Muon state directions."""
     from examples.nanogpt.muon import Muon, zeropower_via_newtonschulz5
@@ -225,6 +234,15 @@ def write_optimizer_probe(
         raise ValueError(f"unsupported optimizer probe dtype: {dtype}")
     if not targets or not layers:
         raise ValueError("optimizer probe targets and layers must be non-empty")
+    selected_fields = tuple(OPTIMIZER_PROBE_FIELDS if fields is None else fields)
+    if (
+        not selected_fields
+        or len(set(selected_fields)) != len(selected_fields)
+        or any(field not in OPTIMIZER_PROBE_FIELDS for field in selected_fields)
+    ):
+        raise ValueError(
+            "optimizer probe fields must be unique supported field names"
+        )
 
     suboptimizers = getattr(optimizer, "optimizers", [optimizer])
     owners: dict[int, tuple[Muon, dict[str, Any]]] = {}
@@ -253,42 +271,82 @@ def write_optimizer_probe(
         if parameter.grad is None:
             raise ValueError(f"optimizer probe parameter has no gradient: {name}")
         gradient = parameter.grad.detach().float()
-        state = muon.state.get(parameter, {})
-        buffer = state.get("momentum_buffer")
-        if buffer is None:
-            buffer = torch.zeros_like(gradient)
-        else:
-            buffer = buffer.detach().float()
         momentum = float(group["momentum"])
         ns_steps = int(group["ns_steps"])
         weight_decay = float(group["weight_decay"])
-        new_buffer = momentum * buffer + gradient
-        combined = gradient + momentum * new_buffer
-        polar = zeropower_via_newtonschulz5(
-            combined, steps=ns_steps
-        ).float()
-        scale = max(
-            1.0,
-            polar.shape[0] / max(1, polar.numel() / polar.shape[0]),
-        ) ** 0.5
-        applied_direction = (
-            -weight_decay * parameter.detach().float()
-            - scale * polar
+        need_buffer = any(
+            field
+            in {
+                "momentum_buffer_before_step",
+                "combined_momentum_update",
+                "polar_update",
+                "applied_direction_per_lr",
+            }
+            for field in selected_fields
         )
+        buffer: torch.Tensor | None = None
+        combined: torch.Tensor | None = None
+        polar: torch.Tensor | None = None
+        scale: float | None = None
+        applied_direction: torch.Tensor | None = None
+        if need_buffer:
+            state = muon.state.get(parameter, {})
+            stored_buffer = state.get("momentum_buffer")
+            if stored_buffer is None:
+                buffer = torch.zeros_like(gradient)
+            else:
+                buffer = stored_buffer.detach().float()
+        if any(
+            field
+            in {
+                "combined_momentum_update",
+                "polar_update",
+                "applied_direction_per_lr",
+            }
+            for field in selected_fields
+        ):
+            assert buffer is not None
+            new_buffer = momentum * buffer + gradient
+            combined = gradient + momentum * new_buffer
+        if any(
+            field in {"polar_update", "applied_direction_per_lr"}
+            for field in selected_fields
+        ):
+            assert combined is not None
+            polar = zeropower_via_newtonschulz5(
+                combined, steps=ns_steps
+            ).float()
+            scale = max(
+                1.0,
+                polar.shape[0] / max(1, polar.numel() / polar.shape[0]),
+            ) ** 0.5
+        if "applied_direction_per_lr" in selected_fields:
+            assert polar is not None and scale is not None
+            applied_direction = (
+                -weight_decay * parameter.detach().float()
+                - scale * polar
+            )
 
         def cpu(value: torch.Tensor) -> torch.Tensor:
             return value.to(
                 device="cpu", dtype=storage_dtype
             ).contiguous()
 
-        tensors[name] = {
-            "weight_before_step": cpu(parameter.detach()),
-            "gradient_after_clip": cpu(gradient),
-            "momentum_buffer_before_step": cpu(buffer),
-            "combined_momentum_update": cpu(combined),
-            "polar_update": cpu(polar),
-            "applied_direction_per_lr": cpu(applied_direction),
+        available = {
+            "weight_before_step": parameter.detach(),
+            "gradient_after_clip": gradient,
+            "momentum_buffer_before_step": buffer,
+            "combined_momentum_update": combined,
+            "polar_update": polar,
+            "applied_direction_per_lr": applied_direction,
         }
+        tensors[name] = {
+            field: cpu(available[field])
+            for field in selected_fields
+            if available[field] is not None
+        }
+        if set(tensors[name]) != set(selected_fields):
+            raise RuntimeError("optimizer probe did not construct every requested field")
         hyperparameters[name] = {
             "lr": float(group["lr"]),
             "momentum": momentum,
@@ -315,6 +373,7 @@ def write_optimizer_probe(
         "targets": list(targets),
         "layers": list(layers),
         "storage_dtype": dtype,
+        "fields": list(selected_fields),
         "model_config": asdict(model_config),
         "run_identity": run_identity,
         "run_identity_sha256": run_identity_sha256,
@@ -378,6 +437,16 @@ def add_arguments(parser: argparse.ArgumentParser) -> None:
         "--optimizer-probe-dtype",
         choices=sorted(DTYPES),
         default="float32",
+    )
+    parser.add_argument(
+        "--optimizer-probe-fields",
+        nargs="+",
+        choices=OPTIMIZER_PROBE_FIELDS,
+        default=None,
+        help=(
+            "optional stored-field subset; defaults to the complete exact "
+            "Muon pre-step probe"
+        ),
     )
 
 
@@ -449,4 +518,14 @@ def validate_arguments(args: argparse.Namespace) -> None:
             raise ValueError(
                 "--optimizer-probe-layers must contain unique non-negative "
                 "integers"
+            )
+        probe_fields = getattr(args, "optimizer_probe_fields", None)
+        if probe_fields is not None and (
+            not isinstance(probe_fields, list)
+            or not probe_fields
+            or len(set(probe_fields)) != len(probe_fields)
+            or any(field not in OPTIMIZER_PROBE_FIELDS for field in probe_fields)
+        ):
+            raise ValueError(
+                "--optimizer-probe-fields must contain unique supported fields"
             )

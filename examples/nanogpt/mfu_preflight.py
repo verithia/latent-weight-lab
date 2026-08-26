@@ -254,7 +254,10 @@ def main() -> None:
                     "I/O-inclusive preflight emitted only "
                     f"{len(rows)} perf rows; expected {expected_rows}"
                 )
-            if not snapshot_seconds:
+            if (
+                int(source.get("trajectory_snapshot_interval", 0)) > 0
+                and not snapshot_seconds
+            ):
                 raise RuntimeError(
                     "I/O-inclusive preflight emitted no parameter-snapshot "
                     "timings"
