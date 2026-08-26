@@ -265,7 +265,10 @@ def main() -> None:
             scores.append(
                 {
                     "parameter": parameter,
-                    "anchor": "gradient_seeded_initial",
+                    # ``summarize`` uses the literal identity label for the
+                    # frozen control.  Here identity means the immutable
+                    # gradient-seeded chart state, before any causal motion.
+                    "anchor": "identity",
                     "probe_index": index,
                     "step": step,
                     "split": split_name(step, args.discovery_stop, args.validation_stop),
