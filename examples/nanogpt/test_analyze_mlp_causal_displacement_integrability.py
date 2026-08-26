@@ -4,6 +4,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_causal_displacement_integrability import (
     best_rank_capture,
+    rank_capture_from_singular_energy,
     right_projection_capture,
     summarize,
 )
@@ -20,6 +21,8 @@ def test_best_rank_capture_matches_diagonal_energy() -> None:
     matrix = torch.diag(torch.tensor([4.0, 3.0, 0.0]))
     assert abs(best_rank_capture(matrix, 1) - 16.0 / 25.0) < 1e-7
     assert abs(best_rank_capture(matrix, 2) - 1.0) < 1e-7
+    energy = torch.tensor([16.0, 9.0, 0.0])
+    assert abs(rank_capture_from_singular_energy(energy, 1) - 16.0 / 25.0) < 1e-7
 
 
 def test_summary_handles_terminal_increment() -> None:

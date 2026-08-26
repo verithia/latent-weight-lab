@@ -36,6 +36,11 @@ def right_projection_capture(matrix: torch.Tensor, basis: torch.Tensor) -> float
 def best_rank_capture(matrix: torch.Tensor, rank: int) -> float:
     """Exact matrix-SVD energy ceiling at ``rank``."""
     values = torch.linalg.svdvals(matrix).double().square()
+    return rank_capture_from_singular_energy(values, rank)
+
+
+def rank_capture_from_singular_energy(values: torch.Tensor, rank: int) -> float:
+    """Energy fraction from already-computed ordered squared singular values."""
     return float(values[:rank].sum() / values.sum().clamp_min(1e-30))
 
 
@@ -128,13 +133,22 @@ def main() -> None:
                 if index + 1 < len(steps)
                 else None
             )
+            basis_max = fit_union_basis(
+                right,
+                singular,
+                range(index - args.history_probes, index),
+                min(max(union_ranks), args.history_probes * args.factor_rank),
+            )
+            displacement_singular_energy = (
+                torch.linalg.svdvals(displacement).double().square()
+            )
+            increment_singular_energy = (
+                torch.linalg.svdvals(increment).double().square()
+                if increment is not None
+                else None
+            )
             for rank in union_ranks:
-                basis = fit_union_basis(
-                    right,
-                    singular,
-                    range(index - args.history_probes, index),
-                    min(rank, args.history_probes * args.factor_rank),
-                )
+                basis = basis_max[:, : min(rank, basis_max.shape[1])]
                 row: dict[str, Any] = {
                     "parameter": parameter,
                     "probe_index": index,
@@ -154,8 +168,8 @@ def main() -> None:
                     "displacement_capture": right_projection_capture(
                         displacement, basis
                     ),
-                    "displacement_oracle_rank_capture": best_rank_capture(
-                        displacement, rank
+                    "displacement_oracle_rank_capture": rank_capture_from_singular_energy(
+                        displacement_singular_energy, rank
                     ),
                     "next_increment_capture": "",
                     "next_increment_oracle_rank_capture": "",
@@ -164,8 +178,8 @@ def main() -> None:
                     row["next_increment_capture"] = right_projection_capture(
                         increment, basis
                     )
-                    row["next_increment_oracle_rank_capture"] = best_rank_capture(
-                        increment, rank
+                    row["next_increment_oracle_rank_capture"] = rank_capture_from_singular_energy(
+                        increment_singular_energy, rank
                     )
                 rows.append(row)
         del gradients, weights, right, singular
