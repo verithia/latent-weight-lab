@@ -180,7 +180,7 @@ def analyze_parameter(
                     "minimum_basis_capture": None,
                     "maximum_basis_capture": None,
                     "total_stored_scalar_fraction_for_all_basis_vectors": (
-                        coordinates / size
+                        available * coordinates / size
                     ),
                 }
             )
