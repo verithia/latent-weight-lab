@@ -60,6 +60,36 @@ def natural_pullback_action(
     under the registered diagonal metric and rotating the chart so that this
     fixed action better matches the target.
     """
+    diagonal_direction, output_direction = natural_pullback_coordinates(
+        module, target
+    )
+    log_diagonals = module.product_log_diagonals
+    output_log_gain = module.product_output_log_gain
+    if differentiable_anchor:
+        action = module._weight_jvp_at_factors(
+            log_diagonals,
+            output_log_gain,
+            diagonal_direction,
+            output_direction,
+        )
+    else:
+        action = module._weight_jvp_from_factors(
+            diagonal_direction,
+            output_direction,
+        )
+    target_float = target.float()
+    action_float = action.float()
+    cosine = torch.sum(target_float * action_float) / (
+        target_float.norm() * action_float.norm()
+    ).clamp_min(1e-30)
+    return action, cosine, cosine.square()
+
+
+def natural_pullback_coordinates(
+    module: ProductFHTLinear,
+    target: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Return the detached approximate-natural coordinate pullback."""
     log_diagonals = module.product_log_diagonals
     output_log_gain = module.product_output_log_gain
     weight = module._weight_from_factors(log_diagonals, output_log_gain)
@@ -83,24 +113,7 @@ def natural_pullback_action(
     ).detach()
     row_metric = weight.detach().float().square().sum(dim=1).clamp_min(1e-12)
     output_direction = (output_pullback / row_metric).detach()
-    if differentiable_anchor:
-        action = module._weight_jvp_at_factors(
-            log_diagonals,
-            output_log_gain,
-            diagonal_direction,
-            output_direction,
-        )
-    else:
-        action = module._weight_jvp_from_factors(
-            diagonal_direction,
-            output_direction,
-        )
-    target_float = target.float()
-    action_float = action.float()
-    cosine = torch.sum(target_float * action_float) / (
-        target_float.norm() * action_float.norm()
-    ).clamp_min(1e-30)
-    return action, cosine, cosine.square()
+    return diagonal_direction, output_direction
 
 
 def deterministic_mixture(
@@ -217,7 +230,11 @@ def evaluate_anchor(
 
 def summarize(rows: list[dict[str, Any]], *, parameter: str) -> list[dict[str, Any]]:
     output: list[dict[str, Any]] = []
-    for anchor in ("identity", "fitted"):
+    anchors = sorted(
+        {str(row["anchor"]) for row in rows},
+        key=lambda value: (value != "identity", value),
+    )
+    for anchor in anchors:
         for split in ("discovery", "validation", "test"):
             selected = [
                 row
