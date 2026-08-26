@@ -79,7 +79,9 @@ def weighted_adaptive_svd_capture(
                 / singular_values.double().square().sum().clamp_min(1e-30)
             )
         )
-    values = torch.tensor(captures, dtype=torch.float64)
+    values = torch.tensor(
+        captures, dtype=torch.float64, device=eigenvalues.device
+    )
     weights = eigenvalues.double() / eigenvalues.double().sum().clamp_min(1e-30)
     return float((weights * values).sum()), float(values.min()), float(values.max())
 
@@ -131,6 +133,7 @@ def analyze_parameter(
             for matrix in basis_matrices
         ],
         dtype=torch.float64,
+        device=eigenvalues.device,
     )
     normalized_eigenvalues = eigenvalues.double() / eigenvalues.double().sum()
     bilateral_weighted = float(
