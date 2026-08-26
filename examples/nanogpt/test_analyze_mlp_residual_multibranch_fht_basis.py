@@ -4,6 +4,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_residual_multibranch_fht_basis import (
     MultiBranchProductFHT,
+    TARGET_FIT_OFFSETS,
     coordinate_vjp,
     parse_topologies,
 )
@@ -32,6 +33,10 @@ def test_equal_total_depth_has_equal_state() -> None:
         )
         counts.append(module.trainable_scalar_count)
     assert counts == [30, 30, 30]
+
+
+def test_target_fit_offsets_are_independent_of_target_filtering() -> None:
+    assert TARGET_FIT_OFFSETS == {"mlp.c_fc": 0, "mlp.c_proj": 1}
 
 
 def test_exact_jvp_matches_finite_difference() -> None:

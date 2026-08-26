@@ -38,6 +38,7 @@ from latent_weight_lab.block_fht import (
 
 
 TARGET_SEED_OFFSETS = {"mlp.c_fc": 2, "mlp.c_proj": 3}
+TARGET_FIT_OFFSETS = {"mlp.c_fc": 0, "mlp.c_proj": 1}
 
 
 def git_commit(root: Path) -> str | None:
@@ -462,7 +463,7 @@ def main() -> None:
     anchors: dict[str, Any] = {}
     retained_fractions: dict[str, float] = {}
     accounting: dict[str, Any] = {}
-    for target_index, (parameter, tensors) in enumerate(sorted(values.items())):
+    for parameter, tensors in sorted(values.items()):
         match = PARAMETER_PATTERN.match(parameter)
         if match is None:
             raise ValueError(f"unsupported parameter {parameter}")
@@ -505,7 +506,11 @@ def main() -> None:
                 learning_rate=args.fit_lr,
                 mixture_width=args.mixture_width,
                 bound=args.anchor_bound,
-                seed=args.fit_seed + target_index * 100 + topology_index,
+                seed=(
+                    args.fit_seed
+                    + TARGET_FIT_OFFSETS[target_name]
+                    + topology_index * 100
+                ),
             )
             rows, summary = evaluate_basis(
                 module,
