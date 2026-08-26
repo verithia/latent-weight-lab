@@ -393,24 +393,23 @@ def main() -> None:
                     window_size=args.local_window_size,
                 )
             )
-            if field == "exact_applied_direction":
-                adaptive_rows.extend(
-                    adaptive_svd_rows(
-                        directions,
-                        parameter=parameter,
-                        field=field,
-                        steps=steps,
-                        ratios=ratios,
-                    )
+            adaptive_rows.extend(
+                adaptive_svd_rows(
+                    directions,
+                    parameter=parameter,
+                    field=field,
+                    steps=steps,
+                    ratios=ratios,
                 )
-                bilateral_output.extend(
-                    bilateral_rows(
-                        weight_rows,
-                        directions,
-                        parameter=parameter,
-                        field=field,
-                    )
+            )
+            bilateral_output.extend(
+                bilateral_rows(
+                    weight_rows,
+                    directions,
+                    parameter=parameter,
+                    field=field,
                 )
+            )
             del directions, dictionaries
             if str(args.device).startswith("cuda"):
                 torch.cuda.empty_cache()
