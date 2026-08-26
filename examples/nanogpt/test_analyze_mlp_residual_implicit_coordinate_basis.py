@@ -6,6 +6,7 @@ from examples.nanogpt.analyze_mlp_residual_implicit_coordinate_basis import (
     axis_features,
     decoder_scalar_count,
     exact_subspace_capture,
+    initialization_features,
     maximum_width,
 )
 
@@ -15,6 +16,14 @@ def test_axis_features_are_deterministic_and_hash_free() -> None:
     second = axis_features(8, maximum_frequencies=3, device="cpu")
     assert torch.equal(first, second)
     assert first.shape == (8, 10)
+
+
+def test_initialization_features_are_deterministic_and_compact() -> None:
+    weight = torch.linspace(-0.1, 0.1, 12)
+    first = initialization_features(weight, frequencies=3)
+    second = initialization_features(weight, frequencies=3)
+    assert torch.equal(first, second)
+    assert first.shape == (12, 11)
 
 
 def test_maximum_width_respects_complete_budget() -> None:

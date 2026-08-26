@@ -106,10 +106,36 @@ def coordinate_batch(
     columns: int,
     row_features: torch.Tensor,
     column_features: torch.Tensor,
+    extra_features: torch.Tensor | None = None,
 ) -> torch.Tensor:
     rows = torch.div(flat_indices, columns, rounding_mode="floor")
     cols = flat_indices.remainder(columns)
-    return torch.cat((row_features[rows], column_features[cols]), dim=1)
+    pieces = [row_features[rows], column_features[cols]]
+    if extra_features is not None:
+        pieces.append(extra_features[flat_indices])
+    return torch.cat(pieces, dim=1)
+
+
+def initialization_features(
+    initial_weight: torch.Tensor, *, frequencies: int = 4
+) -> torch.Tensor:
+    normalized = initial_weight.float() / initial_weight.float().square().mean().sqrt().clamp_min(1e-12)
+    clipped = normalized.clamp(-4.0, 4.0) / 4.0
+    polynomial = torch.stack(
+        (
+            clipped,
+            clipped.square(),
+            clipped.pow(3),
+            clipped.sign(),
+            clipped.abs(),
+        ),
+        dim=1,
+    )
+    multipliers = 2.0 ** torch.arange(
+        frequencies, device=initial_weight.device, dtype=torch.float32
+    )
+    angles = math.pi * clipped.unsqueeze(1) * multipliers.unsqueeze(0)
+    return torch.cat((polynomial, angles.sin(), angles.cos()), dim=1)
 
 
 def exact_subspace_capture(
@@ -145,6 +171,7 @@ def train_decoder(
     batch_size: int,
     learning_rate: float,
     seed: int,
+    extra_features: torch.Tensor | None = None,
 ) -> list[dict[str, float]]:
     generator = torch.Generator(device=target.device).manual_seed(seed)
     optimizer = torch.optim.AdamW(
@@ -164,6 +191,7 @@ def train_decoder(
             columns=columns,
             row_features=row_features,
             column_features=column_features,
+            extra_features=extra_features,
         )
         prediction = decoder(features)
         loss = (prediction - target[indices]).square().mean()
@@ -185,6 +213,7 @@ def evaluate_streaming(
     row_features: torch.Tensor,
     column_features: torch.Tensor,
     chunk_size: int,
+    extra_features: torch.Tensor | None = None,
 ) -> dict[str, Any]:
     generated_parts: list[torch.Tensor] = []
     with torch.no_grad():
@@ -199,6 +228,7 @@ def evaluate_streaming(
                 columns=columns,
                 row_features=row_features,
                 column_features=column_features,
+                extra_features=extra_features,
             )
             generated_parts.append(decoder(features))
     generated = torch.cat(generated_parts)
@@ -226,6 +256,8 @@ def main() -> None:
     parser.add_argument("--basis-rank", type=int, default=16)
     parser.add_argument("--ratios", default="0.001,0.0025,0.005,0.01")
     parser.add_argument("--maximum-frequencies", type=int, default=10)
+    parser.add_argument("--include-initial-weight-features", action="store_true")
+    parser.add_argument("--initial-weight-frequencies", type=int, default=4)
     parser.add_argument("--updates", type=int, default=512)
     parser.add_argument("--batch-size", type=int, default=65536)
     parser.add_argument("--learning-rate", type=float, default=0.003)
@@ -277,7 +309,16 @@ def main() -> None:
             maximum_frequencies=args.maximum_frequencies,
             device=args.device,
         )
+        extra_features = (
+            initialization_features(
+                positions[0].flatten(), frequencies=args.initial_weight_frequencies
+            )
+            if args.include_initial_weight_features
+            else None
+        )
         input_features = row_features.shape[1] + column_features.shape[1]
+        if extra_features is not None:
+            input_features += extra_features.shape[1]
         parameter_decoders: dict[str, Any] = {}
         for ratio_index, ratio in enumerate(ratios):
             budget = int(dense_scalars * ratio)
@@ -296,6 +337,7 @@ def main() -> None:
                 batch_size=args.batch_size,
                 learning_rate=args.learning_rate,
                 seed=args.seed + parameter_index * 100 + ratio_index,
+                extra_features=extra_features,
             )
             evaluation = evaluate_streaming(
                 decoder,
@@ -306,6 +348,7 @@ def main() -> None:
                 row_features=row_features,
                 column_features=column_features,
                 chunk_size=args.evaluation_chunk,
+                extra_features=extra_features,
             )
             rows_out.append(
                 {
@@ -348,7 +391,7 @@ def main() -> None:
             }
             del decoder
         saved_decoders[parameter] = parameter_decoders
-        del positions, basis, basis_targets, weighted_targets
+        del positions, basis, basis_targets, weighted_targets, extra_features
         if str(args.device).startswith("cuda"):
             torch.cuda.empty_cache()
 
@@ -361,7 +404,11 @@ def main() -> None:
     torch.save(saved_decoders, decoders_path)
     script = Path(__file__).resolve()
     metadata = {
-        "schema_version": "nanogpt_mlp_residual_implicit_coordinate_basis_v1",
+        "schema_version": (
+            "nanogpt_mlp_residual_w0_conditioned_basis_v1"
+            if args.include_initial_weight_features
+            else "nanogpt_mlp_residual_implicit_coordinate_basis_v1"
+        ),
         "steps": steps,
         "snapshot_metadata": snapshot_metadata,
         "layer": args.layer,
@@ -369,8 +416,17 @@ def main() -> None:
         "basis_rank": args.basis_rank,
         "retained_residual_energy_fraction": retained_fractions,
         "ratios": ratios,
-        "features": "normalized coordinate + binary digits + dyadic sine/cosine",
+        "features": (
+            "normalized coordinate + binary digits + dyadic sine/cosine"
+            + (
+                " + procedural W0 value/polynomial/sign/dyadic features"
+                if args.include_initial_weight_features
+                else ""
+            )
+        ),
         "maximum_frequencies": args.maximum_frequencies,
+        "include_initial_weight_features": args.include_initial_weight_features,
+        "initial_weight_frequencies": args.initial_weight_frequencies,
         "training": {
             "updates": args.updates,
             "batch_size": args.batch_size,
@@ -380,7 +436,11 @@ def main() -> None:
         "state_contract": {
             "stored": "coordinate-MLP parameters plus one current channel-mixing vector",
             "not_stored": "no residual PC, per-index embedding, hash table, ambient atom, dense shadow, or per-weight code",
-            "procedural": "row/column normalization, bits, and dyadic Fourier features",
+            "procedural": (
+                "row/column normalization, bits, dyadic Fourier features, and exact seed-regenerated W0"
+                if args.include_initial_weight_features
+                else "row/column normalization, bits, and dyadic Fourier features"
+            ),
         },
         "analysis_execution": {
             "git_commit": git_commit(script.parents[2]),
