@@ -26,6 +26,7 @@ def test_normalized_coordinate_step_obeys_trust_cap() -> None:
         torch.randn(4, 8),
         learning_rate=0.5,
         coordinate_cap=0.01,
+        norm_reference=torch.randn(4, 8) * 100.0,
     )
     assert diagnostics["applied_maximum_coordinate_update"] <= 0.0100001
     assert not torch.equal(before, module.product_log_diagonals)

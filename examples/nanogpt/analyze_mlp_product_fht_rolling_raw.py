@@ -39,6 +39,7 @@ def normalized_coordinate_step(
     *,
     learning_rate: float,
     coordinate_cap: float,
+    norm_reference: torch.Tensor | None = None,
 ) -> dict[str, float]:
     """Apply one normalized raw-gradient descent step to compact coordinates."""
     diagonal_direction, output_direction = natural_pullback_coordinates(
@@ -47,7 +48,9 @@ def normalized_coordinate_step(
     action = module._weight_jvp_from_factors(
         diagonal_direction, output_direction
     )
-    target_norm = target_descent.float().norm().clamp_min(1e-30)
+    target_norm = (
+        target_descent if norm_reference is None else norm_reference
+    ).float().norm().clamp_min(1e-30)
     action_norm = action.float().norm().clamp_min(1e-30)
     normalization_scale = float(target_norm / action_norm)
     diagonal_direction = diagonal_direction * normalization_scale
@@ -101,6 +104,11 @@ def main() -> None:
     parser.add_argument("--discovery-stop", type=int, default=119)
     parser.add_argument("--validation-stop", type=int, default=179)
     parser.add_argument("--coordinate-cap", type=float, default=0.02)
+    parser.add_argument(
+        "--norm-reference-field",
+        choices=("raw_gradient_descent", "exact_applied_direction"),
+        default="exact_applied_direction",
+    )
     parser.add_argument("--device", default="cuda")
     args = parser.parse_args()
     started = time.time()
@@ -124,6 +132,9 @@ def main() -> None:
         gradients = torch.stack(values[parameter]["raw_gradient_descent"]).to(
             args.device, dtype=torch.float32
         )
+        norm_references = torch.stack(
+            values[parameter][args.norm_reference_field]
+        ).to(args.device, dtype=torch.float32)
         out_features, in_features = gradients.shape[1:]
         weight_std = (
             0.02
@@ -198,6 +209,7 @@ def main() -> None:
                     gradient,
                     learning_rate=learning_rate,
                     coordinate_cap=args.coordinate_cap,
+                    norm_reference=norm_references[probe_index],
                 )
                 interval_rows.append(diagnostics)
                 update_count += 1
@@ -247,7 +259,7 @@ def main() -> None:
             "coordinate_fraction": module.trainable_scalar_count
             / (out_features * in_features),
         }
-        del gradients, module
+        del gradients, norm_references, module
         if torch.cuda.is_available():
             torch.cuda.empty_cache()
     scores_path = args.output / "probe_scores.csv"
@@ -259,12 +271,13 @@ def main() -> None:
     write_csv(updates_path, all_updates)
     torch.save(coordinates, coordinates_path)
     metadata = {
-        "schema_version": "nanogpt_mlp_product_fht_rolling_raw_v1",
+        "schema_version": "nanogpt_mlp_product_fht_rolling_raw_v2",
         "method": "causal zero-order-hold direct-raw ProductFHT coordinate replay",
         "layer": args.layer,
         "targets": sorted(targets),
         "factors": args.factors,
         "coordinate_cap": args.coordinate_cap,
+        "norm_reference_field": args.norm_reference_field,
         "steps": steps,
         "accounting": accounting,
         "final_decoded_matrix_ranks": final_ranks,
@@ -283,6 +296,7 @@ def main() -> None:
         "limitations": [
             "The replay uses gradients sampled on the dense Muon path, not gradients from a native compact-model trajectory.",
             "Missing steps use zero-order-held gradients and the LR recorded at the preceding probe.",
+            "The exact-applied norm reference preserves dense-Muon step scale while retaining raw-gradient orientation.",
             "No language-model parameter, checkpoint, or optimizer state is updated.",
         ],
     }
