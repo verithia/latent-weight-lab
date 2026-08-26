@@ -3,9 +3,11 @@ from __future__ import annotations
 import torch
 
 from examples.nanogpt.analyze_mlp_nonlinear_bilateral_kernel import (
+    MultiatomNonlinearBilateralKernel,
     NonlinearBilateralKernel,
     apply_normalized_step,
     gradient_seeded_factors,
+    gradient_seeded_multiatom_factors,
     project_target,
 )
 
@@ -62,3 +64,20 @@ def test_normalized_step_respects_coordinate_cap() -> None:
     )
     assert diagnostics["cap_scale"] < 1.0
     assert diagnostics["applied_maximum_coordinate_update"] <= 0.02000001
+
+
+def test_multiatom_chart_preserves_budget_and_gains_rank() -> None:
+    torch.manual_seed(6)
+    gradient = torch.randn(12, 9)
+    left, right = gradient_seeded_multiatom_factors(
+        gradient, atoms=3, rank_per_atom=1, product_rms=0.5
+    )
+    module = MultiatomNonlinearBilateralKernel(
+        left, right, output_scale=0.02 / (3**0.5)
+    )
+    assert module.coordinate_count == 3 * (12 + 9)
+    torch.testing.assert_close(module(), torch.zeros_like(gradient))
+    with torch.no_grad():
+        module.left.add_(torch.randn_like(module.left), alpha=0.2)
+        module.right.add_(torch.randn_like(module.right), alpha=0.2)
+    assert torch.linalg.matrix_rank(module()).item() == 9

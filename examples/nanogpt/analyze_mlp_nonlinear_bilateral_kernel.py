@@ -54,6 +54,41 @@ class NonlinearBilateralKernel(torch.nn.Module):
         return self.left.numel() + self.right.numel()
 
 
+class MultiatomNonlinearBilateralKernel(torch.nn.Module):
+    """A sum of independently gated rank-one sine-kernel atoms."""
+
+    def __init__(
+        self,
+        left: torch.Tensor,
+        right: torch.Tensor,
+        *,
+        output_scale: float,
+    ) -> None:
+        super().__init__()
+        if left.ndim != 3 or right.ndim != 3:
+            raise ValueError("multiatom left/right must be three-dimensional")
+        if left.shape[0] != right.shape[0] or left.shape[2] != right.shape[2]:
+            raise ValueError("multiatom left/right must have matched atom/rank axes")
+        self.left = torch.nn.Parameter(left.detach().clone())
+        self.right = torch.nn.Parameter(right.detach().clone())
+        self.register_buffer("initial_left", left.detach().clone())
+        self.register_buffer("initial_right", right.detach().clone())
+        self.output_scale = float(output_scale)
+
+    @staticmethod
+    def products(left: torch.Tensor, right: torch.Tensor) -> torch.Tensor:
+        return torch.einsum("hmr,hnr->hmn", left, right)
+
+    def forward(self) -> torch.Tensor:
+        current = self.products(self.left, self.right)
+        initial = self.products(self.initial_left, self.initial_right)
+        return self.output_scale * (current.sin() - initial.sin()).sum(dim=0)
+
+    @property
+    def coordinate_count(self) -> int:
+        return self.left.numel() + self.right.numel()
+
+
 def gradient_seeded_factors(
     gradient: torch.Tensor,
     *,
@@ -75,6 +110,34 @@ def gradient_seeded_factors(
     return left * factor_scale, right * factor_scale
 
 
+def gradient_seeded_multiatom_factors(
+    gradient: torch.Tensor,
+    *,
+    atoms: int,
+    rank_per_atom: int,
+    product_rms: float,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    total_rank = atoms * rank_per_atom
+    left, right = gradient_seeded_factors(
+        gradient, rank=total_rank, product_rms=1.0
+    )
+    left_atoms = []
+    right_atoms = []
+    for index in range(atoms):
+        start = index * rank_per_atom
+        stop = start + rank_per_atom
+        left_value = left[:, start:stop]
+        right_value = right[:, start:stop]
+        product = left_value @ right_value.transpose(0, 1)
+        factor_scale = math.sqrt(
+            float(product_rms)
+            / float(product.square().mean().sqrt().clamp_min(1e-30))
+        )
+        left_atoms.append(left_value * factor_scale)
+        right_atoms.append(right_value * factor_scale)
+    return torch.stack(left_atoms), torch.stack(right_atoms)
+
+
 def _tuple_dot(
     left: tuple[torch.Tensor, ...], right: tuple[torch.Tensor, ...]
 ) -> torch.Tensor:
@@ -84,7 +147,7 @@ def _tuple_dot(
 
 
 def project_target(
-    module: NonlinearBilateralKernel,
+    module: NonlinearBilateralKernel | MultiatomNonlinearBilateralKernel,
     target: torch.Tensor,
     *,
     cg_steps: int,
@@ -164,7 +227,7 @@ def project_target(
 
 
 def apply_normalized_step(
-    module: NonlinearBilateralKernel,
+    module: NonlinearBilateralKernel | MultiatomNonlinearBilateralKernel,
     coordinates: tuple[torch.Tensor, ...],
     action: torch.Tensor,
     *,
@@ -190,7 +253,9 @@ def apply_normalized_step(
     }
 
 
-def coordinate_statistics(module: NonlinearBilateralKernel) -> dict[str, float]:
+def coordinate_statistics(
+    module: NonlinearBilateralKernel | MultiatomNonlinearBilateralKernel,
+) -> dict[str, float]:
     current = torch.cat((module.left.detach().flatten(), module.right.detach().flatten())).float()
     initial = torch.cat((module.initial_left.flatten(), module.initial_right.flatten())).float()
     movement = current - initial
@@ -217,6 +282,7 @@ def main() -> None:
     parser.add_argument("--layer", type=int, default=6)
     parser.add_argument("--targets", default="mlp.c_fc,mlp.c_proj")
     parser.add_argument("--rank", type=int, default=6)
+    parser.add_argument("--atoms", type=int, default=1)
     parser.add_argument("--product-rms", type=float, default=0.5)
     parser.add_argument("--output-scale", type=float, default=0.02)
     parser.add_argument("--cg-steps", type=int, default=12)
@@ -245,14 +311,27 @@ def main() -> None:
     for parameter in sorted(values):
         gradients = torch.stack(values[parameter]["raw_gradient_descent"]).to(args.device, torch.float32)
         norm_references = torch.stack(values[parameter]["exact_applied_direction"]).to(args.device, torch.float32)
-        left, right = gradient_seeded_factors(
-            gradients[0], rank=args.rank, product_rms=args.product_rms
-        )
+        if args.atoms <= 0 or args.rank % args.atoms:
+            raise ValueError("atoms must be positive and divide rank exactly")
+        if args.atoms == 1:
+            left, right = gradient_seeded_factors(
+                gradients[0], rank=args.rank, product_rms=args.product_rms
+            )
+        else:
+            left, right = gradient_seeded_multiatom_factors(
+                gradients[0],
+                atoms=args.atoms,
+                rank_per_atom=args.rank // args.atoms,
+                product_rms=args.product_rms,
+            )
 
-        def new_module() -> NonlinearBilateralKernel:
-            return NonlinearBilateralKernel(
-                left, right, output_scale=args.output_scale
-            ).to(args.device)
+        def new_module() -> NonlinearBilateralKernel | MultiatomNonlinearBilateralKernel:
+            cls = (
+                NonlinearBilateralKernel
+                if args.atoms == 1
+                else MultiatomNonlinearBilateralKernel
+            )
+            return cls(left, right, output_scale=args.output_scale).to(args.device)
 
         initial_module = new_module()
         for index, (step, gradient) in enumerate(zip(steps, gradients, strict=True)):
@@ -385,6 +464,7 @@ def main() -> None:
         "input": input_metadata,
         "layer": args.layer,
         "rank": args.rank,
+        "atoms": args.atoms,
         "product_rms": args.product_rms,
         "output_scale": args.output_scale,
         "cg_steps": args.cg_steps,
