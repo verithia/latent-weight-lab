@@ -1000,6 +1000,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--block-fht-ffn-lowrank-rank", type=int, default=0)
     parser.add_argument("--block-fht-ffn-lowrank-scale", type=float, default=1.0)
     parser.add_argument("--block-fht-ffn-lowrank-init-std", type=float, default=0.02)
+    parser.add_argument("--compact-mlp-gradient-seeded-rank", type=int, default=0)
+    parser.add_argument("--compact-mlp-gradient-seeded-scale", type=float, default=1.0)
+    parser.add_argument("--compact-mlp-gradient-bootstrap-seed", type=int, default=20260826)
     parser.add_argument("--block-fht-ffn-spectral-rank", type=int, default=0)
     parser.add_argument("--block-fht-ffn-spectral-out-groups", type=int, default=1)
     parser.add_argument("--block-fht-ffn-spectral-in-groups", type=int, default=1)
@@ -1597,6 +1600,8 @@ def main() -> None:
         block_fht_ffn_lowrank_rank=args.block_fht_ffn_lowrank_rank,
         block_fht_ffn_lowrank_scale=args.block_fht_ffn_lowrank_scale,
         block_fht_ffn_lowrank_init_std=args.block_fht_ffn_lowrank_init_std,
+        compact_mlp_gradient_seeded_rank=args.compact_mlp_gradient_seeded_rank,
+        compact_mlp_gradient_seeded_scale=args.compact_mlp_gradient_seeded_scale,
         block_fht_ffn_spectral_rank=args.block_fht_ffn_spectral_rank,
         block_fht_ffn_spectral_out_groups=args.block_fht_ffn_spectral_out_groups,
         block_fht_ffn_spectral_in_groups=args.block_fht_ffn_spectral_in_groups,
@@ -1731,6 +1736,52 @@ def main() -> None:
     else:
         model = GPT(gpt_config)
     model.to(args.device)
+    if int(args.compact_mlp_gradient_seeded_rank) > 0 and args.init_from != "resume":
+        bootstrap_modules = model.enable_compact_mlp_gradient_bootstrap()
+        expected_modules = 2 * int(args.n_layer)
+        if bootstrap_modules != expected_modules:
+            raise RuntimeError(
+                "gradient-seeded compact MLP expected "
+                f"{expected_modules} modules, found {bootstrap_modules}"
+            )
+        bootstrap_generator = torch.Generator(device="cpu")
+        bootstrap_generator.manual_seed(
+            int(args.compact_mlp_gradient_bootstrap_seed)
+        )
+        bootstrap_x, bootstrap_y = get_batch(
+            data_dir,
+            "train",
+            args.batch_size,
+            args.block_size,
+            args.device,
+            generator=bootstrap_generator,
+        )
+        fork_devices = (
+            [torch.cuda.current_device()] if device_type == "cuda" else []
+        )
+        with torch.random.fork_rng(devices=fork_devices):
+            torch.manual_seed(int(args.compact_mlp_gradient_bootstrap_seed))
+            with ctx:
+                _, bootstrap_loss = model(bootstrap_x, bootstrap_y)
+            assert bootstrap_loss is not None
+            bootstrap_loss.backward()
+        bootstrap_records = model.finish_compact_mlp_gradient_bootstrap()
+        model.zero_grad(set_to_none=True)
+        print(
+            "compact_mlp_gradient_bootstrap "
+            + json.dumps(
+                {
+                    "seed": int(args.compact_mlp_gradient_bootstrap_seed),
+                    "loss": float(bootstrap_loss.detach().item()),
+                    "records": bootstrap_records,
+                },
+                sort_keys=True,
+            ),
+            flush=True,
+        )
+        del bootstrap_x, bootstrap_y, bootstrap_loss
+        if device_type == "cuda":
+            torch.cuda.empty_cache()
     if float(args.mlp_cproj_teacher_lambda) != 0.0:
         teacher_identity = load_mlp_cproj_teacher_weights(
             model,
@@ -1779,6 +1830,14 @@ def main() -> None:
     total_params = sum(param.numel() for param in raw_model.parameters())
     trainable_params = sum(param.numel() for param in raw_model.parameters() if param.requires_grad)
     print(f"parameters: total={total_params:,} trainable={trainable_params:,}")
+    if int(args.compact_mlp_gradient_seeded_rank) > 0:
+        print(
+            "compact_mlp_gradient_seeded: "
+            + json.dumps(
+                raw_model.compact_mlp_gradient_seeded_stats(),
+                sort_keys=True,
+            )
+        )
     if args.method == "block_fht":
         stats = raw_model.block_fht_stats()
         print(

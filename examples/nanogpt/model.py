@@ -116,6 +116,8 @@ class GPTConfig:
     block_fht_ffn_lowrank_rank: int = 0
     block_fht_ffn_lowrank_scale: float = 1.0
     block_fht_ffn_lowrank_init_std: float = 0.02
+    compact_mlp_gradient_seeded_rank: int = 0
+    compact_mlp_gradient_seeded_scale: float = 1.0
     block_fht_ffn_spectral_rank: int = 0
     block_fht_ffn_spectral_out_groups: int = 1
     block_fht_ffn_spectral_in_groups: int = 1
@@ -794,6 +796,91 @@ class GroupedInputLinear(nn.Module):
         for piece, head in zip(pieces[1:], self.heads[1:], strict=True):
             out = out + head(piece)
         return out
+
+
+class GradientSeededLowRankLinear(nn.Linear):
+    """A frozen full-rank seed plus a gradient-bootstrapped rank-r delta.
+
+    The dense seed is a non-persistent buffer initialized by GPT's normal
+    initialization pass. Checkpoints therefore retain only the learned
+    low-rank factors. A one-batch bootstrap sets the right factor to the top
+    right singular vectors of the seed weight gradient while the left factor
+    remains zero, preserving the exact seeded function.
+    """
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        bias: bool,
+        rank: int,
+        scale: float,
+        target_name: str,
+    ) -> None:
+        if rank <= 0 or rank > min(in_features, out_features):
+            raise ValueError(
+                f"gradient-seeded rank must be in [1, {min(in_features, out_features)}]"
+            )
+        super().__init__(in_features, out_features, bias=bias)
+        seed_weight = self.weight.detach()
+        del self._parameters["weight"]
+        self.register_buffer("weight", seed_weight, persistent=False)
+        self.gradient_seeded_left = nn.Parameter(
+            torch.zeros(out_features, rank)
+        )
+        self.gradient_seeded_right = nn.Parameter(
+            torch.zeros(in_features, rank)
+        )
+        self.rank = int(rank)
+        self.scale = float(scale)
+        self.target_name = str(target_name)
+        self._bootstrap_enabled = False
+        self._bootstrap_complete = False
+
+    def enable_gradient_bootstrap(self) -> None:
+        if self._bootstrap_complete:
+            raise RuntimeError("gradient bootstrap is already complete")
+        self.weight.requires_grad_(True)
+        self._bootstrap_enabled = True
+
+    @torch.no_grad()
+    def finish_gradient_bootstrap(self) -> dict[str, float | int | str]:
+        if not self._bootstrap_enabled or self.weight.grad is None:
+            raise RuntimeError("gradient bootstrap weight gradient is missing")
+        gradient = self.weight.grad.float()
+        _, singular_values, vh = torch.linalg.svd(
+            gradient, full_matrices=False
+        )
+        right = vh[: self.rank].T
+        self.gradient_seeded_left.zero_()
+        self.gradient_seeded_right.copy_(
+            right.to(dtype=self.gradient_seeded_right.dtype)
+        )
+        captured = singular_values[: self.rank].double().square().sum()
+        total = singular_values.double().square().sum().clamp_min(1e-30)
+        self.weight.grad = None
+        self.weight.requires_grad_(False)
+        self._bootstrap_enabled = False
+        self._bootstrap_complete = True
+        return {
+            "target": self.target_name,
+            "rank": self.rank,
+            "gradient_energy_capture": float(captured / total),
+            "fixed_seed_scalars": self.in_features * self.out_features,
+            "trainable_factor_scalars": self.rank
+            * (self.in_features + self.out_features),
+        }
+
+    def forward(self, input: torch.Tensor) -> torch.Tensor:
+        base = F.linear(input, self.weight, self.bias)
+        hidden = input.matmul(
+            self.gradient_seeded_right.to(dtype=input.dtype)
+        )
+        delta = hidden.matmul(
+            self.gradient_seeded_left.T.to(dtype=input.dtype)
+        )
+        return base + self.scale * delta
 
 
 def make_linear(
@@ -1508,12 +1595,28 @@ class CausalSelfAttention(nn.Module):
 class MLP(nn.Module):
     def __init__(self, config: GPTConfig, layer_id: int) -> None:
         super().__init__()
+        compact_rank = int(config.compact_mlp_gradient_seeded_rank)
+        if compact_rank < 0:
+            raise ValueError("compact_mlp_gradient_seeded_rank must be non-negative")
         grouped_targets = [target for target in MLP_C_FC_GROUP_TARGETS if target in config.block_fht_targets]
         if len(grouped_targets) > 1:
             raise ValueError("Use exactly one grouped mlp.c_fc target per run")
         if grouped_targets and "mlp.c_fc" in config.block_fht_targets:
             raise ValueError("Use either plain mlp.c_fc or grouped mlp.c_fc, not both")
-        if grouped_targets:
+        if compact_rank and grouped_targets:
+            raise ValueError(
+                "gradient-seeded compact MLP requires plain mlp.c_fc"
+            )
+        if compact_rank:
+            self.c_fc = GradientSeededLowRankLinear(
+                config.n_embd,
+                4 * config.n_embd,
+                bias=config.bias,
+                rank=compact_rank,
+                scale=float(config.compact_mlp_gradient_seeded_scale),
+                target_name="mlp.c_fc",
+            )
+        elif grouped_targets:
             target = grouped_targets[0]
             groups = MLP_C_FC_GROUP_TARGETS[target]
             out_features = 4 * config.n_embd
@@ -1592,6 +1695,10 @@ class MLP(nn.Module):
         )
         if structured_proj_count > 1:
             raise ValueError("Use exactly one grouped mlp.c_proj target per run")
+        if compact_rank and structured_proj_count:
+            raise ValueError(
+                "gradient-seeded compact MLP requires plain mlp.c_proj"
+            )
         if structured_proj_count and "mlp.c_proj" in config.block_fht_targets:
             raise ValueError("Use either plain mlp.c_proj or grouped mlp.c_proj, not both")
         muon_matched_cproj = bool(
@@ -1610,7 +1717,20 @@ class MLP(nn.Module):
                 "Muon-matched Givens c_proj requires mlp.c_proj in "
                 "block_fht_targets"
             )
-        if muon_matched_cproj:
+        if compact_rank and muon_matched_cproj:
+            raise ValueError(
+                "gradient-seeded compact MLP is incompatible with Muon-matched c_proj"
+            )
+        if compact_rank:
+            self.c_proj = GradientSeededLowRankLinear(
+                4 * config.n_embd,
+                config.n_embd,
+                bias=config.bias,
+                rank=compact_rank,
+                scale=float(config.compact_mlp_gradient_seeded_scale),
+                target_name="mlp.c_proj",
+            )
+        elif muon_matched_cproj:
             self.c_proj = MuonMatchedGivensLinear(
                 4 * config.n_embd,
                 config.n_embd,
@@ -3486,6 +3606,16 @@ class GPT(nn.Module):
         for name, param in self.named_parameters():
             if name.endswith("c_proj.weight"):
                 nn.init.normal_(param, mean=0.0, std=0.02 / math.sqrt(2 * config.n_layer))
+        for module in self.modules():
+            if (
+                isinstance(module, GradientSeededLowRankLinear)
+                and module.target_name == "mlp.c_proj"
+            ):
+                nn.init.normal_(
+                    module.weight,
+                    mean=0.0,
+                    std=0.02 / math.sqrt(2 * config.n_layer),
+                )
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
@@ -3494,6 +3624,42 @@ class GPT(nn.Module):
                 nn.init.zeros_(module.bias)
         elif isinstance(module, nn.Embedding):
             nn.init.normal_(module.weight, mean=0.0, std=0.02)
+
+    def enable_compact_mlp_gradient_bootstrap(self) -> int:
+        modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, GradientSeededLowRankLinear)
+        ]
+        for module in modules:
+            module.enable_gradient_bootstrap()
+        return len(modules)
+
+    def finish_compact_mlp_gradient_bootstrap(
+        self,
+    ) -> list[dict[str, float | int | str]]:
+        return [
+            module.finish_gradient_bootstrap()
+            for module in self.modules()
+            if isinstance(module, GradientSeededLowRankLinear)
+        ]
+
+    def compact_mlp_gradient_seeded_stats(self) -> dict[str, int]:
+        modules = [
+            module
+            for module in self.modules()
+            if isinstance(module, GradientSeededLowRankLinear)
+        ]
+        return {
+            "modules": len(modules),
+            "fixed_seed_scalars": sum(
+                module.in_features * module.out_features for module in modules
+            ),
+            "trainable_factor_scalars": sum(
+                module.rank * (module.in_features + module.out_features)
+                for module in modules
+            ),
+        }
 
     def forward(self, idx: torch.Tensor, targets: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor | None]:
         device = idx.device
@@ -3572,6 +3738,14 @@ class GPT(nn.Module):
             product_factor_ids = {
                 id(param) for param in product_factors
             }
+            gradient_seeded_factors = [
+                param
+                for name, param in params.items()
+                if "gradient_seeded_" in name
+            ]
+            gradient_seeded_factor_ids = {
+                id(param) for param in gradient_seeded_factors
+            }
             matrix = [
                 param
                 for name, param in params.items()
@@ -3580,6 +3754,7 @@ class GPT(nn.Module):
                 and "wpe" not in name
                 and "lm_head" not in name
                 and id(param) not in product_factor_ids
+                and id(param) not in gradient_seeded_factor_ids
             ]
             other = [
                 param
@@ -3589,6 +3764,7 @@ class GPT(nn.Module):
                     or "wte" in name
                     or "wpe" in name
                     or "lm_head" in name
+                    or id(param) in gradient_seeded_factor_ids
                 )
                 and id(param) not in product_factor_ids
             ]
@@ -3744,6 +3920,7 @@ class GPT(nn.Module):
             print(
                 f"optimizer=muon matrix_tensors={len(matrix)} adamw_other_tensors={len(other)} "
                 f"product_fht_factor_tensors={len(product_factors)} "
+                f"gradient_seeded_factor_tensors={len(gradient_seeded_factors)} "
                 "muon_matched_givens_tensors="
                 f"{len(muon_matched_givens_modules)} "
                 f"mlp_chart_tensors={len(chart_other)} "

@@ -1,0 +1,35 @@
+{
+  "schema_version": "mai_124m_gradientseeded_rank6_fullmlp_plan_v1",
+  "date": "2026-08-26",
+  "question": "Can a moving rank-6 product, bootstrapped from each MLP matrix's first raw-gradient right singular space, train a compact full MLP within 0.05 CE of the matched dense-MLP parent?",
+  "evidence": {
+    "state_samples": 239,
+    "exact_optimizer_probes": 100,
+    "rank": 6,
+    "factor_fraction_per_mlp_matrix": 0.009765625,
+    "strict_test_next_probe_capture": {
+      "mlp.c_fc": 0.47851394620152327,
+      "mlp.c_proj": 0.5347530092368485
+    },
+    "strict_test_next_probe_minimum": {
+      "mlp.c_fc": 0.4337940131320078,
+      "mlp.c_proj": 0.4946929120134664
+    },
+    "state_basis_conclusion": "the dense-Muon state basis is temporally low-dimensional but dense Gaussian-like and layer-private; this candidate follows a different compact-native raw-gradient path and does not claim dense-path recovery"
+  },
+  "parameterization": "W = W_seed + A B^T; W_seed is initialized procedurally and frozen, A starts at zero, and B is the top-r right singular space of a deterministic first-batch weight gradient",
+  "bootstrap_invariant": "A=0 makes the post-bootstrap function bitwise/evaluation-equivalent to the seeded parent before optimizer step zero",
+  "persistent_state_accounting": "each MLP matrix stores r(out+in) learned factor scalars; the full-rank random seed is a non-persistent procedural buffer and must be counted as materialized runtime weight but not checkpoint or optimizer state",
+  "candidate_config": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_gradientseeded_rank6_fullmlp_0p5tpp_lr24e4.json",
+  "preflight_config": "examples/nanogpt/configs/y400_mai_v3_124m_qkonly_gradientseeded_rank6_fullmlp_perf.json",
+  "gates": {
+    "bootstrap_modules": 24,
+    "minimum_bootstrap_gradient_capture_each": 0.0,
+    "minimum_mfu": 0.20,
+    "matched_parent_terminal_validation_ce": 5.3610,
+    "maximum_terminal_validation_ce": 5.4110,
+    "maximum_fixed_model_compute_penalty": 1.10,
+    "checkpoint_must_omit_dense_mlp_weights": true
+  },
+  "fail_closed": "No rank, learning-rate, bootstrap-seed, horizon, or model-size sweep. A miss rejects this exact compact-native chart; analyze factor drift and loss attribution before another structure."
+}
