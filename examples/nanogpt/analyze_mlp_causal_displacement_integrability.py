@@ -24,6 +24,7 @@ from examples.nanogpt.analyze_mlp_product_fht_tangent_anchor import git_commit
 from examples.nanogpt.analyze_mlp_raw_gradient_factor_transport import exact_singular_factors
 from examples.nanogpt.analyze_mlp_raw_gradient_rolling_prediction import phase_for_step
 from examples.nanogpt.analyze_parameter_trajectory import write_csv
+from examples.nanogpt.parameter_trajectory import OPTIMIZER_PROBE_SCHEMA_VERSION
 
 
 def right_projection_capture(matrix: torch.Tensor, basis: torch.Tensor) -> float:
@@ -42,6 +43,34 @@ def best_rank_capture(matrix: torch.Tensor, rank: int) -> float:
 def rank_capture_from_singular_energy(values: torch.Tensor, rank: int) -> float:
     """Energy fraction from already-computed ordered squared singular values."""
     return float(values[:rank].sum() / values.sum().clamp_min(1e-30))
+
+
+def load_probe_weights(
+    paths: list[Path],
+    *,
+    parameters: set[str],
+    expected_steps: list[int],
+    expected_identity: str,
+) -> dict[str, list[torch.Tensor]]:
+    """Load exact pre-step weights omitted by the shared direction inventory."""
+    result = {parameter: [] for parameter in sorted(parameters)}
+    for path, expected_step in zip(paths, expected_steps, strict=True):
+        payload = torch.load(path, map_location="cpu", weights_only=False)
+        if payload.get("schema_version") != OPTIMIZER_PROBE_SCHEMA_VERSION:
+            raise ValueError(f"unexpected optimizer probe schema: {path}")
+        if int(payload.get("step", -1)) != expected_step:
+            raise ValueError(f"optimizer probe step mismatch: {path}")
+        if payload.get("run_identity_sha256") != expected_identity:
+            raise ValueError(f"optimizer probe identity mismatch: {path}")
+        states = payload.get("parameters", {})
+        if not parameters.issubset(states):
+            raise ValueError(f"optimizer probe parameter inventory mismatch: {path}")
+        for parameter in result:
+            result[parameter].append(
+                states[parameter]["weight_before_step"].detach().float().contiguous()
+            )
+        del payload
+    return result
 
 
 def summarize(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -113,12 +142,18 @@ def main() -> None:
     if len(steps) <= args.history_probes:
         raise ValueError("not enough probes for the requested history")
 
+    weights_by_parameter = load_probe_weights(
+        paths,
+        parameters=set(inventory),
+        expected_steps=steps,
+        expected_identity=str(input_metadata["run_identity_sha256"]),
+    )
     rows: list[dict[str, Any]] = []
     for parameter, fields in sorted(inventory.items()):
         gradients = torch.stack(fields["raw_gradient_descent"]).to(
             args.device, torch.float32
         )
-        weights = torch.stack(fields["weight_before_step"]).to(
+        weights = torch.stack(weights_by_parameter[parameter]).to(
             args.device, torch.float32
         )
         _left, singular, right = exact_singular_factors(

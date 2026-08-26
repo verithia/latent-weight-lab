@@ -4,10 +4,12 @@ import torch
 
 from examples.nanogpt.analyze_mlp_causal_displacement_integrability import (
     best_rank_capture,
+    load_probe_weights,
     rank_capture_from_singular_energy,
     right_projection_capture,
     summarize,
 )
+from examples.nanogpt.parameter_trajectory import OPTIMIZER_PROBE_SCHEMA_VERSION
 
 
 def test_right_projection_capture_is_exact() -> None:
@@ -51,3 +53,23 @@ def test_summary_handles_terminal_increment() -> None:
     assert result["increment_sample_count"] == 1
     assert abs(result["displacement_capture_mean"] - 0.75) < 1e-7
     assert result["next_increment_capture_mean"] == 0.5
+
+
+def test_load_probe_weights_checks_identity_and_step(tmp_path) -> None:
+    path = tmp_path / "step_000003.pt"
+    torch.save(
+        {
+            "schema_version": OPTIMIZER_PROBE_SCHEMA_VERSION,
+            "step": 3,
+            "run_identity_sha256": "identity",
+            "parameters": {"p": {"weight_before_step": torch.eye(2)}},
+        },
+        path,
+    )
+    result = load_probe_weights(
+        [path],
+        parameters={"p"},
+        expected_steps=[3],
+        expected_identity="identity",
+    )
+    torch.testing.assert_close(result["p"][0], torch.eye(2))
