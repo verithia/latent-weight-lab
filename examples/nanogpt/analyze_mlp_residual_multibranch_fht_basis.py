@@ -243,6 +243,24 @@ class MultiBranchProductFHT(nn.Module):
         branch_combination = max(len(self.branch_depths) - 1, 0) * self.padded_features
         return fht_and_diagonal + branch_combination + self.out_features
 
+    def coordinate_metric(self) -> torch.Tensor:
+        branch_scale = self.weight_std / math.sqrt(len(self.branch_depths))
+        diagonal_metric = (
+            branch_scale
+            * branch_scale
+            * self.out_features
+            * self.in_features
+            / self.padded_features
+        )
+        pieces = [
+            torch.full_like(parameter, max(diagonal_metric, 1e-12)).reshape(-1)
+            for parameter in self.branch_log_diagonals
+        ]
+        with torch.no_grad():
+            row_metric = self.weight().float().square().sum(dim=1).clamp_min(1e-12)
+        pieces.append(row_metric.to(self.shared_output_log_gain.dtype))
+        return torch.cat(pieces)
+
 
 def flatten_tensors(tensors: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.cat([tensor.reshape(-1) for tensor in tensors])
@@ -262,22 +280,7 @@ def coordinate_vjp(
 
 
 def coordinate_metric(module: MultiBranchProductFHT) -> torch.Tensor:
-    branch_scale = module.weight_std / math.sqrt(len(module.branch_depths))
-    diagonal_metric = (
-        branch_scale
-        * branch_scale
-        * module.out_features
-        * module.in_features
-        / module.padded_features
-    )
-    pieces = [
-        torch.full_like(parameter, max(diagonal_metric, 1e-12)).reshape(-1)
-        for parameter in module.branch_log_diagonals
-    ]
-    with torch.no_grad():
-        row_metric = module.weight().float().square().sum(dim=1).clamp_min(1e-12)
-    pieces.append(row_metric.to(module.shared_output_log_gain.dtype))
-    return torch.cat(pieces)
+    return module.coordinate_metric()
 
 
 def natural_action(
