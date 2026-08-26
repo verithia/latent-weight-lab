@@ -21,7 +21,7 @@ def test_direction_metrics_distinguishes_scale_and_line() -> None:
     result = direction_metrics(target, prediction)
     assert result["cosine"] > 0.999999
     assert result["positive_line_recovery"] > 0.999999
-    assert result["fixed_scale_recovery"] < 0.0
+    assert result["fixed_scale_recovery"] == 0.0
 
 
 def test_right_projection_is_exact() -> None:
