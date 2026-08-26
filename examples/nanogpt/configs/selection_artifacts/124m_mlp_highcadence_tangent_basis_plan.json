@@ -1,0 +1,79 @@
+{
+  "schema_version": "mai_124m_mlp_highcadence_tangent_basis_plan_v1",
+  "recorded_at": "2026-08-26",
+  "scientific_question": "With 100--239 chronological samples rather than a 20-snapshot rank ceiling, what are the centered and biased MLP gradient/update spans, and which fast compact decoder tangents cover them at 0.1--1 percent retained coordinates?",
+  "existing_zero_update_asset": {
+    "run": "y400_mai_v3_124m_dense_cproj_stepwise_trajectory_0p5tpp_lr24e4",
+    "snapshot_count": 239,
+    "steps": [0, 238],
+    "layers": [0, 3, 6, 9, 11],
+    "targets": ["mlp.c_proj"],
+    "serialized_bytes": 11281647494,
+    "interpretation": "exact realized optimizer updates from consecutive weights; not raw gradients"
+  },
+  "new_acquisition": {
+    "config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_mlp_highcadence_layers0611_lr24e4.json",
+    "config_sha256": "07518a32207996edfe61e869c632a827c49d9ba142588df35e65a59ebe2b5d5c",
+    "parent_source_commit": "b680213e3ca500a669972c0e554006c81971a5e5",
+    "train_entrypoint_sha256": "24020d17edc39ae03e32591d3c9b106bcd1ab2e7c8c9e3b26bdbb9f0b9b6e486",
+    "trajectory_helper_sha256": "2bcbcb806d0e52652f2ac0ecbcc9ae9b8ca51800bfa8a57cfcc4cb0ac5113f1d",
+    "paired_state_layers": [0, 6, 11],
+    "paired_state_targets": ["mlp.c_fc", "mlp.c_proj"],
+    "paired_state_snapshot_count": 239,
+    "paired_state_dtype": "float16",
+    "exact_probe_layer": 6,
+    "exact_probe_targets": ["mlp.c_fc", "mlp.c_proj"],
+    "exact_probe_count": 100,
+    "exact_probe_dtype": "float16",
+    "raw_state_bytes": 6766460928,
+    "raw_probe_bytes": 5662310400,
+    "raw_scientific_bytes": 12428771328,
+    "optimizer_probe_fields": [
+      "weight_before_step",
+      "gradient_after_clip",
+      "momentum_buffer_before_step",
+      "combined_momentum_update",
+      "polar_update",
+      "applied_direction_per_lr"
+    ]
+  },
+  "chronological_split": {
+    "discovery_realized_update_start_steps": [0, 118],
+    "validation_realized_update_start_steps": [119, 178],
+    "test_realized_update_start_steps": [179, 237],
+    "selection_policy": "fit transform family and hyperparameters on discovery, choose on validation, evaluate test exactly once"
+  },
+  "analysis": {
+    "entrypoint": "examples/nanogpt/analyze_mlp_highcadence_basis.py",
+    "entrypoint_sha256": "15c4ca1b5647bc5930e346d8e1c3bc32a3b0d5835bc5575d5e3bb5e06d77acd3",
+    "state_and_update_spectra": "exact temporal Gram eigenanalysis, both centered and uncentered",
+    "gradient_bias": "T times squared mean norm divided by total sample energy, plus chronological mean cosine and relative shift",
+    "basis_transfer": "discovery-only spatial PCs and mean-plus-PC affine basis projected onto validation and test",
+    "coordinate_budgets": [0.001, 0.0025, 0.005, 0.01],
+    "ranks": [1, 2, 4, 8, 16, 32, 64, 96, 119]
+  },
+  "transform_controls": [
+    "dense empirical PCA upper bound with kP storage reported",
+    "production fixed BlockFHT exact tangent projector",
+    "equal-total-budget discovery-selected multi-trunk BlockFHT",
+    "learned product-FHT diagonal stages",
+    "sparse Givens or Householder transport",
+    "Monarch-style block transport"
+  ],
+  "promotion_gate": {
+    "required_real_training_mfu_fraction": 0.2,
+    "basis_requirement": "materially exceed both coordinate fraction and fixed BlockFHT on untouched test data, with no representative-layer collapse",
+    "functional_requirement": "paired c_fc/GELU/c_proj held-out action must pass before any structural LM run",
+    "storage_requirement": "all persistent parameters, gradients, optimizer state, seeds, and expansion buffers counted",
+    "no_automatic_scaleup": true
+  },
+  "execution": {
+    "host": "Y400",
+    "workspace_cap_gib": 300,
+    "prelaunch_mfu_required": true,
+    "watchdog_required": true,
+    "callback_milestones": [20, 50, 100],
+    "failure_and_stall_callbacks": true,
+    "callback_action": "verify live or terminal state, seal artifacts and notes, then continue only the causally authorized basis-fit plan"
+  }
+}
