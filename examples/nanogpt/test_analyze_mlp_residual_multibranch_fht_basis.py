@@ -8,6 +8,7 @@ from examples.nanogpt.analyze_mlp_residual_multibranch_fht_basis import (
     coordinate_vjp,
     parse_topologies,
 )
+from latent_weight_lab import ProductFHTLinear
 
 
 def test_parse_topologies_requires_equal_total_depth() -> None:
@@ -37,6 +38,35 @@ def test_equal_total_depth_has_equal_state() -> None:
 
 def test_target_fit_offsets_are_independent_of_target_filtering() -> None:
     assert TARGET_FIT_OFFSETS == {"mlp.c_fc": 0, "mlp.c_proj": 1}
+
+
+def test_single_branch_matches_production_product_fht() -> None:
+    reference = ProductFHTLinear(
+        5,
+        6,
+        factors=3,
+        seed=13,
+        weight_std=0.02,
+        weight_space_muon=False,
+        natural_gradient=True,
+    )
+    candidate = MultiBranchProductFHT(
+        5, 6, branch_depths=(3,), seed=13, weight_std=0.02
+    )
+    with torch.no_grad():
+        values = torch.randn_like(reference.product_log_diagonals) * 0.04
+        gain = torch.randn_like(reference.product_output_log_gain) * 0.04
+        reference.product_log_diagonals.copy_(values)
+        reference.product_output_log_gain.copy_(gain)
+        candidate.branch_log_diagonals[0].copy_(values)
+        candidate.shared_output_log_gain.copy_(gain)
+    torch.testing.assert_close(candidate.weight(), reference._live_weight())
+    direction = torch.randn(candidate.trainable_scalar_count)
+    diagonal, output = candidate.split_coordinates(direction)
+    torch.testing.assert_close(
+        candidate.jvp(direction),
+        reference._weight_jvp_from_factors(diagonal[0], output),
+    )
 
 
 def test_exact_jvp_matches_finite_difference() -> None:

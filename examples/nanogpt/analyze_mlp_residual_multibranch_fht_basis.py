@@ -171,7 +171,11 @@ class MultiBranchProductFHT(nn.Module):
         return matrix[:, : self.in_features], tangent[:, : self.in_features]
 
     def weight(self) -> torch.Tensor:
-        scale = self.weight_std / math.sqrt(len(self.branch_depths))
+        scale = (
+            self.weight_std
+            * math.sqrt(self.padded_features)
+            / math.sqrt(len(self.branch_depths))
+        )
         inner = sum(
             self._branch_weight(branch, diagonals)
             for branch, diagonals in enumerate(self.branch_log_diagonals)
@@ -221,7 +225,11 @@ class MultiBranchProductFHT(nn.Module):
             (output_anchor > -6.0) & (output_anchor < 6.0)
         ).to(output_anchor.dtype)
         output_tangent = output_gain * output_direction * output_active
-        scale = self.weight_std / math.sqrt(len(self.branch_depths))
+        scale = (
+            self.weight_std
+            * math.sqrt(self.padded_features)
+            / math.sqrt(len(self.branch_depths))
+        )
         return scale * (
             output_gain.view(-1, 1) * inner_tangent
             + output_tangent.view(-1, 1) * inner
