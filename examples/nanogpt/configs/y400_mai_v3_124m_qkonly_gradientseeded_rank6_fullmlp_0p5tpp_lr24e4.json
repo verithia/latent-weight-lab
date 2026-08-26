@@ -61,6 +61,7 @@
   "perf_profile": true,
   "perf_warmup_iters": 5,
   "perf_log_interval": 10,
+  "mfu_preflight_certificate": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/performance_preflight_gradientseeded_rank6_fullmlp_0p5tpp.json",
   "mfu_preflight_required": true,
   "mfu_min_fraction": 0.20,
   "fixed_parent_terminal_validation_ce": 5.3610,
