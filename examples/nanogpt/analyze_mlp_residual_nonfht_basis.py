@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Fit non-Hadamard compact tangents to dense MLP residual PCs.
 
-This optimistic, noncausal oracle compares two basis-free families under the
+This optimistic, noncausal oracle compares basis-free families under the
 same approximately-one-percent state contract:
 
 * three independently modulated rectangular Toeplitz operators; and
-* a ten-stage learned sparse-expander chain of general 2x2 blocks.
+* a ten-stage learned sparse-expander chain of general 2x2 blocks;
+* an open-boundary live matrix-product-operator tangent; and
+* a cyclic live tensor-ring tangent.
 
 Residual PCs are fitting/evaluation targets only.  Candidate artifacts retain
 live coordinates and integer seeds, never an ambient target vector or PCA
@@ -38,6 +40,8 @@ from examples.nanogpt.analyze_parameter_trajectory import (
 
 
 TARGET_SEED_OFFSETS = {"mlp.c_fc": 0, "mlp.c_proj": 1}
+MATRIX_ROW_MODES = (3, 4, 4, 4, 4, 4)
+MATRIX_COLUMN_MODES = (3, 4, 4, 4, 4, 1)
 
 
 def git_commit(root: Path) -> str | None:
@@ -427,6 +431,209 @@ class LearnedSparseExpander(nn.Module):
         return block_multiplications + self.out_features
 
 
+def _tensor_to_matrix(
+    tensor: torch.Tensor,
+    *,
+    row_modes: tuple[int, ...],
+    column_modes: tuple[int, ...],
+) -> torch.Tensor:
+    """Undo a procedural Morton pairing of row and column tensor modes."""
+    if len(row_modes) != len(column_modes):
+        raise ValueError("row and column mode lists must have equal length")
+    physical_modes = tuple(
+        row * column for row, column in zip(row_modes, column_modes, strict=True)
+    )
+    if tuple(tensor.shape) != physical_modes:
+        raise ValueError(
+            f"tensor shape {tuple(tensor.shape)} != physical modes {physical_modes}"
+        )
+    interleaved: list[int] = []
+    for row, column in zip(row_modes, column_modes, strict=True):
+        interleaved.extend((row, column))
+    expanded = tensor.reshape(*interleaved)
+    row_axes = tuple(range(0, 2 * len(row_modes), 2))
+    column_axes = tuple(range(1, 2 * len(row_modes), 2))
+    return expanded.permute(*(row_axes + column_axes)).contiguous().reshape(
+        math.prod(row_modes), math.prod(column_modes)
+    )
+
+
+def _contract_open_cores(cores: tuple[torch.Tensor, ...]) -> torch.Tensor:
+    state = cores[0]
+    for core in cores[1:]:
+        state = torch.einsum("a...b,bdc->a...dc", state, core)
+    return state.squeeze(0).squeeze(-1)
+
+
+def _contract_ring_cores(cores: tuple[torch.Tensor, ...]) -> torch.Tensor:
+    state = cores[0]
+    for core in cores[1:]:
+        state = torch.einsum("a...b,bdc->a...dc", state, core)
+    return state.diagonal(dim1=0, dim2=-1).sum(dim=-1)
+
+
+class LiveTensorNetwork(nn.Module):
+    """Live TT/MPO or tensor-ring cores with procedural random anchors."""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        row_modes: tuple[int, ...],
+        column_modes: tuple[int, ...],
+        topology: str,
+        bond: int,
+        seed: int,
+    ) -> None:
+        super().__init__()
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.row_modes = tuple(int(value) for value in row_modes)
+        self.column_modes = tuple(int(value) for value in column_modes)
+        self.physical_modes = tuple(
+            row * column
+            for row, column in zip(
+                self.row_modes, self.column_modes, strict=True
+            )
+        )
+        self.topology = str(topology)
+        self.bond = int(bond)
+        self.seed = int(seed)
+        canonical_shape = (
+            math.prod(self.row_modes),
+            math.prod(self.column_modes),
+        )
+        requested_shape = (self.out_features, self.in_features)
+        if requested_shape == canonical_shape:
+            self.transpose_output = False
+        elif requested_shape == tuple(reversed(canonical_shape)):
+            self.transpose_output = True
+        else:
+            raise ValueError(
+                f"requested shape {requested_shape} is not {canonical_shape} "
+                "or its transpose"
+            )
+        if self.topology == "open":
+            total = math.prod(self.physical_modes)
+            ranks = [1]
+            prefix = 1
+            for mode in self.physical_modes[:-1]:
+                prefix *= mode
+                ranks.append(min(self.bond, prefix, total // prefix))
+            ranks.append(1)
+        elif self.topology == "ring":
+            ranks = [self.bond] * (len(self.physical_modes) + 1)
+        else:
+            raise ValueError(f"unsupported tensor-network topology {topology}")
+        self.ranks = tuple(ranks)
+        generator = torch.Generator(device="cpu").manual_seed(self.seed)
+        deltas = []
+        for index, mode in enumerate(self.physical_modes):
+            left_rank = self.ranks[index]
+            right_rank = self.ranks[index + 1]
+            shape = (left_rank, mode, right_rank)
+            base = torch.randn(shape, generator=generator) / math.sqrt(left_rank)
+            self.register_buffer(f"base_core_{index}", base, persistent=False)
+            deltas.append(nn.Parameter(torch.zeros(shape)))
+        self.core_delta = nn.ParameterList(deltas)
+
+    @property
+    def coordinate_tensors(self) -> tuple[torch.Tensor, ...]:
+        return tuple(self.core_delta)
+
+    @property
+    def trainable_scalar_count(self) -> int:
+        return sum(tensor.numel() for tensor in self.coordinate_tensors)
+
+    def _cores(self, *, differentiable_anchor: bool) -> tuple[torch.Tensor, ...]:
+        result = []
+        for index, delta in enumerate(self.core_delta):
+            if not differentiable_anchor:
+                delta = delta.detach()
+            result.append(getattr(self, f"base_core_{index}").to(delta) + delta)
+        return tuple(result)
+
+    def _tensor(self, cores: tuple[torch.Tensor, ...]) -> torch.Tensor:
+        if self.topology == "open":
+            return _contract_open_cores(cores)
+        return _contract_ring_cores(cores)
+
+    def _matrix(self, tensor: torch.Tensor) -> torch.Tensor:
+        matrix = _tensor_to_matrix(
+            tensor,
+            row_modes=self.row_modes,
+            column_modes=self.column_modes,
+        )
+        return matrix.T.contiguous() if self.transpose_output else matrix
+
+    def weight(self) -> torch.Tensor:
+        return self._matrix(self._tensor(self._cores(differentiable_anchor=True)))
+
+    def split_coordinates(self, vector: torch.Tensor) -> tuple[torch.Tensor, ...]:
+        result = []
+        offset = 0
+        for delta in self.core_delta:
+            count = delta.numel()
+            result.append(vector[offset : offset + count].reshape_as(delta))
+            offset += count
+        if offset != vector.numel():
+            raise ValueError("coordinate vector has the wrong size")
+        return tuple(result)
+
+    def jvp(
+        self, vector: torch.Tensor, *, differentiable_anchor: bool = False
+    ) -> torch.Tensor:
+        cores = self._cores(differentiable_anchor=differentiable_anchor)
+        directions = self.split_coordinates(vector)
+        state = cores[0]
+        tangent = directions[0]
+        for core, direction in zip(cores[1:], directions[1:], strict=True):
+            tangent = torch.einsum(
+                "a...b,bdc->a...dc", tangent, core
+            ) + torch.einsum("a...b,bdc->a...dc", state, direction)
+            state = torch.einsum("a...b,bdc->a...dc", state, core)
+        if self.topology == "open":
+            tensor = tangent.squeeze(0).squeeze(-1)
+        else:
+            tensor = tangent.diagonal(dim1=0, dim2=-1).sum(dim=-1)
+        return self._matrix(tensor)
+
+    def coordinate_metric(self) -> torch.Tensor:
+        # The procedural anchor uses variance-preserving core scales.  A unit
+        # diagonal is deliberately conservative; exactness remains in CG's
+        # matrix-free J^T J action, and a synthetic own-tangent gate detects
+        # any material conditioning failure.
+        return torch.ones(
+            self.trainable_scalar_count,
+            device=self.core_delta[0].device,
+            dtype=self.core_delta[0].dtype,
+        )
+
+    def clamp_coordinates(self, bound: float) -> None:
+        with torch.no_grad():
+            for delta in self.core_delta:
+                delta.clamp_(-bound, bound)
+
+    def ideal_forward_scalar_ops(self) -> int:
+        # Scalar products needed to materialize the tensor by left-to-right
+        # contraction.  A fused MPO matvec is a separate performance gate.
+        prefix = self.physical_modes[0]
+        operations = 0
+        for index, mode in enumerate(self.physical_modes[1:], start=1):
+            operations += (
+                prefix
+                * self.ranks[0]
+                * self.ranks[index]
+                * mode
+                * self.ranks[index + 1]
+            )
+            prefix *= mode
+        if self.topology == "ring":
+            operations += math.prod(self.physical_modes) * self.bond
+        return operations
+
+
 def flatten_tensors(tensors: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.cat([tensor.reshape(-1) for tensor in tensors])
 
@@ -622,6 +829,26 @@ def build_family(
             group_size=4,
             seed=seed,
         )
+    if family == "tt24":
+        return LiveTensorNetwork(
+            in_features,
+            out_features,
+            row_modes=MATRIX_ROW_MODES,
+            column_modes=MATRIX_COLUMN_MODES,
+            topology="open",
+            bond=24,
+            seed=seed,
+        )
+    if family == "tr17":
+        return LiveTensorNetwork(
+            in_features,
+            out_features,
+            row_modes=MATRIX_ROW_MODES,
+            column_modes=MATRIX_COLUMN_MODES,
+            topology="ring",
+            bond=17,
+            seed=seed,
+        )
     raise ValueError(f"unsupported family {family}")
 
 
@@ -791,7 +1018,7 @@ def main() -> None:
         "accounting": accounting,
         "candidate_contract": {
             "stored": "live coordinates only",
-            "procedural": "integer-seeded signs, kernels, matchings, grouping, and base 2x2 rotations",
+            "procedural": "integer-seeded signs, kernels, matchings, grouping, base 2x2 rotations, and tensor-network anchor cores",
             "forbidden": "ambient PCA vector, dense atom, shadow weight, learned index table, or stored connectivity",
         },
         "analysis_execution": {

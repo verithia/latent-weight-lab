@@ -4,7 +4,10 @@ import torch
 
 from examples.nanogpt.analyze_mlp_residual_nonfht_basis import (
     DiagonalToeplitzDiagonal,
+    LiveTensorNetwork,
     LearnedSparseExpander,
+    MATRIX_COLUMN_MODES,
+    MATRIX_ROW_MODES,
     cg_project,
     coordinate_vjp,
 )
@@ -84,6 +87,53 @@ def test_known_tangent_is_recovered() -> None:
     assert result["cg_projection_capture"] > 0.999
 
 
+def test_live_tensor_network_jvp_and_adjoint() -> None:
+    for topology, bond in (("open", 3), ("ring", 2)):
+        module = LiveTensorNetwork(
+            4,
+            4,
+            row_modes=(2, 2),
+            column_modes=(2, 2),
+            topology=topology,
+            bond=bond,
+            seed=19,
+        )
+        check_jvp_and_adjoint(module)
+    transposed = LiveTensorNetwork(
+        6,
+        4,
+        row_modes=(2, 3),
+        column_modes=(2, 2),
+        topology="open",
+        bond=3,
+        seed=29,
+    )
+    assert transposed.weight().shape == (4, 6)
+    check_jvp_and_adjoint(transposed)
+
+
+def test_live_tensor_network_known_tangent_is_recovered() -> None:
+    module = LiveTensorNetwork(
+        4,
+        4,
+        row_modes=(2, 2),
+        column_modes=(2, 2),
+        topology="ring",
+        bond=2,
+        seed=23,
+    )
+    direction = torch.randn(module.trainable_scalar_count)
+    target = module.jvp(direction)
+    result = cg_project(
+        module,
+        target,
+        maximum_iterations=256,
+        relative_tolerance=1e-8,
+        damping_ratio=1e-9,
+    )
+    assert result["cg_projection_capture"] > 0.999
+
+
 def test_registered_full_size_budgets() -> None:
     dtd = DiagonalToeplitzDiagonal(768, 3072, branches=3, seed=1)
     expander_fc = LearnedSparseExpander(
@@ -111,3 +161,25 @@ def test_registered_full_size_budgets() -> None:
         expander_fc.trainable_scalar_count,
         expander_proj.trainable_scalar_count,
     ) <= dense // 100
+    tt = LiveTensorNetwork(
+        768,
+        3072,
+        row_modes=MATRIX_ROW_MODES,
+        column_modes=MATRIX_COLUMN_MODES,
+        topology="open",
+        bond=24,
+        seed=5,
+    )
+    tensor_ring = LiveTensorNetwork(
+        3072,
+        768,
+        row_modes=MATRIX_ROW_MODES,
+        column_modes=MATRIX_COLUMN_MODES,
+        topology="ring",
+        bond=17,
+        seed=7,
+    )
+    assert tt.trainable_scalar_count == 23521
+    assert tensor_ring.trainable_scalar_count == 22253
+    assert tt.trainable_scalar_count <= dense // 100
+    assert tensor_ring.trainable_scalar_count <= dense // 100
