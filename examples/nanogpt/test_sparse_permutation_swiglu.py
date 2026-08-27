@@ -68,6 +68,40 @@ def test_sparse_mlp_forward_and_backward_are_finite() -> None:
     )
 
 
+def test_memory_bounded_vjp_matches_eager_reference() -> None:
+    config = tiny_config(n_embd=8, n_head=1, n_layer=2)
+    module = SparsePermutationSwiGLUMLP(config, layer_id=0).double()
+    x = torch.randn(2, 3, 8, dtype=torch.double, requires_grad=True)
+    reference_x = x.detach().clone().requires_grad_(True)
+    probe = torch.randn_like(x)
+
+    actual = (module(x) * probe).sum()
+    actual.backward()
+    actual_parameter_grads = [
+        parameter.grad.detach().clone() for parameter in module.parameters()
+    ]
+
+    reference = torch.zeros_like(reference_x)
+    for branch in module.branches:
+        hidden = torch.nn.functional.silu(branch["up"](reference_x)) * branch[
+            "gate"
+        ](reference_x)
+        reference = reference + branch["down"](hidden)
+    reference = (reference * module.branch_scale * probe).sum()
+    for parameter in module.parameters():
+        parameter.grad = None
+    reference.backward()
+
+    torch.testing.assert_close(actual.detach(), reference.detach())
+    torch.testing.assert_close(x.grad, reference_x.grad, rtol=1e-9, atol=1e-10)
+    for actual_grad, parameter in zip(
+        actual_parameter_grads, module.parameters(), strict=True
+    ):
+        torch.testing.assert_close(
+            actual_grad, parameter.grad, rtol=1e-9, atol=1e-10
+        )
+
+
 def test_qk_blockfht_freeze_keeps_sparse_mlp_trainable() -> None:
     config = tiny_config(
         block_fht=True,

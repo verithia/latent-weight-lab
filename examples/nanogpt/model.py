@@ -1651,6 +1651,159 @@ class SparsePermutationLinear(nn.Module):
         return out
 
 
+def _sparse_permutation_map(
+    x: torch.Tensor,
+    permutations: torch.Tensor,
+    gains: tuple[torch.Tensor, ...],
+) -> torch.Tensor:
+    out = torch.zeros_like(x)
+    for permutation, gain in zip(permutations, gains, strict=True):
+        out = out + x.index_select(-1, permutation) * gain.to(dtype=x.dtype)
+    return out
+
+
+def _sparse_permutation_map_backward(
+    x: torch.Tensor,
+    grad_y: torch.Tensor,
+    permutations: torch.Tensor,
+    gains: tuple[torch.Tensor, ...],
+) -> tuple[torch.Tensor, list[torch.Tensor]]:
+    grad_x = torch.zeros_like(x)
+    grad_gains = []
+    reduce_dims = tuple(range(x.dim() - 1))
+    for permutation, gain in zip(permutations, gains, strict=True):
+        gathered = x.index_select(-1, permutation)
+        grad_gains.append(
+            (grad_y * gathered).sum(dim=reduce_dims).to(dtype=gain.dtype)
+        )
+        index = permutation.view(*([1] * (x.dim() - 1)), -1).expand_as(x)
+        grad_x.scatter_add_(
+            -1,
+            index,
+            grad_y * gain.to(dtype=grad_y.dtype),
+        )
+    return grad_x, grad_gains
+
+
+class _SparsePermutationSwiGLUFunction(torch.autograd.Function):
+    """Memory-bounded exact VJP for the frozen sparse SwiGLU topology.
+
+    The forward graph does not retain every gathered edge activation.  The
+    backward recomputes each branch from the saved layer input, then applies
+    the exact sparse transpose with scatter-add.  This changes arithmetic but
+    not the represented function or its gradients.
+    """
+
+    @staticmethod
+    def forward(
+        ctx,
+        x: torch.Tensor,
+        permutations: torch.Tensor,
+        branches: int,
+        paths: int,
+        branch_scale: float,
+        *gains: torch.Tensor,
+    ) -> torch.Tensor:
+        expected = int(branches) * 3 * int(paths)
+        if len(gains) != expected:
+            raise ValueError(
+                f"expected {expected} sparse gain tensors, got {len(gains)}"
+            )
+        ctx.branches = int(branches)
+        ctx.paths = int(paths)
+        ctx.branch_scale = float(branch_scale)
+        ctx.save_for_backward(x, permutations, *gains)
+        out = torch.zeros_like(x)
+        cursor = 0
+        for _ in range(ctx.branches):
+            up_gains = tuple(gains[cursor : cursor + ctx.paths])
+            cursor += ctx.paths
+            gate_gains = tuple(gains[cursor : cursor + ctx.paths])
+            cursor += ctx.paths
+            down_gains = tuple(gains[cursor : cursor + ctx.paths])
+            cursor += ctx.paths
+            branch_index = cursor // (3 * ctx.paths) - 1
+            base = branch_index * 3 * ctx.paths
+            up = _sparse_permutation_map(
+                x, permutations[base : base + ctx.paths], up_gains
+            )
+            gate = _sparse_permutation_map(
+                x,
+                permutations[
+                    base + ctx.paths : base + 2 * ctx.paths
+                ],
+                gate_gains,
+            )
+            hidden = F.silu(up) * gate
+            out = out + _sparse_permutation_map(
+                hidden,
+                permutations[
+                    base + 2 * ctx.paths : base + 3 * ctx.paths
+                ],
+                down_gains,
+            )
+        return out * ctx.branch_scale
+
+    @staticmethod
+    def backward(ctx, grad_output: torch.Tensor):
+        x, permutations, *saved_gains = ctx.saved_tensors
+        gains = tuple(saved_gains)
+        grad_x = torch.zeros_like(x)
+        grad_gains: list[torch.Tensor] = []
+        branch_grad = grad_output * ctx.branch_scale
+        cursor = 0
+        for branch_index in range(ctx.branches):
+            up_gains = gains[cursor : cursor + ctx.paths]
+            cursor += ctx.paths
+            gate_gains = gains[cursor : cursor + ctx.paths]
+            cursor += ctx.paths
+            down_gains = gains[cursor : cursor + ctx.paths]
+            cursor += ctx.paths
+            base = branch_index * 3 * ctx.paths
+            up_permutations = permutations[base : base + ctx.paths]
+            gate_permutations = permutations[
+                base + ctx.paths : base + 2 * ctx.paths
+            ]
+            down_permutations = permutations[
+                base + 2 * ctx.paths : base + 3 * ctx.paths
+            ]
+            up = _sparse_permutation_map(x, up_permutations, up_gains)
+            gate = _sparse_permutation_map(
+                x, gate_permutations, gate_gains
+            )
+            silu_up = F.silu(up)
+            hidden = silu_up * gate
+            grad_hidden, down_gain_grads = _sparse_permutation_map_backward(
+                hidden, branch_grad, down_permutations, down_gains
+            )
+            sigmoid_up = torch.sigmoid(up)
+            grad_up = (
+                grad_hidden
+                * gate
+                * sigmoid_up
+                * (1.0 + up * (1.0 - sigmoid_up))
+            )
+            grad_gate = grad_hidden * silu_up
+            grad_x_up, up_gain_grads = _sparse_permutation_map_backward(
+                x, grad_up, up_permutations, up_gains
+            )
+            grad_x_gate, gate_gain_grads = _sparse_permutation_map_backward(
+                x, grad_gate, gate_permutations, gate_gains
+            )
+            grad_x = grad_x + grad_x_up + grad_x_gate
+            grad_gains.extend(
+                [*up_gain_grads, *gate_gain_grads, *down_gain_grads]
+            )
+        return (
+            grad_x,
+            None,
+            None,
+            None,
+            None,
+            *grad_gains,
+        )
+
+
 class SparsePermutationSwiGLUMLP(nn.Module):
     """Compact-native four-branch SwiGLU with no generated dense weights."""
 
@@ -1696,11 +1849,25 @@ class SparsePermutationSwiGLUMLP(nn.Module):
         self.conditioned_output_gate_source = "residual"
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        out = torch.zeros_like(x)
+        permutations = []
+        gains = []
         for branch in self.branches:
-            hidden = F.silu(branch["up"](x)) * branch["gate"](x)
-            out = out + branch["down"](hidden)
-        return self.dropout(out * self.branch_scale)
+            for name in ("up", "gate", "down"):
+                module = branch[name]
+                permutations.extend(
+                    getattr(module, f"permutation_{path}")
+                    for path in range(module.paths)
+                )
+                gains.extend(module.gains)
+        out = _SparsePermutationSwiGLUFunction.apply(
+            x,
+            torch.stack(permutations),
+            len(self.branches),
+            self.branches[0]["up"].paths,
+            self.branch_scale,
+            *gains,
+        )
+        return self.dropout(out)
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:
         return None
