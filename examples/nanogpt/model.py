@@ -125,6 +125,8 @@ class GPTConfig:
     compact_native_mlp_group_size: int = 4
     compact_native_mlp_core_width: int = 736
     compact_native_mlp_factor_rank: int = 20
+    compact_native_mlp_shared_width: int = 236
+    compact_native_mlp_private_width: int = 10
     block_fht_ffn_spectral_rank: int = 0
     block_fht_ffn_spectral_out_groups: int = 1
     block_fht_ffn_spectral_in_groups: int = 1
@@ -2366,6 +2368,174 @@ class TwoStepRecurrentDenseCoreMLP(nn.Module):
         return None
 
 
+class SharedPairedAtomBank(nn.Module):
+    """One shared nonlinear atom bank, serialized once across depth."""
+
+    def __init__(self, config: GPTConfig) -> None:
+        super().__init__()
+        width = int(config.n_embd)
+        shared_width = int(config.compact_native_mlp_shared_width)
+        private_width = int(config.compact_native_mlp_private_width)
+        if config.n_embd == 768 and (shared_width, private_width) != (236, 10):
+            raise ValueError(
+                "the frozen paired-atom gate requires shared/private widths 236/10"
+            )
+        if shared_width <= 0 or private_width <= 0:
+            raise ValueError("paired-atom widths must be positive")
+        self.width = width
+        self.shared_width = shared_width
+        self.private_width = private_width
+        self.input_weight = nn.Parameter(torch.empty(shared_width, width))
+        self.output_weight = nn.Parameter(torch.empty(width, shared_width))
+        nn.init.normal_(self.input_weight, mean=0.0, std=0.02)
+        output_std = (
+            0.02
+            / math.sqrt(2 * config.n_layer)
+            * math.sqrt((4 * width) / (shared_width + private_width))
+        )
+        nn.init.normal_(self.output_weight, mean=0.0, std=output_std)
+        self.output_init_std = output_std
+
+
+class PairedSharedPrivateAtomMLP(nn.Module):
+    """Shared nonlinear atoms plus layer-private input/output atom pairs."""
+
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_bank: SharedPairedAtomBank,
+    ) -> None:
+        super().__init__()
+        if shared_bank.width != int(config.n_embd):
+            raise ValueError("paired-atom bank width does not match config")
+        if shared_bank.shared_width != int(config.compact_native_mlp_shared_width):
+            raise ValueError("shared paired-atom width does not match config")
+        if shared_bank.private_width != int(config.compact_native_mlp_private_width):
+            raise ValueError("private paired-atom width does not match config")
+        self.width = int(config.n_embd)
+        self.shared_width = int(shared_bank.shared_width)
+        self.private_width = int(shared_bank.private_width)
+        object.__setattr__(self, "_shared_bank", shared_bank)
+
+        self.private_input_weight = nn.Parameter(
+            torch.empty(self.private_width, self.width)
+        )
+        self.private_output_weight = nn.Parameter(
+            torch.empty(self.width, self.private_width)
+        )
+        nn.init.normal_(self.private_input_weight, mean=0.0, std=0.02)
+        nn.init.normal_(
+            self.private_output_weight,
+            mean=0.0,
+            std=shared_bank.output_init_std,
+        )
+        self.shared_hidden_gain = nn.Parameter(torch.ones(self.shared_width))
+        self.output_gain = nn.Parameter(torch.ones(self.width))
+
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(
+            int(config.compact_native_mlp_seed) + int(layer_id) * 1009
+        )
+        permutation = torch.randperm(self.width, generator=generator)
+        inverse_permutation = torch.argsort(permutation)
+        sign = (
+            torch.randint(
+                0,
+                2,
+                (self.width,),
+                generator=generator,
+                dtype=torch.int64,
+            )
+            .mul(2)
+            .sub(1)
+            .float()
+        )
+        self.register_buffer("permutation", permutation, persistent=False)
+        self.register_buffer(
+            "inverse_permutation",
+            inverse_permutation,
+            persistent=False,
+        )
+        self.register_buffer("sign", sign, persistent=False)
+        self.dropout = nn.Dropout(config.dropout)
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    @property
+    def shared_bank(self) -> SharedPairedAtomBank:
+        return object.__getattribute__(self, "_shared_bank")
+
+    def _fold_input_weight(self, weight: torch.Tensor) -> torch.Tensor:
+        inverse = self.inverse_permutation
+        sign = self.sign.to(dtype=weight.dtype)
+        return weight.index_select(-1, inverse) * sign.index_select(0, inverse)
+
+    def _fold_output_weight(self, weight: torch.Tensor) -> torch.Tensor:
+        inverse = self.inverse_permutation
+        sign = self.sign.to(dtype=weight.dtype)
+        return weight.index_select(0, inverse) * sign.index_select(
+            0, inverse
+        ).unsqueeze(-1)
+
+    def activation_space_shared_write(self, x: torch.Tensor) -> torch.Tensor:
+        """Unfolded reference formula used by exact equivalence tests."""
+        sign = self.sign.to(dtype=x.dtype)
+        signed = x.index_select(-1, self.permutation) * sign
+        hidden = F.gelu(F.linear(signed, self.shared_bank.input_weight))
+        hidden = hidden * self.shared_hidden_gain.to(dtype=hidden.dtype)
+        conjugated = F.linear(hidden, self.shared_bank.output_weight)
+        return (conjugated * sign).index_select(-1, self.inverse_permutation)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Fold the layer's procedural signed gauge into the shared matrices.
+        # The live token path therefore contains only dense GEMMs and GELU.
+        shared_hidden = F.gelu(
+            F.linear(x, self._fold_input_weight(self.shared_bank.input_weight))
+        )
+        shared_hidden = shared_hidden * self.shared_hidden_gain.to(
+            dtype=shared_hidden.dtype
+        )
+        shared_write = F.linear(
+            shared_hidden,
+            self._fold_output_weight(self.shared_bank.output_weight),
+        )
+        private_hidden = F.gelu(F.linear(x, self.private_input_weight))
+        private_write = F.linear(private_hidden, self.private_output_weight)
+        output = (shared_write + private_write) * self.output_gain.to(dtype=x.dtype)
+        return self.dropout(output)
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
+
+
 class SharedTensorProductRidgeField(nn.Module):
     """Shared factor and write map for the semiprivate tensor-product MLP."""
 
@@ -4504,6 +4674,7 @@ class Block(nn.Module):
         shared_compact_mlp_core: SharedDenseResidualCore | None = None,
         shared_compact_mlp_tensor_product: SharedTensorProductRidgeField | None = None,
         shared_compact_mlp_recurrent_core: SharedRecurrentDenseCore | None = None,
+        shared_compact_mlp_paired_atom_bank: SharedPairedAtomBank | None = None,
     ) -> None:
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
@@ -4544,6 +4715,14 @@ class Block(nn.Module):
                 config,
                 layer_id,
                 shared_compact_mlp_recurrent_core,
+            )
+        elif config.compact_native_mlp == "paired_shared_private_atoms236x10":
+            if shared_compact_mlp_paired_atom_bank is None:
+                raise ValueError("shared paired-atom bank is required")
+            self.mlp = PairedSharedPrivateAtomMLP(
+                config,
+                layer_id,
+                shared_compact_mlp_paired_atom_bank,
             )
         else:
             raise ValueError(
@@ -4606,6 +4785,10 @@ class GPT(nn.Module):
             self.shared_compact_mlp_recurrent_core = SharedRecurrentDenseCore(config)
         else:
             self.shared_compact_mlp_recurrent_core = None
+        if config.compact_native_mlp == "paired_shared_private_atoms236x10":
+            self.shared_compact_mlp_paired_atom_bank = SharedPairedAtomBank(config)
+        else:
+            self.shared_compact_mlp_paired_atom_bank = None
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
@@ -4620,6 +4803,7 @@ class GPT(nn.Module):
                             self.shared_compact_mlp_core,
                             self.shared_compact_mlp_tensor_product,
                             self.shared_compact_mlp_recurrent_core,
+                            self.shared_compact_mlp_paired_atom_bank,
                         )
                         for layer_id in range(config.n_layer)
                     ]
@@ -5107,6 +5291,8 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 SharedTensorProductRidgeField,
                 TwoStepRecurrentDenseCoreMLP,
                 SharedRecurrentDenseCore,
+                PairedSharedPrivateAtomMLP,
+                SharedPairedAtomBank,
             ),
         ):
             for parameter in module.parameters():

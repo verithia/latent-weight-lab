@@ -1009,6 +1009,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compact-native-mlp-seed", type=int, default=20260827)
     parser.add_argument("--compact-native-mlp-group-size", type=int, default=4)
     parser.add_argument("--compact-native-mlp-core-width", type=int, default=736)
+    parser.add_argument("--compact-native-mlp-factor-rank", type=int, default=20)
+    parser.add_argument("--compact-native-mlp-shared-width", type=int, default=236)
+    parser.add_argument("--compact-native-mlp-private-width", type=int, default=10)
     parser.add_argument("--block-fht-ffn-spectral-rank", type=int, default=0)
     parser.add_argument("--block-fht-ffn-spectral-out-groups", type=int, default=1)
     parser.add_argument("--block-fht-ffn-spectral-in-groups", type=int, default=1)
@@ -1614,6 +1617,9 @@ def main() -> None:
         compact_native_mlp_seed=args.compact_native_mlp_seed,
         compact_native_mlp_group_size=args.compact_native_mlp_group_size,
         compact_native_mlp_core_width=args.compact_native_mlp_core_width,
+        compact_native_mlp_factor_rank=args.compact_native_mlp_factor_rank,
+        compact_native_mlp_shared_width=args.compact_native_mlp_shared_width,
+        compact_native_mlp_private_width=args.compact_native_mlp_private_width,
         block_fht_ffn_spectral_rank=args.block_fht_ffn_spectral_rank,
         block_fht_ffn_spectral_out_groups=args.block_fht_ffn_spectral_out_groups,
         block_fht_ffn_spectral_in_groups=args.block_fht_ffn_spectral_in_groups,

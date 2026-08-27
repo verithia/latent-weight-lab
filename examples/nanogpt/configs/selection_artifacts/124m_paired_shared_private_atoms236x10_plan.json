@@ -1,0 +1,54 @@
+{
+  "schema_version": "mai_124m_paired_shared_private_atoms236x10_plan_v1",
+  "status": "preregistered before tests, systems measurement, or quality",
+  "scientific_question": "Can a sub-1%-state MLP recover layer-private functional directions when each private nonlinear atom owns both its input detector and its residual-write vector?",
+  "causal_basis": {
+    "shared_recurrent_core_terminal_gap": 0.2706,
+    "single_shared_complete_trunk_terminal_gap": 0.2053,
+    "three_shared_complete_trunks_terminal_gap": 0.1225,
+    "four_shared_complete_trunks_terminal_gap": 0.0799,
+    "seven_shared_complete_trunks_terminal_gap": 0.0262,
+    "deduction": "depth without layer-private frames failed, while additional complete input/output trunk pairs monotonically helped; spend the remaining sub-1% budget on layer-private complete nonlinear atoms rather than another shared transform"
+  },
+  "frozen_mechanism": {
+    "shared_width": 236,
+    "private_width_per_layer": 10,
+    "shared_state": ["one 236x768 input bank", "one 768x236 output bank"],
+    "private_state_per_layer": ["one 10x768 input bank", "one 768x10 output bank", "one 236 shared-channel gain", "one 768 output gain"],
+    "procedural_signed_permutation_seed": 20260830,
+    "activation": "GELU",
+    "live_path": "shared and private dense GEMMs only; the shared layer gauge is algebraically folded into its two shared matrices",
+    "initialization": "all input atoms use GPT c_fc std 0.02; all output atoms share a variance corrected for total width 246 to match the ordinary width-3072 GPT MLP residual-write second moment",
+    "optimizer": "Muon for all shared/private matrices and AdamW for vector gains",
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715
+  },
+  "accounting": {
+    "compact_mlp_scalars": 558864,
+    "dense_mlp_scalars": 56623104,
+    "compact_fraction": 0.009869893391927084,
+    "ideal_madds_per_layer_token": 377856,
+    "dense_madds_per_layer_token": 4718592,
+    "ideal_madds_fraction": 0.080078125
+  },
+  "gates": {
+    "state_and_replay": "exact and no dense MLP tensor, dense shadow, ambient code, persistent procedural index, or duplicated shared state",
+    "functional_equivalence": "folded live shared path and all compact gradients equal the activation-space signed conjugation",
+    "gradient": "all live coordinates finite and nonzero; both private input and private output gradients are noncollapsed across layers",
+    "relative_throughput_minimum": 0.9,
+    "conventional_mfu_minimum": 0.2,
+    "parent_tokens_per_second": 330315.77625,
+    "parent_terminal_validation_ce": 5.361,
+    "candidate_terminal_validation_ce_maximum": 5.411,
+    "authorized_quality_updates": 238,
+    "next_rung_gap_maximum": 0.02
+  },
+  "forbidden": [
+    "shared/private width, gain, permutation, initialization, LR, optimizer, or seed sweeps",
+    "5TPP without the 0.5TPP quality pass",
+    "model-size scaling",
+    "storing PCA basis vectors, dense shadow weights, or ambient optimizer carry"
+  ]
+}
