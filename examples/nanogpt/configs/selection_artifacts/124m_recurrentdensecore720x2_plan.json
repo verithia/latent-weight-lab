@@ -1,0 +1,52 @@
+{
+  "schema_version": "mai_124m_recurrentdensecore720x2_plan_v1",
+  "status": "preregistered before tests, systems measurement, or quality",
+  "scientific_question": "Can nonlinear depth recover compact MLP capacity when one broad shared learned core is reused twice in procedurally distinct layer/step gauges?",
+  "causal_basis": {
+    "single_shared_core_terminal_gap": 0.2459,
+    "semiprivate_tensor_product_terminal_gap": 0.3989,
+    "deduction": "retain a broad learned core, remove the 440-channel write bottleneck, and add a second nonlinear composition without another stored dense direction"
+  },
+  "frozen_mechanism": {
+    "core_shape": [720, 720],
+    "recurrence_depth": 2,
+    "shared_state": ["one 720x720 dense core"],
+    "private_state_per_layer": ["two 720 input-gain vectors", "two 720 output-gain vectors"],
+    "procedural_signed_permutation_seed": 20260829,
+    "activation": "GELU",
+    "residual_contract": "internal recurrence carries x; compact MLP returns h2-x because Block.forward owns the outer residual",
+    "tail_contract": "each conjugated update pads 48 zeros; recurrent state carries all 768 coordinates and stores no tail vector",
+    "initialization": "each recurrent write receives half the single-write variance so the summed residual scale matches dense GPT initialization",
+    "optimizer": "Muon for the shared matrix and AdamW for vector gains",
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715
+  },
+  "accounting": {
+    "compact_mlp_scalars": 552960,
+    "dense_mlp_scalars": 56623104,
+    "compact_fraction": 0.009765625,
+    "ideal_madds_per_layer_token": 1036800,
+    "dense_madds_per_layer_token": 4718592,
+    "ideal_madds_fraction": 0.2197265625
+  },
+  "gates": {
+    "state_and_replay": "exact and no dense MLP tensor, dense shadow, ambient code, persistent procedural index, or duplicated shared state",
+    "functional_equivalence": "folded live function and all compact gradients equal the activation-space recurrence",
+    "gradient": "all live coordinates finite and nonzero; private layer and recurrent-step gradients noncollapsed",
+    "relative_throughput_minimum": 0.9,
+    "conventional_mfu_minimum": 0.2,
+    "parent_tokens_per_second": 330315.77625,
+    "parent_terminal_validation_ce": 5.361,
+    "candidate_terminal_validation_ce_maximum": 5.411,
+    "authorized_quality_updates": 238,
+    "next_rung_gap_maximum": 0.02
+  },
+  "forbidden": [
+    "width, depth, residual, gain, permutation, initialization, LR, optimizer, or seed sweeps",
+    "5TPP without the 0.5TPP quality pass",
+    "model-size scaling",
+    "storing a learned basis vector or ambient optimizer carry"
+  ]
+}

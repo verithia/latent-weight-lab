@@ -2173,6 +2173,199 @@ class SharedDenseCoreResidualMLP(nn.Module):
         return None
 
 
+class SharedRecurrentDenseCore(nn.Module):
+    """One learned square core reused by every layer and recurrent step."""
+
+    def __init__(self, config: GPTConfig) -> None:
+        super().__init__()
+        width = int(config.compact_native_mlp_core_width)
+        if config.n_embd == 768 and width != 720:
+            raise ValueError("the frozen recurrent dense-core gate requires width 720")
+        if width <= 0 or width > config.n_embd:
+            raise ValueError("recurrent dense-core width must be in (0, n_embd]")
+        self.width = width
+        self.weight = nn.Parameter(torch.empty(width, width))
+        # Two procedurally decorrelated writes are added inside one residual
+        # block.  Give each half the single-write variance so their sum matches
+        # the ordinary GPT MLP residual-write scale at initialization.
+        output_std = (
+            0.02
+            / math.sqrt(2 * config.n_layer)
+            * math.sqrt((4 * config.n_embd) / (2 * width))
+        )
+        nn.init.normal_(self.weight, mean=0.0, std=output_std)
+        self.init_std = output_std
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return F.linear(x, self.weight)
+
+
+class TwoStepRecurrentDenseCoreMLP(nn.Module):
+    """Two residual writes through one shared core in private signed gauges."""
+
+    depth = 2
+
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_core: SharedRecurrentDenseCore,
+    ) -> None:
+        super().__init__()
+        if shared_core.width != int(config.compact_native_mlp_core_width):
+            raise ValueError("shared recurrent core width does not match config")
+        self.width = int(config.n_embd)
+        self.core_width = int(shared_core.width)
+        object.__setattr__(self, "_shared_core", shared_core)
+
+        permutations = []
+        inverse_permutations = []
+        signs = []
+        for step in range(self.depth):
+            generator = torch.Generator(device="cpu")
+            generator.manual_seed(
+                int(config.compact_native_mlp_seed)
+                + int(layer_id) * 1009
+                + step * 104729
+            )
+            permutation = torch.randperm(self.width, generator=generator)
+            permutations.append(permutation)
+            inverse_permutations.append(torch.argsort(permutation))
+            signs.append(
+                torch.randint(
+                    0,
+                    2,
+                    (self.width,),
+                    generator=generator,
+                    dtype=torch.int64,
+                )
+                .mul(2)
+                .sub(1)
+                .float()
+            )
+        self.register_buffer(
+            "permutations",
+            torch.stack(permutations),
+            persistent=False,
+        )
+        self.register_buffer(
+            "inverse_permutations",
+            torch.stack(inverse_permutations),
+            persistent=False,
+        )
+        self.register_buffer("signs", torch.stack(signs), persistent=False)
+
+        pregelu_scale = 0.02 * math.sqrt(config.n_embd)
+        self.input_gain = nn.ParameterList(
+            [
+                nn.Parameter(torch.full((self.core_width,), pregelu_scale))
+                for _ in range(self.depth)
+            ]
+        )
+        self.output_gain = nn.ParameterList(
+            [
+                nn.Parameter(torch.ones(self.core_width))
+                for _ in range(self.depth)
+            ]
+        )
+        self.dropout = nn.Dropout(config.dropout)
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    @property
+    def shared_core(self) -> SharedRecurrentDenseCore:
+        return object.__getattribute__(self, "_shared_core")
+
+    def _folded_step(self, state: torch.Tensor, step: int) -> torch.Tensor:
+        """Evaluate one signed-conjugated update without activation gathers."""
+        inverse = self.inverse_permutations[step]
+        sign = self.signs[step].to(dtype=state.dtype)
+        tail = self.width - self.core_width
+
+        input_gain = F.pad(
+            self.input_gain[step].to(dtype=state.dtype),
+            (0, tail),
+        )
+        ambient_input_gain = (input_gain * sign).index_select(0, inverse)
+        activated = F.gelu(state * ambient_input_gain)
+
+        padded_core = F.pad(
+            self.shared_core.weight,
+            (0, tail, 0, tail),
+        )
+        folded_core = padded_core.index_select(0, inverse).index_select(
+            1,
+            inverse,
+        )
+        output_gain = F.pad(
+            self.output_gain[step].to(dtype=folded_core.dtype),
+            (0, tail),
+        )
+        ambient_output_gain = (output_gain * sign.to(folded_core.dtype)).index_select(
+            0,
+            inverse,
+        )
+        folded_core = folded_core * ambient_output_gain.unsqueeze(-1)
+        return F.linear(activated, folded_core)
+
+    def activation_space_step(
+        self,
+        state: torch.Tensor,
+        step: int,
+    ) -> torch.Tensor:
+        """Unfolded reference formula used by exact equivalence tests."""
+        permutation = self.permutations[step]
+        inverse = self.inverse_permutations[step]
+        sign = self.signs[step].to(dtype=state.dtype)
+        signed = state.index_select(-1, permutation) * sign
+        activated = F.gelu(
+            signed[..., : self.core_width]
+            * self.input_gain[step].to(dtype=state.dtype)
+        )
+        main = self.shared_core(activated)
+        main = main * self.output_gain[step].to(dtype=main.dtype)
+        conjugated = F.pad(main, (0, self.width - self.core_width))
+        return (conjugated * sign).index_select(-1, inverse)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        state = x
+        for step in range(self.depth):
+            state = state + self._folded_step(state, step)
+        # Block.forward owns the outer skip, so this module returns only the
+        # accumulated write.  Returning state would add x twice.
+        return self.dropout(state - x)
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
+
+
 class SharedTensorProductRidgeField(nn.Module):
     """Shared factor and write map for the semiprivate tensor-product MLP."""
 
@@ -4310,6 +4503,7 @@ class Block(nn.Module):
         shared_compact_mlp_transport: SharedGroupTransport | None = None,
         shared_compact_mlp_core: SharedDenseResidualCore | None = None,
         shared_compact_mlp_tensor_product: SharedTensorProductRidgeField | None = None,
+        shared_compact_mlp_recurrent_core: SharedRecurrentDenseCore | None = None,
     ) -> None:
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
@@ -4342,6 +4536,14 @@ class Block(nn.Module):
                 config,
                 layer_id,
                 shared_compact_mlp_tensor_product,
+            )
+        elif config.compact_native_mlp == "shared_recurrent_core_residual720x2":
+            if shared_compact_mlp_recurrent_core is None:
+                raise ValueError("shared recurrent compact MLP core is required")
+            self.mlp = TwoStepRecurrentDenseCoreMLP(
+                config,
+                layer_id,
+                shared_compact_mlp_recurrent_core,
             )
         else:
             raise ValueError(
@@ -4400,6 +4602,10 @@ class GPT(nn.Module):
             )
         else:
             self.shared_compact_mlp_tensor_product = None
+        if config.compact_native_mlp == "shared_recurrent_core_residual720x2":
+            self.shared_compact_mlp_recurrent_core = SharedRecurrentDenseCore(config)
+        else:
+            self.shared_compact_mlp_recurrent_core = None
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
@@ -4413,6 +4619,7 @@ class GPT(nn.Module):
                             self.shared_compact_mlp_transport,
                             self.shared_compact_mlp_core,
                             self.shared_compact_mlp_tensor_product,
+                            self.shared_compact_mlp_recurrent_core,
                         )
                         for layer_id in range(config.n_layer)
                     ]
@@ -4898,6 +5105,8 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 SharedDenseResidualCore,
                 SemiprivateTensorProductRidgeMLP,
                 SharedTensorProductRidgeField,
+                TwoStepRecurrentDenseCoreMLP,
+                SharedRecurrentDenseCore,
             ),
         ):
             for parameter in module.parameters():
