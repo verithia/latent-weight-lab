@@ -741,6 +741,119 @@ class SinusoidalCoordinateField(nn.Module):
         return dense * (self.rank + 1)
 
 
+class AdditiveSinusoidalCoordinateField(nn.Module):
+    """Sum of independently gated rank-one sinusoidal matrix fields."""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        rank: int,
+        seed: int,
+    ) -> None:
+        super().__init__()
+        if rank < 1:
+            raise ValueError("additive sinusoidal rank must be positive")
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.rank = int(rank)
+        self.seed = int(seed)
+        generator = torch.Generator(device="cpu").manual_seed(self.seed)
+        self.row_codes = nn.Parameter(
+            torch.randn(
+                self.out_features, self.rank, generator=generator
+            )
+        )
+        self.column_codes = nn.Parameter(
+            torch.randn(
+                self.in_features, self.rank, generator=generator
+            )
+        )
+        self.inverse_sqrt_rank = 1.0 / math.sqrt(self.rank)
+
+    @property
+    def coordinate_tensors(self) -> tuple[torch.Tensor, ...]:
+        return self.row_codes, self.column_codes
+
+    @property
+    def trainable_scalar_count(self) -> int:
+        return sum(tensor.numel() for tensor in self.coordinate_tensors)
+
+    def _coordinates(
+        self, *, differentiable_anchor: bool
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if differentiable_anchor:
+            return self.row_codes, self.column_codes
+        return self.row_codes.detach(), self.column_codes.detach()
+
+    def weight(self) -> torch.Tensor:
+        output = self.row_codes.new_zeros(
+            self.out_features, self.in_features
+        )
+        for head in range(self.rank):
+            phase = torch.outer(
+                self.row_codes[:, head], self.column_codes[:, head]
+            )
+            output.add_(torch.sin(phase))
+        return output * self.inverse_sqrt_rank
+
+    def split_coordinates(
+        self, vector: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        row_count = self.row_codes.numel()
+        return (
+            vector[:row_count].reshape_as(self.row_codes),
+            vector[row_count:].reshape_as(self.column_codes),
+        )
+
+    def jvp(
+        self, vector: torch.Tensor, *, differentiable_anchor: bool = False
+    ) -> torch.Tensor:
+        row_direction, column_direction = self.split_coordinates(vector)
+        row, column = self._coordinates(
+            differentiable_anchor=differentiable_anchor
+        )
+        output = row.new_zeros(self.out_features, self.in_features)
+        for head in range(self.rank):
+            phase = torch.outer(row[:, head], column[:, head])
+            phase_direction = (
+                torch.outer(row_direction[:, head], column[:, head])
+                + torch.outer(row[:, head], column_direction[:, head])
+            )
+            output.add_(torch.cos(phase) * phase_direction)
+        return output * self.inverse_sqrt_rank
+
+    def coordinate_metric(self) -> torch.Tensor:
+        with torch.no_grad():
+            row, column = self._coordinates(differentiable_anchor=False)
+            row_metric = torch.empty_like(row)
+            column_metric = torch.empty_like(column)
+            for head in range(self.rank):
+                phase = torch.outer(row[:, head], column[:, head])
+                cosine_square = torch.cos(phase).square()
+                row_metric[:, head] = (
+                    cosine_square @ column[:, head].square()
+                ) * self.inverse_sqrt_rank**2
+                column_metric[:, head] = (
+                    cosine_square.transpose(0, 1)
+                    @ row[:, head].square()
+                ) * self.inverse_sqrt_rank**2
+        return torch.cat(
+            (row_metric.reshape(-1), column_metric.reshape(-1))
+        ).clamp_min(1e-12)
+
+    def clamp_coordinates(self, bound: float) -> None:
+        with torch.no_grad():
+            self.row_codes.clamp_(-bound, bound)
+            self.column_codes.clamp_(-bound, bound)
+
+    def ideal_forward_scalar_ops(self) -> int:
+        dense = self.out_features * self.in_features
+        # Per head: one outer product and one elementwise sine.
+        return 2 * self.rank * dense
+
+
 def flatten_tensors(tensors: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.cat([tensor.reshape(-1) for tensor in tensors])
 
@@ -971,6 +1084,13 @@ def build_family(
         )
     if family == "sinc6":
         return SinusoidalCoordinateField(
+            in_features,
+            out_features,
+            rank=6,
+            seed=seed,
+        )
+    if family == "sinc6_heads":
+        return AdditiveSinusoidalCoordinateField(
             in_features,
             out_features,
             rank=6,

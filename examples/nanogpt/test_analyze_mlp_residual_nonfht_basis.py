@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 
 from examples.nanogpt.analyze_mlp_residual_nonfht_basis import (
+    AdditiveSinusoidalCoordinateField,
     DiagonalToeplitzDiagonal,
     LiveTensorNetwork,
     LearnedSparseExpander,
@@ -155,6 +156,26 @@ def test_sinusoidal_coordinate_known_tangent_is_recovered() -> None:
     assert result["cg_projection_capture"] > 0.999
 
 
+def test_additive_sinusoidal_coordinate_field_jvp_and_adjoint() -> None:
+    module = AdditiveSinusoidalCoordinateField(5, 7, rank=3, seed=41)
+    assert module.trainable_scalar_count == (5 + 7) * 3
+    check_jvp_and_adjoint(module)
+
+
+def test_additive_sinusoidal_coordinate_known_tangent_is_recovered() -> None:
+    module = AdditiveSinusoidalCoordinateField(4, 6, rank=2, seed=43)
+    direction = torch.randn(module.trainable_scalar_count)
+    target = module.jvp(direction)
+    result = cg_project(
+        module,
+        target,
+        maximum_iterations=256,
+        relative_tolerance=1e-8,
+        damping_ratio=1e-9,
+    )
+    assert result["cg_projection_capture"] > 0.999
+
+
 def test_registered_full_size_budgets() -> None:
     dtd = DiagonalToeplitzDiagonal(768, 3072, branches=3, seed=1)
     expander_fc = LearnedSparseExpander(
@@ -207,5 +228,10 @@ def test_registered_full_size_budgets() -> None:
     sinusoidal = SinusoidalCoordinateField(
         768, 3072, rank=6, seed=11
     )
+    additive_sinusoidal = AdditiveSinusoidalCoordinateField(
+        768, 3072, rank=6, seed=13
+    )
     assert sinusoidal.trainable_scalar_count == 23040
+    assert additive_sinusoidal.trainable_scalar_count == 23040
     assert sinusoidal.trainable_scalar_count <= dense // 100
+    assert additive_sinusoidal.trainable_scalar_count <= dense // 100
