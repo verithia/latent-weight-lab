@@ -118,6 +118,10 @@ class GPTConfig:
     block_fht_ffn_lowrank_init_std: float = 0.02
     compact_mlp_gradient_seeded_rank: int = 0
     compact_mlp_gradient_seeded_scale: float = 1.0
+    compact_native_mlp: str = ""
+    compact_native_mlp_branches: int = 4
+    compact_native_mlp_paths: int = 3
+    compact_native_mlp_seed: int = 20260827
     block_fht_ffn_spectral_rank: int = 0
     block_fht_ffn_spectral_out_groups: int = 1
     block_fht_ffn_spectral_in_groups: int = 1
@@ -1590,6 +1594,143 @@ class CausalSelfAttention(nn.Module):
         if self.cproj_output_cayley is not None:
             y = self.cproj_output_cayley(y)
         return self.resid_dropout(y)
+
+
+class SparsePermutationLinear(nn.Module):
+    """A square map with procedural connectivity and learned edge gains.
+
+    Each output coordinate receives one identity edge and ``paths - 1``
+    globally permuted edges.  The integer connectivity is regenerated from the
+    configured seed and is deliberately absent from checkpoints; only the
+    length-``width`` gain vectors are persistent training state.
+    """
+
+    def __init__(
+        self,
+        width: int,
+        paths: int,
+        seed: int,
+        init_std: float,
+    ) -> None:
+        super().__init__()
+        if width <= 0:
+            raise ValueError("sparse-permutation width must be positive")
+        if paths < 1:
+            raise ValueError("sparse-permutation paths must be positive")
+        if not math.isfinite(init_std) or init_std <= 0.0:
+            raise ValueError("sparse-permutation init_std must be positive and finite")
+        self.width = int(width)
+        self.paths = int(paths)
+        self.seed = int(seed)
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(self.seed)
+        for path in range(self.paths):
+            permutation = (
+                torch.arange(self.width, dtype=torch.long)
+                if path == 0
+                else torch.randperm(self.width, generator=generator)
+            )
+            self.register_buffer(
+                f"permutation_{path}", permutation, persistent=False
+            )
+        self.gains = nn.ParameterList(
+            [nn.Parameter(torch.empty(self.width)) for _ in range(self.paths)]
+        )
+        for gain in self.gains:
+            nn.init.normal_(gain, mean=0.0, std=float(init_std))
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if x.size(-1) != self.width:
+            raise ValueError(
+                f"sparse-permutation input width {x.size(-1)} != {self.width}"
+            )
+        out = torch.zeros_like(x)
+        for path, gain in enumerate(self.gains):
+            permutation = getattr(self, f"permutation_{path}")
+            out = out + x.index_select(-1, permutation) * gain.to(dtype=x.dtype)
+        return out
+
+
+class SparsePermutationSwiGLUMLP(nn.Module):
+    """Compact-native four-branch SwiGLU with no generated dense weights."""
+
+    def __init__(self, config: GPTConfig, layer_id: int) -> None:
+        super().__init__()
+        branches = int(config.compact_native_mlp_branches)
+        paths = int(config.compact_native_mlp_paths)
+        if branches != 4 or paths != 3:
+            raise ValueError(
+                "the frozen sparse-permutation SwiGLU gate requires "
+                "branches=4 and paths=3"
+            )
+        width = int(config.n_embd)
+        up_std = 0.02 * math.sqrt(width / paths)
+        down_std = (
+            0.02
+            / math.sqrt(2 * config.n_layer)
+            * math.sqrt((4 * width) / paths)
+        )
+        base_seed = int(config.compact_native_mlp_seed) + layer_id * 1009
+        self.branches = nn.ModuleList()
+        for branch in range(branches):
+            branch_seed = base_seed + branch * 101
+            self.branches.append(
+                nn.ModuleDict(
+                    {
+                        "up": SparsePermutationLinear(
+                            width, paths, branch_seed + 0, up_std
+                        ),
+                        "gate": SparsePermutationLinear(
+                            width, paths, branch_seed + 31, up_std
+                        ),
+                        "down": SparsePermutationLinear(
+                            width, paths, branch_seed + 67, down_std
+                        ),
+                    }
+                )
+            )
+        self.branch_scale = 1.0 / math.sqrt(branches)
+        self.dropout = nn.Dropout(config.dropout)
+        # Preserve the interface consumed by Block and GPT diagnostics.
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        out = torch.zeros_like(x)
+        for branch in self.branches:
+            hidden = F.silu(branch["up"](x)) * branch["gate"](x)
+            out = out + branch["down"](hidden)
+        return self.dropout(out * self.branch_scale)
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
 
 
 class MLP(nn.Module):
@@ -3556,7 +3697,15 @@ class Block(nn.Module):
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
         self.attn = CausalSelfAttention(config, layer_id)
         self.ln_2 = LayerNorm(config.n_embd, bias=config.bias)
-        self.mlp = MLP(config, layer_id)
+        if config.compact_native_mlp == "":
+            self.mlp = MLP(config, layer_id)
+        elif config.compact_native_mlp == "sparse_permutation_swiglu4":
+            self.mlp = SparsePermutationSwiGLUMLP(config, layer_id)
+        else:
+            raise ValueError(
+                "unsupported compact_native_mlp: "
+                f"{config.compact_native_mlp!r}"
+            )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = x + self.attn(self.ln_1(x))
@@ -4012,7 +4161,7 @@ class GPT(nn.Module):
     ) -> list[dict[str, float]]:
         diagnostics = []
         for layer, block in enumerate(self.transformer.h):
-            module = block.mlp.c_proj
+            module = getattr(block.mlp, "c_proj", None)
             if not isinstance(module, ProductFHTLinear):
                 continue
             row = module.finalize_pullback_probe()
@@ -4043,6 +4192,9 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
     for param in model.parameters():
         param.requires_grad_(False)
     for module in model.modules():
+        if isinstance(module, SparsePermutationSwiGLUMLP):
+            for parameter in module.parameters():
+                parameter.requires_grad_(True)
         if isinstance(module, BlockFHTLinear):
             module.generator.latent.requires_grad_(True)
             if module.bias is not None:

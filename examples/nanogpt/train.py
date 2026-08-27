@@ -1003,6 +1003,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compact-mlp-gradient-seeded-rank", type=int, default=0)
     parser.add_argument("--compact-mlp-gradient-seeded-scale", type=float, default=1.0)
     parser.add_argument("--compact-mlp-gradient-bootstrap-seed", type=int, default=20260826)
+    parser.add_argument("--compact-native-mlp", type=str, default="")
+    parser.add_argument("--compact-native-mlp-branches", type=int, default=4)
+    parser.add_argument("--compact-native-mlp-paths", type=int, default=3)
+    parser.add_argument("--compact-native-mlp-seed", type=int, default=20260827)
     parser.add_argument("--block-fht-ffn-spectral-rank", type=int, default=0)
     parser.add_argument("--block-fht-ffn-spectral-out-groups", type=int, default=1)
     parser.add_argument("--block-fht-ffn-spectral-in-groups", type=int, default=1)
@@ -1602,6 +1606,10 @@ def main() -> None:
         block_fht_ffn_lowrank_init_std=args.block_fht_ffn_lowrank_init_std,
         compact_mlp_gradient_seeded_rank=args.compact_mlp_gradient_seeded_rank,
         compact_mlp_gradient_seeded_scale=args.compact_mlp_gradient_seeded_scale,
+        compact_native_mlp=args.compact_native_mlp,
+        compact_native_mlp_branches=args.compact_native_mlp_branches,
+        compact_native_mlp_paths=args.compact_native_mlp_paths,
+        compact_native_mlp_seed=args.compact_native_mlp_seed,
         block_fht_ffn_spectral_rank=args.block_fht_ffn_spectral_rank,
         block_fht_ffn_spectral_out_groups=args.block_fht_ffn_spectral_out_groups,
         block_fht_ffn_spectral_in_groups=args.block_fht_ffn_spectral_in_groups,
