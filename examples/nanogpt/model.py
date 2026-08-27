@@ -2701,6 +2701,185 @@ class HouseholderFrameSharedAtomMLP(nn.Module):
         return None
 
 
+class SharedSpectralPhaseAtomBank(nn.Module):
+    """One shared atom bank moved by layer-private FFT phase frames."""
+
+    def __init__(self, config: GPTConfig) -> None:
+        super().__init__()
+        width = int(config.n_embd)
+        atom_width = int(config.compact_native_mlp_shared_width)
+        if width == 768 and atom_width != 353:
+            raise ValueError(
+                "the frozen spectral-phase frame gate requires width 353"
+            )
+        if width < 4 or width % 2:
+            raise ValueError("spectral-phase width must be even and at least four")
+        if atom_width <= 0:
+            raise ValueError("spectral-phase atom width must be positive")
+        self.width = width
+        self.atom_width = atom_width
+        self.phase_bins = width // 2 - 1
+        self.input_weight = nn.Parameter(torch.empty(atom_width, width))
+        self.output_weight = nn.Parameter(torch.empty(width, atom_width))
+        nn.init.normal_(self.input_weight, mean=0.0, std=0.02)
+        output_std = (
+            0.02
+            / math.sqrt(2 * config.n_layer)
+            * math.sqrt((4 * width) / atom_width)
+        )
+        nn.init.normal_(self.output_weight, mean=0.0, std=output_std)
+        self.output_init_std = output_std
+
+
+class SpectralPhaseFrameSharedAtomMLP(nn.Module):
+    """Shared nonlinear atoms with full-rank, basis-free spectral frames."""
+
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_bank: SharedSpectralPhaseAtomBank,
+    ) -> None:
+        super().__init__()
+        if shared_bank.width != int(config.n_embd):
+            raise ValueError("shared spectral-phase width does not match config")
+        if shared_bank.atom_width != int(config.compact_native_mlp_shared_width):
+            raise ValueError("shared spectral-phase atom width does not match config")
+        self.width = int(shared_bank.width)
+        self.atom_width = int(shared_bank.atom_width)
+        self.phase_bins = int(shared_bank.phase_bins)
+        object.__setattr__(self, "_shared_bank", shared_bank)
+
+        # This changes the fixed Fourier gauge for each layer without adding
+        # any persistent state.  Buffers move with the module but are omitted
+        # from state_dict/checkpoints by construction.
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(
+            int(config.compact_native_mlp_seed) + int(layer_id) * 1009
+        )
+        permutation = torch.randperm(self.width, generator=generator)
+        inverse_permutation = torch.argsort(permutation)
+        sign = torch.randint(0, 2, (self.width,), generator=generator)
+        sign = sign.to(torch.float32).mul_(2.0).sub_(1.0)
+        self.register_buffer("frame_permutation", permutation, persistent=False)
+        self.register_buffer(
+            "frame_inverse_permutation", inverse_permutation, persistent=False
+        )
+        self.register_buffer("frame_sign", sign, persistent=False)
+
+        self.input_phase = nn.Parameter(torch.zeros(self.phase_bins))
+        self.output_phase = nn.Parameter(torch.zeros(self.phase_bins))
+        self.hidden_gain = nn.Parameter(torch.ones(self.atom_width))
+        self.output_gain = nn.Parameter(torch.ones(self.width))
+        self.dropout = nn.Dropout(config.dropout)
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    @property
+    def shared_bank(self) -> SharedSpectralPhaseAtomBank:
+        return object.__getattribute__(self, "_shared_bank")
+
+    def _signed_permute(self, values: torch.Tensor) -> torch.Tensor:
+        sign = self.frame_sign.to(dtype=values.dtype)
+        return values.index_select(-1, self.frame_permutation) * sign
+
+    def _inverse_signed_permute(self, values: torch.Tensor) -> torch.Tensor:
+        inverse = self.frame_inverse_permutation
+        sign = self.frame_sign.index_select(0, inverse).to(dtype=values.dtype)
+        return values.index_select(-1, inverse) * sign
+
+    def _apply_spectral_frame(
+        self,
+        values: torch.Tensor,
+        phase: torch.Tensor,
+        *,
+        inverse: bool = False,
+    ) -> torch.Tensor:
+        if values.shape[-1] != self.width:
+            raise ValueError("spectral frame input width mismatch")
+        if phase.numel() != self.phase_bins:
+            raise ValueError("spectral frame phase count mismatch")
+        original_dtype = values.dtype
+        # Weight folding is FP32 in production.  Promote tiny CPU tests too so
+        # torch.fft never relies on reduced-precision backend support.
+        transformed = self._signed_permute(values.float())
+        phase_values = phase.float()
+        if inverse:
+            phase_values = -phase_values
+        interior = torch.complex(torch.cos(phase_values), torch.sin(phase_values))
+        edge = torch.ones(1, dtype=interior.dtype, device=interior.device)
+        multiplier = torch.cat((edge, interior, edge), dim=0)
+        spectrum = torch.fft.rfft(transformed, n=self.width, dim=-1)
+        transformed = torch.fft.irfft(
+            spectrum * multiplier,
+            n=self.width,
+            dim=-1,
+        )
+        transformed = self._inverse_signed_permute(transformed)
+        return transformed.to(dtype=original_dtype)
+
+    def folded_input_weight(self) -> torch.Tensor:
+        # A P is obtained by applying P^{-1} to every row of A.
+        return self._apply_spectral_frame(
+            self.shared_bank.input_weight,
+            self.input_phase,
+            inverse=True,
+        )
+
+    def folded_output_weight(self) -> torch.Tensor:
+        # Q B is obtained by applying Q to every column of B.
+        return self._apply_spectral_frame(
+            self.shared_bank.output_weight.transpose(0, 1),
+            self.output_phase,
+        ).transpose(0, 1)
+
+    def activation_space_forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Unfolded reference formula for values and gradient equivalence."""
+        transformed = self._apply_spectral_frame(x, self.input_phase)
+        hidden = F.gelu(F.linear(transformed, self.shared_bank.input_weight))
+        hidden = hidden * self.hidden_gain.to(dtype=hidden.dtype)
+        output = F.linear(hidden, self.shared_bank.output_weight)
+        output = self._apply_spectral_frame(output, self.output_phase)
+        return output * self.output_gain.to(dtype=output.dtype)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        hidden = F.gelu(F.linear(x, self.folded_input_weight()))
+        hidden = hidden * self.hidden_gain.to(dtype=hidden.dtype)
+        output = F.linear(hidden, self.folded_output_weight())
+        output = output * self.output_gain.to(dtype=output.dtype)
+        return self.dropout(output)
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
+
+
 class SharedTensorProductRidgeField(nn.Module):
     """Shared factor and write map for the semiprivate tensor-product MLP."""
 
@@ -4841,6 +5020,7 @@ class Block(nn.Module):
         shared_compact_mlp_recurrent_core: SharedRecurrentDenseCore | None = None,
         shared_compact_mlp_paired_atom_bank: SharedPairedAtomBank | None = None,
         shared_compact_mlp_householder_bank: SharedHouseholderAtomBank | None = None,
+        shared_compact_mlp_spectral_phase_bank: SharedSpectralPhaseAtomBank | None = None,
     ) -> None:
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
@@ -4897,6 +5077,14 @@ class Block(nn.Module):
                 config,
                 layer_id,
                 shared_compact_mlp_householder_bank,
+            )
+        elif config.compact_native_mlp == "shared_spectral_phase_frame353":
+            if shared_compact_mlp_spectral_phase_bank is None:
+                raise ValueError("shared spectral-phase atom bank is required")
+            self.mlp = SpectralPhaseFrameSharedAtomMLP(
+                config,
+                layer_id,
+                shared_compact_mlp_spectral_phase_bank,
             )
         else:
             raise ValueError(
@@ -4969,6 +5157,12 @@ class GPT(nn.Module):
             )
         else:
             self.shared_compact_mlp_householder_bank = None
+        if config.compact_native_mlp == "shared_spectral_phase_frame353":
+            self.shared_compact_mlp_spectral_phase_bank = SharedSpectralPhaseAtomBank(
+                config
+            )
+        else:
+            self.shared_compact_mlp_spectral_phase_bank = None
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
@@ -4985,6 +5179,7 @@ class GPT(nn.Module):
                             self.shared_compact_mlp_recurrent_core,
                             self.shared_compact_mlp_paired_atom_bank,
                             self.shared_compact_mlp_householder_bank,
+                            self.shared_compact_mlp_spectral_phase_bank,
                         )
                         for layer_id in range(config.n_layer)
                     ]
@@ -5476,6 +5671,8 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 SharedPairedAtomBank,
                 HouseholderFrameSharedAtomMLP,
                 SharedHouseholderAtomBank,
+                SpectralPhaseFrameSharedAtomMLP,
+                SharedSpectralPhaseAtomBank,
             ),
         ):
             for parameter in module.parameters():

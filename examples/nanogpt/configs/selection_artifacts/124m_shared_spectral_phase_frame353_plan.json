@@ -1,0 +1,57 @@
+{
+  "schema_version": "mai_124m_shared_spectral_phase_frame353_plan_v1",
+  "status": "preregistered before tests, systems measurement, or quality",
+  "scientific_question": "Can sub-1%-state algorithmic spectral phases provide the broad full-rank frame motion that four Householder correction planes could not?",
+  "causal_basis": {
+    "householder_terminal_gap": 0.2833,
+    "reflector_pair_distance_range": [0.2652703524, 0.6705103517],
+    "deduction": "the reflector coordinates trained and opened, but rank(P-I)<=4 per side; replace the low-rank frame delta with a basis-free global transform whose departure from identity can move 766 real Fourier directions"
+  },
+  "frozen_mechanism": {
+    "shared_atom_width": 353,
+    "ambient_width": 768,
+    "learned_phase_bins_per_side_per_layer": 383,
+    "fixed_bins": ["DC", "Nyquist"],
+    "shared_state": ["one 353x768 input atom bank", "one 768x353 output atom bank"],
+    "private_state_per_layer": ["383 input spectral phases", "383 output spectral phases", "one 353 hidden gain", "one 768 output gain"],
+    "gauge": "checkpoint-free layer-specific signed permutation conjugates an exact real orthogonal FFT phase transform",
+    "identity_initialization": "all phases start at zero",
+    "activation": "GELU",
+    "live_path": "input and output phase frames are algebraically folded into shared matrix views; token activations use two dense GEMMs only",
+    "initialization": "input atoms use GPT c_fc std 0.02; output atoms are variance-corrected from width 3072 to width 353",
+    "optimizer": "Muon for the two shared matrices and AdamW for phases and gains",
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "compact_seed": 20260901
+  },
+  "accounting": {
+    "compact_mlp_scalars": 564852,
+    "dense_mlp_scalars": 56623104,
+    "compact_fraction": 0.009975645277235243,
+    "main_gemm_madds_per_layer_token": 542208,
+    "dense_mlp_madds_per_layer_token": 4718592,
+    "main_gemm_madds_fraction": 0.11490885416666667,
+    "folding": "two differentiable real FFT phase transforms over shared weight rows per layer call; batch-independent and charged by exact systems measurement"
+  },
+  "gates": {
+    "state_and_replay": "exact and no dense MLP tensor, dense shadow, PCA basis, ambient code, persistent permutation/sign, materialized transform, or duplicated shared state",
+    "functional_equivalence": "folded live function and all compact gradients equal explicit activation-space spectral frames",
+    "geometry": "zero phase is identity; nonzero frame is real and orthogonal; departure from identity reaches rank 766 at width 768",
+    "gradient": "all live coordinates finite and nonzero; input/output phase gradients are noncollapsed across layers",
+    "relative_throughput_minimum": 0.9,
+    "conventional_mfu_minimum": 0.2,
+    "parent_tokens_per_second": 330315.77625,
+    "parent_terminal_validation_ce": 5.361,
+    "candidate_terminal_validation_ce_maximum": 5.411,
+    "authorized_quality_updates": 238,
+    "next_rung_gap_maximum": 0.02
+  },
+  "forbidden": [
+    "width, phase count, seed, LR, optimizer, gain, gauge, or initialization sweeps",
+    "5TPP without the 0.5TPP quality pass",
+    "model-size scaling",
+    "storing PCA basis vectors, dense rotations, dense shadow weights, materialized transforms, or ambient optimizer carry"
+  ]
+}
