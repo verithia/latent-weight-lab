@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 from torch.nn import functional as F
 
-from examples.nanogpt.muon import Muon
+from examples.nanogpt.muon import GroupedMuon, Muon
 from examples.nanogpt.muon_matched_givens import (
     MuonMatchedGivens,
     MuonMatchedGivensLinear,
@@ -122,6 +122,7 @@ class GPTConfig:
     compact_native_mlp_branches: int = 4
     compact_native_mlp_paths: int = 3
     compact_native_mlp_seed: int = 20260827
+    compact_native_mlp_group_size: int = 4
     block_fht_ffn_spectral_rank: int = 0
     block_fht_ffn_spectral_out_groups: int = 1
     block_fht_ffn_spectral_in_groups: int = 1
@@ -1868,6 +1869,151 @@ class SparsePermutationSwiGLUMLP(nn.Module):
             *gains,
         )
         return self.dropout(out)
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
+
+
+class SharedGroupTransport(nn.Module):
+    """Two global residual-group transports shared by every compact MLP."""
+
+    def __init__(self, groups: int) -> None:
+        super().__init__()
+        if groups <= 0:
+            raise ValueError("shared group transport needs positive groups")
+        self.groups = int(groups)
+        self.pre_delta = nn.Parameter(torch.zeros(groups, groups))
+        self.post_delta = nn.Parameter(torch.zeros(groups, groups))
+        self.register_buffer(
+            "identity",
+            torch.eye(groups),
+            persistent=False,
+        )
+
+    def _apply_transport(
+        self,
+        x: torch.Tensor,
+        delta: torch.Tensor,
+    ) -> torch.Tensor:
+        weight = self.identity.to(device=x.device, dtype=x.dtype) + delta.to(
+            dtype=x.dtype
+        )
+        return F.linear(x, weight)
+
+    def pre(self, x: torch.Tensor) -> torch.Tensor:
+        return self._apply_transport(x, self.pre_delta)
+
+    def post(self, x: torch.Tensor) -> torch.Tensor:
+        return self._apply_transport(x, self.post_delta)
+
+
+class SharedTransportGroupedGELUMLP(nn.Module):
+    """Update-closed local GELU blocks with shared global group transport."""
+
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_transport: SharedGroupTransport,
+    ) -> None:
+        super().__init__()
+        del layer_id
+        group_size = int(config.compact_native_mlp_group_size)
+        if group_size != 4:
+            raise ValueError("the frozen shared-transport gate requires group size 4")
+        if config.n_embd % group_size:
+            raise ValueError("n_embd must be divisible by compact MLP group size")
+        groups = config.n_embd // group_size
+        if shared_transport.groups != groups:
+            raise ValueError("shared transport group count does not match n_embd")
+        self.group_size = group_size
+        self.groups = groups
+        self.hidden_per_group = 4 * group_size
+        # The shared module is owned and serialized once by GPT.  Keep only a
+        # non-registering reference here so state_dict cannot duplicate it for
+        # every layer.
+        object.__setattr__(self, "_shared_transport", shared_transport)
+        self.grouped_c_fc_weight = nn.Parameter(
+            torch.empty(groups, self.hidden_per_group, group_size)
+        )
+        self.grouped_c_proj_weight = nn.Parameter(
+            torch.empty(groups, group_size, self.hidden_per_group)
+        )
+        c_fc_std = 0.02 * math.sqrt(config.n_embd / group_size)
+        c_proj_std = (
+            0.02
+            / math.sqrt(2 * config.n_layer)
+            * math.sqrt(config.n_embd / group_size)
+        )
+        nn.init.normal_(self.grouped_c_fc_weight, mean=0.0, std=c_fc_std)
+        nn.init.normal_(self.grouped_c_proj_weight, mean=0.0, std=c_proj_std)
+        self.dropout = nn.Dropout(config.dropout)
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    @property
+    def shared_transport(self) -> SharedGroupTransport:
+        return object.__getattribute__(self, "_shared_transport")
+
+    def _group_transport(
+        self,
+        x: torch.Tensor,
+        role: str,
+    ) -> torch.Tensor:
+        shape = x.shape
+        grouped = x.reshape(*shape[:-1], self.groups, self.group_size)
+        # Each within-group coordinate gets a global groups x groups GEMM.
+        grouped = grouped.transpose(-1, -2)
+        if role == "pre":
+            grouped = self.shared_transport.pre(grouped)
+        elif role == "post":
+            grouped = self.shared_transport.post(grouped)
+        else:
+            raise ValueError(f"unsupported group transport role {role!r}")
+        return grouped.transpose(-1, -2).reshape(shape)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        shape = x.shape
+        x = self._group_transport(x, "pre")
+        grouped = x.reshape(-1, self.groups, self.group_size).transpose(0, 1)
+        hidden = torch.bmm(
+            grouped,
+            self.grouped_c_fc_weight.transpose(-2, -1),
+        )
+        hidden = F.gelu(hidden)
+        grouped_output = torch.bmm(
+            hidden,
+            self.grouped_c_proj_weight.transpose(-2, -1),
+        )
+        output = grouped_output.transpose(0, 1).reshape(shape)
+        return self.dropout(self._group_transport(output, "post"))
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:
         return None
@@ -3859,7 +4005,12 @@ class MLP(nn.Module):
 
 
 class Block(nn.Module):
-    def __init__(self, config: GPTConfig, layer_id: int) -> None:
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_compact_mlp_transport: SharedGroupTransport | None = None,
+    ) -> None:
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
         self.attn = CausalSelfAttention(config, layer_id)
@@ -3868,6 +4019,14 @@ class Block(nn.Module):
             self.mlp = MLP(config, layer_id)
         elif config.compact_native_mlp == "sparse_permutation_swiglu4":
             self.mlp = SparsePermutationSwiGLUMLP(config, layer_id)
+        elif config.compact_native_mlp == "shared_transport_grouped_gelu4":
+            if shared_compact_mlp_transport is None:
+                raise ValueError("shared compact MLP transport is required")
+            self.mlp = SharedTransportGroupedGELUMLP(
+                config,
+                layer_id,
+                shared_compact_mlp_transport,
+            )
         else:
             raise ValueError(
                 "unsupported compact_native_mlp: "
@@ -3906,12 +4065,30 @@ class GPT(nn.Module):
         ):
             raise ValueError("block_fht_affine_delta_scale must be positive and finite")
         self.config = config
+        if config.compact_native_mlp == "shared_transport_grouped_gelu4":
+            group_size = int(config.compact_native_mlp_group_size)
+            if config.n_embd % group_size:
+                raise ValueError("n_embd must be divisible by compact MLP group size")
+            self.shared_compact_mlp_transport = SharedGroupTransport(
+                config.n_embd // group_size
+            )
+        else:
+            self.shared_compact_mlp_transport = None
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
                 wpe=nn.Embedding(config.block_size, config.n_embd),
                 drop=nn.Dropout(config.dropout),
-                h=nn.ModuleList([Block(config, layer_id) for layer_id in range(config.n_layer)]),
+                h=nn.ModuleList(
+                    [
+                        Block(
+                            config,
+                            layer_id,
+                            self.shared_compact_mlp_transport,
+                        )
+                        for layer_id in range(config.n_layer)
+                    ]
+                ),
                 ln_f=LayerNorm(config.n_embd, bias=config.bias),
             )
         )
@@ -4062,6 +4239,17 @@ class GPT(nn.Module):
             gradient_seeded_factor_ids = {
                 id(param) for param in gradient_seeded_factors
             }
+            grouped_mlp_factors = [
+                param
+                for name, param in params.items()
+                if (
+                    "grouped_c_fc_weight" in name
+                    or "grouped_c_proj_weight" in name
+                )
+            ]
+            grouped_mlp_factor_ids = {
+                id(param) for param in grouped_mlp_factors
+            }
             matrix = [
                 param
                 for name, param in params.items()
@@ -4071,6 +4259,7 @@ class GPT(nn.Module):
                 and "lm_head" not in name
                 and id(param) not in product_factor_ids
                 and id(param) not in gradient_seeded_factor_ids
+                and id(param) not in grouped_mlp_factor_ids
             ]
             other = [
                 param
@@ -4141,6 +4330,18 @@ class GPT(nn.Module):
                 optimizers.append(
                     Muon(
                         matrix,
+                        lr=learning_rate,
+                        momentum=muon_momentum,
+                        weight_decay=weight_decay,
+                        ns_steps=muon_ns_steps,
+                    )
+                )
+                for group in optimizers[-1].param_groups:
+                    group["lr_scale"] = 1.0
+            if grouped_mlp_factors:
+                optimizers.append(
+                    GroupedMuon(
+                        grouped_mlp_factors,
                         lr=learning_rate,
                         momentum=muon_momentum,
                         weight_decay=weight_decay,
@@ -4359,7 +4560,14 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
     for param in model.parameters():
         param.requires_grad_(False)
     for module in model.modules():
-        if isinstance(module, SparsePermutationSwiGLUMLP):
+        if isinstance(
+            module,
+            (
+                SparsePermutationSwiGLUMLP,
+                SharedTransportGroupedGELUMLP,
+                SharedGroupTransport,
+            ),
+        ):
             for parameter in module.parameters():
                 parameter.requires_grad_(True)
         if isinstance(module, BlockFHTLinear):
