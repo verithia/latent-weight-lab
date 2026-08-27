@@ -678,10 +678,12 @@ def cg_project(
     metric = module.coordinate_metric().detach()
     damping = damping_ratio * float(metric.mean())
 
-    def normal(vector: torch.Tensor) -> torch.Tensor:
-        return coordinate_vjp(module, module.jvp(vector)) + damping * vector
-
     estimate = torch.zeros_like(right)
+    projected = torch.zeros_like(target)
+    best_projected = projected.clone()
+    best_error_energy = target.double().square().sum()
+    best_iteration = 0
+    stale_iterations = 0
     residual = right.clone()
     preconditioned = residual / (metric + damping).clamp_min(1e-12)
     direction = preconditioned.clone()
@@ -689,24 +691,35 @@ def cg_project(
     initial_norm = residual.double().norm().clamp_min(1e-30)
     iterations = 0
     for iteration in range(maximum_iterations):
-        action = normal(direction)
+        ambient_action = module.jvp(direction)
+        action = coordinate_vjp(module, ambient_action) + damping * direction
         denominator = torch.dot(direction.double(), action.double()).clamp_min(1e-30)
         step = rz / denominator
         estimate.add_(direction, alpha=float(step))
+        projected.add_(ambient_action, alpha=float(step))
         residual.add_(action, alpha=-float(step))
         iterations = iteration + 1
+        error_energy = (target - projected).double().square().sum()
+        if error_energy < best_error_energy:
+            best_error_energy = error_energy
+            best_projected.copy_(projected)
+            best_iteration = iterations
+            stale_iterations = 0
+        else:
+            stale_iterations += 1
         if float(residual.double().norm() / initial_norm) <= relative_tolerance:
+            break
+        if stale_iterations >= 32:
             break
         next_preconditioned = residual / (metric + damping).clamp_min(1e-12)
         next_rz = torch.dot(residual.double(), next_preconditioned.double())
         direction.mul_(float(next_rz / rz)).add_(next_preconditioned)
         rz = next_rz
-    projected = module.jvp(estimate)
     target_energy = target.double().square().sum().clamp_min(1e-30)
-    error_energy = (target - projected).double().square().sum()
     return {
-        "cg_projection_capture": float(1.0 - error_energy / target_energy),
+        "cg_projection_capture": float(1.0 - best_error_energy / target_energy),
         "cg_iterations": iterations,
+        "cg_best_iteration": best_iteration,
         "cg_final_normal_relative_residual": float(
             residual.double().norm() / initial_norm
         ),
