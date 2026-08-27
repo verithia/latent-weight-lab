@@ -854,6 +854,281 @@ class AdditiveSinusoidalCoordinateField(nn.Module):
         return 2 * self.rank * dense
 
 
+class PairwiseCoordinateHypernetwork(nn.Module):
+    """Implicit dense matrix decoded from compact row and column codes."""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        code_width: int,
+        hidden_width: int,
+        seed: int,
+        row_chunk: int = 128,
+    ) -> None:
+        super().__init__()
+        if code_width < 1 or hidden_width < 1:
+            raise ValueError("coordinate hypernetwork widths must be positive")
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.code_width = int(code_width)
+        self.hidden_width = int(hidden_width)
+        self.seed = int(seed)
+        self.row_chunk = int(row_chunk)
+        generator = torch.Generator(device="cpu").manual_seed(self.seed)
+        code_scale = 1.0 / math.sqrt(self.code_width)
+        self.row_codes = nn.Parameter(
+            torch.randn(
+                self.out_features,
+                self.code_width,
+                generator=generator,
+            )
+        )
+        self.column_codes = nn.Parameter(
+            torch.randn(
+                self.in_features,
+                self.code_width,
+                generator=generator,
+            )
+        )
+        self.row_projection = nn.Parameter(
+            torch.randn(
+                self.hidden_width,
+                self.code_width,
+                generator=generator,
+            )
+            * code_scale
+        )
+        self.column_projection = nn.Parameter(
+            torch.randn(
+                self.hidden_width,
+                self.code_width,
+                generator=generator,
+            )
+            * code_scale
+        )
+        self.hidden_bias = nn.Parameter(torch.zeros(self.hidden_width))
+        self.output_weights = nn.Parameter(
+            torch.randn(self.hidden_width, generator=generator)
+        )
+        self.output_bias = nn.Parameter(torch.zeros(()))
+        self.inverse_sqrt_hidden = 1.0 / math.sqrt(self.hidden_width)
+
+    @property
+    def coordinate_tensors(self) -> tuple[torch.Tensor, ...]:
+        return (
+            self.row_codes,
+            self.column_codes,
+            self.row_projection,
+            self.column_projection,
+            self.hidden_bias,
+            self.output_weights,
+            self.output_bias,
+        )
+
+    @property
+    def trainable_scalar_count(self) -> int:
+        return sum(tensor.numel() for tensor in self.coordinate_tensors)
+
+    def _coordinates(
+        self, *, differentiable_anchor: bool
+    ) -> tuple[torch.Tensor, ...]:
+        if differentiable_anchor:
+            return self.coordinate_tensors
+        return tuple(tensor.detach() for tensor in self.coordinate_tensors)
+
+    def split_coordinates(
+        self, vector: torch.Tensor
+    ) -> tuple[torch.Tensor, ...]:
+        pieces: list[torch.Tensor] = []
+        offset = 0
+        for tensor in self.coordinate_tensors:
+            count = tensor.numel()
+            pieces.append(vector[offset : offset + count].reshape_as(tensor))
+            offset += count
+        if offset != vector.numel():
+            raise ValueError("coordinate vector has incorrect size")
+        return tuple(pieces)
+
+    def _features(
+        self, coordinates: tuple[torch.Tensor, ...]
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        row, column, row_projection, column_projection, *_rest = coordinates
+        return (
+            row @ row_projection.transpose(0, 1),
+            column @ column_projection.transpose(0, 1),
+        )
+
+    def weight(self) -> torch.Tensor:
+        coordinates = self._coordinates(differentiable_anchor=True)
+        row_features, column_features = self._features(coordinates)
+        hidden_bias = coordinates[4]
+        output_weights = coordinates[5]
+        output_bias = coordinates[6]
+        chunks: list[torch.Tensor] = []
+        for start in range(0, self.out_features, self.row_chunk):
+            phase = (
+                row_features[start : start + self.row_chunk, None, :]
+                + column_features[None, :, :]
+                + hidden_bias
+            )
+            chunks.append(
+                torch.einsum("ijh,h->ij", torch.tanh(phase), output_weights)
+                * self.inverse_sqrt_hidden
+                + output_bias
+            )
+        return torch.cat(chunks, dim=0)
+
+    def jvp(
+        self, vector: torch.Tensor, *, differentiable_anchor: bool = False
+    ) -> torch.Tensor:
+        coordinates = self._coordinates(
+            differentiable_anchor=differentiable_anchor
+        )
+        directions = self.split_coordinates(vector)
+        (
+            row,
+            column,
+            row_projection,
+            column_projection,
+            hidden_bias,
+            output_weights,
+            _output_bias,
+        ) = coordinates
+        (
+            row_direction,
+            column_direction,
+            row_projection_direction,
+            column_projection_direction,
+            hidden_bias_direction,
+            output_weights_direction,
+            output_bias_direction,
+        ) = directions
+        row_features, column_features = self._features(coordinates)
+        row_feature_direction = (
+            row_direction @ row_projection.transpose(0, 1)
+            + row @ row_projection_direction.transpose(0, 1)
+        )
+        column_feature_direction = (
+            column_direction @ column_projection.transpose(0, 1)
+            + column @ column_projection_direction.transpose(0, 1)
+        )
+        chunks: list[torch.Tensor] = []
+        for start in range(0, self.out_features, self.row_chunk):
+            phase = (
+                row_features[start : start + self.row_chunk, None, :]
+                + column_features[None, :, :]
+                + hidden_bias
+            )
+            activation = torch.tanh(phase)
+            phase_direction = (
+                row_feature_direction[
+                    start : start + self.row_chunk, None, :
+                ]
+                + column_feature_direction[None, :, :]
+                + hidden_bias_direction
+            )
+            activation_direction = (1.0 - activation.square()) * phase_direction
+            chunks.append(
+                (
+                    torch.einsum(
+                        "ijh,h->ij", activation_direction, output_weights
+                    )
+                    + torch.einsum(
+                        "ijh,h->ij", activation, output_weights_direction
+                    )
+                )
+                * self.inverse_sqrt_hidden
+                + output_bias_direction
+            )
+        return torch.cat(chunks, dim=0)
+
+    def coordinate_metric(self) -> torch.Tensor:
+        with torch.no_grad():
+            coordinates = self._coordinates(differentiable_anchor=False)
+            (
+                row,
+                column,
+                row_projection,
+                column_projection,
+                hidden_bias,
+                output_weights,
+                output_bias,
+            ) = coordinates
+            row_features, column_features = self._features(coordinates)
+            row_metric = torch.empty_like(row)
+            column_metric = torch.zeros_like(column)
+            row_projection_metric = torch.zeros_like(row_projection)
+            column_projection_metric = torch.zeros_like(column_projection)
+            hidden_bias_metric = torch.zeros_like(hidden_bias)
+            output_weights_metric = torch.zeros_like(output_weights)
+            scale = self.inverse_sqrt_hidden
+            for start in range(0, self.out_features, self.row_chunk):
+                row_slice = row[start : start + self.row_chunk]
+                phase = (
+                    row_features[start : start + self.row_chunk, None, :]
+                    + column_features[None, :, :]
+                    + hidden_bias
+                )
+                activation = torch.tanh(phase)
+                base = (
+                    (1.0 - activation.square())
+                    * output_weights
+                    * scale
+                )
+                row_derivative = torch.einsum(
+                    "ijh,ha->ija", base, row_projection
+                )
+                row_metric[start : start + self.row_chunk] = (
+                    row_derivative.square().sum(dim=1)
+                )
+                column_derivative = torch.einsum(
+                    "ijh,ha->ija", base, column_projection
+                )
+                column_metric.add_(column_derivative.square().sum(dim=0))
+                base_square = base.square()
+                row_projection_metric.add_(
+                    torch.einsum("ijh,ia->ha", base_square, row_slice.square())
+                )
+                column_projection_metric.add_(
+                    torch.einsum("ijh,ja->ha", base_square, column.square())
+                )
+                hidden_bias_metric.add_(base_square.sum(dim=(0, 1)))
+                output_weights_metric.add_(
+                    activation.square().sum(dim=(0, 1)) * scale**2
+                )
+            output_bias_metric = torch.full_like(
+                output_bias, self.out_features * self.in_features
+            )
+        return flatten_tensors(
+            (
+                row_metric,
+                column_metric,
+                row_projection_metric,
+                column_projection_metric,
+                hidden_bias_metric,
+                output_weights_metric,
+                output_bias_metric,
+            )
+        ).clamp_min(1e-12)
+
+    def clamp_coordinates(self, bound: float) -> None:
+        with torch.no_grad():
+            for tensor in self.coordinate_tensors:
+                tensor.clamp_(-bound, bound)
+
+    def ideal_forward_scalar_ops(self) -> int:
+        dense = self.out_features * self.in_features
+        code_projection = (
+            (self.out_features + self.in_features)
+            * self.code_width
+            * self.hidden_width
+        )
+        # Per pair and hidden unit: add, tanh, multiply/reduce.
+        return code_projection + 3 * self.hidden_width * dense
+
+
 def flatten_tensors(tensors: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.cat([tensor.reshape(-1) for tensor in tensors])
 
@@ -1094,6 +1369,14 @@ def build_family(
             in_features,
             out_features,
             rank=6,
+            seed=seed,
+        )
+    if family == "coordmlp5x16":
+        return PairwiseCoordinateHypernetwork(
+            in_features,
+            out_features,
+            code_width=5,
+            hidden_width=16,
             seed=seed,
         )
     raise ValueError(f"unsupported family {family}")
