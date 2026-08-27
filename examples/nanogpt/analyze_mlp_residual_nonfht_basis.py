@@ -867,6 +867,7 @@ def main() -> None:
     parser.add_argument("--anchor-bound", type=float, default=0.5)
     parser.add_argument("--fit-seed", type=int, default=20260827)
     parser.add_argument("--cg-iterations", type=int, default=32)
+    parser.add_argument("--self-check-cg-iterations", type=int, default=128)
     parser.add_argument("--cg-tolerance", type=float, default=1e-5)
     parser.add_argument("--cg-damping-ratio", type=float, default=1e-6)
     parser.add_argument("--device", default="cuda")
@@ -916,6 +917,28 @@ def main() -> None:
                     f"{family} exceeds one-percent state: "
                     f"{module.trainable_scalar_count}/{dense_scalars}"
                 )
+            self_check_generator = torch.Generator(device=args.device).manual_seed(
+                args.base_seed
+                + 1009 * TARGET_SEED_OFFSETS[target_name]
+                + 1000003 * family_index
+                + 7000003
+            )
+            self_check_direction = torch.randn(
+                module.trainable_scalar_count,
+                generator=self_check_generator,
+                device=args.device,
+            )
+            self_check = cg_project(
+                module,
+                module.jvp(self_check_direction),
+                maximum_iterations=args.self_check_cg_iterations,
+                relative_tolerance=min(args.cg_tolerance, 1e-7),
+                damping_ratio=min(args.cg_damping_ratio, 1e-9),
+            )
+            if self_check["cg_projection_capture"] < 0.999:
+                raise RuntimeError(
+                    f"{family} failed own-tangent recovery: {self_check}"
+                )
             history = fit_anchor(
                 module,
                 basis_matrices,
@@ -949,6 +972,13 @@ def main() -> None:
                     "ideal_forward_scalar_ops": module.ideal_forward_scalar_ops(),
                     "ideal_forward_ops_to_dense_madds": module.ideal_forward_scalar_ops()
                     / dense_scalars,
+                    "self_check_projection_capture": self_check[
+                        "cg_projection_capture"
+                    ],
+                    "self_check_cg_iterations": self_check["cg_iterations"],
+                    "self_check_cg_final_normal_relative_residual": self_check[
+                        "cg_final_normal_relative_residual"
+                    ],
                 }
             )
             for row in history:
@@ -1012,6 +1042,7 @@ def main() -> None:
         },
         "cg": {
             "iterations": args.cg_iterations,
+            "self_check_iterations": args.self_check_cg_iterations,
             "relative_tolerance": args.cg_tolerance,
             "damping_ratio": args.cg_damping_ratio,
         },
