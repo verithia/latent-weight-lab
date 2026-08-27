@@ -1,0 +1,44 @@
+{
+  "schema_version": "mai_124m_semiprivate_tensorproduct_r20_plan_v1",
+  "status": "preregistered_before_tests_preflight_or_quality_values",
+  "scientific_question": "Can layer-private learned feature planes combined multiplicatively with a shared learned plane bank supply a compact moving nonlinear atom field when one shared dense residual core cannot?",
+  "frozen_mechanism": {
+    "rank": 20,
+    "feature_width": 440,
+    "feature_order": ["private_gelu", "shared_gelu", "private_by_shared_outer_product"],
+    "shared_state": ["20x768 input plane bank", "768x440 residual-write map"],
+    "private_state_per_layer": ["20x768 input plane bank", "440 feature gains", "768 output gains"],
+    "procedural_signed_permutation_seed": 20260828,
+    "activation": "GELU",
+    "optimizer": "Muon for matrices and AdamW for vector gains",
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715
+  },
+  "accounting": {
+    "compact_mlp_scalars": 552096,
+    "dense_mlp_scalars": 56623104,
+    "compact_fraction": 0.0097503662109375,
+    "ideal_madds_per_layer_token": 368640,
+    "dense_madds_per_layer_token": 4718592,
+    "ideal_madds_fraction": 0.078125
+  },
+  "gates": {
+    "state_and_replay": "exact and no dense MLP tensor, dense shadow, ambient code, persistent procedural index, or duplicated shared state",
+    "gradient": "all live coordinates finite and nonzero; private layer gradients noncollapsed",
+    "relative_throughput_minimum": 0.9,
+    "conventional_mfu_minimum": 0.2,
+    "parent_tokens_per_second": 330315.77625,
+    "parent_terminal_validation_ce": 5.361,
+    "candidate_terminal_validation_ce_maximum": 5.411,
+    "authorized_quality_updates": 238,
+    "next_rung_gap_maximum": 0.02
+  },
+  "forbidden": [
+    "rank, feature-order, sharing-side, permutation, initialization, LR, optimizer, seed, activation, or gain sweeps",
+    "5TPP without the 0.5TPP quality pass",
+    "model-size scaling",
+    "calling this a reconstruction of the rejected dense-Muon residual PCA path"
+  ]
+}

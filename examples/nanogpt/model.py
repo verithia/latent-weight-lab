@@ -124,6 +124,7 @@ class GPTConfig:
     compact_native_mlp_seed: int = 20260827
     compact_native_mlp_group_size: int = 4
     compact_native_mlp_core_width: int = 736
+    compact_native_mlp_factor_rank: int = 20
     block_fht_ffn_spectral_rank: int = 0
     block_fht_ffn_spectral_out_groups: int = 1
     block_fht_ffn_spectral_in_groups: int = 1
@@ -2172,6 +2173,158 @@ class SharedDenseCoreResidualMLP(nn.Module):
         return None
 
 
+class SharedTensorProductRidgeField(nn.Module):
+    """Shared factor and write map for the semiprivate tensor-product MLP."""
+
+    def __init__(self, config: GPTConfig) -> None:
+        super().__init__()
+        rank = int(config.compact_native_mlp_factor_rank)
+        if rank != 20:
+            raise ValueError("the frozen tensor-product ridge gate requires rank 20")
+        self.rank = rank
+        self.width = int(config.n_embd)
+        self.feature_width = rank * rank + 2 * rank
+        self.shared_input_weight = nn.Parameter(torch.empty(rank, self.width))
+        self.write_weight = nn.Parameter(
+            torch.empty(self.width, self.feature_width)
+        )
+        nn.init.normal_(self.shared_input_weight, mean=0.0, std=0.02)
+
+        # Match the second moment of the ordinary 4d GELU MLP at GPT init.
+        # The quadrature is deterministic and creates no persistent state.
+        pre_std = 0.02 * math.sqrt(self.width)
+        grid = torch.linspace(-8.0, 8.0, 16_385, dtype=torch.float64)
+        density = torch.exp(-0.5 * grid.square()) / math.sqrt(2.0 * math.pi)
+        gelu_second_moment = float(
+            torch.trapezoid(F.gelu(pre_std * grid).square() * density, grid)
+        )
+        feature_second_moment = (
+            2 * rank * gelu_second_moment
+            + rank * rank * gelu_second_moment * gelu_second_moment
+        ) / self.feature_width
+        dense_output_std = 0.02 / math.sqrt(2 * config.n_layer)
+        write_std = dense_output_std * math.sqrt(
+            (4 * self.width * gelu_second_moment)
+            / (self.feature_width * feature_second_moment)
+        )
+        nn.init.normal_(self.write_weight, mean=0.0, std=write_std)
+        self.gelu_second_moment = gelu_second_moment
+        self.feature_second_moment = feature_second_moment
+        self.write_init_std = write_std
+
+    def shared_features(self, x: torch.Tensor) -> torch.Tensor:
+        return F.gelu(F.linear(x, self.shared_input_weight))
+
+    def write(self, features: torch.Tensor) -> torch.Tensor:
+        return F.linear(features, self.write_weight)
+
+
+class SemiprivateTensorProductRidgeMLP(nn.Module):
+    """Layer-private ridge planes with a shared multiplicative write field."""
+
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_field: SharedTensorProductRidgeField,
+    ) -> None:
+        super().__init__()
+        if shared_field.rank != int(config.compact_native_mlp_factor_rank):
+            raise ValueError("shared tensor-product rank does not match config")
+        self.width = int(config.n_embd)
+        self.rank = int(shared_field.rank)
+        self.feature_width = int(shared_field.feature_width)
+        object.__setattr__(self, "_shared_field", shared_field)
+        self.private_input_weight = nn.Parameter(
+            torch.empty(self.rank, self.width)
+        )
+        nn.init.normal_(self.private_input_weight, mean=0.0, std=0.02)
+        self.feature_gain = nn.Parameter(torch.ones(self.feature_width))
+        self.output_gain = nn.Parameter(torch.ones(self.width))
+
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(
+            int(config.compact_native_mlp_seed) + int(layer_id) * 1009
+        )
+        permutation = torch.randperm(self.width, generator=generator)
+        inverse_permutation = torch.argsort(permutation)
+        sign = (
+            torch.randint(
+                0,
+                2,
+                (self.width,),
+                generator=generator,
+                dtype=torch.int64,
+            )
+            .mul(2)
+            .sub(1)
+            .float()
+        )
+        self.register_buffer("permutation", permutation, persistent=False)
+        self.register_buffer(
+            "inverse_permutation",
+            inverse_permutation,
+            persistent=False,
+        )
+        self.register_buffer("sign", sign, persistent=False)
+        self.dropout = nn.Dropout(config.dropout)
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    @property
+    def shared_field(self) -> SharedTensorProductRidgeField:
+        return object.__getattribute__(self, "_shared_field")
+
+    def tensor_product_features(self, x: torch.Tensor) -> torch.Tensor:
+        private = F.gelu(F.linear(x, self.private_input_weight))
+        shared = self.shared_field.shared_features(x)
+        products = (private.unsqueeze(-1) * shared.unsqueeze(-2)).flatten(-2)
+        return torch.cat((private, shared, products), dim=-1)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        sign = self.sign.to(dtype=x.dtype)
+        signed = x.index_select(-1, self.permutation) * sign
+        features = self.tensor_product_features(signed)
+        features = features * self.feature_gain.to(dtype=x.dtype)
+        conjugated = self.shared_field.write(features)
+        conjugated = conjugated * self.output_gain.to(dtype=x.dtype)
+        output = (conjugated * sign).index_select(
+            -1,
+            self.inverse_permutation,
+        )
+        return self.dropout(output)
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
+
+
 class MLP(nn.Module):
     def __init__(self, config: GPTConfig, layer_id: int) -> None:
         super().__init__()
@@ -4137,6 +4290,7 @@ class Block(nn.Module):
         layer_id: int,
         shared_compact_mlp_transport: SharedGroupTransport | None = None,
         shared_compact_mlp_core: SharedDenseResidualCore | None = None,
+        shared_compact_mlp_tensor_product: SharedTensorProductRidgeField | None = None,
     ) -> None:
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
@@ -4161,6 +4315,14 @@ class Block(nn.Module):
                 config,
                 layer_id,
                 shared_compact_mlp_core,
+            )
+        elif config.compact_native_mlp == "semiprivate_tensorproduct_r20":
+            if shared_compact_mlp_tensor_product is None:
+                raise ValueError("shared tensor-product ridge field is required")
+            self.mlp = SemiprivateTensorProductRidgeMLP(
+                config,
+                layer_id,
+                shared_compact_mlp_tensor_product,
             )
         else:
             raise ValueError(
@@ -4213,6 +4375,12 @@ class GPT(nn.Module):
             self.shared_compact_mlp_core = SharedDenseResidualCore(config)
         else:
             self.shared_compact_mlp_core = None
+        if config.compact_native_mlp == "semiprivate_tensorproduct_r20":
+            self.shared_compact_mlp_tensor_product = SharedTensorProductRidgeField(
+                config
+            )
+        else:
+            self.shared_compact_mlp_tensor_product = None
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
@@ -4225,6 +4393,7 @@ class GPT(nn.Module):
                             layer_id,
                             self.shared_compact_mlp_transport,
                             self.shared_compact_mlp_core,
+                            self.shared_compact_mlp_tensor_product,
                         )
                         for layer_id in range(config.n_layer)
                     ]
@@ -4708,6 +4877,8 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 SharedGroupTransport,
                 SharedDenseCoreResidualMLP,
                 SharedDenseResidualCore,
+                SemiprivateTensorProductRidgeMLP,
+                SharedTensorProductRidgeField,
             ),
         ):
             for parameter in module.parameters():
