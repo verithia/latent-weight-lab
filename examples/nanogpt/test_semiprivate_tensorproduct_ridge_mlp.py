@@ -87,6 +87,43 @@ def test_tensor_product_feature_order_is_exact() -> None:
     assert expected.shape[-1] == 440
 
 
+def test_weight_folded_forward_and_gradients_equal_activation_conjugation() -> None:
+    torch.manual_seed(17)
+    model = GPT(tiny_config(n_layer=1)).eval()
+    mlp = model.transformer.h[0].mlp
+    x = torch.randn(2, 3, 16)
+
+    actual = mlp(x)
+    sign = mlp.sign.to(dtype=x.dtype)
+    signed = x.index_select(-1, mlp.permutation) * sign
+    features = mlp.tensor_product_features(signed)
+    features = features * mlp.feature_gain.to(dtype=x.dtype)
+    conjugated = mlp.shared_field.write(features)
+    conjugated = conjugated * mlp.output_gain.to(dtype=x.dtype)
+    reference = (conjugated * sign).index_select(
+        -1,
+        mlp.inverse_permutation,
+    )
+    torch.testing.assert_close(actual, reference, rtol=1e-5, atol=1e-6)
+
+    parameters = (
+        mlp.private_input_weight,
+        mlp.feature_gain,
+        mlp.output_gain,
+        mlp.shared_field.shared_input_weight,
+        mlp.shared_field.write_weight,
+    )
+    actual_grads = torch.autograd.grad(actual.square().sum(), parameters)
+    reference_grads = torch.autograd.grad(reference.square().sum(), parameters)
+    for actual_grad, reference_grad in zip(actual_grads, reference_grads):
+        torch.testing.assert_close(
+            actual_grad,
+            reference_grad,
+            rtol=2e-5,
+            atol=2e-6,
+        )
+
+
 def test_forward_backward_freeze_and_private_layer_gradients() -> None:
     config = production_config(
         block_fht=True,

@@ -1,6 +1,6 @@
 {
   "schema_version": "mai_124m_semiprivate_tensorproduct_r20_plan_v1",
-  "status": "preregistered_before_tests_preflight_or_quality_values",
+  "status": "activation-space systems gate failed; one algebraically equivalent weight-folded implementation repair preregistered before its preflight",
   "scientific_question": "Can layer-private learned feature planes combined multiplicatively with a shared learned plane bank supply a compact moving nonlinear atom field when one shared dense residual core cannot?",
   "frozen_mechanism": {
     "rank": 20,
@@ -34,6 +34,22 @@
     "candidate_terminal_validation_ce_maximum": 5.411,
     "authorized_quality_updates": 238,
     "next_rung_gap_maximum": 0.02
+  },
+  "activation_space_preflight": {
+    "certificate_sha256": "d00ed9416ca70d06a864d6be84e795ef5ff9297ece0b6363cf528dd0cf866a60",
+    "config_sha256": "1f58468f8bd8cce5e961f3486eae2482d38077f5d92a8505e0a118a57dae2ba8",
+    "tokens_per_second": 287840.88666666666,
+    "parent_throughput_ratio": 0.8714112596572252,
+    "mfu_fraction": 0.2790483546032017,
+    "relative_throughput_passed": false,
+    "absolute_mfu_passed": true
+  },
+  "single_implementation_repair": {
+    "identity": "fold each procedural signed activation permutation exactly into the private/shared input weights and shared write weight",
+    "scientific_equivalence": "same function class, scalar state, initialization distribution, gradients, and optimizer geometry",
+    "required_test": "forward and parameter-gradient equivalence to the activation-space formula",
+    "unchanged_gates": true,
+    "not_authorized": "no rank, topology, feature, permutation, seed, LR, optimizer, or quality sweep"
   },
   "forbidden": [
     "rank, feature-order, sharing-side, permutation, initialization, LR, optimizer, seed, activation, or gain sweeps",

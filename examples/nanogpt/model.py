@@ -2281,17 +2281,36 @@ class SemiprivateTensorProductRidgeMLP(nn.Module):
         products = (private.unsqueeze(-1) * shared.unsqueeze(-2)).flatten(-2)
         return torch.cat((private, shared, products), dim=-1)
 
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        sign = self.sign.to(dtype=x.dtype)
-        signed = x.index_select(-1, self.permutation) * sign
-        features = self.tensor_product_features(signed)
-        features = features * self.feature_gain.to(dtype=x.dtype)
-        conjugated = self.shared_field.write(features)
-        conjugated = conjugated * self.output_gain.to(dtype=x.dtype)
-        output = (conjugated * sign).index_select(
-            -1,
-            self.inverse_permutation,
+    def _fold_input_weight(self, weight: torch.Tensor) -> torch.Tensor:
+        """Move the fixed signed input permutation from activations to a weight."""
+        inverse = self.inverse_permutation
+        sign = self.sign.to(dtype=weight.dtype)
+        return weight.index_select(-1, inverse) * sign.index_select(0, inverse)
+
+    def _fold_write_weight(self) -> torch.Tensor:
+        """Move the fixed signed output inverse-permutation into the write map."""
+        inverse = self.inverse_permutation
+        sign = self.sign.to(dtype=self.shared_field.write_weight.dtype)
+        row_gain = self.output_gain.to(dtype=sign.dtype) * sign
+        return self.shared_field.write_weight.index_select(0, inverse) * (
+            row_gain.index_select(0, inverse).unsqueeze(-1)
         )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        # Algebraically fold the procedural conjugation into the much smaller
+        # weights.  This is exactly equivalent to gathering every token before
+        # and after the MLP, while avoiding two activation-sized gathers.
+        private = F.gelu(F.linear(x, self._fold_input_weight(self.private_input_weight)))
+        shared = F.gelu(
+            F.linear(
+                x,
+                self._fold_input_weight(self.shared_field.shared_input_weight),
+            )
+        )
+        products = (private.unsqueeze(-1) * shared.unsqueeze(-2)).flatten(-2)
+        features = torch.cat((private, shared, products), dim=-1)
+        features = features * self.feature_gain.to(dtype=x.dtype)
+        output = F.linear(features, self._fold_write_weight())
         return self.dropout(output)
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:
