@@ -123,6 +123,7 @@ class GPTConfig:
     compact_native_mlp_paths: int = 3
     compact_native_mlp_seed: int = 20260827
     compact_native_mlp_group_size: int = 4
+    compact_native_mlp_core_width: int = 736
     block_fht_ffn_spectral_rank: int = 0
     block_fht_ffn_spectral_out_groups: int = 1
     block_fht_ffn_spectral_in_groups: int = 1
@@ -2014,6 +2015,131 @@ class SharedTransportGroupedGELUMLP(nn.Module):
         )
         output = grouped_output.transpose(0, 1).reshape(shape)
         return self.dropout(self._group_transport(output, "post"))
+
+    def postgelu_spread_loss(self) -> torch.Tensor | None:
+        return None
+
+    def cproj_teacher_alignment_loss(self) -> torch.Tensor | None:
+        return None
+
+    def prepare_charted_cfc_cache(self) -> None:
+        return None
+
+    def prepare_charted_cproj_cache(self) -> None:
+        return None
+
+    def flush_charted_cfc_cache(self) -> None:
+        return None
+
+    def flush_charted_cproj_cache(self) -> None:
+        return None
+
+    def suspend_charted_cfc_cache(self) -> None:
+        return None
+
+    def suspend_charted_cproj_cache(self) -> None:
+        return None
+
+    def restore_charted_cfc_cache(self, _value: None) -> None:
+        return None
+
+    def restore_charted_cproj_cache(self, _value: None) -> None:
+        return None
+
+
+class SharedDenseResidualCore(nn.Module):
+    """One learned dense residual core, serialized once across depth."""
+
+    def __init__(self, config: GPTConfig) -> None:
+        super().__init__()
+        width = int(config.compact_native_mlp_core_width)
+        if width != 736:
+            raise ValueError("the frozen shared dense-core gate requires width 736")
+        if width > config.n_embd:
+            raise ValueError("shared dense-core width cannot exceed n_embd")
+        self.width = width
+        self.weight = nn.Parameter(torch.empty(width, width))
+        output_std = (
+            0.02
+            / math.sqrt(2 * config.n_layer)
+            * math.sqrt((4 * config.n_embd) / width)
+        )
+        nn.init.normal_(self.weight, mean=0.0, std=output_std)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return F.linear(x, self.weight)
+
+
+class SharedDenseCoreResidualMLP(nn.Module):
+    """Layer-conjugated ``fc(GELU(x))`` with one shared dense core."""
+
+    def __init__(
+        self,
+        config: GPTConfig,
+        layer_id: int,
+        shared_core: SharedDenseResidualCore,
+    ) -> None:
+        super().__init__()
+        if shared_core.width != int(config.compact_native_mlp_core_width):
+            raise ValueError("shared dense-core width does not match config")
+        self.width = int(config.n_embd)
+        self.core_width = int(shared_core.width)
+        object.__setattr__(self, "_shared_core", shared_core)
+        generator = torch.Generator(device="cpu")
+        generator.manual_seed(
+            int(config.compact_native_mlp_seed) + int(layer_id) * 1009
+        )
+        permutation = torch.randperm(self.width, generator=generator)
+        inverse_permutation = torch.argsort(permutation)
+        sign = (
+            torch.randint(
+                0,
+                2,
+                (self.width,),
+                generator=generator,
+                dtype=torch.int64,
+            )
+            .mul(2)
+            .sub(1)
+            .float()
+        )
+        self.register_buffer("permutation", permutation, persistent=False)
+        self.register_buffer(
+            "inverse_permutation",
+            inverse_permutation,
+            persistent=False,
+        )
+        self.register_buffer("sign", sign, persistent=False)
+        pregelu_scale = 0.02 * math.sqrt(config.n_embd)
+        self.input_gain = nn.Parameter(
+            torch.full((self.width,), pregelu_scale)
+        )
+        output_gain = torch.ones(self.width)
+        output_gain[self.core_width :] = 0.0
+        self.output_gain = nn.Parameter(output_gain)
+        self.dropout = nn.Dropout(config.dropout)
+        self.residual_conditioned_output_slope = None
+        self.conditioned_output_gate_source = "residual"
+
+    @property
+    def shared_core(self) -> SharedDenseResidualCore:
+        return object.__getattribute__(self, "_shared_core")
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        sign = self.sign.to(dtype=x.dtype)
+        signed = x.index_select(-1, self.permutation) * sign
+        activated = F.gelu(
+            signed * self.input_gain.to(dtype=x.dtype)
+        )
+        main = self.shared_core(activated[..., : self.core_width])
+        tail = activated[..., self.core_width :]
+        conjugated = torch.cat((main, tail), dim=-1)
+        conjugated = conjugated * self.output_gain.to(dtype=x.dtype)
+        output = (conjugated * sign).index_select(
+            -1,
+            self.inverse_permutation,
+        )
+        return self.dropout(output)
 
     def postgelu_spread_loss(self) -> torch.Tensor | None:
         return None
@@ -4010,6 +4136,7 @@ class Block(nn.Module):
         config: GPTConfig,
         layer_id: int,
         shared_compact_mlp_transport: SharedGroupTransport | None = None,
+        shared_compact_mlp_core: SharedDenseResidualCore | None = None,
     ) -> None:
         super().__init__()
         self.ln_1 = LayerNorm(config.n_embd, bias=config.bias)
@@ -4026,6 +4153,14 @@ class Block(nn.Module):
                 config,
                 layer_id,
                 shared_compact_mlp_transport,
+            )
+        elif config.compact_native_mlp == "shared_dense_core_residual736":
+            if shared_compact_mlp_core is None:
+                raise ValueError("shared compact MLP core is required")
+            self.mlp = SharedDenseCoreResidualMLP(
+                config,
+                layer_id,
+                shared_compact_mlp_core,
             )
         else:
             raise ValueError(
@@ -4074,6 +4209,10 @@ class GPT(nn.Module):
             )
         else:
             self.shared_compact_mlp_transport = None
+        if config.compact_native_mlp == "shared_dense_core_residual736":
+            self.shared_compact_mlp_core = SharedDenseResidualCore(config)
+        else:
+            self.shared_compact_mlp_core = None
         self.transformer = nn.ModuleDict(
             dict(
                 wte=nn.Embedding(config.vocab_size, config.n_embd),
@@ -4085,6 +4224,7 @@ class GPT(nn.Module):
                             config,
                             layer_id,
                             self.shared_compact_mlp_transport,
+                            self.shared_compact_mlp_core,
                         )
                         for layer_id in range(config.n_layer)
                     ]
@@ -4566,6 +4706,8 @@ def freeze_non_block_fht(model: nn.Module, train_embeddings: bool = True) -> Non
                 SparsePermutationSwiGLUMLP,
                 SharedTransportGroupedGELUMLP,
                 SharedGroupTransport,
+                SharedDenseCoreResidualMLP,
+                SharedDenseResidualCore,
             ),
         ):
             for parameter in module.parameters():
