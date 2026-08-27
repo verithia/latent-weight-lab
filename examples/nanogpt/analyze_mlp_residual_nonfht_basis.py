@@ -1129,6 +1129,114 @@ class PairwiseCoordinateHypernetwork(nn.Module):
         return code_projection + 3 * self.hidden_width * dense
 
 
+class KroneckerSum(nn.Module):
+    """Sum of live Kronecker factors with a fixed secondary axis."""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        terms: int,
+        secondary_mode: int,
+        seed: int,
+    ) -> None:
+        super().__init__()
+        if terms < 1 or secondary_mode < 1:
+            raise ValueError("Kronecker terms and mode must be positive")
+        if in_features % secondary_mode or out_features % secondary_mode:
+            raise ValueError("secondary mode must divide both matrix axes")
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.terms = int(terms)
+        self.secondary_mode = int(secondary_mode)
+        self.in_primary = self.in_features // self.secondary_mode
+        self.out_primary = self.out_features // self.secondary_mode
+        self.seed = int(seed)
+        generator = torch.Generator(device="cpu").manual_seed(self.seed)
+        self.primary_factors = nn.Parameter(
+            torch.randn(
+                self.terms,
+                self.out_primary,
+                self.in_primary,
+                generator=generator,
+            )
+            / math.sqrt(self.in_primary)
+        )
+        self.secondary_factors = nn.Parameter(
+            torch.randn(
+                self.terms,
+                self.secondary_mode,
+                self.secondary_mode,
+                generator=generator,
+            )
+            / math.sqrt(self.secondary_mode)
+        )
+
+    @property
+    def coordinate_tensors(self) -> tuple[torch.Tensor, ...]:
+        return self.primary_factors, self.secondary_factors
+
+    @property
+    def trainable_scalar_count(self) -> int:
+        return sum(tensor.numel() for tensor in self.coordinate_tensors)
+
+    def _coordinates(
+        self, *, differentiable_anchor: bool
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if differentiable_anchor:
+            return self.primary_factors, self.secondary_factors
+        return self.primary_factors.detach(), self.secondary_factors.detach()
+
+    def _materialize(
+        self, primary: torch.Tensor, secondary: torch.Tensor
+    ) -> torch.Tensor:
+        tensor = torch.einsum("qac,qbd->abcd", primary, secondary)
+        return tensor.reshape(self.out_features, self.in_features)
+
+    def weight(self) -> torch.Tensor:
+        return self._materialize(self.primary_factors, self.secondary_factors)
+
+    def split_coordinates(
+        self, vector: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        primary_count = self.primary_factors.numel()
+        return (
+            vector[:primary_count].reshape_as(self.primary_factors),
+            vector[primary_count:].reshape_as(self.secondary_factors),
+        )
+
+    def jvp(
+        self, vector: torch.Tensor, *, differentiable_anchor: bool = False
+    ) -> torch.Tensor:
+        primary_direction, secondary_direction = self.split_coordinates(vector)
+        primary, secondary = self._coordinates(
+            differentiable_anchor=differentiable_anchor
+        )
+        return self._materialize(primary_direction, secondary) + self._materialize(
+            primary, secondary_direction
+        )
+
+    def coordinate_metric(self) -> torch.Tensor:
+        with torch.no_grad():
+            primary, secondary = self._coordinates(differentiable_anchor=False)
+            primary_metric = secondary.square().sum(dim=(1, 2))[:, None, None]
+            primary_metric = primary_metric.expand_as(primary)
+            secondary_metric = primary.square().sum(dim=(1, 2))[:, None, None]
+            secondary_metric = secondary_metric.expand_as(secondary)
+        return flatten_tensors((primary_metric, secondary_metric)).clamp_min(1e-12)
+
+    def clamp_coordinates(self, bound: float) -> None:
+        with torch.no_grad():
+            self.primary_factors.clamp_(-bound, bound)
+            self.secondary_factors.clamp_(-bound, bound)
+
+    def ideal_forward_scalar_ops(self) -> int:
+        dense = self.out_features * self.in_features
+        # Materialization: multiply and accumulate every term at every entry.
+        return 2 * self.terms * dense
+
+
 def flatten_tensors(tensors: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.cat([tensor.reshape(-1) for tensor in tensors])
 
@@ -1377,6 +1485,14 @@ def build_family(
             out_features,
             code_width=5,
             hidden_width=16,
+            seed=seed,
+        )
+    if family == "kron7x32":
+        return KroneckerSum(
+            in_features,
+            out_features,
+            terms=7,
+            secondary_mode=32,
             seed=seed,
         )
     raise ValueError(f"unsupported family {family}")

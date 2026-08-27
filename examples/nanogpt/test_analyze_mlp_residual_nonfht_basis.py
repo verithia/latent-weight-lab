@@ -5,6 +5,7 @@ import torch
 from examples.nanogpt.analyze_mlp_residual_nonfht_basis import (
     AdditiveSinusoidalCoordinateField,
     DiagonalToeplitzDiagonal,
+    KroneckerSum,
     LiveTensorNetwork,
     LearnedSparseExpander,
     MATRIX_COLUMN_MODES,
@@ -202,6 +203,27 @@ def test_pairwise_coordinate_hypernetwork_known_tangent_is_recovered() -> None:
     assert result["cg_projection_capture"] > 0.999
 
 
+def test_kronecker_sum_jvp_and_adjoint() -> None:
+    module = KroneckerSum(6, 8, terms=2, secondary_mode=2, seed=59)
+    expected = 2 * ((8 // 2) * (6 // 2) + 2 * 2)
+    assert module.trainable_scalar_count == expected
+    check_jvp_and_adjoint(module)
+
+
+def test_kronecker_sum_known_tangent_is_recovered() -> None:
+    module = KroneckerSum(6, 8, terms=2, secondary_mode=2, seed=61)
+    direction = torch.randn(module.trainable_scalar_count)
+    target = module.jvp(direction)
+    result = cg_project(
+        module,
+        target,
+        maximum_iterations=256,
+        relative_tolerance=1e-8,
+        damping_ratio=1e-9,
+    )
+    assert result["cg_projection_capture"] > 0.999
+
+
 def test_registered_full_size_budgets() -> None:
     dtd = DiagonalToeplitzDiagonal(768, 3072, branches=3, seed=1)
     expander_fc = LearnedSparseExpander(
@@ -260,9 +282,14 @@ def test_registered_full_size_budgets() -> None:
     coordinate_hypernetwork = PairwiseCoordinateHypernetwork(
         768, 3072, code_width=5, hidden_width=16, seed=17
     )
+    kronecker_sum = KroneckerSum(
+        768, 3072, terms=7, secondary_mode=32, seed=19
+    )
     assert sinusoidal.trainable_scalar_count == 23040
     assert additive_sinusoidal.trainable_scalar_count == 23040
     assert coordinate_hypernetwork.trainable_scalar_count == 19393
+    assert kronecker_sum.trainable_scalar_count == 23296
     assert sinusoidal.trainable_scalar_count <= dense // 100
     assert additive_sinusoidal.trainable_scalar_count <= dense // 100
     assert coordinate_hypernetwork.trainable_scalar_count <= dense // 100
+    assert kronecker_sum.trainable_scalar_count <= dense // 100
