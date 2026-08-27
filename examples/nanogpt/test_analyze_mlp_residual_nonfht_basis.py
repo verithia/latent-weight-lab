@@ -8,6 +8,7 @@ from examples.nanogpt.analyze_mlp_residual_nonfht_basis import (
     LearnedSparseExpander,
     MATRIX_COLUMN_MODES,
     MATRIX_ROW_MODES,
+    SinusoidalCoordinateField,
     cg_project,
     coordinate_vjp,
 )
@@ -134,6 +135,26 @@ def test_live_tensor_network_known_tangent_is_recovered() -> None:
     assert result["cg_projection_capture"] > 0.999
 
 
+def test_sinusoidal_coordinate_field_jvp_and_adjoint() -> None:
+    module = SinusoidalCoordinateField(5, 7, rank=3, seed=31)
+    assert module.trainable_scalar_count == (5 + 7) * 3
+    check_jvp_and_adjoint(module)
+
+
+def test_sinusoidal_coordinate_known_tangent_is_recovered() -> None:
+    module = SinusoidalCoordinateField(4, 6, rank=2, seed=37)
+    direction = torch.randn(module.trainable_scalar_count)
+    target = module.jvp(direction)
+    result = cg_project(
+        module,
+        target,
+        maximum_iterations=256,
+        relative_tolerance=1e-8,
+        damping_ratio=1e-9,
+    )
+    assert result["cg_projection_capture"] > 0.999
+
+
 def test_registered_full_size_budgets() -> None:
     dtd = DiagonalToeplitzDiagonal(768, 3072, branches=3, seed=1)
     expander_fc = LearnedSparseExpander(
@@ -183,3 +204,8 @@ def test_registered_full_size_budgets() -> None:
     assert tensor_ring.trainable_scalar_count == 22253
     assert tt.trainable_scalar_count <= dense // 100
     assert tensor_ring.trainable_scalar_count <= dense // 100
+    sinusoidal = SinusoidalCoordinateField(
+        768, 3072, rank=6, seed=11
+    )
+    assert sinusoidal.trainable_scalar_count == 23040
+    assert sinusoidal.trainable_scalar_count <= dense // 100

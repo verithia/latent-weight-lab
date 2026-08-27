@@ -8,6 +8,7 @@ same approximately-one-percent state contract:
 * a ten-stage learned sparse-expander chain of general 2x2 blocks;
 * an open-boundary live matrix-product-operator tangent; and
 * a cyclic live tensor-ring tangent.
+* a learned full-rank sinusoidal row/column coordinate field.
 
 Residual PCs are fitting/evaluation targets only.  Candidate artifacts retain
 live coordinates and integer seeds, never an ambient target vector or PCA
@@ -634,6 +635,112 @@ class LiveTensorNetwork(nn.Module):
         return operations
 
 
+class SinusoidalCoordinateField(nn.Module):
+    """Full-rank implicit matrix with compact learned row/column codes."""
+
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        rank: int,
+        seed: int,
+    ) -> None:
+        super().__init__()
+        if rank < 1:
+            raise ValueError("sinusoidal coordinate rank must be positive")
+        self.in_features = int(in_features)
+        self.out_features = int(out_features)
+        self.rank = int(rank)
+        self.seed = int(seed)
+        generator = torch.Generator(device="cpu").manual_seed(self.seed)
+        self.row_codes = nn.Parameter(
+            torch.randn(
+                self.out_features, self.rank, generator=generator
+            )
+        )
+        self.column_codes = nn.Parameter(
+            torch.randn(
+                self.in_features, self.rank, generator=generator
+            )
+        )
+        self.inverse_sqrt_rank = 1.0 / math.sqrt(self.rank)
+
+    @property
+    def coordinate_tensors(self) -> tuple[torch.Tensor, ...]:
+        return self.row_codes, self.column_codes
+
+    @property
+    def trainable_scalar_count(self) -> int:
+        return sum(tensor.numel() for tensor in self.coordinate_tensors)
+
+    def _coordinates(
+        self, *, differentiable_anchor: bool
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        if differentiable_anchor:
+            return self.row_codes, self.column_codes
+        return self.row_codes.detach(), self.column_codes.detach()
+
+    def _phase(
+        self, *, differentiable_anchor: bool
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        row, column = self._coordinates(
+            differentiable_anchor=differentiable_anchor
+        )
+        phase = (row @ column.transpose(0, 1)) * self.inverse_sqrt_rank
+        return row, column, phase
+
+    def weight(self) -> torch.Tensor:
+        _row, _column, phase = self._phase(differentiable_anchor=True)
+        return torch.sin(phase)
+
+    def split_coordinates(
+        self, vector: torch.Tensor
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        row_count = self.row_codes.numel()
+        return (
+            vector[:row_count].reshape_as(self.row_codes),
+            vector[row_count:].reshape_as(self.column_codes),
+        )
+
+    def jvp(
+        self, vector: torch.Tensor, *, differentiable_anchor: bool = False
+    ) -> torch.Tensor:
+        row_direction, column_direction = self.split_coordinates(vector)
+        row, column, phase = self._phase(
+            differentiable_anchor=differentiable_anchor
+        )
+        phase_direction = (
+            row_direction @ column.transpose(0, 1)
+            + row @ column_direction.transpose(0, 1)
+        ) * self.inverse_sqrt_rank
+        return torch.cos(phase) * phase_direction
+
+    def coordinate_metric(self) -> torch.Tensor:
+        with torch.no_grad():
+            row, column, phase = self._phase(differentiable_anchor=False)
+            cosine_square = torch.cos(phase).square()
+            row_metric = (
+                cosine_square @ column.square()
+            ) * self.inverse_sqrt_rank**2
+            column_metric = (
+                cosine_square.transpose(0, 1) @ row.square()
+            ) * self.inverse_sqrt_rank**2
+        return torch.cat(
+            (row_metric.reshape(-1), column_metric.reshape(-1))
+        ).clamp_min(1e-12)
+
+    def clamp_coordinates(self, bound: float) -> None:
+        with torch.no_grad():
+            self.row_codes.clamp_(-bound, bound)
+            self.column_codes.clamp_(-bound, bound)
+
+    def ideal_forward_scalar_ops(self) -> int:
+        dense = self.out_features * self.in_features
+        # Rank-r phase GEMM (r multiply-adds per entry), then one sine.
+        return dense * (self.rank + 1)
+
+
 def flatten_tensors(tensors: tuple[torch.Tensor, ...]) -> torch.Tensor:
     return torch.cat([tensor.reshape(-1) for tensor in tensors])
 
@@ -860,6 +967,13 @@ def build_family(
             column_modes=MATRIX_COLUMN_MODES,
             topology="ring",
             bond=17,
+            seed=seed,
+        )
+    if family == "sinc6":
+        return SinusoidalCoordinateField(
+            in_features,
+            out_features,
+            rank=6,
             seed=seed,
         )
     raise ValueError(f"unsupported family {family}")
