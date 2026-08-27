@@ -1012,6 +1012,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--compact-native-mlp-factor-rank", type=int, default=20)
     parser.add_argument("--compact-native-mlp-shared-width", type=int, default=236)
     parser.add_argument("--compact-native-mlp-private-width", type=int, default=10)
+    parser.add_argument(
+        "--compact-native-mlp-reflectors-per-side", type=int, default=4
+    )
+    parser.add_argument(
+        "--compact-native-mlp-householder-epsilon", type=float, default=1e-6
+    )
     parser.add_argument("--block-fht-ffn-spectral-rank", type=int, default=0)
     parser.add_argument("--block-fht-ffn-spectral-out-groups", type=int, default=1)
     parser.add_argument("--block-fht-ffn-spectral-in-groups", type=int, default=1)
@@ -1620,6 +1626,12 @@ def main() -> None:
         compact_native_mlp_factor_rank=args.compact_native_mlp_factor_rank,
         compact_native_mlp_shared_width=args.compact_native_mlp_shared_width,
         compact_native_mlp_private_width=args.compact_native_mlp_private_width,
+        compact_native_mlp_reflectors_per_side=(
+            args.compact_native_mlp_reflectors_per_side
+        ),
+        compact_native_mlp_householder_epsilon=(
+            args.compact_native_mlp_householder_epsilon
+        ),
         block_fht_ffn_spectral_rank=args.block_fht_ffn_spectral_rank,
         block_fht_ffn_spectral_out_groups=args.block_fht_ffn_spectral_out_groups,
         block_fht_ffn_spectral_in_groups=args.block_fht_ffn_spectral_in_groups,

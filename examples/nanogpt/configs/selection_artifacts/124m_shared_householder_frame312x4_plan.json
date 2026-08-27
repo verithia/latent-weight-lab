@@ -1,0 +1,59 @@
+{
+  "schema_version": "mai_124m_shared_householder_frame312x4_plan_v1",
+  "status": "preregistered before tests, systems measurement, or quality",
+  "scientific_question": "Can sub-1%-state layer-private global frame motion align a broad shared nonlinear atom bank better than ten isolated private atoms?",
+  "causal_basis": {
+    "shared_dense_core_terminal_gap": 0.2459,
+    "paired_shared_private_atoms_terminal_gap": 0.3149,
+    "paired_shared_private_atoms_width": 246,
+    "deduction": "isolated private atoms consumed too much state for too little width; spend private state on global transforms that move every shared detector and write direction"
+  },
+  "frozen_mechanism": {
+    "shared_atom_width": 312,
+    "input_reflectors_per_layer": 4,
+    "output_reflectors_per_layer": 4,
+    "shared_state": ["one 312x768 input atom bank", "one 768x312 output atom bank"],
+    "private_state_per_layer": ["four 768-vector input reflectors", "four 768-vector output reflectors", "one 312 hidden gain", "one 768 output gain"],
+    "paired_identity_initialization": "reflectors 0/1 and 2/3 begin identical on each side, so both products begin at identity",
+    "householder_epsilon": 1e-6,
+    "activation": "GELU",
+    "live_path": "input and output Householder products are algebraically folded into the shared matrices; token activations use two dense GEMMs only",
+    "initialization": "input atoms use GPT c_fc std 0.02; output atoms are variance-corrected from width 3072 to width 312",
+    "optimizer": "Muon for the two shared matrices and AdamW for one-dimensional reflector/gain coordinates",
+    "learning_rate": 0.0024,
+    "model_seed": 1337,
+    "train_data_seed": 20260714,
+    "eval_seed": 20260715,
+    "compact_seed": 20260831
+  },
+  "accounting": {
+    "compact_mlp_scalars": 565920,
+    "dense_mlp_scalars": 56623104,
+    "compact_fraction": 0.0099945068359375,
+    "main_gemm_madds_per_layer_token": 479232,
+    "dense_mlp_madds_per_layer_token": 4718592,
+    "main_gemm_madds_fraction": 0.1015625,
+    "activation_space_upper_bound_madds_per_layer_token": 491520,
+    "activation_space_upper_bound_fraction": 0.10416666666666667,
+    "batch_independent_fold_madds_per_layer_call": 3833856
+  },
+  "gates": {
+    "state_and_replay": "exact and no dense MLP tensor, dense shadow, PCA basis, ambient code, persistent materialized transform, or duplicated shared state",
+    "functional_equivalence": "folded live function and all compact gradients equal explicit activation-space Householder products",
+    "initialization": "paired products and folded weights equal identity/original weights within numerical tolerance",
+    "gradient": "all live coordinates finite and nonzero; input/output reflector gradients are noncollapsed across layers",
+    "relative_throughput_minimum": 0.9,
+    "conventional_mfu_minimum": 0.2,
+    "parent_tokens_per_second": 330315.77625,
+    "parent_terminal_validation_ce": 5.361,
+    "candidate_terminal_validation_ce_maximum": 5.411,
+    "authorized_quality_updates": 238,
+    "next_rung_gap_maximum": 0.02
+  },
+  "forbidden": [
+    "width, reflector count, epsilon, initialization, seed, LR, optimizer, or gain sweeps",
+    "5TPP without the 0.5TPP quality pass",
+    "model-size scaling",
+    "storing PCA basis vectors, dense shadow weights, materialized transforms, or ambient optimizer carry"
+  ]
+}
