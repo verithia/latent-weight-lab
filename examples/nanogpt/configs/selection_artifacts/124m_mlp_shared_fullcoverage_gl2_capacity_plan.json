@@ -1,0 +1,75 @@
+{
+  "candidate": "H37a shared 36-stage full-coverage non-orthogonal GL2 task-atom fit-all capacity discriminator",
+  "parent_results_sha256": [
+    "e6dc6cd3528f24a1601e1d135300c11766b2c5e4bbd38e51b1a7a7acfcc8d575",
+    "3159e3b3faedf855b3fc2ed000ce317217cfb46c25bfa4fc7f836fc2b347f124"
+  ],
+  "purpose": "Test whether shared full-coverage orientation plus bounded singular-value/shear freedom can fit the six leading-PC parts when applied to a basis-free task-gradient atom.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 375,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "stages": 36,
+    "parameters_per_pair": 4,
+    "permutation_seed": 379,
+    "prompt_scalars": 288000,
+    "shared_gl2_block_scalars": 276480,
+    "persistent_node_coefficients": 24,
+    "total_state_scalars": 564504,
+    "state_fraction": 0.009969499376085069,
+    "fp16_checkpoint_bytes": 1129008,
+    "stored_dense_basis": "none",
+    "stored_permutations": "none"
+  },
+  "task_atom": {
+    "formula": "D_n(E) = NS5(gradient of fixed task loss with respect to W_n at W0)",
+    "pair_block": "R(theta) @ [[exp(1.5*tanh(g1)), tanh(shear)], [0, exp(1.5*tanh(g2))]]",
+    "decoder": "T_n = a_n L_phi D_n R_phi^T",
+    "initialization": "all raw block parameters zero, giving exact identity",
+    "cached_materialization": true
+  },
+  "fit": {
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for every task atom and PC part; normalize prediction only in the cosine objective",
+    "algorithm": "64 deterministic full-batch Adam iterations maximizing mean smooth absolute cosine",
+    "iterations": 64,
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "raw_block_initialization": 0.0,
+    "log_gain_bound": 1.5,
+    "shear_bound": 1.0,
+    "smooth_absolute_epsilon": 1e-12,
+    "fit_all_only": true,
+    "raw_same_prompt_control": true,
+    "node_coefficients": "post-fit optimal signed scalar; charged but not needed by the cosine optimizer"
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_output_norm_ratio": 10000.0,
+    "watchdog_threshold_seconds": 300,
+    "preflight_iterations": 4,
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gate": {
+    "finite_outputs": true,
+    "maximum_output_norm_ratio": 10000.0,
+    "minimum_fit_all_capture_every_node": 0.05,
+    "minimum_median_fit_all_capture": 0.10
+  },
+  "routing_after_pass": "Write and preregister H37b using the identical blocks, prompt, permutations, initialization, optimizer, bounds, and state for six-fold leave-one-node-out transfer.",
+  "routing_after_failure": "Close the exact shared full-coverage GL2 task-atom family and return to theory before a causally distinct carrier or alternate-manifold construction.",
+  "forbidden_followups": [
+    "stage, prompt, gain-bound, or shear-bound sweep",
+    "iteration, learning-rate, or permutation-seed sweep",
+    "role-private or node-private blocks",
+    "prompt optimization",
+    "CE run",
+    "larger-model run"
+  ]
+}
