@@ -1,0 +1,64 @@
+{
+  "candidate": "H30c momentum-aware virtual-lookahead polar bank joint PC1",
+  "parent_results_sha256": [
+    "db4e7128bbd5144b5e9dd6f5f3a0caa4c03f58e1f230df4526256ede9b06d8d3",
+    "02bd7506e3faf4ff136cc34b0e92beae0e24b229c6659d24c69624ad6450ae6d"
+  ],
+  "purpose": "Decouple a realistic virtual state-probe step from unit-scale output mixing, retaining the exact parent-Muon lookahead/curvature orientation without attenuating the generated tangent.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "lookahead_steps": 1,
+    "polar_atoms": 2,
+    "muon_momentum": 0.95,
+    "muon_ns_steps": 5,
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "prompt_length": 737,
+    "prompt_width": 768,
+    "persistent_lookahead_scales_for_deployed_24_matrices": 24,
+    "persistent_output_coefficients_for_deployed_24_matrices": 48,
+    "state_scalars": 566088,
+    "state_fraction": 0.009997473822699653,
+    "output_coefficient_anchor": 1.0
+  },
+  "lookahead": {
+    "epsilon_anchor": "positive scalar matching the registered dense W1-W0 Frobenius norm per matrix",
+    "first_polar_input": "(1+beta) * G1",
+    "second_polar_input": "(1+beta) * G2 + beta^2 * G1",
+    "output": "a1 * D1 + a2 * D2; epsilon is not an output coefficient",
+    "stored_dense_side_information": "none"
+  },
+  "joint_target": {
+    "matrix_weighting": "ordinary concatenated Frobenius geometry; all six matrices have equal ambient size",
+    "path": "239-state centered same-gauge trajectory",
+    "principal_components": 1
+  },
+  "binding_solver": {
+    "cg_iterations": 20,
+    "cg_tolerance": 1e-5,
+    "device": "cuda:0",
+    "relative_ridge": 1e-6
+  },
+  "systems_preflight": {
+    "cg_iterations": 1,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_runtime_seconds": 300,
+    "watchdog_threshold_seconds": 300
+  },
+  "gate": {
+    "minimum_observed_joint_pc1_capture": 0.10,
+    "minimum_best_possible_total_path_capture": 0.20
+  },
+  "routing_after_pass": "Preregister and run one frozen top-16 joint, late, layer-6 common, and held-out innovation audit for this exact virtual-lookahead decoder.",
+  "routing_after_failure": "Close the exact virtual-lookahead/finite-difference curvature bank and return to theory before any premise-changing branch.",
+  "forbidden_followups": [
+    "lookahead-scale sweep",
+    "output-coefficient sweep",
+    "momentum sweep",
+    "branch-count sweep",
+    "prompt or target sweep",
+    "CG or ridge sweep",
+    "prompt optimization",
+    "CE run",
+    "larger-model run"
+  ]
+}
