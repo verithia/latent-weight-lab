@@ -1,0 +1,59 @@
+{
+  "candidate": "H29a single-macrostep learned synthetic-curriculum Muon program",
+  "purpose": "Test whether one globally shared sub-one-percent soft-token latent gives a task-correlated mixed-Hessian/polar tangent for both MLP matrices without storing any ambient basis.",
+  "decoder": {
+    "equation": "W0_n + eta_n * NS5(grad_Wn CE(F_W0(E), y_procedural))",
+    "macrosteps": 1,
+    "muon_ns_steps": 5,
+    "prompt_length": 737,
+    "prompt_width": 768,
+    "prompt_source": "exact token embeddings for sample zero, first registered stream-A batch, first 737 positions",
+    "target_source": "matching deterministic next-token targets from that sample"
+  },
+  "state_accounting": {
+    "amplitude_scalars": 24,
+    "dense_mlp_denominator_scalars": 56623104,
+    "deployable_checkpoint_bytes_fp16": 1132080,
+    "deployable_fraction": 0.009996326234592013,
+    "prompt_scalars": 566016,
+    "total_scalars": 566040
+  },
+  "frozen_discriminator": {
+    "cg_iterations": 20,
+    "cg_tolerance": 1e-5,
+    "device": "cuda:0",
+    "fail_fast_layers": [6],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "paths": ["trajectory_centered", "common_centered"],
+    "relative_ridge": 1e-6,
+    "seed": 20260902
+  },
+  "systems_preflight": {
+    "exact_prompt_length": 737,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_projected_binding_seconds": 21600,
+    "minimum_finite_capture": -1.0,
+    "preflight_cg_iterations": 1,
+    "watchdog_threshold_seconds": 300
+  },
+  "gates": {
+    "minimum_first_pc_best_possible_total_capture": 0.20,
+    "remaining_pc_minimum_capture_if_authorized": 0.10,
+    "remaining_pc_minimum_common_capture_if_authorized": 0.50,
+    "remaining_pc_minimum_heldout_innovation_if_authorized": 0.20,
+    "remaining_pc_minimum_late_capture_if_authorized": 0.20,
+    "remaining_pc_minimum_weighted_capture_if_authorized": 0.50,
+    "tiny_exact_jvp_vjp_self_test": 0.999
+  },
+  "routing_after_failure": "Close one-anchor learned synthetic curricula and analyze a compact multi-macrostep state program without launching it.",
+  "forbidden_followups": [
+    "prompt-length sweep",
+    "target or data sweep",
+    "anchor sweep",
+    "CG or ridge sweep",
+    "prompt optimization after a failed first-PC bound",
+    "macrostep sweep",
+    "CE run",
+    "larger-model run"
+  ]
+}
