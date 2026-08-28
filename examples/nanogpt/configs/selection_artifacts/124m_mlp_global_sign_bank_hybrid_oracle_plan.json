@@ -1,0 +1,69 @@
+{
+  "schema_version": "nanogpt_mlp_global_sign_bank_hybrid_oracle_plan_v1",
+  "candidate_id": "H1a_global_bitpacked_orientation_plus_procedural_coordinate_residual",
+  "scientific_scope": "offline residual-manifold representation discriminator only; no CE, no language-model training, no scale-up",
+  "hypothesis": "a small globally shared or role-shared bank of learned one-bit ambient orientations carries reusable MLP residual directions, while a node-addressed basis-free coordinate residual captures local innovation within an exact one-percent checkpoint-byte ledger",
+  "source": {
+    "base_commit": "f0f4510504d1684ddc310c1b74b372cd34dd635f",
+    "entrypoint": "examples/nanogpt/analyze_mlp_global_sign_bank.py",
+    "entrypoint_sha256": "11668a17b93d47cef2fcb3637edc459a51e21acbeb305fe82cba7eac78370111",
+    "focused_test": "examples/nanogpt/test_analyze_mlp_global_sign_bank.py",
+    "focused_test_sha256": "177f224a4df1ff01b10c918c2b095a47794fae39fcae2d956e9a506355eec7e8"
+  },
+  "inputs": {
+    "snapshot_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "snapshot_states": 239,
+    "run_a_probe_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/optimizer_probe",
+    "run_b_probe_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_gradient_dataseed2_0p5tpp_lr24e4/optimizer_probe",
+    "layers": [0, 6, 11],
+    "targets": ["mlp.c_fc", "mlp.c_proj"]
+  },
+  "fit_and_evaluation": {
+    "basis_rank": 16,
+    "discovery_stop": 119,
+    "late_start": 180,
+    "bank_sizes": [1, 2, 3],
+    "deployment_matrix_count": 24,
+    "maximum_checkpoint_byte_fraction": 0.01,
+    "seed": 20260828,
+    "fit_data": "discovery-window residual PCs only",
+    "heldout_data": [
+      "chronological states and updates after discovery",
+      "same-initialization disjoint-data stream B innovation"
+    ]
+  },
+  "required_families": [
+    "procedural_residual_only",
+    "random_common_k1_with_residual",
+    "random_common_k2_with_residual",
+    "random_common_k3_with_residual",
+    "learned_common_k1_no_residual",
+    "learned_common_k1_with_residual",
+    "learned_common_k2_no_residual",
+    "learned_common_k2_with_residual",
+    "learned_common_k3_no_residual",
+    "learned_common_k3_with_residual",
+    "learned_role_private_k3_no_residual",
+    "learned_role_private_k3_with_residual",
+    "per_node_binary_k3_upper_bound"
+  ],
+  "gates": {
+    "weighted_top16_pc_capture_each_role": 0.20,
+    "minimum_pc_capture_every_sampled_node": 0.05,
+    "common_ab_centered_capture": 0.50,
+    "heldout_b_innovation_centered_capture": 0.20,
+    "late_centered_update_capture": 0.05,
+    "synthetic_reconstruction": 0.999,
+    "performance_preflight_weighted_capture": 0.50,
+    "ce_authorization_weighted_capture": 0.80
+  },
+  "causal_routing": {
+    "common_fails_role_private_passes": "analyze and preregister H2 role-separated low-bit bank",
+    "layer_specific_collapse": "analyze and preregister H3 phase-or-depth-shared bank",
+    "learned_not_better_than_random": "close global binary orientation sharing and analyze H5/H6 nonbinary shared carrier",
+    "shared_bank_passes_local_residual_fails": "analyze and preregister H1b grouped conditional transport",
+    "all_pass": "performance-gate identical representation before any CE"
+  },
+  "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/high_cadence_239_global_sign_bank_hybrid_v1",
+  "storage_policy": "compact JSON, CSV, and bitpacked NPZ only; no new checkpoints or dense basis artifacts"
+}
