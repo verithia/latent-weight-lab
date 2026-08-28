@@ -1,0 +1,99 @@
+{
+  "candidate": "H42 exact-budget role-conditioned 64-branch shallow Givens task-atom atlas",
+  "parent_result_sha256": "ad8a6b8e2b63ebc692d0c8f217b6927d3eea325314d4d474cf10eeffb89bdf85",
+  "purpose": "Test whether the one-percent budget must expose many local manifold directions rather than one deep transported task atom.",
+  "frozen_inventory": {
+    "trajectory_states": 239,
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "frozen_node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "role_groups": {
+      "c_fc": [0, 2, 4],
+      "c_proj": [1, 3, 5]
+    },
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "per_node_components": 16,
+    "pca_centering": "mean of all 239 states independently for each matrix",
+    "pc_normalization": "unit Frobenius norm independently for every matrix PC",
+    "pc_weights": "eigenvalue normalized within the measured top-16 set; also report total-path-weighted recovery"
+  },
+  "frozen_decoder": {
+    "formula": "B_nrk=QL_rk D_n QR_rk^T; Yhat_n=sum_k a_nk B_nrk",
+    "task_atom": "D_n=NS5(first task gradient at W0)",
+    "prompt_length": 415,
+    "prompt_width": 768,
+    "branches_per_role": 64,
+    "stages_per_branch": 1,
+    "angles_per_branch": 1920,
+    "role_angle_scalars": 245760,
+    "prompt_scalars": 318720,
+    "local_coefficient_scalars": 1536,
+    "total_state_scalars": 566016,
+    "state_fraction": 0.009996202268220104,
+    "fp16_checkpoint_bytes": 1132032,
+    "role_seed_bases": {
+      "c_fc": 431,
+      "c_proj": 503
+    },
+    "branch_seed_stride": 2,
+    "branch_zero_anchor": "identity",
+    "other_branch_anchor": "procedural uniform angles on [-pi, pi] from the registered branch seed",
+    "learned_residual_angle_initialization": 0.0,
+    "stored_dense_basis": "none",
+    "stored_branch_matrix": "none",
+    "stored_permutations_or_base_angles": "none"
+  },
+  "fit": {
+    "objective": "mean eigenvalue-weighted ridge projection capture of each training node's top-16 temporal PCs into its 64 generated branch atoms",
+    "fit_all": "learn one shared 64-branch bank independently for each three-node role",
+    "leave_one_out": "learn the shared role bank on the other two same-role nodes; fit only legal 64-dimensional projection coordinates for the held-out node",
+    "optimizer": "Adam",
+    "iterations": 64,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "relative_projection_ridge": 0.0001,
+    "base_control": "identical procedural anchors with learned residual angles fixed at zero; local coordinates still optimally projected",
+    "forbidden_target_access": "no held-out PC enters shared-angle fitting"
+  },
+  "self_test": {
+    "branch_zero_identity": "exact",
+    "known_atlas_minimum_weighted_capture": 0.9,
+    "pca_and_projection_self_checks": true,
+    "accounting_exact": true
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_iterations": 4,
+    "preflight_components": 4,
+    "preflight_scope": "both role fit-all fits plus one held-out fold per role",
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gates": {
+    "fit_all_weighted_top16_capture_every_role": 0.3,
+    "fit_all_minimum_pc_capture_every_role": 0.05,
+    "leave_one_out_weighted_top16_capture_every_role": 0.3,
+    "leave_one_out_minimum_pc_capture_every_role": 0.05,
+    "learned_minus_base_loo_weighted_capture_every_role": 0.05,
+    "finite_outputs": true,
+    "both_roles_must_pass": true
+  },
+  "routing_after_pass": "Run the identical bank on chronological-late and disjoint-stream residual PCs before any LM training.",
+  "routing_after_failure": "Close the exact wide shallow orthogonal atlas and do theory on one causally distinct nonlinear or non-orthogonal task-atom generator.",
+  "forbidden_followups": [
+    "branch, stage, prompt, seed, anchor-range, ridge, iteration, learning-rate, role, or target sweep",
+    "persistent generated branch matrices",
+    "empirical PC storage",
+    "CE or model-size run",
+    "claiming a no-go for nonlinear, non-orthogonal, externally amortized, or alternate-solution manifolds"
+  ]
+}
