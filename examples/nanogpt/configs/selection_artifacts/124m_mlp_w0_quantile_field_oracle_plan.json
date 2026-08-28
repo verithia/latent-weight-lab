@@ -1,0 +1,45 @@
+{
+  "candidate": "H10c procedural W0-quantile field with private bilateral values",
+  "purpose": "Test whether reproducible initialization values provide a transferable node-private coordinate scaffold without storing an empirical basis or assignment.",
+  "frozen_parameters": {
+    "basis_rank": 16,
+    "category_count": 1024,
+    "deployment_matrix_count": 24,
+    "discovery_stop": 119,
+    "fit_iterations": 8,
+    "late_start": 180,
+    "layers": [0, 6, 11],
+    "maximum_checkpoint_byte_fraction": 0.01,
+    "seed": 20260901,
+    "targets": ["mlp.c_fc", "mlp.c_proj"]
+  },
+  "information_split": {
+    "field_source": "exact step-zero W0 regenerated from the initialization seed",
+    "target_fit": "private values, gains, and residual refit independently to each target",
+    "held_out": ["weak full-path PCs", "stream A steps 180 through 238", "all stream B weights"]
+  },
+  "controls": [
+    "node-addressed procedural hash with identical private state",
+    "W0 quantile values without bilateral gains"
+  ],
+  "gates": {
+    "minimum_common_centered_capture": 0.20,
+    "minimum_hash_control_margin": 0.05,
+    "minimum_heldout_b_innovation_capture": 0.05,
+    "minimum_late_centered_update_capture": 0.05,
+    "minimum_pc_capture": 0.05,
+    "minimum_weighted_top16_pc_capture": 0.20,
+    "synthetic_own_family_reconstruction": 0.999
+  },
+  "routing_after_failure": "Close cheap pointwise W0 coordinate fields and derive a causal program-compression transformation before any model training.",
+  "forbidden_followups": [
+    "category-count sweep",
+    "normalization sweep",
+    "gain sweep",
+    "residual sweep",
+    "hash or seed sweep",
+    "optimizer sweep",
+    "CE run",
+    "larger-model run"
+  ]
+}
