@@ -1,0 +1,66 @@
+{
+  "candidate": "H33a shared bitplane task-gradient preconditioner leave-one-node-out discriminator",
+  "parent_results_sha256": [
+    "574009f5c6b902e8aaa8cd91f367acff91cd464ea5dbcc68c7851b3477ebf154"
+  ],
+  "purpose": "Test whether one explicitly charged target-aligned global bitplane transfers a coordinatewise orientation relation from five MLP layer/role nodes to a sixth when it preconditions a basis-free synthetic task-gradient atom.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 545,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "global_bitplanes": 1,
+    "global_bitplane_bits": 2359296,
+    "global_bitplane_bytes": 294912,
+    "prompt_fp16_scalars": 418560,
+    "prompt_fp16_bytes": 837120,
+    "persistent_node_coefficients": 24,
+    "persistent_node_coefficient_fp16_bytes": 48,
+    "total_compact_checkpoint_bytes": 1132080,
+    "dense_mlp_fp16_denominator_bytes": 113246208,
+    "checkpoint_byte_fraction": 0.009996626112196181,
+    "fp16_equivalent_scalars": 566040,
+    "stored_dense_float_basis": "none"
+  },
+  "task_atom": {
+    "formula": "D_n(E) = NS5(gradient of fixed task loss with respect to W_n at W0)",
+    "decoder": "T_n = a_n * decanon(S elementwise-multiply canon(D_n(E)))",
+    "prompt_seed_and_targets": "identical deterministic make_prompt policy used by the sealed synthetic-program family",
+    "cached_materialization": true
+  },
+  "sign_fit": {
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for each canonicalized task atom and PC part",
+    "leave_one_out_rule": "for heldout h, S_j = sign(sum over n != h of normalized(D_n)_j * normalized(U_n)_j); zero maps to +1",
+    "heldout_score": "squared cosine after the heldout node's optimal scalar coefficient",
+    "fit_all_control": true,
+    "raw_no_mask_control": true,
+    "deterministic_random_mask_control": true,
+    "random_mask_seed": 20261001
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_runtime_seconds": 300,
+    "watchdog_threshold_seconds": 300
+  },
+  "gate": {
+    "minimum_leave_one_node_out_capture_every_node": 0.05,
+    "minimum_median_leave_one_node_out_capture": 0.10
+  },
+  "routing_after_pass": "Preregister one all-node-mask tangent audit covering the joint top PCs, untouched late updates, layer-6 A/B common path, and held-out innovation under the identical byte budget.",
+  "routing_after_failure": "Close the exact one-shared-bitplane plus task-gradient hybrid and return to theory before selecting another ledger row.",
+  "forbidden_followups": [
+    "bitplane-count sweep",
+    "prompt-length sweep",
+    "role-private mask",
+    "node-private mask",
+    "mask seed sweep",
+    "sign optimizer",
+    "prompt optimization",
+    "CE run",
+    "larger-model run"
+  ]
+}
