@@ -1,0 +1,96 @@
+{
+  "candidate": "H45 exact-budget node-private 96x96 task-modulated microcore atlas",
+  "parent_result_sha256": "b1ae5f3cfc4aa863d25b0173075801fd22bcf0e5633fa8cd7f1971368e3d5ee6",
+  "purpose": "Test whether each individual MLP matrix path has a compact procedural chart after the repeatedly falsified cross-layer sharing premise is removed.",
+  "frozen_inventory": {
+    "trajectory_states": 239,
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "frozen_node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "observed_deployed_slots": [0, 1, 12, 13, 22, 23],
+    "deployed_slot_rule": "2*layer + role_offset, with c_fc=0 and c_proj=1",
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "per_node_components": 16,
+    "pca_centering": "mean of all 239 states independently for each matrix",
+    "pc_normalization": "unit Frobenius norm independently for every matrix PC",
+    "pc_weights": "eigenvalue normalized within the measured top-16 set"
+  },
+  "frozen_decoder": {
+    "formula": "B_n0=D_n; B_nk=unit(sign(D_n) odot H_nk(C_n)) for k>0; Yhat_n=sum_k a_nk B_nk",
+    "task_atom": "D_n=NS5(first task gradient at W0)",
+    "prompt_length": 415,
+    "prompt_width": 768,
+    "core_shape": [96, 96],
+    "deployed_private_cores": 24,
+    "branches": 64,
+    "prompt_scalars": 318720,
+    "private_core_scalars": 221184,
+    "local_coefficient_scalars": 1536,
+    "total_state_scalars": 541440,
+    "state_fraction": 0.009562174479166666,
+    "fp16_checkpoint_bytes": 1082880,
+    "hash_seed_base": 877,
+    "node_seed_stride": 1009,
+    "branch_seed_stride": 2,
+    "core_initialization_seed_rule": "9001 + 97*deployed_slot",
+    "core_initialization": "deterministic Gaussian followed by unit Frobenius normalization",
+    "core_retraction": "unit Frobenius normalization after every optimizer step",
+    "hash_expander": "procedural independent uniform core-row/core-column lookup vectors plus separable Rademacher signs for every deployed slot and branch",
+    "task_modulation": "multiply every expanded branch elementwise by sign(D_n), with zeros mapped to +1",
+    "branch_zero_anchor": "exact D_n",
+    "stored_dense_basis": "none",
+    "stored_hash_indices_or_signs": "none",
+    "stored_generated_atoms": "none"
+  },
+  "fit": {
+    "objective": "for each node independently, maximize eigenvalue-weighted ridge projection capture of its top-16 temporal PCs into its 64 generated atoms",
+    "optimizer": "Adam",
+    "iterations": 64,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "relative_projection_ridge": 0.0001,
+    "random_core_control": "the exact deterministic initial private core frozen, with local coordinates optimally projected",
+    "task_atom_control": "branch zero alone",
+    "unobserved_deployed_cores": "remain at their registered deterministic initialization in the compact checkpoint"
+  },
+  "self_test": {
+    "branch_zero_identity": "exact",
+    "deterministic_regeneration_without_stored_expanders": true,
+    "finite_nonzero_core_gradient": true,
+    "known_microcore_minimum_weighted_capture": 0.9,
+    "pca_and_projection_self_checks": true,
+    "accounting_exact": true
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_iterations": 4,
+    "preflight_components": 4,
+    "preflight_scope": "all six observed private cores",
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gates": {
+    "weighted_top16_capture_every_node": 0.2,
+    "minimum_pc_capture_every_node": 0.05,
+    "learned_minus_random_core_weighted_capture_every_node": 0.05,
+    "finite_outputs": true,
+    "all_six_nodes_must_pass": true
+  },
+  "routing_after_pass": "Run the identical six private charts on chronological late residuals and the layer-6 disjoint A/B common and held-out-innovation paths before any LM training.",
+  "routing_after_failure": "Close this exact private microcore geometry and write theory for one causally distinct compact-native function class before code.",
+  "forbidden_followups": [
+    "core-size, hash, sign, task-modulation, branch, prompt, seed, ridge, iteration, learning-rate, or target sweep",
+    "persistent expanded atom or empirical PC storage",
+    "CE or model-size run",
+    "cross-layer transfer claims: H45 deliberately tests private path capacity"
+  ]
+}
