@@ -1,0 +1,91 @@
+{
+  "candidate": "H41 exact-budget role-conditioned 73-stage full-coverage Givens task-atom transport",
+  "parent_result_sha256": "7e7a3588dcacecc515281024e35bc2e50df0c7a16fce44d0b81773e01943affa",
+  "purpose": "Test whether same-role depth transfer needs learned channel mixing rather than H40's nontransferable coordinate polarity, while preserving the exact one-percent state ceiling.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "frozen_node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "role_groups": {
+      "c_fc": [0, 2, 4],
+      "c_proj": [1, 3, 5]
+    },
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 372,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "stages_per_role": 73,
+    "angles_per_stage_per_role": 1920,
+    "role_angle_scalars": 280320,
+    "prompt_scalars": 285696,
+    "persistent_node_coefficients": 24,
+    "total_state_scalars": 566040,
+    "state_fraction": 0.009996626112196181,
+    "fp16_checkpoint_bytes": 1132080,
+    "role_permutation_seeds": {
+      "c_fc": 409,
+      "c_proj": 419
+    },
+    "stored_dense_basis": "none",
+    "stored_permutations": "none"
+  },
+  "task_atom": {
+    "formula": "D_n = NS5(gradient of fixed task loss with respect to W_n at W0)",
+    "decoder": "Yhat_n = a_n QL_role(n) D_n QR_role(n)^T",
+    "initialization": "all role angles zero, giving exact identity",
+    "singular_value_invariant": true,
+    "cached_materialization": true
+  },
+  "fit": {
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for every task atom and PC part; normalize prediction only in the cosine objective",
+    "algorithm": "64 deterministic full-batch Adam iterations maximizing mean smooth absolute cosine within each fitted role/fold",
+    "iterations": 64,
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "angle_initialization": 0.0,
+    "smooth_absolute_epsilon": 1e-12,
+    "fit_all": "fit each three-node role independently",
+    "leave_one_out": "fit the other two nodes of the same role only; opposite role forbidden",
+    "node_coefficients": "post-fit optimal signed scalar; charged but cosine gates are scale invariant"
+  },
+  "self_test": {
+    "zero_angle_identity": "exact",
+    "known_role_transport_minimum_capture": 0.90,
+    "accounting_exact": true
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_iterations": 4,
+    "preflight_scope": "both role fit-all fits plus one held-out fold per role",
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gates": {
+    "fit_all_minimum_capture_every_node_within_each_role": 0.05,
+    "fit_all_minimum_median_capture_within_each_role": 0.10,
+    "leave_one_out_minimum_capture_every_node_within_each_role": 0.05,
+    "leave_one_out_minimum_median_capture_within_each_role": 0.10,
+    "finite_outputs": true,
+    "both_roles_must_pass": true
+  },
+  "routing_after_pass": "Run one identical-state remaining-PC, chronological-late, and disjoint-stream transfer audit before any LM training.",
+  "routing_after_failure": "Close the exact role-conditioned orthogonal task-atom family and do theory on one causally distinct identifiable carrier with non-orthogonal or nonlinear freedom.",
+  "forbidden_followups": [
+    "stage, prompt, permutation-seed, iteration, learning-rate, role, or target sweep",
+    "per-node angles",
+    "non-orthogonal blocks inside H41",
+    "CE or model-size run",
+    "claiming a no-go for role-conditioned non-orthogonal or nonlinear carriers"
+  ]
+}
