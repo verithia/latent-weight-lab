@@ -1,0 +1,63 @@
+{
+  "candidate": "H34a shared separable row-column task-gradient conditioner leave-one-node-out discriminator",
+  "parent_results_sha256": [
+    "008aad848e4004f3af991123732142d241960ff1ef17bf161580753a5bae7d50",
+    "029b1e0267ff6c5b5ee8ef2a5c619b73bb03f6fb8c4a09067ccb9f4c9b61fe58"
+  ],
+  "purpose": "Test whether the relation between a procedural synthetic task atom and the dense leading update factors into shared hidden-channel and residual-channel fields that transfer to an untouched layer/role node.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 731,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "prompt_scalars": 561408,
+    "shared_row_gain_scalars": 3072,
+    "shared_column_gain_scalars": 768,
+    "persistent_node_coefficients": 24,
+    "total_state_scalars": 565272,
+    "state_fraction": 0.009983062744140625,
+    "fp16_checkpoint_bytes": 1130544,
+    "stored_dense_basis": "none"
+  },
+  "task_atom": {
+    "formula": "D_n(E) = NS5(gradient of fixed task loss with respect to W_n at W0)",
+    "decoder": "T_n = a_n * decanon(diag(left) * canon(D_n(E)) * diag(right))",
+    "cached_materialization": true
+  },
+  "fit": {
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for each canonicalized task atom and PC part",
+    "algorithm": "20 deterministic alternating least-squares iterations over training-node coefficients, shared rows, then shared columns",
+    "iterations": 20,
+    "initial_left_and_right": 1.0,
+    "denominator_floor": 1e-12,
+    "gauge": "normalize left RMS to one after every iteration and compensate right",
+    "heldout_score": "squared cosine after the heldout node's optimal scalar coefficient",
+    "fit_all_control": true,
+    "raw_no_conditioner_control": true
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_runtime_seconds": 300,
+    "watchdog_threshold_seconds": 300
+  },
+  "gate": {
+    "minimum_leave_one_node_out_capture_every_node": 0.05,
+    "minimum_median_leave_one_node_out_capture": 0.10
+  },
+  "routing_after_pass": "Preregister one exact-state tangent audit covering joint PCs, late updates, layer-6 A/B common path, and held-out innovation for the identical separable conditioner.",
+  "routing_after_failure": "Close the exact shared separable channel conditioner and return to theory before selecting another ledger row.",
+  "forbidden_followups": [
+    "ALS-iteration sweep",
+    "prompt-length sweep",
+    "role-private gains",
+    "node-private gains",
+    "initialization or denominator sweep",
+    "prompt optimization",
+    "CE run",
+    "larger-model run"
+  ]
+}
