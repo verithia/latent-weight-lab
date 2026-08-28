@@ -16,6 +16,7 @@ import torch
 
 from examples.nanogpt.analyze_mlp_synthetic_muon_program import (
     DENSE_MLP_SCALARS,
+    TRAJECTORY_SCHEMA,
     build_dense_model,
     initialization_match,
     make_prompt,
@@ -24,9 +25,6 @@ from examples.nanogpt.analyze_mlp_synthetic_muon_program import (
 from examples.nanogpt.analyze_mlp_synthetic_muon_program_joint import (
     FROZEN_PARAMETERS,
     joint_leading_pc,
-)
-from examples.nanogpt.analyze_mlp_synthetic_muon_program_twostep_joint import (
-    dense_step_norms,
 )
 from examples.nanogpt.analyze_mlp_virtual_lookahead_joint import (
     make_model_lookahead_program,
@@ -85,6 +83,44 @@ def schedule_from_registered_norms(
         "node_ratio_maximum": float(ratios_by_node.max()),
         "rule": "median across nodes of registered step norm divided by node step-zero norm",
     }
+
+
+def all_dense_step_norms(
+    trajectory_dir: Path,
+    parameters: tuple[str, ...],
+) -> tuple[torch.Tensor, dict[str, str]]:
+    """Load every registered transition once, rather than the two-step helper."""
+    files = sorted(trajectory_dir.glob("step_*.pt"))
+    if len(files) != 239:
+        raise ValueError(f"expected 239 states, found {len(files)}")
+    norms = torch.empty(len(files) - 1, len(parameters), dtype=torch.float32)
+    previous: dict[str, torch.Tensor] | None = None
+    identity: str | None = None
+    previous_step = -1
+    for file in files:
+        payload = torch.load(file, map_location="cpu", weights_only=False)
+        if payload.get("schema_version") != TRAJECTORY_SCHEMA:
+            raise ValueError(f"unexpected trajectory schema in {file}")
+        step = int(payload["step"])
+        if step != previous_step + 1:
+            raise ValueError("trajectory steps are not contiguous from zero")
+        previous_step = step
+        observed_identity = str(payload["run_identity_sha256"])
+        identity = observed_identity if identity is None else identity
+        if observed_identity != identity:
+            raise ValueError("trajectory identity changed")
+        current = {
+            parameter: payload["parameters"][parameter].detach().float().contiguous()
+            for parameter in parameters
+        }
+        if previous is not None:
+            for index, parameter in enumerate(parameters):
+                norms[step - 1, index] = (current[parameter] - previous[parameter]).norm()
+        previous = current
+    if not torch.isfinite(norms).all() or not (norms > 0).all():
+        raise ValueError("invalid dense transition norms")
+    identities = {parameter: str(identity) for parameter in parameters}
+    return norms, identities
 
 
 def first_step_scales(
@@ -341,7 +377,7 @@ def main() -> None:
         ns_steps=5,
         momentum=FROZEN_MOMENTUM,
     )
-    registered_norms, trajectory_identities = dense_step_norms(
+    registered_norms, trajectory_identities = all_dense_step_norms(
         args.trajectory_dir,
         FROZEN_PARAMETERS,
     )
