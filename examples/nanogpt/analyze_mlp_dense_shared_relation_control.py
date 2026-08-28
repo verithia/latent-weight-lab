@@ -121,15 +121,20 @@ def solve_right(
     ridge_relative: float = RIDGE_RELATIVE,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     columns = atoms[0].shape[1]
-    gram = torch.zeros(columns, columns, device=atoms[0].device, dtype=atoms[0].dtype)
+    # Five-node LOO Grams are close enough to singular that FP32 roundoff can
+    # make a mathematically positive ridge system fail Cholesky. Accumulate
+    # and solve the frozen equations in FP64, then return the map in the atom
+    # dtype. This is a numerical repair, not a ridge or objective change.
+    gram = torch.zeros(columns, columns, device=atoms[0].device, dtype=torch.float64)
     rhs = torch.zeros_like(gram)
     for index in indices:
-        feature = coefficients[index] * atoms[index]
+        feature = (coefficients[index] * atoms[index]).double()
         gram.addmm_(feature.T, feature)
-        rhs.addmm_(feature.T, targets[index])
-    return _cholesky_solve_with_refinement(
+        rhs.addmm_(feature.T, targets[index].double())
+    matrix, diagnostics = _cholesky_solve_with_refinement(
         gram, rhs, transpose_solution=False, ridge_relative=ridge_relative
     )
+    return matrix.to(dtype=atoms[0].dtype), diagnostics
 
 
 def solve_left(
@@ -141,15 +146,16 @@ def solve_left(
     ridge_relative: float = RIDGE_RELATIVE,
 ) -> tuple[torch.Tensor, dict[str, float]]:
     rows = atoms[0].shape[0]
-    gram = torch.zeros(rows, rows, device=atoms[0].device, dtype=atoms[0].dtype)
+    gram = torch.zeros(rows, rows, device=atoms[0].device, dtype=torch.float64)
     rhs = torch.zeros_like(gram)
     for index in indices:
-        feature = coefficients[index] * atoms[index]
+        feature = (coefficients[index] * atoms[index]).double()
         gram.addmm_(feature, feature.T)
-        rhs.addmm_(targets[index], feature.T)
-    return _cholesky_solve_with_refinement(
+        rhs.addmm_(targets[index].double(), feature.T)
+    matrix, diagnostics = _cholesky_solve_with_refinement(
         gram, rhs, transpose_solution=True, ridge_relative=ridge_relative
     )
+    return matrix.to(dtype=atoms[0].dtype), diagnostics
 
 
 def _metrics(

@@ -35,7 +35,8 @@
     "one_sided_als_iterations": 8,
     "two_sided_als_iterations": 8,
     "two_sided_initializations": ["identity", "right_only", "left_only"],
-    "map_solve": "closed-form ridge normal equations using Cholesky; matrix-free residual is checked against the original normal equation",
+    "map_solve": "closed-form ridge normal equations using FP64 accumulation and Cholesky; matrix-free residual is checked against the original normal equation",
+    "linear_algebra_dtype": "float64; repaired after the FP32 preflight Gram lost positive definiteness at held-out fold 0",
     "coefficient_update": "exact per-node least-squares scalar followed by common RMS gauge normalization",
     "objective_contract": "retain the best monotone iterate; report raw residual energy, squared-cosine capture, stationarity/normal-equation residual, and coefficient history",
     "fit_all_and_leave_one_out": true
