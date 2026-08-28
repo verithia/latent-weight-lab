@@ -489,21 +489,27 @@ def main() -> None:
 
     for parameter in selected_parameters:
         trajectory_cpu, trajectory_identity = load_trajectory_parameter(args.trajectory_dir, parameter)
-        run_a_cpu, steps_a, run_a_identity = load_probe_weights(args.run_a_probe_dir, parameter)
-        run_b_cpu, steps_b, run_b_identity = load_probe_weights(args.run_b_probe_dir, parameter)
-        if steps_a != steps_b:
-            raise ValueError("A/B schedules differ")
-        if not torch.equal(run_a_cpu[0], run_b_cpu[0]):
-            raise ValueError("A/B step-zero gauge mismatch")
+        path_states = {"trajectory_centered": trajectory_cpu}
+        run_a_identity: str | None = None
+        run_b_identity: str | None = None
+        w0_reference = trajectory_cpu[0]
+        if "common_centered" in paths:
+            run_a_cpu, steps_a, run_a_identity = load_probe_weights(args.run_a_probe_dir, parameter)
+            run_b_cpu, steps_b, run_b_identity = load_probe_weights(args.run_b_probe_dir, parameter)
+            if steps_a != steps_b:
+                raise ValueError("A/B schedules differ")
+            if not torch.equal(run_a_cpu[0], run_b_cpu[0]):
+                raise ValueError("A/B step-zero gauge mismatch")
+            if not torch.equal(trajectory_cpu[0], run_a_cpu[0]):
+                raise ValueError("trajectory/probe step-zero gauge mismatch")
+            path_states["common_centered"] = 0.5 * (
+                run_a_cpu.float() + run_b_cpu.float()
+            )
+            w0_reference = run_a_cpu[0]
         model_weight = dict(model.named_parameters())[parameter].detach().cpu()
-        w0_match = initialization_match(model_weight, run_a_cpu[0])
+        w0_match = initialization_match(model_weight, w0_reference)
         if not bool(w0_match["accepted"]):
-            raise ValueError(f"model/probe W0 mismatch for {parameter}: {w0_match}")
-        common_cpu = 0.5 * (run_a_cpu.float() + run_b_cpu.float())
-        path_states = {
-            "trajectory_centered": trajectory_cpu,
-            "common_centered": common_cpu,
-        }
+            raise ValueError(f"model/stored W0 mismatch for {parameter}: {w0_match}")
         function, function_manifest = make_program_function(
             model,
             parameter=parameter,
@@ -547,7 +553,7 @@ def main() -> None:
             "w0_storage_match": w0_match,
             "function": function_manifest,
         }
-        del trajectory_cpu, run_a_cpu, run_b_cpu, common_cpu, function
+        del trajectory_cpu, path_states, function
         torch.cuda.empty_cache()
 
     torch.cuda.synchronize()
