@@ -350,13 +350,13 @@ def self_test(device: str, *, orthogonal_secant: bool = False) -> dict[str, Any]
         target_norms,
         ns_steps=5,
         momentum=FROZEN_MOMENTUM,
-        orthogonal_secant=orthogonal_secant,
     )
     function = make_generic_lookahead_program(
         weights,
         loss_fn,
         ns_steps=5,
         momentum=FROZEN_MOMENTUM,
+        orthogonal_secant=orthogonal_secant,
     )
     coefficients = torch.ones(2, len(weights), device=device)
     primals = (prompt, lookahead_scales, coefficients)
