@@ -7,6 +7,8 @@
     "base_commit": "f0f4510504d1684ddc310c1b74b372cd34dd635f",
     "entrypoint": "examples/nanogpt/analyze_mlp_global_sign_bank.py",
     "entrypoint_sha256": "11668a17b93d47cef2fcb3637edc459a51e21acbeb305fe82cba7eac78370111",
+    "launcher": "examples/nanogpt/launch_tracked_analysis.py",
+    "launcher_sha256": "0580c57fe5e2e208dee0e93b1e9a32202a0b337a11beffd1e8b2bc39d8257dbd",
     "focused_test": "examples/nanogpt/test_analyze_mlp_global_sign_bank.py",
     "focused_test_sha256": "177f224a4df1ff01b10c918c2b095a47794fae39fcae2d956e9a506355eec7e8"
   },
