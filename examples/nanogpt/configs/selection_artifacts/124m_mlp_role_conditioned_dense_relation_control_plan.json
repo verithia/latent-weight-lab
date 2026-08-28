@@ -1,5 +1,6 @@
 {
-  "candidate": "H39 role-conditioned unrestricted dense shared-relation premise control",
+  "candidate": "H39 role-conditioned unrestricted dense shared-relation premise control (analytically blocked before code)",
+  "classification": "ANALYTICALLY_BLOCKED",
   "parent_result_sha256": "8c3bf8e0215cca53e288449e65ada4b929daf8f3483dcf578863001543ef838e",
   "purpose": "Test whether H38 failed because detector and residual-writer nodes were forced through one relation. Fit separate unrestricted relations across depth for c_fc and c_proj before authorizing any compact role-conditioned carrier.",
   "frozen_control": {
@@ -64,7 +65,8 @@
     "both_roles_must_pass": true
   },
   "routing_after_pass": "Analyze each fitted role map for singular decay, quantization tolerance, block locality, displacement rank, and cross-role common structure before proposing exactly one compact role-conditioned carrier.",
-  "routing_after_failure": "Close role-conditioned static bilinear sharing around this task atom and move to a theory-derived node-conditioned nonlinear or alternate-function manifold.",
+  "analytic_blocker": "Each role has only three sampled nodes. A leave-one-layer-out fold observes two 3072x768 atoms whose combined hidden-column span has dimension at most 1536, leaving at least 1536 of 3072 hidden directions unconstrained. An arbitrary dense shared left map is therefore not identifiable on the held-out atom. A negative LOO result cannot distinguish absence of a shared relation from minimum-norm continuation outside the observed span, and the registered >=99% generic shared-map self-test cannot be guaranteed.",
+  "routing_after_failure": "Do not implement H39 on the current six-node asset. Move to an identifiable compact role-conditioned topology whose state itself is determined by two training nodes, or acquire more independent same-role atoms under a separately justified storage plan.",
   "forbidden_followups": [
     "treating either dense role map as a compact candidate",
     "using the opposite role in a held-out fold",
