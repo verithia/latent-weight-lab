@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 import torch
 
@@ -254,6 +254,9 @@ def fit_role_atlas(
     branches: int = BRANCHES,
     iterations: int = BINDING_ITERATIONS,
     learning_rate: float = LEARNING_RATE,
+    basis_function: Callable[
+        [torch.Tensor, torch.Tensor, torch.Tensor, dict[str, Any]], torch.Tensor
+    ] = atlas_basis,
 ) -> tuple[dict[str, Any], torch.Tensor, torch.Tensor]:
     if not train_indices or not evaluation_indices:
         raise ValueError("H42 requires nonempty train and evaluation folds")
@@ -276,7 +279,7 @@ def fit_role_atlas(
         optimizer.zero_grad(set_to_none=True)
         objective = torch.zeros((), device=device)
         for index in train_indices:
-            basis = atlas_basis(
+            basis = basis_function(
                 atoms[index], hidden_residual, residual_residual, geometry
             )
             weighted, _ = projection_metrics(
@@ -305,7 +308,7 @@ def fit_role_atlas(
     zero_residual = torch.zeros_like(residual_residual)
     with torch.no_grad():
         for index in evaluation_indices:
-            learned_basis = atlas_basis(
+            learned_basis = basis_function(
                 atoms[index], hidden_residual, residual_residual, geometry
             )
             _, learned = projection_metrics(
@@ -314,7 +317,7 @@ def fit_role_atlas(
                 weights[index],
                 differentiable=False,
             )
-            base_basis = atlas_basis(
+            base_basis = basis_function(
                 atoms[index], zero_hidden, zero_residual, geometry
             )
             _, base = projection_metrics(
@@ -378,6 +381,9 @@ def atlas_audit(
     iterations: int,
     branches: int = BRANCHES,
     preflight: bool,
+    basis_function: Callable[
+        [torch.Tensor, torch.Tensor, torch.Tensor, dict[str, Any]], torch.Tensor
+    ] = atlas_basis,
 ) -> tuple[dict[str, Any], dict[str, tuple[torch.Tensor, torch.Tensor]]]:
     roles = {}
     stored_angles = {}
@@ -391,6 +397,7 @@ def atlas_audit(
             seed_base=ROLE_SEEDS[role],
             branches=branches,
             iterations=iterations,
+            basis_function=basis_function,
         )
         stored_angles[role] = (hidden, residual)
         heldouts = group[:1] if preflight else group
@@ -406,6 +413,7 @@ def atlas_audit(
                 seed_base=ROLE_SEEDS[role],
                 branches=branches,
                 iterations=iterations,
+                basis_function=basis_function,
             )
             loo_rows.append(
                 {
