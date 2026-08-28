@@ -1,0 +1,46 @@
+{
+  "candidate": "H12a two phase sign carriers with private rank-two envelope",
+  "purpose": "Test whether H5's late failure is repaired by a second chronological chart without exceeding one percent.",
+  "frozen_parameters": {
+    "basis_rank": 16,
+    "carrier_count": 2,
+    "deployment_matrix_count": 24,
+    "early_stop": 119,
+    "envelope_rank": 2,
+    "fit_iterations": 6,
+    "late_start": 180,
+    "layers": [0, 6, 11],
+    "maximum_checkpoint_byte_fraction": 0.01,
+    "middle_stop": 179,
+    "seed": 20260830,
+    "targets": ["mlp.c_fc", "mlp.c_proj"]
+  },
+  "information_split": {
+    "carrier_0_fit": "stream A states through step 119 only",
+    "carrier_1_fit": "stream A states from step 120 through 179 only",
+    "held_out": ["stream A steps 180 through 238", "all stream B weights"]
+  },
+  "controls": [
+    "two random sign carriers with identical private state",
+    "two learned carriers with chronological route swapped",
+    "sealed H5 one-carrier rank-four result"
+  ],
+  "gates": {
+    "late_control_margin": 0.05,
+    "minimum_common_centered_capture": 0.30,
+    "minimum_heldout_b_innovation_capture": 0.10,
+    "minimum_late_centered_update_capture": 0.10,
+    "minimum_pc_capture": 0.05,
+    "minimum_phase_weighted_top16_pc_capture": 0.30,
+    "synthetic_own_family_reconstruction": 0.999
+  },
+  "routing_after_failure": "Close fixed chronological sign-carrier atlases under one percent; return to H17 non-FHT compact-native theory or explicitly relax the accounting premise.",
+  "forbidden_followups": [
+    "boundary sweep",
+    "rank sweep",
+    "carrier-count sweep",
+    "seed sweep",
+    "CE run",
+    "larger-model run"
+  ]
+}
