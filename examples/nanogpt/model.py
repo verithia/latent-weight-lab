@@ -5249,13 +5249,35 @@ class GPT(nn.Module):
             ),
         }
 
-    def forward(self, idx: torch.Tensor, targets: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor | None]:
-        device = idx.device
-        bsz, seq_len = idx.size()
+    def forward(
+        self,
+        idx: torch.Tensor | None,
+        targets: torch.Tensor | None = None,
+        *,
+        input_embeddings: torch.Tensor | None = None,
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
+        if (idx is None) == (input_embeddings is None):
+            raise ValueError("provide exactly one of idx or input_embeddings")
+        if input_embeddings is None:
+            assert idx is not None
+            token_embeddings = self.transformer.wte(idx)
+            device = idx.device
+            bsz, seq_len = idx.size()
+        else:
+            if input_embeddings.ndim != 3:
+                raise ValueError("input_embeddings must have shape [batch, sequence, width]")
+            if input_embeddings.shape[-1] != self.config.n_embd:
+                raise ValueError(
+                    "input embedding width mismatch: expected "
+                    f"{self.config.n_embd}, got {input_embeddings.shape[-1]}"
+                )
+            token_embeddings = input_embeddings
+            device = input_embeddings.device
+            bsz, seq_len, _ = input_embeddings.shape
         if seq_len > self.config.block_size:
             raise ValueError(f"sequence length {seq_len} exceeds block size {self.config.block_size}")
         pos = torch.arange(0, seq_len, dtype=torch.long, device=device)
-        x = self.transformer.drop(self.transformer.wte(idx) + self.transformer.wpe(pos))
+        x = self.transformer.drop(token_embeddings + self.transformer.wpe(pos))
         for block in self.transformer.h:
             x = block(x)
         x = self.transformer.ln_f(x)
