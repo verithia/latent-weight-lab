@@ -14,3 +14,4 @@ def test_microcore_atlas_accounting() -> None:
 def test_microcore_atlas_self_test() -> None:
     result = self_test("cpu")
     assert result["status"] == "passed"
+    assert result["finite_nonzero_core_gradient"] is True

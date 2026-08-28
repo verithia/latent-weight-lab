@@ -151,7 +151,9 @@ def microcore_basis(
             * geometry["row_signs"][branch].unsqueeze(1)
             * geometry["column_signs"][branch].unsqueeze(0)
         )
-        rows.append(normalized(task_sign * expanded).reshape(-1))
+        feature = task_sign * expanded
+        feature = feature / feature.norm().clamp_min(1e-20)
+        rows.append(feature.reshape(-1))
     return torch.stack(rows)
 
 
@@ -410,6 +412,15 @@ def self_test(device_name: str) -> dict[str, Any]:
         raise AssertionError("procedural microcore regeneration is not exact")
     if not torch.equal(basis[0].reshape(shape), atom):
         raise AssertionError("branch zero is not exact identity")
+    differentiable_core = core.clone().requires_grad_(True)
+    differentiable_basis = microcore_basis(atom, differentiable_core, geometry)
+    differentiable_basis[1:, :17].square().sum().backward()
+    if (
+        differentiable_core.grad is None
+        or not torch.isfinite(differentiable_core.grad).all()
+        or float(differentiable_core.grad.norm()) == 0.0
+    ):
+        raise AssertionError("microcore basis has no finite nonzero gradient")
     coefficients = torch.randn(components, branches, device=device)
     targets = coefficients @ basis
     targets = targets / targets.norm(dim=1, keepdim=True).clamp_min(1e-20)
@@ -429,6 +440,7 @@ def self_test(device_name: str) -> dict[str, Any]:
         "minimum_known_microcore_weighted_capture": float(weighted),
         "branch_zero_identity": True,
         "deterministic_regeneration": True,
+        "finite_nonzero_core_gradient": True,
         "accounting": accounting,
     }
 
