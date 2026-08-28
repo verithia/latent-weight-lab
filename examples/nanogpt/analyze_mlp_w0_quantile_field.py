@@ -37,6 +37,7 @@ from examples.nanogpt.analyze_parameter_trajectory import (
     parse_int_list,
     write_csv,
 )
+from examples.nanogpt.parameter_trajectory import SCHEMA_VERSION
 
 
 def field_state_accounting(
@@ -214,6 +215,42 @@ def assignment_record(assignments: torch.Tensor, *, category_count: int) -> dict
     }
 
 
+def load_w0_snapshot(
+    path: Path,
+    *,
+    layers: set[int],
+    targets: set[str],
+) -> tuple[dict[str, torch.Tensor], dict[str, Any]]:
+    """Load the exact step-zero tensors without the >=3-state path guard."""
+    payload = torch.load(path, map_location="cpu", weights_only=False)
+    if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(f"unsupported trajectory snapshot: {path}")
+    if int(payload.get("step", -1)) != 0:
+        raise ValueError(f"the W0 field requires step zero, got {payload.get('step')}")
+    selected: dict[str, torch.Tensor] = {}
+    for name, tensor in payload["parameters"].items():
+        match = PARAMETER_PATTERN.match(name)
+        if match is None:
+            continue
+        if int(match.group("layer")) not in layers or match.group("target") not in targets:
+            continue
+        selected[name] = tensor.detach().float().contiguous()
+    if not selected:
+        raise ValueError("step-zero filter selected no parameters")
+    metadata = {
+        "schema_version": payload["schema_version"],
+        "step": int(payload["step"]),
+        "run_identity": payload["run_identity"],
+        "run_identity_sha256": payload["run_identity_sha256"],
+        "model_config": payload["model_config"],
+        "storage_dtype": payload["storage_dtype"],
+        "execution_provenance": payload.get("execution_provenance"),
+        "snapshot_path": str(path),
+        "snapshot_sha256": file_sha256(path),
+    }
+    return selected, metadata
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--snapshot-dir", required=True, type=Path)
@@ -262,18 +299,16 @@ def main() -> None:
     if len(nodes) != len(layers) * len(targets):
         raise ValueError("the frozen six-node inventory is incomplete")
     paths = sorted(args.snapshot_dir.glob("step_*.pt"))
-    first_steps, first_values, first_metadata = load_snapshots(paths[:1], layers=layers, targets=targets)
-    if first_steps != [0]:
-        raise ValueError(f"the W0 field requires step zero, got {first_steps}")
+    first_values, first_metadata = load_w0_snapshot(paths[0], layers=layers, targets=targets)
 
     quantile_assignments: dict[str, torch.Tensor] = {}
     hash_assignments: dict[str, torch.Tensor] = {}
     field_manifest: dict[str, Any] = {}
-    for parameter, tensors in sorted(first_values.items()):
+    for parameter, tensor in sorted(first_values.items()):
         match = PARAMETER_PATTERN.match(parameter)
         assert match is not None
         target = match.group("target")
-        w0 = orient(target, torch.stack(tensors).to(args.device, torch.float32))[0]
+        w0 = orient(target, tensor.unsqueeze(0).to(args.device, torch.float32))[0]
         quantile = w0_quantile_assignment(w0, category_count=args.category_count)
         hashed = procedural_hash_assignment(
             ambient,

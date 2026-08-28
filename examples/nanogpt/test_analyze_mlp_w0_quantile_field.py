@@ -4,9 +4,11 @@ import torch
 
 from examples.nanogpt.analyze_mlp_w0_quantile_field import (
     field_state_accounting,
+    load_w0_snapshot,
     synthetic_self_check,
     w0_quantile_assignment,
 )
+from examples.nanogpt.parameter_trajectory import SCHEMA_VERSION
 
 
 def test_exact_h10c_accounting() -> None:
@@ -39,3 +41,25 @@ def test_quantile_assignment_is_deterministic_and_populated() -> None:
 
 def test_field_family_reconstructs_own_member() -> None:
     assert synthetic_self_check("cpu") > 0.999
+
+
+def test_single_step_w0_loader_does_not_require_a_path(tmp_path) -> None:
+    path = tmp_path / "step_00000000.pt"
+    name = "transformer.h.0.mlp.c_fc.weight"
+    tensor = torch.randn(8, 4)
+    torch.save(
+        {
+            "schema_version": SCHEMA_VERSION,
+            "step": 0,
+            "run_identity": {"name": "test"},
+            "run_identity_sha256": "abc",
+            "model_config": {"n_layer": 1},
+            "storage_dtype": "float32",
+            "execution_provenance": None,
+            "parameters": {name: tensor},
+        },
+        path,
+    )
+    values, metadata = load_w0_snapshot(path, layers={0}, targets={"mlp.c_fc"})
+    assert torch.equal(values[name], tensor)
+    assert metadata["step"] == 0
