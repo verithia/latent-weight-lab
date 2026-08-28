@@ -1,0 +1,46 @@
+{
+  "candidate": "H4a shared three-bit partition with private bilateral values",
+  "purpose": "Test whether H1's useful orientation bits encode a reusable coordinate partition rather than reusable vector directions.",
+  "frozen_parameters": {
+    "basis_rank": 16,
+    "category_bits": 3,
+    "category_count": 8,
+    "deployment_matrix_count": 24,
+    "discovery_stop": 119,
+    "fit_iterations": 8,
+    "late_start": 180,
+    "layers": [0, 6, 11],
+    "maximum_checkpoint_byte_fraction": 0.01,
+    "partition_iterations": 6,
+    "seed": 20260831,
+    "targets": ["mlp.c_fc", "mlp.c_proj"]
+  },
+  "information_split": {
+    "partition_fit": "stream A discovery PCs through step 119 only",
+    "held_out": ["weak full-path PCs", "stream A steps 180 through 238", "all stream B weights"]
+  },
+  "controls": [
+    "random three-bit partition with identical private state",
+    "learned partition with values but no bilateral gains",
+    "sealed H1 degree-one three-sign span"
+  ],
+  "gates": {
+    "minimum_common_centered_capture": 0.30,
+    "minimum_heldout_b_innovation_capture": 0.10,
+    "minimum_late_centered_update_capture": 0.10,
+    "minimum_pc_capture": 0.05,
+    "minimum_random_control_margin": 0.10,
+    "minimum_weighted_top16_pc_capture": 0.30,
+    "synthetic_own_family_reconstruction": 0.999
+  },
+  "routing_after_failure": "Close shared low-bit coordinate partitions under one percent and return to the non-FHT compact-native or premise-relaxation boundary.",
+  "forbidden_followups": [
+    "cell-count sweep",
+    "bit-count sweep",
+    "gain sweep",
+    "support sweep",
+    "seed sweep",
+    "CE run",
+    "larger-model run"
+  ]
+}
