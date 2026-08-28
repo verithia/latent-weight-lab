@@ -1,0 +1,65 @@
+{
+  "candidate": "H29e residual-structure audit after rejected one-macrostep synthetic program",
+  "parent_result_sha256": "177f14840fbf4806c9d0fe9a15bb28f706e5f60e15bf6eba9d695e61c4231426",
+  "purpose": "Determine whether the directions missed by H29d have a transferable low-bit carrier, shared row/column frame, or phase-local structure before authorizing any hybrid.",
+  "residual_definition": "r_i = u_i - P_J(u_i), using the identical H29d six-output mixed-Hessian/NS5 tangent and regularized 20-CG projection",
+  "frozen_paths": [
+    "joint_centered_top16",
+    "joint_late_top16",
+    "layer6_common_top16",
+    "layer6_stream_b_innovation_top16"
+  ],
+  "canonical_matrix_shape": [3072, 768],
+  "c_proj_canonicalization": "transpose",
+  "diagnostics": {
+    "per_matrix": [
+      "singular energy ranks 90/95/99",
+      "stable rank",
+      "entropy rank",
+      "row and column leverage entropy",
+      "sign balance",
+      "magnitude kurtosis"
+    ],
+    "cross_node": [
+      "Frobenius cosine",
+      "rank-16/32/64 left canonical overlap",
+      "rank-16/32/64 right canonical overlap"
+    ],
+    "global_carrier": {
+      "discovery": "joint-centered PCs 1 through 8 across all six nodes",
+      "dense_control_atoms": 3,
+      "sign_atoms": 3,
+      "evaluation": "joint PCs 9 through 16 and every late/common/innovation residual without refitting"
+    },
+    "shared_frames": {
+      "rank": 32,
+      "fit": "joint-centered PCs 1 through 8",
+      "evaluation": "left, right, and bilateral held-out energy capture"
+    },
+    "phase": "rank-16 residual-row span transfer between joint-centered and late paths"
+  },
+  "authorization_gates": {
+    "H29f_low_bit": {
+      "minimum_each_required_family_capture": 0.20,
+      "minimum_enrichment_over_checkpoint_bit_fraction": 5.0
+    },
+    "H29g_shared_frames": {
+      "minimum_left_mean_squared_canonical_overlap": 0.50,
+      "minimum_right_mean_squared_canonical_overlap": 0.50,
+      "minimum_each_required_family_bilateral_capture": 0.20
+    },
+    "H29h_phase_atlas": {
+      "minimum_within_phase_rank16_capture": 0.50,
+      "maximum_cross_phase_rank16_capture": 0.20
+    }
+  },
+  "routing_if_no_gate_passes": "Close global-carrier hybrids for the measured residual and perform H30a multi-macrostep theory before implementation.",
+  "state_rule": "Residuals, dense controls, empirical frames, and PCs are analysis-only and must not be serialized as a model basis.",
+  "forbidden_followups": [
+    "carrier-count sweep",
+    "frame-rank sweep",
+    "prompt-length test",
+    "CE run",
+    "larger-model run"
+  ]
+}
