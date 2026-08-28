@@ -1,0 +1,75 @@
+{
+  "candidate": "H39 role-conditioned unrestricted dense shared-relation premise control",
+  "parent_result_sha256": "8c3bf8e0215cca53e288449e65ada4b929daf8f3483dcf578863001543ef838e",
+  "purpose": "Test whether H38 failed because detector and residual-writer nodes were forced through one relation. Fit separate unrestricted relations across depth for c_fc and c_proj before authorizing any compact role-conditioned carrier.",
+  "frozen_control": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "frozen_node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "role_groups": {
+      "c_fc": [0, 2, 4],
+      "c_proj": [1, 3, 5]
+    },
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 375,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "prompt_scalars": 288000,
+    "role_specific_left_right_scalars": 20054016,
+    "persistent_node_coefficients": 24,
+    "full_control_state_scalars": 20342040,
+    "state_fraction": 0.35925335354275173,
+    "fp16_checkpoint_bytes": 40684080,
+    "budget_classification": "premise-relaxation control; violates the one-percent ceiling"
+  },
+  "fit": {
+    "formula": "Yhat_n = a_n L_role(n) D_n R_role(n)^T",
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for every task atom and PC part",
+    "ridge_relative_to_mean_gram_diagonal": 1e-6,
+    "linear_algebra_dtype": "float64",
+    "one_sided_als_iterations": 8,
+    "two_sided_als_iterations": 8,
+    "two_sided_initializations": ["identity", "right_only", "left_only"],
+    "coefficient_update": "exact per-node least-squares scalar with common RMS gauge normalization within the fitted role",
+    "fit_all": "fit each three-node role independently",
+    "leave_one_out": "for each node, fit only the other two nodes of the same role; never use the opposite role"
+  },
+  "solver_self_test": {
+    "known_role_specific_minimum_capture": 0.99,
+    "maximum_relative_normal_equation_residual": 1e-5,
+    "underdetermined_fold_interpretation": "registered ridge minimum-norm continuation"
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_scope": "one ALS iteration, both role fit-all controls, and one held-out fold per role",
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gates": {
+    "fit_all_minimum_capture_every_node_within_each_role": 0.60,
+    "fit_all_minimum_median_capture_within_each_role": 0.70,
+    "leave_one_out_minimum_capture_every_node_within_each_role": 0.10,
+    "leave_one_out_minimum_median_capture_within_each_role": 0.20,
+    "maximum_relative_normal_equation_residual": 1e-5,
+    "finite_outputs": true,
+    "both_roles_must_pass": true
+  },
+  "routing_after_pass": "Analyze each fitted role map for singular decay, quantization tolerance, block locality, displacement rank, and cross-role common structure before proposing exactly one compact role-conditioned carrier.",
+  "routing_after_failure": "Close role-conditioned static bilinear sharing around this task atom and move to a theory-derived node-conditioned nonlinear or alternate-function manifold.",
+  "forbidden_followups": [
+    "treating either dense role map as a compact candidate",
+    "using the opposite role in a held-out fold",
+    "ridge, iteration, prompt, seed, role, layer, or optimizer sweep",
+    "CE or model-size run",
+    "claiming a universal no-go beyond role-conditioned static bilinear relations around this task atom"
+  ]
+}
