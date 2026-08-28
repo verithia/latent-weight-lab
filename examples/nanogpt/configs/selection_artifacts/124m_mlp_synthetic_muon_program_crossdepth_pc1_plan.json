@@ -1,0 +1,38 @@
+{
+  "candidate": "H29b cross-depth single-macrostep synthetic Muon program",
+  "parent_result_sha256": "447fb01527a578719d907c4bf10b537a3711da412f5ba7417eb96a7398efacd5",
+  "purpose": "Falsify whether the unchanged H29a global soft-token tangent transfers from layer 6 to the untouched shallow and deep MLP matrices.",
+  "frozen_decoder": {
+    "macrosteps": 1,
+    "muon_ns_steps": 5,
+    "prompt_length": 737,
+    "prompt_width": 768,
+    "source_commit_parent": "182dbfa33924612a2fb2521a2c0276d44ca272bb",
+    "state_scalars": 566040
+  },
+  "frozen_discriminator": {
+    "cg_iterations": 20,
+    "cg_tolerance": 1e-5,
+    "device": "cuda:0",
+    "layers": [0, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "paths": ["trajectory_centered"],
+    "relative_ridge": 1e-6
+  },
+  "gate": {
+    "minimum_first_pc_best_possible_total_capture_every_matrix": 0.20
+  },
+  "routing_after_pass": "Preregister one six-node joint-PC/common/innovation/late representation audit with one shared prompt solve.",
+  "routing_after_failure": "Close one global one-macrostep prompt and do theory on stateful multi-macrostep prompt programs.",
+  "forbidden_followups": [
+    "layer sweep",
+    "prompt-length sweep",
+    "target or data sweep",
+    "anchor sweep",
+    "CG or ridge sweep",
+    "prompt optimization",
+    "macrostep sweep",
+    "CE run",
+    "larger-model run"
+  ]
+}
