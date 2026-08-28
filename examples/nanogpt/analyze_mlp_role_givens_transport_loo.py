@@ -191,8 +191,8 @@ def fit_role_transport(
             abs(row["prediction_norm"] - 1.0) for row in rows_out
         ),
         "angle_norms": {
-            "hidden": float(hidden_angles.norm()),
-            "residual": float(residual_angles.norm()),
+            "hidden": float(hidden_angles.detach().norm()),
+            "residual": float(residual_angles.detach().norm()),
         },
         "angle_sha256": {
             "hidden": tensor_sha256(hidden_angles),
