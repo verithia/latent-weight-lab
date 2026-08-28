@@ -1,0 +1,76 @@
+{
+  "schema_version": "nanogpt_mlp_sign_carrier_rank4_oracle_plan_v1",
+  "candidate_id": "H5a_shared_binary_carrier_private_rank4_envelope",
+  "scientific_scope": "optimistic offline representation ceiling only; no CE, optimizer update, attention work, or scale-up",
+  "hypothesis": "one globally learned dense sign carrier supplies amortized ambient orientation while node-private rank-four envelopes reshape that carrier into distinct full-rank MLP directions within one percent total state",
+  "source": {
+    "base_commit": "50dd723784035782812cb3b9532ab22cc74aab2b",
+    "entrypoint": "examples/nanogpt/analyze_mlp_sign_carrier_lowrank.py",
+    "entrypoint_sha256": "a7a81d41594c7eb2c6ab2ffb5ba1bc509ee0dfcd1e2442b868d51b2494509958",
+    "focused_test": "examples/nanogpt/test_analyze_mlp_sign_carrier_lowrank.py",
+    "focused_test_sha256": "0dd40c7754e745ef078edb8be2215aefcf6f334c36d30770bff8222e5197cafb",
+    "launcher": "examples/nanogpt/launch_tracked_analysis.py",
+    "launcher_sha256": "0580c57fe5e2e208dee0e93b1e9a32202a0b337a11beffd1e8b2bc39d8257dbd"
+  },
+  "inputs": {
+    "snapshot_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "snapshot_states": 239,
+    "run_a_probe_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/optimizer_probe",
+    "run_b_probe_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_gradient_dataseed2_0p5tpp_lr24e4/optimizer_probe",
+    "layers": [0, 6, 11],
+    "targets": ["mlp.c_fc", "mlp.c_proj"]
+  },
+  "representation": {
+    "formula": "DeltaW = S elementwise_mul (U V^T) + procedural_coordinate_residual",
+    "matrix_shape": [3072, 768],
+    "envelope_rank": 4,
+    "shared_carrier_bits": 2359296,
+    "private_factor_scalars_total": 368640,
+    "residual_coordinates_per_matrix": 2088,
+    "deployment_matrix_count": 24,
+    "total_checkpoint_bytes": 1132416,
+    "dense_denominator_fp16_bytes": 113246208,
+    "total_checkpoint_byte_fraction": 0.009999593098958334,
+    "cached_refresh_flops_per_matrix_approx": 18874368
+  },
+  "fit_and_evaluation": {
+    "basis_rank": 16,
+    "discovery_stop": 119,
+    "late_start": 180,
+    "binary_alternations": 6,
+    "randomized_svd_fit_oversample": 8,
+    "randomized_svd_fit_power_iterations": 2,
+    "randomized_svd_eval_oversample": 12,
+    "randomized_svd_eval_power_iterations": 4,
+    "batch_size": 8,
+    "seed": 20260829,
+    "fit_data": "discovery residual PCs only",
+    "heldout_data": [
+      "full-horizon residual PCs",
+      "chronological updates at step >= 180",
+      "same-initialization disjoint-data A/B common and B-innovation paths"
+    ],
+    "optimism": "private U,V and residual coordinates are refit to each evaluation target; this is a representation upper bound, not causal prediction"
+  },
+  "required_equal_state_controls": [
+    "ordinary_rank4",
+    "random_sign_rank4",
+    "learned_sign_rank4"
+  ],
+  "gates": {
+    "synthetic_own_family_capture": 0.999,
+    "minimum_weighted_top16_pc_capture_each_node": 0.50,
+    "minimum_pc_capture": 0.20,
+    "minimum_common_ab_centered_capture": 0.70,
+    "minimum_heldout_b_innovation_capture": 0.40,
+    "minimum_centered_late_update_capture": 0.20,
+    "minimum_margin_over_best_control": 0.10
+  },
+  "causal_routing": {
+    "pass_all": "preregister a separate causal tangent/JVP oracle for the identical H5a representation; do not run CE",
+    "fail_any": "close H5a without a rank/iteration/support/sign/seed sweep and perform H11 versus H17 theory selection",
+    "infrastructure_or_implementation_error": "repair and rerun only the identical frozen H5a oracle"
+  },
+  "output_dir": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/high_cadence_239_signcarrier_rank4_v1",
+  "storage_policy": "compact JSON, CSV, and one bitpacked carrier only; no checkpoints, fitted factors, target matrices, or dense bases"
+}
