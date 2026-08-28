@@ -3,6 +3,7 @@ from __future__ import annotations
 import torch
 
 from examples.nanogpt.analyze_mlp_synthetic_muon_program import (
+    initialization_match,
     latent_accounting,
     principal_component,
     self_test,
@@ -31,3 +32,11 @@ def test_principal_component_recovers_rank_one_path() -> None:
 def test_mixed_hessian_polar_projection_self_test() -> None:
     record = self_test("cpu")
     assert float(record["path_energy_capture"]) > 0.999
+
+
+def test_fp16_storage_roundtrip_is_accepted() -> None:
+    reconstructed = torch.randn(64, 32, dtype=torch.float32)
+    stored = reconstructed.to(torch.float16)
+    record = initialization_match(reconstructed, stored)
+    assert record["storage_roundtrip_bitwise_equal"] is True
+    assert record["accepted"] is True

@@ -79,6 +79,35 @@ def latent_accounting(prompt_length: int, width: int) -> dict[str, int | float]:
     }
 
 
+def initialization_match(
+    reconstructed: torch.Tensor,
+    stored: torch.Tensor,
+) -> dict[str, bool | float | str]:
+    """Compare procedural FP32 W0 to its trajectory storage representation."""
+    reconstructed_cpu = reconstructed.detach().cpu()
+    stored_cpu = stored.detach().cpu()
+    roundtrip = reconstructed_cpu.to(stored_cpu.dtype)
+    relative = float(
+        (reconstructed_cpu.float() - stored_cpu.float()).norm()
+        / reconstructed_cpu.float().norm().clamp_min(1e-30)
+    )
+    cosine = float(
+        (reconstructed_cpu.double() * stored_cpu.double()).sum()
+        / (
+            reconstructed_cpu.double().norm()
+            * stored_cpu.double().norm()
+        ).clamp_min(1e-30)
+    )
+    return {
+        "stored_dtype": str(stored_cpu.dtype),
+        "fp32_reconstruction_dtype": str(reconstructed_cpu.dtype),
+        "storage_roundtrip_bitwise_equal": torch.equal(roundtrip, stored_cpu),
+        "relative_storage_error": relative,
+        "cosine": cosine,
+        "accepted": bool(torch.equal(roundtrip, stored_cpu) and relative <= 5e-4),
+    }
+
+
 def _dot(left: TensorTuple, right: TensorTuple) -> torch.Tensor:
     return sum((a.double() * b.double()).sum() for a, b in zip(left, right, strict=True))
 
@@ -454,9 +483,9 @@ def main() -> None:
         if not torch.equal(run_a_cpu[0], run_b_cpu[0]):
             raise ValueError("A/B step-zero gauge mismatch")
         model_weight = dict(model.named_parameters())[parameter].detach().cpu()
-        if not torch.equal(model_weight, run_a_cpu[0].to(model_weight.dtype)):
-            relative = float((model_weight - run_a_cpu[0].float()).norm() / model_weight.norm().clamp_min(1e-30))
-            raise ValueError(f"model/probe W0 mismatch for {parameter}: {relative}")
+        w0_match = initialization_match(model_weight, run_a_cpu[0])
+        if not bool(w0_match["accepted"]):
+            raise ValueError(f"model/probe W0 mismatch for {parameter}: {w0_match}")
         common_cpu = 0.5 * (run_a_cpu.float() + run_b_cpu.float())
         path_states = {
             "trajectory_centered": trajectory_cpu,
@@ -502,6 +531,7 @@ def main() -> None:
             "trajectory_run_identity_sha256": trajectory_identity,
             "run_a_identity_sha256": run_a_identity,
             "run_b_identity_sha256": run_b_identity,
+            "w0_storage_match": w0_match,
             "function": function_manifest,
         }
         del trajectory_cpu, run_a_cpu, run_b_cpu, common_cpu, function
