@@ -1,0 +1,63 @@
+{
+  "candidate": "H29d full joint synthetic Muon program representation audit",
+  "parent_results_sha256": [
+    "cfda8ca1b4002d016fa747ec4196a3e0e96c8f4d31835f72ccafcc5a849bccec"
+  ],
+  "purpose": "Replace the optimistic joint-PC1 ceiling with observed top-16, late-phase, common-path, and held-out-innovation recovery through one six-output prompt tangent.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "macrosteps": 1,
+    "muon_ns_steps": 5,
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "prompt_length": 737,
+    "prompt_width": 768,
+    "state_scalars": 566040
+  },
+  "binding_targets": {
+    "joint_centered": "top 16 PCs of all 239 six-matrix states",
+    "joint_late": "top 16 PCs of steps 159 through 238 inclusive",
+    "layer6_common": "top 16 PCs of (stream_A + stream_B) / 2",
+    "layer6_stream_b_innovation": "top 16 PCs of (stream_B - stream_A) / 2",
+    "matrix_weighting": "ordinary concatenated Frobenius geometry",
+    "collateral_outputs": "all six decoder outputs remain in the projection norm"
+  },
+  "binding_solver": {
+    "cg_iterations": 20,
+    "cg_tolerance": 1e-5,
+    "device": "cuda:0",
+    "principal_components": 16,
+    "relative_ridge": 1e-6
+  },
+  "systems_preflight": {
+    "cg_iterations": 4,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "paths": ["joint_centered"],
+    "principal_components": 2,
+    "watchdog_threshold_seconds": 300
+  },
+  "representation_gates": {
+    "minimum_common_weighted_capture": 0.50,
+    "minimum_each_pc_capture": 0.10,
+    "minimum_innovation_weighted_capture": 0.20,
+    "minimum_joint_weighted_capture": 0.50,
+    "minimum_late_weighted_capture": 0.20
+  },
+  "classification": {
+    "close_one_macrostep_if_joint_below": 0.20,
+    "retain_only_as_hybrid_component_between": [0.20, 0.50]
+  },
+  "routing_after_pass": "Analyze the residual complement before implementing the identical compact-native decoder; no CE is automatic.",
+  "routing_after_partial": "Run H29e residual structure analysis, then authorize only the first matching global-carrier hybrid.",
+  "routing_after_failure": "Close one-macrostep prompt representation and analyze H30 multi-macrostep state rotation before code.",
+  "forbidden_followups": [
+    "node weighting sweep",
+    "prompt-length sweep",
+    "target or data sweep",
+    "anchor sweep",
+    "CG or ridge sweep",
+    "prompt optimization",
+    "macrostep sweep",
+    "CE run",
+    "larger-model run"
+  ]
+}
