@@ -1,0 +1,69 @@
+{
+  "candidate": "H35a shared rank-36 bilateral task-atom transport fit-all capacity discriminator",
+  "parent_results_sha256": [
+    "2368befd098633063bf0ce4d967334fac8aa7c371684270940f62880db879ff0",
+    "008aad848e4004f3af991123732142d241960ff1ef17bf161580753a5bae7d50"
+  ],
+  "purpose": "Test whether a one-percent shared off-diagonal left/right low-rank transport around a basis-free task-gradient atom can fit the six known leading-PC parts before spending compute on leave-one-node-out transfer.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 375,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "rank": 36,
+    "prompt_scalars": 288000,
+    "shared_left_factor_scalars": 221184,
+    "shared_right_factor_scalars": 55296,
+    "persistent_node_coefficients": 48,
+    "total_state_scalars": 564528,
+    "state_fraction": 0.009969923231336806,
+    "fp16_checkpoint_bytes": 1129056,
+    "stored_dense_basis": "none"
+  },
+  "task_atom": {
+    "formula": "D_n(E) = NS5(gradient of fixed task loss with respect to W_n at W0)",
+    "transport": "B_n = U_L(V_L^T D_n) + (D_n U_R)V_R^T",
+    "decoder": "T_n = a_n D_n + b_n B_n",
+    "maximum_correction_rank_per_node": 72,
+    "cached_materialization": true
+  },
+  "fit": {
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for every task atom and PC part",
+    "algorithm": "128 deterministic full-batch Adam iterations minimizing average unit-target squared error",
+    "iterations": 128,
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "seed": 353,
+    "factor_initialization": "independent normal with standard deviation inverse square root of the corresponding channel dimension",
+    "base_coefficient_initialization": "per-node optimal raw scalar",
+    "correction_coefficient_initialization": 1.0,
+    "fit_all_only": true,
+    "raw_same_prompt_control": true
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_iterations": 8,
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gate": {
+    "minimum_fit_all_capture_every_node": 0.05,
+    "minimum_median_fit_all_capture": 0.10
+  },
+  "routing_after_pass": "Write and preregister H35b using the identical rank, prompt, initialization, optimizer, and state for six-fold leave-one-node-out transfer.",
+  "routing_after_failure": "Close the exact rank-36 bilateral task-atom family and move to the next theory-authorized construction without a sweep.",
+  "forbidden_followups": [
+    "rank or prompt tradeoff sweep",
+    "iteration, learning-rate, seed, or initialization sweep",
+    "role-private or node-private factors",
+    "prompt optimization",
+    "CE run",
+    "larger-model run"
+  ]
+}
