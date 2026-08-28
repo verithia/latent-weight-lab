@@ -1,0 +1,61 @@
+{
+  "candidate": "H30a two-macrostep state-rotating synthetic Muon program joint PC1",
+  "parent_results_sha256": [
+    "177f14840fbf4806c9d0fe9a15bb28f706e5f60e15bf6eba9d695e61c4231426",
+    "a6582128b27cad3f9fde6ac714b697496519fa3b312011e3f1e9ff53bbb17b99"
+  ],
+  "purpose": "Test whether a second replayed task-gradient/Muon macrostep rotates the compact decoder tangent enough to double the one-step joint-PC1 recovery, after residual analysis rejected every cheaper registered static carrier.",
+  "frozen_decoder": {
+    "layers": [0, 6, 11],
+    "macrosteps": 2,
+    "muon_ns_steps_per_macrostep": 5,
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "prompt_length": 737,
+    "prompt_width": 768,
+    "persistent_amplitudes_for_deployed_24_matrices": 48,
+    "state_scalars": 566064,
+    "state_fraction": 0.00999705
+  },
+  "state_transition": {
+    "sign": "descent: W_next = W_current - eta * NS5(task_gradient)",
+    "prompt_and_targets": "the same deterministic prompt and targets are replayed at both macrosteps",
+    "output": "concatenated W2-W0 for the six registered matrices",
+    "first_amplitude_anchor": "positive scalar matching the Frobenius norm of registered dense displacement W1-W0 for each matrix",
+    "second_amplitude_anchor": "positive scalar at generated W1 matching the Frobenius norm of registered dense displacement W2-W1 for each matrix",
+    "stored_dense_side_information": "none; only the 48 amplitude scalars and prompt are deployable state"
+  },
+  "joint_target": {
+    "matrix_weighting": "ordinary concatenated Frobenius geometry; all six matrices have equal ambient size",
+    "path": "239-state centered same-gauge trajectory",
+    "principal_components": 1
+  },
+  "binding_solver": {
+    "cg_iterations": 20,
+    "cg_tolerance": 1e-5,
+    "device": "cuda:0",
+    "relative_ridge": 1e-6
+  },
+  "systems_preflight": {
+    "cg_iterations": 1,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_runtime_seconds": 300,
+    "watchdog_threshold_seconds": 300
+  },
+  "gate": {
+    "minimum_observed_joint_pc1_capture": 0.10,
+    "minimum_best_possible_total_path_capture": 0.20
+  },
+  "routing_after_pass": "Preregister and run the frozen top-16 joint, late, layer-6 common, and held-out innovation audit for exactly two macrosteps.",
+  "routing_after_failure": "Close the two-macrostep K=2 topology without a step-count sweep and move to the separately theorized optimizer-carry branch H30b.",
+  "forbidden_followups": [
+    "macrostep-count sweep",
+    "amplitude sweep",
+    "prompt-length sweep",
+    "target or data sweep",
+    "anchor sweep",
+    "CG or ridge sweep",
+    "prompt optimization",
+    "CE run",
+    "larger-model run"
+  ]
+}
