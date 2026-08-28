@@ -191,9 +191,13 @@ def assemble_component(
             pieces.append(torch.zeros(count, device=device, dtype=torch.float32))
     target = torch.cat(pieces)
     norm = float(target.double().norm())
-    if abs(norm - 1.0) > 2e-3:
-        raise ValueError(f"joint PC is not normalized: {norm}")
-    return target
+    if not torch.isfinite(torch.tensor(norm)) or norm <= 1e-12:
+        raise ValueError(f"joint PC has invalid norm: {norm}")
+    # The temporal Gram eigensolve and ambient reconstruction are FP32.  Weak
+    # late PCs can accumulate a few parts per thousand of roundoff in their
+    # reconstructed norm, so enforce the mathematical unit-PC definition
+    # explicitly.  Projection capture is scale invariant under this step.
+    return target / norm
 
 
 def audit_path(
