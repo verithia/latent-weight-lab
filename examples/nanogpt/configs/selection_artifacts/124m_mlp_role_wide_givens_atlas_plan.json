@@ -37,7 +37,7 @@
     "prompt_scalars": 318720,
     "local_coefficient_scalars": 1536,
     "total_state_scalars": 566016,
-    "state_fraction": 0.009996202268220104,
+    "state_fraction": 0.009996202256944444,
     "fp16_checkpoint_bytes": 1132032,
     "role_seed_bases": {
       "c_fc": 431,
