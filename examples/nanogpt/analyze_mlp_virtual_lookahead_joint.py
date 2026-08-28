@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Joint-PC1 gate for H30c decoupled virtual-lookahead polar atoms."""
+"""Joint-PC1 gates for raw and orthogonal-secanted virtual-lookahead atoms."""
 from __future__ import annotations
 
 import argparse
@@ -64,6 +64,7 @@ def make_generic_lookahead_program(
     *,
     ns_steps: int,
     momentum: float,
+    orthogonal_secant: bool = False,
 ) -> Callable[[torch.Tensor, torch.Tensor, torch.Tensor], torch.Tensor]:
     if not 0.0 <= momentum < 1.0:
         raise ValueError("momentum must be in [0, 1)")
@@ -100,17 +101,135 @@ def make_generic_lookahead_program(
             zeropower_via_newtonschulz5(value, steps=ns_steps)
             for value in polar_inputs2
         )
+        second_atoms = (
+            tuple(
+                normalized_orthogonal_secant(direction1, direction2)
+                for direction1, direction2 in zip(
+                    directions1, directions2, strict=True
+                )
+            )
+            if orthogonal_secant
+            else directions2
+        )
         return torch.cat(
             [
                 (
                     output_coefficients[0, index] * directions1[index]
-                    + output_coefficients[1, index] * directions2[index]
+                    + output_coefficients[1, index] * second_atoms[index]
                 ).flatten()
                 for index in range(count)
             ]
         )
 
     return program
+
+
+def normalized_orthogonal_secant(
+    first: torch.Tensor,
+    second: torch.Tensor,
+) -> torch.Tensor:
+    """Remove the first-atom component and norm-match the residual."""
+    if first.shape != second.shape:
+        raise ValueError("lookahead atom shape mismatch")
+    first_work = first.float()
+    second_work = second.float()
+    epsilon = torch.finfo(first_work.dtype).eps
+    first_square_norm = first_work.square().sum()
+    safe_square_norm = first_square_norm.clamp_min(epsilon)
+    projection = (first_work * second_work).sum() / safe_square_norm
+    secant = second_work - projection * first_work
+    first_norm = first_square_norm.sqrt()
+    safe_secant_norm = secant.square().sum().sqrt().clamp_min(
+        epsilon * first_norm.detach().clamp_min(1.0)
+    )
+    return (secant * (first_norm / safe_secant_norm)).to(first.dtype)
+
+
+def atom_geometry(
+    first_atoms: tuple[torch.Tensor, ...],
+    second_atoms: tuple[torch.Tensor, ...],
+) -> dict[str, Any]:
+    """Report whether H30c's raw atom pair is collinear or scale imbalanced."""
+    if len(first_atoms) != len(second_atoms):
+        raise ValueError("lookahead atom count mismatch")
+    rows = []
+    for index, (first, second) in enumerate(
+        zip(first_atoms, second_atoms, strict=True)
+    ):
+        first_work = first.detach().float()
+        second_work = second.detach().float()
+        curvature = normalized_orthogonal_secant(first, second).detach().float()
+        first_norm = first_work.norm()
+        second_norm = second_work.norm()
+        raw_projection = (first_work * second_work).sum() / first_work.square().sum()
+        raw_secant = second_work - raw_projection * first_work
+        rows.append(
+            {
+                "index": index,
+                "raw_atom_cosine": float(
+                    (first_work * second_work).sum() / (first_norm * second_norm)
+                ),
+                "raw_secant_to_first_norm_ratio": float(raw_secant.norm() / first_norm),
+                "normalized_secant_to_first_cosine": float(
+                    (first_work * curvature).sum()
+                    / (first_norm * curvature.norm())
+                ),
+                "normalized_secant_to_first_norm_ratio": float(
+                    curvature.norm() / first_norm
+                ),
+            }
+        )
+    return {
+        "per_matrix": rows,
+        "raw_atom_cosine_minimum": min(row["raw_atom_cosine"] for row in rows),
+        "raw_atom_cosine_maximum": max(row["raw_atom_cosine"] for row in rows),
+        "raw_secant_to_first_norm_ratio_minimum": min(
+            row["raw_secant_to_first_norm_ratio"] for row in rows
+        ),
+        "raw_secant_to_first_norm_ratio_maximum": max(
+            row["raw_secant_to_first_norm_ratio"] for row in rows
+        ),
+        "normalized_secant_absolute_cosine_maximum": max(
+            abs(row["normalized_secant_to_first_cosine"]) for row in rows
+        ),
+        "normalized_secant_norm_ratio_maximum_error": max(
+            abs(row["normalized_secant_to_first_norm_ratio"] - 1.0)
+            for row in rows
+        ),
+    }
+
+
+def raw_lookahead_atoms(
+    initial_weights: tuple[torch.Tensor, ...],
+    loss_function: Callable[[tuple[torch.Tensor, ...], torch.Tensor], torch.Tensor],
+    prompt: torch.Tensor,
+    lookahead_scales: torch.Tensor,
+    *,
+    ns_steps: int,
+    momentum: float,
+) -> tuple[tuple[torch.Tensor, ...], tuple[torch.Tensor, ...]]:
+    """Regenerate the two raw H30c atoms once for sealed diagnostics."""
+    gradient_function = torch.func.grad(loss_function, argnums=0)
+    gradients1 = gradient_function(initial_weights, prompt)
+    directions1 = tuple(
+        zeropower_via_newtonschulz5((1.0 + momentum) * gradient, steps=ns_steps)
+        for gradient in gradients1
+    )
+    virtual_weights1 = tuple(
+        weight - lookahead_scales[index] * direction
+        for index, (weight, direction) in enumerate(
+            zip(initial_weights, directions1, strict=True)
+        )
+    )
+    gradients2 = gradient_function(virtual_weights1, prompt)
+    directions2 = tuple(
+        zeropower_via_newtonschulz5(
+            (1.0 + momentum) * gradient2 + momentum * momentum * gradient1,
+            steps=ns_steps,
+        )
+        for gradient1, gradient2 in zip(gradients1, gradients2, strict=True)
+    )
+    return directions1, directions2
 
 
 def calibrate_lookahead_scales(
@@ -155,6 +274,7 @@ def make_model_lookahead_program(
     targets: torch.Tensor,
     ns_steps: int,
     momentum: float,
+    orthogonal_secant: bool = False,
 ) -> tuple[
     Callable[[torch.Tensor, torch.Tensor, torch.Tensor], torch.Tensor],
     Callable[[tuple[torch.Tensor, ...], torch.Tensor], torch.Tensor],
@@ -192,6 +312,7 @@ def make_model_lookahead_program(
         task_loss,
         ns_steps=ns_steps,
         momentum=momentum,
+        orthogonal_secant=orthogonal_secant,
     )
     manifest = {
         "parameters": list(parameters),
@@ -203,12 +324,14 @@ def make_model_lookahead_program(
         "lookahead_steps": 1,
         "polar_atoms": 2,
         "lookahead_decoupled_from_output": True,
+        "orthogonal_secant": orthogonal_secant,
+        "secant_normalization": "equal Frobenius norm to first atom",
         "output_scalars": sum(weight.numel() for weight in initial_weights),
     }
     return function, task_loss, initial_weights, manifest
 
 
-def self_test(device: str) -> dict[str, Any]:
+def self_test(device: str, *, orthogonal_secant: bool = False) -> dict[str, Any]:
     torch.manual_seed(20260909)
     weights = (torch.randn(7, 5, device=device), torch.randn(4, 7, device=device))
     prompt = torch.randn(1, 6, 5, device=device)
@@ -227,6 +350,7 @@ def self_test(device: str) -> dict[str, Any]:
         target_norms,
         ns_steps=5,
         momentum=FROZEN_MOMENTUM,
+        orthogonal_secant=orthogonal_secant,
     )
     function = make_generic_lookahead_program(
         weights,
@@ -253,7 +377,13 @@ def self_test(device: str) -> dict[str, Any]:
     metrics = projection_metrics(exact_target, projected)
     if metrics["path_energy_capture"] < 0.999:
         raise AssertionError((metrics, diagnostics))
-    return {"status": "passed", **metrics, **diagnostics, "calibration": calibration}
+    return {
+        "status": "passed",
+        "orthogonal_secant": orthogonal_secant,
+        **metrics,
+        **diagnostics,
+        "calibration": calibration,
+    }
 
 
 def main() -> None:
@@ -271,20 +401,26 @@ def main() -> None:
     parser.add_argument("--relative-ridge", type=float, default=1e-6)
     parser.add_argument("--preflight", action="store_true")
     parser.add_argument("--self-test", action="store_true")
+    parser.add_argument("--orthogonal-secant", action="store_true")
     args = parser.parse_args()
     if args.self_test:
-        print(json.dumps(self_test(args.device), sort_keys=True))
+        print(
+            json.dumps(
+                self_test(args.device, orthogonal_secant=args.orthogonal_secant),
+                sort_keys=True,
+            )
+        )
         return
     if any(value is None for value in (args.config, args.plan, args.trajectory_dir, args.output)):
         parser.error("config, plan, trajectory, and output are required")
     if args.prompt_length != 737 or args.ns_steps != 5 or args.momentum != FROZEN_MOMENTUM:
-        raise ValueError("the frozen H30c oracle requires length 737, beta=0.95, and NS5")
+        raise ValueError("the frozen lookahead oracle requires length 737, beta=0.95, and NS5")
     expected_cg = 1 if args.preflight else 20
     if args.cg_iterations != expected_cg:
-        raise ValueError(f"this H30c mode requires {expected_cg} CG iterations")
+        raise ValueError(f"this lookahead mode requires {expected_cg} CG iterations")
     accounting = lookahead_accounting(args.prompt_length, 768)
     if int(accounting["total_scalars"]) != 566_088 or float(accounting["deployable_scalar_fraction"]) > 0.01:
-        raise ValueError("H30c accounting mismatch")
+        raise ValueError("lookahead accounting mismatch")
 
     assert args.output is not None and args.config is not None
     assert args.plan is not None and args.trajectory_dir is not None
@@ -321,6 +457,7 @@ def main() -> None:
         targets=targets,
         ns_steps=args.ns_steps,
         momentum=args.momentum,
+        orthogonal_secant=args.orthogonal_secant,
     )
     registered_norms_cpu, norm_identities = dense_step_norms(
         args.trajectory_dir, FROZEN_PARAMETERS
@@ -336,6 +473,17 @@ def main() -> None:
         ns_steps=args.ns_steps,
         momentum=args.momentum,
     )
+    atom_geometry_manifest = None
+    if args.orthogonal_secant:
+        raw_first_atoms, raw_second_atoms = raw_lookahead_atoms(
+            initial_weights,
+            loss_function,
+            prompt,
+            lookahead_scales,
+            ns_steps=args.ns_steps,
+            momentum=args.momentum,
+        )
+        atom_geometry_manifest = atom_geometry(raw_first_atoms, raw_second_atoms)
     output_coefficients = torch.ones(2, len(FROZEN_PARAMETERS), device=args.device)
     primals = (prompt, lookahead_scales, output_coefficients)
     solve_started = time.time()
@@ -368,7 +516,11 @@ def main() -> None:
     accounting_path.write_text(json.dumps(accounting, indent=2, sort_keys=True) + "\n")
     script = Path(__file__).resolve()
     metadata = {
-        "schema_version": "nanogpt_mlp_virtual_lookahead_joint_pc1_v1",
+        "schema_version": (
+            "nanogpt_mlp_orthogonal_secant_joint_pc1_v1"
+            if args.orthogonal_secant
+            else "nanogpt_mlp_virtual_lookahead_joint_pc1_v1"
+        ),
         "classification": "PREFLIGHT" if args.preflight else ("RETAINED" if retained else "REJECTED"),
         "preflight": args.preflight,
         "retained": retained,
@@ -379,6 +531,7 @@ def main() -> None:
         "w0_storage_matches": w0_matches,
         "function_manifest": function_manifest,
         "calibration_manifest": calibration_manifest,
+        "atom_geometry_manifest": atom_geometry_manifest,
         "row": row,
         "execution": {
             "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
