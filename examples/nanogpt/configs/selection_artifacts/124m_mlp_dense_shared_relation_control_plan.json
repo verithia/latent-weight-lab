@@ -1,0 +1,72 @@
+{
+  "candidate": "H38 unrestricted dense shared left/right relation premise control",
+  "parent_results_sha256": [
+    "bcfc7778add9fd06aab8e18d2dd5e47e5f3ca6c3c27f104d2b94ffd959fe7344",
+    "e6dc6cd3528f24a1601e1d135300c11766b2c5e4bbd38e51b1a7a7acfcc8d575"
+  ],
+  "purpose": "Separate failure of sub-one-percent shared transports from failure of the shared left/right relation premise itself. This is an over-budget scientific control and can never be promoted as a compact candidate.",
+  "frozen_control": {
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "prompt_length": 375,
+    "prompt_width": 768,
+    "muon_ns_steps": 5,
+    "prompt_scalars": 288000,
+    "shared_left_scalars": 9437184,
+    "shared_right_scalars": 589824,
+    "persistent_node_coefficients": 24,
+    "full_control_state_scalars": 10315032,
+    "state_fraction": 0.18217002020941842,
+    "fp16_checkpoint_bytes": 20630064,
+    "budget_classification": "premise-relaxation control; violates the one-percent ceiling"
+  },
+  "families": {
+    "right_only": "Yhat_n = a_n D_n R^T",
+    "left_only": "Yhat_n = a_n L D_n",
+    "two_sided": "Yhat_n = a_n L D_n R^T"
+  },
+  "fit": {
+    "target": "six-node leading PC of the centered registered 239-state trajectory",
+    "normalization": "unit Frobenius norm independently for every task atom and PC part",
+    "ridge_relative_to_mean_gram_diagonal": 1e-6,
+    "coefficient_initialization": 1.0,
+    "one_sided_als_iterations": 8,
+    "two_sided_als_iterations": 8,
+    "two_sided_initializations": ["identity", "right_only", "left_only"],
+    "map_solve": "closed-form ridge normal equations using Cholesky; matrix-free residual is checked against the original normal equation",
+    "coefficient_update": "exact per-node least-squares scalar followed by common RMS gauge normalization",
+    "objective_contract": "retain the best monotone iterate; report raw residual energy, squared-cosine capture, stationarity/normal-equation residual, and coefficient history",
+    "fit_all_and_leave_one_out": true
+  },
+  "solver_self_test": {
+    "known_shared_right_minimum_capture": 0.99,
+    "known_shared_left_minimum_capture": 0.99,
+    "known_shared_two_sided_minimum_capture": 0.99,
+    "maximum_relative_normal_equation_residual": 1e-5
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_scope": "one fit-all iteration for all three families plus one held-out fold",
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gates": {
+    "fit_all_minimum_capture_every_node": 0.20,
+    "fit_all_minimum_median_capture": 0.40,
+    "leave_one_out_minimum_capture_every_node": 0.10,
+    "leave_one_out_minimum_median_capture": 0.20,
+    "maximum_relative_normal_equation_residual": 1e-5,
+    "finite_outputs": true
+  },
+  "routing_after_pass": "Analyze the fitted dense maps' singular decay, displacement rank, sparsity, block locality, quantization tolerance, and shared-versus-role-specific structure before proposing one compact approximation.",
+  "routing_after_failure": "Close shared left/right transport around this task atom, subject to passed solver controls, and move to a causally distinct node-conditioned nonlinear or alternate-function manifold.",
+  "forbidden_followups": [
+    "treating the dense control as a compact candidate",
+    "CE or model-size run",
+    "ridge, iteration, seed, optimizer, prompt, role, or layer sweep",
+    "storing the fitted dense maps outside the explicit accounting",
+    "claiming a universal no-go beyond this shared bilinear relation"
+  ]
+}
