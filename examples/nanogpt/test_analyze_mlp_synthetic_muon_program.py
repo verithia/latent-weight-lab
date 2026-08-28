@@ -6,6 +6,7 @@ from examples.nanogpt.analyze_mlp_synthetic_muon_program import (
     initialization_match,
     latent_accounting,
     principal_component,
+    selected_parameter_names,
     self_test,
 )
 
@@ -40,3 +41,12 @@ def test_fp16_storage_roundtrip_is_accepted() -> None:
     record = initialization_match(reconstructed, stored)
     assert record["storage_roundtrip_bitwise_equal"] is True
     assert record["accepted"] is True
+
+
+def test_cross_depth_parameter_inventory() -> None:
+    assert selected_parameter_names([0, 11], ["c_fc", "c_proj"]) == [
+        "transformer.h.0.mlp.c_fc.weight",
+        "transformer.h.0.mlp.c_proj.weight",
+        "transformer.h.11.mlp.c_fc.weight",
+        "transformer.h.11.mlp.c_proj.weight",
+    ]

@@ -34,10 +34,7 @@ TRAJECTORY_SCHEMA = "nanogpt_parameter_trajectory_v1"
 PROBE_SCHEMA = "nanogpt_optimizer_probe_v1"
 DENSE_MLP_SCALARS = 56_623_104
 DEPLOYED_MLP_MATRICES = 24
-PARAMETER_NAMES = {
-    "c_fc": "transformer.h.6.mlp.c_fc.weight",
-    "c_proj": "transformer.h.6.mlp.c_proj.weight",
-}
+PARAMETER_SUFFIXES = {"c_fc", "c_proj"}
 TensorTuple = tuple[torch.Tensor, ...]
 
 
@@ -77,6 +74,18 @@ def latent_accounting(prompt_length: int, width: int) -> dict[str, int | float]:
         "fp32_prompt_gradient_bytes_during_fit": 4 * prompt_scalars,
         "adam_fp32_moment_bytes_during_fit": 8 * prompt_scalars,
     }
+
+
+def selected_parameter_names(layers: list[int], suffixes: list[str]) -> list[str]:
+    if not layers or len(set(layers)) != len(layers) or any(layer < 0 for layer in layers):
+        raise ValueError("layers must be unique non-negative integers")
+    if not suffixes or not set(suffixes) <= PARAMETER_SUFFIXES:
+        raise ValueError("unsupported parameter suffix")
+    return [
+        f"transformer.h.{layer}.mlp.{suffix}.weight"
+        for layer in layers
+        for suffix in suffixes
+    ]
 
 
 def initialization_match(
@@ -425,6 +434,7 @@ def main() -> None:
     parser.add_argument("--cg-iterations", type=int, default=20)
     parser.add_argument("--cg-tolerance", type=float, default=1e-5)
     parser.add_argument("--relative-ridge", type=float, default=1e-6)
+    parser.add_argument("--layers", default="6")
     parser.add_argument("--parameters", default="c_fc,c_proj")
     parser.add_argument("--paths", default="trajectory_centered,common_centered")
     parser.add_argument("--preflight", action="store_true")
@@ -443,12 +453,16 @@ def main() -> None:
     if not args.preflight and args.cg_iterations != 20:
         raise ValueError("the binding H29a oracle requires 20 CG iterations")
     selected_suffixes = [item.strip() for item in args.parameters.split(",") if item.strip()]
+    selected_layers = [int(item.strip()) for item in args.layers.split(",") if item.strip()]
     paths = [item.strip() for item in args.paths.split(",") if item.strip()]
-    if not set(selected_suffixes) <= set(PARAMETER_NAMES):
-        raise ValueError("unsupported parameter suffix")
+    selected_parameters = selected_parameter_names(selected_layers, selected_suffixes)
     if not set(paths) <= {"trajectory_centered", "common_centered"}:
         raise ValueError("unsupported path family")
-    if args.preflight and (selected_suffixes != ["c_proj"] or paths != ["trajectory_centered"]):
+    if args.preflight and (
+        selected_layers != [6]
+        or selected_suffixes != ["c_proj"]
+        or paths != ["trajectory_centered"]
+    ):
         raise ValueError("the frozen preflight uses c_proj trajectory_centered only")
 
     accounting = latent_accounting(args.prompt_length, 768)
@@ -473,8 +487,7 @@ def main() -> None:
     torch.cuda.reset_peak_memory_stats()
     torch.cuda.synchronize()
 
-    for suffix in selected_suffixes:
-        parameter = PARAMETER_NAMES[suffix]
+    for parameter in selected_parameters:
         trajectory_cpu, trajectory_identity = load_trajectory_parameter(args.trajectory_dir, parameter)
         run_a_cpu, steps_a, run_a_identity = load_probe_weights(args.run_a_probe_dir, parameter)
         run_b_cpu, steps_b, run_b_identity = load_probe_weights(args.run_b_probe_dir, parameter)
