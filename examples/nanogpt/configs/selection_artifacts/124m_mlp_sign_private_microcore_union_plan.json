@@ -1,0 +1,103 @@
+{
+  "candidate": "H46 exact-byte global sign atom plus node-private 64x64 microcore union",
+  "parent_result_sha256": "8b0241a79b1a22522c94148eb0a626511233ddf0495cf3af855af94b2958adab",
+  "purpose": "Test the final exact-budget weight-path hybrid: combine the verified dominant orientation resource of one global learned sign plane with trained node-private continuous residual charts.",
+  "frozen_inventory": {
+    "trajectory_states": 239,
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "frozen_node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "observed_deployed_slots": [0, 1, 12, 13, 22, 23],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "per_node_components": 16,
+    "pca_centering": "mean of all 239 states independently for each matrix",
+    "pc_normalization": "unit Frobenius norm independently for every matrix PC",
+    "pc_weights": "eigenvalue normalized within the measured top-16 set"
+  },
+  "frozen_decoder": {
+    "formula": "B_n0=D_n; B_n1=unit(S odot D_n); B_nk=unit(sign(D_n) odot H_nk(C_n)) for k=2..63; Yhat_n=sum_k a_nk B_nk",
+    "task_atom": "D_n=NS5(first task gradient at W0)",
+    "global_sign_estimator": "S=sign(sum_n D_n odot PC_n,1), using the unit first temporal PC of all six nodes",
+    "global_sign_planes": 1,
+    "prompt_length": 415,
+    "prompt_width": 768,
+    "core_shape": [64, 64],
+    "deployed_private_cores": 24,
+    "branches": 64,
+    "prompt_fp16_bytes": 637440,
+    "global_bitplane_bits": 2359296,
+    "global_bitplane_bytes": 294912,
+    "private_core_scalars": 98304,
+    "private_core_fp16_bytes": 196608,
+    "local_coefficient_scalars": 1536,
+    "local_coefficient_fp16_bytes": 3072,
+    "total_compact_checkpoint_bytes": 1132032,
+    "checkpoint_byte_fraction": 0.009996202256944444,
+    "trainable_real_scalars": 418560,
+    "hash_seed_base": 977,
+    "node_seed_stride": 1009,
+    "branch_seed_stride": 2,
+    "core_initialization_seed_rule": "10001 + 101*deployed_slot",
+    "random_sign_seed": 20261031,
+    "core_initialization": "deterministic Gaussian followed by unit Frobenius normalization",
+    "core_retraction": "unit Frobenius normalization after every optimizer step",
+    "stored_dense_basis": "one charged ambient bitplane only",
+    "stored_hash_indices_or_generated_atoms": "none"
+  },
+  "fit": {
+    "sign_fit": "closed-form all-six first-PC score before private-core fitting",
+    "private_objective": "for each node independently, maximize eigenvalue-weighted ridge projection capture of its top-16 PCs into the frozen sign atom plus its trained private residual bank",
+    "optimizer": "Adam",
+    "iterations": 64,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "relative_projection_ridge": 0.0001,
+    "controls": [
+      "learned sign atom plus task atom only",
+      "trained private bank plus task atom only",
+      "registered random sign substituted into the learned union",
+      "registered random private core substituted into the learned union"
+    ]
+  },
+  "self_test": {
+    "branch_zero_identity": "exact",
+    "bitpacking_exact": true,
+    "deterministic_regeneration_without_stored_expanders": true,
+    "finite_nonzero_private_core_gradient": true,
+    "known_union_minimum_weighted_capture": 0.9,
+    "accounting_exact": true
+  },
+  "systems_preflight": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "watchdog_threshold_seconds": 300,
+    "preflight_iterations": 4,
+    "preflight_components": 4,
+    "preflight_scope": "all six observed private cores and the global sign estimator",
+    "binding_run_only_after_projected_runtime_is_measured": true
+  },
+  "gates": {
+    "weighted_top16_capture_every_node": 0.2,
+    "minimum_pc_capture_every_node": 0.05,
+    "union_minus_sign_only_weighted_capture_every_node": 0.05,
+    "union_minus_private_only_weighted_capture_every_node": 0.05,
+    "finite_outputs": true,
+    "all_six_nodes_must_pass": true
+  },
+  "routing_after_pass": "Run the identical union on chronological late residuals and layer-6 A/B common/heldout-innovation paths before any LM training.",
+  "routing_after_failure": "Close the exact dense-path hybrid frontier and write theory for a compact-native functional manifold or an explicit information-budget relaxation before code.",
+  "forbidden_followups": [
+    "sign-bank count, bitwidth, core-size, hash, sign, task-modulation, branch, prompt, seed, ridge, iteration, learning-rate, or target sweep",
+    "persistent expanded atom or empirical PC storage",
+    "CE or model-size run",
+    "claiming scalar-latent compression without separately reporting the packed ambient bitplane"
+  ]
+}
