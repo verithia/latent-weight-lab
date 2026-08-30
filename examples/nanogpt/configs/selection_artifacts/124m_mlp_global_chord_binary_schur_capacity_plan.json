@@ -103,8 +103,8 @@
     "all_nodes_and_roles_must_pass": true
   },
   "systems_accounting": {
-    "approximate_refresh_flops_per_matrix": 332662000,
-    "approximate_refresh_flops_all_24_endpoints": 7983888000,
+    "approximate_refresh_flops_per_matrix": 330301440,
+    "approximate_refresh_flops_all_24_endpoints": 7927234560,
     "token_time_path_if_cached": "ordinary dense MLP GEMMs",
     "cached_dense_runtime_bytes": 113246208,
     "direct_khatri_rao_execution_forbidden_as_speed_claim": true,
