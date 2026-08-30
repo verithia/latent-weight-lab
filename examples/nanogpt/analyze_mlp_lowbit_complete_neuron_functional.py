@@ -14,10 +14,18 @@ import hashlib
 import json
 import math
 import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable
+
+# Direct file-path execution sets ``sys.path[0]`` to ``examples/nanogpt``.
+# Add the repository root so sibling analysis modules remain importable under
+# the exact launcher invocation used by the remote supervisor.
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
 
 import torch
 import torch.nn.functional as F

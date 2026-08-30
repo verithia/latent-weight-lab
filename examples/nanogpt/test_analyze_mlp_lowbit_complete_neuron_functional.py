@@ -1,3 +1,7 @@
+import subprocess
+import sys
+from pathlib import Path
+
 import torch
 
 from examples.nanogpt.analyze_mlp_lowbit_complete_neuron_functional import (
@@ -15,6 +19,21 @@ from examples.nanogpt.analyze_mlp_lowbit_complete_neuron_functional import (
     terminal_shared_artifact,
     unpack_signed_int4,
 )
+
+
+def test_direct_entrypoint_resolves_repository_package() -> None:
+    script = Path(__file__).with_name(
+        "analyze_mlp_lowbit_complete_neuron_functional.py"
+    )
+    completed = subprocess.run(
+        [sys.executable, str(script), "--help"],
+        cwd="/tmp",
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
+    assert "usage:" in completed.stdout
 
 
 def test_int4_pack_roundtrip_and_dequantization() -> None:
