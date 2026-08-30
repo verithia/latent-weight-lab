@@ -1,0 +1,136 @@
+{
+  "schema_version": "nanogpt_mlp_position_product_code_capacity_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H55a position-conditioned block-32 K32 product code",
+  "parent_evidence": {
+    "h54_metadata_sha256": "bb55c7562fd7feea5281acffcebfda9363166b821b35cb3b418863059ac9d479",
+    "h54_metrics_sha256": "fc783d5fb949747d37b587d3a90b2e19d54647a71cc6670fd6705f26c7abf524",
+    "h54_unquantized_mean_weighted_capture": 0.04658375928799311,
+    "h54_initial_mean_weighted_capture": 0.04331450971464316,
+    "h54_minimum_pc_capture": 0.04492941126227379,
+    "causal_transition": "H54 uses three choices for an entire 768-coordinate row, learns only 0.327 capture points beyond its initialization, and does not collapse its dictionary. Move nearly every compact bit into independent 32-coordinate subrow choices and test the generic rate-distortion limit directly."
+  },
+  "scientific_question": "Can a globally shared, position-conditioned block-32 K32 product code exploit enough within-row structure in the six-node top-16 MLP tangent to exceed its 19.48 percent near-Haar rate-distortion reference and pass the frozen representation gates under one percent checkpoint bytes?",
+  "frozen_inventory": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "trajectory_identity_sha256": "756d21c02b82be4391c8fd99ea11c2f7c5aff2a35c8906b5bcfde1326a7bee30",
+    "states": 239,
+    "steps": [0, 238],
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "components_per_node": 16,
+    "total_target_blocks": 7077888,
+    "pca_centering": "independent mean of all 239 states for the optimistic capacity ceiling",
+    "pc_normalization": "unit Frobenius norm",
+    "reported_weighting": "eigenvalue normalized within each node top-16 set"
+  },
+  "frozen_decoder": {
+    "weight_formula": "DeltaW_n[i,32*b:32*(b+1)]=scale[b,code[n,i,b]]*int4_codeword[b,code[n,i,b],:]",
+    "seed_weight": "exact step-zero matrix, reproducible from matched initialization and not charged as learned state",
+    "block_width": 32,
+    "block_positions": 24,
+    "codewords_per_position": 32,
+    "private_code_bits_per_block": 5,
+    "dictionary_storage": "one globally shared position-conditioned symmetric signed-int4 codebook with one FP16 scale per codeword",
+    "private_state": "one packed hard five-bit code for every deployed node, row, and block position",
+    "stored_empirical_pc": false,
+    "stored_per_node_basis": false,
+    "stored_dense_master": false,
+    "stored_dense_residual": false,
+    "stored_soft_assignment_logits": false,
+    "stored_optimizer_history": false,
+    "stored_fp16_private_coefficient": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "deployed_block_values": 1769472,
+    "private_code_bits": 8847360,
+    "private_code_bytes": 1105920,
+    "int4_dictionary_values": 24576,
+    "int4_dictionary_bytes": 12288,
+    "fp16_dictionary_scale_values": 768,
+    "fp16_dictionary_scale_bytes": 1536,
+    "total_checkpoint_bytes": 1119744,
+    "checkpoint_byte_fraction": 0.0098876953125,
+    "persistent_pca_or_per_node_basis_values": 0
+  },
+  "rate_distortion_reference": {
+    "stored_bits_per_ambient_scalar": 0.15625,
+    "isotropic_gaussian_squared_error_distortion": 0.805245165975,
+    "isotropic_gaussian_capture_ceiling": 0.194754834025,
+    "interpretation": "This is a generic isotropic rate reference, not a theorem about the empirical source. Capture materially above it demonstrates exploitable block-local structure; capture near it but below the frozen gate means same-rate transform engineering is insufficient."
+  },
+  "unquantized_capacity_fit": {
+    "purpose": "necessary optimistic FP32 product-code capacity gate; not a deployable checkpoint",
+    "dictionary_initialization": "for each of 24 block positions, choose 32 distinct raw target blocks by a deterministic seed, stratified uniformly over all node-PC targets and energy-weighted within each target",
+    "block_sampling": "each update samples node-PC targets uniformly, block positions uniformly, and rows proportional to squared block norm",
+    "batch_blocks": 8192,
+    "steps": 256,
+    "optimizer": "minibatch Lloyd assignment and per-codeword weighted mean update with frozen EMA coefficient 0.25",
+    "assignment": "hard nearest squared Euclidean codeword within the matching block position; no soft logits",
+    "training_objective": "mean squared block reconstruction error under target-balanced energy-weighted sampling",
+    "evaluation": "reconstruct all 24 blocks of every row of all 96 full PCs with hard codes, then report full-matrix squared-cosine capture",
+    "evaluation_block_batch": 65536,
+    "seed": 202608550,
+    "no_sweep": true
+  },
+  "controls": {
+    "fixed_initial_codebook": "the exact deterministic position-conditioned initialization without learned updates",
+    "global_unpositioned_codebook": "one learned K32 codebook shared across all 24 block positions under the same five-bit private rate",
+    "fixed_random_codebook": "deterministic Gaussian K32 codebook per position with hard assignments",
+    "equal_rate_scalar_sign": "one of 32 learned signed scalar levels multiplying a fixed deterministic sign carrier per block position",
+    "block_energy_strata": "capture by target block-energy quartile",
+    "position_strata": "capture for each of the 24 column-block positions",
+    "utilization": "per-position active fraction, entropy, and maximum code load",
+    "synthetic_own_family": "known product-code targets must reconstruct at least 99.9 percent"
+  },
+  "capacity_gates": {
+    "unquantized_weighted_top16_capture_min_every_node": 0.30,
+    "unquantized_weighted_top16_capture_median_each_role": 0.40,
+    "unquantized_minimum_pc_capture_every_node": 0.05,
+    "synthetic_own_family_recovery": 0.999,
+    "finite_outputs": true,
+    "exact_accounting": true,
+    "all_nodes_and_roles_must_pass": true,
+    "rate_efficiency_report_required": true
+  },
+  "quantized_stage_if_and_only_if_unquantized_passes": {
+    "quantizer": "symmetric per-codeword signed int4 with codes in [-7,7] and one FP16 scale",
+    "reassignment": "rerun hard product-code assignment after quantization",
+    "packing": "pack the exact five-bit code stream without byte padding per logical code",
+    "required_metrics": "all capacity gates plus quantization loss, exact packing, chronology, late updates, A/B common path and heldout innovation"
+  },
+  "systems_preflight": {
+    "preflight_components_per_node": 4,
+    "preflight_steps": 4,
+    "preflight_batch_blocks": 2048,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300
+  },
+  "systems_accounting": {
+    "cached_token_time_path": "ordinary dense MLP GEMMs",
+    "cached_dense_runtime_bytes": 113246208,
+    "materialization": "one packed-code lookup and scaled 32-value copy per block",
+    "training_state_rule": "FP32 codebook masters, assignment workspace, sampled targets, gradients or EMA statistics are reported separately and are not checkpoint state; soft logits and dense shadows are forbidden persistent state"
+  },
+  "promotion": "Only a complete unquantized and int4 capacity pass authorizes chronological-late and A/B-stream representation audits. No stage directly authorizes function fitting, CE, attention, or scale-up.",
+  "failure": "Close this exact block-32 K32 position-conditioned product code without block-size, codebook-size, bit-rate, role-split, coefficient, sampling, optimizer, step, seed, CE, or model-size sweep.",
+  "forbidden": [
+    "calling the unquantized product code a compact checkpoint",
+    "persistent empirical PCs, per-node bases, dense masters, dense residuals, private FP16 coefficients, or soft assignment logits",
+    "excluding codebook bits, scales, packed codes, FP32 training masters, assignment workspace, or EMA statistics from the relevant accounting",
+    "block-size, codebook-size, bit-rate, role-split, coefficient, sample, optimizer, step, seed, threshold, layer, or role sweep",
+    "function, CE, attention, or model-size experiments before every representation gate passes"
+  ]
+}
