@@ -1,0 +1,119 @@
+{
+  "schema_version": "nanogpt_mlp_global_ternary_private_rank5_functional_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H48 global ternary complete-neuron carrier plus private rank-five endpoint transport",
+  "parent_evidence": {
+    "h46_metadata_sha256": "8ab9bd683059b21f1a7b61eadc38c116ea02a5a53dfeba6726f19a6b6466c4ab",
+    "h47_preflight_metadata_sha256": "a2a960f39ef96619b23a938be519a860d94f75964ec4b3ff14678e1c9c151cd8",
+    "h47_gate_sha256": "a8bb4d6a5c06d8aaecd2d67070095d0052601371516d8b9a87983bf1246500f9",
+    "causal_transition": "H46 retains a useful target-aligned global carrier but misses private moving directions. H47 preserves complete-neuron semantics but static layer gains neither align shared atoms nor execute efficiently at unaligned width 1421. Add one charged global low-bit carrier, layer-private basis-free endpoint transports, and tensor-core-aligned width 1408."
+  },
+  "scientific_question": "Can one frozen global ternary complete-neuron carrier plus layer-private rank-five endpoint transports reproduce all twelve terminal dense MLP functions and exact input JVPs under one percent checkpoint bytes, while cached materialization executes in at most 0.65 times dense MLP latency?",
+  "frozen_teacher": {
+    "snapshot_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_activation_frame_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+    "terminal_step": 238,
+    "terminal_snapshot": "step_000238.pt",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_activation_frame_trajectory_lr24e4.json",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "primary_report_layers": [0, 6, 11],
+    "hidden_width": 3072,
+    "model_width": 768,
+    "bias": false
+  },
+  "frozen_function_inventory": {
+    "dataset_directory": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "train_seed": 202608311,
+    "holdout_seed": 202608312,
+    "jvp_seed": 202608313,
+    "samples_per_layer_per_split": 1024,
+    "jvp_directions_per_layer_per_split": 4,
+    "jvp_direction_distribution": "Rademacher divided by sqrt(768)",
+    "persistent_activation_cache": "none in compact checkpoint"
+  },
+  "frozen_representation": {
+    "formula": "U_l=Q_U+A_U,l B_U,l; V_l=Q_V+A_V,l B_V,l; fhat_l(x)=sum_j g_lj V_l[j] GELU(U_l[j]^T x)",
+    "complete_atoms": 1408,
+    "transport_rank": 5,
+    "global_codes": "ternary {-1,0,+1} packed in two bits",
+    "global_scale_policy": "one FP16 mean-absolute scale for every detector vector and every write vector; codes are round(value/scale) clipped to {-1,0,+1}",
+    "global_bank_policy": "deterministically acquire balanced paired teacher atoms, quantize once, freeze codes and scales, and never retain an FP32 master bank",
+    "private_transport": "independent FP16 A and B factors for detector and write endpoints in every layer",
+    "layer_gain": "one FP16 gain per layer and atom, folded into the materialized write endpoint before token-time execution",
+    "atom_pairing": "detector and write endpoints remain paired through acquisition, transport, storage and evaluation",
+    "stored_dense_teacher_or_pca_basis": false,
+    "stored_dequantized_bank": false,
+    "stored_optimizer_history": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "ternary_atom_values": 2162688,
+    "ternary_atom_bytes": 540672,
+    "fp16_scale_values": 2816,
+    "fp16_scale_bytes": 5632,
+    "fp16_private_factor_values": 261120,
+    "fp16_private_factor_bytes": 522240,
+    "fp16_layer_gain_values": 16896,
+    "fp16_layer_gain_bytes": 33792,
+    "total_checkpoint_bytes": 1102336,
+    "checkpoint_byte_fraction": 0.009733980324074074,
+    "continuous_coordinate_values": 278016,
+    "continuous_coordinate_fraction": 0.004909939236111111,
+    "cached_all_layer_fp16_endpoint_bytes": 51904512,
+    "cached_weight_memory_fraction": 0.4583333333333333,
+    "candidate_dense_matmul_fraction": 0.4583333333333333
+  },
+  "teacher_derived_initialization": {
+    "score": "e_lj=||GELU(X_train,l u_lj)||_2 ||v_lj||_2",
+    "balanced_quota": "select 118 complete neurons from layers 0--7 and 116 from layers 8--11, totaling 1408",
+    "global_bank": "copy each detector row and paired write row, then freeze the exact ternary codes and FP16 scales",
+    "private_A": "deterministic Gaussian with standard deviation 1e-3",
+    "private_B": "zero, so every layer starts exactly at the frozen global bank while retaining nonzero B gradients",
+    "gain": "one at an atom's source layer and zero elsewhere"
+  },
+  "fit": {
+    "objective": "mean relative output MSE plus 0.25 times relative exact input-JVP MSE",
+    "optimizer": "AdamW only on private rank-five factors and layer gains; global ternary bank is a frozen buffer",
+    "iterations": 1536,
+    "layer_schedule": "deterministic round-robin over all twelve layers",
+    "minibatch_rows": 128,
+    "learning_rate_factors": 0.001,
+    "learning_rate_gains": 0.003,
+    "weight_decay": 0.0001,
+    "gradient_clip_norm": 1.0,
+    "no_sweep": true
+  },
+  "controls": {
+    "global_bank_only": "zero every private endpoint correction and retain fitted gains",
+    "private_transport_only": "zero the global bank while retaining the identical fitted private factors and gains",
+    "shuffled_layer_transport": "cyclically assign every layer the next layer's private factors and gains",
+    "random_global_bank": "replace global codes by a deterministic equal-shape ternary bank while retaining the fitted private state",
+    "dense_teacher": "exact teacher output and input-JVP identity"
+  },
+  "representation_gates": {
+    "holdout_relative_output_rmse_max_every_layer": 0.10,
+    "holdout_relative_jvp_rmse_max_every_layer": 0.15,
+    "holdout_retained_centered_output_covariance_energy_min_every_layer": 0.90,
+    "finite_outputs_and_jvps": true,
+    "exact_compact_checkpoint_identity": true,
+    "all_twelve_layers_must_pass": true
+  },
+  "systems_gate": {
+    "preflight_before_binding_fit": true,
+    "preflight_iterations": 24,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "candidate_kernel": "materialize aligned FP16 U_l and gain-folded V_l once, then benchmark exactly two GEMMs plus GELU",
+    "candidate_mlp_latency_over_dense_max": 0.65,
+    "watchdog_policy": "terminal/error callbacks for a run projected below two hours; resettable 90-minute heartbeat only after two hours"
+  },
+  "promotion": "Only an all-layer representation pass plus systems pass can authorize one exact 124M 0.5TPP causal training test.",
+  "failure": "Close exact width-1408, rank-five, ternary-global/private-transport H48 without rank, width, bitwidth, acquisition, optimizer, CE or scale sweep.",
+  "forbidden": [
+    "stored PCA or empirical trajectory basis",
+    "FP32 global-bank master or dense teacher shadow in compact state",
+    "splitting complete-neuron detector/write pairing",
+    "rank, width, bitwidth, seed, loss, optimizer or initialization sweep",
+    "CE or scale-up before every representation and systems gate passes",
+    "calling cached materialized endpoints compact checkpoint state"
+  ]
+}
