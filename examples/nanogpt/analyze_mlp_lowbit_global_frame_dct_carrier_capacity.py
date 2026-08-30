@@ -316,6 +316,7 @@ def fit_capacity(
     seed: int,
     learn_frames: bool,
     gradient_clip_norm: float,
+    progress_callback: Any | None = None,
 ) -> tuple[dict[str, Any], torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
     nodes = len(targets)
     components, rows, width = targets[0].shape
@@ -366,6 +367,8 @@ def fit_capacity(
                 frame_one_value.div_(
                     frame_one_value.norm(dim=1, keepdim=True).clamp_min(1e-20)
                 )
+        if progress_callback is not None:
+            progress_callback(step + 1, steps)
         if step in record:
             history.append(
                 {
@@ -408,6 +411,7 @@ def refine_coordinates(
     steps: int,
     learning_rate: float,
     gradient_clip_norm: float,
+    progress_callback: Any | None = None,
 ) -> tuple[dict[str, Any], torch.Tensor, torch.Tensor]:
     amplitude_parameter = torch.nn.Parameter(amplitude.detach().clone())
     diagonal_parameter = torch.nn.Parameter(diagonal.detach().clone())
@@ -429,6 +433,8 @@ def refine_coordinates(
             torch.nn.utils.clip_grad_norm_(parameters, gradient_clip_norm)
         )
         optimizer.step()
+        if progress_callback is not None:
+            progress_callback(step + 1, steps)
         if step in {0, 1, 3, 7, 15, 31, steps - 1}:
             history.append(
                 {
@@ -628,6 +634,38 @@ def main() -> None:
         branch_stride=int(decoder["carrier_branch_stride"]),
         device=device,
     )
+    total_updates = 2 * (joint_steps + local_steps)
+    progress_path = args.output / "progress.json"
+
+    def make_progress_callback(stage: str, completed_before: int) -> Any:
+        def record(step: int, stage_steps: int) -> None:
+            write_json(
+                progress_path,
+                {
+                    "schema_version": f"{SCHEMA_VERSION}_progress_v1",
+                    "stage": stage,
+                    "stage_step": step,
+                    "stage_steps": stage_steps,
+                    "completed_updates": completed_before + step,
+                    "total_updates": total_updates,
+                    "fraction": (completed_before + step) / total_updates,
+                },
+            )
+
+        return record
+
+    write_json(
+        progress_path,
+        {
+            "schema_version": f"{SCHEMA_VERSION}_progress_v1",
+            "stage": "inventory_loaded",
+            "stage_step": 0,
+            "stage_steps": joint_steps,
+            "completed_updates": 0,
+            "total_updates": total_updates,
+            "fraction": 0.0,
+        },
+    )
     initial_zero = initial_orthogonal_frame(WIDTH, seed=202608511, device=device)
     initial_one = initial_orthogonal_frame(WIDTH, seed=202608512, device=device)
     fitted, learned_zero, learned_one, amplitude, diagonal = fit_capacity(
@@ -641,6 +679,7 @@ def main() -> None:
         seed=202608513,
         learn_frames=True,
         gradient_clip_norm=float(fit_plan["gradient_clip_norm"]),
+        progress_callback=make_progress_callback("joint_frame_fit", 0),
     )
     fitted["role_summaries"] = {
         "c_fc": role_summary(fitted["rows"], (0, 2, 4)),
@@ -659,6 +698,9 @@ def main() -> None:
         steps=local_steps,
         learning_rate=float(fit_plan["post_quantization_learning_rate"]),
         gradient_clip_norm=float(fit_plan["gradient_clip_norm"]),
+        progress_callback=make_progress_callback(
+            "quantized_local_refine", joint_steps
+        ),
     )
     quantized["role_summaries"] = {
         "c_fc": role_summary(quantized["rows"], (0, 2, 4)),
@@ -684,6 +726,9 @@ def main() -> None:
         seed=202608514,
         learn_frames=False,
         gradient_clip_norm=float(fit_plan["gradient_clip_norm"]),
+        progress_callback=make_progress_callback(
+            "procedural_control_fit", joint_steps + local_steps
+        ),
     )
     procedural["role_summaries"] = {
         "c_fc": role_summary(procedural["rows"], (0, 2, 4)),
@@ -816,6 +861,7 @@ def main() -> None:
             "accounting": {"path": str(accounting_path), "sha256": file_sha256(accounting_path)},
             "metrics": {"path": str(metrics_path), "sha256": file_sha256(metrics_path)},
             "compact_checkpoint": {"path": str(checkpoint_path), "sha256": file_sha256(checkpoint_path)},
+            "progress": {"path": str(progress_path), "sha256": file_sha256(progress_path)},
         },
         "limitations": [
             "This optimistic all-PC fit is a capacity ceiling, not chronological transfer.",
