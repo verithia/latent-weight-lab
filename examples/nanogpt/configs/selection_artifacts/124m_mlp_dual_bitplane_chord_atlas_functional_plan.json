@@ -1,0 +1,123 @@
+{
+  "schema_version": "nanogpt_mlp_dual_bitplane_chord_atlas_functional_plan_v1",
+  "status": "preregistered_after_systems_pass_before_functional_implementation_or_result",
+  "candidate": "H50 dual-bitplane per-neuron chord atlas all-layer functional audit",
+  "parent_evidence": {
+    "h48_metadata_sha256": "9f75a42e2e386a5b3ea926c7eae398a6cca111d0b666f0cd97c9ca2e1c7e88a8",
+    "h49_result_sha256": "cec328c1e1a2a03c4c8144df05ea9d65a94222925faac2d4d03687c9bdcc3454",
+    "h50_systems_result_sha256": "c877113ff0c1b7b2caeefd52b9d1a1b969db54dcc0996f3f05eed9a3b8125d6b",
+    "h50_systems_decision": "PASS_H50_SYSTEMS_AUTHORIZE_REPRESENTATION_AUDIT",
+    "causal_transition": "H50 preserves one tensor-core GEMM pair and passes token-time systems gates. Test whether two charged shared ambient sign planes plus independent row-local layer coordinates resolve H48's global low-rank alignment bottleneck."
+  },
+  "scientific_question": "Can two shared one-bit endpoint planes with independent per-layer/per-neuron two-coordinate chords reproduce all twelve terminal dense MLP functions and exact input JVPs under one percent checkpoint bytes?",
+  "frozen_teacher": {
+    "snapshot_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_activation_frame_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+    "terminal_step": 238,
+    "terminal_snapshot": "step_000238.pt",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_activation_frame_trajectory_lr24e4.json",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "primary_report_layers": [0, 6, 11],
+    "hidden_width": 3072,
+    "candidate_hidden_width": 2304,
+    "model_width": 768,
+    "bias": false
+  },
+  "frozen_function_inventory": {
+    "dataset_directory": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "train_seed": 202608311,
+    "holdout_seed": 202608312,
+    "jvp_seed": 202608313,
+    "samples_per_layer_per_split": 1024,
+    "jvp_directions_per_layer_per_split": 4,
+    "jvp_direction_distribution": "Rademacher divided by sqrt(768)",
+    "persistent_activation_cache": "none in compact checkpoint"
+  },
+  "frozen_representation": {
+    "formula": "W_role[layer,row,:]=sum_{plane=0}^{1} coordinate[layer,role,plane,row]*scale[role,plane,row]*sign_plane[role,plane,row,:]",
+    "complete_atoms": 2304,
+    "planes_per_endpoint_role": 2,
+    "global_codes": "binary {-1,+1} packed one bit per endpoint scalar",
+    "global_scale_policy": "one FP16 mean-absolute scale for every role, plane and row",
+    "global_planes_are_frozen_after_deterministic_teacher_acquisition": true,
+    "layer_private_coordinates": "one independent FP16 coefficient for every layer, endpoint role, plane and row",
+    "atom_pairing": "teacher detector/write endpoints are selected together and assigned to the same plane row; learned detector and write coefficients may differ because the function requires independent read/write amplitudes",
+    "stored_dense_teacher_or_pca_basis": false,
+    "stored_dequantized_bank": false,
+    "stored_optimizer_history": false,
+    "persistent_dense_master": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "binary_endpoint_values": 7077888,
+    "binary_endpoint_bytes": 884736,
+    "fp16_endpoint_scale_values": 9216,
+    "fp16_endpoint_scale_bytes": 18432,
+    "fp16_chord_coordinate_values": 110592,
+    "fp16_chord_coordinate_bytes": 221184,
+    "total_checkpoint_bytes": 1124352,
+    "checkpoint_byte_fraction": 0.009928385416666666,
+    "continuous_coordinate_values": 110592,
+    "continuous_coordinate_fraction": 0.001953125,
+    "cached_all_layer_fp16_endpoint_bytes": 84934656,
+    "cached_weight_memory_fraction": 0.75,
+    "candidate_dense_matmul_fraction": 0.75
+  },
+  "teacher_derived_initialization": {
+    "score": "e_lj=||GELU(X_train,l u_lj)||_2 ||v_lj||_2",
+    "selected_complete_atoms_per_layer": 384,
+    "plane_atoms_per_layer": 192,
+    "plane_zero_assignment": "top 192 atoms from layer l occupy row group l",
+    "plane_one_assignment": "ranked atoms 192:384 from layer (l+1) mod 12 occupy row group l",
+    "cross_layer_pairing": "row group l therefore pairs plane-zero layer l with plane-one layer (l+1) mod 12",
+    "binary_quantizer": "sign with zeros mapped to +1; one FP16 mean-absolute scale per endpoint vector",
+    "coordinate_initialization": "one at the source layer/plane/row and zero elsewhere, independently for detector and write roles",
+    "planes_frozen": true
+  },
+  "fit": {
+    "objective": "mean relative output MSE plus 0.25 times relative exact input-JVP MSE",
+    "optimizer": "AdamW only on layer-private chord coordinates",
+    "iterations": 1536,
+    "layer_schedule": "deterministic round-robin over all twelve layers",
+    "minibatch_rows": 128,
+    "learning_rate_coordinates": 0.003,
+    "weight_decay": 0.0001,
+    "gradient_clip_norm": 1.0,
+    "no_sweep": true
+  },
+  "controls": {
+    "plane_zero_only": "zero all plane-one coordinates while retaining the identical allocated artifact shape",
+    "random_shared_planes": "replace both frozen sign planes by deterministic equal-shape random signs while retaining scales and fitted coordinates",
+    "row_shared_scalar_coordinates": "replace every row coefficient by its layer/role/plane mean",
+    "shuffled_layer_coordinates": "cyclically assign each layer the next layer's fitted coordinates",
+    "dense_teacher": "exact teacher output and input-JVP identity"
+  },
+  "representation_gates": {
+    "holdout_relative_output_rmse_max_every_layer": 0.10,
+    "holdout_relative_jvp_rmse_max_every_layer": 0.15,
+    "holdout_retained_centered_output_covariance_energy_min_every_layer": 0.90,
+    "finite_outputs_and_jvps": true,
+    "exact_compact_checkpoint_identity": true,
+    "all_twelve_layers_must_pass": true
+  },
+  "sealed_systems_gate": {
+    "result_sha256": "c877113ff0c1b7b2caeefd52b9d1a1b969db54dcc0996f3f05eed9a3b8125d6b",
+    "cached_ratio_512": 0.9745602850690503,
+    "cached_ratio_4096": 0.7695165943078748,
+    "maximum_ratio": 1.10,
+    "pass": true
+  },
+  "runtime_gates": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_policy": "terminal/error callbacks plus one resettable 90-minute heartbeat for a run expected below two hours"
+  },
+  "promotion": "Only every-layer representation pass plus exact compact identity and the sealed systems pass may authorize one exact 124M causal training preflight. A pass still does not authorize scale-up.",
+  "failure": "Close exact H50 row-separable dual-bitplane width-2304 topology without plane-count, width, acquisition, optimizer, CE, or scale sweep.",
+  "forbidden": [
+    "stored PCA or empirical trajectory basis",
+    "persistent FP16 or FP32 dense endpoint master",
+    "changing plane count, width, quantizer, assignment, optimizer or gates after seeing results",
+    "CE or scale-up before every representation and systems gate passes",
+    "calling cached materialized endpoints compact checkpoint state"
+  ]
+}
