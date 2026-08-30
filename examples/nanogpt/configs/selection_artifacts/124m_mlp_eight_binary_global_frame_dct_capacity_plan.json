@@ -1,0 +1,120 @@
+{
+  "schema_version": "nanogpt_mlp_eight_binary_global_frame_dct_capacity_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H52a robust eight-plane binary global-frame DCT-carrier capacity ceiling",
+  "parent_evidence": {
+    "h51_metadata_sha256": "f64556a6ca54fed6ccfda77378930ae8275082ebd2d9ba9f348ca18056a681d0",
+    "h51_metrics_sha256": "f2b2e66c9411e9c897ac412fa1d6e7fbab055658cafa9037d62d06183047332d",
+    "h51_quantized_mean_weighted_capture": 0.09516036510467529,
+    "h51_unquantized_mean_weighted_capture": 0.09424892067909241,
+    "h51_single_frame_mean_weighted_capture": 0.0422213077545166,
+    "h51_pc2_to_pc16_mean_capture_range": [0.00047336670216206284, 0.0005276783335792363],
+    "causal_transition": "H51 proves learned global orientations help and the second frame adds capacity, but two multi-bit frames fit PC1 while leaving PC2-PC16 near coordinate chance. Reallocate frame bits to eight independent binary orientations and fit a weak-PC-balanced objective."
+  },
+  "scientific_question": "Can eight globally shared learned binary frames plus node-addressed fast DCT carriers and 0.390625% continuous local coordinates cover all top-16 directions of all six 239-state MLP paths under one percent deployment bytes?",
+  "frozen_inventory": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "trajectory_identity_sha256": "756d21c02b82be4391c8fd99ea11c2f7c5aff2a35c8906b5bcfde1326a7bee30",
+    "states": 239,
+    "steps": [0, 238],
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "components_per_node": 16,
+    "pca_centering": "independent mean of all 239 states for the optimistic capacity ceiling",
+    "pc_normalization": "unit Frobenius norm",
+    "reported_weighting": "eigenvalue normalized within each node top-16 set",
+    "fit_weighting": "uniform across all six nodes and all 16 PCs"
+  },
+  "frozen_decoder": {
+    "weight_formula": "W_n=W0_n+diag(a_n) sum_{k=0}^{7} C_nk diag(d_nk) S_k",
+    "seed_weight": "exact step-zero matrix, reproducible from matched initialization and not charged as learned state",
+    "global_frames": "eight learned 768x768 Rademacher frames, each stored as one bit per value and decoded with fixed 1/sqrt(768) normalization",
+    "frame_count": 8,
+    "frame_persistent_row_scales": 0,
+    "carrier": "for every node and branch, four vertically stacked orthonormal DCT-II blocks with deterministic row permutations and input/output sign flips",
+    "carrier_persistent_state": "none; regenerate from node, branch, block, and seed",
+    "carrier_seed_base": 202608520,
+    "carrier_node_stride": 101,
+    "carrier_branch_stride": 10007,
+    "local_coordinates": "one FP16 row-amplitude vector a_n of length 3072 and eight FP16 diagonal vectors d_nk of length 768 for each of 24 deployed layer/role nodes",
+    "stored_empirical_pc": false,
+    "stored_dense_frame_master": false,
+    "stored_dense_residual": false,
+    "stored_optimizer_history": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "binary_frame_count": 8,
+    "binary_frame_code_values": 4718592,
+    "binary_frame_code_bytes": 589824,
+    "fp16_node_diagonal_values": 147456,
+    "fp16_node_diagonal_bytes": 294912,
+    "fp16_node_row_amplitude_values": 73728,
+    "fp16_node_row_amplitude_bytes": 147456,
+    "total_checkpoint_bytes": 1032192,
+    "checkpoint_byte_fraction": 0.009114583333333334,
+    "continuous_coordinate_values": 221184,
+    "continuous_coordinate_fraction": 0.00390625,
+    "persistent_pca_or_carrier_values": 0
+  },
+  "optimistic_capacity_fit": {
+    "targets": "all 96 unit PCs: six nodes times top 16 components",
+    "temporary_coordinates": "independent a and eight d vectors for each target PC; alternatives along one manifold, not simultaneous deployed state",
+    "frame_initialization": "eight deterministic independent Rademacher matrices normalized by 1/sqrt(768)",
+    "frame_training": "FP32 logits with signed binary deployed forward and identity straight-through derivative from the first update",
+    "local_initialization": "a=1; each d deterministic Gaussian with standard deviation 1/sqrt(768)",
+    "objective": "mean over all 96 targets of log(squared_cosine_capture + 1e-4)",
+    "optimizer": "Adam",
+    "joint_ste_steps": 96,
+    "joint_learning_rate": 0.01,
+    "joint_weight_decay": 0.0,
+    "frame_logit_clip": 1.0,
+    "gradient_clip_norm": 10.0,
+    "post_sign_local_only_steps": 32,
+    "post_sign_learning_rate": 0.01,
+    "no_sweep": true
+  },
+  "controls": {
+    "procedural_unfitted_frames": "same eight initial deterministic binary frames, fixed while nuisance coordinates train for 128 updates under the identical robust objective",
+    "first_two_learned_frames": "zero learned branches two through seven after fitting, with no refit",
+    "h51_reference": "sealed two-frame int8/int4 mean weighted capture 0.09516036510467529",
+    "fixed_blockfht_reference": "sealed one-percent capture near 0.009993",
+    "coordinate_fraction": 0.00390625
+  },
+  "capacity_gates": {
+    "binary_weighted_top16_capture_min_every_node": 0.30,
+    "binary_weighted_top16_capture_median_each_role": 0.40,
+    "binary_minimum_pc_capture_every_node": 0.05,
+    "binary_minus_procedural_weighted_capture_min_every_node": 0.10,
+    "finite_outputs": true,
+    "exact_accounting": true,
+    "all_nodes_and_roles_must_pass": true
+  },
+  "systems_preflight": {
+    "preflight_components_per_node": 4,
+    "preflight_joint_steps": 4,
+    "preflight_local_steps": 2,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300
+  },
+  "promotion": "Only a complete H52a capacity pass authorizes discovery-only binary-frame fitting followed by chronological-late and A/B-stream transfer. It does not authorize function fitting, CE, or scale-up.",
+  "failure": "Close this exact eight-plane binary robust-objective family without frame-count, bit, carrier, seed, objective, step, optimizer, layer, role, function, CE, or model-size sweep.",
+  "forbidden": [
+    "calling the optimistic all-PC fit a chronological transfer result",
+    "persistent empirical PCs, DCT carrier matrices, dense residuals, or FP32 frame logits",
+    "excluding any binary code or local coordinate from checkpoint accounting",
+    "frame-count, bit, carrier, seed, objective, step, learning-rate, threshold, layer, or role sweep",
+    "function, CE, or model-size experiments before capacity and later transfer gates pass"
+  ]
+}
