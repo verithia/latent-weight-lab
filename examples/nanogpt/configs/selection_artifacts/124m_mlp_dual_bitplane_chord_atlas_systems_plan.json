@@ -1,0 +1,80 @@
+{
+  "schema_version": "nanogpt_mlp_dual_bitplane_chord_atlas_systems_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H50 dual-bitplane per-neuron chord atlas",
+  "parent_evidence": {
+    "h48_metadata_sha256": "9f75a42e2e386a5b3ea926c7eae398a6cca111d0b666f0cd97c9ca2e1c7e88a8",
+    "h49_result_sha256": "cec328c1e1a2a03c4c8144df05ea9d65a94222925faac2d4d03687c9bdcc3454",
+    "causal_transition": "H48 global low-rank endpoint transport barely changes short-fit function covariance; H49 proves routed narrow experts and even prepartitioned multiple GEMMs are slower than dense. Allocate independent layer coordinates to every complete neuron while retaining one materialized hardware-native GEMM pair."
+  },
+  "scientific_question": "Can a cached width-2304 MLP generated from two shared binary endpoint planes and independent per-layer/per-neuron chord coordinates stay within 1.10 times dense token-time latency at both 512 and 4096 tokens, before any representation fitting?",
+  "architecture": {
+    "model_width": 768,
+    "dense_hidden_width": 3072,
+    "candidate_hidden_width": 2304,
+    "layers": 12,
+    "endpoint_roles": 2,
+    "shared_binary_planes_per_role": 2,
+    "activation": "GELU",
+    "materialized_token_path": "one cached c_fc GEMM, GELU, and one cached c_proj GEMM; no router, gather, scatter, expert loop, or token-dependent materialization",
+    "active_matrix_arithmetic_fraction": 0.75
+  },
+  "representation": {
+    "formula": "W_role[layer,row,:] = sum_{plane=0}^{1} coordinate[layer,role,plane,row] * scale[role,plane,row] * sign_plane[role,plane,row,:]",
+    "binary_planes_are_charged_checkpoint_state": true,
+    "materialized_fp16_matrices_are_reproducible_runtime_cache": true,
+    "stored_pca_or_dense_teacher": false,
+    "persistent_dense_master_forbidden": true,
+    "causal_distinction": "Per-neuron row-separable plane coordinates replace H48's globally coupled rank-five correction; this is not a width, bitwidth, or rank sweep."
+  },
+  "exact_checkpoint_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "binary_endpoint_values": 7077888,
+    "binary_endpoint_bytes": 884736,
+    "fp16_endpoint_scale_values": 9216,
+    "fp16_endpoint_scale_bytes": 18432,
+    "fp16_chord_coordinate_values": 110592,
+    "fp16_chord_coordinate_bytes": 221184,
+    "total_checkpoint_bytes": 1124352,
+    "checkpoint_byte_fraction": 0.009928385416666666,
+    "continuous_coordinate_values": 110592,
+    "continuous_coordinate_fraction": 0.001953125,
+    "all_layer_materialized_fp16_cache_bytes": 84934656,
+    "materialized_cache_fraction_of_dense_fp16_mlp": 0.75
+  },
+  "frozen_systems_discriminator": {
+    "device": "CUDA",
+    "dtype": "FP16",
+    "token_counts": [512, 4096],
+    "warmup_trials": 10,
+    "timed_trials": 50,
+    "dense_reference": "two FP16 GEMMs with width 3072 plus GELU",
+    "cached_candidate": "two FP16 GEMMs with width 2304 plus GELU",
+    "materialization_measurement": "separately time construction of both candidate endpoints from two FP16-decoded sign planes, FP16 scales, and FP16 coordinates; exclude it from cached token-time but report it explicitly",
+    "maximum_cached_candidate_over_dense_latency_each_token_count": 1.10,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_bytes": 1048576,
+    "all_token_counts_must_pass": true
+  },
+  "future_representation_gate_if_systems_pass": {
+    "scope": "all 12 layers with fixed train/heldout residual inputs",
+    "heldout_output_relative_rmse_maximum_every_layer": 0.10,
+    "exact_input_jvp_relative_rmse_maximum_every_layer": 0.15,
+    "centered_output_covariance_retention_minimum_every_layer": 0.90,
+    "controls": [
+      "single-plane equal-byte control",
+      "random shared two-plane control",
+      "shared scalar-plane coefficients control",
+      "dense identity"
+    ]
+  },
+  "promotion": "Only a systems pass authorizes implementation of the identical two-plane all-layer functional/JVP audit. It does not authorize CE or scale-up.",
+  "failure": "Close exact H50 row-separable dual-bitplane width-2304 topology without plane-count, width, bit, optimizer, CE, or scale sweep.",
+  "forbidden": [
+    "representation fitting or CE before this systems gate passes",
+    "excluding GELU or either GEMM from cached token-time latency",
+    "calling materialized FP16 matrices compact checkpoint state",
+    "using a persistent dense FP16 or FP32 master",
+    "plane-count, width, bitwidth, threshold, optimizer, CE, or scale sweep"
+  ]
+}
