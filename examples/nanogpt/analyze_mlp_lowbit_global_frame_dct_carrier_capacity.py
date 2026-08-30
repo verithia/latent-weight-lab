@@ -83,7 +83,6 @@ def deployment_accounting(
     dense_bytes = deployed_nodes * rows * width * 2
     return {
         "int8_frame_code_bytes": int8_bytes,
-        "int4_frame_code_values": int4_values,
         "int4_frame_code_bytes": int4_bytes,
         "fp16_frame_scale_values": scale_values,
         "fp16_frame_scale_bytes": scale_bytes,
