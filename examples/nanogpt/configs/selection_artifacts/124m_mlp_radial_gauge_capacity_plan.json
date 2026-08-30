@@ -1,0 +1,138 @@
+{
+  "schema_version": "nanogpt_mlp_radial_gauge_capacity_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H56a exact O32 radial-MLP gauge canonicalization",
+  "parent_evidence": {
+    "h55_metadata_sha256": "ac470c963a9a18c992d40059cd0ee50db92156d6a4dadcfeacaf4f2b091638bc",
+    "h55_metrics_sha256": "a816028b09fffedcf394ed6fcf5155459e2c468afdce32ec22da95091a75bcbf",
+    "h55_position_conditioned_mean_weighted_capture": 0.13228641947110495,
+    "h55_global_unpositioned_mean_weighted_capture": 0.13617485016584396,
+    "h55_gaussian_rate_reference": 0.194754834025,
+    "h55_rate_efficiency": 0.6792458843620991,
+    "causal_transition": "H55 puts private choices at the correct local granularity and reaches 13.23 percent, but position conditioning does not help and the generic one-percent rate ceiling is only 19.48 percent. Stop coding the raw GELU gauge and test whether an exact group-orthogonal function gauge removes the dominant orientation entropy."
+  },
+  "scientific_question": "If the MLP latent function is made exactly O(32)-equivariant, does deterministic paired Procrustes gauge fixing turn the measured 239-state c_fc/c_proj path into a manifold that the unchanged five-bit block product-code readout can cover?",
+  "frozen_inventory": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "trajectory_identity_sha256": "756d21c02b82be4391c8fd99ea11c2f7c5aff2a35c8906b5bcfde1326a7bee30",
+    "states": 239,
+    "layers": [0, 6, 11],
+    "paired_parameters": [
+      ["transformer.h.0.mlp.c_fc.weight", "transformer.h.0.mlp.c_proj.weight"],
+      ["transformer.h.6.mlp.c_fc.weight", "transformer.h.6.mlp.c_proj.weight"],
+      ["transformer.h.11.mlp.c_fc.weight", "transformer.h.11.mlp.c_proj.weight"]
+    ],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "components_per_node": 16,
+    "pca_centering": "independent mean of all 239 gauge-canonical states for each matrix",
+    "pc_normalization": "unit Frobenius norm",
+    "reported_weighting": "eigenvalue normalized within each node top-16 set"
+  },
+  "radial_latent_function": {
+    "group_width": 32,
+    "groups": 96,
+    "formula": "phi_tau(u)=GELU(norm2(u)-tau)*u/(norm2(u)+epsilon)",
+    "tau_for_geometry_audit": 0.0,
+    "epsilon": 1e-6,
+    "equivariance_identity": "phi_tau(Q*u)=Q*phi_tau(u) for every Q in O(32)",
+    "paired_weight_gauge": "A_g'=Q_g*A_g; C_g'=Q_g*C_g where C=c_proj.T; b_g'=Q_g*b_g",
+    "function_identity": "C_g'^T*phi_tau(A_g'*x+b_g')=C_g^T*phi_tau(A_g*x+b_g)",
+    "current_gelu_limitation": "coordinatewise GELU has only permutation gauge and is not O(32)-equivariant"
+  },
+  "procedural_gauge": {
+    "reference": "exact step-zero paired c_fc and canonical c_proj rows",
+    "group_width": 32,
+    "objective": "min_Q ||Q*[A_t,g,sqrt(lambda_g)*C_t,g]-[A_0,g,sqrt(lambda_g)*C_0,g]||_F^2 over Q in O(32)",
+    "lambda_per_group": "norm(A_0,g)^2/norm(C_0,g)^2 so c_fc and c_proj reference energies are equal",
+    "solution": "batched SVD/polar Procrustes Q=U*V^T of reference_times_current_transpose",
+    "step_zero_rule": "Q_0 is exactly identity, not an arbitrary SVD basis",
+    "bias_handling": "beta=0 in this weight-only saved inventory; a future radial module must rotate c_fc bias with the identical Q and account for its small state",
+    "stored_gauge_matrix": false,
+    "stored_empirical_pc": false,
+    "stored_per_node_basis": false,
+    "required_checks": [
+      "maximum ||Q*Q^T-I||_F",
+      "step-zero identity",
+      "paired objective before and after gauge fixing",
+      "determinant-sign and distance-from-identity summaries",
+      "exact source and trajectory identity"
+    ]
+  },
+  "fixed_product_code_readout": {
+    "block_width": 32,
+    "codewords": 32,
+    "private_code_bits_per_block": 5,
+    "codebook_sharing": "one global unpositioned K32 codebook shared across all nodes and 32-coordinate blocks",
+    "unquantized_fit": "the exact H55 256-step, batch-8192 minibatch Lloyd fit with EMA coefficient 0.25",
+    "assignment": "hard nearest squared Euclidean codeword; no soft logits",
+    "controls": [
+      "raw-gauge H55 global-unpositioned sealed result",
+      "permutation-only exact GELU gauge canonicalization",
+      "c_fc-only Procrustes gauge applied jointly to c_proj",
+      "paired norm-balanced Procrustes candidate"
+    ],
+    "deployment_accounting": {
+      "dense_replaced_mlp_fp16_bytes": 113246208,
+      "deployed_block_values": 1769472,
+      "private_code_bits": 8847360,
+      "private_code_bytes": 1105920,
+      "int4_dictionary_values": 1024,
+      "int4_dictionary_bytes": 512,
+      "fp16_dictionary_scale_values": 32,
+      "fp16_dictionary_scale_bytes": 64,
+      "total_checkpoint_bytes": 1106496,
+      "checkpoint_byte_fraction": 0.009770711263020834,
+      "persistent_pca_or_per_node_basis_values": 0
+    }
+  },
+  "same_trajectory_audit": {
+    "gauge_all_states_before_pca": true,
+    "reports": [
+      "raw and gauge-canonical top-16 energy fractions and full temporal effective rank",
+      "raw and gauge-canonical pair displacement norms",
+      "all six weighted and per-PC product-code captures",
+      "within-block energy and position strata",
+      "chronological PCA on states 0 through 159 projected onto states 160 through 238",
+      "gauge orthogonality and paired objective checks"
+    ],
+    "chronological_discovery_states": 160,
+    "chronological_heldout_states": 79,
+    "seed": 202608560,
+    "no_sweep": true
+  },
+  "capacity_gates": {
+    "weighted_top16_capture_min_every_node": 0.30,
+    "weighted_top16_capture_median_each_role": 0.40,
+    "minimum_pc_capture_every_node": 0.05,
+    "minimum_absolute_margin_over_raw_h55": 0.10,
+    "maximum_orthogonality_error": 1e-4,
+    "step_zero_identity": true,
+    "finite_outputs": true,
+    "exact_accounting": true,
+    "all_nodes_and_roles_must_pass": true
+  },
+  "promotion_if_and_only_if_capacity_passes": {
+    "next_stage": "H56b same-gauge A/B-stream common-path and heldout-innovation representation audit",
+    "after_h56b": "implement the identical group-radial MLP and run teacher-functional plus exact-config performance gates before CE",
+    "no_direct_ce_authorization": true
+  },
+  "systems_preflight": {
+    "preflight_states": 20,
+    "preflight_components_per_node": 4,
+    "preflight_product_code_steps": 4,
+    "preflight_batch_blocks": 2048,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300
+  },
+  "failure": "Close exact O32 paired radial-gauge canonicalization and move to a compact-native task manifold; do not sweep group width, lambda, SVD convention, radial threshold, product-code parameters, seed, optimizer, CE, or model size.",
+  "forbidden": [
+    "claiming the gauge is exact for coordinatewise GELU",
+    "storing Q matrices, empirical PCs, per-node bases, dense masters, dense residuals, or soft product-code logits",
+    "excluding product-code bits, dictionary bits/scales, SVD workspace, FP32 codebook masters, gradients, or assignment workspace from the relevant accounting",
+    "group-width, lambda, radial-threshold, K, block-size, bit-rate, sample, optimizer, step, seed, threshold, layer, or role sweep",
+    "A/B-stream audit before the same-trajectory capacity gate passes",
+    "function, CE, attention, or model-size experiments before all authorized representation and systems gates pass"
+  ]
+}
