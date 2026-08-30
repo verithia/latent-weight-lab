@@ -588,7 +588,8 @@ def main() -> None:
     started = time.time()
     device = torch.device(args.device)
     if device.type == "cuda":
-        torch.cuda.reset_peak_memory_stats(device)
+        torch.cuda.init()
+        torch.cuda.reset_peak_memory_stats(device.index or 0)
         torch.backends.cuda.matmul.allow_tf32 = True
 
     fit_plan = plan["optimistic_capacity_fit"]
@@ -759,7 +760,11 @@ def main() -> None:
     if device.type == "cuda":
         torch.cuda.synchronize(device)
     runtime = time.time() - started
-    peak = torch.cuda.max_memory_allocated(device) if device.type == "cuda" else 0
+    peak = (
+        torch.cuda.max_memory_allocated(device.index or 0)
+        if device.type == "cuda"
+        else 0
+    )
     projected = (
         runtime
         * int(fit_plan["joint_fp32_steps"] + fit_plan["post_quantization_local_only_steps"])
