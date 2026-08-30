@@ -19,11 +19,11 @@
     "hidden_width": 3072,
     "model_width": 768,
     "bias": false,
-    "teacher_identity_policy": "Hash the terminal snapshot, trajectory metadata, dataset manifest, source config, and exact model parameter inventory at runtime. Abort on any mismatch or nonzero MLP bias."
+    "teacher_identity_policy": "Hash the terminal snapshot, its embedded run identity and exact tensor inventory, dataset manifest, source config, and exact model parameter inventory at runtime. Abort on any mismatch or nonzero MLP bias."
   },
   "frozen_function_inventory": {
     "collection": "Stream deterministic validation batches through the sealed terminal dense parent and retain only the current layer's MLP input, teacher output, and deterministic JVP directions during fitting/evaluation.",
-    "dataset_directory": "/root/userdata/MappingNetworks/data/fineweb10B",
+    "dataset_directory": "/root/userdata/MappingNetworks/data/finewebedu_20b",
     "train_seed": 202608311,
     "holdout_seed": 202608312,
     "jvp_seed": 202608313,
