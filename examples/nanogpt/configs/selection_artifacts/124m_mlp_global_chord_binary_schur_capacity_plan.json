@@ -1,0 +1,129 @@
+{
+  "schema_version": "nanogpt_mlp_global_chord_binary_schur_capacity_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H53a global sign chord plus node-private binary Schur-product capacity ceiling",
+  "parent_evidence": {
+    "h52_metadata_sha256": "4388c7adcf6a1f1a883fa1f9e828487e8a85273c4fee3aa820cd08de9c2ff6be",
+    "h52_metrics_sha256": "b7392f4c5f7c126d2338db6191f8071f6666d43ca2f104b6f7a0fcf1c1f376e9",
+    "h52_mean_weighted_capture": 0.025392076931893826,
+    "h52_minimum_pc_capture": 0.023815540596842766,
+    "h52_procedural_mean_weighted_capture": 0.005609397077932954,
+    "h52_frame_sign_change_fraction": 0.4289807379245758,
+    "causal_transition": "H52's robust objective removes the PC1 collapse but eight global orientations plus diagonal DCT carriers recover only 2.54 percent. Replace the narrow node-private diagonal action with two directly learned binary low-rank fields whose Schur product has generic rank up to r squared, while retaining one charged global chord."
+  },
+  "scientific_question": "Can a sub-one-percent global-chord/private-Schur decoder cover every top-16 direction of all six 239-state MLP paths without a stored empirical basis or dense shadow?",
+  "frozen_inventory": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "trajectory_identity_sha256": "756d21c02b82be4391c8fd99ea11c2f7c5aff2a35c8906b5bcfde1326a7bee30",
+    "states": 239,
+    "steps": [0, 238],
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "components_per_node": 16,
+    "pca_centering": "independent mean of all 239 states for the optimistic capacity ceiling",
+    "pc_normalization": "unit Frobenius norm",
+    "reported_weighting": "eigenvalue normalized within each node top-16 set",
+    "fit_weighting": "uniform geometric objective across all six nodes and all 16 PCs"
+  },
+  "frozen_decoder": {
+    "weight_formula": "W_n=W0_n+alpha_n*S+(U_n1 diag(s_n1) V_n1^T) hadamard (U_n2 diag(s_n2) V_n2^T)",
+    "seed_weight": "exact step-zero matrix, reproducible from matched initialization and not charged as learned state",
+    "global_chord": "one learned 3072x768 Rademacher matrix shared by all 24 MLP endpoints and stored as one bit per value",
+    "private_factor_rank": 35,
+    "private_factors": "for each endpoint, two independent pairs U in signs(3072x35), V in signs(768x35), plus two FP16 rank-amplitude vectors",
+    "node_global_amplitude": "one FP16 scalar alpha per endpoint",
+    "generic_schur_rank_ceiling": 768,
+    "stored_empirical_pc": false,
+    "stored_dense_master": false,
+    "stored_dense_residual": false,
+    "stored_real_bit_logits": false,
+    "stored_optimizer_history": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "global_chord_code_values": 2359296,
+    "global_chord_code_bytes": 294912,
+    "private_factor_code_values": 6451200,
+    "private_factor_code_bytes": 806400,
+    "fp16_rank_amplitude_values": 1680,
+    "fp16_rank_amplitude_bytes": 3360,
+    "fp16_global_amplitude_values": 24,
+    "fp16_global_amplitude_bytes": 48,
+    "total_checkpoint_bytes": 1104720,
+    "checkpoint_byte_fraction": 0.009755028618706597,
+    "persistent_pca_or_dense_basis_values": 0
+  },
+  "continuous_relaxation_ceiling": {
+    "purpose": "necessary topology gate only; not a deployable checkpoint",
+    "targets": "all 96 unit PCs: six nodes times top 16 components",
+    "temporary_coordinates": "independent factor values, amplitudes, and alpha for each target PC; alternative states, not simultaneous deployed state",
+    "global_chord_fit": "one jointly learned bounded real relaxation shared across all 96 targets",
+    "private_factor_fit": "two independently learned bounded real rank-35 factor pairs per target",
+    "objective": "mean over all 96 targets of log(squared_cosine_capture + 1e-4)",
+    "optimizer": "Adam",
+    "steps": 128,
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 10.0,
+    "no_sweep": true
+  },
+  "binary_stage_if_and_only_if_relaxation_passes": {
+    "factor_projection": "sign projection of global chord and all four private factor matrices",
+    "persistent_real_shadow": false,
+    "refinement": "discrete gradient-ranked bit flips plus FP16 amplitude refinement for 64 frozen updates",
+    "objective": "same mean log(capture + 1e-4) objective",
+    "controls": [
+      "global chord only",
+      "either Schur field alone",
+      "ordinary equal-bit additive binary low-rank sum",
+      "fixed-random private factor signs",
+      "synthetic own-family reconstruction"
+    ]
+  },
+  "capacity_gates": {
+    "relaxation_weighted_top16_capture_min_every_node": 0.30,
+    "relaxation_minimum_pc_capture_every_node": 0.05,
+    "binary_weighted_top16_capture_min_every_node": 0.30,
+    "binary_weighted_top16_capture_median_each_role": 0.40,
+    "binary_minimum_pc_capture_every_node": 0.05,
+    "binary_minus_global_chord_weighted_capture_min_every_node": 0.10,
+    "synthetic_own_family_recovery": 0.999,
+    "finite_outputs": true,
+    "exact_accounting": true,
+    "all_nodes_and_roles_must_pass": true
+  },
+  "systems_accounting": {
+    "approximate_refresh_flops_per_matrix": 332662000,
+    "approximate_refresh_flops_all_24_endpoints": 7983888000,
+    "token_time_path_if_cached": "ordinary dense MLP GEMMs",
+    "cached_dense_runtime_bytes": 113246208,
+    "direct_khatri_rao_execution_forbidden_as_speed_claim": true,
+    "training_state_rule": "all transient factor gradients and any bit optimizer state are reported; any factor-sized real logits invalidate the compact-training-state claim"
+  },
+  "systems_preflight": {
+    "preflight_components_per_node": 4,
+    "preflight_relaxation_steps": 4,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300
+  },
+  "promotion": "Only a complete continuous-relaxation and packed-binary capacity pass authorizes chronological-late and A/B-stream representation audits. Those do not authorize function fitting, CE, or scale-up.",
+  "failure": "Close this exact global-chord/private-binary-Schur family without rank, bit, objective, optimizer, step, seed, layer, role, CE, or model-size sweep.",
+  "forbidden": [
+    "calling the continuous relaxation a compact result",
+    "persistent empirical PCs, dense residuals, dense masters, or factor-sized real bit logits",
+    "excluding any global or private bit, amplitude, gradient, or optimizer state from the relevant accounting",
+    "rank, bitwidth, objective, optimizer, step, seed, threshold, layer, or role sweep",
+    "function, CE, attention, or model-size experiments before every representation gate passes"
+  ]
+}
