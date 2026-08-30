@@ -1,0 +1,133 @@
+{
+  "schema_version": "nanogpt_mlp_shared_int4_row_dictionary_capacity_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H54a shared int4 row dictionary with private hard top-three routing",
+  "parent_evidence": {
+    "h53_metadata_sha256": "56dfcd241397261ad64f9ea78c20d1eb169597de24bd11887ab75e7b84e34256",
+    "h53_metrics_sha256": "831f77ebbb511c9e89043847b258e76b35ab4248d581cdddfeae80547430e0fb",
+    "h53_relaxation_mean_weighted_capture": 0.0759407455722491,
+    "h53_minimum_pc_capture": 0.07268323004245758,
+    "h53_global_chord_mean_weighted_capture": 0.004808460789111753,
+    "causal_transition": "H53 removes the matrix-rank ceiling and covers every weak PC above five percent, yet its two coupled factor fields recover only 7.59 percent. Move angular choice to each canonical row through a large shared target-aligned dictionary and private hard sparse routing."
+  },
+  "scientific_question": "Can a single 1024-row shared dictionary plus three hard atom choices per row cover the measured six-node top-16 MLP tangent under one percent checkpoint bytes?",
+  "frozen_inventory": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "trajectory_identity_sha256": "756d21c02b82be4391c8fd99ea11c2f7c5aff2a35c8906b5bcfde1326a7bee30",
+    "states": 239,
+    "steps": [0, 238],
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "components_per_node": 16,
+    "total_target_rows": 294912,
+    "pca_centering": "independent mean of all 239 states for the optimistic capacity ceiling",
+    "pc_normalization": "unit Frobenius norm",
+    "reported_weighting": "eigenvalue normalized within each node top-16 set"
+  },
+  "frozen_decoder": {
+    "weight_formula": "DeltaW_n[i,:]=sum_{j=0}^{2} a_nij D[c_nij,:]",
+    "seed_weight": "exact step-zero matrix, reproducible from matched initialization and not charged as learned state",
+    "dictionary_atoms": 1024,
+    "dictionary_width": 768,
+    "private_atoms_per_row": 3,
+    "private_index_bits": 10,
+    "dictionary_storage": "symmetric signed int4 with one FP16 scale per atom",
+    "private_coefficients": "three FP16 values per canonical row",
+    "stored_empirical_pc": false,
+    "stored_per_node_basis": false,
+    "stored_dense_master": false,
+    "stored_dense_residual": false,
+    "stored_soft_assignment_logits": false,
+    "stored_optimizer_history": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "int4_dictionary_values": 786432,
+    "int4_dictionary_bytes": 393216,
+    "fp16_dictionary_scale_values": 1024,
+    "fp16_dictionary_scale_bytes": 2048,
+    "private_index_values": 221184,
+    "private_index_bits": 2211840,
+    "private_index_bytes": 276480,
+    "fp16_private_coefficient_values": 221184,
+    "fp16_private_coefficient_bytes": 442368,
+    "total_checkpoint_bytes": 1114112,
+    "checkpoint_byte_fraction": 0.009837962962962963,
+    "persistent_pca_or_per_node_basis_values": 0
+  },
+  "unquantized_capacity_fit": {
+    "purpose": "necessary shared-dictionary capacity gate; not a deployable checkpoint",
+    "dictionary_initialization": "1024 distinct normalized target rows drawn with a deterministic seed, stratified uniformly over all node-PC targets and energy-weighted within each target",
+    "row_sampling": "each update samples targets uniformly and rows proportional to squared row norm within target",
+    "batch_rows": 4096,
+    "steps": 256,
+    "optimizer": "Adam",
+    "learning_rate": 0.01,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 1.0,
+    "dictionary_retraction": "unit L2 norm per atom after every update",
+    "assignment": "hard absolute-correlation top three; no soft logits",
+    "coefficient_fit": "differentiable ridge solve of the selected 3x3 Gram system with ridge 1e-5",
+    "training_objective": "mean squared reconstruction error of unit row directions under energy-weighted sampling",
+    "evaluation": "reconstruct every row of all 96 full PCs with hard top-three selection and exact ridge coefficients, then report full-matrix squared-cosine capture",
+    "evaluation_row_batch": 2048,
+    "seed": 202608540,
+    "no_sweep": true
+  },
+  "controls": {
+    "fixed_random_dictionary": "the exact initialized 1024-atom dictionary with no learned updates, evaluated with hard top-three routing",
+    "top_one": "the learned dictionary with one hard selected atom and exact scalar coefficient",
+    "top_three": "the learned dictionary and frozen candidate sparse coding",
+    "utilization": "atom assignment histogram, active fraction, entropy, and maximum load",
+    "row_energy_strata": "capture for quartiles of target row energy",
+    "synthetic_own_family": "known dictionary, codes, and coefficients must reconstruct at least 99.9 percent"
+  },
+  "capacity_gates": {
+    "unquantized_weighted_top16_capture_min_every_node": 0.30,
+    "unquantized_weighted_top16_capture_median_each_role": 0.40,
+    "unquantized_minimum_pc_capture_every_node": 0.05,
+    "synthetic_own_family_recovery": 0.999,
+    "finite_outputs": true,
+    "exact_accounting": true,
+    "all_nodes_and_roles_must_pass": true
+  },
+  "quantized_stage_if_and_only_if_unquantized_passes": {
+    "quantizer": "symmetric per-atom signed int4 with codes in [-7,7] and FP16 mean-absolute-derived scale",
+    "reassignment": "rerun hard top-three assignment after quantization",
+    "refinement": "refit only the three FP16 row coefficients; no dense or soft assignment shadow",
+    "required_metrics": "all capacity gates plus quantization loss, exact packing, chronology, late updates, A/B common path and heldout innovation"
+  },
+  "systems_preflight": {
+    "preflight_components_per_node": 4,
+    "preflight_steps": 4,
+    "preflight_batch_rows": 1024,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300
+  },
+  "systems_accounting": {
+    "cached_token_time_path": "ordinary dense MLP GEMMs",
+    "cached_dense_runtime_bytes": 113246208,
+    "materialization": "three dictionary gathers and one fused scaled row sum",
+    "training_state_rule": "dictionary master, gradients, optimizer moments, index/assignment workspace and coefficient solver workspace are all reported separately; soft logits are forbidden persistent state"
+  },
+  "promotion": "Only a complete unquantized and int4 capacity pass authorizes chronological-late and A/B-stream representation audits. No stage directly authorizes function fitting, CE, attention, or scale-up.",
+  "failure": "Close this exact 1024-atom top-three row-dictionary family without dictionary-size, sparsity, bitwidth, sampling, optimizer, step, seed, CE, or model-size sweep.",
+  "forbidden": [
+    "calling the unquantized dictionary a compact result",
+    "persistent empirical PCs, per-node bases, dense masters, dense residuals, or soft assignment logits",
+    "excluding dictionary bits, scales, indices, coefficients, gradients, optimizer moments, or assignment workspace from the relevant accounting",
+    "dictionary-size, sparsity, bitwidth, sample, optimizer, step, seed, threshold, layer, or role sweep",
+    "function, CE, attention, or model-size experiments before every representation gate passes"
+  ]
+}
