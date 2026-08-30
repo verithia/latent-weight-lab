@@ -85,7 +85,7 @@
     "no_sweep": true
   },
   "controls": {
-    "fixed_random_dictionary": "the exact initialized 1024-atom dictionary with no learned updates, evaluated with hard top-three routing",
+    "fixed_initial_dictionary": "the exact deterministic target-row initialization with no learned updates, evaluated with hard top-three routing",
     "top_one": "the learned dictionary with one hard selected atom and exact scalar coefficient",
     "top_three": "the learned dictionary and frozen candidate sparse coding",
     "utilization": "atom assignment histogram, active fraction, entropy, and maximum load",
