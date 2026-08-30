@@ -528,7 +528,12 @@ def self_test(device_name: str = "cpu") -> dict[str, Any]:
     rows = 4 * width
     identity = torch.eye(width, device=device).unsqueeze(0)
     dct = dct_ii_ortho_rows(identity)[0]
-    orthogonality_error = float((dct @ dct.T - torch.eye(width, device=device)).abs().max())
+    dct_check = dct.detach().double().cpu()
+    orthogonality_error = float(
+        (dct_check @ dct_check.T - torch.eye(width, dtype=torch.float64))
+        .abs()
+        .max()
+    )
     geometry = make_carrier_geometry(
         nodes=2,
         width=width,
