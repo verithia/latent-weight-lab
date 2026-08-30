@@ -1,0 +1,116 @@
+{
+  "schema_version": "nanogpt_mlp_lowbit_global_frame_dct_carrier_capacity_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H51a low-bit global dense frames plus node-addressed DCT carrier capacity ceiling",
+  "parent_evidence": {
+    "h50_metadata_sha256": "0b83624553c1ad2b8345115d2e232a77f53231808777319881d7c190a110f4fb",
+    "h50_gate_sha256": "0fc11baf937517acbc3e7aadbe834abae8a7696cf334a74c313a2da8fb16800a",
+    "h50_mean_holdout_covariance_retention": 0.11484356901226311,
+    "h50_one_plane_mean_holdout_covariance_retention": 0.06648545938319832,
+    "causal_transition": "H50 proves target-acquired shared directions and row-local coordinates are useful, but two row-fixed directions leave an angular bottleneck. Store two full global low-bit frames once, and let every node/row query them through a procedural fast orthogonal carrier and private diagonal fields."
+  },
+  "scientific_question": "Can two charged global 768x768 low-bit frames, addressed through node-private procedural DCT carriers and local diagonal/amplitude coordinates, represent the dominant top-16 PCs of all six 239-state MLP paths under one percent deployment bytes?",
+  "frozen_inventory": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4/parameter_trajectory",
+    "states": 239,
+    "steps": [0, 238],
+    "layers": [0, 6, 11],
+    "parameters": ["mlp.c_fc", "mlp.c_proj"],
+    "node_order": [
+      "layer0.c_fc",
+      "layer0.c_proj",
+      "layer6.c_fc",
+      "layer6.c_proj",
+      "layer11.c_fc",
+      "layer11.c_proj"
+    ],
+    "canonical_shape": [3072, 768],
+    "c_proj_canonicalization": "transpose",
+    "components_per_node": 16,
+    "pca_centering": "independent mean of all 239 states for the optimistic capacity ceiling",
+    "pc_normalization": "unit Frobenius norm",
+    "pc_weighting": "eigenvalue normalized within each node's top-16 set"
+  },
+  "frozen_decoder": {
+    "weight_formula": "W_n=W0_n+diag(a_n)[C_n0 diag(d_n0) R0 + C_n1 diag(d_n1) R1]",
+    "seed_weight": "exact step-zero matrix, reproducible from the matched model initialization and not charged as learned state",
+    "global_frame_zero": "one learned 768x768 frame deployed as signed int8 plus one FP16 scale per row",
+    "global_frame_one": "one learned 768x768 frame deployed as signed int4 plus one FP16 scale per row",
+    "carrier": "four vertically stacked orthonormal DCT-II blocks with deterministic node/carrier row permutations and row/column sign flips",
+    "carrier_persistent_state": "none; regenerate from node identity and seed",
+    "carrier_seed_base": 202608510,
+    "carrier_node_stride": 101,
+    "carrier_branch_stride": 10007,
+    "local_coordinates": "one FP16 row-amplitude vector a_n of length 3072 and two FP16 diagonal vectors d_nk of length 768 for every deployed layer/role node",
+    "stored_empirical_pc": false,
+    "stored_dense_frame_master": false,
+    "stored_dense_residual": false,
+    "stored_optimizer_history": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "int8_frame_code_bytes": 589824,
+    "int4_frame_code_bytes": 294912,
+    "fp16_frame_scale_values": 1536,
+    "fp16_frame_scale_bytes": 3072,
+    "fp16_node_diagonal_values": 36864,
+    "fp16_node_diagonal_bytes": 73728,
+    "fp16_node_row_amplitude_values": 73728,
+    "fp16_node_row_amplitude_bytes": 147456,
+    "total_checkpoint_bytes": 1108992,
+    "checkpoint_byte_fraction": 0.009792751736111112,
+    "continuous_coordinate_values": 112128,
+    "continuous_coordinate_fraction": 0.001980251736111111,
+    "persistent_pca_or_carrier_values": 0
+  },
+  "optimistic_capacity_fit": {
+    "targets": "all 96 unit PCs: six nodes times top 16 components",
+    "temporary_coordinates": "independent a,d0,d1 for each target PC; alternatives along one manifold, not simultaneous deployed state",
+    "frame_initialization": "two independent deterministic orthogonal DCT-II frames with frozen seed signs/permutations",
+    "local_initialization": "a=1; d0 and d1 deterministic Gaussian with standard deviation 1/sqrt(768)",
+    "objective": "mean over nodes of eigenvalue-weighted squared cosine between generated and target PCs",
+    "optimizer": "Adam",
+    "joint_fp32_steps": 64,
+    "joint_learning_rate": 0.01,
+    "joint_weight_decay": 0.0,
+    "row_normalize_frames_after_each_step": true,
+    "gradient_clip_norm": 10.0,
+    "quantization": "per-row symmetric signed int8 qmax=127 for R0 and signed int4 qmax=7 for R1",
+    "post_quantization_local_only_steps": 32,
+    "post_quantization_learning_rate": 0.01,
+    "no_sweep": true
+  },
+  "controls": {
+    "unquantized_fitted_frames": "same final FP32 frames and local coordinates before low-bit quantization",
+    "procedural_unfitted_frames": "initial deterministic DCT frames with optimally trained local coordinates but no learned global orientation",
+    "single_int8_frame": "zero the int4 branch after fitting",
+    "coordinate_fraction": 0.001980251736111111,
+    "fixed_blockfht_reference": "use sealed 1% capture near 0.009993 as the random-coordinate reference"
+  },
+  "capacity_gates": {
+    "quantized_weighted_top16_capture_min_every_node": 0.30,
+    "quantized_weighted_top16_capture_median_each_role": 0.40,
+    "quantized_minimum_pc_capture_every_node": 0.05,
+    "quantized_minus_procedural_weighted_capture_min_every_node": 0.10,
+    "finite_outputs": true,
+    "exact_accounting": true,
+    "all_nodes_and_roles_must_pass": true
+  },
+  "systems_preflight": {
+    "preflight_components_per_node": 4,
+    "preflight_joint_steps": 4,
+    "preflight_local_steps": 2,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300
+  },
+  "promotion": "Only a complete H51a capacity pass authorizes discovery-only frame fitting followed by chronological-late updates and A/B-stream transfer. It does not authorize function fitting, CE, or scale-up.",
+  "failure": "Close this exact two-frame DCT-addressed residual family without frame-bit, frame-count, transform, step, optimizer, layer, role, function, CE, or model-size sweep.",
+  "forbidden": [
+    "calling the optimistic all-PC fit a chronological transfer result",
+    "persistent empirical PCs, DCT carrier matrices, dense residuals, or FP32 frame masters",
+    "excluding any global frame bit or local coordinate from checkpoint accounting",
+    "frame-bit, count, carrier, seed, step, learning-rate, threshold, layer, or role sweep",
+    "function, CE, or model-size experiments before the capacity and later transfer gates pass"
+  ]
+}
