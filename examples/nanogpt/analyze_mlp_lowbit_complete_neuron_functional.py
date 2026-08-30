@@ -148,16 +148,18 @@ def ste_symmetric_int4(value: torch.Tensor) -> torch.Tensor:
 
 
 def relative_rmse(reference: torch.Tensor, candidate: torch.Tensor) -> float:
-    numerator = (candidate.double() - reference.double()).square().sum()
-    denominator = reference.double().square().sum().clamp_min(1e-30)
+    reference = reference.detach().double()
+    candidate = candidate.detach().double()
+    numerator = (candidate - reference).square().sum()
+    denominator = reference.square().sum().clamp_min(1e-30)
     return float((numerator / denominator).sqrt())
 
 
 def retained_centered_energy(
     reference: torch.Tensor, candidate: torch.Tensor
 ) -> float:
-    reference = reference.double()
-    error = candidate.double() - reference
+    reference = reference.detach().double()
+    error = candidate.detach().double() - reference
     reference = reference - reference.mean(dim=0, keepdim=True)
     error = error - error.mean(dim=0, keepdim=True)
     denominator = reference.square().sum().clamp_min(1e-30)
