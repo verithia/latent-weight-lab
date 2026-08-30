@@ -1,0 +1,127 @@
+{
+  "schema_version": "nanogpt_mlp_lowbit_complete_neuron_functional_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H47 shared low-bit complete-neuron functional manifold",
+  "parent_evidence": {
+    "dense_path_terminal": "H46 exact-byte global sign plus private-microcore union",
+    "h46_metadata_sha256": "8ab9bd683059b21f1a7b61eadc38c116ea02a5a53dfeba6726f19a6b6466c4ab",
+    "h46_conclusion": "The exact one-percent dense-path union captures 7.83--8.32 percent of weighted top-16 state energy, but 96--98 percent of the gain comes from one target-aligned global sign atom; private continuous cores add only 0.153--0.163 percentage points and weakest-PC capture remains below 0.01 percent.",
+    "causal_transition": "Stop reconstructing the near-Haar dense optimizer path. Test a looser function quotient while preserving each GELU detector and residual-write vector as one indivisible nonlinear atom."
+  },
+  "scientific_question": "Can one shared bank of complete GELU neurons, stored in less than one percent of the dense FP16 MLP matrix bytes and routed by layer-local gains, reproduce every terminal dense-parent MLP function and input Jacobian on disjoint residual-stream samples?",
+  "frozen_teacher": {
+    "snapshot_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_activation_frame_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+    "terminal_step": 238,
+    "terminal_snapshot": "step_000238.pt",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_activation_frame_trajectory_lr24e4.json",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "primary_report_layers": [0, 6, 11],
+    "hidden_width": 3072,
+    "model_width": 768,
+    "bias": false,
+    "teacher_identity_policy": "Hash the terminal snapshot, trajectory metadata, dataset manifest, source config, and exact model parameter inventory at runtime. Abort on any mismatch or nonzero MLP bias."
+  },
+  "frozen_function_inventory": {
+    "collection": "Stream deterministic validation batches through the sealed terminal dense parent and retain only the current layer's MLP input, teacher output, and deterministic JVP directions during fitting/evaluation.",
+    "dataset_directory": "/root/userdata/MappingNetworks/data/fineweb10B",
+    "train_seed": 202608311,
+    "holdout_seed": 202608312,
+    "jvp_seed": 202608313,
+    "samples_per_layer_per_split": 1024,
+    "jvp_directions_per_layer_per_split": 4,
+    "jvp_direction_distribution": "Rademacher divided by sqrt(768)",
+    "persistent_activation_cache": "none in the deployed checkpoint; analysis tensors may be streamed or written only to the result directory and must be byte-accounted",
+    "teacher_output": "Y_l=GELU(X_l U_l^T)V_l^T",
+    "teacher_input_jvp": "J_l(X_l)[D]=((GELU'(X_l U_l^T) odot (D U_l^T)) V_l^T)"
+  },
+  "frozen_representation": {
+    "formula": "fhat_l(x)=sum_{j=1}^{1421} g_lj v_j GELU(u_j^T x)",
+    "complete_atoms": 1421,
+    "atom_policy": "Detector u_j and write v_j are always initialized, optimized, quantized, stored, and evaluated as a paired complete neuron. Matrix-wise reassignment is forbidden.",
+    "atom_codes": "symmetric signed int4 with integer range [-7,7]",
+    "scale_policy": "one FP16 max-absolute/7 scale for each detector vector and one for each write vector",
+    "layer_routing": "one FP16 multiplicative output gain g_lj for every layer and shared atom",
+    "quantized_forward": "straight-through round-and-clip during fitting; exact dequantized int4 codes and stored FP16 scales/gains for terminal evaluation",
+    "bias": "none, matching the frozen teacher",
+    "stored_dense_teacher_or_pca_basis": false,
+    "stored_dequantized_bank": false,
+    "stored_optimizer_history": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "int4_atom_values": 2182656,
+    "int4_atom_bytes": 1091328,
+    "fp16_scale_values": 2842,
+    "fp16_scale_bytes": 5684,
+    "fp16_layer_gain_values": 17052,
+    "fp16_layer_gain_bytes": 34104,
+    "total_checkpoint_bytes": 1131116,
+    "checkpoint_byte_fraction": 0.009988112343008704,
+    "effective_width_fraction_of_dense_per_layer": 0.4625651041666667,
+    "temporary_training_state_policy": "Report FP32 master atoms, gradients, Adam first/second moments, routing gradients, activation tensors, and peak CUDA bytes separately. None may be counted as deployed compression.",
+    "cached_inference_policy": "If dequantized FP16 U/V are cached, report the additional 4,365,312 bytes and do not call that cache part of the compact checkpoint. Only one shared cache is allowed across all layers."
+  },
+  "teacher_derived_initialization": {
+    "score": "For dense teacher neuron j in layer l, e_lj=||GELU(X_train,l u_lj)||_2 ||v_lj||_2.",
+    "balanced_quota": "Select the top 119 scored complete neurons from layers 0--4 and top 118 from layers 5--11, totaling exactly 1421 atoms.",
+    "atom_initialization": "Copy each selected teacher detector row and its paired c_proj column together into the shared master bank.",
+    "gain_initialization": "Set gain one only at the selected atom's source layer and zero at every other layer.",
+    "reason": "Balanced seeding prevents a high-energy layer from monopolizing the shared bank, gives an exact functional interpretation at initialization, and does not store an empirical trajectory/PCA basis."
+  },
+  "fit": {
+    "objective": "Mean over layers of relative output MSE plus 0.25 times relative exact input-JVP MSE, evaluated through the int4 STE bank. Denominators are stop-gradient teacher energies per layer and split.",
+    "optimizer": "AdamW on FP32 master u/v atoms and FP32 layer gains",
+    "iterations": 1536,
+    "layer_schedule": "deterministic round-robin over all 12 layers, 128 updates per layer",
+    "minibatch_rows": 128,
+    "learning_rate_atoms": 0.001,
+    "learning_rate_gains": 0.003,
+    "weight_decay": 0.0001,
+    "gradient_clip_norm": 1.0,
+    "quantization": "STE int4 on every fit forward; terminal codes are frozen by exact round-and-clip and gains are cast to FP16 before final metrics",
+    "no_sweep": true
+  },
+  "controls": {
+    "random_shared": "Same 1421-atom int4 bank and layer-gain bytes, deterministic Gaussian paired atoms, gains fit under the identical protocol while atoms stay fixed.",
+    "private_narrow": "Same total int4 atom bytes divided as 119 private complete atoms in layers 0--4 and 118 in layers 5--11; no cross-layer sharing; private atoms and gains fit under the identical protocol.",
+    "unquantized_architecture": "Terminal FP32 master shared bank evaluated before int4 to attribute any miss to sharing/width versus quantization. This is an over-budget diagnostic only.",
+    "dense_teacher": "Exact teacher output/JVP identity and numerical self-check."
+  },
+  "metrics": {
+    "relative_output_rmse": "||Yhat-Y||_F / ||Y||_F",
+    "relative_jvp_rmse": "root-mean-square over four directions of ||Jhat[D]-J[D]||_F / ||J[D]||_F",
+    "retained_centered_output_covariance_energy": "1 - ||center(Yhat-Y)||_F^2 / ||center(Y)||_F^2",
+    "per_layer_reporting": true,
+    "aggregate_reporting": ["mean", "median", "maximum_error", "minimum_retained_energy"],
+    "control_margins": "Report learned-minus-random and learned-minus-private-narrow for every metric; absolute gates, not control wins, determine promotion."
+  },
+  "representation_gates": {
+    "holdout_relative_output_rmse_max_every_layer": 0.10,
+    "holdout_relative_jvp_rmse_max_every_layer": 0.15,
+    "holdout_retained_centered_output_covariance_energy_min_every_layer": 0.90,
+    "finite_outputs_and_jvps": true,
+    "exact_compact_checkpoint_identity": true,
+    "all_twelve_layers_must_pass": true
+  },
+  "systems_gate": {
+    "preflight_before_binding_fit": true,
+    "preflight_iterations": 24,
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_threshold_seconds": 300,
+    "watchdog_policy": "terminal/error callback only for a run projected to finish within two hours; 90-minute resettable heartbeat only if it runs longer",
+    "candidate_kernel": "benchmark cached FP16 dequantization and direct candidate MLP against the exact dense 3072-wide teacher shape",
+    "candidate_mlp_latency_over_dense_max": 0.65,
+    "dequantization": "one shared-bank refresh cost reported separately from token-time MLP latency"
+  },
+  "promotion": "Only if every representation and systems gate passes, implement the identical compact-native module and exact-config performance-gate one 124M 0.5TPP causal acquisition before any CE conclusion.",
+  "failure": "If any required layer fails, close shared complete-neuron amortization at this exact one-percent byte budget. Attribute failure among quantization, shared-bank capacity, and function/JVP mismatch using only the frozen controls; do not sweep width, bits, routing, seeds, losses, or optimizer.",
+  "forbidden": [
+    "weight-PCA or residual-state recovery as a promotion metric",
+    "a dense per-layer teacher shadow, stored empirical basis, or hidden dequantized checkpoint",
+    "splitting detector/write atom pairing",
+    "width, bitwidth, layer, seed, loss-weight, optimizer, or initialization sweep",
+    "CE, larger-model, or longer-horizon training before every functional/JVP and systems gate passes",
+    "calling the result scalar-latent compression"
+  ]
+}
