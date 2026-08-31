@@ -1,0 +1,125 @@
+{
+  "schema_version": "nanogpt_mlp_token_router_residual_carrier_functional_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H57 shared rank-256 residual carrier plus token-conditioned group router",
+  "parent_evidence": {
+    "h50_functional_metadata_sha256": "0b83624553c1ad2b8345115d2e232a77f53231808777319881d7c190a110f4fb",
+    "h55_product_code_metrics_sha256": "a816028b09fffedcf394ed6fcf5155459e2c468afdce32ec22da95091a75bcbf",
+    "h56_radial_gauge_metrics_sha256": "6ae58cf7fc4e81d106a4d17b7561d29edebafa6c42180250cc6eec66205615f8",
+    "causal_transition": "The dense paths have temporal effective rank 1.40-1.61 and top-16 energy above 99.9%, but the best basis-free one-percent readout captures only 13.62%. Exact O(32) gauge fixing changes capture by only 0.0033 percentage points. Stop reconstructing dense ambient PCs and test a compact-native function manifold with token-conditioned hidden-group selection and one shared residual-direction carrier."
+  },
+  "scientific_question": "Can a sub-one-percent compact state, trained only in its native coordinates and storing no empirical weight basis, reproduce all twelve terminal dense MLP functions and exact input JVPs?",
+  "frozen_teacher": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_activation_frame_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+    "initial_step": 0,
+    "initial_snapshot": "step_000000.pt",
+    "initial_snapshot_sha256": "9b85043902c12376bfc61ab29fa161dcc0374c7dc6e92436e64fdd16021da4e7",
+    "terminal_step": 238,
+    "terminal_snapshot": "step_000238.pt",
+    "terminal_snapshot_sha256": "34f8a0399550742a67265e98aa91ffa116ab33dff364a2c4f1ad0d3fb1ed772c",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_activation_frame_trajectory_lr24e4.json",
+    "source_config_sha256": "e5cfd92100eaee73f2e9c499d7eda34e96985b8b928cc980b2623a80d0dc6512",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "model_width": 768,
+    "hidden_width": 3072,
+    "bias": false,
+    "procedural_parent_policy": "Use the exact step-zero MLP tensors during this audit. They are not part of the compact artifact. Before any model training, independently regenerate them from the frozen source config and require exact tensor-inventory identity."
+  },
+  "frozen_function_inventory": {
+    "dataset_directory": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "train_seed": 202608311,
+    "holdout_seed": 202608312,
+    "jvp_seed": 202608313,
+    "samples_per_layer_per_split": 1024,
+    "jvp_directions_per_layer_per_split": 4,
+    "jvp_direction_distribution": "Rademacher divided by sqrt(768)",
+    "persistent_activation_cache": "none in compact checkpoint"
+  },
+  "frozen_representation": {
+    "group_width": 32,
+    "hidden_groups": 96,
+    "carrier_rank": 256,
+    "formula": "h_l=GELU(A0_l x); g_l=1+alpha_l*tanh(R x+b_l), repeated within groups; y0_l=B0_l(g_l*h_l); y_l=y0_l+(y0_l V)U^T",
+    "shared_fp16_coordinates": ["U[768,256]", "V[768,256]", "R[96,768]"],
+    "layer_private_fp16_coordinates": ["alpha[12,96]", "b[12,96]"],
+    "materialized_carrier": "P=I+U V^T; P is not stored",
+    "fixed_procedural_endpoints": ["A0_l", "B0_l"],
+    "stored_dense_teacher_or_pca_basis": false,
+    "stored_dense_carrier": false,
+    "stored_optimizer_history": false,
+    "persistent_dense_master": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_values": 56623104,
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "fp16_carrier_factor_values": 393216,
+    "fp16_carrier_factor_bytes": 786432,
+    "fp16_router_values": 73728,
+    "fp16_router_bytes": 147456,
+    "fp16_private_gate_values": 2304,
+    "fp16_private_gate_bytes": 4608,
+    "total_latent_values": 469248,
+    "total_checkpoint_bytes": 938496,
+    "latent_value_fraction": 0.008287217881944444,
+    "checkpoint_byte_fraction": 0.008287217881944444,
+    "extra_mlp_matmul_fraction": 0.09895833333333333,
+    "cached_procedural_endpoint_bytes": 113246208
+  },
+  "initialization": {
+    "router_seed": 202608571,
+    "router_distribution": "normal with standard deviation 1/sqrt(768)",
+    "alpha": 0.1,
+    "bias": 0.0,
+    "carrier_u": "zeros",
+    "carrier_v_seed": 202608572,
+    "carrier_v": "first 256 columns of deterministic float64 QR with positive diagonal convention, cast to float32",
+    "initial_function": "step-zero procedural MLP plus the deterministic 0.1-amplitude token router; residual carrier is identity"
+  },
+  "fit": {
+    "objective": "mean relative output MSE plus 0.25 times relative exact input-JVP MSE",
+    "optimizer": "AdamW on compact coordinates only",
+    "iterations": 3072,
+    "layer_schedule": "deterministic round-robin over all twelve layers",
+    "minibatch_rows": 128,
+    "learning_rate_carrier_factors": 0.001,
+    "learning_rate_router": 0.001,
+    "learning_rate_private_gates": 0.003,
+    "weight_decay_shared": 0.0001,
+    "weight_decay_private": 0.0,
+    "gradient_clip_norm": 1.0,
+    "coordinate_precision_during_fit": "FP32",
+    "terminal_coordinate_precision": "FP16",
+    "no_sweep": true
+  },
+  "controls": {
+    "step_zero_parent": "fixed A0/B0 with all gates one and identity carrier",
+    "carrier_only": "fitted U/V with all gates one",
+    "router_only": "fitted R/alpha/b with U zero",
+    "static_layer_gates": "fitted alpha/b with router input set to zero and fitted carrier",
+    "initial_random_router": "replace fitted R by the exact deterministic initial R while retaining fitted alpha/b and carrier",
+    "dense_teacher": "exact terminal teacher output and input-JVP identity"
+  },
+  "representation_gates": {
+    "holdout_relative_output_rmse_max_every_layer": 0.10,
+    "holdout_relative_jvp_rmse_max_every_layer": 0.15,
+    "holdout_retained_centered_output_covariance_energy_min_every_layer": 0.90,
+    "finite_outputs_and_jvps": true,
+    "exact_compact_checkpoint_identity": true,
+    "all_twelve_layers_must_pass": true
+  },
+  "runtime_gates": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_policy": "terminal/error callbacks plus one resettable 90-minute heartbeat for any run observed or projected above five minutes"
+  },
+  "promotion": "Only an every-layer representation pass authorizes an exact-config latency and MFU gate. Only representation plus performance may authorize one 124M CE acquisition. A pass does not authorize scale-up or attention work.",
+  "failure": "Close this exact shared rank-256 carrier and token-conditioned group-router topology without rank, width, group, seed, optimizer, horizon, bit, CE, attention, or scale sweeps.",
+  "forbidden": [
+    "stored PCA or empirical trajectory basis",
+    "persistent FP16 or FP32 dense endpoint or carrier master",
+    "changing rank, group width, initialization, optimizer, objective or gates after seeing results",
+    "CE, attention work or scale-up before representation and performance gates pass",
+    "calling regenerated step-zero endpoints compact checkpoint state"
+  ]
+}
