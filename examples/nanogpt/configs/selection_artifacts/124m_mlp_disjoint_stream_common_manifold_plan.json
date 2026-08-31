@@ -1,0 +1,75 @@
+{
+  "candidate": "H72 same-initialization disjoint-stream common/innovation manifold decomposition",
+  "causal_question": "Are the high-entropy ambient bases rejected by H69-H71 task-common directions that can be shared globally, or stochastic-path-specific innovations that should not be imitated by a compact transform?",
+  "forbidden": [
+    "hosts other than PRO6 without explicit user authorization",
+    "candidate CE comparison or promotion",
+    "attention experiments or model scale-up",
+    "copying trajectory or optimizer assets from Y400 or Y800",
+    "changing model seed, architecture, optimizer, schedule, evaluation, snapshot targets, or token horizon",
+    "using one stream to tune ranks, thresholds, transforms, or bit budgets after seeing the second"
+  ],
+  "inputs": {
+    "stream_a": {
+      "host": "PRO6",
+      "model_seed": 1337,
+      "run_identity_sha256": "2e26b936cc98972a8bdda4a5672bb210d7666b50fb46340d0bcd124712823c8a",
+      "train_data_seed": 20260714,
+      "trajectory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4_replay2/parameter_trajectory"
+    },
+    "stream_b": {
+      "host": "PRO6",
+      "model_seed": 1337,
+      "required_bitwise_step_zero_identity_with_stream_a": true,
+      "required_run_identity_sha256": "seal_after_acquisition",
+      "train_data_seed": 20260827,
+      "trajectory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_mlp_highcadence_layers0611_dataseed2_0p5tpp_lr24e4/parameter_trajectory"
+    },
+    "required_layers": [
+      0,
+      6,
+      11
+    ],
+    "required_steps": {
+      "count": 239,
+      "first": 0,
+      "last": 238
+    },
+    "required_targets": [
+      "mlp.c_fc",
+      "mlp.c_proj"
+    ]
+  },
+  "mathematics": {
+    "common_path": "C_t = (A_t + B_t) / 2",
+    "innovation_path": "I_t = (A_t - B_t) / 2",
+    "parallelogram_identity": "||C||_F^2 + ||I||_F^2 = (||A||_F^2 + ||B||_F^2) / 2",
+    "residual_gauge": "joint paired c_fc rows plus transposed c_proj rows after exact shared step-zero subtraction",
+    "temporal_pca_components": 16
+  },
+  "measurements": [
+    "bitwise step-zero identity and complete contiguous inventory",
+    "common and innovation energy fractions by layer and role",
+    "top-16 retained energy and temporal effective rank for A, B, C, and I",
+    "principal angles and singular values between A and B top-16 bases",
+    "bidirectional A-basis-to-B and B-basis-to-A energy capture",
+    "chronological early-to-late and late-to-early basis transfer",
+    "same-rate block-local entropy and product-code recovery of C versus A, B, and I",
+    "all source, config, input, output, runtime, CUDA, storage, and artifact hashes"
+  ],
+  "necessary_gate": {
+    "common_basis_capture_of_each_stream_every_layer_minimum": 0.5,
+    "common_energy_fraction_every_layer_minimum": 0.5,
+    "common_path_must_be_materially_more_compressible_than_raw_paths": true,
+    "all_values_finite": true,
+    "step_zero_bitwise_identical": true
+  },
+  "promotion": "A complete necessary-gate pass authorizes theory and one preregistered transform consisting of a charged global common carrier plus a basis-free or private innovation generator under one percent. It does not authorize CE, attention, or scale-up.",
+  "rejection": "Failure identifies the low-rank ambient basis as largely path-specific and authorizes compact-native manifold training instead of another dense-PCA reconstruction transform.",
+  "systems": {
+    "estimated_new_raw_trajectory_bytes": 6766460928,
+    "mfu_preflight_must_include_diagnostic_io": true,
+    "monitoring": "persistent terminal/error-only watchdog plus resettable 90-minute heartbeat",
+    "workspace_cap_bytes": 274877906944
+  }
+}
