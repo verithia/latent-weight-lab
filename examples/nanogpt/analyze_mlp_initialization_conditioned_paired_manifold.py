@@ -366,6 +366,7 @@ def fit_decoder(
     betas: tuple[float, float],
     weight_decay: float,
     freeze_decoder: bool,
+    progress_offset: int = 0,
 ) -> list[dict[str, float | int]]:
     if freeze_decoder:
         for name, parameter in decoder.named_parameters():
@@ -410,7 +411,8 @@ def fit_decoder(
             }
             history.append(row)
             print(
-                f"iter {step + 1}: " + json.dumps(row, sort_keys=True),
+                f"iteration {progress_offset + step + 1}: "
+                + json.dumps(row, sort_keys=True),
                 flush=True,
             )
     return history
@@ -649,6 +651,7 @@ def main() -> None:
             betas=(float(fit["betas"][0]), float(fit["betas"][1])),
             weight_decay=float(fit["weight_decay"]),
             freeze_decoder=bool(spec["freeze"]),
+            progress_offset=arm_index * int(fit["updates"]),
         )
         metrics = evaluate_decoder(
             decoder, active_bundles,

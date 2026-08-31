@@ -169,7 +169,32 @@ def probe(args: argparse.Namespace) -> dict:
     return json.loads(result.stdout)
 
 
-def action_prompt(kind: str) -> str:
+def action_prompt(kind: str, *, analysis_mode: bool = False) -> str:
+    if analysis_mode and kind == "progress":
+        return (
+            "Action required: verify the live analysis stage, optimization "
+            "history, GPU health, output inventory, storage, exact source, and "
+            "the active H69 MLP note; intervene only for an implementation or "
+            "infrastructure fault and continue the frozen representation audit. "
+            "Do not run CE, attention, or scale up and do not merely acknowledge."
+        )
+    if analysis_mode and kind == "success":
+        return (
+            "Action required: verify the exact H69 result, compact checkpoint, "
+            "per-layer metrics, all candidate/control gates, source/plan/input/"
+            "artifact hashes, runtime, GPU health, and workspace; seal the active "
+            "MLP note, then derive only the next theory-authorized compact "
+            "transformation. Do not run CE, attention, or scale up and do not "
+            "merely acknowledge."
+        )
+    if analysis_mode:
+        return (
+            "Action required: inspect the H69 supervisor state, remote log, GPU, "
+            "exact source/assets, output inventory, and active MLP note; repair "
+            "only an implementation or infrastructure fault, or seal the frozen "
+            "scientific rejection and derive the next theory-authorized transform. "
+            "Do not run CE, attention, or scale up and do not merely acknowledge."
+        )
     if kind == "progress":
         return (
             "Action required: verify live iteration, loss, GPU health, output "
@@ -216,11 +241,17 @@ def main() -> None:
             "monitor-degraded, storage-risk, and resettable heartbeat callbacks"
         ),
     )
+    parser.add_argument(
+        "--analysis-mode",
+        action="store_true",
+        help="use representation-audit-specific callback action prompts",
+    )
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
         assert "Action required:" in action_prompt("progress")
         assert "scientific probe inventory" in action_prompt("success")
+        assert "exact H69 result" in action_prompt("success", analysis_mode=True)
         print("self-test passed")
         return
     if args.pgid < 1 or args.max_iters < 1 or args.interval < 15:
@@ -256,7 +287,7 @@ def main() -> None:
                     args.state_path,
                     "error:" + ",".join(sample["errors"]),
                     f"[bot] @Codex {args.run_name} ERROR: {sample['errors']}\n\n"
-                    + action_prompt("failure"),
+                    + action_prompt("failure", analysis_mode=args.analysis_mode),
                 )
             if sample.get("output_bytes") is not None and (
                 sample["output_bytes"] > args.output_budget_gib * (1024**3)
@@ -267,7 +298,8 @@ def main() -> None:
                     "output_budget_exceeded",
                     f"[bot] @Codex {args.run_name} STORAGE_RISK: "
                     f"output={sample['output_bytes'] / 1024**3:.2f} GiB exceeds "
-                    f"{args.output_budget_gib:.2f} GiB\n\n" + action_prompt("failure"),
+                    f"{args.output_budget_gib:.2f} GiB\n\n"
+                    + action_prompt("failure", analysis_mode=args.analysis_mode),
                 )
 
             terminal = status in {"finished", "failed"}
@@ -280,7 +312,7 @@ def main() -> None:
                     "terminal",
                     f"[bot] @Codex {args.run_name} {label}: "
                     f"iter={current_iter}/{args.max_iters} gpu={sample.get('gpu','')}\n\n"
-                    + action_prompt(kind),
+                    + action_prompt(kind, analysis_mode=args.analysis_mode),
                 )
                 retry_pending(state, args.state_path)
                 if not state.get("pending"):
@@ -292,7 +324,7 @@ def main() -> None:
                     "missing_process_group",
                     f"[bot] @Codex {args.run_name} ERROR: process group missing "
                     f"while status={status or 'unknown'} iter={current_iter}\n\n"
-                    + action_prompt("failure"),
+                    + action_prompt("failure", analysis_mode=args.analysis_mode),
                 )
                 return
 
@@ -305,7 +337,7 @@ def main() -> None:
                             f"milestone_{milestone}",
                             f"[bot] @Codex {args.run_name} PROGRESS: {milestone}% "
                             f"({current_iter}/{args.max_iters}) gpu={sample.get('gpu','')}\n\n"
-                            + action_prompt("progress"),
+                            + action_prompt("progress", analysis_mode=args.analysis_mode),
                         )
 
             since_progress = now - float(state["last_progress_at"])
@@ -316,7 +348,7 @@ def main() -> None:
                     f"stall_{int(since_progress // (args.stall_minutes * 60))}",
                     f"[bot] @Codex {args.run_name} STALL: no iteration progress "
                     f"for {int(since_progress)}s at {current_iter}/{args.max_iters}\n\n"
-                    + action_prompt("failure"),
+                    + action_prompt("failure", analysis_mode=args.analysis_mode),
                 )
             since_callback = now - float(state["last_successful_callback_at"])
             if since_callback >= args.heartbeat_minutes * 60:
@@ -326,7 +358,7 @@ def main() -> None:
                     f"heartbeat_{int(now // (args.heartbeat_minutes * 60))}",
                     f"[bot] @Codex {args.run_name} HEARTBEAT: "
                     f"iter={current_iter}/{args.max_iters} gpu={sample.get('gpu','')}\n\n"
-                    + action_prompt("progress"),
+                    + action_prompt("progress", analysis_mode=args.analysis_mode),
                 )
             atomic_json(args.state_path, state)
         except (OSError, subprocess.SubprocessError, json.JSONDecodeError) as error:
@@ -335,7 +367,7 @@ def main() -> None:
                 args.state_path,
                 f"monitor_degraded_{int(time.time() // 900)}",
                 f"[bot] @Codex {args.run_name} MONITOR_DEGRADED: {error}\n\n"
-                + action_prompt("failure"),
+                + action_prompt("failure", analysis_mode=args.analysis_mode),
             )
         time.sleep(args.interval)
 
