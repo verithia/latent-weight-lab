@@ -1,0 +1,106 @@
+{
+  "candidate": "H70 W0-conditioned block atlas with shared local basis",
+  "causal_question": "Can a globally shared full-rank 32-coordinate basis, routed by exact procedural paired-W0 blocks and a 16-dimensional live layer latent, express every dominant and weak joint MLP trajectory direction under one percent persistent state?",
+  "forbidden": [
+    "CE training or evaluation as a promotion criterion",
+    "attention experiments",
+    "model or token-horizon scale-up",
+    "stored trajectory PCs, empirical ambient bases, dense shadows, per-row codes, or per-block codes",
+    "width, block-size, latent, activation, optimizer, objective, seed, layer, or horizon sweeps"
+  ],
+  "inputs": {
+    "host": "PRO6",
+    "trajectory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4_replay2/parameter_trajectory",
+    "run_identity_sha256": "2e26b936cc98972a8bdda4a5672bb210d7666b50fb46340d0bcd124712823c8a",
+    "required_layers": [0, 6, 11],
+    "required_steps": {"first": 0, "last": 238, "count": 239},
+    "required_targets": ["mlp.c_fc", "mlp.c_proj"],
+    "residual_gauge": "joint complete-neuron c_fc rows plus transposed c_proj rows, exact step-zero subtraction, uncentered displacement PCA",
+    "top_components": 16
+  },
+  "transformation": {
+    "equations": {
+      "paired_block": "x0_ljb = concat(u0_ljb, v0_ljb) in R^64",
+      "key": "s_ljb = A x0_ljb + e_l + p_b",
+      "hidden": "h_ljb(z) = GELU(s_ljb + C z_l) - GELU(s_ljb)",
+      "detector": "delta_u_ljb = D_u^T h_ljb(z)",
+      "write": "delta_v_ljb = D_v^T h_ljb(z)"
+    },
+    "block_width": 32,
+    "shared_width": 2048,
+    "latent_width": 16,
+    "deployment_layer_count": 12,
+    "block_position_count": 24,
+    "zero_state_parent_identity_required": true,
+    "w0_is_procedural_and_not_stored": true,
+    "global_local_basis_is_charged": true
+  },
+  "persistent_state": {
+    "shared_2048x64_key_map_fp16_values": 131072,
+    "shared_2048x16_injection_fp16_values": 32768,
+    "two_shared_2048x32_local_bases_fp16_values": 131072,
+    "twelve_layer_embeddings_fp16_values": 24576,
+    "twenty_four_position_embeddings_fp16_values": 49152,
+    "twelve_live_16_vectors_fp16_values": 192,
+    "total_fp16_values": 368832,
+    "total_bytes": 737664,
+    "fraction_of_replaced_dense_mlp_fp16_bytes": 0.0065138075,
+    "persistent_w0_bytes": 0,
+    "persistent_empirical_basis_bytes": 0,
+    "persistent_row_or_block_code_bytes": 0
+  },
+  "systems": {
+    "paired_blocks_all_layers": 884736,
+    "static_key_matrix_flops": 231928233984,
+    "live_latent_refresh_matrix_flops_with_cached_keys": 231929020416,
+    "live_latent_refresh_matrix_flops_if_keys_recomputed": 463857254400,
+    "dense_mlp_matrix_flops_per_token_after_materialization": 113246208,
+    "required_reports": [
+      "static-key cache bytes if used",
+      "generated dense endpoint bytes",
+      "FP32 masters, gradients, optimizer moments, and nuisance-code bytes",
+      "refresh wall time, total runtime, and peak CUDA allocation"
+    ]
+  },
+  "fit": {
+    "device": "cuda",
+    "dtype": "float32",
+    "optimizer": "AdamW",
+    "learning_rate": 0.002,
+    "betas": [0.9, 0.95],
+    "weight_decay": 0.0001,
+    "updates": 1500,
+    "block_batch_per_layer": 256,
+    "evaluation_block_chunk": 256,
+    "seed": 20260901,
+    "objective": "uniform mean over layers and all top-16 PCs of independently normalized paired detector-plus-write block reconstruction error",
+    "offline_pc_codes": "one fitted 16-vector per measured layer and PC is an image-capacity nuisance coordinate and is not deployed state"
+  },
+  "controls": {
+    "equal_state_linear": "replace the GELU difference with C z while retaining and charging every candidate tensor",
+    "w0_blind": "replace exact paired W0 blocks with deterministic seed-bound Gaussian pseudo-initialization of identical shape",
+    "fixed_random_local_basis": "freeze D_u and D_v at their seed-bound initialization while optimizing the router and nuisance codes",
+    "unpaired": "fit separate detector and write nuisance codes as an optimistic diagnostic"
+  },
+  "metrics": [
+    "per-layer weighted top-16 joint capture",
+    "every-PC joint capture and minimum",
+    "detector-only and write-only capture",
+    "retained top-16 energy",
+    "candidate-minus-linear and candidate-minus-W0-blind margins",
+    "D_u and D_v numerical ranks and singular-value condition",
+    "exact zero-state maximum absolute error",
+    "state bytes, refresh arithmetic, runtime, peak CUDA memory, and all hashes"
+  ],
+  "gates": {
+    "weighted_capture_every_layer_minimum": 0.3,
+    "every_pc_capture_minimum": 0.05,
+    "candidate_minus_equal_state_linear_every_layer_minimum": 0.05,
+    "candidate_minus_w0_blind_every_layer_minimum": 0.05,
+    "local_basis_numerical_rank_minimum": 32,
+    "zero_state_max_abs": 0.0,
+    "all_values_finite": true
+  },
+  "promotion": "Only a complete representation pass authorizes frozen-decoder chronological late-state and disjoint-stream A/B audits with fresh nuisance codes. It does not authorize CE, attention, or scale-up.",
+  "rejection": "Any required gate failure closes block-32/shared-width-2048 H70 without a sweep and requires new theory before another transform."
+}
