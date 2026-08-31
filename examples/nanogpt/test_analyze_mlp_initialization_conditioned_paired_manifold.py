@@ -10,6 +10,7 @@ from examples.nanogpt.analyze_mlp_initialization_conditioned_paired_manifold imp
     compact_payload,
     deployment_accounting,
     paired_displacement_pcs,
+    procedural_blind_keys,
 )
 
 
@@ -106,3 +107,16 @@ def test_compact_payload_excludes_codes_and_w0() -> None:
     assert "codes_u" not in payload["tensors"]
     assert "detector_w0" not in payload["tensors"]
     assert "write_w0" not in payload["tensors"]
+
+
+def test_w0_blind_keys_preserve_active_device() -> None:
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    bundle = {
+        "detector_w0": torch.randn(10, 8, device=device),
+        "write_w0": torch.randn(10, 8, device=device),
+    }
+    copied = procedural_blind_keys([bundle], seed=29, device=device)[0]
+    assert copied["detector_w0"].device.type == torch.device(device).type
+    assert copied["write_w0"].device.type == torch.device(device).type
+    assert torch.isfinite(copied["detector_w0"]).all()
+    assert torch.isfinite(copied["write_w0"]).all()

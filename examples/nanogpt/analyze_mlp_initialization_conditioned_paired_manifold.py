@@ -350,7 +350,8 @@ def procedural_blind_keys(
         for role in ("detector", "write"):
             original = bundle[f"{role}_w0"]
             pseudo = torch.randn(original.shape, generator=generator)
-            pseudo *= original.float().std().clamp_min(1e-20)
+            scale = float(original.float().std().clamp_min(1e-20))
+            pseudo *= scale
             copied[f"{role}_w0"] = pseudo.to(device)
         result.append(copied)
     return result
