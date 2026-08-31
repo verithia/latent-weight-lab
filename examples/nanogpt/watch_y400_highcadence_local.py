@@ -208,6 +208,14 @@ def main() -> None:
     parser.add_argument("--stall-minutes", type=int, default=20)
     parser.add_argument("--heartbeat-minutes", type=int, default=90)
     parser.add_argument("--output-budget-gib", type=float, default=15.0)
+    parser.add_argument(
+        "--terminal-only",
+        action="store_true",
+        help=(
+            "suppress percentage milestones; retain terminal, error, stall, "
+            "monitor-degraded, storage-risk, and resettable heartbeat callbacks"
+        ),
+    )
     parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
     if args.self_test:
@@ -288,7 +296,7 @@ def main() -> None:
                 )
                 return
 
-            if current_iter is not None:
+            if current_iter is not None and not args.terminal_only:
                 for milestone in (20, 50):
                     if current_iter * 100 >= milestone * args.max_iters:
                         emit(
