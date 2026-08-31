@@ -1,0 +1,85 @@
+{
+  "candidate": "H69 initialization-conditioned paired-neuron implicit MLP manifold",
+  "causal_question": "Can one globally shared nonlinear decoder use exact reproducible complete-neuron initialization pairs as keys to express the high-entropy ambient bases of three measured low-temporal-rank MLP paths under one percent persistent FP16 state?",
+  "forbidden": [
+    "CE training or evaluation as a promotion criterion",
+    "attention experiments",
+    "model or token-horizon scale-up",
+    "stored trajectory PCs, empirical basis vectors, dense shadows, or per-neuron learned embeddings",
+    "width, latent, activation, optimizer, seed, layer, or horizon sweeps"
+  ],
+  "inputs": {
+    "host": "PRO6",
+    "trajectory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4_replay2/parameter_trajectory",
+    "required_layers": [0, 6, 11],
+    "required_steps": {
+      "first": 0,
+      "last": 238,
+      "count": 239
+    },
+    "required_targets": ["mlp.c_fc", "mlp.c_proj"],
+    "residual_gauge": "for each layer concatenate c_fc rows and transposed c_proj rows into 3072 paired complete-neuron rows, subtract exact step-zero W0, and form uncentered displacement PCs",
+    "top_components": 16
+  },
+  "transformation": {
+    "equations": {
+      "key": "s_lj = P_u u0_lj + P_v v0_lj + e_l",
+      "hidden": "h_lj(z) = GELU(s_lj + C z_l) - GELU(s_lj)",
+      "detector": "u_lj(z) = u0_lj + Q_u h_lj(z)",
+      "write": "v_lj(z) = v0_lj + Q_v h_lj(z)"
+    },
+    "shared_width": 176,
+    "latent_width": 16,
+    "deployment_layer_count": 12,
+    "zero_state_parent_identity_required": true,
+    "w0_is_procedural_and_not_stored": true
+  },
+  "persistent_state": {
+    "four_shared_768x176_maps_fp16_values": 540672,
+    "shared_176x16_injection_fp16_values": 2816,
+    "twelve_176_layer_embeddings_fp16_values": 2112,
+    "twelve_live_16_vectors_fp16_values": 192,
+    "total_fp16_values": 545792,
+    "total_bytes": 1091584,
+    "fraction_of_replaced_dense_mlp_fp16_bytes": 0.00963903
+  },
+  "fit": {
+    "device": "cuda",
+    "dtype": "float32",
+    "optimizer": "AdamW",
+    "learning_rate": 0.003,
+    "betas": [0.9, 0.95],
+    "weight_decay": 0.0001,
+    "updates": 1800,
+    "neuron_batch_per_layer": 384,
+    "evaluation_neuron_chunk": 384,
+    "seed": 20260831,
+    "objective": "sum over layers and top-16 paired PCs of eigenvalue-weighted squared reconstruction error, normalized independently by each layer's retained top-16 energy",
+    "offline_pc_codes": "one fitted 16-vector per layer/PC is a nuisance coordinate used only to measure decoder image capacity and is not charged as deployed state"
+  },
+  "controls": {
+    "equal_state_linear": "replace GELU difference by its linear cancellation C z; retain identical charged tensors",
+    "w0_blind": "replace exact u0/v0 keys by deterministic seed-bound Gaussian pseudo-initialization of the same shapes; retain the identical nonlinear decoder and state",
+    "fixed_random_decoder": "freeze the seed-bound candidate decoder and optimize only nuisance PC codes",
+    "unpaired": "fit detector and write sides with separate nonlinear masks/codes as an optimistic diagnostic of the cost of complete-neuron coupling"
+  },
+  "metrics": [
+    "per-layer weighted top-16 paired-PC capture",
+    "every-PC paired capture and minimum",
+    "detector-only and write-only capture",
+    "retained top-16 trajectory energy",
+    "candidate minus equal-state-linear and W0-blind margins",
+    "exact zero-state maximum absolute error",
+    "state bytes, refresh FLOPs, runtime, peak CUDA memory, source/input/output hashes"
+  ],
+  "gates": {
+    "weighted_capture_every_layer_minimum": 0.30,
+    "every_pc_capture_minimum": 0.05,
+    "candidate_minus_equal_state_linear_every_layer_minimum": 0.05,
+    "candidate_minus_w0_blind_every_layer_minimum": 0.05,
+    "zero_state_max_abs": 0.0,
+    "all_values_finite": true
+  },
+  "promotion": "Only a complete representation pass authorizes chronological late-state and disjoint-stream A/B audits with the decoder frozen and fresh latent codes fitted. It does not authorize CE or scale-up.",
+  "rejection": "Any required gate failure closes this exact initialization-conditioned paired-neuron decoder without a sweep and requires new theory before another transform."
+}
