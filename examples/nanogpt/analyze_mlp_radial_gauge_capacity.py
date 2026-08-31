@@ -352,9 +352,13 @@ def self_test(device_name: str = "cpu") -> dict[str, Any]:
     device = torch.device(device_name)
     generator = torch.Generator(device="cpu")
     generator.manual_seed(56)
-    reference_fc = torch.randn(2, 4, 7, generator=generator).to(device)
-    reference_proj = torch.randn(2, 4, 7, generator=generator).to(device)
-    raw = torch.randn(2, 4, 4, generator=generator).to(device)
+    reference_fc = torch.randn(
+        2, 4, 7, generator=generator, dtype=torch.float64
+    ).to(device)
+    reference_proj = torch.randn(
+        2, 4, 7, generator=generator, dtype=torch.float64
+    ).to(device)
+    raw = torch.randn(2, 4, 4, generator=generator, dtype=torch.float64).to(device)
     q_true, _ = torch.linalg.qr(raw)
     current_fc = torch.einsum("gji,gjk->gik", q_true, reference_fc)[None]
     current_proj = torch.einsum("gji,gjk->gik", q_true, reference_proj)[None]
@@ -383,7 +387,7 @@ def self_test(device_name: str = "cpu") -> dict[str, Any]:
         + (recovered_proj[1] - reference_proj).norm()
         / reference_proj.norm().clamp_min(1e-30)
     )
-    value = torch.randn(11, 4, generator=generator).to(device)
+    value = torch.randn(11, 4, generator=generator, dtype=torch.float64).to(device)
     rotated = torch.einsum("ij,nj->ni", q_true[0], value)
     equivariance_error = float(
         (
