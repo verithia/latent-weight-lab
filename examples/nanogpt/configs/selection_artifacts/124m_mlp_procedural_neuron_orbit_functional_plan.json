@@ -1,0 +1,130 @@
+{
+  "schema_version": "nanogpt_mlp_procedural_neuron_orbit_functional_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H68 procedural complete-neuron orbit with full-rank residual-space gauges",
+  "parent_evidence": {
+    "h66_checkpoint_sha256": "f882e3544dea73c1e72ef63e649362264e2c626690a2e428203d51a5a889eeff",
+    "h66_summary_sha256": "0efcd5ccbb13b29759330f809ecebfd3ef13fe233b62d83abd785698970c205e9",
+    "h67_checkpoint_sha256": "f334a22abd29265cf04139b793b99dc341171c38060e9f2a92facaa8a0e30f7a",
+    "h67_summary_sha256": "adc334e18db636f53ad929ac5a12a13f2b2b5237705f2cdb5562b7d5e779f59e",
+    "causal_transition": "H67's activation-cell diagonal gains are used but regress H66 because every local tangent still reweights one rank-160 paired frame. Preserve all 3,072 reproducible step-zero complete neurons and compactly modulate their gates/writes while moving the residual input/output spaces with H66's full-rank gauges."
+  },
+  "scientific_question": "Can a 0.31%-state orbit of all procedural complete neurons match dense-MLP values and token-dependent Jacobians without storing a learned ambient basis?",
+  "frozen_teacher": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_activation_frame_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+    "initial_step": 0,
+    "initial_snapshot": "step_000000.pt",
+    "initial_snapshot_sha256": "9b85043902c12376bfc61ab29fa161dcc0374c7dc6e92436e64fdd16021da4e7",
+    "terminal_step": 238,
+    "terminal_snapshot": "step_000238.pt",
+    "terminal_snapshot_sha256": "34f8a0399550742a67265e98aa91ffa116ab33dff364a2c4f1ad0d3fb1ed772c",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_activation_frame_trajectory_lr24e4.json",
+    "source_config_sha256": "e5cfd92100eaee73f2e9c499d7eda34e96985b8b928cc980b2623a80d0dc6512",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "model_width": 768,
+    "hidden_width": 3072,
+    "bias": false,
+    "procedural_parent_policy": "Step-zero endpoints are exact frozen audit inputs and excluded from compact state; any later training must independently regenerate and hash them from the source config seed."
+  },
+  "frozen_function_inventory": {
+    "dataset_directory": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "train_seed": 202608311,
+    "holdout_seed": 202608312,
+    "jvp_seed": 202608313,
+    "samples_per_layer_per_split": 1024,
+    "jvp_directions_per_layer_per_split": 4,
+    "jvp_direction_distribution": "Rademacher divided by sqrt(768)",
+    "persistent_activation_cache": "none"
+  },
+  "frozen_representation": {
+    "transport_diagonals_per_side": 3,
+    "mixer_groups": 3,
+    "mixer_group_width": 256,
+    "formula": "Pout_l [ B0_l^T (apost_l * GELU(gpre_l * (A0_l Pin_l x) + bpre_l)) ] + o_l",
+    "materialized_detector": "diag(gpre_l) A0_l Pin_l",
+    "materialized_write": "Pout_l^T B0_l diag(apost_l)",
+    "transport_formula": "P=diag(1+s1) F diag(1+s2) F diag(1+s3), F=(I-(2/3)11T) tensor H256",
+    "shared_learned_basis": "none",
+    "fixed_procedural_carrier": "all 3,072 paired complete neurons from each exact step-zero layer",
+    "layer_private_fp16_coordinates": ["gpre[12,3072]", "bpre[12,3072]", "apost[12,3072]", "sin[12,3,768]", "sout[12,3,768]", "o[12,768]"],
+    "stored_dense_teacher_or_pca_basis": false,
+    "stored_dense_endpoint_master": false,
+    "stored_optimizer_history": false,
+    "persistent_dense_master": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_values": 56623104,
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "fp16_neuron_modulation_values": 110592,
+    "fp16_transport_diagonal_values": 55296,
+    "fp16_output_offset_values": 9216,
+    "total_latent_values": 175104,
+    "total_checkpoint_bytes": 350208,
+    "latent_value_fraction": 0.0030924479166666665,
+    "checkpoint_byte_fraction": 0.0030924479166666665,
+    "cached_generated_endpoint_bytes": 113246208,
+    "token_time_mlp_matmul_fraction": 1.0,
+    "extra_token_elementwise_operations_per_layer": 3840,
+    "persistent_procedural_parent_bytes": 0
+  },
+  "initialization": {
+    "pre_gain": 1.0,
+    "pre_bias": 0.0,
+    "post_gain": 1.0,
+    "input_transport_diagonals": 0.0,
+    "output_transport_diagonals": 0.0,
+    "output_offset": 0.0,
+    "initial_function": "exact step-zero parent because both gauges are identity, gains are one, and biases/offsets are zero"
+  },
+  "fit": {
+    "objective": "mean relative output MSE plus 0.25 times relative analytic input-JVP MSE",
+    "optimizer": "AdamW on compact coordinates only",
+    "iterations": 3072,
+    "layer_schedule": "deterministic round-robin across twelve layers",
+    "minibatch_rows": 128,
+    "learning_rate_neuron_modulation": 0.003,
+    "learning_rate_transport": 0.003,
+    "weight_decay": 0.0,
+    "gradient_clip_norm": 1.0,
+    "coordinate_precision_during_fit": "FP32",
+    "terminal_coordinate_precision": "FP16",
+    "no_sweep": true
+  },
+  "controls": {
+    "step_zero_parent": "all gains one, all biases/offsets/transport diagonals zero",
+    "neuron_modulation_only": "replace both residual gauges by identity",
+    "residual_gauges_only": "pre/post gains one and neuron/outputs biases zero",
+    "pre_gain_only": "only fitted pre-gain retained",
+    "pre_bias_only": "only fitted threshold bias retained",
+    "post_gain_only": "only fitted post-gain retained",
+    "input_gauge_only": "retain full neuron modulation and fitted input gauge, set output gauge identity",
+    "output_gauge_only": "retain full neuron modulation and fitted output gauge, set input gauge identity",
+    "shared_gauges": "replace input/output diagonal banks by exact across-layer means",
+    "dense_teacher": "exact terminal output and input-JVP identity"
+  },
+  "representation_gates": {
+    "holdout_relative_output_rmse_max_every_layer": 0.10,
+    "holdout_relative_jvp_rmse_max_every_layer": 0.15,
+    "holdout_retained_centered_output_covariance_energy_min_every_layer": 0.90,
+    "analytic_jvp_absolute_tolerance": 0.00005,
+    "step_zero_parent_absolute_tolerance": 0.00005,
+    "finite_outputs_and_jvps": true,
+    "exact_compact_checkpoint_identity": true,
+    "all_twelve_layers_must_pass": true
+  },
+  "runtime_gates": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_policy": "terminal/error plus one resettable 90-minute heartbeat only if observed or projected above five minutes"
+  },
+  "promotion": "Only every-layer representation, JVP and parent-identity pass authorizes exact refresh and cached-token systems measurement. Representation plus systems may authorize one 124M CE acquisition, never scale-up.",
+  "failure": "Close this exact procedural complete-neuron orbit without gain, bias, gauge, optimizer, horizon, CE, attention, or scale sweeps.",
+  "forbidden": [
+    "stored PCA, empirical trajectory basis, or terminal dense endpoint",
+    "persistent FP16/FP32 dense endpoint master",
+    "charging procedural step-zero endpoints as zero while failing exact regeneration",
+    "changing gains, biases, gauge depth, mixer, optimizer, objective or gates after results",
+    "CE, attention work or scale-up before representation and systems pass"
+  ]
+}
