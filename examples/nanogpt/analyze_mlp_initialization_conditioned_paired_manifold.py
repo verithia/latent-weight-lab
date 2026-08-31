@@ -604,8 +604,14 @@ def main() -> None:
     fit = plan["fit"]
     transform = plan["transformation"]
     torch.manual_seed(int(fit["seed"]))
+    runtime_device = torch.device(args.device)
+    cuda_index = (
+        runtime_device.index
+        if runtime_device.index is not None
+        else torch.cuda.current_device()
+    ) if runtime_device.type == "cuda" else None
     if args.device.startswith("cuda"):
-        torch.cuda.reset_peak_memory_stats(args.device)
+        torch.cuda.reset_peak_memory_stats(cuda_index)
     bundles, input_manifest = load_layer_bundles(
         args.trajectory_dir, layers=layers, components=components,
         device=args.device,
@@ -774,7 +780,7 @@ def main() -> None:
         },
         "runtime_seconds": runtime,
         "peak_cuda_allocated_bytes": (
-            torch.cuda.max_memory_allocated(args.device)
+            torch.cuda.max_memory_allocated(cuda_index)
             if args.device.startswith("cuda") else 0
         ),
         "outputs": {
