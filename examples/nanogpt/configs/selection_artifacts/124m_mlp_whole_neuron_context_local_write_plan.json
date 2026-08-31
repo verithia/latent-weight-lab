@@ -1,0 +1,127 @@
+{
+  "candidate": "H71 whole-neuron W0 context with procedural local writes",
+  "causal_question": "Does complete paired-neuron W0 context supply the nonlocal identity missing from H70 while a frozen full-rank local decoder avoids H70's learned-frame gauge and expresses every dominant and weak joint MLP trajectory direction under one percent persistent state?",
+  "controls": {
+    "learned_local_decoder": "replace the frozen seed-bound D_u and D_v with charged learned frames as a diagnostic of the H70 decoder gauge",
+    "no_whole_neuron_context": "zero the complete-neuron context while retaining and charging P and B",
+    "shuffled_whole_neuron_context": "deterministically permute contexts among paired neurons within each layer while preserving the context distribution",
+    "w0_blind": "replace the exact complete-neuron and local-block W0 inputs with deterministic seed-bound Gaussian pseudo-initialization of identical shape"
+  },
+  "fit": {
+    "betas": [
+      0.9,
+      0.95
+    ],
+    "block_batch_per_layer": 256,
+    "device": "cuda",
+    "dtype": "float32",
+    "evaluation_block_chunk": 256,
+    "learning_rate": 0.002,
+    "objective": "uniform mean over layers and all top-16 PCs of independently normalized paired detector-plus-write block reconstruction error",
+    "offline_pc_codes": "one fitted 16-vector per measured layer and PC is an image-capacity nuisance coordinate and is not deployed state",
+    "optimizer": "AdamW",
+    "seed": 20260902,
+    "updates": 1500,
+    "weight_decay": 0.0001
+  },
+  "forbidden": [
+    "CE training or evaluation as a promotion criterion",
+    "attention experiments",
+    "model or token-horizon scale-up",
+    "hosts other than PRO6 without explicit user authorization",
+    "stored trajectory PCs, empirical ambient bases, dense shadows, W0 copies, per-row codes, or per-block codes",
+    "context-width, hidden-width, block-size, latent, decoder, activation, optimizer, objective, seed, layer, or horizon sweeps"
+  ],
+  "gates": {
+    "all_values_finite": true,
+    "candidate_minus_no_context_every_layer_minimum": 0.05,
+    "candidate_minus_shuffled_context_every_layer_minimum": 0.05,
+    "every_pc_capture_minimum": 0.05,
+    "procedural_local_basis_numerical_rank_minimum": 32,
+    "weighted_capture_every_layer_minimum": 0.3,
+    "zero_state_max_abs": 0.0
+  },
+  "inputs": {
+    "host": "PRO6",
+    "required_layers": [
+      0,
+      6,
+      11
+    ],
+    "required_steps": {
+      "count": 239,
+      "first": 0,
+      "last": 238
+    },
+    "required_targets": [
+      "mlp.c_fc",
+      "mlp.c_proj"
+    ],
+    "residual_gauge": "joint complete-neuron c_fc rows plus transposed c_proj rows, exact step-zero subtraction, uncentered displacement PCA",
+    "run_identity_sha256": "2e26b936cc98972a8bdda4a5672bb210d7666b50fb46340d0bcd124712823c8a",
+    "top_components": 16,
+    "trajectory": "/home/pro6000-9980x/MappingNetworks/outputs/pro6_mai_v3_mlp_manifold/pro6_mai_v3_124m_dense_mlp_highcadence_layers0611_0p5tpp_lr24e4_replay2/parameter_trajectory"
+  },
+  "metrics": [
+    "per-layer weighted top-16 joint capture",
+    "every-PC joint capture and minimum",
+    "detector-only and write-only capture",
+    "retained top-16 energy",
+    "candidate-minus-no-context and candidate-minus-shuffled-context margins",
+    "procedural D_u and D_v numerical ranks and singular-value condition",
+    "exact zero-state maximum absolute error",
+    "state bytes, static/refresh arithmetic, runtime, peak CUDA memory, and all hashes"
+  ],
+  "persistent_state": {
+    "fraction_of_replaced_dense_mlp_fp16_bytes": 0.0078882288,
+    "persistent_empirical_basis_bytes": 0,
+    "persistent_row_or_block_code_bytes": 0,
+    "persistent_w0_bytes": 0,
+    "shared_1024x16_injection_fp16_values": 16384,
+    "shared_1024x64_local_key_fp16_values": 65536,
+    "shared_1024x128_context_lift_fp16_values": 131072,
+    "shared_128x1536_complete_neuron_frame_fp16_values": 196608,
+    "twelve_layer_embeddings_fp16_values": 12288,
+    "twelve_live_16_vectors_fp16_values": 192,
+    "twenty_four_position_embeddings_fp16_values": 24576,
+    "two_frozen_procedural_32x1024_local_decoders_fp16_values": 0,
+    "total_bytes": 893312,
+    "total_fp16_values": 446656
+  },
+  "promotion": "Only a complete representation pass authorizes frozen-decoder chronological late-state and disjoint-stream A/B audits with fresh nuisance codes. It does not authorize CE, attention, another host, or scale-up.",
+  "rejection": "Any required gate failure closes the exact whole-neuron-context/local-write H71 topology without a sweep and requires new theory before another transform.",
+  "systems": {
+    "dense_mlp_matrix_flops_per_token_after_materialization": 113246208,
+    "generated_dense_endpoint_bytes": 113246208,
+    "live_latent_refresh_matrix_flops_if_keys_recomputed": 256087818240,
+    "live_latent_refresh_matrix_flops_with_cached_keys": 115964510208,
+    "paired_blocks_all_layers": 884736,
+    "paired_neurons_all_layers": 36864,
+    "required_reports": [
+      "whole-neuron and block static-key cache bytes if used",
+      "generated dense endpoint bytes",
+      "FP32 masters, gradients, optimizer moments, and nuisance-code bytes",
+      "refresh wall time, total runtime, and peak CUDA allocation"
+    ],
+    "static_key_matrix_flops": 140123308032
+  },
+  "transformation": {
+    "block_position_count": 24,
+    "block_width": 32,
+    "complete_neuron_context_width": 128,
+    "deployment_layer_count": 12,
+    "equations": {
+      "context": "r_lj = P concat(u0_lj, v0_lj)",
+      "detector": "delta_u_ljb = D_u^T h_ljb(z)",
+      "hidden": "h_ljb(z) = GELU(s_ljb + C z_l) - GELU(s_ljb)",
+      "key": "s_ljb = A x0_ljb + B r_lj + e_l + p_b",
+      "paired_block": "x0_ljb = concat(u0_ljb, v0_ljb) in R^64",
+      "write": "delta_v_ljb = D_v^T h_ljb(z)"
+    },
+    "latent_width": 16,
+    "procedural_local_basis_is_seed_regenerated_and_frozen": true,
+    "shared_width": 1024,
+    "w0_is_procedural_and_not_stored": true,
+    "zero_state_parent_identity_required": true
+  }
+}
