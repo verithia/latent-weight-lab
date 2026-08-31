@@ -1,0 +1,116 @@
+{
+  "schema_version": "nanogpt_mlp_parallel_residual_mlp_functional_plan_v1",
+  "status": "preregistered_before_implementation_or_result",
+  "candidate": "H59 shared width-288 parallel residual MLP with layer-private coordinates",
+  "parent_evidence": {
+    "h58_checkpoint_sha256": "aa255b8b1f23a81680bed51049fedf38e7b6bf21d41e4ee90619375093210910",
+    "h58_summary_sha256": "c80505cd4c69a4ec80813fbcef78bd9cba7acafdd708e9687766b68a4b3f84f3",
+    "h58_gate_sha256": "545c2eb1623d5d954c27323155c3f3dba70d9e019a6d991e23d82cb899740398",
+    "causal_transition": "H58 improves heldout covariance to 69.17%, but its JVP RMSE remains 0.748 because both value and tangent corrections are post-transforms of the step-zero output. Learn the residual function and its Jacobian directly from the residual input with an equal-budget parallel nonlinear atlas."
+  },
+  "scientific_question": "Can an equal-budget shared nonlinear residual MLP plus layer-private gains and thresholds reproduce all terminal MLP outputs and exact input JVPs without storing dense or empirical bases?",
+  "frozen_teacher": {
+    "trajectory_directory": "/root/userdata/MappingNetworks/outputs/y400_mai_v3_mlp_manifold/y400_mai_v3_124m_dense_activation_frame_trajectory_0p5tpp_lr24e4/parameter_trajectory",
+    "initial_step": 0,
+    "initial_snapshot": "step_000000.pt",
+    "initial_snapshot_sha256": "9b85043902c12376bfc61ab29fa161dcc0374c7dc6e92436e64fdd16021da4e7",
+    "terminal_step": 238,
+    "terminal_snapshot": "step_000238.pt",
+    "terminal_snapshot_sha256": "34f8a0399550742a67265e98aa91ffa116ab33dff364a2c4f1ad0d3fb1ed772c",
+    "source_config": "examples/nanogpt/configs/y400_mai_v3_124m_muon_0p5tpp_activation_frame_trajectory_lr24e4.json",
+    "source_config_sha256": "e5cfd92100eaee73f2e9c499d7eda34e96985b8b928cc980b2623a80d0dc6512",
+    "layers": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+    "model_width": 768,
+    "hidden_width": 3072,
+    "bias": false,
+    "procedural_parent_policy": "Use exact step-zero MLP tensors in the audit; exclude them from the compact artifact and require independent config-seed regeneration identity before any later model training."
+  },
+  "frozen_function_inventory": {
+    "dataset_directory": "/root/userdata/MappingNetworks/data/finewebedu_20b",
+    "dataset_manifest_sha256": "1e1de075c504906a93637bd79450d30da2243797d2e1d3e33f2392d9492ddf8b",
+    "train_seed": 202608311,
+    "holdout_seed": 202608312,
+    "jvp_seed": 202608313,
+    "samples_per_layer_per_split": 1024,
+    "jvp_directions_per_layer_per_split": 4,
+    "jvp_direction_distribution": "Rademacher divided by sqrt(768)",
+    "persistent_activation_cache": "none in compact checkpoint"
+  },
+  "frozen_representation": {
+    "residual_width": 288,
+    "formula": "fhat_l(x)=f0_l(x)+(GELU(x T^T+b_l)*a_l) U^T",
+    "shared_fp16_coordinates": ["T[288,768]", "U[768,288]"],
+    "layer_private_fp16_coordinates": ["a[12,288]", "b[12,288]"],
+    "fixed_procedural_endpoints": ["A0_l", "B0_l"],
+    "stored_dense_teacher_or_pca_basis": false,
+    "stored_dense_endpoint_master": false,
+    "stored_optimizer_history": false,
+    "persistent_dense_master": false
+  },
+  "exact_deployment_accounting": {
+    "dense_replaced_mlp_fp16_values": 56623104,
+    "dense_replaced_mlp_fp16_bytes": 113246208,
+    "fp16_shared_residual_values": 442368,
+    "fp16_shared_residual_bytes": 884736,
+    "fp16_private_coordinate_values": 6912,
+    "fp16_private_coordinate_bytes": 13824,
+    "total_latent_values": 449280,
+    "total_checkpoint_bytes": 898560,
+    "latent_value_fraction": 0.0079345703125,
+    "checkpoint_byte_fraction": 0.0079345703125,
+    "extra_mlp_matmul_fraction": 0.09375,
+    "cached_procedural_endpoint_bytes": 113246208
+  },
+  "initialization": {
+    "detector_seed": 202608591,
+    "detector_distribution": "normal with standard deviation 1/sqrt(768)",
+    "write": "zeros",
+    "gain": 1.0,
+    "bias": 0.0,
+    "initial_function": "exact step-zero procedural MLP because residual write U is zero"
+  },
+  "fit": {
+    "objective": "mean relative output MSE plus 0.25 times relative exact input-JVP MSE",
+    "optimizer": "AdamW on compact coordinates only",
+    "iterations": 3072,
+    "layer_schedule": "deterministic round-robin over all twelve layers",
+    "minibatch_rows": 128,
+    "learning_rate_shared_factors": 0.001,
+    "learning_rate_private_coordinates": 0.003,
+    "weight_decay_shared": 0.0001,
+    "weight_decay_private": 0.0,
+    "gradient_clip_norm": 1.0,
+    "coordinate_precision_during_fit": "FP32",
+    "terminal_coordinate_precision": "FP16",
+    "no_sweep": true
+  },
+  "controls": {
+    "step_zero_parent": "set residual write U to zero",
+    "global_coordinates": "replace every layer's fitted gain/bias by their across-layer means",
+    "initial_random_detector": "replace fitted T by the exact initial T while retaining fitted U/gain/bias",
+    "linear_residual": "replace GELU by identity in the fitted residual branch",
+    "dense_teacher": "exact terminal teacher output and input-JVP identity"
+  },
+  "representation_gates": {
+    "holdout_relative_output_rmse_max_every_layer": 0.10,
+    "holdout_relative_jvp_rmse_max_every_layer": 0.15,
+    "holdout_retained_centered_output_covariance_energy_min_every_layer": 0.90,
+    "finite_outputs_and_jvps": true,
+    "exact_compact_checkpoint_identity": true,
+    "all_twelve_layers_must_pass": true
+  },
+  "runtime_gates": {
+    "maximum_peak_cuda_bytes": 75161927680,
+    "maximum_result_directory_bytes": 1073741824,
+    "watchdog_policy": "terminal/error callbacks plus one resettable 90-minute heartbeat for any run observed or projected above five minutes"
+  },
+  "promotion": "Only an every-layer representation pass authorizes exact-config latency and MFU measurement. Only representation plus performance may authorize one 124M CE acquisition. A pass does not authorize scale-up or attention work.",
+  "failure": "Close this exact width-288 parallel residual MLP without width, activation, coordinate, seed, optimizer, horizon, CE, attention, or scale sweeps.",
+  "forbidden": [
+    "stored PCA or empirical trajectory basis",
+    "persistent FP16 or FP32 dense endpoint master",
+    "changing residual width, activation, initialization, optimizer, objective or gates after seeing results",
+    "CE, attention work or scale-up before representation and performance gates pass",
+    "calling regenerated step-zero endpoints compact checkpoint state"
+  ]
+}
